@@ -7659,6 +7659,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
 
     /* Reads both 2 chunks.  Reading the second chunk should bypass the cache because the
      * chunk is bigger than the cache size and it isn't allocated on disk. */
+        fprintf(stderr, "START\n");
     if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata1) < 0)
         FAIL_STACK_ERROR
 
@@ -9372,7 +9373,7 @@ main(void)
         nerrors += (test_simple_io(envval, my_fapl) < 0		? 1 : 0);
         nerrors += (test_compact_io(my_fapl) < 0  		? 1 : 0);
         nerrors += (test_max_compact(my_fapl) < 0  		? 1 : 0);
-        nerrors += (test_conv_buffer(file) < 0		? 1 : 0);
+        nerrors += (test_conv_buffer(file) < 0    		? 1 : 0);
         nerrors += (test_tconv(file) < 0			? 1 : 0);
         nerrors += (test_filters(file, my_fapl) < 0		? 1 : 0);
         nerrors += (test_onebyte_shuffle(file) < 0 		? 1 : 0);

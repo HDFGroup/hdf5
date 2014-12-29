@@ -64,9 +64,9 @@ typedef struct H5D_efl_writevv_ud_t {
 
 /* Layout operation callbacks */
 static herr_t H5D__efl_construct(H5F_t *f, H5D_t *dset);
-static herr_t H5D__efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-    H5D_chunk_map_t *cm);
+static herr_t H5D__efl_io_init(H5D_io_info_t *io_info,
+    const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
+    const H5S_t *mem_space, H5D_dset_info_t *dinfo);
 static ssize_t H5D__efl_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
@@ -91,7 +91,6 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
     NULL,
     H5D__efl_is_space_alloc,
     H5D__efl_io_init,
-    NULL,
     H5D__contig_read,
     H5D__contig_write,
 #ifdef H5_HAVE_PARALLEL
@@ -100,7 +99,6 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
 #endif /* H5_HAVE_PARALLEL */
     H5D__efl_readvv,
     H5D__efl_writevv,
-    NULL,
     NULL,
     NULL
 }};
@@ -225,13 +223,13 @@ H5D__efl_is_space_alloc(const H5O_storage_t UNUSED *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
+H5D__efl_io_init(H5D_io_info_t UNUSED *io_info, const H5D_type_info_t UNUSED *type_info,
     hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
-    H5D_chunk_map_t UNUSED *cm)
+    H5D_dset_info_t *dinfo)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDmemcpy(&io_info->store->efl, &(io_info->dset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
+    HDmemcpy(&dinfo->store->efl, &(dinfo->dset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__efl_io_init() */
@@ -468,8 +466,8 @@ H5D__efl_readvv(const H5D_io_info_t *io_info,
 
     /* Check args */
     HDassert(io_info);
-    HDassert(io_info->store->efl.nused > 0);
-    HDassert(io_info->u.rbuf);
+    HDassert(io_info->dsets_info[0].store->efl.nused > 0);
+    HDassert(io_info->dsets_info[0].u.rbuf);
     HDassert(dset_curr_seq);
     HDassert(dset_len_arr);
     HDassert(dset_off_arr);
@@ -478,8 +476,8 @@ H5D__efl_readvv(const H5D_io_info_t *io_info,
     HDassert(mem_off_arr);
 
     /* Set up user data for H5VM_opvv() */
-    udata.efl = &(io_info->store->efl);
-    udata.rbuf = (unsigned char *)io_info->u.rbuf;
+    udata.efl = &(io_info->dsets_info[0].store->efl);
+    udata.rbuf = (unsigned char *)io_info->dsets_info[0].u.rbuf;
 
     /* Call generic sequence operation routine */
     if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
@@ -548,8 +546,8 @@ H5D__efl_writevv(const H5D_io_info_t *io_info,
 
     /* Check args */
     HDassert(io_info);
-    HDassert(io_info->store->efl.nused > 0);
-    HDassert(io_info->u.wbuf);
+    HDassert(io_info->dsets_info[0].store->efl.nused > 0);
+    HDassert(io_info->dsets_info[0].u.wbuf);
     HDassert(dset_curr_seq);
     HDassert(dset_len_arr);
     HDassert(dset_off_arr);
@@ -558,8 +556,8 @@ H5D__efl_writevv(const H5D_io_info_t *io_info,
     HDassert(mem_off_arr);
 
     /* Set up user data for H5VM_opvv() */
-    udata.efl = &(io_info->store->efl);
-    udata.wbuf = (const unsigned char *)io_info->u.wbuf;
+    udata.efl = &(io_info->dsets_info[0].store->efl);
+    udata.wbuf = (const unsigned char *)io_info->dsets_info[0].u.wbuf;
 
     /* Call generic sequence operation routine */
     if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,

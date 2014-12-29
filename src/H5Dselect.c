@@ -109,10 +109,10 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size,
 
     /* Check args */
     HDassert(io_info);
-    HDassert(io_info->dset);
-    HDassert(io_info->store);
+    HDassert(io_info->dsets_info[0].dset);
+    HDassert(io_info->dsets_info[0].store);
     HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
-    HDassert(io_info->u.rbuf);
+    HDassert(io_info->dsets_info[0].u.rbuf);
 
     /* Allocate the vector I/O arrays */
     if(io_info->dxpl_cache->vec_size > H5D_IO_VECTOR_SIZE) {
@@ -149,14 +149,14 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size,
 
         /* Perform I/O on memory and file sequences */
         if(io_info->op_type == H5D_IO_OP_READ) {
-            if((tmp_file_len = (*io_info->layout_ops.readvv)(io_info,
+            if((tmp_file_len = (*io_info->dsets_info[0].layout_ops.readvv)(io_info,
                     file_nseq, &curr_file_seq, file_len, file_off,
                     mem_nseq, &curr_mem_seq, mem_len, mem_off)) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
         } /* end if */
         else {
             HDassert(io_info->op_type == H5D_IO_OP_WRITE);
-            if((tmp_file_len = (*io_info->layout_ops.writevv)(io_info,
+            if((tmp_file_len = (*io_info->dsets_info[0].layout_ops.writevv)(io_info,
                     file_nseq, &curr_file_seq, file_len, file_off,
                     mem_nseq, &curr_mem_seq, mem_len, mem_off)) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
@@ -207,14 +207,14 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size,
 
             /* Perform I/O on memory and file sequences */
             if(io_info->op_type == H5D_IO_OP_READ) {
-                if((tmp_file_len = (*io_info->layout_ops.readvv)(io_info,
+                if((tmp_file_len = (*io_info->dsets_info[0].layout_ops.readvv)(io_info,
                         file_nseq, &curr_file_seq, file_len, file_off,
                         mem_nseq, &curr_mem_seq, mem_len, mem_off)) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
             } /* end if */
             else {
                 HDassert(io_info->op_type == H5D_IO_OP_WRITE);
-                if((tmp_file_len = (*io_info->layout_ops.writevv)(io_info,
+                if((tmp_file_len = (*io_info->dsets_info[0].layout_ops.writevv)(io_info,
                         file_nseq, &curr_file_seq, file_len, file_off,
                         mem_nseq, &curr_mem_seq, mem_len, mem_off)) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")

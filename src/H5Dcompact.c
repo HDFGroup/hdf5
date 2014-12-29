@@ -60,9 +60,9 @@
 /* Layout operation callbacks */
 static herr_t H5D__compact_construct(H5F_t *f, H5D_t *dset);
 static hbool_t H5D__compact_is_space_alloc(const H5O_storage_t *storage);
-static herr_t H5D__compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-    H5D_chunk_map_t *cm);
+static herr_t H5D__compact_io_init(H5D_io_info_t *io_info,
+    const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
+    const H5S_t *mem_space, H5D_dset_info_t *dinfo);
 static ssize_t H5D__compact_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
@@ -82,7 +82,6 @@ const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
     NULL,
     H5D__compact_is_space_alloc,
     H5D__compact_io_init,
-    NULL,
     H5D__contig_read,
     H5D__contig_write,
 #ifdef H5_HAVE_PARALLEL
@@ -92,7 +91,6 @@ const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
     H5D__compact_readvv,
     H5D__compact_writevv,
     H5D__compact_flush,
-    NULL,
     NULL
 }};
 
@@ -256,14 +254,14 @@ H5D__compact_is_space_alloc(const H5O_storage_t UNUSED *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
+H5D__compact_io_init(H5D_io_info_t UNUSED *io_info, const H5D_type_info_t UNUSED *type_info,
     hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
-    H5D_chunk_map_t UNUSED *cm)
+    H5D_dset_info_t *dinfo)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    io_info->store->compact.buf = io_info->dset->shared->layout.storage.u.compact.buf;
-    io_info->store->compact.dirty = &io_info->dset->shared->layout.storage.u.compact.dirty;
+    dinfo->store->compact.buf = dinfo->dset->shared->layout.storage.u.compact.buf;
+    dinfo->store->compact.dirty = &dinfo->dset->shared->layout.storage.u.compact.dirty;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__compact_io_init() */
@@ -299,7 +297,9 @@ H5D__compact_readvv(const H5D_io_info_t *io_info,
     HDassert(io_info);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value = H5VM_memcpyvv(io_info->u.rbuf, mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr, io_info->store->compact.buf, dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
+    if((ret_value = H5VM_memcpyvv(io_info->dsets_info[0].u.rbuf, mem_max_nseq, mem_curr_seq, 
+                                  mem_size_arr, mem_offset_arr, io_info->dsets_info[0].store->compact.buf, 
+                                  dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
 done:
@@ -340,11 +340,14 @@ H5D__compact_writevv(const H5D_io_info_t *io_info,
     HDassert(io_info);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value = H5VM_memcpyvv(io_info->store->compact.buf, dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr, io_info->u.wbuf, mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr)) < 0)
+    if((ret_value = H5VM_memcpyvv(io_info->dsets_info[0].store->compact.buf, dset_max_nseq, 
+                                  dset_curr_seq, dset_size_arr, dset_offset_arr, 
+                                  io_info->dsets_info[0].u.wbuf, mem_max_nseq, mem_curr_seq, 
+                                  mem_size_arr, mem_offset_arr)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
     /* Mark the compact dataset's buffer as dirty */
-    *io_info->store->compact.dirty = TRUE;
+    *io_info->dsets_info[0].store->compact.dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

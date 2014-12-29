@@ -96,10 +96,8 @@ typedef struct H5D_contig_writevv_ud_t {
 
 /* Layout operation callbacks */
 static herr_t H5D__contig_construct(H5F_t *f, H5D_t *dset);
-static herr_t H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-    H5D_chunk_map_t *cm);
-static herr_t H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo);
+static herr_t H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, 
+    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo);
 static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
@@ -123,18 +121,16 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     NULL,
     H5D__contig_is_space_alloc,
     H5D__contig_io_init,
-    H5D__contig_io_init_mdset,
     H5D__contig_read,
     H5D__contig_write,
 #ifdef H5_HAVE_PARALLEL
-    H5D__mdset_collective_read,
-    H5D__mdset_collective_write,
+    H5D__collective_read,
+    H5D__collective_write,
 #endif /* H5_HAVE_PARALLEL */
     H5D__contig_readvv,
     H5D__contig_writevv,
     H5D__contig_flush,
-    NULL,
-    H5D__piece_io_term_mdset
+    H5D__piece_io_term
 }};
 
 
@@ -200,6 +196,7 @@ herr_t
 H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
 {
     H5D_io_info_t ioinfo;       /* Dataset I/O info */
+    H5D_dset_info_t dset_info;  /* Dset info */
     H5D_storage_t store;        /* Union of storage info for dataset */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
@@ -278,7 +275,13 @@ H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
     offset = 0;
 
     /* Simple setup for dataset I/O info struct */
-    H5D_BUILD_IO_INFO_WRT(&ioinfo, dset, dxpl_cache, my_dxpl_id, &store, fb_info.fill_buf);
+    ioinfo.dxpl_cache = dxpl_cache;
+    ioinfo.dxpl_id = my_dxpl_id;
+    ioinfo.op_type = H5D_IO_OP_WRITE;
+    dset_info.dset = (H5D_t *)dset;
+    dset_info.store = &store;
+    dset_info.u.wbuf = fb_info.fill_buf;
+    ioinfo.dsets_info = &dset_info;
 
     /*
      * Fill the entire current extent with the fill value.  We can do
@@ -496,39 +499,11 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *              Thursday, March 20, 2008
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
-    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
-    H5D_chunk_map_t UNUSED *cm)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    io_info->store->contig.dset_addr = io_info->dset->shared->layout.storage.u.contig.addr;
-    io_info->store->contig.dset_size = io_info->dset->shared->layout.storage.u.contig.size;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D__contig_io_init() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__contig_io_init_mdset
- *
- * Purpose:	Performs initialization before any sort of I/O on the raw data
- *
- *          This was referred from H5D__contig_io_init for multi-dset work.
- *
- * Return:	Non-negative on success/Negative on failure
- *
  * Programmer:	Jonathan Kim
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md,
+H5D__contig_io_init(H5D_io_info_t *io_info,
     const H5D_type_info_t UNUSED *type_info, hsize_t nelmts,
     const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo)
 {
@@ -546,6 +521,9 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md,
     herr_t ret_value = SUCCEED;	/* Return value		*/
 
     FUNC_ENTER_STATIC
+
+    dinfo->store->contig.dset_addr = dataset->shared->layout.storage.u.contig.addr;
+    dinfo->store->contig.dset_size = dataset->shared->layout.storage.u.contig.size;
 
     /* Get layout for dataset */
     dinfo->layout = &(dataset->shared->layout);
@@ -585,23 +563,23 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md,
 
     /* Only need single skip list point over multiple read/write IO 
      * and multiple dsets until H5D_close. Thus check both 
-     * since io_info_md->sel_pieces only lives single write/read IO, 
+     * since io_info->sel_pieces only lives single write/read IO, 
      * even cache.sel_pieces lives until Dclose */
     if(NULL == dataset->shared->cache.sel_pieces &&
-       NULL == io_info_md->sel_pieces) {
+       NULL == io_info->sel_pieces) {
         if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
 
         /* keep the skip list in cache, so do not need to recreate until close */
-        io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
+        io_info->sel_pieces = dataset->shared->cache.sel_pieces;
     } /* end if */
 
     /* this is need when multiple write/read occurs on the same dsets,
      * just pass the previously created pointer */
-    if (NULL == io_info_md->sel_pieces)
-        io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
+    if (NULL == io_info->sel_pieces)
+        io_info->sel_pieces = dataset->shared->cache.sel_pieces;
 
-    HDassert(io_info_md->sel_pieces);
+    HDassert(io_info->sel_pieces);
 
     /* We are not using single element mode */
     dinfo->use_single = FALSE;
@@ -625,99 +603,91 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md,
     else
         sel_hyper_flag = TRUE;
 
-    /*
-     * This block is referred from H5D__create_piece_file_map_hyper as part of
-     * multi-dset work
-     * Note: may be able to make a seperate function as a seperate task later.
-     */
-    {
+    /* if selected elements exist */
+    if (dinfo->nelmts) {
         unsigned    u;
+        H5D_piece_info_t *new_piece_info;   /* piece information to insert into skip list */
 
-        /* if selected elements exist */
-        if (dinfo->nelmts) {
-            H5D_piece_info_t *new_piece_info;   /* piece information to insert into skip list */
+        /* Get copy of dset file_space, so it can be changed temporarily 
+         * purpose 
+         * This tmp_fspace allows multiple write before close dset */
+        H5S_t *tmp_fspace;                  /* Temporary file dataspace */
+        /* Create "temporary" chunk for selection operations (copy file space) */
+        if(NULL == (tmp_fspace = H5S_copy(dinfo->file_space, TRUE, FALSE)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
-            /* Get copy of dset file_space, so it can be changed temporarily 
-             * purpose 
-             * This tmp_fspace allows multiple write before close dset */
-            H5S_t *tmp_fspace;                  /* Temporary file dataspace */
-            /* Create "temporary" chunk for selection operations (copy file space) */
-            if(NULL == (tmp_fspace = H5S_copy(dinfo->file_space, TRUE, FALSE)))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+        /* Actions specific to hyperslab selections */
+        if(sel_hyper_flag) {
+            /* Sanity check */
+            HDassert(dinfo->f_ndims > 0);
 
-            /* Actions specific to hyperslab selections */
-            if(sel_hyper_flag) {
-                /* Sanity check */
-                HDassert(dinfo->f_ndims > 0);
-
-                /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
-                if(H5S_hyper_convert(tmp_fspace) < 0) {
-                    (void)H5S_close(tmp_fspace);
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
-                } /* end if */
-            } /* end if */
-
-            /* Add temporary chunk to the list of pieces */
-            /* collect piece_info into Skip List */
-            /* Allocate the file & memory chunk information */
-            if (NULL==(new_piece_info = H5FL_MALLOC (H5D_piece_info_t))) {
+            /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
+            if(H5S_hyper_convert(tmp_fspace) < 0) {
                 (void)H5S_close(tmp_fspace);
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
             } /* end if */
-
-            /* Set the piece index */
-            new_piece_info->index = 0;
-
-            /* Set the file chunk dataspace */
-            new_piece_info->fspace = tmp_fspace;
-            new_piece_info->fspace_shared = FALSE;
-
-            /* Set the memory chunk dataspace */
-            /* same as one chunk, just use dset mem space */
-            new_piece_info->mspace = mem_space;
-
-            /* set true for sharing mem space with dset, which means
-             * fspace gets free by applicaton H5Sclose(), and
-             * doesn't require providing layout_ops.io_term() for H5D_LOPS_CONTIG.
-             */
-            new_piece_info->mspace_shared = TRUE;
-
-            /* Copy the piece's coordinates */
-            for(u = 0; u < dinfo->f_ndims; u++)
-                new_piece_info->coords[u] = 0;
-            new_piece_info->coords[dinfo->f_ndims] = 0;
-
-            /* make connection to related dset info from this piece_info */
-            new_piece_info->dset_info = dinfo;
-
-            /* get dset file address for piece */
-            new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr;
-
-            /* Save piece to last_piece_info so it is freed at the end of the
-             * operation */
-            dinfo->last_piece_info = new_piece_info;
-
-            /* insert piece info */
-            if(H5SL_insert(io_info_md->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
-                    /* mimic H5D__free_piece_info */
-                    H5S_select_all(new_piece_info->fspace, TRUE);
-                    H5FL_FREE(H5D_piece_info_t, new_piece_info);
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
-            } /* end if */
-
-            H5_ASSIGN_OVERFLOW(new_piece_info->piece_points, nelmts, hssize_t, uint32_t);
-        
-            /* only scratch for this dset */
-            /* Clean hyperslab span's "scratch" information */
-            if(sel_hyper_flag)
-                if(H5S_hyper_reset_scratch(new_piece_info->fspace) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
         } /* end if */
-    } /* end block referred from H5D__create_piece_file_map_hyper */
+
+        /* Add temporary chunk to the list of pieces */
+        /* collect piece_info into Skip List */
+        /* Allocate the file & memory chunk information */
+        if (NULL==(new_piece_info = H5FL_MALLOC (H5D_piece_info_t))) {
+            (void)H5S_close(tmp_fspace);
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
+        } /* end if */
+
+        /* Set the piece index */
+        new_piece_info->index = 0;
+
+        /* Set the file chunk dataspace */
+        new_piece_info->fspace = tmp_fspace;
+        new_piece_info->fspace_shared = FALSE;
+
+        /* Set the memory chunk dataspace */
+        /* same as one chunk, just use dset mem space */
+        new_piece_info->mspace = mem_space;
+
+        /* set true for sharing mem space with dset, which means
+         * fspace gets free by applicaton H5Sclose(), and
+         * doesn't require providing layout_ops.io_term() for H5D_LOPS_CONTIG.
+         */
+        new_piece_info->mspace_shared = TRUE;
+
+        /* Copy the piece's coordinates */
+        for(u = 0; u < dinfo->f_ndims; u++)
+            new_piece_info->coords[u] = 0;
+        new_piece_info->coords[dinfo->f_ndims] = 0;
+
+        /* make connection to related dset info from this piece_info */
+        new_piece_info->dset_info = dinfo;
+
+        /* get dset file address for piece */
+        new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr;
+
+        /* Save piece to last_piece_info so it is freed at the end of the
+         * operation */
+        dinfo->last_piece_info = new_piece_info;
+
+        /* insert piece info */
+        if(H5SL_insert(io_info->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
+            /* mimic H5D__free_piece_info */
+            H5S_select_all(new_piece_info->fspace, TRUE);
+            H5FL_FREE(H5D_piece_info_t, new_piece_info);
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
+        } /* end if */
+
+        H5_ASSIGN_OVERFLOW(new_piece_info->piece_points, nelmts, hssize_t, uint32_t);
+        
+        /* only scratch for this dset */
+        /* Clean hyperslab span's "scratch" information */
+        if(sel_hyper_flag)
+            if(H5S_hyper_reset_scratch(new_piece_info->fspace) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
+    } /* end if */
 
 done:
     if(ret_value < 0) {
-        if(H5D__piece_io_term_mdset(dinfo) < 0)
+        if(H5D__piece_io_term(io_info, dinfo) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
     } /* end if */
 
@@ -728,7 +698,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__contig_io_init_mdset() */
+} /* end H5D__contig_io_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -746,7 +716,7 @@ done:
 herr_t
 H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-    H5D_chunk_map_t UNUSED *fm)
+    H5D_dset_info_t *dinfo)
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
@@ -754,7 +724,7 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
     /* Sanity check */
     HDassert(io_info);
-    HDassert(io_info->u.rbuf);
+    HDassert(dinfo->u.rbuf);
     HDassert(type_info);
     HDassert(mem_space);
     HDassert(file_space);
@@ -783,7 +753,7 @@ done:
 herr_t
 H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-    H5D_chunk_map_t UNUSED *fm)
+    H5D_dset_info_t *dinfo)
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
@@ -791,7 +761,7 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
     /* Sanity check */
     HDassert(io_info);
-    HDassert(io_info->u.wbuf);
+    HDassert(dinfo->u.wbuf);
     HDassert(type_info);
     HDassert(mem_space);
     HDassert(file_space);
@@ -1063,6 +1033,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
+    H5D_dset_info_t dset_info;
     ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1076,15 +1047,17 @@ H5D__contig_readvv(const H5D_io_info_t *io_info,
     HDassert(mem_len_arr);
     HDassert(mem_off_arr);
 
+    dset_info = io_info->dsets_info[0];
+
     /* Check if data sieving is enabled */
-    if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_DATA_SIEVE)) {
+    if(H5F_HAS_FEATURE(dset_info.dset->oloc.file, H5FD_FEAT_DATA_SIEVE)) {
         H5D_contig_readvv_sieve_ud_t udata;     /* User data for H5VM_opvv() operator */
 
         /* Set up user data for H5VM_opvv() */
-        udata.file = io_info->dset->oloc.file;
-        udata.dset_contig = &(io_info->dset->shared->cache.contig);
-        udata.store_contig = &(io_info->store->contig);
-        udata.rbuf = (unsigned char *)io_info->u.rbuf;
+        udata.file = dset_info.dset->oloc.file;
+        udata.dset_contig = &(dset_info.dset->shared->cache.contig);
+        udata.store_contig = &(dset_info.store->contig);
+        udata.rbuf = (unsigned char *)dset_info.u.rbuf;
         udata.dxpl_id = io_info->dxpl_id;
 
         /* Call generic sequence operation routine */
@@ -1097,9 +1070,9 @@ H5D__contig_readvv(const H5D_io_info_t *io_info,
         H5D_contig_readvv_ud_t udata;     /* User data for H5VM_opvv() operator */
 
         /* Set up user data for H5VM_opvv() */
-        udata.file = io_info->dset->oloc.file;
-        udata.dset_addr = io_info->store->contig.dset_addr;
-        udata.rbuf = (unsigned char *)io_info->u.rbuf;
+        udata.file = dset_info.dset->oloc.file;
+        udata.dset_addr = dset_info.store->contig.dset_addr;
+        udata.rbuf = (unsigned char *)dset_info.u.rbuf;
         udata.dxpl_id = io_info->dxpl_id;
 
         /* Call generic sequence operation routine */
@@ -1384,6 +1357,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
+    H5D_dset_info_t dset_info;
     ssize_t ret_value;          /* Return value (Size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
@@ -1397,15 +1371,17 @@ H5D__contig_writevv(const H5D_io_info_t *io_info,
     HDassert(mem_len_arr);
     HDassert(mem_off_arr);
 
+    dset_info = io_info->dsets_info[0];
+
     /* Check if data sieving is enabled */
-    if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_DATA_SIEVE)) {
+    if(H5F_HAS_FEATURE(dset_info.dset->oloc.file, H5FD_FEAT_DATA_SIEVE)) {
         H5D_contig_writevv_sieve_ud_t udata;    /* User data for H5VM_opvv() operator */
 
         /* Set up user data for H5VM_opvv() */
-        udata.file = io_info->dset->oloc.file;
-        udata.dset_contig = &(io_info->dset->shared->cache.contig);
-        udata.store_contig = &(io_info->store->contig);
-        udata.wbuf = (const unsigned char *)io_info->u.wbuf;
+        udata.file = dset_info.dset->oloc.file;
+        udata.dset_contig = &(dset_info.dset->shared->cache.contig);
+        udata.store_contig = &(dset_info.store->contig);
+        udata.wbuf = (const unsigned char *)dset_info.u.wbuf;
         udata.dxpl_id = io_info->dxpl_id;
 
         /* Call generic sequence operation routine */
@@ -1418,9 +1394,9 @@ H5D__contig_writevv(const H5D_io_info_t *io_info,
         H5D_contig_writevv_ud_t udata;     /* User data for H5VM_opvv() operator */
 
         /* Set up user data for H5VM_opvv() */
-        udata.file = io_info->dset->oloc.file;
-        udata.dset_addr = io_info->store->contig.dset_addr;
-        udata.wbuf = (const unsigned char *)io_info->u.wbuf;
+        udata.file = dset_info.dset->oloc.file;
+        udata.dset_addr = dset_info.store->contig.dset_addr;
+        udata.wbuf = (const unsigned char *)dset_info.u.wbuf;
         udata.dxpl_id = io_info->dxpl_id;
 
         /* Call generic sequence operation routine */
