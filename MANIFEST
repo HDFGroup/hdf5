@@ -2219,8 +2219,8 @@
 ./tools/perform/pio_perf.h
 ./tools/perform/pio_standalone.c
 ./tools/perform/pio_standalone.h
-./tools/perform/pio_timer.c
-./tools/perform/pio_timer.h
+./tools/perform/io_timer.c
+./tools/perform/io_timer.h
 ./tools/perform/sio_engine.c
 ./tools/perform/sio_perf.c
 ./tools/perform/sio_perf.h
