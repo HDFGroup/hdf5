@@ -2226,8 +2226,6 @@
 ./tools/perform/sio_perf.h
 ./tools/perform/sio_standalone.c
 ./tools/perform/sio_standalone.h
-./tools/perform/sio_timer.c
-./tools/perform/sio_timer.h
 ./tools/perform/zip_perf.c
 
 
