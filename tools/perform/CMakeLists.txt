@@ -125,18 +125,6 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
     target_link_libraries (h5perf_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     set_target_properties (h5perf_alone PROPERTIES FOLDER perform)
   endif (HDF5_BUILD_PERFORM_STANDALONE)
-
-  if (HDF5_BUILD_PARALLEL_ALL)
-    #-- Adding test for benchpar
-    set (benchpar_SRCS
-        ${HDF5_PERFORM_SOURCE_DIR}/benchpar.c
-    )
-    add_executable (benchpar ${benchpar_SRCS})
-    TARGET_NAMING (benchpar ${LIB_TYPE})
-    TARGET_C_PROPERTIES (benchpar " " " ")
-    target_link_libraries (benchpar ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-    set_target_properties (benchpar PROPERTIES FOLDER perform)
-  endif (HDF5_BUILD_PARALLEL_ALL)
 endif (H5_HAVE_PARALLEL AND BUILD_TESTING)
 
 include (CMakeTests.cmake)
