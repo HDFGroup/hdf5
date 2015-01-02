@@ -55,6 +55,7 @@ typedef struct H5FD_core_t {
     unsigned char *mem;         /* the underlying memory                */
     haddr_t eoa;                /* end of allocated region              */
     haddr_t eof;                /* current allocated size               */
+    haddr_t aligned_eof;        /* EOF as a multiple of the increment   */
     size_t  increment;          /* multiples for mem allocation         */
     hbool_t backing_store;      /* write to file name on flush          */
     size_t  bstore_page_size;   /* backing store page size              */
@@ -778,6 +779,18 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             /* Set up data structures */
             file->eof = size;
 
+            /* MSC - Need to set the EOF to what have been stored in the
+               SuperBlock which is a multiple of the increment */
+            {
+                haddr_t new_eof;
+
+                /* Determine new size of memory buffer */
+                H5_ASSIGN_OVERFLOW(new_eof, file->increment * (file->eof / file->increment), hsize_t, size_t);
+                if(file->eof % file->increment)
+                    new_eof += file->increment;
+                file->aligned_eof = new_eof;
+            }
+
             /* If there is an initial file image, copy it, using the callback if possible */
             if(file_image_info.buffer && file_image_info.size > 0) {
                 if(file->fi_callbacks.image_memcpy) {
@@ -1133,7 +1146,7 @@ H5FD_core_get_eof(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(file->eof)
+    FUNC_LEAVE_NOAPI(file->aligned_eof)
 }
 
 
@@ -1325,6 +1338,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
         file->mem = x;
 
         file->eof = new_eof;
+        file->aligned_eof = file->eof;
     } /* end if */
 
     /* Add the buffer region to the dirty list if using that optimization */
@@ -1545,6 +1559,7 @@ fprintf(stderr, "OLD: Truncated to: %llu\n", file->eoa);
 
             /* Update the eof value */
             file->eof = new_eof;
+            file->aligned_eof = file->eof;
         } /* end if */
     } /* end if(file->eof < file->eoa) */
 
