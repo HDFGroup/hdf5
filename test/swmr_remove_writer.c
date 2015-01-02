@@ -274,10 +274,7 @@ int main(int argc, const char *argv[])
                     case 'r':
                         use_seed = 1;
                         temp = atoi(argv[u + 1]);
-                        if(temp < 0)
-                            usage();
-                        else
-                            random_seed = (unsigned)temp;
+                        random_seed = (unsigned)temp;
                         u += 2;
                         break;
 

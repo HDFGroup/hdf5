@@ -2562,8 +2562,9 @@ HDmemset(leaf->leaf_native, 0, hdr->cls->nrec_size * hdr->node_info[0].max_nrec)
     /* Set parent */
     leaf->parent = parent;
 
-    /* Set shadowed list next pointer */
+    /* Set shadowed list next and prev pointers */
     leaf->shadowed_next = NULL;
+    leaf->shadowed_prev = NULL;
 
     /* Allocate space on disk for the leaf */
     if(HADDR_UNDEF == (node_ptr->addr = H5MF_alloc(hdr->f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)hdr->node_size)))
@@ -2688,8 +2689,9 @@ HDmemset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (hdr->node_info[depth
     /* Set parent */
     internal->parent = parent;
 
-    /* Set shadowed list next pointer */
+    /* Set shadowed list next and prev pointers */
     internal->shadowed_next = NULL;
+    internal->shadowed_prev = NULL;
 
     /* Allocate space on disk for the internal node */
     if(HADDR_UNDEF == (node_ptr->addr = H5MF_alloc(hdr->f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)hdr->node_size)))
