@@ -166,9 +166,9 @@ Supported Platforms
 The following platforms are supported and have been tested for this release.
 They are built with the configure process unless specified otherwise.
 
-    AIX 5.3                       xlc 10.1.0.5
-    (NASA G-ADA)                  xlC 10.1.0.5
-                                  xlf90 12.1.0.6
+    AIX 5.3                       xlc/xlc_r 10.1.0.5
+    (NASA G-ADA)                  xlC/xlC_r 10.1.0.5
+                                  xlf90/xlf90_r 12.1.0.6
 
     Linux 2.6.18-308.13.1.el5PAE  GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP i686 i686 i386         compilers for 32-bit applications;
