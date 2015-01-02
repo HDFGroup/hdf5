@@ -112,26 +112,14 @@ test_fcreate_with_at(hid_t fcpl, hid_t fapl, H5F_avoid_truncate_t at, hbool_t eo
         /* Open the superblock extension, if it exists. */
         if(H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0) FAIL_STACK_ERROR;
 
-        if(H5Pget_driver(fapl) == H5FD_MULTI) {
-            msg_exists = H5O_msg_exists(&ext_loc, H5O_EOFS_ID, H5AC_dxpl_id);
-            if(msg_exists == TRUE) {
-                if(eoa != TRUE) TEST_ERROR;
-            } else if(msg_exists == FALSE) {
-                if(eoa != FALSE) TEST_ERROR;
-            } else {
-                FAIL_STACK_ERROR;
-            } /* end else */
-        }
-        else {
-            msg_exists = H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id);
-            if(msg_exists == TRUE) {
-                if(eoa!=TRUE) TEST_ERROR;
-            } else if(msg_exists == FALSE) {
-                if(eoa!=FALSE) TEST_ERROR;
-            } else {
-                FAIL_STACK_ERROR;
-            } /* end else */
-        }
+        msg_exists = H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id);
+        if(msg_exists == TRUE) {
+            if(eoa!=TRUE) TEST_ERROR;
+        } else if(msg_exists == FALSE) {
+            if(eoa!=FALSE) TEST_ERROR;
+        } else {
+            FAIL_STACK_ERROR;
+        } /* end else */
 
         /* Close sblock extension */
         if(H5F_super_ext_close(f, &ext_loc, H5AC_dxpl_id, FALSE) <0) FAIL_STACK_ERROR;
@@ -712,7 +700,7 @@ check_message(hid_t fid, unsigned value)
         TEST_ERROR;
     } /* end if */
 
-    /* If a SB extension exists check for EOA or EOFs messages */
+    /* If a SB extension exists check for and EOA message */
     if (f->shared->sblock->ext_addr != HADDR_UNDEF) {
         H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
         unsigned mesg_flags;        /* Message flags for the EOA message */
@@ -723,30 +711,15 @@ check_message(hid_t fid, unsigned value)
             TEST_ERROR;
         } /* end if */
 
-        /* If this is a multi-like vfd, check EOFS message. */
-        if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
-            /* Check to see if there is an 'EOFS' message */
-            if(!H5O_msg_exists(&ext_loc, H5O_EOFS_ID, H5AC_dxpl_id)) {
-                fprintf(stderr, "Unable to find 'EOFS' message in superblock extension.\n");
-                TEST_ERROR;
-            }
-            /* Get the 'EOFS' messages flags */
-            if(H5O_msg_flags(&ext_loc, H5O_EOFS_ID, &mesg_flags, H5AC_dxpl_id) < 0) {
-                fprintf(stderr, "Unable to retrieve 'EOFS' message flag.\n");
-                TEST_ERROR;
-            }
+        /* Check to see if there is an 'EOA' message */
+        if(!H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)) {
+            fprintf(stderr, "Unable to find 'EOA' message in superblock extension.\n");
+            TEST_ERROR;
         }
-        else {
-            /* Check to see if there is an 'EOA' message */
-            if(!H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id)) {
-                fprintf(stderr, "Unable to find 'EOA' message in superblock extension.\n");
-                TEST_ERROR;
-            }
-            /* Get the 'EOFS' messages flags */
-            if(H5O_msg_flags(&ext_loc, H5O_EOA_ID, &mesg_flags, H5AC_dxpl_id) < 0) {
-                fprintf(stderr, "Unable to retrieve 'EOFS' message flag.\n");
-                TEST_ERROR;
-            }
+        /* Get the 'EOA' message flags */
+        if(H5O_msg_flags(&ext_loc, H5O_EOA_ID, &mesg_flags, H5AC_dxpl_id) < 0) {
+            fprintf(stderr, "Unable to retrieve 'EOA' message flag.\n");
+            TEST_ERROR;
         }
 
         if(!(value & mesg_flags)) {
@@ -871,7 +844,7 @@ error:
  * Function:    test_truncation_1_8
  *
  * Purpose:     Tests the library's ability to handle files created with the
- *              1.8 library, and with EOA & EOFS messages that were marked by
+ *              1.8 library, and with an EOA messagesthat were marked by
  *              the 1.8 library.
  *
  * Return:      0 on success or 1 on failure.
@@ -912,7 +885,7 @@ test_truncation_1_8(void)
     if(access_file(fapl, TESTFILE1_MULTI) < 0) TEST_ERROR;
     PASSED();
 
-    TESTING("access to a multi-file with an outdated EOFS extension message");
+    TESTING("access to a multi-file with an outdated EOA extension message");
     if(access_file_w_msg(fapl, TESTFILE2_MULTI) < 0) TEST_ERROR;
     PASSED();
 

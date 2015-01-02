@@ -33,17 +33,17 @@
  * Purpose: Create 3 testfiles both with Avoid Truncate Feature turned
  * on:
 
- * The first test file will have an EOA/EOFS message where EOA !=
- * EOF. The 1.8 library should fail when opening the file. 
+ * The first test file will have an EOA message where EOA != EOF. The
+ * 1.8 library should fail when opening the file.
  *
- * The second test file should have an EOA/EOFS message but the EOA ==
+ * The second test file should have an EOA message but the EOA ==
  * EOF. The 1.8 library should succeed in accessing the file and
- * should mark the EOA/EOFS message with MARK_IF_UNKNOWN Flag. 
+ * should mark the EOA message with MARK_IF_UNKNOWN Flag.
  *
- * The third test file should not have an EOA/EOFS message and should
- * be properly truncated. we will run the h5extend tool on to truncate
- * it properly, remove the extension message and make it accessible
- * with the 1.8 branch.
+ * The third test file should not have an EOA message and should be
+ * properly truncated. we will run the h5extend tool on to truncate it
+ * properly, remove the extension message and make it accessible with
+ * the 1.8 branch.
  *
  * Developer:    Mohamad Chaarawi
  *               December 2014
@@ -91,7 +91,7 @@ int main(void)
     if(access_file(H5P_DEFAULT, TESTFILE3) < 0)
         return -1;
 
-    /* Do the same as above but with the multi-vfd to test the EOFS message. */
+    /* Do the same as above but with the multi-vfd. */
     /* create a multi file driver */
     if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
         return -1;

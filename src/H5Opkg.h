@@ -508,10 +508,7 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_FSINFO[1];
 /* 'EOA' message. (0x0018) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_EOA[1];
 
-/* 'EOFS' message. (0x0019) */
-H5_DLLVAR const H5O_msg_class_t H5O_MSG_EOFS[1];
-
-/* Placeholder for unknown message. (0x001A) */
+/* Placeholder for unknown message. (0x0019) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_UNKNOWN[1];
 
 

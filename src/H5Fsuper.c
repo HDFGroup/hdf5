@@ -584,31 +584,26 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update free-space info header message")
 	} /* end if */
 
-        /* Check if we need to store the 'EOFs' value in the superblock extension */
-        if((f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) && 
-            H5F_AVOID_TRUNCATE(f)) {
-            haddr_t eofs[H5FD_MEM_NTYPES]; /* 'EOFs' value */
+        /* Check if we need to store the 'EOA' values in the superblock extension */
+        if(H5F_AVOID_TRUNCATE(f)) {
+            H5O_eoa_t eoa_msg;
             H5FD_mem_t mt;
 
-            for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                if((eofs[mt] = H5FD_get_eof(f->shared->lf, mt)) == HADDR_UNDEF)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eof request failed")
-            } /* end for */
+            HDmemset(eoa_msg.memb_eoa, 0, H5FD_MEM_NTYPES * sizeof(haddr_t));
 
-            if(H5O_msg_create(&ext_loc, H5O_EOFS_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eofs, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update 'EOFS' value header message")
-        } /* end if */
-        /* Check if we need to store the 'EOA' value in the superblock extension */
-        else if(H5F_AVOID_TRUNCATE(f)) {
-            H5O_eoa_t eoa_msg;
-            haddr_t eoa; /* 'EOA' value */
+            if((eoa_msg.memb_eoa[H5FD_MEM_SUPER] = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+            eoa_msg.memb_eoa[H5FD_MEM_SUPER] += sblock->base_addr;
 
-            if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)))
-                HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to obtain EOA value")
+            if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
+                for(mt = H5FD_MEM_SUPER+1; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+                    if((eoa_msg.memb_eoa[mt] = H5FD_get_eoa(f->shared->lf, mt)) == HADDR_UNDEF)
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+                } /* end for */
+            }
 
-            eoa_msg.eoa = eoa + sblock->base_addr;
-
-            if(H5O_msg_create(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
+            if(H5O_msg_create(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, 
+                              &eoa_msg, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update 'EOA' value header message")
         } /* end if */
     } /* end if */

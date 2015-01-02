@@ -193,10 +193,8 @@ typedef struct H5O_copy_t {
 #define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
 #define H5O_FSINFO_ID   0x0017          /* Free-space manager info message.  */
 #define H5O_EOA_ID      0x0018          /* 'EOA' value info message */
-#define H5O_EOFS_ID     0x0019          /* 'EOFs' value info message */
-#define H5O_UNKNOWN_ID  0x001A          /* Placeholder message ID for unknown message.  */
+#define H5O_UNKNOWN_ID  0x0019          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
-
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -355,16 +353,8 @@ typedef struct H5O_efl_t {
  */
 typedef struct H5O_eoa_t {
     H5F_avoid_truncate_t avoid_truncate; /* Avoid Truncate setting for the file */
-    hsize_t eoa; /* 'EOA' value */
+    hsize_t memb_eoa[H5FD_MEM_NTYPES]; /* EOA values */
 } H5O_eoa_t;
-
-/* 
- * EOFs Message
- */
-typedef struct H5O_eofs_t {
-    H5F_avoid_truncate_t avoid_truncate; /* Avoid Truncate setting for the file */
-    hsize_t memb_eof[H5FD_MEM_NTYPES];
-} H5O_eofs_t;
 
 /*
  * Data Layout Message.

@@ -94,6 +94,7 @@ typedef struct H5FD_multi_t {
     H5FD_multi_fapl_t fa;	/*driver-specific file access properties*/
     haddr_t	memb_next[H5FD_MEM_NTYPES];/*addr of next member	*/
     H5FD_t	*memb[H5FD_MEM_NTYPES];	/*member pointers		*/
+    haddr_t     memb_eof[H5FD_MEM_NTYPES]; /*EOF for individual files */
     haddr_t     memb_eoa[H5FD_MEM_NTYPES]; /*EOA for individual files,
     				 *end of allocated addresses.  v1.6 library 
                                  *have the EOA for the entire file. But it's
@@ -609,7 +610,7 @@ H5FD_multi_sb_size(H5FD_t *_file)
 	nseen++;
     } END_MEMBERS;
 
-    /* Addresses and EOA markers */
+    /* Addresses and EOF markers */
     nbytes += nseen * 2 * 8;
 
     /* Name templates */
@@ -632,7 +633,7 @@ H5FD_multi_sb_size(H5FD_t *_file)
  *		The encoding is a six-byte member mapping followed two bytes
  *		which are unused. For each unique file in usage-type order
  *		encode all the starting addresses as unsigned 64-bit integers,
- *		then all the EOA values as unsigned 64-bit integers, then all
+ *		then all the EOF values as unsigned 64-bit integers, then all
  *		the template names as null terminated strings which are
  *		multiples of 8 characters.
  *
@@ -650,7 +651,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
 		     unsigned char *buf/*out*/)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
-    haddr_t		memb_eoa;
+    haddr_t		memb_eof;
     unsigned char	*p;
     size_t		nseen;
     size_t		i;
@@ -673,19 +674,19 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     buf[7] = 0;
 
     /*
-     * Copy the starting addresses and EOA values into the buffer in order of
+     * Copy the starting addresses and EOF values into the buffer in order of
      * usage type but only for types which map to something unique.
      */
 
-    /* Encode all starting addresses and EOA values */
+    /* Encode all starting addresses and EOF values */
     nseen = 0;
     p = buf+8;
     assert(sizeof(haddr_t)<=8);
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
         memcpy(p, &(file->fa.memb_addr[mt]), sizeof(haddr_t));
         p += sizeof(haddr_t);
-        memb_eoa = H5FDget_eoa(file->memb[mt], mt);
-        memcpy(p, &memb_eoa, sizeof(haddr_t));
+        memb_eof = H5FDget_eof(file->memb[mt], mt);
+        memcpy(p, &memb_eof, sizeof(haddr_t));
         p += sizeof(haddr_t);
         nseen++;
     } END_MEMBERS;
@@ -738,7 +739,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     hbool_t		in_use[H5FD_MEM_NTYPES];
     const char		*memb_name[H5FD_MEM_NTYPES];
     haddr_t		memb_addr[H5FD_MEM_NTYPES];
-    haddr_t		memb_eoa[H5FD_MEM_NTYPES];
+    haddr_t		memb_eof[H5FD_MEM_NTYPES];
     haddr_t		*ap;
     static const char *func="H5FD_multi_sb_decode";  /* Function Name for error reporting */
 
@@ -752,7 +753,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     /* Set default values */
     ALL_MEMBERS(mt) {
         memb_addr[mt] = HADDR_UNDEF;
-        memb_eoa[mt] = HADDR_UNDEF;
+        memb_eof[mt] = HADDR_UNDEF;
         memb_name[mt] = NULL;
     } END_MEMBERS;
 
@@ -772,7 +773,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     } END_MEMBERS;
     buf += 8;
 
-    /* Decode Address and EOA values */
+    /* Decode Address and EOF values */
     assert(sizeof(haddr_t)<=8);
     memcpy(x, buf, (nseen*2*8));
     buf += nseen*2*8;
@@ -781,7 +782,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     ap = (haddr_t*)x;
     UNIQUE_MEMBERS(map, mt) {
         memb_addr[_unmapped] = *ap++;
-        memb_eoa[_unmapped] = *ap++;
+        memb_eof[_unmapped] = *ap++;
     } END_MEMBERS;
 
     /* Decode name templates */
@@ -851,14 +852,14 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     if (open_members(file)<0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "open_members() failed", -1)
 
-    /* Set the EOA marker for all open files */
+    /* Set the EOF marker for all open files */
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
         if (file->memb[mt])
-            if(H5FDset_eoa(file->memb[mt], mt, memb_eoa[mt])<0)
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_CANTSET, "set_eoa() failed", -1)
-       
-        /* Save the individual EOAs in one place for later comparison (in H5FD_multi_set_eoa) */ 
-        file->memb_eoa[mt] = memb_eoa[mt]; 
+            if(H5FDset_eoa(file->memb[mt], mt, memb_eof[mt])<0)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_CANTSET, "set_eof() failed", -1)
+        /* Save the individual EOFs in one place for later comparison (in H5FD_multi_set_eof) */ 
+        file->memb_eof[mt] = memb_eof[mt]; 
+        file->memb_eoa[mt] = H5FDget_eoa(file->memb[mt], mt); 
     } END_MEMBERS;
 
     return 0;
@@ -1395,6 +1396,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
      * the EOAs of v1.6 and v1.8 files are the same.  It won't cause any trouble.  (Please see Issue 2598 
      * in Jira) SLU - 2011/6/21
      */
+
     if(H5FD_MEM_SUPER == type && file->memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > file->memb_eoa[H5FD_MEM_SUPER])
         return 0;
 

@@ -1,7 +1,7 @@
 #############################
 Expected output for 'h5extend h5extend_multifile.h5'
 #############################
-  File Driver EOA and Superblock extension EOF values:
+  Superblock extension contains 'EOA' message
   1: EOA = 48  EOF = 48
   2: EOA = 3074457345618259146  EOF = 3074457345618259474
   3: EOA = 0  EOF = 0

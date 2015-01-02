@@ -858,7 +858,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         if(H5I_dec_ref(f->shared->fcpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
-
+#if 0
+        /* MSC - truncation moved to sblock flush now */
         /* If not avoiding truncation, OR if only avoiding truncation during file
            extension and a truncation will result in a smaller file, then truncate
            the file */
@@ -871,7 +872,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                     HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
             } /* end if */
         } /* end if */
-
+#endif
         /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)
             /* Push error, but keep going*/
