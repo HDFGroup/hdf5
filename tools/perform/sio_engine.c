@@ -29,7 +29,7 @@
 #include "hdf5.h"
 
 #include "sio_perf.h"
-#include "sio_timer.h"
+//#include "io_timer.h"
 
 /* Macro definitions */
 
@@ -143,11 +143,11 @@ do_sio(parameters param)
     switch (iot) {
     case POSIXIO:
         fd.posixfd = -1;
-        res.timers = sio_time_new();
+        res.timers = io_time_new(SYS_CLOCK);
         break;
     case HDF5:
         fd.h5fd = -1;
-        res.timers = sio_time_new();
+        res.timers = io_time_new(SYS_CLOCK);
         break;
     default:
         /* unknown request */

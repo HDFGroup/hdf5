@@ -59,8 +59,8 @@ TEST_PROG = iopipe chunk overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_P
 # "make clean" and some systems, e.g., AIX, do not like it.
 check_PROGRAMS= iopipe chunk overhead zip_perf perf_meta $(BUILD_ALL_PROGS) perf
 
-h5perf_SOURCES=pio_perf.c pio_engine.c pio_timer.c
-h5perf_serial_SOURCES=sio_perf.c sio_engine.c sio_timer.c
+h5perf_SOURCES=pio_perf.c pio_engine.c io_timer.c
+h5perf_serial_SOURCES=sio_perf.c sio_engine.c io_timer.c
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.

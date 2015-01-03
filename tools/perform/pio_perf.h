@@ -24,7 +24,7 @@
 #else
 #include "pio_standalone.h"
 #endif
-#include "pio_timer.h"
+#include "io_timer.h"
 
 /* setup the dataset no fill option if this is v1.5 or more */
 #if H5_VERS_MAJOR > 1 || H5_VERS_MINOR > 4
@@ -59,7 +59,7 @@ typedef struct parameters_ {
 
 typedef struct results_ {
     herr_t      ret_code;
-    pio_time   *timers;
+    io_time_t   *timers;
 } results;
 
 #ifndef SUCCESS
@@ -71,7 +71,7 @@ typedef struct results_ {
 #endif  /* !FAIL */
 
 extern FILE     *output;            /* output file                          */
-extern pio_time *timer_g;           /* timer: global for stub functions     */
+extern io_time_t *timer_g;           /* timer: global for stub functions     */
 extern int      comm_world_rank_g;  /* my rank in MPI_COMM_RANK             */
 extern int      comm_world_nprocs_g;/* num. of processes of MPI_COMM_WORLD  */
 extern MPI_Comm pio_comm_g;         /* Communicator to run the PIO          */

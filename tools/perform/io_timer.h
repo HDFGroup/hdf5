@@ -1,5 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -12,10 +13,11 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SIO_TIMER__
-#define SIO_TIMER__
+#ifndef IO_TIMER__
+#define IO_TIMER__
 
 #include "hdf5.h"
+#include "H5private.h"
 
 #if defined(H5_TIME_WITH_SYS_TIME)
 #   include <sys/time.h>
@@ -29,7 +31,6 @@
 #ifdef H5_HAVE_WINSOCK2_H
 #  include <winsock2.h>
 #endif /* H5_HAVE_WINSOCK2_H */
-
 /* The different types of timers we can have */
 typedef enum timer_type_ {
     HDF5_FILE_OPENCLOSE,
@@ -49,6 +50,10 @@ typedef enum timer_type_ {
     NUM_TIMERS
 } timer_type;
 
+typedef enum clock_type_ {
+    SYS_CLOCK = 0,   /* Use system clock to measure time     */
+    MPI_CLOCK = 1    /* Use MPI clock to measure time        */
+} clock_type;
 
 /* Miscellaneous identifiers */
 enum {
@@ -57,22 +62,33 @@ enum {
 };
 
 /* The performance time structure */
-typedef struct sio_time_ {
+typedef struct io_time_t {
+    clock_type type;
     double total_time[NUM_TIMERS];
+    double mpi_timer[NUM_TIMERS];
     struct timeval sys_timer[NUM_TIMERS];
-} sio_time;
+} io_time_t;
 
 /* External function declarations */
 #ifdef __cplusplus
 extern "C" {
 #endif  /* __cplusplus */
-extern sio_time    *sio_time_new(void);
-extern void         sio_time_destroy(sio_time *pt);
-extern void         set_timer_type(sio_time *pt);
-extern sio_time    *set_time(sio_time *pt, timer_type t, int start_stop);
-extern double       get_time(sio_time *pt, timer_type t);
+#if 1
+/* from sio_time.h */
+//extern io_time_t    *sio_time_new(void);
+//extern void         sio_time_destroy(io_time_t *pt);
+//extern void         set_timer_type(io_time_t *pt);
+//extern io_time_t    *set_time(io_time_t *pt, timer_type t, int start_stop);
+//extern double       get_time(io_time_t *pt, timer_type t);
+#endif
+extern io_time_t   *io_time_new(clock_type t);
+extern void         io_time_destroy(io_time_t *pt);
+//extern void         set_timer_type(io_time_t *pt, clock_type type);
+//extern clock_type   get_timer_type(io_time_t *pt);
+extern io_time_t   *set_time(io_time_t *pt, timer_type t, int start_stop);
+extern double       get_time(io_time_t *pt, timer_type t);
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */
 
-#endif  /* SIO_TIMER__ */
+#endif  /* IO_TIMER__ */

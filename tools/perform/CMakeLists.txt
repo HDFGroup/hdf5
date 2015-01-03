@@ -17,7 +17,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib )
 # --------------------------------------------------------------------
 #-- Adding test for h5perf_serial
 set (h5perf_serial_SRCS
-    ${HDF5_PERFORM_SOURCE_DIR}/sio_timer.c
+    ${HDF5_PERFORM_SOURCE_DIR}/io_timer.c
     ${HDF5_PERFORM_SOURCE_DIR}/sio_perf.c
     ${HDF5_PERFORM_SOURCE_DIR}/sio_engine.c
 )
@@ -30,7 +30,7 @@ set_target_properties (h5perf_serial PROPERTIES FOLDER perform)
 if (HDF5_BUILD_PERFORM_STANDALONE)
   #-- Adding test for h5perf_serial_alone
   set (h5perf_serial_alone_SRCS
-      ${HDF5_PERFORM_SOURCE_DIR}/sio_timer.c
+      ${HDF5_PERFORM_SOURCE_DIR}/io_timer.c
       ${HDF5_PERFORM_SOURCE_DIR}/sio_perf.c
       ${HDF5_PERFORM_SOURCE_DIR}/sio_engine.c
   )
@@ -99,7 +99,7 @@ set_target_properties (zip_perf PROPERTIES FOLDER perform)
 if (H5_HAVE_PARALLEL AND BUILD_TESTING)
   #-- Adding test for h5perf
   set (h5perf_SRCS
-      ${HDF5_PERFORM_SOURCE_DIR}/pio_timer.c
+      ${HDF5_PERFORM_SOURCE_DIR}/io_timer.c
       ${HDF5_PERFORM_SOURCE_DIR}/pio_perf.c
       ${HDF5_PERFORM_SOURCE_DIR}/pio_engine.c
   )
@@ -112,7 +112,7 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
   if (HDF5_BUILD_PERFORM_STANDALONE)
     #-- Adding test for h5perf
     set (h5perf_alone_SRCS
-        ${HDF5_PERFORM_SOURCE_DIR}/pio_timer.c
+        ${HDF5_PERFORM_SOURCE_DIR}/io_timer.c
         ${HDF5_PERFORM_SOURCE_DIR}/pio_perf.c
         ${HDF5_PERFORM_SOURCE_DIR}/pio_engine.c
     )
