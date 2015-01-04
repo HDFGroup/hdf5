@@ -29,7 +29,6 @@
 #include "hdf5.h"
 
 #include "sio_perf.h"
-//#include "io_timer.h"
 
 /* Macro definitions */
 
