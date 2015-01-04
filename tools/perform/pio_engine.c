@@ -38,7 +38,6 @@
 #endif  /* !MPI_FILE_NULL */
 
 #include "pio_perf.h"
-//#include "io_timer.h"
 
 /* Macro definitions */
 

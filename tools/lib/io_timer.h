@@ -73,18 +73,8 @@ typedef struct io_time_t {
 #ifdef __cplusplus
 extern "C" {
 #endif  /* __cplusplus */
-#if 1
-/* from sio_time.h */
-//extern io_time_t    *sio_time_new(void);
-//extern void         sio_time_destroy(io_time_t *pt);
-//extern void         set_timer_type(io_time_t *pt);
-//extern io_time_t    *set_time(io_time_t *pt, timer_type t, int start_stop);
-//extern double       get_time(io_time_t *pt, timer_type t);
-#endif
 extern io_time_t   *io_time_new(clock_type t);
 extern void         io_time_destroy(io_time_t *pt);
-//extern void         set_timer_type(io_time_t *pt, clock_type type);
-//extern clock_type   get_timer_type(io_time_t *pt);
 extern io_time_t   *set_time(io_time_t *pt, timer_type t, int start_stop);
 extern double       get_time(io_time_t *pt, timer_type t);
 #ifdef __cplusplus
