@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "H5private.h"
 #include "hdf5.h"
 
 #ifdef H5_HAVE_PARALLEL
@@ -73,7 +74,7 @@ static double sub_time(struct timeval* a, struct timeval* b)
 io_time_t *
 io_time_new(clock_type type)
 {
-    io_time_t *pt = (io_time_t *)calloc(1, sizeof(struct io_time_t));
+    io_time_t *pt = (io_time_t *)HDcalloc(1, sizeof(struct io_time_t));
 
     /* set global timer variable */
     timer_g = pt;
@@ -197,12 +198,15 @@ set_time(io_time_t *pt, timer_type t, int start_stop)
             }
 	break;
     default:
-	fprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
+	HDfprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
 	return (NULL);
 	break;
     }
 
+#if 0
+    /* this does not belong here. Need fix in h5perf code when set_time() is called. -AKC- */
     debug_start_stop_time(pt, t, start_stop);
+#endif
 
     return pt;
 }
@@ -220,6 +224,9 @@ get_time(io_time_t *pt, timer_type t)
     return pt->total_time[t];
 }
 
+#if 0
+/* standalone is not working yet. Need fix later. -AKC- */
 #ifdef STANDALONE
 #include "pio_standalone.c"
+#endif
 #endif
