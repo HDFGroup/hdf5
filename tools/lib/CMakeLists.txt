@@ -24,7 +24,7 @@ set (H5_TOOLS_LIB_SRCS
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_type.c
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5tools_utils.c
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5trav.c
-    ${HDF5_TOOLS_LIB_SOURCE_DIR}/io_timer.c
+#    ${HDF5_TOOLS_LIB_SOURCE_DIR}/io_timer.c
 )
 
 set (H5_TOOLS_LIB_HDRS
