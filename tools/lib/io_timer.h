@@ -17,7 +17,6 @@
 #define IO_TIMER__
 
 #include "hdf5.h"
-#include "H5private.h"
 
 #if defined(H5_TIME_WITH_SYS_TIME)
 #   include <sys/time.h>
@@ -73,10 +72,10 @@ typedef struct io_time_t {
 #ifdef __cplusplus
 extern "C" {
 #endif  /* __cplusplus */
-extern io_time_t   *io_time_new(clock_type t);
-extern void         io_time_destroy(io_time_t *pt);
-extern io_time_t   *set_time(io_time_t *pt, timer_type t, int start_stop);
-extern double       get_time(io_time_t *pt, timer_type t);
+H5TOOLS_DLL io_time_t   *io_time_new(clock_type t);
+H5TOOLS_DLL void         io_time_destroy(io_time_t *pt);
+H5TOOLS_DLL io_time_t   *set_time(io_time_t *pt, timer_type t, int start_stop);
+H5TOOLS_DLL double       get_time(io_time_t *pt, timer_type t);
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */
