@@ -29,7 +29,9 @@
  */
 
 #include "testphdf5.h"
+#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
 
+#include "H5Fpkg.h"
 /*
  * The following are various utility routines used by the tests.
  */
@@ -4353,7 +4355,6 @@ dataset_atomicity(void)
 
     ret = H5Fclose(fid);
     VRFY((ret >= 0), "H5Fclose succeeded");
-
 }
 
 /* Function: dense_attr_test

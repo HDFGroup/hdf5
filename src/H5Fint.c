@@ -858,21 +858,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         if(H5I_dec_ref(f->shared->fcpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
-#if 0
-        /* MSC - truncation moved to sblock flush now */
-        /* If not avoiding truncation, OR if only avoiding truncation during file
-           extension and a truncation will result in a smaller file, then truncate
-           the file */
-        if(TRUE == H5F__should_truncate(f)) {
-            /* Only truncate the file on an orderly close, with write-access */
-            if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {
-                /* Truncate the file to the current allocated size */
-                if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)TRUE) < 0)
-                    /* Push error, but keep going*/
-                    HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
-            } /* end if */
-        } /* end if */
-#endif
+
         /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)
             /* Push error, but keep going*/
@@ -1172,6 +1158,7 @@ herr_t
 H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
 {
     H5F_io_info_t fio_info;             /* I/O info for operation */
+    htri_t   should_truncate;
     herr_t   ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1193,6 +1180,22 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
     if(H5MF_free_aggrs(f, dxpl_id) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
+
+    /* Flush the entire metadata cache */
+    if(H5AC_flush(f, dxpl_id) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
+
+    if((should_truncate = H5F__should_truncate(f, dxpl_id)) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't check whether truncation is required.")
+
+    if(TRUE == should_truncate) {
+        /* Truncate the file to the current allocated size */
+        if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)TRUE) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
+        if(H5F_super_dirty(f) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to mark Super Block dirty")
+    }
 
     /* Flush the entire metadata cache */
     if(H5AC_flush(f, dxpl_id) < 0)
@@ -2081,32 +2084,47 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
-H5F__should_truncate(const H5F_t *f)
+htri_t
+H5F__should_truncate(const H5F_t *f, hid_t dxpl_id)
 {
-    hbool_t ret_value = FALSE;
+    htri_t ret_value = FALSE;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
-    if(H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_OFF)
-        ret_value = TRUE;
-    else if(H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND) {
+    if(H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_OFF || 
+       H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND) {
+
+#ifdef H5_HAVE_PARALLEL
+        /* Coordinate the Local EOFs among all ranks before querying it*/
+        if(H5FD_coordinate(f->shared->lf, dxpl_id, H5FD_COORD_EOF) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level coordinate failed")
+#endif
+
         if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
             H5FD_mem_t mt;
 
             for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                if(H5FD_get_eof(f->shared->lf, mt) > H5FD_get_eoa(f->shared->lf, mt)) {
+                if((H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_OFF && 
+                    H5FD_get_eof(f->shared->lf, mt) != H5FD_get_eoa(f->shared->lf, mt)) 
+                   ||
+                   (H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND &&
+                    H5FD_get_eof(f->shared->lf, mt) > H5FD_get_eoa(f->shared->lf, mt))) {
                    ret_value = TRUE;
                    break;
                 } /* end if */
             } /* end for */
         } /* end if */
         else {
-            if(H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT) > H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT))
+            if((H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_OFF && 
+                H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT) != H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT))
+               ||
+               (H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND &&
+                H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT) > H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
                 ret_value = TRUE;
         } /* end else */
-    } /* end else */
+    }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__should_truncate() */
 

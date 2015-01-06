@@ -729,24 +729,6 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
     lf = f->shared->lf;
 
-    /* MSC - have to truncate here, because between H5AC_Flush in
-       H5F_Flush and here, the eof/eoa are changing, and we need the
-       latest before truncating so the multi driver info has the
-       latest eof before writing the info message with the eofs. */
-    /* If not avoiding truncation, OR if only avoiding truncation during file
-       extension and a truncation will result in a smaller file, then truncate
-       the file */
-    if(TRUE == H5F__should_truncate(f)) {
-        /* Only truncate the file on an orderly close, with write-access */
-        /* MSC - Not just on an orderly close anymore, but everytime
-           the file is flushed with RW access */
-        if(H5F_ACC_RDWR & H5F_INTENT(f)) {
-            /* Truncate the file to the current allocated size */
-            if(H5FD_truncate(lf, dxpl_id, (unsigned)TRUE) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
-        } /* end if */
-    } /* end if */
-
     if(sblock->cache_info.is_dirty) {
         H5P_genplist_t *dxpl;               /* DXPL object */
         uint8_t         buf[H5F_MAX_SUPERBLOCK_SIZE + H5F_MAX_DRVINFOBLOCK_SIZE];  /* Superblock & driver info blockencoding buffer */
@@ -754,7 +736,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
         haddr_t         rel_eof;            /* Relative EOF for file */
         size_t          superblock_size;    /* Size of superblock, in bytes */
         size_t          driver_size;        /* Size of driver info block (bytes)*/
-        hbool_t         should_truncate = FALSE;    /* Whether the file should be truncated */
+        htri_t          should_truncate;    /* Whether the file should be truncated */
 
         /* Encode the common portion of the file superblock for all versions */
         p = buf;
@@ -793,15 +775,12 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             /* Encode the address of global free-space index */
             H5F_addr_encode(f, &p, sblock->ext_addr);
 
-            /* Encode the end-of-file address. Note that at this point in time,
-             * the EOF value itself may not be reflective of the file's size, as
-             * we will eventually truncate the file to match the EOA value. As
-             * such, use the EOA value in its place, knowing that the current EOF
-             * value will ultimately match it. */
-            /* MSC - should do get_eof here since file is truncated
-               already and eoa == eof, but parallel tests are asseting
-               when I do that.
-               src/H5C.c:8722: H5C_flush_single_entry: Assertion `( destroy ) || ( ( entry_ptr ) && ( ! entry_ptr->flush_in_progress ) )' failed.*/
+            /* Encode the end-of-file address. Note that at this point
+             * in time, the EOF value itself may not be reflective of
+             * the file's size, as we will eventually truncate the
+             * file to match the EOA value. As such, use the EOA value
+             * in its place, knowing that the current EOF value will
+             * ultimately match it. */
             if ((rel_eof = H5FD_get_eoa(lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
             H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
@@ -863,9 +842,12 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             /* Encode the address of the superblock extension */
             H5F_addr_encode(f, &p, sblock->ext_addr);
 
+            if((should_truncate = H5F__should_truncate(f, dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't check whether truncation is required.")
+
             /* Encode the end-of-file address if the file will not be truncated
                at file close */
-            if(FALSE == (should_truncate = H5F__should_truncate(f))) {
+            if(FALSE == should_truncate) {
                 H5F_io_info_t fio_info;             /* I/O info for operation */
 
                 /* If we're avoiding truncating the file, then we need to
@@ -880,40 +862,38 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                 /* Set up I/O info for operation */
                 fio_info.f = f;
                 if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
-                    HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
                 if(H5F__accum_flush(&fio_info) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
                 if(H5FD_flush(lf, dxpl_id, FALSE) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 #ifdef H5_HAVE_PARALLEL
-                if(H5FD_coordinate(lf, dxpl_id, H5FD_COORD_EOF) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level coordinate failed")
+                /* H5F__should_truncate() calls H5FD_coordinate() if the avoid truncation setting is 
+                   H5F_AVOID_TRUNCATE_OFF or H5F_AVOID_TRUNCATE_EXTEND. We need to call H5FD_coordinate() 
+                   here only if the avoid truncation setting is H5F_AVOID_TRUNCATE_ALL to coordinate the 
+                   EOFs before querying it. */
+                if(H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_ALL) {
+                    if(H5FD_coordinate(lf, dxpl_id, H5FD_COORD_EOF) < 0)
+                        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level coordinate failed")
+                }
 #endif
                 /* Check again if truncation will happen after updating the EOF when flushing. */
-                if(FALSE == (should_truncate = H5F__should_truncate(f))) {
+                if((should_truncate = H5F__should_truncate(f, dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't check whether truncation is required.")
+                if(FALSE == should_truncate) {
                     if ((rel_eof = H5FD_get_eof(lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eof request failed")
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver get_eof request failed")
                     H5F_addr_encode(f, &p, rel_eof + sblock->base_addr);
                 } /* end if */
             } /* end if */
 
             if(TRUE == should_truncate) {
-                /* MSC - need to truncate again since eof could have
-                   changed after calling H5FD_Flush() above */
-                if(H5F_ACC_RDWR & H5F_INTENT(f)) {
-                    /* Truncate the file to the current allocated size */
-                    if(H5FD_truncate(lf, dxpl_id, (unsigned)TRUE) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
-                }
-                /* Otherwise, at this point in time, the EOF value itself may
-                 * not be reflective of the file's size, since we'll eventually
-                 * truncate it to match the EOA value. As such, use the EOA value
-                 * in its place, knowing that the current EOF value will
-                 * ultimately match it. */
-                /* MSC - should do get_eof here since file is truncated
-                   already and eoa == eof, but parallel tests are asseting
-                   when I do that.
-                   src/H5C.c:8722: H5C_flush_single_entry: Assertion `( destroy ) || ( ( entry_ptr ) && ( ! entry_ptr->flush_in_progress ) )' failed.*/
+                /* Otherwise, at this point in time, the EOF value
+                 * itself may not be reflective of the file's size,
+                 * since we'll eventually truncate it to match the EOA
+                 * value. As such, use the EOA value in its place,
+                 * knowing that the current EOF value will ultimately
+                 * match it. */
                 if ((rel_eof = H5FD_get_eoa(lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
                 H5F_addr_encode(f, &p, rel_eof + sblock->base_addr);

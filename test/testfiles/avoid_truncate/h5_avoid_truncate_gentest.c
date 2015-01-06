@@ -27,6 +27,12 @@
    After this, all the test files can be moved to the 1.8 library
    under test/testfiles/avoid_truncate/* .
 
+   The tavoid_truncate test should be run in the 1.8 library and
+   should pass. Once that happens, TESTFILE2 and TESTFILE2_MULTI files
+   should be moved back into the 1.10 library under
+   test/testfiles/avoid_truncate/. The truncation test should then be
+   run and should pass.
+
 */
 
 /*********************************************************************
@@ -38,7 +44,10 @@
  *
  * The second test file should have an EOA message but the EOA ==
  * EOF. The 1.8 library should succeed in accessing the file and
- * should mark the EOA message with MARK_IF_UNKNOWN Flag.
+ * ignore the EOA extension message, but mark it with
+ * FLAG_WAS_UNKNOWN. Later the 1.10 library should access that file
+ * and check the message flag and update it with the correct EOA
+ * values, and change the FLAG to MARK_IF_UNKOWN.
  *
  * The third test file should not have an EOA message and should be
  * properly truncated. we will run the h5extend tool on to truncate it
