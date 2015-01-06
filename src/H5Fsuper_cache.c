@@ -496,6 +496,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
      *  but we need to set the EOA to something significant prior to this so
      *  we can read in the superblock extension. -MAM)
      */
+    /* (Account for the stored EOA being absolute offset -NAF) */
     if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, stored_eof - sblock->base_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to set end-of-address marker for file")
 

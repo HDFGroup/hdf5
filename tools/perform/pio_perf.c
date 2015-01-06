@@ -664,7 +664,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
 
          }
 
-         pio_time_destroy(res.timers);
+         io_time_destroy(res.timers);
     }
 
     /*
@@ -1675,6 +1675,58 @@ usage(const char *prog)
         fflush(stdout);
     }
 }
+
+void debug_start_stop_time(io_time_t *pt, timer_type t, int start_stop)
+{
+#if 1
+        if (pio_debug_level >= 4) {
+            const char *msg;
+            int myrank;
+
+            MPI_Comm_rank(pio_comm_g, &myrank);
+
+            switch (t) {
+            case HDF5_FILE_OPENCLOSE:
+                msg = "File Open/Close";
+                break;
+            case HDF5_DATASET_CREATE:
+                msg = "Dataset Create";
+                break;
+            case HDF5_MPI_WRITE:
+                msg = "MPI Write";
+                break;
+            case HDF5_MPI_READ:
+                msg = "MPI Read";
+                break;
+            case HDF5_FINE_WRITE_FIXED_DIMS:
+                msg = "Fine Write";
+                break;
+            case HDF5_FINE_READ_FIXED_DIMS:
+                msg = "Fine Read";
+                break;
+            case HDF5_GROSS_WRITE_FIXED_DIMS:
+                msg = "Gross Write";
+                break;
+            case HDF5_GROSS_READ_FIXED_DIMS:
+                msg = "Gross Read";
+                break;
+            case HDF5_RAW_WRITE_FIXED_DIMS:
+                msg = "Raw Write";
+                break;
+            case HDF5_RAW_READ_FIXED_DIMS:
+                msg = "Raw Read";
+                break;
+            default:
+                msg = "Unknown Timer";
+                break;
+            }
+
+            fprintf(output, "    Proc %d: %s %s: %.2f\n", myrank, msg,
+                    (start_stop == TSTART ? "Start" : "Stop"),
+                    pt->total_time[t]);
+        }
+#endif
+} /* debug_start_stop_time */
 
 #else /* H5_HAVE_PARALLEL */
 

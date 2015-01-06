@@ -28,6 +28,12 @@ TARGET_C_PROPERTIES (h5mkgrp " " " ")
 target_link_libraries (h5mkgrp  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5mkgrp PROPERTIES FOLDER tools)
 
+add_executable (h5extend ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5extend.c)
+TARGET_NAMING (h5extend ${LIB_TYPE})
+TARGET_C_PROPERTIES (h5extend " " " ")
+target_link_libraries (h5extend ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+set_target_properties (h5extend PROPERTIES FOLDER tools)
+
 set (H5_DEP_EXECUTABLES
     h5debug
     h5repart
@@ -53,6 +59,12 @@ if (BUILD_TESTING)
     target_link_libraries (h5repart_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
     #add_test (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
+    add_executable (h5extend_gentest ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5extend_gentest.c)
+    TARGET_NAMING (h5extend_gentest ${LIB_TYPE})
+    TARGET_C_PROPERTIES (h5extend_gentest " " " ")
+    target_link_libraries (h5extend_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+    set_target_properties (h5extend_gentest PROPERTIES FOLDER generator/tools)
+    #add_test (NAME h5extend_gentest COMMAND $<TARGET_FILE:h5extend_gentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
   add_executable (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)
@@ -60,6 +72,12 @@ if (BUILD_TESTING)
   TARGET_C_PROPERTIES (h5repart_test " " " ")
   target_link_libraries (h5repart_test ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (h5repart_test PROPERTIES FOLDER tools)
+
+  add_executable (h5extend_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)
+  TARGET_NAMING (h5extend_test ${LIB_TYPE})
+  TARGET_C_PROPERTIES (h5extend_test " " " ")
+  target_link_libraries (h5extend_test ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+  set_target_properties (h5extend_test PROPERTIES FOLDER tools)
 
   include (CMakeTests.cmake)
 endif (BUILD_TESTING)
@@ -76,6 +94,7 @@ endif (BUILD_TESTING)
 
 #INSTALL_PROGRAM_PDB (h5debug ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 #INSTALL_PROGRAM_PDB (h5repart ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+#INSTALL_PROGRAM_PDB (h5extend ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 #INSTALL_PROGRAM_PDB (h5mkgrp ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
 install (
