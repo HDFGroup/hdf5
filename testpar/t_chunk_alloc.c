@@ -95,36 +95,36 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
     /* Only MAINPROCESS should create the file.  Others just wait. */
-    if (MAINPROCESS){
+    if (MAINPROCESS) {
         nchunks=chunk_factor*mpi_size;
-  dims[0]=nchunks*CHUNK_SIZE;
-  /* Create the data space with unlimited dimensions. */
-  dataspace = H5Screate_simple (1, dims, maxdims);
-  VRFY((dataspace >= 0), "");
+        dims[0]=nchunks*CHUNK_SIZE;
+        /* Create the data space with unlimited dimensions. */
+        dataspace = H5Screate_simple (1, dims, maxdims);
+        VRFY((dataspace >= 0), "");
 
-  memspace = H5Screate_simple(1, chunk_dims, NULL);
-  VRFY((memspace >= 0), "");
+        memspace = H5Screate_simple(1, chunk_dims, NULL);
+        VRFY((memspace >= 0), "");
 
-  /* Create a new file. If file exists its contents will be overwritten. */
-  file_id = H5Fcreate(h5_rmprefix(filename), H5F_ACC_TRUNC, H5P_DEFAULT,
-        H5P_DEFAULT);
-  VRFY((file_id >= 0), "H5Fcreate");
+	/* Create a new file. If file exists its contents will be overwritten. */
+	file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
+                            H5P_DEFAULT);
+	VRFY((file_id >= 0), "H5Fcreate");
 
-  /* Modify dataset creation properties, i.e. enable chunking  */
-  cparms = H5Pcreate(H5P_DATASET_CREATE);
-  VRFY((cparms >= 0), "");
+        /* Modify dataset creation properties, i.e. enable chunking  */
+        cparms = H5Pcreate(H5P_DATASET_CREATE);
+        VRFY((cparms >= 0), "");
 
-  hrc = H5Pset_alloc_time(cparms, H5D_ALLOC_TIME_EARLY);
-  VRFY((hrc >= 0), "");
+        hrc = H5Pset_alloc_time(cparms, H5D_ALLOC_TIME_EARLY);
+        VRFY((hrc >= 0), "");
 
-  hrc = H5Pset_chunk(cparms, 1, chunk_dims);
-  VRFY((hrc >= 0), "");
+        hrc = H5Pset_chunk(cparms, 1, chunk_dims);
+        VRFY((hrc >= 0), "");
 
-  /* Create a new dataset within the file using cparms creation properties. */
-  dataset = H5Dcreate2(file_id, DSET_NAME, H5T_NATIVE_UCHAR, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
-  VRFY((dataset >= 0), "");
+        /* Create a new dataset within the file using cparms creation properties. */
+        dataset = H5Dcreate2(file_id, DSET_NAME, H5T_NATIVE_UCHAR, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+        VRFY((dataset >= 0), "");
 
-  if(write_pattern == sec_last) {
+        if(write_pattern == sec_last) {
             HDmemset(buffer, 100, CHUNK_SIZE);
 
             count[0] = 1;
@@ -133,35 +133,35 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
             offset[0] = (nchunks-2)*chunk_dims[0];
 
             hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
-                VRFY((hrc >= 0), "");
+            VRFY((hrc >= 0), "");
 
             /* Write sec_last chunk */
             hrc = H5Dwrite(dataset, H5T_NATIVE_UCHAR, memspace, dataspace, H5P_DEFAULT, buffer);
             VRFY((hrc >= 0), "H5Dwrite");
         } /* end if */
 
-  /* Close resources */
-  hrc = H5Dclose (dataset);
-  VRFY((hrc >= 0), "");
-  dataset = -1;
+        /* Close resources */
+        hrc = H5Dclose (dataset);
+        VRFY((hrc >= 0), "");
+        dataset = -1;
 
-  hrc = H5Sclose (dataspace);
-  VRFY((hrc >= 0), "");
+        hrc = H5Sclose (dataspace);
+        VRFY((hrc >= 0), "");
 
-  hrc = H5Sclose (memspace);
-  VRFY((hrc >= 0), "");
+        hrc = H5Sclose (memspace);
+        VRFY((hrc >= 0), "");
 
-  hrc = H5Pclose (cparms);
-  VRFY((hrc >= 0), "");
+        hrc = H5Pclose (cparms);
+        VRFY((hrc >= 0), "");
 
-  hrc = H5Fclose (file_id);
-  VRFY((hrc >= 0), "");
-  file_id = -1;
+        hrc = H5Fclose (file_id);
+        VRFY((hrc >= 0), "");
+        file_id = -1;
 
-  /* verify file size */
-  filesize = get_filesize(filename);
-  est_filesize = nchunks * CHUNK_SIZE * sizeof(unsigned char);
-  VRFY((filesize >= est_filesize), "file size check");
+        /* verify file size */
+        filesize = get_filesize(filename);
+        est_filesize = nchunks * CHUNK_SIZE * sizeof(unsigned char);
+        VRFY((filesize >= est_filesize), "file size check");
 
     }
 
