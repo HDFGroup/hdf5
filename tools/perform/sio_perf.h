@@ -15,7 +15,7 @@
 #ifndef SIO_PERF_H__
 #define SIO_PERF_H__
 
-#include "sio_timer.h"
+#include "io_timer.h"
 #ifndef STANDALONE
 #include "H5private.h"
 #include "h5test.h"
@@ -71,7 +71,7 @@ typedef struct parameters_ {
 
 typedef struct results_ {
     herr_t      ret_code;
-    sio_time   *timers;
+    io_time_t   *timers;
 } results;
 
 #ifndef SUCCESS
@@ -83,7 +83,7 @@ typedef struct results_ {
 #endif  /* !FAIL */
 
 extern FILE     *output;            /* output file                          */
-extern sio_time *timer_g;           /* timer: global for stub functions     */
+extern io_time_t *timer_g;           /* timer: global for stub functions     */
 extern int      sio_debug_level;    /* The debug level:
                                      *   0 - Off
                                      *   1 - Minimal

@@ -38,7 +38,6 @@
 #endif  /* !MPI_FILE_NULL */
 
 #include "pio_perf.h"
-#include "pio_timer.h"
 
 /* Macro definitions */
 
@@ -174,15 +173,15 @@ do_pio(parameters param)
     switch (iot) {
         case MPIO:
             fd.mpifd = MPI_FILE_NULL;
-            res.timers = pio_time_new(MPI_TIMER);
+            res.timers = io_time_new(MPI_CLOCK);
             break;
         case POSIXIO:
             fd.posixfd = -1;
-            res.timers = pio_time_new(MPI_TIMER);
+            res.timers = io_time_new(MPI_CLOCK);
             break;
         case PHDF5:
             fd.h5fd = -1;
-            res.timers = pio_time_new(MPI_TIMER);
+            res.timers = io_time_new(MPI_CLOCK);
             break;
         default:
             /* unknown request */
