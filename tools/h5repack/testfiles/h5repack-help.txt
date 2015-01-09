@@ -19,6 +19,7 @@ usage: h5repack [OPTIONS] file1 file2
    -a A, --alignment=A     Alignment value for H5Pset_alignment
    -f FILT, --filter=FILT  Filter type
    -l LAYT, --layout=LAYT  Layout type
+   -C S, --cache_size=S    Raw data chunk cache size
    -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy
    -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold
 

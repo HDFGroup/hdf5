@@ -778,6 +778,7 @@ static int check_options(pack_opt_t *options) {
  */
 static int check_objects(const char* fname, pack_opt_t *options) {
 	hid_t fid;
+	hid_t fapl = H5P_DEFAULT;
 	unsigned int i;
 	trav_table_t *travt = NULL;
 
@@ -785,11 +786,24 @@ static int check_objects(const char* fname, pack_opt_t *options) {
 	if (options->op_tbl->nelems == 0)
 		return 0;
 
+	if (options->cache_size){	/* need to set cache size for file access property lists */
+	    if (fapl==H5P_DEFAULT){
+		if ((fapl = H5Pcreate (H5P_FILE_ACCESS)) < 0){
+		    error_msg("file access property list creation failed\n");
+		    goto out;
+		}
+	    }
+	    if (H5Pset(fapl, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(options->cache_size)) < 0){
+		error_msg("input file cache size setting failed\n");
+		goto out;
+	    }
+	}
+
 	/*-------------------------------------------------------------------------
 	 * open the file
 	 *-------------------------------------------------------------------------
 	 */
-	if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0))
+	if ((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl, NULL, NULL, 0))
 			< 0) {
 		printf("<%s>: %s\n", fname, H5FOPENERROR);
 		return -1;
@@ -882,11 +896,15 @@ static int check_objects(const char* fname, pack_opt_t *options) {
 	 * close
 	 *-------------------------------------------------------------------------
 	 */
+	if (fapl > 0)
+	    H5Pclose(fapl);
 	H5Fclose(fid);
 	trav_table_free(travt);
 	return 0;
 
 out:
+	if (fapl > 0)
+	    H5Pclose(fapl);
 	H5Fclose(fid);
 	trav_table_free(travt);
 	return -1;

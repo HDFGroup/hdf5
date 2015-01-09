@@ -105,11 +105,37 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 	hid_t fcpl = H5P_DEFAULT; /* file creation property list ID */
 	hid_t fapl = H5P_DEFAULT; /* file access property list ID */
 
+#if 1
+	/* process option requests */
+	if (options->cache_size){	/* need to set cache size for file access property lists */
+	    if (fapl==H5P_DEFAULT){
+		if ((fapl = H5Pcreate (H5P_FILE_ACCESS)) < 0){
+		    error_msg("file access property list creation failed\n");
+		    goto out;
+		}
+	    }
+	    if (H5Pset(fapl, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(options->cache_size)) < 0){
+		error_msg("input file cache size setting failed\n");
+		goto out;
+	    }
+	}
+#endif
+#if 1
+{int mdc;
+size_t nslots, nbytes;
+double w0;
+if (fapl!=H5P_DEFAULT){
+H5Pget_cache(fapl, &mdc, &nslots, &nbytes, &w0);
+printf("fapl mdc=%d, nslots=%lu, nbytes=%lu, w0=%lf\n",
+mdc, nslots, nbytes, w0);
+}
+}
+#endif
 	/*-------------------------------------------------------------------------
 	 * open input file
 	 *-------------------------------------------------------------------------
 	 */
-	if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL,
+	if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, fapl, NULL, NULL,
 			(size_t) 0)) < 0) {
 		error_msg("<%s>: %s\n", fnamein, H5FOPENERROR);
 		goto out;
@@ -225,19 +251,20 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 				} /* end for */
 			} /* if (nindex>0) */
 
-			/* Create file access property list */
-			if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-				error_msg("Could not create file access property list\n");
-				goto out;
-			} /* end if */
+			/* Create file access property list if fapl is not already created */
+			if (fapl==H5P_DEFAULT){
+			    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+				    error_msg("Could not create file access property list\n");
+				    goto out;
+			    } /* end if */
+			}
 
 			if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
-				error_msg(
-						"Could not set property for using latest version of the format\n");
+				error_msg("Could not set property for using latest version of the format\n");
 				goto out;
 			} /* end if */
-		} /* end if */
-	} /* end if */
+		} /* end if (options->latest) */
+	} /* end if (options->latest || ub_size > 0) */
 #if defined (H5REPACK_DEBUG_USER_BLOCK)
 	print_user_block(fnamein, fidin);
 #endif
@@ -430,7 +457,7 @@ out:
 		trav_table_free(travt);
 
 	return -1;
-}
+} /* copy_objects */
 
 /*-------------------------------------------------------------------------
  * Function: Get_hyperslab

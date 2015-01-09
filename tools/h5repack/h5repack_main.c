@@ -33,7 +33,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:S:T:";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:C:S:T:";
 static struct long_options l_opts[] = {
 	{ "help", no_arg, 'h' },
 	{ "version", no_arg, 'V' },
@@ -54,6 +54,7 @@ static struct long_options l_opts[] = {
 	{ "alignment", require_arg, 'a' },
 	{ "infile", require_arg, 'i' }, /* -i for backward compability */
 	{ "outfile", require_arg, 'o' }, /* -o for backward compability */
+	{ "cache_size", require_arg, 'C' },
 	{ "fs_strategy", require_arg, 'S' },
 	{ "fs_threshold", require_arg, 'T' },
 	{ NULL, 0, '\0' }
@@ -90,6 +91,7 @@ static void usage(const char *prog) {
 	printf("   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
 	printf("   -f FILT, --filter=FILT  Filter type\n");
 	printf("   -l LAYT, --layout=LAYT  Layout type\n");
+	printf("   -C S, --cache_size=S    Raw data chunk cache size\n");
 	printf("   -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy\n");
 	printf("   -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold\n");
 	printf("\n");
@@ -477,6 +479,10 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
 			options->ublock_filename = opt_arg;
 			break;
 
+		case 'C':
+			options->cache_size = (size_t) HDatol( opt_arg );
+			break;
+
 		case 'b':
 			options->ublock_size = (hsize_t) HDatol( opt_arg );
 			break;
@@ -542,8 +548,11 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
 	}
 
 done:
-	return ret_value;
-}
+    /* clean up */
+    /* nothing to clean yet */
+
+    return ret_value;
+} /* parse_command_line */
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -583,6 +592,9 @@ int main(int argc, const char **argv) {
 
 	if (parse_command_line(argc, argv, &options) < 0)
 		goto done;
+#if 1
+if (options.cache_size) printf("cache_size=%lu\n", options.cache_size);
+#endif
 
 	/* get file names if they were not yet got */
 	if (has_i_o == 0) {

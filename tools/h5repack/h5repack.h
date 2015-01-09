@@ -30,6 +30,13 @@
 #define FORMAT_OBJ_ATTR "  %-27s %s\n"  /* obj type, name */
 #define MAX_COMPACT_DSIZE  64512  /* max data size for compact layout. -1k for header size */
 
+/* This is used to set file wide raw data cache size.
+ * Copied from src/H5Fprivate.h. Remove when the information is made public.
+ */
+#ifndef H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME       "rdcc_nbytes"   /* Size of raw data chunk cache(bytes) */
+#endif
+
 /*-------------------------------------------------------------------------
  * data structures for command line options
  *-------------------------------------------------------------------------
@@ -110,6 +117,7 @@ typedef struct {
  int             grp_indexed; /* Set the minimum number of links to store in the indexed format */
  int             msg_size[8]; /* Minimum size of shared messages: dataspace,
                                  datatype, fill value, filter pipleline, attribute */
+ size_t		 cache_size;  /* file wide raw data chunk cache size in bytes */
  const char      *ublock_filename; /* user block file name */
  hsize_t         ublock_size;      /* user block size */
  hsize_t         meta_block_size;  /* metadata aggregation block size (for H5Pset_meta_block_size) */
