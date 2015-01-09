@@ -1164,7 +1164,7 @@ Bug Fixes since HDF5-1.8.0 release
 
 Supported Platforms
 ===================
-    AIX 5.3                       xlc 10.1.0.5
+    AIX 6.1                       xlc 10.1.0.5
     (NASA G-ADA)                  xlC 10.1.0.5
                                   xlf90 12.1.0.6
 
@@ -1272,7 +1272,7 @@ Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
 Mac OS X Mavericks 10.9.1 64-bit        n        y/y    n        y    y     ?
-AIX 5.3 32- and 64-bit                  n        y/n    n        y    y     y
+AIX 6.1 32- and 64-bit                  n        y/n    n        y    y     y
 CentOS 5.9 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
 CentOS 5.9 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
 CentOS 5.9 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
@@ -1298,7 +1298,7 @@ Mac OS X Lion 10.7.3 32-bit                y       n         y         y
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
 Mac OS X Mavericks 10.9.1 64-bit           y       n         y         y
-AIX 5.3 32- and 64-bit                     y       n         n         y        
+AIX 6.1 32- and 64-bit                     y       n         n         y        
 CentOS 5.9 Linux 2.6.18-308 i686 GNU       y       y         y         y        
 CentOS 5.9 Linux 2.6.18-308 i686 Intel     y       y         y         n        
 CentOS 5.9 Linux 2.6.18-308 i686 PGI       y       y         y         n        
