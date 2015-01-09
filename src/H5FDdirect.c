@@ -137,7 +137,7 @@ static int H5FD_direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_direct_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_direct_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_direct_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-static haddr_t H5FD_direct_get_eof(const H5FD_t *_file);
+static haddr_t H5FD_direct_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD_direct_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_direct_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
            size_t size, void *buf);
@@ -810,13 +810,13 @@ H5FD_direct_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_direct_get_eof(const H5FD_t *_file)
+H5FD_direct_get_eof(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
     const H5FD_direct_t  *file = (const H5FD_direct_t*)_file;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    FUNC_LEAVE_NOAPI(MAX(file->eof, file->eoa))
+    FUNC_LEAVE_NOAPI(file->eof)
 }
 
 

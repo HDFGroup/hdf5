@@ -69,6 +69,7 @@ typedef struct H5FD_mpio_t {
     haddr_t	eof;		/*end-of-file marker			*/
     haddr_t	eoa;		/*end-of-address marker			*/
     haddr_t	last_eoa;	/* Last known end-of-address marker	*/
+    haddr_t	local_eof;	/* Local end-of-file address for each process */
 } H5FD_mpio_t;
 
 /* Private Prototypes */
@@ -84,7 +85,7 @@ static herr_t H5FD_mpio_close(H5FD_t *_file);
 static herr_t H5FD_mpio_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_mpio_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-static haddr_t H5FD_mpio_get_eof(const H5FD_t *_file);
+static haddr_t H5FD_mpio_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD_mpio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             size_t size, void *buf);
@@ -1107,6 +1108,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Set the size of the file (from library's perspective) */
     file->eof = H5FD_mpi_MPIOff_to_haddr(size);
+    file->local_eof = file->eof;
 
     /* Set return value */
     ret_value=(H5FD_t*)file;
@@ -1331,7 +1333,7 @@ H5FD_mpio_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_mpio_get_eof(const H5FD_t *_file)
+H5FD_mpio_get_eof(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
     const H5FD_mpio_t	*file = (const H5FD_mpio_t*)_file;
 
@@ -1454,10 +1456,16 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     int				mpi_code;	/* mpi return code */
     MPI_Datatype		buf_type = MPI_BYTE;      /* MPI description of the selection in memory */
     int         		size_i;         /* Integer copy of 'size' to read */
+#if MPI_VERSION >= 3
     MPI_Count         		bytes_read;     /* Number of bytes read in */
-    int         		n;
     MPI_Count                   type_size;      /* MPI datatype used for I/O's size */
     MPI_Count                   io_size;        /* Actual number of bytes requested */
+#else
+    int                         bytes_read;     /* Number of bytes read in */
+    int                         type_size;      /* MPI datatype used for I/O's size */
+    int                         io_size;        /* Actual number of bytes requested */
+#endif
+    int         		n;
     H5P_genplist_t              *plist = NULL;  /* Property list pointer */
     hbool_t			use_view_this_time = FALSE;
     herr_t              	ret_value = SUCCEED;
@@ -1574,11 +1582,19 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     }
 
     /* How many bytes were actually read? */
-    if (MPI_SUCCESS != (mpi_code=MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
+#if MPI_VERSION >= 3
+    if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
+#endif
         HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
     /* Get the type's size */
-    if (MPI_SUCCESS != (mpi_code=MPI_Type_size_x(buf_type,&type_size)))
+#if MPI_VERSION >= 3
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_size(buf_type, &type_size)))
+#endif
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
 
     /* Compute the actual number of bytes requested */
@@ -1734,10 +1750,16 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     MPI_Status  		mpi_stat;       /* Status from I/O operation */
     MPI_Datatype		buf_type = MPI_BYTE;      /* MPI description of the selection in memory */
     int			        mpi_code;	/* MPI return code */
+#if MPI_VERSION >= 3
     MPI_Count         		bytes_written;
-    int                         size_i;
     MPI_Count                   type_size;      /* MPI datatype used for I/O's size */
     MPI_Count                   io_size;        /* Actual number of bytes requested */
+#else
+    int                         bytes_written;
+    int                         type_size;      /* MPI datatype used for I/O's size */
+    int                         io_size;        /* Actual number of bytes requested */
+#endif
+    int                         size_i;
     hbool_t			use_view_this_time = FALSE;
     H5P_genplist_t              *plist = NULL;  /* Property list pointer */
     herr_t              	ret_value = SUCCEED;
@@ -1864,11 +1886,19 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     }
 
     /* How many bytes were actually written? */
+#if MPI_VERSION >= 3
     if(MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_written)))
+#else
+    if(MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_written)))
+#endif
         HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
     /* Get the type's size */
+#if MPI_VERSION >= 3
     if(MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
+#else
+    if(MPI_SUCCESS != (mpi_code = MPI_Type_size(buf_type, &type_size)))
+#endif
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
 
     /* Compute the actual number of bytes requested */
@@ -1878,8 +1908,16 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     if(bytes_written != io_size)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
 
-    /* Forget the EOF value (see H5FD_mpio_get_eof()) --rpm 1999-08-06 */
+    /* Each process will keep track of its perceived EOF value locally, and
+     * ultimately we will reduce this value to the maximum amongst all
+     * processes, but until then keep the actual eof at HADDR_UNDEF just in
+     * case something bad happens before that point. (rather have a value
+     * we know is wrong sitting around rather than one that could only
+     * potentially be wrong.) */
     file->eof = HADDR_UNDEF;
+
+    if(bytes_written && ((bytes_written + addr) > file->local_eof))
+        file->local_eof = addr + bytes_written;
 
 done:
 #ifdef H5FDmpio_DEBUG

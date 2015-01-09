@@ -109,7 +109,7 @@ check_PROGRAMS = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
 	zip_perf$(EXEEXT) perf_meta$(EXEEXT) $(am__EXEEXT_2) \
 	perf$(EXEEXT)
 TESTS = $(am__EXEEXT_3)
-subdir = perform
+subdir = tools/perform
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -130,15 +130,13 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-am_h5perf_OBJECTS = pio_perf.$(OBJEXT) pio_engine.$(OBJEXT) \
-	pio_timer.$(OBJEXT)
+am_h5perf_OBJECTS = pio_perf.$(OBJEXT) pio_engine.$(OBJEXT)
 h5perf_OBJECTS = $(am_h5perf_OBJECTS)
 h5perf_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 h5perf_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5perf_LDFLAGS) $(LDFLAGS) -o $@
-am_h5perf_serial_OBJECTS = sio_perf.$(OBJEXT) sio_engine.$(OBJEXT) \
-	sio_timer.$(OBJEXT)
+am_h5perf_serial_OBJECTS = sio_perf.$(OBJEXT) sio_engine.$(OBJEXT)
 h5perf_serial_OBJECTS = $(am_h5perf_serial_OBJECTS)
 h5perf_serial_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 h5perf_serial_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -723,8 +721,8 @@ h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = h5perf perf
 # Serial test programs.
 TEST_PROG = iopipe chunk overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_PROGS)
-h5perf_SOURCES = pio_perf.c pio_engine.c pio_timer.c
-h5perf_serial_SOURCES = sio_perf.c sio_engine.c sio_timer.c
+h5perf_SOURCES = pio_perf.c pio_engine.c
+h5perf_serial_SOURCES = sio_perf.c sio_engine.c
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.
@@ -772,9 +770,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign perform/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/perform/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign perform/Makefile
+	  $(AUTOMAKE) --foreign tools/perform/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -898,10 +896,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/perf_meta.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_engine.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_perf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sio_engine.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sio_perf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sio_timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zip_perf.Po@am__quote@
 
 .c.o:

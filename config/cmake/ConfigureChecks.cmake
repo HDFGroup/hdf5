@@ -107,15 +107,6 @@ if (WINDOWS)
 endif (WINDOWS)
 SET (H5_DEFAULT_VOL H5VL_NATIVE)
 
-if (WINDOWS)
-  #-----------------------------------------------------------------------------
-  # These tests need to be manually SET for windows since there is currently
-  # something not quite correct with the actual test implementation. This affects
-  # the 'dt_arith' test and most likely lots of other code
-  # ----------------------------------------------------------------------------
-  set (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
-endif (WINDOWS)
-
 # ----------------------------------------------------------------------
 # END of WINDOWS Hard code Values
 # ----------------------------------------------------------------------

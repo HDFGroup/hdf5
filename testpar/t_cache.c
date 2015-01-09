@@ -5717,7 +5717,6 @@ smoke_check_3(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_3()";
     hbool_t success = TRUE;
-    hbool_t verbose = FALSE;
     int cp = 0;
     int i;
     int max_nerrors;
@@ -6402,7 +6401,6 @@ smoke_check_5(int metadata_write_strategy)
 {
     const char * fcn_name = "smoke_check_5()";
     hbool_t success = TRUE;
-    hbool_t verbose = FALSE;
     int cp = 0;
     int i;
     int max_nerrors;
@@ -7126,7 +7124,7 @@ main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-	printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
+	printf("Failed to turn off atexit processing. Continue.\n");
     };
     H5open();
 

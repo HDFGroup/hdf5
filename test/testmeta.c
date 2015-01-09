@@ -105,9 +105,11 @@ int main(void)
 
     for(j=0; j<NDATAOBJECTS; j++)
     {
-        printf("\rWriting Object #%d of %d", j+1, NDATAOBJECTS);
-        fflush(stdout);
-
+        /* Removed print statement as it would lock system resources on Windows */
+        /*
+         * printf("\rWriting Object #%d of %d", j+1, NDATAOBJECTS);
+         * fflush(stdout);
+         */
         floatval = (float)j;
 
         /* Create group to hold data arrays for this object */
