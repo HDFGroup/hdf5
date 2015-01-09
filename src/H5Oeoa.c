@@ -107,7 +107,7 @@ H5O__eoa_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     mesg->avoid_truncate = (H5F_avoid_truncate_t)*p++; /* avoid truncate setting */
 
     /* Get the 'EOAs' message from the file */
-    for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1))
+    for(mt = H5FD_MEM_SUPER-1; mt < H5FD_MEM_NTYPES-1; mt = (H5FD_mem_t)(mt + 1))
         H5F_addr_decode(f, (const uint8_t **)&p, &(mesg->memb_eoa[mt]));
 
     /* Set return value */
@@ -151,7 +151,7 @@ H5O__eoa_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, cons
     *p++ = mesg->avoid_truncate;
 
     /* Encode 'EOAs' Message */
-    for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1))
+    for(mt = H5FD_MEM_SUPER-1; mt < H5FD_MEM_NTYPES-1; mt = (H5FD_mem_t)(mt + 1))
         H5F_addr_encode(f, &p, mesg->memb_eoa[mt]);    
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -189,7 +189,7 @@ H5O__eoa_copy(const void *_mesg, void *_dest)
 
     /* Copy */
     dest->avoid_truncate = mesg->avoid_truncate;
-    for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1))
+    for(mt = H5FD_MEM_SUPER-1; mt < H5FD_MEM_NTYPES-1; mt = (H5FD_mem_t)(mt + 1))
         dest->memb_eoa[mt] = mesg->memb_eoa[mt];
 
     /* Set return value */
@@ -227,7 +227,7 @@ H5O__eoa_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *
     
     /* Determine Size */
     ret_value = (size_t)(1 +     /* Version */
-                H5FD_MEM_NTYPES * H5F_SIZEOF_ADDR(f) + /* EOA Address (haddr_t) */
+                (H5FD_MEM_NTYPES -1) * H5F_SIZEOF_ADDR(f) + /* EOA Addresses (haddr_t) */
                 1); /* truncation avoidance mode */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -316,7 +316,7 @@ H5O__eoa_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
             "Avoid truncate:", ((mesg->avoid_truncate == H5F_AVOID_TRUNCATE_OFF) ?  "H5F_AVOID_TRUNCATE_OFF" :
                 ((mesg->avoid_truncate == H5F_AVOID_TRUNCATE_EXTEND) ?  "H5F_AVOID_TRUNCATE_EXTEND" : "H5F_AVOID_TRUNCATE_ALL")));
 
-    for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+    for(mt = H5FD_MEM_SUPER-1; mt < H5FD_MEM_NTYPES-1; mt = (H5FD_mem_t)(mt + 1)) {
         char temp[32];      /* Temporary string, for sprintf */
 
         HDsnprintf(temp, sizeof(temp), "EOA value[%u]:", (unsigned)mt);

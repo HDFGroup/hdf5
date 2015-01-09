@@ -194,9 +194,9 @@ main(int argc, const char *argv[])
                     } /* end if */
 
                     if(!quiet)
-                        HDfprintf(outputfile, "  %d: EOA = %a  EOF = %a\n", mt, eoa_msg.memb_eoa[mt], eof);
+                        HDfprintf(outputfile, "  %d: EOA = %a  EOF = %a\n", mt, eoa_msg.memb_eoa[mt-1], eof);
 
-                    if(eof != eoa_msg.memb_eoa[mt])
+                    if(eof != eoa_msg.memb_eoa[mt-1])
                         should_truncate = TRUE;
                 } /* end for */
             } /* end if */
@@ -207,7 +207,7 @@ main(int argc, const char *argv[])
                 } /* end if */
 
                 if(!quiet)
-                    HDfprintf(outputfile, "  EOA = %a  EOF = %a\n", eoa_msg.memb_eoa[H5FD_MEM_SUPER], eof);
+                    HDfprintf(outputfile, "  EOA = %a  EOF = %a\n", eoa_msg.memb_eoa[0], eof);
 
                 /* Get file size */
                 if(H5Fget_filesize(fid, &filesize) < 0) {
@@ -217,7 +217,7 @@ main(int argc, const char *argv[])
                 if(!quiet)
                     HDfprintf(outputfile, "  File size = %a\n", filesize);
 
-                if(eoa_msg.memb_eoa[H5FD_MEM_SUPER] != eof)
+                if(eoa_msg.memb_eoa[0] != eof)
                     should_truncate = TRUE;
             } /* end else */
 

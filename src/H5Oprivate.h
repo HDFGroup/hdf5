@@ -352,8 +352,8 @@ typedef struct H5O_efl_t {
  * EOA Message
  */
 typedef struct H5O_eoa_t {
-    H5F_avoid_truncate_t avoid_truncate; /* Avoid Truncate setting for the file */
-    hsize_t memb_eoa[H5FD_MEM_NTYPES]; /* EOA values */
+    H5F_avoid_truncate_t avoid_truncate;   /* Avoid Truncate setting for the file */
+    hsize_t memb_eoa[H5FD_MEM_NTYPES-1];   /* EOA values */
 } H5O_eoa_t;
 
 /*

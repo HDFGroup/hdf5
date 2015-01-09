@@ -558,10 +558,10 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
              */
             if((H5F_INTENT(f) & H5F_ACC_RDWR) && (mesg_flags & H5O_MSG_FLAG_WAS_UNKNOWN)) {
                 /* Re-write EOA message with EOF values */
-                eoa_msg.memb_eoa[H5FD_MEM_SUPER] = stored_eof;
+                eoa_msg.memb_eoa[0] = stored_eof;
                 if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
-                    for(mt = H5FD_MEM_SUPER + 1; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                        if((eoa_msg.memb_eoa[mt] = H5FD_get_eof(lf, mt)) == HADDR_UNDEF)
+                    for(mt = H5FD_MEM_SUPER+1; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+                        if((eoa_msg.memb_eoa[mt-1] = H5FD_get_eof(lf, mt)) == HADDR_UNDEF)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, NULL, "driver get_eof request failed")
                     }
                 }
@@ -571,7 +571,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             } /* end if */
             else {
                 /* Set 'EOA' value in file driver */
-                if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, eoa_msg.memb_eoa[H5FD_MEM_SUPER] - sblock->base_addr) < 0)
+                if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, eoa_msg.memb_eoa[0] - sblock->base_addr) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "unable to set end-of-address marker for file")
 
                 /* If VFD has multiple memory type backends, we need to
@@ -579,8 +579,8 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
                    know them yet. */
                 if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
                     for(mt = H5FD_MEM_SUPER + 1; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                        if (eoa_msg.memb_eoa[mt])
-                            if(H5FD_set_eoa(lf, mt, eoa_msg.memb_eoa[mt])<0)
+                        if (eoa_msg.memb_eoa[mt-1])
+                            if(H5FD_set_eoa(lf, mt, eoa_msg.memb_eoa[mt-1])<0)
                                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set EOA")
                     } /* end for */
                 } /* end if */
@@ -967,10 +967,10 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
                         if((memb_eoa = H5FD_get_eoa(lf, mt)) == HADDR_UNDEF)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-                        eoa_msg.memb_eoa[mt] = memb_eoa;
+                        eoa_msg.memb_eoa[mt-1] = memb_eoa;
 
                         if(H5FD_MEM_SUPER == mt)
-                            eoa_msg.memb_eoa[mt] += sblock->base_addr;
+                            eoa_msg.memb_eoa[mt-1] += sblock->base_addr;
 
                         if((memb_eof = H5FD_get_eof(lf, mt)) == HADDR_UNDEF)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eof request failed")
@@ -981,12 +981,12 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                 }
                 else {
                     /* Get the current EOA */
-                    if((eoa_msg.memb_eoa[H5FD_MEM_SUPER] = H5FD_get_eoa(lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
+                    if((eoa_msg.memb_eoa[0] = H5FD_get_eoa(lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-                    mesg_flags = (eoa_msg.memb_eoa[H5FD_MEM_SUPER] == rel_eof) ? 
+                    mesg_flags = (eoa_msg.memb_eoa[0] == rel_eof) ? 
                         H5O_MSG_FLAG_MARK_IF_UNKNOWN : H5O_MSG_FLAG_FAIL_IF_UNKNOWN;
                     /* add the base address to the EOA */
-                    eoa_msg.memb_eoa[H5FD_MEM_SUPER] += sblock->base_addr;
+                    eoa_msg.memb_eoa[0] += sblock->base_addr;
                 }
 
                 if(H5O_msg_write(&ext_loc, H5O_EOA_ID, mesg_flags, H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)

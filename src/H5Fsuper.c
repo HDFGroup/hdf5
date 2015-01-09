@@ -589,15 +589,17 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
             H5O_eoa_t eoa_msg;
             H5FD_mem_t mt;
 
-            HDmemset(eoa_msg.memb_eoa, 0, H5FD_MEM_NTYPES * sizeof(haddr_t));
+            HDmemset(eoa_msg.memb_eoa, 0, (H5FD_MEM_NTYPES-1) * sizeof(haddr_t));
 
-            if((eoa_msg.memb_eoa[H5FD_MEM_SUPER] = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
+            /* First EOA is the EOA SUPER type for multi-like drivers,
+               and the whole and only file EOA for the other drivers */
+            if((eoa_msg.memb_eoa[0] = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-            eoa_msg.memb_eoa[H5FD_MEM_SUPER] += sblock->base_addr;
+            eoa_msg.memb_eoa[0] += sblock->base_addr;
 
             if(f->shared->feature_flags & H5FD_FEAT_MULTIPLE_MEM_TYPE_BACKENDS) {
                 for(mt = H5FD_MEM_SUPER+1; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
-                    if((eoa_msg.memb_eoa[mt] = H5FD_get_eoa(f->shared->lf, mt)) == HADDR_UNDEF)
+                    if((eoa_msg.memb_eoa[mt-1] = H5FD_get_eoa(f->shared->lf, mt)) == HADDR_UNDEF)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
                 } /* end for */
             }
