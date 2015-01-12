@@ -19,9 +19,13 @@ usage: h5repack [OPTIONS] file1 file2
    -a A, --alignment=A     Alignment value for H5Pset_alignment
    -f FILT, --filter=FILT  Filter type
    -l LAYT, --layout=LAYT  Layout type
+   -B S, --buf_size=S      memory buffer size[268435456]
    -C S, --cache_size=S    Raw data chunk cache size
+   -O, --no-h5ocopy        Do not use H5Ocopy at all [use]
+   -R, --readonly          Read only, no create or write output [off]
    -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy
    -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold
+   -W, --show_time         Show wall clock time [off]
 
     M - is an integer greater than 1, size of dataset in bytes (default is 0) 
     E - is a filename.

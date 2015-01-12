@@ -20,6 +20,7 @@
 #include "H5private.h"
 #include "hdf5.h"
 #include "h5trav.h"
+#include "io_timer.h"
 
 #define H5FOPENERROR "unable to open file"
 #define PFORMAT  "%-7s %-7s %-7s\n"   /* chunk info, compression info, name*/
@@ -102,29 +103,33 @@ typedef struct {
 
 /* all the above, ready to go to the hrepack call */
 typedef struct {
- pack_opttbl_t   *op_tbl;     /*table with all -c and -f options */
- int             all_layout;  /*apply the layout to all objects */
- int             all_filter;  /*apply the filter to all objects */
- filter_info_t   filter_g[H5_REPACK_MAX_NFILTERS];    /*global filter array for the ALL case */
- int             n_filter_g;  /*number of global filters */
- chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
- H5D_layout_t    layout_g;    /*global layout information for the ALL case */
- int             verbose;     /*verbose mode */
- hsize_t         min_comp;    /*minimum size to compress, in bytes */
- int             use_native;  /*use a native type in write */
- int             latest;      /*pack file with the latest file format */
- int             grp_compact; /* Set the maximum number of links to store as header messages in the group */
- int             grp_indexed; /* Set the minimum number of links to store in the indexed format */
- int             msg_size[8]; /* Minimum size of shared messages: dataspace,
-                                 datatype, fill value, filter pipleline, attribute */
- size_t		 cache_size;  /* file wide raw data chunk cache size in bytes */
- const char      *ublock_filename; /* user block file name */
- hsize_t         ublock_size;      /* user block size */
- hsize_t         meta_block_size;  /* metadata aggregation block size (for H5Pset_meta_block_size) */
- hsize_t         threshold;        /* alignment threshold for H5Pset_alignment */
- hsize_t         alignment ;       /* alignment for H5Pset_alignment */
- H5F_file_space_type_t fs_strategy;     /* File space handling strategy */
- hsize_t         fs_threshold;      	/* Free space section threshold */
+    pack_opttbl_t   *op_tbl;     /*table with all -c and -f options */
+    int             all_layout;  /*apply the layout to all objects */
+    int             all_filter;  /*apply the filter to all objects */
+    filter_info_t   filter_g[H5_REPACK_MAX_NFILTERS];    /*global filter array for the ALL case */
+    int             n_filter_g;  /*number of global filters */
+    chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
+    H5D_layout_t    layout_g;    /*global layout information for the ALL case */
+    int             verbose;     /*verbose mode */
+    hsize_t         min_comp;    /*minimum size to compress, in bytes */
+    int             use_native;  /*use a native type in write */
+    int             latest;      /*pack file with the latest file format */
+    int             grp_compact; /* Set the maximum number of links to store as header messages in the group */
+    int             grp_indexed; /* Set the minimum number of links to store in the indexed format */
+    int             msg_size[8]; /* Minimum size of shared messages: dataspace,
+				    datatype, fill value, filter pipleline, attribute */
+    size_t	    buf_size;    /* raw data memory buffer size in bytes */
+    size_t	    cache_size;  /* file wide raw data chunk cache size in bytes */
+    int	            no_h5ocopy;  /* read only, do not create or write to output file */
+    int	            readonly;    /* read only, do not create or write to output file */
+    const char      *ublock_filename; /* user block file name */
+    hsize_t         ublock_size;      /* user block size */
+    hsize_t         meta_block_size;  /* metadata aggregation block size (for H5Pset_meta_block_size) */
+    hsize_t         threshold;        /* alignment threshold for H5Pset_alignment */
+    hsize_t         alignment ;       /* alignment for H5Pset_alignment */
+    H5F_file_space_type_t fs_strategy;     /* File space handling strategy */
+    hsize_t         fs_threshold;      	/* Free space section threshold */
+    int             show_time;	/* show wall clock time */
 } pack_opt_t;
 
 

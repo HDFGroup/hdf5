@@ -104,8 +104,15 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 	hsize_t ub_size = 0; /* size of user block */
 	hid_t fcpl = H5P_DEFAULT; /* file creation property list ID */
 	hid_t fapl = H5P_DEFAULT; /* file access property list ID */
+	io_time_t   *filecopytime = NULL;
+	int	readonly;
 
-#if 1
+	/* local variable initialization */
+	readonly = options->readonly;
+#if 0
+printf("readonly in do_copy_objects=%d\n", readonly);
+#endif
+
 	/* process option requests */
 	if (options->cache_size){	/* need to set cache size for file access property lists */
 	    if (fapl==H5P_DEFAULT){
@@ -119,7 +126,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 		goto out;
 	    }
 	}
-#endif
+
 #if 1
 {int mdc;
 size_t nslots, nbytes;
@@ -131,6 +138,15 @@ mdc, nslots, nbytes, w0);
 }
 }
 #endif
+	if (options->show_time){	/* need to keep track of time */
+	    if (NULL == (filecopytime = io_time_new(SYS_CLOCK))){
+		error_msg("io timer new failed\n");
+		goto out;
+	    }
+	    /* start timer */
+	    set_time(filecopytime, HDF5_FILE_OPENCLOSE, TSTART);
+	}
+
 	/*-------------------------------------------------------------------------
 	 * open input file
 	 *-------------------------------------------------------------------------
@@ -420,6 +436,15 @@ mdc, nslots, nbytes, w0);
 
 	H5Fclose(fidin);
 	H5Fclose(fidout);
+
+	/* stop timer and time if requested */
+	if (filecopytime){
+	    double xwt;
+	    set_time(filecopytime, HDF5_FILE_OPENCLOSE, TSTOP);
+	    xwt = get_time(filecopytime, HDF5_FILE_OPENCLOSE);
+	    printf("Total file copy time = %.2lfm(%.0lfs)\n", xwt/60.0, xwt);
+	    io_time_destroy(filecopytime);
+	}
 
 	/* free table */
 	trav_table_free(travt);
@@ -916,7 +941,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 			 * otherwise we do a copy using H5Ocopy
 			 *-------------------------------------------------------------------------
 			 */
-			if (options->op_tbl->nelems || options->all_filter == 1
+			if (options->no_h5ocopy || options->op_tbl->nelems || options->all_filter == 1
 					|| options->all_layout == 1 || is_ref || is_named) {
 
 				int j;
@@ -1063,9 +1088,12 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 						 */
 						if (nelmts > 0 && space_status != H5D_SPACE_STATUS_NOT_ALLOCATED) {
 							size_t need = (size_t)(nelmts * msize); /* bytes needed */
-
+#if 1
+if (options->show_time)
+printf("need=%ld\n", need);
+#endif
 							/* have to read the whole dataset if there is only one element in the dataset */
-							if (need < H5TOOLS_MALLOCSIZE)
+							if (need <= H5TOOLS_MALLOCSIZE)
 								buf = HDmalloc(need);
 
 							if (buf != NULL) {
@@ -1292,6 +1320,10 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 				 *-------------------------------------------------------------------------
 				 */
 
+#if 1
+if (options->show_time)
+printf("using h5ocopy to copy %s\n", travt->objs[i].name);
+#endif
 				if (H5Ocopy(fidin, /* Source file or group identifier */
 				travt->objs[i].name, /* Name of the source object to be copied */
 				fidout, /* Destination file or group identifier  */
