@@ -6849,8 +6849,11 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     ##  echo $HAVE_FORTRAN_2003
       as_fn_error $? "Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003" "$LINENO" 5
     else
-    ##  echo $HAVE_FORTRAN_2003
       HAVE_FORTRAN_2003="yes"
+      ## We are have a 2003 compiler
+
+$as_echo "#define HAVE_FORTRAN_2003 1" >>confdefs.h
+
     fi
   fi
 else
