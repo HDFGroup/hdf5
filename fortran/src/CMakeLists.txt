@@ -157,7 +157,6 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 if (HDF5_ENABLE_F2003)
   # F2003 features are enabled
   set (F_STATUS "_F03")
-  set (H5_HAVE_FORTRAN_2003 1)
 else (HDF5_ENABLE_F2003)
   # F2003 features are not enabled
   set (F_STATUS "_F90")

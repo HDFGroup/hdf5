@@ -129,9 +129,6 @@
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
-/* Define if we have F2003 compiler */
-#undef HAVE_FORTRAN_2003
-
 /* Define to 1 if you have the `frexpf' function. */
 #undef HAVE_FREXPF
 

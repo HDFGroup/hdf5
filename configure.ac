@@ -569,9 +569,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     ##  echo $HAVE_FORTRAN_2003
       AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
     else
+    ##  echo $HAVE_FORTRAN_2003
       HAVE_FORTRAN_2003="yes"
-      ## We are have a 2003 compiler
-      AC_DEFINE([HAVE_FORTRAN_2003], [1], [Define if we have F2003 compiler])
     fi
   fi
 else
