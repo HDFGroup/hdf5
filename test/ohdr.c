@@ -687,16 +687,13 @@ main(void)
 
             PASSED();
 
-            TESTING("object with unknown header message & 'fail if unknown' flag set");
+            TESTING("object with unknown header message & 'fail if unknown and open for write' flag set");
 
-            /* Attempt to open the dataset with the unknown header message, and "fail if unknown" flag */
-            H5E_BEGIN_TRY {
-                dset = H5Dopen2(file2, "/Dataset2", H5P_DEFAULT);
-            } H5E_END_TRY;
-            if(dset >= 0) {
-                H5Dclose(dset);
+            /* Open the dataset with the unknown header message, and "fail if unknown and open for write" flag */
+            if((dset = H5Dopen2(file2, "/Dataset2", H5P_DEFAULT)) < 0)
                 TEST_ERROR
-            } /* end if */
+            if(H5Dclose(dset) < 0)
+                TEST_ERROR
 
             PASSED();
 
@@ -778,6 +775,26 @@ main(void)
             if(H5Dclose(dset) < 0)
                 TEST_ERROR
 
+            /* Close the file with the bogus objects */
+            if(H5Fclose(file2) < 0)
+                TEST_ERROR
+
+            PASSED();
+
+            /* Open the file with objects that have unknown header messages (generated with gen_bogus.c) with RW intent this time */
+            if((file2 = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+                TEST_ERROR
+
+            TESTING("object with unknown header message & 'fail if unknown and open for write' flag set");
+
+            /* Attempt to open the dataset with the unknown header message, and "fail if unknown and open for write" flag */
+            H5E_BEGIN_TRY {
+                dset = H5Dopen2(file2, "/Dataset2", H5P_DEFAULT);
+            } H5E_END_TRY;
+            if(dset >= 0) {
+                H5Dclose(dset);
+                TEST_ERROR
+            } /* end if */
 
             /* Close the file with the bogus objects */
             if(H5Fclose(file2) < 0)

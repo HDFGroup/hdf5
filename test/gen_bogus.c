@@ -62,7 +62,7 @@ int main(void)
     if(H5Dclose(did) < 0) goto error;
 
     /* Set "fail if unknown" message flag for bogus message */
-    bogus_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN;
+    bogus_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE;
     if(H5Pset(dcpl, H5O_BOGUS_MSG_FLAGS_NAME, &bogus_flags) < 0) goto error;
 
     /* Create second dataset, with "fail if unknown" message flag */
