@@ -1132,7 +1132,7 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unknown flag for message")
         if((flags & H5O_MSG_FLAG_SHARED) && (flags & H5O_MSG_FLAG_DONTSHARE))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "bad flag combination for message")
-        if((flags & H5O_MSG_FLAG_WAS_UNKNOWN) && (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN))
+        if((flags & H5O_MSG_FLAG_WAS_UNKNOWN) && (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "bad flag combination for message")
         if((flags & H5O_MSG_FLAG_WAS_UNKNOWN) && !(flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "bad flag combination for message")
@@ -1208,7 +1208,8 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
                 oh->mesg[mesgno].type = H5O_msg_class_g[H5O_UNKNOWN_ID];
 
                 /* Check for "fail if unknown" message flag */
-                if(flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN)
+                if((udata->file_intent & H5F_ACC_RDWR) && 
+                   (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE))
                     HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unknown message with 'fail if unknown' flag found")
                 /* Check for "mark if unknown" message flag, etc. */
                 else if((flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN) &&

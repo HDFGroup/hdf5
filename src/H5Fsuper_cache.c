@@ -975,16 +975,24 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                         if((memb_eof = H5FD_get_eof(lf, mt)) == HADDR_UNDEF)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eof request failed")
 
-                        if(mesg_flags == H5O_MSG_FLAG_MARK_IF_UNKNOWN && memb_eoa != memb_eof)
-                            mesg_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN;
+                        if(memb_eoa > memb_eof)
+                            mesg_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE;
+                        else if(memb_eoa != memb_eof)
+                            mesg_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS;
                     }
                 }
                 else {
                     /* Get the current EOA */
                     if((eoa_msg.memb_eoa[0] = H5FD_get_eoa(lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-                    mesg_flags = (eoa_msg.memb_eoa[0] == rel_eof) ? 
-                        H5O_MSG_FLAG_MARK_IF_UNKNOWN : H5O_MSG_FLAG_FAIL_IF_UNKNOWN;
+
+                    if(eoa_msg.memb_eoa[0] > rel_eof)
+                        mesg_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE;
+                    else if(eoa_msg.memb_eoa[0] < rel_eof)
+                        mesg_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS;
+                    else
+                        mesg_flags = H5O_MSG_FLAG_MARK_IF_UNKNOWN;
+
                     /* add the base address to the EOA */
                     eoa_msg.memb_eoa[0] += sblock->base_addr;
                 }
