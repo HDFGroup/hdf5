@@ -7612,7 +7612,7 @@ H5C_flush_single_entry(H5F_t *	   	   f,
          * otherwise as no file I/O can result.
          */
         if(!clear_only && entry_ptr->is_dirty &&
-                IS_H5FD_MPI(f)) {
+                H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
             H5P_genplist_t *dxpl;       /* Dataset transfer property list */
             unsigned coll_meta;         /* Collective metadata write flag */
 
