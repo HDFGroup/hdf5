@@ -217,8 +217,8 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      */
 #define H5FD_FEAT_HAS_MPI               0x00000100
     /*
-     * Defining the H5FD_FEAT_ALLOCATE_EARLY for a VFL driver means that
-     * the library will use the H5D_ALLOC_TIME_EARLY on dataset create
+     * Defining the H5FD_FEAT_ALLOCATE_EARLY for a VFL driver will force
+     * the library to use the H5D_ALLOC_TIME_EARLY on dataset create
      * instead of the default H5D_ALLOC_TIME_LATE
      */
 #define H5FD_FEAT_ALLOCATE_EARLY        0x00000200
@@ -234,12 +234,6 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * image to store in memory.
      */
 #define H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS 0x00000800
-    /*
-     * Defining the H5FD_FEAT_HAS_MPI_ATOMICITY for a VFL driver means
-     * that the driver is able to do atomic read/write operations as
-     * defined by MPI atomicity semantics.
-     */
-#define H5FD_FEAT_HAS_MPI_ATOMICITY    0x00001000
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;
