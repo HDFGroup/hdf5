@@ -623,6 +623,7 @@ if (HDF5_TEST_VFD)
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
     endforeach (test ${H5_VFD_TESTS})
+    set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES DEPENDS VFD-${vfdname}-flush1)
     set_tests_properties (VFD-${vfdname}-flush1 PROPERTIES TIMEOUT 10)
     set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES TIMEOUT 10)
     if (HDF5_TEST_FHEAP_VFD)
