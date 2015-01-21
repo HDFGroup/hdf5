@@ -83,7 +83,6 @@ if(<>) {
               next if $name =~ /^(ABS|ADDR_OVERFLOW|ALL_MEMBERS|BOUND|CONSTR|DETECT_[I|F|M]|DOWN)$/;
               next if $name =~ /^(MIN3?|MAX3?|NELMTS|POWER_OF_TWO|REGION_OVERFLOW)$/;
               next if $name =~ /^(UNIQUE_MEMBERS)$/;
-              next if $name =~ /^(IS_H5FD_MPIO)$/;
               next if $name =~ /^addr_defined$/;
 
               # These functions/macros are exempt.
