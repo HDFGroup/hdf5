@@ -208,7 +208,7 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Check VFD */
-    if(!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI_ATOMICITY))
+    if(!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect VFL driver, does not support MPI atomicity mode")
 
     /* set atomicity value */
@@ -248,7 +248,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Check VFD */
-    if(!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI_ATOMICITY))
+    if(!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect VFL driver, does not support MPI atomicity mode")
 
     /* get atomicity value */
