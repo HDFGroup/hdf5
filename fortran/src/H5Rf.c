@@ -143,7 +143,7 @@ done:
  * SOURCE
 */
 int_f
-nh5rcreate_ptr_c (void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *ref_type, hid_t_f *space_id)
+h5rcreate_ptr_c (void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *ref_type, hid_t_f *space_id)
 /******/
 {
      int ret_value = -1;
@@ -252,18 +252,18 @@ done:
 
 /****if* H5Rf/h5rdereference_ptr_c
  * NAME
- *        h5rdereference_ptr_c
+ *  h5rdereference_ptr_c
  * PURPOSE
- *     Call H5Rdereference
+ *  Call H5Rdereference
  * INPUTS
- *      obj_id - Valid identifier for the file containing the
- *                       referenced object or any object in that file.
- *             ref_typ - The reference type of ref.
- *                 ref - Object reference
+ *  obj_id  - Valid identifier for the file containing the
+ *            referenced object or any object in that file.
+ *  ref_typ - The reference type of ref.
+ *  ref     - Object reference
  * OUTPUTS
- *     ref_obj_id - Identifier of referenced object
+ *  ref_obj_id - Identifier of referenced object
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
  *  June 20, 2008
@@ -272,7 +272,7 @@ done:
  * SOURCE
 */
 int_f
-nh5rdereference_ptr_c (hid_t_f *obj_id, int_f *ref_type, void *ref, hid_t_f *ref_obj_id)
+h5rdereference_ptr_c (hid_t_f *obj_id, int_f *ref_type, void *ref, hid_t_f *ref_obj_id)
 /******/
 {
   int ret_value = -1;
@@ -351,7 +351,7 @@ done:
  * SOURCE
 */
 int_f
-nh5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id)
+h5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id)
 /******/
 {
      hid_t c_space_id;
@@ -532,9 +532,9 @@ done:
 
 /****if* H5Rf/h5rget_name_ptr_c
  * NAME
- *        h5rget_name_ptr_c
+ *  h5rget_name_ptr_c
  * PURPOSE
- *     Call H5Rget_name
+ *  Call H5Rget_name
  * INPUTS
  *
  *       loc_id - Identifier for the dataset containing the reference or for the group that dataset is in.
@@ -546,7 +546,7 @@ done:
  *     size - The size of the name buffer.
  *
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
  *  June 20, 2008
@@ -555,7 +555,7 @@ done:
  * SOURCE
 */
 int_f
-nh5rget_name_ptr_c (hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t_f *name_len, size_t_f *size_default)
+h5rget_name_ptr_c (hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t_f *name_len, size_t_f *size_default)
 /******/
 {
      int_f ret_value = -1;
@@ -613,7 +613,7 @@ nh5rget_name_ptr_c (hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size
  * SOURCE
 */
 int_f
-nh5rget_obj_type_c (hid_t_f *loc_id, int_f *ref_type, void *ref, int_f *obj_type)
+h5rget_obj_type_c (hid_t_f *loc_id, int_f *ref_type, void *ref, int_f *obj_type)
 /******/
 {
   int_f ret_value = -1;
