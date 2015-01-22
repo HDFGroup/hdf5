@@ -204,7 +204,7 @@ H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t add
 #endif /* H5_HAVE_PARALLEL */
 
     if(HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
     if((addr + file->base_addr + size) > eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%zu, eoa=%llu", 
                     (unsigned long long)(addr+ file->base_addr), size, (unsigned long long)eoa)
@@ -253,7 +253,7 @@ H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t ad
 #endif /* H5_HAVE_PARALLEL */
 
     if(HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
     if((addr + file->base_addr + size) > eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%zu, eoa=%llu", 
                     (unsigned long long)(addr+ file->base_addr), size, (unsigned long long)eoa)
