@@ -689,11 +689,10 @@ CONTAINS
   !
   ! Outputs:
   !  obj_type - Type of referenced object. 
-  !               H5G_UNKNOWN_F (-1)
-  !               H5G_LINK_F      0
-  !               H5G_GROUP_F     1
-  !               H5G_DATASET_F   2
-  !               H5G_TYPE_F      3
+  !               H5G_UNKNOWN_F
+  !               H5G_GROUP_F
+  !               H5G_DATASET_F
+  !               H5G_TYPE_F
   !              
   !  hdferr   - Returns 0 if successful and -1 if fails.
   !
