@@ -1,0 +1,15 @@
+features/direct_io_2
+
+This branch was created by Neil Fortner to support aligned memory
+buffers when direct I/O is used. This work should be complete but
+was performed around HDF5 1.8.8 and may need some fixing before
+it can be merged.
+
+This branch will probably be merged with the trunk and 1.8
+branch in 2015 as a part of other direct VFD work.
+
+This branches tracks the trunk. It is not regularly updated.
+
+Please see Neil Fortner or Dana Robinson if you have questions
+about this branch.
+
