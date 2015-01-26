@@ -189,7 +189,7 @@ set (H5_TESTS
     objcopy
     links
     unlink
-#    big
+    big
     mtime
     fillval
     mount
@@ -218,9 +218,6 @@ set (H5_TESTS
     file_image
     unregister
 )
-if (NOT CYGWIN)
-  set (H5_TESTS ${H5_TESTS} big)
-endif (NOT CYGWIN)
 
 foreach (test ${H5_TESTS})
   ADD_H5_EXE(${test})
