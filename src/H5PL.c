@@ -405,8 +405,14 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
         /* The library we are looking for should be called libxxx.so... on Unix 
          * or libxxx.xxx.dylib on Mac.
          */ 
+#ifndef __CYGWIN__
         if(!HDstrncmp(dp->d_name, "lib", (size_t)3) && 
                 (HDstrstr(dp->d_name, ".so") || HDstrstr(dp->d_name, ".dylib"))) {
+#else
+        if(!HDstrncmp(dp->d_name, "cyg", (size_t)3) &&
+                HDstrstr(dp->d_name, ".dll") ) {
+
+#endif
             h5_stat_t   my_stat;
             size_t      pathname_len;
             htri_t      found_in_dir;
