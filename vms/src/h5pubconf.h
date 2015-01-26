@@ -488,9 +488,6 @@
 /* Define if deprecated public API symbols are disabled */
 /* #undef H5_NO_DEPRECATED_SYMBOLS */
 
-/* Define if shared writing must be disabled (CodeWarrior only) */
-#define H5_NO_SHARED_WRITING 1
-
 /* Name of package */
 #define H5_PACKAGE "hdf5"
 

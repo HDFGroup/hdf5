@@ -540,9 +540,6 @@
 /* Define if deprecated public API symbols are disabled */
 #cmakedefine H5_NO_DEPRECATED_SYMBOLS @H5_NO_DEPRECATED_SYMBOLS@
 
-/* Define if shared writing must be disabled (CodeWarrior only) */
-#cmakedefine H5_NO_SHARED_WRITING @H5_NO_SHARED_WRITING@
-
 /* Name of package */
 #define H5_PACKAGE "@HDF5_PACKAGE@"
 
