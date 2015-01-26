@@ -474,7 +474,7 @@ H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(IS_H5FD_MPIO(io_info->dset->oloc.file));
+    HDassert(H5FD_MPIO == H5F_DRIVER_ID(io_info->dset->oloc.file));
     HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
 
     /* Call generic internal collective I/O routine */
@@ -521,7 +521,7 @@ H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(IS_H5FD_MPIO(io_info->dset->oloc.file));
+    HDassert(H5FD_MPIO == H5F_DRIVER_ID(io_info->dset->oloc.file));
     HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
 
     /* Call generic internal collective I/O routine */

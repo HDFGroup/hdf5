@@ -302,7 +302,7 @@ done:
 /* } */
 
 int_f
-nh5eset_auto2_c(int_f *printflag, hid_t_f *estack_id, H5E_auto2_t func, void *client_data)
+h5eset_auto2_c(int_f *printflag, hid_t_f *estack_id, H5E_auto2_t func, void *client_data)
 /******/
 {
   int ret_val = -1;
