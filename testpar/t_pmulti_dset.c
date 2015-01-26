@@ -27,6 +27,10 @@
  */
 
 #include "h5test.h"
+#include "testpar.h"
+
+#define T_PMD_ERROR \
+    {nerrors++; H5_FAILED(); AT(); printf("seed = %u\n", seed);}
 
 #define FILENAME "pmulti_dset.h5"
 #define MAX_DSETS 5
@@ -57,6 +61,12 @@ int mpi_rank;
 /* Names for datasets */
 char dset_name[MAX_DSETS][DSET_MAX_NAME_LEN];
 
+/* Random number seed */
+unsigned seed;
+
+/* Number of errors */
+int nerrors = 0;
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_pmdset
@@ -81,7 +91,7 @@ char dset_name[MAX_DSETS][DSET_MAX_NAME_LEN];
  *
  *-------------------------------------------------------------------------
  */
-static int
+static void
 test_pmdset(size_t niter, unsigned flags)
 {
     H5D_rw_multi_t multi_info[MAX_DSETS];
@@ -106,6 +116,7 @@ test_pmdset(size_t niter, unsigned flags)
     unsigned char *dset_usage;
     unsigned char *dset_usagei[MAX_DSETS][MAX_DSET_X];
     hbool_t do_read;
+    hbool_t last_read;
     hbool_t overlap;
     hsize_t start[MAX_HS][3];
     hsize_t count[MAX_HS][3];
@@ -128,15 +139,15 @@ test_pmdset(size_t niter, unsigned flags)
 
     /* Allocate buffers */
     if(NULL == (rbuf = (unsigned *)HDmalloc(buf_size)))
-        TEST_ERROR
+        T_PMD_ERROR
     if(NULL == (erbuf = (unsigned *)HDmalloc(buf_size)))
-        TEST_ERROR
+        T_PMD_ERROR
     if(NULL == (wbuf = (unsigned *)HDmalloc(buf_size)))
-        TEST_ERROR
+        T_PMD_ERROR
     if(NULL == (efbuf = (unsigned *)HDmalloc(buf_size)))
-        TEST_ERROR
+        T_PMD_ERROR
     if(NULL == (dset_usage = (unsigned char *)HDmalloc(max_dsets * MAX_DSET_X * MAX_DSET_Y)))
-        TEST_ERROR
+        T_PMD_ERROR
 
     /* Initialize buffer indices */
     for(i = 0; i < max_dsets; i++)
@@ -169,46 +180,42 @@ test_pmdset(size_t niter, unsigned flags)
     dset_dims[0][0] = MAX_DSET_X;
     dset_dims[0][1] = MAX_DSET_Y;
     if((multi_info[0].mem_space_id = H5Screate_simple((flags & MDSET_FLAG_SHAPESAME) ? 2 : 3, dset_dims[0], NULL)) < 0)
-        TEST_ERROR
+        T_PMD_ERROR
     for(i = 1; i < max_dsets; i++)
         if((multi_info[i].mem_space_id = H5Scopy(multi_info[0].mem_space_id)) < 0)
-            TEST_ERROR
+            T_PMD_ERROR
 
     /* Create fapl */
     if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        TEST_ERROR
+        T_PMD_ERROR
 
     /* Set MPIO file driver */
     if((H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL)) < 0)
-        TEST_ERROR
+        T_PMD_ERROR
 
     /* Create dcpl */
     if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        T_PMD_ERROR
 
     /* Set fill time to alloc, and alloc time to early (so we always know
      * what's in the file) */
     if(H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_ALLOC) < 0)
-        TEST_ERROR
+        T_PMD_ERROR
     if(H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY) < 0)
-        TEST_ERROR
+        T_PMD_ERROR
 
     /* Create dxpl */
     if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        TEST_ERROR
-
-    /* Set collective interface */
-    if(H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
-        TEST_ERROR
+        T_PMD_ERROR
 
     /* Set collective or independent I/O */
     if(flags & MDSET_FLAG_COLLECTIVE) {
-        if(H5Pset_dxpl_mpio_collective_opt(dxpl_id, H5FD_MPIO_COLLECTIVE_IO) < 0)
-            TEST_ERROR
+        if(H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+            T_PMD_ERROR
     } /* end if */
     else
-        if(H5Pset_dxpl_mpio_collective_opt(dxpl_id, H5FD_MPIO_INDIVIDUAL_IO) < 0)
-            TEST_ERROR
+        if(H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) < 0)
+            T_PMD_ERROR
 
     for(i = 0; i < niter; i++) {
         /* Determine number of datasets */
@@ -217,7 +224,7 @@ test_pmdset(size_t niter, unsigned flags)
 
         /* Create file */
         if((file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-            TEST_ERROR
+            T_PMD_ERROR
 
         /* Create datasets */
         for(j = 0; j < ndsets; j++) {
@@ -225,19 +232,19 @@ test_pmdset(size_t niter, unsigned flags)
             dset_dims[j][0] = (hsize_t)((HDrandom() % MAX_DSET_X) + 1);
             dset_dims[j][1] = (hsize_t)((HDrandom() % MAX_DSET_Y) + 1);
             if((multi_info[j].dset_space_id = H5Screate_simple(2, dset_dims[j], (flags & MDSET_FLAG_CHUNK) ? max_dims : NULL)) < 0)
-                TEST_ERROR
+                T_PMD_ERROR
 
             /* Generate chunk (if requested) */
             if(flags & MDSET_FLAG_CHUNK) {
                 chunk_dims[0] = (hsize_t)((HDrandom() % MAX_CHUNK_X) + 1);
                 chunk_dims[1] = (hsize_t)((HDrandom() % MAX_CHUNK_Y) + 1);
                 if(H5Pset_chunk(dcpl_id, 2, chunk_dims) < 0)
-                    TEST_ERROR
+                    T_PMD_ERROR
             } /* end if */
 
             /* Create dataset */
             if((multi_info[j].dset_id = H5Dcreate2(file_id, dset_name[j], H5T_NATIVE_UINT, multi_info[j].dset_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
-                TEST_ERROR
+                T_PMD_ERROR
         } /* end for */
 
         /* Initialize read buffer and expected read buffer */
@@ -253,18 +260,62 @@ test_pmdset(size_t niter, unsigned flags)
         /* Initialize expected file buffer */
         (void)HDmemset(efbuf, 0, buf_size);
 
+        /* Set last_read to TRUE so we don't reopen the file on the first
+         * iteration */
+        last_read = TRUE;
+
         /* Perform read/write operations */
         for(j = 0; j < OPS_PER_FILE; j++) {
             /* Decide whether to read or write */
             do_read = (hbool_t)(HDrandom() % 2);
 
+            /* Barrier to ensure processes have finished the previous operation
+             */
+            MPI_Barrier(MPI_COMM_WORLD);
+
+            /* If the last operation was a write we must close and reopen the
+             * file to ensure consistency */
+            /* Possibly change to MPI_FILE_SYNC at some point? -NAF */
+            if(!last_read) {
+                /* Close datasets */
+                for(k = 0; k < ndsets; k++) {
+                    if(H5Dclose(multi_info[k].dset_id) < 0)
+                        T_PMD_ERROR
+                    multi_info[k].dset_id = -1;
+                } /* end for */
+
+                /* Close file */
+                if(H5Fclose(file_id) < 0)
+                    T_PMD_ERROR
+                file_id = -1;
+
+                /* Barrier */
+                MPI_Barrier(MPI_COMM_WORLD);
+
+                /* Reopen file */
+                if((file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_id)) < 0)
+                    T_PMD_ERROR
+
+                /* Reopen datasets */
+                for(k = 0; k < ndsets; k++) {
+                    if((multi_info[k].dset_id = H5Dopen(file_id, dset_name[k], H5P_DEFAULT)) < 0)
+                        T_PMD_ERROR
+                } /* end for */
+
+                /* Barrier */
+                MPI_Barrier(MPI_COMM_WORLD);
+            } /* end if */
+
+            /* Keep track of whether the last operation was a read */
+            last_read = do_read;
+
             /* Loop over datasets */
             for(k = 0; k < ndsets; k++) {
                 /* Reset selection */
                 if(H5Sselect_none(multi_info[k].mem_space_id) < 0)
-                    TEST_ERROR
+                    T_PMD_ERROR
                 if(H5Sselect_none(multi_info[k].dset_space_id) < 0)
-                    TEST_ERROR
+                    T_PMD_ERROR
 
                 /* Reset dataset usage array, if writing */
                 if(!do_read)
@@ -318,9 +369,9 @@ test_pmdset(size_t niter, unsigned flags)
                              */
                             if(l == (size_t)mpi_rank) {
                                 if(H5Sselect_hyperslab(multi_info[k].mem_space_id, H5S_SELECT_OR, start[m], NULL, count[m], NULL) < 0)
-                                    TEST_ERROR
+                                    T_PMD_ERROR
                                 if(H5Sselect_hyperslab(multi_info[k].dset_space_id, H5S_SELECT_OR, start[m], NULL, count[m], NULL) < 0)
-                                    TEST_ERROR
+                                    T_PMD_ERROR
                             } /* end if */
 
                             /* Update expected buffers */
@@ -380,7 +431,7 @@ test_pmdset(size_t niter, unsigned flags)
                          */
                         if((l == (size_t)mpi_rank) && (npoints > 0))
                             if(H5Sselect_elements(multi_info[k].dset_space_id, H5S_SELECT_APPEND, npoints, points) < 0)
-                                TEST_ERROR
+                                T_PMD_ERROR
 
                         /* Update expected buffers */
                         if(do_read) {
@@ -408,7 +459,7 @@ test_pmdset(size_t niter, unsigned flags)
 
                             /* Select elements */
                             if(H5Sselect_elements(multi_info[k].mem_space_id, H5S_SELECT_APPEND, npoints, points) < 0)
-                                TEST_ERROR
+                                T_PMD_ERROR
                         } /* end if */
                     } /* end else */
                 } /* end for */
@@ -423,16 +474,16 @@ test_pmdset(size_t niter, unsigned flags)
 
                     /* Read datasets */
                     if(H5Dread_multi(file_id, dxpl_id, ndsets, multi_info) < 0)
-                        TEST_ERROR
+                        T_PMD_ERROR
                 } /* end if */
                 else
                     /* Read */
                     if(H5Dread(multi_info[0].dset_id, multi_info[0].mem_type_id, multi_info[0].mem_space_id, multi_info[0].dset_space_id, dxpl_id, rbuf) < 0)
-                        TEST_ERROR
+                        T_PMD_ERROR
 
                 /* Verify data */
                 if(0 != memcmp(rbuf, erbuf, buf_size))
-                    TEST_ERROR
+                    T_PMD_ERROR
             } /* end if */
             else {
                 if(flags & MDSET_FLAG_MDSET) {
@@ -442,12 +493,12 @@ test_pmdset(size_t niter, unsigned flags)
 
                     /* Write datasets */
                     if(H5Dwrite_multi(file_id, dxpl_id, ndsets, multi_info) < 0)
-                        TEST_ERROR
+                        T_PMD_ERROR
                 } /* end if */
                 else
                     /* Write */
                     if(H5Dwrite(multi_info[0].dset_id, multi_info[0].mem_type_id, multi_info[0].mem_space_id, multi_info[0].dset_space_id, dxpl_id, wbuf) < 0)
-                        TEST_ERROR
+                        T_PMD_ERROR
 
                 /* Update wbuf */
                 for(l = 0; l < max_dsets; l++)
@@ -460,31 +511,31 @@ test_pmdset(size_t niter, unsigned flags)
         /* Close */
         for(j = 0; j < ndsets; j++) {
             if(H5Dclose(multi_info[j].dset_id) < 0)
-                TEST_ERROR
+                T_PMD_ERROR
             multi_info[j].dset_id = -1;
             if(H5Sclose(multi_info[j].dset_space_id) < 0)
-                TEST_ERROR
+                T_PMD_ERROR
             multi_info[j].dset_space_id = -1;
         } /* end for */
         if(H5Fclose(file_id) < 0)
-            TEST_ERROR
+            T_PMD_ERROR
         file_id = -1;
     } /* end for */
 
     /* Close */
     for(i = 0; i < max_dsets; i++) {
         if(H5Sclose(multi_info[i].mem_space_id) < 0)
-            TEST_ERROR
+            T_PMD_ERROR
         multi_info[i].mem_space_id = -1;
     } /* end for */
     if(H5Pclose(dxpl_id) < 0)
-        TEST_ERROR
+        T_PMD_ERROR
     dxpl_id = -1;
     if(H5Pclose(dcpl_id) < 0)
-        TEST_ERROR
+        T_PMD_ERROR
     dcpl_id = -1;
     if(H5Pclose(fapl_id) < 0)
-        TEST_ERROR
+        T_PMD_ERROR
     fapl_id = -1;
     free(rbuf);
     rbuf = NULL;
@@ -500,30 +551,7 @@ test_pmdset(size_t niter, unsigned flags)
     if(mpi_rank == 0)
         PASSED();
 
-    return 0;
-
-error:
-    H5E_BEGIN_TRY {
-        for(i = 0; i < max_dsets; i++) {
-            H5Dclose(multi_info[i].dset_id);
-            H5Sclose(multi_info[i].mem_space_id);
-            H5Sclose(multi_info[i].dset_space_id);
-        } /* end for */
-        H5Fclose(file_id);
-        H5Pclose(dcpl_id);
-    } H5E_END_TRY
-    if(rbuf)
-        free(rbuf);
-    if(erbuf)
-        free(erbuf);
-    if(wbuf)
-        free(wbuf);
-    if(efbuf)
-        free(efbuf);
-    if(dset_usage)
-        free(dset_usage);
-
-    return -1;
+    return;
 } /* end test_mdset() */
 
 
@@ -544,8 +572,6 @@ error:
 int
 main(int argc, char *argv[])
 {
-    unsigned seed;
-    int nerrors = 0;
     unsigned i;
     int ret;
 
@@ -557,12 +583,12 @@ main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* Generate random number seed, if rank 0 */
-    if(mpi_rank == 0)
+    if(MAINPROCESS)
         seed = (unsigned)HDtime(NULL);
 
     /* Broadcast seed from rank 0 (other ranks will receive rank 0's seed) */
     if(MPI_SUCCESS != MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, MPI_COMM_WORLD))
-        TEST_ERROR
+        T_PMD_ERROR
 
     /* Seed random number generator with shared seed (so all ranks generate the
      * same sequence) */
@@ -571,14 +597,14 @@ main(int argc, char *argv[])
     /* Fill dset_name array */
     for(i = 0; i < MAX_DSETS; i++) {
         if((ret = snprintf(dset_name[i], DSET_MAX_NAME_LEN, "dset%u", i)) < 0)
-            TEST_ERROR
+            T_PMD_ERROR
         if(ret >= DSET_MAX_NAME_LEN)
-            TEST_ERROR
+            T_PMD_ERROR
     } /* end for */
 
     for(i = 0; i <= MDSET_ALL_FLAGS; i++) {
         /* Print flag configuration */
-        if(mpi_rank == 0) {
+        if(MAINPROCESS) {
             puts("\nConfiguration:");
             printf("  Layout:     %s\n", (i & MDSET_FLAG_CHUNK) ? "Chunked" : "Contiguous");
             printf("  Shape same: %s\n", (i & MDSET_FLAG_SHAPESAME) ? "Yes" : "No");
@@ -586,35 +612,40 @@ main(int argc, char *argv[])
             printf("  MPI I/O type: %s\n", (i & MDSET_FLAG_COLLECTIVE) ? "Collective" : "Independent");
         } /* end if */
 
-        nerrors += test_pmdset(10, i);
+        test_pmdset(10, i);
     } /* end for */
 
     /* Barrier to make sure all ranks are done before deleting the file, and
      * also to clean up output (make sure PASSED is printed before any of the
      * following messages) */
     if(MPI_SUCCESS != MPI_Barrier(MPI_COMM_WORLD))
-        TEST_ERROR
+        T_PMD_ERROR
 
     /* Delete file */
     if(mpi_rank == 0)
         if(MPI_SUCCESS != MPI_File_delete(FILENAME, MPI_INFO_NULL))
-            TEST_ERROR
+            T_PMD_ERROR
 
-    if(nerrors)
-        goto error;
-    printf("Rank %d: All parallel multi dataset tests passed.\n", mpi_rank);
+    /* Gather errors from all processes */
+    MPI_Allreduce(&nerrors, &ret, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+    nerrors = ret;
 
+    if(MAINPROCESS) {
+        printf("===================================\n");
+        if (nerrors)
+            printf("***Parallel multi dataset tests detected %d errors***\n", nerrors);
+        else
+            printf("Parallel multi dataset tests finished with no errors\n");
+        printf("===================================\n");
+    } /* end if */
+
+    /* close HDF5 library */
+    H5close();
+
+    /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
     MPI_Finalize();
 
-    return 0;
-
-error:
-    nerrors = MAX(1, nerrors);
-    printf("***** Rank %d: %d parallel multi dataset TEST%s FAILED! *****\n",
-            mpi_rank, nerrors, 1 == nerrors ? "" : "S");
-
-    MPI_Finalize();
-
-    return 1;
+    /* cannot just return (nerrors) because exit code is limited to 1 byte */
+    return(nerrors != 0);
 } /* end main() */
 

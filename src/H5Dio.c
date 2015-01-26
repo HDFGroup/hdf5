@@ -370,7 +370,7 @@ H5D__pre_read(hid_t file_id, hid_t dxpl_id, size_t count,
                 HGOTO_ERROR(H5E_DATASET,  H5E_READERROR, FAIL, "failed in matching collective MPI calls")
         } /* end else */
 #endif /* H5_HAVE_PARALLEL */
-    } /* end if */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

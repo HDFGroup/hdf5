@@ -434,6 +434,7 @@ if (HDF5_TEST_VFD)
       dtypes
       dsets
       cmpd_dset
+      mdset
       filter_fail
       extend
       external
