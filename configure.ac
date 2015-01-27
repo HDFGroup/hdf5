@@ -608,16 +608,14 @@ fi
 ##			   a parallel library even if configure wasn't
 ##			   able to find some header file or library that
 ##			   might be required. This is defined if the
-##			   compiler looks like a parallel compiler (e.g.,
-##			   mpicc or mpcc) or if the user explicitly states
+##			   user explicitly states
 ##			   that a parallel library is being built by supplying
 ##			   the `--enable-parallel' configure switch.
 ##
 ##    PARALLEL		-- This variable is set to a non-null value if
-##			   configure thinks we're compiling a parallel
-##			   version of the library.
+##			   we're building a parallel version of the library.
 ##
-##    RUNSERIAL	-- This is a command which will be prepended to
+##    RUNSERIAL	        -- This is a command which will be prepended to
 ##			   the executable name to run the executable using
 ##			   a single process. For serial versions of the
 ##			   library this will normally be empty. For parallel
@@ -641,131 +639,6 @@ AC_SUBST([PARALLEL])
 AC_SUBST([RUNSERIAL])
 AC_SUBST([RUNPARALLEL])
 AC_SUBST([TESTPARALLEL])
-
-## ----------------------------------------------------------------------
-## If the compiler is obviously a parallel compiler then we're building
-## a parallel version of hdf5 and should define HAVE_PARALLEL. Furthermore,
-## the name of the compiler might tell us how to run the resulting
-## executable. For `mpicc' the executable should be run with `mpiexec' from
-## the same directory as mpicc if it exists.
-##
-case "$CC_BASENAME" in
-  mpicc)
-    ## The mpich compiler. Use mpiexec from the same directory if it
-    ## exists.
-    PARALLEL=mpicc
-    AC_MSG_CHECKING([for mpiexec])
-
-    ## Find the path where mpicc is located.
-    cmd="`echo $CC | cut -f1 -d' '`"
-    if (echo $cmd | grep / >/dev/null); then
-      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
-    else
-      for path in `echo $PATH | ${TR} ":" " "`; do
-        if test -x $path/$cmd; then
-          break
-        fi
-      done
-    fi
-
-    ## Is there an mpiexec at that path?
-    if test -x $path/mpiexec; then
-      AC_MSG_RESULT([$path/mpiexec])
-      RUNSERIAL="${RUNSERIAL:-none}"
-
-      if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=6}"
-      fi
-    else
-      AC_MSG_RESULT([none])
-    fi
-    ;;
-
-  mpcc|mpcc_r)
-    ## The IBM compiler
-    PARALLEL="$CC_BASENAME"
-    ;;
-
-  *)
-    ## Probably not a parallel compiler, but if `--enable-parallel'
-    ## is defined below then we're still building a parallel hdf5.
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## If the Fortran compiler is obviously a parallel compiler then we're
-## building a parallel version of hdf5 and should define HAVE_PARALLEL.
-## Furthermore, the name of the compiler might tell us how to run the
-## resulting executable. For `mpif90' the executable should be run with
-## `mpiexec' from the same directory as mpif90 if it exists.
-##
-
-if test "X$HDF_FORTRAN" = "Xyes" ; then
-  ## Change to the Fortran 90 language
-  AC_LANG_PUSH(Fortran)
-
-  case "$FC" in
-    *mpif90*)
-      ## The Fortran mpich compiler. Use mpiexec from the same directory
-      ## if it exists.
-      PARALLEL=mpif90
-      AC_MSG_CHECKING([for mpiexec])
-
-      ## Find the path where mpif90 is located.
-      cmd=`echo $FC |cut -f1 -d' '`
-      if (echo $cmd |grep / >/dev/null); then
-        path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
-      else
-        for path in `echo $PATH | ${TR} ":" " "`; do
-          if test -x $path/$cmd; then
-            break;
-          fi
-        done
-      fi
-
-      ## Is there an mpiexec at that path?
-      if test -x $path/mpiexec; then
-        AC_MSG_RESULT([$path/mpiexec])
-        RUNSERIAL="${RUNSERIAL:-none}"
-
-        if test -z "$RUNPARALLEL"; then
-          RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=6}"
-        fi
-      else
-        AC_MSG_RESULT([none])
-      fi
-      ;;
-
-    *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
-      ## The IBM compiler
-      PARALLEL="$FC"
-      ;;
-
-    *)
-      ## Probably not a parallel compiler, but if `--enable-parallel'
-      ## is defined below then we're still building a parallel hdf5.
-      ;;
-  esac
-
-  ## Change to the C language
-  AC_LANG_POP(Fortran)
-fi
-
-## -----------------------------------------------------------------------------
-## If shared libraries are being used with parallel, disable them, unless the 
-## user explicity enables them via the '--enable-shared' option.
-
-if test "X${enable_shared}" = "X" -a "X${enable_parallel}" = "Xyes"; then
-    echo '    shared libraries disabled in parallel'
-    enable_shared="no"
-elif test "X${enable_shared}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
-    echo '    shared libraries explicitly enabled by user'
-elif test "X${enable_shared}" = "X" -a "X${PARALLEL}" != "X"; then
-    echo '    shared libraries disabled when a parallel compiler is being used'
-    enable_shared="no"
-elif test "X${enable_shared}" = "Xyes" -a "X${PARALLEL}" != "X"; then
-    echo '    shared libraries explicitly enabled by user'
-fi
 
 ## ----------------------------------------------------------------------
 ## Fortran libraries are not currently supported on Mac. Disable them.
@@ -2471,10 +2344,7 @@ AC_CACHE_SAVE
 
 ## What header files and libraries do we have to look for for parallel
 ## support?  For the most part, search paths are already specified with
-## CPPFLAGS and LDFLAGS or are known to the compiler.  If the user says
-## `--disable-parallel' but specifies a known parallel compiler (like mpicc
-## or mpcc) then parallel support is enabled but configure doesn't search
-## for any parallel header files or libraries.
+## CPPFLAGS and LDFLAGS or are known to the compiler.
 ##
 AC_ARG_ENABLE([parallel],
               [AS_HELP_STRING([--enable-parallel],
@@ -2497,25 +2367,10 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## It's possible to build in parallel by specifying a parallel compiler
-## without using the --enable-parallel flag.  This isn't allowed with
-## C++ or threadsafe, either, unless the --enable-unsupported flag 
-## has also been specified.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${PARALLEL}" != "X" -a "X${enable_cxx}" = "Xyes" ; then
-    AC_MSG_ERROR([An MPI compiler is being used; --enable-cxx is not allowed. Use --enable-unsupported to override this error.])
-  fi
-  if test "X${PARALLEL}" != "X" -a "X${THREADSAFE}" = "Xyes"; then
-    AC_MSG_ERROR([An MPI compiler is being used; --enable-threadsafe is not allowed. Use --enable-unsupported to override this error.])
-  fi
-fi
-
 AC_MSG_CHECKING([for parallel support files])
 case "X-$enable_parallel" in
   X-|X-no|X-none)
-    ## Either we are not compiling for parallel or the header and
-    ## library files and locations are known to the compiler (this is
-    ## the case for a correct installation of mpicc for instance).
+    ## We are not compiling for parallel.
     AC_MSG_RESULT([skipped])
     ;;
 
@@ -2525,59 +2380,33 @@ case "X-$enable_parallel" in
     AC_MSG_RESULT([provided by compiler])
     PARALLEL=yes
 
-    ## Try link a simple MPI program.  If fail, try again with -lmpi and
-    ## -lmpich.
-    AC_TRY_LINK(, [MPI_Init()],,
-	[AC_CHECK_LIB([mpi], [MPI_Init],,
-	    [AC_CHECK_LIB([mpich], [MPI_Init],, [PARALLEL=no])])])
-
-    ## Then try link a simple MPI-IO program. If fail, try again with
-    ## -lmpio.
-    if test "X$PARALLEL" = "Xyes"; then
-      AC_TRY_LINK(, [MPI_File_open()],,
-                  [AC_CHECK_LIB([mpio], [MPI_File_open],, [PARALLEL=no])])
-    fi
+    ## Try link a simple MPI program.
+    AC_MSG_CHECKING([whether a simple MPI-IO C program can be linked])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mpi.h>]],
+                   [[ MPI_Init(0, (void *)0); 
+		      MPI_File_open(0, (void *)0, 0, 0, (void *)0);]])], 
+		   [AC_MSG_RESULT([yes])],
+	  	   [AC_MSG_RESULT([no])
+		    AC_MSG_ERROR([unable to link a simple MPI-IO C program])])
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
       ## Change to the Fortran 90 language
       AC_LANG_PUSH(Fortran)
 
-      ## Try link a simple MPI program.  If fail, try again with -lmpi.
+      ## Try link a simple MPI program.
+      AC_MSG_CHECKING([whether a simple MPI-IO Fortran program can be linked])
       AC_LINK_IFELSE([
           program main
           include 'mpif.h'
           integer:: ierr
           call mpi_file_open( ierr )
-          end],,
-          [AC_CHECK_LIB([mpi], [mpi_file_open],, [PARALLEL=no])])
-
-      ## Then try link a simple MPI-IO program.  If fail, try again with
-      ## -lmpio.
-      if test "X$PARALLEL" = "Xyes"; then
-        AC_LINK_IFELSE([
-            program main
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )
-            end],,
-            [AC_CHECK_LIB([mpio], [mpi_file_open],, [PARALLEL=no])])
-      fi
+          end],
+	  [AC_MSG_RESULT([yes])],
+	  [AC_MSG_RESULT([no])
+	   AC_MSG_ERROR([unable to link a simple MPI-IO Fortran program])])
 
       ## Change to the C language
       AC_LANG_POP(Fortran)
-    fi
-
-    ## Set RUNPARALLEL to mpiexec if not set yet.
-    ## Check for building on Cray if RUNPARALLEL is not yet set by checking
-    ## for 'aprun' command (which is the parallel job launcher, like mpiexec).
-    if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
-        ## Find the path where aprun is located.
-  	for path in `echo $PATH | ${TR} ":" " "`; do
-  	  if test -x $path/aprun; then
-            RUNPARALLEL="aprun -q -n \$\${NPROCS:=6}"
-  	    break;
-  	  fi
-	done
     fi
 
     ## Set RUNPARALLEL to mpiexec if not set yet.
@@ -2609,13 +2438,6 @@ if test -n "$PARALLEL"; then
   AC_MSG_RESULT([$RUNSERIAL])
   AC_MSG_CHECKING([prefix for running in parallel])
   AC_MSG_RESULT([$RUNPARALLEL])
-
-  ## Check that we can link a simple MPI and MPI-IO application
-  AC_MSG_CHECKING([whether a simple MPI-IO program can be linked])
-  AC_TRY_LINK(, [MPI_Init(); MPI_File_open();],
-              [AC_MSG_RESULT([yes])],
-              [AC_MSG_RESULT([no])
-              AC_MSG_ERROR([unable to link a simple MPI-IO application])])
 
   ## There *must* be some way to run in parallel even if it's just the
   ## word `none'.
