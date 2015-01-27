@@ -441,9 +441,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([FSEARCH_DIRS])
 
   ## --------------------------------------------------------------------
-  ## Check for a Fortran 9X compiler and how to include modules.
+  ## Check for a Fortran compiler and how to include modules.
   ## 
-  AC_PROG_FC([f90 pgf90 slf90 f95 g95 xlf95 efc ifort ftn],)
+  AC_PROG_FC([PAC_FC_SEARCH_LIST],)
   AC_F9X_MODS
 
   ## It seems that libtool (as of Libtool 1.5.14) is trying to
@@ -461,99 +461,27 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## --------------------------------------------------------------------
   ## See if the fortran compiler supports the intrinsic function "SIZEOF"
-
-  AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([ 
-   PROGRAM main
-     i = sizeof(x)
-   END PROGRAM
-  ])],[AC_MSG_RESULT([yes])
-     	HAVE_SIZEOF_FORTRAN="yes"],
-      [AC_MSG_RESULT([no])])
+  PAC_PROG_FC_SIZEOF
 
   ## See if the fortran compiler supports the intrinsic function "C_SIZEOF"
-
-  AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_SIZEOF])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([ 
-   PROGRAM main
-     USE ISO_C_BINDING
-     INTEGER(C_INT) :: a
-     INTEGER(C_SIZE_T) :: result
-     result = C_SIZEOF(a)
-   END PROGRAM
-  ])], [AC_MSG_RESULT([yes])
-     	HAVE_C_SIZEOF_FORTRAN="yes"],
-     [AC_MSG_RESULT([no])])
+  PAC_PROG_FC_C_SIZEOF
 
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
-
-  AC_MSG_CHECKING([if Fortran compiler supports intrinsic STORAGE_SIZE])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-   PROGRAM main
-     INTEGER :: a
-     INTEGER :: result
-     result = STORAGE_SIZE(a)
-   END PROGRAM
-  ])], [AC_MSG_RESULT([yes])
-     	HAVE_STORAGE_SIZE_FORTRAN="yes"],
-     [AC_MSG_RESULT([no])])
+  PAC_PROG_FC_STORAGE_SIZE	
 
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
-
-  AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
-  
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-     MODULE type_mod
-       INTERFACE h5t	
-         MODULE PROCEDURE h5t_real
-         MODULE PROCEDURE h5t_dble
-       END INTERFACE
-     CONTAINS
-       SUBROUTINE h5t_real(r)
-         REAL :: r
-       END SUBROUTINE h5t_real
-       SUBROUTINE h5t_dble(d)
-         DOUBLE PRECISION :: d
-       END SUBROUTINE h5t_dble
-     END MODULE type_mod
-     PROGRAM main
-       USE type_mod
-       REAL :: r
-       DOUBLE PRECISION :: d
-       CALL h5t(r)
-       CALL h5t(d)
-     END PROGRAM main
-    ])], [AC_MSG_RESULT([no])], 
-         [AC_MSG_RESULT([yes])
-            FORTRAN_DEFAULT_REALisDBLE="yes"])
+  PAC_PROG_FC_DEFAULT_REALisDBLE	
 
   if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
     ## Checking if the compiler supports the required Fortran 2003 features and
     ## disable Fortran 2003 if it does not.
-
-    AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
-    HAVE_FORTRAN_2003="no"
-	
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[
-
-	USE iso_c_binding
-	IMPLICIT NONE
-	TYPE(C_PTR) :: ptr
-	TYPE(C_FUNPTR) :: funptr
-	CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
-
-	ptr = C_LOC(ichr(1:1))
-
-        ])],[AC_MSG_RESULT([yes])
-        HAVE_F2003_REQUIREMENTS=[yes]], 
-      [AC_MSG_RESULT([no])])
+    PAC_PROG_FC_HAVE_F2003_REQUIREMENTS
+ 
     if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
-    ##  echo $HAVE_FORTRAN_2003
       AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
     else
-    ##  echo $HAVE_FORTRAN_2003
       HAVE_FORTRAN_2003="yes"
     fi
   fi
@@ -593,91 +521,18 @@ if test "X$HDF_CXX" = "Xyes"; then
   ## Change to the C++ language
   AC_LANG_PUSH(C++)
 
-  AC_MSG_CHECKING([if $CXX needs old style header files in includes])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-#include <iostream>
+  # Checking if C++ needs old style header files in includes
+  PAC_PROG_CXX_HEADERS
 
-int main(void) { return 0; }
-  ])],
-    [AC_MSG_RESULT([no])], 
-    [AC_MSG_RESULT([yes])
-    CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
-    AM_CXXFLAGS="${AM_CXXFLAGS} -DOLD_HEADER_FILENAME"])
+  # Checking if C++ can handle namespaces
+  PAC_PROG_CXX_NAMESPACE
+  
+  # Checking if C++ has offsetof extension 
+  PAC_PROG_CXX_OFFSETOF
 
-  AC_MSG_CHECKING([if $CXX can handle namespaces])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-namespace H5 {
-int fnord;
-}
+  # if C++ can handle static cast
+  PAC_PROG_CXX_STAIC_CAST
 
-int main(void) {
-   using namespace H5;
-   fnord = 37;
-   return 0;
-} 
-  ])], [AC_MSG_RESULT([yes])],
-     [AC_MSG_RESULT([no])
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_NAMESPACE"])
-
-  AC_MSG_CHECKING([if $CXX supports std])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-#include <string>
-
-using namespace std;
-
-int main(void) {
-   string myString("testing namespace std");
-   return 0;
-}
-  ])], [AC_MSG_RESULT([yes])],
-     [AC_MSG_RESULT([no])
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_STD"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_STD"])
-
-  AC_MSG_CHECKING([if $CXX supports bool types])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-int main(void) {
-   bool flag;
-   return 0;
-}
-  ])], [AC_MSG_RESULT([yes])],
-     [AC_MSG_RESULT([no])
-     CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DBOOL_NOTDEFINED"])
-
-  AC_MSG_CHECKING([if $CXX has offsetof extension])
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
-  #include <stdio.h>
-  #include <stddef.h>
-    ],[
-    struct index_st
-    {
-      unsigned char type;
-      unsigned char num;
-      unsigned int len;
-    };
-    typedef struct index_st index_t;
-    int x,y;
-    x = offsetof(struct index_st, len);
-    y = offsetof(index_t, num)
-    ])],[AC_MSG_RESULT([yes])
-    AC_DEFINE([CXX_HAVE_OFFSETOF], [1], [Define if C++ compiler recognizes offsetof])],
-    AC_MSG_RESULT([no]))
-
-  AC_MSG_CHECKING([if $CXX can handle static cast])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-int main(void) {
-   float test_float;
-   int test_int;
-   test_float = 37.0;
-   test_int = static_cast <int> (test_float);
-   return 0;
-}
-  ])], [AC_MSG_RESULT([yes])],
-    [AC_MSG_RESULT([no])
-    CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
-    AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"])
 else
   AC_MSG_RESULT([no])
   CXX="no"
@@ -694,7 +549,6 @@ AC_SUBST([PERL]) PERL=""
 if test "X$GCC" = "Xyes"; then
   AC_CHECK_PROGS([PERL], [perl],, [$PATH])
 fi
-
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before

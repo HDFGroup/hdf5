@@ -108,7 +108,8 @@ DIST_COMMON = $(top_srcdir)/config/commence.am \
 TESTS =
 subdir = hl/c++/src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
+	$(top_srcdir)/m4/aclocal_fc.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs

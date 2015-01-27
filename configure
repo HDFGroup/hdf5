@@ -5576,14 +5576,14 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
   ## --------------------------------------------------------------------
-  ## Check for a Fortran 9X compiler and how to include modules.
+  ## Check for a Fortran compiler and how to include modules.
   ##
   ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 if test -n "$ac_tool_prefix"; then
-  for ac_prog in f90 pgf90 slf90 f95 g95 xlf95 efc ifort ftn
+  for ac_prog in gfortran ifort pgf90 pathf90 pathf95 xlf90 xlf95 xlf2003 f90 epcf90 f95 fort lf95 g95 ifc efc gfc
   do
     # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
 set dummy $ac_tool_prefix$ac_prog; ac_word=$2
@@ -5627,7 +5627,7 @@ fi
 fi
 if test -z "$FC"; then
   ac_ct_FC=$FC
-  for ac_prog in f90 pgf90 slf90 f95 g95 xlf95 efc ifort ftn
+  for ac_prog in gfortran ifort pgf90 pathf90 pathf95 xlf90 xlf95 xlf2003 f90 epcf90 f95 fort lf95 g95 ifc efc gfc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -6600,6 +6600,7 @@ $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
+
   ## See if the fortran compiler supports the intrinsic function "C_SIZEOF"
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic C_SIZEOF" >&5
@@ -6624,6 +6625,7 @@ $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
+
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic STORAGE_SIZE" >&5
@@ -6646,6 +6648,8 @@ else
 $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+
 
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
@@ -6687,12 +6691,13 @@ $as_echo "yes" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
+
   if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
     ## Checking if the compiler supports the required Fortran 2003 features and
     ## disable Fortran 2003 if it does not.
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
 $as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HDF... " >&6; }
     HAVE_FORTRAN_2003="no"
 
@@ -6720,11 +6725,11 @@ else
 $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+
     if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
-    ##  echo $HAVE_FORTRAN_2003
       as_fn_error $? "Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003" "$LINENO" 5
     else
-    ##  echo $HAVE_FORTRAN_2003
       HAVE_FORTRAN_2003="yes"
     fi
   fi
@@ -7359,10 +7364,12 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
+  # Checking if C++ needs old style header files in includes
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX needs old style header files in includes" >&5
 $as_echo_n "checking if $CXX needs old style header files in includes... " >&6; }
-
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 #include <iostream>
@@ -7380,6 +7387,9 @@ $as_echo "yes" >&6; }
     AM_CXXFLAGS="${AM_CXXFLAGS} -DOLD_HEADER_FILENAME"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+
+  # Checking if C++ can handle namespaces
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle namespaces" >&5
 $as_echo_n "checking if $CXX can handle namespaces... " >&6; }
@@ -7408,53 +7418,8 @@ $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX supports std" >&5
-$as_echo_n "checking if $CXX supports std... " >&6; }
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
 
-#include <string>
-
-using namespace std;
-
-int main(void) {
-   string myString("testing namespace std");
-   return 0;
-}
-
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_STD"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_STD"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX supports bool types" >&5
-$as_echo_n "checking if $CXX supports bool types... " >&6; }
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int main(void) {
-   bool flag;
-   return 0;
-}
-
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-     CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DBOOL_NOTDEFINED"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  # Checking if C++ has offsetof extension
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX has offsetof extension" >&5
 $as_echo_n "checking if $CXX has offsetof extension... " >&6; }
@@ -7503,6 +7468,9 @@ $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
+
+  # if C++ can handle static cast
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle static cast" >&5
 $as_echo_n "checking if $CXX can handle static cast... " >&6; }
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -7527,6 +7495,8 @@ $as_echo "no" >&6; }
     AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
