@@ -406,23 +406,12 @@ else
   fi
 fi
 
-HAVE_SIZEOF="no"
-HAVE_C_SIZEOF="no"
-HAVE_STORAGE_SIZE="no"
-FORTRAN_DEFAULT_REALisDBLE="no"
-
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
   AC_SUBST([FC]) HDF_FORTRAN=yes
   AC_SUBST([HAVE_FORTRAN_2003])
 		
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
-
-  ## --------------------------------------------------------------------
-  ## Default for FORTRAN 2003 compliant compilers
-  ##
-  HAVE_FORTRAN_2003="no"
-  HAVE_F2003_REQUIREMENTS="no"
 
   ## --------------------------------------------------------------------
   ## HDF5 integer variables for the H5fortran_types.f90 file.

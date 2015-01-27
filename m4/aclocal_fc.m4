@@ -149,7 +149,11 @@ dnl disable Fortran 2003 if it does not.
 
 AC_DEFUN([PAC_PROG_FC_HAVE_F2003_REQUIREMENTS],[
    AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
+dnl --------------------------------------------------------------------
+dnl Default for FORTRAN 2003 compliant compilers
+dnl
     HAVE_FORTRAN_2003="no"
+    HAVE_F2003_REQUIREMENTS="no"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
 
 	USE iso_c_binding

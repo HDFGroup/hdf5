@@ -5276,23 +5276,12 @@ else
   fi
 fi
 
-HAVE_SIZEOF="no"
-HAVE_C_SIZEOF="no"
-HAVE_STORAGE_SIZE="no"
-FORTRAN_DEFAULT_REALisDBLE="no"
-
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
    HDF_FORTRAN=yes
 
 
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
-
-  ## --------------------------------------------------------------------
-  ## Default for FORTRAN 2003 compliant compilers
-  ##
-  HAVE_FORTRAN_2003="no"
-  HAVE_F2003_REQUIREMENTS="no"
 
   ## --------------------------------------------------------------------
   ## HDF5 integer variables for the H5fortran_types.f90 file.
@@ -6706,6 +6695,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
 $as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HDF... " >&6; }
     HAVE_FORTRAN_2003="no"
+    HAVE_F2003_REQUIREMENTS="no"
     cat > conftest.$ac_ext <<_ACEOF
       program main
 
