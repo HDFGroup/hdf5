@@ -758,6 +758,7 @@ clean-checkPROGRAMS:
 parallel_test$(EXEEXT): $(parallel_test_OBJECTS) $(parallel_test_DEPENDENCIES) $(EXTRA_parallel_test_DEPENDENCIES) 
 	@rm -f parallel_test$(EXEEXT)
 	$(AM_V_FCLD)$(FCLINK) $(parallel_test_OBJECTS) $(parallel_test_LDADD) $(LIBS)
+
 parallel_test_F03$(EXEEXT): $(parallel_test_F03_OBJECTS) $(parallel_test_F03_DEPENDENCIES) $(EXTRA_parallel_test_F03_DEPENDENCIES) 
 	@rm -f parallel_test_F03$(EXEEXT)
 	$(AM_V_FCLD)$(FCLINK) $(parallel_test_F03_OBJECTS) $(parallel_test_F03_LDADD) $(LIBS)

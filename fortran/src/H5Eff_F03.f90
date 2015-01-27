@@ -81,12 +81,10 @@ CONTAINS
     TYPE(C_FUNPTR) :: func_default
     TYPE(C_PTR)    :: client_data_default
     INTERFACE
-       INTEGER FUNCTION h5eset_auto2_c(printflag, estack_id, func, client_data)
-         USE, INTRINSIC :: ISO_C_BINDING
+       INTEGER FUNCTION h5eset_auto2_c(printflag, estack_id, func, client_data) &
+            BIND(C, NAME='h5eset_auto2_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_funptr
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ESET_AUTO2_C'::h5eset_auto2_c
-         !DEC$ENDIF
          INTEGER :: printflag
          INTEGER(HID_T) :: estack_id
 !!$         TYPE(C_FUNPTR) :: func

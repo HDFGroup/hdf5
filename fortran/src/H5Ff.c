@@ -699,7 +699,7 @@ done:
  * SOURCE
 */
 int_f
-nh5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *buf_len, size_t_f *buf_req)
+h5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *buf_len, size_t_f *buf_req)
 /******/
 {
     herr_t ret_value=0;          /* Return value */
