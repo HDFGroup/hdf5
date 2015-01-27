@@ -21,6 +21,12 @@ dnl PURPOSE
 dnl  Contains Macros for HDF5 Fortran
 dnl *********************************
 dnl
+dnl Special characteristics that have no autoconf counterpart but that
+dnl we need as part of the C++ support.  To distinquish these, they
+dnl have a [PAC] prefix.
+dnl
+dnl -------------------------------------------------------------------------
+dnl
 dnl PAC_FC_SEARCH_LIST - expands to a whitespace separated list of modern
 dnl fortran compilers for use with AC_PROG_FC that is more suitable for HPC
 dnl software packages
