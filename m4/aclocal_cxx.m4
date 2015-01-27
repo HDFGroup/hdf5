@@ -25,12 +25,12 @@ dnl Checking if C++ needs old style header files in includes
 
 AC_DEFUN([PAC_PROG_CXX_HEADERS],[
   AC_MSG_CHECKING([if $CXX needs old style header files in includes])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+  AC_LINK_IFELSE([AC_LANG_SOURCE([
 #include <iostream>
 
 int main(void) { return 0; }
   ])],
-    [AC_MSG_RESULT([no])], 
+    [AC_MSG_RESULT([no])],
     [AC_MSG_RESULT([yes])
     CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
     AM_CXXFLAGS="${AM_CXXFLAGS} -DOLD_HEADER_FILENAME"])
@@ -40,7 +40,7 @@ dnl Checking if ++ can handle namespaces
 
 AC_DEFUN([PAC_PROG_CXX_NAMESPACE],[
   AC_MSG_CHECKING([if $CXX can handle namespaces])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+  AC_LINK_IFELSE([AC_LANG_SOURCE([
 namespace H5 {
 int fnord;
 }
@@ -60,7 +60,7 @@ dnl Checking if C++ supports std
 
 AC_DEFUN([PAC_PROG_CXX_STD],[
   AC_MSG_CHECKING([if $CXX supports std])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+  AC_LINK_IFELSE([AC_LANG_SOURCE([
 #include <string>
 
 using namespace std;
@@ -79,7 +79,7 @@ dnl Checking if C++ has offsetof extension
 
 AC_DEFUN([PAC_PROG_CXX_OFFSETOF],[
   AC_MSG_CHECKING([if $CXX has offsetof extension])
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([
   #include <stdio.h>
   #include <stddef.h>
     ],[
@@ -102,7 +102,7 @@ dnl Checking if C++ can handle static cast
 
 AC_DEFUN([PAC_PROG_CXX_STAIC_CAST],[
   AC_MSG_CHECKING([if $CXX can handle static cast])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+  AC_LINK_IFELSE([AC_LANG_SOURCE([
 int main(void) {
    float test_float;
    int test_int;

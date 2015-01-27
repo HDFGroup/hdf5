@@ -399,7 +399,11 @@ if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xno"; then
   echo "no"
   AC_MSG_ERROR([--enable-fortran must be used with --enable-fortran2003])
 else
-  echo "yes"
+  if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xyes"; then
+    echo "yes"
+  else
+    echo "no"
+  fi
 fi
 
 HAVE_SIZEOF="no"
@@ -445,11 +449,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## 
   AC_PROG_FC([PAC_FC_SEARCH_LIST],)
   AC_F9X_MODS
-
-  ## It seems that libtool (as of Libtool 1.5.14) is trying to
-  ## configure itself for Fortran 77.
-  ## Tell it that our F77 compiler is $FC (actually a F9X compiler)
-  F77=$FC
 
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)

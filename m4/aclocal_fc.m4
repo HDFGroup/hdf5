@@ -60,8 +60,9 @@ dnl
 dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
 
 AC_DEFUN([PAC_PROG_FC_SIZEOF],[
+  HAVE_SIZEOF_FORTRAN="no"
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([ 
+  AC_LINK_IFELSE([AC_LANG_SOURCE([ 
    PROGRAM main
      i = sizeof(x)
    END PROGRAM
@@ -73,8 +74,9 @@ AC_DEFUN([PAC_PROG_FC_SIZEOF],[
 dnl See if the fortran compiler supports the intrinsic function "C_SIZEOF"
 
 AC_DEFUN([PAC_PROG_FC_C_SIZEOF],[
+  HAVE_C_SIZEOF_FORTRAN="no"
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_SIZEOF])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([ 
+  AC_LINK_IFELSE([AC_LANG_SOURCE([ 
    PROGRAM main
      USE ISO_C_BINDING
      INTEGER(C_INT) :: a
@@ -89,8 +91,9 @@ AC_DEFUN([PAC_PROG_FC_C_SIZEOF],[
 dnl See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
 
 AC_DEFUN([PAC_PROG_FC_STORAGE_SIZE],[
+  HAVE_STORAGE_SIZE_FORTRAN="no"
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic STORAGE_SIZE])
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+  AC_LINK_IFELSE([AC_LANG_SOURCE([
    PROGRAM main
      INTEGER :: a
      INTEGER :: result
@@ -106,6 +109,7 @@ dnl Check to see if -r8 was specified to determine if we need to
 dnl compile the DOUBLE PRECISION interfaces.
 
 AC_DEFUN([PAC_PROG_FC_DEFAULT_REALisDBLE],[
+  FORTRAN_DEFAULT_REALisDBLE="no"	
   AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
   
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([
@@ -140,8 +144,7 @@ dnl disable Fortran 2003 if it does not.
 AC_DEFUN([PAC_PROG_FC_HAVE_F2003_REQUIREMENTS],[
    AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
     HAVE_FORTRAN_2003="no"
-	
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
 
 	USE iso_c_binding
 	IMPLICIT NONE
