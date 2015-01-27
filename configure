@@ -27967,12 +27967,12 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether a simple MPI-IO Fortran program can be linked" >&5
 $as_echo_n "checking whether a simple MPI-IO Fortran program can be linked... " >&6; }
       cat > conftest.$ac_ext <<_ACEOF
-
-          program main
-          include 'mpif.h'
-          integer:: ierr
+make
+          PROGRAM main
+          USE mpi
+          INTEGER :: ierr
           call mpi_file_open( ierr )
-          end
+          END
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -30301,7 +30301,7 @@ if test "X$HDF5_HL" = "Xyes"; then
 $as_echo "#define INCLUDE_HL 1" >>confdefs.h
 
 
-## Check if Fortran's default real is double precision. If it is and HL is being built then configure
+## If Fortran's default real is double precision and HL is being built then configure
 ## should fail due to bug HDFFV-889.
   if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
     as_fn_error $? "Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl." "$LINENO" 5

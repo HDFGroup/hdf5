@@ -3786,7 +3786,7 @@ if test "X$HDF5_HL" = "Xyes"; then
  AC_DEFINE([INCLUDE_HL], [1],
            [Define if HDF5's high-level library headers should be included in hdf5.h])
 
-## Check if Fortran's default real is double precision. If it is and HL is being built then configure
+## If Fortran's default real is double precision and HL is being built then configure
 ## should fail due to bug HDFFV-889.
   if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
     AC_MSG_ERROR([Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl.])
