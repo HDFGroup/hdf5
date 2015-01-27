@@ -1479,19 +1479,28 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
     ## defined correctly in <stdio.h>. 
+    ##
     ## This flag was removed from h5cc as of 2009-10-17 when it was found
     ## that the flag broke compiling netCDF-4 code with h5cc, but kept in 
     ## H5_CPPFLAGS because fdopen and HDfdopen fail without it. HDfdopen
     ## is used only by H5_debug_mask which is used only when debugging in
     ## H5_init_library (all in H5.c).  When the flag was removed this was
     ## the only compile failure noted.
+    ##
     ## This was originally defined as _POSIX_SOURCE which was updated to
     ## _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
     ## functionality so clock_gettime and CLOCK_MONOTONIC are defined
-    ## correctly.
+    ## correctly. This was later updated to 200112L so that
+    ## posix_memalign() is visible for the direct VFD code on Linux
+    ## systems.
+    ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=199506L $H5_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+
+    ## Need to add this so that O_DIRECT is visible for the direct
+    ## VFD on Linux systems.
+    AM_CPPFLAGS="-D_GNU_SOURCE $AM_CPPFLAGS"
 
     ## Also add BSD support on Linux systems, so <features.h> defines
     ## __USE_BSD, which is required to get the prototype for strdup
