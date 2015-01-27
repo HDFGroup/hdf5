@@ -2390,23 +2390,7 @@ case "X-$enable_parallel" in
 		    AC_MSG_ERROR([unable to link a simple MPI-IO C program])])
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
-      ## Change to the Fortran 90 language
-      AC_LANG_PUSH(Fortran)
-
-      ## Try link a simple MPI program.
-      AC_MSG_CHECKING([whether a simple MPI-IO Fortran program can be linked])
-      AC_LINK_IFELSE([
-          program main
-          include 'mpif.h'
-          integer:: ierr
-          call mpi_file_open( ierr )
-          end],
-	  [AC_MSG_RESULT([yes])],
-	  [AC_MSG_RESULT([no])
-	   AC_MSG_ERROR([unable to link a simple MPI-IO Fortran program])])
-
-      ## Change to the C language
-      AC_LANG_POP(Fortran)
+      PAC_PROG_FC_MPI_CHECK
     fi
 
     ## Set RUNPARALLEL to mpiexec if not set yet.

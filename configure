@@ -27956,14 +27956,14 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
-      ## Change to the Fortran 90 language
+
+
       ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
-      ## Try link a simple MPI program.
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether a simple MPI-IO Fortran program can be linked" >&5
 $as_echo_n "checking whether a simple MPI-IO Fortran program can be linked... " >&6; }
       cat > conftest.$ac_ext <<_ACEOF
@@ -27985,12 +27985,12 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
-      ## Change to the C language
       ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
     fi
 

@@ -249,3 +249,30 @@ rm -rf conftest*
 AC_LANG_POP(Fortran)
 ])
 
+dnl ----------------------
+dnl Parallel Test Programs
+dnl ----------------------
+
+dnl Try link a simple MPI program.
+
+AC_DEFUN([PAC_PROG_FC_MPI_CHECK],[
+
+dnl   Change to the Fortran 90 language
+      AC_LANG_PUSH(Fortran)
+
+dnl   Try link a simple MPI program.
+      AC_MSG_CHECKING([whether a simple MPI-IO Fortran program can be linked])
+      AC_LINK_IFELSE([
+          PROGRAM main
+          USE mpi
+          INTEGER :: ierr
+          call mpi_file_open( ierr )
+          END],
+	  [AC_MSG_RESULT([yes])],
+	  [AC_MSG_RESULT([no])
+	   AC_MSG_ERROR([unable to link a simple MPI-IO Fortran program])])
+
+dnl   Change to the C language
+      AC_LANG_POP(Fortran)
+])
+	
