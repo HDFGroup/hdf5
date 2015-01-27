@@ -460,56 +460,42 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_FC_WRAPPERS
 
   ## --------------------------------------------------------------------
-  ## See if the compiler will support the "-I." option
-  ##
-  dnl  AM_FCFLAGS_saved=$AM_FCFLAGS
-  dnl  AM_FCFLAGS="${AM_FCFLAGS} -I."
-
-  dnl  AC_MSG_CHECKING(if compiler supports -I. option)
-  dnl  AC_TRY_FCOMPILE([
-  dnl      program conftest
-  dnl      end
-  dnl  ], AC_MSG_RESULT(yes),
-  dnl     AC_MSG_RESULT(no)
-  dnl     AM_FCFLAGS="$AM_FCFLAGS_saved")
-
-  ## --------------------------------------------------------------------
   ## See if the fortran compiler supports the intrinsic function "SIZEOF"
 
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
-  AC_TRY_RUN([ 
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([ 
    PROGRAM main
      i = sizeof(x)
    END PROGRAM
-  ], [AC_MSG_RESULT([yes])
-     	HAVE_SIZEOF="yes"],
-     [AC_MSG_RESULT([no])])
+  ])],[AC_MSG_RESULT([yes])
+     	HAVE_SIZEOF_FORTRAN="yes"],
+      [AC_MSG_RESULT([no])])
 
   ## See if the fortran compiler supports the intrinsic function "C_SIZEOF"
 
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_SIZEOF])
-  AC_TRY_RUN([ 
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([ 
    PROGRAM main
      USE ISO_C_BINDING
      INTEGER(C_INT) :: a
      INTEGER(C_SIZE_T) :: result
      result = C_SIZEOF(a)
    END PROGRAM
-  ], [AC_MSG_RESULT([yes])
-     	HAVE_C_SIZEOF="yes"],
+  ])], [AC_MSG_RESULT([yes])
+     	HAVE_C_SIZEOF_FORTRAN="yes"],
      [AC_MSG_RESULT([no])])
 
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
 
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic STORAGE_SIZE])
-  AC_TRY_RUN([ 
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
    PROGRAM main
      INTEGER :: a
      INTEGER :: result
      result = STORAGE_SIZE(a)
    END PROGRAM
-  ], [AC_MSG_RESULT([yes])
-     	HAVE_STORAGE_SIZE="yes"],
+  ])], [AC_MSG_RESULT([yes])
+     	HAVE_STORAGE_SIZE_FORTRAN="yes"],
      [AC_MSG_RESULT([no])])
 
   ## Check to see if -r8 was specified to determine if we need to
@@ -517,7 +503,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
   
-  AC_TRY_RUN([
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
      MODULE type_mod
        INTERFACE h5t	
          MODULE PROCEDURE h5t_real
@@ -538,10 +524,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
        CALL h5t(r)
        CALL h5t(d)
      END PROGRAM main
-                  ],
-    [AC_MSG_RESULT([no])], 
-    [AC_MSG_RESULT([yes])
-        FORTRAN_DEFAULT_REALisDBLE="yes"])
+    ])], [AC_MSG_RESULT([no])], 
+         [AC_MSG_RESULT([yes])
+            FORTRAN_DEFAULT_REALisDBLE="yes"])
 
   if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
@@ -561,8 +546,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
 	ptr = C_LOC(ichr(1:1))
 
-        ])], 
-      [AC_MSG_RESULT([yes])
+        ])],[AC_MSG_RESULT([yes])
         HAVE_F2003_REQUIREMENTS=[yes]], 
       [AC_MSG_RESULT([no])])
     if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
@@ -580,13 +564,11 @@ fi
 ## Change back to the C language
 AC_LANG_POP(Fortran)
 
-AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
-AM_CONDITIONAL([FORTRAN_HAVE_C_SIZEOF], [test "X$HAVE_C_SIZEOF" = "Xyes"])
-AM_CONDITIONAL([FORTRAN_HAVE_STORAGE_SIZE], [test "X$HAVE_STORAGE_SIZE" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_HAVE_C_SIZEOF], [test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_HAVE_STORAGE_SIZE], [test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_2003_CONDITIONAL_F], [test "X$HAVE_FORTRAN_2003" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
-
-
 
 ## ----------------------------------------------------------------------
 ## Check if they would like the C++ interface compiled
@@ -612,20 +594,18 @@ if test "X$HDF_CXX" = "Xyes"; then
   AC_LANG_PUSH(C++)
 
   AC_MSG_CHECKING([if $CXX needs old style header files in includes])
-  AC_TRY_RUN([
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 #include <iostream>
 
 int main(void) { return 0; }
-  ], [
-    echo no
-  ], [
-    echo yes
+  ])],
+    [AC_MSG_RESULT([no])], 
+    [AC_MSG_RESULT([yes])
     CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
-    AM_CXXFLAGS="${AM_CXXFLAGS} -DOLD_HEADER_FILENAME"
-  ])
+    AM_CXXFLAGS="${AM_CXXFLAGS} -DOLD_HEADER_FILENAME"])
 
   AC_MSG_CHECKING([if $CXX can handle namespaces])
-  AC_TRY_RUN([
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 namespace H5 {
 int fnord;
 }
@@ -635,16 +615,13 @@ int main(void) {
    fnord = 37;
    return 0;
 } 
-  ], [
-     echo yes
-  ], [
-     echo no
+  ])], [AC_MSG_RESULT([yes])],
+     [AC_MSG_RESULT([no])
      CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_NAMESPACE"
-  ])
+     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_NAMESPACE"])
 
   AC_MSG_CHECKING([if $CXX supports std])
-  AC_TRY_RUN([
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 #include <string>
 
 using namespace std;
@@ -653,30 +630,24 @@ int main(void) {
    string myString("testing namespace std");
    return 0;
 }
-  ], [
-     echo yes
-  ], [
-     echo no
+  ])], [AC_MSG_RESULT([yes])],
+     [AC_MSG_RESULT([no])
      CXXFLAGS="${CXXFLAGS} -DH5_NO_STD"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_STD"
-  ])
+     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_STD"])
 
   AC_MSG_CHECKING([if $CXX supports bool types])
-  AC_TRY_RUN([
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 int main(void) {
    bool flag;
    return 0;
 }
-  ], [
-     echo yes
-  ], [
-     echo no
+  ])], [AC_MSG_RESULT([yes])],
+     [AC_MSG_RESULT([no])
      CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DBOOL_NOTDEFINED"
-  ])
+     AM_CXXFLAGS="${AM_CXXFLAGS} -DBOOL_NOTDEFINED"])
 
   AC_MSG_CHECKING([if $CXX has offsetof extension])
-    AC_TRY_COMPILE([
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
   #include <stdio.h>
   #include <stddef.h>
     ],[
@@ -690,14 +661,12 @@ int main(void) {
     int x,y;
     x = offsetof(struct index_st, len);
     y = offsetof(index_t, num)
-    ],
-    AC_DEFINE([CXX_HAVE_OFFSETOF], [1],
-    [Define if C++ compiler recognizes offsetof])
-    AC_MSG_RESULT([yes]),
+    ])],[AC_MSG_RESULT([yes])
+    AC_DEFINE([CXX_HAVE_OFFSETOF], [1], [Define if C++ compiler recognizes offsetof])],
     AC_MSG_RESULT([no]))
 
   AC_MSG_CHECKING([if $CXX can handle static cast])
-  AC_TRY_RUN([
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 int main(void) {
    float test_float;
    int test_int;
@@ -705,15 +674,12 @@ int main(void) {
    test_int = static_cast <int> (test_float);
    return 0;
 }
-  ], [
-    echo yes
-  ], [
-    echo no
+  ])], [AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])
     CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
-    AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"
-  ])
+    AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"])
 else
-  echo "no"
+  AC_MSG_RESULT([no])
   CXX="no"
 fi
 
