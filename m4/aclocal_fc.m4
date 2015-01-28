@@ -266,11 +266,11 @@ dnl   Change to the Fortran 90 language
 
 dnl   Try link a simple MPI program.
       AC_MSG_CHECKING([whether a simple MPI-IO Fortran program can be linked])
-      AC_LINK_IFELSE([make 
+      AC_LINK_IFELSE([ 
           PROGRAM main
           USE mpi
           INTEGER :: ierr
-          call mpi_file_open( ierr )
+          CALL mpi_file_open( ierr )
           END],
 	  [AC_MSG_RESULT([yes])],
 	  [AC_MSG_RESULT([no])
