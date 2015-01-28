@@ -27959,7 +27959,7 @@ $as_echo_n "checking whether a simple MPI-IO Fortran program can be linked... " 
       cat > conftest.$ac_ext <<_ACEOF
 
           PROGRAM main
-          USE mpi
+          include "mpif.h"
           INTEGER :: ierr
           CALL mpi_file_open( ierr )
           END
