@@ -1791,16 +1791,6 @@ AC_TRY_COMPILE([
     AC_MSG_RESULT([yes])],
   [AC_MSG_RESULT([no])])
 
-## check if `struct tm' has a `__tm_gmtoff' member.
-AC_MSG_CHECKING([for __tm_gmtoff in struct tm])
-AC_TRY_COMPILE([
-  #include <sys/time.h>
-  #include <time.h>], [struct tm tm; tm.__tm_gmtoff=0;],
-  [AC_DEFINE([HAVE___TM_GMTOFF], [1],
-          [Define if `__tm_gmtoff' is a member of `struct tm'])
-     AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
-
 ## Check whether the global variable `timezone' is defined.
 AC_MSG_CHECKING([for global timezone variable])
 

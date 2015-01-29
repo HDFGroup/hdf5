@@ -401,9 +401,6 @@
 /* Define to 1 if you have the `_scrsize' function. */
 /* #undef H5_HAVE__SCRSIZE */
 
-/* Define if `__tm_gmtoff' is a member of `struct tm' */
-/* #undef H5_HAVE___TM_GMTOFF */
-
 /* Define if your system can't handle converting floating-point values to long
    long. */
 /* #undef H5_HW_FP_TO_LLONG_NOT_WORKS */

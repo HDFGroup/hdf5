@@ -222,14 +222,11 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "badly formatted modification time message")
 
 #if defined(H5_HAVE_TM_GMTOFF)
-    /* FreeBSD, OSF 4.0 */
+    /* BSD-like systems */
     the_time += tm.tm_gmtoff;
-#elif defined(H5_HAVE___TM_GMTOFF)
-    /* Linux libc-4 */
-    the_time += tm.__tm_gmtoff;
 #elif defined(H5_HAVE_TIMEZONE)
-    /* Linux libc-5 */
-    the_time -= timezone - (tm.tm_isdst?3600:0);
+    /* GNU/Linux systems */
+    the_time -= timezone - (tm.tm_isdst ? 3600 : 0);
 #else
     /*
      * The catch-all.  If we can't convert a character string universal
