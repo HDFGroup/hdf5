@@ -1694,7 +1694,7 @@ if test "X$THREADSAFE" = "Xyes"; then
     AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
 
     ## ----------------------------------------------------------------------
-    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## Is the Pthreads library present?  It has a header file `pthread.h' and
     ## a library `-lpthread' and their locations might be specified with the
     ## `--with-pthread' command-line switch.  The value is an include path
     ## and/or a library path.  If the library path is specified then it must
@@ -1768,6 +1768,45 @@ if test "X$THREADSAFE" = "Xyes"; then
         fi
         ;;
     esac
+
+    ## ----------------------------------------------------------------------
+    ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
+    ## is supported on this system
+    ##
+    ## Unfortunately, this probably needs to be an AC_TRY_RUN since
+    ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
+    ## supported a priori. POSIX.1-2001 requires that a conformant
+    ## system need only support one of SYSTEM or PROCESS scopes.
+    ##
+    ## For cross-compiling, we've added a pessimistic 'no'. You can
+    ## hand-hack the config file if you know otherwise.
+    AC_MSG_CHECKING([Pthreads supports system scope])
+    AC_CACHE_VAL([hdf5_cv_system_scope_threads],
+      [AC_TRY_RUN([
+        #if STDC_HEADERS
+        #include <stdlib.h>
+        #include <pthread.h>
+        #endif
+
+        int main(void)
+        {
+          pthread_attr_t attribute;
+          int ret;
+
+          pthread_attr_init(&attribute);
+          ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+          exit(ret==0 ? 0 : 1);
+        }
+      ], [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no], [hdf5_cv_system_scope_threads=no])])
+
+    if test ${hdf5_cv_system_scope_threads} = "yes"; then
+      AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
+                [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+      AC_MSG_NOTICE([Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM).])
+    fi
 fi
 
 ## ----------------------------------------------------------------------
@@ -1866,7 +1905,7 @@ AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGETD;],
 ## ----------------------------------------------------------------------
 ## Check for functions.
 ##
-AC_CHECK_FUNCS([alarm BSDgettimeofday fork frexpf frexpl])
+AC_CHECK_FUNCS([alarm fork frexpf frexpl])
 AC_CHECK_FUNCS([gethostname getpwuid getrusage lstat])
 AC_CHECK_FUNCS([rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
@@ -2019,36 +2058,6 @@ AC_MSG_RESULT([%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u])
 AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"], 
                    [Width for printf() for type `long long' or `__int64', use `ll'])
 
-## ----------------------------------------------------------------------
-## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
-## is supported on this system
-##
-AC_MSG_CHECKING([Threads support system scope])
-AC_CACHE_VAL([hdf5_cv_system_scope_threads],
-  [AC_TRY_RUN([
-    #if STDC_HEADERS
-    #include <stdlib.h>
-    #include <pthread.h>
-    #endif
-
-    int main(void)
-    {
-      pthread_attr_t attribute;
-      int ret;
-
-      pthread_attr_init(&attribute);
-      ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-      exit(ret==0 ? 0 : 1);
-    }
-  ], [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no],)])
-
-if test ${hdf5_cv_system_scope_threads} = "yes"; then
-  AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
-            [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
 
 ## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags

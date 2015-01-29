@@ -26033,7 +26033,7 @@ $as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
 
 
     ## ----------------------------------------------------------------------
-    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## Is the Pthreads library present?  It has a header file `pthread.h' and
     ## a library `-lpthread' and their locations might be specified with the
     ## `--with-pthread' command-line switch.  The value is an include path
     ## and/or a library path.  If the library path is specified then it must
@@ -26313,6 +26313,69 @@ fi
         fi
         ;;
     esac
+
+    ## ----------------------------------------------------------------------
+    ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
+    ## is supported on this system
+    ##
+    ## Unfortunately, this probably needs to be an AC_TRY_RUN since
+    ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
+    ## supported a priori. POSIX.1-2001 requires that a conformant
+    ## system need only support one of SYSTEM or PROCESS scopes.
+    ##
+    ## For cross-compiling, we've added a pessimistic 'no'. You can
+    ## hand-hack the config file if you know otherwise.
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking Pthreads supports system scope" >&5
+$as_echo_n "checking Pthreads supports system scope... " >&6; }
+    if ${hdf5_cv_system_scope_threads+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  hdf5_cv_system_scope_threads=no
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+        #if STDC_HEADERS
+        #include <stdlib.h>
+        #include <pthread.h>
+        #endif
+
+        int main(void)
+        {
+          pthread_attr_t attribute;
+          int ret;
+
+          pthread_attr_init(&attribute);
+          ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+          exit(ret==0 ? 0 : 1);
+        }
+
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  hdf5_cv_system_scope_threads=yes
+else
+  hdf5_cv_system_scope_threads=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+
+
+    if test ${hdf5_cv_system_scope_threads} = "yes"; then
+
+$as_echo "#define SYSTEM_SCOPE_THREADS 1" >>confdefs.h
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)." >&5
+$as_echo "$as_me: Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)." >&6;}
+    fi
 fi
 
 ## ----------------------------------------------------------------------
@@ -26634,7 +26697,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 ## ----------------------------------------------------------------------
 ## Check for functions.
 ##
-for ac_func in alarm BSDgettimeofday fork frexpf frexpl
+for ac_func in alarm fork frexpf frexpl
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -27149,62 +27212,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-## ----------------------------------------------------------------------
-## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
-## is supported on this system
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking Threads support system scope" >&5
-$as_echo_n "checking Threads support system scope... " >&6; }
-if ${hdf5_cv_system_scope_threads+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-    #if STDC_HEADERS
-    #include <stdlib.h>
-    #include <pthread.h>
-    #endif
-
-    int main(void)
-    {
-      pthread_attr_t attribute;
-      int ret;
-
-      pthread_attr_init(&attribute);
-      ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-      exit(ret==0 ? 0 : 1);
-    }
-
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  hdf5_cv_system_scope_threads=yes
-else
-  hdf5_cv_system_scope_threads=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-
-
-if test ${hdf5_cv_system_scope_threads} = "yes"; then
-
-$as_echo "#define SYSTEM_SCOPE_THREADS 1" >>confdefs.h
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
 
 ## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags
