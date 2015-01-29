@@ -57,9 +57,6 @@
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
 
-/* Define the default virtual file driver to compile */
-#cmakedefine H5_DEFAULT_VFD @H5_DEFAULT_VFD@
-
 /* Define if `dev_t' is a scalar */
 #cmakedefine H5_DEV_T_IS_SCALAR @H5_DEV_T_IS_SCALAR@
 
