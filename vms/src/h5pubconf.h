@@ -80,10 +80,6 @@
 /* Define if the function stack tracing code is to be compiled in */
 /* #undef H5_HAVE_CODESTACK */
 
-/* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
-   */
-/* #undef H5_HAVE_DECL_TZNAME */
-
 /* Define to 1 if you have the `difftime' function. */
 #define H5_HAVE_DIFFTIME 1
 
@@ -363,10 +359,6 @@
 
 /* Define if `tm_gmtoff' is a member of `struct tm' */
 /* #undef H5_HAVE_TM_GMTOFF */
-
-/* Define to 1 if you don't have `tm_zone' but do have the external array
-   `tzname'. */
-/* #undef H5_HAVE_TZNAME */
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define H5_HAVE_UNISTD_H 1
