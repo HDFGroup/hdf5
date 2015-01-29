@@ -1819,50 +1819,6 @@ case "`uname`" in
     ;;
 esac
 
-## Check whether `struct timezone' is defined.
-AC_STRUCT_TIMEZONE
-AC_MSG_CHECKING([for struct timezone])
-AC_TRY_COMPILE([
-  #include <sys/types.h>
-  #include <sys/time.h>
-  #include <time.h>], [struct timezone tz; tz.tz_minuteswest=0;],
-  [AC_DEFINE([HAVE_STRUCT_TIMEZONE], [1],
-          [Define if `struct timezone' is defined])
-    have_struct_tz="yes"
-    AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
-
-## If gettimeofday() is going to be used, make sure it uses the timezone struct
-
-if test "$have_gettime" = "yes" -a "$have_struct_tz" = "yes"; then
-   AC_MSG_CHECKING(whether gettimeofday() gives timezone)
-   AC_CACHE_VAL([hdf5_cv_gettimeofday_tz],
-       [AC_TRY_RUN([
-          #include <time.h>
-          #include <sys/time.h>
-          int main(void)
-          {
-             struct timeval tv;
-             struct timezone tz;
-             tz.tz_minuteswest = 7777;  /* Initialize to an unreasonable number */
-             tz.tz_dsttime = 7;
-             gettimeofday(&tv, &tz);
-                /* Check whether the function returned any value at all */
-             if(tz.tz_minuteswest == 7777 && tz.tz_dsttime == 7)
-                exit(1);
-             else exit (0);
-          }], 
-          [hdf5_cv_gettimeofday_tz=yes], 
-          [hdf5_cv_gettimeofday_tz=no])])
-
-   if test ${hdf5_cv_gettimeofday_tz} = "yes"; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([GETTIMEOFDAY_GIVES_TZ], [1],
-                [Define if gettimeofday() populates the tz pointer passed in])
-   else
-      AC_MSG_RESULT([no])
-   fi
-fi 
 
 ## ----------------------------------------------------------------------
 ## Does the struct stat have the st_blocks field?  This field is not Posix.

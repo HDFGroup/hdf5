@@ -230,16 +230,6 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 #elif defined(H5_HAVE_TIMEZONE)
     /* Linux libc-5 */
     the_time -= timezone - (tm.tm_isdst?3600:0);
-#elif defined(H5_HAVE_GETTIMEOFDAY) && defined(H5_HAVE_STRUCT_TIMEZONE) && defined(H5_GETTIMEOFDAY_GIVES_TZ)
-    {
-	struct timezone tz;
-	struct timeval tv;  /* Used as a placebo; some systems don't like NULL */
-
-	if(HDgettimeofday(&tv, &tz) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to obtain local timezone information")
-
-	the_time -= tz.tz_minuteswest * 60 - (tm.tm_isdst ? 3600 : 0);
-    }
 #else
     /*
      * The catch-all.  If we can't convert a character string universal
