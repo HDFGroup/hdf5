@@ -48,7 +48,6 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
 static herr_t
 test_filters_endianess(void)
 {
-#if defined H5_HAVE_FILTER_FLETCHER32
     hid_t     fid = -1;              /* file ID */
     hid_t     dsid = -1;             /* dataset ID */
     hid_t     sid = -1;              /* dataspace ID */
@@ -85,10 +84,8 @@ test_filters_endianess(void)
     if(H5Sclose(sid) < 0) goto error;
     if(H5Fclose(fid) < 0) goto error;
 
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
     return 0;
 
-#if defined H5_HAVE_FILTER_FLETCHER32
 error:
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
@@ -97,7 +94,6 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
     return -1;
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
 } /* end test_filters_endianess() */
 
 /* This message derives from H5Z */

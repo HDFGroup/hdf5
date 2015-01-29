@@ -5433,7 +5433,7 @@ static void gent_filters(void)
      * shuffle
      *-------------------------------------------------------------------------
      */
-#if defined (H5_HAVE_FILTER_SHUFFLE)
+
     /* remove the filters from the dcpl */
     ret = H5Premove_filter(dcpl,H5Z_FILTER_ALL);
     HDassert(ret >= 0);
@@ -5444,14 +5444,13 @@ static void gent_filters(void)
 
     ret=make_dset(fid,"shuffle",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);
-#endif
 
 
     /*-------------------------------------------------------------------------
      * checksum
      *-------------------------------------------------------------------------
      */
-#if defined (H5_HAVE_FILTER_FLETCHER32)
+
     /* remove the filters from the dcpl */
     ret = H5Premove_filter(dcpl,H5Z_FILTER_ALL);
     HDassert(ret >= 0);
@@ -5462,13 +5461,12 @@ static void gent_filters(void)
 
     ret=make_dset(fid,"fletcher32",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);
-#endif
 
     /*-------------------------------------------------------------------------
      * nbit
      *-------------------------------------------------------------------------
      */
-#if defined (H5_HAVE_FILTER_NBIT)
+
     /* remove the filters from the dcpl */
     ret = H5Premove_filter(dcpl,H5Z_FILTER_ALL);
     HDassert(ret >= 0);
@@ -5481,13 +5479,12 @@ static void gent_filters(void)
     H5Tset_precision(tid,H5Tget_size(tid)-1);
     ret=make_dset(fid,"nbit",sid,tid,dcpl,buf1);
     HDassert(ret >= 0);
-#endif
 
     /*-------------------------------------------------------------------------
      * scaleoffset
      *-------------------------------------------------------------------------
      */
-#if defined (H5_HAVE_FILTER_SCALEOFFSET)
+
     /* remove the filters from the dcpl */
     ret = H5Premove_filter(dcpl,H5Z_FILTER_ALL);
     HDassert(ret >= 0);
@@ -5498,7 +5495,6 @@ static void gent_filters(void)
 
     ret=make_dset(fid,"scaleoffset",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);
-#endif
 
     /*-------------------------------------------------------------------------
      * all filters
@@ -5508,11 +5504,9 @@ static void gent_filters(void)
     ret = H5Premove_filter(dcpl,H5Z_FILTER_ALL);
     HDassert(ret >= 0);
 
-#if defined (H5_HAVE_FILTER_SHUFFLE)
     /* set the shuffle filter */
     ret = H5Pset_shuffle(dcpl);
     HDassert(ret >= 0);
-#endif
 
 #ifdef H5_HAVE_FILTER_SZIP
     if(h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
@@ -5529,17 +5523,13 @@ static void gent_filters(void)
     HDassert(ret >= 0);
 #endif
 
-#if defined (H5_HAVE_FILTER_FLETCHER32)
     /* set the checksum filter */
     ret = H5Pset_fletcher32(dcpl);
     HDassert(ret >= 0);
-#endif
 
-#if defined (H5_HAVE_FILTER_NBIT)
     /* set the nbit filter */
     ret = H5Pset_nbit(dcpl);
     HDassert(ret >= 0);
-#endif
 
     ret=make_dset(fid,"all",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);

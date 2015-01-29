@@ -117,18 +117,6 @@
 /* Define if support for deflate (zlib) filter is enabled */
 #define H5_HAVE_FILTER_DEFLATE 1
 
-/* Define if support for Fletcher32 checksum is enabled */
-#define H5_HAVE_FILTER_FLETCHER32 1
-
-/* Define if support for nbit filter is enabled */
-#define H5_HAVE_FILTER_NBIT 1
-
-/* Define if support for scaleoffset filter is enabled */
-#define H5_HAVE_FILTER_SCALEOFFSET 1
-
-/* Define if support for shuffle filter is enabled */
-#define H5_HAVE_FILTER_SHUFFLE 1
-
 /* Define if support for szip filter is enabled */
 /* #undef H5_HAVE_FILTER_SZIP */
 

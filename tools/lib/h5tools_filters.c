@@ -107,44 +107,24 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
 			 *-------------------------------------------------------------------------
 			 */
 		case H5Z_FILTER_SHUFFLE:
-#ifndef H5_HAVE_FILTER_SHUFFLE
-			if (name)
-				print_warning(name,"shuffle");
-			return 0;
-#endif
 			break;
 			/*-------------------------------------------------------------------------
 			 * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
 			 *-------------------------------------------------------------------------
 			 */
 		case H5Z_FILTER_FLETCHER32:
-#ifndef H5_HAVE_FILTER_FLETCHER32
-			if (name)
-				print_warning(name,"fletcher32");
-			return 0;
-#endif
 			break;
 			/*-------------------------------------------------------------------------
 			 * H5Z_FILTER_NBIT
 			 *-------------------------------------------------------------------------
 			 */
 		case H5Z_FILTER_NBIT:
-#ifndef H5_HAVE_FILTER_NBIT
-			if (name)
-				print_warning(name,"nbit");
-			return 0;
-#endif
 			break;
 			/*-------------------------------------------------------------------------
 			 * H5Z_FILTER_SCALEOFFSET
 			 *-------------------------------------------------------------------------
 			 */
 		case H5Z_FILTER_SCALEOFFSET:
-#ifndef H5_HAVE_FILTER_SCALEOFFSET
-			if (name)
-				print_warning(name,"scaleoffset");
-			return 0;
-#endif
 			break;
 		}/*switch*/
 	}/*for*/
@@ -211,24 +191,12 @@ int h5tools_can_encode(H5Z_filter_t filtn) {
 #endif
 		break;
 	case H5Z_FILTER_SHUFFLE:
-#ifndef H5_HAVE_FILTER_SHUFFLE
-		return 0;
-#endif
 		break;
 	case H5Z_FILTER_FLETCHER32:
-#ifndef H5_HAVE_FILTER_FLETCHER32
-		return 0;
-#endif
 		break;
 	case H5Z_FILTER_NBIT:
-#ifndef H5_HAVE_FILTER_NBIT
-		return 0;
-#endif
 		break;
 	case H5Z_FILTER_SCALEOFFSET:
-#ifndef H5_HAVE_FILTER_SCALEOFFSET
-		return 0;
-#endif
 		break;
 	}/*switch*/
 
