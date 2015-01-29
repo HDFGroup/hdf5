@@ -304,9 +304,6 @@
 /* Define if `struct text_info' is defined */
 /* #undef H5_HAVE_STRUCT_TEXT_INFO */
 
-/* Define to 1 if `tm_zone' is member of `struct tm'. */
-#define H5_HAVE_STRUCT_TM_TM_ZONE 1
-
 /* Define if `struct videoconfig' is defined */
 /* #undef H5_HAVE_STRUCT_VIDEOCONFIG */
 
@@ -366,10 +363,6 @@
 
 /* Define if `tm_gmtoff' is a member of `struct tm' */
 /* #undef H5_HAVE_TM_GMTOFF */
-
-/* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
-   `HAVE_STRUCT_TM_TM_ZONE' instead. */
-#define H5_HAVE_TM_ZONE 1
 
 /* Define to 1 if you don't have `tm_zone' but do have the external array
    `tzname'. */
