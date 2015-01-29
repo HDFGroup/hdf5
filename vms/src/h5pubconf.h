@@ -70,9 +70,6 @@
 /* Define if the __attribute__(()) extension is present */
 /* #undef H5_HAVE_ATTRIBUTE */
 
-/* Define to 1 if you have the `BSDgettimeofday' function. */
-/* #undef H5_HAVE_BSDGETTIMEOFDAY */
-
 /* Define if the compiler understands C99 designated initialization of structs
    and unions */
 #define H5_HAVE_C99_DESIGNATED_INITIALIZER 1
