@@ -2531,32 +2531,22 @@ AC_ARG_ENABLE([direct-vfd],
                                flag. [default=no]])],
               [DIRECT_VFD=$enableval], [DIRECT_VFD=no])
 
-if test "$DIRECT_VFD" = "yes"; then
-   AC_CACHE_VAL([hdf5_cv_direct_io],
-       [AC_TRY_RUN([
-	  #include <sys/types.h>
-	  #include <sys/stat.h>
-	  #include <fcntl.h>
-          int main(void)
-          {
-             int fid; 
-             if((fid=open("tst_file", O_CREAT | O_TRUNC | O_DIRECT, 0755))<0)
-		exit(1);
-             close(fid);  
-             remove("tst_file"); 
-             exit (0);
-          }], [AC_TRY_LINK(, [posix_memalign()], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no])], [hdf5_cv_direct_io=no],)])
+if test "X$DIRECT_VFD" = "Xyes"; then
+    AC_CACHE_VAL([hdf5_cv_direct_io],
+        AC_CHECK_DECL([O_DIRECT], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no], [[#include <fcntl.h>]]))
+    AC_CACHE_VAL([hdf5_cv_posix_memalign],
+        AC_TRY_LINK(, [posix_memalign()], [hdf5_cv_posix_memalign=yes], [hdf5_cv_posix_memalign=no]))
 
-   if test ${hdf5_cv_direct_io} = "yes"; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([HAVE_DIRECT], [1],
+    if test ${hdf5_cv_direct_io} = "yes" && test ${hdf5_cv_posix_memalign} = "yes" ; then
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_DIRECT], [1],
                 [Define if the direct I/O virtual file driver (VFD) should be compiled])
-   else
-      AC_MSG_RESULT([no])
-      DIRECT_VFD=no
-   fi
+    else
+        AC_MSG_RESULT([no])
+        DIRECT_VFD=no
+    fi
 else
-      AC_MSG_RESULT([suppressed])
+    AC_MSG_RESULT([suppressed])
 fi
 
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])

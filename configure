@@ -28286,33 +28286,23 @@ else
 fi
 
 
-if test "$DIRECT_VFD" = "yes"; then
-   if ${hdf5_cv_direct_io+:} false; then :
+if test "X$DIRECT_VFD" = "Xyes"; then
+    if ${hdf5_cv_direct_io+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
+  ac_fn_c_check_decl "$LINENO" "O_DIRECT" "ac_cv_have_decl_O_DIRECT" "#include <fcntl.h>
+"
+if test "x$ac_cv_have_decl_O_DIRECT" = xyes; then :
+  hdf5_cv_direct_io=yes
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
+  hdf5_cv_direct_io=no
+fi
 
-	  #include <sys/types.h>
-	  #include <sys/stat.h>
-	  #include <fcntl.h>
-          int main(void)
-          {
-             int fid;
-             if((fid=open("tst_file", O_CREAT | O_TRUNC | O_DIRECT, 0755))<0)
-		exit(1);
-             close(fid);
-             remove("tst_file");
-             exit (0);
-          }
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
+fi
+
+    if ${hdf5_cv_posix_memalign+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -28333,35 +28323,28 @@ posix_memalign()
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  hdf5_cv_direct_io=yes
+  hdf5_cv_posix_memalign=yes
 else
-  hdf5_cv_direct_io=no
+  hdf5_cv_posix_memalign=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-else
-  hdf5_cv_direct_io=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
 fi
 
 
-   if test ${hdf5_cv_direct_io} = "yes"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+    if test ${hdf5_cv_direct_io} = "yes" && test ${hdf5_cv_posix_memalign} = "yes" ; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
 $as_echo "#define HAVE_DIRECT 1" >>confdefs.h
 
-   else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-      DIRECT_VFD=no
-   fi
+        DIRECT_VFD=no
+    fi
 else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
 fi
 
