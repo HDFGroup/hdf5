@@ -1005,16 +1005,6 @@ dnl AC_CHECK_LIB([coug], [main])		## ...for ASCI/Red
 AC_HEADER_STDC
 AC_HEADER_TIME
 
-## ----------------------------------------------------------------------
-## Check for these two functions before the time headers are checked
-## for, otherwise they are not detected correctly on Solaris (the
-## configure test will fail due to multiply-defined symbols).
-##
-AC_CHECK_FUNCS([difftime])
-AC_CHECK_FUNCS([gettimeofday], [have_gettime="yes"], [have_gettime="no"])
-AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AC_CHECK_FUNCS([clock_gettime],[have_clock_gettime="yes"],[have_clock_gettime="no"])
-
 ## Unix
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
 AC_CHECK_HEADERS([sys/socket.h sys/types.h])
@@ -1085,7 +1075,7 @@ if test "X${enable_shared}" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Test for Largefile support.
+## Test for large file support.
 ##
 AC_MSG_CHECKING([if configure should try to set up large file support])
 
@@ -1939,9 +1929,12 @@ AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGETD;],
 ## ----------------------------------------------------------------------
 ## Check for functions.
 ##
-AC_CHECK_FUNCS([alarm fork frexpf frexpl])
-AC_CHECK_FUNCS([gethostname getpwuid getrusage lstat])
-AC_CHECK_FUNCS([rand_r random setsysinfo])
+## NOTE: clock_gettime may require linking to the rt or posix4 library
+##       so we'll search for it before calling AC_CHECK_FUNCS.
+AC_SEARCH_LIBS([clock_gettime], [rt posix4])
+AC_CHECK_FUNCS([alarm clock_gettime difftime fork frexpf frexpl])
+AC_CHECK_FUNCS([gethostname getpwuid getrusage gettimeofday])
+AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf waitpid])
