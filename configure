@@ -1574,7 +1574,7 @@ Optional Features:
   --enable-fortran2003    Compile the Fortran 2003 interface, must also
                           specify --enable-fortran [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
-  --enable-hl             Enable the high level library [default=yes]
+  --enable-hl             Enable the high-level library [default=yes]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -1613,8 +1613,9 @@ Optional Features:
                           picky about it's memory operations and also disables
                           the library's free space manager code. Default=no.
   --enable-parallel       Search for MPI-IO and MPI support files
-  --enable-direct-vfd     Build the Direct I/O Virtual File Driver
-                          [default=yes]
+  --enable-direct-vfd     Build the direct I/O virtual file driver (VFD). This
+                          is based on the POSIX (sec2) VFD and requires the
+                          open() call to take the O_DIRECT flag. [default=no]
   --enable-dconv-exception
                           if exception handling functions is checked during
                           data conversions [default=yes]
@@ -28274,14 +28275,14 @@ fi
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Direct Virtual File Driver support" >&5
-$as_echo_n "checking for Direct Virtual File Driver support... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for direct virtual file driver (VFD) support" >&5
+$as_echo_n "checking for direct virtual file driver (VFD) support... " >&6; }
 
 # Check whether --enable-direct-vfd was given.
 if test "${enable_direct_vfd+set}" = set; then :
   enableval=$enable_direct_vfd; DIRECT_VFD=$enableval
 else
-  DIRECT_VFD=yes
+  DIRECT_VFD=no
 fi
 
 

@@ -540,7 +540,7 @@ AC_SUBST(HL_FOR) HL_FOR=""
 AC_MSG_CHECKING([if high level library is enabled])
 AC_ARG_ENABLE([hl],
      [AS_HELP_STRING([--enable-hl],
-                     [Enable the high level library [default=yes]])],
+                     [Enable the high-level library [default=yes]])],
      [HDF5_HL=$enableval],
      [HDF5_HL=yes])
 
@@ -2521,13 +2521,15 @@ fi
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
-AC_MSG_CHECKING([for Direct Virtual File Driver support])
+AC_MSG_CHECKING([for direct virtual file driver (VFD) support])
 
 AC_ARG_ENABLE([direct-vfd],
               [AS_HELP_STRING([--enable-direct-vfd],
-                              [Build the Direct I/O Virtual File Driver
-                               [default=yes]])],
-              [DIRECT_VFD=$enableval], [DIRECT_VFD=yes])
+                              [Build the direct I/O virtual file driver (VFD).
+                               This is based on the POSIX (sec2) VFD and
+                               requires the open() call to take the O_DIRECT
+                               flag. [default=no]])],
+              [DIRECT_VFD=$enableval], [DIRECT_VFD=no])
 
 if test "$DIRECT_VFD" = "yes"; then
    AC_CACHE_VAL([hdf5_cv_direct_io],
@@ -2548,7 +2550,7 @@ if test "$DIRECT_VFD" = "yes"; then
    if test ${hdf5_cv_direct_io} = "yes"; then
       AC_MSG_RESULT([yes])
       AC_DEFINE([HAVE_DIRECT], [1],
-                [Define if the direct I/O virtual file driver should be compiled])
+                [Define if the direct I/O virtual file driver (VFD) should be compiled])
    else
       AC_MSG_RESULT([no])
       DIRECT_VFD=no
