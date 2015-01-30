@@ -28275,19 +28275,10 @@ fi
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for direct virtual file driver (VFD) support" >&5
-$as_echo_n "checking for direct virtual file driver (VFD) support... " >&6; }
+## Check these regardless. If the checks are moved inside the main
+## direct VFD block, the output is nested.
 
-# Check whether --enable-direct-vfd was given.
-if test "${enable_direct_vfd+set}" = set; then :
-  enableval=$enable_direct_vfd; DIRECT_VFD=$enableval
-else
-  DIRECT_VFD=no
-fi
-
-
-if test "X$DIRECT_VFD" = "Xyes"; then
-    if ${hdf5_cv_direct_io+:} false; then :
+if ${hdf5_cv_direct_io+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_fn_c_check_decl "$LINENO" "O_DIRECT" "ac_cv_have_decl_O_DIRECT" "#include <fcntl.h>
@@ -28300,38 +28291,31 @@ fi
 
 fi
 
-    if ${hdf5_cv_posix_memalign+:} false; then :
+if ${hdf5_cv_posix_memalign+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-posix_memalign()
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
+  ac_fn_c_check_func "$LINENO" "posix_memalign" "ac_cv_func_posix_memalign"
+if test "x$ac_cv_func_posix_memalign" = xyes; then :
   hdf5_cv_posix_memalign=yes
 else
   hdf5_cv_posix_memalign=no
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
+
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if the direct I/O virtual file driver (VFD) is enabled" >&5
+$as_echo_n "checking if the direct I/O virtual file driver (VFD) is enabled... " >&6; }
+
+# Check whether --enable-direct-vfd was given.
+if test "${enable_direct_vfd+set}" = set; then :
+  enableval=$enable_direct_vfd; DIRECT_VFD=$enableval
+else
+  DIRECT_VFD=no
+fi
+
+
+if test "X$DIRECT_VFD" = "Xyes"; then
     if test ${hdf5_cv_direct_io} = "yes" && test ${hdf5_cv_posix_memalign} = "yes" ; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
@@ -28342,10 +28326,14 @@ $as_echo "#define HAVE_DIRECT 1" >>confdefs.h
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
         DIRECT_VFD=no
+        as_fn_error $? "The direct VFD was requested but cannot be built. This is either
+                     due to O_DIRECT not being found in fcntl.h or a lack of
+                     posix_memalign() on your system. Please re-configure without
+                     specifying --enable-direct-vfd." "$LINENO" 5
     fi
 else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
-$as_echo "suppressed" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
  if test "X$DIRECT_VFD" = "Xyes"; then

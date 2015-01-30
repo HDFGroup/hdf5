@@ -2521,7 +2521,15 @@ fi
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
-AC_MSG_CHECKING([for direct virtual file driver (VFD) support])
+## Check these regardless. If the checks are moved inside the main
+## direct VFD block, the output is nested.
+
+AC_CACHE_VAL([hdf5_cv_direct_io],
+    AC_CHECK_DECL([O_DIRECT], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no], [[#include <fcntl.h>]]))
+AC_CACHE_VAL([hdf5_cv_posix_memalign],
+    AC_CHECK_FUNC([posix_memalign], [hdf5_cv_posix_memalign=yes], [hdf5_cv_posix_memalign=no]))
+
+AC_MSG_CHECKING([if the direct I/O virtual file driver (VFD) is enabled])
 
 AC_ARG_ENABLE([direct-vfd],
               [AS_HELP_STRING([--enable-direct-vfd],
@@ -2532,11 +2540,6 @@ AC_ARG_ENABLE([direct-vfd],
               [DIRECT_VFD=$enableval], [DIRECT_VFD=no])
 
 if test "X$DIRECT_VFD" = "Xyes"; then
-    AC_CACHE_VAL([hdf5_cv_direct_io],
-        AC_CHECK_DECL([O_DIRECT], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no], [[#include <fcntl.h>]]))
-    AC_CACHE_VAL([hdf5_cv_posix_memalign],
-        AC_TRY_LINK(, [posix_memalign()], [hdf5_cv_posix_memalign=yes], [hdf5_cv_posix_memalign=no]))
-
     if test ${hdf5_cv_direct_io} = "yes" && test ${hdf5_cv_posix_memalign} = "yes" ; then
         AC_MSG_RESULT([yes])
         AC_DEFINE([HAVE_DIRECT], [1],
@@ -2544,9 +2547,13 @@ if test "X$DIRECT_VFD" = "Xyes"; then
     else
         AC_MSG_RESULT([no])
         DIRECT_VFD=no
+        AC_MSG_ERROR([The direct VFD was requested but cannot be built. This is either
+                     due to O_DIRECT not being found in fcntl.h or a lack of
+                     posix_memalign() on your system. Please re-configure without
+                     specifying --enable-direct-vfd.])
     fi
 else
-    AC_MSG_RESULT([suppressed])
+    AC_MSG_RESULT([no])
 fi
 
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
