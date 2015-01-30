@@ -655,8 +655,6 @@ DEFAULT_API_VERSION
 DEPRECATED_SYMBOLS
 BUILD_ALL_CONDITIONAL_FALSE
 BUILD_ALL_CONDITIONAL_TRUE
-HL_FOR
-HL
 DYNAMIC_DIRS
 ROOT
 CXX_VERSION
@@ -723,6 +721,8 @@ TIME
 TR
 AR
 PERL
+HL_FOR
+HL
 CXXCPP
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
@@ -890,6 +890,7 @@ enable_unsupported
 enable_fortran
 enable_fortran2003
 enable_cxx
+enable_hl
 enable_shared
 enable_static
 with_pic
@@ -920,7 +921,6 @@ enable_direct_vfd
 with_default_plugindir
 enable_dconv_exception
 enable_dconv_accuracy
-enable_hl
 enable_build_all
 enable_deprecated_symbols
 with_default_api_version
@@ -1574,6 +1574,7 @@ Optional Features:
   --enable-fortran2003    Compile the Fortran 2003 interface, must also
                           specify --enable-fortran [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
+  --enable-hl             Enable the high level library [default=yes]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -1585,7 +1586,10 @@ Optional Features:
                           Disable use of the '=Wl,-rpath' linker option
   --enable-production     Determines how to run the compiler.
   --disable-largefile     omit support for large files
-  --enable-threadsafe     Enable thread-safe capability
+  --enable-threadsafe     Enable thread-safe capability. This will disable the
+                          high-level library. You can override this behavior
+                          by specifying --enable-hl and --enable-unsupported.
+                          [default=no]
   --enable-debug=all      Turn on debugging in all packages. One may also
                           specify a comma-separated list of package names
                           without the leading H5 or the word no. The default
@@ -1616,7 +1620,6 @@ Optional Features:
                           data conversions [default=yes]
   --enable-dconv-accuracy if data accuracy is guaranteed during data
                           conversions [default=yes]
-  --enable-hl             Enable the high level library [default=yes]
   --enable-build-all      Build helper programs that only developers should
                           need [default=no]
   --enable-deprecated-symbols
@@ -1650,7 +1653,7 @@ Optional Packages:
   --with-szlib=DIR        Use szlib library for external szlib I/O filter
                           [default=no]
   --with-pthread=DIR      Specify alternative path to Pthreads library when
-                          thread-safe capability is built
+                          thread-safe capability is built.
   --with-mpe=DIR          Use MPE instrumentation [default=no]
   --with-default-plugindir=location
                           Specify default location for plugins
@@ -7424,6 +7427,41 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+
+## ----------------------------------------------------------------------
+## Check if they would like the High Level library  compiled
+##
+
+ HL=""
+## name of fortran folder inside "hl", if FORTRAN compile is requested
+ HL_FOR=""
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if high level library is enabled" >&5
+$as_echo_n "checking if high level library is enabled... " >&6; }
+# Check whether --enable-hl was given.
+if test "${enable_hl+set}" = set; then :
+  enableval=$enable_hl; HDF5_HL=$enableval
+else
+  HDF5_HL=yes
+fi
+
+
+if test "X$HDF5_HL" = "Xyes"; then
+ echo "yes"
+ HL="hl"
+
+$as_echo "#define INCLUDE_HL 1" >>confdefs.h
+
+
+  ## If Fortran's default real is double precision and HL is being built then configure
+  ## should fail due to bug HDFFV-889.
+  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
+    as_fn_error $? "Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl." "$LINENO" 5
+  fi
+else
+ echo "no"
+fi
 
 
 ## ----------------------------------------------------------------------
@@ -25993,6 +26031,10 @@ if test "${enable_threadsafe+set}" = set; then :
 fi
 
 
+## NOTE: The high-level, C++, and Fortran interfaces are not compatible
+## with the thread-safety option because the lock is not hoisted
+## into the higher-level API calls.
+
 ## The --enable-threadsafe flag is not compatible with --enable-cxx.
 ## If the user tried to specify both flags, throw an error, unless
 ## they also provided the --enable-unsupported flag.
@@ -26002,13 +26044,14 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## --enable-threadsafe is also incompatible with --enable-fortran, unless
+## --enable-threadsafe is also incompatible with --enable-fortran unless
 ## --enable-unsupported has been specified on the configure line.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
     as_fn_error $? "--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error." "$LINENO" 5
   fi
 fi
+
 
 case "X-$THREADSAFE" in
   X-|X-no)
@@ -26040,7 +26083,7 @@ $as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
     ## be preceded by a comma.
     ##
     ## Thread-safety in HDF5 only uses Pthreads via configure, so the
-    ## default is "yes", though this only has an effect when
+    ## default is "check", though this only has an effect when
     ## --enable-threadsafe is specified.
      HAVE_PTHREAD=yes
 
@@ -26048,12 +26091,12 @@ $as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
 if test "${with_pthread+set}" = set; then :
   withval=$with_pthread;
 else
-  withval=yes
+  withval=check
 fi
 
 
     case "$withval" in
-      yes)
+      check)
         for ac_header in pthread.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
@@ -26125,13 +26168,6 @@ else
 fi
 
         fi
-        ;;
-      no)
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread" >&5
-$as_echo_n "checking for pthread... " >&6; }
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
-$as_echo "suppressed" >&6; }
-        unset HAVE_PTHREAD
         ;;
       *)
         case "$withval" in
@@ -29830,39 +29866,6 @@ if test -n "$AM_CPPFLAGS"; then
     TEMP_CPPFLAGS="$d $TEMP_CPPFLAGS"
   done
   AM_CPPFLAGS=$TEMP_CPPFLAGS
-fi
-
-## ----------------------------------------------------------------------
-## Check if they would like the High Level library  compiled
-##
-
- HL=""
-## name of fortran folder inside "hl", if FORTRAN compile is requested
- HL_FOR=""
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if high level library is enabled" >&5
-$as_echo_n "checking if high level library is enabled... " >&6; }
-# Check whether --enable-hl was given.
-if test "${enable_hl+set}" = set; then :
-  enableval=$enable_hl; HDF5_HL=$enableval
-else
-  HDF5_HL=yes
-fi
-
-
-if test "X$HDF5_HL" = "Xyes"; then
- echo "yes"
- HL="hl"
-
-$as_echo "#define INCLUDE_HL 1" >>confdefs.h
-
-
-## If Fortran's default real is double precision and HL is being built then configure
-## should fail due to bug HDFFV-889.
-  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
-    as_fn_error $? "Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl." "$LINENO" 5
-  fi
-else
- echo "no"
 fi
 
 

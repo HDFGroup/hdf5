@@ -529,6 +529,37 @@ fi
 ## Change back to the C language
 AC_LANG_POP(C++)
 
+
+## ----------------------------------------------------------------------
+## Check if they would like the High Level library  compiled
+##
+
+AC_SUBST(HL) HL=""
+## name of fortran folder inside "hl", if FORTRAN compile is requested
+AC_SUBST(HL_FOR) HL_FOR=""
+AC_MSG_CHECKING([if high level library is enabled])
+AC_ARG_ENABLE([hl],
+     [AS_HELP_STRING([--enable-hl],
+                     [Enable the high level library [default=yes]])],
+     [HDF5_HL=$enableval],
+     [HDF5_HL=yes])
+
+if test "X$HDF5_HL" = "Xyes"; then
+ echo "yes"
+ HL="hl"
+ AC_DEFINE([INCLUDE_HL], [1],
+           [Define if HDF5's high-level library headers should be included in hdf5.h])
+
+  ## If Fortran's default real is double precision and HL is being built then configure
+  ## should fail due to bug HDFFV-889.
+  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
+    AC_MSG_ERROR([Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl.])
+  fi
+else
+ echo "no"
+fi
+
+
 ## ----------------------------------------------------------------------
 ## Check if they have Perl installed on their system. We only need Perl
 ## if they're using a GNU compiler.
@@ -1656,8 +1687,14 @@ AC_CACHE_SAVE
 AC_MSG_CHECKING([for thread safe support])
 AC_ARG_ENABLE([threadsafe],
               [AS_HELP_STRING([--enable-threadsafe],
-                              [Enable thread-safe capability])],
+                              [Enable thread-safe capability. This will disable the high-level library.
+                              You can override this behavior by specifying --enable-hl and --enable-unsupported.
+                              [default=no]])],
               [THREADSAFE=$enableval])
+
+## NOTE: The high-level, C++, and Fortran interfaces are not compatible
+## with the thread-safety option because the lock is not hoisted
+## into the higher-level API calls.
 
 ## The --enable-threadsafe flag is not compatible with --enable-cxx.
 ## If the user tried to specify both flags, throw an error, unless
@@ -1668,13 +1705,14 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## --enable-threadsafe is also incompatible with --enable-fortran, unless
+## --enable-threadsafe is also incompatible with --enable-fortran unless
 ## --enable-unsupported has been specified on the configure line.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
     AC_MSG_ERROR([--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
   fi
 fi
+
 
 case "X-$THREADSAFE" in
   X-|X-no)
@@ -1701,25 +1739,21 @@ if test "X$THREADSAFE" = "Xyes"; then
     ## be preceded by a comma.
     ##
     ## Thread-safety in HDF5 only uses Pthreads via configure, so the
-    ## default is "yes", though this only has an effect when
+    ## default is "check", though this only has an effect when
     ## --enable-threadsafe is specified.
     AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
     AC_ARG_WITH([pthread],
                 [AS_HELP_STRING([--with-pthread=DIR],
-                                [Specify alternative path to Pthreads library when thread-safe capability is built])],,
-                [withval=yes])
+                                [Specify alternative path to Pthreads library when
+                                thread-safe capability is built.])],,
+                [withval=check])
 
     case "$withval" in
-      yes)
+      check)
         AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
         if test "x$HAVE_PTHREAD" = "xyes"; then
           AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
         fi
-        ;;
-      no)
-        AC_MSG_CHECKING([for pthread])
-        AC_MSG_RESULT([suppressed])
-        unset HAVE_PTHREAD
         ;;
       *)
         case "$withval" in
@@ -3613,35 +3647,6 @@ if test -n "$AM_CPPFLAGS"; then
     TEMP_CPPFLAGS="$d $TEMP_CPPFLAGS"
   done
   AM_CPPFLAGS=$TEMP_CPPFLAGS
-fi
-
-## ----------------------------------------------------------------------
-## Check if they would like the High Level library  compiled
-##
-
-AC_SUBST(HL) HL=""
-## name of fortran folder inside "hl", if FORTRAN compile is requested
-AC_SUBST(HL_FOR) HL_FOR=""
-AC_MSG_CHECKING([if high level library is enabled])
-AC_ARG_ENABLE([hl],
-     [AS_HELP_STRING([--enable-hl],
-                     [Enable the high level library [default=yes]])],
-     [HDF5_HL=$enableval],
-     [HDF5_HL=yes])
-
-if test "X$HDF5_HL" = "Xyes"; then
- echo "yes"
- HL="hl"
- AC_DEFINE([INCLUDE_HL], [1],
-           [Define if HDF5's high-level library headers should be included in hdf5.h])
-
-## If Fortran's default real is double precision and HL is being built then configure
-## should fail due to bug HDFFV-889.
-  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
-    AC_MSG_ERROR([Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl.])
-  fi
-else
- echo "no"
 fi
 
 
