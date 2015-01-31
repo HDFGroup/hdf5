@@ -1,5 +1,6 @@
 #! /bin/sh
 #
+# Copyright by The HDF Group.                                              
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
@@ -150,3 +151,4 @@ echo "    Running flex generation script:"
 bin/genltanalyze || exit 1
 
 exit 0
+
