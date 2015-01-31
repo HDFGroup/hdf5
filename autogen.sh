@@ -32,11 +32,14 @@
 #
 # This script takes two options:
 #
-# -p/--production
+# -p, --production
 #
 # When this is selected, the autotools versions are set to the paths
 # and versions used by The HDF Group to produce the released versions
 # of the library. # -s/--process_source
+#
+#
+# -s, --process_source
 #
 # When this is selected, several scripts are run that process the HDF5
 # source code to add things like trace and error macros. It is not
