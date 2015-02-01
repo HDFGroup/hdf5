@@ -36,10 +36,13 @@
 ./m4/aclocal_fc.m4
 ./m4/aclocal_cxx.m4
 ./README.txt
+./BRANCH.txt
 ./aclocal.m4
 ./acsite.m4
+./autogen.sh
 ./configure
 ./configure.ac
+./configure.ac.orig
 
 ./bin/COPYING
 ./bin/buildhdf5
