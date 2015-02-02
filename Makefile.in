@@ -43,9 +43,9 @@
 # Configure should set AM_MAKEFLAGS to -V to solve this problem in
 # subdirectories.
 # NOTE: This means that invoking pmake in a subdirectory will not work.
-.MAKEFLAGS:@AM_MAKEFLAGS@
-	$(MAKE) all
-
+#xxx.MAKEFLAGS:@AM_MAKEFLAGS@
+#xxx	$(MAKE) all
+#xxx
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \

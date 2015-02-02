@@ -191,7 +191,7 @@ echo SKIP TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
 2.5.1 Building HDF5 for Hopper
 ------------------------------------------ 
 The following steps are for building HDF5 for the Hopper compute
-nodes.  They would probably work for other Cray XE6 systems but have
+nodes.  They would probably work for other Cray systems but have
 not been verified.
 
 Obtain a copy from the HDF ftp server:
@@ -199,39 +199,32 @@ http://www.hdfgroup.org/ftp/HDF5/current/src/
 (link might change, so always double check the HDF group website).
 
 $ wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-x.x.x.tar.gz
-
 unpack the tarball
 
-$ cd hdf5-x.x.x/
-$ CC=cc FC=ftn ./configure \
---prefix=/project/hdf5/hdf5 --enable-parallel --enable-fortran \
---disable-shared --disable-production 
-$ make 
+The entire build process should be done on a MOM node in an interactive allocation and on a file system accessible by all compute nodes.
+Request an interactive allocation with qsub:
+qsub -I -q debug -l mppwidth=8
 
-Run make check. make check should be run on the compute nodes, not the
-front end nodes.  So using a PBS batch script, allocate 4 or more
-cores. Always consult with the machine's website on how to create PBS
-scripts and allocate nodes for your job. For Hopper, all the
-information can be found on:
-http://www.nersc.gov/systems/hopper-cray-xe6/
+- create a build directory build-hdf5:
+  mkdir build-hdf5; cd build-hdf5/
 
-save the PBS script into your HDF5 build directory. The PBS script
-should contain (besides the PBS node allocation requests)the
-following:
+- configure HDF5:
+  RUNSERIAL="aprun -q -n 1" RUNPARALLEL="aprun -q -n 6" FC=ftn CC=cc /path/to/source/configure --enable-fortran --enable-parallel --disable-shared
 
---------------------------------------------------------------
-cd $PBS_O_WORKDIR
+  RUNSERIAL and RUNPARALLEL tells the library how it should launch programs that are part of the build procedure.
 
-##set RUNSERIAL and RUNPARALLEL like this in the PBS script:
-export RUNPARALLEL="aprun -n 6"
-export RUNSERIAL="aprun -n 1"
+- Compile HDF5: 
+  gmake
 
-##execute make check:
-make check
---------------------------------------------------------------
+- Check HDF5
+  gmake check
 
-Once the job runs and all is well, install the binary:
-$ make install
+- Install HDF5
+  gmake install
+
+The build will be in build-hdf5/hdf5/ (or whatever you specify in --prefix).
+To compile other HDF5 applications use the wrappers created by the build (build-hdf5/hdf5/bin/h5pcc or h5fc)
+
 
 2.5.2 Hopper known issues
 ------------------------------
