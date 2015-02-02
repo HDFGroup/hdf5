@@ -148,7 +148,6 @@ AC_MSG_RESULT([done])
 ## HDF_CXX: whether C++ is enabled. Default no.
 ## CXX: C++ compiler.
 ## HDF5_HL: whether high-level library is enabled. Default is yes.
-## LARGEFILE: whether largefile support is enabled. Default yes.
 ## INSTRUMENT: whether INSTRUMENT is enabled. No default set here.
 ## CODESTACK: whether CODESTACK is enabled. Default no.
 ## HAVE_DMALLOC: whether system has dmalloc support. Default no.
@@ -169,7 +168,6 @@ AC_SUBST([FC2003]) HDF_FORTRAN2003=no
 AC_SUBST([HDF_CXX]) HDF_CXX=no
 AC_SUBST([CXX]) HDF_CXX=no
 AC_SUBST([HDF5_HL]) HDF5_HL=yes
-AC_SUBST([LARGEFILE]) LARGEFILE=yes
 AC_SUBST([INSTRUMENT])
 AC_SUBST([CODESTACK]) CODESTACK=no
 AC_SUBST([HAVE_DMALLOC]) HAVE_DMALLOC=no
@@ -1063,96 +1061,25 @@ if test "X${enable_shared}" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Test for large file support.
-##
-AC_MSG_CHECKING([if configure should try to set up large file support])
+## Use the macro _AC_SYS_LARGEFILE_MACRO_VALUE to test defines
+## that might need to be set for largefile support to behave 
+## correctly. This macro is defined in acsite.m4 and overrides
+## the version provided by Autoconf (as of v2.65). The custom
+## macro additionally adds the appropriate defines to AM_CPPFLAGS 
+## so that later configure checks have them visible. 
 
-AC_ARG_ENABLE([largefile],
-           [AS_HELP_STRING([--disable-largefile],
-                           [omit support for large files])])
+## Check for _FILE_OFFSET_BITS
+_AC_SYS_LARGEFILE_MACRO_VALUE([_FILE_OFFSET_BITS], [64],
+  [ac_cv_sys_file_offset_bits],
+  [Number of bits in a file offset, on hosts where this is settable.],
+  [_AC_SYS_LARGEFILE_TEST_INCLUDES])
 
-## If largefile support is enabled, then set up appropriate compiler options.
-if test "$enable_largefile" != no; then
-  AC_MSG_RESULT([yes])
-
-  ## Check for needed compiler options. This check is pulled drectly 
-  ## from autoconf's AC_SYS_LARGEFILE macro, as of Autoconf v2.65.
-  AC_CACHE_CHECK([for special C compiler options needed for large files],
-    ac_cv_sys_largefile_CC,
-    [ac_cv_sys_largefile_CC=no
-     if test "$GCC" != yes; then
-       ac_save_CC=$CC
-       while :; do
-         ## IRIX 6.2 and later do not support large files by default,
-         ## so use the C compiler's -n32 option if that helps.
-         AC_LANG_CONFTEST([AC_LANG_PROGRAM([_AC_SYS_LARGEFILE_TEST_INCLUDES])])
-         AC_COMPILE_IFELSE([], [break])
-         CC="$CC -n32"
-         AC_COMPILE_IFELSE([], [ac_cv_sys_largefile_CC=' -n32'; break])
-         break
-       done
-       CC=$ac_save_CC
-       rm -f conftest.$ac_ext
-    fi])
-  if test "$ac_cv_sys_largefile_CC" != no; then
-    CC=$CC$ac_cv_sys_largefile_CC
-  fi
-
-  ## Use the macro _AC_SYS_LARGEFILE_MACRO_VALUE to test defines
-  ## that might need to be set for largefile support to behave 
-  ## correctly. This macro is defined in acsite.m4 and overrides
-  ## the version provided by Autoconf (as of v2.65). The custom
-  ## macro additionally adds the appropriate defines to AM_CPPFLAGS 
-  ## so that later configure checks have them visible. 
-
-  ## Check for _FILE_OFFSET_BITS
-  _AC_SYS_LARGEFILE_MACRO_VALUE([_FILE_OFFSET_BITS], [64],
-    [ac_cv_sys_file_offset_bits],
-    [Number of bits in a file offset, on hosts where this is settable.],
+## Check for _LARGE_FILES
+if test "$ac_cv_sys_file_offset_bits" = unknown; then
+  _AC_SYS_LARGEFILE_MACRO_VALUE([_LARGE_FILES], [1],
+    [ac_cv_sys_large_files],
+    [Define for large files, on AIX-style hosts.],
     [_AC_SYS_LARGEFILE_TEST_INCLUDES])
-
-  ## Check for _LARGE_FILES
-  if test "$ac_cv_sys_file_offset_bits" = unknown; then
-    _AC_SYS_LARGEFILE_MACRO_VALUE([_LARGE_FILES], [1],
-      [ac_cv_sys_large_files],
-      [Define for large files, on AIX-style hosts.],
-      [_AC_SYS_LARGEFILE_TEST_INCLUDES])
-  fi
-
-  ## Now actually test to see if we can create large files after we've
-  ## checked for any needed defines.
-  AC_MSG_CHECKING([if large (64-bit) files are supported on this system.])
-  AC_CACHE_VAL([hdf5_cv_have_lfs],
-    [AC_TRY_RUN([
-      #include <stdio.h>
-      #include <unistd.h>
-      #include <stdlib.h>
-      #include <fcntl.h>
-      #define BIG_FILE (off_t)0x80000000UL 
-      int main(void) {
-        int fd;
-        if ((fd=open("test.conf", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0) exit(1);
-        if (lseek(fd, BIG_FILE, SEEK_SET)!=BIG_FILE) exit(1);
-        if (5!=write(fd, "hello", (size_t)5)) exit(1);
-        if (lseek(fd, 2*BIG_FILE, SEEK_SET) != 2*BIG_FILE) exit(1);
-        if (5!=write(fd, "hello", (size_t)5)) exit(1);
-        if (unlink("test.conf") < 0) exit(1);
-        exit(0);
-      }
-    ],[hdf5_cv_have_lfs=yes],[hdf5_cv_have_lfs=no],)])
-
-  if test "X${hdf5_cv_have_lfs}" = "Xyes"; then
-    AC_MSG_RESULT([yes])
-    LARGEFILE="yes"
-  fi 
-  if test "X${hdf5_cv_have_lfs}" = "Xno"; then
-    AC_MSG_RESULT([no])
-    LARGEFILE="no"
-  fi 
-
-else
-  LARGEFILE="no"
-  AC_MSG_RESULT([no])
 fi
 
 ## ----------------------------------------------------------------------
@@ -1160,11 +1087,9 @@ fi
 ##
 case "$host_cpu-$host_vendor-$host_os" in
   *linux*)
-    ## If largefile support is enabled, then make available various
-    ## LFS-related routines using the following _LARGEFILE*_SOURCE macros.
-    if test "X$LARGEFILE" != "Xno"; then
-        AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
-    fi
+    ## Make available various LFS-related routines using the following 
+    ## _LARGEFILE*_SOURCE macros.
+    AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
 
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
