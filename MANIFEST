@@ -27,20 +27,12 @@
 ./MANIFEST
 ./Makefile.dist
 ./Makefile.am
-./Makefile.in
-./m4/ltsugar.m4                         _DO_NOT_DISTRIBUTE_
-./m4/libtool.m4                         _DO_NOT_DISTRIBUTE_
-./m4/ltversion.m4                       _DO_NOT_DISTRIBUTE_
-./m4/lt~obsolete.m4                     _DO_NOT_DISTRIBUTE_
-./m4/ltoptions.m4                       _DO_NOT_DISTRIBUTE_
 ./m4/aclocal_fc.m4
 ./m4/aclocal_cxx.m4
 ./README.txt
 ./BRANCH.txt
-./aclocal.m4
 ./acsite.m4
 ./autogen.sh
-./configure
 ./configure.ac
 ./configure.ac.orig
 
@@ -127,7 +119,6 @@
 
 ./examples/Attributes.txt
 ./examples/Makefile.am
-./examples/Makefile.in
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
 ./examples/h5_crtgrpd.c
@@ -167,7 +158,6 @@
 
 ./fortran/COPYING
 ./fortran/Makefile.am
-./fortran/Makefile.in
 
 ./fortran/robodoc.rc
 ./fortran/doc/DevelGuide/toc_index.html
@@ -255,7 +245,6 @@
 ./fortran/doc/DevelGuide/src/H5Lff_F90_f90.html
 
 ./fortran/examples/Makefile.am
-./fortran/examples/Makefile.in
 ./fortran/examples/compound.f90
 ./fortran/examples/compound_fortran2003.f90
 ./fortran/examples/compound_complex_fortran2003.f90
@@ -343,14 +332,12 @@
 ./fortran/src/HDF5.f90
 ./fortran/src/HDF5mpio.f90
 ./fortran/src/Makefile.am
-./fortran/src/Makefile.in
 ./fortran/src/README
 ./fortran/src/README_DEVELOPEMENT   _DO_NOT_DISTRIBUTE_
 ./fortran/src/h5fc.in
 ./fortran/src/hdf5_fortrandll.def.in
 
 ./fortran/test/Makefile.am
-./fortran/test/Makefile.in
 ./fortran/test/fflush1.f90
 ./fortran/test/fflush2.f90
 ./fortran/test/fortranlib_test.f90
@@ -390,7 +377,6 @@
 ./fortran/test/tHDF5.f90
 
 ./fortran/testpar/Makefile.am
-./fortran/testpar/Makefile.in
 ./fortran/testpar/ptest.f90
 ./fortran/testpar/hyper.f90
 ./fortran/testpar/mdset.f90
@@ -409,7 +395,6 @@
 
 ./c++/COPYING
 ./c++/Makefile.am
-./c++/Makefile.in
 
 ./c++/examples/chunks.cpp
 ./c++/examples/compound.cpp
@@ -430,7 +415,6 @@
 ./c++/examples/testh5c++.sh.in
 ./c++/examples/writedata.cpp
 ./c++/examples/Makefile.am
-./c++/examples/Makefile.in
 ./c++/examples/run-c++-ex.sh.in
 
 ./c++/src/H5AbstractDs.cpp
@@ -493,7 +477,6 @@
 ./c++/src/H5VarLenType.cpp
 ./c++/src/H5VarLenType.h
 ./c++/src/Makefile.am
-./c++/src/Makefile.in
 ./c++/src/RM_stylesheet.css
 ./c++/src/cpp_doc_config
 ./c++/src/h5c++.in
@@ -506,7 +489,6 @@
 
 ./c++/test/H5srcdir_str.h.in
 ./c++/test/Makefile.am
-./c++/test/Makefile.in
 ./c++/test/dsets.cpp
 ./c++/test/h5cpputil.cpp
 ./c++/test/h5cpputil.h
@@ -927,7 +909,6 @@
 ./src/H5Zszip.c
 ./src/H5Ztrans.c
 ./src/Makefile.am
-./src/Makefile.in
 ./src/hdf5.h
 ./src/libhdf5.settings.in
 ./src/H5win32defs.h
@@ -936,7 +917,6 @@
 ./test/H5srcdir.h
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
-./test/Makefile.in
 ./test/accum.c
 ./test/app_ref.c
 ./test/bad_compound.h5
@@ -1134,7 +1114,6 @@
 
 ./testpar/COPYING
 ./testpar/Makefile.am
-./testpar/Makefile.in
 ./testpar/t_cache.c
 ./testpar/t_chunk_alloc.c
 ./testpar/t_coll_chunk.c
@@ -1156,10 +1135,8 @@
 
 ./tools/COPYING
 ./tools/Makefile.am
-./tools/Makefile.in
 
 ./tools/h5dump/Makefile.am
-./tools/h5dump/Makefile.in
 ./tools/h5dump/h5dump.c
 ./tools/h5dump/h5dump.h
 ./tools/h5dump/h5dump_defines.h
@@ -1176,7 +1153,6 @@
 
 
 ./tools/h5import/Makefile.am
-./tools/h5import/Makefile.in
 ./tools/h5import/h5import.h
 ./tools/h5import/h5import.c
 ./tools/h5import/h5importtest.c
@@ -1235,7 +1211,6 @@
 
 # h5diff sources
 ./tools/h5diff/Makefile.am
-./tools/h5diff/Makefile.in
 ./tools/h5diff/h5diff_common.c
 ./tools/h5diff/h5diff_common.h
 ./tools/h5diff/h5diff_main.c
@@ -1246,7 +1221,6 @@
 
 # h5repack sources
 ./tools/h5repack/Makefile.am
-./tools/h5repack/Makefile.in
 ./tools/h5repack/dynlib_rpk.c
 ./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack_plugin.sh.in
@@ -1264,20 +1238,17 @@
 
 # h5ls sources
 ./tools/h5ls/Makefile.am
-./tools/h5ls/Makefile.in
 ./tools/h5ls/h5ls.c
 ./tools/h5ls/testh5ls.sh.in
 
 # h5copy sources
 ./tools/h5copy/testh5copy.sh.in
-./tools/h5copy/Makefile.in
 ./tools/h5copy/h5copy.c
 ./tools/h5copy/h5copygentest.c
 ./tools/h5copy/Makefile.am
 
 
 ./tools/lib/Makefile.am
-./tools/lib/Makefile.in
 ./tools/lib/h5diff.c
 ./tools/lib/h5diff.h
 ./tools/lib/h5diff_array.c
@@ -1304,7 +1275,6 @@
 ./tools/lib/io_timer.h
 
 ./tools/misc/Makefile.am
-./tools/misc/Makefile.in
 ./tools/misc/h5cc.in
 ./tools/misc/h5debug.c
 ./tools/misc/h5mkgrp.c
@@ -1321,7 +1291,6 @@
 
 # h5stat sources
 ./tools/h5stat/Makefile.am
-./tools/h5stat/Makefile.in
 ./tools/h5stat/h5stat.c
 
 # h5stat test files
@@ -2168,7 +2137,6 @@
 ./tools/h5jam/h5jam.c
 ./tools/h5jam/h5unjam.c
 ./tools/h5jam/Makefile.am
-./tools/h5jam/Makefile.in
 ./tools/h5jam/h5jamgentest.c
 ./tools/h5jam/testh5jam.sh.in
 ./tools/h5jam/tellub.c
@@ -2212,7 +2180,6 @@
 
 ./tools/perform/COPYING
 ./tools/perform/Makefile.am
-./tools/perform/Makefile.in
 ./tools/perform/build_h5perf_alone.sh
 ./tools/perform/build_h5perf_serial_alone.sh
 ./tools/perform/chunk.c
@@ -2237,9 +2204,7 @@
 # high level libraries
 ./hl/COPYING
 ./hl/Makefile.am
-./hl/Makefile.in
 ./hl/examples/Makefile.am
-./hl/examples/Makefile.in
 ./hl/examples/ex_ds1.c
 ./hl/examples/ex_lite1.c
 ./hl/examples/ex_lite2.c
@@ -2266,7 +2231,6 @@
 ./hl/examples/run-hlc-ex.sh.in
 ./hl/src/COPYING
 ./hl/src/Makefile.am
-./hl/src/Makefile.in
 ./hl/src/H5DO.c
 ./hl/src/H5DOpublic.h
 ./hl/src/H5DS.c
@@ -2294,7 +2258,6 @@
 ./hl/test/COPYING
 ./hl/test/H5srcdir_str.h.in
 ./hl/test/Makefile.am
-./hl/test/Makefile.in
 ./hl/test/dsdata.txt
 ./hl/test/dslat.txt
 ./hl/test/dslon.txt
@@ -2326,9 +2289,7 @@
 # tools
 ./hl/tools/COPYING
 ./hl/tools/Makefile.am
-./hl/tools/Makefile.in
 ./hl/tools/gif2h5/Makefile.am
-./hl/tools/gif2h5/Makefile.in
 ./hl/tools/gif2h5/decompress.c
 ./hl/tools/gif2h5/gif.h
 ./hl/tools/gif2h5/gif2hdf.c
@@ -2345,9 +2306,7 @@
 # hl fortran
 ./hl/fortran/COPYING
 ./hl/fortran/Makefile.am
-./hl/fortran/Makefile.in
 ./hl/fortran/examples/Makefile.am
-./hl/fortran/examples/Makefile.in
 ./hl/fortran/examples/ex_ds1.f90
 ./hl/fortran/examples/exlite.f90
 ./hl/fortran/examples/run-hlfortran-ex.sh.in
@@ -2363,9 +2322,7 @@
 ./hl/fortran/src/H5TBfc.c
 ./hl/fortran/src/H5TBff.f90
 ./hl/fortran/src/Makefile.am
-./hl/fortran/src/Makefile.in
 ./hl/fortran/test/Makefile.am
-./hl/fortran/test/Makefile.in
 ./hl/fortran/test/tstds.f90
 ./hl/fortran/test/tstimage.f90
 ./hl/fortran/test/tstlite.f90
@@ -2374,19 +2331,15 @@
 # hl c++
 ./hl/c++/COPYING
 ./hl/c++/Makefile.am
-./hl/c++/Makefile.in
 ./hl/c++/examples/Makefile.am
-./hl/c++/examples/Makefile.in
 ./hl/c++/examples/ptExampleFL.cpp
 ./hl/c++/examples/run-hlc++-ex.sh.in
 ./hl/c++/src/H5PacketTable.h
 ./hl/c++/src/H5PacketTable.cpp
 ./hl/c++/src/Makefile.am
-./hl/c++/src/Makefile.in
 ./hl/c++/test/ptableTest.h
 ./hl/c++/test/ptableTest.cpp
 ./hl/c++/test/Makefile.am
-./hl/c++/test/Makefile.in
 
 #vms files
 ./vms/COPYING
