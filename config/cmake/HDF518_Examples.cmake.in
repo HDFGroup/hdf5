@@ -14,7 +14,7 @@ set(CTEST_BUILD_CONFIGURATION "Release")
 #set(NO_MAC_FORTRAN "true")
 #set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
 #set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_ENABLE_F2003:BOOL=ON)
-set(CTEST_USE_TAR_SOURCE "true")
+set(CTEST_USE_TAR_SOURCE ${CTEST_SCRIPT_ARG})
 
 ###############################################################################################################
 #     Adjust the following SET Commands as needed
