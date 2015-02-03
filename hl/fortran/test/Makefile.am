@@ -27,7 +27,7 @@ AM_FCFLAGS+=-I$(top_builddir)/fortran/src -I$(top_builddir)/hl/fortran/src $(F9X
 # Some Fortran compilers can't build shared libraries, so sometimes we
 # need to make sure the Fortran programs link against the static version
 # of the HDF5 library.  We do this by passing the -static flag to the linker.
-if FORTRAN_SHARED_CONDITIONAL
+if HAVE_SHARED_CONDITIONAL
 else
    AM_LDFLAGS+=-static
 endif

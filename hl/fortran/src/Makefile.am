@@ -35,7 +35,7 @@ libhdf5hl_fortran_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVIS
 # Some Fortran compilers can't build shared libraries, so sometimes we
 # want to build a shared C library and a static Fortran library.  If so,
 # pass the -static flag to the library linker.
-if FORTRAN_SHARED_CONDITIONAL
+if HAVE_SHARED_CONDITIONAL
 else
    AM_LDFLAGS+=-static
 endif

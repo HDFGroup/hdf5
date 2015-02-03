@@ -29,7 +29,7 @@ AM_FCFLAGS+=-I$(top_srcdir)/fortran/src -I$(top_srcdir)/fortran/test $(F9XMODFLA
 # pass the -static flag to the library linker.
 # (Actually, we historically have bad luck combining shared libraries with
 # parallel code.  But you're welcome to try...)
-if FORTRAN_SHARED_CONDITIONAL
+if HAVE_SHARED_CONDITIONAL
 else
    AM_LDFLAGS+=-static
 endif
