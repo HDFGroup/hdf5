@@ -40,11 +40,6 @@ MODULE H5O_PROVISIONAL
 
   IMPLICIT NONE
 
-  enum, bind(c)
-     enumerator :: H5O_TYPE_UNKNOWN_F = -1
-     enumerator :: H5O_TYPE_GROUP_F, H5O_TYPE_DATASET_F, H5O_TYPE_NAMED_DATATYPE_F, H5O_TYPE_NTYPES_F
-  end enum
-
 !****t* H5T (F03)/h5o_info_t
 !
 ! Fortran2003 Derived Type:
