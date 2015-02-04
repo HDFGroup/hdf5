@@ -2473,7 +2473,6 @@ h5dvlen_reclaim_c(hid_t_f *type_id, hid_t_f *space_id, hid_t_f *plist_id, void *
  *  Calls H5Dread_multi
  *
  * INPUTS
- *  file_id - file or group id for the location of datasets.
  *  dxpl_id - dataset transfer property.
  *  count   - the number of accessing datasets.
  * OUTPUTS
@@ -2487,14 +2486,14 @@ h5dvlen_reclaim_c(hid_t_f *type_id, hid_t_f *space_id, hid_t_f *plist_id, void *
  * SOURCE
 */
 int_f
-nh5dread_multi_c(hid_t_f *file_id, hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info)
+nh5dread_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info)
 /******/
 {
   int ret_value = -1;
   /*
    * Call H5Dread_multi function.
    */
-  if( (H5Dread_multi((hid_t)*file_id, (hid_t)*dxpl_id, (size_t)*count, info )) <0 )
+  if( (H5Dread_multi((hid_t)*dxpl_id, (size_t)*count, info )) <0 )
     return ret_value; /* error occurred */
 
   ret_value = 0;
@@ -2508,7 +2507,6 @@ nh5dread_multi_c(hid_t_f *file_id, hid_t_f *dxpl_id, size_t_f *count, H5D_rw_mul
  *  Calls H5Dwrite_multi
  *
  * INPUTS
- *  file_id - file or group id for the location of datasets,
  *  count   - the number of accessing datasets.
  *  dxpl_id - dataset transfer property.
  *  Info    - the array of dataset information and write buffer.
@@ -2521,14 +2519,14 @@ nh5dread_multi_c(hid_t_f *file_id, hid_t_f *dxpl_id, size_t_f *count, H5D_rw_mul
  * SOURCE
 */
 int_f
-nh5dwrite_multi_c(hid_t_f *file_id, hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info)
+nh5dwrite_multi_c(hid_t_f *dxpl_id, size_t_f *count, H5D_rw_multi_t_f *info)
 /******/
 {
   int ret_value = -1;
   /*
    * Call H5Dwrite_multi function.
    */
-  if( (H5Dwrite_multi((hid_t)*file_id, (hid_t)*dxpl_id, (size_t)*count, info )) <0 )
+  if( (H5Dwrite_multi((hid_t)*dxpl_id, (size_t)*count, info )) <0 )
     return ret_value; /* error occurred */
 
   ret_value = 0;

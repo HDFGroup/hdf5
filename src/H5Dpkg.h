@@ -576,9 +576,6 @@ H5_DLL herr_t H5D__get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D__mark(const H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset, hid_t dxpl_id);
-H5_DLL herr_t H5D__init_dset_info(H5D_dset_info_t *dset_info, hid_t dset_id,
-                                  hid_t mem_type_id, hid_t mem_space_id, hid_t dset_space_id,
-                                  const H5D_dset_buf_t *u_buf);
 
 /* Functions to do I/O */
 H5_DLL herr_t H5D__read(hid_t file_id, hid_t dxpl_id, size_t count,

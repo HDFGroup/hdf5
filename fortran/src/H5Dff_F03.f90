@@ -2407,7 +2407,6 @@ CONTAINS
 !  Reads data from a file to memory buffers for multiple datasets
 !
 ! INPUTS
-!  file_id - file or group id for the location of datasets.
 !  dxpl_id - dataset transfer property.
 !  count   - the number of accessing datasets.
 !
@@ -2418,12 +2417,11 @@ CONTAINS
 !  March 25, 2014
 !
 ! SOURCE
-  SUBROUTINE H5Dread_multi_f(file_id, dxpl_id, count, info, hdferr)
+  SUBROUTINE H5Dread_multi_f(dxpl_id, count, info, hdferr)
 
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
 
-    INTEGER(HID_T),       INTENT(IN)                      :: file_id
     INTEGER(SIZE_T),      INTENT(IN)                      :: count
     TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(1:count) :: info
     INTEGER(HID_T),       INTENT(IN)                      :: dxpl_id
@@ -2431,21 +2429,20 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION H5Dread_multi_c(file_id, dxpl_id, count, info)
+       INTEGER FUNCTION H5Dread_multi_c(dxpl_id, count, info)
          USE H5GLOBAL
          USE, INTRINSIC :: ISO_C_BINDING
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_MULTI_C':: h5dread_multi_c
          !DEC$ENDIF
          IMPORT :: H5D_rw_multi_t
-         INTEGER(HID_T), INTENT(IN) :: file_id
          INTEGER(HID_T),       INTENT(IN)                :: dxpl_id
          INTEGER(SIZE_T),      INTENT(IN)                :: count
          TYPE(H5D_rw_multi_t), INTENT(OUT), DIMENSION(1:count) :: info
        END FUNCTION H5Dread_multi_c
     END INTERFACE
 
-    hdferr = H5Dread_multi_c(file_id, dxpl_id, count, info)
+    hdferr = H5Dread_multi_c(dxpl_id, count, info)
 
   END SUBROUTINE H5Dread_multi_f
 
@@ -2458,7 +2455,6 @@ CONTAINS
 !  Writes data in memory to a file for multiple datasets
 !
 ! INPUTS
-!  file_id - file or group id for the location of datasets,
 !  count   - the number of accessing datasets.
 !  dxpl_id - dataset transfer property.
 !
@@ -2469,12 +2465,11 @@ CONTAINS
 !  March 25, 2014
 !
 ! SOURCE
-  SUBROUTINE H5Dwrite_multi_f(file_id, dxpl_id, count, info, hdferr)
+  SUBROUTINE H5Dwrite_multi_f(dxpl_id, count, info, hdferr)
 
     USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
 
-    INTEGER(HID_T),       INTENT(IN)                     :: file_id
     INTEGER(HID_T),       INTENT(IN)                     :: dxpl_id
     INTEGER(SIZE_T),      INTENT(IN)                     :: count
     TYPE(H5D_rw_multi_t), INTENT(IN), DIMENSION(1:count) :: info
@@ -2482,21 +2477,20 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION H5Dwrite_multi_c(file_id, dxpl_id, count, info)
+       INTEGER FUNCTION H5Dwrite_multi_c(dxpl_id, count, info)
          USE H5GLOBAL
          USE, INTRINSIC :: ISO_C_BINDING
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_MULTI_C':: h5dwrite_multi_c
          !DEC$ENDIF
          IMPORT :: H5D_rw_multi_t
-         INTEGER(HID_T), INTENT(IN) :: file_id
          INTEGER(HID_T),       INTENT(IN)                :: dxpl_id
          INTEGER(SIZE_T),      INTENT(IN)                :: count
          TYPE(H5D_rw_multi_t), INTENT(IN), DIMENSION(1:count) :: info
        END FUNCTION H5Dwrite_multi_c
     END INTERFACE
 
-    hdferr = H5Dwrite_multi_c(file_id, dxpl_id, count, info)
+    hdferr = H5Dwrite_multi_c(dxpl_id, count, info)
 
   END SUBROUTINE H5Dwrite_multi_f
 

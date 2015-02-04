@@ -148,10 +148,10 @@ H5_DLL hsize_t H5Dget_storage_size(hid_t dset_id);
 H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
 H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
-H5_DLL herr_t H5Dread_multi(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info);
+H5_DLL herr_t H5Dread_multi(hid_t dxpl_id, size_t count, H5D_rw_multi_t *info);
 H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     hid_t file_space_id, hid_t plist_id, const void *buf);
-H5_DLL herr_t H5Dwrite_multi(hid_t file_id, hid_t dxpl_id, size_t count, const H5D_rw_multi_t *info);
+H5_DLL herr_t H5Dwrite_multi(hid_t dxpl_id, size_t count, const H5D_rw_multi_t *info);
 H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
     H5D_operator_t op, void *operator_data);
 H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);

@@ -473,7 +473,7 @@ test_pmdset(size_t niter, unsigned flags)
                         multi_info[k].u.rbuf = rbufi[k][0];
 
                     /* Read datasets */
-                    if(H5Dread_multi(file_id, dxpl_id, ndsets, multi_info) < 0)
+                    if(H5Dread_multi(dxpl_id, ndsets, multi_info) < 0)
                         T_PMD_ERROR
                 } /* end if */
                 else
@@ -492,7 +492,7 @@ test_pmdset(size_t niter, unsigned flags)
                         multi_info[k].u.wbuf = wbufi[k][0];
 
                     /* Write datasets */
-                    if(H5Dwrite_multi(file_id, dxpl_id, ndsets, multi_info) < 0)
+                    if(H5Dwrite_multi(dxpl_id, ndsets, multi_info) < 0)
                         T_PMD_ERROR
                 } /* end if */
                 else

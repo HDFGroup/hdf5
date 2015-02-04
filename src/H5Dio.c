@@ -105,7 +105,7 @@ H5FL_BLK_DEFINE(type_conv);
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D__init_dset_info(H5D_dset_info_t *dset_info, hid_t dset_id,
     hid_t mem_type_id, hid_t mem_space_id, hid_t dset_space_id,
     const H5D_dset_buf_t *u_buf)
@@ -157,6 +157,28 @@ H5D__init_dset_info(H5D_dset_info_t *dset_info, hid_t dset_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__init_dset_info() */
+
+static hid_t
+H5D__verify_location(size_t count, const H5D_dset_info_t *info)
+{
+    hid_t file_id;
+    size_t u;
+    hid_t ret_value = FAIL;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    file_id = H5F_FILE_ID(info[0].dset->oloc.file);
+
+    for(u = 1; u < count; u++) {
+        if(file_id != H5F_FILE_ID(info[u].dset->oloc.file))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset's file ID doesn't match file_id parameter")
+    } /* end for */
+
+    ret_value = file_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__verify_location */
 
 
 /*-------------------------------------------------------------------------
@@ -247,14 +269,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dread_multi(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
+H5Dread_multi(hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
 {
     H5D_dset_info_t *dset_info = NULL;  /* Pointer to internal list of multi-dataset info */
     size_t u;                           /* Local index variable */
+    hid_t file_id;                      /* file ID where datasets are located */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iiz*Dm", file_id, dxpl_id, count, info);
+    H5TRACE3("e", "iiz*Dm", dxpl_id, count, info);
+
+    if(count <= 0)
+        HGOTO_DONE(SUCCEED)
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
@@ -273,11 +299,10 @@ H5Dread_multi(hid_t file_id, hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
         if(H5D__init_dset_info(&dset_info[u], info[u].dset_id, info[u].mem_type_id, info[u].mem_space_id, 
                                info[u].dset_space_id, &(info[u].u.rbuf)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
-
-        /* Verify file_id */
-        if(file_id != H5F_FILE_ID(dset_info[u].dset->oloc.file))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset's file ID doesn't match file_id parameter")
     } /* end for */
+
+    if((file_id = H5D__verify_location(count, dset_info)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datasets are not in the same file")
 
     /* Call common pre-read routine */
     if(H5D__pre_read(file_id, dxpl_id, count, dset_info) < 0) 
@@ -466,14 +491,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite_multi(hid_t file_id, hid_t dxpl_id, size_t count, const H5D_rw_multi_t *info)
+H5Dwrite_multi(hid_t dxpl_id, size_t count, const H5D_rw_multi_t *info)
 {
     H5D_dset_info_t *dset_info = NULL;  /* Pointer to internal list of multi-dataset info */
     size_t u;                           /* Local index variable */
+    hid_t file_id;                      /* file ID where datasets are located */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iiz*Dm", file_id, dxpl_id, count, info);
+    H5TRACE3("e", "iiz*Dm", dxpl_id, count, info);
+
+    if(count <= 0)
+        HGOTO_DONE(SUCCEED)
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
@@ -492,11 +521,10 @@ H5Dwrite_multi(hid_t file_id, hid_t dxpl_id, size_t count, const H5D_rw_multi_t 
         if(H5D__init_dset_info(&dset_info[u], info[u].dset_id, info[u].mem_type_id, info[u].mem_space_id, 
                                info[u].dset_space_id, &(info[u].u.wbuf)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
+    }
 
-        /* Verify file_id */
-        if(file_id != H5F_FILE_ID(dset_info[u].dset->oloc.file))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset's file ID doesn't match file_id parameter")
-    } /* end for */
+    if((file_id = H5D__verify_location(count, dset_info)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datasets are not in the same file")
 
     /* Call common pre-write routine */
     if(H5D__pre_write(file_id, dxpl_id, count, dset_info) < 0) 

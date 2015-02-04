@@ -46,12 +46,104 @@
 
 const char *FILENAME[] = {
     "mdset",
+    "mdset1",
+    "mdset2",
     NULL
 };
 
 /* Names for datasets */
 char dset_name[MAX_DSETS][DSET_MAX_NAME_LEN];
 
+static int
+test_mdset_location(hid_t fapl_id)
+{
+    hid_t   file_id1, file_id2;
+    herr_t  ret;
+    H5D_rw_multi_t multi_info[2];
+    hsize_t dset_dims[2];
+    int     *buf = NULL;
+    char    filename1[NAME_BUF_SIZE];
+    char    filename2[NAME_BUF_SIZE];
+
+    TESTING("mdset location");
+
+    h5_fixname(FILENAME[1], fapl_id, filename1, sizeof filename1);
+    h5_fixname(FILENAME[2], fapl_id, filename2, sizeof filename2);
+
+    /* Create files */
+    if((file_id1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR
+    if((file_id2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR
+
+    if(NULL == (buf = (int *)HDcalloc(2 * MAX_DSET_X * MAX_DSET_Y, sizeof(int))))
+        TEST_ERROR
+
+    /* Generate memory dataspace */
+    dset_dims[0] = MAX_DSET_X;
+    dset_dims[1] = MAX_DSET_Y;
+    if((multi_info[0].dset_space_id = H5Screate_simple(2, dset_dims, NULL)) < 0)
+        TEST_ERROR
+    if((multi_info[1].dset_space_id = H5Screate_simple(2, dset_dims, NULL)) < 0)
+        TEST_ERROR
+
+    multi_info[0].mem_space_id = H5S_ALL;
+    multi_info[1].mem_space_id = H5S_ALL;
+
+    multi_info[0].mem_type_id = H5T_NATIVE_UINT;
+    multi_info[1].mem_type_id = H5T_NATIVE_UINT;
+
+    if((multi_info[0].dset_id = H5Dcreate2(file_id1, dset_name[0], H5T_NATIVE_UINT, 
+                                           multi_info[0].dset_space_id, H5P_DEFAULT, 
+                                           H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if((multi_info[1].dset_id = H5Dcreate2(file_id2, dset_name[1], H5T_NATIVE_UINT, 
+                                           multi_info[1].dset_space_id, H5P_DEFAULT, 
+                                           H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    multi_info[0].u.wbuf = buf;
+    multi_info[1].u.wbuf = buf + (MAX_DSET_X * MAX_DSET_Y);
+
+    H5E_BEGIN_TRY {
+        ret = H5Dwrite_multi(H5P_DEFAULT, 2, multi_info);
+    } H5E_END_TRY
+
+    if(ret >= 0) {
+        fprintf(stderr, "H5Dmulti_write with datasets in multiple files should fail.\n");
+        TEST_ERROR
+    }
+
+    multi_info[0].u.rbuf = buf;
+    multi_info[1].u.rbuf = buf + (MAX_DSET_X * MAX_DSET_Y);
+
+    H5E_BEGIN_TRY {
+        ret = H5Dread_multi(H5P_DEFAULT, 2, multi_info);
+    } H5E_END_TRY
+
+    if(ret >= 0) {
+        fprintf(stderr, "H5Dmulti_read with datasets in multiple files should fail.\n");
+        TEST_ERROR
+    }
+
+    H5Dclose(multi_info[0].dset_id);
+    H5Sclose(multi_info[0].dset_space_id);
+    H5Dclose(multi_info[1].dset_id);
+    H5Sclose(multi_info[1].dset_space_id);
+    H5Fclose(file_id1);
+    H5Fclose(file_id2);
+
+    if(buf)
+        free(buf);
+
+    PASSED();
+    return 0;
+
+error:
+    if(buf)
+        free(buf);
+    return -1;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    test_mdset
@@ -305,7 +397,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                         multi_info[k].u.rbuf = rbufi[k][0];
 
                     /* Read datasets */
-                    if(H5Dread_multi(file_id, H5P_DEFAULT, ndsets, multi_info) < 0)
+                    if(H5Dread_multi(H5P_DEFAULT, ndsets, multi_info) < 0)
                         TEST_ERROR
                 } /* end if */
                 else
@@ -324,7 +416,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                         multi_info[k].u.wbuf = wbufi[k][0];
 
                     /* Write datasets */
-                    if(H5Dwrite_multi(file_id, H5P_DEFAULT, ndsets, multi_info) < 0)
+                    if(H5Dwrite_multi(H5P_DEFAULT, ndsets, multi_info) < 0)
                         TEST_ERROR
                 } /* end if */
                 else
@@ -444,6 +536,9 @@ main(void)
     
         nerrors += test_mdset(100, i, fapl_id);
     }
+
+    /* test all datasets in same container */
+    nerrors += test_mdset_location(fapl_id);
 
     h5_cleanup(FILENAME, fapl_id);
 

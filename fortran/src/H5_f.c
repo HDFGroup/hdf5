@@ -471,14 +471,11 @@ nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 /*
  *  H5G flags
  */
-
-    h5g_flags[0] = (int_f)H5O_TYPE_UNKNOWN;
-    h5g_flags[1] = (int_f)H5O_TYPE_GROUP;
-    h5g_flags[2] = (int_f)H5O_TYPE_DATASET;
-    h5g_flags[3] = (int_f)H5O_TYPE_NAMED_DATATYPE;
-/* This value can no longer be returned and all these flags should be updated
- *      to reflect the refinements between links and objects. -QAK */
-/*      h5g_flags[4] = H5G_LINK; */
+    h5g_flags[0] = (int_f)H5O_TYPE_UNKNOWN; /* H5G_UNKNOWN is deprecated */
+    h5g_flags[1] = (int_f)H5O_TYPE_GROUP; /* H5G_GROUP is deprecated  */
+    h5g_flags[2] = (int_f)H5O_TYPE_DATASET; /* H5G_DATASET is deprecated  */
+    h5g_flags[3] = (int_f)H5O_TYPE_NAMED_DATATYPE; /* H5G_TYPE is deprecated  */
+    h5g_flags[4] = (int_f)H5L_SAME_LOC;
     h5g_flags[5] = (int_f)H5L_TYPE_ERROR;
     h5g_flags[6] = (int_f)H5L_TYPE_HARD;
     h5g_flags[7] = (int_f)H5L_TYPE_SOFT;
@@ -491,7 +488,6 @@ nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 /*
  *  H5I flags
  */
-
     h5i_flags[0] = (int_f)H5I_FILE;
     h5i_flags[1] = (int_f)H5I_GROUP;
     h5i_flags[2] = (int_f)H5I_DATATYPE;
@@ -551,10 +547,15 @@ nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
       h5o_flags[20] = (int_f)H5O_SHMESG_MAX_NINDEXES;
       h5o_flags[21] = (int_f)H5O_SHMESG_MAX_LIST_SIZE;
 
+/* Types of objects in file */
+      h5o_flags[22] = (int_f)H5O_TYPE_UNKNOWN;	      /* Unknown object type */
+      h5o_flags[23] = (int_f)H5O_TYPE_GROUP;          /* Object is a group */
+      h5o_flags[24] = (int_f)H5O_TYPE_DATASET;        /* Object is a dataset */
+      h5o_flags[25] = (int_f)H5O_TYPE_NAMED_DATATYPE; /* Object is a named data type */
+      h5o_flags[26] = (int_f)H5O_TYPE_NTYPES;         /* Number of different object types */
 /*
  *  H5P flags
  */
-
       h5p_flags[0] = (hid_t_f)H5P_FILE_CREATE;
       h5p_flags[1] = (hid_t_f)H5P_FILE_ACCESS;
       h5p_flags[2] = (hid_t_f)H5P_DATASET_CREATE;

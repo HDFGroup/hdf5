@@ -149,7 +149,7 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   !
   ! Write the dataset collectively. 
   !
-  CALL h5dwrite_multi_f(file_id, plist_id, mpi_size, info_md, error)
+  CALL h5dwrite_multi_f(plist_id, mpi_size, info_md, error)
   CALL check("h5dwrite_multi_f", error, nerrors)
 
   DO i = 1, mpi_size
@@ -157,7 +157,7 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
      info_md(i)%buf = C_LOC(rdata(1,1,i))
   ENDDO
 
-  CALL H5Dread_multi_f(file_id, plist_id, mpi_size, info_md, error)
+  CALL H5Dread_multi_f(plist_id, mpi_size, info_md, error)
   CALL check("h5dread_multi_f", error, nerrors)
 
   DO i = 1, mpi_size
