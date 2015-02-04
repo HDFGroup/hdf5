@@ -471,21 +471,19 @@ nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 /*
  *  H5G flags
  */
-    h5g_flags[0] = (int_f)H5G_UNKNOWN;
-    h5g_flags[1] = (int_f)H5G_GROUP;
-    h5g_flags[2] = (int_f)H5G_DATASET;
-    h5g_flags[3] = (int_f)H5G_TYPE;
-    h5g_flags[4] = (int_f)H5G_LINK;
-    h5g_flags[5] = (int_f)H5G_UDLINK;
-    h5g_flags[6] = (int_f)H5L_SAME_LOC;
-    h5g_flags[7] = (int_f)H5L_TYPE_ERROR;
-    h5g_flags[8] = (int_f)H5L_TYPE_HARD;
-    h5g_flags[9] = (int_f)H5L_TYPE_SOFT;
+    h5g_flags[0] = (int_f)H5O_TYPE_UNKNOWN; /* H5G_UNKNOWN is deprecated */
+    h5g_flags[1] = (int_f)H5O_TYPE_GROUP; /* H5G_GROUP is deprecated  */
+    h5g_flags[2] = (int_f)H5O_TYPE_DATASET; /* H5G_DATASET is deprecated  */
+    h5g_flags[3] = (int_f)H5O_TYPE_NAMED_DATATYPE; /* H5G_TYPE is deprecated  */
+    h5g_flags[4] = (int_f)H5L_SAME_LOC;
+    h5g_flags[5] = (int_f)H5L_TYPE_ERROR;
+    h5g_flags[6] = (int_f)H5L_TYPE_HARD;
+    h5g_flags[7] = (int_f)H5L_TYPE_SOFT;
 
-    h5g_flags[10] = (int_f)H5G_STORAGE_TYPE_UNKNOWN;
-    h5g_flags[11] = (int_f)H5G_STORAGE_TYPE_SYMBOL_TABLE;
-    h5g_flags[12] = (int_f)H5G_STORAGE_TYPE_COMPACT;
-    h5g_flags[13] = (int_f)H5G_STORAGE_TYPE_DENSE;
+    h5g_flags[8] = (int_f)H5G_STORAGE_TYPE_UNKNOWN;
+    h5g_flags[9] = (int_f)H5G_STORAGE_TYPE_SYMBOL_TABLE;
+    h5g_flags[10] = (int_f)H5G_STORAGE_TYPE_COMPACT;
+    h5g_flags[11] = (int_f)H5G_STORAGE_TYPE_DENSE;
 
 /*
  *  H5I flags
