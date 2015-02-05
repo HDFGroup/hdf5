@@ -104,7 +104,7 @@ AC_DEFUN([PAC_PROG_CXX_OFFSETOF],[
 
 dnl Checking if C++ can handle static cast
 
-AC_DEFUN([PAC_PROG_CXX_STAIC_CAST],[
+AC_DEFUN([PAC_PROG_CXX_STATIC_CAST],[
   AC_MSG_CHECKING([if $CXX can handle static cast])
   AC_LINK_IFELSE([AC_LANG_SOURCE([
 int main(void) {

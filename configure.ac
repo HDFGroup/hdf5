@@ -505,7 +505,7 @@ if test "X$HDF_CXX" = "Xyes"; then
   PAC_PROG_CXX_OFFSETOF
 
   # if C++ can handle static cast
-  PAC_PROG_CXX_STAIC_CAST
+  PAC_PROG_CXX_STATIC_CAST
 
 else
   AC_MSG_RESULT([no])
