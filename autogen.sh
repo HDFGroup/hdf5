@@ -218,10 +218,9 @@ PATH=${AUTOCONF_DIR}:${M4_DIR}:$PATH
 HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/libtoolize"
 
 # OS-X uses glibtoolize, so if libtoolize does not exist try that
-# NEED TO TEST THIS ON OS-X BEFORE MAKING IT ACTIVE
-#if test ! -e ${HDF5_LIBTOOLIZE} ; then
-#    HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/glibtoolize"
-#fi
+if test ! -e ${HDF5_LIBTOOLIZE} ; then
+    HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/glibtoolize"
+fi
 
 # Run autotools in order
 
