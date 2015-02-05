@@ -63,6 +63,7 @@ while getopts "$optspec" optchar; do
         case "${OPTARG}" in
             production)
                 echo "Setting production mode..."
+                echo
                 production=true
                 ;;
             process_source)
