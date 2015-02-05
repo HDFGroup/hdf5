@@ -46,6 +46,12 @@
 # necessary to run these if you have just updated configure.ac or
 # Makefile.am files.
 
+echo
+echo "**************************"
+echo "* HDF5 autogen.sh script *"
+echo "**************************"
+echo
+
 # Defaults are not production, don't run source processing.
 production=false
 process_source=false
@@ -177,21 +183,22 @@ else
     # Not in production mode
     #
     # If paths to autotools are not specified, use whatever the system
-    # has installed as the default.
+    # has installed as the default. We use 'which <tool>' to
+    # show exactly what's being used.
     if test -z ${HDF5_AUTOCONF}; then
-        HDF5_AUTOCONF=autoconf
+        HDF5_AUTOCONF=$(which autoconf)
     fi
     if test -z ${HDF5_AUTOMAKE}; then
-        HDF5_AUTOMAKE=automake
+        HDF5_AUTOMAKE=$(which automake)
     fi
     if test -z ${HDF5_AUTOHEADER}; then
-        HDF5_AUTOHEADER=autoheader
+        HDF5_AUTOHEADER=$(which autoheader)
     fi
     if test -z ${HDF5_ACLOCAL}; then
-        HDF5_ACLOCAL=aclocal
+        HDF5_ACLOCAL=$(which aclocal)
     fi
     if test -z ${HDF5_LIBTOOL}; then
-        HDF5_LIBTOOL=libtool
+        HDF5_LIBTOOL=$(which libtool)
     fi
     if test -z ${HDF5_M4}; then
         HDF5_M4=m4
@@ -199,27 +206,53 @@ else
 
 fi # production
 
+
 # Make sure that these versions of the autotools are in the path
 AUTOCONF_DIR=`dirname ${HDF5_AUTOCONF}`
 LIBTOOL_DIR=`dirname ${HDF5_LIBTOOL}`
 M4_DIR=`dirname ${HDF5_M4}`
 PATH=${AUTOCONF_DIR}:${M4_DIR}:$PATH
 
+# Make libtoolize match the specified libtool
+HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/libtoolize"
+
+# OS-X uses glibtoolize, so if libtoolize does not exist try that
+# NEED TO TEST THIS ON OS-X BEFORE MAKING IT ACTIVE
+#if test ! -e ${HDF5_LIBTOOLIZE} ; then
+#    HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/glibtoolize"
+#fi
+
 # Run autotools in order
+
+# Some versions of libtoolize will suggest that we add ACLOCAL_AMFLAGS
+# = '-I m4'. This is already done in commence.am, which is included
+# in Makefile.am. You can ignore this suggestion.
+
+echo ${HDF5_LIBTOOLIZE}
+${HDF5_LIBTOOLIZE} || exit 1
+echo
+echo "NOTE: You can ignore the warning about adding -I m4."
+echo "      We already do this in an included file."
+echo
+
 if test -e "${LIBTOOL_DIR}/../share/aclocal" ; then
     aclocal_include="-I ${LIBTOOL_DIR}/../share/aclocal"
 fi
 echo ${HDF5_ACLOCAL} ${aclocal_include}
 ${HDF5_ACLOCAL} ${aclocal_include} || exit 1
+echo
 
 echo ${HDF5_AUTOHEADER}
 ${HDF5_AUTOHEADER} || exit 1
+echo
 
 echo ${HDF5_AUTOMAKE} --add-missing
 ${HDF5_AUTOMAKE} --add-missing || exit 1
+echo
 
 echo ${HDF5_AUTOCONF}
 ${HDF5_AUTOCONF} || exit 1
+echo
 
 # If source processing was eanbled using -s/--process_source, run the
 # source processing scripts.
@@ -229,27 +262,28 @@ if [ "$process_source" = true ] ; then
     # The trace script adds H5TRACE macros to library source files.  It should
     # have no effect on files that don't have HDF5 API macros in them.
     echo
-    echo "    Running trace script:"
+    echo "Running trace script:"
+    echo "NOTE: NO TRACE warnings in H5E code are normal and expected."
     bin/trace src/H5*.c || exit 1
 
     # Run make_err
     # make_err automatically generates the H5E headers that create error message
     # types for HDF5.
     echo
-    echo "    Running error generation script:"
+    echo "Running error generation script:"
     bin/make_err src/H5err.txt || exit 1
 
     # Run make_vers
     # make_vers automatically generates the public headers that define the API version
     # macros for HDF5.
     echo
-    echo "    Running API version generation script:"
+    echo "Running API version generation script:"
     bin/make_vers src/H5vers.txt || exit 1
 
     # Run flex
     # automatically generates the lexical file for hl/src/H5LTanalyze.c
     echo
-    echo "    Running flex generation script:"
+    echo "Running flex generation script:"
     bin/genltanalyze || exit 1
 
 fi # process_source
