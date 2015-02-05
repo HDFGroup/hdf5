@@ -31,7 +31,7 @@ noinst_LTLIBRARIES=libh5test_fortran.la
 # Some Fortran compilers can't build shared libraries, so sometimes we
 # want to build a shared C library and a static Fortran library.  If so,
 # pass the -static flag to the library linker.
-if HAVE_SHARED_CONDITIONAL
+if FORTRAN_SHARED_CONDITIONAL
 else
    AM_LDFLAGS+=-static
 endif
