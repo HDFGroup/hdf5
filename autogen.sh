@@ -30,7 +30,7 @@
 # Note that aclocal will attempt to include libtool's share/aclocal
 # directory.
 #
-# This script takes one potential option:
+# This script takes two potential options:
 #
 # -p, --production
 #
@@ -41,6 +41,10 @@
 # NOTE: This is probably temporary. Once we update our dev machines
 # to have recent versions of the autotools this option will probably
 # be removed.
+#
+# -v, --verbose
+#
+# This emits some extra information, mainly tool versions.
 
 echo
 echo "**************************"
@@ -51,7 +55,10 @@ echo
 # Default is not production
 production=false
 
-optspec=":hp-"
+# Default is not verbose output
+verbose=false
+
+optspec=":hpv-"
 while getopts "$optspec" optchar; do
     case "${optchar}" in
     -)
@@ -60,6 +67,11 @@ while getopts "$optspec" optchar; do
                 echo "Setting production mode..."
                 echo
                 production=true
+                ;;
+            verbose)
+                echo "Setting verbosity: high"
+                echo
+                verbose=true
                 ;;
             *)
                 if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
@@ -84,6 +96,10 @@ while getopts "$optspec" optchar; do
         echo "Setting production mode..."
         production=true
         ;;
+    v)
+        echo "Setting verbosity: high"
+        verbose=true
+        ;;
     *)
         if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
             echo "Non-option argument: '-${OPTARG}'" >&2
@@ -96,18 +112,20 @@ if [ "$production" = true ] ; then
 
     # Production mode
     #
-    # Hard-code canonical HDF Group autotools locations and ensure
+    # Hard-code canonical HDF Group tool locations and ensure
     # version numbers are correct.
 
-    # Production versions of the autotools
+    # Production versions of the tools
     AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.69"
     AUTOMAKE_VERSION="automake (GNU automake) 1.14.1"
     AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.69"
     ACLOCAL_VERSION="aclocal (GNU automake) 1.14.1"
     LIBTOOL_VERSION="(GNU libtool) 2.4.2"
     M4_VERSION="m4 (GNU M4) 1.4.17"
+    BISON_VERSION="bison (GNU Bison) 2.7"
+    FLEX_VERSION="flex 2.5.37"
 
-    # If paths to autotools are not specified, assume tools are
+    # If paths to tools are not specified, assume they are
     # located in /mnt/hdf/packages and set paths accordingly.
     if test -z ${HDF5_AUTOCONF}; then
         HDF5_AUTOCONF=/mnt/hdf/packages/autoconf/autoconf-2.69/bin/autoconf
@@ -127,13 +145,19 @@ if [ "$production" = true ] ; then
     if test -z ${HDF5_M4}; then
         HDF5_M4=/mnt/hdf/packages/m4/m4-1.4.17/bin/m4
     fi
+    if test -z ${HDF5_BISON}; then
+        HDF5_BISON=/usr/hdf/bin/bison
+    fi
+    if test -z ${HDF5_FLEX}; then
+        HDF5_FLEX=/usr/hdf/bin/flex
+    fi
 
     # Check version numbers of all autotools against the "correct" versions
     AC_VERS=`${HDF5_AUTOCONF} --version 2>&1 | grep "^${AUTOCONF_VERSION}"`
     if test -z "${AC_VERS}"; then
-       echo "${HDF5_AUTOCONF} version is not ${AUTOCONF_VERSION}"
-       ${HDF5_AUTOCONF} --version
-       exit 1
+        echo "${HDF5_AUTOCONF} version is not ${AUTOCONF_VERSION}"
+        ${HDF5_AUTOCONF} --version
+        exit 1
     fi
     AM_VERS=`${HDF5_AUTOMAKE} --version 2>&1 | grep "^${AUTOMAKE_VERSION}"`
     if test -z "${AM_VERS}"; then
@@ -143,26 +167,36 @@ if [ "$production" = true ] ; then
     fi
     AH_VERS=`${HDF5_AUTOHEADER} --version 2>&1 | grep "^${AUTOHEADER_VERSION}"`
     if test -z "${AH_VERS}"; then
-       echo "${HDF5_AUTOHEADER} version is not ${AUTOHEADER_VERSION}"
-       ${HDF5_AUTOHEADER} --version
-       exit 1
+        echo "${HDF5_AUTOHEADER} version is not ${AUTOHEADER_VERSION}"
+        ${HDF5_AUTOHEADER} --version
+        exit 1
     fi
     AL_VERS=`${HDF5_ACLOCAL} --version 2>&1 | grep "^${ACLOCAL_VERSION}"`
     if test -z "${AL_VERS}"; then
-       echo "${HDF5_ACLOCAL} version is not ${ACLOCAL_VERSION}"
-       ${HDF5_ACLOCAL} --version
-       exit 1
+        echo "${HDF5_ACLOCAL} version is not ${ACLOCAL_VERSION}"
+        ${HDF5_ACLOCAL} --version
+        exit 1
     fi
     LT_VERS=`${HDF5_LIBTOOL} --version 2>&1 | grep "${LIBTOOL_VERSION}"`
     if test -z "${LT_VERS}"; then
-       echo "${HDF5_LIBTOOL} version is not ${LIBTOOL_VERSION}"
-       ${HDF5_LIBTOOL} --version
-       exit 1
+        echo "${HDF5_LIBTOOL} version is not ${LIBTOOL_VERSION}"
+        ${HDF5_LIBTOOL} --version
+        exit 1
     fi
     M4_VERS=`${HDF5_M4} --version 2>&1 | grep "${M4_VERSION}"`
     if test -z "${M4_VERS}"; then
-       echo "${HDF5_M4} version is not ${M4_VERSION}"
-       ${HDF5_M4} --version
+        echo "${HDF5_M4} version is not ${M4_VERSION}"
+        ${HDF5_M4} --version
+        exit 1
+    fi
+    BI_VERS=`${HDF5_BISON} --version 2>&1 | grep "^${BISON_VERSION}"`
+    if test -z "${BI_VERS}"; then
+       echo "${HDF5_BISON} version is not ${BISON_VERSION}"
+       exit 1
+    fi
+    FL_VERS=`${HDF5_FLEX} --version 2>&1 | grep "^${FLEX_VERSION}"`
+    if test -z "${FL_VERS}"; then
+       echo "${HDF5_FLEX} version is not ${FLEX_VERSION}"
        exit 1
     fi
 
@@ -191,6 +225,12 @@ else
     if test -z ${HDF5_M4}; then
         HDF5_M4=m4
     fi
+    if test -z ${HDF5_BISON}; then
+        HDF5_BISON=bison
+    fi
+    if test -z ${HDF5_FLEX}; then
+        HDF5_FLEX=flex
+    fi
 
 fi # production
 
@@ -199,7 +239,9 @@ fi # production
 AUTOCONF_DIR=`dirname ${HDF5_AUTOCONF}`
 LIBTOOL_DIR=`dirname ${HDF5_LIBTOOL}`
 M4_DIR=`dirname ${HDF5_M4}`
-PATH=${AUTOCONF_DIR}:${M4_DIR}:$PATH
+BISON_DIR=`dirname ${HDF5_BISON}`
+FLEX_DIR=`dirname ${HDF5_FLEX}`
+PATH=${AUTOCONF_DIR}:${M4_DIR}:${FLEX_DIR}:${BISON_DIR}:$PATH
 
 # Make libtoolize match the specified libtool
 HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/libtoolize"
@@ -216,7 +258,9 @@ fi
 # in Makefile.am. You can ignore this suggestion.
 
 echo ${HDF5_LIBTOOLIZE}
-${HDF5_LIBTOOLIZE} --version 
+if [ "$verbose" = true ] ; then
+    ${HDF5_LIBTOOLIZE} --version
+fi
 ${HDF5_LIBTOOLIZE} || exit 1
 echo
 echo "NOTE: You can ignore the warning about adding -I m4."
@@ -227,22 +271,30 @@ if test -e "${LIBTOOL_DIR}/../share/aclocal" ; then
     aclocal_include="-I ${LIBTOOL_DIR}/../share/aclocal"
 fi
 echo ${HDF5_ACLOCAL} ${aclocal_include}
-${HDF5_ACLOCAL} --version
+if [ "$verbose" = true ] ; then
+    ${HDF5_ACLOCAL} --version
+fi
 ${HDF5_ACLOCAL} ${aclocal_include} || exit 1
 echo
 
 echo ${HDF5_AUTOHEADER}
-${HDF5_AUTOHEADER} --version
+if [ "$verbose" = true ] ; then
+    ${HDF5_AUTOHEADER} --version
+fi
 ${HDF5_AUTOHEADER} || exit 1
 echo
 
 echo ${HDF5_AUTOMAKE} --add-missing
-${HDF5_AUTOMAKE} --version
+if [ "$verbose" = true ] ; then
+    ${HDF5_AUTOMAKE} --version
+fi
 ${HDF5_AUTOMAKE} --add-missing || exit 1
 echo
 
 echo ${HDF5_AUTOCONF}
-${HDF5_AUTOCONF} --version
+if [ "$verbose" = true ] ; then
+    ${HDF5_AUTOCONF} --version
+fi
 ${HDF5_AUTOCONF} || exit 1
 echo
 
@@ -270,11 +322,35 @@ echo
 echo "Running API version generation script:"
 bin/make_vers src/H5vers.txt || exit 1
 
-# Run flex
-# automatically generates the lexical file for hl/src/H5LTanalyze.c
+# Run flex and bison
+# automatically generates hl/src/H5LTanalyze.c and hl/src/H5LTparse.c
 echo
-echo "Running flex generation script:"
-bin/genltanalyze || exit 1
+echo "Running flex/bison:"
+cd hl/src
+echo "Generate hl/src/H5LTparse.c from hl/src/H5LTparse.y"
+if [ "$verbose" = true ] ; then
+    ${HDF5_BISON} --version
+fi
+${HDF5_BISON} -pH5LTyy -o H5LTparse.c -d H5LTparse.y
 
+echo "Generate hl/src/H5LTanalyze.c from hl/src/H5LTanalyze.l"
+if [ "$verbose" = true ] ; then
+    ${HDF5_FLEX} --version
+fi
+${HDF5_FLEX} --nounistd -PH5LTyy -o H5LTanalyze.c H5LTanalyze.l
+
+# fix H5LTparse.c to declare H5LTyyparse return type as an hid_t
+# instead of int.  Currently the generated function H5LTyyparse is
+# generated with a return value of type int, which is a mapping to the
+# flex yyparse function.  The return value in the HL library should be
+# an hid_t. 
+# I propose to not use flex to generate this function, but for now I am 
+# adding a perl command to find and replace this function declaration in
+# H5LTparse.c.
+perl -0777 -pi -e 's/int\nyyparse/hid_t\nyyparse/igs' H5LTparse.c
+perl -0777 -pi -e 's/int H5LTyyparse/hid_t H5LTyyparse/igs' H5LTparse.c
+cd ../..
+
+echo
 exit 0
 
