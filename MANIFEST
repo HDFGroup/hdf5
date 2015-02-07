@@ -53,7 +53,6 @@
 ./bin/deploy
 ./bin/distdep
 ./bin/errors              _DO_NOT_DISTRIBUTE_
-./bin/genltanalyze      _DO_NOT_DISTRIBUTE_
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
 ./bin/h5vers
 ./bin/install-sh
