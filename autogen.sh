@@ -117,10 +117,12 @@ while getopts "$optspec" optchar; do
         ;;
     p)
         echo "Setting production mode..."
+        echo
         production=true
         ;;
     v)
         echo "Setting verbosity: high"
+        echo
         verbose=true
         ;;
     *)
