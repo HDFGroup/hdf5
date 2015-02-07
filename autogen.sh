@@ -16,6 +16,27 @@
 # A script to reconfigure autotools for HDF5, and to recreate other
 # generated files specifc to HDF5.
 #
+# IMPORTANT OS-X NOTE
+#
+# If you are using OS-X, you will probably not have the autotools
+# installed, even if you have the XCode command-line tools. The
+# easiest way to fix this is to install them via Homebrew:
+#
+#   http://brew.sh/
+#
+# After you install the base packages, install autoconf, automake, and
+# libtool.
+#
+#   brew install autoconf
+#   brew install automake
+#   brew install libtool
+#
+# This only takes a few minutes. Note that libtool and libtoolize will
+# be glibtool and glibtoolize so as not to conflict with Apple's non-gnu
+# tools. This autogen.sh script handles this for you.
+#
+# END IMPORTANT OS-X NOTE
+#
 # If you want to use a particular version of the autotools, the paths
 # to each tool can be overridden using the following environment
 # variables:
@@ -26,6 +47,8 @@
 #   HDF5_AUTOCONF
 #   HDF5_LIBTOOL
 #   HDF5_M4
+#   HDF5_FLEX
+#   HDF5_BISON
 #
 # Note that aclocal will attempt to include libtool's share/aclocal
 # directory.
@@ -220,16 +243,24 @@ else
         HDF5_ACLOCAL=$(which aclocal)
     fi
     if test -z ${HDF5_LIBTOOL}; then
-        HDF5_LIBTOOL=$(which libtool)
+        case "`uname`" in
+        Darwin*)
+            # libtool on OS-X is non-gnu
+            HDF5_LIBTOOL=$(which glibtool)
+            ;;
+        *)
+            HDF5_LIBTOOL=$(which libtool)
+            ;;
+        esac
     fi
     if test -z ${HDF5_M4}; then
-        HDF5_M4=m4
+        HDF5_M4=$(which m4)
     fi
     if test -z ${HDF5_BISON}; then
-        HDF5_BISON=bison
+        HDF5_BISON=$(which bison)
     fi
     if test -z ${HDF5_FLEX}; then
-        HDF5_FLEX=flex
+        HDF5_FLEX=$(which flex)
     fi
 
 fi # production
@@ -241,15 +272,18 @@ LIBTOOL_DIR=`dirname ${HDF5_LIBTOOL}`
 M4_DIR=`dirname ${HDF5_M4}`
 BISON_DIR=`dirname ${HDF5_BISON}`
 FLEX_DIR=`dirname ${HDF5_FLEX}`
-PATH=${AUTOCONF_DIR}:${M4_DIR}:${FLEX_DIR}:${BISON_DIR}:$PATH
+PATH=${AUTOCONF_DIR}:${LIBTOOL_DIR}:${M4_DIR}:${FLEX_DIR}:${BISON_DIR}:$PATH
 
 # Make libtoolize match the specified libtool
-HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/libtoolize"
-
-# OS-X uses glibtoolize, so if libtoolize does not exist try that
-if test ! -e ${HDF5_LIBTOOLIZE} ; then
+case "`uname`" in
+Darwin*)
+    # libtoolize on OS-X is non-gnu
     HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/glibtoolize"
-fi
+    ;;
+*)
+    HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/libtoolize"
+    ;;
+esac
 
 # Run autotools in order
 
