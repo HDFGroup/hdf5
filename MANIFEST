@@ -32,9 +32,9 @@
 ./README.txt
 ./BRANCH.txt
 ./acsite.m4
-./autogen.sh
+./autogen.sh           _DO_NOT_DISTRIBUTE_
 ./configure.ac
-./configure.ac.orig
+./configure.ac.orig    _DO_NOT_DISTRIBUTE_
 
 ./bin/COPYING
 ./bin/buildhdf5
@@ -67,7 +67,6 @@
 ./bin/mkdirs
 ./bin/mkinstalldirs
 ./bin/newer
-./bin/reconfigure      _DO_NOT_DISTRIBUTE_
 ./bin/output_filter.sh
 ./bin/README        _DO_NOT_DISTRIBUTE_
 ./bin/release
