@@ -41,6 +41,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 #include "H5Tprivate.h"		/* Datatypes 				*/
 #include "H5Zpkg.h"		/* Data filters				*/
@@ -55,13 +56,16 @@
 #define H5D_DEF_STORAGE_CONTIG_INIT   {HADDR_UNDEF, (hsize_t)0}
 #define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_BTREE, HADDR_UNDEF,  NULL, {{HADDR_UNDEF, NULL}}}
 #define H5D_DEF_LAYOUT_CHUNK_INIT    {(unsigned)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
+#define H5D_DEF_STORAGE_VIRTUAL_INIT  {{HADDR_UNDEF, 0}, 0, NULL, 0}
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 #define H5D_DEF_STORAGE_COMPACT  {H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }}
 #define H5D_DEF_STORAGE_CONTIG   {H5D_CONTIGUOUS, { .contig = H5D_DEF_STORAGE_CONTIG_INIT }}
 #define H5D_DEF_STORAGE_CHUNK    {H5D_CHUNKED, { .chunk = H5D_DEF_STORAGE_CHUNK_INIT }}
-#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_COMPACT}
+#define H5D_DEF_STORAGE_VIRTUAL  {H5D_CHUNKED, { .chunk = H5D_DEF_STORAGE_CHUNK_INIT }}
+#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_VIRTUAL}
 #define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_CONTIG}
 #define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_CHUNK}
+#define H5D_DEF_LAYOUT_VIRTUAL  {H5D_VIRTUAL, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_VIRTUAL}
 #else /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 /* Note that the compact & chunked layout initialization values are using the
  *      contiguous layout initialization in the union, because the contiguous
@@ -71,6 +75,7 @@
 #define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
 #define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
 #define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
+#define H5D_DEF_LAYOUT_VIRTUAL  {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
 /* ========  Dataset creation properties ======== */
@@ -79,7 +84,10 @@
 #define H5D_CRT_LAYOUT_DEF         H5D_DEF_LAYOUT_CONTIG
 #define H5D_CRT_LAYOUT_ENC         H5P__dcrt_layout_enc
 #define H5D_CRT_LAYOUT_DEC         H5P__dcrt_layout_dec
+#define H5D_CRT_LAYOUT_DEL         H5P__dcrt_layout_del
+#define H5D_CRT_LAYOUT_COPY        H5P__dcrt_layout_copy
 #define H5D_CRT_LAYOUT_CMP         H5P__dcrt_layout_cmp
+#define H5D_CRT_LAYOUT_CLOSE       H5P__dcrt_layout_close
 /* Definitions for fill value.  size=0 means fill value will be 0 as
  * library default; size=-1 means fill value is undefined. */
 #define H5D_CRT_FILL_VALUE_SIZE    sizeof(H5O_fill_t)
@@ -183,10 +191,12 @@ static const H5O_efl_t H5D_def_efl_g = H5D_CRT_EXT_FILE_LIST_DEF;               
 static const H5O_layout_t H5D_def_layout_compact_g = H5D_DEF_LAYOUT_COMPACT;
 static const H5O_layout_t H5D_def_layout_contig_g = H5D_DEF_LAYOUT_CONTIG;
 static const H5O_layout_t H5D_def_layout_chunk_g = H5D_DEF_LAYOUT_CHUNK;
+static const H5O_layout_t H5D_def_layout_virtual_g = H5D_DEF_LAYOUT_VIRTUAL;
 #else /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 static H5O_layout_t H5D_def_layout_compact_g = H5D_DEF_LAYOUT_COMPACT;
 static H5O_layout_t H5D_def_layout_contig_g = H5D_DEF_LAYOUT_CONTIG;
 static H5O_layout_t H5D_def_layout_chunk_g = H5D_DEF_LAYOUT_CHUNK;
+static H5O_layout_t H5D_def_layout_virtual_g = H5D_DEF_LAYOUT_CHUNK;
 static hbool_t H5P_dcrt_def_layout_init_g = FALSE;
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
@@ -213,7 +223,7 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
     /* Register the storage layout property */
     if(H5P_register_real(pclass, H5D_CRT_LAYOUT_NAME, H5D_CRT_LAYOUT_SIZE, &H5D_def_layout_g, 
             NULL, NULL, NULL, H5D_CRT_LAYOUT_ENC, H5D_CRT_LAYOUT_DEC,
-            NULL, NULL, H5D_CRT_LAYOUT_CMP, NULL) < 0)
+            H5D_CRT_LAYOUT_DEL, H5D_CRT_LAYOUT_COPY, H5D_CRT_LAYOUT_CMP, H5D_CRT_LAYOUT_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the fill value property */
@@ -444,6 +454,9 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             for(u = 0; u < layout->u.chunk.ndims; u++)
                 UINT32ENCODE(*pp, layout->u.chunk.dim[u])
         } /* end if */
+        else if(H5D_VIRTUAL == layout->type) {
+            HDassert(0 && "Not yet implemented...");//VDSINC
+        } /* end else */
     } /* end if */
 
     /* Size of layout type */
@@ -531,6 +544,10 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
             }
             break;
 
+        case H5D_VIRTUAL:
+            HDassert(0 && "Not yet implemented...");//VDSINC
+            break;
+
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
@@ -543,6 +560,66 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dcrt_layout_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dcrt_layout_del
+ *
+ * Purpose:     Frees memory used to store the layout property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Never fails
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, Feb 10, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dcrt_layout_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(value);
+
+    (void)H5O_msg_free(H5O_LAYOUT_ID, value)
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dcrt_layout_del() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5P__dcrt_layout_copy
+ *
+ * Purpose:     Copy the layout property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, Feb 9, 2015
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dcrt_layout_copy(const char UNUSED *name, size_t UNUSED size, void *value)
+{
+    H5O_layout_t    *layout;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    HDassert(value);
+
+    layout = (H5O_layout_t *)value;
+
+    if(layout->type == H5D_VIRTUAL)
+        if(H5D_virtual_copy_layout(layout) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual layout")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__dcrt_layout_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -605,6 +682,10 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t UNUSED s
             } /* end case */
             break;
 
+        case H5D_VIRTUAL:
+            HDassert(0 && "Not yet implemented...");//VDSINC
+            break;
+
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
@@ -614,6 +695,32 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t UNUSED s
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dcrt_layout_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dcrt_layout_close
+ *
+ * Purpose:     Frees memory used to store the layout property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Never fails
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, Feb 10, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dcrt_layout_close(const char UNUSED *name, size_t UNUSED size, void *value)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(value);
+
+    (void)H5O_msg_free(H5O_LAYOUT_ID, value)
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dcrt_layout_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -1141,6 +1248,10 @@ H5P__set_layout(H5P_genplist_t *plist, const H5O_layout_t *layout)
                 fill.alloc_time = H5D_ALLOC_TIME_INCR;
                 break;
 
+            case H5D_VIRTUAL:
+                fill.alloc_time = H5D_ALLOC_TIME_INCR;
+                break;
+
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
             default:
@@ -1181,6 +1292,7 @@ H5P__init_def_layout(void)
     const H5O_layout_chunk_t def_layout_chunk = H5D_DEF_LAYOUT_CHUNK_INIT;
     const H5O_storage_compact_t def_store_compact = H5D_DEF_STORAGE_COMPACT_INIT;
     const H5O_storage_chunk_t def_store_chunk = H5D_DEF_STORAGE_CHUNK_INIT;
+    const H5O_storage_virtual_t def_store_virtual = H5D_DEF_STORAGE_VIRTUAL_INIT;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1188,6 +1300,7 @@ H5P__init_def_layout(void)
     H5D_def_layout_compact_g.storage.u.compact = def_store_compact;
     H5D_def_layout_chunk_g.u.chunk = def_layout_chunk;
     H5D_def_layout_chunk_g.storage.u.chunk = def_store_chunk;
+    H5D_def_layout_virtual_g.storage.u.virtual = def_store_virtual;
 
     /* Note that we've initialized the default values */
     H5P_dcrt_def_layout_init_g = TRUE;
@@ -1255,6 +1368,10 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout_type)
 
         case H5D_CHUNKED:
             layout = &H5D_def_layout_chunk_g;
+            break;
+
+        case H5D_VIRTUAL:
+            layout = &H5D_def_layout_virtual_g;
             break;
 
         case H5D_LAYOUT_ERROR:

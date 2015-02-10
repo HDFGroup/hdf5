@@ -372,7 +372,8 @@ typedef struct H5O_efl_t {
  *      for larger chunk dimensions, stores chunk indices into their own
  *      message (the "layout index" message), adds features for compact/dense
  *      storage of elements and/or chunk records, adds features for abbreviating
- *      the storage used for partial chunks on boundaries, etc.
+ *      the storage used for partial chunks on boundaries, adds the virtual
+ *      layout type, etc.
  */
 #define H5O_LAYOUT_VERSION_4	4
 
@@ -410,12 +411,36 @@ typedef struct H5O_storage_compact_t {
     void        *buf;                   /* Buffer for compact dataset        */
 } H5O_storage_compact_t;
 
+typedef struct H5O_storage_virtual_ent_t {
+    /* Stored */
+    char        *source_file;
+    char        *source_dset;
+    H5S_t       *source_select;
+    H5S_t       *virtual_select;
+
+    /* Not stored */
+    H5D_t       *source_dset;
+} H5O_storage_virtual_ent_t;
+
+typedef struct H5O_storage_virtual_t {
+    /* Stored in message */
+    H5HG_t      serial_list_hobjid;
+
+    /* Stored in heap */
+    size_t      list_nused;             /* Number of slots used               */
+    H5O_storage_virtual_ent_t *list;    /* Array of virtual dataset mapping entries */
+
+    /* Not stored */
+    size_t      list_nalloc;            /* Number of slots allocated          */
+} H5O_storage_virtual_t;
+
 typedef struct H5O_storage_t {
     H5D_layout_t type;			/* Type of layout                    */
     union {
         H5O_storage_contig_t contig;    /* Information for contiguous storage */
         H5O_storage_chunk_t chunk;      /* Information for chunked storage    */
         H5O_storage_compact_t compact;  /* Information for compact storage    */
+        H5O_storage_virtual_t virtual;  /* Information for virtual storage    */
     } u;
 } H5O_storage_t;
 

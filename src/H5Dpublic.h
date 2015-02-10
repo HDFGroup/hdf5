@@ -51,6 +51,7 @@ typedef enum H5D_layout_t {
     H5D_COMPACT		= 0,	/*raw data is very small		     */
     H5D_CONTIGUOUS	= 1,	/*the default				     */
     H5D_CHUNKED		= 2,	/*slow and fancy			     */
+    H5D_VIRTUAL         = 3,    /*actual data is stored in other datasets     */
     H5D_NLAYOUTS	= 3	/*this one must be last!		     */
 } H5D_layout_t;
 
