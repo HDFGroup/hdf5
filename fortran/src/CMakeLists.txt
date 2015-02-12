@@ -132,7 +132,6 @@ if (H5_HAVE_PARALLEL)
       ${HDF5_F90_SRC_SOURCE_DIR}/H5FDmpiof.c
   )
 endif (H5_HAVE_PARALLEL)
-
 set_source_files_properties (${f90CStub_C_SRCS} PROPERTIES LANGUAGE C)
 
 set (f90CStub_C_HDRS
@@ -224,6 +223,7 @@ else (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.f90
   )
 endif (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
+set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 
 #-----------------------------------------------------------------------------
 # Add Main fortran library
@@ -255,6 +255,7 @@ set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF
 H5_SET_LIB_OPTIONS (${HDF5_F90_LIB_TARGET} ${HDF5_F90_LIB_NAME} ${LIB_TYPE})
 set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES
     FOLDER libraries/fortran
+    LINKER_LANGUAGE Fortran
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
