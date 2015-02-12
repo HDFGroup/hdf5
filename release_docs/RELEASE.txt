@@ -1216,23 +1216,23 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows 7                     Visual Studio 2008 w/ Intel Fortran 14 (cmake)
+    Windows 7                     Visual Studio 2008 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 14 (cmake)
-                                  Visual Studio 2012 w/ Intel Fortran 14 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 1.7.32(0.274/5/3) gcc(4.8.3) compiler and gfortran)
+                                  Visual Studio 2012 w/ Intel Fortran 15 (cmake)
+                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 1.7.34(0.285/5/3) gcc(4.9.2) compiler and gfortran)
                                   (cmake and autotools)
 
-    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 14 (cmake)
+    Windows 7 x64                 Visual Studio 2008 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 14 (cmake)
-                                  Visual Studio 2012 w/ Intel Fortran 14 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
+                                  Visual Studio 2012 w/ Intel Fortran 15 (cmake)
+                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   
-    Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 14 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
+    Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 15 (cmake)
+                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
 
-    Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 14 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 14 (cmake)
+    Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 15 (cmake)
+                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
 
     Mac OS X Lion 10.7.3          gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.2.1
     32- and 64-bit                g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.2.1
