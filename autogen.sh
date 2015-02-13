@@ -288,50 +288,65 @@ Darwin*)
 esac
 
 # Run autotools in order
+#
+# When available, we use the --force option to ensure all files are
+# updated. This prevents the autotools from re-running to fix dependencies
+# during the 'make' step, which can be a problem if environment variables
+# were set on the command line during autogen invocation.
 
 # Some versions of libtoolize will suggest that we add ACLOCAL_AMFLAGS
 # = '-I m4'. This is already done in commence.am, which is included
 # in Makefile.am. You can ignore this suggestion.
 
-echo ${HDF5_LIBTOOLIZE}
+# LIBTOOLIZE
+libtoolize_cmd="${HDF5_LIBTOOLIZE} --copy --force"
+echo ${libtoolize_cmd}
 if [ "$verbose" = true ] ; then
     ${HDF5_LIBTOOLIZE} --version
 fi
-${HDF5_LIBTOOLIZE} || exit 1
+${libtoolize_cmd} || exit 1
 echo
 echo "NOTE: You can ignore the warning about adding -I m4."
 echo "      We already do this in an included file."
 echo
 
+# ACLOCAL
 if test -e "${LIBTOOL_DIR}/../share/aclocal" ; then
     aclocal_include="-I ${LIBTOOL_DIR}/../share/aclocal"
 fi
-echo ${HDF5_ACLOCAL} ${aclocal_include}
+aclocal_cmd="${HDF5_ACLOCAL} --force ${aclocal_include}"
+echo ${aclocal_cmd}
 if [ "$verbose" = true ] ; then
     ${HDF5_ACLOCAL} --version
 fi
-${HDF5_ACLOCAL} ${aclocal_include} || exit 1
+${aclocal_cmd} || exit 1
 echo
 
-echo ${HDF5_AUTOHEADER}
+# AUTOHEADER
+autoheader_cmd="${HDF5_AUTOHEADER} --force"
+echo ${autoheader_cmd}
 if [ "$verbose" = true ] ; then
     ${HDF5_AUTOHEADER} --version
 fi
-${HDF5_AUTOHEADER} || exit 1
+${autoheader_cmd} || exit 1
 echo
 
-echo ${HDF5_AUTOMAKE} --add-missing
+# AUTOMAKE
+automake_cmd="${HDF5_AUTOMAKE} --force-missing"
+echo ${automake_cmd}
 if [ "$verbose" = true ] ; then
     ${HDF5_AUTOMAKE} --version
 fi
-${HDF5_AUTOMAKE} --add-missing || exit 1
+${automake_cmd} || exit 1
 echo
 
-echo ${HDF5_AUTOCONF}
+# AUTOCONF
+autoconf_cmd="${HDF5_AUTOCONF} --force"
+echo ${autoconf_cmd}
 if [ "$verbose" = true ] ; then
     ${HDF5_AUTOCONF} --version
 fi
-${HDF5_AUTOCONF} || exit 1
+${autoconf_cmd} || exit 1
 echo
 
 # Run scripts that process source.
