@@ -332,7 +332,7 @@ ${autoheader_cmd} || exit 1
 echo
 
 # AUTOMAKE
-automake_cmd="${HDF5_AUTOMAKE} --force-missing"
+automake_cmd="${HDF5_AUTOMAKE} --add-missing"
 echo ${automake_cmd}
 if [ "$verbose" = true ] ; then
     ${HDF5_AUTOMAKE} --version
