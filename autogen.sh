@@ -373,6 +373,13 @@ echo
 echo "Running API version generation script:"
 bin/make_vers src/H5vers.txt || exit 1
 
+# Run make_overflow
+# make_overflow automatically generates macros for detecting overflows for type
+# conversion.
+echo
+echo "Running overflow macro generation script:"
+bin/make_overflow src/H5overflow.txt || exit 1
+
 # Run flex and bison
 # automatically generates hl/src/H5LTanalyze.c and hl/src/H5LTparse.c
 echo
