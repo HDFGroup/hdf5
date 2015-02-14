@@ -7864,8 +7864,7 @@ fi
 
 
 ## ----------------------------------------------------------------------
-## Check that the tr utility is working properly.
-
+## Set up ${TR} which is used to process DEBUG_PKG.
 # Extract the first word of "tr", so it can be a program name with args.
 set dummy tr; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -7906,11 +7905,6 @@ $as_echo "no" >&6; }
 fi
 
 
-
-TR_TEST=`echo Test | ${TR} ${as_cr_letters}"," ${as_cr_LETTERS}" "`
-if test "X${TR_TEST}" != "XTEST"; then
-  as_fn_error $? "tr program doesn't work" "$LINENO" 5
-fi
 
 
 ## ----------------------------------------------------------------------
