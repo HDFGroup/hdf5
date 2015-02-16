@@ -131,7 +131,9 @@ Bug Fixes since HDF5-1.8.14
 
     Parallel Library
     ----------------
-    - None
+    - Fixed a potential memory error when performing parallel I/O on a dataset
+      with a single chunk, and at least one process has nothing to do.
+      (NAF - 2015/02/16)
 
     Performance
     -------------
