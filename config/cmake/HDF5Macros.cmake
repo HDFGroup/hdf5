@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-MACRO (H5_SET_LIB_OPTIONS libtarget libname libtype)
+macro (H5_SET_LIB_OPTIONS libtarget libname libtype)
   set (LIB_OUT_NAME "${libname}")
   if (${libtype} MATCHES "SHARED")
     if (WIN32)
@@ -28,4 +28,4 @@ MACRO (H5_SET_LIB_OPTIONS libtarget libname libtype)
     endif (HDF5_BUILD_WITH_INSTALL_NAME)
   endif (APPLE)
 
-ENDMACRO (H5_SET_LIB_OPTIONS)
+endmacro (H5_SET_LIB_OPTIONS)
