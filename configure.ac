@@ -160,7 +160,6 @@ AC_MSG_RESULT([done])
 ## HDF_CXX: whether C++ is enabled. Default no.
 ## CXX: C++ compiler.
 ## HDF5_HL: whether high-level library is enabled. Default is yes.
-## LARGEFILE: whether largefile support is enabled. Default yes.
 ## INSTRUMENT: whether INSTRUMENT is enabled. No default set here.
 ## CODESTACK: whether CODESTACK is enabled. Default no.
 ## HAVE_DMALLOC: whether system has dmalloc support. Default no.
@@ -181,7 +180,6 @@ AC_SUBST([FC2003]) HDF_FORTRAN2003=no
 AC_SUBST([HDF_CXX]) HDF_CXX=no
 AC_SUBST([CXX]) HDF_CXX=no
 AC_SUBST([HDF5_HL]) HDF5_HL=yes
-AC_SUBST([LARGEFILE]) LARGEFILE=yes
 AC_SUBST([INSTRUMENT])
 AC_SUBST([CODESTACK]) CODESTACK=no
 AC_SUBST([HAVE_DMALLOC]) HAVE_DMALLOC=no
@@ -778,16 +776,14 @@ fi
 ##			   a parallel library even if configure wasn't
 ##			   able to find some header file or library that
 ##			   might be required. This is defined if the
-##			   compiler looks like a parallel compiler (e.g.,
-##			   mpicc or mpcc) or if the user explicitly states
+##			   user explicitly states
 ##			   that a parallel library is being built by supplying
 ##			   the `--enable-parallel' configure switch.
 ##
 ##    PARALLEL		-- This variable is set to a non-null value if
-##			   configure thinks we're compiling a parallel
-##			   version of the library.
+##			   we're building a parallel version of the library.
 ##
-##    RUNSERIAL	-- This is a command which will be prepended to
+##    RUNSERIAL	        -- This is a command which will be prepended to
 ##			   the executable name to run the executable using
 ##			   a single process. For serial versions of the
 ##			   library this will normally be empty. For parallel
@@ -811,131 +807,6 @@ AC_SUBST([PARALLEL])
 AC_SUBST([RUNSERIAL])
 AC_SUBST([RUNPARALLEL])
 AC_SUBST([TESTPARALLEL])
-
-## ----------------------------------------------------------------------
-## If the compiler is obviously a parallel compiler then we're building
-## a parallel version of hdf5 and should define HAVE_PARALLEL. Furthermore,
-## the name of the compiler might tell us how to run the resulting
-## executable. For `mpicc' the executable should be run with `mpiexec' from
-## the same directory as mpicc if it exists.
-##
-case "$CC_BASENAME" in
-  mpicc)
-    ## The mpich compiler. Use mpiexec from the same directory if it
-    ## exists.
-    PARALLEL=mpicc
-    AC_MSG_CHECKING([for mpiexec])
-
-    ## Find the path where mpicc is located.
-    cmd="`echo $CC | cut -f1 -d' '`"
-    if (echo $cmd | grep / >/dev/null); then
-      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
-    else
-      for path in `echo $PATH | ${TR} ":" " "`; do
-        if test -x $path/$cmd; then
-          break
-        fi
-      done
-    fi
-
-    ## Is there an mpiexec at that path?
-    if test -x $path/mpiexec; then
-      AC_MSG_RESULT([$path/mpiexec])
-      RUNSERIAL="${RUNSERIAL:-none}"
-
-      if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=6}"
-      fi
-    else
-      AC_MSG_RESULT([none])
-    fi
-    ;;
-
-  mpcc|mpcc_r)
-    ## The IBM compiler
-    PARALLEL="$CC_BASENAME"
-    ;;
-
-  *)
-    ## Probably not a parallel compiler, but if `--enable-parallel'
-    ## is defined below then we're still building a parallel hdf5.
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## If the Fortran compiler is obviously a parallel compiler then we're
-## building a parallel version of hdf5 and should define HAVE_PARALLEL.
-## Furthermore, the name of the compiler might tell us how to run the
-## resulting executable. For `mpif90' the executable should be run with
-## `mpiexec' from the same directory as mpif90 if it exists.
-##
-
-if test "X$HDF_FORTRAN" = "Xyes" ; then
-  ## Change to the Fortran 90 language
-  AC_LANG_PUSH(Fortran)
-
-  case "$FC" in
-    *mpif90*)
-      ## The Fortran mpich compiler. Use mpiexec from the same directory
-      ## if it exists.
-      PARALLEL=mpif90
-      AC_MSG_CHECKING([for mpiexec])
-
-      ## Find the path where mpif90 is located.
-      cmd=`echo $FC |cut -f1 -d' '`
-      if (echo $cmd |grep / >/dev/null); then
-        path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
-      else
-        for path in `echo $PATH | ${TR} ":" " "`; do
-          if test -x $path/$cmd; then
-            break;
-          fi
-        done
-      fi
-
-      ## Is there an mpiexec at that path?
-      if test -x $path/mpiexec; then
-        AC_MSG_RESULT([$path/mpiexec])
-        RUNSERIAL="${RUNSERIAL:-none}"
-
-        if test -z "$RUNPARALLEL"; then
-          RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=6}"
-        fi
-      else
-        AC_MSG_RESULT([none])
-      fi
-      ;;
-
-    *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
-      ## The IBM compiler
-      PARALLEL="$FC"
-      ;;
-
-    *)
-      ## Probably not a parallel compiler, but if `--enable-parallel'
-      ## is defined below then we're still building a parallel hdf5.
-      ;;
-  esac
-
-  ## Change to the C language
-  AC_LANG_POP(Fortran)
-fi
-
-## -----------------------------------------------------------------------------
-## If shared libraries are being used with parallel, disable them, unless the 
-## user explicity enables them via the '--enable-shared' option.
-
-if test "X${enable_shared}" = "X" -a "X${enable_parallel}" = "Xyes"; then
-    echo '    shared libraries disabled in parallel'
-    enable_shared="no"
-elif test "X${enable_shared}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
-    echo '    shared libraries explicitly enabled by user'
-elif test "X${enable_shared}" = "X" -a "X${PARALLEL}" != "X"; then
-    echo '    shared libraries disabled when a parallel compiler is being used'
-    enable_shared="no"
-elif test "X${enable_shared}" = "Xyes" -a "X${PARALLEL}" != "X"; then
-    echo '    shared libraries explicitly enabled by user'
-fi
 
 ## ----------------------------------------------------------------------
 ## Fortran libraries are not currently supported on Mac. Disable them.
@@ -1362,96 +1233,25 @@ if test "X${enable_shared}" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
-## Test for Largefile support.
-##
-AC_MSG_CHECKING([if configure should try to set up large file support])
+## Use the macro _AC_SYS_LARGEFILE_MACRO_VALUE to test defines
+## that might need to be set for largefile support to behave 
+## correctly. This macro is defined in acsite.m4 and overrides
+## the version provided by Autoconf (as of v2.65). The custom
+## macro additionally adds the appropriate defines to AM_CPPFLAGS 
+## so that later configure checks have them visible. 
 
-AC_ARG_ENABLE([largefile],
-           [AS_HELP_STRING([--disable-largefile],
-                           [omit support for large files])])
+## Check for _FILE_OFFSET_BITS
+_AC_SYS_LARGEFILE_MACRO_VALUE([_FILE_OFFSET_BITS], [64],
+  [ac_cv_sys_file_offset_bits],
+  [Number of bits in a file offset, on hosts where this is settable.],
+  [_AC_SYS_LARGEFILE_TEST_INCLUDES])
 
-## If largefile support is enabled, then set up appropriate compiler options.
-if test "$enable_largefile" != no; then
-  AC_MSG_RESULT([yes])
-
-  ## Check for needed compiler options. This check is pulled drectly 
-  ## from autoconf's AC_SYS_LARGEFILE macro, as of Autoconf v2.65.
-  AC_CACHE_CHECK([for special C compiler options needed for large files],
-    ac_cv_sys_largefile_CC,
-    [ac_cv_sys_largefile_CC=no
-     if test "$GCC" != yes; then
-       ac_save_CC=$CC
-       while :; do
-         ## IRIX 6.2 and later do not support large files by default,
-         ## so use the C compiler's -n32 option if that helps.
-         AC_LANG_CONFTEST([AC_LANG_PROGRAM([_AC_SYS_LARGEFILE_TEST_INCLUDES])])
-         AC_COMPILE_IFELSE([], [break])
-         CC="$CC -n32"
-         AC_COMPILE_IFELSE([], [ac_cv_sys_largefile_CC=' -n32'; break])
-         break
-       done
-       CC=$ac_save_CC
-       rm -f conftest.$ac_ext
-    fi])
-  if test "$ac_cv_sys_largefile_CC" != no; then
-    CC=$CC$ac_cv_sys_largefile_CC
-  fi
-
-  ## Use the macro _AC_SYS_LARGEFILE_MACRO_VALUE to test defines
-  ## that might need to be set for largefile support to behave 
-  ## correctly. This macro is defined in acsite.m4 and overrides
-  ## the version provided by Autoconf (as of v2.65). The custom
-  ## macro additionally adds the appropriate defines to AM_CPPFLAGS 
-  ## so that later configure checks have them visible. 
-
-  ## Check for _FILE_OFFSET_BITS
-  _AC_SYS_LARGEFILE_MACRO_VALUE([_FILE_OFFSET_BITS], [64],
-    [ac_cv_sys_file_offset_bits],
-    [Number of bits in a file offset, on hosts where this is settable.],
+## Check for _LARGE_FILES
+if test "$ac_cv_sys_file_offset_bits" = unknown; then
+  _AC_SYS_LARGEFILE_MACRO_VALUE([_LARGE_FILES], [1],
+    [ac_cv_sys_large_files],
+    [Define for large files, on AIX-style hosts.],
     [_AC_SYS_LARGEFILE_TEST_INCLUDES])
-
-  ## Check for _LARGE_FILES
-  if test "$ac_cv_sys_file_offset_bits" = unknown; then
-    _AC_SYS_LARGEFILE_MACRO_VALUE([_LARGE_FILES], [1],
-      [ac_cv_sys_large_files],
-      [Define for large files, on AIX-style hosts.],
-      [_AC_SYS_LARGEFILE_TEST_INCLUDES])
-  fi
-
-  ## Now actually test to see if we can create large files after we've
-  ## checked for any needed defines.
-  AC_MSG_CHECKING([if large (64-bit) files are supported on this system.])
-  AC_CACHE_VAL([hdf5_cv_have_lfs],
-    [AC_TRY_RUN([
-      #include <stdio.h>
-      #include <unistd.h>
-      #include <stdlib.h>
-      #include <fcntl.h>
-      #define BIG_FILE (off_t)0x80000000UL 
-      int main(void) {
-        int fd;
-        if ((fd=open("test.conf", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0) exit(1);
-        if (lseek(fd, BIG_FILE, SEEK_SET)!=BIG_FILE) exit(1);
-        if (5!=write(fd, "hello", (size_t)5)) exit(1);
-        if (lseek(fd, 2*BIG_FILE, SEEK_SET) != 2*BIG_FILE) exit(1);
-        if (5!=write(fd, "hello", (size_t)5)) exit(1);
-        if (unlink("test.conf") < 0) exit(1);
-        exit(0);
-      }
-    ],[hdf5_cv_have_lfs=yes],[hdf5_cv_have_lfs=no],)])
-
-  if test "X${hdf5_cv_have_lfs}" = "Xyes"; then
-    AC_MSG_RESULT([yes])
-    LARGEFILE="yes"
-  fi 
-  if test "X${hdf5_cv_have_lfs}" = "Xno"; then
-    AC_MSG_RESULT([no])
-    LARGEFILE="no"
-  fi 
-
-else
-  LARGEFILE="no"
-  AC_MSG_RESULT([no])
 fi
 
 ## ----------------------------------------------------------------------
@@ -1459,11 +1259,9 @@ fi
 ##
 case "$host_cpu-$host_vendor-$host_os" in
   *linux*)
-    ## If largefile support is enabled, then make available various
-    ## LFS-related routines using the following _LARGEFILE*_SOURCE macros.
-    if test "X$LARGEFILE" != "Xno"; then
-        AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
-    fi
+    ## Make available various LFS-related routines using the following 
+    ## _LARGEFILE*_SOURCE macros.
+    AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
 
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
@@ -2632,10 +2430,7 @@ AC_CACHE_SAVE
 
 ## What header files and libraries do we have to look for for parallel
 ## support?  For the most part, search paths are already specified with
-## CPPFLAGS and LDFLAGS or are known to the compiler.  If the user says
-## `--disable-parallel' but specifies a known parallel compiler (like mpicc
-## or mpcc) then parallel support is enabled but configure doesn't search
-## for any parallel header files or libraries.
+## CPPFLAGS and LDFLAGS or are known to the compiler.
 ##
 AC_ARG_ENABLE([parallel],
               [AS_HELP_STRING([--enable-parallel],
@@ -2658,25 +2453,10 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## It's possible to build in parallel by specifying a parallel compiler
-## without using the --enable-parallel flag.  This isn't allowed with
-## C++ or threadsafe, either, unless the --enable-unsupported flag 
-## has also been specified.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${PARALLEL}" != "X" -a "X${enable_cxx}" = "Xyes" ; then
-    AC_MSG_ERROR([An MPI compiler is being used; --enable-cxx is not allowed. Use --enable-unsupported to override this error.])
-  fi
-  if test "X${PARALLEL}" != "X" -a "X${THREADSAFE}" = "Xyes"; then
-    AC_MSG_ERROR([An MPI compiler is being used; --enable-threadsafe is not allowed. Use --enable-unsupported to override this error.])
-  fi
-fi
-
 AC_MSG_CHECKING([for parallel support files])
 case "X-$enable_parallel" in
   X-|X-no|X-none)
-    ## Either we are not compiling for parallel or the header and
-    ## library files and locations are known to the compiler (this is
-    ## the case for a correct installation of mpicc for instance).
+    ## We are not compiling for parallel.
     AC_MSG_RESULT([skipped])
     ;;
 
@@ -2686,59 +2466,33 @@ case "X-$enable_parallel" in
     AC_MSG_RESULT([provided by compiler])
     PARALLEL=yes
 
-    ## Try link a simple MPI program.  If fail, try again with -lmpi and
-    ## -lmpich.
-    AC_TRY_LINK(, [MPI_Init()],,
-	[AC_CHECK_LIB([mpi], [MPI_Init],,
-	    [AC_CHECK_LIB([mpich], [MPI_Init],, [PARALLEL=no])])])
-
-    ## Then try link a simple MPI-IO program. If fail, try again with
-    ## -lmpio.
-    if test "X$PARALLEL" = "Xyes"; then
-      AC_TRY_LINK(, [MPI_File_open()],,
-                  [AC_CHECK_LIB([mpio], [MPI_File_open],, [PARALLEL=no])])
-    fi
+    ## Try link a simple MPI program.
+    AC_MSG_CHECKING([whether a simple MPI-IO C program can be linked])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mpi.h>]],
+                   [[ MPI_Init(0, (void *)0); 
+		      MPI_File_open(0, (void *)0, 0, 0, (void *)0);]])], 
+		   [AC_MSG_RESULT([yes])],
+	  	   [AC_MSG_RESULT([no])
+		    AC_MSG_ERROR([unable to link a simple MPI-IO C program])])
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
       ## Change to the Fortran 90 language
       AC_LANG_PUSH(Fortran)
 
-      ## Try link a simple MPI program.  If fail, try again with -lmpi.
+      ## Try link a simple MPI program.
+      AC_MSG_CHECKING([whether a simple MPI-IO Fortran program can be linked])
       AC_LINK_IFELSE([
           program main
           include 'mpif.h'
           integer:: ierr
           call mpi_file_open( ierr )
-          end],,
-          [AC_CHECK_LIB([mpi], [mpi_file_open],, [PARALLEL=no])])
-
-      ## Then try link a simple MPI-IO program.  If fail, try again with
-      ## -lmpio.
-      if test "X$PARALLEL" = "Xyes"; then
-        AC_LINK_IFELSE([
-            program main
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )
-            end],,
-            [AC_CHECK_LIB([mpio], [mpi_file_open],, [PARALLEL=no])])
-      fi
+          end],
+	  [AC_MSG_RESULT([yes])],
+	  [AC_MSG_RESULT([no])
+	   AC_MSG_ERROR([unable to link a simple MPI-IO Fortran program])])
 
       ## Change to the C language
       AC_LANG_POP(Fortran)
-    fi
-
-    ## Set RUNPARALLEL to mpiexec if not set yet.
-    ## Check for building on Cray if RUNPARALLEL is not yet set by checking
-    ## for 'aprun' command (which is the parallel job launcher, like mpiexec).
-    if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
-        ## Find the path where aprun is located.
-  	for path in `echo $PATH | ${TR} ":" " "`; do
-  	  if test -x $path/aprun; then
-            RUNPARALLEL="aprun -q -n \$\${NPROCS:=6}"
-  	    break;
-  	  fi
-	done
     fi
 
     ## Set RUNPARALLEL to mpiexec if not set yet.
@@ -2771,13 +2525,6 @@ if test -n "$PARALLEL"; then
   AC_MSG_CHECKING([prefix for running in parallel])
   AC_MSG_RESULT([$RUNPARALLEL])
 
-  ## Check that we can link a simple MPI and MPI-IO application
-  AC_MSG_CHECKING([whether a simple MPI-IO program can be linked])
-  AC_TRY_LINK(, [MPI_Init(); MPI_File_open();],
-              [AC_MSG_RESULT([yes])],
-              [AC_MSG_RESULT([no])
-              AC_MSG_ERROR([unable to link a simple MPI-IO application])])
-
   ## There *must* be some way to run in parallel even if it's just the
   ## word `none'.
   if test -z "$RUNPARALLEL"; then
@@ -2785,7 +2532,8 @@ if test -n "$PARALLEL"; then
   fi
 
   ## If RUNSERIAL or RUNPARALLEL is the word `none' then replace it with
-  ## the empty string.
+  ## the empty string. This means that no launch commands were requested, 
+  ## so we will not use any launch commands.
   if test "X$RUNSERIAL" = "Xnone"; then
     RUNSERIAL=""
   fi
@@ -2836,7 +2584,6 @@ if test -n "$PARALLEL"; then
     X-yes)
       AC_CHECK_HEADERS([mpe.h],, [unset MPE])
       AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-      AC_CHECK_LIB([lmpe], [MPE_Init_mpi_io],, [unset MPE])
       ;;
     *)
       case "$withval" in
@@ -2878,12 +2625,8 @@ if test -n "$PARALLEL"; then
         AM_LDFLAGS="$AM_LDFLAGS -L$mpe_lib"
         AC_CHECK_LIB([mpe], [MPE_Init_log],,
                      [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE])
-        AC_CHECK_LIB([lmpe], [MPE_Init_mpi_io],,
-                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE])
-
       else
         AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-        AC_CHECK_LIB([lmpe], [MPE_Init_mpi_io],, [unset MPE])
       fi
       ;;
   esac

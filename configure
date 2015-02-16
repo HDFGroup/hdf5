@@ -787,7 +787,6 @@ DIRECT_VFD
 HAVE_DMALLOC
 CODESTACK
 INSTRUMENT
-LARGEFILE
 HDF5_HL
 CXX
 HDF_CXX
@@ -905,7 +904,6 @@ enable_libtool_lock
 enable_static_exec
 enable_sharedlib_rpath
 enable_production
-enable_largefile
 with_fnord
 with_dmalloc
 with_zlib
@@ -1591,7 +1589,6 @@ Optional Features:
   --disable-sharedlib-rpath
                           Disable use of the '=Wl,-rpath' linker option
   --enable-production     Determines how to run the compiler.
-  --disable-largefile     omit support for large files
   --enable-threadsafe     Enable thread-safe capability
   --enable-debug=all      Turn on debugging in all packages. One may also
                           specify a comma-separated list of package names
@@ -4050,7 +4047,6 @@ $as_echo "done" >&6; }
 ## HDF_CXX: whether C++ is enabled. Default no.
 ## CXX: C++ compiler.
 ## HDF5_HL: whether high-level library is enabled. Default is yes.
-## LARGEFILE: whether largefile support is enabled. Default yes.
 ## INSTRUMENT: whether INSTRUMENT is enabled. No default set here.
 ## CODESTACK: whether CODESTACK is enabled. Default no.
 ## HAVE_DMALLOC: whether system has dmalloc support. Default no.
@@ -4071,7 +4067,6 @@ $as_echo "done" >&6; }
  HDF_CXX=no
  HDF_CXX=no
  HDF5_HL=yes
- LARGEFILE=yes
 
  CODESTACK=no
  HAVE_DMALLOC=no
@@ -7935,16 +7930,14 @@ fi
 ##			   a parallel library even if configure wasn't
 ##			   able to find some header file or library that
 ##			   might be required. This is defined if the
-##			   compiler looks like a parallel compiler (e.g.,
-##			   mpicc or mpcc) or if the user explicitly states
+##			   user explicitly states
 ##			   that a parallel library is being built by supplying
 ##			   the `--enable-parallel' configure switch.
 ##
 ##    PARALLEL		-- This variable is set to a non-null value if
-##			   configure thinks we're compiling a parallel
-##			   version of the library.
+##			   we're building a parallel version of the library.
 ##
-##    RUNSERIAL	-- This is a command which will be prepended to
+##    RUNSERIAL	        -- This is a command which will be prepended to
 ##			   the executable name to run the executable using
 ##			   a single process. For serial versions of the
 ##			   library this will normally be empty. For parallel
@@ -7968,146 +7961,6 @@ fi
 
 
 
-
-## ----------------------------------------------------------------------
-## If the compiler is obviously a parallel compiler then we're building
-## a parallel version of hdf5 and should define HAVE_PARALLEL. Furthermore,
-## the name of the compiler might tell us how to run the resulting
-## executable. For `mpicc' the executable should be run with `mpiexec' from
-## the same directory as mpicc if it exists.
-##
-case "$CC_BASENAME" in
-  mpicc)
-    ## The mpich compiler. Use mpiexec from the same directory if it
-    ## exists.
-    PARALLEL=mpicc
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mpiexec" >&5
-$as_echo_n "checking for mpiexec... " >&6; }
-
-    ## Find the path where mpicc is located.
-    cmd="`echo $CC | cut -f1 -d' '`"
-    if (echo $cmd | grep / >/dev/null); then
-      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
-    else
-      for path in `echo $PATH | ${TR} ":" " "`; do
-        if test -x $path/$cmd; then
-          break
-        fi
-      done
-    fi
-
-    ## Is there an mpiexec at that path?
-    if test -x $path/mpiexec; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $path/mpiexec" >&5
-$as_echo "$path/mpiexec" >&6; }
-      RUNSERIAL="${RUNSERIAL:-none}"
-
-      if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=6}"
-      fi
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: none" >&5
-$as_echo "none" >&6; }
-    fi
-    ;;
-
-  mpcc|mpcc_r)
-    ## The IBM compiler
-    PARALLEL="$CC_BASENAME"
-    ;;
-
-  *)
-    ## Probably not a parallel compiler, but if `--enable-parallel'
-    ## is defined below then we're still building a parallel hdf5.
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## If the Fortran compiler is obviously a parallel compiler then we're
-## building a parallel version of hdf5 and should define HAVE_PARALLEL.
-## Furthermore, the name of the compiler might tell us how to run the
-## resulting executable. For `mpif90' the executable should be run with
-## `mpiexec' from the same directory as mpif90 if it exists.
-##
-
-if test "X$HDF_FORTRAN" = "Xyes" ; then
-  ## Change to the Fortran 90 language
-  ac_ext=${ac_fc_srcext-f}
-ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
-
-  case "$FC" in
-    *mpif90*)
-      ## The Fortran mpich compiler. Use mpiexec from the same directory
-      ## if it exists.
-      PARALLEL=mpif90
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mpiexec" >&5
-$as_echo_n "checking for mpiexec... " >&6; }
-
-      ## Find the path where mpif90 is located.
-      cmd=`echo $FC |cut -f1 -d' '`
-      if (echo $cmd |grep / >/dev/null); then
-        path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
-      else
-        for path in `echo $PATH | ${TR} ":" " "`; do
-          if test -x $path/$cmd; then
-            break;
-          fi
-        done
-      fi
-
-      ## Is there an mpiexec at that path?
-      if test -x $path/mpiexec; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $path/mpiexec" >&5
-$as_echo "$path/mpiexec" >&6; }
-        RUNSERIAL="${RUNSERIAL:-none}"
-
-        if test -z "$RUNPARALLEL"; then
-          RUNPARALLEL="$path/mpiexec -n \$\${NPROCS:=6}"
-        fi
-      else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: none" >&5
-$as_echo "none" >&6; }
-      fi
-      ;;
-
-    *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
-      ## The IBM compiler
-      PARALLEL="$FC"
-      ;;
-
-    *)
-      ## Probably not a parallel compiler, but if `--enable-parallel'
-      ## is defined below then we're still building a parallel hdf5.
-      ;;
-  esac
-
-  ## Change to the C language
-  ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-fi
-
-## -----------------------------------------------------------------------------
-## If shared libraries are being used with parallel, disable them, unless the
-## user explicity enables them via the '--enable-shared' option.
-
-if test "X${enable_shared}" = "X" -a "X${enable_parallel}" = "Xyes"; then
-    echo '    shared libraries disabled in parallel'
-    enable_shared="no"
-elif test "X${enable_shared}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
-    echo '    shared libraries explicitly enabled by user'
-elif test "X${enable_shared}" = "X" -a "X${PARALLEL}" != "X"; then
-    echo '    shared libraries disabled when a parallel compiler is being used'
-    enable_shared="no"
-elif test "X${enable_shared}" = "Xyes" -a "X${PARALLEL}" != "X"; then
-    echo '    shared libraries explicitly enabled by user'
-fi
 
 ## ----------------------------------------------------------------------
 ## Fortran libraries are not currently supported on Mac. Disable them.
@@ -23226,92 +23079,15 @@ $as_echo "no" >&6; }
 fi
 
 ## ----------------------------------------------------------------------
-## Test for Largefile support.
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if configure should try to set up large file support" >&5
-$as_echo_n "checking if configure should try to set up large file support... " >&6; }
+## Use the macro _AC_SYS_LARGEFILE_MACRO_VALUE to test defines
+## that might need to be set for largefile support to behave
+## correctly. This macro is defined in acsite.m4 and overrides
+## the version provided by Autoconf (as of v2.65). The custom
+## macro additionally adds the appropriate defines to AM_CPPFLAGS
+## so that later configure checks have them visible.
 
-# Check whether --enable-largefile was given.
-if test "${enable_largefile+set}" = set; then :
-  enableval=$enable_largefile;
-fi
-
-
-## If largefile support is enabled, then set up appropriate compiler options.
-if test "$enable_largefile" != no; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-  ## Check for needed compiler options. This check is pulled drectly
-  ## from autoconf's AC_SYS_LARGEFILE macro, as of Autoconf v2.65.
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for special C compiler options needed for large files" >&5
-$as_echo_n "checking for special C compiler options needed for large files... " >&6; }
-if ${ac_cv_sys_largefile_CC+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_cv_sys_largefile_CC=no
-     if test "$GCC" != yes; then
-       ac_save_CC=$CC
-       while :; do
-         ## IRIX 6.2 and later do not support large files by default,
-         ## so use the C compiler's -n32 option if that helps.
-         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
- /* Check that off_t can represent 2**63 - 1 correctly.
-    We can't simply define LARGE_OFF_T to be 9223372036854775807,
-    since some C++ compilers masquerading as C compilers
-    incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
-  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-		       && LARGE_OFF_T % 2147483647 == 1)
-		      ? 1 : -1];
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-         if ac_fn_c_try_compile "$LINENO"; then :
-  break
-fi
-rm -f core conftest.err conftest.$ac_objext
-         CC="$CC -n32"
-         if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_sys_largefile_CC=' -n32'; break
-fi
-rm -f core conftest.err conftest.$ac_objext
-         break
-       done
-       CC=$ac_save_CC
-       rm -f conftest.$ac_ext
-    fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sys_largefile_CC" >&5
-$as_echo "$ac_cv_sys_largefile_CC" >&6; }
-  if test "$ac_cv_sys_largefile_CC" != no; then
-    CC=$CC$ac_cv_sys_largefile_CC
-  fi
-
-  ## Use the macro _AC_SYS_LARGEFILE_MACRO_VALUE to test defines
-  ## that might need to be set for largefile support to behave
-  ## correctly. This macro is defined in acsite.m4 and overrides
-  ## the version provided by Autoconf (as of v2.65). The custom
-  ## macro additionally adds the appropriate defines to AM_CPPFLAGS
-  ## so that later configure checks have them visible.
-
-  ## Check for _FILE_OFFSET_BITS
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for _FILE_OFFSET_BITS value needed for large files" >&5
+## Check for _FILE_OFFSET_BITS
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for _FILE_OFFSET_BITS value needed for large files" >&5
 $as_echo_n "checking for _FILE_OFFSET_BITS value needed for large files... " >&6; }
 if ${ac_cv_sys_file_offset_bits+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -23397,9 +23173,9 @@ _ACEOF
 esac
 rm -rf conftest*
 
-  ## Check for _LARGE_FILES
-  if test "$ac_cv_sys_file_offset_bits" = unknown; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for _LARGE_FILES value needed for large files" >&5
+## Check for _LARGE_FILES
+if test "$ac_cv_sys_file_offset_bits" = unknown; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for _LARGE_FILES value needed for large files" >&5
 $as_echo_n "checking for _LARGE_FILES value needed for large files... " >&6; }
 if ${ac_cv_sys_large_files+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -23484,68 +23260,6 @@ _ACEOF
      AM_CPPFLAGS="-D_LARGE_FILES=$ac_cv_sys_large_files $AM_CPPFLAGS";;
 esac
 rm -rf conftest*
-  fi
-
-  ## Now actually test to see if we can create large files after we've
-  ## checked for any needed defines.
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if large (64-bit) files are supported on this system." >&5
-$as_echo_n "checking if large (64-bit) files are supported on this system.... " >&6; }
-  if ${hdf5_cv_have_lfs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-      #include <stdio.h>
-      #include <unistd.h>
-      #include <stdlib.h>
-      #include <fcntl.h>
-      #define BIG_FILE (off_t)0x80000000UL
-      int main(void) {
-        int fd;
-        if ((fd=open("test.conf", O_RDWR|O_TRUNC|O_CREAT, 0666)) < 0) exit(1);
-        if (lseek(fd, BIG_FILE, SEEK_SET)!=BIG_FILE) exit(1);
-        if (5!=write(fd, "hello", (size_t)5)) exit(1);
-        if (lseek(fd, 2*BIG_FILE, SEEK_SET) != 2*BIG_FILE) exit(1);
-        if (5!=write(fd, "hello", (size_t)5)) exit(1);
-        if (unlink("test.conf") < 0) exit(1);
-        exit(0);
-      }
-
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  hdf5_cv_have_lfs=yes
-else
-  hdf5_cv_have_lfs=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-
-
-  if test "X${hdf5_cv_have_lfs}" = "Xyes"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-    LARGEFILE="yes"
-  fi
-  if test "X${hdf5_cv_have_lfs}" = "Xno"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-    LARGEFILE="no"
-  fi
-
-else
-  LARGEFILE="no"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
 fi
 
 ## ----------------------------------------------------------------------
@@ -23553,11 +23267,9 @@ fi
 ##
 case "$host_cpu-$host_vendor-$host_os" in
   *linux*)
-    ## If largefile support is enabled, then make available various
-    ## LFS-related routines using the following _LARGEFILE*_SOURCE macros.
-    if test "X$LARGEFILE" != "Xno"; then
-        AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
-    fi
+    ## Make available various LFS-related routines using the following
+    ## _LARGEFILE*_SOURCE macros.
+    AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
 
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
@@ -28204,10 +27916,7 @@ rm -f confcache
 
 ## What header files and libraries do we have to look for for parallel
 ## support?  For the most part, search paths are already specified with
-## CPPFLAGS and LDFLAGS or are known to the compiler.  If the user says
-## `--disable-parallel' but specifies a known parallel compiler (like mpicc
-## or mpcc) then parallel support is enabled but configure doesn't search
-## for any parallel header files or libraries.
+## CPPFLAGS and LDFLAGS or are known to the compiler.
 ##
 # Check whether --enable-parallel was given.
 if test "${enable_parallel+set}" = set; then :
@@ -28232,26 +27941,11 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## It's possible to build in parallel by specifying a parallel compiler
-## without using the --enable-parallel flag.  This isn't allowed with
-## C++ or threadsafe, either, unless the --enable-unsupported flag
-## has also been specified.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${PARALLEL}" != "X" -a "X${enable_cxx}" = "Xyes" ; then
-    as_fn_error $? "An MPI compiler is being used; --enable-cxx is not allowed. Use --enable-unsupported to override this error." "$LINENO" 5
-  fi
-  if test "X${PARALLEL}" != "X" -a "X${THREADSAFE}" = "Xyes"; then
-    as_fn_error $? "An MPI compiler is being used; --enable-threadsafe is not allowed. Use --enable-unsupported to override this error." "$LINENO" 5
-  fi
-fi
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for parallel support files" >&5
 $as_echo_n "checking for parallel support files... " >&6; }
 case "X-$enable_parallel" in
   X-|X-no|X-none)
-    ## Either we are not compiling for parallel or the header and
-    ## library files and locations are known to the compiler (this is
-    ## the case for a correct installation of mpicc for instance).
+    ## We are not compiling for parallel.
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: skipped" >&5
 $as_echo "skipped" >&6; }
     ;;
@@ -28263,11 +27957,12 @@ $as_echo "skipped" >&6; }
 $as_echo "provided by compiler" >&6; }
     PARALLEL=yes
 
-    ## Try link a simple MPI program.  If fail, try again with -lmpi and
-    ## -lmpich.
+    ## Try link a simple MPI program.
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether a simple MPI-IO C program can be linked" >&5
+$as_echo_n "checking whether a simple MPI-IO C program can be linked... " >&6; }
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
+#include <mpi.h>
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -28279,211 +27974,22 @@ $as_echo "provided by compiler" >&6; }
 int
 main ()
 {
-MPI_Init()
+ MPI_Init(0, (void *)0);
+		      MPI_File_open(0, (void *)0, 0, 0, (void *)0);
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPI_Init in -lmpi" >&5
-$as_echo_n "checking for MPI_Init in -lmpi... " >&6; }
-if ${ac_cv_lib_mpi_MPI_Init+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpi  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPI_Init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPI_Init ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_mpi_MPI_Init=yes
-else
-  ac_cv_lib_mpi_MPI_Init=no
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+		    as_fn_error $? "unable to link a simple MPI-IO C program" "$LINENO" 5
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mpi_MPI_Init" >&5
-$as_echo "$ac_cv_lib_mpi_MPI_Init" >&6; }
-if test "x$ac_cv_lib_mpi_MPI_Init" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBMPI 1
-_ACEOF
-
-  LIBS="-lmpi $LIBS"
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPI_Init in -lmpich" >&5
-$as_echo_n "checking for MPI_Init in -lmpich... " >&6; }
-if ${ac_cv_lib_mpich_MPI_Init+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpich  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPI_Init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPI_Init ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_mpich_MPI_Init=yes
-else
-  ac_cv_lib_mpich_MPI_Init=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mpich_MPI_Init" >&5
-$as_echo "$ac_cv_lib_mpich_MPI_Init" >&6; }
-if test "x$ac_cv_lib_mpich_MPI_Init" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBMPICH 1
-_ACEOF
-
-  LIBS="-lmpich $LIBS"
-
-else
-  PARALLEL=no
-fi
-
-fi
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-    ## Then try link a simple MPI-IO program. If fail, try again with
-    ## -lmpio.
-    if test "X$PARALLEL" = "Xyes"; then
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-MPI_File_open()
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPI_File_open in -lmpio" >&5
-$as_echo_n "checking for MPI_File_open in -lmpio... " >&6; }
-if ${ac_cv_lib_mpio_MPI_File_open+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpio  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPI_File_open ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPI_File_open ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_mpio_MPI_File_open=yes
-else
-  ac_cv_lib_mpio_MPI_File_open=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mpio_MPI_File_open" >&5
-$as_echo "$ac_cv_lib_mpio_MPI_File_open" >&6; }
-if test "x$ac_cv_lib_mpio_MPI_File_open" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBMPIO 1
-_ACEOF
-
-  LIBS="-lmpio $LIBS"
-
-else
-  PARALLEL=no
-fi
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-    fi
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
       ## Change to the Fortran 90 language
@@ -28493,7 +27999,9 @@ ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
-      ## Try link a simple MPI program.  If fail, try again with -lmpi.
+      ## Try link a simple MPI program.
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether a simple MPI-IO Fortran program can be linked" >&5
+$as_echo_n "checking whether a simple MPI-IO Fortran program can be linked... " >&6; }
       cat > conftest.$ac_ext <<_ACEOF
 
           program main
@@ -28503,98 +28011,15 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
           end
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
-
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mpi_file_open in -lmpi" >&5
-$as_echo_n "checking for mpi_file_open in -lmpi... " >&6; }
-if ${ac_cv_lib_mpi_mpi_file_open+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpi  $LIBS"
-cat > conftest.$ac_ext <<_ACEOF
-      program main
-      call mpi_file_open
-      end
-_ACEOF
-if ac_fn_fc_try_link "$LINENO"; then :
-  ac_cv_lib_mpi_mpi_file_open=yes
-else
-  ac_cv_lib_mpi_mpi_file_open=no
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	   as_fn_error $? "unable to link a simple MPI-IO Fortran program" "$LINENO" 5
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mpi_mpi_file_open" >&5
-$as_echo "$ac_cv_lib_mpi_mpi_file_open" >&6; }
-if test "x$ac_cv_lib_mpi_mpi_file_open" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBMPI 1
-_ACEOF
-
-  LIBS="-lmpi $LIBS"
-
-else
-  PARALLEL=no
-fi
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-      ## Then try link a simple MPI-IO program.  If fail, try again with
-      ## -lmpio.
-      if test "X$PARALLEL" = "Xyes"; then
-        cat > conftest.$ac_ext <<_ACEOF
-
-            program main
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )
-            end
-_ACEOF
-if ac_fn_fc_try_link "$LINENO"; then :
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mpi_file_open in -lmpio" >&5
-$as_echo_n "checking for mpi_file_open in -lmpio... " >&6; }
-if ${ac_cv_lib_mpio_mpi_file_open+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmpio  $LIBS"
-cat > conftest.$ac_ext <<_ACEOF
-      program main
-      call mpi_file_open
-      end
-_ACEOF
-if ac_fn_fc_try_link "$LINENO"; then :
-  ac_cv_lib_mpio_mpi_file_open=yes
-else
-  ac_cv_lib_mpio_mpi_file_open=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mpio_mpi_file_open" >&5
-$as_echo "$ac_cv_lib_mpio_mpi_file_open" >&6; }
-if test "x$ac_cv_lib_mpio_mpi_file_open" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBMPIO 1
-_ACEOF
-
-  LIBS="-lmpio $LIBS"
-
-else
-  PARALLEL=no
-fi
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-      fi
 
       ## Change to the C language
       ac_ext=c
@@ -28603,19 +28028,6 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-    fi
-
-    ## Set RUNPARALLEL to mpiexec if not set yet.
-    ## Check for building on Cray if RUNPARALLEL is not yet set by checking
-    ## for 'aprun' command (which is the parallel job launcher, like mpiexec).
-    if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
-        ## Find the path where aprun is located.
-  	for path in `echo $PATH | ${TR} ":" " "`; do
-  	  if test -x $path/aprun; then
-            RUNPARALLEL="aprun -q -n \$\${NPROCS:=6}"
-  	    break;
-  	  fi
-	done
     fi
 
     ## Set RUNPARALLEL to mpiexec if not set yet.
@@ -28655,39 +28067,6 @@ $as_echo_n "checking prefix for running in parallel... " >&6; }
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $RUNPARALLEL" >&5
 $as_echo "$RUNPARALLEL" >&6; }
 
-  ## Check that we can link a simple MPI and MPI-IO application
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether a simple MPI-IO program can be linked" >&5
-$as_echo_n "checking whether a simple MPI-IO program can be linked... " >&6; }
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-MPI_Init(); MPI_File_open();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-              as_fn_error $? "unable to link a simple MPI-IO application" "$LINENO" 5
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
   ## There *must* be some way to run in parallel even if it's just the
   ## word `none'.
   if test -z "$RUNPARALLEL"; then
@@ -28695,7 +28074,8 @@ rm -f core conftest.err conftest.$ac_objext \
   fi
 
   ## If RUNSERIAL or RUNPARALLEL is the word `none' then replace it with
-  ## the empty string.
+  ## the empty string. This means that no launch commands were requested,
+  ## so we will not use any launch commands.
   if test "X$RUNSERIAL" = "Xnone"; then
     RUNSERIAL=""
   fi
@@ -28871,61 +28251,6 @@ else
   unset MPE
 fi
 
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPE_Init_mpi_io in -llmpe" >&5
-$as_echo_n "checking for MPE_Init_mpi_io in -llmpe... " >&6; }
-if ${ac_cv_lib_lmpe_MPE_Init_mpi_io+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-llmpe  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPE_Init_mpi_io ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPE_Init_mpi_io ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_lmpe_MPE_Init_mpi_io=yes
-else
-  ac_cv_lib_lmpe_MPE_Init_mpi_io=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_lmpe_MPE_Init_mpi_io" >&5
-$as_echo "$ac_cv_lib_lmpe_MPE_Init_mpi_io" >&6; }
-if test "x$ac_cv_lib_lmpe_MPE_Init_mpi_io" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBLMPE 1
-_ACEOF
-
-  LIBS="-llmpe $LIBS"
-
-else
-  unset MPE
-fi
-
       ;;
     *)
       case "$withval" in
@@ -29046,62 +28371,6 @@ else
   LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE
 fi
 
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPE_Init_mpi_io in -llmpe" >&5
-$as_echo_n "checking for MPE_Init_mpi_io in -llmpe... " >&6; }
-if ${ac_cv_lib_lmpe_MPE_Init_mpi_io+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-llmpe  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPE_Init_mpi_io ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPE_Init_mpi_io ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_lmpe_MPE_Init_mpi_io=yes
-else
-  ac_cv_lib_lmpe_MPE_Init_mpi_io=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_lmpe_MPE_Init_mpi_io" >&5
-$as_echo "$ac_cv_lib_lmpe_MPE_Init_mpi_io" >&6; }
-if test "x$ac_cv_lib_lmpe_MPE_Init_mpi_io" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBLMPE 1
-_ACEOF
-
-  LIBS="-llmpe $LIBS"
-
-else
-  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE
-fi
-
-
       else
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPE_Init_log in -lmpe" >&5
 $as_echo_n "checking for MPE_Init_log in -lmpe... " >&6; }
@@ -29153,61 +28422,6 @@ if test "x$ac_cv_lib_mpe_MPE_Init_log" = xyes; then :
 _ACEOF
 
   LIBS="-lmpe $LIBS"
-
-else
-  unset MPE
-fi
-
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for MPE_Init_mpi_io in -llmpe" >&5
-$as_echo_n "checking for MPE_Init_mpi_io in -llmpe... " >&6; }
-if ${ac_cv_lib_lmpe_MPE_Init_mpi_io+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-llmpe  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char MPE_Init_mpi_io ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return MPE_Init_mpi_io ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_lmpe_MPE_Init_mpi_io=yes
-else
-  ac_cv_lib_lmpe_MPE_Init_mpi_io=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_lmpe_MPE_Init_mpi_io" >&5
-$as_echo "$ac_cv_lib_lmpe_MPE_Init_mpi_io" >&6; }
-if test "x$ac_cv_lib_lmpe_MPE_Init_mpi_io" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBLMPE 1
-_ACEOF
-
-  LIBS="-llmpe $LIBS"
 
 else
   unset MPE
