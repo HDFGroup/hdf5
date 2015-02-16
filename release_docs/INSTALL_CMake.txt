@@ -379,7 +379,7 @@ These five steps are described in detail below.
                 set (HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build HDF5 C++ Library" FORCE)
                 set (HDF5_BUILD_EXAMPLES ON CACHE BOOL "Build HDF5 Library Examples" FORCE)
                 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
-                set (HDF5_ENABLE_F2003 OFF CACHE BOOL "Enable FORTRAN 2003 Standard" FORCE)
+                set (HDF5_ENABLE_F2003 ON CACHE BOOL "Enable FORTRAN 2003 Standard" FORCE)
                 set (HDF5_BUILD_HL_LIB ON CACHE BOOL "Build HIGH Level HDF5 Library" FORCE)
                 set (HDF5_BUILD_TOOLS ON CACHE BOOL "Build HDF5 Tools" FORCE)
                 set (HDF5_BUILD_GENERATORS OFF CACHE BOOL "Build Test Generators" FORCE)
@@ -552,7 +552,7 @@ HDF5_BUILD_FORTRAN  "Build FORTRAN support"          OFF
 HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  OFF
 HDF5_BUILD_TOOLS    "Build HDF5 Tools"               OFF
 if (HDF5_BUILD_FORTRAN) 
-    HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" OFF
+    HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" ON
 
 ---------------- HDF5 Advanced Options ---------------------
 HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                    OFF
@@ -714,8 +714,8 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib -DSZIP_INCLUDE_DIR:PATH=some_location/include")
 
 ####      fortran       ####
-### enable Fortran 2003
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
+### disable Fortran 2003
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=OFF")
 ### disable Fortran
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
 

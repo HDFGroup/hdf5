@@ -805,7 +805,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     if (BUILD_SHARED_LIBS AND APPLE)
       message (FATAL_ERROR " **** Shared FORTRAN libraries are unsupported **** ")
     endif (BUILD_SHARED_LIBS AND APPLE)
-    option (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" OFF)
+    option (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" ON)
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
     if (HDF5_ENABLE_F2003)
       if (NOT FORTRAN_HAVE_ISO_C_BINDING)

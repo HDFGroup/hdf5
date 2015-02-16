@@ -490,7 +490,6 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTRUMENT = @INSTRUMENT@
 INSTRUMENT_LIBRARY = @INSTRUMENT_LIBRARY@
-LARGEFILE = @LARGEFILE@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -671,7 +670,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 203
+LT_VERS_REVISION = 205
 LT_VERS_AGE = 0
 
 # This library is our main target.
