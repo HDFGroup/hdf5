@@ -63,6 +63,7 @@ CONTAINS
        INTEGER FUNCTION H5DSset_scale_c(dsid, dimname, dimname_len )
 
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DSSET_SCALE_C'::h5dsset_scale_c
          !DEC$ENDIF
@@ -119,6 +120,7 @@ CONTAINS
        INTEGER FUNCTION  H5DSattach_scale_c(did, dsid, idx )
          
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DSATTACH_SCALE_C':: h5dsattach_scale_c
          !DEC$ENDIF
@@ -171,6 +173,7 @@ CONTAINS
        INTEGER FUNCTION  H5DSdetach_scale_c(did, dsid, idx )
          
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DSDETACH_SCALE_C':: h5dsdetach_scale_c
          !DEC$ENDIF
@@ -227,6 +230,7 @@ CONTAINS
        INTEGER FUNCTION H5DSis_attached_c(did, dsid, idx, c_is_attached )
          
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DSIS_ATTACHED_C':: h5dsis_attached_c
          !DEC$ENDIF
@@ -291,6 +295,7 @@ CONTAINS
        INTEGER FUNCTION  H5DSis_scale_c(did,c_is_scale)
          
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DSIS_SCALE_C':: h5dsis_scale_c
          !DEC$ENDIF
@@ -350,6 +355,7 @@ CONTAINS
        INTEGER FUNCTION H5DSset_label_c(did, idx, label, label_len)
 
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DSSET_LABEL_C'::h5dsset_label_c
          !DEC$ENDIF
@@ -407,6 +413,7 @@ CONTAINS
        INTEGER FUNCTION H5DSget_label_c(did, idx, label, size)
 
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DSGET_LABEL_C'::h5dsget_label_c
          !DEC$ENDIF
@@ -462,6 +469,7 @@ CONTAINS
        INTEGER FUNCTION H5DSget_scale_name_c(did, name, size)
 
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DSGET_SCALE_NAME_C'::h5dsget_scale_name_c
          !DEC$ENDIF
@@ -513,6 +521,7 @@ CONTAINS
        INTEGER FUNCTION  H5DSget_num_scales_c(did, idx, num_scales)
          
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DSGET_NUM_SCALES_C':: h5dsget_num_scales_c
          !DEC$ENDIF

@@ -65,4 +65,3 @@ Clear file buffers before write: @HDF5_Enable_Clear_File_Buffers@
          Function Stack Tracing: @HDF5_ENABLE_CODESTACK@
       Strict File Format Checks: @HDF5_STRICT_FORMAT_CHECKS@
    Optimization Instrumentation: @HDF5_Enable_Instrument@
-       Large File Support (LFS): @HDF5_ENABLE_LARGE_FILE@
