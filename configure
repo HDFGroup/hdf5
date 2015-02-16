@@ -655,8 +655,6 @@ DEFAULT_API_VERSION
 DEPRECATED_SYMBOLS
 BUILD_ALL_CONDITIONAL_FALSE
 BUILD_ALL_CONDITIONAL_TRUE
-HL_FOR
-HL
 DYNAMIC_DIRS
 ROOT
 CXX_VERSION
@@ -728,6 +726,8 @@ TIME
 TR
 AR
 PERL
+HL_FOR
+HL
 CXXCPP
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
@@ -894,6 +894,7 @@ enable_unsupported
 enable_fortran
 enable_fortran2003
 enable_cxx
+enable_hl
 enable_shared
 enable_static
 with_pic
@@ -925,7 +926,6 @@ enable_direct_vfd
 with_default_plugindir
 enable_dconv_exception
 enable_dconv_accuracy
-enable_hl
 enable_build_all
 enable_deprecated_symbols
 with_default_api_version
@@ -1575,10 +1575,11 @@ Optional Features:
   --disable-dependency-tracking
                           speeds up one-time build
   --enable-unsupported    Allow unsupported combinations of configure options
-  --enable-fortran        Compile the Fortran 77/90/95 interface [default=no]
+  --enable-fortran        Compile the Fortran 90/95 interface [default=no]
   --enable-fortran2003    Compile the Fortran 2003 interface, must also
                           specify --enable-fortran [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
+  --enable-hl             Enable the high-level library [default=yes]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -1623,7 +1624,6 @@ Optional Features:
                           data conversions [default=yes]
   --enable-dconv-accuracy if data accuracy is guaranteed during data
                           conversions [default=yes]
-  --enable-hl             Enable the high level library [default=yes]
   --enable-build-all      Build helper programs that only developers should
                           need [default=no]
   --enable-deprecated-symbols
@@ -1885,13 +1885,13 @@ fi
 
 } # ac_fn_c_try_link
 
-# ac_fn_fc_try_run LINENO
-# -----------------------
-# Try to link conftest.$ac_ext, and return whether this succeeded. Assumes
-# that executables *can* be run.
-ac_fn_fc_try_run ()
+# ac_fn_fc_try_link LINENO
+# ------------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded.
+ac_fn_fc_try_link ()
 {
   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  rm -f conftest.$ac_objext conftest$ac_exeext
   if { { ac_try="$ac_link"
 case "(($ac_try" in
   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
@@ -1899,33 +1899,37 @@ case "(($ac_try" in
 esac
 eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
 $as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>&5
+  (eval "$ac_link") 2>conftest.err
   ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && { ac_try='./conftest$ac_exeext'
-  { { case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; }; then :
+  test $ac_status = 0; } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 test -x conftest$ac_exeext
+       }; then :
   ac_retval=0
 else
-  $as_echo "$as_me: program exited with status $ac_status" >&5
-       $as_echo "$as_me: failed program was:" >&5
+  $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-       ac_retval=$ac_status
+	ac_retval=1
 fi
+  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
+  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
+  # interfere with the next link command; also delete a directory that is
+  # left behind by Apple's compiler.  We do this before executing the actions.
   rm -rf conftest.dSYM conftest_ipa8_conftest.oo
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
   as_fn_set_status $ac_retval
 
-} # ac_fn_fc_try_run
+} # ac_fn_fc_try_link
 
 # ac_fn_cxx_try_compile LINENO
 # ----------------------------
@@ -2002,13 +2006,13 @@ fi
 
 } # ac_fn_cxx_try_cpp
 
-# ac_fn_cxx_try_run LINENO
-# ------------------------
-# Try to link conftest.$ac_ext, and return whether this succeeded. Assumes
-# that executables *can* be run.
-ac_fn_cxx_try_run ()
+# ac_fn_cxx_try_link LINENO
+# -------------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded.
+ac_fn_cxx_try_link ()
 {
   as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  rm -f conftest.$ac_objext conftest$ac_exeext
   if { { ac_try="$ac_link"
 case "(($ac_try" in
   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
@@ -2016,33 +2020,37 @@ case "(($ac_try" in
 esac
 eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
 $as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>&5
+  (eval "$ac_link") 2>conftest.err
   ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && { ac_try='./conftest$ac_exeext'
-  { { case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_try") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; }; then :
+  test $ac_status = 0; } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 test -x conftest$ac_exeext
+       }; then :
   ac_retval=0
 else
-  $as_echo "$as_me: program exited with status $ac_status" >&5
-       $as_echo "$as_me: failed program was:" >&5
+  $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-       ac_retval=$ac_status
+	ac_retval=1
 fi
+  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
+  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
+  # interfere with the next link command; also delete a directory that is
+  # left behind by Apple's compiler.  We do this before executing the actions.
   rm -rf conftest.dSYM conftest_ipa8_conftest.oo
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
   as_fn_set_status $ac_retval
 
-} # ac_fn_cxx_try_run
+} # ac_fn_cxx_try_link
 
 # ac_fn_c_check_header_compile LINENO HEADER VAR INCLUDES
 # -------------------------------------------------------
@@ -2228,98 +2236,6 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_func
-
-# ac_fn_cxx_try_link LINENO
-# -------------------------
-# Try to link conftest.$ac_ext, and return whether this succeeded.
-ac_fn_cxx_try_link ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  rm -f conftest.$ac_objext conftest$ac_exeext
-  if { { ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>conftest.err
-  ac_status=$?
-  if test -s conftest.err; then
-    grep -v '^ *+' conftest.err >conftest.er1
-    cat conftest.er1 >&5
-    mv -f conftest.er1 conftest.err
-  fi
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && {
-	 test -z "$ac_cxx_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 test -x conftest$ac_exeext
-       }; then :
-  ac_retval=0
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_retval=1
-fi
-  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
-  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
-  # interfere with the next link command; also delete a directory that is
-  # left behind by Apple's compiler.  We do this before executing the actions.
-  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-  as_fn_set_status $ac_retval
-
-} # ac_fn_cxx_try_link
-
-# ac_fn_fc_try_link LINENO
-# ------------------------
-# Try to link conftest.$ac_ext, and return whether this succeeded.
-ac_fn_fc_try_link ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  rm -f conftest.$ac_objext conftest$ac_exeext
-  if { { ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>conftest.err
-  ac_status=$?
-  if test -s conftest.err; then
-    grep -v '^ *+' conftest.err >conftest.er1
-    cat conftest.er1 >&5
-    mv -f conftest.er1 conftest.err
-  fi
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && {
-	 test -z "$ac_fc_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 test -x conftest$ac_exeext
-       }; then :
-  ac_retval=0
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_retval=1
-fi
-  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
-  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
-  # interfere with the next link command; also delete a directory that is
-  # left behind by Apple's compiler.  We do this before executing the actions.
-  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-  as_fn_set_status $ac_retval
-
-} # ac_fn_fc_try_link
 
 # ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
 # -------------------------------------------------------
@@ -5348,13 +5264,12 @@ if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xno"; then
   echo "no"
   as_fn_error $? "--enable-fortran must be used with --enable-fortran2003" "$LINENO" 5
 else
-  echo "yes"
+  if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xyes"; then
+    echo "yes"
+  else
+    echo "no"
+  fi
 fi
-
-HAVE_SIZEOF="no"
-HAVE_C_SIZEOF="no"
-HAVE_STORAGE_SIZE="no"
-FORTRAN_DEFAULT_REALisDBLE="no"
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
@@ -5362,12 +5277,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
 
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
-
-  ## --------------------------------------------------------------------
-  ## Default for FORTRAN 2003 compliant compilers
-  ##
-  HAVE_FORTRAN_2003="no"
-  HAVE_F2003_REQUIREMENTS="no"
 
   ## --------------------------------------------------------------------
   ## HDF5 integer variables for the H5fortran_types.f90 file.
@@ -5655,14 +5564,14 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
   ## --------------------------------------------------------------------
-  ## Check for a Fortran 9X compiler and how to include modules.
+  ## Check for a Fortran compiler and how to include modules.
   ##
   ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 if test -n "$ac_tool_prefix"; then
-  for ac_prog in f90 pgf90 slf90 f95 g95 xlf95 efc ifort ftn
+  for ac_prog in gfortran ifort pgf90 pathf90 pathf95 xlf90 xlf95 xlf2003 f90 epcf90 f95 fort lf95 g95 ifc efc gfc
   do
     # Extract the first word of "$ac_tool_prefix$ac_prog", so it can be a program name with args.
 set dummy $ac_tool_prefix$ac_prog; ac_word=$2
@@ -5706,7 +5615,7 @@ fi
 fi
 if test -z "$FC"; then
   ac_ct_FC=$FC
-  for ac_prog in f90 pgf90 slf90 f95 g95 xlf95 efc ifort ftn
+  for ac_prog in gfortran ifort pgf90 pathf90 pathf95 xlf90 xlf95 xlf2003 f90 epcf90 f95 fort lf95 g95 ifc efc gfc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -5959,11 +5868,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-
-  ## It seems that libtool (as of Libtool 1.5.14) is trying to
-  ## configure itself for Fortran 77.
-  ## Tell it that our F77 compiler is $FC (actually a F9X compiler)
-  F77=$FC
 
   ## Change to the Fortran 90 language
   ac_ext=${ac_fc_srcext-f}
@@ -6658,21 +6562,11 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
   ## --------------------------------------------------------------------
-  ## See if the compiler will support the "-I." option
-  ##
-
-
-  ## --------------------------------------------------------------------
   ## See if the fortran compiler supports the intrinsic function "SIZEOF"
 
+  HAVE_SIZEOF_FORTRAN="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic SIZEOF" >&5
 $as_echo_n "checking if Fortran compiler supports intrinsic SIZEOF... " >&6; }
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
   cat > conftest.$ac_ext <<_ACEOF
 
    PROGRAM main
@@ -6680,29 +6574,23 @@ else
    END PROGRAM
 
 _ACEOF
-if ac_fn_fc_try_run "$LINENO"; then :
+if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-     	HAVE_SIZEOF="yes"
+     	HAVE_SIZEOF_FORTRAN="yes"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 
 
   ## See if the fortran compiler supports the intrinsic function "C_SIZEOF"
 
+  HAVE_C_SIZEOF_FORTRAN="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic C_SIZEOF" >&5
 $as_echo_n "checking if Fortran compiler supports intrinsic C_SIZEOF... " >&6; }
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
   cat > conftest.$ac_ext <<_ACEOF
 
    PROGRAM main
@@ -6713,29 +6601,23 @@ else
    END PROGRAM
 
 _ACEOF
-if ac_fn_fc_try_run "$LINENO"; then :
+if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-     	HAVE_C_SIZEOF="yes"
+     	HAVE_C_SIZEOF_FORTRAN="yes"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 
 
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
 
+  HAVE_STORAGE_SIZE_FORTRAN="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler supports intrinsic STORAGE_SIZE" >&5
 $as_echo_n "checking if Fortran compiler supports intrinsic STORAGE_SIZE... " >&6; }
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
   cat > conftest.$ac_ext <<_ACEOF
 
    PROGRAM main
@@ -6745,31 +6627,26 @@ else
    END PROGRAM
 
 _ACEOF
-if ac_fn_fc_try_run "$LINENO"; then :
+if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-     	HAVE_STORAGE_SIZE="yes"
+     	HAVE_STORAGE_SIZE_FORTRAN="yes"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
 
 
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
 
+  FORTRAN_DEFAULT_REALisDBLE="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran default REAL is DOUBLE PRECISION" >&5
 $as_echo_n "checking if Fortran default REAL is DOUBLE PRECISION... " >&6; }
 
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
   cat > conftest.$ac_ext <<_ACEOF
 
      MODULE type_mod
@@ -6794,17 +6671,15 @@ else
      END PROGRAM main
 
 _ACEOF
-if ac_fn_fc_try_run "$LINENO"; then :
+if ac_fn_fc_try_compile "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-        FORTRAN_DEFAULT_REALisDBLE="yes"
+            FORTRAN_DEFAULT_REALisDBLE="yes"
 fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
   if test "X$HDF_FORTRAN2003" = "Xyes"; then
@@ -6812,10 +6687,10 @@ fi
     ## Checking if the compiler supports the required Fortran 2003 features and
     ## disable Fortran 2003 if it does not.
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
 $as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HDF... " >&6; }
     HAVE_FORTRAN_2003="no"
-
+    HAVE_F2003_REQUIREMENTS="no"
     cat > conftest.$ac_ext <<_ACEOF
       program main
 
@@ -6831,7 +6706,7 @@ $as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HD
 
       end
 _ACEOF
-if ac_fn_fc_try_compile "$LINENO"; then :
+if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
         HAVE_F2003_REQUIREMENTS=yes
@@ -6839,12 +6714,13 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+
     if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
-    ##  echo $HAVE_FORTRAN_2003
       as_fn_error $? "Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003" "$LINENO" 5
     else
-    ##  echo $HAVE_FORTRAN_2003
       HAVE_FORTRAN_2003="yes"
     fi
   fi
@@ -6860,7 +6736,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
- if test "X$HAVE_SIZEOF" = "Xyes"; then
+ if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
   FORTRAN_HAVE_SIZEOF_TRUE=
   FORTRAN_HAVE_SIZEOF_FALSE='#'
 else
@@ -6868,7 +6744,7 @@ else
   FORTRAN_HAVE_SIZEOF_FALSE=
 fi
 
- if test "X$HAVE_C_SIZEOF" = "Xyes"; then
+ if test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
   FORTRAN_HAVE_C_SIZEOF_TRUE=
   FORTRAN_HAVE_C_SIZEOF_FALSE='#'
 else
@@ -6876,7 +6752,7 @@ else
   FORTRAN_HAVE_C_SIZEOF_FALSE=
 fi
 
- if test "X$HAVE_STORAGE_SIZE" = "Xyes"; then
+ if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"; then
   FORTRAN_HAVE_STORAGE_SIZE_TRUE=
   FORTRAN_HAVE_STORAGE_SIZE_FALSE='#'
 else
@@ -6899,8 +6775,6 @@ else
   FORTRAN_DEFAULT_REALisDBLE_F_TRUE='#'
   FORTRAN_DEFAULT_REALisDBLE_F_FALSE=
 fi
-
-
 
 
 ## ----------------------------------------------------------------------
@@ -7481,15 +7355,11 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
+  # Checking if C++ needs old style header files in includes
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX needs old style header files in includes" >&5
 $as_echo_n "checking if $CXX needs old style header files in includes... " >&6; }
-
-if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -7498,30 +7368,23 @@ else
 int main(void) { return 0; }
 
 _ACEOF
-if ac_fn_cxx_try_run "$LINENO"; then :
-
-    echo no
-
+if ac_fn_cxx_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 else
-
-    echo yes
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
     CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
     AM_CXXFLAGS="${AM_CXXFLAGS} -DOLD_HEADER_FILENAME"
-
 fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 
+
+  # Checking if C++ can handle namespaces
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle namespaces" >&5
 $as_echo_n "checking if $CXX can handle namespaces... " >&6; }
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -7536,91 +7399,20 @@ int main(void) {
 }
 
 _ACEOF
-if ac_fn_cxx_try_run "$LINENO"; then :
-
-     echo yes
-
+if ac_fn_cxx_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 else
-
-     echo no
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
      CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
      AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_NAMESPACE"
-
 fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX supports std" >&5
-$as_echo_n "checking if $CXX supports std... " >&6; }
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <string>
-
-using namespace std;
-
-int main(void) {
-   string myString("testing namespace std");
-   return 0;
-}
-
-_ACEOF
-if ac_fn_cxx_try_run "$LINENO"; then :
-
-     echo yes
-
-else
-
-     echo no
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_STD"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_STD"
-
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX supports bool types" >&5
-$as_echo_n "checking if $CXX supports bool types... " >&6; }
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int main(void) {
-   bool flag;
-   return 0;
-}
-
-_ACEOF
-if ac_fn_cxx_try_run "$LINENO"; then :
-
-     echo yes
-
-else
-
-     echo no
-     CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DBOOL_NOTDEFINED"
-
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
+  # Checking if C++ has offsetof extension
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX has offsetof extension" >&5
 $as_echo_n "checking if $CXX has offsetof extension... " >&6; }
@@ -7657,26 +7449,24 @@ main ()
   return 0;
 }
 _ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
+if ac_fn_cxx_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 
 $as_echo "#define CXX_HAVE_OFFSETOF 1" >>confdefs.h
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+
+  # if C++ can handle static cast
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if $CXX can handle static cast" >&5
 $as_echo_n "checking if $CXX can handle static cast... " >&6; }
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -7689,23 +7479,22 @@ int main(void) {
 }
 
 _ACEOF
-if ac_fn_cxx_try_run "$LINENO"; then :
-
-    echo yes
-
+if ac_fn_cxx_try_link "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 else
-
-    echo no
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
     CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
     AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
 
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
 
 else
-  echo "no"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
   CXX="no"
 fi
 
@@ -7715,6 +7504,41 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+
+## ----------------------------------------------------------------------
+## Check if they would like the High Level library  compiled
+##
+
+ HL=""
+## name of fortran folder inside "hl", if FORTRAN compile is requested
+ HL_FOR=""
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if high level library is enabled" >&5
+$as_echo_n "checking if high level library is enabled... " >&6; }
+# Check whether --enable-hl was given.
+if test "${enable_hl+set}" = set; then :
+  enableval=$enable_hl; HDF5_HL=$enableval
+else
+  HDF5_HL=yes
+fi
+
+
+if test "X$HDF5_HL" = "Xyes"; then
+ echo "yes"
+ HL="hl"
+
+$as_echo "#define INCLUDE_HL 1" >>confdefs.h
+
+
+  ## If Fortran's default real is double precision and HL is being built then configure
+  ## should fail due to bug HDFFV-889.
+  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
+    as_fn_error $? "Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl." "$LINENO" 5
+  fi
+else
+ echo "no"
+fi
 
 
 ## ----------------------------------------------------------------------
@@ -7766,7 +7590,6 @@ fi
 done
 
 fi
-
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
@@ -27992,23 +27815,24 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
-      ## Change to the Fortran 90 language
+
+
       ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
-      ## Try link a simple MPI program.
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether a simple MPI-IO Fortran program can be linked" >&5
 $as_echo_n "checking whether a simple MPI-IO Fortran program can be linked... " >&6; }
       cat > conftest.$ac_ext <<_ACEOF
 
-          program main
-          include 'mpif.h'
-          integer:: ierr
-          call mpi_file_open( ierr )
-          end
+          PROGRAM main
+          USE mpi
+          INTEGER :: comm, amode, info, fh, ierror
+          CHARACTER(LEN=1) :: filename
+          CALL MPI_File_open( comm, filename, amode, info, fh, ierror)
+          END
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -28021,12 +27845,12 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
-      ## Change to the C language
       ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
     fi
 
@@ -30156,39 +29980,6 @@ if test -n "$AM_CPPFLAGS"; then
     TEMP_CPPFLAGS="$d $TEMP_CPPFLAGS"
   done
   AM_CPPFLAGS=$TEMP_CPPFLAGS
-fi
-
-## ----------------------------------------------------------------------
-## Check if they would like the High Level library  compiled
-##
-
- HL=""
-## name of fortran folder inside "hl", if FORTRAN compile is requested
- HL_FOR=""
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if high level library is enabled" >&5
-$as_echo_n "checking if high level library is enabled... " >&6; }
-# Check whether --enable-hl was given.
-if test "${enable_hl+set}" = set; then :
-  enableval=$enable_hl; HDF5_HL=$enableval
-else
-  HDF5_HL=yes
-fi
-
-
-if test "X$HDF5_HL" = "Xyes"; then
- echo "yes"
- HL="hl"
-
-$as_echo "#define INCLUDE_HL 1" >>confdefs.h
-
-
-## Check if Fortran's default real is double precision. If it is and HL is being built then configure
-## should fail due to bug HDFFV-889.
-  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
-    as_fn_error $? "Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl." "$LINENO" 5
-  fi
-else
- echo "no"
 fi
 
 

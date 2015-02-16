@@ -370,7 +370,7 @@ AC_SUBST([HDF5_INTERFACES]) HDF5_INTERFACES=""
 AC_MSG_CHECKING([if Fortran interface enabled])
 AC_ARG_ENABLE([fortran],
               [AS_HELP_STRING([--enable-fortran],
-                              [Compile the Fortran 77/90/95 interface [default=no]])],
+                              [Compile the Fortran 90/95 interface [default=no]])],
               [HDF_FORTRAN=$enableval])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
@@ -397,13 +397,12 @@ if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xno"; then
   echo "no"
   AC_MSG_ERROR([--enable-fortran must be used with --enable-fortran2003])
 else
-  echo "yes"
+  if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xyes"; then
+    echo "yes"
+  else
+    echo "no"
+  fi
 fi
-
-HAVE_SIZEOF="no"
-HAVE_C_SIZEOF="no"
-HAVE_STORAGE_SIZE="no"
-FORTRAN_DEFAULT_REALisDBLE="no"
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
@@ -411,12 +410,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([HAVE_FORTRAN_2003])
 		
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
-
-  ## --------------------------------------------------------------------
-  ## Default for FORTRAN 2003 compliant compilers
-  ##
-  HAVE_FORTRAN_2003="no"
-  HAVE_F2003_REQUIREMENTS="no"
 
   ## --------------------------------------------------------------------
   ## HDF5 integer variables for the H5fortran_types.f90 file.
@@ -439,15 +432,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([FSEARCH_DIRS])
 
   ## --------------------------------------------------------------------
-  ## Check for a Fortran 9X compiler and how to include modules.
+  ## Check for a Fortran compiler and how to include modules.
   ## 
-  AC_PROG_FC([f90 pgf90 slf90 f95 g95 xlf95 efc ifort ftn],)
+  AC_PROG_FC([PAC_FC_SEARCH_LIST],)
   AC_F9X_MODS
-
-  ## It seems that libtool (as of Libtool 1.5.14) is trying to
-  ## configure itself for Fortran 77.
-  ## Tell it that our F77 compiler is $FC (actually a F9X compiler)
-  F77=$FC
 
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
@@ -458,116 +446,28 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_FC_WRAPPERS
 
   ## --------------------------------------------------------------------
-  ## See if the compiler will support the "-I." option
-  ##
-  dnl  AM_FCFLAGS_saved=$AM_FCFLAGS
-  dnl  AM_FCFLAGS="${AM_FCFLAGS} -I."
-
-  dnl  AC_MSG_CHECKING(if compiler supports -I. option)
-  dnl  AC_TRY_FCOMPILE([
-  dnl      program conftest
-  dnl      end
-  dnl  ], AC_MSG_RESULT(yes),
-  dnl     AC_MSG_RESULT(no)
-  dnl     AM_FCFLAGS="$AM_FCFLAGS_saved")
-
-  ## --------------------------------------------------------------------
   ## See if the fortran compiler supports the intrinsic function "SIZEOF"
-
-  AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
-  AC_TRY_RUN([ 
-   PROGRAM main
-     i = sizeof(x)
-   END PROGRAM
-  ], [AC_MSG_RESULT([yes])
-     	HAVE_SIZEOF="yes"],
-     [AC_MSG_RESULT([no])])
+  PAC_PROG_FC_SIZEOF
 
   ## See if the fortran compiler supports the intrinsic function "C_SIZEOF"
-
-  AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_SIZEOF])
-  AC_TRY_RUN([ 
-   PROGRAM main
-     USE ISO_C_BINDING
-     INTEGER(C_INT) :: a
-     INTEGER(C_SIZE_T) :: result
-     result = C_SIZEOF(a)
-   END PROGRAM
-  ], [AC_MSG_RESULT([yes])
-     	HAVE_C_SIZEOF="yes"],
-     [AC_MSG_RESULT([no])])
+  PAC_PROG_FC_C_SIZEOF
 
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
-
-  AC_MSG_CHECKING([if Fortran compiler supports intrinsic STORAGE_SIZE])
-  AC_TRY_RUN([ 
-   PROGRAM main
-     INTEGER :: a
-     INTEGER :: result
-     result = STORAGE_SIZE(a)
-   END PROGRAM
-  ], [AC_MSG_RESULT([yes])
-     	HAVE_STORAGE_SIZE="yes"],
-     [AC_MSG_RESULT([no])])
+  PAC_PROG_FC_STORAGE_SIZE	
 
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
-
-  AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
-  
-  AC_TRY_RUN([
-     MODULE type_mod
-       INTERFACE h5t	
-         MODULE PROCEDURE h5t_real
-         MODULE PROCEDURE h5t_dble
-       END INTERFACE
-     CONTAINS
-       SUBROUTINE h5t_real(r)
-         REAL :: r
-       END SUBROUTINE h5t_real
-       SUBROUTINE h5t_dble(d)
-         DOUBLE PRECISION :: d
-       END SUBROUTINE h5t_dble
-     END MODULE type_mod
-     PROGRAM main
-       USE type_mod
-       REAL :: r
-       DOUBLE PRECISION :: d
-       CALL h5t(r)
-       CALL h5t(d)
-     END PROGRAM main
-                  ],
-    [AC_MSG_RESULT([no])], 
-    [AC_MSG_RESULT([yes])
-        FORTRAN_DEFAULT_REALisDBLE="yes"])
+  PAC_PROG_FC_DEFAULT_REALisDBLE	
 
   if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
     ## Checking if the compiler supports the required Fortran 2003 features and
     ## disable Fortran 2003 if it does not.
-
-    AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
-    HAVE_FORTRAN_2003="no"
-	
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[
-
-	USE iso_c_binding
-	IMPLICIT NONE
-	TYPE(C_PTR) :: ptr
-	TYPE(C_FUNPTR) :: funptr
-	CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
-
-	ptr = C_LOC(ichr(1:1))
-
-        ])], 
-      [AC_MSG_RESULT([yes])
-        HAVE_F2003_REQUIREMENTS=[yes]], 
-      [AC_MSG_RESULT([no])])
+    PAC_PROG_FC_HAVE_F2003_REQUIREMENTS
+ 
     if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
-    ##  echo $HAVE_FORTRAN_2003
       AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
     else
-    ##  echo $HAVE_FORTRAN_2003
       HAVE_FORTRAN_2003="yes"
     fi
   fi
@@ -578,13 +478,11 @@ fi
 ## Change back to the C language
 AC_LANG_POP(Fortran)
 
-AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
-AM_CONDITIONAL([FORTRAN_HAVE_C_SIZEOF], [test "X$HAVE_C_SIZEOF" = "Xyes"])
-AM_CONDITIONAL([FORTRAN_HAVE_STORAGE_SIZE], [test "X$HAVE_STORAGE_SIZE" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_HAVE_C_SIZEOF], [test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_HAVE_STORAGE_SIZE], [test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_2003_CONDITIONAL_F], [test "X$HAVE_FORTRAN_2003" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
-
-
 
 ## ----------------------------------------------------------------------
 ## Check if they would like the C++ interface compiled
@@ -609,114 +507,56 @@ if test "X$HDF_CXX" = "Xyes"; then
   ## Change to the C++ language
   AC_LANG_PUSH(C++)
 
-  AC_MSG_CHECKING([if $CXX needs old style header files in includes])
-  AC_TRY_RUN([
-#include <iostream>
+  # Checking if C++ needs old style header files in includes
+  PAC_PROG_CXX_HEADERS
 
-int main(void) { return 0; }
-  ], [
-    echo no
-  ], [
-    echo yes
-    CXXFLAGS="${CXXFLAGS} -DOLD_HEADER_FILENAME"
-    AM_CXXFLAGS="${AM_CXXFLAGS} -DOLD_HEADER_FILENAME"
-  ])
+  # Checking if C++ can handle namespaces
+  PAC_PROG_CXX_NAMESPACE
+  
+  # Checking if C++ has offsetof extension 
+  PAC_PROG_CXX_OFFSETOF
 
-  AC_MSG_CHECKING([if $CXX can handle namespaces])
-  AC_TRY_RUN([
-namespace H5 {
-int fnord;
-}
+  # if C++ can handle static cast
+  PAC_PROG_CXX_STATIC_CAST
 
-int main(void) {
-   using namespace H5;
-   fnord = 37;
-   return 0;
-} 
-  ], [
-     echo yes
-  ], [
-     echo no
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_NAMESPACE"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_NAMESPACE"
-  ])
-
-  AC_MSG_CHECKING([if $CXX supports std])
-  AC_TRY_RUN([
-#include <string>
-
-using namespace std;
-
-int main(void) {
-   string myString("testing namespace std");
-   return 0;
-}
-  ], [
-     echo yes
-  ], [
-     echo no
-     CXXFLAGS="${CXXFLAGS} -DH5_NO_STD"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DH5_NO_STD"
-  ])
-
-  AC_MSG_CHECKING([if $CXX supports bool types])
-  AC_TRY_RUN([
-int main(void) {
-   bool flag;
-   return 0;
-}
-  ], [
-     echo yes
-  ], [
-     echo no
-     CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
-     AM_CXXFLAGS="${AM_CXXFLAGS} -DBOOL_NOTDEFINED"
-  ])
-
-  AC_MSG_CHECKING([if $CXX has offsetof extension])
-    AC_TRY_COMPILE([
-  #include <stdio.h>
-  #include <stddef.h>
-    ],[
-    struct index_st
-    {
-      unsigned char type;
-      unsigned char num;
-      unsigned int len;
-    };
-    typedef struct index_st index_t;
-    int x,y;
-    x = offsetof(struct index_st, len);
-    y = offsetof(index_t, num)
-    ],
-    AC_DEFINE([CXX_HAVE_OFFSETOF], [1],
-    [Define if C++ compiler recognizes offsetof])
-    AC_MSG_RESULT([yes]),
-    AC_MSG_RESULT([no]))
-
-  AC_MSG_CHECKING([if $CXX can handle static cast])
-  AC_TRY_RUN([
-int main(void) {
-   float test_float;
-   int test_int;
-   test_float = 37.0;
-   test_int = static_cast <int> (test_float);
-   return 0;
-}
-  ], [
-    echo yes
-  ], [
-    echo no
-    CXXFLAGS="${CXXFLAGS} -DNO_STATIC_CAST"
-    AM_CXXFLAGS="${AM_CXXFLAGS} -DNO_STATIC_CAST"
-  ])
 else
-  echo "no"
+  AC_MSG_RESULT([no])
   CXX="no"
 fi
 
 ## Change back to the C language
 AC_LANG_POP(C++)
+
+
+## ----------------------------------------------------------------------
+## Check if they would like the High Level library  compiled
+##
+
+AC_SUBST(HL) HL=""
+## name of fortran folder inside "hl", if FORTRAN compile is requested
+AC_SUBST(HL_FOR) HL_FOR=""
+AC_MSG_CHECKING([if high level library is enabled])
+AC_ARG_ENABLE([hl],
+     [AS_HELP_STRING([--enable-hl],
+                     [Enable the high-level library [default=yes]])],
+     [HDF5_HL=$enableval],
+     [HDF5_HL=yes])
+
+if test "X$HDF5_HL" = "Xyes"; then
+ echo "yes"
+ HL="hl"
+ AC_DEFINE([INCLUDE_HL], [1],
+           [Define if HDF5's high-level library headers should be included in hdf5.h])
+
+  ## If Fortran's default real is double precision and HL is being built then configure
+  ## should fail due to bug HDFFV-889.
+  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
+    AC_MSG_ERROR([Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl.])
+  fi
+else
+ echo "no"
+fi
+
 
 ## ----------------------------------------------------------------------
 ## Check if they have Perl installed on their system. We only need Perl
@@ -726,7 +566,6 @@ AC_SUBST([PERL]) PERL=""
 if test "X$GCC" = "Xyes"; then
   AC_CHECK_PROGS([PERL], [perl],, [$PATH])
 fi
-
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
@@ -2476,23 +2315,7 @@ case "X-$enable_parallel" in
 		    AC_MSG_ERROR([unable to link a simple MPI-IO C program])])
 
     if test "X$HDF_FORTRAN" = "Xyes"; then
-      ## Change to the Fortran 90 language
-      AC_LANG_PUSH(Fortran)
-
-      ## Try link a simple MPI program.
-      AC_MSG_CHECKING([whether a simple MPI-IO Fortran program can be linked])
-      AC_LINK_IFELSE([
-          program main
-          include 'mpif.h'
-          integer:: ierr
-          call mpi_file_open( ierr )
-          end],
-	  [AC_MSG_RESULT([yes])],
-	  [AC_MSG_RESULT([no])
-	   AC_MSG_ERROR([unable to link a simple MPI-IO Fortran program])])
-
-      ## Change to the C language
-      AC_LANG_POP(Fortran)
+      PAC_PROG_FC_MPI_CHECK
     fi
 
     ## Set RUNPARALLEL to mpiexec if not set yet.
@@ -3871,35 +3694,6 @@ if test -n "$AM_CPPFLAGS"; then
     TEMP_CPPFLAGS="$d $TEMP_CPPFLAGS"
   done
   AM_CPPFLAGS=$TEMP_CPPFLAGS
-fi
-
-## ----------------------------------------------------------------------
-## Check if they would like the High Level library  compiled
-##
-
-AC_SUBST(HL) HL=""
-## name of fortran folder inside "hl", if FORTRAN compile is requested
-AC_SUBST(HL_FOR) HL_FOR=""
-AC_MSG_CHECKING([if high level library is enabled])
-AC_ARG_ENABLE([hl],
-     [AS_HELP_STRING([--enable-hl],
-                     [Enable the high level library [default=yes]])],
-     [HDF5_HL=$enableval],
-     [HDF5_HL=yes])
-
-if test "X$HDF5_HL" = "Xyes"; then
- echo "yes"
- HL="hl"
- AC_DEFINE([INCLUDE_HL], [1],
-           [Define if HDF5's high-level library headers should be included in hdf5.h])
-
-## Check if Fortran's default real is double precision. If it is and HL is being built then configure
-## should fail due to bug HDFFV-889.
-  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
-    AC_MSG_ERROR([Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl.])
-  fi
-else
- echo "no"
 fi
 
 
