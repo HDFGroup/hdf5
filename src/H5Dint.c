@@ -1296,6 +1296,10 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
                     fill_prop->alloc_time = H5D_ALLOC_TIME_INCR;
                     break;
 
+                case H5D_VIRTUAL:
+                    fill_prop->alloc_time = H5D_ALLOC_TIME_INCR;
+                    break;
+
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
@@ -1310,7 +1314,8 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     alloc_time_state = 0;
     if((dataset->shared->layout.type == H5D_COMPACT && fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
             || (dataset->shared->layout.type == H5D_CONTIGUOUS && fill_prop->alloc_time == H5D_ALLOC_TIME_LATE)
-            || (dataset->shared->layout.type == H5D_CHUNKED && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR))
+            || (dataset->shared->layout.type == H5D_CHUNKED && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR)
+            || (dataset->shared->layout.type == H5D_VIRTUAL && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR))
         alloc_time_state = 1;
 
     /* Set revised fill value properties, if they are different from the defaults */
@@ -1435,6 +1440,10 @@ H5D_close(H5D_t *dataset)
             case H5D_COMPACT:
                 /* Free the buffer for the raw data for compact datasets */
                 dataset->shared->layout.storage.u.compact.buf = H5MM_xfree(dataset->shared->layout.storage.u.compact.buf);
+                break;
+
+            case H5D_VIRTUAL:
+                /* Close datasets here?  VDSINC */
                 break;
 
             case H5D_LAYOUT_ERROR:
@@ -1681,6 +1690,10 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
                 } /* end if */
                 break;
 
+            case H5D_VIRTUAL:
+                /* No-op for now VDSINC */
+                break;
+
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
             default:
@@ -1800,6 +1813,9 @@ H5D__init_storage(const H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
                 break;
             } /* end block */
 
+        case H5D_VIRTUAL:
+            /* No-op for now VDSINC */
+
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
@@ -1856,6 +1872,10 @@ H5D__get_storage_size(H5D_t *dset, hid_t dxpl_id, hsize_t *storage_size)
             *storage_size = dset->shared->layout.storage.u.compact.size;
             break;
 
+        case H5D_VIRTUAL:
+            /* Just set to 0 until private data is implemented VDSINC */
+            *storage_size = 0;
+
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
@@ -1894,6 +1914,7 @@ H5D__get_offset(const H5D_t *dset)
     switch(dset->shared->layout.type) {
         case H5D_CHUNKED:
         case H5D_COMPACT:
+        case H5D_VIRTUAL:
             break;
 
         case H5D_CONTIGUOUS:

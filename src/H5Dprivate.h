@@ -106,6 +106,9 @@
 #define H5D_VLEN_FREE           NULL
 #define H5D_VLEN_FREE_INFO      NULL
 
+/* Default virtual dataset list size */
+#define H5D_VIRTUAL_DEF_LIST_SIZE 8
+
 
 /****************************/
 /* Library Private Typedefs */
@@ -176,8 +179,8 @@ H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_ad
 
 /* Functions that operate on virtual storage */
 herr_t H5D_virtual_copy_layout(H5O_layout_t *layout);
-herr_t H5D__virtual_delete(H5F_t *f, hid_t dxpl_id,
-    const H5O_storage_t *storage);
+herr_t H5D_virtual_reset_layout(H5O_layout_t *layout);
+herr_t H5D_virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage);
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,

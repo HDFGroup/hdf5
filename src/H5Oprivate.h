@@ -37,6 +37,7 @@
 /* Private headers needed by this file */
 #include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5HGprivate.h"        /* Global Heaps                         */
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatype functions			*/
 #include "H5Zprivate.h"         /* I/O pipeline filters			*/
@@ -413,21 +414,21 @@ typedef struct H5O_storage_compact_t {
 
 typedef struct H5O_storage_virtual_ent_t {
     /* Stored */
-    char        *source_file;
-    char        *source_dset;
-    H5S_t       *source_select;
-    H5S_t       *virtual_select;
+    char        *source_file_name;      /* Source file name used for virtual dataset mapping */
+    char        *source_dset_name;      /* Source dataset name used for virtual dataset mapping */
+    struct H5S_t *source_select;        /* Selection in the source dataset for mapping */
+    struct H5S_t *virtual_select;       /* Selection in the virtual dataset that is mapped to source_select */
 
     /* Not stored */
-    H5D_t       *source_dset;
+    struct H5D_t *source_dset;          /* Source dataset */
 } H5O_storage_virtual_ent_t;
 
 typedef struct H5O_storage_virtual_t {
     /* Stored in message */
-    H5HG_t      serial_list_hobjid;
+    H5HG_t      serial_list_hobjid;     /* Global heap ID for the list of virtual mapping entries stored on disk */
 
     /* Stored in heap */
-    size_t      list_nused;             /* Number of slots used               */
+    size_t      list_nused;             /* Number of array elements used in list    */
     H5O_storage_virtual_ent_t *list;    /* Array of virtual dataset mapping entries */
 
     /* Not stored */
@@ -440,7 +441,7 @@ typedef struct H5O_storage_t {
         H5O_storage_contig_t contig;    /* Information for contiguous storage */
         H5O_storage_chunk_t chunk;      /* Information for chunked storage    */
         H5O_storage_compact_t compact;  /* Information for compact storage    */
-        H5O_storage_virtual_t virtual;  /* Information for virtual storage    */
+        H5O_storage_virtual_t virt;     /* Information for virtual storage    */
     } u;
 } H5O_storage_t;
 

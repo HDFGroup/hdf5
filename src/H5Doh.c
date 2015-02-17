@@ -398,6 +398,9 @@ H5O__dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         if(H5D__chunk_bh_info(f, dxpl_id, &layout, &pline, &(bh_info->index_size)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
     } /* end if */
+    else if(layout.type == H5D_VIRTUAL && H5D__virtual_is_space_alloc(&layout.storage)) {
+        HDassert(0 && "Not yet implemented...");//VDSINC
+    } /* end if */
 
     /* Check for External File List message in the object header */
     if((exists = H5O_msg_exists_oh(oh, H5O_EFL_ID)) < 0)

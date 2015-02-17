@@ -36,6 +36,7 @@
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5Fprivate.h"         /* Files                                */
 #include "H5HGprivate.h"        /* Global Heaps                         */
+#include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Oprivate.h"         /* Object headers                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
 
@@ -119,34 +120,35 @@ H5D_virtual_copy_layout(H5O_layout_t *layout)
     size_t          i;
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(layout);
+    HDassert(layout->type == H5D_VIRTUAL);
 
-    if(mesg->storage.u.virtual.list_nused > 0) {
+    if(layout->storage.u.virt.list_nused > 0) {
         HDassert(0 && "checking code coverage...");//VDSINC
-        HDassert(layout->storage.u.virtual.list);
+        HDassert(layout->storage.u.virt.list);
 
         /* Save original entry list for use as the "source" */
-        orig_list = layout->storage.u.virtual.list;
+        orig_list = layout->storage.u.virt.list;
 
         /* Allocate memory for the list */
-        if(NULL == (layout->storage.u.virtual.list = (H5O_storage_virtual_ent_t *)H5MM_calloc(layout->storage.u.virtual.list_nused * sizeof(H5O_storage_virtual_ent_t))))
+        if(NULL == (layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc(layout->storage.u.virt.list_nused * sizeof(H5O_storage_virtual_ent_t))))
             HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "unable to allocate memory for virtual dataset entry list")
-        layout->storage.u.virtual.list_nalloc = layout->storage.u.virtual.list_nused;
+        layout->storage.u.virt.list_nalloc = layout->storage.u.virt.list_nused;
 
         /* Copy the list entries */
-        for(i = 0; i < layout->storage.u.virtual.nused; i++) {
-            if(NULL == (layout->storage.u.virtual.list[i].source_file
-                    = HDstrdup(orig_list[i].source_file)))
+        for(i = 0; i < layout->storage.u.virt.list_nused; i++) {
+            if(NULL == (layout->storage.u.virt.list[i].source_file_name
+                    = HDstrdup(orig_list[i].source_file_name)))
                 HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source file name")
-            if(NULL == (layout->storage.u.virtual.list[i].source_dset
-                    = HDstrdup(orig_list[i].source_dset)))
+            if(NULL == (layout->storage.u.virt.list[i].source_dset_name
+                    = HDstrdup(orig_list[i].source_dset_name)))
                 HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source dataset name")
-            if(NULL == (layout->storage.u.virtual.list[i].source_select
+            if(NULL == (layout->storage.u.virt.list[i].source_select
                     = H5S_copy(orig_list[i].source_select, FALSE, TRUE)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy source selection")
-            if(NULL == (layout->storage.u.virtual.list[i].virtual_select
+            if(NULL == (layout->storage.u.virt.list[i].virtual_select
                     = H5S_copy(orig_list[i].virtual_select, FALSE, TRUE)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
         } /* end for */
@@ -154,38 +156,74 @@ H5D_virtual_copy_layout(H5O_layout_t *layout)
     else {
         HDassert(0 && "checking code coverage...");//VDSINC
         /* Zero out other fields related to list, just to be sure */
-        layout->storage.u.virtual.list = NULL;
-        layout->storage.u.virtual.list_nalloc = 0;
+        layout->storage.u.virt.list = NULL;
+        layout->storage.u.virt.list_nalloc = 0;
     } /* end else */
 
 done:
     /* Release allocated resources on failure */
     if((ret_value < 0) && orig_list
-            && (orig_list != layout->storage.u.virtual.list)) {
-        /* Free the list entries */
-        for(i = 0; i < layout->storage.u.virtual.nused; i++) {
-            layout->storage.u.virtual.list[i].source_file = H5MM_xfree(layout->storage.u.virtual.list[i].source_file);
-            layout->storage.u.virtual.list[i].source_dset = H5MM_xfree(layout->storage.u.virtual.list[i].source_dset);
-            if(layout->storage.u.virtual.list[i].source_select
-                    && H5S_close(layout->storage.u.virtual.list[i].source_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
-            mesg->storage.u.virtual.list[i].source_select = NULL;
-            if(layout->storage.u.virtual.list[i].virtual_select
-                    && H5S_close(layout->storage.u.virtual.list[i].virtual_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection")
-            mesg->storage.u.virtual.list[i].virtual_select = NULL;
-        } /* end for */
-
-        /* Free the list */
-        layout->storage.u.virtual.list = H5MM_xfree(layout->storage.u.virtual.list);
-    } /* end if */
+            && (orig_list != layout->storage.u.virt.list))
+        if(H5D_virtual_reset_layout(layout) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset virtual layout")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_copy_layout() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__virtual_delete
+ * Function:    H5D_virtual_reset_layout
+ *
+ * Purpose:     Frees internal structures in a virtual storage layout
+ *              message in memory.  This function is safe to use on
+ *              incomplete structures (for recovery from failure) provided
+ *              the internal structures are initialized with all bytes set
+ *              to 0.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              February 11, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_virtual_reset_layout(H5O_layout_t *layout)
+{
+    size_t          i;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(layout);
+    HDassert(layout->type == H5D_VIRTUAL);
+
+    /* Free the list entries.  Note we always attempt to free everything even in
+     * the case of a failure. */
+    for(i = 0; i < layout->storage.u.virt.list_nused; i++) {
+        layout->storage.u.virt.list[i].source_file_name = (char *)H5MM_xfree(layout->storage.u.virt.list[i].source_file_name);
+        layout->storage.u.virt.list[i].source_dset_name = (char *)H5MM_xfree(layout->storage.u.virt.list[i].source_dset_name);
+        if(layout->storage.u.virt.list[i].source_select
+                && H5S_close(layout->storage.u.virt.list[i].source_select) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+        layout->storage.u.virt.list[i].source_select = NULL;
+        if(layout->storage.u.virt.list[i].virtual_select
+                && H5S_close(layout->storage.u.virt.list[i].virtual_select) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection")
+        layout->storage.u.virt.list[i].virtual_select = NULL;
+        /* Close dataset here?  VDSINC */
+    } /* end for */
+
+    /* Free the list */
+    layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)(layout->storage.u.virt.list);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_virtual_reset_layout() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_virtual_delete
  *
  * Purpose:     Delete the file space for a virtual dataset
  *
@@ -197,25 +235,30 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__virtual_delete(H5F_t *f, hid_t dxpl_id, const H5O_storage_t *storage)
+H5D_virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
     HDassert(storage);
+    HDassert(storage->type == H5D_VIRTUAL);
 
     /* Need to add stuff for private data here VDSINC */
 
     /* Delete the global heap block */
-    if(H5HG_remove(f, dxpl_id, &(storage->u.virtual.serial_list_hobjid)) < 0)
+    if(H5HG_remove(f, dxpl_id, (H5HG_t *)&(storage->u.virt.serial_list_hobjid)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Unable to remove heap object")
+
+    /* Clear global heap ID in storage */
+    storage->u.virt.serial_list_hobjid.addr = HADDR_UNDEF;
+    storage->u.virt.serial_list_hobjid.idx = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__virtual_delete */
+} /* end H5D_virtual_delete */
 
 
 /*-------------------------------------------------------------------------
@@ -257,15 +300,18 @@ H5D__virtual_construct(H5F_t UNUSED *f, H5D_t UNUSED *dset)
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5D__virtual_is_space_alloc(const H5O_storage_t UNUSED *storage)
+H5D__virtual_is_space_alloc(const H5O_storage_t *storage)
 {
     hbool_t ret_value;                  /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Need to decide what to do here.  For now just return true.  VDSINC */
+    HDassert(0 && "checking code coverage...");//VDSINC
+    /* Need to decide what to do here.  For now just return TRUE if the global
+     * heap block has been allocated.  VDSINC */
+    ret_value = storage->u.virt.serial_list_hobjid.addr != HADDR_UNDEF;
 
-    FUNC_LEAVE_NOAPI(TRUE)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_is_space_alloc() */
 
 
@@ -381,8 +427,8 @@ H5D__virtual_flush(H5D_t UNUSED *dset, hid_t UNUSED dxpl_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__virtual_copy(H5F_t UNUSED *f_src, const H5O_storage_contig_t UNUSED *storage_src,
-    H5F_t UNUSED *f_dst, H5O_storage_contig_t UNUSED *storage_dst, H5T_t UNUSED *dt_src,
+H5D__virtual_copy(H5F_t UNUSED *f_src, const H5O_storage_virtual_t UNUSED *storage_src,
+    H5F_t UNUSED *f_dst, H5O_storage_virtual_t UNUSED *storage_dst, H5T_t UNUSED *dt_src,
     H5O_copy_t UNUSED *cpy_info, hid_t UNUSED dxpl_id)
 {
     FUNC_ENTER_PACKAGE_NOERR

@@ -524,6 +524,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     fprintf(out, "H5D_CHUNKED");
                                     break;
 
+                                case H5D_VIRTUAL:
+                                    fprintf(out, "H5D_VIRTUAL");
+                                    break;
+
                                 case H5D_NLAYOUTS:
                                     fprintf(out, "H5D_NLAYOUTS");
                                     break;

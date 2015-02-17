@@ -193,9 +193,9 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	enc_dec_plist_with_endianess$(EXEEXT) getname$(EXEEXT) \
 	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
-	freespace$(EXEEXT) mf$(EXEEXT) farray$(EXEEXT) earray$(EXEEXT) \
-	btree2$(EXEEXT) fheap$(EXEEXT) file_image$(EXEEXT) \
-	unregister$(EXEEXT)
+	freespace$(EXEEXT) mf$(EXEEXT) vds$(EXEEXT) farray$(EXEEXT) \
+	earray$(EXEEXT) btree2$(EXEEXT) fheap$(EXEEXT) \
+	file_image$(EXEEXT) unregister$(EXEEXT)
 @HAVE_SHARED_CONDITIONAL_TRUE@am__EXEEXT_2 = plugin$(EXEEXT)
 am__EXEEXT_3 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
@@ -518,6 +518,10 @@ unregister_SOURCES = unregister.c
 unregister_OBJECTS = unregister.$(OBJEXT)
 unregister_LDADD = $(LDADD)
 unregister_DEPENDENCIES = libh5test.la $(LIBHDF5)
+vds_SOURCES = vds.c
+vds_OBJECTS = vds.$(OBJEXT)
+vds_LDADD = $(LDADD)
+vds_DEPENDENCIES = libh5test.la $(LIBHDF5)
 vfd_SOURCES = vfd.c
 vfd_OBJECTS = vfd.$(OBJEXT)
 vfd_LDADD = $(LDADD)
@@ -573,7 +577,7 @@ SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 	mount.c mtime.c ntypes.c objcopy.c ohdr.c plugin.c pool.c \
 	reserved.c set_extent.c space_overflow.c stab.c \
 	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c unregister.c vfd.c
+	$(ttsafe_SOURCES) unlink.c unregister.c vds.c vfd.c
 DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	$(am__libdynlib2_la_SOURCES_DIST) \
 	$(am__libdynlib3_la_SOURCES_DIST) $(libh5test_la_SOURCES) \
@@ -592,7 +596,7 @@ DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	mount.c mtime.c ntypes.c objcopy.c ohdr.c plugin.c pool.c \
 	reserved.c set_extent.c space_overflow.c stab.c \
 	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c unregister.c vfd.c
+	$(ttsafe_SOURCES) unlink.c unregister.c vds.c vfd.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -1101,7 +1105,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	earray.h5 efc[0-5].h5 log_vfd_out.log new_multi_file_v16-r.h5 \
 	new_multi_file_v16-s.h5 split_get_file_image_test-m.h5 \
 	split_get_file_image_test-r.h5 file_image_core_test.h5.copy \
-	unregister_filter_1.h5 unregister_filter_2.h5
+	unregister_filter_1.h5 unregister_filter_2.h5 vds_[1-4].h5
 
 # Test script for error_test and err_compat
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh \
@@ -1123,7 +1127,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf farray earray btree2 fheap file_image unregister
+           freespace mf vds farray earray btree2 fheap file_image unregister
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -1609,6 +1613,10 @@ unregister$(EXEEXT): $(unregister_OBJECTS) $(unregister_DEPENDENCIES) $(EXTRA_un
 	@rm -f unregister$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(unregister_OBJECTS) $(unregister_LDADD) $(LIBS)
 
+vds$(EXEEXT): $(vds_OBJECTS) $(vds_DEPENDENCIES) $(EXTRA_vds_DEPENDENCIES) 
+	@rm -f vds$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(vds_OBJECTS) $(vds_LDADD) $(LIBS)
+
 vfd$(EXEEXT): $(vfd_OBJECTS) $(vfd_DEPENDENCIES) $(EXTRA_vfd_DEPENDENCIES) 
 	@rm -f vfd$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(vfd_OBJECTS) $(vfd_LDADD) $(LIBS)
@@ -1728,6 +1736,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvltypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unlink.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unregister.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vds.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vfd.Po@am__quote@
 
 .c.o:
@@ -2250,6 +2259,13 @@ freespace.log: freespace$(EXEEXT)
 mf.log: mf$(EXEEXT)
 	@p='mf$(EXEEXT)'; \
 	b='mf'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+vds.log: vds$(EXEEXT)
+	@p='vds$(EXEEXT)'; \
+	b='vds'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
