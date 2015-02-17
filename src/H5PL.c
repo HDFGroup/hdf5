@@ -23,11 +23,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5PLprivate.h"	/* Plugin       			*/
-#include "H5Zprivate.h"		/* Filter pipeline			*/
+#include "H5private.h"      /* Generic Functions            */
+#include "H5Eprivate.h"     /* Error handling               */
+#include "H5MMprivate.h"    /* Memory management            */
+#include "H5PLprivate.h"    /* Plugin                       */
+#include "H5Zprivate.h"     /* Filter pipeline              */
 
 
 /****************/
@@ -96,9 +96,9 @@ typedef const void *(*H5PL_get_plugin_info_t)(void);
 
 /* Type for the list of info for opened plugin libraries */
 typedef struct H5PL_table_t {
-    H5PL_type_t pl_type;			/* plugin type	     */
-    int         pl_id;                          /* ID for the plugin */
-    H5PL_HANDLE handle;			/* plugin handle     */
+    H5PL_type_t pl_type;            /* plugin type          */
+    int         pl_id;              /* ID for the plugin    */
+    H5PL_HANDLE handle;             /* plugin handle        */
 } H5PL_table_t;
 
 
@@ -128,8 +128,8 @@ static herr_t H5PL__close(H5PL_HANDLE handle);
 /*******************/
 
 /* Table for opened plugin libraries */
-static size_t		H5PL_table_alloc_g = 0;
-static size_t		H5PL_table_used_g = 0;
+static size_t           H5PL_table_alloc_g = 0;
+static size_t           H5PL_table_used_g = 0;
 static H5PL_table_t     *H5PL_table_g = NULL;
 
 /* Table of location paths for plugin libraries */
@@ -173,15 +173,15 @@ H5PL__init_interface(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL_no_plugin
+ * Function:    H5PL_no_plugin
  *
- * Purpose:	Quick way for filter module to query whether to load plugin 
+ * Purpose:     Quick way for filter module to query whether to load plugin 
  *
- * Return:	TRUE:	No plugin loading during data reading
+ * Return:      TRUE:   No plugin loading during data reading
  *
- * 		FALSE:	Load plugin during data reading
+ *              FALSE:  Load plugin during data reading
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              20 February 2013
  *
  *-------------------------------------------------------------------------
@@ -201,18 +201,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL_term_interface
+ * Function:    H5PL_term_interface
  *
- * Purpose:	Terminate the H5PL interface: release all memory, reset all
- *		global variables to initial values. This only happens if all
- *		types have been destroyed from other interfaces.
+ * Purpose:     Terminate the H5PL interface: release all memory, reset all
+ *              global variables to initial values. This only happens if all
+ *              types have been destroyed from other interfaces.
  *
- * Return:	Success:	Positive if any action was taken that might
- *				affect some other interface; zero otherwise.
+ * Return:      Success:    Positive if any action was taken that might
+ *                          affect some other interface; zero otherwise.
  *
- * 		Failure:	Negative.
+ *              Failure:    Negative.
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              20 February 2013
  *
  *-------------------------------------------------------------------------
@@ -227,13 +227,13 @@ H5PL_term_interface(void)
     if(H5_interface_initialize_g) {
         size_t u;       /* Local index variable */
 
-	/* Close opened dynamic libraries */
+        /* Close opened dynamic libraries */
         for(u = 0; u < H5PL_table_used_g; u++)
             H5PL__close((H5PL_table_g[u]).handle);
 
-	/* Free the table of dynamic libraries */
-	H5PL_table_g = (H5PL_table_t *)H5MM_xfree(H5PL_table_g);
-	H5PL_table_used_g = H5PL_table_alloc_g = 0;
+        /* Free the table of dynamic libraries */
+        H5PL_table_g = (H5PL_table_t *)H5MM_xfree(H5PL_table_g);
+        H5PL_table_used_g = H5PL_table_alloc_g = 0;
 
         /* Free the table of search paths */
         for(u = 0; u < H5PL_num_paths_g; u++)
@@ -242,7 +242,7 @@ H5PL_term_interface(void)
         H5PL_num_paths_g = 0;
         H5PL_path_found_g = FALSE;
 
-	H5_interface_initialize_g = 0;
+        H5_interface_initialize_g = 0;
         i = 1;
     } /* end if */
 
@@ -251,15 +251,15 @@ H5PL_term_interface(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL_load
+ * Function:    H5PL_load
  *
- * Purpose:	Given the plugin type and identifier, this function searches
+ * Purpose:     Given the plugin type and identifier, this function searches
  *              and/or loads a dynamic plugin library first among the already
  *              opened libraries then in the designated location paths.
  *
- * Return:	Non-NULL on success/NULL on failure
+ * Return:      Non-NULL on success/NULL on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              13 February 2013
  *
  *-------------------------------------------------------------------------
@@ -314,13 +314,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL__init_path_table
+ * Function:    H5PL__init_path_table
  *
- * Purpose:	Initialize the path table.
+ * Purpose:     Initialize the path table.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              18 March 2013
  *
  *-------------------------------------------------------------------------
@@ -369,18 +369,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL__find
+ * Function:    H5PL__find
  *
  * Purpose:     Given a path, this function opens the directory and envokes
  *              another function to go through all files to find the right 
  *              plugin library. Two function definitions are for Unix and 
  *              Windows.
  *
- * Return:	TRUE on success, 
+ * Return:      TRUE on success, 
  *              FALSE on not found,
  *              negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              13 February 2013
  *
  *-------------------------------------------------------------------------
@@ -480,7 +480,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
 
             /* Allocate & initialize the path name */
             pathname_len = HDstrlen(dir) + HDstrlen(fdFile.cFileName) + 2;
-	    if(NULL == (pathname = (char *)H5MM_malloc(pathname_len)))
+            if(NULL == (pathname = (char *)H5MM_malloc(pathname_len)))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
             HDsnprintf(pathname, pathname_len, "%s\\%s", dir, fdFile.cFileName);
 
@@ -495,7 +495,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
                 HGOTO_DONE(TRUE)
             } /* end if */
             else
-	        HDassert(pathname);
+                HDassert(pathname);
                 pathname = (char *)H5MM_xfree(pathname);
         } /* end if */
     } while(FindNextFile(hFind, &fdFile)); /* Find the next file. */
@@ -512,17 +512,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL__open
+ * Function:    H5PL__open
  *
  * Purpose:     Iterates through all files to find the right plugin library.
  *              It loads the dynamic plugin library and keeps it on the list 
- *              of loaded libraries. 	
+ *              of loaded libraries.
  *
- * Return:	TRUE on success, 
+ * Return:      TRUE on success, 
  *              FALSE on not found,
  *              negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              13 February 2013
  *
  *-------------------------------------------------------------------------
@@ -600,16 +600,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL__search_table
+ * Function:    H5PL__search_table
  *
  * Purpose:     Search in the list of already opened dynamic libraries
  *              to see if the one we are looking for is already opened.
  *
- * Return:	TRUE on success, 
+ * Return:      TRUE on success, 
  *              FALSE on not found,
  *              Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              13 February 2013
  *
  *-------------------------------------------------------------------------
@@ -631,12 +631,12 @@ H5PL__search_table(H5PL_type_t plugin_type, int type_id, const void **info)
                 const H5Z_class2_t   *plugin_info;
 
                 if(NULL == (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC((H5PL_table_g[i]).handle, "H5PLget_plugin_info")))
-		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info")
 
-	        if(NULL == (plugin_info = (const H5Z_class2_t *)(*get_plugin_info)()))
-		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
+                if(NULL == (plugin_info = (const H5Z_class2_t *)(*get_plugin_info)()))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
 
-	        *info = plugin_info;
+                *info = plugin_info;
                 HGOTO_DONE(TRUE)
             } /* end if */
         } /* end for */
@@ -648,13 +648,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL__close
+ * Function:    H5PL__close
  *
  * Purpose:     Closes the handle for dynamic library	
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              13 February 2013
  *
  *-------------------------------------------------------------------------
@@ -668,4 +668,3 @@ H5PL__close(H5PL_HANDLE handle)
    
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5PL__close() */
-
