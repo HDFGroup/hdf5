@@ -180,6 +180,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_int1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_INT1_C'::h5ltmake_dataset_int1_c
          !DEC$ENDIF
@@ -246,6 +247,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_int2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_INT2_C'::h5ltmake_dataset_int2_c
          !DEC$ENDIF
@@ -313,6 +315,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_int3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_INT3_C'::h5ltmake_dataset_int3_c
          !DEC$ENDIF
@@ -375,6 +378,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_int4_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_INT4_C'::h5ltmake_dataset_int4_c
          !DEC$ENDIF
@@ -437,6 +441,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_int5_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_INT5_C'::h5ltmake_dataset_int5_c
          !DEC$ENDIF
@@ -499,6 +504,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_int6_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_INT6_C'::h5ltmake_dataset_int6_c
          !DEC$ENDIF
@@ -561,6 +567,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_int7_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_INT7_C'::h5ltmake_dataset_int7_c
          !DEC$ENDIF
@@ -628,6 +635,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_fl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_FL1_C'::h5ltmake_dataset_fl1_c
          !DEC$ENDIF
@@ -694,6 +702,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_fl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_FL2_C'::h5ltmake_dataset_fl2_c
          !DEC$ENDIF
@@ -761,6 +770,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_fl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_FL3_C'::h5ltmake_dataset_fl3_c
          !DEC$ENDIF
@@ -823,6 +833,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_fl4_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_FL4_C'::h5ltmake_dataset_fl4_c
          !DEC$ENDIF
@@ -885,6 +896,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_fl5_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_FL5_C'::h5ltmake_dataset_fl5_c
          !DEC$ENDIF
@@ -947,6 +959,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_fl6_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_FL6_C'::h5ltmake_dataset_fl6_c
          !DEC$ENDIF
@@ -1009,6 +1022,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_fl7_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_FL7_C'::h5ltmake_dataset_fl7_c
          !DEC$ENDIF
@@ -1075,6 +1089,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_dl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_DL1_C'::h5ltmake_dataset_dl1_c
          !DEC$ENDIF
@@ -1141,6 +1156,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_dl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_DL2_C'::h5ltmake_dataset_dl2_c
          !DEC$ENDIF
@@ -1208,6 +1224,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_dl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_DL3_C'::h5ltmake_dataset_dl3_c
          !DEC$ENDIF
@@ -1270,6 +1287,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_dl4_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_DL4_C'::h5ltmake_dataset_dl4_c
          !DEC$ENDIF
@@ -1332,6 +1350,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_dl5_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_DL5_C'::h5ltmake_dataset_dl5_c
          !DEC$ENDIF
@@ -1394,6 +1413,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_dl6_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_DL6_C'::h5ltmake_dataset_dl6_c
          !DEC$ENDIF
@@ -1456,6 +1476,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_dl7_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_DL7_C'::h5ltmake_dataset_dl7_c
          !DEC$ENDIF
@@ -1520,6 +1541,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_int1_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_INT1_C'::h5ltread_dataset_int1_c
          !DEC$ENDIF
@@ -1583,6 +1605,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_int2_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_INT2_C'::h5ltread_dataset_int2_c
          !DEC$ENDIF
@@ -1647,6 +1670,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_int3_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_INT3_C'::h5ltread_dataset_int3_c
          !DEC$ENDIF
@@ -1707,6 +1731,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_int4_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_INT4_C'::h5ltread_dataset_int4_c
          !DEC$ENDIF
@@ -1767,6 +1792,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_int5_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_INT5_C'::h5ltread_dataset_int5_c
          !DEC$ENDIF
@@ -1827,6 +1853,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_int6_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_INT6_C'::h5ltread_dataset_int6_c
          !DEC$ENDIF
@@ -1887,6 +1914,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_int7_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_INT7_C'::h5ltread_dataset_int7_c
          !DEC$ENDIF
@@ -1951,6 +1979,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_fl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_FL1_C'::h5ltread_dataset_fl1_c
          !DEC$ENDIF
@@ -2015,6 +2044,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_fl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_FL2_C'::h5ltread_dataset_fl2_c
          !DEC$ENDIF
@@ -2079,6 +2109,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_fl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_FL3_C'::h5ltread_dataset_fl3_c
          !DEC$ENDIF
@@ -2139,6 +2170,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_fl4_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_FL4_C'::h5ltread_dataset_fl4_c
          !DEC$ENDIF
@@ -2199,6 +2231,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_fl5_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_FL5_C'::h5ltread_dataset_fl5_c
          !DEC$ENDIF
@@ -2259,6 +2292,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_fl6_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_FL6_C'::h5ltread_dataset_fl6_c
          !DEC$ENDIF
@@ -2319,6 +2353,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_fl7_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_FL7_C'::h5ltread_dataset_fl7_c
          !DEC$ENDIF
@@ -2383,6 +2418,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_dl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_DL1_C'::h5ltread_dataset_dl1_c
          !DEC$ENDIF
@@ -2446,6 +2482,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_dl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_DL2_C'::h5ltread_dataset_dl2_c
          !DEC$ENDIF
@@ -2510,6 +2547,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_dl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_DL3_C'::h5ltread_dataset_dl3_c
          !DEC$ENDIF
@@ -2570,6 +2608,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_dl4_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_DL4_C'::h5ltread_dataset_dl4_c
          !DEC$ENDIF
@@ -2630,6 +2669,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_dl5_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_DL5_C'::h5ltread_dataset_dl5_c
          !DEC$ENDIF
@@ -2690,6 +2730,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_dl6_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_DL6_C'::h5ltread_dataset_dl6_c
          !DEC$ENDIF
@@ -2750,6 +2791,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_dl7_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_DL7_C'::h5ltread_dataset_dl7_c
          !DEC$ENDIF
@@ -2813,6 +2855,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nint1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NINT1_C'::h5ltmake_dataset_nint1_c
          !DEC$ENDIF
@@ -2878,6 +2921,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nint2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NINT2_C'::h5ltmake_dataset_nint2_c
          !DEC$ENDIF
@@ -2945,6 +2989,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nint3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NINT3_C'::h5ltmake_dataset_nint3_c
          !DEC$ENDIF
@@ -3007,6 +3052,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nint4_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NINT4_C'::h5ltmake_dataset_nint4_c
          !DEC$ENDIF
@@ -3069,6 +3115,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nint5_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NINT5_C'::h5ltmake_dataset_nint5_c
          !DEC$ENDIF
@@ -3131,6 +3178,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nint6_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NINT6_C'::h5ltmake_dataset_nint6_c
          !DEC$ENDIF
@@ -3193,6 +3241,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nint7_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NINT7_C'::h5ltmake_dataset_nint7_c
          !DEC$ENDIF
@@ -3257,6 +3306,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nfl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NFL1_C'::h5ltmake_dataset_nfl1_c
          !DEC$ENDIF
@@ -3321,6 +3371,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nfl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NFL2_C'::h5ltmake_dataset_nfl2_c
          !DEC$ENDIF
@@ -3386,6 +3437,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nfl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NFL3_C'::h5ltmake_dataset_nfl3_c
          !DEC$ENDIF
@@ -3447,6 +3499,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nfl4_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NFL4_C'::h5ltmake_dataset_nfl4_c
          !DEC$ENDIF
@@ -3508,6 +3561,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nfl5_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NFL5_C'::h5ltmake_dataset_nfl5_c
          !DEC$ENDIF
@@ -3569,6 +3623,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nfl6_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NFL6_C'::h5ltmake_dataset_nfl6_c
          !DEC$ENDIF
@@ -3630,6 +3685,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nfl7_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NFL7_C'::h5ltmake_dataset_nfl7_c
          !DEC$ENDIF
@@ -3696,6 +3752,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_ndl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NDL1_C'::h5ltmake_dataset_ndl1_c
          !DEC$ENDIF
@@ -3762,6 +3819,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_ndl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NDL2_C'::h5ltmake_dataset_ndl2_c
          !DEC$ENDIF
@@ -3827,6 +3885,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_ndl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NDL3_C'::h5ltmake_dataset_ndl3_c
          !DEC$ENDIF
@@ -3888,6 +3947,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_ndl4_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NDL4_C'::h5ltmake_dataset_ndl4_c
          !DEC$ENDIF
@@ -3949,6 +4009,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_ndl5_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NDL5_C'::h5ltmake_dataset_ndl5_c
          !DEC$ENDIF
@@ -4010,6 +4071,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_ndl6_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NDL6_C'::h5ltmake_dataset_ndl6_c
          !DEC$ENDIF
@@ -4071,6 +4133,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_ndl7_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NDL7_C'::h5ltmake_dataset_ndl7_c
          !DEC$ENDIF
@@ -4134,6 +4197,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nint1_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NINT1_C'::h5ltread_dataset_nint1_c
          !DEC$ENDIF
@@ -4197,6 +4261,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nint2_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NINT2_C'::h5ltread_dataset_nint2_c
          !DEC$ENDIF
@@ -4259,6 +4324,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nint3_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NINT3_C'::h5ltread_dataset_nint3_c
          !DEC$ENDIF
@@ -4317,6 +4383,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nint4_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NINT4_C'::h5ltread_dataset_nint4_c
          !DEC$ENDIF
@@ -4375,6 +4442,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nint5_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NINT5_C'::h5ltread_dataset_nint5_c
          !DEC$ENDIF
@@ -4433,6 +4501,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nint6_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NINT6_C'::h5ltread_dataset_nint6_c
          !DEC$ENDIF
@@ -4491,6 +4560,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nint7_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NINT7_C'::h5ltread_dataset_nint7_c
          !DEC$ENDIF
@@ -4554,6 +4624,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nfl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NFL1_C'::h5ltread_dataset_nfl1_c
          !DEC$ENDIF
@@ -4617,6 +4688,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nfl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NFL2_C'::h5ltread_dataset_nfl2_c
          !DEC$ENDIF
@@ -4679,6 +4751,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nfl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NFL3_C'::h5ltread_dataset_nfl3_c
          !DEC$ENDIF
@@ -4737,6 +4810,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nfl4_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NFL4_C'::h5ltread_dataset_nfl4_c
          !DEC$ENDIF
@@ -4795,6 +4869,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nfl5_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NFL5_C'::h5ltread_dataset_nfl5_c
          !DEC$ENDIF
@@ -4853,6 +4928,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nfl6_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NFL6_C'::h5ltread_dataset_nfl6_c
          !DEC$ENDIF
@@ -4911,6 +4987,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_nfl7_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NFL7_C'::h5ltread_dataset_nfl7_c
          !DEC$ENDIF
@@ -4973,6 +5050,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_ndl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NDL1_C'::h5ltread_dataset_ndl1_c
          !DEC$ENDIF
@@ -5036,6 +5114,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_ndl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NDL2_C'::h5ltread_dataset_ndl2_c
          !DEC$ENDIF
@@ -5098,6 +5177,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_ndl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NDL3_C'::h5ltread_dataset_ndl3_c
          !DEC$ENDIF
@@ -5156,6 +5236,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_ndl4_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NDL4_C'::h5ltread_dataset_ndl4_c
          !DEC$ENDIF
@@ -5214,6 +5295,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_ndl5_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NDL5_C'::h5ltread_dataset_ndl5_c
          !DEC$ENDIF
@@ -5272,6 +5354,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_ndl6_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NDL6_C'::h5ltread_dataset_ndl6_c
          !DEC$ENDIF
@@ -5330,6 +5413,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_ndl7_c(loc_id,namelen,dset_name,type_id,buf,dims)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NDL7_C'::h5ltread_dataset_ndl7_c
          !DEC$ENDIF
@@ -5391,6 +5475,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_string_c(loc_id,namelen,dset_name,buflen,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_STRING_C'::h5ltmake_dataset_string_c
          !DEC$ENDIF
@@ -5449,6 +5534,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_string_c(loc_id,namelen,dset_name,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_STRING_C'::h5ltread_dataset_string_c
          !DEC$ENDIF
@@ -5518,6 +5604,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltset_attribute_int_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTSET_ATTRIBUTE_INT_C'::h5ltset_attribute_int_c
          !DEC$ENDIF
@@ -5584,6 +5671,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltset_attribute_float_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTSET_ATTRIBUTE_FLOAT_C'::h5ltset_attribute_float_c
          !DEC$ENDIF
@@ -5650,6 +5738,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltset_attribute_double_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTSET_ATTRIBUTE_DOUBLE_C'::h5ltset_attribute_double_c
          !DEC$ENDIF
@@ -5716,6 +5805,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltset_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buflen,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTSET_ATTRIBUTE_STRING_C'::h5ltset_attribute_string_c
          !DEC$ENDIF
@@ -5783,6 +5873,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_int_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_INT_C'::h5ltget_attribute_int_c
          !DEC$ENDIF
@@ -5847,6 +5938,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_float_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_FLOAT_C'::h5ltget_attribute_float_c
          !DEC$ENDIF
@@ -5910,6 +6002,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_double_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_DOUBLE_C'::h5ltget_attribute_double_c
          !DEC$ENDIF
@@ -5974,6 +6067,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,buf_size)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_STRING_C'::h5ltget_attribute_string_c
          !DEC$ENDIF
@@ -6041,6 +6135,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltget_dataset_ndims_c(loc_id,namelen,dset_name,rank)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTGET_DATASET_NDIMS_C'::h5ltget_dataset_ndims_c
          !DEC$ENDIF
@@ -6096,6 +6191,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltfind_dataset_c(loc_id,namelen,dset_name)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTFIND_DATASET_C'::h5ltfind_dataset_c
          !DEC$ENDIF
@@ -6156,6 +6252,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltget_dataset_info_c(loc_id,namelen,dset_name,dims,type_class,type_size)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTGET_DATASET_INFO_C'::h5ltget_dataset_info_c
          !DEC$ENDIF
@@ -6223,6 +6320,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_ndims_c(loc_id,namelen,dset_name,attrlen,attr_name,rank)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_NDIMS_C'::h5ltget_attribute_ndims_c
          !DEC$ENDIF
@@ -6291,6 +6389,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_info_c(loc_id,namelen,dset_name,attrlen,attr_name,dims,type_class,type_size)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_INFO_C'::h5ltget_attribute_info_c
          !DEC$ENDIF
@@ -6353,6 +6452,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ltpath_valid_c(loc_id, path, pathlen, check_object_valid_c)
          USE h5global
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LTPATH_VALID_C'::h5ltpath_valid_c
          !DEC$ENDIF
