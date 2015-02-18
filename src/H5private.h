@@ -211,10 +211,9 @@
 #define eventa(func_name)   h5_mpe_eventa
 #define eventb(func_name)   h5_mpe_eventb
 #define MPE_LOG_VARS                                                    \
-    static int h5_mpe_eventa = -1;                                      \
-    static int h5_mpe_eventb = -1;                                      \
-    static char p_event_start[128];                                     \
-    static char p_event_end[128];
+    static int eventa(FUNC) = -1;                                       \
+    static int eventb(FUNC) = -1;                                       \
+    char p_event_start[128];
 
 /* Hardwire the color to "red", since that's what all the routines are using
  * now.  In the future, if we want to change that color for a given routine,
@@ -223,19 +222,18 @@
  * color information down to the BEGIN_MPE_LOG macro (which should have a new
  * BEGIN_MPE_LOG_COLOR variant). -QAK
  */
+
 #define BEGIN_MPE_LOG                                                   \
-  if(H5_MPEinit_g) {                                                    \
-    if(h5_mpe_eventa == -1 && h5_mpe_eventb == -1) {                    \
-         const char *p_color = "red";                                   \
-                                                                        \
-         h5_mpe_eventa = MPE_Log_get_event_number();                    \
-         h5_mpe_eventb = MPE_Log_get_event_number();                    \
-         HDsnprintf(p_event_start, sizeof(p_event_start) - 1, "start_%s", FUNC); \
-         HDsnprintf(p_event_end, sizeof(p_event_end) - 1, "end_%s", FUNC); \
-         MPE_Describe_state(h5_mpe_eventa, h5_mpe_eventb, (char *)FUNC, (char *)p_color); \
-    }                                                                   \
-    MPE_Log_event(h5_mpe_eventa, 0, p_event_start);                     \
-  }
+    if (H5_MPEinit_g){                                                  \
+        sprintf(p_event_start, "start %s", FUNC);                       \
+        if (eventa(FUNC) == -1 && eventb(FUNC) == -1) {                 \
+            const char* p_color = "red";                                \
+            eventa(FUNC)=MPE_Log_get_event_number();                    \
+            eventb(FUNC)=MPE_Log_get_event_number();                    \
+            MPE_Describe_state(eventa(FUNC), eventb(FUNC), FUNC, p_color); \
+        }                                                               \
+        MPE_Log_event(eventa(FUNC), 0, p_event_start);                  \
+    }
 
 
 /*------------------------------------------------------------------------
@@ -245,8 +243,8 @@
  * Programmer: Long Wang
  */
 #define FINISH_MPE_LOG                                                  \
-    if(H5_MPEinit_g) {                                                  \
-        MPE_Log_event(h5_mpe_eventb, 0, p_event_end);                   \
+    if (H5_MPEinit_g) {                                                 \
+        MPE_Log_event(eventb(FUNC), 0, FUNC);                           \
     }
 
 #else /* H5_HAVE_MPE */
@@ -1845,7 +1843,7 @@ static herr_t    H5_INTERFACE_INIT_FUNC(void);
 
 /* Local variables for API routines */
 #define FUNC_ENTER_API_VARS                                                   \
-    MPE_LOG_VARS                                                              \
+    MPE_LOG_VARS                                                  \
     H5TRACE_DECL
 
 #define FUNC_ENTER_API_COMMON                         \

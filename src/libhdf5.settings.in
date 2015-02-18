@@ -71,4 +71,3 @@ Clear file buffers before write: @CLEARFILEBUF@
          Function Stack Tracing: @CODESTACK@
       Strict File Format Checks: @STRICT_FORMAT_CHECKS@
    Optimization Instrumentation: @INSTRUMENT@
-       Large File Support (LFS): @LARGEFILE@
