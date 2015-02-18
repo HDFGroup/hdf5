@@ -40,7 +40,7 @@ MODULE H5T_PROVISIONAL
 
 CONTAINS
 !
-!****s* H5T/h5tenaum_insert_f
+!****s* H5T/h5tenum_insert_f
 !
 ! NAME
 !  h5tenaum_insert_f

@@ -151,18 +151,15 @@ CONTAINS
     INTEGER(C_INT), TARGET :: c_value
     TYPE(C_PTR) :: f_ptr
 
-    PRINT*,'b',value
     ! make sure 'value' is the same type as the C int
     c_value = INT(value, C_INT)
     f_ptr = C_LOC(c_value)
 
-
-    PRINT*,value
     CALL h5tenum_insert_ptr(type_id, name, f_ptr, hdferr)
   END SUBROUTINE h5tenum_insert_integer
 
 !
-!****s* H5T/h5tenaum_insert_f_F03
+!****s* H5T/h5tenum_insert_f_F03
 !
 ! NAME
 !  h5tenaum_insert_f
