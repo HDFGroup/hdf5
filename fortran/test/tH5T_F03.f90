@@ -1419,7 +1419,7 @@ SUBROUTINE t_enum(total_error)
      ! Insert enumerated value for memtype.
      !
      val(1) = i
-     CALL H5Tenum_insert_f(memtype, TRIM(names(i+1)), val(1), error)
+     CALL H5Tenum_insert_f(memtype, TRIM(names(i+1)), C_LOC(val(1)), error)
      CALL check("H5Tenum_insert_f", error, total_error)
      !
      ! Insert enumerated value for filetype.  We must first convert

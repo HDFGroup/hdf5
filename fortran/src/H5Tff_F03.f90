@@ -47,6 +47,11 @@ MODULE H5T_PROVISIONAL
 
 !*****
 
+  INTERFACE h5tenum_insert_f
+     MODULE PROCEDURE h5tenum_insert_f03
+     MODULE PROCEDURE h5tenum_insert_f90
+  END INTERFACE
+
 CONTAINS
 
 !****s* H5T (F03)/H5Tconvert_f_F03
@@ -93,6 +98,7 @@ CONTAINS
             BIND(C, NAME='h5tconvert_c')
          USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
          USE H5GLOBAL
+         IMPLICIT NONE
          INTEGER(HID_T) , INTENT(IN)           :: src_id
          INTEGER(HID_T) , INTENT(IN)           :: dst_id
          INTEGER(SIZE_T), INTENT(IN)           :: nelmts
@@ -111,6 +117,107 @@ CONTAINS
     hdferr = H5Tconvert_c(src_id, dst_id, nelmts, buf, background_default, plist_id_default)
 
   END SUBROUTINE h5tconvert_f
+!
+!****s* (F03) H5T/h5tenaum_insert_f03
+!
+! NAME
+!  h5tenum_insert_f
+!
+! PURPOSE
+!  Inserts a new enumeration datatype member.
+!
+! INPUTS
+!  type_id  - Datatype identifier for the enumeration datatype.
+!  name     - Datatype identifier.
+!  value    - Value of the new member.
+! OUTPUTS
+!  hdferr   - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  Elena Pourmal
+!  August 12, 1999
+!
+! HISTORY
+!  Explicit Fortran interfaces were added for
+!  called C functions (it is needed for Windows
+!  port).  March 7, 2001
+! SOURCE
+  SUBROUTINE h5tenum_insert_f90(type_id,  name, value, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
+    CHARACTER(LEN=*), INTENT(IN) :: name  !Name of  the new member
+    INTEGER, INTENT(IN) :: value !value of the new member
+    INTEGER, INTENT(OUT) :: hdferr        ! Error code
+!*****
+    INTEGER :: namelen
+    INTERFACE
+       INTEGER FUNCTION h5tenum_insert_c(type_id, name, namelen, value)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TENUM_INSERT_C'::h5tenum_insert_c
+         !DEC$ENDIF
+         !DEC$ATTRIBUTES reference :: name
+         INTEGER(HID_T), INTENT(IN) :: type_id
+         CHARACTER(LEN=*), INTENT(IN) :: name
+         INTEGER, INTENT(IN) :: value
+         INTEGER :: namelen
+       END FUNCTION h5tenum_insert_c
+    END INTERFACE
+            
+    namelen = LEN(name)
+    hdferr = h5tenum_insert_c(type_id, name, namelen, value)
+  END SUBROUTINE h5tenum_insert_f90
+
+!
+!****s* (F03) H5T/h5tenaum_insert_f03
+!
+! NAME
+!  h5tenum_insert_f
+!
+! PURPOSE
+!  Inserts a new enumeration datatype member.
+!
+! INPUTS
+!  type_id  - Datatype identifier for the enumeration datatype.
+!  name     - Datatype identifier.
+!  value    - Pointer to the value of the new member.
+! OUTPUTS
+!  hdferr   - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  February 6, 2015
+!
+! HISTORY
+!  F2003 implementation of function
+! SOURCE
+  SUBROUTINE h5tenum_insert_f03(type_id, name, value, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_char
+    USE H5GLOBAL
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN) :: type_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    TYPE(C_PTR)     , INTENT(IN) :: value
+    INTEGER, INTENT(OUT) :: hdferr
+!*****
+    INTEGER :: namelen
+    
+    INTERFACE
+       INTEGER FUNCTION h5tenum_insert_ptr_c(type_id, name, namelen, value) &
+            BIND(C, NAME='h5tenum_insert_ptr_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_char
+         USE H5GLOBAL
+         IMPLICIT NONE
+         INTEGER(HID_T)  , INTENT(IN) :: type_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+         INTEGER :: namelen
+         TYPE(C_PTR), VALUE :: value
+       END FUNCTION h5tenum_insert_ptr_c
+    END INTERFACE
+            
+    namelen = LEN(name)
+    hdferr = h5tenum_insert_ptr_c(type_id, name, namelen, value)
+  END SUBROUTINE h5tenum_insert_f03
 
 END MODULE H5T_PROVISIONAL
 

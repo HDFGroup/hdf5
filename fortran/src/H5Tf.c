@@ -2421,3 +2421,46 @@ h5tconvert_c(hid_t_f *src_id, hid_t_f *dst_id, size_t_f *nelmts, void *buf, void
   return ret_value;
 }
 
+/****if* H5Tf/h5tenum_insert_ptr_c
+ * NAME
+ *  /h5tenum_insert_ptr_c
+ * PURPOSE
+ *  Calls H5Tenum_insert
+ * INPUTS
+ *  type_id  - Datatype identifier for the enumeration datatype.
+ *  name     - Datatype identifier.
+ *  value    - Pointer to the value of the new member.
+ *
+ * OUTPUTS
+ *
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
+ *  2/6/2015
+ *
+ * SOURCE
+*/
+int_f
+h5tenum_insert_ptr_c(hid_t_f *type_id, _fcd name, int_f* namelen, void *value)
+/******/
+{
+  int ret_value = -1;
+  hid_t status;
+  char *c_name;
+  size_t c_namelen;
+
+  /*
+   * Convert FORTRAN name to C name
+   */
+  c_namelen = *namelen;
+  c_name = (char *)HD5f2cstring(name, c_namelen);
+  if (c_name == NULL) return ret_value;
+
+  status = H5Tenum_insert( (hid_t)*type_id, c_name, value);
+  if ( status < 0  ) return ret_value;
+  ret_value = 0;
+  return ret_value;
+}
+
+
