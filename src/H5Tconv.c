@@ -3410,6 +3410,7 @@ H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     FUNC_ENTER_PACKAGE
 
+      printf("conv_array\n");
     switch (cdata->command) {
         case H5T_CONV_INIT:
             /*
@@ -3579,6 +3580,8 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     FUNC_ENTER_PACKAGE
 
+      printf("**H5T__conv_i_i\n");
+
     switch(cdata->command) {
         case H5T_CONV_INIT:
             if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
@@ -3615,6 +3618,7 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                 olap = (size_t)olap_d;
                 sp = dp = (uint8_t*)buf;
+		printf("sp %d\n", *sp);
                 direction = 1;
             } else {
                 double olap_d = HDceil((double)(src->shared->size)/
