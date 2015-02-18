@@ -1379,8 +1379,7 @@ SUBROUTINE t_enum(total_error)
   INTEGER(hsize_t),   DIMENSION(1:2) :: dims = (/dim0, dim1/)
   INTEGER, DIMENSION(1:dim0, 1:dim1), TARGET :: wdata ! Write buffer
   INTEGER, DIMENSION(:,:), ALLOCATABLE, TARGET :: rdata ! Read buffer
-  INTEGER(C_INT), DIMENSION(1:1), TARGET :: val
-  INTEGER(C_INT), TARGET :: c_val
+  INTEGER, DIMENSION(1:1), TARGET :: val
 
   CHARACTER(LEN=6), DIMENSION(1:4) :: &
        names = (/"SOLID ", "LIQUID", "GAS   ", "PLASMA"/)
@@ -1399,12 +1398,6 @@ SUBROUTINE t_enum(total_error)
         wdata(i,j) = MOD( (j-1)*(i-1), PLASMA+1)
      ENDDO
   ENDDO
-  PRINT*,F_BASET,M_BASET
-  val(1) = 0
-!!$  f_ptr = C_LOC(val(1))
-!!$  CALL H5Tconvert_f(M_BASET, F_BASET, INT(1,SIZE_T), f_ptr, error)
-!!$  stop
-
   !
   ! Create a new file using the default properties.
   !
@@ -1426,28 +1419,18 @@ SUBROUTINE t_enum(total_error)
      ! Insert enumerated value for memtype.
      !
      val(1) = i
-    ! c_val = val(1)
-     f_ptr = C_LOC(val(1))
-     CALL H5Tenum_insert_f(memtype, TRIM(names(i+1)), f_ptr, error)
+     CALL H5Tenum_insert_f(memtype, TRIM(names(i+1)), val(1), error)
      CALL check("H5Tenum_insert_f", error, total_error)
      !
      ! Insert enumerated value for filetype.  We must first convert
      ! the numerical value val to the base type of the destination.
      !
-   !  f_ptr = C_LOC(val(1))
-    !  c_val = val(1)
-   !  f_ptr = C_LOC(c_val)
-     PRINT*,'a0',val(1), sizeof(val(1))
+     f_ptr = C_LOC(val(1))
      CALL H5Tconvert_f(M_BASET, F_BASET, INT(1,SIZE_T), f_ptr, error)
-  !   val(1) = c_val
-     PRINT*,'aa',val(1)
-    ! if(i.eq.1)stop
      CALL check("H5Tconvert_f",error, total_error)
-     CALL H5Tenum_insert_f(filetype, TRIM(names(i+1)), f_ptr, error)
+     CALL H5Tenum_insert_f(filetype, TRIM(names(i+1)), val(1), error)
      CALL check("H5Tenum_insert_f",error, total_error)
-     if(i.eq.1) STOP
   ENDDO
-  stop
   !
   ! Create dataspace.  Setting maximum size to be the current size.
   !

@@ -1772,52 +1772,8 @@ nh5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
   if (c_name == NULL) return ret_value;
 
   c_type_id = (hid_t)*type_id;
-
+  c_value = (int)*value;
   error = H5Tenum_insert(c_type_id, c_name, &c_value);
-  HDfree(c_name);
-  if(error < 0) return ret_value;
-
-  ret_value = 0;
-  return ret_value;
-}
-
-/****if* H5Tf/h5tenum_insert_ptr_c
- * NAME
- *  h5tenum_insert_c
- * PURPOSE
- *  Call H5Tenum_insert to insert a new enumeration datatype member.
- * INPUTS
- *  type_id - Datatype identifier for the enumeration datatype.
- *  name    - Name of the new member. 
- *  namelen - length of the name.
- *  value   - Pointer to the value of the new member.
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  M. Scot Breitenfeld
- *  September 25, 2014
- * HISTORY
- *
- * SOURCE
-*/
-int_f
-nh5tenum_insert_ptr_c(hid_t_f *type_id, _fcd name, int_f* namelen, void *value)
-/******/
-{
-  int ret_value = -1;
-  hid_t c_type_id;
-  char* c_name;
-  size_t c_namelen;
-  int_f c_value;
-  herr_t error;
-
-  c_namelen = *namelen;
-  c_name = (char *)HD5f2cstring(name, c_namelen);
-  if (c_name == NULL) return ret_value;
-
-  c_type_id = (hid_t)*type_id;
-
-  error = H5Tenum_insert(c_type_id, c_name, value);
   HDfree(c_name);
   if(error < 0) return ret_value;
 

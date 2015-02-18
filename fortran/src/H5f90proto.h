@@ -709,7 +709,6 @@ H5_FCDLL int_f nh5arename_c( hid_t_f *loc_id,
 #define nh5tinsert_array_c2           H5_FC_FUNC_(h5tinsert_array_c2, H5TINSERT_ARRAY_C2)
 #define nh5tenum_create_c             H5_FC_FUNC_(h5tenum_create_c, H5TENUM_CREATE_C)
 #define nh5tenum_insert_c             H5_FC_FUNC_(h5tenum_insert_c, H5TENUM_INSERT_C)
-#define nh5tenum_insert_ptr_c         H5_FC_FUNC_(h5tenum_insert_ptr_c, H5TENUM_INSERT_PTR_C)
 #define nh5tenum_nameof_c             H5_FC_FUNC_(h5tenum_nameof_c, H5TENUM_NAMEOF_C)
 #define nh5tenum_valueof_c             H5_FC_FUNC_(h5tenum_valueof_c, H5TENUM_VALUEOF_C)
 #define nh5tget_member_value_c         H5_FC_FUNC_(h5tget_member_value_c, H5TGET_MEMBER_VALUE_C)
@@ -773,7 +772,6 @@ H5_FCDLL int_f nh5tinsert_array_c(hid_t_f * parent_id, _fcd name, int_f* namelen
 H5_FCDLL int_f nh5tinsert_array_c2(hid_t_f * parent_id, _fcd name, int_f* namelen, size_t_f* offset, int_f* ndims, size_t_f* dims, hid_t_f* member_id);
 H5_FCDLL int_f nh5tenum_create_c ( hid_t_f *parent_id , hid_t_f *new_type_id);
 H5_FCDLL int_f nh5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value);
-H5_FCDLL int_f nh5tenum_insert_ptr_c(hid_t_f *type_id, _fcd name, int_f* namelen, void *value);
 H5_FCDLL int_f nh5tenum_nameof_c(hid_t_f *type_id, int_f* value, _fcd name, size_t_f* namelen);
 H5_FCDLL int_f nh5tenum_valueof_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value);
 H5_FCDLL int_f nh5tget_member_value_c(hid_t_f *type_id, int_f* member_no, int_f* value);

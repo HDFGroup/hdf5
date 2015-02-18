@@ -47,12 +47,6 @@ MODULE H5T_PROVISIONAL
 
 !*****
 
-  INTERFACE h5tenum_insert_f
-     MODULE PROCEDURE h5tenum_insert_integer
-     ! Recommended procedure:
-     MODULE PROCEDURE h5tenum_insert_ptr
-  END INTERFACE
-
 CONTAINS
 
 !****s* H5T (F03)/H5Tconvert_f_F03
@@ -117,97 +111,6 @@ CONTAINS
     hdferr = H5Tconvert_c(src_id, dst_id, nelmts, buf, background_default, plist_id_default)
 
   END SUBROUTINE h5tconvert_f
-
-!
-!****s* H5T/h5tenaum_insert_f
-!
-! NAME
-!  h5tenaum_insert_f
-!
-! PURPOSE
-!  Inserts a new enumeration datatype member.
-!
-! INPUTS
-!  type_id 	 - datatype identifier
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces were added for
-!  called C functions (it is needed for Windows
-!  port).  March 7, 2001
-! SOURCE
-  SUBROUTINE h5tenum_insert_integer(type_id,  name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name  !Name of  the new member
-    INTEGER, INTENT(IN) :: value ! value of the new member
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-!*****
-    INTEGER(C_INT), TARGET :: c_value
-    TYPE(C_PTR) :: f_ptr
-
-    ! make sure 'value' is the same type as the C int
-    c_value = INT(value, C_INT)
-    f_ptr = C_LOC(c_value)
-
-    CALL h5tenum_insert_ptr(type_id, name, f_ptr, hdferr)
-  END SUBROUTINE h5tenum_insert_integer
-
-!
-!****s* H5T/h5tenum_insert_f_F03
-!
-! NAME
-!  h5tenaum_insert_f
-!
-! PURPOSE
-!  Inserts a new enumeration datatype member.
-!
-! INPUTS
-!  type_id - Datatype identifier for the enumeration datatype.
-!  name    - Name of the new member. 
-!  value   - Pointer to the value of the new member. 	 
-! OUTPUTS
-!  hdferr  - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  September 25, 2014
-!
-! HISTORY
-! SOURCE
-  SUBROUTINE h5tenum_insert_ptr(type_id,  name, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
-    IMPLICIT NONE
-    INTEGER(HID_T),   INTENT(IN)  :: type_id
-    CHARACTER(LEN=*), INTENT(IN)  :: name
-    TYPE(C_PTR),      INTENT(IN)  :: value
-    INTEGER,          INTENT(OUT) :: hdferr
-!*****
-    INTEGER :: namelen
-    
-    INTERFACE
-       INTEGER FUNCTION h5tenum_insert_ptr_c(type_id, name, namelen, value)
-         USE H5GLOBAL
-         USE, INTRINSIC :: ISO_C_BINDING
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TENUM_INSERT_PTR_C'::h5tenum_insert_ptr_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
-         INTEGER(HID_T), INTENT(IN) :: type_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
-         TYPE(C_PTR), VALUE :: value
-         INTEGER :: namelen
-       END FUNCTION h5tenum_insert_ptr_c
-    END INTERFACE
-            
-    namelen = LEN(name)
-    hdferr = h5tenum_insert_ptr_c(type_id, name, namelen, value)
-  END SUBROUTINE h5tenum_insert_ptr
 
 END MODULE H5T_PROVISIONAL
 
