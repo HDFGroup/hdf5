@@ -63,6 +63,20 @@ New Features
     - cmakehdf5: configure options added to enable or disable the building of
       different API's and testings. See "cmakehdf5 --help" for details.
       (AKC - 2014/12/09 HDFFV-8932)
+
+    - Remove restriction for building shared when parallel is
+      enabled. --disable-shared has to be used explicitly if user wishes to
+      disable shared libraries.
+      (MSC - 2015/02/19 HDFFV-9069)
+
+    - Remove infering parallel compilers to enable
+      parallel. --enable-parallel has to be used explicitly to build
+      parallel HDF5 regardless of the compiler type being used.
+      (MSC - 2015/02/19 HDFFV-9068)
+
+    - Remove option to enable or disable large file support. It will
+      always be enabled.
+      (MSC - 2015/02/19 HDFFV-9097)
     
     Library
     -------
