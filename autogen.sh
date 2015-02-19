@@ -361,7 +361,6 @@ echo
 # have no effect on files that don't have HDF5 API macros in them.
 echo
 echo "Running trace script:"
-echo "NOTE: NO TRACE warnings in H5E code are normal and expected."
 bin/trace src/H5*.c || exit 1
 
 # Run make_err
