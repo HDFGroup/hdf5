@@ -44,7 +44,7 @@ CONTAINS
 !****s* H5T/h5tenum_insert_f
 !
 ! NAME
-!  h5tenaum_insert_f
+!  h5tenum_insert_f
 !
 ! PURPOSE
 !  Inserts a new enumeration datatype member.
