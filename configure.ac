@@ -1647,11 +1647,14 @@ if test "X$THREADSAFE" = "Xyes"; then
                 [withval=check])
 
     case "$withval" in
-      check)
+      check | yes)
         AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
         if test "x$HAVE_PTHREAD" = "xyes"; then
           AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
         fi
+        ;;
+      no)
+        AC_MSG_ERROR([Must use Pthreads with thread safety])
         ;;
       *)
         case "$withval" in
