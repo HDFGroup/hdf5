@@ -16,26 +16,31 @@
 # A script to reconfigure autotools for HDF5, and to recreate other
 # generated files specifc to HDF5.
 #
-# IMPORTANT OS-X NOTE
+# IMPORTANT OS X NOTE
 #
-# If you are using OS-X, you will probably not have the autotools
-# installed, even if you have the XCode command-line tools. The
-# easiest way to fix this is to install them via Homebrew:
+# If you are using OS X, you will probably not have the autotools
+# installed, even if you have the Xcode command-line tools. The
+# bison version you have installed may also have a bug that makes
+# it unable to process our input files.
+#
+# The easiest way to fix this is to install everything via Homebrew:
 #
 #   http://brew.sh/
 #
-# After you install the base packages, install autoconf, automake, and
-# libtool.
+# After you install the base packages, install autoconf, automake,
+# libtool, and flex/bison.
 #
 #   brew install autoconf
 #   brew install automake
 #   brew install libtool
+#   brew install flex
+#   brew install bison
 #
 # This only takes a few minutes. Note that libtool and libtoolize will
 # be glibtool and glibtoolize so as not to conflict with Apple's non-gnu
 # tools. This autogen.sh script handles this for you.
 #
-# END IMPORTANT OS-X NOTE
+# END IMPORTANT OS X NOTE
 #
 # If you want to use a particular version of the autotools, the paths
 # to each tool can be overridden using the following environment
@@ -382,6 +387,10 @@ bin/make_overflow src/H5overflow.txt || exit 1
 
 # Run flex and bison
 # automatically generates hl/src/H5LTanalyze.c and hl/src/H5LTparse.c
+# Note that, as of Xcode 6.1 (2015), the default bison version on OS X
+# is old enough to have the circular dependency bug. You'll have
+# to install a later version of bison. See the OS X note at the top
+# of this script.
 echo
 echo "Running flex/bison:"
 cd hl/src
