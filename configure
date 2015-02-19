@@ -28340,16 +28340,6 @@ $as_echo "#define HAVE_FILTER_SCALEOFFSET 1" >>confdefs.h
   done
 fi
 
-## ----------------------------------------------------------------------
-## This is defined only when we're using CodeWarrior, since it has a
-## broken "open()" call.
-#
-if test 1 = 2; then
-
-$as_echo "#define NO_SHARED_WRITING 1" >>confdefs.h
-
-fi
-
 ## --------------------------------------------------------------------------
 ## Should the Default Virtual File Driver be compiled?
 ##

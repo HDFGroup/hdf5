@@ -470,9 +470,6 @@
 /* Define if deprecated public API symbols are disabled */
 #undef NO_DEPRECATED_SYMBOLS
 
-/* Define if shared writing must be disabled (CodeWarrior only) */
-#undef NO_SHARED_WRITING
-
 /* Name of package */
 #undef PACKAGE
 

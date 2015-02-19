@@ -3652,9 +3652,7 @@ test_file(void)
 
     test_file_create();		/* Test file creation(also creation templates)*/
     test_file_open();		/* Test file opening */
-#ifndef H5_NO_SHARED_WRITING
     test_file_close();          /* Test file close behavior */
-#endif /* H5_NO_SHARED_WRITING */
     test_get_file_id();         /* Test H5Iget_file_id */
     test_get_obj_ids();         /* Test H5Fget_obj_ids for Jira Issue 8528 */
     test_file_perm();           /* Test file access permissions */

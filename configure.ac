@@ -2531,15 +2531,6 @@ if test -n "$FILTERS"; then
   done
 fi
 
-## ----------------------------------------------------------------------
-## This is defined only when we're using CodeWarrior, since it has a
-## broken "open()" call.
-#
-if test 1 = 2; then
-  AC_DEFINE([NO_SHARED_WRITING], [1],
-            [Define if shared writing must be disabled (CodeWarrior only)])
-fi
-
 ## --------------------------------------------------------------------------
 ## Should the Default Virtual File Driver be compiled?
 ##
