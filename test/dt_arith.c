@@ -5309,7 +5309,7 @@ run_fp_int_conv(const char *name)
 #endif /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM*/
 #endif
 
-#if H5_LDOUBLE_TO_INTEGER_WORKS && H5_LDOUBLE_TO_INTEGER_ACCURATE
+#if H5_LDOUBLE_TO_INTEGER_WORKS
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SCHAR);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UCHAR);
@@ -5391,7 +5391,7 @@ run_fp_int_conv(const char *name)
 #endif /*H5_FP_TO_ULLONG_RIGHT_MAXIMUM && H5_LDOUBLE_TO_LLONG_ACCURATE*/
 #endif
 #endif
-#else /*H5_LDOUBLE_TO_INTEGER_WORKS && H5_LDOUBLE_TO_INTEGER_ACCURATE*/
+#else /*H5_LDOUBLE_TO_INTEGER_WORKS*/
         {
             char		str[256];		/*hello string		*/
 
@@ -5405,7 +5405,7 @@ run_fp_int_conv(const char *name)
             HDputs("    Test skipped due to disabled long double.");
 #endif
         }
-#endif /*H5_LDOUBLE_TO_INTEGER_WORKS && H5_LDOUBLE_TO_INTEGER_ACCURATE*/
+#endif /*H5_LDOUBLE_TO_INTEGER_WORKS */
 #ifndef H5_VMS
     } /* end for */
 #endif /* H5_VMS */

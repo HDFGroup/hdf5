@@ -460,9 +460,6 @@
    values. */
 #cmakedefine H5_INTEGER_TO_LDOUBLE_ACCURATE @H5_INTEGER_TO_LDOUBLE_ACCURATE@
 
-/* Define if your system can convert long double to integers accurately. */
-#cmakedefine H5_LDOUBLE_TO_INTEGER_ACCURATE @H5_LDOUBLE_TO_INTEGER_ACCURATE@
-
 /* Define if your system can convert from long double to integer values. */
 #cmakedefine H5_LDOUBLE_TO_INTEGER_WORKS @H5_LDOUBLE_TO_INTEGER_WORKS@
 
