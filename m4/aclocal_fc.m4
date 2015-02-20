@@ -268,7 +268,7 @@ dnl   Try link a simple MPI program.
       AC_MSG_CHECKING([whether a simple MPI-IO Fortran program can be linked])
       AC_LINK_IFELSE([ 
           PROGRAM main
-          USE mpi
+          INCLUDE 'mpif.h'
           INTEGER :: comm, amode, info, fh, ierror
           CHARACTER(LEN=1) :: filename 
           CALL MPI_File_open( comm, filename, amode, info, fh, ierror)
