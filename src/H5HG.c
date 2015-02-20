@@ -718,6 +718,50 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5HG_get_obj_size
+ *
+ * Purpose:     Returns the size of a global heap object.
+ * Return:      Success:        Non-negative
+ *
+ *              Failure:        Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Thursday, February 12, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HG_get_obj_size(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, size_t *obj_size)
+{
+    H5HG_heap_t *heap = NULL;           /* Pointer to global heap object */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__GLOBALHEAP_TAG, FAIL)
+
+    /* Check args */
+    HDassert(f);
+    HDassert(hobj);
+    HDassert(obj_size);
+
+    /* Load the heap */
+    if(NULL == (heap = H5HG_protect(f, dxpl_id, hobj->addr, H5AC_READ)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
+
+    HDassert(hobj->idx < heap->nused);
+    HDassert(heap->obj[hobj->idx].begin);
+
+    /* Set object size */
+    *obj_size = heap->obj[hobj->idx].size;
+
+done:
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_GHEAP, hobj->addr, heap, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+} /* end H5HG_get_obj_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HG_remove
  *
  * Purpose:	Removes the specified object from the global heap.

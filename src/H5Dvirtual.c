@@ -99,7 +99,7 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_virtual_copy_layout
+ * Function:    H5D__virtual_copy_layout
  *
  * Purpose:     Deep copies virtual storage layout message in memory.
  *              This function assumes that the top-level struct has
@@ -114,19 +114,18 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_virtual_copy_layout(H5O_layout_t *layout)
+H5D__virtual_copy_layout(H5O_layout_t *layout)
 {
     H5O_storage_virtual_ent_t *orig_list = NULL;
     size_t          i;
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     HDassert(layout);
     HDassert(layout->type == H5D_VIRTUAL);
 
     if(layout->storage.u.virt.list_nused > 0) {
-        HDassert(0 && "checking code coverage...");//VDSINC
         HDassert(layout->storage.u.virt.list);
 
         /* Save original entry list for use as the "source" */
@@ -164,15 +163,15 @@ done:
     /* Release allocated resources on failure */
     if((ret_value < 0) && orig_list
             && (orig_list != layout->storage.u.virt.list))
-        if(H5D_virtual_reset_layout(layout) < 0)
+        if(H5D__virtual_reset_layout(layout) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset virtual layout")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_virtual_copy_layout() */
+} /* end H5D__virtual_copy_layout() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_virtual_reset_layout
+ * Function:    H5D__virtual_reset_layout
  *
  * Purpose:     Frees internal structures in a virtual storage layout
  *              message in memory.  This function is safe to use on
@@ -188,12 +187,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_virtual_reset_layout(H5O_layout_t *layout)
+H5D__virtual_reset_layout(H5O_layout_t *layout)
 {
     size_t          i;
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     HDassert(layout);
     HDassert(layout->type == H5D_VIRTUAL);
@@ -215,15 +214,16 @@ H5D_virtual_reset_layout(H5O_layout_t *layout)
     } /* end for */
 
     /* Free the list */
-    layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)(layout->storage.u.virt.list);
+    layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_xfree(layout->storage.u.virt.list);
 
-done:
+    /* Note the lack of a done: label.  This is because there are no HGOTO_ERROR
+     * calls.  If one is added, a done: label must also be added */
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_virtual_reset_layout() */
+} /* end H5D__virtual_reset_layout() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_virtual_delete
+ * Function:    H5D__virtual_delete
  *
  * Purpose:     Delete the file space for a virtual dataset
  *
@@ -235,7 +235,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage)
+H5D__virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -258,7 +258,7 @@ H5D_virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_virtual_delete */
+} /* end H5D__virtual_delete */
 
 
 /*-------------------------------------------------------------------------
@@ -279,7 +279,6 @@ H5D__virtual_construct(H5F_t UNUSED *f, H5D_t UNUSED *dset)
     FUNC_ENTER_STATIC_NOERR
 
     /* No-op for now VDSINC */
-    HDassert(0 && "checking code coverage...");//VDSINC
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__virtual_construct() */
@@ -306,7 +305,6 @@ H5D__virtual_is_space_alloc(const H5O_storage_t *storage)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(0 && "checking code coverage...");//VDSINC
     /* Need to decide what to do here.  For now just return TRUE if the global
      * heap block has been allocated.  VDSINC */
     ret_value = storage->u.virt.serial_list_hobjid.addr != HADDR_UNDEF;
@@ -408,7 +406,6 @@ H5D__virtual_flush(H5D_t UNUSED *dset, hid_t UNUSED dxpl_id)
     FUNC_ENTER_STATIC_NOERR
 
     /* No-op for now VDSINC */
-    HDassert(0 && "checking code coverage...");//VDSINC
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__virtual_flush() */

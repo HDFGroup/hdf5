@@ -317,6 +317,9 @@ H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "incorrect heap block size")
                 } /* end if */
 
+                /* Set the layout operations */
+                mesg->ops = H5D_LOPS_VIRTUAL;
+
                 break;
 
             case H5D_LAYOUT_ERROR:
@@ -333,7 +336,7 @@ done:
     if(ret_value == NULL)
         if(mesg) {
             if(mesg->type == H5D_VIRTUAL)
-                if(H5D_virtual_reset_layout(mesg) < 0)
+                if(H5D__virtual_reset_layout(mesg) < 0)
                     HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to reset virtual layout")
             mesg = H5FL_FREE(H5O_layout_t, mesg);
         } /* end if */
@@ -596,11 +599,9 @@ H5O_layout_copy(const void *_mesg, void *_dest)
 	H5D_chunk_idx_reset(&dest->storage.u.chunk, FALSE);
 
     /* Deep copy the entry list for virtual datasets */
-    if(mesg->type == H5D_VIRTUAL) {
-        HDassert((mesg->storage.u.virt.list_nused > 0) && "checking code coverage...");//VDSINC
-        if(H5D_virtual_copy_layout(dest) < 0)
+    if(mesg->type == H5D_VIRTUAL)
+        if(H5D__virtual_copy_layout(dest) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy virtual layout")
-    } //VDSINC
 
     /* Set return value */
     ret_value = dest;
@@ -677,7 +678,7 @@ H5O_layout_reset(void *_mesg)
             mesg->storage.u.compact.buf = H5MM_xfree(mesg->storage.u.compact.buf);
         else if(H5D_VIRTUAL == mesg->type)
             /* Free the virtual entry list */
-            if(H5D_virtual_reset_layout(mesg) < 0)
+            if(H5D__virtual_reset_layout(mesg) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to reset virtual layout")
 
         /* Reset the message */
@@ -768,7 +769,7 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
         case H5D_VIRTUAL:       /* Virtual dataset */
             HDassert(0 && "checking code coverage...");//VDSINC
             /* Free the file space virtual dataset */
-            if(H5D_virtual_delete(f, dxpl_id, &mesg->storage) < 0)
+            if(H5D__virtual_delete(f, dxpl_id, &mesg->storage) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 

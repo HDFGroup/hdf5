@@ -174,7 +174,6 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
             break;
 
         case H5D_VIRTUAL:
-            HDassert((layout->storage.u.virt.list_nused > 0) && "checking code coverage...");//VDSINC
             ret_value += H5F_SIZEOF_ADDR(f);    /* Address of global heap */
             ret_value += 4;                     /* Global heap index */
             break;
