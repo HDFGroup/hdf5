@@ -2387,7 +2387,6 @@
 
 # CMake-specific Files
 ./config/cmake/cacheinit.cmake
-./config/cmake/CMakePackageConfigHelpers.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CTestCustom.cmake
