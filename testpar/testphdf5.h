@@ -301,4 +301,5 @@ int dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[],
                  hsize_t block[], DATATYPE *dataset, DATATYPE *original);
 void point_set (hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[],
                 size_t num_points, hsize_t coords[], int order);
+
 #endif /* PHDF5TEST_H */
