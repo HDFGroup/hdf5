@@ -1,4 +1,4 @@
-include (${HDF_RESOURCES_DIR}/CMakePackageConfigHelpers.cmake)
+include (CMakePackageConfigHelpers.cmake)
 
 #-----------------------------------------------------------------------------
 # Check for Installation Utilities
