@@ -10,6 +10,7 @@ INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${
 # Add Test Lib
 #-----------------------------------------------------------------------------
 add_library (${HDF5_F90_C_TEST_LIB_TARGET} ${LIB_TYPE} t.c)
+set_source_files_properties (t.c PROPERTIES LANGUAGE C)
 TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIB_TARGET} " " " ")
 target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_F90_C_LIB_TARGET}
@@ -18,12 +19,14 @@ target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_TEST_LIB_TARGET} ${HDF5_F90_C_TEST_LIB_NAME} ${LIB_TYPE})
 set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
     FOLDER libraries/test/fortran
+    LINKER_LANGUAGE C
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
 # See if the F2008 intrinsic STORAGE_SIZE and C_SIZEOF are supported. If not then
 # fall back to F2003. If F2003 not supported then use F90 for the tests.
 
+set_source_files_properties (tf_F90.f90 tf_F03.f90 tf_F08.f90 tf.f90 PROPERTIES LANGUAGE Fortran)
 if (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
  add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf_F08.f90 tf.f90)
 elseif (HDF5_ENABLE_F2003)
@@ -36,7 +39,7 @@ endif (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
 set (SHARED_LINK_FLAGS " ")
 if (WIN32)
   if (BUILD_SHARED_LIBS)
-    set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS BUILD_HDF5_DLL)
+    set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS BUILD_HDF5_TEST_DLL)
     if (MSVC)
       set (SHARED_LINK_FLAGS "/DLL")
     endif (MSVC)
@@ -53,6 +56,7 @@ target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
 H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_TEST_LIB_NAME} ${LIB_TYPE})
 set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES
     FOLDER libraries/test/fortran
+    LINKER_LANGUAGE Fortran
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 

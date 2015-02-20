@@ -96,7 +96,7 @@ SUBROUTINE h5tbmake_table_f(table_title,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbmake_table_f
 !DEC$endif
 !
@@ -219,7 +219,7 @@ SUBROUTINE h5tbwrite_field_name_f_int(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_name_f_int
 !DEC$endif
 !
@@ -295,7 +295,7 @@ SUBROUTINE h5tbwrite_field_name_f_float(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_name_f_float
 !DEC$endif
 !
@@ -373,7 +373,7 @@ SUBROUTINE h5tbwrite_field_name_f_double(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_name_f_double
 !DEC$endif
 !
@@ -449,7 +449,7 @@ SUBROUTINE h5tbwrite_field_name_f_string(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_name_f_string
 !DEC$endif
 !
@@ -526,7 +526,7 @@ SUBROUTINE h5tbread_field_name_f_int(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_name_f_int
 !DEC$endif
 !
@@ -602,7 +602,7 @@ SUBROUTINE h5tbread_field_name_f_float(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_name_f_float
 !DEC$endif
 !
@@ -678,7 +678,7 @@ SUBROUTINE h5tbread_field_name_f_double(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_name_f_double
 !DEC$endif
 !
@@ -754,7 +754,7 @@ SUBROUTINE h5tbread_field_name_f_string(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_name_f_string
 !DEC$endif
 !
@@ -831,7 +831,7 @@ SUBROUTINE h5tbwrite_field_index_f_int(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_index_f_int
 !DEC$endif
 !
@@ -903,7 +903,7 @@ SUBROUTINE h5tbwrite_field_index_f_float(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_index_f_float
 !DEC$endif
 !
@@ -977,7 +977,7 @@ SUBROUTINE h5tbwrite_field_index_f_double(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_index_f_double
 !DEC$endif
 !
@@ -1049,7 +1049,7 @@ SUBROUTINE h5tbwrite_field_index_f_string(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_index_f_string
 !DEC$endif
 !
@@ -1122,7 +1122,7 @@ SUBROUTINE h5tbread_field_index_f_int(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport ::h5tbread_field_index_f_int
 !DEC$endif
 !
@@ -1194,7 +1194,7 @@ SUBROUTINE h5tbread_field_index_f_float(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_index_f_float
 !DEC$endif
 !
@@ -1266,7 +1266,7 @@ SUBROUTINE h5tbread_field_index_f_double(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_index_f_double
 !DEC$endif
 !
@@ -1338,7 +1338,7 @@ SUBROUTINE h5tbread_field_index_f_string(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_index_f_string
 !DEC$endif
 !
@@ -1409,7 +1409,7 @@ SUBROUTINE h5tbinsert_field_f_int(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbinsert_field_f_int
 !DEC$endif
 !
@@ -1483,7 +1483,7 @@ SUBROUTINE h5tbinsert_field_f_float(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbinsert_field_f_float
 !DEC$endif
 !
@@ -1557,7 +1557,7 @@ SUBROUTINE h5tbinsert_field_f_double(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbinsert_field_f_double
 !DEC$endif
 !
@@ -1632,7 +1632,7 @@ SUBROUTINE h5tbinsert_field_f_string(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbinsert_field_f_string
 !DEC$endif
 !
@@ -1704,7 +1704,7 @@ SUBROUTINE h5tbdelete_field_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbdelete_field_f
 !DEC$endif
 !
@@ -1771,7 +1771,7 @@ SUBROUTINE h5tbget_table_info_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbget_table_info_f
 !DEC$endif
 !
@@ -1836,7 +1836,7 @@ SUBROUTINE h5tbget_field_info_f(loc_id,&
   IMPLICIT NONE
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbget_field_info_f
 !DEC$endif
 !

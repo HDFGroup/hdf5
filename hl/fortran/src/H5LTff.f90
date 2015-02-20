@@ -163,7 +163,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int1
     !DEC$endif
     !
@@ -229,7 +229,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int2
     !DEC$endif
     !
@@ -297,7 +297,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int3
     !DEC$endif
     !
@@ -360,7 +360,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int4
     !DEC$endif
     !
@@ -423,7 +423,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int5
     !DEC$endif
     !
@@ -486,7 +486,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int6
     !DEC$endif
     !
@@ -549,7 +549,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int7
     !DEC$endif
     !
@@ -618,7 +618,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float1
     !DEC$endif
     !
@@ -684,7 +684,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float2
     !DEC$endif
     !
@@ -752,7 +752,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float3
     !DEC$endif
     !
@@ -815,7 +815,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float4
     !DEC$endif
     !
@@ -878,7 +878,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float5
     !DEC$endif
     !
@@ -941,7 +941,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float6
     !DEC$endif
     !
@@ -1004,7 +1004,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float7
     !DEC$endif
     !
@@ -1072,7 +1072,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double1
     !DEC$endif
     !
@@ -1138,7 +1138,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double2
     !DEC$endif
     !
@@ -1206,7 +1206,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double3
     !DEC$endif
     !
@@ -1269,7 +1269,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double4
     !DEC$endif
     !
@@ -1332,7 +1332,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double5
     !DEC$endif
     !
@@ -1395,7 +1395,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double6
     !DEC$endif
     !
@@ -1458,7 +1458,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double7
     !DEC$endif
     !
@@ -1525,7 +1525,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int1
     !DEC$endif
     !
@@ -1588,7 +1588,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int2
     !DEC$endif
     !
@@ -1653,7 +1653,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int3
     !DEC$endif
     !
@@ -1714,7 +1714,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int4
     !DEC$endif
     !
@@ -1775,7 +1775,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int5
     !DEC$endif
     !
@@ -1836,7 +1836,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int6
     !DEC$endif
     !
@@ -1897,7 +1897,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int7
     !DEC$endif
     !
@@ -1963,7 +1963,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float1
     !DEC$endif
     !
@@ -2026,7 +2026,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float2
     !DEC$endif
     !
@@ -2092,7 +2092,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float3
     !DEC$endif
     !
@@ -2153,7 +2153,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float4
     !DEC$endif
     !
@@ -2214,7 +2214,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float5
     !DEC$endif
     !
@@ -2275,7 +2275,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float6
     !DEC$endif
     !
@@ -2336,7 +2336,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float7
     !DEC$endif
     !
@@ -2402,7 +2402,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport ::h5ltread_dataset_f_double1
     !DEC$endif
     !
@@ -2465,7 +2465,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double2
     !DEC$endif
     !
@@ -2530,7 +2530,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double3
     !DEC$endif
     !
@@ -2591,7 +2591,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double4
     !DEC$endif
     !
@@ -2652,7 +2652,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double5
     !DEC$endif
     !
@@ -2713,7 +2713,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double6
     !DEC$endif
     !
@@ -2774,7 +2774,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double7
     !DEC$endif
     !
@@ -2839,7 +2839,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_1
     !DEC$endif
     !
@@ -2903,7 +2903,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_2
     !DEC$endif
     !
@@ -2971,7 +2971,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_3
     !DEC$endif
     !
@@ -3034,7 +3034,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_4
     !DEC$endif
     !
@@ -3097,7 +3097,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_5
     !DEC$endif
     !
@@ -3160,7 +3160,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_6
     !DEC$endif
     !
@@ -3223,7 +3223,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_7
     !DEC$endif
     !
@@ -3290,7 +3290,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_1
     !DEC$endif
     !
@@ -3354,7 +3354,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_2
     !DEC$endif
     !
@@ -3420,7 +3420,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_3
     !DEC$endif
     !
@@ -3482,7 +3482,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_4
     !DEC$endif
     !
@@ -3544,7 +3544,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_5
     !DEC$endif
     !
@@ -3606,7 +3606,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_6
     !DEC$endif
     !
@@ -3668,7 +3668,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_7
     !DEC$endif
     !
@@ -3735,7 +3735,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_1
     !DEC$endif
     !
@@ -3802,7 +3802,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_2
     !DEC$endif
     !
@@ -3868,7 +3868,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_3
     !DEC$endif
     !
@@ -3930,7 +3930,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_4
     !DEC$endif
     !
@@ -3992,7 +3992,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_5
     !DEC$endif
     !
@@ -4054,7 +4054,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_5
     !DEC$endif
     !
@@ -4116,7 +4116,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_5
     !DEC$endif
     !
@@ -4181,7 +4181,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_1
     !DEC$endif
     !
@@ -4245,7 +4245,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_2
     !DEC$endif
     !
@@ -4308,7 +4308,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_3
     !DEC$endif
     !
@@ -4367,7 +4367,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_4
     !DEC$endif
     !
@@ -4426,7 +4426,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_5
     !DEC$endif
     !
@@ -4485,7 +4485,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_6
     !DEC$endif
     !
@@ -4544,7 +4544,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_7
     !DEC$endif
     !
@@ -4608,7 +4608,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_1
     !DEC$endif
     !
@@ -4672,7 +4672,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_2
     !DEC$endif
     !
@@ -4735,7 +4735,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_3
     !DEC$endif
     !
@@ -4794,7 +4794,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_4
     !DEC$endif
     !
@@ -4853,7 +4853,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_5
     !DEC$endif
     !
@@ -4912,7 +4912,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_6
     !DEC$endif
     !
@@ -4971,7 +4971,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_7
     !DEC$endif
     !
@@ -5034,7 +5034,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_1
     !DEC$endif
     !
@@ -5098,7 +5098,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_2
     !DEC$endif
     !
@@ -5161,7 +5161,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_3
     !DEC$endif
     !
@@ -5220,7 +5220,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_4
     !DEC$endif
     !
@@ -5279,7 +5279,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_5
     !DEC$endif
     !
@@ -5338,7 +5338,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_6
     !DEC$endif
     !
@@ -5397,7 +5397,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_7
     !DEC$endif
     !
@@ -5460,7 +5460,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_string_f
     !DEC$endif
     !
@@ -5520,7 +5520,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_string_f
     !DEC$endif
     !
@@ -5587,7 +5587,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltset_attribute_int_f
     !DEC$endif
     !
@@ -5654,7 +5654,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltset_attribute_float_f
     !DEC$endif
     !
@@ -5721,7 +5721,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltset_attribute_double_f
     !DEC$endif
     !
@@ -5788,7 +5788,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltset_attribute_string_f
     !DEC$endif
     !
@@ -5857,7 +5857,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_int_f
     !DEC$endif
     !
@@ -5922,7 +5922,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_float_f
     !DEC$endif
     !
@@ -5986,7 +5986,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_double_f
     !DEC$endif
     !
@@ -6050,7 +6050,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_string_f
     !DEC$endif
     !
@@ -6121,7 +6121,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_dataset_ndims_f
     !DEC$endif
     !
@@ -6178,7 +6178,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltfind_dataset_f
     !DEC$endif
     !
@@ -6236,7 +6236,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_dataset_info_f
     !DEC$endif
     !
@@ -6304,7 +6304,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_ndims_f
     !DEC$endif
     !
@@ -6371,7 +6371,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_info_f
     !DEC$endif
     !
@@ -6434,7 +6434,7 @@ CONTAINS
     IMPLICIT NONE
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltpath_valid_f
     !DEC$endif
     !
