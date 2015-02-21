@@ -38,6 +38,19 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
 AM_SILENT_RULES([yes])
 
+## AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
+## for Makefiles, configure, src/H5config.h, etc. If AM_MAINTAINER_MODE
+## is enabled, these files will be rebuilt if out of date. This is a
+## problem because if users try to build on a machine with
+## the wrong versions of autoconf and automake, these files will be
+## rebuilt with the wrong versions and bad things can happen.
+## Also, CVS doesn't preserve dependencies between timestamps, so
+## Makefiles will often think rebuilding needs to occur when it doesn't.
+##
+## By default, it is enabled. Users can configure with
+## --disable-maintainer-mode to prevent running the autotools.
+AM_MAINTAINER_MODE([enable])
+
 ## ----------------------------------------------------------------------
 ## Set prefix default (install directory) to a directory in the build area.
 ## This allows multiple src-dir builds within one host.
