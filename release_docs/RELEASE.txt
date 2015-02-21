@@ -77,7 +77,19 @@ New Features
     - Remove option to enable or disable large file support. It will
       always be enabled.
       (MSC - 2015/02/19 HDFFV-9097)
-    
+
+    - Removed configuration feature
+
+      When configure detected that the CodeWarrior compiler was being used it
+      would define a symbol that caused a test in test/tfile.c to be skipped
+      due to a broken CodeWarrior open() command.
+
+      Since this only masks the problem instead of fixing it and we don't
+      support CodeWarrior anyway, this functionality was removed.
+
+      (DER - 2015/02/21, HDFFV-9080)
+      
+
     Library
     -------
     - None
