@@ -44,28 +44,20 @@
 ./bin/chkcopyright      _DO_NOT_DISTRIBUTE_
 ./bin/chkmanifest
 ./bin/cmakehdf5
-./bin/compile
-./bin/config.guess
-./bin/config.sub
 ./bin/debug-ohdr      _DO_NOT_DISTRIBUTE_
 ./bin/dependencies
-./bin/depcomp
 ./bin/deploy
 ./bin/distdep
 ./bin/errors              _DO_NOT_DISTRIBUTE_
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
 ./bin/h5vers
-./bin/install-sh
 ./bin/iostats
 ./bin/locate_sw
-./bin/ltmain.sh
 ./bin/make_err
 ./bin/make_overflow
 ./bin/make_vers
 ./bin/makehelp
-./bin/missing
 ./bin/mkdirs
-./bin/mkinstalldirs
 ./bin/newer
 ./bin/output_filter.sh
 ./bin/README        _DO_NOT_DISTRIBUTE_
@@ -73,7 +65,6 @@
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
-./bin/test-driver
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
@@ -533,18 +524,15 @@
 ./src/H5dbg.c
 ./src/H5api_adpt.h
 ./src/H5err.txt
-./src/H5config.h.in
 ./src/H5detect.c
 ./src/H5make_libsettings.c
 ./src/H5overflow.txt
-./src/H5overflow.h
 ./src/H5private.h
 ./src/H5public.h
 ./src/H5system.c
 ./src/H5timer.c
 ./src/H5trace.c
 ./src/H5vers.txt
-./src/H5version.h
 ./src/H5A.c
 ./src/H5Abtree2.c
 ./src/H5Adense.c
@@ -601,15 +589,11 @@
 ./src/H5Dselect.c
 ./src/H5Dtest.c
 ./src/H5E.c
-./src/H5Edefin.h
 ./src/H5Edeprec.c
-./src/H5Einit.h
 ./src/H5Eint.c
 ./src/H5Epkg.h
 ./src/H5Eprivate.h
-./src/H5Epubgen.h
 ./src/H5Epublic.h
-./src/H5Eterm.h
 ./src/H5EA.c
 ./src/H5EAcache.c
 ./src/H5EAdbg.c
@@ -2240,10 +2224,7 @@
 ./hl/src/H5IMpublic.h
 ./hl/src/H5LT.c
 ./hl/src/H5LTanalyze.l
-./hl/src/H5LTanalyze.c
 ./hl/src/H5LTparse.y
-./hl/src/H5LTparse.c
-./hl/src/H5LTparse.h
 ./hl/src/H5LTprivate.h
 ./hl/src/H5LTpublic.h
 ./hl/src/H5PT.c
@@ -2338,55 +2319,6 @@
 ./hl/c++/test/ptableTest.h
 ./hl/c++/test/ptableTest.cpp
 ./hl/c++/test/Makefile.am
-
-#vms files
-./vms/COPYING
-
-./vms/c++/examples/check.com
-./vms/c++/examples/make.com
-./vms/c++/src/make.com
-./vms/c++/test/check.com
-./vms/c++/test/make.com
-
-./vms/fortran/examples/check.com
-./vms/fortran/examples/make.com
-./vms/fortran/src/make.com
-./vms/fortran/test/check.com
-./vms/fortran/test/make.com
-
-./vms/examples/check.com
-./vms/examples/make.com
-./vms/src/make.com
-./vms/src/h5pubconf.h
-./vms/test/check.com
-./vms/test/make.com
-./vms/test/H5srcdir_str.h
-
-./vms/build.com
-./vms/install.com
-./vms/make.com
-./vms/tools/h5copy/make.com
-./vms/tools/h5copy/check_h5copy.com
-./vms/tools/h5dump/make.com
-./vms/tools/h5dump/check_h5dump.com
-./vms/tools/h5ls/check.com
-./vms/tools/h5ls/check_h5ls.com
-./vms/tools/h5ls/make.com
-./vms/tools/h5diff/check_h5diff.com
-./vms/tools/h5diff/make.com
-./vms/tools/h5import/check_h5import.com
-./vms/tools/h5import/make.com
-./vms/tools/h5jam/check_h5jam.com
-./vms/tools/h5jam/make.com
-./vms/tools/h5repack/check_h5repack.com
-./vms/tools/h5repack/make.com
-./vms/tools/h5stat/make.com
-./vms/tools/lib/make.com
-./vms/tools/misc/make.com
-./vms/tools/testfiles/tattr-3.ddl
-./vms/tools/testfiles/tdset-2.ddl
-./vms/tools/testfiles/tgroup-2.ddl
-./vms/tools/testfiles/tperror.ddl
 
 # CMake-specific Files
 ./config/cmake/cacheinit.cmake
@@ -2508,3 +2440,4 @@
 ./tools/misc/CMakeTests.cmake
 ./tools/perform/CMakeLists.txt
 ./tools/perform/CMakeTests.cmake
+
