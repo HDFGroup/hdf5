@@ -284,8 +284,13 @@ PATH=${AUTOCONF_DIR}:${LIBTOOL_DIR}:${M4_DIR}:${FLEX_DIR}:${BISON_DIR}:$PATH
 # Make libtoolize match the specified libtool
 case "`uname`" in
 Darwin*)
-    # libtoolize on OS-X is non-gnu
+    # On OS X, libtoolize could be named glibtoolize or
+    # libtoolize. Try the former first, then fall back
+    # to the latter if it's not found.
     HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/glibtoolize"
+    if [ ! -f $HDF5_LIBTOOLIZE ] ; then
+        HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/libtoolize"
+    fi
     ;;
 *)
     HDF5_LIBTOOLIZE="${LIBTOOL_DIR}/libtoolize"
