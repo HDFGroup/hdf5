@@ -154,6 +154,29 @@ Bug Fixes since HDF5-1.8.14
       transform the list to a series of -D{value} for the compile.
       
       (ADB - 2014/12/09, HDFV-9041)
+      
+    - Fixed compile errors on Windows w/ Visual Studio and CMake when
+      UNICODE is defined.
+    
+      The HDF5 library could not be built on Windows with Visual Studio when
+      UNICODE was defined. This was due to incorrect use of the TEXT() macro
+      and some Win32 API functions that take TCHAR parameters. The faulty
+      code was a part of the filter plugin functionality. This was a
+      compile-time error that only affected users who build HDF5 from source
+      and define UNICODE, usually when HDF5 is being built as a part of a
+      larger product. There were no run-time effects.
+      
+      These errors caused no problems when UNICODE was not defined. HDF5 is
+      normally not built with UNICODE defined and the binaries were
+      unaffected.
+      
+      The fix was to remove the TEXT() macro and explicitly use the
+      'A' form of the Win32 API calls, which expect char strings instead of
+      wchar_t strings.
+      
+      Note that HDF5 currently does not support Unicode file paths on Windows.
+      
+      (DER - 2015/02/22, HDFFV-8927)
 
     Parallel Library
     ----------------

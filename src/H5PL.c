@@ -29,8 +29,6 @@
 #include "H5PLprivate.h"	/* Plugin       			*/
 #include "H5Zprivate.h"		/* Filter pipeline			*/
 
-#ifndef H5_VMS
-
 /****************/
 /* Local Macros */
 /****************/
@@ -41,7 +39,19 @@
 /* Macros for supporting 
  * both Windows and Unix */
 /****************************/
-/* Windows support */
+/* Windows support
+ *
+ * SPECIAL WINDOWS NOTE
+ *
+ * Some of the Win32 API functions expand to fooA or fooW depending on
+ * whether UNICODE or _UNICODE are defined. You MUST explicitly use
+ * the A version of the functions to force char * behavior until we
+ * work out a scheme for proper Windows Unicode support.
+ *
+ * If you do not do this, people will be unable to incorporate our
+ * source code into their own CMake builds if they define UNICODE.
+ */
+
 #ifdef H5_HAVE_WIN32_API
 
 #define H5PL_PATH_SEPARATOR     ";"
@@ -50,7 +60,7 @@
 #define H5PL_HANDLE HINSTANCE
 
 /* Get a handle to a plugin library.  Windows: TEXT macro handles Unicode strings */
-#define H5PL_OPEN_DLIB(S) LoadLibraryEx(TEXT(S), NULL, LOAD_WITH_ALTERED_SEARCH_PATH)
+#define H5PL_OPEN_DLIB(S) LoadLibraryExA(S, NULL, LOAD_WITH_ALTERED_SEARCH_PATH)
 
 /* Get the address of a symbol in dynamic library */
 #define H5PL_GET_LIB_FUNC(H,N) GetProcAddress(H,N)
@@ -458,17 +468,17 @@ done:
 static htri_t
 H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
 {
-    WIN32_FIND_DATA fdFile;
-    HANDLE          hFind;
-    char           *pathname = NULL;
-    char            service[2048];
-    htri_t          ret_value = FALSE;
+    WIN32_FIND_DATAA    fdFile;
+    HANDLE              hFind;
+    char                *pathname = NULL;
+    char                service[2048];
+    htri_t              ret_value = FALSE;
 
     FUNC_ENTER_STATIC
 
     /* Specify a file mask. *.* = We want everything! */
     sprintf(service, "%s\\*.dll", dir);
-    if((hFind = FindFirstFile(service, &fdFile)) == INVALID_HANDLE_VALUE)
+    if((hFind = FindFirstFileA(service, &fdFile)) == INVALID_HANDLE_VALUE)
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
 
     do {
@@ -499,7 +509,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
 	        HDassert(pathname);
                 pathname = (char *)H5MM_xfree(pathname);
         } /* end if */
-    } while(FindNextFile(hFind, &fdFile)); /* Find the next file. */
+    } while(FindNextFileA(hFind, &fdFile)); /* Find the next file. */
 
 done:
     if(hFind) 
@@ -669,4 +679,3 @@ H5PL__close(H5PL_HANDLE handle)
    
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5PL__close() */
-#endif /*H5_VMS*/
