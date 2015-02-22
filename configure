@@ -1616,8 +1616,9 @@ Optional Features:
   --enable-filters=all    Turn on all internal I/O filters. One may also
                           specify a comma-separated list of filters or the
                           word no. The default is all internal I/O filters.
-  --enable-direct-vfd     Build the Direct I/O Virtual File Driver
-                          [default=yes]
+  --enable-direct-vfd     Build the direct I/O virtual file driver (VFD). This
+                          is based on the POSIX (sec2) VFD and requires the
+                          open() call to take the O_DIRECT flag. [default=no]
   --enable-dconv-exception
                           if exception handling functions is checked during
                           data conversions [default=yes]
@@ -23099,19 +23100,28 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
     ## defined correctly in <stdio.h>.
+    ##
     ## This flag was removed from h5cc as of 2009-10-17 when it was found
     ## that the flag broke compiling netCDF-4 code with h5cc, but kept in
     ## H5_CPPFLAGS because fdopen and HDfdopen fail without it. HDfdopen
     ## is used only by H5_debug_mask which is used only when debugging in
     ## H5_init_library (all in H5.c).  When the flag was removed this was
     ## the only compile failure noted.
+    ##
     ## This was originally defined as _POSIX_SOURCE which was updated to
     ## _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
     ## functionality so clock_gettime and CLOCK_MONOTONIC are defined
-    ## correctly.
+    ## correctly. This was later updated to 200112L so that
+    ## posix_memalign() is visible for the direct VFD code on Linux
+    ## systems.
+    ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=199506L $H5_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+
+    ## Need to add this so that O_DIRECT is visible for the direct
+    ## VFD on Linux systems.
+    AM_CPPFLAGS="-D_GNU_SOURCE $AM_CPPFLAGS"
 
     ## Also add BSD support on Linux systems, so <features.h> defines
     ## __USE_BSD, which is required to get the prototype for strdup
@@ -28343,94 +28353,65 @@ fi
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Direct Virtual File Driver support" >&5
-$as_echo_n "checking for Direct Virtual File Driver support... " >&6; }
+## Check these regardless. If the checks are moved inside the main
+## direct VFD block, the output is nested.
+
+if ${hdf5_cv_direct_io+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_fn_c_check_decl "$LINENO" "O_DIRECT" "ac_cv_have_decl_O_DIRECT" "#include <fcntl.h>
+"
+if test "x$ac_cv_have_decl_O_DIRECT" = xyes; then :
+  hdf5_cv_direct_io=yes
+else
+  hdf5_cv_direct_io=no
+fi
+
+fi
+
+if ${hdf5_cv_posix_memalign+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_fn_c_check_func "$LINENO" "posix_memalign" "ac_cv_func_posix_memalign"
+if test "x$ac_cv_func_posix_memalign" = xyes; then :
+  hdf5_cv_posix_memalign=yes
+else
+  hdf5_cv_posix_memalign=no
+fi
+
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if the direct I/O virtual file driver (VFD) is enabled" >&5
+$as_echo_n "checking if the direct I/O virtual file driver (VFD) is enabled... " >&6; }
 
 # Check whether --enable-direct-vfd was given.
 if test "${enable_direct_vfd+set}" = set; then :
   enableval=$enable_direct_vfd; DIRECT_VFD=$enableval
 else
-  DIRECT_VFD=yes
+  DIRECT_VFD=no
 fi
 
 
-if test "$DIRECT_VFD" = "yes"; then
-   if ${hdf5_cv_direct_io+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-	  #include <sys/types.h>
-	  #include <sys/stat.h>
-	  #include <fcntl.h>
-          int main(void)
-          {
-             int fid;
-             if((fid=open("tst_file", O_CREAT | O_TRUNC | O_DIRECT, 0755))<0)
-		exit(1);
-             close(fid);
-             remove("tst_file");
-             exit (0);
-          }
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-posix_memalign()
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  hdf5_cv_direct_io=yes
-else
-  hdf5_cv_direct_io=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-else
-  hdf5_cv_direct_io=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-
-
-   if test ${hdf5_cv_direct_io} = "yes"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+if test "X$DIRECT_VFD" = "Xyes"; then
+    if test ${hdf5_cv_direct_io} = "yes" && test ${hdf5_cv_posix_memalign} = "yes" ; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
 $as_echo "#define HAVE_DIRECT 1" >>confdefs.h
 
-   else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+    else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-      DIRECT_VFD=no
-   fi
+        DIRECT_VFD=no
+        as_fn_error $? "The direct VFD was requested but cannot be built. This is either
+                     due to O_DIRECT not being found in fcntl.h or a lack of
+                     posix_memalign() on your system. Please re-configure without
+                     specifying --enable-direct-vfd." "$LINENO" 5
+    fi
 else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
-$as_echo "suppressed" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
  if test "X$DIRECT_VFD" = "Xyes"; then

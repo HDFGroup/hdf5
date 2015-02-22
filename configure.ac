@@ -1110,19 +1110,28 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
     ## defined correctly in <stdio.h>. 
+    ##
     ## This flag was removed from h5cc as of 2009-10-17 when it was found
     ## that the flag broke compiling netCDF-4 code with h5cc, but kept in 
     ## H5_CPPFLAGS because fdopen and HDfdopen fail without it. HDfdopen
     ## is used only by H5_debug_mask which is used only when debugging in
     ## H5_init_library (all in H5.c).  When the flag was removed this was
     ## the only compile failure noted.
+    ##
     ## This was originally defined as _POSIX_SOURCE which was updated to
     ## _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
     ## functionality so clock_gettime and CLOCK_MONOTONIC are defined
-    ## correctly.
+    ## correctly. This was later updated to 200112L so that
+    ## posix_memalign() is visible for the direct VFD code on Linux
+    ## systems.
+    ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=199506L $H5_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+
+    ## Need to add this so that O_DIRECT is visible for the direct
+    ## VFD on Linux systems.
+    AM_CPPFLAGS="-D_GNU_SOURCE $AM_CPPFLAGS"
 
     ## Also add BSD support on Linux systems, so <features.h> defines
     ## __USE_BSD, which is required to get the prototype for strdup
@@ -2537,40 +2546,39 @@ fi
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
-AC_MSG_CHECKING([for Direct Virtual File Driver support])
+## Check these regardless. If the checks are moved inside the main
+## direct VFD block, the output is nested.
+
+AC_CACHE_VAL([hdf5_cv_direct_io],
+    AC_CHECK_DECL([O_DIRECT], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no], [[#include <fcntl.h>]]))
+AC_CACHE_VAL([hdf5_cv_posix_memalign],
+    AC_CHECK_FUNC([posix_memalign], [hdf5_cv_posix_memalign=yes], [hdf5_cv_posix_memalign=no]))
+
+AC_MSG_CHECKING([if the direct I/O virtual file driver (VFD) is enabled])
 
 AC_ARG_ENABLE([direct-vfd],
               [AS_HELP_STRING([--enable-direct-vfd],
-                              [Build the Direct I/O Virtual File Driver
-                               [default=yes]])],
-              [DIRECT_VFD=$enableval], [DIRECT_VFD=yes])
+                              [Build the direct I/O virtual file driver (VFD).
+                               This is based on the POSIX (sec2) VFD and
+                               requires the open() call to take the O_DIRECT
+                               flag. [default=no]])],
+              [DIRECT_VFD=$enableval], [DIRECT_VFD=no])
 
-if test "$DIRECT_VFD" = "yes"; then
-   AC_CACHE_VAL([hdf5_cv_direct_io],
-       [AC_TRY_RUN([
-	  #include <sys/types.h>
-	  #include <sys/stat.h>
-	  #include <fcntl.h>
-          int main(void)
-          {
-             int fid; 
-             if((fid=open("tst_file", O_CREAT | O_TRUNC | O_DIRECT, 0755))<0)
-		exit(1);
-             close(fid);  
-             remove("tst_file"); 
-             exit (0);
-          }], [AC_TRY_LINK(, [posix_memalign()], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no])], [hdf5_cv_direct_io=no],)])
-
-   if test ${hdf5_cv_direct_io} = "yes"; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([HAVE_DIRECT], [1],
-                [Define if the direct I/O virtual file driver should be compiled])
-   else
-      AC_MSG_RESULT([no])
-      DIRECT_VFD=no
-   fi
+if test "X$DIRECT_VFD" = "Xyes"; then
+    if test ${hdf5_cv_direct_io} = "yes" && test ${hdf5_cv_posix_memalign} = "yes" ; then
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_DIRECT], [1],
+                [Define if the direct I/O virtual file driver (VFD) should be compiled])
+    else
+        AC_MSG_RESULT([no])
+        DIRECT_VFD=no
+        AC_MSG_ERROR([The direct VFD was requested but cannot be built. This is either
+                     due to O_DIRECT not being found in fcntl.h or a lack of
+                     posix_memalign() on your system. Please re-configure without
+                     specifying --enable-direct-vfd.])
+    fi
 else
-      AC_MSG_RESULT([suppressed])
+    AC_MSG_RESULT([no])
 fi
 
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])

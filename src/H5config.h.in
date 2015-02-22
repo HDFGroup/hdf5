@@ -87,7 +87,7 @@
 /* Define to 1 if you have the `difftime' function. */
 #undef HAVE_DIFFTIME
 
-/* Define if the direct I/O virtual file driver should be compiled */
+/* Define if the direct I/O virtual file driver (VFD) should be compiled */
 #undef HAVE_DIRECT
 
 /* Define to 1 if you have the <dirent.h> header file. */
