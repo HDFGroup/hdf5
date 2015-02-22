@@ -1,8 +1,8 @@
 /************************************************************
 
-  This example illustrates the concept of the virtual dataset.
+  This example illustrates the concept of virtual dataset.
   The program  creates three 1-dim source datasets and writes
-  data to them. Then it creates 2-dim virtual dataset and
+  data to them. Then it creates a 2-dim virtual dataset and
   maps the first three rows of the virtual dataset to the data 
   in the source datasets. Elements of a row are mapped to all 
   elements of the corresponding source dataset.
@@ -74,10 +74,10 @@ main (void)
          */
         for (j = 0; j < DIM0; j++) wdata[j] = i+1;
         
-       /*
-	* Create the source files and  datasets. Write data to each dataset and 
-        * close all resources.
-        */
+        /*
+         * Create the source files and  datasets. Write data to each dataset and 
+         * close all resources.
+         */
 
         file = H5Fcreate (SRC_FILE[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         space = H5Screate_simple (RANK1, dims, NULL);
@@ -88,19 +88,19 @@ main (void)
         status = H5Sclose (space);
         status = H5Dclose (dset);
         status = H5Fclose (file);
-   }
-
+    }
+    /* Create file in which virtual dataset will be stored. */
     file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create VDS dataspace.  */
     space = H5Screate_simple (RANK2, vdsdims, NULL);
     src_space = H5Screate_simple (RANK1, dims, NULL);
 
-    /* Create VDS creation property */
+    /* Set VDS creation property. */
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
     status = H5Pset_fill_value (dcpl, H5T_NATIVE_INT, &fill_value);
      
-    /* Initialize hyperslab values */
+    /* Initialize hyperslab values. */
     start[0] = 0;
     start[1] = 0;
     count[0] = 1;
@@ -122,7 +122,7 @@ main (void)
         status = H5Sselect_none (space);
     }
 
-    /* Create a virtual dataset */
+    /* Create a virtual dataset. */
     dset = H5Dcreate (file, DATASET, H5T_NATIVE_INT, space, H5P_DEFAULT,
                 dcpl, H5P_DEFAULT);
     status = H5Sclose (space);
@@ -135,7 +135,7 @@ main (void)
      */
 
     /*
-     * Open file and virtual dataset using the default properties.
+     * Open the file and virtual dataset.
      */
     file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     dset = H5Dopen (file, DATASET, H5P_DEFAULT);
@@ -155,7 +155,7 @@ main (void)
         printf("Wrong layout found \n");
 
      /*
-      * Find number of mappings.
+      * Find the number of mappings.
       */
      status = H5Pget_virtual_count (dcpl, &num_map);
      printf("Number of mappings is %d\n", num_map);
@@ -186,23 +186,23 @@ main (void)
                 printf ("\n");
             }
         }
-        /* Get source file name */
+        /* Get source file name. */
         len = H5Pget_virtual_filename (dcpl, (size_t)i, NULL, 0);
         filename = (char *)malloc((size_t)len*sizeof(char)+1);
         H5Pget_virtual_filename (dcpl, (size_t)i, filename, len+1);
         printf("         Source filename %s\n", filename);
 
-        /* Get source dataset name */
+        /* Get source dataset name. */
         len = H5Pget_virtual_dsetname (dcpl, (size_t)i, NULL, 0);
         dsetname = (char *)malloc((size_t)len*sizeof(char)+1);
         H5Pget_virtual_dsetname (dcpl, (size_t)i, dsetname, len+1);
         printf("         Source dataset name %s\n", dsetname);
 
-        /* Get selection in the source dataset */
+        /* Get selection in the source dataset. */
         printf("         Selection in the source dataset ");
         src_space = H5Pget_virtual_srcspace (dcpl, (size_t)i);
 
-        /* Make sure it is ALL selection and then print the coordinates */
+        /* Make sure it is ALL selection and then print the coordinates. */
         if(H5Sget_select_type(src_space) == H5S_SEL_ALL) {
                 printf("(0) - (%d)", DIM0-1);
                 printf ("\n");
