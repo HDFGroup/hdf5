@@ -921,7 +921,6 @@ enable_using_memchecker
 enable_parallel
 with_mpe
 enable_filters
-with_default_vfd
 enable_direct_vfd
 with_default_plugindir
 enable_dconv_exception
@@ -1659,8 +1658,6 @@ Optional Packages:
   --with-pthread=DIR      Specify alternative path to Pthreads library when
                           thread-safe capability is built
   --with-mpe=DIR          Use MPE instrumentation [default=no]
-  --with-default-vfd=driver
-                          Specify default file driver [default=sec2]
   --with-default-plugindir=location
                           Specify default location for plugins
                           [default="/usr/local/hdf5/lib/plugin"]
@@ -28267,6 +28264,7 @@ $as_echo "#define HAVE_MPE 1" >>confdefs.h
   fi
 fi
 
+
 ## ----------------------------------------------------------------------
 ## Turn on internal I/O filters by setting macros in header files
 ## Internal I/O filters are contained entirely within the library and do
@@ -28340,44 +28338,6 @@ $as_echo "#define HAVE_FILTER_SCALEOFFSET 1" >>confdefs.h
   done
 fi
 
-## --------------------------------------------------------------------------
-## Should the Default Virtual File Driver be compiled?
-##
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Default Virtual File Driver definition" >&5
-$as_echo_n "checking for Default Virtual File Driver definition... " >&6; }
-
-# Check whether --with-default-vfd was given.
-if test "${with_default_vfd+set}" = set; then :
-  withval=$with_default_vfd;
-else
-  withval=sec2
-fi
-
-
-if test "X$withval" = "Xsec2"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-    default_vfd=yes
-    vfd_define=H5FD_SEC2
-elif test "X$withval" = "Xstdio"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-    default_vfd=yes
-    vfd_define=H5FD_STDIO
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-    default_vfd=no
-fi
-
-if test "X$default_vfd" = "Xyes"; then
-
-cat >>confdefs.h <<_ACEOF
-#define DEFAULT_VFD $vfd_define
-_ACEOF
-
-fi
 
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd

@@ -2464,6 +2464,7 @@ if test -n "$PARALLEL"; then
   fi
 fi
 
+
 ## ----------------------------------------------------------------------
 ## Turn on internal I/O filters by setting macros in header files
 ## Internal I/O filters are contained entirely within the library and do
@@ -2531,34 +2532,6 @@ if test -n "$FILTERS"; then
   done
 fi
 
-## --------------------------------------------------------------------------
-## Should the Default Virtual File Driver be compiled?
-##
-
-AC_MSG_CHECKING([for Default Virtual File Driver definition])
-AC_ARG_WITH([default-vfd],
-            [AS_HELP_STRING([--with-default-vfd=driver],
-                            [Specify default file driver
-                             [default=sec2]])],,
-            withval=sec2)
-
-if test "X$withval" = "Xsec2"; then
-    AC_MSG_RESULT([yes])
-    default_vfd=yes
-    vfd_define=H5FD_SEC2
-elif test "X$withval" = "Xstdio"; then
-    AC_MSG_RESULT([yes])
-    default_vfd=yes
-    vfd_define=H5FD_STDIO
-else
-    AC_MSG_RESULT([no])
-    default_vfd=no
-fi
-
-if test "X$default_vfd" = "Xyes"; then
-  AC_DEFINE_UNQUOTED([DEFAULT_VFD], [$vfd_define],
-            [Define the default virtual file driver to compile])
-fi
 
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
