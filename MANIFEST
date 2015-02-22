@@ -29,6 +29,8 @@
 ./Makefile.am
 ./m4/aclocal_fc.m4
 ./m4/aclocal_cxx.m4
+./m4/aclocal_cxx.m4
+./m4/aclocal_fc.m4
 ./README.txt
 ./BRANCH.txt
 ./acsite.m4
@@ -2322,7 +2324,6 @@
 
 # CMake-specific Files
 ./config/cmake/cacheinit.cmake
-./config/cmake/CMakePackageConfigHelpers.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CTestCustom.cmake

@@ -101,13 +101,17 @@ check_file(char* name, hid_t fapl)
     if(H5Dclose(dset) < 0) goto error;
     if(H5Fclose(file) < 0) goto error;
     if(H5Pclose(plist) < 0) goto error;
+    if(H5Sclose(space) < 0) goto error;
 
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-        H5Fclose(file);
         H5Pclose(plist);
+        H5Gclose(groups);
+        H5Dclose(dset);
+        H5Fclose(file);
+        H5Sclose(space);
     } H5E_END_TRY;
     return 1;
 }
@@ -204,6 +208,9 @@ main(int argc, char* argv[])
         SKIPPED();
         puts("    Test not compatible with current Virtual File Driver");
     }
+
+    /* close HDF5 library */
+    H5close();
 
     MPI_Finalize();
     return 0;

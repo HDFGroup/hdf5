@@ -147,7 +147,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
             /* Set the chunk operations */
             /* (Only "btree" indexing type currently supported in this version) */
-            mesg->storage.u.chunk.idx_type = H5D_CHUNK_BTREE;
+            mesg->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BTREE;
             mesg->storage.u.chunk.ops = H5D_COPS_BTREE;
         } /* end if */
         else {
@@ -234,7 +234,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
                 /* Set the chunk operations */
                 /* (Only "btree" indexing type supported with v3 of message format) */
-                mesg->storage.u.chunk.idx_type = H5D_CHUNK_BTREE;
+                mesg->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BTREE;
                 mesg->storage.u.chunk.ops = H5D_COPS_BTREE;
 
                 /* Set the layout operations */
@@ -715,7 +715,7 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
 
             /* Index information */
             switch(mesg->storage.u.chunk.idx_type) {
-                case H5D_CHUNK_BTREE:
+                case H5D_CHUNK_IDX_BTREE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
                     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,

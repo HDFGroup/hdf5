@@ -362,7 +362,7 @@ typedef struct H5D_chunk_map_t {
 } H5D_chunk_map_t;
 
 /* Cached information about a particular chunk */
-typedef struct H5D_chunk_cached_t{
+typedef struct H5D_chunk_cached_t {
     hbool_t     valid;                          /*whether cache info is valid*/
     hsize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
     uint32_t	nbytes;				/*size of stored data	*/

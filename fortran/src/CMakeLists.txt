@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
@@ -11,6 +11,8 @@ if (WIN32)
       endif (NOT H5_HAVE_PARALLEL)
       if (NOT HDF5_ENABLE_F2003)
         set (H5_NOF03EXP ";")
+      else (NOT HDF5_ENABLE_F2003)
+        set (H5_F03EXP ";")
       endif (NOT HDF5_ENABLE_F2003)
       configure_file (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
     endif (MSVC)
@@ -132,7 +134,6 @@ if (H5_HAVE_PARALLEL)
       ${HDF5_F90_SRC_SOURCE_DIR}/H5FDmpiof.c
   )
 endif (H5_HAVE_PARALLEL)
-
 set_source_files_properties (${f90CStub_C_SRCS} PROPERTIES LANGUAGE C)
 
 set (f90CStub_C_HDRS
@@ -224,6 +225,7 @@ else (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.f90
   )
 endif (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
+set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 
 #-----------------------------------------------------------------------------
 # Add Main fortran library
@@ -255,6 +257,7 @@ set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF
 H5_SET_LIB_OPTIONS (${HDF5_F90_LIB_TARGET} ${HDF5_F90_LIB_NAME} ${LIB_TYPE})
 set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES
     FOLDER libraries/fortran
+    LINKER_LANGUAGE Fortran
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
