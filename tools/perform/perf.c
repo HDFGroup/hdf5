@@ -391,6 +391,9 @@ die_jar_jar_die:
     free(tmp);
     if (opt_correct) free(tmp2);
 
+    /* close HDF5 library */
+    H5close();
+
     MPI_Finalize();
 
     return(0);

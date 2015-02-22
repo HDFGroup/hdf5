@@ -112,8 +112,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = t_mpi$(EXEEXT) testphdf5$(EXEEXT) t_cache$(EXEEXT) \
-	t_pflush1$(EXEEXT) t_pflush2$(EXEEXT) t_pshutdown$(EXEEXT) \
-	t_prestart$(EXEEXT) t_shapesame$(EXEEXT)
+	t_pflush1$(EXEEXT) t_pflush2$(EXEEXT) t_shapesame$(EXEEXT)
 t_cache_SOURCES = t_cache.c
 t_cache_OBJECTS = t_cache.$(OBJEXT)
 t_cache_LDADD = $(LDADD)
@@ -134,14 +133,6 @@ t_pflush2_SOURCES = t_pflush2.c
 t_pflush2_OBJECTS = t_pflush2.$(OBJEXT)
 t_pflush2_LDADD = $(LDADD)
 t_pflush2_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
-t_prestart_SOURCES = t_prestart.c
-t_prestart_OBJECTS = t_prestart.$(OBJEXT)
-t_prestart_LDADD = $(LDADD)
-t_prestart_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
-t_pshutdown_SOURCES = t_pshutdown.c
-t_pshutdown_OBJECTS = t_pshutdown.$(OBJEXT)
-t_pshutdown_LDADD = $(LDADD)
-t_pshutdown_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 t_shapesame_SOURCES = t_shapesame.c
 t_shapesame_OBJECTS = t_shapesame.$(OBJEXT)
 t_shapesame_LDADD = $(LDADD)
@@ -188,10 +179,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c t_prestart.c \
-	t_pshutdown.c t_shapesame.c $(testphdf5_SOURCES)
-DIST_SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c t_prestart.c \
-	t_pshutdown.c t_shapesame.c $(testphdf5_SOURCES)
+SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c t_shapesame.c \
+	$(testphdf5_SOURCES)
+DIST_SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c t_shapesame.c \
+	$(testphdf5_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -696,14 +687,13 @@ TRACE = perl $(top_srcdir)/bin/trace
 # Temporary files
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
-# shutdown.h5 is from t_pshutdown
 # go is used for debugging. See testphdf5.c.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog MPItest.h5 Para*.h5 \
-	CacheTestDummy.h5 shutdown.h5 go
+	CacheTestDummy.h5 go
 
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi testphdf5 t_cache t_pflush1 t_pflush2 t_pshutdown t_prestart t_shapesame
+TEST_PROG_PARA = t_mpi testphdf5 t_cache t_pflush1 t_pflush2 t_shapesame
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c \
 	t_prop.c
@@ -792,14 +782,6 @@ t_pflush2$(EXEEXT): $(t_pflush2_OBJECTS) $(t_pflush2_DEPENDENCIES) $(EXTRA_t_pfl
 	@rm -f t_pflush2$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(t_pflush2_OBJECTS) $(t_pflush2_LDADD) $(LIBS)
 
-t_prestart$(EXEEXT): $(t_prestart_OBJECTS) $(t_prestart_DEPENDENCIES) $(EXTRA_t_prestart_DEPENDENCIES) 
-	@rm -f t_prestart$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(t_prestart_OBJECTS) $(t_prestart_LDADD) $(LIBS)
-
-t_pshutdown$(EXEEXT): $(t_pshutdown_OBJECTS) $(t_pshutdown_DEPENDENCIES) $(EXTRA_t_pshutdown_DEPENDENCIES) 
-	@rm -f t_pshutdown$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(t_pshutdown_OBJECTS) $(t_pshutdown_LDADD) $(LIBS)
-
 t_shapesame$(EXEEXT): $(t_shapesame_OBJECTS) $(t_shapesame_DEPENDENCIES) $(EXTRA_t_shapesame_DEPENDENCIES) 
 	@rm -f t_shapesame$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(t_shapesame_OBJECTS) $(t_shapesame_LDADD) $(LIBS)
@@ -826,9 +808,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pflush1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pflush2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_ph5basic.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_prestart.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_prop.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pshutdown.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_shapesame.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_span_tree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testphdf5.Po@am__quote@

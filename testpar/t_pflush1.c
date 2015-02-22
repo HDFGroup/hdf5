@@ -164,9 +164,12 @@ main(int argc, char* argv[])
     } /* end else */
 
     /*
-     * Some systems like AIX do not like files not closed when MPI_Finalize
-     * is called.  So, we need to get the MPI file handles, close them by hand.
-     * Then the _exit is still needed to stop at_exit from happening in some systems.
+     * Some systems like Linux with mpich, if you just _exit without MPI_Finalize
+     * called, it would terminate but left the launching process waiting forever.
+     * OTHO, some systems like AIX do not like files not closed when MPI_Finalize
+     * is called.  So, we need to get the MPI file handles, close them by hand,
+     * then MPI_Finalize. Then the _exit is still needed to stop at_exit from
+     * happening in some systems.
      * Note that MPIO VFD returns the address of the file-handle in the VFD struct
      * because MPI_File_close wants to modify the file-handle variable.
      */
@@ -192,11 +195,13 @@ main(int argc, char* argv[])
 
     fflush(stdout);
     fflush(stderr);
+    MPI_Finalize();
     HD_exit(0);
 
 error:
     fflush(stdout);
     fflush(stderr);
+    MPI_Finalize();
     HD_exit(1);
 }
 

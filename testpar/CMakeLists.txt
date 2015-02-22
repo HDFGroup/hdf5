@@ -46,8 +46,6 @@ set (H5P_TESTS
     t_cache
     t_pflush1
     t_pflush2
-    t_pshutdown
-    t_prestart
     t_shapesame
 )
 
