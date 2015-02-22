@@ -1105,7 +1105,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	earray.h5 efc[0-5].h5 log_vfd_out.log new_multi_file_v16-r.h5 \
 	new_multi_file_v16-s.h5 split_get_file_image_test-m.h5 \
 	split_get_file_image_test-r.h5 file_image_core_test.h5.copy \
-	unregister_filter_1.h5 unregister_filter_2.h5 vds_[1-4].h5
+	unregister_filter_1.h5 unregister_filter_2.h5 vds_1.h5
 
 # Test script for error_test and err_compat
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh \
