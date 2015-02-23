@@ -416,9 +416,9 @@ h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_str_dump_region_blocks
+ * Function:    h5tools_str_dump_space_blocks
  *
- * Purpose: Prints information about a dataspace region by appending
+ * Purpose: Prints information about a dataspace selection by appending
  *          the information to the specified string.
  *
  * Return:  none
@@ -429,19 +429,19 @@ h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
  *-------------------------------------------------------------------------
  */
 void
-h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
+h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace,
         const h5tool_format_t *info)
 {
     hssize_t   nblocks;
     hsize_t    alloc_size;
     hsize_t   *ptdata;
-    int        ndims = H5Sget_simple_extent_ndims(region);
+    int        ndims = H5Sget_simple_extent_ndims(rspace);
 
     /*
-     * This function fails if the region does not have blocks.
+     * This function fails if the rspace does not have blocks.
      */
     H5E_BEGIN_TRY {
-        nblocks = H5Sget_select_hyper_nblocks(region);
+        nblocks = H5Sget_select_hyper_nblocks(rspace);
     } H5E_END_TRY;
 
     /* Print block information */
@@ -452,7 +452,7 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
         ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
-        H5Sget_select_hyper_blocklist(region, (hsize_t)0, (hsize_t)nblocks, ptdata);
+        H5Sget_select_hyper_blocklist(rspace, (hsize_t)0, (hsize_t)nblocks, ptdata);
 
         for (i = 0; i < nblocks; i++) {
             int j;
@@ -477,9 +477,9 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_str_dump_region_points
+ * Function:    h5tools_str_dump_space_points
  *
- * Purpose: Prints information about a dataspace region by appending
+ * Purpose: Prints information about a dataspace selection by appending
  *          the information to the specified string.
  *
  * Return:  none
@@ -490,19 +490,19 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
  *-------------------------------------------------------------------------
  */
 void
-h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
+h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace,
         const h5tool_format_t *info)
 {
     hssize_t   npoints;
     hsize_t    alloc_size;
     hsize_t   *ptdata;
-    int        ndims = H5Sget_simple_extent_ndims(region);
+    int        ndims = H5Sget_simple_extent_ndims(rspace);
 
     /*
-     * This function fails if the region does not have points.
+     * This function fails if the rspace does not have points.
      */
     H5E_BEGIN_TRY {
-        npoints = H5Sget_select_elem_npoints(region);
+        npoints = H5Sget_select_elem_npoints(rspace);
     } H5E_END_TRY;
 
     /* Print point information */
@@ -513,7 +513,7 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
         HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
         ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(npoints, hssize_t, hsize_t);
-        H5Sget_select_elem_pointlist(region, (hsize_t)0, (hsize_t)npoints, ptdata);
+        H5Sget_select_elem_pointlist(rspace, (hsize_t)0, (hsize_t)npoints, ptdata);
 
         for (i = 0; i < npoints; i++) {
             int j;
@@ -1241,9 +1241,9 @@ h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
 
             region_type = H5Sget_select_type(region);
             if(region_type==H5S_SEL_POINTS)
-                h5tools_str_dump_region_points(str, region, info);
+                h5tools_str_dump_space_points(str, region, info);
             else
-                h5tools_str_dump_region_blocks(str, region, info);
+                h5tools_str_dump_space_blocks(str, region, info);
 
             h5tools_str_append(str, "}");
 
