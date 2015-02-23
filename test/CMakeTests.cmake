@@ -330,6 +330,7 @@ add_test (
         tstint2.h5
         unregister_filter_1.h5
         unregister_filter_2.h5
+        vds_1.h5
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
