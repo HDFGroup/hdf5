@@ -86,9 +86,6 @@
    long long values. */
 #cmakedefine H5_FP_TO_ULLONG_RIGHT_MAXIMUM @H5_FP_TO_ULLONG_RIGHT_MAXIMUM@
 
-/* Define if gettimeofday() populates the tz pointer passed in */
-#cmakedefine H5_GETTIMEOFDAY_GIVES_TZ @H5_GETTIMEOFDAY_GIVES_TZ@
-
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
 
@@ -97,9 +94,6 @@
 
 /* Define if the __attribute__(()) extension is present */
 #cmakedefine H5_HAVE_ATTRIBUTE @H5_HAVE_ATTRIBUTE@
-
-/* Define to 1 if you have the `BSDgettimeofday' function. */
-#cmakedefine H5_HAVE_BSDGETTIMEOFDAY @H5_HAVE_BSDGETTIMEOFDAY@
 
 /* Define if the compiler understands C99 designated initialization of structs
    and unions */
@@ -374,12 +368,6 @@
 /* Define if `struct text_info' is defined */
 #cmakedefine H5_HAVE_STRUCT_TEXT_INFO @H5_HAVE_STRUCT_TEXT_INFO@
 
-/* Define if `struct timezone' is defined */
-#cmakedefine H5_HAVE_STRUCT_TIMEZONE @H5_HAVE_STRUCT_TIMEZONE@
-
-/* Define to 1 if `tm_zone' is a member of `struct tm'. */
-#cmakedefine H5_HAVE_STRUCT_TM_TM_ZONE @H5_HAVE_STRUCT_TM_TM_ZONE@
-
 /* Define if `struct videoconfig' is defined */
 #cmakedefine H5_HAVE_STRUCT_VIDEOCONFIG @H5_HAVE_STRUCT_VIDEOCONFIG@
 
@@ -443,14 +431,6 @@
 /* Define if `tm_gmtoff' is a member of `struct tm' */
 #cmakedefine H5_HAVE_TM_GMTOFF @H5_HAVE_TM_GMTOFF@
 
-/* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
-   `HAVE_STRUCT_TM_TM_ZONE' instead. */
-#cmakedefine H5_HAVE_TM_ZONE @H5_HAVE_TM_ZONE@
-
-/* Define to 1 if you don't have `tm_zone' but do have the external array
-   `tzname'. */
-#cmakedefine H5_HAVE_TZNAME @H5_HAVE_TZNAME@
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine H5_HAVE_UNISTD_H @H5_HAVE_UNISTD_H@
 
@@ -480,9 +460,6 @@
 
 /* Define to 1 if you have the `_scrsize' function. */
 #cmakedefine H5_HAVE__SCRSIZE @H5_HAVE__SCRSIZE@
-
-/* Define if `__tm_gmtoff' is a member of `struct tm' */
-#cmakedefine H5_HAVE___TM_GMTOFF @H5_HAVE___TM_GMTOFF@
 
 /* Define if your system can't handle converting floating-point values to long
    long. */

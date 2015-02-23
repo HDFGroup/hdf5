@@ -2680,79 +2680,6 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_decl
-
-# ac_fn_c_check_member LINENO AGGR MEMBER VAR INCLUDES
-# ----------------------------------------------------
-# Tries to find if the field MEMBER exists in type AGGR, after including
-# INCLUDES, setting cache variable VAR accordingly.
-ac_fn_c_check_member ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2.$3" >&5
-$as_echo_n "checking for $2.$3... " >&6; }
-if eval \${$4+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$5
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-static $2 ac_aggr;
-if (ac_aggr.$3)
-return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  eval "$4=yes"
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$5
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-static $2 ac_aggr;
-if (sizeof ac_aggr.$3)
-return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  eval "$4=yes"
-else
-  eval "$4=no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-eval ac_res=\$$4
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-
-} # ac_fn_c_check_member
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -22538,113 +22465,6 @@ $as_echo "#define TIME_WITH_SYS_TIME 1" >>confdefs.h
 fi
 
 
-## ----------------------------------------------------------------------
-## Check for these two functions before the time headers are checked
-## for, otherwise they are not detected correctly on Solaris (the
-## configure test will fail due to multiply-defined symbols).
-##
-for ac_func in difftime
-do :
-  ac_fn_c_check_func "$LINENO" "difftime" "ac_cv_func_difftime"
-if test "x$ac_cv_func_difftime" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_DIFFTIME 1
-_ACEOF
-
-fi
-done
-
-for ac_func in gettimeofday
-do :
-  ac_fn_c_check_func "$LINENO" "gettimeofday" "ac_cv_func_gettimeofday"
-if test "x$ac_cv_func_gettimeofday" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GETTIMEOFDAY 1
-_ACEOF
- have_gettime="yes"
-else
-  have_gettime="no"
-fi
-done
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing clock_gettime" >&5
-$as_echo_n "checking for library containing clock_gettime... " >&6; }
-if ${ac_cv_search_clock_gettime+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char clock_gettime ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return clock_gettime ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' rt posix4; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_clock_gettime=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_clock_gettime+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_clock_gettime+:} false; then :
-
-else
-  ac_cv_search_clock_gettime=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_clock_gettime" >&5
-$as_echo "$ac_cv_search_clock_gettime" >&6; }
-ac_res=$ac_cv_search_clock_gettime
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-fi
-
-for ac_func in clock_gettime
-do :
-  ac_fn_c_check_func "$LINENO" "clock_gettime" "ac_cv_func_clock_gettime"
-if test "x$ac_cv_func_clock_gettime" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_CLOCK_GETTIME 1
-_ACEOF
- have_clock_gettime="yes"
-else
-  have_clock_gettime="no"
-fi
-done
-
-
 ## Unix
 for ac_header in sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h
 do :
@@ -26335,42 +26155,6 @@ $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
-## check if `struct tm' has a `__tm_gmtoff' member.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for __tm_gmtoff in struct tm" >&5
-$as_echo_n "checking for __tm_gmtoff in struct tm... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-  #include <sys/time.h>
-  #include <time.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-struct tm tm; tm.__tm_gmtoff=0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-
-$as_echo "#define HAVE___TM_GMTOFF 1" >>confdefs.h
-
-     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
 ## Check whether the global variable `timezone' is defined.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for global timezone variable" >&5
 $as_echo_n "checking for global timezone variable... " >&6; }
@@ -26417,217 +26201,6 @@ rm -f core conftest.err conftest.$ac_objext \
     ;;
 esac
 
-## Check whether `struct timezone' is defined.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether struct tm is in sys/time.h or time.h" >&5
-$as_echo_n "checking whether struct tm is in sys/time.h or time.h... " >&6; }
-if ${ac_cv_struct_tm+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
-#include <time.h>
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-struct tm tm;
-				     int *p = &tm.tm_sec;
-				     return !p;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_struct_tm=time.h
-else
-  ac_cv_struct_tm=sys/time.h
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_struct_tm" >&5
-$as_echo "$ac_cv_struct_tm" >&6; }
-if test $ac_cv_struct_tm = sys/time.h; then
-
-$as_echo "#define TM_IN_SYS_TIME 1" >>confdefs.h
-
-fi
-
-ac_fn_c_check_member "$LINENO" "struct tm" "tm_zone" "ac_cv_member_struct_tm_tm_zone" "#include <sys/types.h>
-#include <$ac_cv_struct_tm>
-
-"
-if test "x$ac_cv_member_struct_tm_tm_zone" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_TM_TM_ZONE 1
-_ACEOF
-
-
-fi
-
-if test "$ac_cv_member_struct_tm_tm_zone" = yes; then
-
-$as_echo "#define HAVE_TM_ZONE 1" >>confdefs.h
-
-else
-  ac_fn_c_check_decl "$LINENO" "tzname" "ac_cv_have_decl_tzname" "#include <time.h>
-"
-if test "x$ac_cv_have_decl_tzname" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_TZNAME $ac_have_decl
-_ACEOF
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for tzname" >&5
-$as_echo_n "checking for tzname... " >&6; }
-if ${ac_cv_var_tzname+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <time.h>
-#if !HAVE_DECL_TZNAME
-extern char *tzname[];
-#endif
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return tzname[0][0];
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_var_tzname=yes
-else
-  ac_cv_var_tzname=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_var_tzname" >&5
-$as_echo "$ac_cv_var_tzname" >&6; }
-  if test $ac_cv_var_tzname = yes; then
-
-$as_echo "#define HAVE_TZNAME 1" >>confdefs.h
-
-  fi
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct timezone" >&5
-$as_echo_n "checking for struct timezone... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-  #include <sys/types.h>
-  #include <sys/time.h>
-  #include <time.h>
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-struct timezone tz; tz.tz_minuteswest=0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-
-$as_echo "#define HAVE_STRUCT_TIMEZONE 1" >>confdefs.h
-
-    have_struct_tz="yes"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-## If gettimeofday() is going to be used, make sure it uses the timezone struct
-
-if test "$have_gettime" = "yes" -a "$have_struct_tz" = "yes"; then
-   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether gettimeofday() gives timezone" >&5
-$as_echo_n "checking whether gettimeofday() gives timezone... " >&6; }
-   if ${hdf5_cv_gettimeofday_tz+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-          #include <time.h>
-          #include <sys/time.h>
-          int main(void)
-          {
-             struct timeval tv;
-             struct timezone tz;
-             tz.tz_minuteswest = 7777;  /* Initialize to an unreasonable number */
-             tz.tz_dsttime = 7;
-             gettimeofday(&tv, &tz);
-                /* Check whether the function returned any value at all */
-             if(tz.tz_minuteswest == 7777 && tz.tz_dsttime == 7)
-                exit(1);
-             else exit (0);
-          }
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  hdf5_cv_gettimeofday_tz=yes
-else
-  hdf5_cv_gettimeofday_tz=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-
-
-   if test ${hdf5_cv_gettimeofday_tz} = "yes"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-$as_echo "#define GETTIMEOFDAY_GIVES_TZ 1" >>confdefs.h
-
-   else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-   fi
-fi
 
 ## ----------------------------------------------------------------------
 ## Does the struct stat have the st_blocks field?  This field is not Posix.
@@ -26847,7 +26420,73 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 ## ----------------------------------------------------------------------
 ## Check for functions.
 ##
-for ac_func in alarm BSDgettimeofday fork frexpf frexpl
+## NOTE: clock_gettime may require linking to the rt or posix4 library
+##       so we'll search for it before calling AC_CHECK_FUNCS.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing clock_gettime" >&5
+$as_echo_n "checking for library containing clock_gettime... " >&6; }
+if ${ac_cv_search_clock_gettime+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char clock_gettime ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return clock_gettime ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' rt posix4; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_clock_gettime=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_clock_gettime+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_clock_gettime+:} false; then :
+
+else
+  ac_cv_search_clock_gettime=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_clock_gettime" >&5
+$as_echo "$ac_cv_search_clock_gettime" >&6; }
+ac_res=$ac_cv_search_clock_gettime
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+for ac_func in alarm clock_gettime difftime fork frexpf frexpl
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -26859,7 +26498,7 @@ _ACEOF
 fi
 done
 
-for ac_func in gethostname getpwuid getrusage lstat
+for ac_func in gethostname getpwuid getrusage gettimeofday
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -26871,7 +26510,7 @@ _ACEOF
 fi
 done
 
-for ac_func in rand_r random setsysinfo
+for ac_func in lstat rand_r random setsysinfo
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

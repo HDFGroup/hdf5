@@ -571,9 +571,6 @@ typedef struct {
 #ifndef HDatol
     #define HDatol(S)    atol(S)
 #endif /* HDatol */
-#ifndef HDBSDgettimeofday
-    #define HDBSDgettimeofday(S,P)  BSDgettimeofday(S,P)
-#endif /* HDBSDgettimeofday */
 #ifndef HDbsearch
     #define HDbsearch(K,B,N,Z,F)  bsearch(K,B,N,Z,F)
 #endif /* HDbsearch */

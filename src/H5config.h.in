@@ -49,9 +49,6 @@
    long long values. */
 #undef FP_TO_ULLONG_RIGHT_MAXIMUM
 
-/* Define if gettimeofday() populates the tz pointer passed in */
-#undef GETTIMEOFDAY_GIVES_TZ
-
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 
@@ -60,9 +57,6 @@
 
 /* Define if the __attribute__(()) extension is present */
 #undef HAVE_ATTRIBUTE
-
-/* Define to 1 if you have the `BSDgettimeofday' function. */
-#undef HAVE_BSDGETTIMEOFDAY
 
 /* Define if the compiler understands C99 designated initialization of structs
    and unions */
@@ -79,10 +73,6 @@
 
 /* Define if Darwin or Mac OS X */
 #undef HAVE_DARWIN
-
-/* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
-   */
-#undef HAVE_DECL_TZNAME
 
 /* Define to 1 if you have the `difftime' function. */
 #undef HAVE_DIFFTIME
@@ -310,12 +300,6 @@
 /* Define if `struct text_info' is defined */
 #undef HAVE_STRUCT_TEXT_INFO
 
-/* Define if `struct timezone' is defined */
-#undef HAVE_STRUCT_TIMEZONE
-
-/* Define to 1 if `tm_zone' is a member of `struct tm'. */
-#undef HAVE_STRUCT_TM_TM_ZONE
-
 /* Define if `struct videoconfig' is defined */
 #undef HAVE_STRUCT_VIDEOCONFIG
 
@@ -376,14 +360,6 @@
 /* Define if `tm_gmtoff' is a member of `struct tm' */
 #undef HAVE_TM_GMTOFF
 
-/* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
-   `HAVE_STRUCT_TM_TM_ZONE' instead. */
-#undef HAVE_TM_ZONE
-
-/* Define to 1 if you don't have `tm_zone' but do have the external array
-   `tzname'. */
-#undef HAVE_TZNAME
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
@@ -410,9 +386,6 @@
 
 /* Define to 1 if you have the `_scrsize' function. */
 #undef HAVE__SCRSIZE
-
-/* Define if `__tm_gmtoff' is a member of `struct tm' */
-#undef HAVE___TM_GMTOFF
 
 /* Define if your system can't handle converting floating-point values to long
    long. */
@@ -620,9 +593,6 @@
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
-
-/* Define to 1 if your <sys/time.h> declares `struct tm'. */
-#undef TM_IN_SYS_TIME
 
 /* Define if your system can compile unsigned long long to floating-point
    casts. */
