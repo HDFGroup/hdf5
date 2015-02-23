@@ -2866,7 +2866,7 @@ h5tools_print_virtual_selection(h5tools_str_t *buffer, const h5tool_format_t *in
     h5tools_str_append(buffer, "%s ", h5tools_dump_header_format->virtualselectionbegin);
     switch(H5Sget_select_type(vspace)) {
     case H5S_SEL_NONE:    /* Nothing selected         */
-        h5tools_str_append(buffer, "NONE");
+        h5tools_str_append(buffer, "H5S_NONE");
         break;
     case H5S_SEL_POINTS:    /* Sequence of points selected  */
         h5tools_str_append(buffer, "POINT_SELECTION %s ", h5tools_dump_header_format->virtualselectionblockbegin);
@@ -2879,7 +2879,7 @@ h5tools_print_virtual_selection(h5tools_str_t *buffer, const h5tool_format_t *in
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionblockend);
         break;
     case H5S_SEL_ALL:    /* Entire extent selected   */
-        h5tools_str_append(buffer, "ALL");
+        h5tools_str_append(buffer, "H5S_ALL");
         break;
     default:
         h5tools_str_append(buffer, "Unknown Selection");
