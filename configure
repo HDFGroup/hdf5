@@ -6620,13 +6620,13 @@ $as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HD
       program main
 
 
-	USE iso_c_binding
-	IMPLICIT NONE
-	TYPE(C_PTR) :: ptr
-	TYPE(C_FUNPTR) :: funptr
-	CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(C_PTR) :: ptr
+        TYPE(C_FUNPTR) :: funptr
+        CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
 
-	ptr = C_LOC(ichr(1:1))
+        ptr = C_LOC(ichr(1:1))
 
 
       end
