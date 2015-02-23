@@ -2909,7 +2909,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     size_t           cd_nelmts;      /* filter client number of values */
     off_t            offset;         /* offset of external file     */
     char             f_name[256];    /* filter name */
-    char             name[256];      /* external file name       */
+    char             name[256];      /* external or virtual file name       */
+    char             dsetname[256];  /* virtual datset name       */
     hsize_t          chsize[64];     /* chunk size in elements */
     hsize_t          size;           /* size of external file   */
     hsize_t          storage_size;
@@ -2975,18 +2976,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
                                        cd_values, sizeof(f_name), f_name, NULL);
 				ok = (filtn>=0);
-				
-			    /* this following code will not show compression ratio for 
-				   user defined filter. For example, see HDFFV-8344 --xcao@hdfgroup.org
-                switch(filtn) {
-                case H5Z_FILTER_DEFLATE:
-                case H5Z_FILTER_SZIP:
-                case H5Z_FILTER_NBIT:
-                case H5Z_FILTER_SCALEOFFSET:
-                    ok = 1;
-                    break;
-                }
-				*/
             }
 
             if(ndims && ok) {
@@ -3018,13 +3007,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
         ctx->indent_level--;
-
-        ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-        
-        h5tools_str_reset(&buffer);
-        h5tools_str_append(&buffer, "%s",END);
-        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
     }
     else if(H5D_COMPACT == H5Pget_layout(dcpl_id)) {
         ctx->indent_level++;
@@ -3044,13 +3026,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
         ctx->indent_level--;
-
-        ctx->need_prefix = TRUE;
-        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-        
-        h5tools_str_reset(&buffer);
-        h5tools_str_append(&buffer, "%s",END);
-        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
     }
     else if(H5D_CONTIGUOUS == H5Pget_layout(dcpl_id)) {
         int              next;
@@ -3100,13 +3075,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
             ctx->indent_level--;
-
-            ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-            
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "%s",END);
-            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
         }
         else {
             haddr_t          ioffset;
@@ -3115,37 +3083,118 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
 
             ctx->need_prefix = TRUE;
             h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-            
+
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "%s", CONTIGUOUS);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
             ctx->need_prefix = TRUE;
             h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-            
+
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer,"SIZE " HSIZE_T_FORMAT, storage_size);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
             ctx->need_prefix = TRUE;
             h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-            
+
             h5tools_str_reset(&buffer);
             ioffset = H5Dget_offset(obj_id);
             h5tools_str_append(&buffer,"OFFSET "H5_PRINTF_HADDR_FMT, ioffset);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
             ctx->indent_level--;
+        }
+    }
+    else if(H5D_VIRTUAL == H5Pget_layout(dcpl_id)) {
+        int vmaps;
+
+        vmaps = 0;//H5Pget_mapping_count(dcpl_id);
+
+        ctx->indent_level++;
+
+        ctx->need_prefix = TRUE;
+        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+        h5tools_str_reset(&buffer);
+        h5tools_str_append(&buffer, "%s %s", VDS_VIRTUAL, BEGIN);
+        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+
+        if(vmaps) {
+            int next;
+
+            ctx->indent_level++;
 
             ctx->need_prefix = TRUE;
             h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-            
+
+            h5tools_str_reset(&buffer);
+            h5tools_str_append(&buffer, "%s %s", VDS_MAPPING, BEGIN);
+            h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+
+            next = 0;//H5Pget_mapping selection_count(dcpl_id);
+
+            if(next) {
+                ctx->indent_level++;
+                for(j = 0; j < (unsigned)next; j++) {
+                    //H5Pget_virtual(dcpl_id, j, sizeof(name), name, &dsetname, &selection);
+
+                    //h5tools_dump_virtual_selection(stream, info, ctx, selection);
+
+                    ctx->need_prefix = TRUE;
+                    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, "%s", name);
+                    h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+
+                    ctx->need_prefix = TRUE;
+                    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, "%s", dsetname);
+                    h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+
+                    //h5tools_dump_virtual_selection(stream, info, ctx, selection);
+                }
+                ctx->indent_level--;
+
+                ctx->need_prefix = TRUE;
+                h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "%s",END);
+                h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+            }
+
+            ctx->indent_level--;
+
+            ctx->need_prefix = TRUE;
+            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "%s",END);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
         }
+
+        ctx->need_prefix = TRUE;
+        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+        h5tools_str_reset(&buffer);
+        h5tools_str_append(&buffer, "%s",END);
+        h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+
+        ctx->indent_level--;
     }
-   /*-------------------------------------------------------------------------
+
+    ctx->need_prefix = TRUE;
+    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+    h5tools_str_reset(&buffer);
+    h5tools_str_append(&buffer, "%s",END);
+    h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
+
+    /*-------------------------------------------------------------------------
     * FILTERS
     *-------------------------------------------------------------------------
     */
