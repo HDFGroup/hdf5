@@ -2870,16 +2870,12 @@ h5tools_print_virtual_selection(h5tools_str_t *buffer, const h5tool_format_t *in
         break;
     case H5S_SEL_POINTS:    /* Sequence of points selected  */
         h5tools_str_append(buffer, "POINT_SELECTION %s ", h5tools_dump_header_format->virtualselectionblockbegin);
-        h5tools_str_append(buffer, "{");
         h5tools_str_dump_space_points(buffer, vspace, info);
-        h5tools_str_append(buffer, "}");
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionblockend);
         break;
     case H5S_SEL_HYPERSLABS:    /* "New-style" hyperslab selection defined  */
         h5tools_str_append(buffer, "HYPERSLAB_SELECTION %s ", h5tools_dump_header_format->virtualselectionblockbegin);
-        h5tools_str_append(buffer, "{");
         h5tools_str_dump_space_blocks(buffer, vspace, info);
-        h5tools_str_append(buffer, "}");
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionblockend);
         break;
     case H5S_SEL_ALL:    /* Entire extent selected   */
