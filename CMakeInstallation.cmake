@@ -1,4 +1,4 @@
-include (CMakePackageConfigHelpers.cmake)
+include (CMakePackageConfigHelpers)
 
 #-----------------------------------------------------------------------------
 # Check for Installation Utilities
