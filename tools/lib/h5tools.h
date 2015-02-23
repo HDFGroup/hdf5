@@ -186,6 +186,15 @@ typedef struct h5tools_dump_header_t {
     const char *dataspacedimbegin;
     const char *dataspacedimend;
 
+    const char *virtualselectionbegin;
+    const char *virtualselectionend;
+    const char *virtualselectionblockbegin;
+    const char *virtualselectionblockend;
+    const char *virtualfilenamebegin;
+    const char *virtualfilenameend;
+    const char *virtualdatasetnamebegin;
+    const char *virtualdatasetnameend;
+
 } h5tools_dump_header_t;
 
 /*
