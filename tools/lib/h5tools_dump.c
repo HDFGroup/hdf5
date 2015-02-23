@@ -181,9 +181,9 @@ BLOCK, /*blockbegin */
 ")", /*dataspacedimend */
 
 "", /*virtualselectionbegin */
-"", /*virtualselectionend */
-"", /*virtualselectionblockbegin */
-";", /*virtualselectionblockend */
+";", /*virtualselectionend */
+"{", /*virtualselectionblockbegin */
+"}", /*virtualselectionblockend */
 "", /*virtualfilenamebeginbegin */
 ";", /*virtualfilenamebeginend */
 "", /*virtualdatasetnamebegin */
@@ -225,8 +225,7 @@ void h5tools_print_dims(h5tools_str_t *buffer, hsize_t *s, int dims);
 void h5tools_dump_subsetting_header(FILE *stream, const h5tool_format_t *info,
         h5tools_context_t *ctx, struct subset_t *sset, int dims);
 
-void h5tools_dump_virtual_selection(FILE *stream, const h5tool_format_t *info,
-        h5tools_context_t *ctx, hid_t dcpl_id, size_t index);
+void h5tools_print_virtual_selection(h5tools_str_t *buffer, hid_t vspace, hid_t dcpl_id, size_t index);
 
 void
 h5tools_dump_init(void)
@@ -2854,43 +2853,38 @@ h5tools_dump_oid(FILE *stream, const h5tool_format_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    dump_virtual_selection
+ * Function:    print_virtual_selection
  *
- * Purpose:     Dump the virtual dataset selection.
+ * Purpose:     Print the virtual dataset selection.
  *
  * Return:      void
- *
- * In/Out:      h5tools_context_t *ctx
  *-------------------------------------------------------------------------
  */
 void
-h5tools_dump_virtual_selection(FILE *stream, const h5tool_format_t *info,
-        h5tools_context_t *ctx, hid_t dcpl_id, size_t index)
+h5tools_print_virtual_selection(h5tools_str_t *buffer, hid_t vspace, hid_t dcpl_id, size_t index)
 {
-    h5tools_str_t buffer;          /* string into which to render   */
-    size_t        ncols = 80;      /* available output width        */
-    hsize_t       curr_pos = ctx->sm_pos;   /* total data element position   */
-                                            /* pass to the prefix in h5tools_simple_prefix the total position
-                                             * instead of the current stripmine position i; this is necessary
-                                             * to print the array indices
-                                             */
-
-    /* setup */
-    HDmemset(&buffer, 0, sizeof(h5tools_str_t));
-
-    if (info->line_ncols > 0)
-        ncols = info->line_ncols;
-
-    ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, (hsize_t)0, 0);
-
-    h5tools_str_reset(&buffer);
-    h5tools_str_append(&buffer, "%s %s ", h5tools_dump_header_format->virtualselectionbegin, h5tools_dump_header_format->virtualselectionblockbegin);
-    //h5tools_print_selection(&buffer, sset->start.data, dims);
-    h5tools_str_append(&buffer, "%s %s", h5tools_dump_header_format->virtualselectionend, h5tools_dump_header_format->virtualselectionblockend);
-    h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-
-    h5tools_str_close(&buffer);
+    h5tools_str_append(buffer, "%s ", h5tools_dump_header_format->virtualselectionbegin);
+    switch(H5Sget_select_type(vspace)) {
+    case H5S_SEL_NONE:    /* Nothing selected         */
+        h5tools_str_append(buffer, "NONE");
+        break;
+    case H5S_SEL_POINTS:    /* Sequence of points selected  */
+        h5tools_str_append(buffer, "POINT_SELECTION %s ", h5tools_dump_header_format->virtualselectionblockbegin);
+        //h5tools_print_selection(&buffer, sset->start.data, dims);
+        h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionblockend);
+        break;
+    case H5S_SEL_HYPERSLABS:    /* "New-style" hyperslab selection defined  */
+        h5tools_str_append(buffer, "HYPERSLAB_SELECTION %s ", h5tools_dump_header_format->virtualselectionblockbegin);
+        //h5tools_print_selection(&buffer, sset->start.data, dims);
+        h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionblockend);
+        break;
+    case H5S_SEL_ALL:    /* Entire extent selected   */
+        h5tools_str_append(buffer, "ALL");
+        break;
+    default:
+        h5tools_str_append(buffer, "Unknown Selection");
+    }
+    h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionend);
 }
 
 
@@ -3187,7 +3181,15 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
 
             ctx->indent_level++;
             for(next = 0; next < (unsigned)vmaps; next++) {
-                h5tools_dump_virtual_selection(stream, info, ctx, dcpl_id, next);
+                hid_t virtual_vspace = H5Pget_virtual_vspace(dcpl_id, next);
+                hid_t virtual_srcspace = H5Pget_virtual_srcspace(dcpl_id, next);
+
+                ctx->need_prefix = TRUE;
+                h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+                h5tools_str_reset(&buffer);
+                h5tools_print_virtual_selection(&buffer, virtual_vspace, dcpl_id, next);
+                h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
                 ssize_out = H5Pget_virtual_filename(dcpl_id, next, NULL, 0);
                 H5Pget_virtual_filename(dcpl_id, next, name, sizeof(name));
@@ -3212,7 +3214,12 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->virtualdatasetnameend);
                 h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
-                h5tools_dump_virtual_selection(stream, info, ctx, dcpl_id, next);
+                ctx->need_prefix = TRUE;
+                h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+                h5tools_str_reset(&buffer);
+                h5tools_print_virtual_selection(&buffer, virtual_srcspace, dcpl_id, next);
+                h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
             }
             ctx->indent_level--;
 
