@@ -164,6 +164,7 @@ test_api(test_api_config_t config, hid_t fapl)
     hid_t       space_out = -1;
     char        name_out[32];
     hsize_t     blocklist[4];
+    htri_t      tri_ret;
     unsigned    i;
 
     switch(config) {
@@ -218,14 +219,6 @@ test_api(test_api_config_t config, hid_t fapl)
     if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
         TEST_ERROR
 
-    /* Close dataspaces */
-    if(H5Sclose(srcspace[0]) < 0)
-        TEST_ERROR
-    srcspace[0] = -1;
-    if(H5Sclose(vspace[0]) < 0)
-        TEST_ERROR
-    vspace[0] = -1;
-
     /* Test H5Pget_virtual_count */
     if(H5Pget_virtual_count(ex_dcpl, &size_out) < 0)
         TEST_ERROR
@@ -234,6 +227,10 @@ test_api(test_api_config_t config, hid_t fapl)
 
     /* Test H5Pget_virtual_vspace */
     if((space_out = H5Pget_virtual_vspace(ex_dcpl, 0)) < 0)
+        TEST_ERROR
+    if((tri_ret = H5Sextent_equal(space_out, vspace[0])) < 0)
+        TEST_ERROR
+    if(!tri_ret)
         TEST_ERROR
     if(H5Sget_select_type(space_out) != H5S_SEL_ALL)
         TEST_ERROR
@@ -277,6 +274,12 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Close */
+    if(H5Sclose(srcspace[0]) < 0)
+        TEST_ERROR
+    srcspace[0] = -1;
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
     if(H5Pclose(ex_dcpl) < 0)
         TEST_ERROR
     ex_dcpl = -1;
@@ -333,14 +336,6 @@ test_api(test_api_config_t config, hid_t fapl)
     if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
         TEST_ERROR
 
-    /* Close dataspaces */
-    if(H5Sclose(srcspace[0]) < 0)
-        TEST_ERROR
-    srcspace[0] = -1;
-    if(H5Sclose(vspace[0]) < 0)
-        TEST_ERROR
-    vspace[0] = -1;
-
     /* Test H5Pget_virtual_count */
     if(H5Pget_virtual_count(ex_dcpl, &size_out) < 0)
         TEST_ERROR
@@ -351,6 +346,10 @@ test_api(test_api_config_t config, hid_t fapl)
     for(i = 0; i < LIST_DOUBLE_SIZE; i++) {
         /* Test H5Pget_virtual_vspace */
         if((space_out = H5Pget_virtual_vspace(ex_dcpl, i)) < 0)
+            TEST_ERROR
+        if((tri_ret = H5Sextent_equal(space_out, vspace[0])) < 0)
+            TEST_ERROR
+        if(!tri_ret)
             TEST_ERROR
         if(H5Sget_select_type(space_out) != H5S_SEL_HYPERSLABS)
             TEST_ERROR
@@ -413,6 +412,12 @@ test_api(test_api_config_t config, hid_t fapl)
     } /* end if */
 
     /* Close */
+    if(H5Sclose(srcspace[0]) < 0)
+        TEST_ERROR
+    srcspace[0] = -1;
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
     if(H5Pclose(ex_dcpl) < 0)
         TEST_ERROR
     ex_dcpl = -1;

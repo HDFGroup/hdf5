@@ -479,7 +479,7 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Copy */
-    if(H5S_extent_copy(&(dst->extent), &(src->extent), TRUE) < 0)
+    if(H5S_extent_copy_real(&(dst->extent), &(src->extent), TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent")
 
 done:
@@ -488,7 +488,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_extent_copy
+ * Function:    H5S_extent_copy
+ *
+ * Purpose:     Copies a dataspace extent
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, February 23, 2015
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_extent_copy(H5S_t *dst, const H5S_t *src)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(dst);
+    HDassert(src);
+
+    /* Copy */
+    if(H5S_extent_copy_real(&(dst->extent), &(src->extent), TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_extent_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_extent_copy_real
  *
  * Purpose:	Copies a dataspace extent
  *
@@ -502,7 +535,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src, hbool_t copy_max)
+H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src, hbool_t copy_max)
 {
     unsigned u;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -551,7 +584,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src, hbool_t copy_max)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_extent_copy() */
+} /* end H5S_extent_copy_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -587,7 +620,7 @@ H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the source dataspace's extent */
-    if(H5S_extent_copy(&(dst->extent), &(src->extent), copy_max) < 0)
+    if(H5S_extent_copy_real(&(dst->extent), &(src->extent), copy_max) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent")
 
     /* Copy the source dataspace's selection */
