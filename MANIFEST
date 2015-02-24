@@ -33,6 +33,8 @@
 ./m4/ltversion.m4                       _DO_NOT_DISTRIBUTE_
 ./m4/lt~obsolete.m4                     _DO_NOT_DISTRIBUTE_
 ./m4/ltoptions.m4                       _DO_NOT_DISTRIBUTE_
+./m4/aclocal_cxx.m4
+./m4/aclocal_fc.m4
 ./README.txt
 ./aclocal.m4
 ./acsite.m4
@@ -1146,6 +1148,8 @@
 ./testpar/t_pflush2.c
 ./testpar/t_prop.c
 ./testpar/t_shapesame.c
+./testpar/t_pshutdown.c
+./testpar/t_prestart.c
 ./testpar/t_span_tree.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
@@ -2385,58 +2389,8 @@
 ./hl/c++/test/Makefile.am
 ./hl/c++/test/Makefile.in
 
-#vms files
-./vms/COPYING
-
-./vms/c++/examples/check.com
-./vms/c++/examples/make.com
-./vms/c++/src/make.com
-./vms/c++/test/check.com
-./vms/c++/test/make.com
-
-./vms/fortran/examples/check.com
-./vms/fortran/examples/make.com
-./vms/fortran/src/make.com
-./vms/fortran/test/check.com
-./vms/fortran/test/make.com
-
-./vms/examples/check.com
-./vms/examples/make.com
-./vms/src/make.com
-./vms/src/h5pubconf.h
-./vms/test/check.com
-./vms/test/make.com
-./vms/test/H5srcdir_str.h
-
-./vms/build.com
-./vms/install.com
-./vms/make.com
-./vms/tools/h5copy/make.com
-./vms/tools/h5copy/check_h5copy.com
-./vms/tools/h5dump/make.com
-./vms/tools/h5dump/check_h5dump.com
-./vms/tools/h5ls/check.com
-./vms/tools/h5ls/check_h5ls.com
-./vms/tools/h5ls/make.com
-./vms/tools/h5diff/check_h5diff.com
-./vms/tools/h5diff/make.com
-./vms/tools/h5import/check_h5import.com
-./vms/tools/h5import/make.com
-./vms/tools/h5jam/check_h5jam.com
-./vms/tools/h5jam/make.com
-./vms/tools/h5repack/check_h5repack.com
-./vms/tools/h5repack/make.com
-./vms/tools/h5stat/make.com
-./vms/tools/lib/make.com
-./vms/tools/misc/make.com
-./vms/tools/testfiles/tattr-3.ddl
-./vms/tools/testfiles/tdset-2.ddl
-./vms/tools/testfiles/tgroup-2.ddl
-./vms/tools/testfiles/tperror.ddl
-
 # CMake-specific Files
 ./config/cmake/cacheinit.cmake
-./config/cmake/CMakePackageConfigHelpers.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CTestCustom.cmake

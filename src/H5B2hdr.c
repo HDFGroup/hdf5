@@ -166,7 +166,7 @@ HDmemset(hdr->page, 0, hdr->node_size);
     hdr->node_info[0].cum_max_nrec = hdr->node_info[0].max_nrec;
     hdr->node_info[0].cum_max_nrec_size = 0;
     if(NULL == (hdr->node_info[0].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[0].max_nrec)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
     hdr->node_info[0].node_ptr_fac = NULL;
 
     /* Allocate array of pointers to internal node native keys */
@@ -250,7 +250,7 @@ H5B2_hdr_alloc(H5F_t *f)
 
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5FL_CALLOC(H5B2_hdr_t)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree header")
 
     /* Assign non-zero information */
     hdr->f = f;
@@ -298,19 +298,19 @@ H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
 
     /* Allocate v2 B-tree header */
     if(NULL == (hdr = H5B2_hdr_alloc(f)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header")
 
     /* Initialize shared B-tree info */
     if(H5B2_hdr_init(hdr, cparam, ctx_udata, (uint16_t)0) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, HADDR_UNDEF, "can't create shared B-tree info")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, HADDR_UNDEF, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */
     if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)hdr->hdr_size)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for B-tree header")
 
     /* Cache the new B-tree node */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, HADDR_UNDEF, "can't add B-tree header to cache")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, HADDR_UNDEF, "can't add B-tree header to cache")
 
     /* Set address of v2 B-tree header to return */
     ret_value = hdr->addr;
@@ -398,15 +398,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_hdr_fuse_incr
+ * Function:    H5B2_hdr_fuse_incr
  *
- * Purpose:	Increment file reference count on shared v2 B-tree header
+ * Purpose:     Increment file reference count on shared v2 B-tree header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Oct 27 2009
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Oct 27 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -426,15 +426,15 @@ H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_hdr_fuse_decr
+ * Function:    H5B2_hdr_fuse_decr
  *
- * Purpose:	Decrement file reference count on shared v2 B-tree header
+ * Purpose:     Decrement file reference count on shared v2 B-tree header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      The file's reference count after the decrement. (Can't fail)
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Oct 27 2009
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Oct 27 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -540,6 +540,16 @@ H5B2_hdr_free(H5B2_hdr_t *hdr)
 
         /* Free the array of node info structs */
         hdr->node_info = H5FL_SEQ_FREE(H5B2_node_info_t, hdr->node_info);
+    } /* end if */
+
+    /* Release the min & max record info, if set */
+    if(hdr->min_native_rec) {
+	HDfree(hdr->min_native_rec);
+	hdr->min_native_rec = NULL;
+    } /* end if */
+    if(hdr->max_native_rec) {
+	HDfree(hdr->max_native_rec);
+	hdr->max_native_rec = NULL;
     } /* end if */
 
     /* Free B-tree header info */

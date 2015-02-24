@@ -833,39 +833,37 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
      *  equivalent of compressed contiguous datasets - QAK]
      */
     if(total_chunks == 1) {
-        H5D_chunk_ud_t udata;           /* User data for querying chunk info */
-        hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
         H5SL_node_t *chunk_node;        /* Pointer to chunk node for selection */
         H5S_t *fspace;                  /* Dataspace describing chunk & selection in it */
         H5S_t *mspace;                  /* Dataspace describing selection in memory corresponding to this chunk */
-
-        /* Initialize the chunk coordinates */
-        /* (must be all zero, since there's only one chunk) */
-        HDmemset(coords, 0, sizeof(coords));
-
-        /* Look up address of chunk */
-        if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, coords,
-                io_info->store->chunk.index, &udata) < 0)
-            HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
-        ctg_store.contig.dset_addr = udata.addr;
 
         /* Check for this process having selection in this chunk */
         chunk_node = H5SL_first(fm->sel_chunks);
 
         if(chunk_node == NULL) {
-                /* Set the dataspace info for I/O to NULL, this process doesn't have any I/O to perform */
-                fspace = mspace = NULL;
+            /* Set the dataspace info for I/O to NULL, this process doesn't have any I/O to perform */
+            fspace = mspace = NULL;
+
+            /* Initialize chunk address */
+            ctg_store.contig.dset_addr = 0;
         } /* end if */
         else {
-                H5D_chunk_info_t *chunk_info;
+            H5D_chunk_ud_t udata;           /* User data for querying chunk info */
+            H5D_chunk_info_t *chunk_info;   /* Info for chunk in skiplist */
 
-                /* Get the chunk info, for the selection in the chunk */
-                if(NULL == (chunk_info = H5SL_item(chunk_node)))
-                    HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
+            /* Get the chunk info, for the selection in the chunk */
+            if(NULL == (chunk_info = (H5D_chunk_info_t *)H5SL_item(chunk_node)))
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skip list")
 
-                /* Set the dataspace info for I/O */
-                fspace = chunk_info->fspace;
-                mspace = chunk_info->mspace;
+            /* Set the dataspace info for I/O */
+            fspace = chunk_info->fspace;
+            mspace = chunk_info->mspace;
+
+            /* Look up address of chunk */
+            if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->coords,
+                    chunk_info->index, &udata) < 0)
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk address")
+            ctg_store.contig.dset_addr = udata.addr;
         } /* end else */
 
         /* Set up the base storage address for this chunk */

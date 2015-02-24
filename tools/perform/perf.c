@@ -390,7 +390,7 @@ die_jar_jar_die:
 
     free(tmp);
     if (opt_correct) free(tmp2);
-    
+
     MPI_Finalize();
 
     return(0);
