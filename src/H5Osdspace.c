@@ -308,7 +308,7 @@ H5O_sdspace_copy(const void *_mesg, void *_dest)
 
     /* check args */
     HDassert(mesg);
-    if(!dest && NULL == (dest = H5FL_MALLOC(H5S_extent_t)))
+    if(!dest && NULL == (dest = H5FL_CALLOC(H5S_extent_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy extent information */
@@ -463,7 +463,7 @@ H5O_sdspace_pre_copy_file(H5F_t UNUSED *file_src, const void *mesg_src,
      */
     if(udata) {
         /* Allocate copy of dataspace extent */
-        if(NULL == (udata->src_space_extent = H5FL_MALLOC(H5S_extent_t)))
+        if(NULL == (udata->src_space_extent = H5FL_CALLOC(H5S_extent_t)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_NOSPACE, FAIL, "dataspace extent allocation failed")
 
         /* Create a copy of the dataspace extent */
