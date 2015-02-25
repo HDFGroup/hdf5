@@ -8856,3 +8856,108 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_seq_list() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sis_regular_hyperslab
+ PURPOSE
+    Determine if a hyperslab selection is regular
+ USAGE
+    htri_t H5Sis_regular_hyperslab(dsid)
+        hid_t dsid;             IN: Dataspace ID of hyperslab selection to query
+ RETURNS
+    TRUE/FALSE for hyperslab selection, FAIL on error or when querying other
+    selection types.
+ DESCRIPTION
+    If a hyperslab can be represented as a single call to H5Sselect_hyperslab,
+    with the H5S_SELECT_SET option, it is regular.  If the hyperslab selection
+    would require multiple calls to H5Sselect_hyperslab, it is irregular.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+htri_t
+H5Sis_regular_hyperslab(hid_t spaceid)
+{
+    H5S_t *space;               /* Dataspace to query */
+    htri_t ret_value;           /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("Hs", "i", spaceid);
+
+    /* Check args */
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(H5S_GET_SELECT_TYPE(space) != H5S_SEL_HYPERSLABS)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection")
+
+    ret_value = H5S_hyper_is_regular(space);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* H5Sis_regular_hyperslab() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sgetregular_hyperslab
+ PURPOSE
+    Retrieve a regular hyperslab selection
+ USAGE
+    herr_t H5Sget_regular_hyperslab(dsid, start, stride, block, count)
+        hid_t dsid;             IN: Dataspace ID of hyperslab selection to query
+        hsize_t start[];        OUT: Offset of start of hyperslab
+        hsize_t stride[];       OUT: Hyperslab stride
+        hsize_t count[];        OUT: Number of blocks included in hyperslab
+        hsize_t block[];        OUT: Size of block in hyperslab
+ RETURNS
+    Non-negative on success/Negative on failure.  (It is an error to query
+    the regular hyperslab selections for non-regular hyperslab selections)
+ DESCRIPTION
+    Retrieve the start/stride/count/block for a regular hyperslab selection.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Note that if a hyperslab is originally regular, then becomes irregular
+    through selection operations, and then becomes regular again, the new
+    final regular selection may be equivalent but not identical to the
+    original regular selection.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[],
+    hsize_t count[], hsize_t block[])
+{
+    H5S_t *space;               /* Dataspace to query */
+    unsigned u;                 /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(H5S_GET_SELECT_TYPE(space) != H5S_SEL_HYPERSLABS)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection")
+    if(TRUE != H5S_hyper_is_regular(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a regular hyperslab selection")
+
+    /* Retrieve hyperslab parameters */
+    if(start)
+        for(u = 0; u < space->extent.rank; u++)
+            start[u] = space->select.sel_info.hslab->app_diminfo[u].start;
+    if(stride)
+        for(u = 0; u < space->extent.rank; u++)
+            stride[u] = space->select.sel_info.hslab->app_diminfo[u].stride;
+    if(count)
+        for(u = 0; u < space->extent.rank; u++)
+            count[u] = space->select.sel_info.hslab->app_diminfo[u].count;
+    if(block)
+        for(u = 0; u < space->extent.rank; u++)
+            block[u] = space->select.sel_info.hslab->app_diminfo[u].block;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* H5Sget_regular_hyperslab() */
+
