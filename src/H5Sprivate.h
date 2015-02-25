@@ -206,7 +206,7 @@ H5_DLL int H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t 
 H5_DLL htri_t H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2);
 
 /* Operations on selections */
-H5_DLL herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);
+H5_DLL herr_t H5S_select_deserialize(H5S_t **space, const uint8_t **p);
 H5_DLL H5S_sel_type H5S_get_select_type(const H5S_t *space);
 H5_DLL herr_t H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space,
     H5D_operator_t op, void *operator_data);
@@ -227,7 +227,7 @@ H5_DLL herr_t H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 H5_DLL hssize_t H5S_select_serial_size(const H5S_t *space);
-H5_DLL herr_t H5S_select_serialize(const H5S_t *space, uint8_t *buf);
+H5_DLL herr_t H5S_select_serialize(const H5S_t *space, uint8_t **p);
 H5_DLL htri_t H5S_select_is_contiguous(const H5S_t *space);
 H5_DLL htri_t H5S_select_is_single(const H5S_t *space);
 H5_DLL htri_t H5S_select_is_regular(const H5S_t *space);

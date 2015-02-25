@@ -41,8 +41,8 @@ static herr_t H5S_point_get_seq_list(const H5S_t *space, unsigned flags,
 static herr_t H5S_point_release(H5S_t *space);
 static htri_t H5S_point_is_valid(const H5S_t *space);
 static hssize_t H5S_point_serial_size(const H5S_t *space);
-static herr_t H5S_point_serialize(const H5S_t *space, uint8_t *buf);
-static herr_t H5S_point_deserialize(H5S_t *space, const uint8_t *buf);
+static herr_t H5S_point_serialize(const H5S_t *space, uint8_t **p);
+static herr_t H5S_point_deserialize(H5S_t *space, const uint8_t **p);
 static herr_t H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_point_offset(const H5S_t *space, hsize_t *off);
 static htri_t H5S_point_is_contiguous(const H5S_t *space);
@@ -804,9 +804,11 @@ H5S_point_serial_size (const H5S_t *space)
  PURPOSE
     Serialize the current selection into a user-provided buffer.
  USAGE
-    herr_t H5S_point_serialize(space, buf)
-        H5S_t *space;           IN: Dataspace pointer of selection to serialize
-        uint8 *buf;             OUT: Buffer to put serialized selection into
+    herr_t H5S_point_serialize(space, p)
+        const H5S_t *space;     IN: Dataspace with selection to serialize
+        uint8_t **p;            OUT: Pointer to buffer to put serialized
+                                selection.  Will be advanced to end of
+                                serialized selection.
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -818,7 +820,7 @@ H5S_point_serial_size (const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_serialize (const H5S_t *space, uint8_t *buf)
+H5S_point_serialize (const H5S_t *space, uint8_t **p)
 {
     H5S_pnt_node_t *curr;   /* Point information nodes */
     uint8_t *lenp;          /* pointer to length location for later storage */
@@ -830,18 +832,18 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
     HDassert(space);
 
     /* Store the preamble information */
-    UINT32ENCODE(buf, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(buf, (uint32_t)1);  /* Store the version number */
-    UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
-    lenp=buf;           /* keep the pointer to the length location for later */
-    buf+=4;             /* skip over space for length */
+    UINT32ENCODE(*p, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
+    UINT32ENCODE(*p, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(*p, (uint32_t)0);  /* Store the un-used padding */
+    lenp=*p;           /* keep the pointer to the length location for later */
+    *p+=4;             /* skip over space for length */
 
     /* Encode number of dimensions */
-    UINT32ENCODE(buf, (uint32_t)space->extent.rank);
+    UINT32ENCODE(*p, (uint32_t)space->extent.rank);
     len+=4;
 
     /* Encode number of elements */
-    UINT32ENCODE(buf, (uint32_t)space->select.num_elem);
+    UINT32ENCODE(*p, (uint32_t)space->select.num_elem);
     len+=4;
 
     /* Encode each point in selection */
@@ -852,7 +854,7 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
 
         /* Encode each point */
         for(u=0; u<space->extent.rank; u++)
-            UINT32ENCODE(buf, (uint32_t)curr->pnt[u]);
+            UINT32ENCODE(*p, (uint32_t)curr->pnt[u]);
 
         curr=curr->next;
     } /* end while */
@@ -870,9 +872,12 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
  PURPOSE
     Deserialize the current selection from a user-provided buffer.
  USAGE
-    herr_t H5S_point_deserialize(space, buf)
-        H5S_t *space;           IN/OUT: Dataspace pointer to place selection into
-        uint8 *buf;             IN: Buffer to retrieve serialized selection from
+    herr_t H5S_point_deserialize(space, p)
+        H5S_t *space;           IN/OUT: Dataspace pointer to place
+                                selection into
+        uint8 **p;              OUT: Pointer to buffer holding serialized
+                                selection.  Will be advanced to end of
+                                serialized selection.
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -884,10 +889,10 @@ H5S_point_serialize (const H5S_t *space, uint8_t *buf)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_deserialize (H5S_t *space, const uint8_t *buf)
+H5S_point_deserialize (H5S_t *space, const uint8_t **p)
 {
     H5S_seloper_t op=H5S_SELECT_SET;    /* Selection operation */
-    uint32_t rank;           /* Rank of points */
+    unsigned rank;          /* Rank of points */
     size_t num_elem=0;      /* Number of elements in selection */
     hsize_t *coord=NULL, *tcoord;   /* Pointer to array of elements */
     unsigned i, j;              /* local counting variables */
@@ -897,14 +902,13 @@ H5S_point_deserialize (H5S_t *space, const uint8_t *buf)
 
     /* Check args */
     HDassert(space);
-    HDassert(buf);
+    HDassert(p);
+    HDassert(*p);
 
     /* Deserialize points to select */
-    buf += 16;    /* Skip over selection header */
-    UINT32DECODE(buf, rank);  /* decode the rank of the point selection */
-    if(rank != space->extent.rank)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "rank of pointer does not match dataspace")
-    UINT32DECODE(buf, num_elem);  /* decode the number of points */
+    /* (The header and rank have already beed decoded) */
+    rank = space->extent.rank;  /* Retrieve rank from space */
+    UINT32DECODE(*p, num_elem); /* decode the number of points */
 
     /* Allocate space for the coordinates */
     if(NULL == (coord = (hsize_t *)H5MM_malloc(num_elem * rank * sizeof(hsize_t))))
@@ -913,7 +917,7 @@ H5S_point_deserialize (H5S_t *space, const uint8_t *buf)
     /* Retrieve the coordinates from the buffer */
     for(tcoord = coord, i = 0; i < num_elem; i++)
         for(j = 0; j < (unsigned)rank; j++, tcoord++)
-            UINT32DECODE(buf, *tcoord);
+            UINT32DECODE(*p, *tcoord);
 
     /* Select points */
     if(H5S_select_elements(space, op, num_elem, (const hsize_t *)coord) < 0)
