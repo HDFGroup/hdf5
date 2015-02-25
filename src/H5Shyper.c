@@ -8888,7 +8888,7 @@ H5Sis_regular_hyperslab(hid_t spaceid)
     htri_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("Hs", "i", spaceid);
+    H5TRACE1("t", "i", spaceid);
 
     /* Check args */
     if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
@@ -8938,6 +8938,7 @@ H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[],
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "i*h*h*h*h", spaceid, start, stride, count, block);
 
     /* Check args */
     if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))

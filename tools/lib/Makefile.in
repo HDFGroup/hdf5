@@ -659,8 +659,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog
+# *.clog and *.clog2 are from the MPE option.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 
 # This is our main target, the h5tools library.
 noinst_LTLIBRARIES = libh5tools.la

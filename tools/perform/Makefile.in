@@ -701,8 +701,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog
+# *.clog and *.clog2 are from the MPE option.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 
 # Add h5perf and h5perf_serial specific linker flags here
 h5perf_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)

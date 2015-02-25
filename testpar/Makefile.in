@@ -691,15 +691,15 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
+# *.clog and *.clog2 are from the MPE option.
 
 # Temporary files
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
 # shutdown.h5 is from t_pshutdown
 # go is used for debugging. See testphdf5.c.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog MPItest.h5 Para*.h5 \
-	CacheTestDummy.h5 shutdown.h5 go
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 MPItest.h5 \
+	Para*.h5 CacheTestDummy.h5 shutdown.h5 go
 
 # Test programs.  These are our main targets.
 #
