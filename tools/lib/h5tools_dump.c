@@ -2866,25 +2866,25 @@ h5tools_print_virtual_selection(h5tools_str_t *buffer, const h5tool_format_t *in
     h5tools_str_append(buffer, "%s ", h5tools_dump_header_format->virtualselectionbegin);
     switch(H5Sget_select_type(vspace)) {
     case H5S_SEL_NONE:    /* Nothing selected         */
-        h5tools_str_append(buffer, "H5S_NONE");
+        h5tools_str_append(buffer, "NONE");
         break;
     case H5S_SEL_POINTS:    /* Sequence of points selected  */
-        h5tools_str_append(buffer, "POINT_SELECTION %s ", h5tools_dump_header_format->virtualselectionblockbegin);
+        h5tools_str_append(buffer, "POINT %s ", h5tools_dump_header_format->virtualselectionblockbegin);
         h5tools_str_dump_space_points(buffer, vspace, info);
-        h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionblockend);
+        h5tools_str_append(buffer, "% s", h5tools_dump_header_format->virtualselectionblockend);
         break;
     case H5S_SEL_HYPERSLABS:    /* "New-style" hyperslab selection defined  */
-        h5tools_str_append(buffer, "HYPERSLAB_SELECTION %s ", h5tools_dump_header_format->virtualselectionblockbegin);
+        h5tools_str_append(buffer, "HYPERSLAB %s ", h5tools_dump_header_format->virtualselectionblockbegin);
         h5tools_str_dump_space_blocks(buffer, vspace, info);
-        h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionblockend);
+        h5tools_str_append(buffer, "% s", h5tools_dump_header_format->virtualselectionblockend);
         break;
     case H5S_SEL_ALL:    /* Entire extent selected   */
-        h5tools_str_append(buffer, "H5S_ALL");
+        h5tools_str_append(buffer, "ALL");
         break;
     default:
         h5tools_str_append(buffer, "Unknown Selection");
     }
-    h5tools_str_append(buffer, " %s", h5tools_dump_header_format->virtualselectionend);
+    h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionend);
 }
 
 
@@ -3173,13 +3173,15 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             ctx->indent_level++;
 
             ctx->need_prefix = TRUE;
-            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-
+/* EIP           h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+*/
             h5tools_str_reset(&buffer);
+/* EIP
             h5tools_str_append(&buffer, "%s %s", VDS_MAPPING, BEGIN);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
 
             ctx->indent_level++;
+*/
             for(next = 0; next < (unsigned)vmaps; next++) {
                 hid_t virtual_vspace = H5Pget_virtual_vspace(dcpl_id, next);
                 hid_t virtual_srcspace = H5Pget_virtual_srcspace(dcpl_id, next);
@@ -3221,7 +3223,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 h5tools_print_virtual_selection(&buffer, info, virtual_srcspace, dcpl_id, next);
                 h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
             }
+/* EIP
             ctx->indent_level--;
+*/
 
             ctx->need_prefix = TRUE;
             h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);

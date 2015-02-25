@@ -34,6 +34,7 @@ set (examples
     h5_extlink
     h5_elink_unix2win
     h5_shared_mesg
+    h5_vds
 )
 
 foreach (example ${examples})

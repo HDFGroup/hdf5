@@ -47,8 +47,8 @@ main (void)
     hid_t        file, space, src_space, vspace, dset; /* Handles */ 
     hid_t        dcpl;
     herr_t       status;
-    hsize_t      vdsdims[2] = {VDSDIM0, VDSDIM1},      /* Datasets dimension */
-                 dims[1] = {DIM0},
+    hsize_t      vdsdims[2] = {VDSDIM0, VDSDIM1},      /* Virtual satasets dimension */
+                 dims[1] = {DIM0},           /* Source datasets dimensions */
                  start[2],                   /* Hyperslab parameters */
                  stride[2],
                  count[2],
@@ -89,12 +89,12 @@ main (void)
         status = H5Dclose (dset);
         status = H5Fclose (file);
     }
+
     /* Create file in which virtual dataset will be stored. */
     file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create VDS dataspace.  */
     space = H5Screate_simple (RANK2, vdsdims, NULL);
-    src_space = H5Screate_simple (RANK1, dims, NULL);
 
     /* Set VDS creation property. */
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
@@ -110,16 +110,16 @@ main (void)
 
     /* 
      * Build the mappings.
-     *
-     * Select the first, the second and the third rows and map each row to the data in the
-     * corresponding source datasets.
+     * Selections in the source datasets are H5S_ALL.
+     * In the virtual dataset we select the first, the second and the third rows 
+     * and map each row to the data in the corresponding source dataset. 
      */
+    src_space = H5Screate_simple (RANK1, dims, NULL);
     for (i = 0; i < 3; i++) {
         start[0] = (hsize_t)i;
         /* Select i-th row in the virtual dataset; selection in the source datasets is the same. */
         status = H5Sselect_hyperslab (space, H5S_SELECT_SET, start, NULL, count, block);
         status = H5Pset_virtual (dcpl, space, SRC_FILE[i], SRC_DATASET[i], src_space);
-        status = H5Sselect_none (space);
     }
 
     /* Create a virtual dataset. */
@@ -176,14 +176,12 @@ main (void)
             status = H5Sget_select_hyper_blocklist (vspace, (hsize_t)0, nblocks, buf);
             for (l=0; l<nblocks; l++) {
                 printf("(");
-                for (k=0; k<RANK2-1; k++) printf("%d,", (int)buf[k]);
-                printf("%d", (int)buf[k]);
-                printf(") - ");
-                printf("(");
-                for (k=0; k<RANK2-1; k++) printf("%d,", (int)buf[RANK2+k]);
-                printf("%d", (int)buf[RANK2+k]);
-                printf(")");
-                printf ("\n");
+                for (k=0; k<RANK2-1; k++) 
+                    printf("%d,", (int)buf[k]);
+                printf("%d ) - (", (int)buf[k]);
+                for (k=0; k<RANK2-1; k++) 
+                    printf("%d,", (int)buf[RANK2+k]);
+                printf("%d)\n", (int)buf[RANK2+k]);
             }
         }
         /* Get source file name. */
@@ -204,8 +202,7 @@ main (void)
 
         /* Make sure it is ALL selection and then print the coordinates. */
         if(H5Sget_select_type(src_space) == H5S_SEL_ALL) {
-                printf("(0) - (%d)", DIM0-1);
-                printf ("\n");
+                printf("(0) - (%d) \n", DIM0-1);
         }
         H5Sclose(vspace);
         H5Sclose(src_space);
