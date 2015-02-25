@@ -89,8 +89,8 @@ F9XMODFLAG=@F9XMODFLAG@
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
-CHECK_CLEANFILES=*.chkexe *.chklog *.clog
+# *.clog and *.clog2 are from the MPE option.
+CHECK_CLEANFILES=*.chkexe *.chklog *.clog *.clog2
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
 # This tells the Makefiles that these targets are not files to be built but
