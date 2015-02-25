@@ -501,10 +501,10 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
+# *.clog and *.clog2 are from the MPE option.
 
 # Some files/directories generated during check that should be cleaned
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog *-tmp
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *-tmp
 @BUILD_PARALLEL_CONDITIONAL_FALSE@TESTPARALLEL_DIR = 
 
 # Define subdirectories to build.

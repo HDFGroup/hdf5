@@ -553,7 +553,7 @@ H5S_all_serialize (const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_all_deserialize(H5S_t *space, const uint8_t **p)
+H5S_all_deserialize(H5S_t *space, const uint8_t UNUSED **p)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 

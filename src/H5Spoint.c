@@ -906,7 +906,7 @@ H5S_point_deserialize (H5S_t *space, const uint8_t **p)
     HDassert(*p);
 
     /* Deserialize points to select */
-    /* The header and rank have already beed decoded */
+    /* (The header and rank have already beed decoded) */
     rank = space->extent.rank;  /* Retrieve rank from space */
     UINT32DECODE(*p, num_elem); /* decode the number of points */
 

@@ -518,6 +518,7 @@ H5S_select_deserialize (H5S_t **space, const uint8_t **p)
     /* Return space to the caller if allocated */
     if(!*space)
         *space = tmp_space;
+
 done:
     /* Free temporary space if not passed to caller (only happens on error) */
     if(!*space && tmp_space)

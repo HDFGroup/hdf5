@@ -661,10 +661,10 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
+# *.clog and *.clog2 are from the MPE option.
 
 # Temporary files
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog parf[12].h5
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 parf[12].h5
 
 # These are our main targets
 TEST_PROG_PARA = parallel_test
