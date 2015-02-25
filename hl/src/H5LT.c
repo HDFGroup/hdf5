@@ -1981,7 +1981,8 @@ find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo,
     * cause the iterator to immediately return that positive value,
     * indicating short-circuit success
     */
-    if(HDstrncmp(name, (char *)op_data, HDstrlen((char *)op_data)) == 0)
+
+    if(HDstrncmp(name, (char *)op_data, MAX(HDstrlen((char *)op_data),HDstrlen(name))) == 0)
         ret = H5_ITER_STOP;
 
     return ret;

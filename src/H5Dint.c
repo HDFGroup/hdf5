@@ -478,7 +478,6 @@ done:
 herr_t
 H5D__get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id)
 {
-    H5S_t      *space;              /* Dataset's dataspace */
     hsize_t     space_allocated;    /* The number of bytes allocated for chunks */
     hssize_t    snelmts;            /* Temporary holder for number of elements in dataspace */
     hsize_t     nelmts;             /* Number of elements in dataspace */
@@ -491,11 +490,10 @@ H5D__get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id
     HDassert(dset);
 
     /* Get the dataset's dataspace */
-    space = dset->shared->space;
-    HDassert(space);
+    HDassert(dset->shared->space);
 
     /* Get the total number of elements in dataset's dataspace */
-    if((snelmts = H5S_GET_EXTENT_NPOINTS(space)) < 0)
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
     nelmts = (hsize_t)snelmts;
 
@@ -1185,6 +1183,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment object count")
     } /* end else */
 
+    /* Set the dataset to return */
     ret_value = dataset;
 
 done:
@@ -1226,6 +1225,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     H5O_fill_t *fill_prop;              /* Pointer to dataset's fill value info */
     unsigned alloc_time_state;          /* Allocation time state */
     htri_t msg_exists;                  /* Whether a particular type of message exists */
+    hbool_t layout_init = FALSE;    	/* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;		/* Return value */
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -1262,6 +1262,9 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     /* Get the layout/pline/efl message information */
     if(H5D__layout_oh_read(dataset, dxpl_id, dapl_id, plist) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get layout/pline/efl info")
+
+    /* Indicate that the layout information was initialized */
+    layout_init = TRUE;
 
     /* Point at dataset's copy, to cache it for later */
     fill_prop = &dataset->shared->dcpl_cache.fill;
@@ -1338,6 +1341,9 @@ done:
         if(H5F_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc)) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
         if(dataset->shared) {
+	    if(dataset->shared->layout.type == H5D_CHUNKED && layout_init)
+                if(H5D__chunk_dest(dataset->oloc.file, dxpl_id, dataset) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
             if(dataset->shared->space && H5S_close(dataset->shared->space) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
             if(dataset->shared->type) {
@@ -2212,6 +2218,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          */
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dset->shared->layout.type) {
+            /* Update the cached chunk info */
             if(H5D__chunk_set_info(dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks")
             if(H5D__chunk_update_cache(dset, dxpl_id) < 0)
@@ -2230,11 +2237,10 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          *-------------------------------------------------------------------------
          */
         if(shrink && H5D_CHUNKED == dset->shared->layout.type &&
-                (*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
+                (*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage))
             /* Remove excess chunks */
             if(H5D__chunk_prune_by_extent(dset, dxpl_id, curr_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks")
-        } /* end if */
 
         /* Mark the dataspace as dirty, for later writing to the file */
         if(H5D__mark(dset, dxpl_id, H5D_MARK_SPACE) < 0)
@@ -2667,16 +2673,14 @@ H5D_get_space(H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get data space")
 
     /* Create an atom */
-    if((ret_value = H5I_register (H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space")
+    if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
 done:
-    if(ret_value < 0) {
-        if(space!=NULL) {
+    if(ret_value < 0)
+        if(space != NULL)
             if(H5S_close(space) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
-        } /* end if */
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_space() */

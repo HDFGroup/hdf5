@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_TEST_PAR)
 
 #-----------------------------------------------------------------------------
@@ -46,6 +46,8 @@ set (H5P_TESTS
     t_cache
     t_pflush1
     t_pflush2
+    t_pshutdown
+    t_prestart
     t_shapesame
 )
 
