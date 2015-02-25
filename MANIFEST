@@ -1005,6 +1005,8 @@
 ./testpar/t_coll_chunk.c
 ./testpar/t_filter_read.c
 ./testpar/t_shapesame.c
+./testpar/t_pshutdown.c
+./testpar/t_prestart.c
 ./testpar/t_span_tree.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
