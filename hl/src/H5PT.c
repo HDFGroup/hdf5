@@ -130,6 +130,9 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
   if((table->type_id = H5Tcopy(dtype_id)) < 0)
     goto out;
 
+  if((table->type_id = H5Tget_native_type(table->type_id, H5T_DIR_DEFAULT)) < 0)
+    goto out;
+
   H5PT_create_index(table);
   table->size = 0;
 
