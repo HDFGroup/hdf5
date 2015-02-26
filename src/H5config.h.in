@@ -20,9 +20,6 @@
 /* Define the default plugins path to compile */
 #undef DEFAULT_PLUGINDIR
 
-/* Define the default virtual file driver to compile */
-#undef DEFAULT_VFD
-
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
 

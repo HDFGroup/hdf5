@@ -103,6 +103,17 @@ New Features
 
       (DER - 2015-02-26, HDFFV-9147)
 
+    - Removal of --with-default-vfd configure option
+
+      In theory, this option was intended to allow setting a default
+      VFD that would be used by the library. In practice, the feature
+      only accepted the POSIX (SEC2) VFD (already the default) and
+      the stdio VFD (a demo VFD not intended for production use). The
+      inability to pass key VFD parameters at configure time limits the
+      full implementation of this feature, so it was retired.
+
+      (DER - 2015-02-26, HDFFV-9081)
+
     Library
     -------
     - None
