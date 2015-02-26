@@ -36,10 +36,12 @@
 
 #define DIM 6
 
+#define ATTR_NAME_SUB "att"
 #define ATTR1_NAME "attr string"
 #define ATTR2_NAME "attr char"
 #define ATTR3_NAME "attr short"
 #define ATTR4_NAME "attr int"
+#define ATTR_NAME_EXT "att int ext"
 #define ATTR5_NAME "attr long"
 #define ATTR6_NAME "attr uchar"
 #define ATTR7_NAME "attr ushort"
@@ -646,6 +648,14 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     if ( H5LTset_attribute_int( loc_id, obj_name, ATTR4_NAME, attr_int_in, (size_t)5 ) < 0 )
         return -1;
 
+    /* Set the attribute which is a substring of an existing attribute */
+    if ( H5LTset_attribute_int( loc_id, obj_name, ATTR_NAME_SUB, attr_int_in, (size_t)5 ) < 0 )
+        return -1;
+
+    /* Set the attribute which is an extension of an existing attribute */
+    if ( H5LTset_attribute_int( loc_id, obj_name, ATTR_NAME_EXT, attr_int_in, (size_t)5 ) < 0 )
+        return -1;
+
     PASSED();
 
     /*-------------------------------------------------------------------------
@@ -657,6 +667,26 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     /* Get the attribute */
     if ( H5LTget_attribute_int( loc_id, obj_name, ATTR4_NAME, attr_int_out ) < 0 )
+        return -1;
+
+    for (i = 0; i < 5; i++)
+    {
+        if ( attr_int_in[i] != attr_int_out[i] ) {
+            return -1;
+        }
+    }
+
+    if ( H5LTget_attribute_int( loc_id, obj_name, ATTR_NAME_SUB, attr_int_out ) < 0 )
+        return -1;
+
+    for (i = 0; i < 5; i++)
+    {
+        if ( attr_int_in[i] != attr_int_out[i] ) {
+            return -1;
+        }
+    }
+
+    if ( H5LTget_attribute_int( loc_id, obj_name, ATTR_NAME_EXT, attr_int_out ) < 0 )
         return -1;
 
     for (i = 0; i < 5; i++)
