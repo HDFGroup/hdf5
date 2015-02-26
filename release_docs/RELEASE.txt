@@ -88,7 +88,20 @@ New Features
       support CodeWarrior anyway, this functionality was removed.
 
       (DER - 2015/02/21, HDFFV-9080)
-      
+
+    - VMS build/test files have been removed
+
+      HDF5 no longer supports VMS and the files were getting out of date.
+      Since we have no access to a VMS machine, there is no way for us to
+      maintain them.
+
+      A Subversion tag was created at:
+
+        https://svn.hdfgroup.uiuc.edu/tags/vms_last_support_1_8
+
+      immediately before removing the files.
+
+      (DER - 2015-02-26, HDFFV-9147)
 
     Library
     -------
