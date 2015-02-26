@@ -94,12 +94,8 @@
 #define PACKED_OFFSET   "OFFSET"
 #define PACKED_LENGTH   "LENGTH"
 #define VDS_VIRTUAL     "VIRTUAL"
-/* EIP
-#define VDS_MAPPING     "MAPPING"
-*/
-/* It looks like two definitions below are not used */
-#define VDS_HYPERSLAB   "HYPERSLAB_SELECTION"
-#define VDS_POINT       "POINT_SELECTION"
+#define VDS_HYPERSLAB   "HYPERSLAB"
+#define VDS_POINT       "POINT"
 
 #define BEGIN           "{"
 #define END             "}"

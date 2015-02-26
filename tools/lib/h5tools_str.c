@@ -469,7 +469,7 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace,
                 h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : ")-(",
                                     ptdata[i * 2 * ndims + j + ndims]);
 
-            h5tools_str_append(str, ") ");
+            h5tools_str_append(str, ")");
         }
 
         HDfree(ptdata);
