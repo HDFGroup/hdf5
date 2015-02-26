@@ -152,6 +152,7 @@ H5Eget_major(H5E_major_t maj)
     char        *ret_value;     /* Return value */
 
     FUNC_ENTER_API_NOCLEAR(NULL)
+    H5TRACE1("*s", "i", maj);
 
     /* Get the message object */
     if(NULL == (msg = (H5E_msg_t *)H5I_object_verify(maj, H5I_ERROR_MSG)))
@@ -204,6 +205,7 @@ H5Eget_minor(H5E_minor_t min)
     char        *ret_value;     /* Return value */
 
     FUNC_ENTER_API_NOCLEAR(NULL)
+    H5TRACE1("*s", "i", min);
 
     /* Get the message object */
     if(NULL == (msg = (H5E_msg_t *)H5I_object_verify(min, H5I_ERROR_MSG)))

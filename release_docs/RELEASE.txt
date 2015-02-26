@@ -202,6 +202,17 @@ Bug Fixes since HDF5-1.8.14
       
       (DER - 2015/02/22, HDFFV-8927)
 
+    - Addition of error tracing functionality to several C API calls
+
+      A bug in a text processing script caused API calls that return a
+      pointer to not receive error tracing macros/functionality.
+
+      The bug has been corrected and error tracing functionality has been
+      added to the affected API calls. These functions will now correctly
+      print trace information when library errors are encountered.
+
+      (DER - 2015/02/26, HDFFV-9141)
+
     Parallel Library
     ----------------
     - Fixed a potential memory error when performing parallel I/O on a dataset
