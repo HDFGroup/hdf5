@@ -114,6 +114,24 @@ New Features
 
       (DER - 2015-02-26, HDFFV-9081)
 
+    - Direct VFD configure behavior
+
+      The configure options for Linux now allow the direct VFD to built
+      without passing additional compiler options/defines like _GNU_SOURCE.
+      Passing --enable-direct-vfd is now all that is needed to enable
+      the feature.
+
+      The direct VFD is now disabled by default since it is intended for
+      specialized audiences. It was previously enabled by default, but the
+      configure script did not set correct POSIX levels, etc. making this
+      a moot point.
+
+      Note that the direct VFD can only be configured on Linux when
+      the O_DIRECT flag to open()/create() and posix_memalign() function
+      are available. This is unchanged from previous behavior.
+
+      (DER - 2015-02-26, HDFFV-9057, 7567, 9088, 7566)
+
     Library
     -------
     - None
