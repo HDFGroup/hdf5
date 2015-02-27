@@ -860,27 +860,109 @@ H5close(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5allocate_memory
+ *
+ * Purpose:	    Allocate a memory buffer with the semantics of malloc().
+ *
+ *              NOTE: This function is intended for use with filter
+ *              plugins so that all allocation and free operations
+ *              use the same memory allocator. It is not intended for
+ *              use as a general memory allocator in applications.
+ *
+ * Parameters:
+ *
+ *      size:   The size of the buffer.
+ *
+ *      clear:  Whether or not to memset the buffer to 0.
+ *
+ * Return:
+ *
+ *      Success:    A pointer to the allocated buffer.
+ *  
+ *      Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5allocate_memory(size_t size, hbool_t clear)
+{
+    void *ret_value = NULL;
+
+    FUNC_ENTER_API_NOINIT;
+    H5TRACE2("*x", "zb", size, clear);
+
+    if(clear)
+        ret_value = H5MM_calloc(size);
+    else
+        ret_value = H5MM_malloc(size);
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5allocate_memory() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5resize_memory
+ *
+ * Purpose:	    Resize a memory buffer with the semantics of realloc().
+ *
+ *              NOTE: This function is intended for use with filter
+ *              plugins so that all allocation and free operations
+ *              use the same memory allocator. It is not intended for
+ *              use as a general memory allocator in applications.
+ *
+ * Parameters:
+ *
+ *      mem:    The buffer to be resized.
+ *
+ *      size:   The size of the buffer.
+ *
+ * Return:
+ *
+ *      Success:    A pointer to the resized buffer.
+ *  
+ *      Failure:    NULL (the input buffer will be unchanged)
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5resize_memory(void *mem, size_t size)
+{
+    void *ret_value = NULL;
+
+    FUNC_ENTER_API_NOINIT;
+    H5TRACE2("*x", "*xz", mem, size);
+
+    ret_value = H5MM_realloc(mem, size);
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5resize_memory() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5free_memory
  *
- * Purpose:	Frees memory allocated by the library that it is the user's
+ * Purpose:	    Frees memory allocated by the library that it is the user's
  *              responsibility to free.  Ensures that the same library
  *              that was used to allocate the memory frees it.  Passing
  *              NULL pointers is allowed.
  *
- * Return:	SUCCEED/FAIL
+ * Return:	    SUCCEED/FAIL
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5free_memory(void *mem)
 {
-    FUNC_ENTER_API_NOINIT
+    FUNC_ENTER_API_NOINIT;
     H5TRACE1("e", "*x", mem);
 
     /* At this time, it is impossible for this to fail. */
     HDfree(mem);
 
     FUNC_LEAVE_API(SUCCEED)
+
 } /* end H5free_memory() */
 
 
@@ -944,3 +1026,4 @@ DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved)
     return fOkay;
 }
 #endif /* H5_HAVE_WIN32_API && H5_BUILT_AS_DYNAMIC_LIB && H5_HAVE_WIN_THREADS && H5_HAVE_THREADSAFE*/
+
