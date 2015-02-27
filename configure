@@ -668,11 +668,6 @@ CONFIG_DATE
 H5_VERSION
 DIRECT_VFD_CONDITIONAL_FALSE
 DIRECT_VFD_CONDITIONAL_TRUE
-USE_FILTER_SCALEOFFSET
-USE_FILTER_NBIT
-USE_FILTER_FLETCHER32
-USE_FILTER_SHUFFLE
-FILTERS
 ADD_PARALLEL_FILES
 USINGMEMCHECKER
 CLEARFILEBUF
@@ -920,7 +915,6 @@ enable_clear_file_buffers
 enable_using_memchecker
 enable_parallel
 with_mpe
-enable_filters
 enable_direct_vfd
 with_default_plugindir
 enable_dconv_exception
@@ -1613,9 +1607,6 @@ Optional Features:
                           picky about it's memory operations and also disables
                           the library's free space manager code. Default=no.
   --enable-parallel       Search for MPI-IO and MPI support files
-  --enable-filters=all    Turn on all internal I/O filters. One may also
-                          specify a comma-separated list of filters or the
-                          word no. The default is all internal I/O filters.
   --enable-direct-vfd     Build the direct I/O virtual file driver (VFD). This
                           is based on the POSIX (sec2) VFD and requires the
                           open() call to take the O_DIRECT flag. [default=no]
@@ -27912,81 +27903,6 @@ $as_echo "#define HAVE_MPE 1" >>confdefs.h
 
   fi
 fi
-
-
-## ----------------------------------------------------------------------
-## Turn on internal I/O filters by setting macros in header files
-## Internal I/O filters are contained entirely within the library and do
-## not depend on external headers or libraries.  The shuffle filter is
-## an example of an internal filter, while the gzip filter is an example of
-## an external filter.  Each external filter is controlled with an
-## "--with-foo=" configure flag.
-##
-
- USE_FILTER_SHUFFLE="no"
- USE_FILTER_FLETCHER32="no"
- USE_FILTER_NBIT="no"
- USE_FILTER_SCALEOFFSET="no"
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for I/O filters" >&5
-$as_echo_n "checking for I/O filters... " >&6; }
-# Check whether --enable-filters was given.
-if test "${enable_filters+set}" = set; then :
-  enableval=$enable_filters; FILTERS=$enableval
-fi
-
-
-## Eventually: all_filters="shuffle,foo,bar,baz"
-all_filters="shuffle,fletcher32,nbit,scaleoffset"
-case "X-$FILTERS" in
-  X-|X-all)
-    FILTERS=$all_filters
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: all ($FILTERS)" >&5
-$as_echo "all ($FILTERS)" >&6; }
-    ;;
-  X-no|X-none)
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: none" >&5
-$as_echo "none" >&6; }
-    FILTERS="none"
-    ;;
-  *)
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $FILTERS" >&5
-$as_echo "$FILTERS" >&6; }
-    ;;
-esac
-
-if test -n "$FILTERS"; then
-  for filter in `echo $FILTERS | tr ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
-    ## ------------------------------------------------------------------
-    ## Have to use separate 'if' construct for each filter, so that
-    ## autoheader can detect the AC_DEFINE for each one...
-    ##
-    if test $filter = "SHUFFLE"; then
-
-$as_echo "#define HAVE_FILTER_SHUFFLE 1" >>confdefs.h
-
-      USE_FILTER_SHUFFLE="yes"
-    fi
-    if test $filter = "FLETCHER32"; then
-
-$as_echo "#define HAVE_FILTER_FLETCHER32 1" >>confdefs.h
-
-      USE_FILTER_FLETCHER32="yes"
-    fi
-    if test $filter = "NBIT"; then
-
-$as_echo "#define HAVE_FILTER_NBIT 1" >>confdefs.h
-
-      USE_FILTER_NBIT="yes"
-    fi
-    if test $filter = "SCALEOFFSET"; then
-
-$as_echo "#define HAVE_FILTER_SCALEOFFSET 1" >>confdefs.h
-
-      USE_FILTER_SCALEOFFSET="yes"
-    fi
-  done
-fi
-
 
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd

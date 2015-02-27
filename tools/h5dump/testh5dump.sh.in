@@ -19,10 +19,6 @@ srcdir=@srcdir@
 
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
-USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
-USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
-USE_FILTER_NBIT="@USE_FILTER_NBIT@"
-USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
 
 TESTNAME=h5dump
 EXIT_SUCCESS=0
@@ -1184,7 +1180,7 @@ TOOLTEST tallfilters.ddl --enable-error-stack -H -p -d all  tfilters.h5
 # user defined
 TOOLTEST tuserfilter.ddl --enable-error-stack -H  -p -d myfilter  tfilters.h5
 
-if test $USE_FILTER_DEFLATE = "yes" -a $USE_FILTER_SHUFFLE = "yes" -a $USE_FILTER_FLETCHER32 = "yes" -a $USE_FILTER_NBIT = "yes" -a $USE_FILTER_SCALEOFFSET = "yes" ; then
+if test $USE_FILTER_DEFLATE = "yes" ; then
   # data read internal filters
   TOOLTEST treadintfilter.ddl --enable-error-stack -d deflate -d shuffle -d fletcher32 -d nbit -d scaleoffset tfilters.h5
   if test $USE_FILTER_SZIP = "yes"; then

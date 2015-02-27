@@ -139,18 +139,6 @@
 /* Define if support for deflate (zlib) filter is enabled */
 #cmakedefine H5_HAVE_FILTER_DEFLATE @H5_HAVE_FILTER_DEFLATE@
 
-/* Define if support for Fletcher32 checksum is enabled */
-#cmakedefine H5_HAVE_FILTER_FLETCHER32 @H5_HAVE_FILTER_FLETCHER32@
-
-/* Define if support for nbit filter is enabled */
-#cmakedefine H5_HAVE_FILTER_NBIT @H5_HAVE_FILTER_NBIT@
-
-/* Define if support for scaleoffset filter is enabled */
-#cmakedefine H5_HAVE_FILTER_SCALEOFFSET @H5_HAVE_FILTER_SCALEOFFSET@
-
-/* Define if support for shuffle filter is enabled */
-#cmakedefine H5_HAVE_FILTER_SHUFFLE @H5_HAVE_FILTER_SHUFFLE@
-
 /* Define if support for szip filter is enabled */
 #cmakedefine H5_HAVE_FILTER_SZIP @H5_HAVE_FILTER_SZIP@
 
