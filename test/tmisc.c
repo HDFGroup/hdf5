@@ -5345,7 +5345,7 @@ test_misc32(void)
     buffer = H5allocate_memory(0, FALSE);
     CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
     buffer = H5allocate_memory(0, TRUE);
-    CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/a
+    CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
 #endif /* NDEBUG */
 
     /* RESIZE */
