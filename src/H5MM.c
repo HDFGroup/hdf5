@@ -31,107 +31,93 @@
 #include "H5Eprivate.h"
 #include "H5MMprivate.h"
 
+#ifndef NDEBUG
 
 /*-------------------------------------------------------------------------
- * Function:    H5MM_malloc
+ * Function:	H5MM_malloc
  *
- * Purpose:     Similar to the C89 version of malloc().
+ * Purpose:	Just like the POSIX version of malloc(3). This routine
+ *		specifically checks for allocations of 0 bytes and fails
+ *              in that case.  This routine is not called when NDEBUG is
+ *		defined.
  *
- *              On size of 0, we return a NULL pointer instead of the
- *              standard-allowed 'special' pointer since that's more
- *              difficult to check as a return value. This is still
- *              considered an error condition since allocations of zero
- *              bytes usually indicate problems.
- *  
- * Return:  Success:    Pointer new memory
+ * Return:	Success:	Ptr to new memory
  *
- *          Failure:	NULL
+ *		Failure:	NULL
  *
- * Programmer:  Quincey Koziol
- *              Nov  8 2003
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Nov  8 2003
+ *
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 void *
 H5MM_malloc(size_t size)
 {
-    void *ret_value;
-
-    HDassert(size);
-
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(size)
-        ret_value = HDmalloc(size);
-    else
-        ret_value = NULL;
+    HDassert(size);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(HDmalloc(size));
 } /* end H5MM_malloc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5MM_calloc
+ * Function:	H5MM_calloc
  *
- * Purpose:     Similar to the C89 version of calloc(), except this
- *              routine just takes a 'size' parameter.
+ * Purpose:	Similar to the POSIX version of calloc(3), except this routine
+ *              just takes a 'size' parameter. This routine
+ *		specifically checks for allocations of 0 bytes and fails
+ *              in that case.  This routine is not called when NDEBUG is
+ *		defined.
  *
- *              On size of 0, we return a NULL pointer instead of the
- *              standard-allowed 'special' pointer since that's more
- *              difficult to check as a return value. This is still
- *              considered an error condition since allocations of zero
- *              bytes usually indicate problems.
+ * Return:	Success:	Ptr to new memory
  *
- *
- * Return:  Success:    Pointer new memory
- *
- *          Failure:	NULL
+ *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              Nov  8 2003
+ *		koziol@ncsa.uiuc.edu
+ *		Nov  8 2003
+ *
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 void *
 H5MM_calloc(size_t size)
 {
-    void *ret_value;
-
-    HDassert(size);
-
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(size)
-        ret_value = HDcalloc((size_t)1, size);
-    else
-        ret_value = NULL;
+    HDassert(size);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(HDcalloc(1,size));
 } /* end H5MM_calloc() */
+#endif /* NDEBUG */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5MM_realloc
+ * Function:	H5MM_realloc
  *
- * Purpose:     Similar semantics as C89's realloc(). Specifically, the
- *              following calls are equivalent:
+ * Purpose:	Just like the POSIX version of realloc(3). Specifically, the
+ *		following calls are equivalent
  *
- *              H5MM_realloc(NULL, size)    <==> H5MM_malloc(size)
- *              H5MM_realloc(ptr, 0)        <==> H5MM_xfree(ptr)
- *              H5MM_realloc(NULL, 0)       <==> NULL
+ *		H5MM_realloc (NULL, size) <==> H5MM_malloc (size)
+ *		H5MM_realloc (ptr, 0)	  <==> H5MM_xfree (ptr)
+ *		H5MM_realloc (NULL, 0)	  <==> NULL
  *
- *              Note that the (NULL, 0) combination is undefined behavior
- *              in the C standard.
+ * Return:	Success:	Ptr to new memory or NULL if the memory
+ *				was freed or HDrealloc couldn't allocate
+ *				memory.
  *
- * Return:  Success:    Ptr to new memory if size > 0
- *                      NULL if size is zero
+ *		Failure:	NULL
  *
- *          Failure:    NULL (input buffer is unchanged on failure)
- *
- * Programmer:  Robb Matzke
- *              Jul 10 1997
+ * Programmer:	Robb Matzke
+ *		matzke@llnl.gov
+ *		Jul 10 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -143,12 +129,16 @@ H5MM_realloc(void *mem, size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(mem || size);
-
-    if(NULL == mem && 0 == size)
-        ret_value = NULL;   /* Not defined in the standard, return NULL */
+    if(NULL == mem) {
+	if(0 == size)
+            ret_value = NULL;
+        else
+            ret_value = H5MM_malloc(size);
+    } /* end if */
+    else if(0 == size)
+	ret_value = H5MM_xfree(mem);
     else
-        ret_value = HDrealloc(mem, size);
+	ret_value = HDrealloc(mem, size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_realloc() */

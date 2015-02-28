@@ -5304,73 +5304,6 @@ test_misc31(void)
 
 
 /****************************************************************
- *
- *  test_misc32(): Simple test of filter memory allocation
- *                 functions.
- *
- ***************************************************************/
-static void
-test_misc32(void)
-{
-    void *buffer;
-    void *resized;
-    size_t size;
-
-    /* Output message about test being performed */
-    MESSAGE(5, ("Edge case test of filter memory allocation functions\n"));
-
-    /* Test that the filter memory allocation functions behave correctly
-     * at edge cases.
-     */
-
-    /* FREE */
-
-    /* Test freeing a NULL pointer.
-     * No real confirmation check here, but Valgrind will confirm no
-     * shenanigans.
-     */
-    buffer = NULL;
-    H5free_memory(buffer);
-
-    /* ALLOCATE */
-
-    /* Size zero returns NULL.
-     * Also checks that a size of zero and setting the buffer clear flag
-     * to TRUE can be used together.
-     *
-     * Note that we have asserts in the code, so only check when NDEBUG
-     * is defined.
-     */
-#ifdef NDEBUG
-    buffer = H5allocate_memory(0, FALSE);
-    CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
-    buffer = H5allocate_memory(0, TRUE);
-    CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
-#endif /* NDEBUG */
-
-    /* RESIZE */
-
-    /* Size zero returns NULL. Valgrind will confirm buffer is freed. */
-    size = 1024;
-    buffer = H5allocate_memory(size, TRUE);
-    resized = H5resize_memory(buffer, 0);
-    CHECK_PTR_NULL(resized, "H5resize_memory");
-
-    /* NULL input pointer returns new buffer */
-    resized = H5resize_memory(NULL, 1024);
-    CHECK_PTR(resized, "H5resize_memory");
-    H5free_memory(resized);
-
-    /* NULL input pointer and size zero returns NULL */
-#ifdef NDEBUG
-    resized = H5resize_memory(NULL, 0);
-    CHECK_PTR_NULL(resized, "H5resize_memory"); /*BAD*/
-#endif /* NDEBUG */
-    
-} /* end test_misc32() */
-
-
-/****************************************************************
 **
 **  test_misc(): Main misc. test routine.
 **
@@ -5416,7 +5349,6 @@ test_misc(void)
     test_misc29();      /* Test that speculative metadata reads are handled correctly */
     test_misc30();      /* Exercise local heap loading bug where free lists were getting dropped */
     test_misc31();      /* Test Reentering library through deprecated routines after H5close() */
-    test_misc32();      /* Test filter memory allocation functions */
 
 } /* test_misc() */
 

@@ -68,18 +68,6 @@
    }									      \
 }
 
-#define CHECK_PTR_NULL(ret,where) {						      \
-   if (VERBOSE_HI) {					      \
-      print_func("   Call to routine: %15s at line %4d in %s returned %p\n",  \
-                 (where), (int)__LINE__, __FILE__, (ret));		      \
-   }									      \
-   if (ret) {							      \
-      TestErrPrintf ("*** UNEXPECTED RETURN from %s is not NULL line %4d in %s\n", \
-                  (where), (int)__LINE__, __FILE__);			      \
-      H5Eprint2(H5E_DEFAULT, stdout);				      \
-   }									      \
-}
-
 /* Used to make certain a return value _is_ a value */
 #define VERIFY(_x, _val, where) do {					      \
     long __x = (long)_x, __val = (long)_val;				      \
