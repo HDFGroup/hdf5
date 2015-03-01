@@ -79,7 +79,7 @@ struct space4_struct {
     unsigned u;
     float f;
     char c2;
- } space4_data={'v',987123,(float)-3.14,'g'}; /* Test data for 4th dataspace */
+ } space4_data={'v',987123,-3.14F,'g'}; /* Test data for 4th dataspace */
 
 /****************************************************************
 **
@@ -1647,7 +1647,7 @@ test_h5s_chunk(void)
     /* Initialize float array */
     for(i = 0; i < 50000; i++)
         for(j = 0; j < 3; j++)
-            chunk_data_flt[i][j] = (float)((i + 1) * 2.5 - j * 100.3);
+            chunk_data_flt[i][j] = (float)((i + 1) * 2.5F - j * 100.3F);
 
     status = H5Dwrite(dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
     CHECK(status, FAIL, "H5Dwrite");
@@ -1683,7 +1683,7 @@ test_h5s_chunk(void)
     for(i=0; i<50000; i++) {
         for(j=0; j<3; j++) {
             /* Check if the two values are within 0.001% range. */
-            if(!DBL_REL_EQUAL(chunk_data_dbl[i][j], chunk_data_flt[i][j], 0.00001))
+            if(!DBL_REL_EQUAL(chunk_data_dbl[i][j], chunk_data_flt[i][j], 0.00001F))
                 TestErrPrintf("%u: chunk_data_dbl[%d][%d]=%e, chunk_data_flt[%d][%d]=%e\n", (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j, chunk_data_flt[i][j]);
         } /* end for */
     } /* end for */

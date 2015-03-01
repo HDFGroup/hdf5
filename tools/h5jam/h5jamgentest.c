@@ -254,7 +254,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   space = H5Screate_simple(1, dims, NULL);
   dataset = H5Dcreate2(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
-       dset2_1[i] = (float)(i*0.1+1);
+       dset2_1[i] = (float)(i*0.1F+1);
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
   H5Sclose(space);
   H5Dclose(dataset);
@@ -265,7 +265,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   dataset = H5Dcreate2(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   for (i = 0; i < 3; i++)
        for (j = 0; j < 5; j++)
-            dset2_2[i][j] = (float)((i+1)*j*0.1);
+            dset2_2[i][j] = (float)((i+1)*j*0.1F);
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_2);
   H5Sclose(space);
   H5Dclose(dataset);

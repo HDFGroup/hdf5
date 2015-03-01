@@ -2362,7 +2362,7 @@ test_rw_noupdate(void)
     diff = HDdifftime(sb2.st_mtime, sb1.st_mtime);
 
     /* Check That Timestamps Are Equal */
-    if(diff > 0.0) {
+    if(diff > 0.0F) {
         /* Output message about test being performed */
         MESSAGE(1, ("Testing to verify that nothing is written if nothing is changed: This test is skipped on this system because the modification time from stat is the same as the last access time (We know OpenVMS behaves in this way).\n"));
     } /* end if */
@@ -2395,7 +2395,7 @@ test_rw_noupdate(void)
 
         /* Ensure That Timestamps Are Equal */
         diff = HDdifftime(sb2.st_mtime, sb1.st_mtime);
-        ret = (diff > 0.0);
+        ret = (diff > 0.0F);
         VERIFY(ret, 0, "Timestamp");
     } /* end else */
 } /* end test_rw_noupdate() */

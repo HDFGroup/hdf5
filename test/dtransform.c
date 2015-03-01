@@ -17,7 +17,7 @@
 
 #define ROWS    12
 #define COLS    18
-#define FLOAT_TOL 0.0001
+#define FLOAT_TOL 0.0001F
 
 static int init_test(hid_t file_id);
 static int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy);

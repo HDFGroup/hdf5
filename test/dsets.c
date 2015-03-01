@@ -2814,8 +2814,8 @@ test_nbit_float(hid_t file)
     /* orig_data[] are initialized to be within the range that can be represented by
      * dataset datatype (no precision loss during datatype conversion)
      */
-    float               orig_data[2][5] = {{(float)188384.00f, (float)19.103516f, (float)-1.0831790e9f, (float)-84.242188f,
-    (float)5.2045898f}, {(float)-49140.000f, (float)2350.2500f, (float)-3.2110596e-1f, (float)6.4998865e-5f, (float)-0.0000000f}};
+    float               orig_data[2][5] = {{188384.0f, 19.103516f, -1.0831790e9f, -84.242188f, 5.2045898f},
+                                           {-49140.0f, 2350.25f, -3.2110596e-1f, 6.4998865e-5f, -0.0f}};
     float               new_data[2][5];
     size_t              precision, offset;
     size_t             i, j;
@@ -2926,9 +2926,21 @@ test_nbit_double(hid_t file)
     /* orig_data[] are initialized to be within the range that can be represented by
      * dataset datatype (no precision loss during datatype conversion)
      */
-    double              orig_data[2][5] = {{1.6081706885101836e+60, -255.32099170994480,
-    1.2677579992621376e-61, 64568.289448797700, -1.0619721778839084e-75}, {2.1499497833454840e+56,
-    6.6562295504670740e-3, -1.5747263393432150, 1.0711093225222612, -9.8971679387636870e-1}};
+    double              orig_data[2][5] = {
+        {
+            H5_DOUBLE(1.6081706885101836e+60),
+            H5_DOUBLE(-255.32099170994480),
+            H5_DOUBLE(1.2677579992621376e-61),
+            H5_DOUBLE(64568.289448797700),
+            H5_DOUBLE(-1.0619721778839084e-75)
+        }, 
+        {
+            H5_DOUBLE(2.1499497833454840e+56),
+            H5_DOUBLE(6.6562295504670740e-3), 
+            H5_DOUBLE(-1.5747263393432150), 
+            H5_DOUBLE(1.0711093225222612), 
+            H5_DOUBLE(-9.8971679387636870e-1)
+        }};
     double              new_data[2][5];
     size_t              precision, offset;
     size_t             i, j;
@@ -3081,7 +3093,7 @@ test_nbit_array(hid_t file)
         for(m = 0; m < (size_t)adims[0]; m++)
           for(n = 0; n < (size_t)adims[1]; n++)
             orig_data[i][j][m][n] = (unsigned int)(((long long)HDrandom() %
-                                     (long long)HDpow(2.0, (double)precision)) << offset);
+                                     (long long)HDpow(2.0F, (double)precision)) << offset);
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -3175,8 +3187,8 @@ test_nbit_compound(hid_t file)
     hid_t               dataset, space, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2, 5};
-    const float         float_val[2][5] = {{(float)188384.00, (float)19.103516, (float)-1.0831790e9, (float)-84.242188,
-    (float)5.2045898}, {(float)-49140.000, (float)2350.2500, (float)-3.2110596e-1, (float)6.4998865e-5, (float)-0.0000000}};
+    const float         float_val[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F}, 
+                                           {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
     atomic              orig_data[2][5];
     atomic              new_data[2][5];
     unsigned int        i_mask, s_mask, c_mask;
@@ -3240,11 +3252,11 @@ test_nbit_compound(hid_t file)
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
         orig_data[i][j].i = (int)(((long long)HDrandom() %
-                             (long long)HDpow(2.0, (double)(precision[0]-1))) << offset[0]);
+                             (long long)HDpow(2.0F, (double)(precision[0]-1))) << offset[0]);
         orig_data[i][j].c = (char)(((long long)HDrandom() %
-                             (long long)HDpow(2.0, (double)(precision[1]-1))) << offset[1]);
+                             (long long)HDpow(2.0F, (double)(precision[1]-1))) << offset[1]);
         orig_data[i][j].s = (short)(((long long)HDrandom() %
-                             (long long)HDpow(2.0, (double)(precision[2]-1))) << offset[2]);
+                             (long long)HDpow(2.0F, (double)(precision[2]-1))) << offset[2]);
         orig_data[i][j].f = float_val[i][j];
 
         /* some even-numbered integer values are negtive */
@@ -3369,8 +3381,8 @@ test_nbit_compound_2(hid_t file)
     hid_t               dataset, space, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2, 5};
-    const float         float_val[2][5] = {{(float)188384.00, (float)19.103516, (float)-1.0831790e9, (float)-84.242188,
-    (float)5.2045898}, {(float)-49140.000, (float)2350.2500, (float)-3.2110596e-1, (float)6.4998865e-5, (float)-0.0000000}};
+    const float         float_val[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F},
+                                           {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
     complex             orig_data[2][5];
     complex             new_data[2][5];
     unsigned int        i_mask, s_mask, c_mask, b_mask;
@@ -3466,29 +3478,29 @@ test_nbit_compound_2(hid_t file)
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
         orig_data[i][j].a.i = (int)(((long long)HDrandom() %
-                               (long long)HDpow(2.0, (double)(precision[0]-1))) << offset[0]);
+                               (long long)HDpow(2.0F, (double)(precision[0]-1))) << offset[0]);
         orig_data[i][j].a.c = (char)(((long long)HDrandom() %
-                               (long long)HDpow(2.0, (double)(precision[1]-1))) << offset[1]);
+                               (long long)HDpow(2.0F, (double)(precision[1]-1))) << offset[1]);
         orig_data[i][j].a.s = (short)(-((long long)HDrandom() %
-                               (long long)HDpow(2.0, (double)(precision[2]-1))) << offset[2]);
+                               (long long)HDpow(2.0F, (double)(precision[2]-1))) << offset[2]);
         orig_data[i][j].a.f = float_val[i][j];
 
         orig_data[i][j].v = (unsigned int)(((long long)HDrandom() %
-                             (long long)HDpow(2.0, (double)precision[3])) << offset[3]);
+                             (long long)HDpow(2.0F, (double)precision[3])) << offset[3]);
 
         for(m = 0; m < (size_t)array_dims[0]; m++)
           for(n = 0; n < (size_t)array_dims[1]; n++)
             orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() %
-                                       (long long)HDpow(2.0, (double)(precision[4]-1))) << offset[4]);
+                                       (long long)HDpow(2.0F, (double)(precision[4]-1))) << offset[4]);
 
         for(m = 0; m < (size_t)array_dims[0]; m++)
           for(n = 0; n < (size_t)array_dims[1]; n++) {
             orig_data[i][j].d[m][n].i = (int)(-((long long)HDrandom() %
-                                         (long long)HDpow(2.0, (double)(precision[0]-1))) << offset[0]);
+                                         (long long)HDpow(2.0F, (double)(precision[0]-1))) << offset[0]);
             orig_data[i][j].d[m][n].c = (char)(((long long)HDrandom() %
-                                         (long long)HDpow(2.0, (double)(precision[1]-1))) << offset[1]);
+                                         (long long)HDpow(2.0F, (double)(precision[1]-1))) << offset[1]);
             orig_data[i][j].d[m][n].s = (short)(((long long)HDrandom() %
-                                         (long long)HDpow(2.0, (double)(precision[2]-1))) << offset[2]);
+                                         (long long)HDpow(2.0F, (double)(precision[2]-1))) << offset[2]);
             orig_data[i][j].d[m][n].f = float_val[i][j];
           }
       }
@@ -3684,7 +3696,7 @@ test_nbit_compound_3(hid_t file)
     /* Initialize data */
     for(i = 0; i < (size_t)size[0]; i++) {
         HDmemset(&orig_data[i], 0, sizeof(orig_data[i]));
-        orig_data[i].i = HDrandom() % (long)HDpow(2.0, 17.0 - 1.0);
+        orig_data[i].i = HDrandom() % (long)HDpow(2.0F, 17.0F - 1.0F);
         HDstrcpy(orig_data[i].str, "fixed-length C string");
         orig_data[i].vl_str = HDstrdup("variable-length C string");
 
@@ -4436,7 +4448,7 @@ test_scaleoffset_float(hid_t file)
     /* Initialize data */
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[i][j] = (float)((HDrandom() % 100000) / (float)1000.0);
+        orig_data[i][j] = (float)((HDrandom() % 100000) / 1000.0F);
 
         /* even-numbered values are negtive */
         if((i*size[1]+j+1)%2 == 0)
@@ -4469,7 +4481,7 @@ test_scaleoffset_float(hid_t file)
     /* Check that the values read are the same as the values written */
     for(i=0; i<(size_t)size[0]; i++) {
         for(j=0; j<(size_t)size[1]; j++) {
-            if(HDfabs(new_data[i][j]-orig_data[i][j]) > HDpow(10.0, -3.0)) {
+            if(HDfabs(new_data[i][j]-orig_data[i][j]) > HDpow(10.0F, -3.0F)) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -4539,7 +4551,7 @@ test_scaleoffset_float_2(hid_t file)
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
 
     /* Set fill value */
-    fillval = 10000.0;
+    fillval = 10000.0F;
     if(H5Pset_fill_value(dc, H5T_NATIVE_FLOAT, &fillval) < 0) goto error;
 
     /* Set up to use scaleoffset filter, decimal scale factor is 3,
@@ -4567,7 +4579,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (float)((HDrandom() % 100000) / (float)1000.0);
+        orig_data[0][j] = (float)((HDrandom() % 100000) / 1000.0F);
 
         /* even-numbered values are negtive */
         if((j+1)%2 == 0)
@@ -4600,7 +4612,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for(j=0; j<(size_t)size[1]; j++) {
-        if(HDfabs(new_data[0][j]-orig_data[0][j]) > HDpow(10.0, -3.0)) {
+        if(HDfabs(new_data[0][j]-orig_data[0][j]) > HDpow(10.0F, -3.0F)) {
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -4678,7 +4690,7 @@ test_scaleoffset_double(hid_t file)
     /* Initialize data */
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[i][j] = (HDrandom() % 10000000) / 10000000.0;
+        orig_data[i][j] = (HDrandom() % 10000000) / 10000000.0F;
 
         /* even-numbered values are negtive */
         if((i*size[1]+j+1)%2 == 0)
@@ -4711,7 +4723,7 @@ test_scaleoffset_double(hid_t file)
     /* Check that the values read are the same as the values written */
     for(i=0; i<(size_t)size[0]; i++) {
         for(j=0; j<(size_t)size[1]; j++) {
-            if(HDfabs(new_data[i][j]-orig_data[i][j]) > HDpow(10.0, -7.0)) {
+            if(HDfabs(new_data[i][j]-orig_data[i][j]) > HDpow(10.0F, -7.0F)) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -4781,7 +4793,7 @@ test_scaleoffset_double_2(hid_t file)
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
 
     /* Set fill value */
-    fillval = 10000.0;
+    fillval = 10000.0F;
     if(H5Pset_fill_value(dc, H5T_NATIVE_DOUBLE, &fillval) < 0) goto error;
 
     /* Set up to use scaleoffset filter, decimal scale factor is 7,
@@ -4809,7 +4821,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (HDrandom() % 10000000) / 10000000.0;
+        orig_data[0][j] = (HDrandom() % 10000000) / 10000000.0F;
 
         /* even-numbered values are negtive */
         if((j+1)%2 == 0)
@@ -4842,7 +4854,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for(j=0; j<(size_t)size[1]; j++) {
-        if(HDfabs(new_data[0][j]-orig_data[0][j]) > HDpow(10.0, -7.0)) {
+        if(HDfabs(new_data[0][j]-orig_data[0][j]) > HDpow(10.0F, -7.0F)) {
             H5_FAILED();
             printf("    Read different values than written.\n");
             printf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -5609,11 +5621,11 @@ test_set_local(hid_t fapl)
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
 
     /* Initialize the integer & floating-point dataset */
-    n=1.0;
+    n=1.0F;
     for(i = 0; i < DSET_DIM1; i++)
 	for(j = 0; j < DSET_DIM2; j++) {
 	    points[i][j] = (int)n++;
-	    points_dbl[i][j] = (double)1.5*n++;
+	    points_dbl[i][j] = (double)1.5F*n++;
 	}
 
     /* Open file */
@@ -5807,7 +5819,7 @@ test_set_local(hid_t fapl)
 	for(j=0; j<dims[1]; j++) {
 	    /* If the difference between two values is greater than 0.001%, they're
              * considered not equal. */
-            if(!DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001)) {
+            if(!DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001F)) {
 		H5_FAILED();
 		printf("    Line %d: Read different values than written.\n",__LINE__);
 		printf("    At index %lu,%lu\n", (unsigned long)(i), (unsigned long)(j));
@@ -7130,7 +7142,7 @@ test_chunk_cache(hid_t fapl)
     /* Set new rdcc settings on fapl */
     nslots_2 = nslots_1 * 2;
     nbytes_2 = nbytes_1 * 2;
-    w0_2 = w0_1 / 2.;
+    w0_2 = w0_1 / 2.0F;
     if (H5Pset_cache(fapl_local, 0, nslots_2, nbytes_2, w0_2) < 0) FAIL_STACK_ERROR
 
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
@@ -7325,7 +7337,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     /* Define cache size to be smaller than chunk size */
     rdcc_nelmts = BYPASS_CHUNK_DIM/5;
     rdcc_nbytes = sizeof(int)*BYPASS_CHUNK_DIM/5;
-    if(H5Pset_cache(fapl_local, 0, rdcc_nelmts, rdcc_nbytes, (double)0.0) < 0) FAIL_STACK_ERROR
+    if(H5Pset_cache(fapl_local, 0, rdcc_nelmts, rdcc_nbytes, 0.0F) < 0) FAIL_STACK_ERROR
 
     /* Create file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_local)) < 0) FAIL_STACK_ERROR

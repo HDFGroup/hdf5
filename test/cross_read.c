@@ -100,15 +100,15 @@ static int check_data(const char *dsetname, hid_t fid, hbool_t floating_number)
     for (j = 0; j < NX; j++) {
         for (i = 0; i < NY; i++) {
             data_in[j][i] = ((double)(i + j + 1))/3;
-            data_out[j][i] = 0;
+            data_out[j][i] = 0.0F;
 
             int_data_in[j][i] = i + j;
             int_data_out[j][i] = 0;
         }
     }
     for (i = 0; i < NY; i++) {
-        data_in[NX][i] = -2.2;
-        data_out[NX][i] = 0;
+        data_in[NX][i] = -2.2F;
+        data_out[NX][i] = 0.0F;
 
         int_data_in[NX][i] = -2;
         int_data_out[NX][i] = 0;
@@ -126,7 +126,7 @@ static int check_data(const char *dsetname, hid_t fid, hbool_t floating_number)
 	/* Check results */
 	for (j=0; j<(NX+1); j++) {
 	    for (i=0; i<NY; i++) {
-		if (!DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001)) {
+		if (!DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001F)) {
 		    if (!nerrors++) {
 			H5_FAILED();
 			printf("element [%d][%d] is %g but should have been %g\n",
