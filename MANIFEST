@@ -29,8 +29,6 @@
 ./Makefile.am
 ./m4/aclocal_fc.m4
 ./m4/aclocal_cxx.m4
-./m4/aclocal_cxx.m4
-./m4/aclocal_fc.m4
 ./README.txt
 ./BRANCH.txt
 ./acsite.m4
