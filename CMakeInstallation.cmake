@@ -5,7 +5,10 @@ include (${HDF_RESOURCES_DIR}/CMakePackageConfigHelpers.cmake)
 #-----------------------------------------------------------------------------
 if (WIN32)
   find_program (NSIS_EXECUTABLE NSIS.exe PATHS "$ENV{ProgramFiles}\\NSIS" "$ENV{ProgramFiles(x86)}\\NSIS")
-  find_program (WIX_EXECUTABLE candle  PATHS "$ENV{ProgramFiles}\\WiX\ Toolset\ v3.9\\bin" "$ENV{ProgramFiles(x86)}\\WiX\ Toolset\ v3.9\\bin")
+  if(NOT CPACK_WIX_ROOT)
+    file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
+  endif()
+  find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
 endif (WIN32)
 
 #-----------------------------------------------------------------------------
