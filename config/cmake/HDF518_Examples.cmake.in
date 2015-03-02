@@ -12,7 +12,7 @@ set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
 set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 set(CTEST_BUILD_CONFIGURATION "Release")
 #set(NO_MAC_FORTRAN "true")
-#set(BUILD_OPTIONS ""${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
+#set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
 #set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_ENABLE_F2003:BOOL=ON)
 set(CTEST_USE_TAR_SOURCE "true")
 
@@ -68,9 +68,8 @@ if(CTEST_USE_TAR_SOURCE)
   ## Uncompress source if tar or zip file provided
   ## --------------------------
   if(WIN32)
-    set(CTEST_7Z_COMMAND "C:/Program Files/7-Zip/7z.exe")
-    message(STATUS "extracting... [${CTEST_7Z_COMMAND} x ${CTEST_SOURCE_NAME}.zip]")
-    execute_process(COMMAND ${CTEST_7Z_COMMAND} x ${CTEST_SOURCE_NAME}.zip RESULT_VARIABLE rv)
+    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_USE_TAR_SOURCE}.zip]")
+    execute_process(COMMAND ${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_USE_TAR_SOURCE}.zip RESULT_VARIABLE rv)
   else(WIN32)
     message(STATUS "extracting... [${CTEST_CMAKE_COMMAND} -E tar -xvf ${CTEST_SOURCE_NAME}.tar.gz]")
     execute_process(COMMAND tar -xvf ${CTEST_SOURCE_NAME}.tar.gz RESULT_VARIABLE rv)
@@ -87,8 +86,11 @@ endif(CTEST_USE_TAR_SOURCE)
 ## Clear the build directory
 ## --------------------------
 set(CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
-file(MAKE_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
-ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
+if (EXISTS "${CTEST_BINARY_DIRECTORY}" AND IS_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
+  ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
+else (EXISTS "${CTEST_BINARY_DIRECTORY}" AND IS_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
+  file(MAKE_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
+endif (EXISTS "${CTEST_BINARY_DIRECTORY}" AND IS_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
 
 # Use multiple CPU cores to build
 include(ProcessorCount)

@@ -40,12 +40,11 @@
 USAGE()
 {
 cat << EOF
-Usage: $0 [--nocheck] [-d <dir>] [-h] <methods> ...
+Usage: $0 -d <dir> [-h] [--nocheck] [--private] <methods> ...
    -d DIR	The name of the directory where the releas(es) should be
                 placed.
-
+   -h           print the help page.
    --nocheck	Ignore errors in MANIFEST file.
-         
    --private	Make a private release with today's date in version information.
          
 This must be run at the top level of the source directory.
