@@ -53,6 +53,10 @@ main (void)
                  stride[2],
                  count[2],
                  block[2];
+    hsize_t      start_out[2],
+                 stride_out[2],
+                 count_out[2],
+                 block_out[2];
     int          wdata[DIM0],                /* Write buffer for source dataset */
                  rdata[VDSDIM0][VDSDIM1],    /* Read buffer for virtual dataset */
                  i, j, k, l;  
@@ -182,6 +186,14 @@ main (void)
                 for (k=0; k<RANK2-1; k++) 
                     printf("%d,", (int)buf[RANK2+k]);
                 printf("%d)\n", (int)buf[RANK2+k]);
+            }
+        /* We also can use new APIs to get start, stride, count and block */
+            if (H5Sis_regular_hyperslab(vspace)) {
+                status = H5Sget_regular_hyperslab (vspace, start_out, stride_out, count_out, block_out);
+                printf("start  = [%d, %d] \n", (int)start_out[0], (int)start_out[1]);
+                printf("stride = [%d, %d] \n", (int)stride_out[0], (int)stride_out[1]);
+                printf("count  = [%d, %d] \n", (int)count_out[0], (int)count_out[1]);
+                printf("block  = [%d, %d] \n", (int)block_out[0], (int)block_out[1]);
             }
         }
         /* Get source file name. */
