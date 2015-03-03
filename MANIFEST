@@ -1338,6 +1338,8 @@
 ./tools/lib/h5tools_type.c
 ./tools/lib/ph5diff.h
 ./tools/lib/h5tools_error.h
+./tools/lib/io_timer.c
+./tools/lib/io_timer.h
 
 ./tools/misc/Makefile.am
 ./tools/misc/Makefile.in
@@ -2259,7 +2261,6 @@
 ./tools/perform/COPYING
 ./tools/perform/Makefile.am
 ./tools/perform/Makefile.in
-./tools/perform/benchpar.c
 ./tools/perform/build_h5perf_alone.sh
 ./tools/perform/build_h5perf_serial_alone.sh
 ./tools/perform/chunk.c
@@ -2273,17 +2274,12 @@
 ./tools/perform/pio_perf.h
 ./tools/perform/pio_standalone.c
 ./tools/perform/pio_standalone.h
-./tools/perform/pio_timer.c
-./tools/perform/pio_timer.h
 ./tools/perform/sio_engine.c
 ./tools/perform/sio_perf.c
 ./tools/perform/sio_perf.h
 ./tools/perform/sio_standalone.c
 ./tools/perform/sio_standalone.h
-./tools/perform/sio_timer.c
-./tools/perform/sio_timer.h
 ./tools/perform/zip_perf.c
-
 
 # high level libraries
 ./hl/COPYING
@@ -2429,25 +2425,16 @@
 ./hl/tools/testfiles/w-ext-cmpd.ddl
 ./hl/tools/testfiles/w-ext-cmpd-esc.ddl
 ./hl/tools/testfiles/w-ext-cmpd-esc-f1.ddl
-./hl/tools/testfiles/w-ext-cmpd-esc-f2.ddl
 ./hl/tools/testfiles/w-ext-cmpd-esc-f3.ddl
-./hl/tools/testfiles/w-ext-cmpd-esc-ff1.ddl
 ./hl/tools/testfiles/w-ext-cmpd-esc-ff2.ddl
-./hl/tools/testfiles/w-ext-cmpd-esc-ff3.ddl
 ./hl/tools/testfiles/w-ext-cmpd-f1.ddl
 ./hl/tools/testfiles/w-ext-cmpd-f2.ddl
-./hl/tools/testfiles/w-ext-cmpd-f3.ddl
-./hl/tools/testfiles/w-ext-cmpd-ff1.ddl
-./hl/tools/testfiles/w-ext-cmpd-ff2.ddl
 ./hl/tools/testfiles/w-ext-cmpd-ff3.ddl
 ./hl/tools/testfiles/w-ext-cmpd-label.ddl
 ./hl/tools/testfiles/w-ext-cmpd-two.ddl
 ./hl/tools/testfiles/w-ext-cmpd-two-f1.ddl
-./hl/tools/testfiles/w-ext-cmpd-two-f2.ddl
 ./hl/tools/testfiles/w-ext-cmpd-two-f3.ddl
-./hl/tools/testfiles/w-ext-cmpd-two-ff1.ddl
 ./hl/tools/testfiles/w-ext-cmpd-two-ff2.ddl
-./hl/tools/testfiles/w-ext-cmpd-two-ff3.ddl
 ./hl/tools/testfiles/w-ext-early.ddl
 ./hl/tools/testfiles/w-ext-late.ddl
 ./hl/tools/testfiles/w-ext-one-d.ddl
@@ -2457,7 +2444,6 @@
 ./hl/tools/testfiles/w-ext-two.ddl
 ./hl/tools/testfiles/w-ext-two-width.ddl
 ./hl/tools/testfiles/w-help1.ddl
-./hl/tools/testfiles/w-help2.ddl
 
 #
 # hl fortran

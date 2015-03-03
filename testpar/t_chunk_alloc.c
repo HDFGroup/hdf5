@@ -106,7 +106,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
 	VRFY((memspace >= 0), "");
 
 	/* Create a new file. If file exists its contents will be overwritten. */
-	file_id = H5Fcreate(h5_rmprefix(filename), H5F_ACC_TRUNC, H5P_DEFAULT,
+	file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
 		    H5P_DEFAULT);
 	VRFY((file_id >= 0), "H5Fcreate");
 

@@ -43,10 +43,6 @@
  */
 #define H5FD_MULTI_DEBUG
 
-/* Our version of MAX */
-#undef MAX
-#define MAX(X,Y)	((X)>(Y)?(X):(Y))
-
 #ifndef FALSE
 #define FALSE		0
 #endif
@@ -135,7 +131,7 @@ static herr_t H5FD_multi_query(const H5FD_t *_f1, unsigned long *flags);
 static herr_t H5FD_multi_get_type_map(const H5FD_t *file, H5FD_mem_t *type_map);
 static haddr_t H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa);
-static haddr_t H5FD_multi_get_eof(const H5FD_t *_file);
+static haddr_t H5FD_multi_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD_multi_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static haddr_t H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
 static herr_t H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
@@ -1430,54 +1426,70 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_multi_get_eof(const H5FD_t *_file)
+H5FD_multi_get_eof(const H5FD_t *_file, H5FD_mem_t type)
 {
     const H5FD_multi_t	*file = (const H5FD_multi_t*)_file;
-    haddr_t		eof=0, tmp_eof;
-    haddr_t		eoa=0, tmp_eoa;
+    haddr_t		eof = 0;
     static const char *func="H5FD_multi_get_eof";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    UNIQUE_MEMBERS(file->fa.memb_map, mt) {
-	if (file->memb[mt]) {
+    if(H5FD_MEM_DEFAULT == type) {
+        UNIQUE_MEMBERS(file->fa.memb_map, mt) {
+            haddr_t tmp_eof;
+
+            if(file->memb[mt]) {
+                /* Retrieve EOF */
+                H5E_BEGIN_TRY {
+                    tmp_eof = H5FDget_eof(file->memb[mt], type);
+                } H5E_END_TRY;
+
+                if(HADDR_UNDEF == tmp_eof)
+                    H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eof", HADDR_UNDEF)
+                if(tmp_eof > 0)
+                    tmp_eof += file->fa.memb_addr[mt];
+            } else if(file->fa.relax) {
+                /*
+                 * The member is not open yet (maybe it doesn't exist). Make the
+                 * best guess about the end-of-file.
+                 */
+                tmp_eof = file->memb_next[mt];
+                assert(HADDR_UNDEF != tmp_eof);
+            } else {
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "bad eof", HADDR_UNDEF)
+            }
+            if(tmp_eof > eof)
+                eof = tmp_eof;
+        } END_MEMBERS;
+    } else {
+        H5FD_mem_t mmt = file->fa.memb_map[type];
+
+        if(H5FD_MEM_DEFAULT == mmt)
+            mmt = type;
+
+	if(file->memb[mmt]) {
             /* Retrieve EOF */
-	    H5E_BEGIN_TRY {
-		tmp_eof = H5FDget_eof(file->memb[mt]);
-	    } H5E_END_TRY;
+            H5E_BEGIN_TRY {
+	        eof = H5FDget_eof(file->memb[mmt], mmt);
+            } H5E_END_TRY;
 
-	    if (HADDR_UNDEF==tmp_eof)
+	    if(HADDR_UNDEF == eof)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eof", HADDR_UNDEF)
-	    if (tmp_eof>0) tmp_eof += file->fa.memb_addr[mt];
-
-            /* Retrieve EOA */
-	    H5E_BEGIN_TRY {
-		tmp_eoa = H5FDget_eoa(file->memb[mt], mt);
-	    } H5E_END_TRY;
-
-	    if (HADDR_UNDEF==tmp_eoa)
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eoa", HADDR_UNDEF)
-	    if (tmp_eoa>0) tmp_eoa += file->fa.memb_addr[mt];
-	} else if (file->fa.relax) {
+	    if(eof > 0)
+                eof += file->fa.memb_addr[mmt];
+	} else if(file->fa.relax) {
 	    /*
 	     * The member is not open yet (maybe it doesn't exist). Make the
 	     * best guess about the end-of-file.
 	     */
-	    tmp_eof = file->memb_next[mt];
-	    assert(HADDR_UNDEF!=tmp_eof);
-
-	    tmp_eoa = file->memb_next[mt];
-	    assert(HADDR_UNDEF!=tmp_eoa);
-	} else {
+	    eof = file->memb_next[mmt];
+	    assert(HADDR_UNDEF != eof);
+	 } else {
             H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "bad eof", HADDR_UNDEF)
-	}
-
-	if (tmp_eof>eof) eof = tmp_eof;
-	if (tmp_eoa>eoa) eoa = tmp_eoa;
-    } END_MEMBERS;
-
-    return MAX(eoa, eof);
+	 }
+    }
+    return eof;
 }
 
 

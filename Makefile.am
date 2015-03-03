@@ -79,7 +79,7 @@ DIST_SUBDIRS = src test testpar tools . c++ fortran hl examples
 # Some files generated during configure that should be cleaned
 DISTCLEANFILES=config/stamp1 config/stamp2
 
-# Some files/directories generated during checkperform  that should be cleaned
+# Some files/directories generated during check that should be cleaned
 CHECK_CLEANFILES+=*-tmp
 
 # Define rules for lib, progs, check, and tests.
@@ -93,7 +93,7 @@ lib progs check-p check-s:
 	  fi;                                                           \
 	done
 
-# Make all, tests, and (un)install also recurse into directory
+# Make all, tests, and (un)install
 tests:
 	@@SETX@; for d in $(SUBDIRS); do                        \
 	  if test $$d != .; then                                        \

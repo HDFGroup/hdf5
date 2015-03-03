@@ -106,15 +106,6 @@ if (WINDOWS)
   set (H5_HAVE_WINDOW_PATH 1)
 endif (WINDOWS)
 
-if (WINDOWS)
-  #-----------------------------------------------------------------------------
-  # These tests need to be manually SET for windows since there is currently
-  # something not quite correct with the actual test implementation. This affects
-  # the 'dt_arith' test and most likely lots of other code
-  # ----------------------------------------------------------------------------
-  set (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
-endif (WINDOWS)
-
 # ----------------------------------------------------------------------
 # END of WINDOWS Hard code Values
 # ----------------------------------------------------------------------
