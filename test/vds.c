@@ -43,6 +43,262 @@ const char *FILENAME[] = {
 
 
 /*-------------------------------------------------------------------------
+ * Function:    vds_select_equal
+ *
+ * Purpose:     Helper function to check if the selections in the two
+ *              provided dataspaces are the same.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, March 2, 2015
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+vds_select_equal(hid_t space1, hid_t space2)
+{
+    H5S_sel_type    type1;
+    H5S_sel_type    type2;
+    hsize_t         *buf1 = NULL;
+    hsize_t         *buf2 = NULL;
+    size_t          i;
+    htri_t          ret_value = TRUE;
+
+    /* Get and compare selection types */
+    if((type1 = H5Sget_select_type(space1)) < 0)
+        TEST_ERROR
+    if((type2 = H5Sget_select_type(space2)) < 0)
+        TEST_ERROR
+    if(type1 != type2)
+        return FALSE;
+
+    /* Check selection type */
+    switch(type1) {
+        case H5S_SEL_NONE:
+        case H5S_SEL_ALL:
+            break;
+
+        case H5S_SEL_POINTS:
+            {
+                int         rank1;
+                int         rank2;
+                hssize_t    npoints1;
+                hssize_t    npoints2;
+
+                /* Get and compare rank */
+                if((rank1 = H5Sget_simple_extent_ndims(space1)) < 0)
+                    TEST_ERROR
+                if((rank2 = H5Sget_simple_extent_ndims(space2)) < 0)
+                    TEST_ERROR
+                if(rank1 != rank2)
+                    return FALSE;
+
+                /* Get and compare number of points */
+                if((npoints1 = H5Sget_select_elem_npoints(space1)) < 0)
+                    TEST_ERROR
+                if((npoints2 = H5Sget_select_elem_npoints(space2)) < 0)
+                    TEST_ERROR
+                if(npoints1 != npoints2)
+                    return FALSE;
+
+                /* Allocate point lists.  Do not return directly afer
+                 * allocating, to make sure buffers are freed. */
+                if(NULL == (buf1 = (hsize_t *)HDmalloc((size_t)rank1 * (size_t)npoints1 * sizeof(hsize_t))))
+                    TEST_ERROR
+                if(NULL == (buf2 = (hsize_t *)HDmalloc((size_t)rank1 * (size_t)npoints1 * sizeof(hsize_t))))
+                    TEST_ERROR
+
+                /* Get and compare point lists */
+                if(H5Sget_select_elem_pointlist(space1, (hsize_t)0, (hsize_t)npoints1, buf1) < 0)
+                    TEST_ERROR
+                if(H5Sget_select_elem_pointlist(space2, (hsize_t)0, (hsize_t)npoints1, buf2) < 0)
+                    TEST_ERROR
+                for(i = 0; i < ((size_t)rank1 * (size_t)npoints1); i++)
+                    if(buf1[i] != buf2[i]) {
+                        ret_value = FALSE;
+                        break;
+                    } /* end if */
+
+                /* Free buffers */
+                HDfree(buf1);
+                buf1 = NULL;
+                HDfree(buf2);
+                buf2 = NULL;
+            } /* end block */
+
+            break;
+
+        case H5S_SEL_HYPERSLABS:
+            {
+                int         rank1;
+                int         rank2;
+                hssize_t    nblocks1;
+                hssize_t    nblocks2;
+
+                /* Get and compare rank */
+                if((rank1 = H5Sget_simple_extent_ndims(space1)) < 0)
+                    TEST_ERROR
+                if((rank2 = H5Sget_simple_extent_ndims(space2)) < 0)
+                    TEST_ERROR
+                if(rank1 != rank2)
+                    return FALSE;
+
+                /* Get and compare number of blocks */
+                if((nblocks1 = H5Sget_select_hyper_nblocks(space1)) < 0)
+                    TEST_ERROR
+                if((nblocks2 = H5Sget_select_hyper_nblocks(space2)) < 0)
+                    TEST_ERROR
+                if(nblocks1 != nblocks2)
+                    return FALSE;
+
+                /* Allocate block lists.  Do not return directly afer
+                 * allocating, to make sure buffers are freed. */
+                if(NULL == (buf1 = (hsize_t *)HDmalloc((size_t)2 * (size_t)rank1 * (size_t)nblocks1 * sizeof(*buf1))))
+                    TEST_ERROR
+                if(NULL == (buf2 = (hsize_t *)HDmalloc((size_t)2 * (size_t)rank1 * (size_t)nblocks1 * sizeof(*buf2))))
+                    TEST_ERROR
+
+                /* Get and compare block lists */
+                if(H5Sget_select_hyper_blocklist(space1, (hsize_t)0, (hsize_t)nblocks1, buf1) < 0)
+                    TEST_ERROR
+                if(H5Sget_select_hyper_blocklist(space2, (hsize_t)0, (hsize_t)nblocks1, buf2) < 0)
+                    TEST_ERROR
+                for(i = 0; i < ((size_t)2 * (size_t)rank1 * (size_t)nblocks1); i++)
+                    if(buf1[i] != buf2[i]) {
+                        ret_value = FALSE;
+                        break;
+                    } /* end if */
+
+                /* Free buffers */
+                HDfree(buf1);
+                buf1 = NULL;
+                HDfree(buf2);
+                buf2 = NULL;
+            } /* end block */
+
+            break;
+
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+        default:
+            TEST_ERROR
+    } /* end switch */
+
+    return ret_value;
+
+error:
+    if(buf1)
+        HDfree(buf1);
+    if(buf2)
+        HDfree(buf2);
+
+    return -1;
+} /* end vds_select_equal() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    vds_check_mapping
+ *
+ * Purpose:     Helper function to check if the ith virtual mapping in the
+ *              provided dcpl is the same as that described by the other
+ *              parameters.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, March 2, 2015
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+vds_check_mapping(hid_t dcpl, size_t i, hid_t vspace, hid_t srcspace,
+    const char *filename, const char *dsetname)
+{
+    hid_t       space_out = -1;
+    char        name_out[32];
+    htri_t      tri_ret;
+    ssize_t     str_len;
+
+    HDassert(dcpl >= 0);
+    HDassert(vspace >= 0);
+    HDassert(srcspace >= 0);
+    HDassert(filename);
+    HDassert(dsetname);
+
+    /* Check vspace */
+    if((space_out = H5Pget_virtual_vspace(dcpl, i)) < 0)
+        TEST_ERROR
+    if((tri_ret = H5Sextent_equal(space_out, vspace)) < 0)
+        TEST_ERROR
+    if(!tri_ret)
+        TEST_ERROR
+    if((tri_ret = vds_select_equal(space_out, vspace)) < 0)
+        TEST_ERROR
+    if(!tri_ret)
+        TEST_ERROR
+    if(H5Sclose(space_out) < 0)
+        TEST_ERROR
+    space_out = -1;
+
+    /* Check srcspace */
+    if((space_out = H5Pget_virtual_srcspace(dcpl, i)) < 0)
+        TEST_ERROR
+    if((tri_ret = vds_select_equal(space_out, srcspace)) < 0)
+        TEST_ERROR
+    if(!tri_ret)
+        TEST_ERROR
+    if(H5Sclose(space_out) < 0)
+        TEST_ERROR
+    space_out = -1;
+
+    /* Check filename */
+    if((str_len = H5Pget_virtual_filename(dcpl, i, NULL, (size_t)0)) < 0)
+        TEST_ERROR
+    if((size_t)str_len != HDstrlen(filename))
+        TEST_ERROR
+    HDassert((size_t)str_len < sizeof(name_out));
+    if((str_len = H5Pget_virtual_filename(dcpl, i, name_out, sizeof(name_out))) < 0)
+        TEST_ERROR
+    if((size_t)str_len != HDstrlen(filename))
+        TEST_ERROR
+    if(HDstrncmp(name_out, filename, (size_t)str_len + 1) != 0)
+        TEST_ERROR
+
+    /* Check dsetname */
+    if((str_len = H5Pget_virtual_dsetname(dcpl, i, NULL, (size_t)0)) < 0)
+        TEST_ERROR
+    if((size_t)str_len != HDstrlen(dsetname))
+        TEST_ERROR
+    HDassert((size_t)str_len < sizeof(name_out));
+    if((str_len = H5Pget_virtual_dsetname(dcpl, i, name_out, sizeof(name_out))) < 0)
+        TEST_ERROR
+    if((size_t)str_len != HDstrlen(dsetname))
+        TEST_ERROR
+    if(HDstrncmp(name_out, dsetname, (size_t)str_len + 1) != 0)
+        TEST_ERROR
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(space_out >= 0)
+            (void)H5Sclose(space_out);
+    } H5E_END_TRY
+
+    return -1;
+} /* end vds_check_mapping() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_api
  *
  * Purpose:     Tests API functions related to virtual datasets.
@@ -149,7 +405,7 @@ test_api(test_api_config_t config, hid_t fapl)
     hid_t       dcpl = -1;      /* Dataset creation property list */
     hid_t       ex_dcpl = -1;   /* Temporary dcpl for examination */
     hid_t       srcspace[4] = {-1, -1, -1, -1}; /* Source dataspaces */
-    hid_t       vspace[4] = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
+    hid_t       vspace[LIST_DOUBLE_SIZE]; /* Virtual dset dataspaces */
     const char  *src_file[4] = {"src_file1", "src_file2.", "src_file3..", "src_file4..."}; /* Source file names (different lengths) */
     const char  *src_dset[4] = {"src_dset1....", "src_dset2.....", "src_dset3......", "src_dset4......."}; /* Source dataset names (different lengths) */
     char        tmp_filename[32];
@@ -159,13 +415,13 @@ test_api(test_api_config_t config, hid_t fapl)
     hsize_t     stride[2];      /* Hyperslab stride */
     hsize_t     count[2];       /* Hyperslab count */
     hsize_t     block[2];       /* Hyperslab block */
+    hsize_t     coord[10];      /* Point selection array */
     size_t      size_out;
-    ssize_t     ssize_out;
-    hid_t       space_out = -1;
-    char        name_out[32];
-    hsize_t     blocklist[4];
-    htri_t      tri_ret;
     unsigned    i;
+
+    /* Initialize vspace */
+    for(i = 0; i < (unsigned)(sizeof(vspace) / sizeof(vspace[0])); i++)
+        vspace[i] = -1;
 
     switch(config) {
         case TEST_API_BASIC:
@@ -193,6 +449,7 @@ test_api(test_api_config_t config, hid_t fapl)
     /* Create DCPL */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR
+
 
     /*
      * Test 1: All - all selection
@@ -222,55 +479,11 @@ test_api(test_api_config_t config, hid_t fapl)
     /* Test H5Pget_virtual_count */
     if(H5Pget_virtual_count(ex_dcpl, &size_out) < 0)
         TEST_ERROR
-    if(size_out != 1)
+    if(size_out != (size_t)1)
         TEST_ERROR
 
-    /* Test H5Pget_virtual_vspace */
-    if((space_out = H5Pget_virtual_vspace(ex_dcpl, 0)) < 0)
-        TEST_ERROR
-    if((tri_ret = H5Sextent_equal(space_out, vspace[0])) < 0)
-        TEST_ERROR
-    if(!tri_ret)
-        TEST_ERROR
-    if(H5Sget_select_type(space_out) != H5S_SEL_ALL)
-        TEST_ERROR
-    if(H5Sclose(space_out) < 0)
-        TEST_ERROR
-    space_out = -1;
-
-    /* Test H5Pget_virtual_srcspace */
-    if((space_out = H5Pget_virtual_srcspace(ex_dcpl, 0)) < 0)
-        TEST_ERROR
-    if(H5Sget_select_type(space_out) != H5S_SEL_ALL)
-        TEST_ERROR
-    if(H5Sclose(space_out) < 0)
-        TEST_ERROR
-    space_out = -1;
-
-    /* Test H5Pget_virtual_filename */
-    if((ssize_out = H5Pget_virtual_filename(ex_dcpl, 0, NULL, 0)) < 0)
-        TEST_ERROR
-    if((size_t)ssize_out != HDstrlen(src_file[0]))
-        TEST_ERROR
-    HDassert((size_t)ssize_out < sizeof(name_out));
-    if((ssize_out = H5Pget_virtual_filename(ex_dcpl, 0, name_out, sizeof(name_out))) < 0)
-        TEST_ERROR
-    if((size_t)ssize_out != HDstrlen(src_file[0]))
-        TEST_ERROR
-    if(HDstrncmp(name_out, src_file[0], (size_t)ssize_out + 1) != 0)
-        TEST_ERROR
-
-    /* Test H5Pget_virtual_dsetname */
-    if((ssize_out = H5Pget_virtual_dsetname(ex_dcpl, 0, NULL, 0)) < 0)
-        TEST_ERROR
-    if((size_t)ssize_out != HDstrlen(src_dset[0]))
-        TEST_ERROR
-    HDassert((size_t)ssize_out < sizeof(name_out));
-    if((ssize_out = H5Pget_virtual_dsetname(ex_dcpl, 0, name_out, sizeof(name_out))) < 0)
-        TEST_ERROR
-    if((size_t)ssize_out != HDstrlen(src_dset[0]))
-        TEST_ERROR
-    if(HDstrncmp(name_out, src_dset[0], (size_t)ssize_out + 1) != 0)
+    /* Check that the mapping in the DCPL is correct */
+    if(vds_check_mapping(ex_dcpl, (size_t)0, vspace[0], srcspace[0], src_file[0], src_dset[0]) < 0)
         TEST_ERROR
 
     /* Close */
@@ -280,6 +493,355 @@ test_api(test_api_config_t config, hid_t fapl)
     if(H5Sclose(vspace[0]) < 0)
         TEST_ERROR
     vspace[0] = -1;
+    if(H5Pclose(ex_dcpl) < 0)
+        TEST_ERROR
+    ex_dcpl = -1;
+
+
+    /*
+     * Test 2: Hyper - hyper selection
+     */
+    /* Clear virtual layout in DCPL */
+    if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR
+
+    /* Create source dataspace */
+    if((srcspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspace */
+    if((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Select regular hyperslab in source space */
+    start[0] = 2;
+    start[1] = 1;
+    stride[0] = 3;
+    stride[1] = 5;
+    count[0] = 2;
+    count[1] = 3;
+    block[0] = 2;
+    block[1] = 4;
+    if(H5Sselect_hyperslab(srcspace[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR
+
+    /* Select composite hyperslab in virtual space */
+    count[0] = 1;
+    count[1] = 1;
+    block[0] = 5;
+    block[1] = 6;
+    if(H5Sselect_hyperslab(vspace[0], H5S_SELECT_SET, start, NULL, count, block) < 0)
+        TEST_ERROR
+    start[0] = 7;
+    start[1] = 0;
+    block[0] = 1;
+    block[1] = 18;
+    if(H5Sselect_hyperslab(vspace[0], H5S_SELECT_OR, start, NULL, count, block) < 0)
+        TEST_ERROR
+
+    /* Add virtual layout mapping */
+    if(H5Pset_virtual(dcpl, vspace[0], src_file[0], src_dset[0], srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Get examination DCPL */
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+        TEST_ERROR
+
+    /* Test H5Pget_virtual_count */
+    if(H5Pget_virtual_count(ex_dcpl, &size_out) < 0)
+        TEST_ERROR
+    if(size_out != (size_t)1)
+        TEST_ERROR
+
+    /* Check that the mapping in the DCPL is correct */
+    if(vds_check_mapping(ex_dcpl, (size_t)0, vspace[0], srcspace[0], src_file[0], src_dset[0]) < 0)
+        TEST_ERROR
+
+    /* Close */
+    if(H5Sclose(srcspace[0]) < 0)
+        TEST_ERROR
+    srcspace[0] = -1;
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
+    if(H5Pclose(ex_dcpl) < 0)
+        TEST_ERROR
+    ex_dcpl = -1;
+
+
+    /*
+     * Test 3: Point - point selection
+     */
+    /* Clear virtual layout in DCPL */
+    if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR
+
+    /* Create source dataspace */
+    if((srcspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspace */
+    if((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Select points in source space */
+    coord[0] = 5;
+    coord[1] = 15;
+    coord[2] = 7;
+    coord[3] = 19;
+    coord[4] = 8;
+    coord[5] = 0;
+    coord[6] = 2;
+    coord[7] = 14;
+    coord[8] = 8;
+    coord[9] = 18;
+    if(H5Sselect_elements(srcspace[0], H5S_SELECT_SET, (size_t)5, coord) < 0)
+        TEST_ERROR
+
+    /* Select points in virtual space */
+    coord[0] = 3;
+    coord[1] = 12;
+    coord[2] = 7;
+    coord[3] = 11;
+    coord[4] = 4;
+    coord[5] = 9;
+    coord[6] = 7;
+    coord[7] = 11;
+    coord[8] = 5;
+    coord[9] = 5;
+    if(H5Sselect_elements(vspace[0], H5S_SELECT_SET, (size_t)5, coord) < 0)
+        TEST_ERROR
+
+    /* Add virtual layout mapping */
+    if(H5Pset_virtual(dcpl, vspace[0], src_file[0], src_dset[0], srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Get examination DCPL */
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+        TEST_ERROR
+
+    /* Test H5Pget_virtual_count */
+    if(H5Pget_virtual_count(ex_dcpl, &size_out) < 0)
+        TEST_ERROR
+    if(size_out != (size_t)1)
+        TEST_ERROR
+
+    /* Check that the mapping in the DCPL is correct */
+    if(vds_check_mapping(ex_dcpl, (size_t)0, vspace[0], srcspace[0], src_file[0], src_dset[0]) < 0)
+        TEST_ERROR
+
+    /* Close */
+    if(H5Sclose(srcspace[0]) < 0)
+        TEST_ERROR
+    srcspace[0] = -1;
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
+    if(H5Pclose(ex_dcpl) < 0)
+        TEST_ERROR
+    ex_dcpl = -1;
+
+
+    /*
+     * Test 4: Point - hyper selection
+     */
+    /* Clear virtual layout in DCPL */
+    if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR
+
+    /* Create source dataspace */
+    if((srcspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspace */
+    if((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Select hyperslab in source space */
+    start[0] = 2;
+    start[1] = 7;
+    count[0] = 1;
+    count[1] = 1;
+    block[0] = 1;
+    block[1] = 5;
+    if(H5Sselect_hyperslab(srcspace[0], H5S_SELECT_SET, start, NULL, count, block) < 0)
+        TEST_ERROR
+
+    /* Select points in virtual space */
+    coord[0] = 1;
+    coord[1] = 1;
+    coord[2] = 4;
+    coord[3] = 17;
+    coord[4] = 3;
+    coord[5] = 9;
+    coord[6] = 5;
+    coord[7] = 13;
+    coord[8] = 7;
+    coord[9] = 16;
+    if(H5Sselect_elements(vspace[0], H5S_SELECT_SET, (size_t)5, coord) < 0)
+        TEST_ERROR
+
+    /* Add virtual layout mapping */
+    if(H5Pset_virtual(dcpl, vspace[0], src_file[0], src_dset[0], srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Get examination DCPL */
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+        TEST_ERROR
+
+    /* Test H5Pget_virtual_count */
+    if(H5Pget_virtual_count(ex_dcpl, &size_out) < 0)
+        TEST_ERROR
+    if(size_out != (size_t)1)
+        TEST_ERROR
+
+    /* Check that the mapping in the DCPL is correct */
+    if(vds_check_mapping(ex_dcpl, (size_t)0, vspace[0], srcspace[0], src_file[0], src_dset[0]) < 0)
+        TEST_ERROR
+
+    /* Close */
+    if(H5Sclose(srcspace[0]) < 0)
+        TEST_ERROR
+    srcspace[0] = -1;
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
+    if(H5Pclose(ex_dcpl) < 0)
+        TEST_ERROR
+    ex_dcpl = -1;
+
+
+    /*
+     * Test 5: All previous mappings together
+     */
+    /* Clear virtual layout in DCPL */
+    if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR
+
+    /* Create dataspaces */
+    for(i = 0; i < 4; i++) {
+        /* Create source dataspace */
+        if((srcspace[i] = H5Screate_simple(2, dims, NULL)) < 0)
+            TEST_ERROR
+
+        /* Create virtual dataspace */
+        if((vspace[i] = H5Screate_simple(2, dims, NULL)) < 0)
+            TEST_ERROR
+    } /* end for */
+
+    /* Select all (should not be necessary, but just to be sure) */
+    if(H5Sselect_all(srcspace[0]) < 0)
+        TEST_ERROR
+    if(H5Sselect_all(vspace[0]) < 0)
+        TEST_ERROR
+
+    /* Select regular hyperslab in source space */
+    start[0] = 2;
+    start[1] = 1;
+    stride[0] = 3;
+    stride[1] = 5;
+    count[0] = 2;
+    count[1] = 3;
+    block[0] = 2;
+    block[1] = 4;
+    if(H5Sselect_hyperslab(srcspace[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+        TEST_ERROR
+
+    /* Select composite hyperslab in virtual space */
+    count[0] = 1;
+    count[1] = 1;
+    block[0] = 5;
+    block[1] = 6;
+    if(H5Sselect_hyperslab(vspace[1], H5S_SELECT_SET, start, NULL, count, block) < 0)
+        TEST_ERROR
+    start[0] = 7;
+    start[1] = 0;
+    block[0] = 1;
+    block[1] = 18;
+    if(H5Sselect_hyperslab(vspace[1], H5S_SELECT_OR, start, NULL, count, block) < 0)
+        TEST_ERROR
+
+    /* Select points in source space */
+    coord[0] = 5;
+    coord[1] = 15;
+    coord[2] = 7;
+    coord[3] = 19;
+    coord[4] = 8;
+    coord[5] = 0;
+    coord[6] = 2;
+    coord[7] = 14;
+    coord[8] = 8;
+    coord[9] = 18;
+    if(H5Sselect_elements(srcspace[2], H5S_SELECT_SET, (size_t)5, coord) < 0)
+        TEST_ERROR
+
+    /* Select points in virtual space */
+    coord[0] = 3;
+    coord[1] = 12;
+    coord[2] = 7;
+    coord[3] = 11;
+    coord[4] = 4;
+    coord[5] = 9;
+    coord[6] = 7;
+    coord[7] = 11;
+    coord[8] = 5;
+    coord[9] = 5;
+    if(H5Sselect_elements(vspace[2], H5S_SELECT_SET, (size_t)5, coord) < 0)
+        TEST_ERROR
+
+    /* Select hyperslab in source space */
+    start[0] = 2;
+    start[1] = 7;
+    count[0] = 1;
+    count[1] = 1;
+    block[0] = 1;
+    block[1] = 5;
+    if(H5Sselect_hyperslab(srcspace[3], H5S_SELECT_SET, start, NULL, count, block) < 0)
+        TEST_ERROR
+
+    /* Select points in virtual space */
+    coord[0] = 1;
+    coord[1] = 1;
+    coord[2] = 4;
+    coord[3] = 17;
+    coord[4] = 3;
+    coord[5] = 9;
+    coord[6] = 5;
+    coord[7] = 13;
+    coord[8] = 7;
+    coord[9] = 16;
+    if(H5Sselect_elements(vspace[3], H5S_SELECT_SET, (size_t)5, coord) < 0)
+        TEST_ERROR
+
+    /* Add virtual layout mappings */
+    for(i = 0; i < 4; i++)
+        if(H5Pset_virtual(dcpl, vspace[i], src_file[i], src_dset[i], srcspace[i]) < 0)
+            TEST_ERROR
+
+    /* Get examination DCPL */
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+        TEST_ERROR
+
+    /* Test H5Pget_virtual_count */
+    if(H5Pget_virtual_count(ex_dcpl, &size_out) < 0)
+        TEST_ERROR
+    if(size_out != (size_t)4)
+        TEST_ERROR
+
+    /* Check that the mappings in the DCPL are correct */
+    for(i = 0; i < 4; i++)
+        if(vds_check_mapping(ex_dcpl, (size_t)i, vspace[i], srcspace[i], src_file[i], src_dset[i]) < 0)
+            TEST_ERROR
+
+    /* Close */
+    for(i = 0; i < 4; i++) {
+        if(H5Sclose(srcspace[i]) < 0)
+            TEST_ERROR
+        srcspace[i] = -1;
+        if(H5Sclose(vspace[i]) < 0)
+            TEST_ERROR
+        vspace[i] = -1;
+    } /* end for */
     if(H5Pclose(ex_dcpl) < 0)
         TEST_ERROR
     ex_dcpl = -1;
@@ -301,10 +863,8 @@ test_api(test_api_config_t config, hid_t fapl)
     if(H5Sselect_all(srcspace[0]) < 0)
         TEST_ERROR
 
-    /* Create virtual dataspace */
+    /* Init virtual space extent */
     dims[0] = LIST_DOUBLE_SIZE;
-    if((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
-        TEST_ERROR
 
     /* Init hyperslab values */
     start[0] = 0;
@@ -316,9 +876,13 @@ test_api(test_api_config_t config, hid_t fapl)
 
     /* Build virtual layout */
     for(i = 0; i < LIST_DOUBLE_SIZE; i++) {
+        /* Create virtual dataspace */
+        if((vspace[i] = H5Screate_simple(2, dims, NULL)) < 0)
+            TEST_ERROR
+
         /* Select row in virual dataspace */
         start[0] = (hsize_t)i;
-        if(H5Sselect_hyperslab(vspace[0], H5S_SELECT_SET, start, NULL, count, block) < 0)
+        if(H5Sselect_hyperslab(vspace[i], H5S_SELECT_SET, start, NULL, count, block) < 0)
             TEST_ERROR
 
         /* Create file and dataset names */
@@ -328,7 +892,7 @@ test_api(test_api_config_t config, hid_t fapl)
         tmp_dsetname[sizeof(tmp_dsetname) - 1] = '\0';
 
         /* Add virtual layout mapping */
-        if(H5Pset_virtual(dcpl, vspace[0], tmp_filename, tmp_dsetname, srcspace[0]) < 0)
+        if(H5Pset_virtual(dcpl, vspace[i], tmp_filename, tmp_dsetname, srcspace[0]) < 0)
             TEST_ERROR
     } /* end if */
 
@@ -339,75 +903,21 @@ test_api(test_api_config_t config, hid_t fapl)
     /* Test H5Pget_virtual_count */
     if(H5Pget_virtual_count(ex_dcpl, &size_out) < 0)
         TEST_ERROR
-    if(size_out != LIST_DOUBLE_SIZE)
+    if(size_out != (size_t)LIST_DOUBLE_SIZE)
         TEST_ERROR
 
     /* Verify virtual layout */
     for(i = 0; i < LIST_DOUBLE_SIZE; i++) {
-        /* Test H5Pget_virtual_vspace */
-        if((space_out = H5Pget_virtual_vspace(ex_dcpl, i)) < 0)
-            TEST_ERROR
-        if((tri_ret = H5Sextent_equal(space_out, vspace[0])) < 0)
-            TEST_ERROR
-        if(!tri_ret)
-            TEST_ERROR
-        if(H5Sget_select_type(space_out) != H5S_SEL_HYPERSLABS)
-            TEST_ERROR
-        if((ssize_out = H5Sget_select_hyper_nblocks(space_out)) < 0)
-            TEST_ERROR
-        if(ssize_out != 1)
-            TEST_ERROR
-        if(H5Sget_select_hyper_blocklist(space_out, 0, 1, blocklist) < 0)
-            TEST_ERROR
-        if(blocklist[0] != (hsize_t)i)
-            TEST_ERROR
-        if(blocklist[1] != 0)
-            TEST_ERROR
-        if(blocklist[2] != (hsize_t)i)
-            TEST_ERROR
-        if(blocklist[3] != 19)
-            TEST_ERROR
-        if(H5Sclose(space_out) < 0)
-            TEST_ERROR
-        space_out = -1;
-
-        /* Test H5Pget_virtual_srcspace */
-        if((space_out = H5Pget_virtual_srcspace(ex_dcpl, i)) < 0)
-            TEST_ERROR
-        if(H5Sget_select_type(space_out) != H5S_SEL_ALL)
-            TEST_ERROR
-        if(H5Sclose(space_out) < 0)
-            TEST_ERROR
-        space_out = -1;
-
-        /* Test H5Pget_virtual_filename */
+        /* Generate source file name */
         (void)HDsnprintf(tmp_filename, sizeof(tmp_filename), "src_file%u", i);
         tmp_filename[sizeof(tmp_filename) - 1] = '\0';
-        if((ssize_out = H5Pget_virtual_filename(ex_dcpl, i, NULL, 0)) < 0)
-            TEST_ERROR
-        if((size_t)ssize_out != HDstrlen(tmp_filename))
-            TEST_ERROR
-        HDassert((size_t)ssize_out < sizeof(name_out));
-        if((ssize_out = H5Pget_virtual_filename(ex_dcpl, i, name_out, sizeof(name_out))) < 0)
-            TEST_ERROR
-        if((size_t)ssize_out != HDstrlen(tmp_filename))
-            TEST_ERROR
-        if(HDstrncmp(name_out, tmp_filename, (size_t)ssize_out + 1) != 0)
-            TEST_ERROR
 
-        /* Test H5Pget_virtual_dsetname */
+        /* Generate source dset name */
         (void)HDsnprintf(tmp_dsetname, sizeof(tmp_dsetname), "src_dset%u", i);
         tmp_dsetname[sizeof(tmp_dsetname) - 1] = '\0';
-        if((ssize_out = H5Pget_virtual_dsetname(ex_dcpl, i, NULL, 0)) < 0)
-            TEST_ERROR
-        if((size_t)ssize_out != HDstrlen(tmp_dsetname))
-            TEST_ERROR
-        HDassert((size_t)ssize_out < sizeof(name_out));
-        if((ssize_out = H5Pget_virtual_dsetname(ex_dcpl, i, name_out, sizeof(name_out))) < 0)
-            TEST_ERROR
-        if((size_t)ssize_out != HDstrlen(tmp_dsetname))
-            TEST_ERROR
-        if(HDstrncmp(name_out, tmp_dsetname, (size_t)ssize_out + 1) != 0)
+
+        /* Check that the mapping in the DCPL is correct */
+        if(vds_check_mapping(ex_dcpl, (size_t)i, vspace[i], srcspace[0], tmp_filename, tmp_dsetname) < 0)
             TEST_ERROR
     } /* end if */
 
@@ -415,9 +925,11 @@ test_api(test_api_config_t config, hid_t fapl)
     if(H5Sclose(srcspace[0]) < 0)
         TEST_ERROR
     srcspace[0] = -1;
-    if(H5Sclose(vspace[0]) < 0)
-        TEST_ERROR
-    vspace[0] = -1;
+    for(i = 0; i < LIST_DOUBLE_SIZE; i++) {
+        if(H5Sclose(vspace[i]) < 0)
+            TEST_ERROR
+        vspace[i] = -1;
+    } /* end for */
     if(H5Pclose(ex_dcpl) < 0)
         TEST_ERROR
     ex_dcpl = -1;
@@ -436,11 +948,11 @@ error:
         for(i = 0; i < (sizeof(srcspace) / sizeof(srcspace[0])); i++) {
             if(srcspace[i] >= 0)
                 (void)H5Sclose(srcspace[i]);
+        } /* end for */
+        for(i = 0; i < (sizeof(vspace) / sizeof(vspace[0])); i++) {
             if(vspace[i] >= 0)
                 (void)H5Sclose(vspace[i]);
         } /* end for */
-        if(space_out >= 0)
-            (void)H5Sclose(space_out);
         if(dcpl >= 0)
             (void)H5Pclose(dcpl);
         if(ex_dcpl >= 0)

@@ -452,7 +452,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
             {
                 size_t i;
 
-                HDassert(!dataset->shared->layout.storage.u.virt.list == (dataset->shared->layout.storage.u.virt.list_nused == 0));
+                HDassert(dataset->shared->layout.storage.u.virt.list || (dataset->shared->layout.storage.u.virt.list_nused == 0));
 
                 /* Patch the virtual selection dataspaces */
                 for(i = 0; i < dataset->shared->layout.storage.u.virt.list_nused; i++)

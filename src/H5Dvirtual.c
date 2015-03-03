@@ -239,7 +239,7 @@ H5D__virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
