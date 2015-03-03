@@ -1095,7 +1095,7 @@ case "$host_cpu-$host_vendor-$host_os" in
   *linux*)
     ## Make available various LFS-related routines using the following 
     ## _LARGEFILE*_SOURCE macros.
-    AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $H5_CPPFLAGS"
 
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
@@ -1121,7 +1121,7 @@ case "$host_cpu-$host_vendor-$host_os" in
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
-    AM_CPPFLAGS="-D_GNU_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
 
     ## Also add BSD support on Linux systems, so <features.h> defines
     ## __USE_BSD, which is required to get the prototype for strdup
@@ -1131,7 +1131,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
     ## however, we do not do this since it breaks the big test on some 
     ## older platforms.
-    AM_CPPFLAGS="-D_BSD_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_BSD_SOURCE $H5_CPPFLAGS"
     ;;
 esac
 
