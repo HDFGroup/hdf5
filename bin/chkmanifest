@@ -86,15 +86,18 @@ for file in $svn_stat; do
     # The line listing them starts with 'A'.
     letter="$(echo $file | head -c 1)"
     if [ "$letter" = "A" ]; then
-        # Convert 'A     ' to './' so it matches
+        # Convert the seven Subversion status columns to './' so it matches
         # the manifest file name.
-        path=`echo $file | sed 's/^A\s*/\.\//g'`
+        #
+        # There is a space between the status columns and file name, hence
+        # the '8' instead of '7'.
+        path=`echo $file | sed 's/^.\{8\}/\.\//g'`
         # Ignore directories
         if [ ! -d $path ]; then
             if (grep ^$path$ $MANIFEST >/dev/null); then
                 :
             else
-                echo "+ $path"
+                echo "- $path"
                 fail=yes
             fi
         fi
