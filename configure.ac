@@ -1095,7 +1095,7 @@ case "$host_cpu-$host_vendor-$host_os" in
   *linux*)
     ## Make available various LFS-related routines using the following 
     ## _LARGEFILE*_SOURCE macros.
-    H5_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $H5_CPPFLAGS"
+    AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
 
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
