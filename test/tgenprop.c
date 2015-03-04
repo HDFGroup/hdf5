@@ -47,7 +47,7 @@ int         prop1_def=10;   /* Property 1 default value */
 #define PROP1_DEF_VALUE (&prop1_def)
 
 #define PROP2_NAME     "Property 2"
-float         prop2_def=(float)3.14;   /* Property 2 default value */
+float         prop2_def=3.14F;   /* Property 2 default value */
 #define PROP2_SIZE      sizeof(prop2_def)
 #define PROP2_DEF_VALUE (&prop2_def)
 
@@ -57,7 +57,7 @@ char          prop3_def[10]="Ten chars";   /* Property 3 default value */
 #define PROP3_DEF_VALUE (&prop3_def)
 
 #define PROP4_NAME     "Property 4"
-double          prop4_def=1.41;   /* Property 4 default value */
+double          prop4_def=1.41F;   /* Property 4 default value */
 #define PROP4_SIZE      sizeof(prop4_def)
 #define PROP4_DEF_VALUE (&prop4_def)
 

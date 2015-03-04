@@ -541,7 +541,7 @@ test_array_compound_atomic(void)
     for(i = 0; i < SPACE1_DIM1; i++)
         for(j = 0; j < ARRAY1_DIM1; j++) {
             wdata[i][j].i = i * 10 + j;
-            wdata[i][j].f = (float)(i * 2.5 + j);
+            wdata[i][j].f = (float)(i * 2.5F + j);
         } /* end for */
 
     /* Create file */
@@ -745,7 +745,7 @@ test_array_compound_array(void)
         for(j=0; j<ARRAY1_DIM1; j++) {
             wdata[i][j].i=i*10+j;
             for(k=0; k<ARRAY1_DIM1; k++)
-                wdata[i][j].f[k]=(float)(i*10+j*2.5+k);
+                wdata[i][j].f[k]=(float)(i * 10.0F + j * 2.5F + k);
         } /* end for */
 
     /* Create file */
@@ -1534,8 +1534,8 @@ test_array_bkg(void)
 		for (j = 0; j < ALEN; j++)
 		  {
 			cf[i].a[j] = 100*(i+1) + j;
-			cf[i].b[j] = (float)(100.*(i+1) + 0.01*j);
-			cf[i].c[j] = 100.*(i+1) + 0.02*j;
+			cf[i].b[j] = (float)(100.0F*(i+1) + 0.01F*j);
+			cf[i].c[j] = (double)(100.0F*(i+1) + 0.02F*j);
 		  }
 	  }
 
@@ -1674,7 +1674,7 @@ test_array_bkg(void)
     /* -------------------------------- */
     for (i=0; i< LENGTH; i++)
         for (j = 0; j < ALEN; j++)
-            cf[i].b[j]=fld[i].b[j] = (float)1.313;
+            cf[i].b[j]=fld[i].b[j] = 1.313F;
 
     status = H5Dwrite (dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, fld);
     CHECK(status, FAIL, "H5Dwrite");

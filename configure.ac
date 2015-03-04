@@ -1097,7 +1097,7 @@ case "$host_cpu-$host_vendor-$host_os" in
   *linux*)
     ## Make available various LFS-related routines using the following 
     ## _LARGEFILE*_SOURCE macros.
-    AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $H5_CPPFLAGS"
 
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
@@ -1123,7 +1123,7 @@ case "$host_cpu-$host_vendor-$host_os" in
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
-    AM_CPPFLAGS="-D_GNU_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
 
     ## Also add BSD support on Linux systems, so <features.h> defines
     ## __USE_BSD, which is required to get the prototype for strdup
@@ -1133,7 +1133,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
     ## however, we do not do this since it breaks the big test on some 
     ## older platforms.
-    AM_CPPFLAGS="-D_BSD_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_BSD_SOURCE $H5_CPPFLAGS"
     ;;
 esac
 
@@ -2429,14 +2429,12 @@ if test -n "$PARALLEL"; then
   fi
 fi
 
-
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
-
-## Check these regardless. If the checks are moved inside the main
-## direct VFD block, the output is nested.
-
+## ----------------------------------------------------------------------
+## Check if Direct I/O driver is enabled by --enable-direct-vfd
+##
 AC_CACHE_VAL([hdf5_cv_direct_io],
     AC_CHECK_DECL([O_DIRECT], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no], [[#include <fcntl.h>]]))
 AC_CACHE_VAL([hdf5_cv_posix_memalign],

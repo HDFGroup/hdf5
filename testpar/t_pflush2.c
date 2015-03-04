@@ -209,9 +209,6 @@ main(int argc, char* argv[])
         puts("    Test not compatible with current Virtual File Driver");
     }
 
-    /* close HDF5 library */
-    H5close();
-
     MPI_Finalize();
     return 0;
 

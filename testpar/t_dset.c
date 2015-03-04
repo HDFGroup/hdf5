@@ -2502,6 +2502,7 @@ extend_readAll(void)
  * Example of using the parallel HDF5 library to read a compressed
  * dataset in an HDF5 file with collective parallel access support.
  */
+#ifdef H5_HAVE_FILTER_DEFLATE
 void
 compress_readAll(void)
 {
@@ -2655,6 +2656,7 @@ compress_readAll(void)
     if(data_read) HDfree(data_read);
     if(data_orig) HDfree(data_orig);
 }
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
 /*
  * Part 4--Non-selection for chunked dataset

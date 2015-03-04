@@ -323,7 +323,7 @@ precision (detected_t *d)
      * steps).  This is necessary because padding bits can change arbitrarily \
      * and interfere with detection of the various properties below unless we \
      * know to ignore them. */                                                \
-    _v1 = 4.0;                                                                \
+    _v1 = (TYPE)4.0L;                                                         \
     HDmemcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                        \
     for(_i = 0; _i < (int)sizeof(TYPE); _i++)                                 \
         for(_byte_mask = (unsigned char)1; _byte_mask; _byte_mask <<= 1) {    \
@@ -335,10 +335,10 @@ precision (detected_t *d)
         } /* end for */                                                       \
                                                                               \
     /* Byte Order */                                                          \
-    for(_i = 0, _v1 = 0.0, _v2 = 1.0; _i < (int)sizeof(TYPE); _i++) {         \
+    for(_i = 0, _v1 = (TYPE)0.0L, _v2 = (TYPE)1.0L; _i < (int)sizeof(TYPE); _i++) {         \
         _v3 = _v1;                                                            \
         _v1 += _v2;                                                           \
-        _v2 /= 256.0;                                                         \
+        _v2 /= (TYPE)256.0L;                                                  \
         HDmemcpy(_buf1, (const void *)&_v1, sizeof(TYPE));                    \
         HDmemcpy(_buf3, (const void *)&_v3, sizeof(TYPE));                    \
         _j = byte_cmp(sizeof(TYPE), _buf3, _buf1, _pad_mask);                 \
@@ -353,20 +353,20 @@ precision (detected_t *d)
         INFO.is_vax = TRUE;                                                   \
                                                                               \
     /* Implicit mantissa bit */                                               \
-    _v1 = 0.5;                                                                \
-    _v2 = 1.0;                                                                \
+    _v1 = (TYPE)0.5L;                                                         \
+    _v2 = (TYPE)1.0L;                                                         \
     INFO.imp = imp_bit (sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);      \
                                                                               \
     /* Sign bit */                                                            \
-    _v1 = 1.0;                                                                \
-    _v2 = -1.0;                                                               \
+    _v1 = (TYPE)1.0L;                                                         \
+    _v2 = (TYPE)-1.0L;                                                        \
     INFO.sign = bit_cmp (sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);     \
                                                                               \
     /* Mantissa */                                                            \
     INFO.mpos = 0;                                                            \
                                                                               \
-    _v1 = 1.0;                                                                \
-    _v2 = 1.5;                                                                \
+    _v1 = (TYPE)1.0L;                                                         \
+    _v2 = (TYPE)1.5L;                                                         \
     INFO.msize = bit_cmp (sizeof(TYPE), INFO.perm, &_v1, &_v2, _pad_mask);    \
     INFO.msize += 1 + (INFO.imp?0:1) - INFO.mpos;                             \
                                                                               \
@@ -375,7 +375,7 @@ precision (detected_t *d)
                                                                               \
     INFO.esize = INFO.sign - INFO.epos;                                       \
                                                                               \
-    _v1 = 1.0;                                                                \
+    _v1 = (TYPE)1.0L;                                                         \
     INFO.bias = find_bias (INFO.epos, INFO.esize, INFO.perm, &_v1);           \
     precision (&(INFO));                                                      \
     ALIGNMENT(TYPE, INFO);                                                    \
@@ -1381,8 +1381,8 @@ detect_C89_integers(void)
 static void
 detect_C89_floats(void)
 {
-    DETECT_F(float,		  FLOAT,        d_g[nd_g]); nd_g++;
-    DETECT_F(double,		  DOUBLE,       d_g[nd_g]); nd_g++;
+    DETECT_F(float,     FLOAT,      d_g[nd_g]); nd_g++;
+    DETECT_F(double,    DOUBLE,     d_g[nd_g]); nd_g++;
 }
 
 

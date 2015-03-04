@@ -156,13 +156,13 @@ dnl
     HAVE_F2003_REQUIREMENTS="no"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
 
-	USE iso_c_binding
-	IMPLICIT NONE
-	TYPE(C_PTR) :: ptr
-	TYPE(C_FUNPTR) :: funptr
-	CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(C_PTR) :: ptr
+        TYPE(C_FUNPTR) :: funptr
+        CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
 
-	ptr = C_LOC(ichr(1:1))
+        ptr = C_LOC(ichr(1:1))
 
         ])],[AC_MSG_RESULT([yes])
         HAVE_F2003_REQUIREMENTS=[yes]], 

@@ -5161,7 +5161,7 @@ check_and_validate_cache_hit_rate(hid_t file_id,
 
         } else {
 
-            expected_hit_rate = 0.0;
+            expected_hit_rate = 0.0F;
         }
 
         result = H5Fget_mdc_hit_rate(file_id, &hit_rate);
@@ -5171,7 +5171,7 @@ check_and_validate_cache_hit_rate(hid_t file_id,
             pass = FALSE;
             failure_mssg = "H5Fget_mdc_hit_rate() failed.";
 
-        } else if ( ! DBL_REL_EQUAL(hit_rate, expected_hit_rate, 0.00001) ) {
+        } else if ( ! DBL_REL_EQUAL(hit_rate, expected_hit_rate, 0.00001F) ) {
 
             pass = FALSE;
             failure_mssg = "unexpected hit rate.";

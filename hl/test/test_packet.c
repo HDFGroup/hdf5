@@ -54,14 +54,14 @@ typedef struct particle_t
  *-------------------------------------------------------------------------
  */
 static particle_t testPart[NRECORDS] = {
-    {"zero", 0,0, 0.0f, 0.0},
-    {"one",  10,10, 1.0f, 10.0},
-    {"two",  20,20, 2.0f, 20.0},
-    {"three",30,30, 3.0f, 30.0},
-    {"four", 40,40, 4.0f, 40.0},
-    {"five", 50,50, 5.0f, 50.0},
-    {"six",  60,60, 6.0f, 60.0},
-    {"seven",70,70, 7.0f, 70.0}
+    {"zero", 0,0, 0.0f, 0.0f},
+    {"one",  10,10, 1.0f, 10.0f},
+    {"two",  20,20, 2.0f, 20.0f},
+    {"three",30,30, 3.0f, 30.0f},
+    {"four", 40,40, 4.0f, 40.0f},
+    {"five", 50,50, 5.0f, 50.0f},
+    {"six",  60,60, 6.0f, 60.0f},
+    {"seven",70,70, 7.0f, 70.0f}
   };
 
 /*-------------------------------------------------------------------------
@@ -895,6 +895,92 @@ error:
     return -1;
 }
 
+/*-------------------------------------------------------------------------
+ * test_rw_non-native_dt
+ *
+ * test reading and writing packet table using datatypes that are not
+ * native.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int test_rw_nonnative_dt(hid_t fid)
+{
+ hid_t          ptable;     /* Packet table identifier */
+
+ herr_t         err;        /* Function return status */
+ hsize_t        count;      /* Number of records in the table */
+
+ int            x;          /* Loop variable */
+
+ /* Buffers to hold data */
+ int writeBuffer[5];
+ int readBuffer[5];
+
+ TESTING("reading/writing non-native packet table");
+
+ /* Initialize buffers */
+ for(x=0; x<5; x++) {
+   writeBuffer[x]=x;
+   readBuffer[x] = -1;
+ }
+
+ /* Create a fixed-length packet table within the file */
+ /* This table's "packets" will be simple integers and it will use no compression */
+ if(H5Tget_order(H5T_NATIVE_INT) == H5T_ORDER_LE) {
+   ptable = H5PTcreate_fl(fid, "Packet Test Dataset, Non-native", H5T_STD_I32BE, (hsize_t)100, -1);
+ } else {
+   ptable = H5PTcreate_fl(fid, "Packet Test Dataset, Non-native", H5T_STD_I32LE, (hsize_t)100, -1);
+ }
+ if(ptable == H5I_INVALID_HID)
+   goto out;
+
+ /* Write one packet to the packet table */
+ if( (err = H5PTappend(ptable, (hsize_t)1, &(writeBuffer[0]))) < 0 )
+   goto out;
+
+ /* Write several packets to the packet table */
+ if( (err = H5PTappend(ptable, (hsize_t)4, &(writeBuffer[1]))) < 0)
+   goto out;
+
+ if( (err = H5PTclose(ptable)) < 0)
+   goto out;
+
+ /* Open the Packet table */
+ if( (ptable = H5PTopen(fid, "Packet Test Dataset, Non-native")) < 0)
+   goto out;
+
+ /* Get the number of packets in the packet table.  This should be five. */
+ if( (err = H5PTget_num_packets(ptable, &count)) < 0)
+   goto out;
+
+ if( (int)count != 5 )
+   goto out;
+
+ /* Initialize packet table's "current record" */
+ if( (err = H5PTcreate_index(ptable)) < 0)
+   goto out;
+
+ /* Iterate through packets, read each one back */
+ for(x=0; x<5; x++) {
+   if( (err = H5PTget_next(ptable, (hsize_t)1, &(readBuffer[x]))) < 0)
+     goto out;
+   if( x != readBuffer[x])
+     goto out;
+ }
+
+ /* Close the packet table */
+ if( (err = H5PTclose(ptable)) < 0)
+   goto out;
+ 
+ PASSED();
+ return 0;
+
+ out:
+     H5_FAILED();
+     if( H5PTis_valid(ptable) < 0)
+       H5PTclose(ptable);
+     return -1;
+}
 
 /*-------------------------------------------------------------------------
  * test_error
@@ -1035,6 +1121,7 @@ static int test_packet_table(hid_t fid)
     test_read(fid);
     test_get_next(fid);
     test_big_table(fid);
+    test_rw_nonnative_dt(fid);
 #ifdef VLPT_REMOVED
     test_varlen(fid);
 #endif /* VLPT_REMOVED */
