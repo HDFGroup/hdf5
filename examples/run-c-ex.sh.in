@@ -125,8 +125,10 @@ then
         RunTest h5_elink_unix2win &&\
         rm h5_elink_unix2win &&\
         RunTest h5_shared_mesg &&\
-        rm h5_shared_mesg &&
-        RunTest h5_vds &&
+        rm h5_shared_mesg &&\
+        RunTest h5_vds-exc &&\
+        rm h5_vds-exc&&\
+        RunTest h5_vds &&\
         rm h5_vds); then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
