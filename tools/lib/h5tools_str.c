@@ -468,16 +468,24 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace,
 
     /* Count coordinates */
     h5tools_str_append(str, "%s ", COUNT);
-    for (j = 0; j < ndims; j++)
-        h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", count[j]);
+    for (j = 0; j < ndims; j++) {
+        if(count[j] == H5S_UNLIMITED)
+            h5tools_str_append(str, "%s%s", j ? "," : "(","H5S_UNLIMITED");
+        else
+            h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", count[j]);
+    }
     h5tools_str_append(str, ");");
     h5tools_str_append(str, "%s", "\n");
     h5tools_str_indent(str, info, ctx);
 
     /* Block coordinates */
     h5tools_str_append(str, "%s ", BLOCK);
-    for (j = 0; j < ndims; j++)
-        h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", block[j]);
+    for (j = 0; j < ndims; j++) {
+        if(block[j] == H5S_UNLIMITED)
+            h5tools_str_append(str, "%s%s", j ? "," : "(","H5S_UNLIMITED");
+        else
+            h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", block[j]);
+    }
     h5tools_str_append(str, ");");
     h5tools_str_append(str, "%s", "\n");
     h5tools_str_indent(str, info, ctx);
