@@ -99,6 +99,8 @@
 #define VDS_POINT       "POINT"
 #define VDS_SRC_FILE    "SRC_FILE"
 #define VDS_SRC_DATASET "SRC_DATASET"
+#define VDS_NONE        "SELECTION_NONE"
+#define VDS_ALL         "SELECTION_ALL"
 
 #define BEGIN           "{"
 #define END             "}"
