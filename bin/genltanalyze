@@ -60,6 +60,37 @@ flex --nounistd -PH5LTyy -oH5LTanalyze.c H5LTanalyze.l
 # H5LTparse.c.
 perl -0777 -pi -e 's/int\nyyparse/hid_t\nyyparse/igs' H5LTparse.c
 perl -0777 -pi -e 's/int H5LTyyparse/hid_t H5LTyyparse/igs' H5LTparse.c
+
+# Add code that disables warnings in the flex/bison-generated code.
+#
+# Note that the GCC pragmas did not exist until gcc 4.2. Earlier versions
+# will simply ignore them, but we want to avoid those warnings.
+for f in H5LTparse.c H5LTanalyze.c
+do
+    echo '#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2                           ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wconversion"                     ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"  ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wlarger-than="                   ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wmissing-prototypes"             ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wnested-externs"                 ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wold-style-definition"           ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wsign-compare"                   ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wsign-conversion"                ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wstrict-prototypes"              ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wswitch-default"                 ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wunused-function"                ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wunused-macros"                  ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wunused-parameter"               ' >> tmp.out
+    echo '#elif defined __SUNPRO_CC                                         ' >> tmp.out
+    echo '#pragma disable_warn                                              ' >> tmp.out
+    echo '#elif defined _MSC_VER                                            ' >> tmp.out
+    echo '#pragma warning(push, 1)                                          ' >> tmp.out
+    echo '#endif                                                            ' >> tmp.out
+
+    cat $f >> tmp.out
+    mv tmp.out $f
+done
+
 cd ../..
 
 exit 0
