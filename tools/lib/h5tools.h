@@ -94,8 +94,11 @@
 #define PACKED_OFFSET   "OFFSET"
 #define PACKED_LENGTH   "LENGTH"
 #define VDS_VIRTUAL     "VIRTUAL"
-#define VDS_HYPERSLAB   "HYPERSLAB"
+#define VDS_REG_HYPERSLAB   "REGULAR_HYPERSLAB"
+#define VDS_IRR_HYPERSLAB   "IRREGULAR_HYPERSLAB"
 #define VDS_POINT       "POINT"
+#define VDS_SRC_FILE    "SRC_FILE"
+#define VDS_SRC_DATASET "SRC_DATASET"
 
 #define BEGIN           "{"
 #define END             "}"
