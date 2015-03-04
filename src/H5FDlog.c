@@ -126,12 +126,6 @@ typedef struct H5FD_log_t {
      */
     hbool_t     fam_to_sec2;
 
-    /* Information from file open flags, for SWMR access:
-     *
-     *  Whether the file is open for SWMR read access.
-     */
-    hbool_t     swmr_read;
-
     /* Fields for tracking I/O operations */
     unsigned char       *nread;                 /* Number of reads from a file location             */
     unsigned char       *nwrite;                /* Number of write to a file location               */
@@ -647,10 +641,6 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     } /* end if */
 
-    /* Check for SWMR reader access */
-    if(flags & H5F_ACC_SWMR_READ)
-        file->swmr_read = TRUE;
-
     /* Check for non-default FAPL */
     if(H5P_FILE_ACCESS_DEFAULT != fapl_id) {
         /* This step is for h5repart tool only. If user wants to change file driver from
@@ -1149,14 +1139,6 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
-    /* If the file is open for SWMR read access, allow access to data past
-     * the end of the allocated space (the 'eoa').  This is done because the
-     * eoa stored in the file's superblock might be out of sync with the
-     * objects being written within the file by the application performing
-     * SWMR write operations.
-     */
-    if(!file->swmr_read && (addr + size) > file->eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
 
     /* Log the I/O information about the read */
     if(file->fa.flags != 0) {
@@ -1361,8 +1343,6 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu", (unsigned long long)addr, (unsigned long long)size)
-    if((addr + size) > file->eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu", (unsigned long long)addr, (unsigned long long)size, (unsigned long long)file->eoa)
 
     /* Log the I/O information about the write */
     if(file->fa.flags & H5FD_LOG_FILE_WRITE) {

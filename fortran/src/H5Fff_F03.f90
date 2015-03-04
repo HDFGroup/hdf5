@@ -74,12 +74,9 @@ CONTAINS
     INTEGER(SIZE_T) :: buf_size_default
 
     INTERFACE
-       INTEGER FUNCTION h5fget_file_image_c(file_id, buf_ptr, buf_len, buf_size)
-         USE, INTRINSIC :: ISO_C_BINDING
+       INTEGER FUNCTION h5fget_file_image_c(file_id, buf_ptr, buf_len, buf_size) BIND(C, NAME='h5fget_file_image_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5FGET_FILE_IMAGE_C'::h5fget_file_image_c
-         !DEC$ENDIF
          INTEGER(HID_T) , INTENT(IN) :: file_id
          TYPE(C_PTR)    , VALUE      :: buf_ptr
          INTEGER(SIZE_T), INTENT(IN) :: buf_len

@@ -103,11 +103,6 @@ typedef struct H5FD_sec2_t {
      */
     hbool_t         fam_to_sec2;
 
-    /* Information from file open flags, for SWMR access:
-     *
-     *  Whether the file is open for SWMR read access.
-     */
-    hbool_t     swmr_read;
 } H5FD_sec2_t;
 
 /*
@@ -392,10 +387,6 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Retain a copy of the name used to open the file, for possible error reporting */
     HDstrncpy(file->filename, name, sizeof(file->filename));
     file->filename[sizeof(file->filename) - 1] = '\0';
-
-    /* Check for SWMR reader access */
-    if(flags & H5F_ACC_SWMR_READ)
-        file->swmr_read = TRUE;
 
     /* Check for non-default FAPL */
     if(H5P_FILE_ACCESS_DEFAULT != fapl_id) {
@@ -704,15 +695,6 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
-    /* If the file is open for SWMR read access, allow access to data past
-     * the end of the allocated space (the 'eoa').  This is done because the
-     * eoa stored in the file's superblock might be out of sync with the
-     * objects being written within the file by the application performing
-     * SWMR write operations.
-     */
-    if(!file->swmr_read && (addr + size) > file->eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%lu, eoa=%llu", 
-                    (unsigned long long)addr, size, (unsigned long long)file->eoa)
 
     /* Seek to the correct location */
     if(addr != file->pos || OP_READ != file->op) {
@@ -808,8 +790,6 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu", (unsigned long long)addr, (unsigned long long)size)
-    if((addr + size) > file->eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu", (unsigned long long)addr, (unsigned long long)size, (unsigned long long)file->eoa)
 
     /* Seek to the correct location */
     if(addr != file->pos || OP_WRITE != file->op) {

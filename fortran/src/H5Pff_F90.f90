@@ -927,22 +927,21 @@ SUBROUTINE h5pinsert_char(plist, name, size, value, hdferr)
     INTEGER :: name_len
 
     INTERFACE
-       INTEGER FUNCTION h5pcreate_class_c(parent, name, name_len,&
-            class)
+       INTEGER FUNCTION h5pcreate_class_f90_c(parent, name, name_len, class)
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PCREATE_CLASS_C'::h5pcreate_class_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PCREATE_CLASS_F90_C'::h5pcreate_class_f90_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: parent
          CHARACTER(LEN=*), INTENT(IN) :: name
          INTEGER, INTENT(IN)         :: name_len
          INTEGER(HID_T), INTENT(OUT) :: class
-       END FUNCTION h5pcreate_class_c
+       END FUNCTION h5pcreate_class_f90_c
     END INTERFACE
 
     name_len = LEN(name)
-    hdferr = h5pcreate_class_c(parent, name, name_len, class)
+    hdferr = h5pcreate_class_f90_c(parent, name, name_len, class)
 
   END SUBROUTINE h5pcreate_class_f
 

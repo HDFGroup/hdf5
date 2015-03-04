@@ -124,8 +124,6 @@ typedef struct H5FD_stdio_t {
     HANDLE          hFile;      /* Native windows file handle */
 #endif  /* H5_HAVE_WIN32_API */
 
-    /* Information from file open flags, for SWMR access */
-    hbool_t     swmr_read;      /* Whether the file is open for SWMR read access */
 } H5FD_stdio_t;
 
 /* Use similar structure as in H5private.h by defining Windows stuff first. */
@@ -461,10 +459,6 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
     file->inode = sb.st_ino;
 #endif /* H5_VMS */
 #endif /* H5_HAVE_WIN32_API */
-
-    /* Check for SWMR reader access */
-    if(flags & H5F_ACC_SWMR_READ)
-        file->swmr_read = 1;
 
     return((H5FD_t*)file);
 } /* end H5FD_stdio_open() */
@@ -806,14 +800,6 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
         H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     if (REGION_OVERFLOW(addr, size))
         H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
-    /* If the file is open for SWMR read access, allow access to data past
-     * the end of the allocated space (the 'eoa').  This is done because the
-     * eoa stored in the file's superblock might be out of sync with the
-     * objects being written within the file by the application performing
-     * SWMR write operations.
-     */
-    if(!file->swmr_read && (addr + size) > file->eoa)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
 
     /* Check easy cases */
     if (0 == size)
@@ -918,8 +904,6 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     if (HADDR_UNDEF == addr)
         H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     if (REGION_OVERFLOW(addr, size))
-        H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
-    if (addr+size > file->eoa)
         H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
 
     /* Seek to the correct file position. */

@@ -1852,6 +1852,9 @@ test_swmr_write_big(void)
         file a ways. 10MB should do. */
     if(H5FD_set_eoa(rf->shared->lf, H5FD_MEM_DEFAULT, (haddr_t)(1024*1024*10)) < 0) FAIL_STACK_ERROR
 
+    if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+	FAIL_STACK_ERROR;
+
     /* Reset metadata accumulator for the file */
     if(accum_reset(&fio_info) < 0) FAIL_STACK_ERROR;
 

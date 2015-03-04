@@ -28,8 +28,16 @@ exit_code=$EXIT_SUCCESS
 TEST_NAME=plugin
 TEST_BIN=`pwd`/$TEST_NAME
 FROM_DIR=`pwd`/.libs
-PLUGIN_LIB1="$FROM_DIR/libdynlib1.* $FROM_DIR/libdynlib3.*"
-PLUGIN_LIB2="$FROM_DIR/libdynlib2.*"
+case $(uname) in
+    CYGWIN* )
+        PLUGIN_LIB1="$FROM_DIR/cygdynlib1* $FROM_DIR/cygdynlib3*"
+        PLUGIN_LIB2="$FROM_DIR/cygdynlib2*"
+        ;;
+    *)
+        PLUGIN_LIB1="$FROM_DIR/libdynlib1.* $FROM_DIR/libdynlib3.*"
+        PLUGIN_LIB2="$FROM_DIR/libdynlib2.*"
+        ::
+esac
 PLUGIN_LIBDIR1=testdir1
 PLUGIN_LIBDIR2=testdir2
 CP="cp -p"	# Use -p to preserve mode,ownership,timestamps

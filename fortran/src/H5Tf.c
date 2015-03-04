@@ -2385,9 +2385,9 @@ nh5tget_native_type_c(hid_t_f *dtype_id, int_f *direction, hid_t_f *native_dtype
 
 /****if* H5Tf/h5tconvert_c
  * NAME
- *        h5tconvert_c
+ *  h5tconvert_c
  * PURPOSE
- *     Call H5Tconvert
+ *  Call H5Tconvert
  * INPUTS
  *
  *  src_id     - Identifier for the source datatype.
@@ -2401,7 +2401,7 @@ nh5tget_native_type_c(hid_t_f *dtype_id, int_f *direction, hid_t_f *native_dtype
  *  buf        - Array containing post-conversion values.
  *
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
  *  December 8, 2008
@@ -2409,7 +2409,7 @@ nh5tget_native_type_c(hid_t_f *dtype_id, int_f *direction, hid_t_f *native_dtype
  * SOURCE
 */
 int_f
-nh5tconvert_c(hid_t_f *src_id, hid_t_f *dst_id, size_t_f *nelmts, void *buf, void *background, hid_t_f *plist_id)
+h5tconvert_c(hid_t_f *src_id, hid_t_f *dst_id, size_t_f *nelmts, void *buf, void *background, hid_t_f *plist_id)
 /******/
 {
   int ret_value = -1;
