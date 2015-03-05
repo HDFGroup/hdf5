@@ -1154,7 +1154,7 @@ H5B_iterate_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t add
     H5UC_t	        *rc_shared;     /* Ref-counted shared info */
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
     H5B_cache_ud_t      cache_udata;    /* User-data for metadata cache callback */
-    unsigned            i;              /* Index */
+    unsigned            u;              /* Local index variable */
     herr_t              ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1181,16 +1181,14 @@ H5B_iterate_helper(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t add
     if(NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, &cache_udata, H5AC_READ)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load B-tree node")
 
-    /* Iterate over children */
-    for(i=0; i<bt->nchildren && ret_value == H5_ITER_CONT; i++) {
-        if(bt->level > 0) {
-            /* Keep following the left-most child until we reach a leaf node. */
-            if((ret_value = H5B_iterate_helper(f, dxpl_id, type, bt->child[i], op, udata)) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, H5_ITER_ERROR, "unable to list B-tree node")
-        } /* end if */
+    /* Iterate over node's children */
+    for(u = 0; u < bt->nchildren && ret_value == H5_ITER_CONT; u++) {
+        if(bt->level > 0)
+            ret_value = H5B_iterate_helper(f, dxpl_id, type, bt->child[u], op, udata);
         else
-            if((ret_value = (*op)(f, dxpl_id, H5B_NKEY(bt, shared, i), bt->child[i], H5B_NKEY(bt, shared, i + 1), udata)) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, H5_ITER_ERROR, "iterator function failed")
+            ret_value = (*op)(f, dxpl_id, H5B_NKEY(bt, shared, u), bt->child[u], H5B_NKEY(bt, shared, u + 1), udata);
+        if(ret_value < 0)
+            HERROR(H5E_BTREE, H5E_BADITER, "B-tree iteration failed");
     } /* end for */
 
 done:
