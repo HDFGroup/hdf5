@@ -482,6 +482,7 @@ set (H5PL_SRCS
 
 set (H5PL_HDRS
     ${HDF5_SRC_DIR}/H5PLextern.h
+    ${HDF5_SRC_DIR}/H5PLpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5PL" "${H5PL_HDRS}" "${H5PL_SRCS}" )
 

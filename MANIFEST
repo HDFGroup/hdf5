@@ -847,6 +847,7 @@
 ./src/H5Ptest.c
 ./src/H5PL.c
 ./src/H5PLprivate.h
+./src/H5PLpublic.h
 ./src/H5PLextern.h
 ./src/H5R.c
 ./src/H5Rdeprec.c
@@ -2400,6 +2401,7 @@
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
+./config/cmake/patch.xml
 ./config/cmake/PkgInfo.in
 ./config/cmake/README.txt.cmake.in
 ./config/cmake/userblockTest.cmake
