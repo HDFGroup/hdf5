@@ -858,6 +858,7 @@ done:\n\
     printf("/* signal_handlers tested: %d times */\n", signal_handler_tested_g);
     printf("/* sigbus_handler called: %d times */\n", sigbus_handler_called_g);
     printf("/* sigsegv_handler called: %d times */\n", sigsegv_handler_called_g);
+    printf("/* sigill_handler called: %d times */\n", sigill_handler_called_g);
 } /* end print_results() */
 
 
@@ -1750,13 +1751,17 @@ main(void)
 
 #if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
     /* verify the SIGBUS and SIGSEGV handlers work properly */
-    if (verify_signal_handlers (SIGBUS, sigbus_handler) != 0){
-	fprintf(stderr, "Signal handler %s for signal %d failed\n",
-	    "sigbus_handler", SIGBUS);
+    if (verify_signal_handlers(SIGBUS, sigbus_handler) != 0) {
+        fprintf(stderr, "Signal handler %s for signal %d failed\n",
+                "sigbus_handler", SIGBUS);
     }
-    if (verify_signal_handlers (SIGSEGV, sigsegv_handler) != 0){
-	fprintf(stderr, "Signal handler %s for signal %d failed\n",
-	    "sigsegv_handler", SIGSEGV);
+    if (verify_signal_handlers(SIGSEGV, sigsegv_handler) != 0) {
+        fprintf(stderr, "Signal handler %s for signal %d failed\n",
+                "sigsegv_handler", SIGSEGV);
+    }
+    if (verify_signal_handlers(SIGILL, sigill_handler) != 0) {
+        fprintf(stderr, "Signal handler %s for signal %d failed\n",
+                "sigill_handler", SIGILL);
     }
 #else
     align_status_g |= STA_NoHandlerVerify;
