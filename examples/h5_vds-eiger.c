@@ -1,7 +1,8 @@
 /************************************************************
 
   This example illustrates the concept of the virtual dataset.
-  Excalibur use case with k=2 and m=3.
+  Eiger use case. Every 5 frames 10x10 are in the source 
+  dataset "/A" in file with the name f-<#>.h5
   This file is intended for use with HDF5 Library version 1.10
 
  ************************************************************/
@@ -10,61 +11,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE         "vds-exc.h5"
-#define DATASET      "VDS-Excalibur"
-#define VDSDIM0         0 
-#define VDSDIM1         15 
-#define VDSDIM2         6 
-#define KDIM0           0 
-#define KDIM1           2 
-#define KDIM2           6 
-#define NDIM0           0 
-#define NDIM1           3 
-#define NDIM2           6 
-#define RANK            3 
-
-const char *SRC_FILE[] = {
-    "a.h5",
-    "b.h5",
-    "c.h5",
-    "d.h5",
-    "e.h5",
-    "f.h5"
-};
-
-const char *SRC_DATASET[] = {
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F"
-};
+#define FILE         "vds-eiger.h5"
+#define DATASET      "VDS-Eiger"
+#define VDSDIM0       5 
+#define VDSDIM1       10 
+#define VDSDIM2       10 
+#define DIM0          5 
+#define DIM1          10 
+#define DIM2          10 
+#define RANK          3 
 
 int
 main (void)
 {
-    hid_t        file, space, ksrc_space, nsrc_space, vspace,
-                 src_space,
+    hid_t        file, src_space, vspace,
                  dset;                       /* Handles */
     hid_t        dcpl;
     herr_t       status;
     hsize_t      vdsdims[3] = {VDSDIM0, VDSDIM1, VDSDIM2},
-                 vdsdims_max[3] = {H5S_UNLIMITED,VDSDIM1, VDSDIM2},
-                 kdims[3] = {KDIM0, KDIM1, KDIM2},
-                 kdims_max[3] = {H5S_UNLIMITED, KDIM1, KDIM2},
-                 ndims[3] = {NDIM0, NDIM1, NDIM2},
-                 ndims_max[3] = {H5S_UNLIMITED, NDIM1, NDIM2},
+                 vdsdims_max[3] = {H5S_UNLIMITED, VDSDIM1, VDSDIM1},
+                 dims[3] = {DIM0, DIM1, DIM2},
                  start[3],                   /* Hyperslab parameters */
                  stride[3],
                  count[3],
                  block[3];
-    hsize_t      start_out[3],
+    hsize_t      start_out[3],               /* Hyperslab parameter out */
                  stride_out[3],
                  count_out[3],
                  block_out[3];
-    int          k = 2;
-    int          n = 3;
     int          i;
     H5D_layout_t layout;                     /* Storage layout */
     size_t       num_map;                    /* Number of mappings */
@@ -76,11 +50,10 @@ main (void)
     file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create VDS dataspace.  */
-    space = H5Screate_simple (RANK, vdsdims, vdsdims_max);
-    /* Create dataspaces for A, C, and E datasets. */
-    ksrc_space = H5Screate_simple (RANK, kdims, kdims_max);
-    /* Create dataspaces for B, D, and F datasets. */
-    nsrc_space = H5Screate_simple (RANK, ndims, ndims_max);
+    vspace = H5Screate_simple (RANK, vdsdims, vdsdims_max);
+
+    /* Create dataspaces for the source dataset. */
+    src_space = H5Screate_simple (RANK, dims, NULL);
 
     /* Create VDS creation property */
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
@@ -90,41 +63,30 @@ main (void)
     start[0] = 0;
     start[1] = 0;
     start[2] = 0;
+    stride[0] = DIM0;
+    stride[1] = 1;
+    stride[2] = 1;
     count[0] = H5S_UNLIMITED;
     count[1] = 1;
     count[2] = 1;
-    block[0] = 1;
-    block[1] = k;
-    block[2] = VDSDIM2;
+    block[0] = DIM0;
+    block[1] = DIM1;
+    block[2] = DIM2;
 
    /* 
-    * Build the mappings for A, C and E source datasets.
+    * Build the mappings 
     *
     */
-   for (i = 0; i < 3; i++) {
-      start[1] = (hsize_t)((k+n)*i);
-      status = H5Sselect_hyperslab (space, H5S_SELECT_SET, start, NULL, count, block);
-      status = H5Pset_virtual (dcpl, space, SRC_FILE[2*i], SRC_DATASET[2*i], ksrc_space);
-   }
+      status = H5Sselect_hyperslab (vspace, H5S_SELECT_SET, start, stride, count, block);
+      status = H5Pset_virtual (dcpl, vspace, "f-%0b.h5", "/A", src_space);
+   
 
-   /* Reinitialize block[1] */
-   block[1] = n;
-   /* 
-    * Build the mappings for B, D and F source datasets.
-    *
-    */
-   for (i = 0; i < 3; i++) {
-      start[1] = (hsize_t)(k+(k+n)*i);
-      status = H5Sselect_hyperslab (space, H5S_SELECT_SET, start, NULL, count, block);
-      status = H5Pset_virtual (dcpl, space, SRC_FILE[2*i+1], SRC_DATASET[2*i+1], nsrc_space);
-   }
 
    /* Create a virtual dataset */
-      dset = H5Dcreate (file, DATASET, H5T_NATIVE_INT, space, H5P_DEFAULT,
+      dset = H5Dcreate (file, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT,
                   dcpl, H5P_DEFAULT);
-      status = H5Sclose (space);
-      status = H5Sclose (nsrc_space);
-      status = H5Sclose (ksrc_space);
+      status = H5Sclose (vspace);
+      status = H5Sclose (src_space);
       status = H5Dclose (dset);
       status = H5Fclose (file);    
      
@@ -152,7 +114,7 @@ main (void)
     if (H5D_VIRTUAL == layout) 
         printf(" Dataset has a virtual layout \n");
     else
-        printf("Wrong layout found \n");
+        printf(" Wrong layout found \n");
 
      /*
       * Find number of mappings.

@@ -34,6 +34,8 @@ set (examples
     h5_extlink
     h5_elink_unix2win
     h5_shared_mesg
+    h5_vds-eiger
+    h5_vds-exclim
     h5_vds-exc
     h5_vds
 )

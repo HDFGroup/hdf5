@@ -1,7 +1,8 @@
 /************************************************************
 
   This example illustrates the concept of the virtual dataset.
-  Excalibur use case with k=2 and m=3.
+  Excalibur use case with k=2 and m=3 and only 3 planes in
+  Z-direction (i.e., not unlimited).
   This file is intended for use with HDF5 Library version 1.10
 
  ************************************************************/
@@ -10,15 +11,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE         "vds-exc.h5"
-#define DATASET      "VDS-Excalibur"
-#define VDSDIM0         0 
+#define FILE         "vds-exclim.h5"
+#define DATASET      "VDS-Excaliburlim"
+#define VDSDIM0         3 
 #define VDSDIM1         15 
 #define VDSDIM2         6 
-#define KDIM0           0 
+#define KDIM0           3 
 #define KDIM1           2 
 #define KDIM2           6 
-#define NDIM0           0 
+#define NDIM0           3 
 #define NDIM1           3 
 #define NDIM2           6 
 #define RANK            3 
@@ -50,11 +51,8 @@ main (void)
     hid_t        dcpl;
     herr_t       status;
     hsize_t      vdsdims[3] = {VDSDIM0, VDSDIM1, VDSDIM2},
-                 vdsdims_max[3] = {H5S_UNLIMITED,VDSDIM1, VDSDIM2},
                  kdims[3] = {KDIM0, KDIM1, KDIM2},
-                 kdims_max[3] = {H5S_UNLIMITED, KDIM1, KDIM2},
                  ndims[3] = {NDIM0, NDIM1, NDIM2},
-                 ndims_max[3] = {H5S_UNLIMITED, NDIM1, NDIM2},
                  start[3],                   /* Hyperslab parameters */
                  stride[3],
                  count[3],
@@ -76,11 +74,11 @@ main (void)
     file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create VDS dataspace.  */
-    space = H5Screate_simple (RANK, vdsdims, vdsdims_max);
+    space = H5Screate_simple (RANK, vdsdims, NULL);
     /* Create dataspaces for A, C, and E datasets. */
-    ksrc_space = H5Screate_simple (RANK, kdims, kdims_max);
+    ksrc_space = H5Screate_simple (RANK, kdims, NULL);
     /* Create dataspaces for B, D, and F datasets. */
-    nsrc_space = H5Screate_simple (RANK, ndims, ndims_max);
+    nsrc_space = H5Screate_simple (RANK, ndims, NULL);
 
     /* Create VDS creation property */
     dcpl = H5Pcreate (H5P_DATASET_CREATE);
@@ -90,7 +88,7 @@ main (void)
     start[0] = 0;
     start[1] = 0;
     start[2] = 0;
-    count[0] = H5S_UNLIMITED;
+    count[0] = VDSDIM0;
     count[1] = 1;
     count[2] = 1;
     block[0] = 1;
@@ -101,18 +99,21 @@ main (void)
     * Build the mappings for A, C and E source datasets.
     *
     */
+   status = H5Sselect_hyperslab (ksrc_space, H5S_SELECT_SET, start, NULL, count, block);
    for (i = 0; i < 3; i++) {
       start[1] = (hsize_t)((k+n)*i);
       status = H5Sselect_hyperslab (space, H5S_SELECT_SET, start, NULL, count, block);
       status = H5Pset_virtual (dcpl, space, SRC_FILE[2*i], SRC_DATASET[2*i], ksrc_space);
    }
 
-   /* Reinitialize block[1] */
+   /* Reinitialize start[0] and block[1] */
+   start[0] = 0;
    block[1] = n;
    /* 
     * Build the mappings for B, D and F source datasets.
     *
     */
+   status = H5Sselect_hyperslab (nsrc_space, H5S_SELECT_SET, start, NULL, count, block);
    for (i = 0; i < 3; i++) {
       start[1] = (hsize_t)(k+(k+n)*i);
       status = H5Sselect_hyperslab (space, H5S_SELECT_SET, start, NULL, count, block);
@@ -190,10 +191,16 @@ main (void)
           printf("         Source dataset name %s\n", dsetname);
 
       /* Get selection in the source dataset */
-          printf("         Selection in the source dataset ");
+          printf("         Selection in the source dataset \n");
           src_space = H5Pget_virtual_srcspace (dcpl, (size_t)i);
-          if(H5Sget_select_type(src_space) == H5S_SEL_ALL) {
-                  printf("H5S_ALL \n");
+          if(H5Sget_select_type(src_space) == H5S_SEL_HYPERSLABS) {
+              if (H5Sis_regular_hyperslab(vspace)) {
+                   status = H5Sget_regular_hyperslab (vspace, start_out, stride_out, count_out, block_out);
+                   printf("         start  = [%d, %d, %d] \n", (int)start_out[0], (int)start_out[1], (int)start_out[2]);
+                   printf("         stride = [%d, %d, %d] \n", (int)stride_out[0], (int)stride_out[1], (int)stride_out[2]);
+                   printf("         count  = [%d, %d, %d] \n", (int)count_out[0], (int)count_out[1], (int)count_out[2]);
+                   printf("         block  = [%d, %d, %d] \n", (int)block_out[0], (int)block_out[1], (int)block_out[2]);
+               }
           }
           H5Sclose(vspace);
           H5Sclose(src_space);
