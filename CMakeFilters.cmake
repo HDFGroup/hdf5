@@ -45,9 +45,9 @@ option (HDF5_ENABLE_Z_LIB_SUPPORT "Enable Zlib Filters" OFF)
 if (HDF5_ENABLE_Z_LIB_SUPPORT)
   if (NOT H5_ZLIB_HEADER)
     if (NOT ZLIB_USE_EXTERNAL)
-      FIND_PACKAGE (ZLIB NAMES ${ZLIB_PACKAGE_NAME}${HDF_PACKAGE_EXT})
+      find_package (ZLIB NAMES ${ZLIB_PACKAGE_NAME}${HDF_PACKAGE_EXT})
       if (NOT ZLIB_FOUND)
-        FIND_PACKAGE (ZLIB) # Legacy find
+        find_package (ZLIB) # Legacy find
       endif (NOT ZLIB_FOUND)
     endif (NOT ZLIB_USE_EXTERNAL)
     if (ZLIB_FOUND)
@@ -89,9 +89,9 @@ option (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF)
 if (HDF5_ENABLE_SZIP_SUPPORT)
   option (HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" OFF)
   if (NOT SZIP_USE_EXTERNAL)
-    FIND_PACKAGE (SZIP NAMES ${SZIP_PACKAGE_NAME}${HDF_PACKAGE_EXT})
+    find_package (SZIP NAMES ${SZIP_PACKAGE_NAME}${HDF_PACKAGE_EXT})
     if (NOT SZIP_FOUND)
-      FIND_PACKAGE (SZIP) # Legacy find
+      find_package (SZIP) # Legacy find
     endif (NOT SZIP_FOUND)
   endif (NOT SZIP_USE_EXTERNAL)
   if (SZIP_FOUND)

@@ -1072,12 +1072,7 @@ ADD_H5_TEST (h5diff_80 1 -v ${FILE7} ${FILE8})
 ADD_H5_TEST (h5diff_90 0 -v ${FILE2} ${FILE2})
 
 # 10. read by hyperslab, print indexes
-#if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
-#    # skip this test which sometimes hangs in some THG machines
-#    message (STATUS "SKIP -v ${FILE9} ${FILE10})
-#else
-#    ADD_H5_TEST (h5diff_100 1 -v ${FILE9} ${FILE10}) 
-#fi
+ADD_H5_TEST (h5diff_100 1 -v ${FILE9} ${FILE10}) 
 
 # 11. floating point comparison
 ADD_H5_TEST (h5diff_101 1 -v ${FILE1} ${FILE1} g1/d1  g1/d2) 

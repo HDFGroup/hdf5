@@ -7,8 +7,8 @@
 
 # make test dir
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST")
-file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/tesfiles")
-file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/tesfiles/plist_files")
+file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/testfiles")
+file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/testfiles/plist_files")
 if (HDF5_TEST_VFD)
   set (VFD_LIST
       sec2
