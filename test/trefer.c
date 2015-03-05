@@ -522,6 +522,12 @@ test_reference_region(void)
     H5O_type_t  obj_type;       /* Type of object */
     int        i, j;           /* counting variables */
     herr_t	ret;		/* Generic return value		*/
+    haddr_t     addr = HADDR_UNDEF; /* test for undefined reference */
+    hid_t dset_NA;   /* Dataset id for undefined reference */
+    hid_t space_NA; /* Dataspace id for undefined reference */
+    hsize_t             dims_NA[1] = {1};  /* Dims array for undefined reference */
+    hdset_reg_ref_t     wdata_NA[1],       /* Write buffer */
+                        rdata_NA[1];       /* Read buffer */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Dataset Region Reference Functions\n"));
@@ -612,6 +618,31 @@ test_reference_region(void)
     ret = H5Dwrite(dset1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
     CHECK(ret, FAIL, "H5Dwrite");
 
+    /*
+     * Store a dataset region reference which will not get written to disk
+     */
+
+    /* Create reference to an element in dset1 */
+    ret = H5Sselect_elements(sid2, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord1);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+    ret = H5Rcreate(&wdata_NA[0], fid1, "/Dataset1", H5R_DATASET_REGION, sid2);
+    CHECK(ret, FAIL, "H5Rcreate");
+
+    /* Create the dataspace of the region references */
+    space_NA = H5Screate_simple(1, dims_NA, NULL);
+    CHECK(space_NA, FAIL, "H5Screate_simple");
+
+    /* Create the dataset and write the region references to it */
+    dset_NA = H5Dcreate(fid1, "DS_NA", H5T_STD_REF_DSETREG, space_NA, H5P_DEFAULT,
+                H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset_NA, FAIL, "H5Dcreate");
+
+    /* Close and release resources for undefined region reference tests */
+    ret = H5Dclose(dset_NA);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Sclose(space_NA); 
+    CHECK(ret, FAIL, "H5Sclose");
+
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
@@ -632,6 +663,41 @@ test_reference_region(void)
     fid1 = H5Fopen(FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
 
+    /* 
+     * Start the test of an undefined reference 
+     */
+    
+    /* Open the dataset of the undefined references */
+    dset_NA = H5Dopen2(fid1, "DS_NA", H5P_DEFAULT);
+    CHECK(dset_NA, FAIL, "H5Dopen2");
+
+    /* Read the data */
+    ret = H5Dread(dset_NA, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata_NA);
+    CHECK(ret, FAIL, "H5Dread");
+    
+    /*
+     * Dereference an undefined reference (should fail)
+     */
+    H5E_BEGIN_TRY {
+      dset2 = H5Rdereference2(dset_NA, H5P_DEFAULT, H5R_DATASET_REGION, &rdata_NA[0]);
+    } H5E_END_TRY;                                  
+    VERIFY(dset2, FAIL, "H5Rdereference2"); 
+
+    /* Close and release resources. */
+    ret = H5Dclose(dset_NA);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* This close should fail since H5Rdereference2 never created 
+     * the id of the referenced object. */
+    H5E_BEGIN_TRY {
+      ret = H5Dclose(dset2);
+    } H5E_END_TRY;                                  
+    VERIFY(ret, FAIL, "H5Dclose"); 
+
+    /* 
+     * End the test of an undefined reference 
+     */
+
     /* Open the dataset */
     dset1 = H5Dopen2(fid1, "/Dataset1", H5P_DEFAULT);
     CHECK(dset1, FAIL, "H5Dopen2");
@@ -639,6 +705,10 @@ test_reference_region(void)
     /* Read selection from disk */
     ret = H5Dread(dset1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
     CHECK(ret, FAIL, "H5Dread");
+
+    /* Try to read an unaddressed dataset */
+    dset2 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, &addr);
+    VERIFY(dset2, FAIL, "H5Rdereference2 haddr_undef");
 
     /* Try to open objects */
     dset2 = H5Rdereference2(dset1, dapl_id, H5R_DATASET_REGION, &rbuf[0]);
@@ -1070,6 +1140,7 @@ test_reference_obj_deleted(void)
     hid_t		sid1;       /* Dataspace ID			*/
     hobj_ref_t  oref;       /* Object Reference to test */
     H5O_type_t          obj_type;       /* Object type */
+    haddr_t addr = HADDR_UNDEF; /* test for undefined reference */                
     herr_t		ret;		/* Generic return value		*/
 
     /* Create file */
@@ -1126,6 +1197,10 @@ test_reference_obj_deleted(void)
     /* Open the dataset */
     dataset = H5Dopen2(fid1, "/Dataset2", H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Dopen2");
+
+    /* Open undefined reference */
+    dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &addr);
+    VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Read selection from disk */
     HDmemset(&oref, 0, sizeof(hobj_ref_t));
