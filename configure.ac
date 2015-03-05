@@ -594,6 +594,11 @@ AC_PATH_PROG([TR], [tr])
 ## Check that time can be used with srcdir.  This is okay on most systems,
 ## but seems to cause problems on Cygwin.
 ## The solution on Cygwin is not to record execution time for tests.
+##
+## Note: This is still true as of Cygwin 1.7.32 (Aug 2014) on both 32-
+## and 64-bit platforms. Given how long this has been true, it seems
+## unlikely to change, but we should probably re-test this periodically.
+
 AC_MSG_CHECKING([if srcdir= and time commands work together])
 
 AC_SUBST([TIME])

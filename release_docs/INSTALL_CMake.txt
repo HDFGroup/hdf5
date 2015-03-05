@@ -632,7 +632,7 @@ platform configuration script.
 # CTestScript.cmake file. Usage:
 # "ctest -S HDF518LinuxCmake.cmake -C Release -O hdf518shared.log"
 ############################################################################
-cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 
 # this is the location of the source hardcoded to hdf5-1.8.13
 set(CTEST_SOURCE_NAME hdf5-1.8.13)

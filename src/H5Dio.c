@@ -320,6 +320,8 @@ H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
         if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &direct_datasize) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data size for direct chunk write")
 
+	/* The library's chunking code requires the offset terminates with a zero. So transfer the 
+         * offset array to an internal offset array */ 
 	for(u = 0; u < dset->shared->ndims; u++) {
 	    /* Make sure the offset doesn't exceed the dataset's dimensions */
             if(direct_offset[u] > dset->shared->curr_dims[u])

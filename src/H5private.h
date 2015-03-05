@@ -213,7 +213,7 @@
 #define MPE_LOG_VARS                                                    \
     static int eventa(FUNC) = -1;                                       \
     static int eventb(FUNC) = -1;                                       \
-    char p_event_start[100];
+    char p_event_start[128];
 
 /* Hardwire the color to "red", since that's what all the routines are using
  * now.  In the future, if we want to change that color for a given routine,
