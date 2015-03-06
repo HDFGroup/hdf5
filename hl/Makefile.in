@@ -665,8 +665,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog
+# *.clog and *.clog2 are from the MPE option.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 @BUILD_FORTRAN_CONDITIONAL_TRUE@FORTRAN_DIR = fortran
 @BUILD_CXX_CONDITIONAL_TRUE@CXX_DIR = c++
 @BUILD_HDF5_HL_CONDITIONAL_TRUE@SUBDIRS = src test tools $(CXX_DIR) $(FORTRAN_DIR)

@@ -666,10 +666,10 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
+# *.clog and *.clog2 are from the MPE option.
 # Temporary files
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog tattr_multi.h5 tfattrs.h5 \
-	tattr_scalar.h5 tattr_compound.h5 tattr_dtype.h5 \
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 tattr_multi.h5 \
+	tfattrs.h5 tattr_scalar.h5 tattr_compound.h5 tattr_dtype.h5 \
 	tattr_basic.h5
 
 # These are our main targets.  They should be listed in the order to be

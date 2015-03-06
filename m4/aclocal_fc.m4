@@ -156,13 +156,13 @@ dnl
     HAVE_F2003_REQUIREMENTS="no"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
 
-	USE iso_c_binding
-	IMPLICIT NONE
-	TYPE(C_PTR) :: ptr
-	TYPE(C_FUNPTR) :: funptr
-	CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(C_PTR) :: ptr
+        TYPE(C_FUNPTR) :: funptr
+        CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
 
-	ptr = C_LOC(ichr(1:1))
+        ptr = C_LOC(ichr(1:1))
 
         ])],[AC_MSG_RESULT([yes])
         HAVE_F2003_REQUIREMENTS=[yes]], 
@@ -268,7 +268,7 @@ dnl   Try link a simple MPI program.
       AC_MSG_CHECKING([whether a simple MPI-IO Fortran program can be linked])
       AC_LINK_IFELSE([ 
           PROGRAM main
-          USE mpi
+          INCLUDE 'mpif.h'
           INTEGER :: comm, amode, info, fh, ierror
           CHARACTER(LEN=1) :: filename 
           CALL MPI_File_open( comm, filename, amode, info, fh, ierror)

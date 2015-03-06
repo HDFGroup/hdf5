@@ -118,7 +118,8 @@ $Source = "";
                "H5G_iterate_t"              => "x",
 	       "H5G_info_t"                 => "x",
 	       "H5I_free_t"                 => "x",
-               "H5L_class_t"                => "x",
+                "H5I_search_func_t"         => "x",
+                "H5L_class_t"                => "x",
                "H5L_elink_traverse_t"       => "x",
                "H5L_iterate_t"              => "x",
                "H5MM_allocate_t"            => "x",
@@ -281,14 +282,10 @@ sub rewrite_func ($$$$$) {
 
   # The H5TRACE() statement
   if ($body =~ /\/\*[ \t]*NO[ \t]*TRACE[ \t]*\*\//) {
-    if ($body =~ /\s*H5TRACE\d+\s*\(/) {
-      errmesg $file, $name, "warning: trace info was not updated because of NO TRACE comment";
-    } else {
-      errmesg $file, $name, "warning: trace info was not inserted because of NO TRACE comment";
-    }
+    # Ignored due to NO TRACE comment.
   } elsif ($body =~ s/((\n[ \t]*)H5TRACE\d+\s*\(.*?\);)\n/"$2$trace"/es) {
-    # Replaced an H5TRACE macro
-  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*\s*\(.*?\);??)\n/"$1$2$trace"/es) {
+    # Replaced an H5TRACE macro.
+  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*\s*(\(.*?\))?;??)\n/"$1$2$trace"/es) {
     # Added an H5TRACE macro after a FUNC_ENTER macro.
   } else {
     errmesg $file, $name, "unable to insert tracing information";
@@ -317,14 +314,14 @@ for $file (@ARGV) {
 
     # Make modifications
     my $original = $Source;
-    my $napi = $Source =~ s/\n([A-Za-z]\w*(\s+[a-z]\w*)*)\s*\n #type
+    my $napi = $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
                               (H5[A-Z]{0,2}[^_A-Z0-9]\w*)      #name
                               \s*\((.*?)\)\s*               #args
                               (\{.*?\n\}[^\n]*)             #body
                            /rewrite_func($file,$1,$3,$4,$5)/segx;
     $total_api += $napi;
 
-    # If the source changed then print out the new version
+# If the source changed then print out the new version
     if ($original ne $Source) {
       printf "%s: instrumented %d API function%s\n", 
              $file, $napi, 1==$napi?"":"s";
@@ -335,3 +332,6 @@ for $file (@ARGV) {
     }
   }
 }
+
+printf "Finished processing HDF5 API calls\n"
+

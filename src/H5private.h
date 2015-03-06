@@ -160,6 +160,10 @@
 #include <dirent.h>
 #endif
 
+/* Define the default VFD for this platform.
+ * Since the removal of the Windows VFD, this is sec2 for all platforms.
+ */
+#define H5_DEFAULT_VFD      H5FD_SEC2
 
 #ifdef H5_HAVE_WIN32_API
 /* The following two defines must be before any windows headers are included */
@@ -567,9 +571,6 @@ typedef struct {
 #ifndef HDatol
     #define HDatol(S)    atol(S)
 #endif /* HDatol */
-#ifndef HDBSDgettimeofday
-    #define HDBSDgettimeofday(S,P)  BSDgettimeofday(S,P)
-#endif /* HDBSDgettimeofday */
 #ifndef HDbsearch
     #define HDbsearch(K,B,N,Z,F)  bsearch(K,B,N,Z,F)
 #endif /* HDbsearch */

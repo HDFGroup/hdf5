@@ -48,7 +48,7 @@ CONTAINS
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5dsset_scale_f
 !DEC$endif
 !
@@ -106,7 +106,7 @@ CONTAINS
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5dsattach_scale_f
 !DEC$endif
 !
@@ -159,7 +159,7 @@ CONTAINS
     
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5dsdetach_scale_f
 !DEC$endif
 !
@@ -213,7 +213,7 @@ CONTAINS
     
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5dsis_attached_f
 !DEC$endif
 !
@@ -281,7 +281,7 @@ CONTAINS
     
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5dsis_scale_f
 !DEC$endif
 !
@@ -338,7 +338,7 @@ CONTAINS
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5dsset_label_f
 !DEC$endif
 !
@@ -397,7 +397,7 @@ CONTAINS
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5dsget_label_f
 !DEC$endif
 !
@@ -455,7 +455,7 @@ CONTAINS
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5dsget_scale_name_f
 !DEC$endif
 !
@@ -507,7 +507,7 @@ CONTAINS
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5dsget_num_scales_f
 !DEC$endif
 !

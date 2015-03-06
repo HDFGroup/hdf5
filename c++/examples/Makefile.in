@@ -609,8 +609,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
+# *.clog and *.clog2 are from the MPE option.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5
 INSTALL_SCRIPT_FILES = run-c++-ex.sh
 
 # These are the programs that 'make all' or 'make prog' will build and

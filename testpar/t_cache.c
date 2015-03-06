@@ -4245,7 +4245,6 @@ setup_rand(void)
     unsigned predefined_seeds[3] = {33402, 33505, 33422};
     unsigned seed;
     struct timeval tv;
-    struct timezone tz;
 
     if ( ( use_predefined_seeds ) &&
          ( world_mpi_size == num_predefined_seeds ) ) {
@@ -4261,7 +4260,7 @@ setup_rand(void)
 
     } else {
 
-        if ( HDgettimeofday(&tv, &tz) != 0 ) {
+        if ( HDgettimeofday(&tv, NULL) != 0 ) {
 
             nerrors++;
             if ( verbose ) {

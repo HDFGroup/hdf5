@@ -118,7 +118,7 @@ CONTAINS
 
   END SUBROUTINE h5tconvert_f
 !
-!****s* (F03) H5T/h5tenaum_insert_f03
+!****s* (F03) H5T/h5tenum_insert_f90
 !
 ! NAME
 !  h5tenum_insert_f
@@ -146,7 +146,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  !Name of  the new member
-    INTEGER, INTENT(IN) :: value !value of the new member
+    INTEGER, INTENT(IN) :: value ! value of the new member
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
 !*****
     INTEGER :: namelen
@@ -169,7 +169,7 @@ CONTAINS
   END SUBROUTINE h5tenum_insert_f90
 
 !
-!****s* (F03) H5T/h5tenaum_insert_f03
+!****s* (F03) H5T/h5tenum_insert_f03
 !
 ! NAME
 !  h5tenum_insert_f

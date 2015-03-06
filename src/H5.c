@@ -52,7 +52,9 @@
 /* Local Prototypes */
 /********************/
 static void H5_debug_mask(const char*);
-
+#ifdef H5_HAVE_PARALLEL
+static int H5_mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *flag);
+#endif /*H5_HAVE_PARALLEL*/
 
 /*********************/
 /* Package Variables */
@@ -109,6 +111,43 @@ H5_init_library(void)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
+
+#ifdef H5_HAVE_PARALLEL
+    {
+	int mpi_initialized;
+        int mpi_code;
+
+	MPI_Initialized(&mpi_initialized);
+
+#ifdef H5_HAVE_MPE
+        /* Initialize MPE instrumentation library. */
+        if (!H5_MPEinit_g)
+            {
+                int mpe_code;
+                if (mpi_initialized){
+                    mpe_code = MPE_Init_log();
+                    HDassert(mpe_code >=0);
+                    H5_MPEinit_g = TRUE;
+                }
+            }
+#endif /*H5_HAVE_MPE*/
+
+        /* add an attribute on MPI_COMM_SELF to call H5_term_library
+           when it is destroyed, i.e. on MPI_Finalize */
+        if (mpi_initialized) {
+            int key_val;
+
+            if(MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(MPI_NULL_COPY_FN, 
+                                                                 (MPI_Comm_delete_attr_function *)H5_mpi_delete_cb, 
+                                                                 &key_val, NULL)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Comm_create_keyval failed", mpi_code)
+
+            if(MPI_SUCCESS != (mpi_code = MPI_Comm_set_attr(MPI_COMM_SELF, key_val, NULL)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Comm_set_attr failed", mpi_code)
+        }
+    }
+#endif /*H5_HAVE_PARALLEL*/
+
     /*
      * Make sure the package information is updated.
      */
@@ -131,24 +170,6 @@ H5_init_library(void)
     H5_debug_g.pkg[H5_PKG_T].name = "t";
     H5_debug_g.pkg[H5_PKG_V].name = "v";
     H5_debug_g.pkg[H5_PKG_Z].name = "z";
-
-#ifdef H5_HAVE_MPE
-    /* Initialize MPE instrumentation library.  May need to move this
-     * up earlier if any of the above initialization involves using
-     * the instrumentation code.
-     */
-    if (!H5_MPEinit_g)
-    {
-	int mpe_code;
-	int mpi_initialized;
-	MPI_Initialized(&mpi_initialized);
-	if (mpi_initialized){
-	    mpe_code = MPE_Init_log();
-	    HDassert(mpe_code >=0);
-	    H5_MPEinit_g = TRUE;
-	}
-    }
-#endif
 
     /*
      * Install atexit() library cleanup routines unless the H5dont_atexit()
@@ -579,6 +600,27 @@ H5_debug_mask(const char *s)
 	}
     }
 } /* end H5_debug_mask() */
+
+#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_mpi_delete_cb
+ *
+ * Purpose:	Callback attribute on MPI_COMM_SELF to terminate the HDF5 
+ *              library when the communicator is destroyed, i.e. on MPI_Finalize.
+ *
+ * Return:	MPI_SUCCESS
+ *
+ * Programmer:	Mohamad Chaarawi, February 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int H5_mpi_delete_cb(MPI_Comm UNUSED comm, int UNUSED keyval, void UNUSED *attr_val, int UNUSED *flag)
+{
+    H5_term_library();
+    return MPI_SUCCESS;
+}
+#endif /*H5_HAVE_PARALLEL*/
 
 
 /*-------------------------------------------------------------------------

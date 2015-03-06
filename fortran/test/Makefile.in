@@ -735,10 +735,10 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
+# *.clog and *.clog2 are from the MPE option.
 
 # Temporary files
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 *.raw
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 *.raw
 
 # The Fortran test library
 noinst_LTLIBRARIES = libh5test_fortran.la

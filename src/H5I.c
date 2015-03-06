@@ -952,6 +952,7 @@ H5Iobject_verify(hid_t id, H5I_type_t id_type)
     void * ret_value;                      /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE2("*x", "iIt", id, id_type);
 
     if(H5I_IS_LIB_TYPE(id_type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
@@ -1092,6 +1093,7 @@ H5Iremove_verify(hid_t id, H5I_type_t id_type)
     void * ret_value;                      /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE2("*x", "iIt", id, id_type);
 
     if(H5I_IS_LIB_TYPE(id_type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
@@ -1940,6 +1942,7 @@ H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
     void *ret_value;            /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE3("*x", "Itx*x", type, func, key);
 
     /* Check arguments */
     if(H5I_IS_LIB_TYPE(type))

@@ -997,16 +997,6 @@ dnl AC_CHECK_LIB([coug], [main])		## ...for ASCI/Red
 AC_HEADER_STDC
 AC_HEADER_TIME
 
-## ----------------------------------------------------------------------
-## Check for these two functions before the time headers are checked
-## for, otherwise they are not detected correctly on Solaris (the
-## configure test will fail due to multiply-defined symbols).
-##
-AC_CHECK_FUNCS([difftime])
-AC_CHECK_FUNCS([gettimeofday], [have_gettime="yes"], [have_gettime="no"])
-AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AC_CHECK_FUNCS([clock_gettime],[have_clock_gettime="yes"],[have_clock_gettime="no"])
-
 ## Unix
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
 AC_CHECK_HEADERS([sys/socket.h sys/types.h])
@@ -1110,19 +1100,28 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
     ## defined correctly in <stdio.h>. 
+    ##
     ## This flag was removed from h5cc as of 2009-10-17 when it was found
     ## that the flag broke compiling netCDF-4 code with h5cc, but kept in 
     ## H5_CPPFLAGS because fdopen and HDfdopen fail without it. HDfdopen
     ## is used only by H5_debug_mask which is used only when debugging in
     ## H5_init_library (all in H5.c).  When the flag was removed this was
     ## the only compile failure noted.
+    ##
     ## This was originally defined as _POSIX_SOURCE which was updated to
     ## _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
     ## functionality so clock_gettime and CLOCK_MONOTONIC are defined
-    ## correctly.
+    ## correctly. This was later updated to 200112L so that
+    ## posix_memalign() is visible for the direct VFD code on Linux
+    ## systems.
+    ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=199506L $H5_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+
+    ## Need to add this so that O_DIRECT is visible for the direct
+    ## VFD on Linux systems.
+    AM_CPPFLAGS="-D_GNU_SOURCE $AM_CPPFLAGS"
 
     ## Also add BSD support on Linux systems, so <features.h> defines
     ## __USE_BSD, which is required to get the prototype for strdup
@@ -1732,16 +1731,6 @@ AC_TRY_COMPILE([
     AC_MSG_RESULT([yes])],
   [AC_MSG_RESULT([no])])
 
-## check if `struct tm' has a `__tm_gmtoff' member.
-AC_MSG_CHECKING([for __tm_gmtoff in struct tm])
-AC_TRY_COMPILE([
-  #include <sys/time.h>
-  #include <time.h>], [struct tm tm; tm.__tm_gmtoff=0;],
-  [AC_DEFINE([HAVE___TM_GMTOFF], [1],
-          [Define if `__tm_gmtoff' is a member of `struct tm'])
-     AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
-
 ## Check whether the global variable `timezone' is defined.
 AC_MSG_CHECKING([for global timezone variable])
 
@@ -1760,50 +1749,6 @@ case "`uname`" in
     ;;
 esac
 
-## Check whether `struct timezone' is defined.
-AC_STRUCT_TIMEZONE
-AC_MSG_CHECKING([for struct timezone])
-AC_TRY_COMPILE([
-  #include <sys/types.h>
-  #include <sys/time.h>
-  #include <time.h>], [struct timezone tz; tz.tz_minuteswest=0;],
-  [AC_DEFINE([HAVE_STRUCT_TIMEZONE], [1],
-          [Define if `struct timezone' is defined])
-    have_struct_tz="yes"
-    AC_MSG_RESULT([yes])],
-  [AC_MSG_RESULT([no])])
-
-## If gettimeofday() is going to be used, make sure it uses the timezone struct
-
-if test "$have_gettime" = "yes" -a "$have_struct_tz" = "yes"; then
-   AC_MSG_CHECKING(whether gettimeofday() gives timezone)
-   AC_CACHE_VAL([hdf5_cv_gettimeofday_tz],
-       [AC_TRY_RUN([
-          #include <time.h>
-          #include <sys/time.h>
-          int main(void)
-          {
-             struct timeval tv;
-             struct timezone tz;
-             tz.tz_minuteswest = 7777;  /* Initialize to an unreasonable number */
-             tz.tz_dsttime = 7;
-             gettimeofday(&tv, &tz);
-                /* Check whether the function returned any value at all */
-             if(tz.tz_minuteswest == 7777 && tz.tz_dsttime == 7)
-                exit(1);
-             else exit (0);
-          }], 
-          [hdf5_cv_gettimeofday_tz=yes], 
-          [hdf5_cv_gettimeofday_tz=no])])
-
-   if test ${hdf5_cv_gettimeofday_tz} = "yes"; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([GETTIMEOFDAY_GIVES_TZ], [1],
-                [Define if gettimeofday() populates the tz pointer passed in])
-   else
-      AC_MSG_RESULT([no])
-   fi
-fi 
 
 ## ----------------------------------------------------------------------
 ## Does the struct stat have the st_blocks field?  This field is not Posix.
@@ -1861,9 +1806,12 @@ AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGETD;],
 ## ----------------------------------------------------------------------
 ## Check for functions.
 ##
-AC_CHECK_FUNCS([alarm BSDgettimeofday fork frexpf frexpl])
-AC_CHECK_FUNCS([gethostname getpwuid getrusage lstat])
-AC_CHECK_FUNCS([rand_r random setsysinfo])
+## NOTE: clock_gettime may require linking to the rt or posix4 library
+##       so we'll search for it before calling AC_CHECK_FUNCS.
+AC_SEARCH_LIBS([clock_gettime], [rt posix4])
+AC_CHECK_FUNCS([alarm clock_gettime difftime fork frexpf frexpl])
+AC_CHECK_FUNCS([gethostname getpwuid getrusage gettimeofday])
+AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf waitpid])
@@ -2464,6 +2412,7 @@ if test -n "$PARALLEL"; then
   fi
 fi
 
+
 ## ----------------------------------------------------------------------
 ## Turn on internal I/O filters by setting macros in header files
 ## Internal I/O filters are contained entirely within the library and do
@@ -2531,82 +2480,44 @@ if test -n "$FILTERS"; then
   done
 fi
 
-## ----------------------------------------------------------------------
-## This is defined only when we're using CodeWarrior, since it has a
-## broken "open()" call.
-#
-if test 1 = 2; then
-  AC_DEFINE([NO_SHARED_WRITING], [1],
-            [Define if shared writing must be disabled (CodeWarrior only)])
-fi
-
-## --------------------------------------------------------------------------
-## Should the Default Virtual File Driver be compiled?
-##
-
-AC_MSG_CHECKING([for Default Virtual File Driver definition])
-AC_ARG_WITH([default-vfd],
-            [AS_HELP_STRING([--with-default-vfd=driver],
-                            [Specify default file driver
-                             [default=sec2]])],,
-            withval=sec2)
-
-if test "X$withval" = "Xsec2"; then
-    AC_MSG_RESULT([yes])
-    default_vfd=yes
-    vfd_define=H5FD_SEC2
-elif test "X$withval" = "Xstdio"; then
-    AC_MSG_RESULT([yes])
-    default_vfd=yes
-    vfd_define=H5FD_STDIO
-else
-    AC_MSG_RESULT([no])
-    default_vfd=no
-fi
-
-if test "X$default_vfd" = "Xyes"; then
-  AC_DEFINE_UNQUOTED([DEFAULT_VFD], [$vfd_define],
-            [Define the default virtual file driver to compile])
-fi
 
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
 
-AC_MSG_CHECKING([for Direct Virtual File Driver support])
+## Check these regardless. If the checks are moved inside the main
+## direct VFD block, the output is nested.
+
+AC_CACHE_VAL([hdf5_cv_direct_io],
+    AC_CHECK_DECL([O_DIRECT], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no], [[#include <fcntl.h>]]))
+AC_CACHE_VAL([hdf5_cv_posix_memalign],
+    AC_CHECK_FUNC([posix_memalign], [hdf5_cv_posix_memalign=yes], [hdf5_cv_posix_memalign=no]))
+
+AC_MSG_CHECKING([if the direct I/O virtual file driver (VFD) is enabled])
 
 AC_ARG_ENABLE([direct-vfd],
               [AS_HELP_STRING([--enable-direct-vfd],
-                              [Build the Direct I/O Virtual File Driver
-                               [default=yes]])],
-              [DIRECT_VFD=$enableval], [DIRECT_VFD=yes])
+                              [Build the direct I/O virtual file driver (VFD).
+                               This is based on the POSIX (sec2) VFD and
+                               requires the open() call to take the O_DIRECT
+                               flag. [default=no]])],
+              [DIRECT_VFD=$enableval], [DIRECT_VFD=no])
 
-if test "$DIRECT_VFD" = "yes"; then
-   AC_CACHE_VAL([hdf5_cv_direct_io],
-       [AC_TRY_RUN([
-	  #include <sys/types.h>
-	  #include <sys/stat.h>
-	  #include <fcntl.h>
-          int main(void)
-          {
-             int fid; 
-             if((fid=open("tst_file", O_CREAT | O_TRUNC | O_DIRECT, 0755))<0)
-		exit(1);
-             close(fid);  
-             remove("tst_file"); 
-             exit (0);
-          }], [AC_TRY_LINK(, [posix_memalign()], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no])], [hdf5_cv_direct_io=no],)])
-
-   if test ${hdf5_cv_direct_io} = "yes"; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([HAVE_DIRECT], [1],
-                [Define if the direct I/O virtual file driver should be compiled])
-   else
-      AC_MSG_RESULT([no])
-      DIRECT_VFD=no
-   fi
+if test "X$DIRECT_VFD" = "Xyes"; then
+    if test ${hdf5_cv_direct_io} = "yes" && test ${hdf5_cv_posix_memalign} = "yes" ; then
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_DIRECT], [1],
+                [Define if the direct I/O virtual file driver (VFD) should be compiled])
+    else
+        AC_MSG_RESULT([no])
+        DIRECT_VFD=no
+        AC_MSG_ERROR([The direct VFD was requested but cannot be built. This is either
+                     due to O_DIRECT not being found in fcntl.h or a lack of
+                     posix_memalign() on your system. Please re-configure without
+                     specifying --enable-direct-vfd.])
+    fi
 else
-      AC_MSG_RESULT([suppressed])
+    AC_MSG_RESULT([no])
 fi
 
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])

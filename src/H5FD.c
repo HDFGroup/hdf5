@@ -886,6 +886,7 @@ H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_t	*ret_value=NULL;
 
     FUNC_ENTER_API(NULL)
+    H5TRACE4("*x", "*sIuia", name, flags, fapl_id, maxaddr);
 
     /* Check arguments */
     if(H5P_DEFAULT == fapl_id)
