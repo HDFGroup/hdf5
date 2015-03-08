@@ -633,7 +633,7 @@ test_reference_region(void)
     CHECK(space_NA, FAIL, "H5Screate_simple");
 
     /* Create the dataset and write the region references to it */
-    dset_NA = H5Dcreate(fid1, "DS_NA", H5T_STD_REF_DSETREG, space_NA, H5P_DEFAULT,
+    dset_NA = H5Dcreate2(fid1, "DS_NA", H5T_STD_REF_DSETREG, space_NA, H5P_DEFAULT,
                 H5P_DEFAULT, H5P_DEFAULT);
     CHECK(dset_NA, FAIL, "H5Dcreate");
 
