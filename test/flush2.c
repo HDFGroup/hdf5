@@ -63,26 +63,27 @@ check_dset(hid_t file, const char* name)
     assert(100 == ds_size[0] && 100 == ds_size[1]);
 
     /* Read some data */
-    if(H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT,
-    the_data) < 0) goto error;
+    if(H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, the_data) < 0)
+        goto error;
     for(i = 0; i < (size_t)ds_size[0]; i++)
-  for(j = 0; j < (size_t)ds_size[1]; j++) {
-      /*
-       * The extra cast in the following statement is a bug workaround
-       * for the Win32 version 5.0 compiler.
-       * 1998-11-06 ptl
-       */
-      error = fabs(the_data[i][j] - (double)(hssize_t)i / ((hssize_t)j + 1));
-      if(error > 0.0001) {
-    H5_FAILED();
-    printf("    dset[%lu][%lu] = %g\n",
-      (unsigned long)i, (unsigned long)j, the_data[i][j]);
-    printf("    should be %g\n",
-      (double)(hssize_t)i/(hssize_t)(j+1));
-    goto error;
-      }
-  }
-    if(H5Dclose(dset) < 0) goto error;
+        for(j = 0; j < (size_t)ds_size[1]; j++) {
+            /*
+             * The extra cast in the following statement is a bug workaround
+             * for the Win32 version 5.0 compiler.
+             * 1998-11-06 ptl
+             */
+            error = fabs(the_data[i][j] - (double)(hssize_t)i / ((hssize_t)j + 1));
+            if(error > 0.0001F) {
+                H5_FAILED();
+                printf("    dset[%lu][%lu] = %g\n",
+                    (unsigned long)i, (unsigned long)j, the_data[i][j]);
+                printf("    should be %g\n",
+                    (double)(hssize_t)i/(hssize_t)(j+1));
+                goto error;
+            } /* end if */
+        } /* end for */
+    if(H5Dclose(dset) < 0)
+        goto error;
     return 0;
 
 error:

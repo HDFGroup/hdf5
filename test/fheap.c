@@ -15710,9 +15710,9 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 
         /* Change size of data to write */
         if(u < 20)
-            obj_size *= 1.3;
+            obj_size = (size_t)(obj_size * 1.3F);
         else
-            obj_size /= 1.3;
+            obj_size = (size_t)(obj_size / 1.3F);
     } /* end for */
 
     /* Close the fractal heap */
@@ -15755,9 +15755,9 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 
         /* Change size of data to write */
         if(u < 20)
-            obj_size *= 1.3;
+            obj_size = (size_t)(obj_size * 1.3F);
         else
-            obj_size /= 1.3;
+            obj_size = (size_t)(obj_size / 1.3F);
     } /* end for */
 
     /* Close the fractal heap */

@@ -57,7 +57,7 @@ const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES] = {0, 2, 40, 100, 3, 1000}
 #define NAME_BUF_SIZE 512
 
 /* How much overhead counts as "not much" when converting B-trees, etc. */
-#define OVERHEAD_ALLOWED 1.15
+#define OVERHEAD_ALLOWED 1.15F
 
 #define NUM_DATASETS 10
 #define NUM_ATTRIBUTES 100
@@ -600,7 +600,7 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     wdata.i6 = 66;
     wdata.i7 = 77;
     wdata.i8 = 88;
-    wdata.f1 = 0.0;
+    wdata.f1 = 0.0F;
 
     /* Intialize rdata */
     HDmemset(&rdata, 0, sizeof(rdata));

@@ -62,7 +62,7 @@
  * group's B-trees as well as chunked dataset's B-trees - QAK)
  */
 #define H5D_XFER_BTREE_SPLIT_RATIO_SIZE sizeof(double[3])
-#define H5D_XFER_BTREE_SPLIT_RATIO_DEF  {0.1, 0.5, 0.9}
+#define H5D_XFER_BTREE_SPLIT_RATIO_DEF  {0.1F, 0.5F, 0.9F}
 /* Definitions for vlen allocation function property */
 #define H5D_XFER_VLEN_ALLOC_SIZE        sizeof(H5MM_allocate_t)
 #define H5D_XFER_VLEN_ALLOC_DEF         H5D_VLEN_ALLOC

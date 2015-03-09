@@ -46,7 +46,7 @@
 /******************/
 /* Local Typedefs */
 /******************/
-#define EXTEND_THRESHOLD .10
+#define EXTEND_THRESHOLD 0.10F
 
 
 /********************/

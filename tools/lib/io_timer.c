@@ -40,7 +40,7 @@
  * The number to divide the tv_usec field with to get a nice decimal to add to
  * the number of seconds.
  */
-#define MICROSECOND     1000000.0
+#define MICROSECOND     1000000.0F
 
 /* global variables */
 io_time_t   *timer_g;            /* timer: global for stub functions     */

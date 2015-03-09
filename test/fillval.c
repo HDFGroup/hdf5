@@ -909,9 +909,9 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     else if(datatype == H5T_COMPOUND) {
         HDmemset(buf_c, 0, ((size_t)nelmts * sizeof(comp_datatype)));
         for(u = 0; u < nelmts; u++) {
-	    buf_c[u].a = (float)1111.11;
+	    buf_c[u].a = 1111.11F;
  	    buf_c[u].x = 2222;
-	    buf_c[u].y = 3333.3333;
+	    buf_c[u].y = 3333.3333F;
 	    buf_c[u].z = 'd';
 	}
         if(H5Dwrite(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, buf_c) < 0)
@@ -1144,7 +1144,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
          * as compound type */
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
         HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
-        fill_ctype.y = 4444.4444;
+        fill_ctype.y = 4444.4444F;
         if(H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0) goto error;
         nerrors += test_rdwr_cases(file, dcpl, "dset11", &fill_ctype, H5D_FILL_TIME_ALLOC,
 				layout, H5T_COMPOUND, ctype_id);
@@ -1197,7 +1197,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
      * as compound type */
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
     HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
-    fill_ctype.y = 4444.4444;
+    fill_ctype.y = 4444.4444F;
     if(H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0) goto error;
     nerrors += test_rdwr_cases(file, dcpl, "dset12", &fill_ctype, H5D_FILL_TIME_ALLOC,
                                 layout, H5T_COMPOUND, ctype_id);

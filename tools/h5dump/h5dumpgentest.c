@@ -389,7 +389,7 @@ gent_dataset(void)
 
     for(i = 0; i < 30; i++)
         for(j = 0; j < 20; j++)
-            dset2[i][j] = 0.0001 * j + i;
+            dset2[i][j] = 0.0001F * j + i;
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
 
@@ -484,7 +484,7 @@ gent_attribute(void)
     space = H5Screate_simple(1, dims, NULL);
     attr = H5Acreate2(root, "attr3", H5T_IEEE_F64BE, space, H5P_DEFAULT, H5P_DEFAULT);
 
-    for(i = 0; i < 10; i++) d[i] = 0.1 * i;
+    for(i = 0; i < 10; i++) d[i] = 0.1F * i;
 
     H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
     H5Sclose(space);
@@ -912,16 +912,16 @@ static void gent_compound_dt(void) {       /* test compound data type */
     for(i = 0; i < (int)sdim; i++) {
         dset1[i].a = i;
         dset1[i].b = (float)(i*i);
-        dset1[i].c = (float)(1./(i+1));
+        dset1[i].c = (float)(1.0F/(i+1));
 
         dset2[i].a = i;
-        dset2[i].b = (float)(i+ i*0.1);
+        dset2[i].b = (float)(i+ i*0.1F);
 
         dset4[i].a = i;
         dset4[i].b = (float)(i+3);
 
         dset5[i].a = i;
-        dset5[i].b = (float)(i*0.1);
+        dset5[i].b = (float)(i*0.1F);
     }
 
 
@@ -1097,16 +1097,16 @@ static void gent_compound_dt2(void) {       /* test compound data type */
     for(i = 0; i < (int)sdim; i++) {
         dset1[i].a = i;
         dset1[i].b = (float)(i*i);
-        dset1[i].c = (float)(1./(i+1));
+        dset1[i].c = (float)(1.0F/(i+1));
 
         dset2[i].a = i;
-        dset2[i].b = (float)(i+ i*0.1);
+        dset2[i].b = (float)(i+ i*0.1F);
 
         dset4[i].a = i;
-        dset4[i].b = (float)(i*1.0);
+        dset4[i].b = (float)(i*1.0F);
 
         dset5[i].a = i;
-        dset5[i].b = (float)(i*1.0);
+        dset5[i].b = (float)(i*1.0F);
     }
 
     fid = H5Fcreate(FILE9, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1346,7 +1346,7 @@ static void gent_all(void)
     space = H5Screate_simple(1, dims, NULL);
     dataset = H5Dcreate2(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     for(i = 0; i < 10; i++)
-        dset2_1[i] = (float)(i * 0.1 + 1);
+        dset2_1[i] = (float)(i * 0.1F + 1);
     H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
     H5Sclose(space);
     H5Dclose(dataset);
@@ -1357,7 +1357,7 @@ static void gent_all(void)
     dataset = H5Dcreate2(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     for(i = 0; i < 3; i++)
         for(j = 0; j < 5; j++)
-            dset2_2[i][j] = (float)((i + 1) * j * 0.1);
+            dset2_2[i][j] = (float)((i + 1) * j * 0.1F);
     H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_2);
     H5Sclose(space);
     H5Dclose(dataset);
@@ -1525,7 +1525,7 @@ gent_many(void)
     space2 = H5Screate_simple(1, dims, NULL);
     attr = H5Acreate2(dataset, "attr3", H5T_IEEE_F64BE, space2, H5P_DEFAULT, H5P_DEFAULT);
     for(i = 0; i < 10; i++)
-        d[i] = 0.1 * i;
+        d[i] = 0.1F * i;
     H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
     H5Sclose(space2);
     H5Aclose(attr);
@@ -2338,10 +2338,10 @@ static void gent_nestcomp(void)
     for(i = 0; i< 10; i++) {
         s1[i].a = i;
         s1[i].b = (float)(i*i);
-        s1[i].c = 1./(i+1);
+        s1[i].c = 1.0F/(i+1);
         s1[i].d.a = 65 + i;
-        s1[i].d.b[0] = -100.;
-        s1[i].d.b[1] =  100.;
+        s1[i].d.b[0] = -100.0F;
+        s1[i].d.b[1] =  100.0F;
     }
 
     /*
@@ -2542,7 +2542,7 @@ static void gent_vldatatypes(void)
         wdata[i].len = i + 1;
 
         for(j = 0; j < i + 1; j++)
-            ((float *)wdata[i].p)[j] = (float)(i * 10 + ((float)j) / 10.0);
+            ((float *)wdata[i].p)[j] = (float)(i * 10 + ((float)j) / 10.0F);
     }
 
     /* write out the floats in little-endian format */
@@ -2676,7 +2676,7 @@ static void gent_vldatatypes3(void)
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
         wdata[i].i=i*10;
-        wdata[i].f=(float)((i*20)/3.0);
+        wdata[i].f=(float)((i*20)/3.0F);
         wdata[i].v.p=HDmalloc((i+1)*sizeof(unsigned int));
         wdata[i].v.len=i+1;
         for(j=0; j<(i+1); j++)
@@ -2748,7 +2748,7 @@ static void gent_vldatatypes4(void)
         wdata[i].len=i+1;
         for(j=0; j<(i+1); j++) {
             ((s1 *)wdata[i].p)[j].i=i*10+j;
-            ((s1 *)wdata[i].p)[j].f=(float)((i*20+j)/3.0);
+            ((s1 *)wdata[i].p)[j].f=(float)((i*20+j)/3.0F);
         } /* end for */
     } /* end for */
 
@@ -3119,7 +3119,7 @@ static void gent_array4(void)
     for(i=0; i<SPACE1_DIM1; i++)
         for(j=0; j<ARRAY1_DIM1; j++) {
             wdata[i][j].i=i*10+j;
-            wdata[i][j].f=(float)(i*2.5+j);
+            wdata[i][j].f=(float)(i*2.5F+j);
         } /* end for */
 
     /* Create file */
@@ -3187,7 +3187,7 @@ static void gent_array5(void)
         for(j=0; j<ARRAY1_DIM1; j++) {
             wdata[i][j].i=i*10+j;
             for(k=0; k<ARRAY1_DIM1; k++)
-                wdata[i][j].f[k]=(float)(i*10+j*2.5+k);
+                wdata[i][j].f[k]=(float)(i*10+j*2.5F+k);
         } /* end for */
 
     /* Create file */
@@ -4893,10 +4893,10 @@ static void gent_compound_complex(void)
             }
         }
 
-        Array1[m].e = (float)( m * .96 );
+        Array1[m].e = (float)( m * 0.96F );
 
         for(n = 0; n < F41_ARRAY_DIMf; n++) {
-            Array1[m].f[n] = ( m * 1024.9637 );
+            Array1[m].f[n] = ( m * 1024.9637F );
         }
 
         Array1[m].g = 'm';
@@ -6833,7 +6833,7 @@ gent_fpformat(void)
 {
     hid_t    fid, sid, did;
     hsize_t  dims[1]  = {6};
-    double   dbuf[6]  = {-0.1234567, 0.1234567, 0, 0, 0, 0};
+    double   dbuf[6]  = {-0.1234567f, 0.1234567f, 0, 0, 0, 0};
     float    fbuf[6]  = {-0.1234567f, 0.1234567f, 0, 0, 0, 0};
 
     fid = H5Fcreate(FILE60, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -7126,7 +7126,7 @@ gent_packedbits(void)
 
     for(i = 0; i < dims[0]; i++)
         for(j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001 * j + i;
+            dsetdbl[i][j] = 0.0001F * j + i;
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetdbl);
 
@@ -7316,7 +7316,7 @@ gent_attr_intsize(void)
 
     for(i = 0; i < dims[0]; i++)
         for(j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001 * j + i;
+            dsetdbl[i][j] = 0.0001F * j + i;
 
     H5Awrite(attr, H5T_NATIVE_DOUBLE, dsetdbl);
 
@@ -7524,7 +7524,7 @@ static void gent_compound_intsizes(void) {
 
         for(n = 0; n < dims[0]; n++)
             for(o = 0; o < dims[1]; o++)
-                Array1[m].dsetdbl[n][o] = 0.0001 * o + n;
+                Array1[m].dsetdbl[n][o] = 0.0001F * o + n;
     }
 
     /* Create the array data type for the 8 bits signed int array             */
@@ -7799,7 +7799,7 @@ static void gent_compound_attr_intsizes(void) {
 
         for(n = 0; n < dims[0]; n++)
             for(o = 0; o < dims[1]; o++)
-                Array1[m].dsetdbl[n][o] = 0.0001 * o + n;
+                Array1[m].dsetdbl[n][o] = 0.0001F * o + n;
     }
 
     /* Create the array data type for the 8 bits signed int array             */
@@ -7967,17 +7967,17 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
         dset1[i].b = (float)(i*i);
 
         dset2[i].a = i;
-        dset2[i].b = (float)(i+i*0.1);
+        dset2[i].b = (float)(i+i*0.1F);
         dset2[i].c = GREEN;
 
         for(j = 0; j < 5; j++) {
             dset3[i].a[j] = i*j;
             for(k = 0; k < 6; k++) {
-                dset3[i].b[j][k] = (float)(i*j*k*1.0);
+                dset3[i].b[j][k] = (float)(i*j*k*1.0F);
             }
         }
         dset3[i].c.a = i;
-        dset3[i].c.b = (float)(i*1.0);
+        dset3[i].c.b = (float)(i*1.0F);
     }
 
     fid = H5Fcreate(FILE72, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -8265,7 +8265,7 @@ gent_intscalars(void)
 
     for(i = 0; i < dims[0]; i++)
         for(j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001 * j + i;
+            dsetdbl[i][j] = 0.0001F * j + i;
 
     H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetdbl);
 
@@ -8464,7 +8464,7 @@ gent_attr_intscalars(void)
 
     for(i = 0; i < dims[0]; i++)
         for(j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001 * j + i;
+            dsetdbl[i][j] = 0.0001F * j + i;
 
     H5Awrite(attr, tid, dsetdbl);
 
