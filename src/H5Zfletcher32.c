@@ -27,8 +27,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
-#ifdef H5_HAVE_FILTER_FLETCHER32
-
 /* Local function prototypes */
 static size_t H5Z_filter_fletcher32 (unsigned flags, size_t cd_nelmts,
     const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
@@ -164,5 +162,4 @@ done:
         H5MM_xfree(outbuf);
     FUNC_LEAVE_NOAPI(ret_value)
 }
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
 

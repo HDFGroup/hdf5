@@ -70,19 +70,17 @@ const char *FILENAME[] = {
 #define DSET_CONV_BUF_NAME	"conv_buf"
 #define DSET_TCONV_NAME		"tconv"
 #define DSET_DEFLATE_NAME	"deflate"
-#ifdef H5_HAVE_FILTER_SZIP
-#define DSET_SZIP_NAME          "szip"
-#endif /* H5_HAVE_FILTER_SZIP */
 #define DSET_SHUFFLE_NAME	"shuffle"
 #define DSET_FLETCHER32_NAME	"fletcher32"
 #define DSET_FLETCHER32_NAME_2	"fletcher32_2"
 #define DSET_FLETCHER32_NAME_3	"fletcher32_3"
 #define DSET_SHUF_DEF_FLET_NAME	"shuffle+deflate+fletcher32"
 #define DSET_SHUF_DEF_FLET_NAME_2	"shuffle+deflate+fletcher32_2"
-#if defined H5_HAVE_FILTER_SZIP && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
+#ifdef H5_HAVE_FILTER_SZIP
+#define DSET_SZIP_NAME          "szip"
 #define DSET_SHUF_SZIP_FLET_NAME	"shuffle+szip+fletcher32"
 #define DSET_SHUF_SZIP_FLET_NAME_2	"shuffle+szip+fletcher32_2"
-#endif /* defined H5_HAVE_FILTER_SZIP && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32 */
+#endif /* H5_HAVE_FILTER_SZIP */
 
 #define DSET_BOGUS_NAME		"bogus"
 #define DSET_MISSING_NAME	"missing"
@@ -2011,21 +2009,17 @@ test_get_filter_info(void)
   /* Verify that each filter is reported as having the right combination
    * of encoder and decoder.
    */
-#ifdef H5_HAVE_FILTER_FLETCHER32
   if(H5Zget_filter_info(H5Z_FILTER_FLETCHER32, &flags) < 0) TEST_ERROR
 
   if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
      ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
       TEST_ERROR
-#endif
 
-#ifdef H5_HAVE_FILTER_SHUFFLE
   if(H5Zget_filter_info(H5Z_FILTER_SHUFFLE, &flags) < 0) TEST_ERROR
 
   if(((flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED) == 0) ||
      ((flags & H5Z_FILTER_CONFIG_DECODE_ENABLED) == 0))
       TEST_ERROR
-#endif
 
 #ifdef H5_HAVE_FILTER_DEFLATE
   if(H5Zget_filter_info(H5Z_FILTER_DEFLATE, &flags) < 0) TEST_ERROR
@@ -2088,10 +2082,8 @@ UNUSED
     const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
     hsize_t     null_size;          /* Size of dataset with null filter */
 
-#ifdef H5_HAVE_FILTER_FLETCHER32
     hsize_t     fletcher32_size;       /* Size of dataset with Fletcher32 checksum */
     unsigned    data_corrupt[3];     /* position and length of data to be corrupted */
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     hsize_t     deflate_size;       /* Size of dataset with deflate filter */
@@ -2103,13 +2095,11 @@ UNUSED
     unsigned szip_pixels_per_block=4;
 #endif /* H5_HAVE_FILTER_SZIP */
 
-#ifdef H5_HAVE_FILTER_SHUFFLE
     hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
-#endif /* H5_HAVE_FILTER_SHUFFLE */
 
-#if(defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP) && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
-    hsize_t     combo_size;     /* Size of dataset with shuffle+deflate filter */
-#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
+#if(defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP)
+    hsize_t     combo_size;     /* Size of dataset with multiple filters */
+#endif /* defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP */
 
     /* test the H5Zget_filter_info function */
     if(test_get_filter_info() < 0) goto error;
@@ -2133,7 +2123,6 @@ UNUSED
      * STEP 1: Test Fletcher32 Checksum by itself.
      *----------------------------------------------------------
      */
-#ifdef H5_HAVE_FILTER_FLETCHER32
     puts("Testing Fletcher32 checksum(enabled for read)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
@@ -2174,11 +2163,6 @@ UNUSED
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
 
-#else /* H5_HAVE_FILTER_FLETCHER32 */
-    TESTING("fletcher32 checksum");
-    SKIPPED();
-    puts("    Fletcher32 checksum not enabled");
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
 
     /*----------------------------------------------------------
      * STEP 2: Test deflation by itself.
@@ -2236,7 +2220,6 @@ UNUSED
      * STEP 4: Test shuffling by itself.
      *----------------------------------------------------------
      */
-#ifdef H5_HAVE_FILTER_SHUFFLE
     puts("Testing shuffle filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
@@ -2251,17 +2234,12 @@ UNUSED
 
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
-#else /* H5_HAVE_FILTER_SHUFFLE */
-    TESTING("shuffle filter");
-    SKIPPED();
-    puts("    Shuffle filter not enabled");
-#endif /* H5_HAVE_FILTER_SHUFFLE */
 
     /*----------------------------------------------------------
      * STEP 5: Test shuffle + deflate + checksum in any order.
      *----------------------------------------------------------
      */
-#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
+#ifdef H5_HAVE_FILTER_DEFLATE
     puts("Testing shuffle+deflate+checksum filters(checksum first)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
@@ -2285,17 +2263,17 @@ UNUSED
 
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
-#else /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
+#else /* H5_HAVE_FILTER_DEFLATE */
     TESTING("shuffle+deflate+fletcher32 filters");
     SKIPPED();
-    puts("    Deflate, shuffle, or fletcher32 checksum filter not enabled");
-#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
+    puts("    Deflate filter not enabled");
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
     /*----------------------------------------------------------
      * STEP 6: Test shuffle + szip + checksum in any order.
      *----------------------------------------------------------
      */
-#if defined H5_HAVE_FILTER_SZIP && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
+#ifdef H5_HAVE_FILTER_SZIP
 
     TESTING("shuffle+szip+checksum filters(checksum first, with encoder)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
@@ -2344,11 +2322,11 @@ UNUSED
 	SKIPPED();
     }
 
-#else /* H5_HAVE_FILTER_SZIP && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
+#else /* H5_HAVE_FILTER_SZIP */
     TESTING("shuffle+szip+fletcher32 filters");
     SKIPPED();
-    puts("    Szip, shuffle, or fletcher32 checksum filter not enabled");
-#endif /* H5_HAVE_FILTER_SZIP && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
+    puts("    szip filter not enabled");
+#endif /* H5_HAVE_FILTER_SZIP */
     return 0;
 
 error:
@@ -2623,20 +2601,15 @@ error:
 static herr_t
 test_onebyte_shuffle(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_SHUFFLE
     hid_t		dataset, space,dc;
     const hsize_t	size[2] = {10, 20};
     const hsize_t       chunk_size[2] = {10, 20};
     unsigned char       orig_data[10][20];
     unsigned char       new_data[10][20];
     size_t		i, j;
-#else /* H5_HAVE_FILTER_SHUFFLE */
-    const char		*not_supported= "    Data shuffling is not enabled.";
-#endif /* H5_HAVE_FILTER_SHUFFLE */
 
     TESTING("8-bit shuffling (setup)");
 
-#ifdef H5_HAVE_FILTER_SHUFFLE
     /* Create the data space */
     if((space = H5Screate_simple(2, size, NULL)) < 0) goto error;
 
@@ -2654,10 +2627,6 @@ test_onebyte_shuffle(hid_t file)
 	orig_data[i][j] = (unsigned char)HDrandom();
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test shuffling by setting up a chunked dataset and writing
@@ -2666,16 +2635,11 @@ test_onebyte_shuffle(hid_t file)
      */
     TESTING("8-bit shuffling (write)");
 
-#ifdef H5_HAVE_FILTER_SHUFFLE
     if(H5Dwrite(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT,
 		 orig_data) < 0)
 	goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -2683,7 +2647,6 @@ test_onebyte_shuffle(hid_t file)
      */
     TESTING("8-bit shuffling (read)");
 
-#ifdef H5_HAVE_FILTER_SHUFFLE
     /* Read the dataset back */
     if(H5Dread(dataset, H5T_NATIVE_UCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT,
 		new_data) < 0)
@@ -2710,10 +2673,6 @@ test_onebyte_shuffle(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     return 0;
 
@@ -2739,7 +2698,6 @@ error:
 static herr_t
 test_nbit_int(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_NBIT
     hid_t               dataset, datatype, mem_datatype, space, dc;
     hsize_t             size[2] = {2, 5};
     hsize_t             chunk_size[2] = {2,5};
@@ -2748,13 +2706,10 @@ test_nbit_int(hid_t file)
     unsigned int        mask;
     size_t              precision, offset;
     size_t             i, j;
-#else /* H5_HAVE_FILTER_NBIT */
-    const char          *not_supported= "    Nbit is not enabled.";
-#endif /* H5_HAVE_FILTER_NBIT */
 
     puts("Testing nbit filter");
     TESTING("    nbit int (setup)");
-#ifdef H5_HAVE_FILTER_NBIT
+
     /* Define dataset datatype (integer), and set precision, offset */
     datatype = H5Tcopy(H5T_NATIVE_INT);
     precision = 17; /* precision includes sign bit */
@@ -2792,10 +2747,6 @@ test_nbit_int(hid_t file)
       }
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test nbit by setting up a chunked dataset and writing
@@ -2804,15 +2755,10 @@ test_nbit_int(hid_t file)
      */
     TESTING("    nbit int (write)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     if(H5Dwrite(dataset, mem_datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data) < 0)
         goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -2820,7 +2766,6 @@ test_nbit_int(hid_t file)
      */
     TESTING("    nbit int (read)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     /* Read the dataset back */
     if(H5Dread(dataset, mem_datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data) < 0)
@@ -2852,10 +2797,7 @@ test_nbit_int(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 error:
     return -1;
@@ -2879,7 +2821,6 @@ error:
 static herr_t
 test_nbit_float(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_NBIT
     hid_t               dataset, datatype, space, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2, 5};
@@ -2891,12 +2832,9 @@ test_nbit_float(hid_t file)
     float               new_data[2][5];
     size_t              precision, offset;
     size_t             i, j;
-#else /* H5_HAVE_FILTER_NBIT */
-    const char          *not_supported= "    Nbit is not enabled.";
-#endif /* H5_HAVE_FILTER_NBIT */
 
     TESTING("    nbit float (setup)");
-#ifdef H5_HAVE_FILTER_NBIT
+
     /* Define user-defined single-precision floating-point type for dataset */
     datatype = H5Tcopy(H5T_IEEE_F32BE);
     if(H5Tset_fields(datatype, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0) goto error;
@@ -2919,10 +2857,6 @@ test_nbit_float(hid_t file)
     if((dataset = H5Dcreate2(file, DSET_NBIT_FLOAT_NAME, datatype,
                              space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0) goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test nbit by setting up a chunked dataset and writing
@@ -2931,16 +2865,11 @@ test_nbit_float(hid_t file)
      */
     TESTING("    nbit float (write)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     if(H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data) < 0)
         goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -2948,7 +2877,6 @@ test_nbit_float(hid_t file)
      */
     TESTING("    nbit float (read)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     /* Read the dataset back */
     if(H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data) < 0)
@@ -2979,10 +2907,6 @@ test_nbit_float(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     return 0;
 
@@ -3009,7 +2933,6 @@ static herr_t
 test_nbit_double(hid_t file)
 {
 /* assume unsigned int and float has the same number of bytes */
-#ifdef H5_HAVE_FILTER_NBIT
     hid_t               dataset, datatype, space, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2, 5};
@@ -3022,12 +2945,9 @@ test_nbit_double(hid_t file)
     double              new_data[2][5];
     size_t              precision, offset;
     size_t             i, j;
-#else /* H5_HAVE_FILTER_NBIT */
-    const char          *not_supported= "    Nbit is not enabled.";
-#endif /* H5_HAVE_FILTER_NBIT */
 
     TESTING("    nbit double (setup)");
-#ifdef H5_HAVE_FILTER_NBIT
+
     /* Define user-defined doule-precision floating-point type for dataset */
     datatype = H5Tcopy(H5T_IEEE_F64BE);
     if(H5Tset_fields(datatype, (size_t)55, (size_t)46, (size_t)9, (size_t)5, (size_t)41) < 0) goto error;
@@ -3051,10 +2971,6 @@ test_nbit_double(hid_t file)
                              space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test nbit by setting up a chunked dataset and writing
@@ -3063,15 +2979,10 @@ test_nbit_double(hid_t file)
      */
     TESTING("    nbit double (write)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     if(H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data) < 0)
         goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -3079,7 +2990,6 @@ test_nbit_double(hid_t file)
      */
     TESTING("    nbit double (read)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     /* Read the dataset back */
     if(H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data) < 0)
@@ -3110,10 +3020,6 @@ test_nbit_double(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     return 0;
 
@@ -3139,7 +3045,6 @@ error:
 static herr_t
 test_nbit_array(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_NBIT
     hid_t               dataset, base_datatype, array_datatype, space, dc;
     hid_t               mem_base_datatype, mem_array_datatype;
     const hsize_t       size[2] = {2, 5};
@@ -3149,12 +3054,9 @@ test_nbit_array(hid_t file)
     unsigned int        new_data[2][5][3][2];
     size_t              precision, offset;
     size_t             i, j, m, n;
-#else /* H5_HAVE_FILTER_NBIT */
-    const char          *not_supported= "    Nbit is not enabled.";
-#endif /* H5_HAVE_FILTER_NBIT */
 
     TESTING("    nbit array (setup)");
-#ifdef H5_HAVE_FILTER_NBIT
+
     /* Define dataset array datatype's base datatype and set precision, offset */
     base_datatype = H5Tcopy(H5T_NATIVE_UINT);
     precision = 22;
@@ -3194,10 +3096,6 @@ test_nbit_array(hid_t file)
             orig_data[i][j][m][n] = (unsigned int)(((long long)HDrandom() %
                                      (long long)HDpow(2.0, (double)precision)) << offset);
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test nbit by setting up a chunked dataset and writing
@@ -3206,16 +3104,11 @@ test_nbit_array(hid_t file)
      */
     TESTING("    nbit array (write)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     if(H5Dwrite(dataset, mem_array_datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data) < 0)
         goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -3223,7 +3116,6 @@ test_nbit_array(hid_t file)
      */
     TESTING("    nbit array (read)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     /* Read the dataset back */
     if(H5Dread(dataset, mem_array_datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data) < 0)
@@ -3257,10 +3149,7 @@ test_nbit_array(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 
 error:
@@ -3285,7 +3174,6 @@ error:
 static herr_t
 test_nbit_compound(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_NBIT
     typedef struct {     /* Struct with atomic fields */
         int i;
         char c;
@@ -3307,12 +3195,9 @@ test_nbit_compound(hid_t file)
     unsigned int        i_mask, s_mask, c_mask;
     size_t             i, j;
 
-#else /* H5_HAVE_FILTER_NBIT */
-    const char          *not_supported= "    Nbit is not enabled.";
-#endif /* H5_HAVE_FILTER_NBIT */
 
     TESTING("    nbit compound (setup)");
-#ifdef H5_HAVE_FILTER_NBIT
+
     /* Define datatypes of members of compound datatype */
     i_tid=H5Tcopy(H5T_NATIVE_INT);
     c_tid=H5Tcopy(H5T_NATIVE_CHAR);
@@ -3383,10 +3268,6 @@ test_nbit_compound(hid_t file)
       }
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test nbit by setting up a chunked dataset and writing
@@ -3395,15 +3276,10 @@ test_nbit_compound(hid_t file)
      */
     TESTING("    nbit compound (write)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     if(H5Dwrite(dataset, mem_cmpd_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data) < 0)
         goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -3411,7 +3287,6 @@ test_nbit_compound(hid_t file)
      */
     TESTING("    nbit compound (read)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     /* Read the dataset back */
     if(H5Dread(dataset, mem_cmpd_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data) < 0)
@@ -3453,10 +3328,7 @@ test_nbit_compound(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 
 error:
@@ -3481,7 +3353,6 @@ error:
 static herr_t
 test_nbit_compound_2(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_NBIT
     typedef struct {     /* Struct with atomic fields */
         int i;
         char c;
@@ -3518,12 +3389,9 @@ test_nbit_compound_2(hid_t file)
     unsigned int        i_mask, s_mask, c_mask, b_mask;
     size_t             i, j, m, n, b_failed, d_failed;
 
-#else /* H5_HAVE_FILTER_NBIT */
-    const char          *not_supported= "    Nbit is not enabled.";
-#endif /* H5_HAVE_FILTER_NBIT */
 
     TESTING("    nbit compound complex (setup)");
-#ifdef H5_HAVE_FILTER_NBIT
+
     /* Define datatypes of members of compound datatype */
     i_tid=H5Tcopy(H5T_NATIVE_INT);
     c_tid=H5Tcopy(H5T_NATIVE_CHAR);
@@ -3639,10 +3507,6 @@ test_nbit_compound_2(hid_t file)
       }
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test nbit by setting up a chunked dataset and writing
@@ -3651,15 +3515,10 @@ test_nbit_compound_2(hid_t file)
      */
     TESTING("    nbit compound complex (write)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     if(H5Dwrite(dataset, mem_cmpd_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data) < 0)
         goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -3667,7 +3526,6 @@ test_nbit_compound_2(hid_t file)
      */
     TESTING("    nbit compound complex (read)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     /* Read the dataset back */
     if(H5Dread(dataset, mem_cmpd_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data) < 0)
@@ -3751,10 +3609,7 @@ test_nbit_compound_2(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 
 error:
@@ -3779,7 +3634,6 @@ error:
 static herr_t
 test_nbit_compound_3(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_NBIT
     typedef struct {     /* Struct with some no-op type fields */
         int i;              /* integer field, NOT a no-op type */
         char str[30];       /* fixed-length string, no-op type */
@@ -3797,12 +3651,8 @@ test_nbit_compound_3(hid_t file)
     atomic              new_data[5];
     size_t             i, k, j;
 
-#else /* H5_HAVE_FILTER_NBIT */
-    const char          *not_supported= "    Nbit is not enabled.";
-#endif /* H5_HAVE_FILTER_NBIT */
 
     TESTING("    nbit compound with no-op type (setup)");
-#ifdef H5_HAVE_FILTER_NBIT
 
     /* Define datatypes of members of compound datatype */
     i_tid=H5Tcopy(H5T_NATIVE_INT);
@@ -3862,10 +3712,6 @@ test_nbit_compound_3(hid_t file)
     }
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test nbit by setting up a chunked dataset and writing
@@ -3874,15 +3720,10 @@ test_nbit_compound_3(hid_t file)
      */
     TESTING("    nbit compound with no-op type (write)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     if(H5Dwrite(dataset, cmpd_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data) < 0)
         goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -3890,7 +3731,6 @@ test_nbit_compound_3(hid_t file)
      */
     TESTING("    nbit compound with no-op type (read)");
 
-#ifdef H5_HAVE_FILTER_NBIT
     /* Read the dataset back */
     if(H5Dread(dataset, cmpd_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data) < 0)
@@ -3947,10 +3787,7 @@ test_nbit_compound_3(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 
 error:
@@ -3975,19 +3812,14 @@ error:
 static herr_t
 test_nbit_int_size(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_NBIT
     hid_t   dataspace, dataset, datatype, mem_datatype, dset_create_props;
     hsize_t dims[2], chunk_size[2];
     hsize_t dset_size = 0;
     int     orig_data[DSET_DIM1][DSET_DIM2];
     int     i, j;
     size_t  precision, offset;
-#else /* H5_HAVE_FILTER_NBIT */
-    const char          *not_supported= "    Nbit is not enabled.";
-#endif /* H5_HAVE_FILTER_NBIT */
 
     TESTING("    nbit integer dataset size");
-#ifdef H5_HAVE_FILTER_NBIT
 
    /* Define dataset datatype (integer), and set precision, offset */
    if((datatype = H5Tcopy(H5T_NATIVE_INT)) < 0) {
@@ -4120,10 +3952,6 @@ test_nbit_int_size(hid_t file)
    H5Pclose (dset_create_props);
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
    return 0;
 error:
@@ -4149,7 +3977,6 @@ error:
 static herr_t
 test_nbit_flt_size(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_NBIT
     hid_t   dataspace, dataset, datatype, dset_create_props;
     hsize_t dims[2], chunk_size[2];
     hsize_t dset_size = 0;
@@ -4157,12 +3984,8 @@ test_nbit_flt_size(hid_t file)
     int     i, j;
     size_t  precision, offset;
     size_t  spos, epos, esize, mpos, msize;
-#else /* H5_HAVE_FILTER_NBIT */
-    const char          *not_supported= "    Nbit is not enabled.";
-#endif /* H5_HAVE_FILTER_NBIT */
 
     TESTING("    nbit floating-number dataset size");
-#ifdef H5_HAVE_FILTER_NBIT
 
   /* Define floating-point type for dataset
    *-------------------------------------------------------------------
@@ -4326,10 +4149,6 @@ test_nbit_flt_size(hid_t file)
    H5Pclose (dset_create_props);
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
    return 0;
 error:
@@ -4354,20 +4173,16 @@ error:
 static herr_t
 test_scaleoffset_int(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     hid_t               dataset, datatype, space, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2,5};
     int                 orig_data[2][5];
     int                 new_data[2][5];
     size_t             i, j;
-#else /* H5_HAVE_FILTER_SCALEOFFSET */
-    const char          *not_supported= "    Scaleoffset is not enabled.";
-#endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
     puts("Testing scaleoffset filter");
     TESTING("    scaleoffset int without fill value (setup)");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
+
     datatype = H5Tcopy(H5T_NATIVE_INT);
 
     /* Set order of dataset datatype */
@@ -4401,10 +4216,6 @@ test_scaleoffset_int(hid_t file)
       }
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test scaleoffset by setting up a chunked dataset and writing
@@ -4413,14 +4224,9 @@ test_scaleoffset_int(hid_t file)
      */
     TESTING("    scaleoffset int without fill value (write)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data) < 0) goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -4428,7 +4234,6 @@ test_scaleoffset_int(hid_t file)
      */
     TESTING("    scaleoffset int without fill value (read)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* Read the dataset back */
     if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data) < 0) goto error;
@@ -4455,10 +4260,7 @@ test_scaleoffset_int(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 error:
     return -1;
@@ -4483,7 +4285,6 @@ error:
 static herr_t
 test_scaleoffset_int_2(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     hid_t               dataset, datatype, space, mspace, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2,5};
@@ -4495,12 +4296,9 @@ test_scaleoffset_int_2(hid_t file)
     hsize_t             block[2];  /* Block sizes */
     int                 fillval;
     size_t              j;
-#else /* H5_HAVE_FILTER_SCALEOFFSET */
-    const char          *not_supported= "    Scaleoffset is not enabled.";
-#endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
     TESTING("    scaleoffset int with fill value (setup)");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
+
     datatype = H5Tcopy(H5T_NATIVE_INT);
 
     /* Set order of dataset datatype */
@@ -4547,10 +4345,6 @@ test_scaleoffset_int_2(hid_t file)
     }
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test scaleoffset by setting up a chunked dataset and writing
@@ -4559,15 +4353,10 @@ test_scaleoffset_int_2(hid_t file)
      */
     TESTING("    scaleoffset int with fill value (write)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* only data in the hyperslab will be written, other value should be fill value */
     if(H5Dwrite(dataset, H5T_NATIVE_INT, mspace, mspace, H5P_DEFAULT,
                  orig_data) < 0) goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -4575,7 +4364,6 @@ test_scaleoffset_int_2(hid_t file)
      */
     TESTING("    scaleoffset int with fill value (read)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* Read the dataset back */
     if(H5Dread(dataset, H5T_NATIVE_INT, mspace, mspace, H5P_DEFAULT,
                 new_data) < 0) goto error;
@@ -4600,10 +4388,7 @@ test_scaleoffset_int_2(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 error:
     return -1;
@@ -4628,19 +4413,15 @@ error:
 static herr_t
 test_scaleoffset_float(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     hid_t               dataset, datatype, space, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2,5};
     float               orig_data[2][5];
     float               new_data[2][5];
     size_t              i, j;
-#else /* H5_HAVE_FILTER_SCALEOFFSET */
-    const char          *not_supported= "    Scaleoffset is not enabled.";
-#endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
     TESTING("    scaleoffset float without fill value, D-scaling (setup)");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
+
     datatype = H5Tcopy(H5T_NATIVE_FLOAT);
 
     /* Set order of dataset datatype */
@@ -4676,10 +4457,6 @@ test_scaleoffset_float(hid_t file)
       }
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test scaleoffset by setting up a chunked dataset and writing
@@ -4688,14 +4465,9 @@ test_scaleoffset_float(hid_t file)
      */
     TESTING("    scaleoffset float without fill value, D-scaling (write)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     if(H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data) < 0) goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -4703,7 +4475,6 @@ test_scaleoffset_float(hid_t file)
      */
     TESTING("    scaleoffset float without fill value, D-scaling (read)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* Read the dataset back */
     if(H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data) < 0) goto error;
@@ -4730,10 +4501,7 @@ test_scaleoffset_float(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 error:
     return -1;
@@ -4758,7 +4526,6 @@ error:
 static herr_t
 test_scaleoffset_float_2(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     hid_t               dataset, datatype, space, mspace, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2,5};
@@ -4770,12 +4537,9 @@ test_scaleoffset_float_2(hid_t file)
     hsize_t             count[2];  /* Block count */
     hsize_t             block[2];  /* Block sizes */
     size_t              j;
-#else /* H5_HAVE_FILTER_SCALEOFFSET */
-    const char          *not_supported= "    Scaleoffset is not enabled.";
-#endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
     TESTING("    scaleoffset float with fill value, D-scaling (setup)");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
+
     datatype = H5Tcopy(H5T_NATIVE_FLOAT);
 
     /* Set order of dataset datatype */
@@ -4824,10 +4588,6 @@ test_scaleoffset_float_2(hid_t file)
     }
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test scaleoffset by setting up a chunked dataset and writing
@@ -4836,15 +4596,10 @@ test_scaleoffset_float_2(hid_t file)
      */
     TESTING("    scaleoffset float with fill value, D-scaling (write)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* only data in the hyperslab will be written, other value should be fill value */
     if(H5Dwrite(dataset, H5T_NATIVE_FLOAT, mspace, mspace, H5P_DEFAULT,
                  orig_data) < 0) goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -4852,7 +4607,6 @@ test_scaleoffset_float_2(hid_t file)
      */
     TESTING("    scaleoffset float with fill value, D-scaling (read)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* Read the dataset back */
     if(H5Dread(dataset, H5T_NATIVE_FLOAT, mspace, mspace, H5P_DEFAULT,
                 new_data) < 0) goto error;
@@ -4876,10 +4630,7 @@ test_scaleoffset_float_2(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 error:
     return -1;
@@ -4904,19 +4655,15 @@ error:
 static herr_t
 test_scaleoffset_double(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     hid_t               dataset, datatype, space, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2,5};
     double              orig_data[2][5];
     double              new_data[2][5];
     size_t              i, j;
-#else /* H5_HAVE_FILTER_SCALEOFFSET */
-    const char          *not_supported= "    Scaleoffset is not enabled.";
-#endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
     TESTING("    scaleoffset double without fill value, D-scaling (setup)");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
+
     datatype = H5Tcopy(H5T_NATIVE_DOUBLE);
 
     /* Set order of dataset datatype */
@@ -4952,10 +4699,6 @@ test_scaleoffset_double(hid_t file)
       }
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test scaleoffset by setting up a chunked dataset and writing
@@ -4964,14 +4707,9 @@ test_scaleoffset_double(hid_t file)
      */
     TESTING("    scaleoffset double without fill value, D-scaling (write)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     if(H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  orig_data) < 0) goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -4979,7 +4717,6 @@ test_scaleoffset_double(hid_t file)
      */
     TESTING("    scaleoffset double without fill value, D-scaling (read)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* Read the dataset back */
     if(H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                 new_data) < 0) goto error;
@@ -5006,10 +4743,7 @@ test_scaleoffset_double(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 error:
     return -1;
@@ -5034,7 +4768,6 @@ error:
 static herr_t
 test_scaleoffset_double_2(hid_t file)
 {
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     hid_t               dataset, datatype, space, mspace, dc;
     const hsize_t       size[2] = {2, 5};
     const hsize_t       chunk_size[2] = {2,5};
@@ -5046,12 +4779,9 @@ test_scaleoffset_double_2(hid_t file)
     hsize_t             count[2];  /* Block count */
     hsize_t             block[2];  /* Block sizes */
     size_t              j;
-#else /* H5_HAVE_FILTER_SCALEOFFSET */
-    const char          *not_supported= "    Scaleoffset is not enabled.";
-#endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
     TESTING("    scaleoffset double with fill value, D-scaling (setup)");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
+
     datatype = H5Tcopy(H5T_NATIVE_DOUBLE);
 
     /* Set order of dataset datatype */
@@ -5100,10 +4830,6 @@ test_scaleoffset_double_2(hid_t file)
     }
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 1: Test scaleoffset by setting up a chunked dataset and writing
@@ -5112,15 +4838,10 @@ test_scaleoffset_double_2(hid_t file)
      */
     TESTING("    scaleoffset double with fill value, D-scaling (write)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* only data in the hyperslab will be written, other value should be fill value */
     if(H5Dwrite(dataset, H5T_NATIVE_DOUBLE, mspace, mspace, H5P_DEFAULT,
                  orig_data) < 0) goto error;
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
 
     /*----------------------------------------------------------------------
      * STEP 2: Try to read the data we just wrote.
@@ -5128,7 +4849,6 @@ test_scaleoffset_double_2(hid_t file)
      */
     TESTING("    scaleoffset double with fill value, D-scaling (read)");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     /* Read the dataset back */
     if(H5Dread(dataset, H5T_NATIVE_DOUBLE, mspace, mspace, H5P_DEFAULT,
                 new_data) < 0) goto error;
@@ -5153,10 +4873,7 @@ test_scaleoffset_double_2(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     PASSED();
-#else
-    SKIPPED();
-    puts(not_supported);
-#endif
+
     return 0;
 error:
     return -1;
@@ -6384,7 +6101,7 @@ test_filter_delete(hid_t file)
 
     TESTING("filter deletion");
 
-#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
+#ifdef H5_HAVE_FILTER_DEFLATE
     /* create the data space */
     if((sid = H5Screate_simple(2, dims, NULL)) < 0) goto error;
 
@@ -6589,7 +6306,6 @@ test_filters_endianess(void)
 
     TESTING("filters with big-endian/little-endian data");
 
-#if defined H5_HAVE_FILTER_FLETCHER32
    /*-------------------------------------------------------------------------
     * step 1: open a file written on a little-endian machine
     *-------------------------------------------------------------------------
@@ -6622,9 +6338,7 @@ test_filters_endianess(void)
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
-#else
-    SKIPPED();
-#endif
+
     return 0;
 
 error:

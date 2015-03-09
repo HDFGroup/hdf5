@@ -140,6 +140,21 @@ New Features
 
       (DER - 2015-03-08, HDFFV-9152)
 
+    - Removed the --enable-filters option from configure.
+
+      This option allowed the user to disable selected internal filters,
+      presumably to make the library smaller. It has been removed since
+      it saved little space (the internal filters are small with respect
+      to the overall library size) and was not generally extendible to
+      the library at large due to the large number of #ifdefs that would
+      be required.
+
+      Note that this features applied to internal filters such as suffle
+      and n-bit, not external filters like gzip or szip. Those are still
+      enabled or disabled via their own configure options.
+
+      (DER - 2015-03-08, HDFFV-9086)
+
     Library
     -------
     - None
