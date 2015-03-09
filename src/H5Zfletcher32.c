@@ -137,8 +137,10 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
         /* Compute checksum (can't fail) */
         fletcher = H5_checksum_fletcher32(src, nbytes);
 
-	if (NULL==(dst=outbuf=H5MM_malloc(nbytes+FLETCHER_LEN)))
+	if (NULL == (outbuf = H5MM_malloc(nbytes + FLETCHER_LEN)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "unable to allocate Fletcher32 checksum destination buffer")
+
+        dst = (unsigned char *) outbuf;
 
         /* Copy raw data */
         HDmemcpy((void*)dst, (void*)(*buf), nbytes);

@@ -48,7 +48,7 @@ done])
 case $$3 in #(
   no | unknown) ;;
   *) AC_DEFINE_UNQUOTED([$1], [$$3], [$4])
-     H5_CPPFLAGS="-D$1=$$3 $H5_CPPFLAGS";;
+     AM_CPPFLAGS="-D$1=$$3 $AM_CPPFLAGS";;
 esac
 rm -rf conftest*[]dnl
 ])# _AC_SYS_LARGEFILE_MACRO_VALUE
