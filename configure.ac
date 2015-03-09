@@ -111,7 +111,7 @@ AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_CPPFLAGS])
 AC_SUBST([AM_LDFLAGS])
 
-## Make sure flags are set to something (otherwise macros may set them later).
+## Make sure flags are initialized.
 AM_CFLAGS="${AM_CFLAGS}"
 AM_CXXFLAGS="${AM_CXXFLAGS}"
 AM_FCFLAGS="${AM_FCFLAGS}"
@@ -194,15 +194,9 @@ AC_SUBST([UNAME_INFO]) UNAME_INFO=`uname -a`
 ## ----------------------------------------------------------------------
 ## Some platforms have broken basename, and/or xargs programs. Check
 ## that it actually does what it's supposed to do. Catch this early
-## since configure relies upon them heavily and there's no use continuing
-## if it's broken.
+## since configure and scripts relies upon them heavily and there's 
+## no use continuing if it's broken.
 ##
-
-## Avoid depending upon Character Ranges.
-## These are defined by autoconf.
-## as_cr_letters='abcdefghijklmnopqrstuvwxyz'
-## as_cr_LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-
 AC_MSG_CHECKING([if basename works])
 BASENAME_TEST="`basename /foo/bar/baz/qux/basename_works`"
 if test $BASENAME_TEST != "basename_works"; then
@@ -211,6 +205,7 @@ else
   AC_MSG_RESULT([yes])
 fi
 
+## xargs basename used in configure to get the CC_BASENAME value
 AC_MSG_CHECKING([if xargs works])
 XARGS_TEST="`echo /foo/bar/baz/qux/xargs_works | xargs basename`"
 if test $XARGS_TEST != "xargs_works"; then
@@ -696,80 +691,14 @@ fi
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
 
 ## ----------------------------------------------------------------------
-## Disable C++ shared libraries if +DD64 flag is detected.
-##
-AC_SUBST([H5_CXX_SHARED])
-H5_CXX_SHARED="no"
-if test "X${HDF_CXX}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
-  AC_MSG_CHECKING([if shared C++ libraries are supported])
-  H5_CXX_SHARED="yes"
-
-  ## Disable C++ shared libraries if DD64 flag is being used.
-  
-  if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'DD64') > /dev/null; then
-    H5_CXX_SHARED="no"
-    CHECK_WARN="Shared C++ libraries not currently supported with +DD64 flag."
-  fi
-
-  ## Report results of check(s)
-  
-  if test "X${H5_CXX_SHARED}" = "Xno"; then
-    AC_MSG_RESULT([no])
-    AC_MSG_WARN([$CHECK_WARN])
-    if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-      AC_MSG_WARN([Disabling shared C++ libraries.])
-      AC_MSG_WARN([To override this behavior, please use --enable-unsupported configure option.])
-      if test "X${enable_static}" = "Xno"; then
-        AC_MSG_ERROR([both static and shared C++ libraries are disabled])
-      fi
-    else
-      AC_MSG_WARN([Allowing unsupported C++ shared librares due to use of --enable-unsupported flag])
-    fi
-  else
-    AC_MSG_RESULT([yes])
-  fi
-fi
-
-AM_CONDITIONAL([CXX_SHARED_CONDITIONAL], [test "X$H5_CXX_SHARED" = "Xyes"])
-
-## ----------------------------------------------------------------------
-## pgcc version 6.0x have optimization (-O, -O2 or -O3) problem.  Detect
-## these versions and add option "-Mx,28,0x8" to the compiler to avoid
-## the problem if optimization is enabled.
-##
-
-if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_production" = "Xyes"; then
-    echo 'adding compiler flag to avoid optimization problem in pgcc'
-    CC="${CC-cc} -Mx,28,0x8"
-fi
-
-## ----------------------------------------------------------------------
-## Shared libraries are not currently supported under Cygwin, so configure
-## disables them unless --enable-unsupported has been supplied by the user.
-
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  case "`uname`" in
-    CYGWIN*)
-      if test "X${enable_shared}" = "Xyes"; then
-        echo '    warning: shared libraries are not supported on Cygwin!'
-        echo '    disabling shared libraries'
-        echo '    use --enable-unsupported to override this warning and keep shared libraries enabled'
-      fi
-      enable_shared="no"
-      ;;
-  esac
-fi
-
-## ----------------------------------------------------------------------
-## Windows won't create DLLs without the following macro.
-##
-AC_LIBTOOL_WIN32_DLL
-
-## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
 ## or disabled, it should happen before these macros.
 LT_PREREQ([2.2])
-LT_INIT([dlopen])
+
+## ----------------------------------------------------------------------
+## dlopen - This will use an improved version of libtool
+## win32-dll - This will build clean dlls on win32 platforms.
+LT_INIT([dlopen,win32-dll])
 
 ## ----------------------------------------------------------------------
 ## Check if we should install only statically linked executables.
@@ -910,32 +839,6 @@ done
 rm maketest
 
 ## ----------------------------------------------------------------------
-## pmake will throw an error if variables are undefined in a Makefile.
-## These errors can be changed to warnings using the -V flag.
-##
-AC_SUBST([AM_MAKEFLAGS]) AM_MAKEFLAGS=""
-
-## Don't run test if MAKE is defined but is the empty string
-if test -n "${MAKE-make}"; then 
-
-  AC_MSG_CHECKING([whether make will build with undefined variables])
-
-  cat >maketest <<EOF
-foo: \$(UNDEFINED) \$(UNDEFINED2)
-	@echo \$(UNDEFINED3) works
-EOF
-
-  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no, setting -V flag])
-    AM_MAKEFLAGS="\-V"
-  fi
-
-  rm maketest
-fi
-
-## ----------------------------------------------------------------------
 ## Production flags?  Save the value in $CONFIG_MODE so we have it for
 ## the record.
 ##
@@ -990,8 +893,6 @@ if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
   AC_CHECK_LIB([socket], [socket])
   AC_CHECK_LIB([nsl], [xdr_int])
 fi
-
-dnl AC_CHECK_LIB([coug], [main])		## ...for ASCI/Red
 
 ## ----------------------------------------------------------------------
 ## Check for system header files.
