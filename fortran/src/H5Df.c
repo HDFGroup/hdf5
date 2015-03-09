@@ -621,7 +621,7 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
     hid_t c_file_space_id;
     hid_t c_xfer_prp;
     hobj_ref_t *buf_c;
-    int i, n;
+    unsigned int i, n;
 
     /*
      * Define transfer property
@@ -631,7 +631,7 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
     /*
      * Allocate temporary buffer and copy references from Fortran.
      */
-    n = (int)*dims;
+    n = (unsigned int)*dims;
     buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(n));
     if ( buf_c != NULL ) {
         for (i = 0; i < n; i++)
@@ -688,9 +688,9 @@ nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      hid_t c_file_space_id;
      hid_t c_xfer_prp;
      hdset_reg_ref_t *buf_c = NULL;
-     int i, n;
+     unsigned int i, n;
 
-      n = (int)*dims;
+      n = (unsigned int)*dims;
      /*
       * Define transfer property
       */
@@ -1494,7 +1494,7 @@ nh5dset_extent_c ( hid_t_f *dset_id , hsize_t_f *dims)
    * Reverse dimensions due to C-FORTRAN storage order.
    */
   for(i = 0; i < rank; i++)
-      c_dims[i] = dims[rank - i - 1];
+      c_dims[i] = (hsize_t)dims[rank - i - 1];
 
   status = H5Dset_extent((hid_t)*dset_id, c_dims);
 
@@ -1642,7 +1642,7 @@ nh5dwrite_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_
   hsize_t num_elem;
 
   max_len = (size_t)dims[0];
-  num_elem = dims[1];
+  num_elem = (hsize_t)dims[1];
 
   c_dset_id       = (hid_t)*dset_id;
   c_mem_type_id   = (hid_t)*mem_type_id;
@@ -1711,7 +1711,7 @@ nh5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_s
   size_t max_len;
 
   hvl_t *c_buf;
-  hssize_t i;
+  hsize_t i;
   hssize_t num_elem;
 
   c_dset_id       = (hid_t)*dset_id;
@@ -1731,7 +1731,7 @@ nh5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_s
    */
    status = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
  if ( status < 0 ) goto DONE;
-  for (i=0; i < num_elem; i++) {
+  for (i=0; i < (hsize_t)num_elem; i++) {
        len[i] = (size_t_f)c_buf[i].len;
        memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(int_f));
   }
@@ -1786,7 +1786,7 @@ nh5dwrite_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_sp
   hsize_t num_elem;
 
   max_len = (size_t)dims[0];
-  num_elem = dims[1];
+  num_elem = (hsize_t)dims[1];
 
   c_dset_id       = (hid_t)*dset_id;
   c_mem_type_id   = (hid_t)*mem_type_id;
@@ -1873,7 +1873,7 @@ nh5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   hsize_t num_elem;
 
   max_len = (size_t)dims[0];
-  num_elem = dims[1];
+  num_elem = (hsize_t)dims[1];
 
   c_dset_id       = (hid_t)*dset_id;
   c_mem_type_id   = (hid_t)*mem_type_id;
@@ -1957,7 +1957,7 @@ nh5dwrite_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spa
   hsize_t num_elem;
 
   max_len = (size_t)dims[0];
-  num_elem = dims[1];
+  num_elem = (hsize_t)dims[1];
 
   c_dset_id       = (hid_t)*dset_id;
   c_mem_type_id   = (hid_t)*mem_type_id;
@@ -2026,7 +2026,7 @@ nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
   size_t max_len;
 
   hvl_t *c_buf;
-  hssize_t i;
+  hsize_t i;
   hssize_t num_elem;
 
   c_dset_id       = (hid_t)*dset_id;
@@ -2046,7 +2046,7 @@ nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
    */
    status = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, c_buf);
  if ( status <0  )  goto DONE;
-  for (i=0; i < num_elem; i++) {
+  for (i=0; i < (hsize_t)num_elem; i++) {
        len[i] = (size_t_f)c_buf[i].len;
        memcpy(&buf[i*max_len], c_buf[i].p, c_buf[i].len*sizeof(real_f));
   }
