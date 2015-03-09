@@ -536,6 +536,8 @@ H5_DLL H5D_t *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space,
 H5_DLL H5D_t *H5D__create_named(const H5G_loc_t *loc, const char *name,
     hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id);
+H5_DLL H5D_t *H5D__open_name(const H5G_loc_t *loc, const char *name,
+    hid_t dapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5D__get_space_status(H5D_t *dset, H5D_space_status_t *allocation,
     hid_t dxpl_id);
 H5_DLL herr_t H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc,
@@ -558,6 +560,9 @@ H5_DLL herr_t H5D__flush_real(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id,
     const H5S_t *mem_space, const H5S_t *file_space, hid_t dset_xfer_plist,
     void *buf/*out*/);
+H5_DLL herr_t H5D__write(H5D_t *dataset, hid_t mem_type_id,
+    const H5S_t *mem_space, const H5S_t *file_space, hid_t dset_xfer_plist,
+    const void *buf);
 
 /* Functions that perform direct serial I/O operations */
 H5_DLL herr_t H5D__select_read(const H5D_io_info_t *io_info,

@@ -235,6 +235,9 @@ H5_DLL htri_t H5S_select_is_regular(const H5S_t *space);
 H5_DLL herr_t H5S_select_adjust_u(H5S_t *space, const hsize_t *offset);
 H5_DLL herr_t H5S_select_project_scalar(const H5S_t *space, hsize_t *offset);
 H5_DLL herr_t H5S_select_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
+H5_DLL herr_t H5S_select_project_intersection(const H5S_t *src_space,
+    const H5S_t *dst_space, const H5S_t *src_intersect_space,
+    H5S_t **new_space_ptr);
 
 /* Operations on all selections */
 H5_DLL herr_t H5S_select_all(H5S_t *space, hbool_t rel_prev);

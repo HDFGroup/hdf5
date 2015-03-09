@@ -34,8 +34,14 @@ typedef enum {
 
 const char *FILENAME[] = {
     "vds_1",
+    "vds_2",
     NULL
 };
+
+/* I/O test config flags */
+#define TEST_IO_CLOSE_SRC       0x01u
+#define TEST_IO_DIFFERENT_FILE  0x02u
+#define TEST_IO_NTESTS          0x04u
 
 #define LIST_DOUBLE_SIZE (H5D_VIRTUAL_DEF_LIST_SIZE + 1)
 
@@ -848,7 +854,7 @@ test_api(test_api_config_t config, hid_t fapl)
 
 
     /*
-     * Test X: Enough Selections to trigger doubling of mapping list
+     * Test 6: Enough Selections to trigger doubling of mapping list
      */
     /* Clear virtual layout in DCPL */
     if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
@@ -964,6 +970,208 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_basic_io
+ *
+ * Purpose:     Tests VDS I/O without unlimited selections or
+ *              pattern-matching file/dataset strings
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, March 3, 2015
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_basic_io(unsigned config, hid_t fapl)
+{
+    char        srcfilename[FILENAME_BUF_SIZE];
+    char        vfilename[FILENAME_BUF_SIZE];
+    hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
+    hid_t       vfile = -1;     /* File with virtual dset */
+    hid_t       dcpl = -1;      /* Dataset creation property list */
+    hid_t       srcspace[4] = {-1, -1, -1, -1}; /* Source dataspaces */
+    hid_t       vspace[4] = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
+    hid_t       srcdset[4] = {-1, -1, -1, -1}; /* Source datsets */
+    hid_t       vdset = -1;     /* Virtual dataset */
+    hsize_t     dims[2] = {10, 20}; /* Data space current size */
+    hsize_t     start[2];       /* Hyperslab start */
+    hsize_t     stride[2];      /* Hyperslab stride */
+    hsize_t     count[2];       /* Hyperslab count */
+    hsize_t     block[2];       /* Hyperslab block */
+    hsize_t     coord[10];      /* Point selection array */
+    int         buf[10][20];    /* Write and expecte read buffer */
+    int         rbuf[10][20];   /* Read buffer */
+    int         i, j;
+
+    TESTING("basic virtual dataset I/O")
+
+    h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
+    h5_fixname(FILENAME[1], fapl, srcfilename, sizeof srcfilename);
+
+    /* Create DCPL */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR
+
+    /*
+     * Test 1: All - all selection
+     */
+    /* Create source dataspace */
+    if((srcspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspace */
+    if((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Select all (should not be necessary, but just to be sure) */
+    if(H5Sselect_all(srcspace[0]) < 0)
+        TEST_ERROR
+    if(H5Sselect_all(vspace[0]) < 0)
+        TEST_ERROR
+
+    /* Add virtual layout mapping */
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset", srcspace[0]) < 0)
+        TEST_ERROR
+
+    /* Create virtual file */
+    if((vfile = H5Fcreate(vfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR
+
+    /* Create source file if requested */
+    if(config & TEST_IO_DIFFERENT_FILE) {
+        if((srcfile[0] = H5Fcreate(srcfilename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
+    } /* end if */
+    else {
+        srcfile[0] = vfile;
+        if(H5Iinc_ref(srcfile[0]) < 0)
+            TEST_ERROR
+    } /* end if */
+
+    /* Create source dataset */
+    if((srcdset[0] = H5Dcreate2(srcfile[0], "src_dset", H5T_NATIVE_INT, srcspace[0], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataset */
+    if((vdset = H5Dcreate2(vfile, "v_dset", H5T_NATIVE_INT, vspace[0], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Populate write buffer */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            buf[i][j] = (i * (int)(sizeof(buf[0]) / sizeof(buf[0][0]))) + j;
+
+    /* Write data directly to source dataset */
+    if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Close srcdset if config option specified */
+    if(config & TEST_IO_CLOSE_SRC) {
+        if(H5Dclose(srcdset[0]) < 0)
+            TEST_ERROR
+        srcdset[0] = -1;
+    } /* end if */
+
+    /* Read data through virtual dataset */
+    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    if(H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+        TEST_ERROR
+
+    /* Verify read data */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            if(rbuf[i][j] != buf[i][j])
+                TEST_ERROR
+
+    /* Adjust write buffer */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            buf[i][j] += (int)(sizeof(buf) / sizeof(buf[0][0]));
+
+    /* Write data through virtual dataset */
+    if(H5Dwrite(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Reopen srcdset if config option specified */
+    if(config & TEST_IO_CLOSE_SRC)
+        if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset", H5P_DEFAULT)) < 0)
+            TEST_ERROR
+
+    /* Read data directly from source dataset */
+    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    if(H5Dread(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+        TEST_ERROR
+
+    /* Verify read data */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            if(rbuf[i][j] != buf[i][j])
+                TEST_ERROR
+
+    /* Close */
+    if(H5Dclose(srcdset[0]) < 0)
+        TEST_ERROR
+    srcdset[0] = -1;
+    if(H5Dclose(vdset) < 0)
+        TEST_ERROR
+    vdset = -1;
+    if(H5Fclose(srcfile[0]) < 0)
+        TEST_ERROR
+    if(H5Fclose(vfile) < 0)
+        TEST_ERROR
+    vfile = -1;
+    if(H5Sclose(srcspace[0]) < 0)
+        TEST_ERROR
+    srcspace[0] = -1;
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
+
+
+    /* Close */
+    if(H5Pclose(dcpl) < 0)
+        TEST_ERROR
+    dcpl = -1;
+
+     PASSED();
+     return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        for(i = 0; i < (int)(sizeof(srcdset) / sizeof(srcdset[0])); i++) {
+            if(srcdset[i] >= 0)
+                (void)H5Dclose(srcdset[i]);
+        } /* end for */
+        if(vdset >= 0)
+            (void)H5Dclose(vdset);
+        for(i = 0; i < (int)(sizeof(srcfile) / sizeof(srcfile[0])); i++) {
+            if(srcfile[i] >= 0)
+                (void)H5Fclose(srcfile[i]);
+        } /* end for */
+        if(vfile >= 0)
+            (void)H5Fclose(vfile);
+        for(i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++) {
+            if(srcspace[i] >= 0)
+                (void)H5Sclose(srcspace[i]);
+        } /* end for */
+        for(i = 0; i < (int)(sizeof(vspace) / sizeof(vspace[0])); i++) {
+            if(vspace[i] >= 0)
+                (void)H5Sclose(vspace[i]);
+        } /* end for */
+        if(dcpl >= 0)
+            (void)H5Pclose(dcpl);
+    } H5E_END_TRY;
+
+     return 1;
+} /* end test_basic_io() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests datasets with virtual layout
@@ -983,6 +1191,7 @@ main(void)
     char filename[FILENAME_BUF_SIZE];
     hid_t fapl;
     int test_api_config;
+    unsigned bit_config;
     int nerrors = 0;
 
     /* Testing setup */
@@ -993,6 +1202,10 @@ main(void)
 
     for(test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS; test_api_config++)
         nerrors += test_api((test_api_config_t)test_api_config, fapl);
+    for(bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
+        printf("Config: %s%s\n", bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "", bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file");
+        nerrors += test_basic_io(bit_config, fapl);
+    } /* end for */
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);

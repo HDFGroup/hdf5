@@ -2101,3 +2101,96 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_fill() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_project_intersection
+
+ PURPOSE
+    VDSINC
+
+ USAGE
+    VDSINC
+
+ RETURNS
+    Non-negative on success/Negative on failure.
+
+ DESCRIPTION
+    VDSINC
+    
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
+    const H5S_t *src_intersect_space, H5S_t **new_space_ptr)
+{
+    H5S_t *new_space = NULL;           /* New dataspace constructed */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(src_space);
+    HDassert(dst_space);
+    HDassert(src_intersect_space);
+    HDassert(new_space_ptr);
+
+    /* Create new space, using dst extent.  Start wil "all" selection. */
+    if(NULL == (new_space = H5S_create(H5S_SIMPLE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create output dataspace")
+    if(H5S_extent_copy_real(&new_space->extent, &dst_space->extent, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy destination space extent")
+
+    /* Check intersecting space's selection type */
+    switch(src_intersect_space->select.type->type) {
+        case H5S_SEL_NONE:
+            /* Since the intersecting space is "none", the intersection has no
+             * selection and so does the projection.  Change to "none" selection
+             */
+            if(H5S_select_none(new_space) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+
+            break;
+
+        case H5S_SEL_POINTS:
+            HDassert(0 && "Not yet implemented...");//VDSINC
+
+            break;
+
+        case H5S_SEL_HYPERSLABS:
+            HDassert(0 && "Not yet implemented...");//VDSINC
+
+            break;
+
+        case H5S_SEL_ALL:
+            /* Since the intersecting space is "all", the intersection must be
+             * equal to the source space and the projection must be equal to the
+             * destination space.  Copy the destination selection.
+             */
+            if(H5S_select_copy(new_space, dst_space, FALSE) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination space selection")
+
+            break;
+
+        case H5S_SEL_ERROR:
+        case H5S_SEL_N:
+        default:
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid source dataspace selection type")
+    } /* end switch */
+
+    /* load the address of the new space into *new_space_ptr */
+    *new_space_ptr = new_space;
+
+done:
+    /* Cleanup on error */
+    if(ret_value < 0) {
+        if(new_space && H5S_close(new_space) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5S_select_project_intersection() */
+

@@ -1105,6 +1105,69 @@ done:
 } /* end H5D__create() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:    H5D__open_name
+ *
+ * Purpose:     Opens an existing dataset by name.
+ *
+ * Return:      Success:        Ptr to a new dataset.
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, March 6, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+H5D_t *
+H5D__open_name(const H5G_loc_t *loc, const char *name, hid_t dapl_id,
+    hid_t dxpl_id)
+{
+    H5D_t       *dset = NULL;
+    H5G_loc_t   dset_loc;               /* Object location of dataset */
+    H5G_name_t  path;                   /* Dataset group hier. path */
+    H5O_loc_t   oloc;                   /* Dataset object location */
+    H5O_type_t  obj_type;               /* Type of object at location */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
+    H5D_t       *ret_value;             /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    HDassert(loc);
+    HDassert(name);
+
+    /* Set up dataset location to fill in */
+    dset_loc.oloc = &oloc;
+    dset_loc.path = &path;
+    H5G_loc_reset(&dset_loc);
+
+    /* Find the dataset object */
+    if(H5G_loc_find(loc, name, &dset_loc, dapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found")
+    loc_found = TRUE;
+
+    /* Check that the object found is the correct type */
+    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get object type")
+    if(obj_type != H5O_TYPE_DATASET)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, NULL, "not a dataset")
+
+    /* Open the dataset */
+    if(NULL == (dset = H5D_open(&dset_loc, dapl_id, dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't open dataset")
+
+    /* Set return value */
+    ret_value = dset;
+
+done:
+    if(!ret_value)
+        if(loc_found && H5G_loc_free(&dset_loc) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "can't free location")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__open_name() */
+
+
 /*
  *-------------------------------------------------------------------------
  * Function:	H5D_open
@@ -1449,8 +1512,21 @@ H5D_close(H5D_t *dataset)
                 break;
 
             case H5D_VIRTUAL:
-                /* Close datasets here?  VDSINC */
-                break;
+            {
+                size_t i;
+
+                HDassert(dataset->shared->layout.storage.u.virt.list || (dataset->shared->layout.storage.u.virt.list_nused == 0));
+
+                /* Close source datasets */
+                for(i = 0; i < dataset->shared->layout.storage.u.virt.list_nused; i++)
+                    if(dataset->shared->layout.storage.u.virt.list[i].source_dset) {
+                        HDassert(dataset->shared->layout.storage.u.virt.list[i].source_dset != dataset);
+                        if(H5D_close(dataset->shared->layout.storage.u.virt.list[i].source_dset) < 0)
+                            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
+                        dataset->shared->layout.storage.u.virt.list[i].source_dset = NULL;
+                    } /* end if */
+            } /* end block */
+            break;
 
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
