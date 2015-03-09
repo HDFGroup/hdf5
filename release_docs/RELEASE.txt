@@ -266,7 +266,13 @@ Bug Fixes since HDF5-1.8.14
 
     High-Level APIs:
     ------
-    - None
+    - Suppress warnings from flex/bison-generated code.
+
+      Warning suppression #pragmas, etc. have been added to H5LTparse.c and
+      H5LTanalyze.c. We have no control over this code since it's created by
+      a generator.
+
+      (DER - 2015/03/08 - HDFFV-9149)
 
     Fortran High-Level APIs:
     ------
