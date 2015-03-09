@@ -1721,7 +1721,7 @@ if test "X$THREADSAFE" = "Xyes"; then
     ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
     ## is supported on this system
     ##
-    ## Unfortunately, this probably needs to be an AC_TRY_RUN since
+    ## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
     ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
     ## supported a priori. POSIX.1-2001 requires that a conformant
     ## system need only support one of SYSTEM or PROCESS scopes.
@@ -1730,22 +1730,24 @@ if test "X$THREADSAFE" = "Xyes"; then
     ## hand-hack the config file if you know otherwise.
     AC_MSG_CHECKING([Pthreads supports system scope])
     AC_CACHE_VAL([hdf5_cv_system_scope_threads],
-      [AC_TRY_RUN([
-        #if STDC_HEADERS
-        #include <stdlib.h>
-        #include <pthread.h>
-        #endif
+      [AC_RUN_IFELSE(
+        [AC_LANG_PROGRAM([
+            #if STDC_HEADERS
+            #include <stdlib.h>
+            #include <pthread.h>
+            #endif
+        ],[
+            int main(void)
+            {
+              pthread_attr_t attribute;
+              int ret;
 
-        int main(void)
-        {
-          pthread_attr_t attribute;
-          int ret;
-
-          pthread_attr_init(&attribute);
-          ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-          exit(ret==0 ? 0 : 1);
-        }
-      ], [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no], [hdf5_cv_system_scope_threads=no])])
+              pthread_attr_init(&attribute);
+              ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+              exit(ret==0 ? 0 : 1);
+            }
+        ])]
+      , [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no], [hdf5_cv_system_scope_threads=no])])
 
     if test ${hdf5_cv_system_scope_threads} = "yes"; then
       AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
