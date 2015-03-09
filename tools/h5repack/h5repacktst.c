@@ -1354,7 +1354,7 @@ int main (void)
 
     TESTING("    several global filters");
 
-#if defined (H5_HAVE_FILTER_DEFLATE) && defined (H5_HAVE_FILTER_SHUFFLE)
+#if defined (H5_HAVE_FILTER_DEFLATE)
 
     if (h5repack_init (&pack_options, 0) < 0)
         GOERROR;
