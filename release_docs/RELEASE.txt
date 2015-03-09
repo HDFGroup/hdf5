@@ -132,6 +132,14 @@ New Features
 
       (DER - 2015-02-26, HDFFV-9057, 7567, 9088, 7566)
 
+    - _POSIX_C_SOURCE, _GNU_SOURCE, and _BSD_SOURCE no longer exported to
+      h5cc and other compiler wrappers.
+
+      These definitions are not required for using API functions and may
+      conflict with user code requirements.
+
+      (DER - 2015-03-08, HDFFV-9152)
+
     Library
     -------
     - None
