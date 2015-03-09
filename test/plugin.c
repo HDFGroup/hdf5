@@ -568,7 +568,7 @@ static herr_t
 test_noread_with_filters(hid_t file)
 {
     hid_t	dset;                 /* Dataset ID */
-    int     plugin_state;         /* status of plugins */
+    unsigned     plugin_state;         /* status of plugins */
     TESTING("Testing DYNLIB1 filter with plugins disabled");
 
     /* disable filter plugin */

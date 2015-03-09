@@ -26,14 +26,14 @@
 /* Public Typedefs */
 /*******************/
 
-/* Plugin type */
+/* Plugin type used by the plugin library */
 typedef enum H5PL_type_t {
     H5PL_TYPE_ERROR        = -1,  /*error                    */
     H5PL_TYPE_FILTER       = 0,   /*filter                   */
     H5PL_TYPE_NONE         = 1    /*this must be last!       */
 } H5PL_type_t;
 
-/* Common dynamic plugin type flags */
+/* Common dynamic plugin type flags used by the set/get_loading_state functions */
 #define H5PL_FILTER_PLUGIN 0x0001
 #define H5PL_ALL_PLUGIN 0xFFFF
 
