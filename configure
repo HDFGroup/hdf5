@@ -1572,7 +1572,7 @@ Optional Features:
   --enable-fortran2003    Compile the Fortran 2003 interface, must also
                           specify --enable-fortran [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
-  --enable-hl             Enable the high-level library [default=yes]
+  --enable-hl             Enable the high level library [default=yes]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -1583,7 +1583,10 @@ Optional Features:
   --disable-sharedlib-rpath
                           Disable use of the '=Wl,-rpath' linker option
   --enable-production     Determines how to run the compiler.
-  --enable-threadsafe     Enable thread-safe capability
+  --enable-threadsafe     Enable thread-safe capability. This will disable the
+                          high-level library. You can override this behavior
+                          by specifying --enable-hl and --enable-unsupported.
+                          [default=no]
   --enable-debug=all      Turn on debugging in all packages. One may also
                           specify a comma-separated list of package names
                           without the leading H5 or the word no. The default
@@ -1648,7 +1651,7 @@ Optional Packages:
   --with-szlib=DIR        Use szlib library for external szlib I/O filter
                           [default=no]
   --with-pthread=DIR      Specify alternative path to Pthreads library when
-                          thread-safe capability is built
+                          thread-safe capability is built.
   --with-mpe=DIR          Use MPE instrumentation [default=no]
   --with-default-plugindir=location
                           Specify default location for plugins
@@ -25770,6 +25773,10 @@ if test "${enable_threadsafe+set}" = set; then :
 fi
 
 
+## NOTE: The high-level, C++, and Fortran interfaces are not compatible
+## with the thread-safety option because the lock is not hoisted
+## into the higher-level API calls.
+
 ## The --enable-threadsafe flag is not compatible with --enable-cxx.
 ## If the user tried to specify both flags, throw an error, unless
 ## they also provided the --enable-unsupported flag.
@@ -25779,13 +25786,14 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## --enable-threadsafe is also incompatible with --enable-fortran, unless
+## --enable-threadsafe is also incompatible with --enable-fortran unless
 ## --enable-unsupported has been specified on the configure line.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
     as_fn_error $? "--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error." "$LINENO" 5
   fi
 fi
+
 
 case "X-$THREADSAFE" in
   X-|X-no)
@@ -25810,14 +25818,14 @@ $as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
 
 
     ## ----------------------------------------------------------------------
-    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## Is the Pthreads library present?  It has a header file `pthread.h' and
     ## a library `-lpthread' and their locations might be specified with the
     ## `--with-pthread' command-line switch.  The value is an include path
     ## and/or a library path.  If the library path is specified then it must
     ## be preceded by a comma.
     ##
     ## Thread-safety in HDF5 only uses Pthreads via configure, so the
-    ## default is "yes", though this only has an effect when
+    ## default is "check", though this only has an effect when
     ## --enable-threadsafe is specified.
      HAVE_PTHREAD=yes
 
@@ -25825,12 +25833,12 @@ $as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
 if test "${with_pthread+set}" = set; then :
   withval=$with_pthread;
 else
-  withval=yes
+  withval=check
 fi
 
 
     case "$withval" in
-      yes)
+      check | yes)
         for ac_header in pthread.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
@@ -25904,11 +25912,7 @@ fi
         fi
         ;;
       no)
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread" >&5
-$as_echo_n "checking for pthread... " >&6; }
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
-$as_echo "suppressed" >&6; }
-        unset HAVE_PTHREAD
+        as_fn_error $? "Must use Pthreads with thread safety" "$LINENO" 5
         ;;
       *)
         case "$withval" in
@@ -26090,6 +26094,85 @@ fi
         fi
         ;;
     esac
+
+    ## ----------------------------------------------------------------------
+    ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
+    ## is supported on this system
+    ##
+    ## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
+    ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
+    ## supported a priori. POSIX.1-2001 requires that a conformant
+    ## system need only support one of SYSTEM or PROCESS scopes.
+    ##
+    ## For cross-compiling, we've added a pessimistic 'no'. You can
+    ## hand-hack the config file if you know otherwise.
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking Pthreads supports system scope" >&5
+$as_echo_n "checking Pthreads supports system scope... " >&6; }
+    if ${hdf5_cv_system_scope_threads+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  hdf5_cv_system_scope_threads=no
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+            #if STDC_HEADERS
+            #include <stdlib.h>
+            #include <pthread.h>
+            #endif
+
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+
+            int main(void)
+            {
+              pthread_attr_t attribute;
+              int ret;
+
+              pthread_attr_init(&attribute);
+              ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+              exit(ret==0 ? 0 : 1);
+            }
+
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  hdf5_cv_system_scope_threads=yes
+else
+  hdf5_cv_system_scope_threads=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+
+
+    if test ${hdf5_cv_system_scope_threads} = "yes"; then
+
+$as_echo "#define SYSTEM_SCOPE_THREADS 1" >>confdefs.h
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)." >&5
+$as_echo "$as_me: Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)." >&6;}
+    fi
 fi
 
 ## ----------------------------------------------------------------------
@@ -26992,62 +27075,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-## ----------------------------------------------------------------------
-## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
-## is supported on this system
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking Threads support system scope" >&5
-$as_echo_n "checking Threads support system scope... " >&6; }
-if ${hdf5_cv_system_scope_threads+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-    #if STDC_HEADERS
-    #include <stdlib.h>
-    #include <pthread.h>
-    #endif
-
-    int main(void)
-    {
-      pthread_attr_t attribute;
-      int ret;
-
-      pthread_attr_init(&attribute);
-      ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-      exit(ret==0 ? 0 : 1);
-    }
-
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  hdf5_cv_system_scope_threads=yes
-else
-  hdf5_cv_system_scope_threads=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-
-
-if test ${hdf5_cv_system_scope_threads} = "yes"; then
-
-$as_echo "#define SYSTEM_SCOPE_THREADS 1" >>confdefs.h
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
 
 ## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags

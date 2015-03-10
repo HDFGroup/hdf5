@@ -538,7 +538,7 @@ AC_SUBST(HL_FOR) HL_FOR=""
 AC_MSG_CHECKING([if high level library is enabled])
 AC_ARG_ENABLE([hl],
      [AS_HELP_STRING([--enable-hl],
-                     [Enable the high-level library [default=yes]])],
+                     [Enable the high level library [default=yes]])],
      [HDF5_HL=$enableval],
      [HDF5_HL=yes])
 
@@ -1596,8 +1596,14 @@ AC_CACHE_SAVE
 AC_MSG_CHECKING([for thread safe support])
 AC_ARG_ENABLE([threadsafe],
               [AS_HELP_STRING([--enable-threadsafe],
-                              [Enable thread-safe capability])],
+                              [Enable thread-safe capability. This will disable the high-level library.
+                              You can override this behavior by specifying --enable-hl and --enable-unsupported.
+                              [default=no]])],
               [THREADSAFE=$enableval])
+
+## NOTE: The high-level, C++, and Fortran interfaces are not compatible
+## with the thread-safety option because the lock is not hoisted
+## into the higher-level API calls.
 
 ## The --enable-threadsafe flag is not compatible with --enable-cxx.
 ## If the user tried to specify both flags, throw an error, unless
@@ -1608,13 +1614,14 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## --enable-threadsafe is also incompatible with --enable-fortran, unless
+## --enable-threadsafe is also incompatible with --enable-fortran unless
 ## --enable-unsupported has been specified on the configure line.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
     AC_MSG_ERROR([--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
   fi
 fi
+
 
 case "X-$THREADSAFE" in
   X-|X-no)
@@ -1634,32 +1641,31 @@ if test "X$THREADSAFE" = "Xyes"; then
     AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
 
     ## ----------------------------------------------------------------------
-    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## Is the Pthreads library present?  It has a header file `pthread.h' and
     ## a library `-lpthread' and their locations might be specified with the
     ## `--with-pthread' command-line switch.  The value is an include path
     ## and/or a library path.  If the library path is specified then it must
     ## be preceded by a comma.
     ##
     ## Thread-safety in HDF5 only uses Pthreads via configure, so the
-    ## default is "yes", though this only has an effect when
+    ## default is "check", though this only has an effect when
     ## --enable-threadsafe is specified.
     AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
     AC_ARG_WITH([pthread],
                 [AS_HELP_STRING([--with-pthread=DIR],
-                                [Specify alternative path to Pthreads library when thread-safe capability is built])],,
-                [withval=yes])
+                                [Specify alternative path to Pthreads library when
+                                thread-safe capability is built.])],,
+                [withval=check])
 
     case "$withval" in
-      yes)
+      check | yes)
         AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
         if test "x$HAVE_PTHREAD" = "xyes"; then
           AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
         fi
         ;;
       no)
-        AC_MSG_CHECKING([for pthread])
-        AC_MSG_RESULT([suppressed])
-        unset HAVE_PTHREAD
+        AC_MSG_ERROR([Must use Pthreads with thread safety])
         ;;
       *)
         case "$withval" in
@@ -1708,6 +1714,47 @@ if test "X$THREADSAFE" = "Xyes"; then
         fi
         ;;
     esac
+
+    ## ----------------------------------------------------------------------
+    ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
+    ## is supported on this system
+    ##
+    ## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
+    ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
+    ## supported a priori. POSIX.1-2001 requires that a conformant
+    ## system need only support one of SYSTEM or PROCESS scopes.
+    ##
+    ## For cross-compiling, we've added a pessimistic 'no'. You can
+    ## hand-hack the config file if you know otherwise.
+    AC_MSG_CHECKING([Pthreads supports system scope])
+    AC_CACHE_VAL([hdf5_cv_system_scope_threads],
+      [AC_RUN_IFELSE(
+        [AC_LANG_PROGRAM([
+            #if STDC_HEADERS
+            #include <stdlib.h>
+            #include <pthread.h>
+            #endif
+        ],[
+            int main(void)
+            {
+              pthread_attr_t attribute;
+              int ret;
+
+              pthread_attr_init(&attribute);
+              ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+              exit(ret==0 ? 0 : 1);
+            }
+        ])]
+      , [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no], [hdf5_cv_system_scope_threads=no])])
+
+    if test ${hdf5_cv_system_scope_threads} = "yes"; then
+      AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
+                [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+      AC_MSG_NOTICE([Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM).])
+    fi
 fi
 
 ## ----------------------------------------------------------------------
@@ -1962,36 +2009,6 @@ AC_MSG_RESULT([%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u])
 AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"], 
                    [Width for printf() for type `long long' or `__int64', use `ll'])
 
-## ----------------------------------------------------------------------
-## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
-## is supported on this system
-##
-AC_MSG_CHECKING([Threads support system scope])
-AC_CACHE_VAL([hdf5_cv_system_scope_threads],
-  [AC_TRY_RUN([
-    #if STDC_HEADERS
-    #include <stdlib.h>
-    #include <pthread.h>
-    #endif
-
-    int main(void)
-    {
-      pthread_attr_t attribute;
-      int ret;
-
-      pthread_attr_init(&attribute);
-      ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-      exit(ret==0 ? 0 : 1);
-    }
-  ], [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no],)])
-
-if test ${hdf5_cv_system_scope_threads} = "yes"; then
-  AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
-            [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
 
 ## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags
