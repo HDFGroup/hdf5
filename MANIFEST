@@ -1,4 +1,4 @@
-#
+
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -156,6 +156,7 @@
 ./examples/h5_vds-exc.c
 ./examples/h5_vds-exclim.c
 ./examples/h5_vds-eiger.c
+./examples/h5_vds-simpleIO.c
 ./examples/testh5cc.sh.in
 ./examples/README
 

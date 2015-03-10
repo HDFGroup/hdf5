@@ -16,6 +16,7 @@
   This file is intended for use with HDF5 Library version 1.10
 
  ************************************************************/
+/* EIP Add link to the picture */
 
 #include "hdf5.h"
 #include <stdio.h>
@@ -47,9 +48,9 @@ main (void)
     hid_t        file, space, src_space, vspace, dset; /* Handles */ 
     hid_t        dcpl;
     herr_t       status;
-    hsize_t      vdsdims[2] = {VDSDIM0, VDSDIM1},      /* Virtual satasets dimension */
-                 dims[1] = {DIM0},           /* Source datasets dimensions */
-                 start[2],                   /* Hyperslab parameters */
+    hsize_t      vdsdims[2] = {VDSDIM0, VDSDIM1},      /* Virtual datasets dimension */
+                 dims[1] = {DIM0},                     /* Source datasets dimensions */
+                 start[2],                             /* Hyperslab parameters */
                  stride[2],
                  count[2],
                  block[2];
@@ -156,19 +157,19 @@ main (void)
     if (H5D_VIRTUAL == layout) 
         printf(" Dataset has a virtual layout \n");
     else
-        printf("Wrong layout found \n");
+        printf(" Wrong layout found \n");
 
      /*
       * Find the number of mappings.
       */
      status = H5Pget_virtual_count (dcpl, &num_map);
-     printf("Number of mappings is %d\n", num_map);
+     printf(" Number of mappings is %d\n", num_map);
 
      /* 
       * Get mapping parameters for each mapping.
       */
     for (i = 0; i < (int)num_map; i++) {   
-        printf("Mapping %d \n", i);
+        printf(" Mapping %d \n", i);
         printf("         Selection in the virtual dataset ");
         /* Get selection in the virttual  dataset */
         vspace = H5Pget_virtual_vspace (dcpl, (size_t)i);
@@ -190,10 +191,10 @@ main (void)
         /* We also can use new APIs to get start, stride, count and block */
             if (H5Sis_regular_hyperslab(vspace)) {
                 status = H5Sget_regular_hyperslab (vspace, start_out, stride_out, count_out, block_out);
-                printf("         start  = [%d, %d] \n", (int)start_out[0], (int)start_out[1]);
-                printf("         stride = [%d, %d] \n", (int)stride_out[0], (int)stride_out[1]);
-                printf("         count  = [%d, %d] \n", (int)count_out[0], (int)count_out[1]);
-                printf("         block  = [%d, %d] \n", (int)block_out[0], (int)block_out[1]);
+                printf("         start  = [%llu, %llu] \n", (unsigned long long)start_out[0], (unsigned long long)start_out[1]);
+                printf("         stride = [%llu, %llu] \n", (unsigned long long)stride_out[0], (unsigned long long)stride_out[1]);
+                printf("         count  = [%llu, %llu] \n", (unsigned long long)count_out[0], (unsigned long long)count_out[1]);
+                printf("         block  = [%llu, %llu] \n", (unsigned long long)block_out[0], (unsigned long long)block_out[1]);
             }
         }
         /* Get source file name. */
@@ -223,7 +224,7 @@ main (void)
         free(buf);
     }
 
-#ifdef LATER
+#ifdef EIP 
     /*
      * Read the data using the default properties.
      */

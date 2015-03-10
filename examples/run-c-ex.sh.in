@@ -127,11 +127,13 @@ then
         RunTest h5_shared_mesg &&\
         rm h5_shared_mesg &&\
         RunTest h5_vds-eiger &&\
-        rm h5_vds-eiger&&\
+        rm h5_vds-eiger &&\
         RunTest h5_vds-exclim &&\
-        rm h5_vds-exclim&&\
+        rm h5_vds-exclim &&\
         RunTest h5_vds-exc &&\
-        rm h5_vds-exc&&\
+        rm h5_vds-exc &&\
+        RunTest h5_vds-simpleIO &&\
+        rm h5_vds-simpleIO &&\
         RunTest h5_vds &&\
         rm h5_vds); then
         EXIT_VALUE=${EXIT_SUCCESS}

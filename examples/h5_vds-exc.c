@@ -5,6 +5,7 @@
   This file is intended for use with HDF5 Library version 1.10
 
  ************************************************************/
+/* EIP Add link to the picture */
 
 #include "hdf5.h"
 #include <stdio.h>
@@ -171,10 +172,10 @@ main (void)
           if (H5Sget_select_type(vspace) == H5S_SEL_HYPERSLABS) { 
               if (H5Sis_regular_hyperslab(vspace)) {
                    status = H5Sget_regular_hyperslab (vspace, start_out, stride_out, count_out, block_out);
-                   printf("         start  = [%d, %d, %d] \n", (int)start_out[0], (int)start_out[1], (int)start_out[2]);
-                   printf("         stride = [%d, %d, %d] \n", (int)stride_out[0], (int)stride_out[1], (int)stride_out[2]);
-                   printf("         count  = [%d, %d, %d] \n", (int)count_out[0], (int)count_out[1], (int)count_out[2]);
-                   printf("         block  = [%d, %d, %d] \n", (int)block_out[0], (int)block_out[1], (int)block_out[2]);
+                   printf("         start  = [%llu, %llu, %llu] \n", (unsigned long long)start_out[0], (unsigned long long)start_out[1], (unsigned long long)start_out[2]);
+                   printf("         stride = [%llu, %llu, %llu] \n", (unsigned long long)stride_out[0], (unsigned long long)stride_out[1], (unsigned long long)stride_out[2]);
+                   printf("         count  = [%llu, %llu, %llu] \n", (unsigned long long)count_out[0], (unsigned long long)count_out[1], (unsigned long long)count_out[2]);
+                   printf("         block  = [%llu, %llu, %llu] \n", (unsigned long long)block_out[0], (unsigned long long)block_out[1], (unsigned long long)block_out[2]);
                }
           }
       /* Get source file name */
@@ -200,6 +201,7 @@ main (void)
           free(filename);
           free(dsetname);
       }
+/* EIP read data back */
 
     /*
      * Close and release resources.
