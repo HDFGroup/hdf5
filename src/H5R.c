@@ -409,6 +409,10 @@ done:
     Currently only set up to work with references to datasets
  EXAMPLES
  REVISION LOG
+
+    M. Scot Breitenfeld
+    3 March 2015
+    Added a check for undefined reference pointer.
 --------------------------------------------------------------------------*/
 static hid_t
 H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref, hbool_t app_ref)
@@ -433,8 +437,10 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
     switch(ref_type) {
         case H5R_OBJECT:
             oloc.addr = *(const hobj_ref_t *)_ref; /* Only object references currently supported */
-            break;
-
+	    if(!H5F_addr_defined(oloc.addr) || oloc.addr == 0)
+	      HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Undefined reference pointer")
+	      break;
+            
         case H5R_DATASET_REGION:
         {
             H5HG_t hobjid;  /* Heap object ID */
@@ -445,6 +451,9 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
             p = (const uint8_t *)_ref;
             H5F_addr_decode(oloc.file, &p, &(hobjid.addr));
             UINT32DECODE(p, hobjid.idx);
+
+            if(!H5F_addr_defined(hobjid.addr) || hobjid.addr == 0)
+	      HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Undefined reference pointer")
 
             /* Get the dataset region from the heap (allocate inside routine) */
             if(NULL == (buf = (uint8_t *)H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)))
