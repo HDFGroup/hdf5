@@ -155,6 +155,34 @@ New Features
 
       (DER - 2015-03-08, HDFFV-9086)
 
+    - Removed obsolete time functionality from configure and C library
+
+      The library contained some residual functionality from obsolete
+      time zone handling code. This has been removed and the configure
+      checks for the time functions have been cleaned up.
+
+      * Lumped all the time functionality together in configure.ac.
+        This was previously more spread out due to Solaris issues
+        with the ordering of certain checks.
+
+      * Removes processing that handles __tm_gmtoff members of struct
+        tm. (libc-4)
+
+      * Removes BSDgettimeofday(). (IRIX 5.3)
+
+      * Removes timezone struct handling in gettimeofday(). (considered
+        harmful)
+
+      Note that the HDF5 library stores timestamps in a platform-independent
+      manner, so old files can still be read. This only affects convering
+      system time to HDF5 timestamps.
+
+      The library currently uses the tm_gmtoff member of the tm struct
+      (preferred, if available) or the timezone global variable to
+      construct HDF5 timestamps.
+
+      (DER - 2015-03-09, HDFFV-9083 and 9085)
+
     Library
     -------
     - None
