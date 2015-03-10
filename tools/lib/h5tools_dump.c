@@ -3161,6 +3161,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
 
                         ctx->indent_level++;
 
+                        ctx->need_prefix = TRUE;
+                        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
                         h5tools_str_reset(&buffer);
                         h5tools_print_virtual_selection(&buffer, info, ctx, virtual_vspace, dcpl_id, next);
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
