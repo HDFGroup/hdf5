@@ -75,8 +75,8 @@ static int cmp_par(size_t i, size_t j, particle_t *rbuf, particle_t *wbuf )
  if ( ( HDstrcmp( rbuf[i].name, wbuf[j].name ) != 0 ) ||
   rbuf[i].lati != wbuf[j].lati ||
   rbuf[i].longi != wbuf[j].longi ||
-  rbuf[i].pressure != wbuf[j].pressure ||
-  rbuf[i].temperature != wbuf[j].temperature ) {
+  !FLT_ABS_EQUAL(rbuf[i].pressure,wbuf[j].pressure) ||
+  !DBL_ABS_EQUAL(rbuf[i].temperature,wbuf[j].temperature) ) {
   return -1;
  }
  return 0;
