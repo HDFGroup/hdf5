@@ -110,16 +110,17 @@ set (CTEST_CONFIGURE_COMMAND
 set($ENV{LC_MESSAGES}  "en_EN")
  
 #-----------------------------------------------------------------------------
-  ## NORMAL process
-  ## --------------------------
-  CTEST_START (Experimental)
-  CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
-  CTEST_READ_CUSTOM_FILES ("${CTEST_BINARY_DIRECTORY}")
-  CTEST_BUILD (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
-  CTEST_TEST (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args} RETURN_VALUE res)
-  if(res GREATER 0)
-    message (FATAL_ERROR "tests FAILED")
-  endif(res GREATER 0)
+configure_file(${CTEST_SOURCE_DIRECTORY}/config/cmake/CTestCustom.cmake ${CTEST_BINARY_DIRECTORY}/CTestCustom.cmake)
+ctest_read_custom_files ("${CTEST_BINARY_DIRECTORY}")
+## NORMAL process
+## --------------------------
+ctest_start (Experimental)
+ctest_configure (BUILD "${CTEST_BINARY_DIRECTORY}")
+ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
+ctest_test (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args} RETURN_VALUE res)
+if(res GREATER 0)
+  message (FATAL_ERROR "tests FAILED")
+endif(res GREATER 0)
 #-----------------------------------------------------------------------------
 ############################################################################################################## 
 message(STATUS "DONE")
