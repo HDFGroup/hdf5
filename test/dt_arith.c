@@ -538,7 +538,7 @@ some_dummy_func(float x)
 {
     char	s[128];
 
-    HDsnprintf(s, sizeof(s), "%g", x);
+    HDsnprintf(s, sizeof(s), "%g", (double)x);
 }
 
 
@@ -832,7 +832,7 @@ static int test_particular_fp_integer(void)
             printf(" %02x", saved_buf2[ENDIAN(src_size2, j, endian)]);
 
         HDmemcpy(&x, saved_buf2, src_size2);
-        printf(" %29.20e\n", x);
+        printf(" %29.20e\n", (double)x);
 
         printf("        dst = ");
         for (j=0; j<dst_size2; j++)
@@ -2720,7 +2720,7 @@ my_isnan(dtype_t type, void *val)
 	    float x;
 
 	    HDmemcpy(&x, val, sizeof(float));
-	    HDsnprintf(s, sizeof(s), "%g", x);
+	    HDsnprintf(s, sizeof(s), "%g", (double)x);
 	} else if (FLT_DOUBLE==type) {
 	    double x;
 
@@ -3387,7 +3387,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
         if (FLT_FLOAT==src_type) {
             float x;
             HDmemcpy(&x, &saved[j*src_size], sizeof(float));
-            printf(" %29.20e\n", x);
+            printf(" %29.20e\n", (double)x);
         } else if (FLT_DOUBLE==src_type) {
             double x;
             HDmemcpy(&x, &saved[j*src_size], sizeof(double));
@@ -3407,7 +3407,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
         if (FLT_FLOAT==dst_type) {
             float x;
             HDmemcpy(&x, &buf[j*dst_size], sizeof(float));
-            printf(" %29.20e\n", x);
+            printf(" %29.20e\n", (double)x);
         } else if (FLT_DOUBLE==dst_type) {
             double x;
             HDmemcpy(&x, &buf[j*dst_size], sizeof(double));
@@ -3425,7 +3425,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             printf(" %02x", hw[ENDIAN(dst_size,k,dendian)]);
         printf("%*s", (int)(3*MAX(0, (ssize_t)src_size-(ssize_t)dst_size)), "");
         if (FLT_FLOAT==dst_type)
-            printf(" %29.20e\n", hw_f);
+            printf(" %29.20e\n", (double)hw_f);
         else if (FLT_DOUBLE==dst_type)
             printf(" %29.20e\n", hw_d);
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
@@ -4570,7 +4570,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
             case FLT_FLOAT:
                 HDmemcpy(aligned, saved+j*sizeof(float), sizeof(float));
-                printf(" %29f\n", *((float*)aligned));
+                printf(" %29f\n", (double)*((float*)aligned));
                 break;
             case FLT_DOUBLE:
                 HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
@@ -4635,7 +4635,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
             case FLT_FLOAT:
                 HDmemcpy(aligned, buf+j*sizeof(float), sizeof(float));
-                printf(" %29f\n", *((float*)aligned));
+                printf(" %29f\n", (double)*((float*)aligned));
                 break;
             case FLT_DOUBLE:
                 HDmemcpy(aligned, buf+j*sizeof(double), sizeof(double));
@@ -4689,7 +4689,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 printf(" %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long long*)hw));
                 break;
             case FLT_FLOAT:
-                printf(" %29f\n", *((float*)hw));
+                printf(" %29f\n", (double)*((float*)hw));
                 break;
             case FLT_DOUBLE:
                 printf(" %29f\n", *((double*)hw));
