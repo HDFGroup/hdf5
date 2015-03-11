@@ -125,21 +125,20 @@ H5_timer_begin (H5_timer_t *timer)
     HDassert(timer);
 
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage(RUSAGE_SELF, &rusage);
+    HDgetrusage (RUSAGE_SELF, &rusage);
     timer->utime = (double)rusage.ru_utime.tv_sec +
-                   ((double)rusage.ru_utime.tv_usec / H5_DOUBLE(1e6));
+                   ((double)rusage.ru_utime.tv_usec / 1e6F);
     timer->stime = (double)rusage.ru_stime.tv_sec +
-                   ((double)rusage.ru_stime.tv_usec / H5_DOUBLE(1e6));
+                   ((double)rusage.ru_stime.tv_usec / 1e6F);
 #else
-    timer->utime = H5_DOUBLE(0.0);
-    timer->stime = H5_DOUBLE(0.0);
+    timer->utime = 0.0F;
+    timer->stime = 0.0F;
 #endif
 #ifdef H5_HAVE_GETTIMEOFDAY
-    HDgettimeofday(&etime, NULL);
-    timer->etime = (double)etime.tv_sec +
-                   ((double)etime.tv_usec / H5_DOUBLE(1e6));
+    HDgettimeofday (&etime, NULL);
+    timer->etime = (double)etime.tv_sec + ((double)etime.tv_usec / 1e6F);
 #else
-    timer->etime = H5_DOUBLE(0.0);
+    timer->etime = 0.0F;
 #endif
 } /* end H5_timer_begin() */
 
@@ -167,9 +166,9 @@ H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
     HDassert(timer);
     H5_timer_begin(&now);
 
-    timer->utime = MAX(H5_DOUBLE(0.0), now.utime - timer->utime);
-    timer->stime = MAX(H5_DOUBLE(0.0), now.stime - timer->stime);
-    timer->etime = MAX(H5_DOUBLE(0.0), now.etime - timer->etime);
+    timer->utime = MAX(0.0F, now.utime - timer->utime);
+    timer->stime = MAX(0.0F, now.stime - timer->stime);
+    timer->etime = MAX(0.0F, now.etime - timer->etime);
 
     if (sum) {
         sum->utime += timer->utime;
@@ -185,14 +184,14 @@ H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
  * Purpose:	Prints the bandwidth (bytes per second) in a field 10
  *		characters wide widh four digits of precision like this:
  *
- * 			       NaN	If <= 0.0 seconds
+ * 			       NaN	If <=0 seconds
  *			1234. TB/s
  * 			123.4 TB/s
  *			12.34 GB/s
  *			1.234 MB/s
  *			4.000 kB/s
  *			1.000  B/s
- *			0.000  B/s	If NBYTES == 0.0
+ *			0.000  B/s	If NBYTES==0
  *			1.2345e-10	For bandwidth less than 1
  *			6.7893e+94	For exceptionally large values
  *			6.678e+106	For really big values
@@ -205,17 +204,17 @@ H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
  *-------------------------------------------------------------------------
  */
 void
-H5_bandwidth(char *buf /*out*/, double nbytes, double nseconds)
+H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
 {
     double	bw;
 
-    if(nseconds <= H5_DOUBLE(0.0))
+    if(nseconds <= 0.0F)
         HDstrcpy(buf, "       NaN");
     else {
         bw = nbytes/nseconds;
-        if(H5_DBL_ABS_EQUAL(bw, H5_DOUBLE(0.0)))
+        if(H5_DBL_ABS_EQUAL(bw, 0.0F))
 	        HDstrcpy(buf, "0.000  B/s");
-        else if(bw < H5_DOUBLE(1.0))
+        else if(bw < 1.0F)
             sprintf(buf, "%10.4e", bw);
         else if(bw < H5_KB) {
             sprintf(buf, "%05.4f", bw);
