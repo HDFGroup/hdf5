@@ -1508,6 +1508,17 @@ AC_ARG_ENABLE([threadsafe],
 ## with the thread-safety option because the lock is not hoisted
 ## into the higher-level API calls.
 
+## --enable-threadsafe is incompatible with --enable-hl unless
+## --enable-unsupported has been specified on the configure line.
+##
+## Note that the high-level library is enabled by default so most
+## users will have to add --disable-hl to the configure options.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF5_HL}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([The thread-safe library is incompatible with the high-level library. --enable-unsupported will allow building the high-level library, though this configuration is not supported by The HDF Group. Alternatively,--disable-hl can be used to prevent building the high-level library (recommended).])
+  fi
+fi
+
 ## The --enable-threadsafe flag is not compatible with --enable-cxx.
 ## If the user tried to specify both flags, throw an error, unless
 ## they also provided the --enable-unsupported flag.
