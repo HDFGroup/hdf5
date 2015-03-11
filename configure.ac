@@ -534,7 +534,7 @@ AC_SUBST(HL_FOR) HL_FOR=""
 AC_MSG_CHECKING([if high level library is enabled])
 AC_ARG_ENABLE([hl],
      [AS_HELP_STRING([--enable-hl],
-                     [Enable the high-level library [default=yes]])],
+                     [Enable the high level library [default=yes]])],
      [HDF5_HL=$enableval],
      [HDF5_HL=yes])
 

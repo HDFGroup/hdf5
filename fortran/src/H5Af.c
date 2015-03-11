@@ -1652,7 +1652,7 @@ nh5aget_info_c (hid_t_f *loc_id, int_f *corder_valid, int_f *corder,
 
     *corder = (int_f)ainfo.corder;
     *cset = (int_f)ainfo.cset;
-    *data_size = (hsize_t)ainfo.data_size;
+    *data_size = (hsize_t_f)ainfo.data_size;
 
 done:
     return ret_value;
@@ -1728,7 +1728,7 @@ nh5aget_info_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
         *corder_valid = 1;
     *corder = (int_f)ainfo.corder;
     *cset = (int_f)ainfo.cset;
-    *data_size = (hsize_t)ainfo.data_size;
+    *data_size = (hsize_t_f)ainfo.data_size;
 
 done:
     if(c_obj_name)
@@ -1797,7 +1797,7 @@ nh5aget_info_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
         *corder_valid = 1;
     *corder = (int_f)ainfo.corder;
     *cset = (int_f)ainfo.cset;
-    *data_size = (hsize_t)ainfo.data_size;
+    *data_size = (hsize_t_f)ainfo.data_size;
 
 done:
     if(c_obj_name)

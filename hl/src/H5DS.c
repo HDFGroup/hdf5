@@ -144,7 +144,8 @@ herr_t H5DSattach_scale(hid_t did,
     hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
     H5O_info_t oi1, oi2;
     H5I_type_t it1, it2;
-    int        i, len;
+    int        i;
+    size_t len;
     int        found_ds=0;
     htri_t     is_scale;
 
@@ -242,7 +243,7 @@ herr_t H5DSattach_scale(hid_t did,
     if (has_dimlist == 0)
     {
 
-        dims[0] = rank;
+      dims[0] = (hsize_t)rank;
 
         /* space for the attribute */
         if((sid = H5Screate_simple(1, dims, NULL)) < 0)
@@ -477,7 +478,7 @@ herr_t H5DSattach_scale(hid_t did,
         dsbuf[nelmts - 1] = dsl;
 
         /* create a new data space for the new references array */
-        dims[0] = nelmts;
+        dims[0] = (hsize_t)nelmts;
 
         if((sid = H5Screate_simple(1, dims, NULL)) < 0)
             goto out;
@@ -798,7 +799,7 @@ herr_t H5DSdetach_scale(hid_t did,
 
     for(ii=0; ii<nelmts; ii++) {
         /* First check if we have the same dimension index */
-        if((int)idx == dsbuf[ii].dim_idx) {
+      if(idx == dsbuf[ii].dim_idx) {
             /* get the reference to the dataset */
             ref = dsbuf[ii].ref;
 
@@ -853,7 +854,7 @@ herr_t H5DSdetach_scale(hid_t did,
     if(nelmts)
     {
         /* create a new data space for the new references array */
-        dims[0] = nelmts;
+      dims[0] = (hsize_t)nelmts;
 
         if((sid = H5Screate_simple(1, dims, NULL)) < 0)
             goto out;
@@ -1153,7 +1154,7 @@ htri_t H5DSis_attached(hid_t did,
                     goto out;
 
                 /* same object */
-                if(oi3.fileno == oi4.fileno && oi3.addr == oi4.addr && (int)idx==dsbuf[i].dim_idx)
+                if(oi3.fileno == oi4.fileno && oi3.addr == oi4.addr && idx==dsbuf[i].dim_idx)
                     found_dset=1;
 
                 /* close the dereferenced dataset */
@@ -1478,7 +1479,7 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
 
     if (has_labels == 0)
     {
-        dims[0] = rank;
+        dims[0] = (hsize_t)rank;
 
         /* space for the attribute */
         if ((sid = H5Screate_simple(1, dims, NULL)) < 0)

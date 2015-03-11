@@ -28,7 +28,7 @@
 /* attribute type of a DS dataset */
 typedef struct ds_list_t {
  hobj_ref_t ref;     /* object reference  */
- int        dim_idx; /* dimension index of the dataset */
+ unsigned int dim_idx; /* dimension index of the dataset */
 } ds_list_t;
 
 

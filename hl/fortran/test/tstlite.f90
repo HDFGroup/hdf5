@@ -63,7 +63,6 @@ INTEGER        :: i                                  ! general purpose integer
 
 CALL test_begin(' Make/Read datasets (1D)        ')
 
-
 !
 ! Initialize the data array.
 !
@@ -186,8 +185,8 @@ USE HDF5 ! module of HDF5 library
 IMPLICIT NONE
 
 
-INTEGER, PARAMETER :: DIM1 = 4;                             ! columns
-INTEGER, PARAMETER :: DIM2 = 6;                             ! rows
+INTEGER(HSIZE_T), PARAMETER :: DIM1 = 4;             ! columns
+INTEGER(HSIZE_T), PARAMETER :: DIM2 = 6;             ! rows
 CHARACTER(len=9), PARAMETER :: filename = "dsetf2.h5"! File name
 CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
 CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"   ! Dataset name
@@ -205,7 +204,7 @@ REAL, DIMENSION(DIM1,DIM2)    :: buf3r               ! Data buffer
 DOUBLE PRECISION, DIMENSION(DIM1,DIM2) :: buf4       ! Data buffer
 DOUBLE PRECISION, DIMENSION(DIM1,DIM2) :: buf4r      ! Data buffer
 INTEGER        :: errcode                            ! Error flag
-INTEGER        :: i, j, n                            ! general purpose integers
+INTEGER(HSIZE_T) :: i, j, n                            ! general purpose integers
 
 CALL test_begin(' Make/Read datasets (2D)        ')
 
@@ -215,15 +214,15 @@ CALL test_begin(' Make/Read datasets (2D)        ')
 !
 n=1
 DO i = 1, DIM1*DIM2
-   buf(i) = n;
+   buf(i) = INT(n)
    n = n + 1
 END DO
 
 DO i = 1, dims(1)
  DO j = 1, dims(2)
-  buf2(i,j) = (i-1)*dims(2) + j;
-  buf3(i,j) = (i-1)*dims(2) + j;
-  buf4(i,j) = (i-1)*dims(2) + j;
+  buf2(i,j) = INT((i-1)*dims(2) + j)
+  buf3(i,j) = INT((i-1)*dims(2) + j)
+  buf4(i,j) = INT((i-1)*dims(2) + j)
  END DO
 END DO
 
@@ -373,9 +372,9 @@ USE HDF5 ! module of HDF5 library
 
 IMPLICIT NONE
 
-INTEGER, PARAMETER :: DIM1 = 6;                             ! columns
-INTEGER, PARAMETER :: DIM2 = 4;                             ! rows
-INTEGER, PARAMETER :: DIM3 = 2;                             ! layers
+INTEGER, PARAMETER :: DIM1 = 6                             ! columns
+INTEGER, PARAMETER :: DIM2 = 4                             ! rows
+INTEGER, PARAMETER :: DIM3 = 2                             ! layers
 CHARACTER(len=9), PARAMETER :: filename = "dsetf3.h5"       ! File name
 CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"          ! Dataset name
 CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"          ! Dataset name
@@ -394,7 +393,7 @@ DOUBLE PRECISION, DIMENSION(DIM1,DIM2,DIM3) :: buf4         ! Data buffer
 DOUBLE PRECISION, DIMENSION(DIM1,DIM2,DIM3) :: buf4r        ! Data buffer
 INTEGER        :: rank = 3                                  ! Dataset rank
 INTEGER        :: errcode                                   ! Error flag
-INTEGER        :: i, j, k, n                                ! general purpose integers
+INTEGER(HSIZE_T) :: i, j, k, n                                ! general purpose integers
 INTEGER          :: type_class
 INTEGER(SIZE_T)  :: type_size
 
@@ -406,20 +405,20 @@ CALL test_begin(' Make/Read datasets (3D)        ')
 !
 n=1
 DO i = 1, DIM1*DIM2*DIM3
-   buf(i) = n;
+   buf(i) = INT(n)
    n = n + 1
 END DO
 
 n = 1
 DO i = 1, dims(1)
- DO j = 1, dims(2)
- DO k = 1, dims(3)
-  buf2(i,j,k) = n;
-  buf3(i,j,k) = n;
-  buf4(i,j,k) = n;
-  n = n + 1
- END DO
- END DO
+   DO j = 1, dims(2)
+      DO k = 1, dims(3)
+         buf2(i,j,k) = INT(n)
+         buf3(i,j,k) = INT(n)
+         buf4(i,j,k) = INT(n)
+         n = n + 1
+      END DO
+   END DO
 END DO
 
 !
@@ -625,7 +624,7 @@ SUBROUTINE test_datasetND(rank)
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:) :: dbuf_7       ! Data buffer
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:) :: dbufr_7      ! Data buffer
   INTEGER        :: errcode                                   ! Error flag
-  INTEGER        :: i, j, k, l, m, n, o, nn                   ! general purpose integers
+  INTEGER(HSIZE_T)        :: i, j, k, l, m, n, o, nn                   ! general purpose integers
   INTEGER          :: type_class
   INTEGER(SIZE_T)  :: type_size
   CHARACTER(LEN=1) :: ichr1
@@ -651,9 +650,9 @@ SUBROUTINE test_datasetND(rank)
         DO j = 1, DIM2
            DO k = 1, DIM3
               DO l = 1, DIM4
-                 ibuf_4(i,j,k,l) = nn
-                 rbuf_4(i,j,k,l) = nn
-                 dbuf_4(i,j,k,l) = nn
+                 ibuf_4(i,j,k,l) = INT(nn)
+                 rbuf_4(i,j,k,l) = INT(nn)
+                 dbuf_4(i,j,k,l) = INT(nn)
                  nn = nn + 1
               END DO
            END DO
@@ -677,9 +676,9 @@ SUBROUTINE test_datasetND(rank)
            DO k = 1, DIM3
               DO l = 1, DIM4
                  DO m = 1, DIM5
-                    ibuf_5(i,j,k,l,m) = nn
-                    rbuf_5(i,j,k,l,m) = nn
-                    dbuf_5(i,j,k,l,m) = nn
+                    ibuf_5(i,j,k,l,m) = INT(nn)
+                    rbuf_5(i,j,k,l,m) = INT(nn)
+                    dbuf_5(i,j,k,l,m) = INT(nn)
                     nn = nn + 1
                  END DO
               END DO
@@ -705,9 +704,9 @@ SUBROUTINE test_datasetND(rank)
               DO l = 1, DIM4
                  DO m = 1, DIM5
                     DO n = 1, DIM6
-                       ibuf_6(i,j,k,l,m,n) = nn
-                       rbuf_6(i,j,k,l,m,n) = nn
-                       dbuf_6(i,j,k,l,m,n) = nn
+                       ibuf_6(i,j,k,l,m,n) = INT(nn)
+                       rbuf_6(i,j,k,l,m,n) = INT(nn)
+                       dbuf_6(i,j,k,l,m,n) = INT(nn)
                        nn = nn + 1
                     END DO
                  END DO
@@ -735,9 +734,9 @@ SUBROUTINE test_datasetND(rank)
                  DO m = 1, DIM5
                     DO n = 1, DIM6
                        DO o = 1, DIM7
-                          ibuf_7(i,j,k,l,m,n,o) = nn
-                          rbuf_7(i,j,k,l,m,n,o) = nn
-                          dbuf_7(i,j,k,l,m,n,o) = nn
+                          ibuf_7(i,j,k,l,m,n,o) = INT(nn)
+                          rbuf_7(i,j,k,l,m,n,o) = INT(nn)
+                          dbuf_7(i,j,k,l,m,n,o) = INT(nn)
                           nn = nn + 1
                        END DO
                     END DO
@@ -1045,7 +1044,7 @@ SUBROUTINE test_datasets()
   CHARACTER(len=9), PARAMETER :: filename = "dsetf4.h5"! File name
   INTEGER(HID_T) :: file_id                            ! File identifier
   INTEGER        :: errcode                            ! Error flag
-  INTEGER, PARAMETER :: DIM1 = 10;                     ! Dimension of array
+  INTEGER, PARAMETER :: DIM1 = 10                     ! Dimension of array
   CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"   ! Dataset name
@@ -1086,10 +1085,10 @@ SUBROUTINE test_datasets()
   !
   n = 1
   DO i = 1, DIM1
-     buf2(i) = n;
-     buf3(i) = n;
-     buf4(i) = n;
-     n = n + 1;
+     buf2(i) = n
+     buf3(i) = n
+     buf4(i) = n
+     n = n + 1
   END DO
 
   !-------------------------------------------------------------------------
@@ -1344,8 +1343,8 @@ SUBROUTINE test_attributes()
   CHARACTER(len=9), PARAMETER :: filename = "dsetf5.h5"! File name
   CHARACTER(len=9), PARAMETER :: filename1 ="tattr.h5" ! C written attribute file
   INTEGER(HID_T) :: file_id                            ! File identifier
-  INTEGER(HID_T) :: file_id1
-  INTEGER, PARAMETER :: DIM1 = 10;                     ! Dimension of array
+!  INTEGER(HID_T) :: file_id1
+  INTEGER, PARAMETER :: DIM1 = 10                     ! Dimension of array
   CHARACTER(LEN=5), PARAMETER :: attrname1 = "attr1"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname2 = "attr2"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname3 = "attr3"   ! Attribute name
@@ -1355,8 +1354,8 @@ SUBROUTINE test_attributes()
   CHARACTER(LEN=16), PARAMETER :: buf_c = "string attribute"
   CHARACTER(LEN=8)                  :: bufr1           ! Data buffer
   CHARACTER(LEN=10)                 :: bufr1_lg        ! Data buffer
-  CHARACTER(LEN=16)                 :: bufr_c          ! Data buffer
-  CHARACTER(LEN=18)                 :: bufr_c_lg       ! Data buffer
+!  CHARACTER(LEN=16)                 :: bufr_c          ! Data buffer
+!  CHARACTER(LEN=18)                 :: bufr_c_lg       ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: buf2            ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: bufr2           ! Data buffer
   REAL, DIMENSION(DIM1)             :: buf3            ! Data buffer
@@ -1395,10 +1394,10 @@ SUBROUTINE test_attributes()
   size = DIM1
   n = 1
   DO i = 1, DIM1
-     buf2(i) = n;
-     buf3(i) = n;
-     buf4(i) = n;
-     n = n + 1;
+     buf2(i) = n
+     buf3(i) = n
+     buf4(i) = n
+     n = n + 1
   END DO
 
 
@@ -1443,7 +1442,6 @@ SUBROUTINE test_attributes()
   ! write attribute.
   !
   CALL h5ltset_attribute_float_f(file_id,dsetname1,attrname3,buf3,size,errcode)
-
   !
   ! read attribute.
   !
@@ -1460,7 +1458,6 @@ SUBROUTINE test_attributes()
      ENDIF
   END DO
 
-
   CALL passed()
 
   !-------------------------------------------------------------------------
@@ -1468,8 +1465,7 @@ SUBROUTINE test_attributes()
   !-------------------------------------------------------------------------
 
   CALL test_begin(' Set/Get attributes double      ')
-
-
+  
   !
   ! write attribute.
   !

@@ -81,7 +81,6 @@ int main( void )
  hsize_t    start1;                      /* Record to start reading from 1st table */
  hsize_t    nrecords;                    /* Number of records to insert */
  hsize_t    start2;                      /* Record to start writing in 2nd table */
- herr_t     status;
  int        i;
  hsize_t    nfields_out;
  hsize_t    nrecords_out;
@@ -99,11 +98,11 @@ int main( void )
  file_id = H5Fcreate( "ex_table_09.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* Make 2 tables: TABLE2_NAME is empty  */
- status=H5TBmake_table( "Table Title",file_id,TABLE1_NAME,NFIELDS,NRECORDS,
+ H5TBmake_table( "Table Title",file_id,TABLE1_NAME,NFIELDS,NRECORDS,
                          dst_size,field_names, dst_offset, field_type,
                          chunk_size, fill_data, compress, p_data  );
 
- status=H5TBmake_table( "Table Title",file_id,TABLE2_NAME,NFIELDS,NRECORDS,
+ H5TBmake_table( "Table Title",file_id,TABLE2_NAME,NFIELDS,NRECORDS,
                          dst_size,field_names, dst_offset, field_type,
                          chunk_size, fill_data, compress, NULL  );
 
@@ -112,13 +111,13 @@ int main( void )
  start1    = 3;
  nrecords  = NRECORDS_INS;
  start2    = 6;
- status=H5TBadd_records_from( file_id, TABLE1_NAME, start1, nrecords, TABLE2_NAME, start2 );
+ H5TBadd_records_from( file_id, TABLE1_NAME, start1, nrecords, TABLE2_NAME, start2 );
 
  /* read TABLE2_NAME: it should have 2 more records now */
- status=H5TBread_table( file_id, TABLE2_NAME, dst_size, dst_offset, dst_sizes, dst_buf );
+ H5TBread_table( file_id, TABLE2_NAME, dst_size, dst_offset, dst_sizes, dst_buf );
 
  /* Get table info  */
- status=H5TBget_table_info (file_id,TABLE2_NAME, &nfields_out, &nrecords_out );
+ H5TBget_table_info (file_id,TABLE2_NAME, &nfields_out, &nrecords_out );
 
  /* print */
  printf ("Table has %d fields and %d records\n",(int)nfields_out,(int)nrecords_out);
