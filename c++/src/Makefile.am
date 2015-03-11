@@ -30,12 +30,6 @@ lib_LTLIBRARIES=libhdf5_cpp.la
 # Add libtool numbers to the HDF5 C++ library (from config/lt_vers.am)
 libhdf5_cpp_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
 
-# Shared C++ libraries aren't universally supported.
-if CXX_SHARED_CONDITIONAL
-else
-  AM_LDFLAGS+=-static
-endif
-
 bin_SCRIPTS=h5c++
 
 # Source files for the library
