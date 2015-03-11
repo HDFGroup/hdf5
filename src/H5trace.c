@@ -129,34 +129,34 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     void		*vp = NULL;
     FILE		*out = H5_debug_g.trace;
     H5_timer_t          event_time;
-    static H5_timer_t   first_time = {0.0F, 0.0F, 0.0F};
+    static H5_timer_t   first_time = {H5_DOUBLE(0.0), H5_DOUBLE(0.0), H5_DOUBLE(0.0)};
     static int          current_depth = 0;
     static int          last_call_depth = 0;
 
     /* FUNC_ENTER() should not be called */
 
     if(!out)
-        return 0.0F;	/*tracing is off*/
+        return H5_DOUBLE(0.0);	/*tracing is off*/
     va_start(ap, type);
 
     if(H5_debug_g.ttop) {
         if(returning) {
             if(current_depth > 1) {
                 --current_depth;
-                return 0.0F;
+                return H5_DOUBLE(0.0);
             } /* end if */
         } /* end if */
         else {
             if(current_depth > 0) {
                 /*do not update last_call_depth*/
                 current_depth++;
-                return 0.0F;
+                return H5_DOUBLE(0.0);
             } /* end if */
         } /* end else */
     } /* end if */
 
     /* Get time for event */
-    if(HDfabs(first_time.etime) < 0.0000000001F)
+    if(HDfabs(first_time.etime) < H5_DOUBLE(0.0000000001))
         /* That is == 0.0, but direct comparison between floats is bad */
         H5_timer_begin(&first_time);
     if(H5_debug_g.ttimes)
