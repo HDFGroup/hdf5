@@ -10,20 +10,20 @@ add_definitions (${HDF_EXTRA_C_FLAGS})
 # Define Sources
 #-----------------------------------------------------------------------------
 set (examples
-    h5_crtdat
-    h5_rdwt
-    h5_crtatt
-    h5_crtgrp
-    h5_crtgrpar
-    h5_crtgrpd
-    h5_cmprss
-    h5_extend
-    h5_subset
     h5_write
     h5_read
     h5_extend_write
     h5_chunk_read
     h5_compound
+    h5_crtgrpar
+    h5_crtgrpd
+    h5_subset
+    h5_cmprss
+    h5_crtdat
+    h5_rdwt
+    h5_crtatt
+    h5_extend
+    h5_crtgrp
     h5_group
     h5_select
     h5_attribute
@@ -34,10 +34,11 @@ set (examples
     h5_extlink
     h5_elink_unix2win
     h5_shared_mesg
-    h5_vds-eiger
-    h5_vds-exclim
-    h5_vds-exc
     h5_vds
+    h5_vds-exc
+    h5_vds-exclim
+    h5_vds-eiger
+    h5_vds-simpleIO
 )
 
 foreach (example ${examples})
