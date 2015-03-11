@@ -261,9 +261,7 @@ ENDMACRO (H5MiscConversionTest)
 # -----------------------------------------------------------------------
 # Set flag to indicate that the machine can handle conversion from
 # integers to long double.  (This flag should be set "yes" for all
-# machines except all SGIs, where some conversions are
-# incorrect and its cache value is set "no" in its config/irix6.x and
-# irix5.x)
+# machines except all SGIs, where some conversions are incorrect)
 #
 H5MiscConversionTest (H5_SIZEOF_LONG_DOUBLE H5_INTEGER_TO_LDOUBLE_ACCURATE "checking IF accurately converting from integers to long double")
 # ----------------------------------------------------------------------
@@ -278,8 +276,7 @@ H5ConversionTests (H5_ULONG_TO_FLOAT_ACCURATE "Checking IF accurately converting
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # 'unsigned (long) long' values to 'float' and 'double' values.
-# (This flag should be set for all machines, except for the SGIs, where
-# the cache value is set in the config/irix6.x config file) and Solaris
+# (This flag should be set for all machines, except for the SGIs) and Solaris
 # 64-bit machines, where the short program below tests if round-up is
 # correctly handled.
 #

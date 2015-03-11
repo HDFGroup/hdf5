@@ -67,33 +67,6 @@ case "$OSname" in
               ;;
         esac
 	;;
-    IRIX)
-	swpaths="/afs/ncsa/packages/hdf/IRIX_6.5"
-	;;
-    IRIX64)
-	case "$CC" in
-	cc|"")	#default cc
-	    abi=`cc -show_defaults 2>&1 | grep 'default abi'`
-	    case $abi in
-	    *-n32)
-		swpaths="/afs/ncsa/packages/hdf/IRIX64-n32_6.5"
-		;;
-	    *-64)
-		swpaths="/afs/ncsa/packages/hdf/IRIX64_6.5"
-		;;
-	    *)
-		swpaths="/afs/ncsa/packages/hdf/IRIX64_6.5"
-		;;
-	    esac	# $abi
-	    ;;
-	*-n32)
-	    swpaths="/afs/ncsa/packages/hdf/IRIX64-n32_6.5"
-	    ;;
-	*)
-	    swpaths="/afs/ncsa/packages/hdf/IRIX64_6.5"
-	    ;;
-	esac
-	;;
     Linux)
 	swpaths="/afs/ncsa/packages/hdf/Linux"
 	;;
@@ -149,36 +122,6 @@ case "$OSname" in
            # use default
               ;;
         esac
-	;;
-    IRIX)
-	swpaths="/afs/ncsa/packages/hdf5/IRIX_6.5"
-	;;
-    IRIX64)
-	case "$CC" in
-	cc|"")	#default cc
-	    abi=`cc -show_defaults 2>&1 | grep 'default abi'`
-	    case $abi in
-	    *-n32)
-		swpaths="/afs/ncsa/packages/hdf5/IRIX64-n32_6.5"
-		;;
-	    *-64)
-		#swpaths="/afs/ncsa/packages/hdf5/IRIX64_6.5"
-                swpaths="/afs/ncsa/packages/hdf5/5-1.4.3-irix64"
-		;;
-	    *)
-		#swpaths="/afs/ncsa/packages/hdf5/IRIX64_6.5"
-                swpaths="/afs/ncsa/packages/hdf5/5-1.4.3-irix64"  
-		;;
-	    esac	# $abi
-	    ;;
-	*-n32)
-	    swpaths="/afs/ncsa/packages/hdf5/IRIX64-n32_6.5"
-	    ;;
-	*)
-	    #swpaths="/afs/ncsa/packages/hdf5/IRIX64_6.5"
-            swpaths="/afs/ncsa/packages/hdf5/5-1.4.3-irix64"
-	    ;;
-	esac
 	;;
     Linux)
 	swpaths="/afs/ncsa/packages/hdf5/Linux"
