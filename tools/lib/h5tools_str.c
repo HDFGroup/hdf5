@@ -432,17 +432,12 @@ void
 h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace,
         const h5tool_format_t *info, h5tools_context_t *ctx)
 {
-    hsize_t   *start;
-    hsize_t   *stride;
-    hsize_t   *count;
-    hsize_t   *block;
-    int        j;
-    int        ndims = H5Sget_simple_extent_ndims(rspace);
-
-    start = (hsize_t *)malloc(sizeof(hsize_t) * ndims);
-    stride = (hsize_t *)malloc(sizeof(hsize_t) * ndims);
-    count = (hsize_t *)malloc(sizeof(hsize_t) * ndims);
-    block = (hsize_t *)malloc(sizeof(hsize_t) * ndims);
+    hsize_t   start[H5S_MAX_RANK];
+    hsize_t   stride[H5S_MAX_RANK];
+    hsize_t   count[H5S_MAX_RANK];
+    hsize_t   block[H5S_MAX_RANK];
+    int       j;
+    int       ndims = H5Sget_simple_extent_ndims(rspace);
 
     H5Sget_regular_hyperslab(rspace, start, stride, count, block);
 
@@ -454,7 +449,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace,
     h5tools_str_append(str, "%s ", START);
     for (j = 0; j < ndims; j++)
         h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", start[j]);
-    h5tools_str_append(str, ");");
+    h5tools_str_append(str, ")");
     h5tools_str_append(str, "%s", "\n");
     h5tools_str_indent(str, info, ctx);
 
@@ -462,7 +457,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace,
     h5tools_str_append(str, "%s ", STRIDE);
     for (j = 0; j < ndims; j++)
         h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", stride[j]);
-    h5tools_str_append(str, ");");
+    h5tools_str_append(str, ")");
     h5tools_str_append(str, "%s", "\n");
     h5tools_str_indent(str, info, ctx);
 
@@ -474,7 +469,7 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace,
         else
             h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", count[j]);
     }
-    h5tools_str_append(str, ");");
+    h5tools_str_append(str, ")");
     h5tools_str_append(str, "%s", "\n");
     h5tools_str_indent(str, info, ctx);
 
@@ -486,14 +481,9 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace,
         else
             h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", block[j]);
     }
-    h5tools_str_append(str, ");");
+    h5tools_str_append(str, ")");
     h5tools_str_append(str, "%s", "\n");
     h5tools_str_indent(str, info, ctx);
-
-    HDfree(block);
-    HDfree(count);
-    HDfree(stride);
-    HDfree(start);
 }
 
 /*-------------------------------------------------------------------------
