@@ -367,3 +367,39 @@ pack_info_t* options_get_object(const char *path, pack_opttbl_t *table) {
 	return NULL;
 }
 
+/*-------------------------------------------------------------------------
+ * Function: options_set_cache
+ *
+ * Purpose: set the file chunk cache size
+ *
+ * Parameters:
+ *    fpal: File Acccess Property list
+ *    rdcc_nbytes: Raw Data Chunk cache size in bytes
+ *
+ * Return: 0 succeeds, -1 else.
+ *
+ *-------------------------------------------------------------------------
+ */
+int options_set_cache (hid_t fapl, size_t rdcc_nbytes)
+{
+    /* Dummy variables */
+    size_t	rdcc_nelmts;
+    double	w0;
+
+    /* sanity check */
+    HDassert(fapl != H5P_DEFAULT);
+    HDassert(H5Pequal(H5Pget_class(fapl), H5P_FILE_ACCESS) > 0);
+
+
+    /* retrieve current values of rdcc_nelmts and w0 to reapply them together */
+    /* with the new values of rdcc_nbytes */
+    if (H5Pget_cache (fapl, NULL, &rdcc_nelmts, NULL, &w0) < 0){
+	error_msg("internal call of get cache failed\n");
+	return -1;
+    }
+    if (H5Pset_cache (fapl, 0, rdcc_nelmts, rdcc_nbytes, w0) < 0){
+	error_msg("input file cache size setting failed\n");
+	return -1;
+    }
+    return 0;
+}

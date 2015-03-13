@@ -793,7 +793,7 @@ static int check_objects(const char* fname, pack_opt_t *options) {
 		    goto out;
 		}
 	    }
-	    if (H5Pset(fapl, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(options->cache_size)) < 0){
+	    if (options_set_cache(fapl, options->cache_size) < 0){
 		error_msg("input file cache size setting failed\n");
 		goto out;
 	    }

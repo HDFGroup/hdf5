@@ -129,7 +129,7 @@ typedef struct {
     hsize_t         alignment ;       /* alignment for H5Pset_alignment */
     H5F_file_space_type_t fs_strategy;     /* File space handling strategy */
     hsize_t         fs_threshold;      	/* Free space section threshold */
-    int             show_time;	/* show wall clock time */
+    int             showtime;	/* show wall clock time */
 } pack_opt_t;
 
 
@@ -231,6 +231,8 @@ int          options_add_filter ( obj_list_t *obj_list,
                                  pack_opttbl_t *table );
 pack_info_t* options_get_object( const char *path,
                                  pack_opttbl_t *table);
+int	     options_set_cache (hid_t plist_id,
+				 size_t rdcc_nbytes);
 
 /*-------------------------------------------------------------------------
  * parse functions

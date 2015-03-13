@@ -109,9 +109,6 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 
 	/* local variable initialization */
 	readonly = options->readonly;
-#if 0
-printf("readonly in do_copy_objects=%d\n", readonly);
-#endif
 
 	/* process option requests */
 	if (options->cache_size){	/* need to set cache size for file access property lists */
@@ -121,24 +118,13 @@ printf("readonly in do_copy_objects=%d\n", readonly);
 		    goto out;
 		}
 	    }
-	    if (H5Pset(fapl, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(options->cache_size)) < 0){
+	    if (options_set_cache(fapl, options->cache_size) < 0){
 		error_msg("input file cache size setting failed\n");
 		goto out;
 	    }
 	}
 
-#if 1
-{int mdc;
-size_t nslots, nbytes;
-double w0;
-if (fapl!=H5P_DEFAULT){
-H5Pget_cache(fapl, &mdc, &nslots, &nbytes, &w0);
-printf("fapl mdc=%d, nslots=%lu, nbytes=%lu, w0=%lf\n",
-mdc, nslots, nbytes, w0);
-}
-}
-#endif
-	if (options->show_time){	/* need to keep track of time */
+	if (options->showtime){	/* need to keep track of time */
 	    if (NULL == (filecopytime = io_time_new(SYS_CLOCK))){
 		error_msg("io timer new failed\n");
 		goto out;
@@ -1088,10 +1074,8 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 						 */
 						if (nelmts > 0 && space_status != H5D_SPACE_STATUS_NOT_ALLOCATED) {
 							size_t need = (size_t)(nelmts * msize); /* bytes needed */
-#if 1
-if (options->show_time)
-printf("need=%ld\n", need);
-#endif
+							if (options->showtime && options->verbose)
+							    printf("memory buffer size needed=%lu\n", (unsigned long)need);;
 							/* have to read the whole dataset if there is only one element in the dataset */
 							if (need <= H5TOOLS_MALLOCSIZE)
 								buf = HDmalloc(need);
@@ -1307,6 +1291,8 @@ printf("need=%ld\n", need);
 			else {
 				hid_t pid;
 
+				if (options->showtime && options->verbose)
+				    printf("using h5ocopy to copy %s\n", travt->objs[i].name);
 				/* create property to pass copy options */
 				if ((pid = H5Pcreate(H5P_OBJECT_COPY)) < 0)
 					goto error;
@@ -1320,10 +1306,6 @@ printf("need=%ld\n", need);
 				 *-------------------------------------------------------------------------
 				 */
 
-#if 1
-if (options->show_time)
-printf("using h5ocopy to copy %s\n", travt->objs[i].name);
-#endif
 				if (H5Ocopy(fidin, /* Source file or group identifier */
 				travt->objs[i].name, /* Name of the source object to be copied */
 				fidout, /* Destination file or group identifier  */

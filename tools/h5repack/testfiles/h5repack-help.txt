@@ -25,7 +25,7 @@ usage: h5repack [OPTIONS] file1 file2
    -R, --readonly          Read only, no create or write output [off]
    -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy
    -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold
-   -W, --show_time         Show wall clock time [off]
+   -W, --showtime          Show wall clock time [off]
 
     M - is an integer greater than 1, size of dataset in bytes (default is 0) 
     E - is a filename.

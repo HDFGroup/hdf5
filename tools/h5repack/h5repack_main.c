@@ -57,11 +57,11 @@ static struct long_options l_opts[] = {
 	{ "outfile", require_arg, 'o' }, /* -o for backward compability */
 	{ "buf_size", require_arg, 'B' },/* memory buffer size */
 	{ "cache_size", require_arg, 'C' },
-	{ "no_h5ocopy", no_arg, 'O' },
+	{ "no-h5ocopy", no_arg, 'O' },
 	{ "readonly", no_arg, 'R' },
 	{ "fs_strategy", require_arg, 'S' },
 	{ "fs_threshold", require_arg, 'T' },
-	{ "show_time", no_arg, 'W' },	/* show wall clock time */
+	{ "showtime", no_arg, 'W' },	/* show wall clock time */
 	{ NULL, 0, '\0' }
 };
 
@@ -102,7 +102,7 @@ static void usage(const char *prog) {
 	printf("   -R, --readonly          Read only, no create or write output [off]\n");
 	printf("   -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy\n");
 	printf("   -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold\n");
-	printf("   -W, --show_time         Show wall clock time [off]\n");
+	printf("   -W, --showtime          Show wall clock time [off]\n");
 	printf("\n");
 	printf("    M - is an integer greater than 1, size of dataset in bytes (default is 0) \n");
 	printf("    E - is a filename.\n");
@@ -560,7 +560,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
 			break;
 
 		case 'W':
-			options->show_time++;
+			options->showtime++;
 			break;
 
 		default:
@@ -604,14 +604,14 @@ done:
 static void
 dump_options(const pack_opt_t* options){
     /* for now only display options related to performance */
-    printf("show_time=%d\n", options->show_time);
+    printf("showtime=%d\n", options->showtime);
     printf("input file=%s\n", infile);
     printf("output file=%s\n", outfile);
-    printf("no_h5ocopy=%d\n", options->no_h5ocopy);
+    printf("no-h5ocopy=%d\n", options->no_h5ocopy);
     printf("readonly=%d[NOT IMPLEMENTED YET]\n", options->readonly);
-    printf("cache_size=%lu\n", options->cache_size);
+    printf("cache_size=%lu\n", (unsigned long)options->cache_size);
     printf("buf_size=%lu (H5TOOLS_BUFSIZE=%llu, H5TOOLS_MALLOCSIZE=%llu) \n",
-	options->buf_size, H5TOOLS_BUFSIZE, H5TOOLS_MALLOCSIZE);
+	(unsigned long)options->buf_size, H5TOOLS_BUFSIZE, H5TOOLS_MALLOCSIZE);
     /* flush output so that interactive user may see the output at once. */
     fflush(stdout);
 }
@@ -677,11 +677,9 @@ int main(int argc, const char **argv) {
 		}
 	}
 
-#if 1
 	/* show all option values when time statistics is requested */
-	if (options.show_time)
+	if (options.showtime)
 	    dump_options(&options);
-#endif
 
 	/* pack it */
 	h5tools_setstatus(h5repack(infile, outfile, &options));
