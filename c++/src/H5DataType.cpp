@@ -134,7 +134,7 @@ DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, 
 ///\brief	Copy constructor: makes a copy of the original DataType object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType(const DataType& original) : H5Object(original)
+DataType::DataType(const DataType& original) : H5Object()
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
