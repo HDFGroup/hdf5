@@ -12,35 +12,42 @@
  * to either file, you may request a copy from help@hdfgroup.org.            *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Raymond Lu <songyulu@hdfgroup.org>
+/* Programmer:  Raymond Lu <songyulu@hdfgroup.org>
  *              13 February 2013
  */
-#ifndef _H5PLextern_H
-#define _H5PLextern_H
 
-/* Include HDF5 header */
-#include "hdf5.h"
+#ifndef _H5PLpublic_H
+#define _H5PLpublic_H
 
-/* plugins always export */
-#if defined (_MSC_VER)  /* MSVC Compiler Case */
-  #define H5PLUGIN_DLL __declspec(dllexport)
-#elif (__GNUC__ >= 4)  /* GCC 4.x has support for visibility options */
-  #define H5PLUGIN_DLL __attribute__ ((visibility("default")))
-#else
-  #define H5PLUGIN_DLL
-#endif
+/* Public headers needed by this file */
+#include "H5public.h"          /* Generic Functions                    */
+
+/*******************/
+/* Public Typedefs */
+/*******************/
+
+/* Plugin type used by the plugin library */
+typedef enum H5PL_type_t {
+    H5PL_TYPE_ERROR        = -1,  /*error                    */
+    H5PL_TYPE_FILTER       = 0,   /*filter                   */
+    H5PL_TYPE_NONE         = 1    /*this must be last!       */
+} H5PL_type_t;
+
+/* Common dynamic plugin type flags used by the set/get_loading_state functions */
+#define H5PL_FILTER_PLUGIN 0x0001
+#define H5PL_ALL_PLUGIN 0xFFFF
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5PLUGIN_DLL H5PL_type_t H5PLget_plugin_type(void);
-H5PLUGIN_DLL const void *H5PLget_plugin_info(void);
+/* plugin state */
+H5_DLL herr_t H5PLset_loading_state(unsigned int plugin_type);
+H5_DLL herr_t H5PLget_loading_state(unsigned int *plugin_type/*out*/);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _H5PLextern_H */
+#endif /* _H5PLpublic_H */
 
