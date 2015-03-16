@@ -151,7 +151,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 	H5Location(const hid_t loc_id);
 
 	// Copy constructor.
-	H5Location(const H5Location& original);
+	// H5Location(const H5Location& original);
 
 	// Creates a reference to an HDF5 object or a dataset region.
 	void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
