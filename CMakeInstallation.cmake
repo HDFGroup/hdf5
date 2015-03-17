@@ -176,9 +176,17 @@ if (HDF5_PACK_EXAMPLES)
       COMPONENT hdfdocuments
   )
   if (EXISTS "${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
+    )
+    install (
+      DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples-0.1.1-Source
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}
+      USE_SOURCE_PERMISSIONS 
+      COMPONENT hdfdocuments
+    )
     install (
         FILES
-            ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
             ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
         DESTINATION ${HDF5_INSTALL_DATA_DIR}
         COMPONENT hdfdocuments

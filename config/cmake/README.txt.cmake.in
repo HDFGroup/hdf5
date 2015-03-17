@@ -24,15 +24,15 @@ Installation
 
 After Installation
 ===========================================================================
-The compressed examples file HDF5Examples-0.1.1-Source.@BINARY_EXAMPLE_ENDING@, located in the 
+The examples folder, HDF5Examples, located in the 
 HDF5 install folder, can be built and tested with CMake and the supplied
 HDF518_Examples.cmake file. The HDF518_Examples.cmake expects HDF5 to have
-been installed in the default location with above compilers. Also, CMake and 7Zip 
-utilities should be installed.
+been installed in the default location with above compilers. Also, the CMake 
+utility should be installed.
 
 To test the installation with the examples;
     Create a directory to run the examples.
-    Copy HDF5Examples-0.1.1-Source.@BINARY_EXAMPLE_ENDING@ to this directory, do NOT unzip.
+    Copy HDF5Examples-0.1.1-Source folder to this directory, do NOT unzip.
     Copy HDF518_Examples.cmake to this directory.
     Edit HDF518_Examples.cmake line 8 to set INSTALLDIR to where HDF5 is installed.
        (The default should be correct unless you installed into a different folder.)
