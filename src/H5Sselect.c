@@ -2138,48 +2138,52 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     HDassert(src_intersect_space);
     HDassert(new_space_ptr);
 
-    /* Create new space, using dst extent.  Start wil "all" selection. */
+    /* Create new space, using dst extent.  Start with "all" selection. */
     if(NULL == (new_space = H5S_create(H5S_SIMPLE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create output dataspace")
     if(H5S_extent_copy_real(&new_space->extent, &dst_space->extent, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy destination space extent")
 
-    /* Check intersecting space's selection type */
-    switch(src_intersect_space->select.type->type) {
-        case H5S_SEL_NONE:
-            /* Since the intersecting space is "none", the intersection has no
-             * selection and so does the projection.  Change to "none" selection
-             */
-            if(H5S_select_none(new_space) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+    /* If the intersecting space is "all", the intersection must be equal to the
+     * source space and the projection must be equal to the destination space */
+    if(src_intersect_space->select.type->type == H5S_SEL_ALL) {
+        /* Copy the destination selection. */
+        if(H5S_select_copy(new_space, dst_space, FALSE) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination space selection")
+    } /* end if */
+    /* If any of the spaces are "none", the projection must also be "none" */
+    else if((src_intersect_space->select.type->type == H5S_SEL_NONE)
+            || (src_space->select.type->type == H5S_SEL_NONE)
+            || (dst_space->select.type->type == H5S_SEL_NONE)) {
+        /* Change to "none" selection */
+        if(H5S_select_none(new_space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+    } /* end if */
+    /* If any of the spaces use point selection, fall back to general algorithm
+     */
+    else if((src_intersect_space->select.type->type == H5S_SEL_POINTS)
+            || (src_space->select.type->type == H5S_SEL_POINTS)
+            || (dst_space->select.type->type == H5S_SEL_POINTS)) {
+        HDassert(0 && "Not yet implemented...");//VDSINC
+    else {
+        HDassert(src_intersect_space->select.type->type == H5S_SEL_HYPERSLABS);
+        /* Intersecting space is hyperslab selection.  If source space is set to
+         * all, use simpler algorithm, otherwise use general hyperslab algorithm
+         * (in either case if the destination space is al; the hyperslab
+         * routines will convert the destination selection to a span tree to use
+         * the same algorithm as with hyperslabs). */
+        if(dst_space->select.type->type == H5S_SEL_ALL) {
+            HDassert(0 && "Checking code coverage...");//VDSINC
+            /* Project src_intersect_space onto dst_space selection */
+            if(H5S_hyper_project_to_hs(src_intersect_space, dst_space, new_space) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't project hyperslab ondot destination selection")
+        } /* end if */
+        else {
+            HDassert(dst_space->select.type->type == H5S_SEL_HYPERSLABS);
 
-            break;
-
-        case H5S_SEL_POINTS:
             HDassert(0 && "Not yet implemented...");//VDSINC
-
-            break;
-
-        case H5S_SEL_HYPERSLABS:
-            HDassert(0 && "Not yet implemented...");//VDSINC
-
-            break;
-
-        case H5S_SEL_ALL:
-            /* Since the intersecting space is "all", the intersection must be
-             * equal to the source space and the projection must be equal to the
-             * destination space.  Copy the destination selection.
-             */
-            if(H5S_select_copy(new_space, dst_space, FALSE) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination space selection")
-
-            break;
-
-        case H5S_SEL_ERROR:
-        case H5S_SEL_N:
-        default:
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid source dataspace selection type")
-    } /* end switch */
+        } /* end else */
+    } /* end else */
 
     /* load the address of the new space into *new_space_ptr */
     *new_space_ptr = new_space;

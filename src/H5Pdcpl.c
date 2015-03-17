@@ -1615,7 +1615,8 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     if(NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-    //VDSINC add check for overlaping virtual spaces
+    //VDSINC add check for overlapping virtual spaces and same number of
+    // elements in vspace and src_space
 
 #ifndef H5_HAVE_C99_DESIGNATED_INITIALIZER
     /* If the compiler doesn't support C99 designated initializers, check if
@@ -1668,6 +1669,8 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")
     if(NULL == (layout.storage.u.virt.list[layout.storage.u.virt.list_nused].virtual_select = H5S_copy(vspace, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
+    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_space_status = H5O_VIRTUAL_STATUS_USER;
+    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].virtual_space_status = H5O_VIRTUAL_STATUS_USER;
     layout.storage.u.virt.list_nused++;
     adding_entry = FALSE;
 
@@ -1699,7 +1702,7 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_virtual() */
-
+#error
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_virtual_count

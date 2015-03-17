@@ -412,6 +412,13 @@ typedef struct H5O_storage_compact_t {
     void        *buf;                   /* Buffer for compact dataset        */
 } H5O_storage_compact_t;
 
+typedef enum H5O_virtual_space_status_t {
+    H5O_VIRTUAL_STATUS_INVALID = 0,     /* Space extent is invalid */
+    H5O_VIRTUAL_STATUS_SEL_BOUNDS,      /* Space extent set to bounds of selection */
+    H5O_VIRTUAL_STATUS_USER,            /* Space extent provided by application */
+    H5O_VIRTUAL_STATUS_CORRECT          /* Space extent matches dataset */
+} H5O_virtual_space_status_t;
+
 typedef struct H5O_storage_virtual_ent_t {
     /* Stored */
     char        *source_file_name;      /* Source file name used for virtual dataset mapping */
@@ -421,6 +428,8 @@ typedef struct H5O_storage_virtual_ent_t {
 
     /* Not stored */
     struct H5D_t *source_dset;          /* Source dataset */
+    H5O_virtual_space_status_t source_space_status; /* Extent patching status of source_select */
+    H5O_virtual_space_status_t virtual_space_status; /* Extent patching status of virtual_select */
 } H5O_storage_virtual_ent_t;
 
 typedef struct H5O_storage_virtual_t {
