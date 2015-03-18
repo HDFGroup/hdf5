@@ -454,12 +454,13 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
 
                 HDassert(dataset->shared->layout.storage.u.virt.list || (dataset->shared->layout.storage.u.virt.list_nused == 0));
 
-                /* Patch the virtual selection dataspaces */
+                /* Patch the virtual selection dataspaces if necessary */
                 for(i = 0; i < dataset->shared->layout.storage.u.virt.list_nused; i++) {
-                    HDassert(dataset->shared->layout.storage.u.virt.list[i].virtual_space_status == H5O_VIRTUAL_STATUS_INVALID);
-                    if(H5S_extent_copy(dataset->shared->layout.storage.u.virt.list[i].virtual_select, dataset->shared->space) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy virtual dataspace extent")
-                    dataset->shared->layout.storage.u.virt.list[i].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
+                    if(dataset->shared->layout.storage.u.virt.list[i].virtual_space_status != H5O_VIRTUAL_STATUS_CORRECT) {
+                        if(H5S_extent_copy(dataset->shared->layout.storage.u.virt.list[i].virtual_select, dataset->shared->space) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy virtual dataspace extent")
+                        dataset->shared->layout.storage.u.virt.list[i].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
+                    } /* end if */
                 } /* end for */
             } /* end block */
             break;
@@ -473,7 +474,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_oh_read() */
-#error
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__layout_oh_write

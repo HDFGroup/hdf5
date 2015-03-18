@@ -141,7 +141,7 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
             HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "unable to allocate memory for virtual dataset entry list")
         layout->storage.u.virt.list_nalloc = layout->storage.u.virt.list_nused;
 
-        /* Copy the list entries */
+        /* Copy the list entries, though set source_dset to NULL */
         for(i = 0; i < layout->storage.u.virt.list_nused; i++) {
             if(NULL == (layout->storage.u.virt.list[i].source_file_name
                     = HDstrdup(orig_list[i].source_file_name)))
@@ -155,6 +155,9 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
             if(NULL == (layout->storage.u.virt.list[i].virtual_select
                     = H5S_copy(orig_list[i].virtual_select, FALSE, TRUE)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
+            layout->storage.u.virt.list[i].source_dset = NULL;
+            layout->storage.u.virt.list[i].source_space_status = orig_list[i].source_space_status;
+            layout->storage.u.virt.list[i].virtual_space_status = orig_list[i].virtual_space_status;
         } /* end for */
     } /* end if */
     else {
@@ -356,7 +359,7 @@ H5D__virtual_construct(H5F_t UNUSED *f, H5D_t *dset)
 
     FUNC_ENTER_STATIC
 
-    HDassert(dataset->shared->layout.storage.u.virt.list || (dataset->shared->layout.storage.u.virt.list_nused == 0));
+    HDassert(dset->shared->layout.storage.u.virt.list || (dset->shared->layout.storage.u.virt.list_nused == 0));
 
     /* Patch the virtual selection dataspaces */
     for(i = 0; i < dset->shared->layout.storage.u.virt.list_nused; i++) {
@@ -386,14 +389,13 @@ done:
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5D__virtual_is_space_alloc(const H5O_storage_t *storage)
+H5D__virtual_is_space_alloc(const H5O_storage_t UNUSED *storage)
 {
     hbool_t ret_value;                  /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Need to decide what to do here.  For now just return TRUE if the global
-     * heap block has been allocated.  VDSINC */
+    /* Need to decide what to do here.  For now just return TRUE VDSINC */
     ret_value = TRUE;//storage->u.virt.serial_list_hobjid.addr != HADDR_UNDEF;
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -463,8 +465,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
     /* Iterate over mappings */
     for(i = 0; i < storage->list_nused; i++) {
-        /* Sanity check that both spaces have been patched by now */
-        HDassert(storage->list[i].source_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+        /* Sanity check that the virtual space has been patched by now */
         HDassert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
 
         /* Project intersection of file space and mapping virtual space onto
@@ -478,28 +479,36 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
         /* Only perform I/O if there are any elements */
         if(nelmts > 0) {
-            /* Open source dataset, fail if cannot open */
+            /* Open source dataset */
             if(!storage->list[i].source_dset) {
+                /* Try to open dataset */
                 if((opened_dset = H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], io_info->dxpl_id)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
-                if(!opened_dset)
-                    /* Fill with fill value */
-                    HDassert(0 && "Not yet implemented...");//VDSINC
+
+                if(opened_dset)
+                    /* Sanity check that the source space has been patched by now */
+                    HDassert(storage->list[i].source_space_status == H5O_VIRTUAL_STATUS_CORRECT);
             } /* end if */
 
-            /* Project intersection of file space and mapping virtual space onto
-             * mapping source space */
-            if(H5S_select_project_intersection(storage->list[i].virtual_select, storage->list[i].source_select, file_space, &projected_src_space) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
+            /* Check if source dataset is open */
+            if(storage->list[i].source_dset) {
+                /* Project intersection of file space and mapping virtual space onto
+                 * mapping source space */
+                if(H5S_select_project_intersection(storage->list[i].virtual_select, storage->list[i].source_select, file_space, &projected_src_space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
 
-            /* Perform read on source dataset */
-            if(H5D__read(storage->list[i].source_dset, type_info->dst_type_id, projected_mem_space, projected_src_space, io_info->dxpl_id, io_info->u.rbuf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read source dataset")
+                /* Perform read on source dataset */
+                if(H5D__read(storage->list[i].source_dset, type_info->dst_type_id, projected_mem_space, projected_src_space, io_info->dxpl_id, io_info->u.rbuf) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read source dataset")
 
-            /* Close projected_src_space */
-            if(H5S_close(projected_src_space) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected source space")
-            projected_src_space = NULL;
+                /* Close projected_src_space */
+                if(H5S_close(projected_src_space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected source space")
+                projected_src_space = NULL;
+            } /* end if */
+            else
+                /* We do not have a source dataset open, fill with fill value */
+                HDassert(0 && "Not yet implemented...");//VDSINC
         } /* end if */
 
         /* Close projected_mem_space */
@@ -563,8 +572,7 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
     /* Iterate over mappings */
     for(i = 0; i < storage->list_nused; i++) {
-        /* Sanity check that both spaces have been patched by now */
-        HDassert(storage->list[i].source_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+        /* Sanity check that virtual space has been patched by now */
         HDassert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
 
         /* Project intersection of file space and mapping virtual space onto
@@ -580,13 +588,18 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         if(nelmts > 0) {
             /* Open source dataset, fail if cannot open */
             if(!storage->list[i].source_dset) {
-                //VDSINC check all source datasets before any I/O.  Also for read?
+                //VDSINC check all source datasets before any I/O
                 if((opened_dset = H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], io_info->dxpl_id)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
                 if(!opened_dset)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "did not open source dataset")
+
+                /* Sanity check that source space has been patched by now */
+                HDassert(storage->list[i].source_space_status == H5O_VIRTUAL_STATUS_CORRECT);
             } /* end if */
 
+            /* Extend source dataset if necessary and there is an unlimited
+             * dimension VDSINC */
             /* Project intersection of file space and mapping virtual space onto
              * mapping source space */
             if(H5S_select_project_intersection(storage->list[i].virtual_select, storage->list[i].source_select, file_space, &projected_src_space) < 0)
@@ -671,4 +684,4 @@ H5D__virtual_copy(H5F_t UNUSED *f_src, const H5O_storage_virtual_t UNUSED *stora
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__virtual_copy() */
-#error
+

@@ -976,6 +976,7 @@ H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_i
     /* Determine the actual number of elements to use */
     H5_CHECK_OVERFLOW(iter->elmt_left,hsize_t,size_t);
     elem_used=MIN(maxelem,(size_t)iter->elmt_left);
+    HDassert(elem_used > 0);
 
     /* Compute the offset in the dataset */
     off[0]=iter->u.all.byte_offset;

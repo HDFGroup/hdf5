@@ -1702,7 +1702,7 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_virtual() */
-#error
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_virtual_count

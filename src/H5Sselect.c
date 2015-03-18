@@ -2128,6 +2128,7 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     const H5S_t *src_intersect_space, H5S_t **new_space_ptr)
 {
     H5S_t *new_space = NULL;           /* New dataspace constructed */
+    unsigned i;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2143,6 +2144,11 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create output dataspace")
     if(H5S_extent_copy_real(&new_space->extent, &dst_space->extent, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy destination space extent")
+
+    /* Set offset to zeros */
+    for(i = 0; i < new_space->extent.rank; i++)
+        new_space->select.offset[i] = 0;
+    new_space->select.offset_changed = FALSE;
 
     /* If the intersecting space is "all", the intersection must be equal to the
      * source space and the projection must be equal to the destination space */
@@ -2163,26 +2169,14 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
      */
     else if((src_intersect_space->select.type->type == H5S_SEL_POINTS)
             || (src_space->select.type->type == H5S_SEL_POINTS)
-            || (dst_space->select.type->type == H5S_SEL_POINTS)) {
+            || (dst_space->select.type->type == H5S_SEL_POINTS))
         HDassert(0 && "Not yet implemented...");//VDSINC
     else {
         HDassert(src_intersect_space->select.type->type == H5S_SEL_HYPERSLABS);
-        /* Intersecting space is hyperslab selection.  If source space is set to
-         * all, use simpler algorithm, otherwise use general hyperslab algorithm
-         * (in either case if the destination space is al; the hyperslab
-         * routines will convert the destination selection to a span tree to use
-         * the same algorithm as with hyperslabs). */
-        if(dst_space->select.type->type == H5S_SEL_ALL) {
-            HDassert(0 && "Checking code coverage...");//VDSINC
-            /* Project src_intersect_space onto dst_space selection */
-            if(H5S_hyper_project_to_hs(src_intersect_space, dst_space, new_space) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't project hyperslab ondot destination selection")
-        } /* end if */
-        else {
-            HDassert(dst_space->select.type->type == H5S_SEL_HYPERSLABS);
-
-            HDassert(0 && "Not yet implemented...");//VDSINC
-        } /* end else */
+        /* Intersecting space is hyperslab selection.  Call the hyperslab
+         * routine to project to another hyperslab selection. */
+        if(H5S__hyper_project_intersection(src_space, dst_space, src_intersect_space, new_space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't project hyperslab ondot destination selection")
     } /* end else */
 
     /* load the address of the new space into *new_space_ptr */

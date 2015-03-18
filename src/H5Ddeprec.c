@@ -255,7 +255,7 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen1() */
-#error
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Dextend

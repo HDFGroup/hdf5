@@ -3193,13 +3193,15 @@ H5S_hyper_release(H5S_t *space)
     space->select.num_elem = 0;
 
     /* Release irregular hyperslab information */
-    if(space->select.sel_info.hslab->span_lst != NULL) {
-        if(H5S_hyper_free_span_info(space->select.sel_info.hslab->span_lst) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "failed to release hyperslab spans")
-    } /* end if */
+    if(space->select.sel_info.hslab) {
+        if(space->select.sel_info.hslab->span_lst != NULL) {
+            if(H5S_hyper_free_span_info(space->select.sel_info.hslab->span_lst) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "failed to release hyperslab spans")
+        } /* end if */
 
-    /* Release space for the hyperslab selection information */
-    space->select.sel_info.hslab = H5FL_FREE(H5S_hyper_sel_t, space->select.sel_info.hslab);
+        /* Release space for the hyperslab selection information */
+        space->select.sel_info.hslab = H5FL_FREE(H5S_hyper_sel_t, space->select.sel_info.hslab);
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8892,27 +8894,42 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     hsize_t             ss_off[H5S_PROJECT_INTERSECT_NSEQS];
     size_t              ss_len[H5S_PROJECT_INTERSECT_NSEQS];
     size_t              ss_nseq;
-    size_t              ss_i;
+    size_t              ss_nelem;
+    size_t              ss_i = (size_t)0;
+    hbool_t             advance_ss = FALSE;
     H5S_sel_iter_t      ss_iter;
     hbool_t             ss_iter_init = FALSE;
-    hsize_t             ss_sel_off;
+    hsize_t             ss_sel_off = (hsize_t)0;
     hsize_t             ds_off[H5S_PROJECT_INTERSECT_NSEQS];
     size_t              ds_len[H5S_PROJECT_INTERSECT_NSEQS];
     size_t              ds_nseq;
-    size_t              ds_i;
+    size_t              ds_nelem;
+    size_t              ds_i = (size_t)0;
     H5S_sel_iter_t      ds_iter;
     hbool_t             ds_iter_init = FALSE;
-    hsize_t             ds_sel_off;
+    hsize_t             ds_sel_off = (hsize_t)0;
     hsize_t             sis_off[H5S_PROJECT_INTERSECT_NSEQS];
     size_t              sis_len[H5S_PROJECT_INTERSECT_NSEQS];
     size_t              sis_nseq;
-    size_t              sis_i;
+    size_t              sis_nelem;
+    size_t              sis_i = (size_t)0;
+    hbool_t             advance_sis = FALSE;
     H5S_sel_iter_t      sis_iter;
     hbool_t             sis_iter_init = FALSE;
+    hsize_t             int_sel_off;
+    size_t              int_len;
+    hsize_t             proj_off;
+    size_t              proj_len;
+    size_t              proj_len_rem;
     hsize_t             proj_down_dims[H5S_MAX_RANK];
     H5S_hyper_span_info_t *curr_span_tree[H5S_MAX_RANK];
     H5S_hyper_span_t    *prev_span[H5S_MAX_RANK];
+    hsize_t             curr_span_dim[H5S_MAX_RANK];
     unsigned            proj_rank;
+    hsize_t             low;
+    hsize_t             high;
+    size_t              span_len;
+    size_t              nelem;
     unsigned            i;
     herr_t              ret_value = SUCCEED;
 
@@ -8924,36 +8941,41 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     HDassert(src_intersect_space);
     HDassert(proj_space);
         
-    /* Assert that src_space and dst_space have same # of elements in selection,
-     * src_space and src_intersect_space have same extent, and no point
-     * selections? */
+    /* Assert that src_space and src_intersect_space have same extent and there
+     * are no point selections? */
 
-    /* Initialize prev_space and curr_span_tree */
+    /* Initialize prev_space, curr_span_tree, and curr_span_dim */
     for(i = 0; i < H5S_MAX_RANK; i++) {
         curr_span_tree[i] = NULL;
         prev_span[i] = NULL;
+        curr_span_dim[i] = (hsize_t)0;
     } /* end for */
 
     /* Save rank of projected space */
     proj_rank = proj_space->extent.rank;
     HDassert(proj_rank > 0);
 
+    /* Get numbers of elements */
+    ss_nelem = (size_t)H5S_GET_SELECT_NPOINTS(src_space);
+    ds_nelem = (size_t)H5S_GET_SELECT_NPOINTS(dst_space);
+    sis_nelem = (size_t)H5S_GET_SELECT_NPOINTS(src_intersect_space);
+    HDassert(ss_nelem == ds_nelem);
+
     /* Calculate proj_down_dims (note loop relies on unsigned i wrapping around)
      */
-    proj_down_dims[proj_rank - 1] = proj_space->extend.size[proj_rank - 1];
+    proj_down_dims[proj_rank - 1] = proj_space->extent.size[proj_rank - 1];
     if(proj_rank > 1)
         for(i = proj_rank - 2; i < proj_rank; i--)
-            proj_down_dims[i] =  proj_space->extend.size[i] * proj_down_dims[i + 1];
+            proj_down_dims[i] =  proj_space->extent.size[i] * proj_down_dims[i + 1];
 
-    /* Init, get sequence lists, loop, etc VDSINC */
     /* Remove current selection from proj_space */
     if(H5S_SELECT_RELEASE(proj_space) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release hyperslab")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection")
 
     /* Allocate space for the hyperslab selection information (note this sets
      * diminfo_valid to FALSE, diminfo arrays to 0, and span list to NULL) */
     if((proj_space->select.sel_info.hslab = H5FL_CALLOC(H5S_hyper_sel_t))==NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab info")
 
     /* Set selection type */
     proj_space->select.type = H5S_sel_hyper;
@@ -8964,8 +8986,9 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     ss_iter_init = TRUE;
 
     /* Get sequence list for source space */
-    if(H5S_SELECT_GET_SEQ_LIST(src_space, 0u, &ss_iter, H5S_PROJECT_INTERSECT_NSEQS, (size_t)-1, &ss_nseq, &nelem, ss_off, ss_len) < 0)
+    if(H5S_SELECT_GET_SEQ_LIST(src_space, 0u, &ss_iter, H5S_PROJECT_INTERSECT_NSEQS, ss_nelem, &ss_nseq, &nelem, ss_off, ss_len) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+    ss_nelem -= nelem;
 
     /* Initialize destination space iterator */
     if(H5S_select_iter_init(&ds_iter, dst_space, (size_t)1) < 0)
@@ -8973,8 +8996,9 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     ds_iter_init = TRUE;
 
     /* Get sequence list for destination space */
-    if(H5S_SELECT_GET_SEQ_LIST(dst_space, 0u, &ds_iter, H5S_PROJECT_INTERSECT_NSEQS, (size_t)-1, &ds_nseq, &nelem, ds_off, ds_len) < 0)
+    if(H5S_SELECT_GET_SEQ_LIST(dst_space, 0u, &ds_iter, H5S_PROJECT_INTERSECT_NSEQS, ds_nelem, &ds_nseq, &nelem, ds_off, ds_len) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+    ds_nelem -= nelem;
 
     /* Initialize source intersect space iterator */
     if(H5S_select_iter_init(&sis_iter, src_intersect_space, (size_t)1) < 0)
@@ -8982,125 +9006,166 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     sis_iter_init = TRUE;
 
     /* Get sequence list for source intersect space */
-    if(H5S_SELECT_GET_SEQ_LIST(src_intersect_space, 0u, &sis_iter, H5S_PROJECT_INTERSECT_NSEQS, (size_t)-1, &sis_nseq, &nelem, sis_off, sis_len) < 0)
+    if(H5S_SELECT_GET_SEQ_LIST(src_intersect_space, 0u, &sis_iter, H5S_PROJECT_INTERSECT_NSEQS, sis_nelem, &sis_nseq, &nelem, sis_off, sis_len) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+    sis_nelem -= nelem;
 
     /* Make sure all sequences are non-empty */
     if((ss_nseq > 0) && (ds_nseq > 0) && (sis_nseq > 0)) {
         /* Loop until we run out of sequences in either the source or source
          * intersect space */
         while(1) {
-            if(ss_off[ss_i] + ss_len[ss_i] <= sis_off[sis_i]) {
+            if(advance_ss || (ss_off[ss_i] + ss_len[ss_i] <= sis_off[sis_i])) {
                 /* Sequences do not intersect, advance source space */
                 ss_sel_off += (hsize_t)ss_len[ss_i];
                 if(++ss_i == ss_nseq) {
-                    /* Try to grab more sequences from src_space.  If there are
-                     * no more then we are done, otherwise reset the source
-                     * space index. */
-                    if(H5S_SELECT_GET_SEQ_LIST(src_space, 0u, &ss_iter, H5S_PROJECT_INTERSECT_NSEQS, (size_t)-1, &ss_nseq, &nelem, ss_off, ss_len) < 0)
-                        HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-                    if(ss_nseq == 0)
-                        break;
-                    else {
+                    if(ss_nelem > 0) {
                         HDassert(0 && "Checking code coverage..."); //VDSINC
+                        /* Try to grab more sequences from src_space */
+                        if(H5S_SELECT_GET_SEQ_LIST(src_space, 0u, &ss_iter, H5S_PROJECT_INTERSECT_NSEQS, ss_nelem, &ss_nseq, &nelem, ss_off, ss_len) < 0)
+                            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                        HDassert(ss_len[0] > 0);
+
+                        /* Update ss_nelem */
+                        HDassert(nelem > 0);
+                        HDassert(nelem <= ss_nelem);
+                        ss_nelem -= nelem;
+
+                        /* Reset source space index */
                         ss_i = 0;
-                    } //VDSINC
-                } /* end if */
-            } /* end if */
-            else if(sis_off[sis_i] + sis_len[sis_i] <= ss_off[ss_i]) {
-                if(++sis_i == sis_nseq) {
-                    /* Try to grab more sequences from src_intersect_space.  If
-                     * there are no more then we are done, otherwise reset the
-                     * source intersect space index. */
-                    if(H5S_SELECT_GET_SEQ_LIST(src_intersect_space, 0u, &sis_iter, H5S_PROJECT_INTERSECT_NSEQS, (size_t)-1, &sis_nseq, &nelem, sis_off, sis_len) < 0)
-                        HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-                    if(sis_nseq == 0)
+                    } /* end if */
+                    else
+                        /* There are no more sequences in src_space, so we can
+                         * exit the loop */
                         break;
-                    else {
-                        HDassert(0 && "Checking code coverage..."); //VDSINC
-                        sis_i = 0;
-                    } //VDSINC
                 } /* end if */
+
+                /* Reset advance_ss */
+                advance_ss = FALSE;
+            } /* end if */
+            else if(advance_sis
+                    || (sis_off[sis_i] + sis_len[sis_i] <= ss_off[ss_i])) {
+                if(++sis_i == sis_nseq) {
+                    if(sis_nelem > 0) {
+                        /* Try to grab more sequences from src_intersect_space
+                         */
+                        if(H5S_SELECT_GET_SEQ_LIST(src_intersect_space, 0u, &sis_iter, H5S_PROJECT_INTERSECT_NSEQS, sis_nelem, &sis_nseq, &nelem, sis_off, sis_len) < 0)
+                            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                        HDassert(sis_len[0] > 0);
+
+                        /* Update ss_nelem */
+                        HDassert(nelem > 0);
+                        HDassert(nelem <= sis_nelem);
+                        sis_nelem -= nelem;
+
+                        /* Reset source space index */
+                        sis_i = 0;
+                    } /* end if */
+                    else
+                        /* There are no more sequences in src_intersect_space,
+                         * so we can exit the loop */
+                        break;
+                } /* end if */
+
+                /* Reset advance_sis */
+                advance_sis = FALSE;
             } /* end if */
             else {
                 /* Sequences intersect, add intersection to projected space */
-                /* Calculate intersection sequence */
-                if(ss_off[ss_i] >= sis_off[sis_i]) {
-                    HDassert(0 && "Checking code coverage..."); //VDSINC
+                /* Calculate intersection sequence and advance any sequences we
+                 * complete */
+                if(ss_off[ss_i] >= sis_off[sis_i])
                     int_sel_off = ss_sel_off;
-                } //VDSINC
-                else {
-                    HDassert(0 && "Checking code coverage..."); //VDSINC
+                else 
                     int_sel_off = sis_off[sis_i] - ss_off[ss_i] + ss_sel_off;
-                } //VDSINC
-                int_len = (size_t)(MIN(ss_off[ss_i] + (hsize_t)ss_len[ss_i],
-                        sis_off[sis_i] + (hsize_t)sis_len[sis_i]) - tmp_off);
+                if((ss_off[ss_i] + (hsize_t)ss_len[ss_i]) <= (sis_off[sis_i]
+                        + (hsize_t)sis_len[sis_i])) {
+                    int_len = (size_t)(ss_off[ss_i] + (hsize_t)ss_len[ss_i] - int_sel_off);
+                    advance_ss = TRUE;
+                } /* end if */
+                else
+                    int_len = (size_t)(sis_off[sis_i] + (hsize_t)sis_len[sis_i] - int_sel_off);
+                if((ss_off[ss_i] + (hsize_t)ss_len[ss_i]) >= (sis_off[sis_i]
+                        + (hsize_t)sis_len[sis_i]))
+                    advance_sis = TRUE;
 
                 /* Project to destination */
                 while(int_len > (size_t)0) {
                     while(ds_sel_off + (hsize_t)ds_len[ds_i] <= int_sel_off) {
-                        HDassert(0 && "Checking code coverage..."); //VDSINC
                         /* Intersection is not projected to this destination
                          * sequence, advance destination space */
                         ds_sel_off += (hsize_t)ds_len[ds_i];
                         if(++ds_i == ds_nseq) {
-                            /* Try to grab more sequences from dst_space.  If
-                             * there are no more then we are done, otherwise
-                             * reset the destination space index. */
-                            if(H5S_SELECT_GET_SEQ_LIST(dst_space, 0u, H5S_sel_iter_t *iter, H5S_PROJECT_INTERSECT_NSEQS, (size_t)-1, &sis_nseq, &nelem, sis_off, sis_len) < 0)
+                            HDassert(0 && "Checking code coverage..."); //VDSINC
+                            HDassert(sis_nelem > 0);
+
+                            /* Try to grab more sequences from dst_space */
+                            if(H5S_SELECT_GET_SEQ_LIST(dst_space, 0u, &ds_iter, H5S_PROJECT_INTERSECT_NSEQS, ds_nelem, &ds_nseq, &nelem, ds_off, ds_len) < 0)
                                 HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-                            if(sis_nseq == 0)
-                                break;
-                            else {
-                                HDassert(0 && "Checking code coverage..."); //VDSINC
-                                sis_i = 0;
-                            } //VDSINC
+                            HDassert(ds_len[0] > 0);
+
+                            /* Update ss_nelem */
+                            HDassert(nelem > 0);
+                            HDassert(nelem <= ds_nelem);
+                            ds_nelem -= nelem;
+
+                            /* Reset source space index */
+                            ds_i = 0;
                         } /* end if */
                     } /* end while */
 
                     /* Add sequence to projected space */
                     HDassert(ds_sel_off <= int_sel_off);
                     proj_off = ds_off[ds_i] + int_sel_off - ds_sel_off;
-                    proj_len = (size_t)((hsize_t)ds_len[ds_i] + ds_sel_off
-                            - int_sel_off);
+                    proj_len = proj_len_rem = MIN(int_len, (size_t)(ds_sel_off
+                            + (hsize_t)ds_len[ds_i] - int_sel_off + (hsize_t)1));
 
                     /* Add to span tree */
-                    while(proj_len > (size_t)0) {
+                    while(proj_len_rem > (size_t)0) {
                         /* Check for more than one full row (in every dim) and
                          * append multiple spans at once? -NAF */
                         /* Append spans in higher dimensions if we're going
                          * ouside the plan of the span currently being built
                          * (i.e. they're finished being built) */
                         for(i = proj_rank - 1; ((i > 0)
-                                && ((up_dim = proj_off / proj_down_dims[i])
-                                != curr_span_dim[i - 1])
-                                && curr_span_tree[i]);
-                                i--) {
-                            HDassert(0 && "Checking code coverage..."); //VDSINC
-                            /* Append complete lower dimension span tree to
-                             * current dimension */
-                            if(H5S_hyper_append_span(&prev_span[i - 1], &curr_span_tree[i - 1], up_dim, up_dim, curr_span_tree[i], NULL) < 0)
-                                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
+                                && ((proj_off / proj_down_dims[i])
+                                != curr_span_dim[i - 1])); i--) {
+                            if(curr_span_tree[i]) {
+                                HDassert(prev_span[i]);
 
-                            /* Reset lower dimension's span tree and previous
-                             * span since we just committed it and will start
-                             * over with a new one */
-                            curr_span_tree[i] = NULL;
-                            prev_span[i] = NULL;
+                                /* Append complete lower dimension span tree to
+                                 * current dimension */
+                                if(H5S_hyper_append_span(&prev_span[i - 1], &curr_span_tree[i - 1], curr_span_dim[i - 1], curr_span_dim[i - 1], curr_span_tree[i], NULL) < 0)
+                                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
+
+                                /* Reset lower dimension's span tree and previous
+                                 * span since we just committed it and will start
+                                 * over with a new one */
+                                if(H5S_hyper_free_span_info(curr_span_tree[i]) < 0)
+                                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't free span info")
+                                curr_span_tree[i] = NULL;
+                                prev_span[i] = NULL;
+                            } /* end if */
+
+                            /* Update curr_span_dim */
+                            curr_span_dim[i - 1] = proj_off / proj_down_dims[i];
                         } /* end for */
 
                         /* Compute bounds for new span in lowest dimension */
                         low = proj_off % proj_down_dims[proj_rank - 1];
-                        high = MAX(low + (hsize_t)proj_len,
-                                proj_space->extent.size[proj_rank - 1]);
+                        span_len = MIN(proj_len_rem,
+                                (size_t)(proj_space->extent.size[proj_rank - 1]
+                                - low));
+                        HDassert(proj_len_rem >= span_len);
+                        high = low + (hsize_t)span_len - (hsize_t)1;
 
                         /* Append span in lowest dimension */
                         if(H5S_hyper_append_span(&prev_span[proj_rank - 1], &curr_span_tree[proj_rank - 1], low, high, NULL, NULL) < 0)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
                         /* Update remaining offset and length */
-                        proj_off += high - low;
-                        proj_len -= (size_t)(high - low);
+                        proj_off += (hsize_t)span_len;
+                        proj_len_rem -= span_len;
                     } /* end while */
 
                     /* Update intersection sequence */
@@ -9111,27 +9176,75 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
         } /* end while */
     } /* end if */
 
-    /* Back off proj_off by 1 so it's guaranteed to point to the right dimension
-     * for the current span tree in every rank except the lowest */
-    proj_off--;
-
     /* Add remaining spans to span tree */
-    for(i = proj_rank - 1; i > 0; i--) {
+    for(i = proj_rank - 1; i > 0; i--)
         if(curr_span_tree[i]) {
             HDassert(prev_span[i]);
-            up_dim = proj_off / proj_down_dims[i];
+
             /* Append remaining span tree to higher dimension */
-            if(H5S_hyper_append_span(&prev_span[i - 1], &curr_span_tree[i - 1], up_dim, up_dim, curr_span_tree[i], NULL) < 0)
+            if(H5S_hyper_append_span(&prev_span[i - 1], &curr_span_tree[i - 1], curr_span_dim[i - 1], curr_span_dim[i - 1], curr_span_tree[i], NULL) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
-            /* Reset lower dimension's span tree and previous span since we just
-             * committed it and will start over with a new one */
+            /* Reset span tree */
+            if(H5S_hyper_free_span_info(curr_span_tree[i]) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't free span info")
             curr_span_tree[i] = NULL;
-            prev_span[i] = NULL;
-            
+        } /* end if */
 
-    /* Add span tree to proj_space VDSINC */
-    /* If we did not add anything to proj_space, select none instead VDSINC */
+    /* Add span tree to proj_space */
+    if(curr_span_tree[0]) {
+        proj_space->select.sel_info.hslab->span_lst = curr_span_tree[0];
+        curr_span_tree[0] = NULL;
+
+        /* Set the number of elements in current selection */
+        proj_space->select.num_elem = H5S_hyper_spans_nelem(proj_space->select.sel_info.hslab->span_lst);
+
+        /* Attempt to rebuild "optimized" start/stride/count/block information.
+         * from resulting hyperslab span tree */
+        if(H5S_hyper_rebuild(proj_space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't rebuild hyperslab info")
+    } /* end if */
+    else {
+        HDassert(0 && "Checking code coverage..."); //VDSINC
+        /* If we did not add anything to proj_space, select none instead */
+        if(H5S_select_none(proj_space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't convert selection")
+    } /* end else */
+
+
+done:
+    /* Release source selection iterator */
+    if(ss_iter_init)
+        if(H5S_SELECT_ITER_RELEASE(&ss_iter) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+
+    /* Release destination selection iterator */
+    if(ds_iter_init)
+        if(H5S_SELECT_ITER_RELEASE(&ds_iter) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+
+    /* Release source intersect selection iterator */
+    if(sis_iter_init)
+        if(H5S_SELECT_ITER_RELEASE(&sis_iter) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+
+    /* Cleanup on error */
+    if(ret_value < 0) {
+        /* Remove current selection from proj_space */
+        if(H5S_SELECT_RELEASE(proj_space) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection")
+
+        /* Free span trees */
+        for(i = 0; i < proj_rank; i++)
+            if(curr_span_tree[i]) {
+                if(H5S_hyper_free_span_info(curr_span_tree[i]) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't free span info")
+                curr_span_tree[i] = NULL;
+            } /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S__hyper_project_intersection() */
 
 
 /*--------------------------------------------------------------------------

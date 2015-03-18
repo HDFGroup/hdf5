@@ -34,6 +34,9 @@
 #define H5S_VALID_MAX	0x01
 #define H5S_VALID_PERM	0x02
 
+/* Length of stack-allocated sequences for "project intersect" routines */
+#define H5S_PROJECT_INTERSECT_NSEQS 256
+
 
 /* Initial version of the dataspace information */
 #define H5O_SDSPACE_VERSION_1	1
@@ -249,6 +252,9 @@ H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
     hbool_t copy_max);
 
 /* Operations on selections */
+H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
+    const H5S_t *dst_space, const H5S_t *src_intersect_space,
+    H5S_t *proj_space);
 
 /* Testing functions */
 #ifdef H5S_TESTING
