@@ -1071,11 +1071,17 @@ test_basic_io(unsigned config, hid_t fapl)
     if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
         TEST_ERROR
 
-    /* Close srcdset if config option specified */
+    /* Close srcdset and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(H5Dclose(srcdset[0]) < 0)
             TEST_ERROR
         srcdset[0] = -1;
+
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            if(H5Fclose(srcfile[0]) < 0)
+                TEST_ERROR
+            srcfile[0] = -1;
+        } /* end if */
     } /* end if */
 
     /* Read data through virtual dataset */
@@ -1098,10 +1104,14 @@ test_basic_io(unsigned config, hid_t fapl)
     if(H5Dwrite(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
         TEST_ERROR
 
-    /* Reopen srcdset if config option specified */
-    if(config & TEST_IO_CLOSE_SRC)
+    /* Reopen srcdset and srcfile if config option specified */
+    if(config & TEST_IO_CLOSE_SRC) {
+        if(config & TEST_IO_DIFFERENT_FILE)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+                TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
+    } /* end if */
 
     /* Read data directly from source dataset */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -1211,7 +1221,7 @@ test_basic_io(unsigned config, hid_t fapl)
     if(H5Dwrite(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
         TEST_ERROR
 
-    /* Close srcdsets if config option specified */
+    /* Close srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(H5Dclose(srcdset[0]) < 0)
             TEST_ERROR
@@ -1219,6 +1229,12 @@ test_basic_io(unsigned config, hid_t fapl)
         if(H5Dclose(srcdset[1]) < 0)
             TEST_ERROR
         srcdset[1] = -1;
+
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            if(H5Fclose(srcfile[0]) < 0)
+                TEST_ERROR
+            srcfile[0] = -1;
+        } /* end if */
     } /* end if */
 
     /* Read data through virtual dataset */
@@ -1241,8 +1257,11 @@ test_basic_io(unsigned config, hid_t fapl)
     if(H5Dwrite(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
         TEST_ERROR
 
-    /* Reopen srcdsets if config option specified */
+    /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
+        if(config & TEST_IO_DIFFERENT_FILE)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+                TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)

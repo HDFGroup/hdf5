@@ -9016,7 +9016,8 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
          * intersect space */
         while(1) {
             if(advance_ss || (ss_off[ss_i] + ss_len[ss_i] <= sis_off[sis_i])) {
-                /* Sequences do not intersect, advance source space */
+                /* Either we finished the current source sequence or the
+                 * sequences do not intersect.  Advance source space. */
                 ss_sel_off += (hsize_t)ss_len[ss_i];
                 if(++ss_i == ss_nseq) {
                     if(ss_nelem > 0) {
@@ -9045,8 +9046,12 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
             } /* end if */
             else if(advance_sis
                     || (sis_off[sis_i] + sis_len[sis_i] <= ss_off[ss_i])) {
+                /* Either we finished the current source intersect sequence or
+                 * the sequences do not intersect.  Advance source intersect
+                 * space. */
                 if(++sis_i == sis_nseq) {
                     if(sis_nelem > 0) {
+                        HDassert(0 && "Checking code coverage..."); //VDSINC
                         /* Try to grab more sequences from src_intersect_space
                          */
                         if(H5S_SELECT_GET_SEQ_LIST(src_intersect_space, 0u, &sis_iter, H5S_PROJECT_INTERSECT_NSEQS, sis_nelem, &sis_nseq, &nelem, sis_off, sis_len) < 0)
@@ -9125,8 +9130,8 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                         /* Check for more than one full row (in every dim) and
                          * append multiple spans at once? -NAF */
                         /* Append spans in higher dimensions if we're going
-                         * ouside the plan of the span currently being built
-                         * (i.e. they're finished being built) */
+                         * ouside the plane of the span currently being built
+                         * (i.e. it's finished being built) */
                         for(i = proj_rank - 1; ((i > 0)
                                 && ((proj_off / proj_down_dims[i])
                                 != curr_span_dim[i - 1])); i--) {

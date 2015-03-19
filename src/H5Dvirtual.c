@@ -213,7 +213,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     /* Check if we need to open the source file */
     if(HDstrcmp(virtual_ent->source_file_name, ".")) {
         /* Open the source file */
-        if(NULL == (src_file = H5F_open(virtual_ent->source_file_name, H5F_ACC_RDONLY, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, dxpl_id)))
+        if(NULL == (src_file = H5F_open(virtual_ent->source_file_name, H5F_INTENT(vdset->oloc.file) & H5F_ACC_RDWR, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, dxpl_id)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "unable to open source file")
         src_file_open = TRUE;
     } /* end if */
