@@ -2558,53 +2558,6 @@ case "`uname`" in
 esac
 
 ## -----------------------------------------------------------------------
-## Set flag to indicate that the machine can do conversion from 
-## long double to integers regardless of accuracy.  This flag should be 
-## set "yes" for all machines except HP-UX 11.00.  For HP-UX 11.00, the
-## compiler has 'floating exception' when converting 'long double' to all 
-## integers except 'unsigned long long'.  Other HP-UX systems are unknown
-## yet. (1/8/05 - SLU)
-
-AC_MSG_CHECKING([if converting from long double to integers works])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_ldouble_to_integer_works=${hdf5_cv_ldouble_to_integer_works=no}
-else
-   AC_CACHE_VAL([hdf5_cv_ldouble_to_integer_works],
-        [AC_TRY_RUN([
-        int main(void)
-        {
-            void *align;
-            long double ld= 9701917572145405952.00L;
-            unsigned char v1;
-            short v2;
-            unsigned int v3;
-            int  ret = 0;
-
-            align = (void*)malloc(sizeof(long double));
-            memcpy(align, &ld, sizeof(long double));
-
-            /*For HU-UX11.00, there's floating exception(core dump) when doing some of casting
-             *from 'long double' to integers*/
-            v1=(unsigned char)(*((long double*)align));
-            v2=(short)(*((long double*)align));
-            v3=(unsigned int)(*((long double*)align));
-
-    done:
-            exit(ret);
-        }
-        ], [hdf5_cv_ldouble_to_integer_works=yes], [hdf5_cv_ldouble_to_integer_works=no],)])
-fi
-
-if test ${hdf5_cv_ldouble_to_integer_works} = "yes"; then
-  AC_DEFINE([LDOUBLE_TO_INTEGER_WORKS], [1],
-            [Define if your system can convert from long double to integer values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## -----------------------------------------------------------------------
 ## Set flag to indicate that the machine can handle conversion from 
 ## integers to long double.  (This flag should be set "yes" for all 
 ## machines except all SGIs, where some conversions are

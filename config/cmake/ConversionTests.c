@@ -61,35 +61,6 @@ done:
 
 #endif
 
-#ifdef H5_LDOUBLE_TO_INTEGER_WORKS_TEST
-
-#include <stdlib.h>
-#include <string.h>
-
-int main(void)
-{
-    void *align;
-    long double ld= 9701917572145405952.00L;
-    unsigned char v1;
-    short v2;
-    unsigned int v3;
-    int  ret = 0;
-
-    align = (void*)malloc(sizeof(long double));
-    memcpy(align, &ld, sizeof(long double));
-
-    /*For HU-UX11.00, there's floating exception(core dump) when doing some of casting
-     *from 'long double' to integers*/
-    v1=(unsigned char)(*((long double*)align));
-    v2=(short)(*((long double*)align));
-    v3=(unsigned int)(*((long double*)align));
-
-done:
-    exit(ret);
-}
-
-#endif
-
 #ifdef H5_LDOUBLE_TO_LONG_SPECIAL_TEST
 
 int main(void)
