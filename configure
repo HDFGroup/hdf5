@@ -7710,8 +7710,7 @@ fi
 
 
 ## ----------------------------------------------------------------------
-## Fortran libraries are not currently supported on Mac. Disable them.
-## (this is overridable with --enable-unsupported).
+## Check for Fortran shared libraries.
 ##
 
 H5_FORTRAN_SHARED="no"
@@ -7719,42 +7718,9 @@ if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if shared Fortran libraries are supported" >&5
 $as_echo_n "checking if shared Fortran libraries are supported... " >&6; }
   H5_FORTRAN_SHARED="yes"
-
-  ## Disable fortran shared libraries on Mac. (MAM - 03/30/11)
-
-  case "`uname`" in
-    Darwin*)
-    H5_FORTRAN_SHARED="no"
-    CHECK_WARN="Shared Fortran libraries not currently supported on Mac."
-      ;;
-  esac
-
-  ## Report results of check(s)
-
-  if test "X${H5_FORTRAN_SHARED}" = "Xno"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $CHECK_WARN" >&5
-$as_echo "$as_me: WARNING: $CHECK_WARN" >&2;}
-    if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling shared Fortran libraries." >&5
-$as_echo "$as_me: WARNING: Disabling shared Fortran libraries." >&2;}
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: To override this behavior, please use --enable-unsupported configure option." >&5
-$as_echo "$as_me: WARNING: To override this behavior, please use --enable-unsupported configure option." >&2;}
-        if test "X${enable_static}" = "Xno"; then
-          as_fn_error $? "both static and shared Fortran libraries are disabled" "$LINENO" 5
-        fi
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Allowing unsupported Fortran shared libraries due to use of --enable-unsupported flag" >&5
-$as_echo "$as_me: WARNING: Allowing unsupported Fortran shared libraries due to use of --enable-unsupported flag" >&2;}
-      H5_FORTRAN_SHARED="yes"
-    fi
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-  fi
 fi
-
  if test "X$H5_FORTRAN_SHARED" = "Xyes"; then
   FORTRAN_SHARED_CONDITIONAL_TRUE=
   FORTRAN_SHARED_CONDITIONAL_FALSE='#'
