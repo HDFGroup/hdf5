@@ -260,18 +260,6 @@ ENDMACRO (H5MiscConversionTest)
 
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
-# 'unsigned (long) long' values to 'float' and 'double' values.
-# (This flag should be set for all machines, except for the SGIs) and Solaris
-# 64-bit machines, where the short program below tests if round-up is
-# correctly handled.
-#
-if (CMAKE_SYSTEM MATCHES "solaris2.*")
-  H5ConversionTests (H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE "Checking IF accurately converting unsigned long long to floating-point values")
-else (CMAKE_SYSTEM MATCHES "solaris2.*")
-  set (H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE 1)
-endif (CMAKE_SYSTEM MATCHES "solaris2.*")
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
 # 'float' or 'double' to 'unsigned long long' values.
 # (This flag should be set for all machines, except for PGI compiler
 # where round-up happens when the fraction of float-point value is greater
