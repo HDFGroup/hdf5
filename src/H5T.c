@@ -1187,51 +1187,37 @@ H5T_init_interface(void)
     /* From char to floats */
     status |= H5T_register(H5T_PERS_HARD, "schar_flt", native_schar, native_float, H5T__conv_schar_float, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "schar_dbl", native_schar, native_double, H5T__conv_schar_double, H5AC_dxpl_id, FALSE);
-#if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
     status |= H5T_register(H5T_PERS_HARD, "schar_ldbl", native_schar, native_ldouble, H5T__conv_schar_ldouble, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
     /* From unsigned char to floats */
     status |= H5T_register(H5T_PERS_HARD, "uchar_flt", native_uchar, native_float, H5T__conv_uchar_float, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "uchar_dbl", native_uchar, native_double, H5T__conv_uchar_double, H5AC_dxpl_id, FALSE);
-#if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
     status |= H5T_register(H5T_PERS_HARD, "uchar_ldbl", native_uchar, native_ldouble, H5T__conv_uchar_ldouble, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
     /* From short to floats */
     status |= H5T_register(H5T_PERS_HARD, "short_flt", native_short, native_float, H5T__conv_short_float, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "short_dbl", native_short, native_double, H5T__conv_short_double, H5AC_dxpl_id, FALSE);
-#if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
     status |= H5T_register(H5T_PERS_HARD, "short_ldbl", native_short, native_ldouble, H5T__conv_short_ldouble, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
     /* From unsigned short to floats */
     status |= H5T_register(H5T_PERS_HARD, "ushort_flt", native_ushort, native_float, H5T__conv_ushort_float, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "ushort_dbl", native_ushort, native_double, H5T__conv_ushort_double, H5AC_dxpl_id, FALSE);
-#if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
     status |= H5T_register(H5T_PERS_HARD, "ushort_ldbl", native_ushort, native_ldouble, H5T__conv_ushort_ldouble, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
     /* From int to floats */
     status |= H5T_register(H5T_PERS_HARD, "int_flt", native_int, native_float, H5T__conv_int_float, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "int_dbl", native_int, native_double, H5T__conv_int_double, H5AC_dxpl_id, FALSE);
-#if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
     status |= H5T_register(H5T_PERS_HARD, "int_ldbl", native_int, native_ldouble, H5T__conv_int_ldouble, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
     /* From unsigned int to floats */
     status |= H5T_register(H5T_PERS_HARD, "uint_flt", native_uint, native_float, H5T__conv_uint_float, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "uint_dbl", native_uint, native_double, H5T__conv_uint_double, H5AC_dxpl_id, FALSE);
-#if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
     status |= H5T_register(H5T_PERS_HARD, "uint_ldbl", native_uint, native_ldouble, H5T__conv_uint_ldouble, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
     /* From long to floats */
     status |= H5T_register(H5T_PERS_HARD, "long_flt", native_long, native_float, H5T__conv_long_float, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "long_dbl", native_long, native_double, H5T__conv_long_double, H5AC_dxpl_id, FALSE);
-#if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
     status |= H5T_register(H5T_PERS_HARD, "long_ldbl", native_long, native_ldouble, H5T__conv_long_ldouble, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_INTEGER_LDOUBLE */
 
     /* From unsigned long to floats */
 #if H5T_CONV_INTERNAL_ULONG_FLT
