@@ -260,22 +260,6 @@ ENDMACRO (H5MiscConversionTest)
 
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
-# 'float' or 'double' to 'unsigned long long' values.
-# (This flag should be set for all machines, except for PGI compiler
-# where round-up happens when the fraction of float-point value is greater
-# than 0.5.
-#
-H5ConversionTests (H5_FP_TO_ULLONG_ACCURATE "Checking IF accurately roundup converting floating-point to unsigned long long values" )
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
-# 'float', 'double' or 'long double' to 'unsigned long long' values.
-# (This flag should be set for all machines, except for HP-UX machines
-# where the maximal number for unsigned long long is 0x7fffffffffffffff
-# during conversion.
-#
-H5ConversionTests (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "Checking IF right maximum converting floating-point to unsigned long long values" )
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
 # 'long double' to 'unsigned int' values.  (This flag should be set for
 # all machines, except for some Intel compilers on some Linux.)
 #

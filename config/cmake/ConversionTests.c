@@ -13,54 +13,6 @@ done:
 
 #endif
 
-#ifdef H5_FP_TO_ULLONG_ACCURATE_TEST
-
-int main(void)
-{
-    float  f = 111.60f;
-    double d = 222.55L;
-    unsigned long long l1 = (unsigned long long)f;
-    unsigned long long l2 = (unsigned long long)d;
-    int           ret = 0;
-
-    if(l1 == 112)
-        ret = 1;
-    if(l2 == 223)
-        ret = 1;
-
-done:
-    exit(ret);
-}
-
-#endif
-
-#ifdef H5_FP_TO_ULLONG_RIGHT_MAXIMUM_TEST
-int main(void)
-{
-    float  f = 9701917572145405952.00f;
-    double d1 = 9701917572145405952.00L;
-    long double d2 = 9701917572145405952.00L;
-    double d3 = 2e40L;
-    unsigned long long l1 = (unsigned long long)f;
-    unsigned long long l2 = (unsigned long long)d1;
-    unsigned long long l3 = (unsigned long long)d2;
-    unsigned long long l4;
-    unsigned long long l5 = 0x7fffffffffffffffULL;
-    int           ret = 0;
-
-    if(l1 <= l5 || l2 <= l5 || l3 <= l5)
-        ret = 1;
-
-    l4 = (unsigned long long)d3;
-    if(l4 <= l5)
-        ret = 1;
-
-done:
-    exit(ret);
-}
-
-#endif
-
 #ifdef H5_LDOUBLE_TO_LONG_SPECIAL_TEST
 
 int main(void)
