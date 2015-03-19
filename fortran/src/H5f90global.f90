@@ -9,13 +9,19 @@
 ! PURPOSE
 !  This module is used to pass C stubs for H5 Fortran APIs. The C stubs are
 !  packed into arrays in H5_f.c and these arrays are then passed to Fortran.
-!  This module then uses EQUIVALENCE to assign elements of the arrays to
-!  Fortran equivalent C stubs.
+!  The Fortran values listed in this file are actually assigned in H5_ff.f90
+!  in H5open_f from the elements of the array that is being passed back from C.
 !
 ! NOTES
 !  The size of the C arrays in H5_f.c has to match the values of the variables
 !  declared as PARAMETER, hence if the size of an array in H5_f.c is changed
 !  then the PARAMETER of that corresponding array in Fortran must also be changed.
+!
+!                         *** IMPORTANT ***
+!  If you add a new variable here then you must add the variable name to the
+!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
+!  This is needed for Windows based operating systems.  
+!
 !
 ! USES
 !  H5FORTRAN_TYPES 	 - This module is generated at run time. See
