@@ -2558,29 +2558,6 @@ case "`uname`" in
 esac
 
 ## -----------------------------------------------------------------------
-## Set flag to indicate that the machine can handle conversion from 
-## long double to integers accurately.  This flag should be set "yes" for 
-## all machines except all SGIs.  For SGIs, some conversions are
-## incorrect and its cache value is set "no" in its config/irix6.x and 
-## irix5.x.
-##
-AC_MSG_CHECKING([if converting from long double to integers is accurate])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_ldouble_to_integer_accurate=${hdf5_cv_ldouble_to_integer_accurate=no}
-else
-   AC_CACHE_VAL([hdf5_cv_ldouble_to_integer_accurate], [hdf5_cv_ldouble_to_integer_accurate=yes])
-fi
-
-if test "${hdf5_cv_ldouble_to_integer_accurate}" = "yes"; then
-  AC_DEFINE([LDOUBLE_TO_INTEGER_ACCURATE], [1],
-            [Define if your system can convert long double to integers accurately.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## -----------------------------------------------------------------------
 ## Set flag to indicate that the machine can do conversion from 
 ## long double to integers regardless of accuracy.  This flag should be 
 ## set "yes" for all machines except HP-UX 11.00.  For HP-UX 11.00, the
