@@ -234,10 +234,6 @@ add_library (${HDF5_F90_LIB_TARGET} ${LIB_TYPE} ${f90_F_SRCS})
 set (SHARED_LINK_FLAGS " ")
 if (WIN32)
   if (BUILD_SHARED_LIBS)
-    set_property (TARGET ${HDF5_F90_LIB_TARGET}
-      APPEND PROPERTY COMPILE_DEFINITIONS
-        BUILD_HDF5_DLL
-    )
     if (MSVC)
       set (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def")
     endif (MSVC)
