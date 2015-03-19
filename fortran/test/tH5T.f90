@@ -112,7 +112,7 @@ CONTAINS
      INTEGER(HID_T) :: decoded_tid1
 
      INTEGER(HID_T) :: fixed_str1, fixed_str2
-     LOGICAL :: are_equal, differ
+     LOGICAL :: are_equal
      INTEGER(SIZE_T), PARAMETER :: str_size = 10 
      INTEGER(SIZE_T) :: query_size
 

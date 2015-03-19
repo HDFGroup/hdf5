@@ -80,7 +80,6 @@ SUBROUTINE dtransform(cleanup, total_error)
   IF(cleanup) CALL h5_cleanup_f("dtransform", H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
 
-
 END SUBROUTINE dtransform
 
 
@@ -91,13 +90,12 @@ END SUBROUTINE dtransform
 !**
 !***************************************************************
 
-SUBROUTINE test_genprop_basic_class(cleanup, total_error)
+SUBROUTINE test_genprop_basic_class(total_error)
 
   USE HDF5 ! This module contains all necessary modules
   USE TH5_MISC
 
   IMPLICIT NONE
-  LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER(HID_T) :: cid1    ! Generic Property class ID 
@@ -181,7 +179,7 @@ SUBROUTINE test_genprop_basic_class(cleanup, total_error)
 
 END SUBROUTINE test_genprop_basic_class
 
-SUBROUTINE test_h5s_encode(cleanup, total_error)
+SUBROUTINE test_h5s_encode(total_error)
 
 !***************************************************************
 !**
@@ -192,7 +190,6 @@ SUBROUTINE test_h5s_encode(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules
   USE TH5_MISC
   IMPLICIT NONE
-  LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER(hid_t) :: sid1, sid3!	 Dataspace ID		
@@ -468,6 +465,9 @@ SUBROUTINE test_scaleoffset(cleanup, total_error )
   CALL CHECK(" H5Dclose_f", error, total_error)
   CALL H5Fclose_f(file, error)
   CALL CHECK(" H5Fclose_f", error, total_error)
+
+  IF(cleanup) CALL h5_cleanup_f("h5scaleoffset", H5P_DEFAULT_F, error)
+  CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE test_scaleoffset
 

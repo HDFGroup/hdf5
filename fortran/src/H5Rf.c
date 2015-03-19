@@ -148,13 +148,11 @@ h5rcreate_ptr_c (void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *r
 {
      int ret_value = -1;
      char *c_name;
-     size_t c_namelen;
 
      /*
       * Convert FORTRAN name to C name
       */
-     c_namelen = (size_t)*namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
+     c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
      if (c_name == NULL) return ret_value;
 
      /*

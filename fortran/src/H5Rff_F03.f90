@@ -551,7 +551,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     TYPE(hobj_ref_t_f), INTENT(IN), TARGET :: ref
     INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
-    CHARACTER(LEN=*), INTENT(OUT) :: name
+    CHARACTER(LEN=*), INTENT(INOUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
 !*****
 
@@ -598,7 +598,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     TYPE(hdset_reg_ref_t_f), INTENT(IN), TARGET :: ref
     INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
-    CHARACTER(LEN=*), INTENT(OUT) :: name
+    CHARACTER(LEN=*), INTENT(INOUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTEGER(SIZE_T) :: size_default
@@ -647,7 +647,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER, INTENT(IN) :: ref_type
     TYPE(C_PTR), INTENT(IN) :: ref
-    CHARACTER(LEN=*), INTENT(OUT) :: name
+    CHARACTER(LEN=*), INTENT(INOUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
 !*****
