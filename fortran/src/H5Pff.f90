@@ -237,18 +237,10 @@ CONTAINS
 !  Returns the property list class for a property list.
 !
 ! INPUTS
-!  
 !  prp_id	- property list identifier
+!
 ! OUTPUTS
-!  
 !  classtype	- property list class
-!		  Possible values are:
-!		   H5P_ROOT_F
-!		   H5P_FILE_CREATE_F
-!		   H5P_FILE_ACCESS_F
-!		   H5P_DATASET_CREATE_F
-!		   H5P_DATASET_XFER_F
-!		   H5P_FILE_MOUNT_F
 !  hdferr:	- error code		
 !		   Success:  0
 !		   Failure: -1 
@@ -265,30 +257,21 @@ CONTAINS
 ! Fortran90 Interface:
   SUBROUTINE h5pget_class_f(prp_id, classtype, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-    INTEGER, INTENT(OUT) :: classtype    ! The type of the property list 
-                                         ! to be created. Possible values are: 
-                                         !  H5P_ROOT_F
-                                         !  H5P_FILE_CREATE_F
-                                         !  H5P_FILE_ACCESS_F
-                                         !  H5P_DATASET_CREATE_F 
-                                         !  H5P_DATASET_XFER_F
-                                         !  H5P_FILE_MOUNT_F
+    INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier 
+    INTEGER(HID_T), INTENT(OUT) :: classtype  ! The type of the property list 
+                                              ! to be created.
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
 
-!   INTEGER, EXTERNAL :: h5pget_class_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
        INTEGER FUNCTION h5pget_class_c(prp_id, classtype)
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_CLASS_C'::h5pget_class_c
          !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER, INTENT(OUT) :: classtype 
+         INTEGER(HID_T), INTENT(IN)  :: prp_id
+         INTEGER(HID_T), INTENT(OUT) :: classtype 
        END FUNCTION h5pget_class_c
     END INTERFACE
 
@@ -3641,7 +3624,7 @@ CONTAINS
 !  size         - Actual length of the class name
 !                   NOTE: If provided buffer "name" is smaller,
 !                   than name will be truncated to fit into
-!                   provided user buffer
+!                   provided user buffer.
 !  hdferr:	- error code
 !  		   Success: 0
 !  		   Failure: -1   

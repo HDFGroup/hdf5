@@ -995,7 +995,7 @@ H5_FCDLL int_f nh5pcreate_c ( hid_t_f *cls, hid_t_f *prp_id );
 H5_FCDLL int_f nh5pclose_c ( hid_t_f *prp_id );
 H5_FCDLL int_f nh5pcopy_c ( hid_t_f *prp_id , hid_t_f *new_prp_id);
 H5_FCDLL int_f nh5pequal_c ( hid_t_f *plist1_id , hid_t_f *plist2_id, int_f *c_flag);
-H5_FCDLL int_f nh5pget_class_c ( hid_t_f *prp_id , int_f *classtype);
+H5_FCDLL int_f nh5pget_class_c ( hid_t_f *prp_id , hid_t_f *classtype);
 H5_FCDLL int_f nh5pset_deflate_c ( hid_t_f *prp_id , int_f *level);
 H5_FCDLL int_f nh5pset_chunk_c ( hid_t_f *prp_id, int_f *rank, hsize_t_f *dims );
 H5_FCDLL int_f nh5pget_chunk_c ( hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims );

@@ -556,13 +556,13 @@ CONTAINS
      ! * Test encoding and decoding compound datatypes
      ! *-----------------------------------------------------------------------
      !
-     !    /* Encode compound type in a buffer */
+     !     Encode compound type in a buffer 
      !         -- First find the buffer size
 
      CALL H5Tencode_f(dtype_id, cmpd_buf, cmpd_buf_size, error)
      CALL check("H5Tencode_f", error, total_error)
 
-     ! /* Try decoding bogus buffer */
+     !  Try decoding bogus buffer 
 
      CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
      CALL VERIFY("H5Tdecode_f", error, -1, total_error)
@@ -570,11 +570,11 @@ CONTAINS
      CALL H5Tencode_f(dtype_id, cmpd_buf, cmpd_buf_size, error)
      CALL check("H5Tencode_f", error, total_error)
 
-     ! /* Decode from the compound buffer and return an object handle */
+     !  Decode from the compound buffer and return an object handle 
      CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
      CALL check("H5Tdecode_f", error, total_error)
 
-     ! /* Verify that the datatype was copied exactly */
+     !  Verify that the datatype was copied exactly 
 
      CALL H5Tequal_f(decoded_tid1, dtype_id, flag, error)
      CALL check("H5Tequal_f", error, total_error)
@@ -897,7 +897,7 @@ CONTAINS
     CALL H5Tget_native_type_f(dtype, H5T_DIR_ASCEND_F, native_type, error)
     CALL check("H5Tget_native_type_f",error, total_error)
 
-    !/* Verify the datatype retrieved and converted */
+    ! Verify the datatype retrieved and converted 
     CALL H5Tget_order_f(native_type, order1, error)
     CALL check("H5Tget_order_f",error, total_error)
     CALL H5Tget_order_f(H5T_NATIVE_INTEGER, order2, error)
@@ -952,7 +952,7 @@ CONTAINS
     RETURN
   END SUBROUTINE enumtest
 
-!/*-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
 ! * Function:    test_derived_flt
 ! *
 ! * Purpose:     Tests user-define and query functions of floating-point types.
@@ -968,7 +968,7 @@ CONTAINS
 ! * Modifications:
 ! *
 ! *-------------------------------------------------------------------------
-! */
+! 
 
 SUBROUTINE test_derived_flt(cleanup, total_error)
 
@@ -990,7 +990,7 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
 
   INTEGER :: error
 
-  !/* Create File */
+  ! Create File 
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN
      WRITE(*,*) "Cannot modify filename"
@@ -1009,7 +1009,7 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
   CALL h5tcopy_f(H5T_IEEE_F32LE, tid2, error)
   CALL check("h5tcopy_f",error,total_error)
 
-  !/*------------------------------------------------------------------------
+  !------------------------------------------------------------------------
   ! *                   1st floating-point type
   ! * size=7 byte, precision=42 bits, offset=3 bits, mantissa size=31 bits,
   ! * mantissa position=3, exponent size=10 bits, exponent position=34,
@@ -1026,7 +1026,7 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
   ! * bigger than original size but can be decreased.  There should be no
   ! * holes among the significant bits.  Exponent bias usually is set
   ! * 2^(n-1)-1, where n is the exponent size.
-  ! *-----------------------------------------------------------------------*/
+  ! *-----------------------------------------------------------------------
 
   CALL H5Tset_fields_f(tid1, INT(44,size_t), INT(34,size_t), INT(10,size_t), &
        INT(3,size_t), INT(31,size_t), error)
@@ -1079,7 +1079,7 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
   CALL check("H5Tget_ebias_f", error, total_error)
   CALL VERIFY("H5Tget_ebias_f", INT(ebias1), 511, total_error)
 
-  !/*--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
   ! *                   2nd floating-point type
   ! * size=3 byte, precision=24 bits, offset=0 bits, mantissa size=16 bits,
   ! * mantissa position=0, exponent size=7 bits, exponent position=16, exponent
@@ -1087,7 +1087,7 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
   ! *
   ! *          2       1       0
   ! *    SEEEEEEE MMMMMMMM MMMMMMMM
-  ! *--------------------------------------------------------------------------*/
+  ! *--------------------------------------------------------------------------
 
   CALL H5Tset_fields_f(tid2, INT(23,size_t), INT(16,size_t), INT(7,size_t), &
        INT(0,size_t), INT(16,size_t), error)
