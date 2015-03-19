@@ -149,14 +149,6 @@
 #define H5T_CONV_INTERNAL_ULLONG_LDOUBLE         1
 #endif
 
-/* Define an internal macro for converting long double to unsigned int.  SGI compilers give some incorrect
- * conversions.  HP-UX 11.00 compiler generates floating exception.  Some Intel compilers on some Linux
- * give incorrect values. */
-#if (H5_WANT_DATA_ACCURACY && H5_LDOUBLE_TO_UINT_ACCURATE) \
-    || (!H5_WANT_DATA_ACCURACY)
-#define H5T_CONV_INTERNAL_LDOUBLE_UINT         1
-#endif
-
 /* Define an internal macro for converting floating numbers to long long.  The hard conversion on Windows
  * .NET 2003 has a bug and gives wrong exception value. */
 #if (H5_WANT_DATA_ACCURACY && !defined(H5_HW_FP_TO_LLONG_NOT_WORKS)) || (!H5_WANT_DATA_ACCURACY)

@@ -5278,23 +5278,7 @@ run_fp_int_conv(const char *name)
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_SHORT);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_USHORT);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_INT);
-#if H5_LDOUBLE_TO_UINT_ACCURATE
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_UINT);
-#else /*H5_LDOUBLE_TO_UINT_ACCURATE*/
-        {
-            char		str[256];		/*string		*/
-
-            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
-                    name, "long double", "unsigned int");
-            printf("%-70s", str);
-            SKIPPED();
-#if H5_SIZEOF_LONG_DOUBLE!=0
-            HDputs("    Test skipped due to hardware conversion error.");
-#else
-            HDputs("    Test skipped due to disabled long double.");
-#endif
-        }
-#endif /*H5_LDOUBLE_TO_UINT_ACCURATE*/
 #if H5_SIZEOF_LONG!=H5_SIZEOF_INT && H5_SIZEOF_LONG_DOUBLE!=0
 #ifndef H5_LDOUBLE_TO_LONG_SPECIAL
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LONG);

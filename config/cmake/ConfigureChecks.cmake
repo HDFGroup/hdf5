@@ -259,12 +259,6 @@ ENDMACRO (H5MiscConversionTest)
 #-----------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
-# 'long double' to 'unsigned int' values.  (This flag should be set for
-# all machines, except for some Intel compilers on some Linux.)
-#
-H5ConversionTests (H5_LDOUBLE_TO_UINT_ACCURATE "Checking IF correctly converting long double to unsigned int values")
-# ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can _compile_
 # 'unsigned long long' to 'float' and 'double' typecasts.
 # (This flag should be set for all machines.)

@@ -170,22 +170,6 @@ done:
 }
 #endif
 
-#ifdef H5_LDOUBLE_TO_UINT_ACCURATE_TEST
-int main(void)
-{
-    long double ld = 2733248032.9183987530L;
-    unsigned int i;
-    int           ret = 0;
-
-    i = (unsigned int)ld;
-    if(i!=2733248032 && i!=2733248031 && i!=2733248033)
-        ret = 1;
-
-done:
-    exit(ret);
-}
-#endif
-
 #ifdef H5_LLONG_TO_LDOUBLE_CORRECT_TEST
 int main(void)
 {
