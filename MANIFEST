@@ -104,7 +104,6 @@
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
-./config/irix6.x
 ./config/linux-gnu
 ./config/linux-gnuaout
 ./config/linux-gnulibc1

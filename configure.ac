@@ -131,12 +131,6 @@ saved_user_FCFLAGS="$FCFLAGS"
 saved_user_LDFLAGS="$LDFLAGS"
 saved_user_CPPFLAGS="$CPPFLAGS"
 
-## Different compilers may need default libraries. They are specified in
-## the config/* files, so we put this statement here so that it'll be
-## set by the code which follows...
-##
-DEFAULT_LIBS=""
-
 ## Support F9X variable to define Fortran compiler if FC variable is
 ## not used.  This should be deprecated in the future.
 if test "x" = "x$FC"; then
@@ -254,12 +248,6 @@ case $host_os in
     ;;
   freebsd*)
     host_os_novers=freebsd
-    ;;
-  irix5.*)
-    host_os_novers=irix5.x
-    ;;
-  irix6.*)
-    host_os_novers=irix6.x
     ;;
   osf4.*)
     host_os_novers=osf4.x
@@ -1006,7 +994,7 @@ case "$host" in
     ## many problems with including them.
     AC_CHECK_HEADERS([sys/sysinfo.h sys/proc.h])
     ;;
-  mips*-sgi*-irix*)
+  mips*-sgi*)
     ## The <sys/fpu.h> is needed on the SGI machines to turn off
     ## denormalized floating-point values going to zero.  We do *not*
     ## attempt to locate these files on other systems because there
@@ -2560,9 +2548,7 @@ esac
 ## -----------------------------------------------------------------------
 ## Set flag to indicate that the machine can handle conversion from 
 ## integers to long double.  (This flag should be set "yes" for all 
-## machines except all SGIs, where some conversions are
-## incorrect and its cache value is set "no" in its config/irix6.x and 
-## irix5.x) 
+## machines except all SGIs, where some conversions are incorrect) 
 ##
 AC_MSG_CHECKING([if accurately converting from integers to long double])
 
@@ -2633,8 +2619,7 @@ fi
 ## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine can accurately convert
 ## 'unsigned (long) long' values to 'float' and 'double' values.
-## (This flag should be set for all machines, except for the SGIs, where
-## the cache value is set in the config/irix6.x config file) and Solaris
+## (This flag should be set for all machines, except for the SGIs) and Solaris
 ## 64-bit machines, where the short program below tests if round-up is 
 ## correctly handled.
 ##
@@ -3414,11 +3399,6 @@ else
   pwd=pwd
 fi
 AC_SUBST([ROOT]) ROOT="`$pwd`"
-
-## ----------------------------------------------------------------------
-## Move any compiler-specific libraries into the main LIBS varaible.
-## 
-LIBS="$DEFAULT_LIBS $LIBS"
 
 ## ----------------------------------------------------------------------
 ## Determine the runtime libraries we may need to include in the
