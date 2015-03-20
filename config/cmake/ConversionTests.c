@@ -1,18 +1,3 @@
-#ifdef H5_FP_TO_INTEGER_OVERFLOW_WORKS_TEST
-
-int main(void)
-{
-    float  f = 2147483648.0f;
-    int    i;
-
-    i = (int)f;
-
-done:
-    exit(0);
-}
-
-#endif
-
 #ifdef H5_LDOUBLE_TO_LONG_SPECIAL_TEST
 
 int main(void)

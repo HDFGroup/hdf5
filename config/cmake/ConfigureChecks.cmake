@@ -252,14 +252,6 @@ ENDMACRO (H5MiscConversionTest)
 #-----------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can handle overflow converting
-# all floating-point to all integer types.
-# (This flag should be set for all machines, except for Cray X1 where
-# floating exception is generated when the floating-point value is greater
-# than the maximal integer value).
-#
-H5ConversionTests (H5_FP_TO_INTEGER_OVERFLOW_WORKS  "Checking IF overflows normally converting floating-point to integer values")
-# ----------------------------------------------------------------------
 # Set the flag to indicate that the machine is using a special algorithm to convert
 # 'long double' to '(unsigned) long' values.  (This flag should only be set for 
 # the IBM Power6 Linux.  When the bit sequence of long double is 
