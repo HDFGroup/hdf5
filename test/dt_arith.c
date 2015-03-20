@@ -3294,7 +3294,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 check_mant[1] = HDfrexpl(hw_ld, check_expo+1);
 #endif
             }
-#ifdef H5_CONVERT_DENORMAL_FLOAT
             /* Special check for denormalized values */
             if(check_expo[0]<(-(int)dst_ebias) || check_expo[1]<(-(int)dst_ebias)) {
                 int expo_diff=check_expo[0]-check_expo[1];
@@ -3317,58 +3316,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                         HDfabs(check_mant[0]-check_mant[1])<FP_EPSILON)
                     continue;
             } /* end else */
-#else /* H5_CONVERT_DENORMAL_FLOAT */
-            {
-            hssize_t	expo;			/*exponent			*/
-            uint8_t tmp[32];
-
-            assert(src_size<=sizeof(tmp));
-            if(sendian==H5T_ORDER_LE)
-                HDmemcpy(tmp,&saved[j*src_size],src_size);
-            else if(sendian==H5T_ORDER_BE)
-                for (k=0; k<src_size; k++)
-                    tmp[k]=saved[j*src_size+(src_size-(k+1))];
-            else {
-                for (k = 0; k < src_size; k += 4) {
-                    tmp[k] = saved[j*src_size+(src_size-2)-k];
-                    tmp[k+1] = saved[j*src_size+(src_size-1)-k];
-
-                    tmp[(src_size-2)-k] = saved[j*src_size+k];
-                    tmp[(src_size-1)-k] = saved[j*src_size+k+1];
-                }
-            }
-
-            expo = H5T__bit_get_d(tmp, src_epos, src_esize);
-            if(expo==0)
-                continue;   /* Denormalized floating-point value detected */
-            else {
-                assert(dst_size<=sizeof(tmp));
-                if(sendian==H5T_ORDER_LE)
-                    HDmemcpy(tmp,&buf[j*dst_size],dst_size);
-                else if(sendian==H5T_ORDER_BE)
-                    for (k=0; k<dst_size; k++)
-                        tmp[k]=buf[j*dst_size+(dst_size-(k+1))];
-                else {
-                    for (k = 0; k < src_size; k += 4) {
-                        tmp[k] = buf[j*dst_size+(dst_size-2)-k];
-                        tmp[k+1] = buf[j*dst_size+(dst_size-1)-k];
-
-                        tmp[(dst_size-2)-k] = buf[j*dst_size+k];
-                        tmp[(dst_size-1)-k] = buf[j*dst_size+k+1];
-                    }
-                }
-
-                expo = H5T__bit_get_d(tmp, dst_epos, dst_esize);
-                if(expo==0)
-                    continue;   /* Denormalized floating-point value detected */
-                else {
-                    if (check_expo[0]==check_expo[1] &&
-                            HDfabs(check_mant[0]-check_mant[1])<FP_EPSILON)
-                        continue;
-                } /* end else */
-            } /* end else */
-            }
-#endif /* H5_CONVERT_DENORMAL_FLOAT */
         }
 
         if (0==fails_this_test++) {

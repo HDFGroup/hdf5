@@ -1073,16 +1073,14 @@ H5T_init_interface(void)
      */
 
     /* floating point */
-#if H5T_CONV_INTERNAL_FP_FP
     status |= H5T_register(H5T_PERS_HARD, "flt_dbl", native_float, native_double, H5T__conv_float_double, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "dbl_flt", native_double, native_float, H5T__conv_double_float, H5AC_dxpl_id, FALSE);
-#endif /*H5T_CONV_INTERNAL_FP_FP*/
-#if H5T_CONV_INTERNAL_FP_LDOUBLE
+#if H5_SIZEOF_LONG_DOUBLE != 0
     status |= H5T_register(H5T_PERS_HARD, "flt_ldbl", native_float, native_ldouble, H5T__conv_float_ldouble, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "dbl_ldbl", native_double, native_ldouble, H5T__conv_double_ldouble, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "ldbl_flt", native_ldouble, native_float, H5T__conv_ldouble_float, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "ldbl_dbl", native_ldouble, native_double, H5T__conv_ldouble_double, H5AC_dxpl_id, FALSE);
-#endif /*H5T_CONV_INTERNAL_FP_LDOUBLE*/
+#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
     /* from long long */
     status |= H5T_register(H5T_PERS_HARD, "llong_ullong", native_llong, native_ullong, H5T__conv_llong_ullong, H5AC_dxpl_id, FALSE);
