@@ -641,15 +641,44 @@ AC_SUBST([RUNPARALLEL])
 AC_SUBST([TESTPARALLEL])
 
 ## ----------------------------------------------------------------------
-## Check for Fortran shared libraries.
+## Fortran libraries are not currently supported on Mac. Disable them.
+## (this is overridable with --enable-unsupported).
 ##
 AC_SUBST([H5_FORTRAN_SHARED])
 H5_FORTRAN_SHARED="no"
 if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   AC_MSG_CHECKING([if shared Fortran libraries are supported])
   H5_FORTRAN_SHARED="yes"
-  AC_MSG_RESULT([yes])
+
+  ## Disable fortran shared libraries on Mac. (MAM - 03/30/11)
+  
+  case "`uname`" in
+    Darwin*)
+    H5_FORTRAN_SHARED="no"
+    CHECK_WARN="Shared Fortran libraries not currently supported on Mac."
+      ;;
+  esac
+
+  ## Report results of check(s)
+  
+  if test "X${H5_FORTRAN_SHARED}" = "Xno"; then
+    AC_MSG_RESULT([no])
+    AC_MSG_WARN([$CHECK_WARN])
+    if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+      AC_MSG_WARN([Disabling shared Fortran libraries.])
+      AC_MSG_WARN([To override this behavior, please use --enable-unsupported configure option.])
+        if test "X${enable_static}" = "Xno"; then
+          AC_MSG_ERROR([both static and shared Fortran libraries are disabled])
+        fi
+    else
+      AC_MSG_WARN([Allowing unsupported Fortran shared libraries due to use of --enable-unsupported flag])
+      H5_FORTRAN_SHARED="yes"
+    fi
+  else
+    AC_MSG_RESULT([yes])
+  fi
 fi
+
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
 
 ## ----------------------------------------------------------------------
