@@ -8653,7 +8653,6 @@ H5_GCC_DIAG_ON(float-equal)
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_FP_LLONG
 herr_t
 H5T__conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8664,7 +8663,6 @@ H5_GCC_DIAG_OFF(float-equal)
     H5T_CONV_Fx(FLOAT, LLONG, float, long long, LLONG_MIN, LLONG_MAX);
 H5_GCC_DIAG_ON(float-equal)
 }
-#endif /* H5T_CONV_INTERNAL_FP_LLONG */
 
 
 /*-------------------------------------------------------------------------
@@ -8707,7 +8705,6 @@ H5T__conv_float_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_FP_LLONG
 herr_t
 H5T__conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8718,7 +8715,6 @@ H5_GCC_DIAG_OFF(float-equal)
     H5T_CONV_Fx(DOUBLE, LLONG, double, long long, LLONG_MIN, LLONG_MAX);
 H5_GCC_DIAG_ON(float-equal)
 }
-#endif /*H5T_CONV_INTERNAL_FP_LLONG*/
 
 
 /*-------------------------------------------------------------------------
