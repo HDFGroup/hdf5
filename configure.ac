@@ -3305,7 +3305,7 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Set some variables for general configuration information to be saved
-## and installed with the libraries.
+## and installed with the libraries (used to generate libhdf5.settings).
 ##
 
 ## HDF5 version from the first line of the README.txt file.
