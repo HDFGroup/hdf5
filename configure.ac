@@ -3652,14 +3652,6 @@ cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
 SEARCH="$SEARCH_RULE`eval $cmd`"
 export SEARCH
 
-## We don't need to say when we're entering directories if we're using
-## GNU make because make does it for us.
-if test "X$GMAKE" = "Xyes"; then
-  AC_SUBST([SETX]) SETX=":"
-else
-  AC_SUBST([SETX]) SETX="set -x"
-fi
-
 ## Some cleanup stuff
 rm -f conftest conftest.o conftest.c dummy.o *.mod
 
