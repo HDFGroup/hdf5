@@ -218,9 +218,6 @@
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #cmakedefine H5_HAVE_LIBDMALLOC @H5_HAVE_LIBDMALLOC@
 
-/* Define to 1 if you have the `lmpe' library (-llmpe). */
-#cmakedefine H5_HAVE_LIBLMPE @H5_HAVE_LIBLMPE@
-
 /* Define to 1 if you have the `m' library (-lm). */
 #cmakedefine H5_HAVE_LIBM @H5_HAVE_LIBM@
 

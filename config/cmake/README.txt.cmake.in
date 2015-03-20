@@ -32,7 +32,7 @@ utility should be installed.
 
 To test the installation with the examples;
     Create a directory to run the examples.
-    Copy HDF5Examples-0.1.1-Source folder to this directory, do NOT unzip.
+    Copy HDF5Examples folder to this directory.
     Copy HDF518_Examples.cmake to this directory.
     Edit HDF518_Examples.cmake line 8 to set INSTALLDIR to where HDF5 is installed.
        (The default should be correct unless you installed into a different folder.)
