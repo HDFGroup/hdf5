@@ -4445,49 +4445,6 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 }
             }
         }
-/* On some machines (notably the SGI and Solaris 64-bit machines) unsigned long
-* values are not converted to float or double values correctly, they are
-* consistently off by the lowest bit being rounded oppositely to our
-* software conversion routines output.  So, on those machines, we allow
-* the converted value to be +/- 1 from the machine's value.  -QAK
-*/
-#ifndef H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS
-        if(dst_size==sizeof(unsigned)) {
-            unsigned tmp_s, tmp_h;
-            HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(unsigned));
-            HDmemcpy(&tmp_h,&hw[0],sizeof(unsigned));
-            if((tmp_s+1)==tmp_h || (tmp_s-1)==tmp_h)
-                continue; /*no error*/
-        } /* end if */
-        else if (dst_size==sizeof(unsigned long)) {
-            unsigned long tmp_s, tmp_h;
-            HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(unsigned long));
-            HDmemcpy(&tmp_h,&hw[0],sizeof(unsigned long));
-            if((tmp_s+1)==tmp_h || (tmp_s-1)==tmp_h)
-                continue; /*no error*/
-        } /* end if */
-        else if (dst_size==sizeof(unsigned long long)) {
-            unsigned long long tmp_s, tmp_h;
-            HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(unsigned long long));
-            HDmemcpy(&tmp_h,&hw[0],sizeof(unsigned long long));
-            if((tmp_s+1)==tmp_h || (tmp_s-1)==tmp_h)
-                continue; /*no error*/
-        } /* end if */
-#endif /* end H5_ULONG_FP_BOTTOM_BIT_WORKS */
-
-/* For PGI compiler on Linux, during conversion from 'float' or 'double' to
-* 'unsigned long long', round-up happens when the fraction of float-point
-* value is greater than 0.5. So we allow the converted value to be off by 1.
-*/
-#ifndef H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS
-        if((src_type==FLT_FLOAT || src_type==FLT_DOUBLE) && dst_type==INT_ULLONG) {
-            unsigned long long tmp_s, tmp_h;
-            HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(unsigned long long));
-            HDmemcpy(&tmp_h,&hw[0],sizeof(unsigned long long));
-            if((tmp_s+1)==tmp_h)
-                continue; /*no error*/
-        }
-#endif /*end H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS*/
 
         /* Print errors */
         if (0==fails_this_test++) {

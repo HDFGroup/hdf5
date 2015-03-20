@@ -153,11 +153,9 @@ hdf5_cv_mpi_file_set_size_big=${hdf5_cv_mpi_file_set_size_big='yes'}
 # Set gettimeofday_tz to yes.
 hdf5_cv_gettimeofday_tz=${hdf5_cv_gettimeofday_tz='yes'}
 hdf5_cv_convert_denormal_float=${hdf5_cv_convert_denormal_float='no'}
-hdf5_cv_fp_to_ullong_bottom_bit_works=${hdf5_cv_fp_to_ullong_bottom_bit_works='no'}
 hdf5_cv_fp_to_ullong_right_maximum=${hdf5_cv_fp_to_ullong_right_maximum='yes'}
 hdf5_cv_ldouble_to_uint_works=${hdf5_cv_ldouble_to_uint_works='yes'}
 hdf5_cv_sw_ldouble_to_integer_works=${hdf5_cv_sw_ldouble_to_integer_works='yes'}
-hdf5_cv_sw_ulong_to_fp_bottom_bit_works=${hdf5_cv_sw_ulong_to_fp_bottom_bit_works='no'}
 hdf5_cv_ullong_to_fp_cast_works=${hdf5_cv_ullong_to_fp_cast_works='yes'}
 hdf5_cv_ullong_to_ldouble_precision_works=${hdf5_cv_ullong_to_ldouble_precision_works='yes'}
 hdf5_cv_vsnprintf_works=${hdf5_cv_vsnprintf_works='yes'}
