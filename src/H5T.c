@@ -1278,16 +1278,12 @@ H5T_init_interface(void)
     /* From floats to long long */
     status |= H5T_register(H5T_PERS_HARD, "flt_llong", native_float, native_llong, H5T__conv_float_llong, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "dbl_llong", native_double, native_llong, H5T__conv_double_llong, H5AC_dxpl_id, FALSE);
-#ifdef H5T_CONV_INTERNAL_LDOUBLE_LLONG
     status |= H5T_register(H5T_PERS_HARD, "ldbl_llong", native_ldouble, native_llong, H5T__conv_ldouble_llong, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_LDOUBLE_LLONG */
 
     /* From floats to unsigned long long */
     status |= H5T_register(H5T_PERS_HARD, "flt_ullong", native_float, native_ullong, H5T__conv_float_ullong, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "dbl_ullong", native_double, native_ullong, H5T__conv_double_ullong, H5AC_dxpl_id, FALSE);
-#if H5T_CONV_INTERNAL_LDOUBLE_ULLONG
     status |= H5T_register(H5T_PERS_HARD, "ldbl_ullong", native_ldouble, native_ullong, H5T__conv_ldouble_ullong, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_LDOUBLE_ULLONG */
 
     /*
      * The special no-op conversion is the fastest, so we list it last. The

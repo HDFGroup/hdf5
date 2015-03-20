@@ -116,45 +116,6 @@ done:
 
 #endif
 
-#ifdef H5_LDOUBLE_TO_LLONG_ACCURATE_TEST
-int main(void)
-{
-    long double         ld = 20041683600089727.779961L;
-    long long           ll;
-    unsigned long long  ull;
-    unsigned char       s[16];
-    int                 ret = 0;
-
-    if(sizeof(long double) == 16) {
-        /*make sure the long double type is the same as the failing type
-         *which has 16 bytes in size and 11 bits of exponent.  If it is,
-         *the bit sequence should be like below.  It's not
-         *a decent way to check but this info isn't available. */
-        memcpy(s, &ld, 16);
-        if(s[0]==0x43 && s[1]==0x51 && s[2]==0xcc && s[3]==0xf3 &&
-            s[4]==0x85 && s[5]==0xeb && s[6]==0xc8 && s[7]==0xa0 &&
-            s[8]==0xbf && s[9]==0xcc && s[10]==0x2a && s[11]==0x3c) {
-
-            /*slightly adjust the bit sequence (s[8]=0xdf).  The converted
-             *values will go wild on Mac OS 10.4 and IRIX64 6.5.*/
-            s[0]=0x43; s[1]=0x51; s[2]=0xcc; s[3]=0xf3;
-            s[4]=0x85; s[5]=0xeb; s[6]=0xc8; s[7]=0xa0;
-            s[8]=0xdf; s[9]=0xcc; s[10]=0x2a; s[11]=0x3c;
-            s[12]=0x3d; s[13]=0x85; s[14]=0x56; s[15]=0x20;
-
-            memcpy(&ld, s, 16);
-            ll = (long long)ld;
-            ull = (unsigned long long)ld;
-
-            if(ll != 20041683600089728 || ull != 20041683600089728)
-                ret = 1;
-        }
-    }
-done:
-    exit(ret);
-}
-#endif
-
 #ifdef H5_LLONG_TO_LDOUBLE_CORRECT_TEST
 int main(void)
 {
