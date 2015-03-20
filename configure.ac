@@ -3401,48 +3401,6 @@ fi
 AC_SUBST([ROOT]) ROOT="`$pwd`"
 
 ## ----------------------------------------------------------------------
-## Determine the runtime libraries we may need to include in the
-## libtools command so that executables will find the correct dynamic
-## libraries.
-## 
-AC_SUBST([DYNAMIC_DIRS]) DYNAMIC_DIRS=""
-
-if test -n "$AM_LDFLAGS $LDFLAGS"; then
-  for d in $AM_LDFLAGS $LDFLAGS ; do
-    case "$d" in
-      -L*)
-        d="`echo $d | sed -e 's/-L//g'`"
-        case "$d" in
-          .*)
-            ## If the path isn't absolute, make it so by
-            ## prepending the ROOT directory to it.
-            d=${ROOT}/$d
-            ;;
-        esac
-        DYNAMIC_DIRS="-R${d} $DYNAMIC_DIRS"
-        ;;
-    esac
-  done
-fi
-
-if test -n "$AM_CPPFLAGS"; then
-  TEMP_CPPFLAGS=""
-  for d in $AM_CPPFLAGS ; do
-    case "$d" in
-      -I.*)
-        ## If the path isn't absolute, make it so by prepending
-        ## the ROOT directory to it.
-        d="`echo $d | sed -e 's/-I//g'`"
-        d="-I${ROOT}/${d}"
-        ;;
-    esac
-    TEMP_CPPFLAGS="$d $TEMP_CPPFLAGS"
-  done
-  AM_CPPFLAGS=$TEMP_CPPFLAGS
-fi
-
-
-## ----------------------------------------------------------------------
 ## Some programs shouldn't be built by default (e.g., programs to generate
 ## data files used by tests, some optional tests).
 ## Check if they want such programs built anyway.
