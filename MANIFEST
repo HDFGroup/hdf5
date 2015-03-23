@@ -2251,8 +2251,7 @@
 ./config/cmake/FindHDF5.cmake.in
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
-./config/cmake/hdf5-config.cmake.build.in
-./config/cmake/hdf5-config.cmake.install.in
+./config/cmake/hdf5-config.cmake.in
 ./config/cmake/hdf5-config-version.cmake.in
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in
