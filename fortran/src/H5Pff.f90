@@ -1432,7 +1432,7 @@ CONTAINS
 
 !****s* H5P/h5pget_fapl_core_f 
 ! NAME
-!   h5pget_fapl_core_f 
+!  h5pget_fapl_core_f 
 !
 ! PURPOSE
 !  Queries core file driver properties. 
@@ -1470,9 +1470,6 @@ CONTAINS
 !*****
     INTEGER :: backing_store_flag 
 
-!            INTEGER, EXTERNAL :: h5pget_fapl_core_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
        INTEGER FUNCTION h5pget_fapl_core_c(prp_id, increment, backing_store_flag)
          USE H5GLOBAL
@@ -4205,50 +4202,46 @@ CONTAINS
 ! Fortran90 Interface:
   SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
-    INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_map ! Mapping array
-    INTEGER(HID_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_fapl ! Property list for each memory usage type
-    CHARACTER(LEN=*), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_name ! Names of member file
-    REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_addr 
-    LOGICAL, INTENT(IN) :: relax     ! Flag
-    INTEGER, INTENT(OUT) :: hdferr   ! Error code
-                                     ! 0 on success and -1 on failure
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER, DIMENSION(*), INTENT(IN) :: memb_map
+    INTEGER(HID_T), DIMENSION(*), INTENT(IN) :: memb_fapl
+    CHARACTER(LEN=*), DIMENSION(*), INTENT(IN) :: memb_name
+    REAL, DIMENSION(*), INTENT(IN) :: memb_addr 
+    LOGICAL, INTENT(IN) :: relax
+    INTEGER, INTENT(OUT) :: hdferr
 !***** 
-    INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: lenm
+    INTEGER, DIMENSION(1:H5FD_MEM_NTYPES_F) :: lenm
     INTEGER :: maxlen
-    INTEGER :: flag
+    INTEGER :: flag = 0
     INTEGER :: i
 
-!            INTEGER, EXTERNAL :: h5pset_fapl_multi_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
        INTEGER FUNCTION h5pset_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, &
             maxlen, memb_addr, flag)
          USE H5GLOBAL
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_MULTI_C'::h5pset_fapl_multi_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: memb_name
          INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
-         INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_map
-         INTEGER(HID_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_fapl
-         CHARACTER(LEN=*), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_name
-         REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_addr
-         !INTEGER(HADDR_T), DIMENSION(H5FD_MEM_NTYPES_F), INTENT(IN) :: memb_addr
-         INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: lenm
+         INTEGER, DIMENSION(*), INTENT(IN) :: memb_map
+         INTEGER(HID_T), DIMENSION(*), INTENT(IN) :: memb_fapl
+         CHARACTER(LEN=*), DIMENSION(*), INTENT(IN) :: memb_name
+         REAL, DIMENSION(*), INTENT(IN) :: memb_addr
+         INTEGER, DIMENSION(*) :: lenm
          INTEGER :: maxlen
          INTEGER, INTENT(IN) :: flag
        END FUNCTION h5pset_fapl_multi_c
     END INTERFACE
+
     maxlen = LEN(memb_name(1))
-    DO i=0, H5FD_MEM_NTYPES_F-1
+    DO i=1, H5FD_MEM_NTYPES_F
        lenm(i) = LEN_TRIM(memb_name(i))
     ENDDO
-    flag = 0
-    IF (relax) flag = 1
-    hdferr = h5pset_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, maxlen, memb_addr, flag) 
-    
+    IF(relax) flag = 1
+    hdferr = h5pset_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, maxlen, memb_addr, flag)
+
   END SUBROUTINE h5pset_fapl_multi_l
 !****s* H5P/h5pset_fapl_multi_s 
 ! NAME
@@ -4286,6 +4279,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5pset_fapl_multi_sc(prp_id,flag) 
          USE H5GLOBAL
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_MULTI_SC'::h5pset_fapl_multi_sc
          !DEC$ENDIF
@@ -4329,51 +4323,50 @@ CONTAINS
   SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr, maxlen_out)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
-    INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_map
-    INTEGER(HID_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_fapl
-    CHARACTER(LEN=*), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_name
-    !INTEGER(HADDR_T), DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_addr
-    REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_addr
+    INTEGER, DIMENSION(*), INTENT(OUT) :: memb_map
+    INTEGER(HID_T), DIMENSION(*), INTENT(OUT) :: memb_fapl
+    CHARACTER(LEN=*), DIMENSION(*), INTENT(OUT) :: memb_name
+    REAL, DIMENSION(*), INTENT(OUT) :: memb_addr
     INTEGER, OPTIONAL, INTENT(OUT) :: maxlen_out 
     LOGICAL, INTENT(OUT) :: relax
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !***** 
-    INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: lenm
+    INTEGER, DIMENSION(1:H5FD_MEM_NTYPES_F) :: lenm
     INTEGER :: maxlen
     INTEGER :: c_maxlen_out 
     INTEGER :: flag
     INTEGER :: i
-
-!            INTEGER, EXTERNAL :: h5pget_fapl_multi_c
-!  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
        INTEGER FUNCTION h5pget_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, &
             maxlen, memb_addr, flag, c_maxlen_out)
          USE H5GLOBAL
+         IMPLICIT NONE
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FAPL_MULTI_C'::h5pget_fapl_multi_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: memb_name
          INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
-         INTEGER, DIMENSION(H5FD_MEM_NTYPES_F), INTENT(OUT) :: memb_map
-         INTEGER(HID_T), DIMENSION(H5FD_MEM_NTYPES_F), INTENT(OUT) :: memb_fapl
-         CHARACTER(LEN=*), DIMENSION(H5FD_MEM_NTYPES_F), INTENT(OUT) :: memb_name
-         REAL, DIMENSION(H5FD_MEM_NTYPES_F), INTENT(OUT) :: memb_addr
-         INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1) :: lenm
+         INTEGER, DIMENSION(*), INTENT(OUT) :: memb_map
+         INTEGER(HID_T), DIMENSION(*), INTENT(OUT) :: memb_fapl
+         CHARACTER(LEN=*), DIMENSION(*), INTENT(OUT) :: memb_name
+         REAL, DIMENSION(*), INTENT(OUT) :: memb_addr
+         INTEGER, DIMENSION(*) :: lenm
          INTEGER :: maxlen
          INTEGER :: c_maxlen_out 
          INTEGER, INTENT(OUT) :: flag
        END FUNCTION h5pget_fapl_multi_c
     END INTERFACE
-    maxlen = LEN(memb_name(0))
-    DO i=0, H5FD_MEM_NTYPES_F-1
+
+    maxlen = LEN(memb_name(1))
+    DO i=1, H5FD_MEM_NTYPES_F
        lenm(i) = LEN_TRIM(memb_name(i))
     ENDDO
-    hdferr = h5pget_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, maxlen, memb_addr, flag, c_maxlen_out) 
+    hdferr = h5pget_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, maxlen, memb_addr, flag, c_maxlen_out)
+    
     relax = .TRUE.
-    IF(flag .EQ. 0) relax = .FALSE. 
+    IF(flag .EQ. 0) relax = .FALSE.
     IF(PRESENT(maxlen_out)) maxlen_out = c_maxlen_out
   END SUBROUTINE h5pget_fapl_multi_f
 !****s* H5P/h5pset_szip_f 
