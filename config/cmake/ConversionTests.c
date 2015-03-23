@@ -116,49 +116,6 @@ done:
 
 #endif
 
-#ifdef H5_LLONG_TO_LDOUBLE_CORRECT_TEST
-int main(void)
-{
-    long double         ld;
-    long long           ll;
-    unsigned long long  ull;
-    unsigned char       s[16];
-    int                 flag=0, ret=0;
-
-    /*Determine if long double has 16 byte in size, 11 bit exponent, and
-     *the bias is 0x3ff */
-    if(sizeof(long double) == 16) {
-        ld = 1.0L;
-        memcpy(s, &ld, 16);
-        if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
-            s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00)
-            flag = 1;
-    }
-
-    if(flag==1 && sizeof(long long)==8) {
-        ll = 0x01ffffffffffffffLL;
-        ld = (long double)ll;
-        memcpy(s, &ld, 16);
-        /*Check if the bit sequence is as supposed to be*/
-        if(s[0]!=0x43 || s[1]!=0x7f || s[2]!=0xff || s[3]!=0xff ||
-            s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
-            s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
-            ret = 1;
-    }
-    if(flag==1 && sizeof(unsigned long long)==8) {
-        ull = 0x01ffffffffffffffULL;
-        ld = (long double)ull;
-        memcpy(s, &ld, 16);
-        if(s[0]!=0x43 || s[1]!=0x7f || s[2]!=0xff || s[3]!=0xff ||
-            s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
-            s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
-            ret = 1;
-    }
-done:
-    exit(ret);
-}
-#endif
-
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS_TEST
 
 #include <stdlib.h>
