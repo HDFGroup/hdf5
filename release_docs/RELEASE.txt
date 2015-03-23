@@ -201,7 +201,17 @@ New Features
 
     Fortran API
     -----------
-    - None
+    - Added new global variables (equivalent to the C definitions--minus the '_F'):
+         H5G_UDLINK_F  
+         H5G_SAME_LOC_F
+	 H5O_TYPE_UNKNOWN_F
+	 H5O_TYPE_GROUP_F
+	 H5O_TYPE_DATASET_F
+	 H5O_NAMED_DATATYPE_F
+	 H5O_TYPE_NTYPES_F
+
+	 (MSB, 2015-2-3, HDFFV-9040)
+
 
     C++ API
     -------
@@ -301,7 +311,31 @@ Bug Fixes since HDF5-1.8.14
 
     F90 API
     -------
-    - None
+    - Fortran fails with --enable-fortran2003 and Intel 15.x compilers.
+      
+      Added BIND(C) to the offending APIs. 
+
+      The Fortran Library (--enable-fortran2003)  now works using Intel 15.x 
+      without the need for any additional compilers flags. 
+      (MSB - 2015/1/26, HDFFV-9049)
+
+    - h5tenum_insert_f does not work with default 8 byte integers (xlf compiler)
+      
+      * In the Fortran 90 API, 'value' is no longer cast into the C int type. Therefore, if
+        h5tenum_insert_f is passed an 8 byte integer (via -i8) then 'value' is written as 
+	the same type as the default Fortran integer type (which can be 8 bytes).
+
+      * A new Fortran 2003 API was added which is more in line with the C API and users are strongly 
+        encouraged to use the Fortran 2003 API instead of the Fortran 90 API.
+
+	SUBROUTINE h5tenum_insert_f(type_id, name, value, hdferr)
+ 	 INTEGER(HID_T)  , INTENT(IN) :: type_id
+ 	 CHARACTER(LEN=*), INTENT(IN) :: name
+ 	 TYPE(C_PTR)     , INTENT(IN) :: value
+ 	 INTEGER, INTENT(OUT) :: hdferr
+
+      (MSB - 2015/2/19, HDFFV-8908)
+
 
     C++ API
     ------
