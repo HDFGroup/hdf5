@@ -481,7 +481,10 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
 
   cpack_add_component_group(Runtime)
 
-  cpack_add_component_group(Documents)
+  cpack_add_component_group(Documents
+      EXPANDED
+      DESCRIPTION "Release notes for developing HDF5 applications"
+  )
 
   cpack_add_component_group(Development
       EXPANDED
@@ -496,28 +499,27 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
   #---------------------------------------------------------------------------
   # Now list the cpack commands
   #---------------------------------------------------------------------------
-  CPACK_ADD_COMPONENT (hdfapplications 
-      DISPLAY_NAME "HDF5 Applications" 
-      DEPENDS libraries
-      GROUP Applications
-  )
   CPACK_ADD_COMPONENT (libraries 
       DISPLAY_NAME "HDF5 Libraries"
       GROUP Runtime
+      INSTALL_TYPES Full Developer User
   )
   CPACK_ADD_COMPONENT (headers 
       DISPLAY_NAME "HDF5 Headers" 
       DEPENDS libraries
       GROUP Development
+      INSTALL_TYPES Full Developer
   )
   CPACK_ADD_COMPONENT (hdfdocuments 
       DISPLAY_NAME "HDF5 Documents"
       GROUP Documents
+      INSTALL_TYPES Full Developer
   )
   CPACK_ADD_COMPONENT (configinstall 
       DISPLAY_NAME "HDF5 CMake files" 
       DEPENDS libraries
       GROUP Development
+      INSTALL_TYPES Full Developer User
   )
   
   if (HDF5_BUILD_FORTRAN)
@@ -525,11 +527,13 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
         DISPLAY_NAME "HDF5 Fortran Libraries" 
         DEPENDS libraries
         GROUP Runtime
+        INSTALL_TYPES Full Developer User
     )
     CPACK_ADD_COMPONENT (fortheaders 
         DISPLAY_NAME "HDF5 Fortran Headers" 
         DEPENDS fortlibraries
         GROUP Development
+        INSTALL_TYPES Full Developer
     )
   endif (HDF5_BUILD_FORTRAN)
   
@@ -538,11 +542,13 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
         DISPLAY_NAME "HDF5 C++ Libraries" 
         DEPENDS libraries
         GROUP Runtime
+        INSTALL_TYPES Full Developer User
     )
     CPACK_ADD_COMPONENT (cppheaders 
         DISPLAY_NAME "HDF5 C++ Headers" 
         DEPENDS cpplibraries
         GROUP Development
+        INSTALL_TYPES Full Developer
     )
   endif (HDF5_BUILD_CPP_LIB)
   
@@ -551,16 +557,19 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
         DISPLAY_NAME "HDF5 Tools Applications" 
         DEPENDS toolslibraries
         GROUP Applications
+        INSTALL_TYPES Full Developer User
     )
     CPACK_ADD_COMPONENT (toolslibraries 
         DISPLAY_NAME "HDF5 Tools Libraries" 
         DEPENDS libraries
         GROUP Runtime
+        INSTALL_TYPES Full Developer User
     )
     CPACK_ADD_COMPONENT (toolsheaders 
         DISPLAY_NAME "HDF5 Tools Headers" 
         DEPENDS toolslibraries
         GROUP Development
+        INSTALL_TYPES Full Developer
     )
   endif (HDF5_BUILD_TOOLS)
   
@@ -569,31 +578,37 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
         DISPLAY_NAME "HDF5 HL Libraries" 
         DEPENDS libraries
         GROUP Runtime
+        INSTALL_TYPES Full Developer User
     )
     CPACK_ADD_COMPONENT (hlheaders 
         DISPLAY_NAME "HDF5 HL Headers" 
         DEPENDS hllibraries
         GROUP Development
+        INSTALL_TYPES Full Developer
     )
     CPACK_ADD_COMPONENT (hltoolsapplications 
         DISPLAY_NAME "HDF5 HL Tools Applications" 
         DEPENDS hllibraries
         GROUP Applications
+        INSTALL_TYPES Full Developer User
     )
     CPACK_ADD_COMPONENT (hlcpplibraries 
         DISPLAY_NAME "HDF5 HL C++ Libraries" 
         DEPENDS hllibraries
         GROUP Runtime
+        INSTALL_TYPES Full Developer User
     )
     CPACK_ADD_COMPONENT (hlcppheaders 
         DISPLAY_NAME "HDF5 HL C++ Headers" 
         DEPENDS hlcpplibraries
         GROUP Development
+        INSTALL_TYPES Full Developer
     )
     CPACK_ADD_COMPONENT (hlfortlibraries 
         DISPLAY_NAME "HDF5 HL Fortran Libraries" 
         DEPENDS fortlibraries
         GROUP Runtime
+        INSTALL_TYPES Full Developer User
     )
   endif (HDF5_BUILD_HL_LIB)
   
