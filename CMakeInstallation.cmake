@@ -1,3 +1,4 @@
+include (CMakePackageConfigHelpers)
 
 #-----------------------------------------------------------------------------
 # Check for Installation Utilities
@@ -28,7 +29,7 @@ endif (NOT HDF5_INSTALL_NO_DEVELOPMENT)
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   install (
       EXPORT ${HDF5_EXPORTED_TARGETS}
-      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/${HDF5_PACKAGE}
+      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
       FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
       COMPONENT configinstall
   )
@@ -45,7 +46,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
 endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 
 #-----------------------------------------------------------------------------
-# Configure the hdf5-config.cmake file for the build directory
+# Set includes needed for build
 #-----------------------------------------------------------------------------
 set (HDF5_INCLUDES_BUILD_TIME
     ${HDF5_SRC_DIR} ${HDF5_CPP_SRC_DIR} ${HDF5_HL_SRC_DIR}
@@ -59,9 +60,18 @@ set (HDF5_VERSION_STRING ${HDF5_PACKAGE_VERSION})
 set (HDF5_VERSION_MAJOR  ${HDF5_PACKAGE_VERSION_MAJOR})
 set (HDF5_VERSION_MINOR  ${HDF5_PACKAGE_VERSION_MINOR})
 
-configure_file (
-    ${HDF_RESOURCES_DIR}/hdf5-config.cmake.build.in 
-    ${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake @ONLY
+#-----------------------------------------------------------------------------
+# Configure the hdf5-config.cmake file for the build directory
+#-----------------------------------------------------------------------------
+set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})
+set (SHARE_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_INSTALL_CMAKE_DIR}" )
+set (CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
+configure_package_config_file (
+    ${HDF_RESOURCES_DIR}/hdf5-config.cmake.in
+    "${HDF5_BINARY_DIR}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
+    INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}"
+    PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
+    INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 #-----------------------------------------------------------------------------
@@ -74,7 +84,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   install (
       FILES ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindHDF5${HDF_PACKAGE_EXT}.cmake
-      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/${HDF5_PACKAGE}
+      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
       COMPONENT configinstall
   )
 endif (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -82,14 +92,20 @@ endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 #-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the install directory
 #-----------------------------------------------------------------------------
+set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})
+set (SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/${HDF5_INSTALL_CMAKE_DIR}" )
+set (CURRENT_BUILD_DIR "${CMAKE_INSTALL_PREFIX}" )
+configure_package_config_file (
+    ${HDF_RESOURCES_DIR}/hdf5-config.cmake.in
+    "${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake"
+    INSTALL_DESTINATION "${HDF5_INSTALL_CMAKE_DIR}"
+    PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
+)
+
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  configure_file (
-      ${HDF_RESOURCES_DIR}/hdf5-config.cmake.install.in
-      ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake @ONLY
-  )
   install (
       FILES ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config.cmake
-      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/${HDF5_PACKAGE}
+      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
       COMPONENT configinstall
   )
 endif (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -104,7 +120,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   install (
       FILES ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake
-      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/${HDF5_PACKAGE}
+      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
       COMPONENT configinstall
   )
 endif (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -123,7 +139,7 @@ configure_file (
 )
 install (
     FILES ${HDF5_BINARY_DIR}/libhdf5.settings
-    DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/${HDF5_PACKAGE}
+    DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
     COMPONENT libraries
 )
 
@@ -142,9 +158,17 @@ if (HDF5_PACK_EXAMPLES)
       COMPONENT hdfdocuments
   )
   if (EXISTS "${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
+    )
+    install (
+      DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples-0.1.1-Source
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}
+      USE_SOURCE_PERMISSIONS 
+      COMPONENT hdfdocuments
+    )
     install (
         FILES
-            ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
             ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
         DESTINATION ${HDF5_INSTALL_DATA_DIR}
         COMPONENT hdfdocuments
@@ -329,8 +353,9 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set(CPACK_WIX_PROPERTY_ARPCOMMENTS "HDF5 (Hierarchical Data Format 5) Software Library and Utilities")
     set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT "${HDF5_PACKAGE_URL}")
     set(CPACK_WIX_PROPERTY_ARPHELPLINK "${HDF5_PACKAGE_BUGREPORT}")
-
-    set(CPACK_WIX_PATCH_FILE "${HDF_RESOURCES_DIR}/patch.xml")
+    if (BUILD_SHARED_LIBS)
+      set(CPACK_WIX_PATCH_FILE "${HDF_RESOURCES_DIR}/patch.xml")
+    endif (BUILD_SHARED_LIBS)
   elseif (APPLE)
     list (APPEND CPACK_GENERATOR "DragNDrop") 
     set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
