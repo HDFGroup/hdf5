@@ -19,8 +19,9 @@
 
 PROGRAM parallel_test
   USE hdf5
-  USE mpi
+  
   IMPLICIT NONE
+  INCLUDE 'mpif.h'
 
   INTEGER :: mpierror                             ! MPI hdferror flag
   INTEGER :: hdferror                             ! HDF hdferror flag

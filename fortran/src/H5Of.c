@@ -23,6 +23,8 @@
 
 #include "H5f90.h"
 #include "H5Eprivate.h"
+int_f
+fill_h5o_info_t_f(H5O_info_t Oinfo, H5O_info_t_f *object_info);
 
 int_f
 fill_h5o_info_t_f(H5O_info_t Oinfo, H5O_info_t_f *object_info) {
@@ -874,6 +876,7 @@ nh5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *name_size,
   char *c_comment = NULL;  /* Buffer to hold C string */
   char *c_name = NULL;     /* Buffer to hold C string */
   int_f ret_value = 0;     /* Return value */
+  ssize_t c_bufsize;
   size_t c_commentsize;
 
   /*
@@ -895,8 +898,10 @@ nh5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *name_size,
    * Call H5Oget_comment_by_name function.
    */ 
 
-  if((*bufsize = (size_t_f)H5Oget_comment_by_name((hid_t)*loc_id, c_name, c_comment, (size_t)*commentsize,(hid_t)*lapl_id )) < 0)
+  if((c_bufsize = H5Oget_comment_by_name((hid_t)*loc_id, c_name, c_comment, (size_t)*commentsize,(hid_t)*lapl_id )) < 0)
     HGOTO_DONE(FAIL);
+
+  *bufsize = (size_t_f)c_bufsize;
 
   /*
    * Convert C name to FORTRAN and place it in the given buffer
