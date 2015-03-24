@@ -57,7 +57,6 @@ main (void)
                  dims[3] = {DIM0, DIM1, DIM2},
                  dims_max[3] = {DIM0, DIM1, DIM2},
                  start[3],                   /* Hyperslab start parameter for VDS */
-                 src_start[3],               /* Hyperslab start parameter for source dataset */
                  stride[3],
                  count[3],
                  src_count[3],
@@ -115,9 +114,6 @@ main (void)
     start[0] = 0;
     start[1] = 0;
     start[2] = 0;
-    src_start[0] = 0;
-    src_start[1] = 0;
-    src_start[2] = 0;
     stride[0] = PLANE_STRIDE; /* we will select every fifth plane in VDS */
     stride[1] = 1;
     stride[2] = 1;
@@ -141,21 +137,22 @@ main (void)
      * Build the mappings 
      *
      */
+    status = H5Sselect_hyperslab (src_space, H5S_SELECT_SET, start, NULL, src_count, block);
     for (i=0; i < PLANE_STRIDE; i++) {
         status = H5Sselect_hyperslab (vspace, H5S_SELECT_SET, start, stride, count, block);
-        status = H5Sselect_hyperslab (src_space, H5S_SELECT_SET, src_start, NULL, src_count, block);
         status = H5Pset_virtual (dcpl, vspace, SRC_FILE[i], SRC_DATASET[i], src_space);
         start[0]++; 
     } 
 
+    H5Sselect_none(vspace); 
 
-   /* Create a virtual dataset */
-      dset = H5Dcreate (file, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT,
-                  dcpl, H5P_DEFAULT);
-      status = H5Sclose (vspace);
-      status = H5Sclose (src_space);
-      status = H5Dclose (dset);
-      status = H5Fclose (file);    
+    /* Create a virtual dataset */
+    dset = H5Dcreate (file, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT,
+                dcpl, H5P_DEFAULT);
+    status = H5Sclose (vspace);
+    status = H5Sclose (src_space);
+    status = H5Dclose (dset);
+    status = H5Fclose (file);    
      
     /*
      * Now we begin the read section of this example.
