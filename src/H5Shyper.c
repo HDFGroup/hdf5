@@ -9077,8 +9077,8 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
             } /* end if */
             else {
                 /* Sequences intersect, add intersection to projected space */
-                /* Calculate intersection sequence and advance any sequences we
-                 * complete */
+                /* Calculate intersection sequence in terms of offset within
+                 * source selection and advance any sequences we complete */
                 if(ss_off[ss_i] >= sis_off[sis_i])
                     int_sel_off = ss_sel_off;
                 else 
@@ -9094,7 +9094,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                         + (hsize_t)sis_len[sis_i]))
                     advance_sis = TRUE;
 
-                /* Project to destination */
+                /* Project intersection sequence to destination selection */
                 while(int_len > (size_t)0) {
                     while(ds_sel_off + (hsize_t)ds_len[ds_i] <= int_sel_off) {
                         /* Intersection is not projected to this destination
@@ -9133,7 +9133,8 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                          * ouside the plane of the span currently being built
                          * (i.e. it's finished being built) */
                         for(i = proj_rank - 1; ((i > 0)
-                                && ((proj_off / proj_down_dims[i])
+                                && (((proj_off / proj_down_dims[i])
+                                % proj_space->extent.size[i])
                                 != curr_span_dim[i - 1])); i--) {
                             if(curr_span_tree[i]) {
                                 HDassert(prev_span[i]);
@@ -9153,11 +9154,11 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                             } /* end if */
 
                             /* Update curr_span_dim */
-                            curr_span_dim[i - 1] = proj_off / proj_down_dims[i];
+                            curr_span_dim[i - 1] = (proj_off / proj_down_dims[i]) % proj_space->extent.size[i];
                         } /* end for */
 
                         /* Compute bounds for new span in lowest dimension */
-                        low = proj_off % proj_down_dims[proj_rank - 1];
+                        low = proj_off % proj_space->extent.size[proj_rank - 1];
                         span_len = MIN(proj_len_rem,
                                 (size_t)(proj_space->extent.size[proj_rank - 1]
                                 - low));
