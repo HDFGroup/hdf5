@@ -157,6 +157,7 @@
 ./examples/h5_vds-exclim.c
 ./examples/h5_vds-eiger.c
 ./examples/h5_vds-simpleIO.c
+./examples/h5_vds-percival.c
 ./examples/testh5cc.sh.in
 ./examples/README
 
