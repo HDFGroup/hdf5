@@ -28150,36 +28150,6 @@ $as_echo "no" >&6; }
     ;;
 esac
 
-## -----------------------------------------------------------------------
-## Set flag to indicate that the machine can handle conversion from
-## integers to long double.  (This flag should be set "yes" for all
-## machines except all SGIs, where some conversions are incorrect)
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if accurately converting from integers to long double" >&5
-$as_echo_n "checking if accurately converting from integers to long double... " >&6; }
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_integer_to_ldouble_accurate=${hdf5_cv_integer_to_ldouble_accurate=no}
-else
-   if ${hdf5_cv_integer_to_ldouble_accurate+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  hdf5_cv_integer_to_ldouble_accurate=yes
-fi
-
-fi
-
-if test ${hdf5_cv_integer_to_ldouble_accurate} = "yes"; then
-
-$as_echo "#define INTEGER_TO_LDOUBLE_ACCURATE 1" >>confdefs.h
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
 ## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine can accurately convert
 ## 'unsigned long' to 'float' values.

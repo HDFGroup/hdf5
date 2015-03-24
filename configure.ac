@@ -2574,27 +2574,6 @@ case "`uname`" in
     ;;
 esac
 
-## -----------------------------------------------------------------------
-## Set flag to indicate that the machine can handle conversion from 
-## integers to long double.  (This flag should be set "yes" for all 
-## machines except all SGIs, where some conversions are incorrect) 
-##
-AC_MSG_CHECKING([if accurately converting from integers to long double])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_integer_to_ldouble_accurate=${hdf5_cv_integer_to_ldouble_accurate=no}
-else
-   AC_CACHE_VAL([hdf5_cv_integer_to_ldouble_accurate], [hdf5_cv_integer_to_ldouble_accurate=yes])
-fi
-
-if test ${hdf5_cv_integer_to_ldouble_accurate} = "yes"; then
-  AC_DEFINE([INTEGER_TO_LDOUBLE_ACCURATE], [1],
-            [Define if your system can accurately convert from integers to long double values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
 ## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine can accurately convert
 ## 'unsigned long' to 'float' values.

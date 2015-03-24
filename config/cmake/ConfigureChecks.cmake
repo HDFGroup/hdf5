@@ -258,12 +258,6 @@ ENDMACRO (H5MiscConversionTest)
 # Check various conversion capabilities
 #-----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------
-# Set flag to indicate that the machine can handle conversion from
-# integers to long double.  (This flag should be set "yes" for all
-# machines except all SGIs, where some conversions are incorrect)
-#
-H5MiscConversionTest (H5_SIZEOF_LONG_DOUBLE H5_INTEGER_TO_LDOUBLE_ACCURATE "checking IF accurately converting from integers to long double")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # 'unsigned long' to 'float' values.

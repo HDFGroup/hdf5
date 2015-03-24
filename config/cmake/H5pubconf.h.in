@@ -453,10 +453,6 @@
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #cmakedefine H5_INCLUDE_HL @H5_INCLUDE_HL@
 
-/* Define if your system can accurately convert from integers to long double
-   values. */
-#cmakedefine H5_INTEGER_TO_LDOUBLE_ACCURATE @H5_INTEGER_TO_LDOUBLE_ACCURATE@
-
 /* Define if your system can convert long double to (unsigned) long long
    values correctly. */
 #cmakedefine H5_LDOUBLE_TO_LLONG_ACCURATE @H5_LDOUBLE_TO_LLONG_ACCURATE@
