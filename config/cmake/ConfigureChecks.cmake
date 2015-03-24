@@ -259,14 +259,6 @@ ENDMACRO (H5MiscConversionTest)
 #-----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------
-# Set flag to indicate that the machine can handle conversion from
-# long double to integers accurately.  This flag should be set "yes" for
-# all machines except all SGIs.  For SGIs, some conversions are
-# incorrect and its cache value is set "no" in its config/irix6.x and
-# irix5.x.
-#
-H5MiscConversionTest (H5_SIZEOF_LONG_DOUBLE H5_LDOUBLE_TO_INTEGER_ACCURATE "checking IF converting from long double to integers is accurate")
-# -----------------------------------------------------------------------
 # Set flag to indicate that the machine can do conversion from
 # long double to integers regardless of accuracy.  This flag should be
 # set "yes" for all machines except HP-UX 11.00.  For HP-UX 11.00, the

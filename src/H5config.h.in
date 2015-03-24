@@ -386,9 +386,6 @@
    values. */
 #undef INTEGER_TO_LDOUBLE_ACCURATE
 
-/* Define if your system can convert long double to integers accurately. */
-#undef LDOUBLE_TO_INTEGER_ACCURATE
-
 /* Define if your system can convert from long double to integer values. */
 #undef LDOUBLE_TO_INTEGER_WORKS
 
