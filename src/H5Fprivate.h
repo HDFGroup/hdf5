@@ -428,6 +428,8 @@
                                                     if it is changed, the code
                                                     must compensate. -QAK
                                                  */
+#define HDF5_BTREE_IK_MAX_ENTRIES       65536 	/* 2^16 - 2 bytes for storing entries (children) */
+						/* See format specification on version 1 B-trees */
 
 /* Macros to define signatures of all objects in the file */
 
