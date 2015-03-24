@@ -223,6 +223,11 @@ main (void)
         free(dsetname);
         free(buf);
     }
+    /* EIP Initialize read buffer with -2 since fille values for VDS are not implemented yet */
+    for (i=0; i<VDSDIM0; i++) {
+        for (j=0; j<VDSDIM1; j++)
+            rdata[i][j] = -2;
+    }
 
     /*
      * Read the data using the default properties.
