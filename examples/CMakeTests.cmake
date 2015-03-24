@@ -44,6 +44,10 @@
           u2w/u2w_target.h5
           vds.h5
           vds-excalibur.h5
+          vds-exclim.h5
+          vds-percival.h5
+          vds-simpleIO.h5
+          vds-eiger.h5
   )
   if (NOT "${last_test}" STREQUAL "")
     set_tests_properties (EXAMPLES-clear-objects PROPERTIES DEPENDS ${last_test})

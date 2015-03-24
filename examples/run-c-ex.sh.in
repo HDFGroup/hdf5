@@ -134,6 +134,8 @@ then
         rm h5_vds-exc &&\
         RunTest h5_vds-simpleIO &&\
         rm h5_vds-simpleIO &&\
+        RunTest h5_vds-percival &&\
+        rm h5_vds-percival &&\
         RunTest h5_vds &&\
         rm h5_vds); then
         EXIT_VALUE=${EXIT_SUCCESS}

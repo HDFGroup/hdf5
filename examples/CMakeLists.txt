@@ -39,6 +39,7 @@ set (examples
     h5_vds-exclim
     h5_vds-eiger
     h5_vds-simpleIO
+    h5_vds-percival
 )
 
 foreach (example ${examples})
