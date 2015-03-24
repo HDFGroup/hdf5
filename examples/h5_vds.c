@@ -224,7 +224,6 @@ main (void)
         free(buf);
     }
 
-#ifdef EIP 
     /*
      * Read the data using the default properties.
      */
@@ -241,7 +240,6 @@ main (void)
             printf (" %3d", rdata[i][j]);
         printf ("]\n");
     }
-#endif 
     /*
      * Close and release resources.
      */
