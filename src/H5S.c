@@ -511,9 +511,19 @@ H5S_extent_copy(H5S_t *dst, const H5S_t *src)
     HDassert(dst);
     HDassert(src);
 
-    /* Copy */
+    /* Copy extent */
     if(H5S_extent_copy_real(&(dst->extent), &(src->extent), TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent")
+
+    /* If the selection is 'all', update the number of elements selected in the
+     * destination space */
+    if(H5S_SEL_ALL == H5S_GET_SELECT_TYPE(dst))
+        if(H5S_select_all(dst, FALSE) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+
+    /* Mark the destination space as no longer shared if it was before */
+    if(H5O_msg_reset_share(H5O_SDSPACE_ID, dst) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRESET, FAIL, "can't stop sharing dataspace")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

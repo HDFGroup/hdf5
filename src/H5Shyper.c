@@ -9085,11 +9085,11 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                     int_sel_off = sis_off[sis_i] - ss_off[ss_i] + ss_sel_off;
                 if((ss_off[ss_i] + (hsize_t)ss_len[ss_i]) <= (sis_off[sis_i]
                         + (hsize_t)sis_len[sis_i])) {
-                    int_len = (size_t)(ss_off[ss_i] + (hsize_t)ss_len[ss_i] - int_sel_off);
+                    int_len = (size_t)((hsize_t)ss_len[ss_i] + ss_sel_off - int_sel_off);
                     advance_ss = TRUE;
                 } /* end if */
                 else
-                    int_len = (size_t)(sis_off[sis_i] + (hsize_t)sis_len[sis_i] - int_sel_off);
+                    int_len = (size_t)(sis_off[sis_i] + (hsize_t)sis_len[sis_i] - ss_off[ss_i] + ss_sel_off - int_sel_off);
                 if((ss_off[ss_i] + (hsize_t)ss_len[ss_i]) >= (sis_off[sis_i]
                         + (hsize_t)sis_len[sis_i]))
                     advance_sis = TRUE;
@@ -9102,7 +9102,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                         ds_sel_off += (hsize_t)ds_len[ds_i];
                         if(++ds_i == ds_nseq) {
                             HDassert(0 && "Checking code coverage..."); //VDSINC
-                            HDassert(sis_nelem > 0);
+                            HDassert(ds_nelem > 0);
 
                             /* Try to grab more sequences from dst_space */
                             if(H5S_SELECT_GET_SEQ_LIST(dst_space, 0u, &ds_iter, H5S_PROJECT_INTERSECT_NSEQS, ds_nelem, &ds_nseq, &nelem, ds_off, ds_len) < 0)
