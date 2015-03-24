@@ -3232,7 +3232,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->virtualdatasetnameend);
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
-                        h5tools_print_virtual_selection(virtual_vspace, dcpl_id, next, stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
+                        h5tools_print_virtual_selection(virtual_srcspace, dcpl_id, next, stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 
                         ctx->indent_level--;
 
