@@ -159,19 +159,6 @@ LOCATE_SZLIB()
 		HP-UX)
 		    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/HPUX-11.00"
 		    ;;
-		IRIX)
-		    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5-32bit"
-		    ;;
-		IRIX64)
-		    case "$CC" in
-		    *-n32)
-			szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5-32bit"
-			;;
-		    *)
-			szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5"
-			;;
-		    esac
-		    ;;
 		Linux)
 		    case `uname -m` in
 		    i686)
