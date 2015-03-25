@@ -2575,42 +2575,6 @@ case "`uname`" in
 esac
 
 ## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can accurately convert
-## 'long double' to 'unsigned int' values.  (This flag should be set for 
-## all machines, except for some Intel compilers on some Linux.)
-##
-AC_MSG_CHECKING([if correctly converting long double to unsigned int values])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_ldouble_to_uint_accurate=${hdf5_cv_ldouble_to_uint_accurate=no}
-else
-   AC_CACHE_VAL([hdf5_cv_ldouble_to_uint_accurate],
-        [AC_TRY_RUN([
-        int main(void)
-        {
-            long double ld = 2733248032.9183987530L;
-            unsigned int i;
-            int           ret = 0;
-
-            i = (unsigned int)ld;
-            if(i!=2733248032 && i!=2733248031 && i!=2733248033)
-                ret = 1;
-
-    done:
-            exit(ret);
-        }
-        ], [hdf5_cv_ldouble_to_uint_accurate=yes], [hdf5_cv_ldouble_to_uint_accurate=no],)])
-fi
-
-if test ${hdf5_cv_ldouble_to_uint_accurate} = "yes"; then
-  AC_DEFINE([LDOUBLE_TO_UINT_ACCURATE], [1],
-            [Define if your system can convert long double to unsigned int values correctly.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine can _compile_
 ## 'unsigned long long' to 'float' and 'double' typecasts.
 ## (This flag should be set for all machines, except for under Windows when
