@@ -21,7 +21,7 @@
 #define PROGRAMNAME "h5repack"
 
 static int parse_command_line(int argc, const char **argv, pack_opt_t* options);
-static void leave(int ret);
+static void leave(int ret) NORETURN;
 
 
 /* module-scoped variables */
