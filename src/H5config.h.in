@@ -580,10 +580,6 @@
    correct precision. */
 #undef ULLONG_TO_LDOUBLE_PRECISION
 
-/* Define if your system can accurately convert unsigned (long) long values to
-   floating-point values. */
-#undef ULONG_TO_FP_BOTTOM_BIT_ACCURATE
-
 /* Define using v1.6 public API symbols by default */
 #undef USE_16_API_DEFAULT
 
