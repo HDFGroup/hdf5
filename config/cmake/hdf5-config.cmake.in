@@ -5,6 +5,16 @@
 
 string(TOUPPER @HDF5_PACKAGE@ HDF5_PACKAGE_NAME)
 
+set (${HDF5_PACKAGE_NAME}_VALID_COMPONENTS
+    C
+    CXX
+    Fortran
+    HL
+    CXX_HL
+    Fortran_HL
+    Tools
+)
+
 #-----------------------------------------------------------------------------
 # User Options
 #-----------------------------------------------------------------------------
@@ -19,7 +29,7 @@ set (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_SUPPORT  @HDF5_ENABLE_SZIP_SUPPORT@)
 set (${HDF5_PACKAGE_NAME}_ENABLE_SZIP_ENCODING @HDF5_ENABLE_SZIP_ENCODING@)
 set (${HDF5_PACKAGE_NAME}_BUILD_SHARED_LIBS    @BUILD_SHARED_LIBS@)
 set (${HDF5_PACKAGE_NAME}_PACKAGE_EXTLIBS      @HDF5_PACKAGE_EXTLIBS@)
-set (${HDF5_PACKAGE_NAME}_LIBRARIES @HDF5_LIBRARIES_TO_EXPORT@)
+set (${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES @HDF5_LIBRARIES_TO_EXPORT@)
 
 #-----------------------------------------------------------------------------
 # Dependencies
@@ -86,4 +96,55 @@ if (NOT TARGET "@HDF5_PACKAGE@")
   set (HDF5_LIBRARIES "@HDF5_LIBRARIES_TO_EXPORT@")
 endif ()
 
-check_required_components(hdf5)
+# Handle default component :
+if (NOT ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+    set (${HDF5_PACKAGE_NAME}_FIND_COMPONENTS C)
+    set (${HDF5_PACKAGE_NAME}_FIND_REQUIRED_C true)
+endif ()
+
+# Handle requested components:
+list (REMOVE_DUPLICATES ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+foreach (comp IN LISTS ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+    list (REMOVE_ITEM ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS ${comp})
+endforeach ()
+  foreach (comp IN LISTS ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+    set (hdf5_comp2)
+    if (${comp} MATCHES "C")
+      set (hdf5_comp "hdf5")
+    elseif (${comp} MATCHES "CXX")
+      set (hdf5_comp "hdf5_cpp")
+    elseif (${comp} MATCHES "HL")
+      set (hdf5_comp "hdf5_hl")
+    elseif (${comp} MATCHES "CXX_HL")
+      set (hdf5_comp "hdf5_hl_cpp")
+    elseif (${comp} MATCHES "Tools")
+      set (hdf5_comp "hdf5_tools")
+    elseif (${comp} MATCHES "Fortran")
+      set (hdf5_comp2 "hdf5_f90cstub")
+      set (hdf5_comp "hdf5_fortran")
+    elseif (${comp} MATCHES "Fortran_HL")
+      set (hdf5_comp2 "hdf5_hl_f90cstub")
+      set (hdf5_comp "hdf5_hl_fortran")
+    endif ()
+    list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp}" HAVE_COMP) 
+    if (${HAVE_COMP} LESS 0) 
+      set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 0)
+    else ()
+      if (hdf5_comp2)
+        list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp2}" HAVE_COMP2) 
+        if (${HAVE_COMP2} LESS 0)
+          set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 0)
+        else ()
+          set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 1)
+          string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_LIBRARY COMP_LIBRARY)
+          set (${COMP_LIBRARY} ${${COMP_LIBRARY}} ${hdf5_comp2} ${hdf5_comp})
+        endif ()
+      else ()
+        set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 1)
+        string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_LIBRARY COMP_LIBRARY)
+        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} ${hdf5_comp})
+      endif ()
+  endforeach ()
+endforeach ()
+
+check_required_components(${HDF5_PACKAGE_NAME})

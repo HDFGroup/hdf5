@@ -23,7 +23,7 @@ INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
 MACRO (HL_ADD_EXE hl_name)
   add_executable (hl_${hl_name} ${hl_name}.c)
   TARGET_NAMING (hl_${hl_name} ${LIB_TYPE})
-  TARGET_C_PROPERTIES (hl_${hl_name} " " " ")
+  TARGET_C_PROPERTIES (hl_${hl_name} ${LIB_TYPE} " " " ")
   target_link_libraries (hl_${hl_name}
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_LIB_TARGET}
@@ -46,7 +46,7 @@ HL_ADD_EXE (test_table)
 if (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   add_executable (hl_gen_test_ds gen_test_ds.c)
   TARGET_NAMING (hl_gen_test_ds ${LIB_TYPE})
-  TARGET_C_PROPERTIES (hl_gen_test_ds " " " ")
+  TARGET_C_PROPERTIES (hl_gen_test_ds ${LIB_TYPE} " " " ")
   target_link_libraries (hl_gen_test_ds
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_LIB_TARGET}
