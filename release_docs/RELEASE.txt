@@ -293,6 +293,16 @@ Bug Fixes since HDF5-1.8.14
 
       (DER - 2015/02/26, HDFFV-9141)
 
+    - H5Rdereference now checks for HADDR_UNDEF or uninitialized references
+
+      When passed HADDR_UNDEF or uninitialized references, the previous behavior of 
+      H5Rdereference was to continue to process the reference as a valid address. 
+      H5Rdereference was changed to return immediately (with an error message)
+      if the references are HADDR_UNDEF or uninitialized.
+
+      (MSB - 2015/3/10, HDFFV-7959)
+       
+
     Parallel Library
     ----------------
     - Fixed a potential memory error when performing parallel I/O on a dataset
