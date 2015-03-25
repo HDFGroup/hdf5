@@ -8141,7 +8141,6 @@ H5_GCC_DIAG_ON(float-equal)
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
 H5T__conv_ldouble_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8152,7 +8151,6 @@ H5_GCC_DIAG_OFF(float-equal)
     H5T_CONV_Fx(LDOUBLE, SCHAR, long double, signed char, SCHAR_MIN, SCHAR_MAX);
 H5_GCC_DIAG_ON(float-equal)
 }
-#endif /* H5T_CONV_INTERNAL_LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
@@ -8170,7 +8168,6 @@ H5_GCC_DIAG_ON(float-equal)
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
 H5T__conv_ldouble_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8181,7 +8178,6 @@ H5_GCC_DIAG_OFF(float-equal)
     H5T_CONV_Fx(LDOUBLE, UCHAR, long double, unsigned char, 0, UCHAR_MAX);
 H5_GCC_DIAG_ON(float-equal)
 }
-#endif /* H5T_CONV_INTERNAL_LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
@@ -8307,7 +8303,6 @@ H5_GCC_DIAG_ON(float-equal)
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
 H5T__conv_ldouble_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8318,7 +8313,6 @@ H5_GCC_DIAG_OFF(float-equal)
     H5T_CONV_Fx(LDOUBLE, SHORT, long double, short, SHRT_MIN, SHRT_MAX);
 H5_GCC_DIAG_ON(float-equal)
 }
-#endif /*H5T_CONV_INTERNAL_LDOUBLE_INTEGER*/
 
 
 /*-------------------------------------------------------------------------
@@ -8336,7 +8330,6 @@ H5_GCC_DIAG_ON(float-equal)
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
 H5T__conv_ldouble_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8347,7 +8340,6 @@ H5_GCC_DIAG_OFF(float-equal)
     H5T_CONV_Fx(LDOUBLE, USHORT, long double, unsigned short, 0, USHRT_MAX);
 H5_GCC_DIAG_ON(float-equal)
 }
-#endif /* H5T_CONV_INTERNAL_LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
@@ -8473,7 +8465,6 @@ H5_GCC_DIAG_ON(float-equal)
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
 H5T__conv_ldouble_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8484,7 +8475,6 @@ H5_GCC_DIAG_OFF(float-equal)
     H5T_CONV_Fx(LDOUBLE, INT, long double, int, INT_MIN, INT_MAX);
 H5_GCC_DIAG_ON(float-equal)
 }
-#endif /* H5T_CONV_INTERNAL_LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
@@ -8639,7 +8629,6 @@ H5_GCC_DIAG_ON(float-equal)
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
 H5T__conv_ldouble_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8650,7 +8639,6 @@ H5_GCC_DIAG_OFF(float-equal)
     H5T_CONV_Fx(LDOUBLE, LONG, long double, long, LONG_MIN, LONG_MAX);
 H5_GCC_DIAG_ON(float-equal)
 }
-#endif /*H5T_CONV_INTERNAL_LDOUBLE_INTEGER*/
 
 
 /*-------------------------------------------------------------------------
@@ -8668,7 +8656,6 @@ H5_GCC_DIAG_ON(float-equal)
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
 H5T__conv_ldouble_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8679,7 +8666,6 @@ H5_GCC_DIAG_OFF(float-equal)
     H5T_CONV_Fx(LDOUBLE, ULONG, long double, unsigned long, 0, ULONG_MAX);
 H5_GCC_DIAG_ON(float-equal)
 }
-#endif /* H5T_CONV_INTERNAL_LDOUBLE_INTEGER */
 
 
 /*-------------------------------------------------------------------------
