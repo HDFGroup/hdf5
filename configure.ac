@@ -2574,55 +2574,6 @@ case "`uname`" in
     ;;
 esac
 
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can accurately convert
-## 'unsigned long' to 'float' values.
-## (This flag should be set for all machines, except for Pathscale compiler
-## on Sandia's Linux machine where the compiler interprets 'unsigned long'
-## values as negative when the first bit of 'unsigned long' is on during 
-## the conversion to float.) 
-##
-AC_MSG_CHECKING([if accurately converting unsigned long to float values])
-
-AC_CACHE_VAL([hdf5_cv_ulong_to_float_accurate],
-    [AC_TRY_RUN([
-    int main(void)
-    {
-        int           ret = 0;
-        unsigned long l1;
-        unsigned long l2;
-        unsigned long l3;
-        float f1;
-        float f2;
-        float f3;
-
-
-        if(sizeof(unsigned long)==8) {
-            l1 = 0xffffffffffffffffUL;
-            l2 = 0xffffffffffff0000UL;
-            l3 = 0xf000000000000000UL;
-
-            f1 = (float)l1;
-            f2 = (float)l2;
-            f3 = (float)l3;
-
-            if((f1 < 0) || (f2 < 0) || (f3 < 0))
-                ret = 1;
-        }
-
-done:
-        exit(ret);
-    }
-    ], [hdf5_cv_ulong_to_float_accurate=yes], [hdf5_cv_ulong_to_float_accurate=no],)])
-
-if test ${hdf5_cv_ulong_to_float_accurate} = "yes"; then
-  AC_DEFINE([ULONG_TO_FLOAT_ACCURATE], [1],
-            [Define if your system accurately converting unsigned long to float values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
 
 ## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine can accurately convert

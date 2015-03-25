@@ -673,10 +673,6 @@
    correct precision. */
 #cmakedefine H5_ULLONG_TO_LDOUBLE_PRECISION @H5_ULLONG_TO_LDOUBLE_PRECISION@
 
-/* Define if your system accurately converting unsigned long to float values.
-   */
-#cmakedefine H5_ULONG_TO_FLOAT_ACCURATE @H5_ULONG_TO_FLOAT_ACCURATE@
-
 /* Define if your system can accurately convert unsigned (long) long values to
    floating-point values. */
 #cmakedefine H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE @H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE@
