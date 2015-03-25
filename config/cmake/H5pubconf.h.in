@@ -78,14 +78,6 @@
    integer values. */
 #cmakedefine H5_FP_TO_INTEGER_OVERFLOW_WORKS @H5_FP_TO_INTEGER_OVERFLOW_WORKS@
 
-/* Define if your system roundup accurately converting floating-point to
-   unsigned long long values. */
-#cmakedefine H5_FP_TO_ULLONG_ACCURATE @H5_FP_TO_ULLONG_ACCURATE@
-
-/* Define if your system has right maximum convert floating-point to unsigned
-   long long values. */
-#cmakedefine H5_FP_TO_ULLONG_RIGHT_MAXIMUM @H5_FP_TO_ULLONG_RIGHT_MAXIMUM@
-
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
 
