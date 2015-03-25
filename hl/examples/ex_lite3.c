@@ -26,7 +26,6 @@ int main( void )
  hid_t   space_id;
  hsize_t dims[1] = { ATTR_SIZE };
  int     data[ATTR_SIZE] = {1,2,3,4,5};
- herr_t  status;
  int     i;
 
  /* create a file */
@@ -39,8 +38,8 @@ int main( void )
  dset_id = H5Dcreate2(file_id, "dset", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
  /* close */
- status = H5Dclose(dset_id);
- status = H5Sclose(space_id);
+ H5Dclose(dset_id);
+ H5Sclose(space_id);
 
 /*-------------------------------------------------------------------------
  * example of H5LTset_attribute_int
@@ -48,7 +47,7 @@ int main( void )
  */
 
  /* create and write the attribute "attr1" on the dataset "dset" */
- status = H5LTset_attribute_int(file_id, "dset", "attr1", data, ATTR_SIZE);
+ H5LTset_attribute_int(file_id, "dset", "attr1", data, ATTR_SIZE);
 
 /*-------------------------------------------------------------------------
  * example of H5LTget_attribute_int
@@ -56,14 +55,14 @@ int main( void )
  */
 
  /* get the attribute "attr1" from the dataset "dset" */
- status = H5LTget_attribute_int(file_id, "dset", "attr1", data);
+ H5LTget_attribute_int(file_id, "dset", "attr1", data);
 
  for(i = 0; i < ATTR_SIZE; i++ )
   printf("  %d", data[i]);
  printf("\n");
 
  /* close file */
- status = H5Fclose(file_id);
+ H5Fclose(file_id);
 
  return 0;
 }

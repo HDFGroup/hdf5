@@ -71,7 +71,6 @@ int main( void )
  hsize_t    chunk_size = 10;
  hsize_t    start;      /* Record to start reading/writing */
  hsize_t    nrecords;   /* Number of records to read/write */
- herr_t     status;
  int        i;
 
  /* Define 2 new particles to write */
@@ -92,7 +91,7 @@ int main( void )
  file_id = H5Fcreate( "ex_table_03.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* Make the table */
- status=H5TBmake_table( "Table Title",
+ H5TBmake_table( "Table Title",
   file_id,
   TABLE_NAME,
   NFIELDS,
@@ -110,11 +109,11 @@ int main( void )
  /* Overwrite 2 records starting at record 0 */
  start    = 0;
  nrecords = NRECORDS_WRITE;
- status=H5TBwrite_records( file_id, TABLE_NAME, start, nrecords, dst_size, dst_offset,
+ H5TBwrite_records( file_id, TABLE_NAME, start, nrecords, dst_size, dst_offset,
   dst_sizes, particle_in);
 
  /* read the table */
- status=H5TBread_table( file_id, TABLE_NAME, dst_size, dst_offset, dst_sizes, dst_buf );
+ H5TBread_table( file_id, TABLE_NAME, dst_size, dst_offset, dst_sizes, dst_buf );
 
  /* print it by rows */
  for (i=0; i<NRECORDS; i++) {
