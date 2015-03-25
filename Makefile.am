@@ -87,7 +87,7 @@ CHECK_CLEANFILES+=*-tmp
 test _test: check
 
 lib progs check-p check-s:
-	@@SETX@; for d in $(SUBDIRS); do                                \
+	for d in $(SUBDIRS); do                                \
 	  if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
 	  fi;                                                           \
@@ -95,7 +95,7 @@ lib progs check-p check-s:
 
 # Make all, tests, and (un)install
 tests:
-	@@SETX@; for d in $(SUBDIRS); do                        \
+	for d in $(SUBDIRS); do                        \
 	  if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
 	  fi;                                                           \
@@ -103,7 +103,7 @@ tests:
 
 # Check-clean also recurses into examples directory
 check-clean:
-	@@SETX@; for d in $(SUBDIRS) examples; do               \
+	for d in $(SUBDIRS) examples; do               \
 	  if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
 	  fi;                                                           \
@@ -130,7 +130,7 @@ uninstall-all:
 
 # Install examples in this directory and recursively
 install-examples uninstall-examples:
-	@@SETX@; for d in examples $(HDF5_INTERFACES) $(HL); do               \
+	for d in examples $(HDF5_INTERFACES) $(HL); do               \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
 	done
 
@@ -177,7 +177,7 @@ trace:
 # Run tests with different Virtual File Drivers.
 # Currently, only invoke check-vfd in the test directory.
 check-vfd:
-	@@SETX@; for d in src test; do                                 \
+	for d in src test; do                                 \
 	  if test $$d != .; then                                       \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;          \
 	  fi;                                                          \
