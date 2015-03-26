@@ -363,10 +363,6 @@
 /* Define to 1 if you have the `_scrsize' function. */
 #undef HAVE__SCRSIZE
 
-/* Define if your system can't handle converting floating-point values to long
-   long. */
-#undef HW_FP_TO_LLONG_NOT_WORKS
-
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #undef INCLUDE_HL
 

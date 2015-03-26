@@ -73,13 +73,6 @@ if (HDF5_ENABLE_HSIZET)
   set (${HDF_PREFIX}_HAVE_LARGE_HSIZET 1)
 endif (HDF5_ENABLE_HSIZET)
 
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can handle converting
-# floating-point to long long values.
-# (This flag should be _unset_ for all machines)
-#
-#  set (H5_HW_FP_TO_LLONG_NOT_WORKS 0)
-
 # so far we have no check for this
 set (H5_HAVE_TMPFILE 1)
 
