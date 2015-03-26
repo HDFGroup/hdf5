@@ -62,7 +62,6 @@ Features:
             Default API Mapping: @DEFAULT_API_VERSION@
  With Deprecated Public Symbols: @DEPRECATED_SYMBOLS@
          I/O filters (external): @EXTERNAL_FILTERS@
-         I/O filters (internal): @FILTERS@
                             MPE: @MPE@
                      Direct VFD: @DIRECT_VFD@
                         dmalloc: @HAVE_DMALLOC@

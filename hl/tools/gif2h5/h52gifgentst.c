@@ -64,7 +64,7 @@ int main(void)
     space = WIDTH*HEIGHT / PAL_ENTRIES;
     for (i=0, j=0, n=0; i < WIDTH*HEIGHT; i++, j++ )
     {
-        buf[i] = n;
+        buf[i] = (unsigned char)n;
         if ( j > space )
         {
             n++;
@@ -83,9 +83,9 @@ int main(void)
     */
     for ( i=0, n=0; i<PAL_ENTRIES*3; i+=3, n++)
     {
-        pal[i]  =n;      /* red */
-        pal[i+1]=0;      /* green */
-        pal[i+2]=255-n;  /* blue */
+      pal[i]   = (unsigned char)n;       /* red */
+      pal[i+1] = (unsigned char)0;       /* green */
+      pal[i+2] = (unsigned char)(255-n); /* blue */
     }
 
     /* make a palette */

@@ -20340,7 +20340,10 @@ check_auto_cache_resize(void)
 
         auto_size_ctl.decr_mode              = H5C_decr__age_out_with_threshold;
 
-        auto_size_ctl.upper_hr_threshold     = 0.999; /* for ease of testing */
+        /* NOTE: upper_hr_threshold MUST be type double (not float)
+         * or the cache test will fail on 64-bit systems.
+         */
+        auto_size_ctl.upper_hr_threshold     = H5_DOUBLE(0.999); /* for ease of testing */
 
         auto_size_ctl.decrement              = 0.5f;
 
@@ -28353,7 +28356,7 @@ check_auto_cache_resize_aux_fcns(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
 
-        } else if ( ! DBL_REL_EQUAL(hit_rate, 0.5, FP_EPSILON) ) { /* i.e. hit_rate != 0.5 */
+        } else if ( ! DBL_REL_EQUAL(hit_rate, 0.5F, FP_EPSILON) ) { /* i.e. hit_rate != 0.5 */
 
             pass = FALSE;
             failure_mssg =

@@ -43,7 +43,7 @@ MODULE test_genprop_cls_cb1_mod
   USE ISO_C_BINDING
   IMPLICIT NONE
   
-  TYPE, BIND(C) :: cop_cb_struct_ ! /* Struct for iterations */
+  TYPE, BIND(C) :: cop_cb_struct_ !  Struct for iterations 
     INTEGER :: count
     INTEGER(HID_T) :: id
   END TYPE cop_cb_struct_
@@ -73,7 +73,7 @@ MODULE TH5P_F03
 
 CONTAINS
 
-!/*-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
 ! * Function:	test_create
 ! *
 ! * Purpose:	Tests H5Pset_fill_value_f and H5Pget_fill_value_f
@@ -88,7 +88,7 @@ CONTAINS
 ! * Modifications:
 ! *
 ! *-------------------------------------------------------------------------
-! */
+! 
 
 SUBROUTINE test_create(total_error)
 
@@ -116,9 +116,9 @@ SUBROUTINE test_create(total_error)
   REAL :: rfill
   REAL(KIND=dp) :: dpfill
 
-  !/*
+  !
   ! * Create a file.
-  ! */
+  ! 
   CALL h5fcreate_f(filename,H5F_ACC_TRUNC_F,file,error)
   CALL check("h5fcreate_f", error, total_error)   
 
@@ -131,7 +131,7 @@ SUBROUTINE test_create(total_error)
   CALL h5pset_chunk_f(dcpl, 5, ch_size, error)
   CALL check("h5pset_chunk_f",error, total_error)
 
-  ! /* Create a compound datatype */
+  !  Create a compound datatype 
   CALL h5tcreate_f(H5T_COMPOUND_F, H5_SIZEOF(fill_ctype), comp_type_id, error)
   CALL check("h5tcreate_f", error, total_error)
   h5off = H5OFFSETOF(C_LOC(fill_ctype), C_LOC(fill_ctype%a))
@@ -152,7 +152,7 @@ SUBROUTINE test_create(total_error)
   CALL H5Pset_fill_time_f(dcpl, H5D_FILL_TIME_ALLOC_F, error)
   CALL check("H5Pset_fill_time_f",error, total_error)
 
-  ! /* Compound datatype test */
+  !  Compound datatype test 
 
   f_ptr = C_LOC(fill_ctype)
 
@@ -213,7 +213,7 @@ SUBROUTINE test_create(total_error)
   CALL h5fclose_f(file,error)
   CALL check("h5fclose_f", error, total_error)
 
-  ! /* Open the file and get the dataset fill value from each dataset */
+  !  Open the file and get the dataset fill value from each dataset 
   CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
   CALL check("H5Pcreate_f",error, total_error)
 
@@ -223,7 +223,7 @@ SUBROUTINE test_create(total_error)
   CALL h5fopen_f (FILENAME, H5F_ACC_RDONLY_F, file, error, fapl)
   CALL check("h5fopen_f", error, total_error)
 
-  !/* Compound datatype test */
+  ! Compound datatype test 
   CALL h5dopen_f(file, "dset9", dset9, error)
   CALL check("h5dopen_f", error, total_error)
 
@@ -277,14 +277,13 @@ SUBROUTINE test_genprop_class_callback(total_error)
 
   INTEGER, INTENT(INOUT) :: total_error
 
-  INTEGER(hid_t) :: cid1 !/* Generic Property class ID */
-  INTEGER(hid_t) :: lid1 !/* Generic Property list ID */
-  INTEGER(hid_t) :: lid2 !/* 2nd Generic Property list ID */
-  INTEGER(size_t) :: nprops !/* Number of properties in class */
+  INTEGER(hid_t) :: cid1, cid2 ! Generic Property class ID 
+  INTEGER(hid_t) :: lid1, lid2 ! Generic Property list ID 
+  INTEGER(size_t) :: nprops ! Number of properties in class 
 
   TYPE(cop_cb_struct_), TARGET :: crt_cb_struct, cls_cb_struct
-
-  CHARACTER(LEN=7) :: CLASS1_NAME = "Class 1"
+  INTEGER :: CLASS1_NAME_SIZE = 7 ! length of class string
+  CHARACTER(LEN=7) :: CLASS1_NAME = "Class 1", CLASS1_NAME_BUF
   TYPE(C_FUNPTR) :: f1, f5
   TYPE(C_PTR) :: f2, f6
 
@@ -301,7 +300,8 @@ SUBROUTINE test_genprop_class_callback(total_error)
   INTEGER :: PROP3_DEF_VALUE = 10
   INTEGER :: PROP4_DEF_VALUE = 10
 
-  INTEGER :: error ! /* Generic RETURN value	*/
+  INTEGER :: error !  Generic RETURN value	
+  LOGICAL :: flag  ! for tests
 
   f1 = C_FUNLOC(test_genprop_cls_cb1_f)
   f5 = C_FUNLOC(test_genprop_cls_cb1_f)
@@ -309,79 +309,101 @@ SUBROUTINE test_genprop_class_callback(total_error)
   f2 = C_LOC(crt_cb_struct)
   f6 = C_LOC(cls_cb_struct)
 
-  !/* Create a new generic class, derived from the root of the class hierarchy */
-  CALL h5pcreate_class_f(h5p_ROOT_F,CLASS1_NAME, cid1, error, f1, f2, c_null_funptr, c_null_ptr, f5, f6)
+  ! Create a new generic class, derived from the root of the class hierarchy 
+  CALL h5pcreate_class_f(h5p_ROOT_F, CLASS1_NAME, cid1, error, f1, f2, c_null_funptr, c_null_ptr, f5, f6)
   CALL check("h5pcreate_class_f", error, total_error)
 
-  !/* Insert first property into class (with no callbacks) */
+  ! Insert first property into class (with no callbacks) 
   CALL h5pregister_f(cid1, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, error)
   CALL check("h5pregister_f", error, total_error)
-  !/* Insert second property into class (with no callbacks) */
+  ! Insert second property into class (with no callbacks) 
   CALL h5pregister_f(cid1, PROP2_NAME, PROP2_SIZE, PROP2_DEF_VALUE, error)
   CALL check("h5pregister_f", error, total_error)
-  !/* Insert third property into class (with no callbacks) */
+  ! Insert third property into class (with no callbacks) 
   CALL h5pregister_f(cid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, error)
   CALL check("h5pregister_f", error, total_error)
 
-  !/* Insert fourth property into class (with no callbacks) */
+  ! Insert fourth property into class (with no callbacks) 
   CALL h5pregister_f(cid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, error)
   CALL check("h5pregister_f", error, total_error)
 
-  ! /* Check the number of properties in class */
+  !  Check the number of properties in class 
   CALL h5pget_nprops_f(cid1, nprops, error)
   CALL check("h5pget_nprops_f", error, total_error)
   CALL VERIFY("h5pget_nprops_f", INT(nprops), 4, total_error)
 
-  ! /* Initialize class callback structs */
+  !  Initialize class callback structs 
 
   crt_cb_struct%count = 0
   crt_cb_struct%id    = -1
   cls_cb_struct%count = 0
   cls_cb_struct%id    = -1
 
-  !/* Create a property list from the class */
+  ! Create a property list from the class 
   CALL h5pcreate_f(cid1, lid1, error)
   CALL check("h5pcreate_f", error, total_error)
 
-  !/* Verify that the creation callback occurred */
+  ! Get the list's class 
+  CALL H5Pget_class_f(lid1, cid2, error)
+  CALL check("H5Pget_class_f", error, total_error)
+
+  !  Check that the list's class is correct 
+  CALL H5Pequal_f(cid2, cid1, flag, error)
+  CALL check("H5Pequal_f", error, total_error)
+  CALL verifylogical("H5Pequal_f", flag, .TRUE., total_error)
+
+  ! Check the class name
+  CALL H5Pget_class_name_f(cid2, CLASS1_NAME_BUF, CLASS1_NAME_SIZE, error)
+  CALL check("H5Pget_class_name_f", error, total_error)
+  CALL verifystring("H5Pget_class_name_f", CLASS1_NAME_BUF, CLASS1_NAME, error)
+  IF(error.NE.0)THEN
+     WRITE(*,*) 'Class names do not match! name=',CLASS1_NAME_BUF, 'CLASS1_NAME=',CLASS1_NAME
+     total_error = total_error + 1
+  ENDIF
+
+  ! Close class 
+  CALL h5pclose_class_f(cid2, error)
+  CALL check("h5pclose_class_f", error, total_error)
+
+  ! Verify that the creation callback occurred 
   CALL VERIFY("h5pcreate_f", crt_cb_struct%count, 1, total_error)
   CALL VERIFY("h5pcreate_f", INT(crt_cb_struct%id), INT(lid1), total_error)
 
-  ! /* Check the number of properties in list */
+  !  Check the number of properties in list 
   CALL h5pget_nprops_f(lid1,nprops, error)
   CALL check("h5pget_nprops_f", error, total_error)
   CALL VERIFY("h5pget_nprops_f", INT(nprops), 4, total_error)
 
-  ! /* Create another property list from the class */
+  !  Create another property list from the class 
   CALL h5pcreate_f(cid1, lid2, error)
   CALL check("h5pcreate_f", error, total_error)
 
-  ! /* Verify that the creation callback occurred */
+  !  Verify that the creation callback occurred 
   CALL VERIFY("h5pcreate_f", crt_cb_struct%count, 2, total_error)
   CALL VERIFY("h5pcreate_f", INT(crt_cb_struct%id), INT(lid2), total_error)
 
-  ! /* Check the number of properties in list */
+  !  Check the number of properties in list 
   CALL h5pget_nprops_f(lid2,nprops, error)
   CALL check("h5pget_nprops_f", error, total_error)
   CALL VERIFY("h5pget_nprops_f", INT(nprops), 4, total_error)
 
-  ! /* Close first list */
+  !  Close first list 
   CALL h5pclose_f(lid1, error);
   CALL check("h5pclose_f", error, total_error)
 
-  !/* Verify that the close callback occurred */
+  ! Verify that the close callback occurred 
   CALL VERIFY("h5pcreate_f", cls_cb_struct%count, 1, total_error)
   CALL VERIFY("h5pcreate_f", INT(cls_cb_struct%id), INT(lid1), total_error)
 
-  !/* Close second list */
+  ! Close second list 
   CALL h5pclose_f(lid2, error);
   CALL check("h5pclose_f", error, total_error)
 
-  !/* Verify that the close callback occurred */
+  ! Verify that the close callback occurred 
   CALL VERIFY("h5pcreate_f", cls_cb_struct%count, 2, total_error)
   CALL VERIFY("h5pcreate_f", INT(cls_cb_struct%id), INT(lid2), total_error)
 
-  !/* Close class */
+  ! Close class 
   CALL h5pclose_class_f(cid1, error)
   CALL check("h5pclose_class_f", error, total_error)
 

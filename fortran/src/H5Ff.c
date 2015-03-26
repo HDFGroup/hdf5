@@ -632,7 +632,7 @@ nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
      /*
       * Call H5Fget_name function
       */
-     if ((size_c = (size_t_f)H5Fget_name((hid_t)*obj_id, c_buf, (size_t)*buflen)) < 0)
+     if ((size_c = H5Fget_name((hid_t)*obj_id, c_buf, (size_t)*buflen)) < 0)
          HGOTO_DONE(FAIL);
 
      /*
@@ -703,12 +703,15 @@ h5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *buf_len, size_t_f
 /******/
 {
     herr_t ret_value=0;          /* Return value */
-
+    ssize_t c_buf_req;
     /*
      * Call h5fget_file_image function
      */
-    if ((*buf_req = (size_t_f)H5Fget_file_image((hid_t)*file_id, buf_ptr, (size_t)*buf_len)) < 0)
+    
+    if ( (c_buf_req = H5Fget_file_image((hid_t)*file_id, buf_ptr, (size_t)*buf_len)) < 0)
          HGOTO_DONE(FAIL);
+
+    *buf_req = (size_t_f)c_buf_req;
 
 done:
       return ret_value;

@@ -258,101 +258,6 @@ ENDMACRO (H5MiscConversionTest)
 # Check various conversion capabilities
 #-----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------
-# Set flag to indicate that the machine can handle conversion from
-# long double to integers accurately.  This flag should be set "yes" for
-# all machines except all SGIs.  For SGIs, some conversions are
-# incorrect and its cache value is set "no" in its config/irix6.x and
-# irix5.x.
-#
-H5MiscConversionTest (H5_SIZEOF_LONG_DOUBLE H5_LDOUBLE_TO_INTEGER_ACCURATE "checking IF converting from long double to integers is accurate")
-# -----------------------------------------------------------------------
-# Set flag to indicate that the machine can do conversion from
-# long double to integers regardless of accuracy.  This flag should be
-# set "yes" for all machines except HP-UX 11.00.  For HP-UX 11.00, the
-# compiler has 'floating exception' when converting 'long double' to all
-# integers except 'unsigned long long'.  Other HP-UX systems are unknown
-# yet. (1/8/05 - SLU)
-#
-H5ConversionTests (H5_LDOUBLE_TO_INTEGER_WORKS "Checking IF converting from long double to integers works")
-# -----------------------------------------------------------------------
-# Set flag to indicate that the machine can handle conversion from
-# integers to long double.  (This flag should be set "yes" for all
-# machines except all SGIs, where some conversions are
-# incorrect and its cache value is set "no" in its config/irix6.x and
-# irix5.x)
-#
-H5MiscConversionTest (H5_SIZEOF_LONG_DOUBLE H5_INTEGER_TO_LDOUBLE_ACCURATE "checking IF accurately converting from integers to long double")
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
-# 'unsigned long' to 'float' values.
-# (This flag should be set for all machines, except for Pathscale compiler
-# on Sandia's Linux machine where the compiler interprets 'unsigned long'
-# values as negative when the first bit of 'unsigned long' is on during
-# the conversion to float.)
-#
-H5ConversionTests (H5_ULONG_TO_FLOAT_ACCURATE "Checking IF accurately converting unsigned long to float values")
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
-# 'unsigned (long) long' values to 'float' and 'double' values.
-# (This flag should be set for all machines, except for the SGIs, where
-# the cache value is set in the config/irix6.x config file) and Solaris
-# 64-bit machines, where the short program below tests if round-up is
-# correctly handled.
-#
-if (CMAKE_SYSTEM MATCHES "solaris2.*")
-  H5ConversionTests (H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE "Checking IF accurately converting unsigned long long to floating-point values")
-else (CMAKE_SYSTEM MATCHES "solaris2.*")
-  set (H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE 1)
-endif (CMAKE_SYSTEM MATCHES "solaris2.*")
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
-# 'float' or 'double' to 'unsigned long long' values.
-# (This flag should be set for all machines, except for PGI compiler
-# where round-up happens when the fraction of float-point value is greater
-# than 0.5.
-#
-H5ConversionTests (H5_FP_TO_ULLONG_ACCURATE "Checking IF accurately roundup converting floating-point to unsigned long long values" )
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
-# 'float', 'double' or 'long double' to 'unsigned long long' values.
-# (This flag should be set for all machines, except for HP-UX machines
-# where the maximal number for unsigned long long is 0x7fffffffffffffff
-# during conversion.
-#
-H5ConversionTests (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "Checking IF right maximum converting floating-point to unsigned long long values" )
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
-# 'long double' to 'unsigned int' values.  (This flag should be set for
-# all machines, except for some Intel compilers on some Linux.)
-#
-H5ConversionTests (H5_LDOUBLE_TO_UINT_ACCURATE "Checking IF correctly converting long double to unsigned int values")
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can _compile_
-# 'unsigned long long' to 'float' and 'double' typecasts.
-# (This flag should be set for all machines.)
-#
-if (H5_ULLONG_TO_FP_CAST_WORKS MATCHES ^H5_ULLONG_TO_FP_CAST_WORKS$)
-  set (H5_ULLONG_TO_FP_CAST_WORKS 1 CACHE INTERNAL "Checking IF compiling unsigned long long to floating-point typecasts work")
-  message (STATUS "Checking IF compiling unsigned long long to floating-point typecasts work... yes")
-endif (H5_ULLONG_TO_FP_CAST_WORKS MATCHES ^H5_ULLONG_TO_FP_CAST_WORKS$)
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can _compile_
-# 'long long' to 'float' and 'double' typecasts.
-# (This flag should be set for all machines.)
-#
-if (H5_LLONG_TO_FP_CAST_WORKS MATCHES ^H5_LLONG_TO_FP_CAST_WORKS$)
-  set (H5_LLONG_TO_FP_CAST_WORKS 1 CACHE INTERNAL "Checking IF compiling long long to floating-point typecasts work")
-  message (STATUS "Checking IF compiling long long to floating-point typecasts work... yes")
-endif (H5_LLONG_TO_FP_CAST_WORKS MATCHES ^H5_LLONG_TO_FP_CAST_WORKS$)
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can convert from
-# 'unsigned long long' to 'long double' without precision loss.
-# (This flag should be set for all machines, except for FreeBSD(sleipnir)
-# where the last 2 bytes of mantissa are lost when compiler tries to do
-# the conversion, and Cygwin where compiler doesn't do rounding correctly.)
-#
-H5ConversionTests (H5_ULLONG_TO_LDOUBLE_PRECISION "Checking IF converting unsigned long long to long double with precision")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can handle overflow converting
 # all floating-point to all integer types.
@@ -370,10 +275,7 @@ H5ConversionTests (H5_FP_TO_INTEGER_OVERFLOW_WORKS  "Checking IF overflows norma
 # The machine's conversion gets the correct value.  We define the macro and disable
 # this kind of test until we figure out what algorithm they use.
 #
-if (H5_LDOUBLE_TO_LONG_SPECIAL MATCHES ^H5_LDOUBLE_TO_LONG_SPECIAL$)
-  set (H5_LDOUBLE_TO_LONG_SPECIAL 0 CACHE INTERNAL "Define if your system converts long double to (unsigned) long values with special algorithm")
-  message (STATUS "Checking IF your system converts long double to (unsigned) long values with special algorithm... no")
-endif (H5_LDOUBLE_TO_LONG_SPECIAL MATCHES ^H5_LDOUBLE_TO_LONG_SPECIAL$)
+H5ConversionTests (H5_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your system converts long double to (unsigned) long values with special algorithm")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine is using a special algorithm
 # to convert some values of '(unsigned) long' to 'long double' values.  
@@ -382,10 +284,7 @@ endif (H5_LDOUBLE_TO_LONG_SPECIAL MATCHES ^H5_LDOUBLE_TO_LONG_SPECIAL$)
 # ..., 7fffff..., the compiler uses a unknown algorithm.  We define a 
 # macro and skip the test for now until we know about the algorithm.
 #
-if (H5_LONG_TO_LDOUBLE_SPECIAL MATCHES ^H5_LONG_TO_LDOUBLE_SPECIAL$)
-  set (H5_LONG_TO_LDOUBLE_SPECIAL 0 CACHE INTERNAL "Define if your system can convert (unsigned) long to long double values with special algorithm")
-  message (STATUS "Checking IF your system can convert (unsigned) long to long double values with special algorithm... no")
-endif (H5_LONG_TO_LDOUBLE_SPECIAL MATCHES ^H5_LONG_TO_LDOUBLE_SPECIAL$)
+H5ConversionTests (H5_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can convert (unsigned) long to long double values with special algorithm")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # 'long double' to '(unsigned) long long' values.  (This flag should be set for

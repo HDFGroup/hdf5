@@ -2398,7 +2398,7 @@ print_enum(hid_t type, char* str, size_t *str_len, hbool_t no_ubuf, size_t indt)
     for (i = 0; i < nmembs; i++) {
         if((name[i] = H5Tget_member_name(type, (unsigned)i))==NULL)
             goto out;
-        if(H5Tget_member_value(type, (unsigned)i, value + i * super_size) < 0)
+        if(H5Tget_member_value(type, (unsigned)i, value + (size_t)i * super_size) < 0)
             goto out;
     }
 
@@ -2426,7 +2426,7 @@ print_enum(hid_t type, char* str, size_t *str_len, hbool_t no_ubuf, size_t indt)
 
         /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
          *strangely, unless use another pointer "copy".*/
-        copy = value+i*dst_size;
+        copy = value + (size_t)i * dst_size;
         if (H5T_SGN_NONE == H5Tget_sign(native))
             HDsnprintf(tmp_str, TMP_LEN, "%u", *((unsigned int*)((void *)copy)));
         else
@@ -2557,6 +2557,7 @@ char* H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *sl
 
     switch (tcls) {
         case H5T_INTEGER:
+        case H5T_BITFIELD:
             if (H5Tequal(dtype, H5T_STD_I8BE)) {
                 HDsnprintf(dt_str, *slen, "H5T_STD_I8BE");
             } else if (H5Tequal(dtype, H5T_STD_I8LE)) {
@@ -3053,9 +3054,19 @@ next:
         case H5T_TIME:
             HDsnprintf(dt_str, *slen, "H5T_TIME: not yet implemented");
             break;
-        case H5T_BITFIELD:
-            HDsnprintf(dt_str, *slen, "H5T_BITFIELD: not yet implemented");
+        case H5T_NO_CLASS:
+            HDsnprintf(dt_str, *slen, "H5T_NO_CLASS");
             break;
+        case H5T_REFERENCE:
+	    if (H5Tequal(dtype, H5T_STD_REF_DSETREG) == TRUE) {
+	      HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_DSETREG }");
+	    }
+	    else {
+	      HDsnprintf(dt_str, *slen, " H5T_REFERENCE { H5T_STD_REF_OBJECT }");
+	    }
+	    break;
+        case H5T_NCLASSES:
+	    break;
         default:
             HDsnprintf(dt_str, *slen, "unknown data type");
     }

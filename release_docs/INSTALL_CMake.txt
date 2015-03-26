@@ -30,7 +30,7 @@ Obtaining HDF5 source code
 
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site. 
-      The HDF5 1.8."X" product requires a minimum CMake version 2.8.12,
+      The HDF5 1.8."X" product requires a minimum CMake version 3.1.0,
       where "X" is the current HDF5 release version.                     
 
 
@@ -227,7 +227,7 @@ IV. Further considerations
 ========================================================================
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.8."X" product requires a minimum CMake version 2.8.12.                     
+      web site. The HDF5 1.8."X" product requires a minimum CMake version 3.1.0.                     
                                                                          
    2. If you plan to use Zlib or Szip:
       A. Download the binary packages and install them in a central location. 

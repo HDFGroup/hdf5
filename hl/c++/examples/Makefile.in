@@ -384,7 +384,6 @@ DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
-DYNAMIC_DIRS = @DYNAMIC_DIRS@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -403,7 +402,6 @@ FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
 FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
-FILTERS = @FILTERS@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 GREP = @GREP@
 H5_CFLAGS = @H5_CFLAGS@
@@ -476,7 +474,6 @@ R_INTEGER = @R_INTEGER@
 R_LARGE = @R_LARGE@
 SEARCH = @SEARCH@
 SED = @SED@
-SETX = @SETX@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIZE_T = @SIZE_T@
@@ -491,10 +488,6 @@ TR = @TR@
 TRACE_API = @TRACE_API@
 UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
-USE_FILTER_FLETCHER32 = @USE_FILTER_FLETCHER32@
-USE_FILTER_NBIT = @USE_FILTER_NBIT@
-USE_FILTER_SCALEOFFSET = @USE_FILTER_SCALEOFFSET@
-USE_FILTER_SHUFFLE = @USE_FILTER_SHUFFLE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
 VERSION = @VERSION@
@@ -608,8 +601,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
+# *.clog and *.clog2 are from the MPE option.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5
 
 # These are the programs that 'make all' or 'make prog' will build and
 # which 'make check' will run.  List them in the order they should be run.

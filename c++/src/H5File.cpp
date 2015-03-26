@@ -50,7 +50,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub H5File object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File() : H5Location(), id(H5I_INVALID_HID) {}
+H5File::H5File() : H5Location(), CommonFG(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	H5File overloaded constructor
@@ -86,7 +86,7 @@ H5File::H5File() : H5Location(), id(H5I_INVALID_HID) {}
 //		to catch then re-throw it. -BMR 2013/03/21
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), id(H5I_INVALID_HID)
+H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), CommonFG(), id(H5I_INVALID_HID)
 {
     try {
 	p_get_file(name, flags, create_plist, access_plist);
@@ -111,7 +111,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 //		to catch then re-throw it. -BMR 2013/03/21
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), id(H5I_INVALID_HID)
+H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), CommonFG(), id(H5I_INVALID_HID)
 {
     try {
 	p_get_file(name.c_str(), flags, create_plist, access_plist);
@@ -164,7 +164,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 ///\param	original - IN: H5File instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File(const H5File& original) : H5Location(original)
+H5File::H5File(const H5File& original) : H5Location(), CommonFG()
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id

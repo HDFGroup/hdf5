@@ -91,7 +91,7 @@ SUBROUTINE test_testds(err)
   !-------------------------------------------------------------------------
   ! attach the DS_1_NAME dimension scale to DSET_NAME at dimension 1
   !-------------------------------------------------------------------------
- 
+
   CALL test_begin(' Test Attaching Dimension Scale         ')
 
   ! get the dataset id for DSET_NAME

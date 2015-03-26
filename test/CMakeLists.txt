@@ -27,7 +27,7 @@ set (TEST_LIB_HEADERS
 )
 
 add_library (${HDF5_TEST_LIB_TARGET} ${LIB_TYPE} ${TEST_LIB_SRCS} ${TEST_LIB_HEADERS})
-TARGET_C_PROPERTIES (${HDF5_TEST_LIB_TARGET} " " " ")
+TARGET_C_PROPERTIES (${HDF5_TEST_LIB_TARGET} ${LIB_TYPE} " " " ")
 if (MSVC)
   target_link_libraries (${HDF5_TEST_LIB_TARGET} "ws2_32.lib")
 endif (MSVC)
@@ -68,7 +68,7 @@ if (BUILD_SHARED_LIBS)
     INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
 
     add_library (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
-    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} " " " ")
+    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} " " " ")
     target_link_libraries (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     H5_SET_LIB_OPTIONS (
         ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
@@ -99,7 +99,7 @@ if (BUILD_SHARED_LIBS)
     INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
 
     add_library (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
-    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} " " " ")
+    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} " " " ")
     target_link_libraries (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     H5_SET_LIB_OPTIONS (
         ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
@@ -154,14 +154,14 @@ set (testhdf5_SRCS
 #-- Adding test for testhdf5
 add_executable (testhdf5 ${testhdf5_SRCS})
 TARGET_NAMING (testhdf5 ${LIB_TYPE})
-TARGET_C_PROPERTIES (testhdf5 " " " ")
+TARGET_C_PROPERTIES (testhdf5 ${LIB_TYPE} " " " ")
 target_link_libraries (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (testhdf5 PROPERTIES FOLDER test)
 
 MACRO (ADD_H5_EXE file)
   add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
   TARGET_NAMING (${file} ${LIB_TYPE})
-  TARGET_C_PROPERTIES (${file} " " " ")
+  TARGET_C_PROPERTIES (${file} ${LIB_TYPE} " " " ")
   target_link_libraries (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (${file} PROPERTIES FOLDER test)
 ENDMACRO (ADD_H5_EXE file)
@@ -237,21 +237,21 @@ endforeach (test ${H5_TESTS})
 #-- Adding test for cache
 add_executable (cache ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache ${LIB_TYPE})
-TARGET_C_PROPERTIES (cache " " " ")
+TARGET_C_PROPERTIES (cache ${LIB_TYPE} " " " ")
 target_link_libraries (cache ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (cache PROPERTIES FOLDER test)
 
 #-- Adding test for cache_api
 add_executable (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache_api ${LIB_TYPE})
-TARGET_C_PROPERTIES (cache_api " " " ")
+TARGET_C_PROPERTIES (cache_api ${LIB_TYPE} " " " ")
 target_link_libraries (cache_api ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (cache_api PROPERTIES FOLDER test)
 
 #-- Adding test for cache_tagging
 add_executable (cache_tagging ${HDF5_TEST_SOURCE_DIR}/cache_tagging.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache_tagging ${LIB_TYPE})
-TARGET_C_PROPERTIES (cache_tagging " " " ")
+TARGET_C_PROPERTIES (cache_tagging ${LIB_TYPE} " " " ")
 target_link_libraries (cache_tagging ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (cache_tagging PROPERTIES FOLDER test)
 
@@ -264,7 +264,7 @@ add_executable (ttsafe
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
 )
 TARGET_NAMING (ttsafe ${LIB_TYPE})
-TARGET_C_PROPERTIES (ttsafe " " " ")
+TARGET_C_PROPERTIES (ttsafe ${LIB_TYPE} " " " ")
 target_link_libraries (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (ttsafe PROPERTIES FOLDER test)
 
@@ -272,7 +272,7 @@ set_target_properties (ttsafe PROPERTIES FOLDER test)
 if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
   add_executable (err_compat ${HDF5_TEST_SOURCE_DIR}/err_compat.c)
   TARGET_NAMING (err_compat ${LIB_TYPE})
-  TARGET_C_PROPERTIES (err_compat " " " ")
+  TARGET_C_PROPERTIES (err_compat ${LIB_TYPE} " " " ")
   target_link_libraries (err_compat ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
   set_target_properties (err_compat PROPERTIES FOLDER test)
 endif (HDF5_ENABLE_DEPRECATED_SYMBOLS)
@@ -280,14 +280,14 @@ endif (HDF5_ENABLE_DEPRECATED_SYMBOLS)
 #-- Adding test for error_test
 add_executable (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
 TARGET_NAMING (error_test ${LIB_TYPE})
-TARGET_C_PROPERTIES (error_test " " " ")
+TARGET_C_PROPERTIES (error_test ${LIB_TYPE} " " " ")
 target_link_libraries (error_test ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (error_test PROPERTIES FOLDER test)
 
 #-- Adding test for links_env
 add_executable (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
 TARGET_NAMING (links_env ${LIB_TYPE})
-TARGET_C_PROPERTIES (links_env " " " ")
+TARGET_C_PROPERTIES (links_env ${LIB_TYPE} " " " ")
 target_link_libraries (links_env ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (links_env PROPERTIES FOLDER test)
 
@@ -309,7 +309,7 @@ endif (\${TEST_RESULT} STREQUAL \"0\")
 if (BUILD_SHARED_LIBS)
   add_executable (plugin ${HDF5_TEST_SOURCE_DIR}/plugin.c)
   TARGET_NAMING (plugin ${LIB_TYPE})
-  TARGET_C_PROPERTIES (plugin " " " ")
+  TARGET_C_PROPERTIES (plugin ${LIB_TYPE} " " " ")
   target_link_libraries (plugin ${HDF5_TEST_PLUGIN_LIB_TARGET})
   set_target_properties (plugin PROPERTIES FOLDER test)
 endif (BUILD_SHARED_LIBS)

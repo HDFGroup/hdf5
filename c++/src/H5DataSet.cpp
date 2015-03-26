@@ -52,7 +52,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub DataSet.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet() : AbstractDs(), H5Object(), id(H5I_INVALID_HID) {}
+DataSet::DataSet() : H5Object(), AbstractDs(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	DataSet overloaded constructor
@@ -60,7 +60,7 @@ DataSet::DataSet() : AbstractDs(), H5Object(), id(H5I_INVALID_HID) {}
 ///\param	existing_id - IN: Id of an existing dataset
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet(const hid_t existing_id) : AbstractDs(), H5Object()
+DataSet::DataSet(const hid_t existing_id) : H5Object(), AbstractDs()
 {
     id = existing_id;
 }
@@ -71,7 +71,7 @@ DataSet::DataSet(const hid_t existing_id) : AbstractDs(), H5Object()
 ///\param	original - IN: DataSet instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet(const DataSet& original) : AbstractDs(original), H5Object(original)
+DataSet::DataSet(const DataSet& original) : H5Object(), AbstractDs()
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
@@ -95,7 +95,7 @@ DataSet::DataSet(const DataSet& original) : AbstractDs(original), H5Object(origi
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : AbstractDs(), H5Object(), id(H5I_INVALID_HID)
+DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), AbstractDs(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereferenced");
 }
@@ -114,7 +114,7 @@ DataSet::DataSet(const H5Location& loc, const void* ref, H5R_type_t ref_type, co
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataSet::DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : AbstractDs(), H5Object(), id(H5I_INVALID_HID)
+DataSet::DataSet(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), AbstractDs(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
 }

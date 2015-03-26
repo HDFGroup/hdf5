@@ -40,8 +40,8 @@ static herr_t H5S_none_get_seq_list(const H5S_t *space, unsigned flags,
 static herr_t H5S_none_release(H5S_t *space);
 static htri_t H5S_none_is_valid(const H5S_t *space);
 static hssize_t H5S_none_serial_size(const H5S_t *space);
-static herr_t H5S_none_serialize(const H5S_t *space, uint8_t *buf);
-static herr_t H5S_none_deserialize(H5S_t *space, const uint8_t *buf);
+static herr_t H5S_none_serialize(const H5S_t *space, uint8_t **p);
+static herr_t H5S_none_deserialize(H5S_t *space, const uint8_t **p);
 static herr_t H5S_none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_none_offset(const H5S_t *space, hsize_t *off);
 static htri_t H5S_none_is_contiguous(const H5S_t *space);
@@ -464,9 +464,11 @@ H5S_none_serial_size(const H5S_t UNUSED *space)
  PURPOSE
     Serialize the current selection into a user-provided buffer.
  USAGE
-    herr_t H5S_none_serialize(space, buf)
-        H5S_t *space;           IN: Dataspace pointer of selection to serialize
-        uint8 *buf;             OUT: Buffer to put serialized selection into
+    herr_t H5S_none_serialize(space, p)
+        const H5S_t *space;     IN: Dataspace with selection to serialize
+        uint8_t **p;            OUT: Pointer to buffer to put serialized
+                                selection.  Will be advanced to end of
+                                serialized selection.
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -478,17 +480,17 @@ H5S_none_serial_size(const H5S_t UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_none_serialize(const H5S_t *space, uint8_t *buf)
+H5S_none_serialize(const H5S_t *space, uint8_t **p)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(space);
 
     /* Store the preamble information */
-    UINT32ENCODE(buf, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(buf, (uint32_t)1);  /* Store the version number */
-    UINT32ENCODE(buf, (uint32_t)0);  /* Store the un-used padding */
-    UINT32ENCODE(buf, (uint32_t)0);  /* Store the additional information length */
+    UINT32ENCODE(*p, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
+    UINT32ENCODE(*p, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(*p, (uint32_t)0);  /* Store the un-used padding */
+    UINT32ENCODE(*p, (uint32_t)0);  /* Store the additional information length */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5S_none_serialize() */
@@ -500,9 +502,12 @@ H5S_none_serialize(const H5S_t *space, uint8_t *buf)
  PURPOSE
     Deserialize the current selection from a user-provided buffer.
  USAGE
-    herr_t H5S_none_deserialize(space, buf)
-        H5S_t *space;           IN/OUT: Dataspace pointer to place selection into
-        uint8 *buf;             IN: Buffer to retrieve serialized selection from
+    herr_t H5S_none_deserialize(space, p)
+        H5S_t *space;           IN/OUT: Dataspace pointer to place
+                                selection into
+        uint8 **p;              OUT: Pointer to buffer holding serialized
+                                selection.  Will be advanced to end of
+                                serialized selection.
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -514,13 +519,15 @@ H5S_none_serialize(const H5S_t *space, uint8_t *buf)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_none_deserialize(H5S_t *space, const uint8_t UNUSED *buf)
+H5S_none_deserialize(H5S_t *space, const uint8_t UNUSED **p)
 {
     herr_t ret_value = SUCCEED;  /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(space);
+    HDassert(p);
+    HDassert(*p);
 
     /* Change to "none" selection */
     if(H5S_select_none(space) < 0)

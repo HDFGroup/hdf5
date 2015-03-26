@@ -67,10 +67,9 @@ int main( void )
  hid_t      file_id;
  hsize_t    chunk_size = 10;
  int        compress  = 0;
- Particle1  fill_data[1] = { "no data",-1,-1, -99.0f, -99.0 };
+ Particle1  fill_data[1] = { {"no data",-1,-1, -99.0f, -99.0} };
  int        fill_data_new[1] = { -100 };
  hsize_t    position;
- herr_t     status;
  hsize_t    nfields_out;
  hsize_t    nrecords_out;
 
@@ -91,17 +90,17 @@ int main( void )
  file_id = H5Fcreate( "ex_table_11.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* Make the table */
- status=H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS,
+ H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS,
                          dst_size1,field_names, dst_offset1, field_type,
                          chunk_size, fill_data, compress, p_data  );
 
  /* Insert the new field at the end of the field list */
  position = NFIELDS;
- status=H5TBinsert_field( file_id, TABLE_NAME, "New Field", field_type_new, position,
+ H5TBinsert_field( file_id, TABLE_NAME, "New Field", field_type_new, position,
   fill_data_new, data );
 
  /* Get table info  */
- status=H5TBget_table_info (file_id,TABLE_NAME, &nfields_out, &nrecords_out );
+ H5TBget_table_info (file_id,TABLE_NAME, &nfields_out, &nrecords_out );
 
  /* print */
  printf ("Table has %d fields and %d records\n",(int)nfields_out,(int)nrecords_out);

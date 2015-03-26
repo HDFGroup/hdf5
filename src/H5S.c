@@ -509,6 +509,10 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src, hbool_t copy_max)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Release destination extent before we copy over it */
+    if(H5S_extent_release(dst) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace extent")
+
     /* Copy the regular fields */
     dst->type = src->type;
     dst->version = src->version;
@@ -583,7 +587,7 @@ H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max)
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if(NULL == (dst = H5FL_MALLOC(H5S_t)))
+    if(NULL == (dst = H5FL_CALLOC(H5S_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the source dataspace's extent */
@@ -1536,7 +1540,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
         buf += extent_size;
 
         /* Encode the selection part of dataspace.  */
-        if(H5S_SELECT_SERIALIZE(obj, buf) < 0)
+        if(H5S_SELECT_SERIALIZE(obj, &buf) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode select space")
     } /* end else */
 
@@ -1655,7 +1659,7 @@ H5S_decode(const unsigned char *buf)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     /* Decode the select part of dataspace.  I believe this part always exists. */
-    if(H5S_SELECT_DESERIALIZE(ds, buf) < 0)
+    if(H5S_SELECT_DESERIALIZE(&ds, &buf) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode space selection")
 
     /* Set return value */

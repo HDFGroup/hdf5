@@ -35,8 +35,6 @@ following platforms and compilers:
      *  SunOS 5.6  with  WorkshopCompilers 4.2 Fortran 90 1.2
      *  SunOS 5.7  with  WorkshopCompilers 5.0 Fortran 90 2.0 
      *  OSF1 V4.0  with  Digital Fortran 90 4.1 
-     *  IRIX64 6.5 (64 option only) with  MIPSpro Compilers: Version 7.3.1m    
-                          mpt.1.4
      *  Linux RedHat 6.1, Kernel 2.2.12 with PGF90
      *  T3E with Cray Fortran: Version 3.4.0.0
             with mpt 1.3
@@ -55,7 +53,6 @@ Compilation
 
      solaris
      digunix
-     irix
      linux
 
    Example: On Digital Unix systems use the following command
