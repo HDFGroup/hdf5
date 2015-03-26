@@ -87,7 +87,6 @@ main (void)
     status = H5Sclose (vspace);
     status = H5Sclose (src_space);
     status = H5Dclose (dset);
-#ifdef EIP /*Currently the file with VDS should stay open. Neil will fix the issue */
     status = H5Fclose (file);    
      
     /*
@@ -98,7 +97,6 @@ main (void)
      * Open the file and virtual dataset.
      */
     file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
-#endif
     dset = H5Dopen (file, DATASET, H5P_DEFAULT);
     /*
      * Get creation property list and mapping properties.
