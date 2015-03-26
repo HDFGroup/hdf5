@@ -104,9 +104,6 @@ endif ()
 
 # Handle requested components:
 list (REMOVE_DUPLICATES ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
-foreach (comp IN LISTS ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
-    list (REMOVE_ITEM ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS ${comp})
-endforeach ()
   foreach (comp IN LISTS ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
     set (hdf5_comp2)
     if (${comp} MATCHES "C")
@@ -145,6 +142,8 @@ endforeach ()
         set (${COMP_LIBRARY} ${${COMP_LIBRARY}} ${hdf5_comp})
       endif ()
   endforeach ()
-endforeach ()
 
-check_required_components(${HDF5_PACKAGE_NAME})
+  check_required_components(${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+
+set (${HDF5_PACKAGE_NAME}_LIBRARIES ${${COMP_LIBRARY}})
+  
