@@ -646,10 +646,6 @@
 /* Define to 1 if your <sys/time.h> declares `struct tm'. */
 #cmakedefine H5_TM_IN_SYS_TIME @H5_TM_IN_SYS_TIME@
 
-/* Define if your system can convert unsigned long long to long double with
-   correct precision. */
-#cmakedefine H5_ULLONG_TO_LDOUBLE_PRECISION @H5_ULLONG_TO_LDOUBLE_PRECISION@
-
 /* Define using v1.6 public API symbols by default */
 #cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
 

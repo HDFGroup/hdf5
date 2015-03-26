@@ -4489,24 +4489,6 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         }
 #endif /*end H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS*/
 
-/* For GNU compilers on FreeBSD(sleipnir), during conversion from 'unsigned long long'
-* to 'long double', the last 2 bytes of mantissa are lost.  But this loss seems
-* acceptable.  We allow it to go through instead of fail it.  Sometimes, there's roundup
-* to the 3rd last byte of mantissa.  So we only try to compare all but the last 3 bytes.
-*/
-#ifndef H5_ULLONG_TO_LDOUBLE_PRECISION
-#if H5_SIZEOF_LONG_DOUBLE !=0
-        if(src_type==INT_ULLONG && dst_type==FLT_LDOUBLE) {
-            long double tmp_s, tmp_h;
-            HDmemcpy(&tmp_s,&buf[j*dst_size],sizeof(long double));
-            HDmemcpy(&tmp_h,&hw[0],sizeof(long double));
-            /*Don't compare the last 3 bytes of mantissa*/
-            if(!HDmemcmp(&tmp_s+4, &tmp_h+4, sizeof(long double)-4))
-                continue; /*no error*/
-        }
-#endif
-#endif /*end H5_ULLONG_TO_LDOUBLE_PRECISION*/
-
         /* Print errors */
         if (0==fails_this_test++) {
             if(run_test==TEST_NORMAL) {
@@ -5159,9 +5141,9 @@ run_int_fp_conv(const char *name)
         HDputs("    Test skipped due to compiler error in handling conversion.");
     }
 #endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
-#if H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT
+#if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
-#else /* H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT */
+#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
     {
         char		str[256];		/*hello string		*/
 
@@ -5171,7 +5153,7 @@ run_int_fp_conv(const char *name)
         SKIPPED();
         HDputs("    Test skipped due to compiler not handling conversion.");
     }
-#endif /* H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT */
+#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
 #endif
 #endif
 

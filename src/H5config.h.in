@@ -557,10 +557,6 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
-/* Define if your system can convert unsigned long long to long double with
-   correct precision. */
-#undef ULLONG_TO_LDOUBLE_PRECISION
-
 /* Define using v1.6 public API symbols by default */
 #undef USE_16_API_DEFAULT
 
