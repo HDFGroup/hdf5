@@ -43,10 +43,6 @@
    writing. */
 #cmakedefine H5_CLEAR_MEMORY @H5_CLEAR_MEMORY@
 
-/* Define if your system can handle converting denormalized floating-point
-   values. */
-#cmakedefine H5_CONVERT_DENORMAL_FLOAT @H5_CONVERT_DENORMAL_FLOAT@
-
 /* Define if C++ compiler recognizes offsetof */
 #cmakedefine H5_CXX_HAVE_OFFSETOF @H5_CXX_HAVE_OFFSETOF@
 

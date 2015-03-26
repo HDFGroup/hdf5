@@ -28077,32 +28077,6 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine can handle converting
-## denormalized floating-point values.
-## (This flag should be set for all machines, except for the Crays, where
-## the cache value is set in it's config file)
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if converting denormalized floating-point values is possible" >&5
-$as_echo_n "checking if converting denormalized floating-point values is possible... " >&6; }
-if ${hdf5_cv_convert_denormal_float+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  hdf5_cv_convert_denormal_float=yes
-fi
-
-
-if test ${hdf5_cv_convert_denormal_float} = "yes"; then
-
-$as_echo "#define CONVERT_DENORMAL_FLOAT 1" >>confdefs.h
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can handle converting
 ## floating-point to long long values.
 ## (This flag should be _unset_ for all machines, except for Windows, where
 ## it's set in the custom Windows H5pubconf.h file)
