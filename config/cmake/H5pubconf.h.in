@@ -449,9 +449,6 @@
    special algorithm. */
 #cmakedefine H5_LDOUBLE_TO_LONG_SPECIAL @H5_LDOUBLE_TO_LONG_SPECIAL@
 
-/* Define if your system can compile long long to floating-point casts. */
-#cmakedefine H5_LLONG_TO_FP_CAST_WORKS @H5_LLONG_TO_FP_CAST_WORKS@
-
 /* Define if your system can convert (unsigned) long long to long double
    values correctly. */
 #cmakedefine H5_LLONG_TO_LDOUBLE_CORRECT @H5_LLONG_TO_LDOUBLE_CORRECT@
