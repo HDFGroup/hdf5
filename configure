@@ -28152,33 +28152,6 @@ esac
 
 ## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine can _compile_
-## 'unsigned long long' to 'float' and 'double' typecasts.
-## (This flag should be set for all machines, except for under Windows when
-## compiled with Visual Studio 6, where the macro value is set in the
-## src/H5pubconf.h file)
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if compiling unsigned long long to floating-point typecasts work" >&5
-$as_echo_n "checking if compiling unsigned long long to floating-point typecasts work... " >&6; }
-if ${hdf5_cv_ullong_to_fp_cast_works+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  hdf5_cv_ullong_to_fp_cast_works=yes
-fi
-
-
-if test ${hdf5_cv_ullong_to_fp_cast_works} = "yes"; then
-
-$as_echo "#define ULLONG_TO_FP_CAST_WORKS 1" >>confdefs.h
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can _compile_
 ## 'long long' to 'float' and 'double' typecasts.
 ## (This flag should be set for all machines, except for under Windows when
 ## compiled with Visual Studio 6, where the macro value is set in the

@@ -1232,10 +1232,8 @@ H5T_init_interface(void)
 #endif /* H5T_CONV_INTERNAL_LLONG_LDOUBLE */
 
     /* From unsigned long long to floats */
-#if H5T_CONV_INTERNAL_ULLONG_FP
     status |= H5T_register(H5T_PERS_HARD, "ullong_flt", native_ullong, native_float, H5T__conv_ullong_float, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "ullong_dbl", native_ullong, native_double, H5T__conv_ullong_double, H5AC_dxpl_id, FALSE);
-#endif /* H5T_CONV_INTERNAL_ULLONG_FP */
 #ifdef H5T_CONV_INTERNAL_ULLONG_LDOUBLE
     status |= H5T_register(H5T_PERS_HARD, "ullong_ldbl", native_ullong, native_ldouble, H5T__conv_ullong_ldouble, H5AC_dxpl_id, FALSE);
 #endif /* H5T_CONV_INTERNAL_ULLONG_LDOUBLE */

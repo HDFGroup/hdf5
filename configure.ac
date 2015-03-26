@@ -2576,24 +2576,6 @@ esac
 
 ## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine can _compile_
-## 'unsigned long long' to 'float' and 'double' typecasts.
-## (This flag should be set for all machines, except for under Windows when
-## compiled with Visual Studio 6, where the macro value is set in the
-## src/H5pubconf.h file)
-##
-AC_MSG_CHECKING([if compiling unsigned long long to floating-point typecasts work])
-AC_CACHE_VAL([hdf5_cv_ullong_to_fp_cast_works], [hdf5_cv_ullong_to_fp_cast_works=yes])
-
-if test ${hdf5_cv_ullong_to_fp_cast_works} = "yes"; then
-  AC_DEFINE([ULLONG_TO_FP_CAST_WORKS], [1],
-            [Define if your system can compile unsigned long long to floating-point casts.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can _compile_
 ## 'long long' to 'float' and 'double' typecasts.
 ## (This flag should be set for all machines, except for under Windows when
 ## compiled with Visual Studio 6, where the macro value is set in the

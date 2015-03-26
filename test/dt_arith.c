@@ -3877,12 +3877,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(long long), sizeof(long long));
                 hw_float = (float)(*((long long*)aligned));
                 break;
-#ifdef H5_ULLONG_TO_FP_CAST_WORKS
             case INT_ULLONG:
                 HDmemcpy(aligned, saved+j*sizeof(unsigned long long), sizeof(unsigned long long));
                 hw_float = (float)(*((unsigned long long*)aligned));
                 break;
-#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
             case FLT_FLOAT:
             case FLT_DOUBLE:
             case FLT_LDOUBLE:
@@ -3930,12 +3928,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(long long), sizeof(long long));
                 hw_double = (double)(*((long long*)aligned));
                 break;
-#ifdef H5_ULLONG_TO_FP_CAST_WORKS
             case INT_ULLONG:
                 HDmemcpy(aligned, saved+j*sizeof(unsigned long long), sizeof(unsigned long long));
                 hw_double = (double)(*((unsigned long long*)aligned));
                 break;
-#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
             case FLT_FLOAT:
             case FLT_DOUBLE:
             case FLT_LDOUBLE:
@@ -3984,12 +3980,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDmemcpy(aligned, saved+j*sizeof(long long), sizeof(long long));
                 hw_ldouble = (long double)(*((long long*)aligned));
                 break;
-#ifdef H5_ULLONG_TO_FP_CAST_WORKS
             case INT_ULLONG:
                 HDmemcpy(aligned, saved+j*sizeof(unsigned long long), sizeof(unsigned long long));
                 hw_ldouble = (long double)(*((unsigned long long*)aligned));
                 break;
-#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
             case FLT_FLOAT:
             case FLT_DOUBLE:
             case FLT_LDOUBLE:
@@ -5120,26 +5114,8 @@ run_int_fp_conv(const char *name)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_DOUBLE);
 
-#ifdef H5_ULLONG_TO_FP_CAST_WORKS
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_DOUBLE);
-#else /* H5_ULLONG_TO_FP_CAST_WORKS */
-    {
-        char		str[256];		/*hello string		*/
-
-        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
-                name, "unsigned long long", "float");
-        printf("%-70s", str);
-        SKIPPED();
-        HDputs("    Test skipped due to compiler not handling conversion.");
-
-        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
-                name, "unsigned long long", "double");
-        printf("%-70s", str);
-        SKIPPED();
-        HDputs("    Test skipped due to compiler not handling conversion.");
-    }
-#endif /* H5_ULLONG_TO_FP_CAST_WORKS */
 #endif
 
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
@@ -5183,9 +5159,9 @@ run_int_fp_conv(const char *name)
         HDputs("    Test skipped due to compiler error in handling conversion.");
     }
 #endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
-#if H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT
+#if H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
-#else /* H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT */
+#else /* H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT */
     {
         char		str[256];		/*hello string		*/
 
@@ -5195,7 +5171,7 @@ run_int_fp_conv(const char *name)
         SKIPPED();
         HDputs("    Test skipped due to compiler not handling conversion.");
     }
-#endif /* H5_ULLONG_TO_FP_CAST_WORKS && H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT */
+#endif /* H5_ULLONG_TO_LDOUBLE_PRECISION && H5_LLONG_TO_LDOUBLE_CORRECT */
 #endif
 #endif
 

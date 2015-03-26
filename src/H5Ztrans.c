@@ -160,23 +160,6 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unexpected type conversion operation")	\
 }
 
-/* Due to the undefined nature of embedding macros/conditionals within macros, we employ
- * this clever little hack.  We always compile in the code for the type conversion, even if
- * it isn't supported in the compiler.  To avoid errors, we define  ULLONG_TO_FP_XFORM_TYPE_OP_ERROR on
- * unsupported compilers, which will cause the code to execute HGOTO_ERROR and skip the code
- * that does the actual conversion */
-
-
-#ifndef H5_ULLONG_TO_FP_CAST_WORKS
-#define H5Z_XFORM_ULL_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                    \
-{									\
-    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from unsigned long long to double: required for data transform") \
-}
-#else
-#define H5Z_XFORM_ULL_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                    \
-    H5Z_XFORM_DO_OP1(RESL,RESR,TYPE,OP,SIZE)
-#endif
-
 /* Windows Intel 8.1 compiler has error converting long long to double.
  * Hard code it in.
  */
@@ -213,7 +196,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_LLONG)					\
 	H5Z_XFORM_LL_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_ULLONG)				\
-	H5Z_XFORM_ULL_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
     else if((TYPE) == H5T_NATIVE_FLOAT)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
     else if((TYPE) == H5T_NATIVE_DOUBLE)				\
@@ -245,7 +228,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_LLONG)					\
 	H5Z_XFORM_LL_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_ULLONG)				\
-	H5Z_XFORM_ULL_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
     else if((TYPE) == H5T_NATIVE_FLOAT)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
     else if((TYPE) == H5T_NATIVE_DOUBLE)				\

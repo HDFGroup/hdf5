@@ -305,12 +305,7 @@ int main(void)
     SKIPPED()
 #endif
 
-#ifdef H5_ULLONG_TO_FP_CAST_WORKS
     TEST_TYPE_CONTIG(dxpl_id_utrans_inv, unsigned long long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
-#else
-    TESTING("contiguous, with type conversion (float->ullong)")
-    SKIPPED()
-#endif
     TEST_TYPE_CONTIG(dxpl_id_c_to_f, float, H5T_NATIVE_FLOAT, "float", windchillFfloat, 1);
     TEST_TYPE_CONTIG(dxpl_id_c_to_f, double, H5T_NATIVE_DOUBLE, "double", windchillFfloat, 1);
 #if H5_SIZEOF_LONG_DOUBLE!=0
@@ -333,12 +328,7 @@ int main(void)
     SKIPPED()
 #endif
 
-#ifdef H5_ULLONG_TO_FP_CAST_WORKS
     TEST_TYPE_CHUNK(dxpl_id_utrans_inv, unsigned long long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
-#else
-    TESTING("chunked, with type conversion (float->ullong)")
-    SKIPPED()
-#endif
     TEST_TYPE_CHUNK(dxpl_id_c_to_f, float, H5T_NATIVE_FLOAT, "float", windchillFfloat, 1);
     TEST_TYPE_CHUNK(dxpl_id_c_to_f, double, H5T_NATIVE_DOUBLE, "double", windchillFfloat, 1);
 #if H5_SIZEOF_LONG_DOUBLE!=0

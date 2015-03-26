@@ -7932,7 +7932,6 @@ H5T__conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_ULLONG_FP
 herr_t
 H5T__conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7941,7 +7940,6 @@ H5T__conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     H5T_CONV_xF(ULLONG, FLOAT, unsigned long long, float, -, -);
 }
-#endif /*H5T_CONV_INTERNAL_ULLONG_FP*/
 
 
 /*-------------------------------------------------------------------------
@@ -7959,7 +7957,6 @@ H5T__conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_ULLONG_FP
 herr_t
 H5T__conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7968,7 +7965,6 @@ H5T__conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     H5T_CONV_xF(ULLONG, DOUBLE, unsigned long long, double, -, -);
 }
-#endif /*H5T_CONV_INTERNAL_ULLONG_FP*/
 
 
 /*-------------------------------------------------------------------------
