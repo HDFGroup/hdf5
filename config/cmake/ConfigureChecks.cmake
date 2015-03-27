@@ -263,12 +263,6 @@ H5ConversionTests (H5_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can conve
 #
 H5ConversionTests (H5_NO_ALIGNMENT_RESTRICTIONS "Checking IF alignment restrictions are strictly enforced")
 
-# Define a macro for Cygwin (on XP only) where the compiler has rounding
-#   problem converting from unsigned long long to long double */
-if (CYGWIN)
-  set (H5_CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM 1)
-endif (CYGWIN)
-
 # -----------------------------------------------------------------------
 # wrapper script variables
 # 
