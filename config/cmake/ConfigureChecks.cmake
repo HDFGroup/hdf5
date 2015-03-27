@@ -271,14 +271,6 @@ H5ConversionTests (H5_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your system converts
 #
 H5ConversionTests (H5_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can convert (unsigned) long to long double values with special algorithm")
 # ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
-# '(unsigned) long long' to 'long double' values.  (This flag should be set for
-# all machines, except for Mac OS 10.4, when the bit sequences are 003fff...,
-# 007fff..., 00ffff..., 01ffff..., ..., 7fffff..., the converted values are twice
-# as big as they should be.
-#
-H5ConversionTests (H5_LLONG_TO_LDOUBLE_CORRECT "Checking IF correctly converting (unsigned) long long to long double values")
-# ----------------------------------------------------------------------
 # Set the flag to indicate that the machine generates bad code
 # for the H5VM_log2_gen() routine in src/H5VMprivate.h
 # (This flag should be set to no for all machines, except for SGI IRIX64,

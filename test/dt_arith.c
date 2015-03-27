@@ -5032,32 +5032,8 @@ run_int_fp_conv(const char *name)
 #endif
 #endif /* H5_SIZEOF_LONG!=H5_SIZEOF_INT */
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
-#if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
-#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
-    {
-        char		str[256];		/*hello string		*/
-
-        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
-                name, "long long", "long double");
-        printf("%-70s", str);
-        SKIPPED();
-        HDputs("    Test skipped due to compiler error in handling conversion.");
-    }
-#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
-#if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
-#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
-    {
-        char		str[256];		/*hello string		*/
-
-        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
-                name, "unsigned long long", "long double");
-        printf("%-70s", str);
-        SKIPPED();
-        HDputs("    Test skipped due to compiler not handling conversion.");
-    }
-#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
 #endif
 #endif
 
