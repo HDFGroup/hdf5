@@ -88,8 +88,6 @@
 ./config/COPYING
 ./config/BlankForm
 ./config/apple
-./config/cce-fflags
-./config/cce-flags
 ./config/commence.am
 ./config/conclude.am
 ./config/examples.am

@@ -360,13 +360,14 @@ SUBROUTINE test_genprop_class_callback(total_error)
      WRITE(*,*) 'Class names do not match! name=',CLASS1_NAME_BUF, 'CLASS1_NAME=',CLASS1_NAME
      total_error = total_error + 1
   ENDIF
+
   ! Close class 
   CALL h5pclose_class_f(cid2, error)
   CALL check("h5pclose_class_f", error, total_error)
 
   ! Verify that the creation callback occurred 
   CALL VERIFY("h5pcreate_f", crt_cb_struct%count, 1, total_error)
-  CALL VERIFY_INTEGER_HID_T("h5pcreate_f", crt_cb_struct%id, lid1, total_error)
+  CALL VERIFY("h5pcreate_f", INT(crt_cb_struct%id), INT(lid1), total_error)
 
   !  Check the number of properties in list 
   CALL h5pget_nprops_f(lid1,nprops, error)
@@ -379,7 +380,7 @@ SUBROUTINE test_genprop_class_callback(total_error)
 
   !  Verify that the creation callback occurred 
   CALL VERIFY("h5pcreate_f", crt_cb_struct%count, 2, total_error)
-  CALL VERIFY_INTEGER_HID_T("h5pcreate_f", crt_cb_struct%id, lid2, total_error)
+  CALL VERIFY("h5pcreate_f", INT(crt_cb_struct%id), INT(lid2), total_error)
 
   !  Check the number of properties in list 
   CALL h5pget_nprops_f(lid2,nprops, error)
@@ -392,15 +393,15 @@ SUBROUTINE test_genprop_class_callback(total_error)
 
   ! Verify that the close callback occurred 
   CALL VERIFY("h5pcreate_f", cls_cb_struct%count, 1, total_error)
-  CALL VERIFY_INTEGER_HID_T("h5pcreate_f", cls_cb_struct%id, lid1, total_error)
+  CALL VERIFY("h5pcreate_f", INT(cls_cb_struct%id), INT(lid1), total_error)
 
   ! Close second list 
   CALL h5pclose_f(lid2, error);
   CALL check("h5pclose_f", error, total_error)
 
-  ! Verify that the close callback occurred
+  ! Verify that the close callback occurred 
   CALL VERIFY("h5pcreate_f", cls_cb_struct%count, 2, total_error)
-  CALL verify_INTEGER_HID_T("h5pcreate_f", cls_cb_struct%id, lid2, total_error)
+  CALL VERIFY("h5pcreate_f", INT(cls_cb_struct%id), INT(lid2), total_error)
 
   ! Close class 
   CALL h5pclose_class_f(cid1, error)
