@@ -272,16 +272,6 @@ H5ConversionTests (H5_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your system converts
 H5ConversionTests (H5_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can convert (unsigned) long to long double values with special algorithm")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
-# 'long double' to '(unsigned) long long' values.  (This flag should be set for
-# all machines, except for Mac OS 10.4 and SGI IRIX64 6.5.  When the bit sequence
-# of long double is 0x4351ccf385ebc8a0bfcc2a3c..., the values of (unsigned)long long
-# start to go wrong on these two machines.  Adjusting it higher to
-# 0x4351ccf385ebc8a0dfcc... or 0x4351ccf385ebc8a0ffcc... will make the converted
-# values wildly wrong.  This test detects this wrong behavior and disable the test.
-#
-H5ConversionTests (H5_LDOUBLE_TO_LLONG_ACCURATE "Checking IF correctly converting long double to (unsigned) long long values")
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
 # '(unsigned) long long' to 'long double' values.  (This flag should be set for
 # all machines, except for Mac OS 10.4, when the bit sequences are 003fff...,
 # 007fff..., 00ffff..., 01ffff..., ..., 7fffff..., the converted values are twice
