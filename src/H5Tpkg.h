@@ -172,21 +172,10 @@
 #define H5T_CONV_INTERNAL_LDOUBLE_LLONG         1
 #endif
 
-/* Define an internal macro for converting floating numbers to unsigned long long.  PGI compiler does
- * roundup when the source fraction part is greater than 0.5.  HP-UX compilers set the maximal number
- * for unsigned long long as 0x7fffffffffffffff during conversion. */
-#if (H5_WANT_DATA_ACCURACY && H5_FP_TO_ULLONG_ACCURATE && defined(H5_FP_TO_ULLONG_RIGHT_MAXIMUM)) || \
-    (!H5_WANT_DATA_ACCURACY)
-#define H5T_CONV_INTERNAL_FP_ULLONG         1
-#else
-#define H5T_CONV_INTERNAL_FP_ULLONG         0
-#endif
-
 /* Define an internal macro for converting long double to unsigned long long.  SGI compilers give some
  * incorrect conversions.  Mac OS 10.4 gives incorrect conversions. HP-UX 11.00 compiler generates
  * floating exception. */
-#if (H5_WANT_DATA_ACCURACY && \
-    H5_FP_TO_ULLONG_ACCURATE && defined(H5_FP_TO_ULLONG_RIGHT_MAXIMUM) && defined(H5_LDOUBLE_TO_LLONG_ACCURATE)) || \
+#if (H5_WANT_DATA_ACCURACY && defined(H5_LDOUBLE_TO_LLONG_ACCURATE)) || \
     (!H5_WANT_DATA_ACCURACY)
 #define H5T_CONV_INTERNAL_LDOUBLE_ULLONG         1
 #else
