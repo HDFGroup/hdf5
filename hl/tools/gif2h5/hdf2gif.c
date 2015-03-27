@@ -194,9 +194,9 @@ int main(int argc , char **argv)
             numcols = 256;
             for (i = 0 ; i < numcols ; i++)
             {
-                Red[i] = 255 - i;
-                Green[i] = 255 - i;
-                Blue[i] = 255 - i;
+	      Red[i] = (BYTE)(255 - i);
+	      Green[i] = (BYTE)(255 - i);
+	      Blue[i] = (BYTE)(255 - i);
             }
         }
         else
@@ -229,7 +229,7 @@ int main(int argc , char **argv)
             if (j==i)
             {
                 /* wasn't found */
-                pc2nc[i] = nc;
+	      pc2nc[i] = (BYTE)nc;
                 r1[nc] = Red[i];
                 g1[nc] = Green[i];
                 b1[nc] = Blue[i];
