@@ -8472,7 +8472,6 @@ H5_GCC_DIAG_ON(float-equal)
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_LDOUBLE_UINT
 herr_t
 H5T__conv_ldouble_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -8483,7 +8482,6 @@ H5_GCC_DIAG_OFF(float-equal)
     H5T_CONV_Fx(LDOUBLE, UINT, long double, unsigned int, 0, UINT_MAX);
 H5_GCC_DIAG_ON(float-equal)
 }
-#endif /* H5T_CONV_INTERNAL_LDOUBLE_UINT */
 
 
 /*-------------------------------------------------------------------------
