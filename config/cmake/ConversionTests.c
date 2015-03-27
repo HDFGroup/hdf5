@@ -410,38 +410,6 @@ done:
 #endif
 
 
-#ifdef H5_ULONG_TO_FLOAT_ACCURATE_TEST
-
-int main(void)
-{
-    int           ret = 0;
-    unsigned long l1;
-    unsigned long l2;
-    unsigned long l3;
-    float f1;
-    float f2;
-    float f3;
-
-
-    if(sizeof(unsigned long)==8) {
-        l1 = 0xffffffffffffffffUL;
-        l2 = 0xffffffffffff0000UL;
-        l3 = 0xf000000000000000UL;
-
-        f1 = (float)l1;
-        f2 = (float)l2;
-        f3 = (float)l3;
-
-        if((f1 < 0) || (f2 < 0) || (f3 < 0))
-            ret = 1;
-    }
-
-done:
-    exit(ret);
-}
-
-#endif
-
 #ifdef H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE_TEST
 
 #include <string.h>

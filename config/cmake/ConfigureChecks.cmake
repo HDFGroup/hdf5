@@ -260,15 +260,6 @@ ENDMACRO (H5MiscConversionTest)
 
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
-# 'unsigned long' to 'float' values.
-# (This flag should be set for all machines, except for Pathscale compiler
-# on Sandia's Linux machine where the compiler interprets 'unsigned long'
-# values as negative when the first bit of 'unsigned long' is on during
-# the conversion to float.)
-#
-H5ConversionTests (H5_ULONG_TO_FLOAT_ACCURATE "Checking IF accurately converting unsigned long to float values")
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can accurately convert
 # 'unsigned (long) long' values to 'float' and 'double' values.
 # (This flag should be set for all machines, except for the SGIs) and Solaris
 # 64-bit machines, where the short program below tests if round-up is
