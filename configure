@@ -22929,6 +22929,11 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## however, we do not do this since it breaks the big test on some
     ## older platforms.
     H5_CPPFLAGS="-D_BSD_SOURCE $H5_CPPFLAGS"
+
+    ## _BSD_SOURCE is deprecated as of glibc 2.20, in favor of _DEFAULT_SOURCE.
+    ## To avoid warnings, we define _DEFAULT_SOURCE in addition to _BSD_SOURCE,
+    ## which should work for all versions of glibc.
+    H5_CPPFLAGS="-D_DEFAULT_SOURCE $H5_CPPFLAGS"
     ;;
 esac
 
