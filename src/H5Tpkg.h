@@ -124,38 +124,16 @@
 #define H5T_CONV_INTERNAL_FP_LDOUBLE      1
 #endif /*H5_SIZEOF_LONG_DOUBLE && H5_CONVERT_DENORMAL_FLOAT*/
 
-/* Define an internal macro for converting unsigned long to float.
- * Pathscale compiler on Sandia's Linux machine has some problem.
- * 64-bit Solaris does different rounding. */
-#if (H5_WANT_DATA_ACCURACY && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE) || \
-    (!H5_WANT_DATA_ACCURACY)
-#define H5T_CONV_INTERNAL_ULONG_FLT         1
-#endif
-
-/* Define an internal macro for converting unsigned (long) long to double.
- * 64-bit Solaris does different rounding. */
-#if (H5_WANT_DATA_ACCURACY && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE) || (!H5_WANT_DATA_ACCURACY)
-#define H5T_CONV_INTERNAL_ULONG_DBL         1
-#endif
-
-/* Define an internal macro for converting unsigned long to long double.  SGI compilers give some
- * incorrect conversions. 64-bit Solaris does different rounding. */
-#if (H5_WANT_DATA_ACCURACY && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE) || \
-    (!H5_WANT_DATA_ACCURACY)
-#define H5T_CONV_INTERNAL_ULONG_LDOUBLE       1
-#endif
-
 /* Define an internal macro for converting long long to long double.  Mac OS 10.4 gives some
  * incorrect conversions. */
-#if (H5_WANT_DATA_ACCURACY && defined(H5_LLONG_TO_LDOUBLE_CORRECT)) || \
-    (!H5_WANT_DATA_ACCURACY)
+#if (H5_WANT_DATA_ACCURACY && defined(H5_LLONG_TO_LDOUBLE_CORRECT)) || (!H5_WANT_DATA_ACCURACY)
 #define H5T_CONV_INTERNAL_LLONG_LDOUBLE       1
 #endif
 
 /* Define an internal macro for converting unsigned long long to floating numbers.  SGI compilers give
  * some incorect conversion.  64-bit Solaris does different rounding.   Windows Visual Studio 6 does
  * not support unsigned long long. */
-#if (H5_WANT_DATA_ACCURACY && H5_ULLONG_TO_FP_CAST_WORKS && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE) || \
+#if (H5_WANT_DATA_ACCURACY && H5_ULLONG_TO_FP_CAST_WORKS) || \
     (!H5_WANT_DATA_ACCURACY && H5_ULLONG_TO_FP_CAST_WORKS)
 #define H5T_CONV_INTERNAL_ULLONG_FP         1
 #endif
@@ -165,7 +143,7 @@
  * not support unsigned long long.  For FreeBSD(sleipnir), the last 2 bytes of mantissa are lost when
  * compiler tries to do the conversion.  For Cygwin, compiler doesn't do rounding correctly.
  * Mac OS 10.4 gives some incorrect result. */
-#if (H5_WANT_DATA_ACCURACY && H5_ULLONG_TO_FP_CAST_WORKS && H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE && \
+#if (H5_WANT_DATA_ACCURACY && H5_ULLONG_TO_FP_CAST_WORKS && \
     defined(H5_ULLONG_TO_LDOUBLE_PRECISION) && defined(H5_LLONG_TO_LDOUBLE_CORRECT)) || (!H5_WANT_DATA_ACCURACY && \
     H5_ULLONG_TO_FP_CAST_WORKS)
 #define H5T_CONV_INTERNAL_ULLONG_LDOUBLE         1
