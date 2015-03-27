@@ -319,9 +319,9 @@ Bug Fixes since HDF5-1.8.14
     - The perform directory is moved to tools/perform for easier maintenance.
       (AKC - 2014/12/17, HDFFV-9046)
 
-    F90 API
-    -------
-    - Fortran fails with --enable-fortran2003 and Intel 15.x compilers.
+    Fortran API
+    ------------
+    - ISSUE: Fortran fails with --enable-fortran2003 and Intel 15.x compilers.
       
       Added BIND(C) to the offending APIs. 
 
@@ -329,7 +329,7 @@ Bug Fixes since HDF5-1.8.14
       without the need for any additional compilers flags. 
       (MSB - 2015/1/26, HDFFV-9049)
 
-    - h5tenum_insert_f does not work with default 8 byte integers (xlf compiler)
+    - ISSUE: h5tenum_insert_f does not work with default 8 byte integers (xlf compiler)
       
       * In the Fortran 90 API, 'value' is no longer cast into the C int type. Therefore, if
         h5tenum_insert_f is passed an 8 byte integer (via -i8) then 'value' is written as 
@@ -346,6 +346,16 @@ Bug Fixes since HDF5-1.8.14
 
       (MSB - 2015/2/19, HDFFV-8908)
 
+    - ISSUE: The following Fortran APIs never returned the error state (i.e. the APIs
+      always returned a positive number), they were corrected to return a negative number as
+      described in the Reference Manual if an error occurred:
+
+        h5fget_file_image_f
+        h5lget_name_by_idx_f
+        h5oget_comment_by_name_f
+
+      (MSB - 2015/3/19, HDF5-239)
+
 
     C++ API
     ------
@@ -361,9 +371,36 @@ Bug Fixes since HDF5-1.8.14
 
       (DER - 2015/03/08 - HDFFV-9149)
 
+    - Changed hdf5_hl.h to include the hdf5 main library "hdf5.h"
+
+      User's no longer need to include both hdf5_hl.h and hdf5.h
+
+      (MSB - 2015/2/14 - HDFFV-8685)
+
+   
+    - ISSUE: H5PTcreate_fl does not convert to memory type.
+
+      H5PTcreate_fl now converts to the table's native memory datatype to fix 
+      the problem of handling BE and LE packet tables.
+
+      (MSB - 2015/2/26 - HDFFV-9042)
+
+
+    - ISSUE: H5LT attribute functions fail to create attributes whose name 
+      is a substring of an existing attribute.
+
+      H5LT attribute functions can now create attributes whose name 
+      is a substring of an existing attribute.
+
+      (MSB - 2015/2/24 - HDFFV-9132)
+    
+
     Fortran High-Level APIs:
-    ------
-    - None
+    ------------------------
+    - Fixed mismatching integer type for internal library C interface function H5tbmake_table_c.
+       
+      (MSB - 2015/2/18 - HDFFV-8559)
+      
 
     Testing
     -------
