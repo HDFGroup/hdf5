@@ -357,26 +357,17 @@ H5VM_log2_gen(uint64_t n)
     unsigned r;                         /* r will be log2(n) */
     register unsigned int t, tt, ttt;   /* temporaries */
 
-#ifdef H5_BAD_LOG2_CODE_GENERATED
-    if(n > (uint64_t)0x7fffffffffffffff)
-        r = 63;
-    else {
-        n &= (uint64_t)0x7fffffffffffffff;
-#endif /* H5_BAD_LOG2_CODE_GENERATED */
-        if((ttt = (unsigned)(n >> 32)))
-            if((tt = (unsigned)(n >> 48)))
-                r = (t = (unsigned)(n >> 56)) ? 56 + (unsigned)LogTable256[t] : 48 + (unsigned)LogTable256[tt & 0xFF];
-            else
-                r = (t = (unsigned)(n >> 40)) ? 40 + (unsigned)LogTable256[t] : 32 + (unsigned)LogTable256[ttt & 0xFF];
+    if((ttt = (unsigned)(n >> 32)))
+        if((tt = (unsigned)(n >> 48)))
+            r = (t = (unsigned)(n >> 56)) ? 56 + (unsigned)LogTable256[t] : 48 + (unsigned)LogTable256[tt & 0xFF];
         else
-            if((tt = (unsigned)(n >> 16)))
-                r = (t = (unsigned)(n >> 24)) ? 24 + (unsigned)LogTable256[t] : 16 + (unsigned)LogTable256[tt & 0xFF];
-            else
-                /* Added 'uint8_t' cast to pacify PGCC compiler */
-                r = (t = (unsigned)(n >> 8)) ? 8 + (unsigned)LogTable256[t] : (unsigned)LogTable256[(uint8_t)n];
-#ifdef H5_BAD_LOG2_CODE_GENERATED
-    } /* end else */
-#endif /* H5_BAD_LOG2_CODE_GENERATED  */
+            r = (t = (unsigned)(n >> 40)) ? 40 + (unsigned)LogTable256[t] : 32 + (unsigned)LogTable256[ttt & 0xFF];
+    else
+        if((tt = (unsigned)(n >> 16)))
+            r = (t = (unsigned)(n >> 24)) ? 24 + (unsigned)LogTable256[t] : 16 + (unsigned)LogTable256[tt & 0xFF];
+        else
+            /* Added 'uint8_t' cast to pacify PGCC compiler */
+            r = (t = (unsigned)(n >> 8)) ? 8 + (unsigned)LogTable256[t] : (unsigned)LogTable256[(uint8_t)n];
 
     return(r);
 } /* H5VM_log2_gen() */

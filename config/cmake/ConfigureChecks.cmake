@@ -259,16 +259,6 @@ H5ConversionTests (H5_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your system converts
 #
 H5ConversionTests (H5_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can convert (unsigned) long to long double values with special algorithm")
 # ----------------------------------------------------------------------
-# Set the flag to indicate that the machine generates bad code
-# for the H5VM_log2_gen() routine in src/H5VMprivate.h
-# (This flag should be set to no for all machines, except for SGI IRIX64,
-# where the cache value is set to yes in it's config file)
-#
-if (H5_BAD_LOG2_CODE_GENERATED MATCHES ^H5_BAD_LOG2_CODE_GENERATED$)
-  set (H5_BAD_LOG2_CODE_GENERATED 0 CACHE INTERNAL "Define if your system generates wrong code for log2 routine")
-  message (STATUS "Checking IF your system generates wrong code for log2 routine... no")
-endif (H5_BAD_LOG2_CODE_GENERATED MATCHES ^H5_BAD_LOG2_CODE_GENERATED$)
-# ----------------------------------------------------------------------
 # Check if pointer alignments are enforced
 #
 H5ConversionTests (H5_NO_ALIGNMENT_RESTRICTIONS "Checking IF alignment restrictions are strictly enforced")

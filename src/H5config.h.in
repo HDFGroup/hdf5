@@ -3,9 +3,6 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
-/* Define if your system generates wrong code for log2 routine. */
-#undef BAD_LOG2_CODE_GENERATED
-
 /* Define if the memory buffers being written to disk should be cleared before
    writing. */
 #undef CLEAR_MEMORY

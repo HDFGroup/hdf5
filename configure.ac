@@ -2680,23 +2680,6 @@ else
 fi
 
 ## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine generates bad code
-## for the H5VM_log2_gen() routine in src/H5VMprivate.h
-## (This flag should be set to no for all machines, except for SGI IRIX64,
-## where the cache value is set to yes in it's config file)
-##
-AC_MSG_CHECKING([if bad code for log2 routine is generated])
-AC_CACHE_VAL([hdf5_cv_bad_log2_code_generated], [hdf5_cv_bad_log2_code_generated=no])
-
-if test ${hdf5_cv_bad_log2_code_generated} = "yes"; then
-  AC_DEFINE([BAD_LOG2_CODE_GENERATED], [1],
-            [Define if your system generates wrong code for log2 routine.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
 ## Set some variables for general configuration information to be saved
 ## and installed with the libraries (used to generate libhdf5.settings).
 ##
