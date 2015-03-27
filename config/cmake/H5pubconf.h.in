@@ -66,10 +66,6 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #define @H5_FC_FUNC_@
 
-/* Define if your system can handle overflow converting floating-point to
-   integer values. */
-#cmakedefine H5_FP_TO_INTEGER_OVERFLOW_WORKS @H5_FP_TO_INTEGER_OVERFLOW_WORKS@
-
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
 

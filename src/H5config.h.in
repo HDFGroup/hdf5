@@ -33,10 +33,6 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
 
-/* Define if your system can handle overflow converting floating-point to
-   integer values. */
-#undef FP_TO_INTEGER_OVERFLOW_WORKS
-
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 

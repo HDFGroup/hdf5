@@ -2541,37 +2541,6 @@ case "`uname`" in
 esac
 
 ## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can handle overflow converting
-## all floating-point to all integer types.
-## (This flag should be set for all machines, except for Cray X1 where
-## floating exception is generated when the floating-point value is greater
-## than the maximal integer value).
-##
-AC_MSG_CHECKING([if overflows normally converting floating-point to integer values])
-
-AC_CACHE_VAL([hdf5_cv_fp_to_integer_overflow_works],
-    [AC_TRY_RUN([
-    int main(void)
-    {
-        float  f = 2147483648.0f;
-        int    i;
-
-        i = (int)f;
-
-done:
-        exit(0);
-    }
-    ], [hdf5_cv_fp_to_integer_overflow_works=yes], [hdf5_cv_fp_to_integer_overflow_works=no],)])
-
-if test ${hdf5_cv_fp_to_integer_overflow_works} = "yes"; then
-  AC_DEFINE([FP_TO_INTEGER_OVERFLOW_WORKS], [1],
-            [Define if your system can handle overflow converting floating-point to integer values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine is using a special algorithm to convert
 ## 'long double' to '(unsigned) long' values.  (This flag should only be set for 
 ## the IBM Power6 Linux.  When the bit sequence of long double is 

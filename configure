@@ -28099,63 +28099,6 @@ $as_echo "no" >&6; }
 esac
 
 ## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can handle overflow converting
-## all floating-point to all integer types.
-## (This flag should be set for all machines, except for Cray X1 where
-## floating exception is generated when the floating-point value is greater
-## than the maximal integer value).
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if overflows normally converting floating-point to integer values" >&5
-$as_echo_n "checking if overflows normally converting floating-point to integer values... " >&6; }
-
-if ${hdf5_cv_fp_to_integer_overflow_works+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-    int main(void)
-    {
-        float  f = 2147483648.0f;
-        int    i;
-
-        i = (int)f;
-
-done:
-        exit(0);
-    }
-
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  hdf5_cv_fp_to_integer_overflow_works=yes
-else
-  hdf5_cv_fp_to_integer_overflow_works=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-fi
-
-
-if test ${hdf5_cv_fp_to_integer_overflow_works} = "yes"; then
-
-$as_echo "#define FP_TO_INTEGER_OVERFLOW_WORKS 1" >>confdefs.h
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine is using a special algorithm to convert
 ## 'long double' to '(unsigned) long' values.  (This flag should only be set for
 ## the IBM Power6 Linux.  When the bit sequence of long double is
