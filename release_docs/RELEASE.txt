@@ -356,6 +356,17 @@ Bug Fixes since HDF5-1.8.14
 
       (MSB - 2015/3/19, HDF5-239)
 
+    - ISSUE: h5pget_class_f is an ill-functioning API
+
+      h5pget_class_f never correlated the class identifier to the property list class name (as indicated
+      in the HDF5 Reference Manual), but instead returned a property list class identifier as a INTEGER.
+      However, the INTEGER needed to be of type INTEGER(HID_T) to be correct.
+
+      RESOLUTION: the h5pget_class_f API was changed to return an INTEGER(HID_T) property list class 
+      identifier instead of an INTEGER. This mimics the intended behavior of the C API.
+
+      (MSB - 2015/3/16, HDF5-9162)
+
 
     C++ API
     ------
