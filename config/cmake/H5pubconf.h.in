@@ -644,9 +644,6 @@
    don't fit into size allowed */
 #cmakedefine H5_VSNPRINTF_WORKS @H5_VSNPRINTF_WORKS@
 
-/* Data accuracy is prefered to speed during data conversions */
-#cmakedefine H5_WANT_DATA_ACCURACY @H5_WANT_DATA_ACCURACY@
-
 /* Check exception handling functions during data conversions */
 #cmakedefine H5_WANT_DCONV_EXCEPTION @H5_WANT_DCONV_EXCEPTION@
 

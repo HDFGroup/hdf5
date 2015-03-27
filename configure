@@ -916,7 +916,6 @@ with_mpe
 enable_direct_vfd
 with_default_plugindir
 enable_dconv_exception
-enable_dconv_accuracy
 enable_build_all
 enable_deprecated_symbols
 with_default_api_version
@@ -1614,8 +1613,6 @@ Optional Features:
   --enable-dconv-exception
                           if exception handling functions is checked during
                           data conversions [default=yes]
-  --enable-dconv-accuracy if data accuracy is guaranteed during data
-                          conversions [default=yes]
   --enable-build-all      Build helper programs that only developers should
                           need [default=no]
   --enable-deprecated-symbols
@@ -28042,33 +28039,6 @@ if test "$DCONV_EXCEPTION" = "yes"; then
 $as_echo "yes" >&6; }
 
 $as_echo "#define WANT_DCONV_EXCEPTION 1" >>confdefs.h
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-## ----------------------------------------------------------------------
-## Decide whether the data accuracy has higher priority during data
-## conversions.  If not, some hard conversions will still be prefered even
-## though the data may be wrong (for example, some compilers don't
-## support denormalized floating values) to maximize speed.
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether data accuracy is guaranteed during data conversions" >&5
-$as_echo_n "checking whether data accuracy is guaranteed during data conversions... " >&6; }
-# Check whether --enable-dconv-accuracy was given.
-if test "${enable_dconv_accuracy+set}" = set; then :
-  enableval=$enable_dconv_accuracy; DATA_ACCURACY=$enableval
-else
-  DATA_ACCURACY=yes
-fi
-
-
-if test "$DATA_ACCURACY" = "yes"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-$as_echo "#define WANT_DATA_ACCURACY 1" >>confdefs.h
 
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5

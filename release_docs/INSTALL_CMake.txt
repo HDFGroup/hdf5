@@ -574,7 +574,6 @@ HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"   
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  OFF
-HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                          OFF
 if (APPLE) 

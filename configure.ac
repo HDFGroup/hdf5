@@ -2501,27 +2501,6 @@ else
 fi
 
 ## ----------------------------------------------------------------------
-## Decide whether the data accuracy has higher priority during data
-## conversions.  If not, some hard conversions will still be prefered even
-## though the data may be wrong (for example, some compilers don't 
-## support denormalized floating values) to maximize speed.
-## 
-AC_MSG_CHECKING([whether data accuracy is guaranteed during data conversions])
-AC_ARG_ENABLE([dconv-accuracy],
-              [AS_HELP_STRING([--enable-dconv-accuracy],
-                              [if data accuracy is guaranteed during 
-                              data conversions [default=yes]])],
-              [DATA_ACCURACY=$enableval], [DATA_ACCURACY=yes])
-
-if test "$DATA_ACCURACY" = "yes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([WANT_DATA_ACCURACY], [1],
-            [Data accuracy is prefered to speed during data conversions])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine has window style pathname,
 ## that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
 ## (This flag should be _unset_ for all machines, except for Windows, where
