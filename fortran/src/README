@@ -88,7 +88,6 @@ Compilation
    grpdsetexample    - creates datasets in the groups
    hyperslabexample  - writes and reads a hyperslab
    selectele         - writes element selections
-   grpit             - iterates through the members of the group
    attrexample       - creates and writes a dataset attribute
    compound          - creates, writes and reads one dim array of structures
    mountexample      - shows how to use mounting files to access a dataset
