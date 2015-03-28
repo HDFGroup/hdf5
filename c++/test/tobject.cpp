@@ -182,20 +182,38 @@ static void test_get_objname_ontypes()
 
 	// Create a datatype and save it
 	IntType inttype(PredType::STD_B8LE);
+	inttype.commit(file, "INT type of STD_B8LE");
 
+	// Close the type then open it again to test getting its name
+	inttype.close();
+	inttype = file.openIntType("INT type of STD_B8LE");
+
+	// Get and verify its name
+	H5std_string inttype_name = inttype.getObjName();
+	verify_val(inttype_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
+
+	// Make copy of a predefined type and save it
 	DataType dtype(PredType::STD_B8LE);
 	dtype.commit(file, "STD_B8LE");
 
+	// Close the data type and file
+	dtype.close();
+	file.close();
+
+	// Re-open the file and the data type to test getting its name
+	file.openFile(FILE_OBJECTS, H5F_ACC_RDWR);
+	dtype = file.openDataType("STD_B8LE");
+
 	// Get and verify its name
 	H5std_string type_name = dtype.getObjName();
-	verify_val(type_name, "/STD_B8LE", "DataSet::getObjName", __LINE__, __FILE__);
+	verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
 
 	// Test getting type's name from copied type
 	DataType copied_type;
 	copied_type.copy(dtype);
 	copied_type.commit(file, "copy of STD_B8LE");
 	type_name = copied_type.getObjName();
-	verify_val(type_name, "/copy of STD_B8LE", "DataSet::getObjName", __LINE__, __FILE__);
+	verify_val(type_name, "/copy of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
 
 	// Test copying an integer predefined type
 	IntType new_int_type(PredType::NATIVE_INT);
@@ -203,8 +221,8 @@ static void test_get_objname_ontypes()
 	// Name this datatype
 	new_int_type.commit(grp, "IntType NATIVE_INT");
 	ssize_t name_len = new_int_type.getObjName(type_name); // default len
-	verify_val(name_len, (ssize_t)HDstrlen("/typetests/IntType NATIVE_INT"), "DataSet::getObjName", __LINE__, __FILE__);
-	verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataSet::getObjName", __LINE__, __FILE__);
+	verify_val(name_len, (ssize_t)HDstrlen("/typetests/IntType NATIVE_INT"), "DataType::getObjName", __LINE__, __FILE__);
+	verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__);
 
 	// Close everything or they can be closed when objects go out of scope
 	dtype.close();

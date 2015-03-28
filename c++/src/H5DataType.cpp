@@ -141,6 +141,22 @@ DataType::DataType(const DataType& original) : H5Object()
 }
 
 //--------------------------------------------------------------------------
+// Function:    DataType overloaded constructor
+///\brief       Creates a integer type using a predefined type
+///\param       pred_type - IN: Predefined datatype
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+// Description
+//		This is so that when a predefined type is passed in, a
+//		copy of it is made, not just a duplicate of the HDF5 id.
+//--------------------------------------------------------------------------
+DataType::DataType(const PredType& pred_type) : H5Object()
+{
+   // use DataType::copy to make a copy of this predefined type
+   copy(pred_type);
+}
+
+//--------------------------------------------------------------------------
 // Function:	DataType::copy
 ///\brief	Copies an existing datatype to this datatype object
 ///\param	like_type - IN: Datatype to be copied
@@ -203,11 +219,21 @@ void DataType::copy(const DataSet& dset)
 // 		Makes a copy of the type on the right hand side and stores
 //		the new id in the left hand side object.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		Changed operator= to simply copy the id of rhs instead of
+//		calling H5Tcopy because, when the operator= is invoked, a
+//		different datatype id is created and it won't have the same
+//		characteristics as the original one, specifically, if the
+//		rhs represents a named datatype, "this" would still be a
+//		transient datatype.
 //--------------------------------------------------------------------------
 DataType& DataType::operator=( const DataType& rhs )
 {
     if (this != &rhs)
-	copy(rhs);
+    {
+	id = rhs.id;
+	incRefCount(); // increment number of references to this id
+    }
     return(*this);
 }
 

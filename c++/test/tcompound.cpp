@@ -780,7 +780,7 @@ static void test_compound_set_size()
 	CompType dtype_tmp = file.openCompType("dtype");
 
 	// Make a copy of the data type
-	dtype = dtype_tmp;
+	dtype.copy(dtype_tmp);
 
 	// Verify that the compound is not packed
 	// packed = dtype_tmp.packed(); // not until C library provides API
