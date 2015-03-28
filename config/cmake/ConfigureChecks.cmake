@@ -260,15 +260,6 @@ ENDMACRO (H5MiscConversionTest)
 
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can _compile_
-# 'unsigned long long' to 'float' and 'double' typecasts.
-# (This flag should be set for all machines.)
-#
-if (H5_ULLONG_TO_FP_CAST_WORKS MATCHES ^H5_ULLONG_TO_FP_CAST_WORKS$)
-  set (H5_ULLONG_TO_FP_CAST_WORKS 1 CACHE INTERNAL "Checking IF compiling unsigned long long to floating-point typecasts work")
-  message (STATUS "Checking IF compiling unsigned long long to floating-point typecasts work... yes")
-endif (H5_ULLONG_TO_FP_CAST_WORKS MATCHES ^H5_ULLONG_TO_FP_CAST_WORKS$)
-# ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can _compile_
 # 'long long' to 'float' and 'double' typecasts.
 # (This flag should be set for all machines.)
 #

@@ -560,10 +560,6 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
-/* Define if your system can compile unsigned long long to floating-point
-   casts. */
-#undef ULLONG_TO_FP_CAST_WORKS
-
 /* Define if your system can convert unsigned long long to long double with
    correct precision. */
 #undef ULLONG_TO_LDOUBLE_PRECISION
