@@ -160,18 +160,6 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unexpected type conversion operation")	\
 }
 
-/* Windows Intel 8.1 compiler has error converting long long to double.
- * Hard code it in.
- */
-#ifndef H5_LLONG_TO_FP_CAST_WORKS
-#define H5Z_XFORM_LL_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                     \
-{									\
-    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Cannot convert from long long to double: required for data transform") \
-}
-#else
-#define H5Z_XFORM_LL_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                     \
-    H5Z_XFORM_DO_OP1(RESL,RESR,TYPE,OP,SIZE)
-#endif
 #if H5_SIZEOF_LONG_DOUBLE !=0
 #define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
 {									\
@@ -194,7 +182,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_ULONG)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_LLONG)					\
-	H5Z_XFORM_LL_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_ULLONG)				\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
     else if((TYPE) == H5T_NATIVE_FLOAT)					\
@@ -226,7 +214,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_ULONG)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_LLONG)					\
-	H5Z_XFORM_LL_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_ULLONG)				\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
     else if((TYPE) == H5T_NATIVE_FLOAT)					\
