@@ -259,14 +259,6 @@ ENDMACRO (H5MiscConversionTest)
 #-----------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
-# Set the flag to indicate that the machine can convert from
-# 'unsigned long long' to 'long double' without precision loss.
-# (This flag should be set for all machines, except for FreeBSD(sleipnir)
-# where the last 2 bytes of mantissa are lost when compiler tries to do
-# the conversion, and Cygwin where compiler doesn't do rounding correctly.)
-#
-H5ConversionTests (H5_ULLONG_TO_LDOUBLE_PRECISION "Checking IF converting unsigned long long to long double with precision")
-# ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can handle overflow converting
 # all floating-point to all integer types.
 # (This flag should be set for all machines, except for Cray X1 where
