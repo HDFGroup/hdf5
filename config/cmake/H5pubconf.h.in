@@ -637,10 +637,6 @@
 /* Version number of package */
 #define H5_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
-/* Define if vsnprintf() returns the correct value for formatted strings that
-   don't fit into size allowed */
-#cmakedefine H5_VSNPRINTF_WORKS @H5_VSNPRINTF_WORKS@
-
 /* Check exception handling functions during data conversions */
 #cmakedefine H5_WANT_DCONV_EXCEPTION @H5_WANT_DCONV_EXCEPTION@
 

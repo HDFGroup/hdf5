@@ -545,10 +545,6 @@
 /* Version number of package */
 #undef VERSION
 
-/* Define if vsnprintf() returns the correct value for formatted strings that
-   don't fit into size allowed */
-#undef VSNPRINTF_WORKS
-
 /* Check exception handling functions during data conversions */
 #undef WANT_DCONV_EXCEPTION
 

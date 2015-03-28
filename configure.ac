@@ -1854,59 +1854,7 @@ AC_CHECK_FUNCS([gethostname getpwuid getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
-AC_CHECK_FUNCS([tmpfile asprintf vasprintf waitpid])
-
-## Check for vsnprintf() separately, so we can detect situations where it
-## doesn't return the correct size for formatted strings that are too large
-## for the buffer provided
-AC_CHECK_FUNCS([vsnprintf],
-
-    ## Check if vsnprintf() returns correct size for strings that don't fit
-    ## into the size allowed.  If vsnprintf() works correctly on this platform,
-    ## it should return a value of 42 for the test below
-    ##
-    ## Note that vsnprintf fails in two different ways:
-    ##         - In IRIX64, calls to vnsprintf() with a formatted string that
-    ##                 is larger than the buffer size allowed incorrectly
-    ##                 return the size of the buffer minus one.
-    ##         - In HP/UX, calls to vsnprintf() with a formatted string that
-    ##                 is larger than the buffer size allowed incorrectly
-    ##                 return (-1)
-    AC_MSG_CHECKING([if vsnprintf returns correct value])
-
-    AC_CACHE_VAL([hdf5_cv_vsnprintf_works],
-        AC_TRY_RUN([
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-int test_vsnprintf(const char *fmt,...)
-{
-    va_list     ap;
-    char *s = malloc(16);
-    int ret;
-
-    va_start(ap, fmt);
-    ret=vsnprintf(s,16,"%s",ap);
-    va_end(ap);
-
-    return(ret!=42 ? 1 : 0);
-}
-
-int main(void)
-{
-    exit(test_vsnprintf("%s","A string that is longer than 16 characters"));
-}
-   ],[hdf5_cv_vsnprintf_works=yes],[hdf5_cv_vsnprintf_works=no],))
-
-       if test ${hdf5_cv_vsnprintf_works} = "yes"; then
-          AC_MSG_RESULT([yes])
-          AC_DEFINE([VSNPRINTF_WORKS], [1],
-                    [Define if vsnprintf() returns the correct value for formatted strings that don't fit into size allowed])
-       else
-          AC_MSG_RESULT([no])
-       fi
-    ,)
+AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
 
 ## ----------------------------------------------------------------------
 ## Check that a lone colon can be used as an argument
