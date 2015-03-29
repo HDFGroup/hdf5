@@ -70,6 +70,11 @@ class H5_DLLCPP CommonFG {
 	H5O_type_t childObjType(const char* objname) const;
 	H5O_type_t childObjType(hsize_t index, H5_index_t index_type=H5_INDEX_NAME, H5_iter_order_t order=H5_ITER_INC, const char* objname=".") const;
 
+	// Returns the object header version of an object in this file or group,
+	// given the object's name.
+	unsigned childObjVersion(const char* objname) const;
+	unsigned childObjVersion(const H5std_string& objname) const;
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Returns the type of an object in this group, given the
 	// object's index.

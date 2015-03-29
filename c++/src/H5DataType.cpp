@@ -226,6 +226,7 @@ void DataType::copy(const DataSet& dset)
 //		characteristics as the original one, specifically, if the
 //		rhs represents a named datatype, "this" would still be a
 //		transient datatype.
+//		BMR - Mar, 2015
 //--------------------------------------------------------------------------
 DataType& DataType::operator=( const DataType& rhs )
 {
