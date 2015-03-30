@@ -280,8 +280,8 @@ main(void)
         assert(ret > 0);
 
     /* Create FAPL for the elink FAPL */
-    if((fapl1 = ret = H5Pcreate(ret = H5P_FILE_ACCESS)) < 0)
-        assert(ret > 0);
+    if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        assert(fapl1 > 0);
     if((ret = H5Pset_alignment(fapl1, 2, 1024)) < 0)
         assert(ret > 0);
 
