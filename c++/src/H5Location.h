@@ -167,6 +167,10 @@ class H5_DLLCPP H5Location : public IdComponent {
 	// Retrieves the type of object that an object reference points to.
 	H5O_type_t p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const;
 
+        // Sets the identifier of this object to a new value. - this one
+        // doesn't increment reference count
+        virtual void p_setId(const hid_t new_id) = 0;
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Noop destructor.

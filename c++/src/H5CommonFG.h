@@ -164,6 +164,10 @@ class H5_DLLCPP CommonFG {
 
 	// Noop destructor.
 	virtual ~CommonFG();
+
+    protected:
+	virtual void p_setId(const hid_t new_id) = 0;
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end of CommonFG declaration

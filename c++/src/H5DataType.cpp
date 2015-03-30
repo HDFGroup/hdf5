@@ -71,6 +71,7 @@ DataType::DataType() : H5Object(), id(H5I_INVALID_HID) {}
 DataType::DataType(const hid_t existing_id) : H5Object()
 {
     id = existing_id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -490,8 +491,9 @@ DataType DataType::getSuper() const
    // the base type, otherwise, raise exception
    if( base_type_id > 0 )
    {
-      DataType base_type( base_type_id );
-      return( base_type );
+	DataType base_type;
+	base_type.p_setId(base_type_id);
+	return(base_type);
    }
    else
    {

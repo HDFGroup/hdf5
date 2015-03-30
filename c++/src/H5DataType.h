@@ -136,6 +136,9 @@ class H5_DLLCPP DataType : public H5Object {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
+	// Friend function to set DataType id.  For library use only.
+	friend void f_DataType_setId(DataType* dtype, hid_t new_id);
+
 	void p_commit(hid_t loc_id, const char* name);
 };
 #ifndef H5_NO_NAMESPACE

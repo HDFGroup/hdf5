@@ -258,6 +258,7 @@ void PropList::p_setId(const hid_t new_id)
    // reset object's id to the given id
    id = new_id;
 }
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------

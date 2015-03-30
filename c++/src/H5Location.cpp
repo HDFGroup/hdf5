@@ -126,8 +126,9 @@ Attribute H5Location::createAttribute( const char* name, const DataType& data_ty
    // If the attribute id is valid, create and return the Attribute object
    if( attr_id > 0 )
    {
-      Attribute attr( attr_id );
-      return( attr );
+	Attribute attr;
+	f_Attribute_setId(&attr, attr_id);
+	return( attr );
    }
    else
       throw AttributeIException(inMemFunc("createAttribute"), "H5Acreate2 failed");
@@ -158,8 +159,9 @@ Attribute H5Location::openAttribute( const char* name ) const
    hid_t attr_id = H5Aopen(getId(), name, H5P_DEFAULT);
    if( attr_id > 0 )
    {
-      Attribute attr( attr_id );
-      return( attr );
+	Attribute attr;
+	f_Attribute_setId(&attr, attr_id);
+	return( attr );
    }
    else
    {
@@ -193,12 +195,13 @@ Attribute H5Location::openAttribute( const unsigned int idx ) const
 			H5_ITER_INC, (hsize_t)idx, H5P_DEFAULT, H5P_DEFAULT);
    if( attr_id > 0 )
    {
-      Attribute attr( attr_id );
-      return( attr );
+	Attribute attr( attr_id );
+	f_Attribute_setId(&attr, attr_id);
+	return(attr);
    }
    else
    {
-      throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_by_idx failed");
+	throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_by_idx failed");
    }
 }
 
@@ -904,6 +907,12 @@ H5O_type_t H5Location::p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const
 ///\return	DataSpace object
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - May, 2004
+// Modification
+//	Mar 29, 2015
+//		Used friend function to set id for DataSpace instead of the
+//		existing id constructor or the setId method to avoid incrementing
+//		ref count, as a work-around for a problem described in the JIRA
+//		issue HDFFV-7947. -BMR
 //--------------------------------------------------------------------------
 DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
 {
@@ -913,8 +922,9 @@ DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
       throw ReferenceException(inMemFunc("getRegion"), "H5Rget_region failed");
    }
    try {
-      DataSpace dataspace(space_id);
-      return(dataspace);
+	DataSpace dataspace;
+	f_DataSpace_setId(&dataspace, space_id);
+	return(dataspace);
    }
    catch (DataSpaceIException E) {
       throw ReferenceException(inMemFunc("getRegion"), E.getDetailMsg());
@@ -928,6 +938,36 @@ DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Location::~H5Location() {}
+
+//--------------------------------------------------------------------------
+// Function:	f_Attribute_setId - friend
+// Purpose:	This function is friend to class H5::Attribute so that it
+//		can set Attribute::id in order to work around a problem
+//		described in the JIRA issue HDFFV-7947.
+//		Applications shouldn't need to use it.
+// param	attr   - IN/OUT: Attribute object to be changed
+// param	new_id - IN: New id to set
+// Programmer	Binh-Minh Ribler - 2015
+//--------------------------------------------------------------------------
+void f_Attribute_setId(Attribute* attr, hid_t new_id)
+{
+    attr->id = new_id;
+}
+
+//--------------------------------------------------------------------------
+// Function:	f_DataSpace_setId - friend
+// Purpose:	This function is friend to class H5::DataSpace so that it can
+//		can set DataSpace::id in order to work around a problem
+//		described in the JIRA issue HDFFV-7947.
+//		Applications shouldn't need to use it.
+// param	dspace   - IN/OUT: DataSpace object to be changed
+// param	new_id - IN: New id to set
+// Programmer	Binh-Minh Ribler - 2015
+//--------------------------------------------------------------------------
+void f_DataSpace_setId(DataSpace* dspace, hid_t new_id)
+{
+    dspace->id = new_id;
+}
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
