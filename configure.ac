@@ -1538,18 +1538,18 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
   AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
 
   AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
-        [AC_TRY_RUN([
-        #include <szlib.h>
-        
-        int main(void)
-        {       
+        [AC_RUN_IFELSE(
+            [AC_LANG_PROGRAM([
+                #include "szlib.h"
+            ],[[
                 /* SZ_encoder_enabled returns 1 if encoder is present */
-            if(SZ_encoder_enabled() == 1)
-                exit(0);
-            else
-                exit(1);
-        }
-        ], [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)])
+                if(SZ_encoder_enabled() == 1)
+                    exit(0);
+                else
+                    exit(1);
+            ]])]
+        , [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)]
+   )
     
   AC_DEFINE([HAVE_FILTER_SZIP], [1], 
             [Define if support for szip filter is enabled])
@@ -1728,15 +1728,12 @@ if test "X$THREADSAFE" = "Xyes"; then
             #include <pthread.h>
             #endif
         ],[
-            int main(void)
-            {
               pthread_attr_t attribute;
               int ret;
 
               pthread_attr_init(&attribute);
               ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
               exit(ret==0 ? 0 : 1);
-            }
         ])]
       , [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no], [hdf5_cv_system_scope_threads=no])])
 
@@ -1931,19 +1928,18 @@ AC_MSG_CHECKING([how to print long long])
 AC_CACHE_VAL([hdf5_cv_printf_ll], [
 
 for hdf5_cv_printf_ll in l ll L q unknown; do
-   AC_TRY_RUN([
-     #include <stdio.h>
-     #include <stdlib.h>
-     #include <string.h>
-
-     int main(void)
-     {
-	char *s = malloc(128);
-	long long x = (long long)1048576 * (long long)1048576;
-	sprintf(s,"%${hdf5_cv_printf_ll}d",x);
-	exit(strcmp(s,"1099511627776"));
-     }
-   ], [break],,[continue])
+   AC_RUN_IFELSE(
+        [AC_LANG_PROGRAM([
+            #include <stdio.h>
+            #include <stdlib.h>
+            #include <string.h>
+        ],[[
+            char *s = malloc(128);
+            long long x = (long long)1048576 * (long long)1048576;
+            sprintf(s,"%${hdf5_cv_printf_ll}d",x);
+            exit(strcmp(s,"1099511627776"));
+        ]])]
+   , [break],,[continue])
 done])
 
 AC_MSG_RESULT([%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u])
