@@ -2333,6 +2333,8 @@
 ./hl/tools/gif2h5/writehdf.c
 ./hl/tools/gif2h5/h52gifgentst.c
 ./hl/tools/gif2h5/h52giftest.sh.in
+./hl/tools/gif2h5/testfiles/REAMDE
+./hl/tools/gif2h5/testfiles/ex_image2.h5
 ./hl/tools/gif2h5/testfiles/image1.gif
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
 
