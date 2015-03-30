@@ -134,19 +134,20 @@ CONTAINS
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_TEST_DLL)
-!DEC$attributes dllexport :: verify_INTEGER_HID_T
+!DEC$attributes dllexport :: verify_Fortran_INTEGER_4
 !DEC$endif
-  SUBROUTINE verify_INTEGER_HID_T(string,value,correct_value,total_error)
-    USE HDF5	
+  SUBROUTINE verify_Fortran_INTEGER_4(string,value,correct_value,total_error)
+    USE HDF5
+    INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  ! should map to INTEGER*4 on most modern processors	
     CHARACTER(LEN=*) :: string
-    INTEGER(HID_T) :: value, correct_value
+    INTEGER(int_kind_8) :: value, correct_value
     INTEGER :: total_error
     IF (value .NE. correct_value) THEN
        total_error=total_error+1
        WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
     ENDIF
     RETURN
-  END SUBROUTINE verify_INTEGER_HID_T
+  END SUBROUTINE verify_Fortran_INTEGER_4
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_TEST_DLL)
