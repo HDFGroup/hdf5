@@ -51,7 +51,7 @@ subroutine h5immake_image_8bit_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5immake_image_8bit_f
 !DEC$endif
 !
@@ -115,7 +115,7 @@ subroutine h5imread_image_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imread_image_f
 !DEC$endif
 !
@@ -175,7 +175,7 @@ subroutine h5immake_image_24bit_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5immake_image_24bit_f
 !DEC$endif
 !
@@ -249,7 +249,7 @@ subroutine h5imget_image_info_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imget_image_info_f
 !DEC$endif
 !
@@ -317,7 +317,7 @@ integer function h5imis_image_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imis_image_f
 !DEC$endif
 !
@@ -375,7 +375,7 @@ subroutine h5immake_palette_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5immake_palette_f
 !DEC$endif
 !
@@ -436,7 +436,7 @@ subroutine h5imlink_palette_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imlink_palette_f
 !DEC$endif
 !
@@ -497,7 +497,7 @@ subroutine h5imunlink_palette_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imunlink_palette_f
 !DEC$endif
 !
@@ -561,7 +561,7 @@ subroutine h5imget_npalettes_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imget_npalettes_f
 !DEC$endif
 !
@@ -621,7 +621,7 @@ subroutine h5imget_palette_info_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imget_palette_info_f
 !DEC$endif
 !
@@ -684,7 +684,7 @@ subroutine h5imget_palette_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imget_palette_f
 !DEC$endif
 !
@@ -742,7 +742,7 @@ integer function h5imis_palette_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imis_palette_f
 !DEC$endif
 !
