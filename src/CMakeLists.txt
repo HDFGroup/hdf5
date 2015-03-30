@@ -611,7 +611,7 @@ set (H5_PRIVATE_HEADERS
 # specific type checks inside
 #-----------------------------------------------------------------------------
 add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
-TARGET_C_PROPERTIES (H5detect ${LIB_TYPE} " " " ")
+TARGET_C_PROPERTIES (H5detect STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
 endif (MSVC OR MINGW)
@@ -625,7 +625,7 @@ add_custom_command (
 )
 
 add_executable (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
-TARGET_C_PROPERTIES (H5make_libsettings ${LIB_TYPE} " " " ")
+TARGET_C_PROPERTIES (H5make_libsettings STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
 endif (MSVC OR MINGW)

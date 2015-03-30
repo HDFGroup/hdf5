@@ -47,7 +47,7 @@ Files in the HDF5 install directory:
        
 Default installation process:
        Create a directory to run the examples, i.e. \test_hdf5.
-       Copy HDF5Examples-0.1.1-Source.zip(.tar.gz) to this directory, do NOT unzip.
+       Copy HDF5Examples-0.1.1-Source.zip(.tar.gz) to this directory, uncompress.
        Copy HDF518_Examples.cmake to this directory.
        Edit line 8 of the HDF518_Examples.cmake file and change the INSTALLDIR 
            to the HDF5 install location.
@@ -55,7 +55,7 @@ Default installation process:
        Execute from this directory:
           ctest -S HDF518_Examples.cmake,HDF5Examples-0.1.1-Source -C Release -O test.log
 
-The script will uncompress the examples file HDF5Examples-0.1.1-Source.zip(.tar.gz),
+The script will use the examples folder HDF5Examples-0.1.1-Source,
    and create a build directory inside the HDF5Examples-0.1.1-Source directory.
    It will then configure, build, and execute the examples. All the log files
    will be found under the build\Testing\Temporary directory, check these for
@@ -75,9 +75,9 @@ Line 14: uncomment to allow Mac machines to build shared examples.
 
 Line 15: uncomment to build and test Fortran examples.
 
-Line 16: uncomment to build and test Fortran examples with F2003 option.
+Line 16: comment to NOT build and test Fortran examples with F2003 option.
 
-Line 17: comment to use an existing source directory.
+Line 17: uncomment to use a compressed source file.
 
 Line 71: change the CTEST_7Z_COMMAND to a different unzip program.
 

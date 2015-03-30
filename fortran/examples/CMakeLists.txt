@@ -90,8 +90,12 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
       ${HDF5_LIB_TARGET}
       ${MPI_Fortran_LIBRARIES}
   )
-  set_target_properties (f90_ex_ph5example PROPERTIES LINKER_LANGUAGE Fortran)
-  set_target_properties (f90_ex_ph5example PROPERTIES FOLDER examples/fortran)
+  target_include_directories (f90_ex_ph5example PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  set_target_properties (f90_ex_ph5example PROPERTIES
+      LINKER_LANGUAGE Fortran
+      FOLDER examples/fortran
+      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+  )
 endif (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 
 if (BUILD_TESTING)

@@ -542,15 +542,14 @@ The config/cmake/cacheinit.cmake file overrides the following values.
 ---------------- General Build Options ---------------------
 BUILD_SHARED_LIBS  "Build Shared Libraries"    OFF
 BUILD_STATIC_EXECS "Build Static Executabless" OFF
-BUILD_STATIC_PIC   "Build Static PIC"          OFF
 BUILD_TESTING      "Build HDF5 Unit Testing"   OFF
 
 ---------------- HDF5 Build Options ---------------------
-HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library"         OFF
-HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples"    OFF
+HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library"         ON
+HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples"    ON
 HDF5_BUILD_FORTRAN  "Build FORTRAN support"          OFF
-HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  OFF
-HDF5_BUILD_TOOLS    "Build HDF5 Tools"               OFF
+HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  ON
+HDF5_BUILD_TOOLS    "Build HDF5 Tools"               ON
 if (HDF5_BUILD_FORTRAN) 
     HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" ON
 
@@ -574,7 +573,6 @@ HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"   
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  OFF
-HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                          OFF
 if (APPLE) 

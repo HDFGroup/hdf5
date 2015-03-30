@@ -33,13 +33,13 @@ if (HDF5_BUILD_PERFORM_STANDALONE)
       ${HDF5_PERFORM_SOURCE_DIR}/sio_engine.c
   )
   add_executable (h5perf_serial_alone ${h5perf_serial_alone_SRCS})
-  set_property (TARGET h5perf_serial_alone 
-      APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
-  )
   TARGET_NAMING (h5perf_serial_alone ${LIB_TYPE})
   TARGET_C_PROPERTIES (h5perf_serial_alone ${LIB_TYPE} " " " ")
   target_link_libraries (h5perf_serial_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (h5perf_serial_alone PROPERTIES FOLDER perform)
+  set_property (TARGET h5perf_serial_alone 
+      APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
+  )
 endif (HDF5_BUILD_PERFORM_STANDALONE)
 
 #-- Adding test for chunk
@@ -113,13 +113,13 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
         ${HDF5_PERFORM_SOURCE_DIR}/pio_engine.c
     )
     add_executable (h5perf_alone ${h5perf_alone_SRCS})
-    set_property (TARGET h5perf_alone 
-        APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
-    )
     TARGET_NAMING (h5perf_alone ${LIB_TYPE})
     TARGET_C_PROPERTIES (h5perf_alone ${LIB_TYPE} " " " ")
     target_link_libraries (h5perf_alone ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     set_target_properties (h5perf_alone PROPERTIES FOLDER perform)
+    set_property (TARGET h5perf_alone 
+        APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
+    )
   endif (HDF5_BUILD_PERFORM_STANDALONE)
 endif (H5_HAVE_PARALLEL AND BUILD_TESTING)
 
