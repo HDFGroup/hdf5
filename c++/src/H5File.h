@@ -84,6 +84,10 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 	// Gets the file id
 	virtual hid_t getLocId() const;
 
+	// Creates an H5File using an existing file id.  Not recommended
+	// in applications.
+	H5File(hid_t existing_id);
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	///\brief Returns this class name.

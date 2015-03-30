@@ -330,6 +330,32 @@ static void test_file_open()
         verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
         verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
 
+	// Test H5File constructor with existing file id
+	H5File file2(file1.getId());
+	file1.close();
+
+	// Try truncating the file, and it should fail because the file is
+	// still opened with file2.
+    	try {
+	    H5File file3 (FILE2, H5F_ACC_TRUNC);  // should throw E
+
+	    // Should FAIL but didn't, so throw an invalid action exception
+	    throw InvalidActionException("H5File constructor", "Attempt truncating an opened file.");
+    	}
+	catch( FileIException E ) // catching H5F_ACC_TRUNC on opened file
+	{} // do nothing, FAIL expected
+
+	// Now, really close the file.
+	file2.close();
+
+	// Truncating should succeed now.
+	H5File file3(FILE2, H5F_ACC_TRUNC);
+
+	// Opening another file to file3 object, FILE2 should be closed, so
+	// the next attempt to truncate FILE2 should succeed.
+	file3.openFile(FILE1, H5F_ACC_RDONLY);
+	H5File file4(FILE2, H5F_ACC_TRUNC);
+
 	PASSED();
     }   // end of try block
 
