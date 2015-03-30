@@ -507,7 +507,7 @@ CONTAINS
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5dsget_num_scales_f
 !DEC$endif
 !
