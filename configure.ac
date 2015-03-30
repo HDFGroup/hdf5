@@ -1228,15 +1228,6 @@ case $withval in
         ;;
     esac
 
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$dmalloc_inc" = "X/usr/include"; then
-      dmalloc_inc=""
-    fi
-    if test "X$dmalloc_lib" = "X/usr/lib"; then
-      dmalloc_lib=""
-    fi
-
     saved_CPPFLAGS="$CPPFLAGS"
     saved_AM_CPPFLAGS="$AM_CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
@@ -1311,15 +1302,6 @@ case $withval in
         fi
         ;;
     esac
-
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$zlib_inc" = "X/usr/include"; then
-      zlib_inc=""
-    fi
-    if test "X$zlib_lib" = "X/usr/lib"; then
-      zlib_lib=""
-    fi
 
     saved_CPPFLAGS="$CPPFLAGS"
     saved_AM_CPPFLAGS="$AM_CPPFLAGS"
@@ -1410,15 +1392,6 @@ case $withval in
         fi
         ;;
     esac
-    
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$szlib_inc" = "X/usr/include"; then
-      szlib_inc=""
-    fi 
-    if test "X$szlib_lib" = "X/usr/lib"; then
-      szlib_lib=""
-    fi
     
     saved_CPPFLAGS="$CPPFLAGS"
     saved_AM_CPPFLAGS="$AM_CPPFLAGS"
@@ -1601,15 +1574,6 @@ if test "X$THREADSAFE" = "Xyes"; then
             fi
             ;;
         esac
-
-        ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-        ## can mess some compilers up.
-        if test "X$pthread_inc" = "X/usr/include"; then
-          pthread_inc=""
-        fi
-        if test "X$pthread_lib" = "X/usr/lib"; then
-          pthread_lib=""
-        fi
 
         if test -n "$pthread_inc"; then
           saved_CPPFLAGS="$CPPFLAGS"
@@ -2256,15 +2220,6 @@ if test -n "$PARALLEL"; then
           fi
           ;;
       esac
-  
-      ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-      ## can mess some compilers up.
-      if test "X$mpe_inc" = "X/usr/include"; then
-        mpe_inc=""
-      fi
-      if test "X$mpe_lib" = "X/usr/lib"; then
-        mpe_lib=""
-      fi
   
       if test -n "$mpe_inc"; then
         saved_CPPFLAGS="$CPPFLAGS"
