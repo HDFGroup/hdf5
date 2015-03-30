@@ -568,10 +568,6 @@
 /* Version number of package */
 #undef VERSION
 
-/* Define if vsnprintf() returns the correct value for formatted strings that
-   don't fit into size allowed */
-#undef VSNPRINTF_WORKS
-
 /* Data accuracy is prefered to speed during data conversions */
 #undef WANT_DATA_ACCURACY
 

@@ -1397,17 +1397,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
-    while((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap))
-#ifdef H5_VSNPRINTF_WORKS
-            >
-#else /* H5_VSNPRINTF_WORKS */
-            >=
-#endif /* H5_VSNPRINTF_WORKS */
-            (tmp_len - 1)
-#ifndef H5_VSNPRINTF_WORKS
-            || (desc_len < 0)
-#endif /* H5_VSNPRINTF_WORKS */
-            ) {
+    while((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap)) > (tmp_len - 1)) {
         /* shutdown & restart the va_list */
         va_end(ap);
         va_start(ap, fmt);
@@ -1416,11 +1406,7 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
         H5MM_xfree(tmp);
 
         /* Allocate a description of the appropriate length */
-#ifdef H5_VSNPRINTF_WORKS
         tmp_len = desc_len + 1;
-#else /* H5_VSNPRINTF_WORKS */
-        tmp_len = 2 * tmp_len;
-#endif /* H5_VSNPRINTF_WORKS */
         if(NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end while */
