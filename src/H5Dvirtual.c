@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -473,12 +472,12 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         if(H5S_select_project_intersection(file_space, mem_space, storage->list[i].virtual_select, &projected_mem_space) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto memory space")
 
-            /* Get number of elements in projected dataspace */
+        /* Get number of elements in projected dataspace */
         if((select_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(projected_mem_space)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get number of elements in selection")
 
         /* Only perform I/O if there are any elements */
-        if(nelmts > 0) {
+        if(select_nelmts > 0) {
             /* Open source dataset */
             if(!storage->list[i].source_dset) {
                 /* Try to open dataset */
@@ -585,7 +584,7 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get number of elements in selection")
 
         /* Only perform I/O if there are any elements */
-        if(nelmts > 0) {
+        if(select_nelmts > 0) {
             /* Open source dataset, fail if cannot open */
             if(!storage->list[i].source_dset) {
                 //VDSINC check all source datasets before any I/O
@@ -655,6 +654,8 @@ H5D__virtual_flush(H5D_t UNUSED *dset, hid_t UNUSED dxpl_id)
 {
     FUNC_ENTER_STATIC_NOERR
 
+    /* Need to decide what to do here - flush only open datasets, try to flush
+     * all, or do nothing and rely on source datasets to flush themselves? */
     /* No-op for now VDSINC */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
