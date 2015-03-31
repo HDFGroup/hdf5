@@ -753,79 +753,6 @@ case "X-$RPATH" in
 esac
 
 ## ----------------------------------------------------------------------
-## Sometimes makes think the `.PATH:' appearing before the first rule
-## with an action should override the `all' default target. So we have
-## to decide what the proper syntax is.
-##
-AC_MSG_CHECKING([how make searches directories])
-while true; do #for break
-  ## The most common method is `VPATH=DIR1 DIR2 ...'
-  cat >maketest <<EOF
-VPATH=$srcdir/config $srcdir/src $srcdir/bin
-.c.o:
-	cp $< H5.o
-
-foo: H5.o
-	rm -f H5.o
-	@echo works
-EOF
-
-  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    SEARCH_RULE='VPATH='
-    SEARCH_SEP=' '
-    AC_MSG_RESULT([VPATH=DIR1 DIR2 ...])
-    break
-  fi
-
-  ## The second most common method is like above except with the
-  ## directories separated by colons.
-  cat >maketest <<EOF
-VPATH=$srcdir/config:$srcdir/src:$srcdir/bin
-.c.o:
-	cp $< H5.o
-
-foo: H5.o
-	rm -f H5.o
-	@echo works
-EOF
-
-  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    SEARCH_RULE='VPATH='
-    SEARCH_SEP=':'
-    AC_MSG_RESULT([VPATH=DIR1:DIR2:...])
-    break
-  fi
-
-  ## pmake uses the construct `.PATH: DIR1 DIR2
-  cat >maketest <<EOF
-.PATH: $srcdir/config $srcdir/src $srcdir/bin
-.c.o:
-	cp $< H5.o
-
-foo: H5.o
-	rm -f H5.o
-	@echo works
-EOF
-
-  if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    SEARCH_RULE='.PATH: '
-    SEARCH_SEP=' '
-    AC_MSG_RESULT([.PATH: DIR1 DIR2 ...])
-    break
-  fi
-
-  ## No way for make to search directories
-  SEARCH_RULE='## SEARCH DISABLED: '
-  SEARCH_SEP=' '
-  AC_MSG_RESULT([it doesn't])
-  if test ! -f configure; then
-    AC_MSG_ERROR([${MAKE-make} requires the build and source directories to be the same])
-  fi
-  break
-done
-rm maketest
-
-## ----------------------------------------------------------------------
 ## pmake will throw an error if variables are undefined in a Makefile.
 ## These errors can be changed to warnings using the -V flag.
 ##
@@ -1744,32 +1671,6 @@ AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
-
-## ----------------------------------------------------------------------
-## Check that a lone colon can be used as an argument
-## This is not true on Cray X1, which interprets a lone colon as a
-## system command.
-##
-AC_CACHE_CHECK([if lone colon can be used as an argument],
-               [hdf5_cv_lone_colon],
-               [
-  echo "int main(int argc, char * argv[]) {return 0;}" > conftest.c
-  $CC $CFLAGS conftest.c -o a.out> /dev/null 2> /dev/null
-  echo "./a.out :" > conftest.sh
-  chmod 700 conftest.sh
-
-  ./conftest.sh 2> conftest.out
-  rm -f a.out
-  TEST_OUTPUT=`cat conftest.out`
-
-  if test "X$TEST_OUTPUT" = "X"; then
-    hdf5_cv_lone_colon=yes
-  else
-    hdf5_cv_lone_colon=no
-  fi
-               ])
-
-AC_SUBST([H5_LONE_COLON]) H5_LONE_COLON="$hdf5_cv_lone_colon"
 
 ## ----------------------------------------------------------------------
 ## Check compiler characteristics
@@ -2829,8 +2730,6 @@ AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 
 ## The directory search list
 AC_SUBST([SEARCH]) SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
-cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
-SEARCH="$SEARCH_RULE`eval $cmd`"
 export SEARCH
 
 ## Some cleanup stuff
