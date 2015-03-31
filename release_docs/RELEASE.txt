@@ -315,6 +315,8 @@ Bug Fixes since HDF5-1.8.14
 
     Tools
     -----
+    - Fixed h52gif crashed if instructed to convert images other than 8bit
+      images. (AKC - 2015/03/31, HDFFV-8957)
     - Benchpar.c in perform is retired. (AKC - 2014/12/19, HDFFV-8156)
     - The perform directory is moved to tools/perform for easier maintenance.
       (AKC - 2014/12/17, HDFFV-9046)
