@@ -69,7 +69,7 @@ static herr_t H5D__virtual_write(H5D_io_info_t *io_info,
 static herr_t H5D__virtual_flush(H5D_t *dset, hid_t dxpl_id);
 
 /* Other functions */
-static htri_t H5D__virtual_open_source_dset(const H5D_t *vdset,
+static herr_t H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_ent_t *virtual_ent, hid_t dxpl_id);
 
 
@@ -191,14 +191,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static htri_t
+static herr_t
 H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_ent_t *virtual_ent, hid_t dxpl_id)
 {
     H5F_t       *src_file = NULL;       /* Source file */
     hbool_t     src_file_open = FALSE;  /* Whether we have opened and need to close src_file */
     H5G_loc_t   src_root_loc;           /* Object location of source file root group */
-    htri_t      ret_value = TRUE;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -207,7 +207,8 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     HDassert(!virtual_ent->source_dset);
 
     /* Get dapl and fapl from current (virtual dataset) location? VDSINC */
-    /* Write code to check if these exist and return FALSE otherwise VDSINC */
+    /* Write code to check if these exist and return without opening dset
+     * otherwise VDSINC */
 
     /* Check if we need to open the source file */
     if(HDstrcmp(virtual_ent->source_file_name, ".")) {
@@ -447,7 +448,6 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5S_t       *projected_mem_space = NULL; /* Memory space for selection in a single mapping */
     H5S_t       *projected_src_space = NULL; /* File space for selection in a single source dataset */
     hssize_t    select_nelmts;              /* Number of elements in selection */
-    htri_t      opened_dset;                /* Whether we opened the source dataset */
     size_t      i;                          /* Local index variable */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
@@ -479,18 +479,16 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         /* Only perform I/O if there are any elements */
         if(select_nelmts > 0) {
             /* Open source dataset */
-            if(!storage->list[i].source_dset) {
+            if(!storage->list[i].source_dset)
                 /* Try to open dataset */
-                if((opened_dset = H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], io_info->dxpl_id)) < 0)
+                if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], io_info->dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
-
-                if(opened_dset)
-                    /* Sanity check that the source space has been patched by now */
-                    HDassert(storage->list[i].source_space_status == H5O_VIRTUAL_STATUS_CORRECT);
-            } /* end if */
 
             /* Check if source dataset is open */
             if(storage->list[i].source_dset) {
+                /* Sanity check that the source space has been patched by now */
+                HDassert(storage->list[i].source_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+
                 /* Project intersection of file space and mapping virtual space onto
                  * mapping source space */
                 if(H5S_select_project_intersection(storage->list[i].virtual_select, storage->list[i].source_select, file_space, &projected_src_space) < 0)
@@ -515,6 +513,9 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected memory space")
         projected_mem_space = NULL;
     } /* end for */
+
+    /* Fill unmapped part of buffer with fill value.  Keep track of total number
+     * elements written to memory buffer and assert that it == nelmts */
 
 done:
     /* Release allocated resources on failure */
@@ -554,7 +555,6 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5S_t       *projected_mem_space = NULL; /* Memory space for selection in a single mapping */
     H5S_t       *projected_src_space = NULL; /* File space for selection in a single source dataset */
     hssize_t    select_nelmts;              /* Number of elements in selection */
-    htri_t      opened_dset;                /* Whether we opened the source dataset */
     size_t      i;                          /* Local index variable */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
@@ -588,14 +588,14 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             /* Open source dataset, fail if cannot open */
             if(!storage->list[i].source_dset) {
                 //VDSINC check all source datasets before any I/O
-                if((opened_dset = H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], io_info->dxpl_id)) < 0)
+                if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], io_info->dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
-                if(!opened_dset)
+                if(!storage->list[i].source_dset)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "did not open source dataset")
-
-                /* Sanity check that source space has been patched by now */
-                HDassert(storage->list[i].source_space_status == H5O_VIRTUAL_STATUS_CORRECT);
             } /* end if */
+
+            /* Sanity check that source space has been patched by now */
+            HDassert(storage->list[i].source_space_status == H5O_VIRTUAL_STATUS_CORRECT);
 
             /* Extend source dataset if necessary and there is an unlimited
              * dimension VDSINC */
@@ -654,8 +654,7 @@ H5D__virtual_flush(H5D_t UNUSED *dset, hid_t UNUSED dxpl_id)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    /* Need to decide what to do here - flush only open datasets, try to flush
-     * all, or do nothing and rely on source datasets to flush themselves? */
+    /* Flush only open datasets */
     /* No-op for now VDSINC */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

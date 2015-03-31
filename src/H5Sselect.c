@@ -2128,7 +2128,6 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     const H5S_t *src_intersect_space, H5S_t **new_space_ptr)
 {
     H5S_t *new_space = NULL;           /* New dataspace constructed */
-    unsigned i;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2146,8 +2145,7 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy destination space extent")
 
     /* Set offset to zeros */
-    for(i = 0; i < new_space->extent.rank; i++)
-        new_space->select.offset[i] = 0;
+    (void)HDmemset(new_space->select.offset, 0, (size_t)new_space->extent.rank * sizeof(new_space->select.offset[0]));
     new_space->select.offset_changed = FALSE;
 
     /* If the intersecting space is "all", the intersection must be equal to the

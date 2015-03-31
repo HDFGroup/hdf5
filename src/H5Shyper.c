@@ -8963,10 +8963,8 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
     /* Calculate proj_down_dims (note loop relies on unsigned i wrapping around)
      */
-    proj_down_dims[proj_rank - 1] = proj_space->extent.size[proj_rank - 1];
-    if(proj_rank > 1)
-        for(i = proj_rank - 2; i < proj_rank; i--)
-            proj_down_dims[i] =  proj_space->extent.size[i] * proj_down_dims[i + 1];
+    if(H5VM_array_down(proj_rank, proj_space->extent.size, proj_down_dims) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
 
     /* Remove current selection from proj_space */
     if(H5S_SELECT_RELEASE(proj_space) < 0)
@@ -9137,7 +9135,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                      * the plane of the span currently being built (i.e. it's
                      * finished being built) */
                     for(i = proj_rank - 1; ((i > 0)
-                            && (((proj_off / proj_down_dims[i])
+                            && (((proj_off / proj_down_dims[i - 1])
                             % proj_space->extent.size[i])
                             != curr_span_dim[i - 1])); i--) {
                         if(curr_span_tree[i]) {
@@ -9158,7 +9156,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                         } /* end if */
 
                         /* Update curr_span_dim */
-                        curr_span_dim[i - 1] = (proj_off / proj_down_dims[i]) % proj_space->extent.size[i];
+                        curr_span_dim[i - 1] = (proj_off / proj_down_dims[i - 1]) % proj_space->extent.size[i];
                     } /* end for */
 
                     /* Compute bounds for new span in lowest dimension */
