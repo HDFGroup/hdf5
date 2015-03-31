@@ -104,6 +104,7 @@ $SRC_H5DUMP_TESTFILES/tcmpdattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tcmpdintsize.h5
 $SRC_H5DUMP_TESTFILES/tcompound.h5
 $SRC_H5DUMP_TESTFILES/tcompound_complex.h5
+$SRC_H5DUMP_TESTFILES/tcompound_enum.h5
 $SRC_H5DUMP_TESTFILES/tdatareg.h5
 $SRC_H5DUMP_TESTFILES/tdset.h5
 $SRC_H5DUMP_TESTFILES/tempty.h5
@@ -227,6 +228,7 @@ $SRC_H5DUMP_TESTFILES/tcomp-1.ddl
 $SRC_H5DUMP_TESTFILES/tcomp-2.ddl
 $SRC_H5DUMP_TESTFILES/tcomp-3.ddl
 $SRC_H5DUMP_TESTFILES/tcomp-4.ddl
+$SRC_H5DUMP_TESTFILES/tcompound_enum.ddl
 $SRC_H5DUMP_TESTFILES/tcompact.ddl
 $SRC_H5DUMP_TESTFILES/tcontents.ddl
 $SRC_H5DUMP_TESTFILES/tcontiguos.ddl
@@ -1016,6 +1018,7 @@ TOOLTEST tcomp-4.ddl --enable-error-stack tcompound_complex.h5
 #test for the nested compound type
 TOOLTEST tnestcomp-1.ddl --enable-error-stack tnestedcomp.h5
 TOOLTEST tnestedcmpddt.ddl --enable-error-stack tnestedcmpddt.h5
+TOOLTEST tcompound_enum.ddl --enable-error-stack tcompound_enum.h5
 
 # test for options
 TOOLTEST4 tall-1.ddl --enable-error-stack tall.h5

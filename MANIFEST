@@ -1358,6 +1358,7 @@
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
 
 # h5dump test files
+./tools/testfiles/README
 ./tools/testfiles/charsets.h5
 ./tools/testfiles/charsets.ddl
 ./tools/testfiles/family_file00000.h5
@@ -1468,6 +1469,8 @@
 ./tools/testfiles/tcompound.h5
 ./tools/testfiles/tcompound2.h5
 ./tools/testfiles/tcompound_complex.h5
+./tools/testfiles/tcompound_enum.ddl
+./tools/testfiles/tcompound_enum.h5
 ./tools/testfiles/tdatareg.h5
 ./tools/testfiles/tdatareg.ddl 
 ./tools/testfiles/tdataregR.ddl 
