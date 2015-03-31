@@ -109,7 +109,7 @@ STEP()
     (TIMESTAMP; nerror=0 ;
 	echo "eval $command"
 	eval $command || nerror=1 ;
-	TIMESTAMP; exit $nerror) < /dev/null >> "$logfile" 2>&1
+	TIMESTAMP; exit $nerror) < /dev/null > "$logfile" 2>&1
     if [ $? -ne 0 ]; then
 	echo "error in '$banner'.  $progname aborted."
 	exit 1
