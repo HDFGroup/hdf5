@@ -24,6 +24,13 @@
 /* This will only be defined if HDF5 was built with CMake */
 #ifdef H5_BUILT_AS_DYNAMIC_LIB
 
+#ifdef __cplusplus
+#define __attribute__(X)  /*void*/
+#endif /* __cplusplus */
+#ifndef H5_HAVE_ATTRIBUTE
+#define __attribute__(X)  /*void*/
+#endif /* H5_HAVE_ATTRIBUTE */
+
 #if defined(hdf5_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define H5_DLL __declspec(dllexport)
