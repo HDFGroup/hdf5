@@ -588,10 +588,6 @@ HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                        OFF
 HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                    OFF
 ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB" 0
 SZIP_USE_EXTERNAL           "Use External Library Building for SZIP" 0
-HDF5_USE_FILTER_FLETCHER32  "Use the FLETCHER32 Filter"              ON
-HDF5_USE_FILTER_NBIT        "Use the NBIT Filter"                    ON
-HDF5_USE_FILTER_SCALEOFFSET "Use the SCALEOFFSET Filter"             ON
-HDF5_USE_FILTER_SHUFFLE     "Use the SHUFFLE Filter"                 ON
 if (HDF5_ENABLE_SZIP_SUPPORT) 
     HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"      OFF
 if (WINDOWS)

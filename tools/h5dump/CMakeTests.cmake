@@ -1343,22 +1343,14 @@
     set (USE_FILTER_SZIP "true")
   endif (H5_HAVE_FILTER_SZIP)
 
-  set (USE_FILTER_SHUFFLE "true")
-
-  set (USE_FILTER_FLETCHER32 "true")
-
-  set (USE_FILTER_NBIT "true")
-
-  set (USE_FILTER_SCALEOFFSET "true")
-
-  if (USE_FILTER_DEFLATE AND USE_FILTER_SHUFFLE AND USE_FILTER_FLETCHER32 AND USE_FILTER_NBIT AND USE_FILTER_SCALEOFFSET)
+  if (USE_FILTER_DEFLATE)
     # data read internal filters
     ADD_H5_TEST (treadintfilter 0 --enable-error-stack -d deflate -d shuffle -d fletcher32 -d nbit -d scaleoffset tfilters.h5)
     if (HDF5_ENABLE_SZIP_SUPPORT)
       # data read all filters
       ADD_H5_TEST (treadfilter 0 --enable-error-stack -d all -d szip tfilters.h5)
     endif (HDF5_ENABLE_SZIP_SUPPORT)
-  endif (USE_FILTER_DEFLATE AND USE_FILTER_SHUFFLE AND USE_FILTER_FLETCHER32 AND USE_FILTER_NBIT AND USE_FILTER_SCALEOFFSET)
+  endif (USE_FILTER_DEFLATE)
 
   # test for displaying objects with very long names
   ADD_H5_TEST (tlonglinks 0 --enable-error-stack tlonglinks.h5)

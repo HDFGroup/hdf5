@@ -649,14 +649,6 @@
     set (USE_FILTER_SZIP "true")
   endif (H5_HAVE_FILTER_SZIP)
 
-  set (USE_FILTER_SHUFFLE "true")
-
-  set (USE_FILTER_FLETCHER32 "true")
-
-  set (USE_FILTER_NBIT "true")
-
-  set (USE_FILTER_SCALEOFFSET "true")
-  
 # copy files (these files have no filters) 
   ADD_H5_TEST (fill "TEST" ${FILE0})
   ADD_H5_TEST (objs "TEST" ${FILE1})
@@ -701,42 +693,26 @@
 
 # shuffle with individual object
   set (arg ${FILE4} -f dset2:SHUF  -l dset2:CHUNK=20x10)
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SHUFFLE)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SHUFFLE)
-  ADD_H5_TEST (shuffle_individual ${TESTTYPE} ${arg}) 
+  ADD_H5_TEST (shuffle_individual "TEST" ${arg}) 
 
 # shuffle for all
   set (arg ${FILE4} -f SHUF)
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SHUFFLE)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SHUFFLE)
-  ADD_H5_TEST (shuffle_all ${TESTTYPE} ${arg})
+  ADD_H5_TEST (shuffle_all "TEST" ${arg})
   
 # fletcher32  with individual object
   set (arg ${FILE4} -f dset2:FLET  -l dset2:CHUNK=20x10)
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_FLETCHER32)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_FLETCHER32)
-  ADD_H5_TEST (fletcher_individual ${TESTTYPE} ${arg})
+  ADD_H5_TEST (fletcher_individual "TEST" ${arg})
 
 # fletcher32 for all
   set (arg ${FILE4} -f FLET)
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_FLETCHER32)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_FLETCHER32)
-  ADD_H5_TEST (fletcher_all ${TESTTYPE} ${arg})
+  ADD_H5_TEST (fletcher_all "TEST" ${arg})
 
 # all filters
   set (arg ${FILE4} -f dset2:SHUF -f dset2:FLET -f dset2:SZIP=8,NN -f dset2:GZIP=1 -l dset2:CHUNK=20x10)
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SHUFFLE OR NOT USE_FILTER_FLETCHER32 OR NOT USE_FILTER_DEFLATE)
+  if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SHUFFLE OR NOT USE_FILTER_FLETCHER32 OR NOT USE_FILTER_DEFLATE)
+  endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
   ADD_H5_TEST (all_filters ${TESTTYPE} ${arg})
 
 # verbose gzip with individual object
@@ -785,90 +761,50 @@
     
 # shuffle copy
   set (arg ${FILE9})
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SHUFFLE)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SHUFFLE)
-  ADD_H5_TEST (shuffle_copy ${TESTTYPE} ${arg})
+  ADD_H5_TEST (shuffle_copy "TEST" ${arg})
 
 # shuffle remove
   set (arg ${FILE9} -f dset_shuffle:NONE)
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SHUFFLE)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SHUFFLE)
-  ADD_H5_TEST (shuffle_remove ${TESTTYPE} ${arg})
+  ADD_H5_TEST (shuffle_remove "TEST" ${arg})
 
 # fletcher32 copy
   set (arg ${FILE10})
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_FLETCHER32)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_FLETCHER32)
-  ADD_H5_TEST (fletcher_copy ${TESTTYPE} ${arg})
+  ADD_H5_TEST (fletcher_copy "TEST" ${arg})
 
 # fletcher32 remove
   set (arg ${FILE10} -f dset_fletcher32:NONE)
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_FLETCHER32)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_FLETCHER32)
-  ADD_H5_TEST (fletcher_remove ${TESTTYPE} ${arg})
+  ADD_H5_TEST (fletcher_remove "TEST" ${arg})
 
 # nbit copy
   set (arg ${FILE12})
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_NBIT)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_NBIT)
-  ADD_H5_TEST (nbit_copy ${TESTTYPE} ${arg})
+  ADD_H5_TEST (nbit_copy "TEST" ${arg})
 
 # nbit remove
   set (arg ${FILE12} -f dset_nbit:NONE)
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_NBIT)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_NBIT)
-  ADD_H5_TEST (nbit_remove ${TESTTYPE} ${arg})
+  ADD_H5_TEST (nbit_remove "TEST" ${arg})
 
 # nbit add
   set (arg ${FILE12} -f dset_int31:NBIT)
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_NBIT)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_NBIT)
-  ADD_H5_TEST (nbit_add ${TESTTYPE} ${arg})
+  ADD_H5_TEST (nbit_add "TEST" ${arg})
 
 # scaleoffset copy
   set (arg ${FILE13})
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SCALEOFFSET)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SCALEOFFSET)
-  ADD_H5_TEST (scale_copy ${TESTTYPE} ${arg})
+  ADD_H5_TEST (scale_copy "TEST" ${arg})
 
 # scaleoffset add
   set (arg ${FILE13} -f dset_none:SOFF=31,IN)
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SCALEOFFSET)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SCALEOFFSET)
-  ADD_H5_TEST (scale_add ${TESTTYPE} ${arg})
+  ADD_H5_TEST (scale_add "TEST" ${arg})
 
 # scaleoffset remove
   set (arg ${FILE13} -f dset_scaleoffset:NONE)
-  set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_SCALEOFFSET)
-    set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SCALEOFFSET)
-  ADD_H5_TEST (scale_remove ${TESTTYPE} ${arg})
+  ADD_H5_TEST (scale_remove "TEST" ${arg})
 
 # remove all  filters
   set (arg ${FILE11} -f NONE)
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_FLETCHER32 OR NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SHUFFLE OR NOT USE_FILTER_NBIT OR NOT USE_FILTER_SCALEOFFSET)
+  if (NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_FLETCHER32 OR NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SHUFFLE OR NOT USE_FILTER_NBIT OR NOT USE_FILTER_SCALEOFFSET)
+  endif (NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER)
   ADD_H5_TEST (remove_all ${TESTTYPE} ${arg})
 
 #filter conversions
@@ -1000,9 +936,9 @@
 # several global filters
   set (arg ${FILE4} --filter GZIP=1 --filter SHUF)
   set (TESTTYPE "TEST")
-  if (NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_SHUFFLE)
+  if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_SHUFFLE)
+  endif (NOT USE_FILTER_DEFLATE)
   ADD_H5_TEST (global_filters ${TESTTYPE} ${arg})
 
 # syntax of -i infile -o outfile
