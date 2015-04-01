@@ -37,8 +37,8 @@ if (BUILD_TESTING)
   # --------------------------------------------------------------------
   if (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     add_executable (h5diffgentest ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/h5diffgentest.c)
-    TARGET_NAMING (h5diffgentest ${LIB_TYPE})
-    TARGET_C_PROPERTIES (h5diffgentest ${LIB_TYPE} " " " ")
+    TARGET_NAMING (h5diffgentest STATIC)
+    TARGET_C_PROPERTIES (h5diffgentest STATIC " " " ")
     target_link_libraries (h5diffgentest ${HDF5_LIB_TARGET})
     set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
     
