@@ -32,6 +32,7 @@ add_test (
 )
 
 add_test (NAME PERFORM_h5perf_serial COMMAND $<TARGET_FILE:h5perf_serial>)
+set_tests_properties (PERFORM_h5perf_serial PROPERTIES TIMEOUT 1800)
 
 if (HDF5_BUILD_PERFORM_STANDALONE)
   add_test (NAME PERFORM_h5perf_serial_alone COMMAND $<TARGET_FILE:h5perf_serial_alone>)
