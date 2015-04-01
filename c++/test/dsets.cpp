@@ -59,11 +59,9 @@ const H5std_string	DSET_BOGUS_NAME	("bogus");
 /* Temporary filter IDs used for testing */
 const int H5Z_FILTER_BOGUS = 305;
 
-#if 0 // UNUSED variables caused warning, so duplicated below with NULL instead
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
-#endif
-static size_t filter_bogus(size_t nbytes);
+// UNUSED variables caused warning, but taking them out caused failure.
 
 /*-------------------------------------------------------------------------
  * Function:	test_create
@@ -461,12 +459,10 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *-------------------------------------------------------------------------
  */
 static size_t
-#if 0 // UNUSED variables caused warning, so duplicated below with NULL instead
 filter_bogus(unsigned int flags, size_t cd_nelmts,
       const unsigned int cd_values[], size_t nbytes,
       size_t *buf_size, void **buf)
-#endif
-filter_bogus(size_t nbytes)
+// UNUSED variables caused warning, but taking them out caused failure.
 {
     return nbytes;
 }

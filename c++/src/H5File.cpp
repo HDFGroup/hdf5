@@ -405,25 +405,6 @@ ssize_t H5File::getObjCount(unsigned types) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::getObjCount
-///\brief	This is an overloaded member function, provided for convenience.
-///		It takes no parameter and returns the object count of all
-///		object types.
-///\return	Number of opened object IDs
-///\exception	H5::FileIException
-// Programmer   Binh-Minh Ribler - May 2004
-//--------------------------------------------------------------------------
-ssize_t H5File::getObjCount() const
-{
-   ssize_t num_objs = H5Fget_obj_count(id, H5F_OBJ_ALL);
-   if( num_objs < 0 )
-   {
-      throw FileIException("H5File::getObjCount", "H5Fget_obj_count failed");
-   }
-   return (num_objs);
-}
-
-//--------------------------------------------------------------------------
 // Function:	H5File::getObjIDs
 ///\brief	Retrieves a list of opened object IDs (files, datasets,
 ///		groups and datatypes) in the same file.

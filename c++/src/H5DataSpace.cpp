@@ -85,6 +85,7 @@ DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) :
 DataSpace::DataSpace(const hid_t existing_id) : IdComponent()
 {
     id = existing_id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------

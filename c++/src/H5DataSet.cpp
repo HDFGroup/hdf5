@@ -63,6 +63,7 @@ DataSet::DataSet() : H5Object(), AbstractDs(), id(H5I_INVALID_HID) {}
 DataSet::DataSet(const hid_t existing_id) : H5Object(), AbstractDs()
 {
     id = existing_id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
