@@ -185,7 +185,32 @@ New Features
 
     Library
     -------
-    - None
+    - Added memory allocation functions that use the library's allocator.
+
+      HDF5 filters may need to allocate or resize the buffer that is passed
+      to them from the library. If the filter has been compiled separately
+      from the library, it and the library may use different memory
+      allocation libraries for the (re)allocation and free calls. This can
+      cause heap corruption and crashes. This is particularly a problem on
+      Windows since each C run-time library is implemented as a separate
+      shared library, but can also show up on POSIX systems when debug or
+      high-performance allocation libraries are in use.
+
+      Two new functions (H5allocate_memory() and H5resize_memory()) were
+      added to the HDF5 C library. These functions have the same semantics as
+      malloc/calloc and realloc, respectively. Their primary purpose is to
+      allow filter authors to allocate or resize memory using the same
+      memory allocation library as the HDF5 library. Filter authors are
+      highly encouraged to use these new functions in place of malloc,
+      calloc, and realloc. They should also use the H5free_memory() call when
+      freeing memory.
+
+      Note that the filters provided with the library (zlib, szip, etc.) do
+      not experience the problems that these new functions are intended to
+      fix. This work only applies to third-party filters that are compiled
+      separately from the library.
+
+      (DER - 2015-04-01, HDFFV-9100)
  
     Parallel Library
     ----------------
