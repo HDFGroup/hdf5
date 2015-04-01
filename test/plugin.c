@@ -536,16 +536,17 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_noread_data(hid_t dataset, int *origin_data)
+test_noread_data(hid_t dataset)
 {
-    int                 check[DSET_DIM1][DSET_DIM2];
-    const hsize_t   size[2] = {DSET_DIM1, DSET_DIM2};           /* Dataspace dimensions */
-    int                 *data_p = origin_data;
-    size_t      i, j;        /* Local index variables */
+    int        check[DSET_DIM1][DSET_DIM2];
+    herr_t     ret;
 
     /* Read the dataset back */
-    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) >= 0)
-        TEST_ERROR;
+    H5E_BEGIN_TRY {
+        ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check);
+    } H5E_END_TRY
+    if(ret >= 0)
+        TEST_ERROR
 
     PASSED();
     return 0;
@@ -578,7 +579,7 @@ test_noread_with_filters(hid_t file)
 
     if((dset = H5Dopen2(file,DSET_DYNLIB1_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
 
-    if(test_noread_data(dset, (int *)points_dynlib1) < 0) TEST_ERROR
+    if(test_noread_data(dset) < 0) TEST_ERROR
 
     if(H5Dclose(dset) < 0) TEST_ERROR
 
