@@ -333,6 +333,11 @@ Bug Fixes since HDF5-1.8.14
       if the references are HADDR_UNDEF or uninitialized.
 
       (MSB - 2015/3/10, HDFFV-7959)
+
+    - Fixed bugs in H5Sextent_copy that resulted in leaked memory and incorrect
+      number of elements selected.
+
+      (NAF - 2015/04/02)
        
 
     Parallel Library
