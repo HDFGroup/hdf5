@@ -49,6 +49,8 @@ enable_f2003=-DHDF5_ENABLE_F2003:BOOL=OFF	# Fortran2003 interface default off
 build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
 build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
 build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
+with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT=ON	# enable zlib filter default on
+with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT=OFF	# enables zlib filter default off
 
 
 #=============
@@ -82,6 +84,12 @@ Usage: $progname [<options>]
     enable or disable building tools. Default is on.
   --enable-testing | --disable-testing:
     enable or disable building tests. Default is on.
+  --with-zlib=INC,LIB | --without-zlib:
+    Use zlib library for external deflate I/O filter. Default is on.
+    INC and LIB are the include and lib directories.
+  --with-szlib=INC,LIB| --without-szlib:
+    Use szip library for external szip library I/O filter. Default is off.
+    INC and LIB are the include and lib directories.
   --help: shows details help page
 EOF
 }
@@ -208,12 +216,15 @@ echo Running Cmake for HDF5-${version} ...
 
 #      4. Configure the C library, tools and tests with this command:
 STEP "Configure..." "cmake \
+    -C $cacheinit \
     $build_cpp_lib \
     $build_fortran \
     $enable_f2003 \
     $build_hl_lib \
     $build_testing \
     $build_tools \
+    $with_zlib \
+    $with_szlib \
     $srcdir" $configlog
       
 #      5. Build the C library, tools and tests with this command:
