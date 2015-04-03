@@ -51,7 +51,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub Group.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group() : H5Object(), id(H5I_INVALID_HID) {}
+Group::Group() : H5Object(), CommonFG(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	Group copy constructor
@@ -59,7 +59,7 @@ Group::Group() : H5Object(), id(H5I_INVALID_HID) {}
 ///\param	original - IN: Original group to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group(const Group& original) : H5Object(original)
+Group::Group(const Group& original) : H5Object(), CommonFG()
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
@@ -82,7 +82,7 @@ hid_t Group::getLocId() const
 ///\param	existing_id - IN: Id of an existing group
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group(const hid_t existing_id) : H5Object()
+Group::Group(const hid_t existing_id) : H5Object(), CommonFG()
 {
     id = existing_id;
 }

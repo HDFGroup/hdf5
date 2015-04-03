@@ -52,7 +52,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub DataSet.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet() : AbstractDs(), H5Object(), id(H5I_INVALID_HID) {}
+DataSet::DataSet() : H5Object(), AbstractDs(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	DataSet overloaded constructor
@@ -60,7 +60,7 @@ DataSet::DataSet() : AbstractDs(), H5Object(), id(H5I_INVALID_HID) {}
 ///\param	existing_id - IN: Id of an existing dataset
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet(const hid_t existing_id) : AbstractDs(), H5Object()
+DataSet::DataSet(const hid_t existing_id) : H5Object(), AbstractDs()
 {
     id = existing_id;
 }
@@ -71,7 +71,7 @@ DataSet::DataSet(const hid_t existing_id) : AbstractDs(), H5Object()
 ///\param	original - IN: DataSet instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet(const DataSet& original) : AbstractDs(original), H5Object(original)
+DataSet::DataSet(const DataSet& original) : H5Object(), AbstractDs()
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
