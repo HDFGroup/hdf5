@@ -97,7 +97,7 @@ endif ()
 
 # Handle default component :
 if (NOT ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
-    set (${HDF5_PACKAGE_NAME}_FIND_COMPONENTS C)
+    set (${HDF5_PACKAGE_NAME}_FIND_COMPONENTS C HL)
     set (${HDF5_PACKAGE_NAME}_FIND_REQUIRED_C true)
 endif ()
 
