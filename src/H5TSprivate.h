@@ -122,7 +122,7 @@ H5_DLL herr_t H5TS_mutex_lock(H5TS_mutex_t *mutex);
 H5_DLL herr_t H5TS_mutex_unlock(H5TS_mutex_t *mutex);
 H5_DLL herr_t H5TS_cancel_count_inc(void);
 H5_DLL herr_t H5TS_cancel_count_dec(void);
-H5_DLL H5TS_thread_t H5TS_create_thread(void * func, H5TS_attr_t * attr, void *udata);
+H5_DLL H5TS_thread_t H5TS_create_thread(void *(*func)(void *), H5TS_attr_t * attr, void *udata);
 
 #if defined c_plusplus || defined __cplusplus
 }

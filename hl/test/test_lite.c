@@ -36,10 +36,12 @@
 
 #define DIM 6
 
+#define ATTR_NAME_SUB "att"
 #define ATTR1_NAME "attr string"
 #define ATTR2_NAME "attr char"
 #define ATTR3_NAME "attr short"
 #define ATTR4_NAME "attr int"
+#define ATTR_NAME_EXT "att int ext"
 #define ATTR5_NAME "attr long"
 #define ATTR6_NAME "attr uchar"
 #define ATTR7_NAME "attr ushort"
@@ -298,7 +300,7 @@ static int test_dsets( void )
 
     for (i = 0; i < DIM; i++)
     {
-        if ( data_float_in[i] != data_float_out[i] ) {
+        if(!FLT_ABS_EQUAL(data_float_in[i],data_float_out[i])) {
             goto out;
         }
     }
@@ -309,7 +311,7 @@ static int test_dsets( void )
 
     for (i = 0; i < DIM; i++)
     {
-        if ( data_float_in[i] != data_float_out[i] ) {
+        if(!FLT_ABS_EQUAL(data_float_in[i],data_float_out[i])) {
             goto out;
         }
     }
@@ -334,7 +336,7 @@ static int test_dsets( void )
 
     for (i = 0; i < DIM; i++)
     {
-        if ( data_double_in[i] != data_double_out[i] ) {
+        if(!DBL_ABS_EQUAL(data_double_in[i],data_double_out[i])) {
             goto out;
         }
     }
@@ -345,7 +347,7 @@ static int test_dsets( void )
 
     for (i = 0; i < DIM; i++)
     {
-        if ( data_double_in[i] != data_double_out[i] ) {
+        if(!DBL_ABS_EQUAL(data_double_in[i],data_double_out[i])) {
             goto out;
         }
     }
@@ -646,6 +648,14 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
     if ( H5LTset_attribute_int( loc_id, obj_name, ATTR4_NAME, attr_int_in, (size_t)5 ) < 0 )
         return -1;
 
+    /* Set the attribute which is a substring of an existing attribute */
+    if ( H5LTset_attribute_int( loc_id, obj_name, ATTR_NAME_SUB, attr_int_in, (size_t)5 ) < 0 )
+        return -1;
+
+    /* Set the attribute which is an extension of an existing attribute */
+    if ( H5LTset_attribute_int( loc_id, obj_name, ATTR_NAME_EXT, attr_int_in, (size_t)5 ) < 0 )
+        return -1;
+
     PASSED();
 
     /*-------------------------------------------------------------------------
@@ -657,6 +667,26 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     /* Get the attribute */
     if ( H5LTget_attribute_int( loc_id, obj_name, ATTR4_NAME, attr_int_out ) < 0 )
+        return -1;
+
+    for (i = 0; i < 5; i++)
+    {
+        if ( attr_int_in[i] != attr_int_out[i] ) {
+            return -1;
+        }
+    }
+
+    if ( H5LTget_attribute_int( loc_id, obj_name, ATTR_NAME_SUB, attr_int_out ) < 0 )
+        return -1;
+
+    for (i = 0; i < 5; i++)
+    {
+        if ( attr_int_in[i] != attr_int_out[i] ) {
+            return -1;
+        }
+    }
+
+    if ( H5LTget_attribute_int( loc_id, obj_name, ATTR_NAME_EXT, attr_int_out ) < 0 )
         return -1;
 
     for (i = 0; i < 5; i++)
@@ -929,7 +959,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     for (i = 0; i < 5; i++)
     {
-        if ( attr_float_in[i] != attr_float_out[i] ) {
+        if(!FLT_ABS_EQUAL(attr_float_in[i],attr_float_out[i])) {
             return -1;
         }
     }
@@ -940,7 +970,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     for (i = 0; i < 5; i++)
     {
-        if ( attr_float_in[i] != attr_float_out[i] ) {
+        if(!FLT_ABS_EQUAL(attr_float_in[i],attr_float_out[i])) {
             return -1;
         }
     }
@@ -973,7 +1003,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     for (i = 0; i < 5; i++)
     {
-        if ( attr_double_in[i] != attr_double_out[i] ) {
+        if(!DBL_ABS_EQUAL(attr_double_in[i],attr_double_out[i])) {
             return -1;
         }
     }
@@ -984,7 +1014,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     for (i = 0; i < 5; i++)
     {
-        if ( attr_double_in[i] != attr_double_out[i] ) {
+        if(!DBL_ABS_EQUAL(attr_double_in[i],attr_double_out[i])) {
             return -1;
         }
     }
@@ -1016,7 +1046,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     TESTING("H5LTget_attribute_info");
 
-    if(NULL==(dims_out = (hsize_t*) HDmalloc( sizeof(hsize_t) * rank_out ))) return -1;
+    if(NULL==(dims_out = (hsize_t*) HDmalloc( sizeof(hsize_t) * (size_t)rank_out ))) return -1;
 
     if ( H5LTget_attribute_info( loc_id, obj_name, ATTR2_NAME, dims_out, &type_class, &type_size) < 0 ) {
         HDfree( dims_out );

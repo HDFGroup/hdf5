@@ -628,9 +628,9 @@ herr_t H5IMlink_palette( hid_t loc_id,
 
         n_refs = H5Sget_simple_extent_npoints(asid);
 
-        dim_ref = n_refs + 1;
+        dim_ref = (hsize_t)n_refs + 1;
 
-        refbuf = (hobj_ref_t*)HDmalloc( sizeof(hobj_ref_t) * (int)dim_ref );
+        refbuf = (hobj_ref_t*)HDmalloc( sizeof(hobj_ref_t) * (size_t)dim_ref );
 
         if ( H5Aread( aid, atid, refbuf ) < 0)
             goto out;
@@ -949,9 +949,9 @@ herr_t H5IMget_palette_info( hid_t loc_id,
 
         n_refs = H5Sget_simple_extent_npoints(asid);
 
-        dim_ref = n_refs;
+        dim_ref = (hsize_t)n_refs;
 
-        refbuf = (hobj_ref_t*)HDmalloc( sizeof(hobj_ref_t) * (int)dim_ref );
+        refbuf = (hobj_ref_t*)HDmalloc( sizeof(hobj_ref_t) * (size_t)dim_ref );
 
         if ( H5Aread( aid, atid, refbuf ) < 0)
             goto out;
@@ -1067,9 +1067,9 @@ herr_t H5IMget_palette( hid_t loc_id,
 
         n_refs = H5Sget_simple_extent_npoints(asid);
 
-        dim_ref = n_refs;
+        dim_ref = (hsize_t)n_refs;
 
-        refbuf = (hobj_ref_t*)HDmalloc( sizeof(hobj_ref_t) * (int)dim_ref );
+        refbuf = (hobj_ref_t*)HDmalloc( sizeof(hobj_ref_t) * (size_t)dim_ref );
 
         if ( H5Aread( aid, atid, refbuf ) < 0)
             goto out;

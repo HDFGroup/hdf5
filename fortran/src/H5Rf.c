@@ -148,13 +148,11 @@ h5rcreate_ptr_c (void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *r
 {
      int ret_value = -1;
      char *c_name;
-     size_t c_namelen;
 
      /*
       * Convert FORTRAN name to C name
       */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
+     c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -567,7 +565,7 @@ h5rget_name_ptr_c (hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_
      /*
       * Allocate buffer to hold name of an attribute
       */
-     if ((c_buf = HDmalloc(c_bufsize)) == NULL)
+     if ((c_buf = (char *)HDmalloc(c_bufsize)) == NULL)
        return ret_value;
 
      /*

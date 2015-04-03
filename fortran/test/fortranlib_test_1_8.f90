@@ -89,7 +89,7 @@ PROGRAM fortranlibtest
        total_error)
 
   ret_total_error = 0
-  CALL test_h5s_encode(cleanup, ret_total_error)
+  CALL test_h5s_encode(ret_total_error)
   CALL write_test_status(ret_total_error, &
        ' Testing dataspace encoding and decoding', &
        total_error)
@@ -98,6 +98,12 @@ PROGRAM fortranlibtest
   CALL test_scaleoffset(cleanup, ret_total_error )
   CALL write_test_status(ret_total_error, &
        ' Testing scaleoffset filter', &
+       total_error)
+
+  ret_total_error = 0
+  CALL test_genprop_basic_class(ret_total_error )
+  CALL write_test_status(ret_total_error, &
+       ' Testing basic generic property list class creation functionality', &
        total_error)
 
   WRITE(*,*)

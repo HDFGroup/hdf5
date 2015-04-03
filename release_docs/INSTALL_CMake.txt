@@ -30,7 +30,7 @@ Obtaining HDF5 source code
 
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site. 
-      The HDF5 1.8."X" product requires a minimum CMake version 2.8.12,
+      The HDF5 1.8."X" product requires a minimum CMake version 3.1.0,
       where "X" is the current HDF5 release version.                     
 
 
@@ -227,7 +227,7 @@ IV. Further considerations
 ========================================================================
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.8."X" product requires a minimum CMake version 2.8.12.                     
+      web site. The HDF5 1.8."X" product requires a minimum CMake version 3.1.0.                     
                                                                          
    2. If you plan to use Zlib or Szip:
       A. Download the binary packages and install them in a central location. 
@@ -542,15 +542,14 @@ The config/cmake/cacheinit.cmake file overrides the following values.
 ---------------- General Build Options ---------------------
 BUILD_SHARED_LIBS  "Build Shared Libraries"    OFF
 BUILD_STATIC_EXECS "Build Static Executabless" OFF
-BUILD_STATIC_PIC   "Build Static PIC"          OFF
 BUILD_TESTING      "Build HDF5 Unit Testing"   OFF
 
 ---------------- HDF5 Build Options ---------------------
-HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library"         OFF
-HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples"    OFF
+HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library"         ON
+HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples"    ON
 HDF5_BUILD_FORTRAN  "Build FORTRAN support"          OFF
-HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  OFF
-HDF5_BUILD_TOOLS    "Build HDF5 Tools"               OFF
+HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  ON
+HDF5_BUILD_TOOLS    "Build HDF5 Tools"               ON
 if (HDF5_BUILD_FORTRAN) 
     HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" ON
 
@@ -574,7 +573,6 @@ HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"   
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  OFF
-HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                          OFF
 if (APPLE) 
@@ -590,10 +588,6 @@ HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                        OFF
 HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                    OFF
 ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB" 0
 SZIP_USE_EXTERNAL           "Use External Library Building for SZIP" 0
-HDF5_USE_FILTER_FLETCHER32  "Use the FLETCHER32 Filter"              ON
-HDF5_USE_FILTER_NBIT        "Use the NBIT Filter"                    ON
-HDF5_USE_FILTER_SCALEOFFSET "Use the SCALEOFFSET Filter"             ON
-HDF5_USE_FILTER_SHUFFLE     "Use the SHUFFLE Filter"                 ON
 if (HDF5_ENABLE_SZIP_SUPPORT) 
     HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"      OFF
 if (WINDOWS)
@@ -632,7 +626,7 @@ platform configuration script.
 # CTestScript.cmake file. Usage:
 # "ctest -S HDF518LinuxCmake.cmake -C Release -O hdf518shared.log"
 ############################################################################
-cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 
 # this is the location of the source hardcoded to hdf5-1.8.13
 set(CTEST_SOURCE_NAME hdf5-1.8.13)

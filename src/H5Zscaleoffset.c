@@ -26,8 +26,6 @@
 #include "H5Tprivate.h"		/* Datatypes         			*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
-
 /* Struct of parameters needed for compressing/decompressing one atomic datatype */
 typedef struct {
    size_t size;        /* datatype size */
@@ -1722,5 +1720,4 @@ H5Z_scaleoffset_compress(unsigned char *data, unsigned d_nelmts,
    for(i = 0; i < d_nelmts; i++)
        H5Z_scaleoffset_compress_one_atomic(data, i * p.size, buffer, &j, &buf_len, p);
 }
-#endif /* H5_HAVE_FILTER_SCALEOFFSET */
 

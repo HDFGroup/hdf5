@@ -142,7 +142,8 @@ H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hb
     /* Open the datatype */
     if(NULL == (type = H5T_open(obj_loc, dxpl_id)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
-
+    if(type->vol_obj != NULL) 
+        printf("TRIGERRED\n");
     /* Register an ID for the datatype */
     if((ret_value = H5I_register(H5I_DATATYPE, type, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
@@ -225,7 +226,7 @@ H5O_dtype_get_oloc(hid_t obj_id)
     if(NULL == (dt = (H5T_t *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
     /* If this is a named datatype, get the plugin pointer to the datatype */
-    type = (const H5T_t *)H5T_get_actual_type(dt);
+    type = (H5T_t *)H5T_get_actual_type(dt);
 
     /* Get the datatype's object header location */
     if(NULL == (ret_value = H5T_oloc(type)))

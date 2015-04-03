@@ -93,14 +93,12 @@ SUBROUTINE h5tbmake_table_f(table_title,&
                             errcode )
 
  IMPLICIT NONE
-
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbmake_table_f
 !DEC$endif
 !
-
  CHARACTER(LEN=*), INTENT(in) :: table_title                      ! name of the dataset
  INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
  CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
@@ -112,12 +110,12 @@ SUBROUTINE h5tbmake_table_f(table_title,&
  INTEGER(hid_t),   DIMENSION(1:nfields), INTENT(in) :: field_types  ! field types
  INTEGER(hsize_t), INTENT(in) :: chunk_size                       ! chunk size
  INTEGER,          INTENT(in) :: compress                         ! compress
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
  INTEGER :: errcode                                               ! error code
- INTEGER, DIMENSION(1:nfields) :: char_len_field_names            ! field name lengths
- INTEGER :: max_char_size_field_names                             ! character len of field names
- INTEGER :: i                                                     ! general purpose integer
+ INTEGER(size_t), DIMENSION(1:nfields) :: char_len_field_names    ! field name lengths
+ INTEGER(size_t) :: max_char_size_field_names                     ! character len of field names
+ INTEGER(hsize_t) :: i                                            ! general purpose integer
 
 
  INTERFACE
@@ -155,10 +153,10 @@ SUBROUTINE h5tbmake_table_f(table_title,&
       INTEGER(hid_t),   DIMENSION(nfields), INTENT(in) :: field_types  ! field types
       INTEGER(hsize_t), INTENT(in) :: chunk_size                       ! chunk size
       INTEGER,          INTENT(in) :: compress                         ! compress
-      INTEGER :: namelen                                               ! name length
-      INTEGER :: namelen1                                              ! name length
-      INTEGER, DIMENSION(nfields) :: char_len_field_names              ! field name's lengths
-      INTEGER :: max_char_size_field_names                             ! character len of field names
+      INTEGER(size_t) :: namelen                                       ! name length
+      INTEGER(size_t) :: namelen1                                      ! name length
+      INTEGER(size_t), DIMENSION(nfields) :: char_len_field_names      ! field name's lengths
+      INTEGER(size_t) :: max_char_size_field_names                     ! character len of field names
     END FUNCTION h5tbmake_table_c
  END INTERFACE
  
@@ -219,7 +217,7 @@ SUBROUTINE h5tbwrite_field_name_f_int(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_name_f_int
 !DEC$endif
 !
@@ -232,8 +230,8 @@ SUBROUTINE h5tbwrite_field_name_f_int(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbwrite_field_name_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
@@ -254,8 +252,8 @@ SUBROUTINE h5tbwrite_field_name_f_int(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length
   END FUNCTION h5tbwrite_field_name_int_c
  END INTERFACE
 
@@ -295,7 +293,7 @@ SUBROUTINE h5tbwrite_field_name_f_float(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_name_f_float
 !DEC$endif
 !
@@ -308,8 +306,8 @@ SUBROUTINE h5tbwrite_field_name_f_float(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  REAL, INTENT(in), DIMENSION(*) :: buf                            ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbwrite_field_name_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
@@ -330,8 +328,8 @@ SUBROUTINE h5tbwrite_field_name_f_float(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   REAL, INTENT(in), DIMENSION(*) :: buf                            ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length
   END FUNCTION h5tbwrite_field_name_fl_c
  END INTERFACE
 
@@ -373,7 +371,7 @@ SUBROUTINE h5tbwrite_field_name_f_double(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_name_f_double
 !DEC$endif
 !
@@ -386,8 +384,8 @@ SUBROUTINE h5tbwrite_field_name_f_double(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf                ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbwrite_field_name_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
@@ -408,8 +406,8 @@ SUBROUTINE h5tbwrite_field_name_f_double(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf                ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length
   END FUNCTION h5tbwrite_field_name_dl_c
  END INTERFACE
 
@@ -449,7 +447,7 @@ SUBROUTINE h5tbwrite_field_name_f_string(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_name_f_string
 !DEC$endif
 !
@@ -462,8 +460,8 @@ SUBROUTINE h5tbwrite_field_name_f_string(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbwrite_field_name_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
@@ -484,8 +482,8 @@ SUBROUTINE h5tbwrite_field_name_f_string(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length
+  INTEGER(size_t) :: namelen                                               ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length
   END FUNCTION h5tbwrite_field_name_st_c
  END INTERFACE
 
@@ -526,7 +524,7 @@ SUBROUTINE h5tbread_field_name_f_int(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_name_f_int
 !DEC$endif
 !
@@ -539,8 +537,8 @@ SUBROUTINE h5tbread_field_name_f_int(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbread_field_name_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
@@ -561,8 +559,8 @@ SUBROUTINE h5tbread_field_name_f_int(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length
   END FUNCTION h5tbread_field_name_int_c
  END INTERFACE
 
@@ -602,7 +600,7 @@ SUBROUTINE h5tbread_field_name_f_float(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_name_f_float
 !DEC$endif
 !
@@ -615,8 +613,8 @@ SUBROUTINE h5tbread_field_name_f_float(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  REAL, INTENT(in), DIMENSION(*) :: buf                            ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbread_field_name_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
@@ -637,8 +635,8 @@ SUBROUTINE h5tbread_field_name_f_float(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   REAL, INTENT(in), DIMENSION(*) :: buf                            ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length
   END FUNCTION h5tbread_field_name_fl_c
  END INTERFACE
 
@@ -678,7 +676,7 @@ SUBROUTINE h5tbread_field_name_f_double(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_name_f_double
 !DEC$endif
 !
@@ -691,8 +689,8 @@ SUBROUTINE h5tbread_field_name_f_double(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf                ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbread_field_name_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
@@ -713,8 +711,8 @@ SUBROUTINE h5tbread_field_name_f_double(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf                ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length
   END FUNCTION h5tbread_field_name_dl_c
  END INTERFACE
 
@@ -754,7 +752,7 @@ SUBROUTINE h5tbread_field_name_f_string(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_name_f_string
 !DEC$endif
 !
@@ -767,8 +765,8 @@ SUBROUTINE h5tbread_field_name_f_string(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbread_field_name_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
@@ -789,8 +787,8 @@ SUBROUTINE h5tbread_field_name_f_string(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length
   END FUNCTION h5tbread_field_name_st_c
  END INTERFACE
 
@@ -831,7 +829,7 @@ SUBROUTINE h5tbwrite_field_index_f_int(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_index_f_int
 !DEC$endif
 !
@@ -844,7 +842,7 @@ SUBROUTINE h5tbwrite_field_index_f_int(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbwrite_field_index_int_c(loc_id,namelen,dset_name,field_index,&
@@ -864,7 +862,7 @@ SUBROUTINE h5tbwrite_field_index_f_int(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
   END FUNCTION h5tbwrite_field_index_int_c
  END INTERFACE
 
@@ -903,7 +901,7 @@ SUBROUTINE h5tbwrite_field_index_f_float(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_index_f_float
 !DEC$endif
 !
@@ -916,7 +914,7 @@ SUBROUTINE h5tbwrite_field_index_f_float(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  REAL, INTENT(in), DIMENSION(*) :: buf                            ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbwrite_field_index_fl_c(loc_id,namelen,dset_name,field_index,&
@@ -936,7 +934,7 @@ SUBROUTINE h5tbwrite_field_index_f_float(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   REAL, INTENT(in), DIMENSION(*) :: buf                            ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
   END FUNCTION h5tbwrite_field_index_fl_c
  END INTERFACE
 
@@ -977,7 +975,7 @@ SUBROUTINE h5tbwrite_field_index_f_double(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_index_f_double
 !DEC$endif
 !
@@ -990,7 +988,7 @@ SUBROUTINE h5tbwrite_field_index_f_double(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf                ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbwrite_field_index_dl_c(loc_id,namelen,dset_name,field_index,&
@@ -1010,7 +1008,7 @@ SUBROUTINE h5tbwrite_field_index_f_double(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf                ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
   END FUNCTION h5tbwrite_field_index_dl_c
  END INTERFACE
 
@@ -1049,7 +1047,7 @@ SUBROUTINE h5tbwrite_field_index_f_string(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbwrite_field_index_f_string
 !DEC$endif
 !
@@ -1062,7 +1060,7 @@ SUBROUTINE h5tbwrite_field_index_f_string(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbwrite_field_index_st_c(loc_id,namelen,dset_name,field_index,&
@@ -1082,7 +1080,7 @@ SUBROUTINE h5tbwrite_field_index_f_string(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
   END FUNCTION h5tbwrite_field_index_st_c
  END INTERFACE
 
@@ -1122,7 +1120,7 @@ SUBROUTINE h5tbread_field_index_f_int(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport ::h5tbread_field_index_f_int
 !DEC$endif
 !
@@ -1135,7 +1133,7 @@ SUBROUTINE h5tbread_field_index_f_int(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbread_field_index_int_c(loc_id,namelen,dset_name,field_index,&
@@ -1155,7 +1153,7 @@ SUBROUTINE h5tbread_field_index_f_int(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
   END FUNCTION h5tbread_field_index_int_c
  END INTERFACE
 
@@ -1194,7 +1192,7 @@ SUBROUTINE h5tbread_field_index_f_float(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_index_f_float
 !DEC$endif
 !
@@ -1207,7 +1205,7 @@ SUBROUTINE h5tbread_field_index_f_float(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  REAL, INTENT(in), DIMENSION(*) :: buf                            ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbread_field_index_fl_c(loc_id,namelen,dset_name,field_index,&
@@ -1227,7 +1225,7 @@ SUBROUTINE h5tbread_field_index_f_float(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   REAL, INTENT(in), DIMENSION(*) :: buf                            ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
   END FUNCTION h5tbread_field_index_fl_c
  END INTERFACE
 
@@ -1266,7 +1264,7 @@ SUBROUTINE h5tbread_field_index_f_double(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_index_f_double
 !DEC$endif
 !
@@ -1279,7 +1277,7 @@ SUBROUTINE h5tbread_field_index_f_double(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf                ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbread_field_index_dl_c(loc_id,namelen,dset_name,field_index,&
@@ -1299,7 +1297,7 @@ SUBROUTINE h5tbread_field_index_f_double(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf                ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
   END FUNCTION h5tbread_field_index_dl_c
  END INTERFACE
 
@@ -1338,7 +1336,7 @@ SUBROUTINE h5tbread_field_index_f_string(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbread_field_index_f_string
 !DEC$endif
 !
@@ -1351,7 +1349,7 @@ SUBROUTINE h5tbread_field_index_f_string(loc_id,&
  INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
  CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
  INTEGER :: errcode                                               ! error code
- INTEGER :: namelen                                               ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbread_field_index_st_c(loc_id,namelen,dset_name,field_index,&
@@ -1371,7 +1369,7 @@ SUBROUTINE h5tbread_field_index_f_string(loc_id,&
   INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
   CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
   INTEGER :: errcode                                               ! error code
-  INTEGER :: namelen                                               ! name length
+  INTEGER(size_t) :: namelen                                       ! name length
   END FUNCTION h5tbread_field_index_st_c
  END INTERFACE
 
@@ -1409,7 +1407,7 @@ SUBROUTINE h5tbinsert_field_f_int(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbinsert_field_f_int
 !DEC$endif
 !
@@ -1420,8 +1418,8 @@ SUBROUTINE h5tbinsert_field_f_int(loc_id,&
  INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
  INTEGER, INTENT(in) :: field_index                               ! field_index
  INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
  INTEGER :: errcode                                               ! error code
 
 
@@ -1442,8 +1440,8 @@ SUBROUTINE h5tbinsert_field_f_int(loc_id,&
   INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
   INTEGER, INTENT(in) :: field_index                               ! field_index
   INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length length
   END FUNCTION h5tbinsert_field_int_c
  END INTERFACE
 
@@ -1483,7 +1481,7 @@ SUBROUTINE h5tbinsert_field_f_float(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbinsert_field_f_float
 !DEC$endif
 !
@@ -1494,8 +1492,8 @@ SUBROUTINE h5tbinsert_field_f_float(loc_id,&
  INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
  INTEGER, INTENT(in) :: field_index                               ! field_index
  REAL, INTENT(in), DIMENSION(*) :: buf                            ! data buffer
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
  INTEGER :: errcode                                               ! error code
 
 
@@ -1516,8 +1514,8 @@ SUBROUTINE h5tbinsert_field_f_float(loc_id,&
   INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
   INTEGER, INTENT(in) :: field_index                               ! field_index
   REAL, INTENT(in), DIMENSION(*) :: buf                            ! data buffer
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length length
   END FUNCTION h5tbinsert_field_fl_c
  END INTERFACE
 
@@ -1557,7 +1555,7 @@ SUBROUTINE h5tbinsert_field_f_double(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbinsert_field_f_double
 !DEC$endif
 !
@@ -1568,8 +1566,8 @@ SUBROUTINE h5tbinsert_field_f_double(loc_id,&
  INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
  INTEGER, INTENT(in) :: field_index                               ! field_index
  DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf                ! data buffer
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
  INTEGER :: errcode                                               ! error code
 
 
@@ -1590,8 +1588,8 @@ SUBROUTINE h5tbinsert_field_f_double(loc_id,&
   INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
   INTEGER, INTENT(in) :: field_index                               ! field_index
   DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf                ! data buffer
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length length
   END FUNCTION h5tbinsert_field_dl_c
  END INTERFACE
 
@@ -1632,7 +1630,7 @@ SUBROUTINE h5tbinsert_field_f_string(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbinsert_field_f_string
 !DEC$endif
 !
@@ -1643,8 +1641,8 @@ SUBROUTINE h5tbinsert_field_f_string(loc_id,&
  INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
  INTEGER, INTENT(in) :: field_index                               ! field_index
  CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
  INTEGER :: errcode                                               ! error code
 
 
@@ -1665,8 +1663,8 @@ SUBROUTINE h5tbinsert_field_f_string(loc_id,&
   INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
   INTEGER, INTENT(in) :: field_index                               ! field_index
   CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length length
   END FUNCTION h5tbinsert_field_st_c
  END INTERFACE
 
@@ -1704,7 +1702,7 @@ SUBROUTINE h5tbdelete_field_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbdelete_field_f
 !DEC$endif
 !
@@ -1712,8 +1710,8 @@ SUBROUTINE h5tbdelete_field_f(loc_id,&
  INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
  CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
  CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
- INTEGER :: namelen                                               ! name length
- INTEGER :: namelen1                                              ! name length
+ INTEGER(size_t) :: namelen                                       ! name length
+ INTEGER(size_t) :: namelen1                                      ! name length
  INTEGER :: errcode                                               ! error code
 
 
@@ -1730,8 +1728,8 @@ SUBROUTINE h5tbdelete_field_f(loc_id,&
   INTEGER(HID_T),   INTENT(IN) :: loc_id                           ! file or group identifier
   CHARACTER(LEN=*), INTENT(IN) :: dset_name                        ! name of the dataset
   CHARACTER(LEN=*), INTENT(IN) :: field_name                       ! name of the field
-  INTEGER :: namelen                                               ! name length
-  INTEGER :: namelen1                                              ! name length length
+  INTEGER(size_t) :: namelen                                       ! name length
+  INTEGER(size_t) :: namelen1                                      ! name length length
   END FUNCTION h5tbdelete_field_c
  END INTERFACE
 
@@ -1771,7 +1769,7 @@ SUBROUTINE h5tbget_table_info_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbget_table_info_f
 !DEC$endif
 !
@@ -1781,7 +1779,7 @@ SUBROUTINE h5tbget_table_info_f(loc_id,&
  INTEGER(hsize_t), INTENT(inout):: nfields          ! nfields
  INTEGER(hsize_t), INTENT(inout):: nrecords         ! nrecords
  INTEGER :: errcode                                 ! error code
- INTEGER :: namelen                                 ! name length
+ INTEGER(size_t) :: namelen                         ! name length
 
  INTERFACE
   INTEGER FUNCTION h5tbget_table_info_c(loc_id,namelen,dset_name,nfields,nrecords)
@@ -1795,7 +1793,7 @@ SUBROUTINE h5tbget_table_info_f(loc_id,&
   CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
   INTEGER(hsize_t), INTENT(inout):: nfields          ! nfields
   INTEGER(hsize_t), INTENT(inout):: nrecords         ! nrecords
-  INTEGER :: namelen                                 ! name length
+  INTEGER(size_t) :: namelen                         ! name length
   END FUNCTION h5tbget_table_info_c
  END INTERFACE
 
@@ -1819,7 +1817,7 @@ END SUBROUTINE h5tbget_table_info_f
 ! Comments:
 !
 ! Modifications: 
-!  Added optional parameter for returning the maximum character lenght
+!  Added optional parameter for returning the maximum character length
 !  in the field name array. March 3, 2011 
 !
 !-------------------------------------------------------------------------
@@ -1828,15 +1826,15 @@ SUBROUTINE h5tbget_field_info_f(loc_id,&
                                 dset_name,&
                                 nfields,&
                                 field_names,&
-				field_sizes,&
-				field_offsets,&
-				type_size,&
+                                field_sizes,&
+                                field_offsets,&
+                                type_size,&
                                 errcode, maxlen_out )
 
   IMPLICIT NONE
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5tbget_field_info_f
 !DEC$endif
 !
@@ -1849,11 +1847,11 @@ SUBROUTINE h5tbget_field_info_f(loc_id,&
   INTEGER(size_t),  INTENT(inout):: type_size                           ! type size
   INTEGER :: errcode                                                    ! error code
   INTEGER, OPTIONAL :: maxlen_out                                       ! maximum character len of the field names
-  INTEGER :: namelen                                                    ! name length
-  INTEGER, DIMENSION(nfields) :: namelen2                               ! name lengths
-  INTEGER :: i                                                          ! general purpose integer
-  INTEGER :: maxlen
-  INTEGER :: c_maxlen_out
+  INTEGER(size_t) :: namelen                                            ! name length
+  INTEGER(size_t), DIMENSION(nfields) :: namelen2                       ! name lengths
+  INTEGER(hsize_t) :: i                                                          ! general purpose integer
+  INTEGER(size_t) :: maxlen
+  INTEGER(size_t) :: c_maxlen_out
 
   INTERFACE
      INTEGER FUNCTION h5tbget_field_info_c(loc_id,namelen,dset_name,nfields,&
@@ -1872,10 +1870,10 @@ SUBROUTINE h5tbget_field_info_f(loc_id,&
        INTEGER(size_t),  DIMENSION(1:nfields), INTENT(inout) :: field_sizes   ! field sizes
        INTEGER(size_t),  DIMENSION(1:nfields), INTENT(inout) :: field_offsets ! field offsets
        INTEGER(size_t),  INTENT(inout):: type_size                            ! type size
-       INTEGER :: namelen                                                     ! name length
-       INTEGER :: maxlen                                                      ! maxiumum length of input field names
-       INTEGER, DIMENSION(1:nfields) :: namelen2                              ! name lengths
-       INTEGER :: c_maxlen_out                  ! maximum character length of a field array element 
+       INTEGER(size_t) :: namelen                                             ! name length
+       INTEGER(size_t) :: maxlen                                              ! maxiumum length of input field names
+       INTEGER(size_t), DIMENSION(1:nfields) :: namelen2                      ! name lengths
+       INTEGER(size_t) :: c_maxlen_out                  ! maximum character length of a field array element 
      END FUNCTION h5tbget_field_info_c
   END INTERFACE
 

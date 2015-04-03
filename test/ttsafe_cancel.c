@@ -123,7 +123,7 @@ void tts_cancel(void)
 void *tts_cancel_thread(void UNUSED *arg)
 {
     int datavalue;
-    int *buffer;
+    int buffer;
     hid_t dataspace, datatype, dataset;
     hsize_t dimsf[1];	/* dataset dimensions */
     cancel_cleanup_t *cleanup_structure;
@@ -156,10 +156,9 @@ void *tts_cancel_thread(void UNUSED *arg)
     ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
     assert(ret>=0);
 
-    buffer = HDmalloc(sizeof(int));
-    ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+    ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
     assert(ret>=0);
-    ret=H5Diterate(buffer, H5T_NATIVE_INT, dataspace, tts_cancel_callback, &dataset);
+    ret=H5Diterate(&buffer, H5T_NATIVE_INT, dataspace, tts_cancel_callback, &dataset);
     assert(ret>=0);
 
     sleep(3);

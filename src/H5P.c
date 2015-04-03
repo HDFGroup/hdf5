@@ -1596,6 +1596,7 @@ H5Pget_class_name(hid_t pclass_id)
     char *ret_value;       /* return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE1("*s", "i", pclass_id);
 
     /* Check arguments. */
     if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))

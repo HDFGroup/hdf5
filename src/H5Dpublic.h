@@ -56,7 +56,8 @@ typedef enum H5D_layout_t {
 
 /* Types of chunk index data structures */
 typedef enum H5D_chunk_index_t {
-    H5D_CHUNK_BTREE	= 0	/* v1 B-tree index			     */
+    H5D_CHUNK_IDX_BTREE	= 0,	/* v1 B-tree index		     	*/
+    H5D_CHUNK_IDX_NTYPES        /* this one must be last!		*/
 } H5D_chunk_index_t;
 
 /* Values for the space allocation time property */

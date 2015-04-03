@@ -35,7 +35,7 @@
 *-------------------------------------------------------------------------
 */
 int_f
-nh5dsset_scale_c(hid_t_f *dsid, _fcd dimname, int_f *dimnamelen) 
+nh5dsset_scale_c(hid_t_f *dsid, _fcd dimname, size_t_f *dimnamelen) 
 {
   char *c_dimname = NULL;
   int_f ret_value = 0;
@@ -217,7 +217,7 @@ nh5dsis_scale_c( hid_t_f *did, int_f *is_scale)
 *-------------------------------------------------------------------------
 */
 int_f
-nh5dsset_label_c(hid_t_f *did, int_f *idx, _fcd label, int_f *labellen) 
+nh5dsset_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *labellen) 
 {
   char *c_label = NULL;
   int_f ret_value = 0;
@@ -269,14 +269,14 @@ nh5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size)
   /*
    * Allocate buffer to hold label
    */
-  if ((c_label = HDmalloc((size_t)*size + 1)) == NULL)
+  if ((c_label = (char *)HDmalloc((size_t)*size + 1)) == NULL)
     HGOTO_DONE(FAIL);
 
   /*
    * call H5DSget_label function.
    */
       
-  if( (size_c = (size_t_f)H5DSget_label( (hid_t)*did, (unsigned)*idx, c_label, (size_t)*size+1)) < 0)
+  if( (size_c = H5DSget_label( (hid_t)*did, (unsigned)*idx, c_label, (size_t)*size+1)) < 0)
     HGOTO_DONE(FAIL)
 
   /*
@@ -287,7 +287,7 @@ nh5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size)
 
 done:
      *size = (size_t_f)size_c; /* Don't subtract '1'  because H5DSget_label doesn't include the 
-				* trailing NULL in the length calculation, Ref. HDFFV-7596 */
+                                * trailing NULL in the length calculation, Ref. HDFFV-7596 */
      if(c_label) HDfree(c_label);
      return ret_value;
 
@@ -318,14 +318,14 @@ nh5dsget_scale_name_c(hid_t_f *did, _fcd name, size_t_f *size)
   /*
    * Allocate buffer to hold name
    */
-  if ((c_scale_name = HDmalloc((size_t)*size + 1)) == NULL)
+  if ((c_scale_name = (char *)HDmalloc((size_t)*size + 1)) == NULL)
     HGOTO_DONE(FAIL);
 
   /*
    * call H5DSget_scale_name function.
    */
       
-  if( (size_c = (size_t_f)H5DSget_scale_name( (hid_t)*did, c_scale_name, (size_t)*size+1)) < 0)
+  if( (size_c = H5DSget_scale_name( (hid_t)*did, c_scale_name, (size_t)*size+1)) < 0)
     HGOTO_DONE(FAIL)
 
   /*

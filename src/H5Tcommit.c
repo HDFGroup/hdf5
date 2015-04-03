@@ -717,7 +717,7 @@ H5T_open(const H5G_loc_t *loc, hid_t dxpl_id)
     else {
         if(NULL == (dt = H5FL_MALLOC(H5T_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
-
+        dt->vol_obj = NULL;
 #if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
         /* Clear object location */
         if(H5O_loc_reset(&(dt->oloc)) < 0)
@@ -912,7 +912,7 @@ H5T_get_named_type(const H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_get_actual_type(const H5T_t *dt)
+H5T_get_actual_type(H5T_t *dt)
 {
     H5T_t *ret_value = NULL;    /* Return value */
 

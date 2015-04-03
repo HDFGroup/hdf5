@@ -39,11 +39,11 @@ MODULE test_my_hdf5_error_handler
 
 CONTAINS
 
-!/****************************************************************
+!***************************************************************
 !**
 !**  my_hdf5_error_handler: Custom error callback routine.
 !**
-!****************************************************************/
+!***************************************************************
 
     INTEGER FUNCTION my_hdf5_error_handler(estack_id, data_inout) bind(C)
 
@@ -173,10 +173,10 @@ SUBROUTINE test_error(total_error)
 !!$#ifdef H5_USE_16_API
 !!$    if (old_func != (H5E_auto_t)H5Eprint)
 !!$	TEST_ERROR;
-!!$#else /* H5_USE_16_API */
+!!$#else  H5_USE_16_API 
 !!$    if (old_func != (H5E_auto2_t)H5Eprint2)
 !!$	TEST_ERROR;
-!!$#endif /* H5_USE_16_API */
+!!$#endif  H5_USE_16_API 
 
 
   ! set the customized error handling routine

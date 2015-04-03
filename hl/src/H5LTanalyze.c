@@ -1,3 +1,22 @@
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2                           
+#pragma GCC diagnostic ignored "-Wconversion"                     
+#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"  
+#pragma GCC diagnostic ignored "-Wlarger-than="                   
+#pragma GCC diagnostic ignored "-Wmissing-prototypes"             
+#pragma GCC diagnostic ignored "-Wnested-externs"                 
+#pragma GCC diagnostic ignored "-Wold-style-definition"           
+#pragma GCC diagnostic ignored "-Wsign-compare"                   
+#pragma GCC diagnostic ignored "-Wsign-conversion"                
+#pragma GCC diagnostic ignored "-Wstrict-prototypes"              
+#pragma GCC diagnostic ignored "-Wswitch-default"                 
+#pragma GCC diagnostic ignored "-Wunused-function"                
+#pragma GCC diagnostic ignored "-Wunused-macros"                  
+#pragma GCC diagnostic ignored "-Wunused-parameter"               
+#elif defined __SUNPRO_CC                                         
+#pragma disable_warn                                              
+#elif defined _MSC_VER                                            
+#pragma warning(push, 1)                                          
+#endif                                                            
 #line 2 "H5LTanalyze.c"
 
 #line 4 "H5LTanalyze.c"

@@ -93,35 +93,28 @@ H5Z_init_interface (void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Internal filters */
+    if (H5Z_register (H5Z_SHUFFLE)<0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register shuffle filter")
+    if (H5Z_register (H5Z_FLETCHER32)<0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register fletcher32 filter")
+    if (H5Z_register (H5Z_NBIT)<0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register nbit filter")
+    if (H5Z_register (H5Z_SCALEOFFSET)<0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register scaleoffset filter")
+
+    /* External filters */
 #ifdef H5_HAVE_FILTER_DEFLATE
     if (H5Z_register (H5Z_DEFLATE)<0)
-	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register deflate filter")
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register deflate filter")
 #endif /* H5_HAVE_FILTER_DEFLATE */
-#ifdef H5_HAVE_FILTER_SHUFFLE
-    if (H5Z_register (H5Z_SHUFFLE)<0)
-	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register shuffle filter")
-#endif /* H5_HAVE_FILTER_SHUFFLE */
-#ifdef H5_HAVE_FILTER_FLETCHER32
-    if (H5Z_register (H5Z_FLETCHER32)<0)
-	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register fletcher32 filter")
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
 #ifdef H5_HAVE_FILTER_SZIP
     H5Z_SZIP->encoder_present = SZ_encoder_enabled();
     if (H5Z_register (H5Z_SZIP)<0)
-	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter")
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter")
 #endif /* H5_HAVE_FILTER_SZIP */
-#ifdef H5_HAVE_FILTER_NBIT
-    if (H5Z_register (H5Z_NBIT)<0)
-        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register nbit filter")
-#endif /* H5_HAVE_FILTER_NBIT */
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
-    if (H5Z_register (H5Z_SCALEOFFSET)<0)
-        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register scaleoffset filter")
-#endif /* H5_HAVE_FILTER_SCALEOFFSET */
 
-#if (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT | defined H5_HAVE_FILTER_SCALEOFFSET)
 done:
-#endif /* (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT | defined H5_HAVE_FILTER_SCALEOFFSET) */
     FUNC_LEAVE_NOAPI(ret_value)
 }
 

@@ -66,6 +66,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-3.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-4.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompact.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_enum.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcontents.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcontiguos.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.ddl
@@ -215,6 +216,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdintsize.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_enum.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty.h5
@@ -1157,6 +1159,7 @@
   #test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
   ADD_H5_TEST (tnestedcmpddt 0 --enable-error-stack tnestedcmpddt.h5)
+  #ADD_H5_TEST (tcompound_enum 0 --enable-error-stack tcompound_enum.h5)
 
   # test for options
   ADD_H5ERR_MASK_TEST (tall-1 0 --enable-error-stack tall.h5)
@@ -1340,30 +1343,14 @@
     set (USE_FILTER_SZIP "true")
   endif (H5_HAVE_FILTER_SZIP)
 
-  if (H5_HAVE_FILTER_SHUFFLE)
-    set (USE_FILTER_SHUFFLE "true")
-  endif (H5_HAVE_FILTER_SHUFFLE)
-
-  if (H5_HAVE_FILTER_FLETCHER32)
-    set (USE_FILTER_FLETCHER32 "true")
-  endif (H5_HAVE_FILTER_FLETCHER32)
-
-  if (H5_HAVE_FILTER_NBIT)
-    set (USE_FILTER_NBIT "true")
-  endif (H5_HAVE_FILTER_NBIT)
-
-  if (H5_HAVE_FILTER_SCALEOFFSET)
-    set (USE_FILTER_SCALEOFFSET "true")
-  endif (H5_HAVE_FILTER_SCALEOFFSET)
-
-  if (USE_FILTER_DEFLATE AND USE_FILTER_SHUFFLE AND USE_FILTER_FLETCHER32 AND USE_FILTER_NBIT AND USE_FILTER_SCALEOFFSET)
+  if (USE_FILTER_DEFLATE)
     # data read internal filters
     ADD_H5_TEST (treadintfilter 0 --enable-error-stack -d deflate -d shuffle -d fletcher32 -d nbit -d scaleoffset tfilters.h5)
     if (HDF5_ENABLE_SZIP_SUPPORT)
       # data read all filters
       ADD_H5_TEST (treadfilter 0 --enable-error-stack -d all -d szip tfilters.h5)
     endif (HDF5_ENABLE_SZIP_SUPPORT)
-  endif (USE_FILTER_DEFLATE AND USE_FILTER_SHUFFLE AND USE_FILTER_FLETCHER32 AND USE_FILTER_NBIT AND USE_FILTER_SCALEOFFSET)
+  endif (USE_FILTER_DEFLATE)
 
   # test for displaying objects with very long names
   ADD_H5_TEST (tlonglinks 0 --enable-error-stack tlonglinks.h5)
