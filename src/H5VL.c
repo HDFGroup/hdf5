@@ -691,6 +691,8 @@ H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const 
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE8("*x", "*xxi*siii**x", obj, loc_params, plugin_id, name, acpl_id,
+             aapl_id, dxpl_id, req);
 
     if (NULL == obj)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
@@ -727,6 +729,8 @@ H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const ch
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, plugin_id, name, aapl_id,
+             dxpl_id, req);
 
     if (NULL == obj)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
@@ -983,6 +987,8 @@ H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, co
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE10("*x", "*xxi*siiiii**x", obj, loc_params, plugin_id, name, type_id,
+             lcpl_id, tcpl_id, tapl_id, dxpl_id, req);
 
     if (NULL == obj)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
@@ -1019,6 +1025,8 @@ H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, cons
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, plugin_id, name, tapl_id,
+             dxpl_id, req);
 
     if (NULL == obj)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
@@ -1206,6 +1214,8 @@ H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, con
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE8("*x", "*xxi*siii**x", obj, loc_params, plugin_id, name, dcpl_id,
+             dapl_id, dxpl_id, req);
 
     if (NULL == obj)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
@@ -1242,6 +1252,8 @@ H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, plugin_id, name, dapl_id,
+             dxpl_id, req);
 
     if (NULL == obj)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
@@ -1506,6 +1518,7 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     void	       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE6("*x", "*sIuiii**x", name, flags, fcpl_id, fapl_id, dxpl_id, req);
 
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1547,6 +1560,7 @@ H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, vo
     void	       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE5("*x", "*sIuii**x", name, flags, fapl_id, dxpl_id, req);
 
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1758,6 +1772,8 @@ H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE8("*x", "*xxi*siii**x", obj, loc_params, plugin_id, name, gcpl_id,
+             gapl_id, dxpl_id, req);
 
     if (NULL == obj)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
@@ -1794,6 +1810,8 @@ H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, hid_t plugin_id, const c
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE7("*x", "*xxi*sii**x", obj, loc_params, plugin_id, name, gapl_id,
+             dxpl_id, req);
 
     if (NULL == obj)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
@@ -2213,6 +2231,7 @@ H5VLobject_open(void *obj, H5VL_loc_params_t params, hid_t plugin_id, H5I_type_t
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE6("*x", "*xxi*Iti**x", obj, params, plugin_id, opened_type, dxpl_id, req);
 
     if (NULL == obj)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object")
