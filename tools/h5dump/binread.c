@@ -49,8 +49,7 @@
 static void
 usage (void)
 {
- fprintf(stderr, "\
- usage: binread FILE_NAME\n");
+    fprintf(stderr, "usage: binread FILE_NAME\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -64,38 +63,35 @@ usage (void)
 int
 main (int argc, const char *argv[])
 {
- FILE  *stream;
- int    numread;
- TYPE   buf[NELMTS];
- size_t i, nelmts = NELMTS;
- char  *fname=NULL;
+    FILE  *stream;
+    size_t numread;
+    TYPE   buf[NELMTS];
+    size_t i, nelmts = NELMTS;
+    char  *fname=NULL;
 
- if (argc != 2)
- {
-  usage();
-  exit(1);
- }
+    if (argc != 2) {
+        usage();
+        exit(1);
+    }
 
- fname = strdup(argv[1]);
+    fname = strdup(argv[1]);
 
- if( (stream = fopen(fname, "rb" )) != NULL )
- {
-  numread = fread( buf, sizeof( TYPE ), nelmts, stream );
-  printf( "Number of items read = %d\n", numread );
+    if((stream = fopen(fname, "rb")) != NULL) {
+        numread = fread(buf, sizeof( TYPE ), nelmts, stream);
+        printf("Number of items read = %llu\n", (unsigned long long)numread);
 
-  for (i = 0; i < nelmts; i++)
-  {
-   printf(FORMAT,buf[i]);
-  }
-  printf("\n");
+        for (i = 0; i < nelmts; i++) {
+            printf(FORMAT,buf[i]);
+        }
+        printf("\n");
 
-  fclose( stream );
- }
- else
-  printf( "File %s could not be opened\n",fname );
+        fclose(stream);
+    }
+    else
+        printf("File %s could not be opened\n", fname);
 
- free(fname);
+    free(fname);
 
- return 0;
+    return 0;
 }
 

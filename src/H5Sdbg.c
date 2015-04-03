@@ -113,6 +113,7 @@ H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent,
                                  indent + 3, MAX(0, fwidth - 3));
             break;
 
+        case H5S_NO_CLASS:
         default:
             fprintf(stream, "%*s%-*s **UNKNOWN-%ld**\n", indent, "", fwidth,
                     "Space class:", (long)(H5S_GET_EXTENT_TYPE(mesg)));

@@ -182,7 +182,7 @@ HDmemset(heap->chunk, 0, size);
      * which was always at least H5HG_ALIGNMENT aligned then we could just
      * align the pointer, but this might not be the case.
      */
-    n = H5HG_ALIGN(p - heap->chunk) - (p - heap->chunk);
+    n = H5HG_ALIGN(p - heap->chunk) - (size_t)(p - heap->chunk);
 #ifdef OLD_WAY
 /* Don't bother zeroing out the rest of the info in the heap -QAK */
     HDmemset(p, 0, n);
@@ -776,7 +776,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
     else
         heap->obj[0].size += need;
     HDmemmove(obj_start, obj_start + need,
-	       heap->size - ((obj_start + need) - heap->chunk));
+              heap->size - (size_t)((obj_start + need) - heap->chunk));
     if(heap->obj[0].size >= H5HG_SIZEOF_OBJHDR(f)) {
         p = heap->obj[0].begin;
         UINT16ENCODE(p, 0); /*id*/

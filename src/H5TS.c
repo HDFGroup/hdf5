@@ -489,7 +489,7 @@ H5TS_win32_thread_exit(void)
  *--------------------------------------------------------------------------
  */
 H5TS_thread_t
-H5TS_create_thread(void *func, H5TS_attr_t *attr, void *udata)
+H5TS_create_thread(void *(*func)(void *), H5TS_attr_t *attr, void *udata)
 {
     H5TS_thread_t ret_value;
 
