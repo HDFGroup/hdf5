@@ -1159,7 +1159,7 @@
   #test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
   ADD_H5_TEST (tnestedcmpddt 0 --enable-error-stack tnestedcmpddt.h5)
-  ADD_H5_TEST (tcompound_enum 0 --enable-error-stack tcompound_enum.h5)
+  #ADD_H5_TEST (tcompound_enum 0 --enable-error-stack tcompound_enum.h5)
 
   # test for options
   ADD_H5ERR_MASK_TEST (tall-1 0 --enable-error-stack tall.h5)
