@@ -138,6 +138,13 @@ class H5_DLLCPP H5Location : public IdComponent {
 	// Default constructor,
 	H5Location();
 
+	// *** Deprecation warning ***
+	// The following two constructors are no longer appropriate after the
+	// data member "id" had been moved to the sub-classes.
+	// The copy constructor is a noop and is removed in 1.8.15 and the
+	// other will be removed from 1.10 release, and then from 1.8 if its
+	// removal does not raise any problems in two 1.10 releases.
+
 	// Creates a copy of an existing object giving the location id.
 	H5Location(const hid_t loc_id);
 
