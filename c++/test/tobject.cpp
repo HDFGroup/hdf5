@@ -181,6 +181,8 @@ static void test_get_objname_ontypes()
 	Group grp = file.createGroup ("typetests");
 
 	// Create a datatype and save it
+	IntType inttype(PredType::STD_B8LE);
+
 	DataType dtype(PredType::STD_B8LE);
 	dtype.commit(file, "STD_B8LE");
 
@@ -201,6 +203,7 @@ static void test_get_objname_ontypes()
 	// Name this datatype
 	new_int_type.commit(grp, "IntType NATIVE_INT");
 	ssize_t name_len = new_int_type.getObjName(type_name); // default len
+	verify_val(name_len, (ssize_t)HDstrlen("/typetests/IntType NATIVE_INT"), "DataSet::getObjName", __LINE__, __FILE__);
 	verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataSet::getObjName", __LINE__, __FILE__);
 
 	// Close everything or they can be closed when objects go out of scope
@@ -208,7 +211,6 @@ static void test_get_objname_ontypes()
 	copied_type.close();
 	new_int_type.close();
 	grp.close();
-	file.close();
 
 	PASSED();
     } // end top try block
