@@ -1100,6 +1100,58 @@ H5O_type_t CommonFG::childObjType(hsize_t index, H5_index_t index_type, H5_iter_
     return(objtype);
 }
 
+//--------------------------------------------------------------------------
+// Function:	CommonFG::childObjVersion
+///\brief	Returns the object header version of an object in this file/group,
+///		given the object's name.
+///\param	objname - IN: Name of the object
+///\return	Object version, which can have the following values:
+///		\li \c H5O_VERSION_1
+///		\li \c H5O_VERSION_2
+///\exception	H5::FileIException or H5::GroupIException
+///		Exception will be thrown when:
+///		- an error returned by the C API
+///		- version number is not one of the valid values above
+// Programmer	Binh-Minh Ribler - April, 2014
+//--------------------------------------------------------------------------
+unsigned CommonFG::childObjVersion(const char* objname) const
+{
+    H5O_info_t objinfo;
+
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_info_by_name(getLocId(), objname, &objinfo, H5P_DEFAULT);
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+	throwException("childObjVersion", "H5Oget_info_by_name failed");
+    // Return a valid version or throw an exception for invalid value
+    else
+    {
+	unsigned version = objinfo.hdr.version;
+	if (version != H5O_VERSION_1 && version != H5O_VERSION_2)
+	    throwException("childObjVersion", "Invalid version for object");
+	else
+	    return(version);
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::childObjVersion
+///\brief	This is an overloaded member function, provided for convenience.
+///		It takes an \a H5std_string for the object's name.
+///\brief	Returns the type of an object in this group, given the
+///		object's name.
+///\param	objname - IN: Name of the object (H5std_string&)
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - April, 2014
+//--------------------------------------------------------------------------
+unsigned CommonFG::childObjVersion(const H5std_string& objname) const
+{
+    // Use overloaded function
+    unsigned version = childObjVersion(objname.c_str());
+    return(version);
+}
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
