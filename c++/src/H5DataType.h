@@ -39,6 +39,9 @@ class H5_DLLCPP DataType : public H5Object {
 	// Copy constructor: makes a copy of the original object
 	DataType( const DataType& original );
 
+	// Creates a copy of a predefined type
+	DataType(const PredType& pred_type);
+
 	// Creates a datatype by way of dereference.
 	DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
 	DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
