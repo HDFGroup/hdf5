@@ -158,6 +158,25 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
+// Function:	H5File overloaded constructor
+///\brief	Creates an H5File object using an existing file id.
+///\param	existing_id - IN: Id of an existing file
+// Programmer	Binh-Minh Ribler - 2015
+// Description
+//	Mar 29, 2015
+//		Added in responding to a request from user Jason Newton.
+//		However, it is not recommended to use the private member "id"
+//		in applications.  Unlike other situations, where similar
+//		constructor is needed by the library in order to return
+//		an object, H5File doesn't need it. -BMR (HDFFV-8766 partially)
+//--------------------------------------------------------------------------
+H5File::H5File(hid_t existing_id) : H5Location(), CommonFG()
+{
+    id = existing_id;
+    incRefCount(); // increment number of references to this id
+}
+
+//--------------------------------------------------------------------------
 // Function:	H5File copy constructor
 ///\brief	Copy constructor: makes a copy of the original
 ///		H5File object.
@@ -225,6 +244,13 @@ bool H5File::isHdf5(const H5std_string& name )
 //--------------------------------------------------------------------------
 void H5File::openFile(const char* name, unsigned int flags, const FileAccPropList& access_plist)
 {
+    try {
+        close();
+    }
+    catch (Exception close_error) {
+        throw FileIException("H5File::openFile", close_error.getDetailMsg());
+    }
+
     hid_t access_plist_id = access_plist.getId();
     id = H5Fopen (name, flags, access_plist_id);
     if (id < 0)  // throw an exception when open fails
