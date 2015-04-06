@@ -14,6 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#include <iostream>
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -33,9 +34,6 @@
 #include "H5Alltypes.h"
 #include "H5private.h"		// for HDstrcpy
 
-#include <iostream>
-using namespace std;
-
 // There are a few comments that are common to most of the functions
 // defined in this file so they are listed here.
 // - getLocId is called by all functions, that call a C API, to get
@@ -51,6 +49,7 @@ using namespace std;
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
+using namespace std;
 #endif
 
 //--------------------------------------------------------------------------
@@ -100,7 +99,9 @@ Group CommonFG::createGroup( const char* name, size_t size_hint ) const
       throwException("createGroup", "H5Gcreate2 failed");
 
    // No failure, create and return the Group object
-   Group group( group_id );
+   Group group;
+    CommonFG *ptr = &group;
+    ptr->p_setId(group_id);
    return( group );
 }
 
@@ -136,7 +137,9 @@ Group CommonFG::openGroup( const char* name ) const
       throwException("openGroup", "H5Gopen2 failed");
 
    // No failure, create and return the Group object
-   Group group( group_id );
+   Group group;
+    CommonFG *ptr = &group;
+    ptr->p_setId(group_id);
    return( group );
 }
 
@@ -178,7 +181,8 @@ DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, co
       throwException("createDataSet", "H5Dcreate2 failed");
 
    // No failure, create and return the DataSet object
-   DataSet dataset( dataset_id );
+   DataSet dataset;
+   f_DataSet_setId(&dataset, dataset_id);
    return( dataset );
 }
 
@@ -213,7 +217,8 @@ DataSet CommonFG::openDataSet( const char* name ) const
       throwException("openDataSet", "H5Dopen2 failed");
 
    // No failure, create and return the DataSet object
-   DataSet dataset( dataset_id );
+   DataSet dataset;
+   f_DataSet_setId(&dataset, dataset_id);
    return( dataset );
 }
 
@@ -576,7 +581,8 @@ DataType CommonFG::openDataType( const char* name ) const
       throwException("openDataType", "H5Topen2 failed");
 
    // No failure, create and return the DataType object
-   DataType data_type(type_id);
+   DataType data_type;
+   f_DataType_setId(&data_type, type_id);
    return(data_type);
 }
 
@@ -611,7 +617,8 @@ ArrayType CommonFG::openArrayType( const char* name ) const
       throwException("openArrayType", "H5Topen2 failed");
 
    // No failure, create and return the ArrayType object
-   ArrayType array_type (type_id);
+   ArrayType array_type;
+   f_DataType_setId(&array_type, type_id);
    return(array_type);
 }
 
@@ -646,7 +653,8 @@ CompType CommonFG::openCompType( const char* name ) const
       throwException("openCompType", "H5Topen2 failed");
 
    // No failure, create and return the CompType object
-   CompType comp_type(type_id);
+   CompType comp_type;
+   f_DataType_setId(&comp_type, type_id);
    return(comp_type);
 }
 
@@ -681,7 +689,8 @@ EnumType CommonFG::openEnumType( const char* name ) const
       throwException("openEnumType", "H5Topen2 failed");
 
    // No failure, create and return the EnumType object
-   EnumType enum_type(type_id);
+   EnumType enum_type;
+   f_DataType_setId(&enum_type, type_id);
    return(enum_type);
 }
 
@@ -716,7 +725,8 @@ IntType CommonFG::openIntType( const char* name ) const
       throwException("openIntType", "H5Topen2 failed");
 
    // No failure, create and return the IntType object
-   IntType int_type(type_id);
+   IntType int_type;
+   f_DataType_setId(&int_type, type_id);
    return(int_type);
 }
 
@@ -751,7 +761,8 @@ FloatType CommonFG::openFloatType( const char* name ) const
       throwException("openFloatType", "H5Topen2 failed");
 
    // No failure, create and return the FloatType object
-   FloatType float_type(type_id);
+   FloatType float_type;
+   f_DataType_setId(&float_type, type_id);
    return(float_type);
 }
 
@@ -786,7 +797,8 @@ StrType CommonFG::openStrType( const char* name ) const
       throwException("openStrType", "H5Topen2 failed");
 
    // No failure, create and return the StrType object
-   StrType str_type(type_id);
+   StrType str_type;
+   f_DataType_setId(&str_type, type_id);
    return(str_type);
 }
 
@@ -821,7 +833,8 @@ VarLenType CommonFG::openVarLenType( const char* name ) const
       throwException("openVarLenType", "H5Topen2 failed");
 
    // No failure, create and return the VarLenType object
-   VarLenType varlen_type(type_id);
+   VarLenType varlen_type;
+   f_DataType_setId(&varlen_type, type_id);
    return(varlen_type);
 }
 
@@ -1100,6 +1113,58 @@ H5O_type_t CommonFG::childObjType(hsize_t index, H5_index_t index_type, H5_iter_
     return(objtype);
 }
 
+//--------------------------------------------------------------------------
+// Function:	CommonFG::childObjVersion
+///\brief	Returns the object header version of an object in this file/group,
+///		given the object's name.
+///\param	objname - IN: Name of the object
+///\return	Object version, which can have the following values:
+///		\li \c H5O_VERSION_1
+///		\li \c H5O_VERSION_2
+///\exception	H5::FileIException or H5::GroupIException
+///		Exception will be thrown when:
+///		- an error returned by the C API
+///		- version number is not one of the valid values above
+// Programmer	Binh-Minh Ribler - April, 2014
+//--------------------------------------------------------------------------
+unsigned CommonFG::childObjVersion(const char* objname) const
+{
+    H5O_info_t objinfo;
+
+    // Use C API to get information of the object
+    herr_t ret_value = H5Oget_info_by_name(getLocId(), objname, &objinfo, H5P_DEFAULT);
+
+    // Throw exception if C API returns failure
+    if (ret_value < 0)
+	throwException("childObjVersion", "H5Oget_info_by_name failed");
+    // Return a valid version or throw an exception for invalid value
+    else
+    {
+	unsigned version = objinfo.hdr.version;
+	if (version != H5O_VERSION_1 && version != H5O_VERSION_2)
+	    throwException("childObjVersion", "Invalid version for object");
+	else
+	    return(version);
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::childObjVersion
+///\brief	This is an overloaded member function, provided for convenience.
+///		It takes an \a H5std_string for the object's name.
+///\brief	Returns the type of an object in this group, given the
+///		object's name.
+///\param	objname - IN: Name of the object (H5std_string&)
+///\exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - April, 2014
+//--------------------------------------------------------------------------
+unsigned CommonFG::childObjVersion(const H5std_string& objname) const
+{
+    // Use overloaded function
+    unsigned version = childObjVersion(objname.c_str());
+    return(version);
+}
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
@@ -1172,6 +1237,7 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const
    }
    return (obj_type);
 }
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -1189,6 +1255,37 @@ CommonFG::CommonFG() {}
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 CommonFG::~CommonFG() {}
+
+//--------------------------------------------------------------------------
+// Function:	f_DataType_setId - friend
+// Purpose:	This function is friend to class H5::DataType so that it
+//		can set DataType::id in order to work around a problem
+//		described in the JIRA issue HDFFV-7947.
+//		Applications shouldn't need to use it.
+// param        dtype   - IN/OUT: DataType object to be changed
+// param        new_id - IN: New id to set
+// Programmer	Binh-Minh Ribler - 2015
+//--------------------------------------------------------------------------
+void f_DataType_setId(DataType* dtype, hid_t new_id)
+{
+    dtype->id = new_id;
+}
+
+//--------------------------------------------------------------------------
+// Function:	f_DataSet_setId - friend
+// Purpose:	This function is friend to class H5::DataSet so that it
+//		can set DataSet::id in order to work around a problem
+//		described in the JIRA issue HDFFV-7947.
+//		Applications shouldn't need to use it.
+// param        dset   - IN/OUT: DataSet object to be changed
+// param        new_id - IN: New id to set
+// Programmer	Binh-Minh Ribler - 2015
+//--------------------------------------------------------------------------
+void f_DataSet_setId(DataSet* dset, hid_t new_id)
+{
+    dset->id = new_id;
+}
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef H5_NO_NAMESPACE

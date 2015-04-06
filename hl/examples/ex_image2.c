@@ -35,7 +35,7 @@ int main( void )
  hsize_t        height;                        /* height of image */
  unsigned char  pal[ PAL_ENTRIES * 3 ];        /* palette array */
  hsize_t        pal_dims[2] = {PAL_ENTRIES,3}; /* palette dimensions */
- herr_t         status, i, n;
+ herr_t         i, n;
 
  /* create a new HDF5 file using default properties. */
  file_id = H5Fcreate( "ex_image2.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
@@ -45,7 +45,7 @@ int main( void )
   goto out;
 
  /* make the image */
- status=H5IMmake_image_8bit( file_id, IMAGE1_NAME, width, height, gbuf );
+ H5IMmake_image_8bit( file_id, IMAGE1_NAME, width, height, gbuf );
  if (gbuf) {
     free(gbuf);
     gbuf = NULL;
@@ -63,10 +63,10 @@ int main( void )
  }
 
  /* make a palette */
- status=H5IMmake_palette( file_id, PAL_NAME, pal_dims, pal );
+ H5IMmake_palette( file_id, PAL_NAME, pal_dims, pal );
 
  /* attach the palette to the image */
- status=H5IMlink_palette( file_id, IMAGE1_NAME, PAL_NAME );
+ H5IMlink_palette( file_id, IMAGE1_NAME, PAL_NAME );
 
 /*-------------------------------------------------------------------------
  * True color image example with pixel interlace
@@ -78,7 +78,7 @@ int main( void )
   goto out;
 
  /* make dataset */
- status=H5IMmake_image_24bit( file_id, IMAGE2_NAME, width, height, "INTERLACE_PIXEL", gbuf );
+ H5IMmake_image_24bit( file_id, IMAGE2_NAME, width, height, "INTERLACE_PIXEL", gbuf );
 
  /* close the file. */
  H5Fclose( file_id );

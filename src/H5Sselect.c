@@ -239,9 +239,11 @@ H5S_select_serial_size(const H5S_t *space)
  PURPOSE
     Serialize the selection for a dataspace into a buffer
  USAGE
-    herr_t H5S_select_serialize(space, buf)
+    herr_t H5S_select_serialize(space, p)
         const H5S_t *space;     IN: Dataspace with selection to serialize
-        uint8_t *buf;           OUT: Buffer to put serialized selection
+        uint8_t **p;            OUT: Pointer to buffer to put serialized
+                                selection.  Will be advanced to end of
+                                serialized selection.
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -256,17 +258,17 @@ H5S_select_serial_size(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_serialize(const H5S_t *space, uint8_t *buf)
+H5S_select_serialize(const H5S_t *space, uint8_t **p)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(space);
-    HDassert(buf);
+    HDassert(p);
 
     /* Call the selection type's serialize function */
-    ret_value=(*space->select.type->serialize)(space,buf);
+    ret_value=(*space->select.type->serialize)(space,p);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_serialize() */
@@ -428,9 +430,13 @@ H5S_select_valid(const H5S_t *space)
     Deserialize the current selection from a user-provided buffer into a real
         selection in the dataspace.
  USAGE
-    herr_t H5S_select_deserialize(space, buf)
-        H5S_t *space;           IN/OUT: Dataspace pointer to place selection into
-        uint8 *buf;             IN: Buffer to retrieve serialized selection from
+    herr_t H5S_select_deserialize(space, p)
+        H5S_t **space;          IN/OUT: Dataspace pointer to place
+                                selection into.  Will be allocated if not
+                                provided.
+        uint8 **p;              OUT: Pointer to buffer holding serialized
+                                selection.  Will be advanced to end of
+                                serialized selection.
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -444,42 +450,81 @@ H5S_select_valid(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
+H5S_select_deserialize (H5S_t **space, const uint8_t **p)
 {
-    const uint8_t *tbuf;    /* Temporary pointer to the selection type */
-    uint32_t sel_type;       /* Pointer to the selection type */
+    H5S_t *tmp_space;       /* Pointer to actual dataspace to use, either
+                               *space or a newly allocated one */
+    uint32_t sel_type;      /* Pointer to the selection type */
     herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
 
-    tbuf=buf;
-    UINT32DECODE(tbuf, sel_type);
+    /* Allocate space if not provided */
+    if(!*space) {
+        if(NULL == (tmp_space = H5S_create(H5S_SIMPLE)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
+    } /* end if */
+    else
+        tmp_space = *space;
+
+    /* Decode selection type */
+    UINT32DECODE(*p, sel_type);
+
+    /* Skip over the remainder of the header */
+    *p += 12;
+
+    /* Decode and check or patch rank for point and hyperslab selections */
+    if((sel_type == H5S_SEL_POINTS) || (sel_type == H5S_SEL_HYPERSLABS)) {
+        uint32_t rank;              /* Rank of dataspace */
+
+        /* Decode the rank of the point selection */
+        UINT32DECODE(*p,rank);
+
+        if(!*space)
+            /* Patch the rank of the allocated dataspace */
+            tmp_space->extent.rank = rank;
+        else
+            /* Verify the rank of the provided dataspace */
+            if(rank != tmp_space->extent.rank)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "rank of serialized selection does not match dataspace")
+    } /* end if */
+
+    /* Make routine for selection type */
     switch(sel_type) {
         case H5S_SEL_POINTS:         /* Sequence of points selected */
-            ret_value=(*H5S_sel_point->deserialize)(space,buf);
+            ret_value = (*H5S_sel_point->deserialize)(tmp_space, p);
             break;
 
         case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-            ret_value=(*H5S_sel_hyper->deserialize)(space,buf);
+            ret_value = (*H5S_sel_hyper->deserialize)(tmp_space, p);
             break;
 
         case H5S_SEL_ALL:            /* Entire extent selected */
-            ret_value=(*H5S_sel_all->deserialize)(space,buf);
+            ret_value = (*H5S_sel_all->deserialize)(tmp_space, p);
             break;
 
         case H5S_SEL_NONE:           /* Nothing selected */
-            ret_value=(*H5S_sel_none->deserialize)(space,buf);
+            ret_value = (*H5S_sel_none->deserialize)(tmp_space, p);
             break;
 
         default:
             break;
     }
-    if(ret_value<0)
+    if(ret_value < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "can't deserialize selection")
 
+    /* Return space to the caller if allocated */
+    if(!*space)
+        *space = tmp_space;
+
 done:
+    /* Free temporary space if not passed to caller (only happens on error) */
+    if(!*space && tmp_space)
+        if(H5S_close(tmp_space) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_deserialize() */
 

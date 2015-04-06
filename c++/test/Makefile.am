@@ -23,12 +23,6 @@ include $(top_srcdir)/config/commence.am
 # Include src, test, and c++/src directories
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
 
-# Shared C++ libraries aren't universally supported.
-if CXX_SHARED_CONDITIONAL
-else
-  AM_LDFLAGS+=-static
-endif
-
 # These are our main targets.  They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
 TEST_PROG=testhdf5

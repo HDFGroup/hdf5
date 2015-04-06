@@ -84,7 +84,6 @@ int main( void )
  int        *fill_data = NULL;
  hsize_t    start;      /* Record to start reading */
  hsize_t    nrecords;   /* Number of records to insert/delete */
- herr_t     status;
  hsize_t    nfields_out;
  hsize_t    nrecords_out;
  int        i;
@@ -102,21 +101,21 @@ int main( void )
  file_id = H5Fcreate( "ex_table_08.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* Make the table */
- status=H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS,
+ H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS,
                          dst_size,field_names, dst_offset, field_type,
                          chunk_size, fill_data, compress, p_data  );
 
  /* Insert records */
  start    = 3;
  nrecords = NRECORDS_INS;
- status=H5TBinsert_record( file_id, TABLE_NAME, start, nrecords, dst_size, dst_offset,
+ H5TBinsert_record( file_id, TABLE_NAME, start, nrecords, dst_size, dst_offset,
   dst_sizes, p_data_insert );
 
  /* read the table */
- status=H5TBread_table( file_id, TABLE_NAME, dst_size, dst_offset, dst_sizes, dst_buf );
+ H5TBread_table( file_id, TABLE_NAME, dst_size, dst_offset, dst_sizes, dst_buf );
 
  /* get table info  */
- status=H5TBget_table_info(file_id,TABLE_NAME, &nfields_out, &nrecords_out );
+ H5TBget_table_info(file_id,TABLE_NAME, &nfields_out, &nrecords_out );
 
  /* print */
  printf ("Table has %d fields and %d records\n",(int)nfields_out,(int)nrecords_out);

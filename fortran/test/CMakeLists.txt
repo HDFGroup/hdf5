@@ -1,16 +1,17 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_FORTRAN_TESTS C CXX Fortran)
 
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
+INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
 
 #-----------------------------------------------------------------------------
 # Add Test Lib
 #-----------------------------------------------------------------------------
 add_library (${HDF5_F90_C_TEST_LIB_TARGET} ${LIB_TYPE} t.c)
-TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIB_TARGET} " " " ")
+set_source_files_properties (t.c PROPERTIES LANGUAGE C)
+TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIB_TARGET} ${LIB_TYPE} " " " ")
 target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_F90_C_LIB_TARGET}
     ${HDF5_TEST_LIB_TARGET}
@@ -18,12 +19,14 @@ target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_TEST_LIB_TARGET} ${HDF5_F90_C_TEST_LIB_NAME} ${LIB_TYPE})
 set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
     FOLDER libraries/test/fortran
+    LINKER_LANGUAGE C
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
 # See if the F2008 intrinsic STORAGE_SIZE and C_SIZEOF are supported. If not then
 # fall back to F2003. If F2003 not supported then use F90 for the tests.
 
+set_source_files_properties (tf_F90.f90 tf_F03.f90 tf_F08.f90 tf.f90 PROPERTIES LANGUAGE Fortran)
 if (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
  add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf_F08.f90 tf.f90)
 elseif (HDF5_ENABLE_F2003)
@@ -36,15 +39,14 @@ endif (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
 set (SHARED_LINK_FLAGS " ")
 if (WIN32)
   if (BUILD_SHARED_LIBS)
-    set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS BUILD_HDF5_DLL)
+    set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS BUILD_HDF5_TEST_DLL)
     if (MSVC)
       set (SHARED_LINK_FLAGS "/DLL")
     endif (MSVC)
   endif (BUILD_SHARED_LIBS)
   set_property (TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS HDF5F90_WINDOWS)
 endif (WIN32)
-TARGET_FORTRAN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} " " ${SHARED_LINK_FLAGS})
-set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
+TARGET_FORTRAN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} " " ${SHARED_LINK_FLAGS})
 target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_C_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
@@ -53,7 +55,9 @@ target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
 H5_SET_LIB_OPTIONS (${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_TEST_LIB_NAME} ${LIB_TYPE})
 set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES
     FOLDER libraries/test/fortran
+    LINKER_LANGUAGE Fortran
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
 #-----------------------------------------------------------------------------
@@ -79,7 +83,7 @@ add_executable (testhdf5_fortran
     tHDF5.f90
 )
 TARGET_NAMING (testhdf5_fortran ${LIB_TYPE})
-TARGET_FORTRAN_PROPERTIES (testhdf5_fortran " " " ")
+TARGET_FORTRAN_PROPERTIES (testhdf5_fortran ${LIB_TYPE} " " " ")
 target_link_libraries (testhdf5_fortran 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
@@ -88,8 +92,12 @@ target_link_libraries (testhdf5_fortran
 if (WIN32 AND MSVC)
   target_link_libraries (testhdf5_fortran "ws2_32.lib")
 endif (WIN32 AND MSVC)
-set_target_properties (testhdf5_fortran PROPERTIES LINKER_LANGUAGE Fortran)
-set_target_properties (testhdf5_fortran PROPERTIES FOLDER test/fortran)
+target_include_directories (testhdf5_fortran PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+set_target_properties (testhdf5_fortran PROPERTIES
+    LINKER_LANGUAGE Fortran
+    FOLDER test/fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
 
 #-- Adding test for testhdf5_fortran_1_8
 add_executable (testhdf5_fortran_1_8
@@ -101,7 +109,7 @@ add_executable (testhdf5_fortran_1_8
     tHDF5_1_8.f90
 )
 TARGET_NAMING (testhdf5_fortran_1_8 ${LIB_TYPE})
-TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8 " " " ")
+TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8 ${LIB_TYPE} " " " ")
 target_link_libraries (testhdf5_fortran_1_8 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
@@ -110,8 +118,12 @@ target_link_libraries (testhdf5_fortran_1_8
 if (WIN32 AND MSVC)
   target_link_libraries (testhdf5_fortran_1_8 "ws2_32.lib")
 endif (WIN32 AND MSVC)
-set_target_properties (testhdf5_fortran_1_8 PROPERTIES LINKER_LANGUAGE Fortran)
-set_target_properties (testhdf5_fortran_1_8 PROPERTIES FOLDER test/fortran)
+target_include_directories (testhdf5_fortran_1_8 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+set_target_properties (testhdf5_fortran_1_8 PROPERTIES
+    LINKER_LANGUAGE Fortran
+    FOLDER test/fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
 
 #-- Adding test for fortranlib_test_F03
 if (HDF5_ENABLE_F2003)
@@ -126,7 +138,7 @@ if (HDF5_ENABLE_F2003)
       tHDF5_F03.f90
   )
   TARGET_NAMING (fortranlib_test_F03 ${LIB_TYPE})
-  TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03 " " " ")
+  TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03 ${LIB_TYPE} " " " ")
   target_link_libraries (fortranlib_test_F03 
       ${HDF5_F90_TEST_LIB_TARGET}
       ${HDF5_F90_LIB_TARGET}
@@ -135,14 +147,18 @@ if (HDF5_ENABLE_F2003)
   if (WIN32 AND MSVC)
     target_link_libraries (fortranlib_test_F03 "ws2_32.lib")
   endif (WIN32 AND MSVC)
-  set_target_properties (fortranlib_test_F03 PROPERTIES LINKER_LANGUAGE Fortran)
-  set_target_properties (fortranlib_test_F03 PROPERTIES FOLDER test/fortran)
+  target_include_directories (fortranlib_test_F03 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  set_target_properties (fortranlib_test_F03 PROPERTIES
+      LINKER_LANGUAGE Fortran
+      FOLDER test/fortran
+      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+  )
 endif (HDF5_ENABLE_F2003)
 
 #-- Adding test for fflush1
 add_executable (fflush1 fflush1.f90)
 TARGET_NAMING (fflush1 ${LIB_TYPE})
-TARGET_FORTRAN_PROPERTIES (fflush1 " " " ")
+TARGET_FORTRAN_PROPERTIES (fflush1 ${LIB_TYPE} " " " ")
 target_link_libraries (fflush1 
     ${HDF5_F90_LIB_TARGET}
     ${HDF5_F90_TEST_LIB_TARGET}
@@ -151,13 +167,17 @@ target_link_libraries (fflush1
 if (WIN32 AND MSVC)
   target_link_libraries (fflush1 "ws2_32.lib")
 endif (WIN32 AND MSVC)
-set_target_properties (fflush1 PROPERTIES LINKER_LANGUAGE Fortran)
-set_target_properties (fflush1 PROPERTIES FOLDER test/fortran)
+target_include_directories (fflush1 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+set_target_properties (fflush1 PROPERTIES
+    LINKER_LANGUAGE Fortran
+    FOLDER test/fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
 
 #-- Adding test for fflush2
 add_executable (fflush2 fflush2.f90)
 TARGET_NAMING (fflush2 ${LIB_TYPE})
-TARGET_FORTRAN_PROPERTIES (fflush2 " " " ")
+TARGET_FORTRAN_PROPERTIES (fflush2 ${LIB_TYPE} " " " ")
 target_link_libraries (fflush2 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
@@ -166,7 +186,11 @@ target_link_libraries (fflush2
 if (WIN32 AND MSVC)
   target_link_libraries (fflush2 "ws2_32.lib")
 endif (WIN32 AND MSVC)
-set_target_properties (fflush2 PROPERTIES LINKER_LANGUAGE Fortran)
-set_target_properties (fflush2 PROPERTIES FOLDER test/fortran)
+target_include_directories (fflush2 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+set_target_properties (fflush2 PROPERTIES
+    LINKER_LANGUAGE Fortran
+    FOLDER test/fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
 
 include (CMakeTests.cmake)

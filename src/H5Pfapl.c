@@ -920,6 +920,7 @@ H5Pget_driver_info(hid_t plist_id)
     void *ret_value;            /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE1("*x", "i", plist_id);
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")

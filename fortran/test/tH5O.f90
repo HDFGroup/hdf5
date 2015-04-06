@@ -49,11 +49,11 @@ SUBROUTINE test_h5o(cleanup, total_error)
 
 END SUBROUTINE test_h5o
 
-!/****************************************************************
+!***************************************************************
 !**
 !**  test_h5o_link: Test creating link to object
 !**
-!****************************************************************/
+!***************************************************************
 
 SUBROUTINE test_h5o_link(total_error)
 
@@ -80,10 +80,10 @@ SUBROUTINE test_h5o_link(total_error)
 
   INTEGER, PARAMETER :: TRUE = 1
 
-  LOGICAL :: committed ! /* Whether the named datatype is committed 
+  LOGICAL :: committed !  Whether the named datatype is committed 
 
   INTEGER :: i, j
-  INTEGER ::  error  ! /* Value returned from API calls 
+  INTEGER ::  error  !  Value returned from API calls 
 
   CHARACTER(LEN=14) :: NAME_DATATYPE_SIMPLE="H5T_NATIVE_INT"
   CHARACTER(LEN=16) :: NAME_DATATYPE_SIMPLE2="H5T_NATIVE_INT-2"

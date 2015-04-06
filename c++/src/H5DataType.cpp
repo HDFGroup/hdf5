@@ -71,6 +71,7 @@ DataType::DataType() : H5Object(), id(H5I_INVALID_HID) {}
 DataType::DataType(const hid_t existing_id) : H5Object()
 {
     id = existing_id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -134,10 +135,26 @@ DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, 
 ///\brief	Copy constructor: makes a copy of the original DataType object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType(const DataType& original) : H5Object(original)
+DataType::DataType(const DataType& original) : H5Object()
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType overloaded constructor
+///\brief       Creates a integer type using a predefined type
+///\param       pred_type - IN: Predefined datatype
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - 2000
+// Description
+//		This is so that when a predefined type is passed in, a
+//		copy of it is made, not just a duplicate of the HDF5 id.
+//--------------------------------------------------------------------------
+DataType::DataType(const PredType& pred_type) : H5Object()
+{
+   // use DataType::copy to make a copy of this predefined type
+   copy(pred_type);
 }
 
 //--------------------------------------------------------------------------
@@ -203,11 +220,22 @@ void DataType::copy(const DataSet& dset)
 // 		Makes a copy of the type on the right hand side and stores
 //		the new id in the left hand side object.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		Changed operator= to simply copy the id of rhs instead of
+//		calling H5Tcopy because, when the operator= is invoked, a
+//		different datatype id is created and it won't have the same
+//		characteristics as the original one, specifically, if the
+//		rhs represents a named datatype, "this" would still be a
+//		transient datatype.
+//		BMR - Mar, 2015
 //--------------------------------------------------------------------------
 DataType& DataType::operator=( const DataType& rhs )
 {
     if (this != &rhs)
-	copy(rhs);
+    {
+	id = rhs.id;
+	incRefCount(); // increment number of references to this id
+    }
     return(*this);
 }
 
@@ -463,8 +491,9 @@ DataType DataType::getSuper() const
    // the base type, otherwise, raise exception
    if( base_type_id > 0 )
    {
-      DataType base_type( base_type_id );
-      return( base_type );
+	DataType base_type;
+	base_type.p_setId(base_type_id);
+	return(base_type);
    }
    else
    {

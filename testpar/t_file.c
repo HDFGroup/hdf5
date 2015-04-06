@@ -89,7 +89,7 @@ test_split_comm_access(void)
 
 	/* delete the test file */
 	if (sub_mpi_rank == 0){
-	    mrc = MPI_File_delete((char *)filename, info);
+	    mrc = MPI_File_delete(filename, info);
 	    /*VRFY((mrc==MPI_SUCCESS), ""); */
 	}
     }
@@ -137,7 +137,7 @@ test_avoid_truncation(void)
     MPI_Info info = MPI_INFO_NULL;
     const char *filename;
 
-    filename = GetTestParameters();
+    filename = (const char *)GetTestParameters();
 
     if (VERBOSE_MED)
 	printf("Avoid Truncate test on file %s\n",
@@ -162,7 +162,7 @@ test_avoid_truncation(void)
     VRFY((status >= 0), "");
 
     /* create the file collectively */
-    fid=H5Fcreate(filename,H5F_ACC_TRUNC,fcpl,acc_tpl);
+    fid = H5Fcreate(filename,H5F_ACC_TRUNC,fcpl,acc_tpl);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
     /* Get the internal file pointer */
@@ -199,8 +199,12 @@ test_avoid_truncation(void)
     VRFY((status >= 0), "");
 
     /* open the file collectively */
-    fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
+    fid = H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
     VRFY((fid >= 0), "");
+
+    /* Get the internal file pointer */
+    f = (H5F_t *)H5I_object(fid);
+    VRFY((f != NULL), "");
 
     /* Get this file's creation properties */
     fcpl = H5Fget_create_plist(fid);
@@ -247,7 +251,7 @@ test_avoid_truncation(void)
     VRFY((mrc==MPI_SUCCESS), "pre-file removal MPI_Barrier succeeded");
     /* delete the test file */
     if (sub_mpi_rank == 0)
-        mrc = MPI_File_delete((char *)filename, info);
+        mrc = MPI_File_delete(filename, info);
     mrc = MPI_Barrier(MPI_COMM_WORLD);
     VRFY((mrc==MPI_SUCCESS), "final MPI_Barrier succeeded");
 

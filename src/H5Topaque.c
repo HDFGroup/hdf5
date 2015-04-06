@@ -121,6 +121,7 @@ H5Tget_tag(hid_t type_id)
     char	*ret_value;
 
     FUNC_ENTER_API(NULL)
+    H5TRACE1("*s", "i", type_id);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))

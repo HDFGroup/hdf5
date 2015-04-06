@@ -163,6 +163,7 @@ H5Tget_member_name(hid_t type_id, unsigned membno)
     char	*ret_value;
 
     FUNC_ENTER_API(NULL)
+    H5TRACE2("*s", "iIu", type_id, membno);
 
     /* Check args */
     if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id,H5I_DATATYPE)))

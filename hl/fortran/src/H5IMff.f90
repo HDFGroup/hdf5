@@ -51,7 +51,7 @@ subroutine h5immake_image_8bit_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5immake_image_8bit_f
 !DEC$endif
 !
@@ -62,7 +62,7 @@ subroutine h5immake_image_8bit_f(loc_id,&
  integer(hsize_t), intent(in) :: height             ! height of image
  integer, intent(in), dimension(*) :: buf           ! buffer
  integer :: errcode                                 ! error code
- integer :: namelen                                 ! name length
+ INTEGER(size_t) :: namelen                         ! name length
 
  interface
   integer function h5immake_image_8bit_c(loc_id,namelen,dset_name,width,height,buf)
@@ -73,11 +73,11 @@ subroutine h5immake_image_8bit_f(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer :: namelen                                      ! lenght of name buffer
+  integer(size_t) :: namelen                              ! length of name buffer
   character(len=*), intent(in) :: dset_name               ! name of the dataset
   integer(hsize_t), intent(in) :: width                   ! width of image
   integer(hsize_t), intent(in) :: height                  ! height of image
-  integer , intent(in), dimension(*) :: buf               ! buffer
+  integer         , intent(in), dimension(*) :: buf       ! buffer
   end function h5immake_image_8bit_c
  end interface
 
@@ -115,7 +115,7 @@ subroutine h5imread_image_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imread_image_f
 !DEC$endif
 !
@@ -123,7 +123,7 @@ subroutine h5imread_image_f(loc_id,&
  character(len=*), intent(in) :: dset_name          ! name of the dataset
  integer, intent(inout), dimension(*) :: buf        ! buffer
  integer :: errcode                                 ! error code
- integer :: namelen                                 ! name length
+ INTEGER(size_t) :: namelen                         ! name length
 
  interface
   integer function h5imread_image_c(loc_id,namelen,dset_name,buf)
@@ -134,7 +134,7 @@ subroutine h5imread_image_f(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer :: namelen                                      ! lenght of name buffer
+  integer(size_t) :: namelen                              ! length of name buffer
   character(len=*), intent(in) :: dset_name               ! name of the dataset
   integer, intent(inout), dimension(*) :: buf             ! buffer
   end function h5imread_image_c
@@ -175,7 +175,7 @@ subroutine h5immake_image_24bit_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5immake_image_24bit_f
 !DEC$endif
 !
@@ -187,8 +187,8 @@ subroutine h5immake_image_24bit_f(loc_id,&
  character(len=*), intent(in) :: il                 ! interlace
  integer, intent(in), dimension(*) :: buf           ! buffer
  integer :: errcode                                 ! error code
- integer :: namelen                                 ! name length
- integer :: ilen                                    ! name length
+ INTEGER(size_t) :: namelen                                 ! name length
+ integer(size_t) :: ilen                                    ! name length
 
  interface
   integer function h5immake_image_24bit_c(loc_id,namelen,dset_name,ilen,il,width,height,buf)
@@ -205,8 +205,8 @@ subroutine h5immake_image_24bit_f(loc_id,&
   integer(hsize_t), intent(in) :: height                  ! height of image
   character(len=*), intent(in) :: il                      ! interlace
   integer, intent(in), dimension(*) :: buf                ! buffer
-  integer :: namelen                                      ! lenght of name buffer
-  integer :: ilen                                         ! name length
+  integer(size_t) :: namelen                                      ! length of name buffer
+  integer(size_t) :: ilen                                         ! name length
 
   end function h5immake_image_24bit_c
  end interface
@@ -249,7 +249,7 @@ subroutine h5imget_image_info_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imget_image_info_f
 !DEC$endif
 !
@@ -262,8 +262,8 @@ subroutine h5imget_image_info_f(loc_id,&
  integer(hsize_t), intent(inout) :: npals           ! palettes
  character(len=*), intent(inout) :: interlace       ! interlace
  integer :: errcode                                 ! error code
- integer :: namelen                                 ! name length
- integer :: ilen                                    ! name length
+ integer(size_t) :: namelen                                 ! name length
+ integer(size_t) :: ilen                                    ! name length
 
  interface
   integer function h5imget_image_info_c(loc_id,namelen,dset_name,width,height,planes,npals,ilen,interlace)
@@ -281,8 +281,8 @@ subroutine h5imget_image_info_f(loc_id,&
   integer(hsize_t), intent(inout) :: planes          ! color planes
   integer(hsize_t), intent(inout) :: npals           ! palettes
   character(len=*), intent(inout) :: interlace       ! interlace
-  integer :: namelen                                 ! name length
-  integer :: ilen                                    ! name length
+  integer(size_t) :: namelen                                 ! name length
+  integer(size_t) :: ilen                                    ! name length
   end function h5imget_image_info_c
  end interface
 
@@ -317,7 +317,7 @@ integer function h5imis_image_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imis_image_f
 !DEC$endif
 !
@@ -325,7 +325,7 @@ integer function h5imis_image_f(loc_id,&
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
  character(len=*), intent(in) :: dset_name          ! name of the dataset
  integer :: errcode                                 ! error code
- integer :: namelen                                 ! name length
+ integer(size_t) :: namelen                                 ! name length
 
  interface
   integer function h5imis_image_c(loc_id,namelen,dset_name)
@@ -336,7 +336,7 @@ integer function h5imis_image_f(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer :: namelen                                      ! lenght of name buffer
+  integer(size_t) :: namelen                                      ! length of name buffer
   character(len=*), intent(in) :: dset_name               ! name of the dataset
   end function h5imis_image_c
  end interface
@@ -375,7 +375,7 @@ subroutine h5immake_palette_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5immake_palette_f
 !DEC$endif
 !
@@ -385,7 +385,7 @@ subroutine h5immake_palette_f(loc_id,&
  integer(hsize_t), intent(in), dimension(*) :: pal_dims ! dimensions
  integer, intent(in), dimension(*) :: buf               ! buffer
  integer :: errcode                                     ! error code
- integer :: namelen                                     ! name length
+ integer(size_t) :: namelen                                     ! name length
 
  interface
   integer function h5immake_palette_c(loc_id,namelen,dset_name,pal_dims,buf)
@@ -396,7 +396,7 @@ subroutine h5immake_palette_f(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer :: namelen                                      ! lenght of name buffer
+  integer(size_t) :: namelen                                      ! length of name buffer
   character(len=*), intent(in) :: dset_name               ! name of the dataset
   integer(hsize_t), intent(in), dimension(*) :: pal_dims  ! dimensions
   integer, intent(in), dimension(*) :: buf                ! buffer
@@ -436,7 +436,7 @@ subroutine h5imlink_palette_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imlink_palette_f
 !DEC$endif
 !
@@ -444,8 +444,8 @@ subroutine h5imlink_palette_f(loc_id,&
  character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: pal_name           ! palette name
  integer :: errcode                                 ! error code
- integer :: namelen                                 ! name length
- integer :: ilen                                    ! name length
+ integer(size_t) :: namelen                                 ! name length
+ integer(size_t) :: ilen                                    ! name length
 
  interface
   integer function h5imlink_palette_c(loc_id,namelen,dset_name,ilen,pal_name)
@@ -459,8 +459,8 @@ subroutine h5imlink_palette_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
   character(len=*), intent(in) :: dset_name          ! name of the dataset
   character(len=*), intent(in) :: pal_name           ! palette name
-  integer :: namelen                                 ! name length
-  integer :: ilen                                    ! name length
+  integer(size_t) :: namelen                                 ! name length
+  integer(size_t) :: ilen                                    ! name length
   end function h5imlink_palette_c
  end interface
 
@@ -497,7 +497,7 @@ subroutine h5imunlink_palette_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imunlink_palette_f
 !DEC$endif
 !
@@ -507,8 +507,8 @@ subroutine h5imunlink_palette_f(loc_id,&
  character(len=*), intent(in) :: dset_name          ! name of the dataset
  character(len=*), intent(in) :: pal_name           ! palette name
  integer :: errcode                                 ! error code
- integer :: namelen                                 ! name length
- integer :: ilen                                    ! name length
+ integer(size_t) :: namelen                                 ! name length
+ integer(size_t) :: ilen                                    ! name length
 
  interface
   integer function h5imunlink_palette_c(loc_id,namelen,dset_name,ilen,pal_name)
@@ -522,8 +522,8 @@ subroutine h5imunlink_palette_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
   character(len=*), intent(in) :: dset_name          ! name of the dataset
   character(len=*), intent(in) :: pal_name           ! palette name
-  integer :: namelen                                 ! name length
-  integer :: ilen                                    ! name length
+  integer(size_t) :: namelen                                 ! name length
+  integer(size_t) :: ilen                                    ! name length
   end function h5imunlink_palette_c
  end interface
 
@@ -561,7 +561,7 @@ subroutine h5imget_npalettes_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imget_npalettes_f
 !DEC$endif
 !
@@ -570,7 +570,7 @@ subroutine h5imget_npalettes_f(loc_id,&
  character(len=*), intent(in) :: dset_name          ! name of the dataset
  integer(hsize_t), intent(inout) :: npals           ! palettes
  integer :: errcode                                 ! error code
- integer :: namelen                                 ! name length
+ integer(size_t) :: namelen                                 ! name length
 
  interface
   integer function h5imget_npalettes_c(loc_id,namelen,dset_name,npals)
@@ -583,7 +583,7 @@ subroutine h5imget_npalettes_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
   character(len=*), intent(in) :: dset_name          ! name of the dataset
   integer(hsize_t), intent(inout) :: npals           ! palettes
-  integer :: namelen                                 ! name length
+  integer(size_t) :: namelen                                 ! name length
   end function h5imget_npalettes_c
  end interface
 
@@ -621,7 +621,7 @@ subroutine h5imget_palette_info_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imget_palette_info_f
 !DEC$endif
 !
@@ -631,7 +631,7 @@ subroutine h5imget_palette_info_f(loc_id,&
  integer, intent(in) :: pal_number                     ! palette number
  integer(hsize_t), dimension(*), intent(inout) :: dims ! dimensions
  integer :: errcode                                    ! error code
- integer :: namelen                                    ! name length
+ integer(size_t) :: namelen                                    ! name length
 
  interface
   integer function h5imget_palette_info_c(loc_id,namelen,dset_name,pal_number,dims)
@@ -645,7 +645,7 @@ subroutine h5imget_palette_info_f(loc_id,&
   character(len=*), intent(in) :: dset_name             ! name of the dataset
   integer, intent(in) :: pal_number                     ! palette number
   integer(hsize_t), dimension(*), intent(inout) :: dims ! dimensions
-  integer :: namelen                                    ! name length
+  integer(size_t) :: namelen                                    ! name length
   end function h5imget_palette_info_c
  end interface
 
@@ -684,7 +684,7 @@ subroutine h5imget_palette_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imget_palette_f
 !DEC$endif
 !
@@ -694,7 +694,7 @@ subroutine h5imget_palette_f(loc_id,&
  integer, intent(in) :: pal_number                  ! palette number
  integer, intent(inout), dimension(*) :: buf        ! buffer
  integer :: errcode                                 ! error code
- integer :: namelen                                 ! name length
+ integer(size_t) :: namelen                                 ! name length
 
  interface
   integer function h5imget_palette_c(loc_id,namelen,dset_name,pal_number,buf)
@@ -705,7 +705,7 @@ subroutine h5imget_palette_f(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer :: namelen                                      ! lenght of name buffer
+  integer(size_t) :: namelen                                      ! length of name buffer
   character(len=*), intent(in) :: dset_name               ! name of the dataset
   integer, intent(in) :: pal_number                       ! palette number
   integer, intent(inout), dimension(*) :: buf             ! buffer
@@ -742,7 +742,7 @@ integer function h5imis_palette_f(loc_id,&
 
 !
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_HL_DLL)
 !DEC$attributes dllexport :: h5imis_palette_f
 !DEC$endif
 !
@@ -750,7 +750,7 @@ integer function h5imis_palette_f(loc_id,&
  integer(hid_t),   intent(in) :: loc_id             ! file or group identifier
  character(len=*), intent(in) :: dset_name          ! name of the dataset
  integer :: errcode                                 ! error code
- integer :: namelen                                 ! name length
+ integer(size_t) :: namelen                                 ! name length
 
  interface
   integer function h5imis_palette_c(loc_id,namelen,dset_name)
@@ -761,7 +761,7 @@ integer function h5imis_palette_f(loc_id,&
   !DEC$ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
-  integer :: namelen                                      ! lenght of name buffer
+  integer(size_t) :: namelen                              ! length of name buffer
   character(len=*), intent(in) :: dset_name               ! name of the dataset
   end function h5imis_palette_c
  end interface

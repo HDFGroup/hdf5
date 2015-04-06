@@ -298,7 +298,7 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
   if (rank < 0 ) return ret_value;
   c_startblock = (hsize_t)*startblock;
 
-  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_blocks*2*rank));
+  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_blocks*2*(hsize_t)rank));
   if (!c_buf) return ret_value;
 
   ret_value = H5Sget_select_hyper_blocklist(c_space_id, c_startblock,
@@ -425,7 +425,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   if (rank < 0 ) return ret_value;
 
   c_startpoint = (hsize_t)*startpoint;
-  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_points*rank));
+  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_points*(hsize_t)rank));
   if (!c_buf) return ret_value;
   ret_value = H5Sget_select_elem_pointlist(c_space_id, c_startpoint,
                                             c_num_points, c_buf);
@@ -434,7 +434,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   /* and add 1 to account for array's starting at one in Fortran */
   i2 = 0;
   for( i = 0; i < c_num_points; i++) {
-    i1 =  rank*(i+1);
+    i1 =  (hsize_t)rank*(i+1);
     for(j = 0; j < rank; j++) {
       buf[i2] = (hsize_t_f)(c_buf[i1-1]+1);
       i2 = i2 + 1;
@@ -442,18 +442,12 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
     }
   }
 
-/*   for( i = 0; i < c_num_points*rank; i++) { */
-/*     printf("%i \n", (int)c_buf[i]+1); */
-/*   } */
-
   if (ret_value  >= 0  ) ret_value = 0;
 
   HDfree(c_buf);
 
   return ret_value;
 }
-
-
 
 /****if* H5Sf/h5sselect_all_c
  * NAME
@@ -1230,7 +1224,8 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
   H5S_seloper_t c_op;
   herr_t  status;
   int rank;
-  int i, j;
+  size_t i;
+  int j;
   hsize_t *c_coord;
   size_t c_nelements;
 
@@ -1239,11 +1234,11 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
   c_space_id = *space_id;
   rank = H5Sget_simple_extent_ndims(c_space_id);
 
-  c_coord = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank*(*nelements));
+  c_coord = (hsize_t *)HDmalloc(sizeof(hsize_t)*(size_t)rank*((size_t)*nelements));
   if(!c_coord) return ret_value;
-  for (i=0; i< *nelements; i++) {
+  for (i=0; i< (size_t)*nelements; i++) {
       for (j = 0; j < rank; j++) {
-          c_coord[j+i*rank] = (hsize_t)coord[j + i*rank];
+	c_coord[(size_t)j+i*(size_t)rank] = (hsize_t)coord[(size_t)j + i*(size_t)rank];
       }
   }
 

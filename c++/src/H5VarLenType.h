@@ -40,7 +40,6 @@ class H5_DLLCPP VarLenType : public DataType {
 	// Noop destructor
 	virtual ~VarLenType();
 
-   protected:
 	// Default constructor
 	VarLenType();
 };

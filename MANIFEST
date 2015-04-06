@@ -34,6 +34,8 @@
 ./m4/ltversion.m4                       _DO_NOT_DISTRIBUTE_
 ./m4/lt~obsolete.m4                     _DO_NOT_DISTRIBUTE_
 ./m4/ltoptions.m4                       _DO_NOT_DISTRIBUTE_
+./m4/aclocal_cxx.m4
+./m4/aclocal_fc.m4
 ./README.txt
 ./aclocal.m4
 ./acsite.m4
@@ -87,37 +89,31 @@
 ./config/COPYING
 ./config/BlankForm
 ./config/apple
+./config/cce-fflags
+./config/cce-flags
 ./config/commence.am
 ./config/conclude.am
-./config/craynv
-./config/dec-flags
 ./config/examples.am
 ./config/freebsd
 ./config/gnu-fflags
 ./config/gnu-flags
-./config/hpux11.23
 ./config/i386-pc-cygwin32
 ./config/i686-pc-cygwin
-./config/ia64-linux-gnu
 ./config/ibm-aix
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
-./config/irix6.x
 ./config/linux-gnu
 ./config/linux-gnuaout
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/lt_vers.am
-./config/nec-superux14.1
 ./config/Makefile.am.blank
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/powerpc-ibm-aix5.x
 ./config/solaris2.x
-./config/sv1-cray
 ./config/x86_64-pc-cygwin
-./config/x86_64-redstorm-linux-gnu
 
 ./config/site-specific/BlankForm
 
@@ -848,6 +844,7 @@
 ./src/H5Ptest.c
 ./src/H5PL.c
 ./src/H5PLprivate.h
+./src/H5PLpublic.h
 ./src/H5PLextern.h
 ./src/H5R.c
 ./src/H5Rdeprec.c
@@ -1164,6 +1161,8 @@
 ./testpar/t_pflush2.c
 ./testpar/t_prop.c
 ./testpar/t_shapesame.c
+./testpar/t_pshutdown.c
+./testpar/t_prestart.c
 ./testpar/t_span_tree.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
@@ -1382,6 +1381,7 @@
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
 
 # h5dump test files
+./tools/testfiles/README
 ./tools/testfiles/charsets.h5
 ./tools/testfiles/charsets.ddl
 ./tools/testfiles/family_file00000.h5
@@ -1492,6 +1492,8 @@
 ./tools/testfiles/tcompound.h5
 ./tools/testfiles/tcompound2.h5
 ./tools/testfiles/tcompound_complex.h5
+./tools/testfiles/tcompound_enum.ddl
+./tools/testfiles/tcompound_enum.h5
 ./tools/testfiles/tdatareg.h5
 ./tools/testfiles/tdatareg.ddl 
 ./tools/testfiles/tdataregR.ddl 
@@ -2376,6 +2378,8 @@
 ./hl/tools/gif2h5/writehdf.c
 ./hl/tools/gif2h5/h52gifgentst.c
 ./hl/tools/gif2h5/h52giftest.sh.in
+./hl/tools/gif2h5/testfiles/REAMDE
+./hl/tools/gif2h5/testfiles/ex_image2.h5
 ./hl/tools/gif2h5/testfiles/image1.gif
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
 
@@ -2425,58 +2429,8 @@
 ./hl/c++/test/Makefile.am
 ./hl/c++/test/Makefile.in
 
-#vms files
-./vms/COPYING
-
-./vms/c++/examples/check.com
-./vms/c++/examples/make.com
-./vms/c++/src/make.com
-./vms/c++/test/check.com
-./vms/c++/test/make.com
-
-./vms/fortran/examples/check.com
-./vms/fortran/examples/make.com
-./vms/fortran/src/make.com
-./vms/fortran/test/check.com
-./vms/fortran/test/make.com
-
-./vms/examples/check.com
-./vms/examples/make.com
-./vms/src/make.com
-./vms/src/h5pubconf.h
-./vms/test/check.com
-./vms/test/make.com
-./vms/test/H5srcdir_str.h
-
-./vms/build.com
-./vms/install.com
-./vms/make.com
-./vms/tools/h5copy/make.com
-./vms/tools/h5copy/check_h5copy.com
-./vms/tools/h5dump/make.com
-./vms/tools/h5dump/check_h5dump.com
-./vms/tools/h5ls/check.com
-./vms/tools/h5ls/check_h5ls.com
-./vms/tools/h5ls/make.com
-./vms/tools/h5diff/check_h5diff.com
-./vms/tools/h5diff/make.com
-./vms/tools/h5import/check_h5import.com
-./vms/tools/h5import/make.com
-./vms/tools/h5jam/check_h5jam.com
-./vms/tools/h5jam/make.com
-./vms/tools/h5repack/check_h5repack.com
-./vms/tools/h5repack/make.com
-./vms/tools/h5stat/make.com
-./vms/tools/lib/make.com
-./vms/tools/misc/make.com
-./vms/tools/testfiles/tattr-3.ddl
-./vms/tools/testfiles/tdset-2.ddl
-./vms/tools/testfiles/tgroup-2.ddl
-./vms/tools/testfiles/tperror.ddl
-
 # CMake-specific Files
 ./config/cmake/cacheinit.cmake
-./config/cmake/CMakePackageConfigHelpers.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CTestCustom.cmake
@@ -2488,6 +2442,7 @@
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
+./config/cmake/patch.xml
 ./config/cmake/PkgInfo.in
 ./config/cmake/README.txt.cmake.in
 ./config/cmake/userblockTest.cmake

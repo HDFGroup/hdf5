@@ -43,10 +43,10 @@
 #define ONE_MB              (ONE_KB * ONE_KB)
 #define ONE_GB              (ONE_MB * ONE_KB)
 
-#define MICROSECOND         1000000.0
+#define MICROSECOND         1000000.0F
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes,t) ((fabs(t)<0.0000000001) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
+#define MB_PER_SEC(bytes,t) ((fabs(t)<0.0000000001F) ? 0.0F : ((((double)bytes) / ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE    1
@@ -182,7 +182,7 @@ write_file(Bytef *source, uLongf sourceLen)
 
     /* destination buffer needs to be at least 0.1% larger than sourceLen
      * plus 12 bytes */
-    destLen = (uLongf)((double)sourceLen + ((double)sourceLen * 0.1)) + 12;
+    destLen = (uLongf)((double)sourceLen + ((double)sourceLen * 0.1F)) + 12;
     dest = (Bytef *)HDmalloc(destLen);
 
     if (!dest)
@@ -464,7 +464,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
             error("out of memory");
         }
 
-        compression_time = 0.0;
+        compression_time = 0.0F;
 
         if (random_test)
             fill_with_random_data(src, src_len);

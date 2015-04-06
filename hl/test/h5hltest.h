@@ -33,7 +33,7 @@
 #define TESTING2(WHAT)  {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
 #define TESTING3(WHAT)  {printf("%-70s", "" WHAT); fflush(stdout);}
 
-/* Implrements verbose 'assert' with 'goto error' exit  */
+/* Implements verbose 'assert' with 'goto error' exit  */
 #define VERIFY(condition, string) do { if (!(condition)) FAIL_PUTS_ERROR(string) } while(0)
 
 #endif /* _H5HLTEST_H */
