@@ -681,25 +681,6 @@ Known Problems
   spurious data values has only been encountered on Windows 32-bit systems.
   (Issue HDFFV-8247; JP - 2013/03/27)
 
-* The 5.9 C++ compiler on Sun failed to compile a C++ test ttypes.cpp.  It 
-  complains with this message:
-      "/home/hdf5/src/H5Vprivate.h", line 130: Error: __func__ is not defined.
-  
-  The reason is that __func__ is a predefined identifier in C99 standard.  The
-  HDF5 C library uses it in H5private.h.  The test ttypes.cpp includes 
-  H5private.h (H5Tpkg.h<-H5Fprivate.h<-H5Vprivate.h<-H5private.h).  Sun's 5.9
-  C++ compiler doesn't support __func__, thus fails to compile the C++ test.
-  But Sun's 5.11 C++ compiler does.  To check whether your Sun C++ compiler 
-  knows this identifier, try to compile the following simple C++ program:
-      #include<stdio.h>
-
-      int main(void)
-      {
-          printf("%s\n", __func__);
-          return 0;
-      }
-  (SLU - 2012/11/5)
-
 * The C++ and FORTRAN bindings are not currently working on FreeBSD with the
   native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
   ports (and probably gcc releases after that).
@@ -770,12 +751,9 @@ Known Problems
 
 * Shared Fortran libraries are not quite working on AIX. While they are
   generated when --enable-shared is specified, the fortran and hl/fortran
-  tests fail. We are looking into the issue. HL and C++ shared libraries
-  should now be working as intended, however.
+  tests fail. the issue. HL and C++ shared libraries should now be 
+  working as intended, however.
   (MAM - 2011/04/20)
-
-* The --with-mpe configure option does not work with Mpich2.
-  (AKC - 2011/03/10)
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
   occur when reading from a dataset in parallel shortly after it has been
@@ -809,16 +787,6 @@ Known Problems
   executable is statically linked with just the HDF5 library.
   (MAM - 2009/11/04)
   
-* Parallel tests failed with 16 processes with data inconsistency at testphdf5
-  / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
-  collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
-  with MPI IO.
-  (CMC - 2009/04/28)
-
-* On an Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
-  use -mp -O1 compilation flags to build the libraries. A higher level of 
-  optimization causes failures in several HDF5 library tests. 
-
 * A dataset created or rewritten with a v1.6.3 library or after cannot be read 
   with the v1.6.2 library or before when the Fletcher32 EDC filter is enabled.
   There was a bug in the calculation of the Fletcher32 checksum in the 
