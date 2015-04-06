@@ -698,20 +698,6 @@ Known Problems
   not via the test script.
   (AKC - 2012/05/03)
 
-* The data conversion test dt_arith.c fails in "long double" to integer
-  conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
-  is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
-  (3.2.2 on Fedora) doesn't have the problem.  Users should lower the 
-  optimization level (-O1 or -O0) by defining CFLAGS in the command line of 
-  "configure" like:
-
-      CFLAGS=-O1 ./configure
-
-  This will overwrite the library's default optimization level.
-  (SLU - 2012/02/07 - HDFFV-7829)
-  This issue is no longer present on Ubuntu 12.10 (3.5.0 kernel) with 
-  gcc 4.7.2.
-
 * The STDIO VFD does not work on some architectures, possibly due to 32/64
   bit or large file issues.  The basic STDIO VFD test is known to fail on
   64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
