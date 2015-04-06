@@ -14,6 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#include <iostream>
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -35,6 +36,7 @@
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
+using namespace std;
 #endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
