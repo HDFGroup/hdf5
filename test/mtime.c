@@ -114,7 +114,7 @@ main(void)
         puts("    Modification times will be mantained in the file but");
         puts("    cannot be queried on this system.  See H5O_mtime_decode().");
         return 0;
-    } else if(HDfabs(HDdifftime(now, oi1.ctime)) > 60.0) {
+    } else if(HDfabs(HDdifftime(now, oi1.ctime)) > 60.0F) {
         H5_FAILED();
         tm = HDlocaltime(&(oi1.ctime));
         HDstrftime((char*)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);

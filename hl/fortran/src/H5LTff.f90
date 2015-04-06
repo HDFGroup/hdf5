@@ -163,7 +163,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int1
     !DEC$endif
     !
@@ -171,11 +171,11 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER, INTENT(in), DIMENSION(*) :: buf           ! data buffer
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                         ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_int1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
@@ -187,10 +187,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), DIMENSION(*) :: buf                ! data buffer
        END FUNCTION h5ltmake_dataset_int1_c
     END INTERFACE
@@ -229,7 +229,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int2
     !DEC$endif
     !
@@ -237,10 +237,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -254,10 +254,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                              ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2)) :: buf                       ! data buffer
        END FUNCTION h5ltmake_dataset_int2_c
@@ -297,7 +297,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int3
     !DEC$endif
     !
@@ -305,10 +305,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -322,10 +322,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_int3_c
@@ -360,7 +360,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int4
     !DEC$endif
     !
@@ -368,10 +368,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf  ! data buffer
 
@@ -385,10 +385,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf      ! data buffer
        END FUNCTION h5ltmake_dataset_int4_c
@@ -423,7 +423,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int5
     !DEC$endif
     !
@@ -431,10 +431,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf  ! data buffer
 
@@ -448,10 +448,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf      ! data buffer
        END FUNCTION h5ltmake_dataset_int5_c
@@ -486,7 +486,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int6
     !DEC$endif
     !
@@ -494,10 +494,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf  ! data buffer
 
@@ -511,10 +511,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf      ! data buffer
        END FUNCTION h5ltmake_dataset_int6_c
@@ -549,7 +549,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_int7
     !DEC$endif
     !
@@ -557,10 +557,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf  ! data buffer
 
@@ -574,10 +574,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf      ! data buffer
        END FUNCTION h5ltmake_dataset_int7_c
@@ -618,7 +618,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float1
     !DEC$endif
     !
@@ -626,11 +626,11 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     REAL, INTENT(in), DIMENSION(*) :: buf              ! data buffer
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_fl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
@@ -642,10 +642,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), DIMENSION(*) :: buf                   ! data buffer
        END FUNCTION h5ltmake_dataset_fl1_c
     END INTERFACE
@@ -684,7 +684,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float2
     !DEC$endif
     !
@@ -692,10 +692,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -709,10 +709,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2)) :: buf                       ! data buffer
        END FUNCTION h5ltmake_dataset_fl2_c
@@ -752,7 +752,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float3
     !DEC$endif
     !
@@ -760,10 +760,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -777,10 +777,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_fl3_c
@@ -815,7 +815,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float4
     !DEC$endif
     !
@@ -823,10 +823,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf          ! data buffer
 
@@ -840,10 +840,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3), dims(4)) :: buf ! data buffer
        END FUNCTION h5ltmake_dataset_fl4_c
@@ -878,7 +878,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float5
     !DEC$endif
     !
@@ -886,10 +886,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -903,10 +903,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf ! data buffer
        END FUNCTION h5ltmake_dataset_fl5_c
@@ -941,7 +941,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float6
     !DEC$endif
     !
@@ -949,10 +949,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -966,10 +966,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf ! data buffer
        END FUNCTION h5ltmake_dataset_fl6_c
@@ -1004,7 +1004,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_float7
     !DEC$endif
     !
@@ -1012,10 +1012,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -1029,10 +1029,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf ! data buffer
        END FUNCTION h5ltmake_dataset_fl7_c
@@ -1072,7 +1072,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double1
     !DEC$endif
     !
@@ -1080,11 +1080,11 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf  ! data buffer
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_dl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
@@ -1096,10 +1096,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf       ! data buffer
        END FUNCTION h5ltmake_dataset_dl1_c
     END INTERFACE
@@ -1138,7 +1138,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double2
     !DEC$endif
     !
@@ -1146,10 +1146,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -1163,10 +1163,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2)) :: buf                       ! data buffer
        END FUNCTION h5ltmake_dataset_dl2_c
@@ -1206,7 +1206,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double3
     !DEC$endif
     !
@@ -1214,10 +1214,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -1231,10 +1231,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_dl3_c
@@ -1269,7 +1269,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double4
     !DEC$endif
     !
@@ -1277,10 +1277,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3), dims(4)) :: buf          ! data buffer
 
@@ -1294,10 +1294,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf  ! data buffer
        END FUNCTION h5ltmake_dataset_dl4_c
@@ -1332,7 +1332,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double5
     !DEC$endif
     !
@@ -1340,10 +1340,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -1357,10 +1357,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf  ! data buffer
        END FUNCTION h5ltmake_dataset_dl5_c
@@ -1395,7 +1395,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double6
     !DEC$endif
     !
@@ -1403,10 +1403,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -1420,10 +1420,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf  ! data buffer
        END FUNCTION h5ltmake_dataset_dl6_c
@@ -1458,7 +1458,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_f_double7
     !DEC$endif
     !
@@ -1466,10 +1466,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -1483,10 +1483,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf  ! data buffer
        END FUNCTION h5ltmake_dataset_dl7_c
@@ -1525,7 +1525,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int1
     !DEC$endif
     !
@@ -1533,10 +1533,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER, INTENT(inout), DIMENSION(*) :: buf        ! data buffer
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_int1_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -1548,9 +1548,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(HID_T),   INTENT(IN) :: loc_id                  ! file or group identifier
          INTEGER(HID_T),   INTENT(IN) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(LEN=*), INTENT(IN) :: dset_name               ! name of the dataset
-         INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims      ! size of the bufffer buf
+         INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims      ! size of the buffer buf
          INTEGER, INTENT(IN), DIMENSION(*) :: buf                ! data buffer
        END FUNCTION h5ltread_dataset_int1_c
     END INTERFACE
@@ -1588,7 +1588,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int2
     !DEC$endif
     !
@@ -1596,9 +1596,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -1612,9 +1612,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2)) :: buf                       ! data buffer
        END FUNCTION h5ltread_dataset_int2_c
@@ -1653,7 +1653,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int3
     !DEC$endif
     !
@@ -1661,9 +1661,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -1677,9 +1677,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_int3_c
@@ -1714,7 +1714,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int4
     !DEC$endif
     !
@@ -1722,9 +1722,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf          ! data buffer
 
@@ -1738,9 +1738,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_int4_c
@@ -1775,7 +1775,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int5
     !DEC$endif
     !
@@ -1783,9 +1783,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -1799,9 +1799,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_int5_c
@@ -1836,7 +1836,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int6
     !DEC$endif
     !
@@ -1844,9 +1844,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -1860,9 +1860,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_int6_c
@@ -1897,7 +1897,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_int7
     !DEC$endif
     !
@@ -1905,9 +1905,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -1921,9 +1921,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_int7_c
@@ -1963,7 +1963,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float1
     !DEC$endif
     !
@@ -1971,10 +1971,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     REAL, INTENT(inout), DIMENSION(*) :: buf           ! data buffer
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_fl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -1986,9 +1986,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), DIMENSION(*) :: buf                   ! data buffer
        END FUNCTION h5ltread_dataset_fl1_c
     END INTERFACE
@@ -2026,7 +2026,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float2
     !DEC$endif
     !
@@ -2035,9 +2035,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -2051,9 +2051,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2)) :: buf                       ! data buffer
        END FUNCTION h5ltread_dataset_fl2_c
@@ -2092,7 +2092,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float3
     !DEC$endif
     !
@@ -2100,9 +2100,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -2116,9 +2116,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_fl3_c
@@ -2153,7 +2153,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float4
     !DEC$endif
     !
@@ -2161,9 +2161,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf          ! data buffer
 
@@ -2177,9 +2177,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_fl4_c
@@ -2214,7 +2214,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float5
     !DEC$endif
     !
@@ -2222,9 +2222,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -2238,9 +2238,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_fl5_c
@@ -2275,7 +2275,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float6
     !DEC$endif
     !
@@ -2283,9 +2283,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -2299,9 +2299,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_fl6_c
@@ -2336,7 +2336,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_float7
     !DEC$endif
     !
@@ -2344,9 +2344,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -2360,9 +2360,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_fl7_c
@@ -2402,7 +2402,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport ::h5ltread_dataset_f_double1
     !DEC$endif
     !
@@ -2410,10 +2410,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     DOUBLE PRECISION, INTENT(inout), DIMENSION(*) :: buf ! data buffer
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_dl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
@@ -2425,9 +2425,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf       ! data buffer
        END FUNCTION h5ltread_dataset_dl1_c
     END INTERFACE
@@ -2465,7 +2465,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double2
     !DEC$endif
     !
@@ -2473,9 +2473,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -2489,9 +2489,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2)) :: buf                       ! data buffer
        END FUNCTION h5ltread_dataset_dl2_c
@@ -2530,7 +2530,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double3
     !DEC$endif
     !
@@ -2538,9 +2538,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -2554,9 +2554,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_dl3_c
@@ -2591,7 +2591,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double4
     !DEC$endif
     !
@@ -2599,9 +2599,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf          ! data buffer
 
@@ -2615,9 +2615,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_dl4_c
@@ -2652,7 +2652,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double5
     !DEC$endif
     !
@@ -2660,9 +2660,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -2676,9 +2676,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_dl5_c
@@ -2713,7 +2713,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double6
     !DEC$endif
     !
@@ -2721,9 +2721,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -2737,9 +2737,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_dl6_c
@@ -2774,7 +2774,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_f_double7
     !DEC$endif
     !
@@ -2782,9 +2782,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -2798,9 +2798,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_dl7_c
@@ -2839,7 +2839,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_1
     !DEC$endif
     !
@@ -2847,10 +2847,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER, INTENT(in), DIMENSION(*) :: buf           ! data buffer
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nint1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
@@ -2862,10 +2862,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), DIMENSION(*) :: buf                ! data buffer
        END FUNCTION h5ltmake_dataset_nint1_c
     END INTERFACE
@@ -2903,7 +2903,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_2
     !DEC$endif
     !
@@ -2911,9 +2911,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -2928,10 +2928,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
        END FUNCTION h5ltmake_dataset_nint2_c
@@ -2971,7 +2971,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_3
     !DEC$endif
     !
@@ -2979,9 +2979,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -2996,10 +2996,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_nint3_c
@@ -3034,7 +3034,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_4
     !DEC$endif
     !
@@ -3042,9 +3042,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf          ! data buffer
 
@@ -3059,10 +3059,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf  ! data buffer
        END FUNCTION h5ltmake_dataset_nint4_c
@@ -3097,7 +3097,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_5
     !DEC$endif
     !
@@ -3105,9 +3105,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -3122,10 +3122,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf  ! data buffer
        END FUNCTION h5ltmake_dataset_nint5_c
@@ -3160,7 +3160,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_6
     !DEC$endif
     !
@@ -3168,9 +3168,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -3185,10 +3185,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf  ! data buffer
        END FUNCTION h5ltmake_dataset_nint6_c
@@ -3223,7 +3223,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_int_f_7
     !DEC$endif
     !
@@ -3231,9 +3231,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -3248,10 +3248,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf  ! data buffer
        END FUNCTION h5ltmake_dataset_nint7_c
@@ -3290,7 +3290,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_1
     !DEC$endif
     !
@@ -3298,10 +3298,10 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     REAL, INTENT(in), DIMENSION(*) :: buf              ! data buffer
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_nfl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
@@ -3313,10 +3313,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), DIMENSION(*) :: buf                   ! data buffer
        END FUNCTION h5ltmake_dataset_nfl1_c
     END INTERFACE
@@ -3354,7 +3354,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_2
     !DEC$endif
     !
@@ -3362,9 +3362,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -3378,10 +3378,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
        END FUNCTION h5ltmake_dataset_nfl2_c
@@ -3420,7 +3420,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_3
     !DEC$endif
     !
@@ -3428,9 +3428,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -3444,10 +3444,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_nfl3_c
@@ -3482,7 +3482,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_4
     !DEC$endif
     !
@@ -3490,9 +3490,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf          ! data buffer
 
@@ -3506,10 +3506,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_nfl4_c
@@ -3544,7 +3544,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_5
     !DEC$endif
     !
@@ -3552,9 +3552,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -3568,10 +3568,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_nfl5_c
@@ -3606,7 +3606,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_6
     !DEC$endif
     !
@@ -3614,9 +3614,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -3630,10 +3630,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_nfl6_c
@@ -3668,7 +3668,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_float_f_7
     !DEC$endif
     !
@@ -3676,9 +3676,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -3692,10 +3692,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_nfl7_c
@@ -3735,7 +3735,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_1
     !DEC$endif
     !
@@ -3743,9 +3743,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1)) :: buf                          ! data buffer
 
@@ -3759,10 +3759,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1)) :: buf                               ! data buffer
        END FUNCTION h5ltmake_dataset_ndl1_c
@@ -3802,7 +3802,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_2
     !DEC$endif
     !
@@ -3810,9 +3810,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -3826,10 +3826,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2)) :: buf                       ! data buffer
        END FUNCTION h5ltmake_dataset_ndl2_c
@@ -3868,7 +3868,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_3
     !DEC$endif
     !
@@ -3876,9 +3876,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -3892,10 +3892,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_ndl3_c
@@ -3930,7 +3930,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_4
     !DEC$endif
     !
@@ -3938,9 +3938,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf          ! data buffer
 
@@ -3954,10 +3954,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_ndl4_c
@@ -3992,7 +3992,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_5
     !DEC$endif
     !
@@ -4000,9 +4000,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -4016,10 +4016,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_ndl5_c
@@ -4054,7 +4054,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_5
     !DEC$endif
     !
@@ -4062,9 +4062,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -4078,10 +4078,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_ndl6_c
@@ -4116,7 +4116,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_double_f_5
     !DEC$endif
     !
@@ -4124,9 +4124,9 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -4140,10 +4140,10 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(in) :: rank                    ! rank
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(in), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf               ! data buffer
        END FUNCTION h5ltmake_dataset_ndl7_c
@@ -4181,16 +4181,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_1
     !DEC$endif
     !
 
     INTEGER(HID_T),   INTENT(IN) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1)) :: buf                          ! data buffer
 
@@ -4204,9 +4204,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(inout), &
               DIMENSION(dims(1)) :: buf                               ! data buffer
        END FUNCTION h5ltread_dataset_nint1_c
@@ -4245,16 +4245,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_2
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -4268,9 +4268,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(inout), &
               DIMENSION(dims(1),dims(2)) :: buf                       ! data buffer
        END FUNCTION h5ltread_dataset_nint2_c
@@ -4308,16 +4308,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_3
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -4331,9 +4331,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_nint3_c
@@ -4367,16 +4367,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_4
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf          ! data buffer
 
@@ -4390,9 +4390,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_nint4_c
@@ -4426,16 +4426,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_5
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -4449,9 +4449,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_nint5_c
@@ -4485,16 +4485,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_6
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -4508,9 +4508,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_nint6_c
@@ -4544,16 +4544,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_int_f_7
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -4567,9 +4567,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          INTEGER, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_nint7_c
@@ -4608,16 +4608,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_1
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1)) :: buf                          ! data buffer
 
@@ -4631,9 +4631,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(inout), &
               DIMENSION(dims(1)) :: buf                               ! data buffer
        END FUNCTION h5ltread_dataset_nfl1_c
@@ -4672,16 +4672,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_2
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -4695,9 +4695,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(inout), &
               DIMENSION(dims(1),dims(2)) :: buf                       ! data buffer
        END FUNCTION h5ltread_dataset_nfl2_c
@@ -4735,16 +4735,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_3
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -4758,9 +4758,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_nfl3_c
@@ -4794,16 +4794,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_4
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf          ! data buffer
 
@@ -4817,9 +4817,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_nfl4_c
@@ -4853,16 +4853,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_5
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -4876,9 +4876,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_nfl5_c
@@ -4912,16 +4912,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_6
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -4935,9 +4935,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_nfl6_c
@@ -4971,16 +4971,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_float_f_7
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     REAL, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -4994,9 +4994,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          REAL, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_nfl7_c
@@ -5034,16 +5034,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_1
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1)) :: buf                          ! data buffer
 
@@ -5057,9 +5057,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(inout), &
               DIMENSION(dims(1)) :: buf                               ! data buffer
        END FUNCTION h5ltread_dataset_ndl1_c
@@ -5098,16 +5098,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_2
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2)) :: buf                  ! data buffer
 
@@ -5121,9 +5121,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(inout), &
               DIMENSION(dims(1),dims(2)) :: buf                       ! data buffer
        END FUNCTION h5ltread_dataset_ndl2_c
@@ -5161,16 +5161,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_3
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3)) :: buf          ! data buffer
 
@@ -5184,9 +5184,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_ndl3_c
@@ -5220,16 +5220,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_4
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf          ! data buffer
 
@@ -5243,9 +5243,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_ndl4_c
@@ -5279,16 +5279,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_5
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf          ! data buffer
 
@@ -5302,9 +5302,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_ndl5_c
@@ -5338,16 +5338,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_6
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf          ! data buffer
 
@@ -5361,9 +5361,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_ndl6_c
@@ -5397,16 +5397,16 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_double_f_7
     !DEC$endif
     !
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the bufffer buf
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                         ! name length
     DOUBLE PRECISION, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf          ! data buffer
 
@@ -5420,9 +5420,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
          INTEGER(hid_t),   INTENT(in) :: type_id                 ! datatype identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                              ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the bufffer buf
+         INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims      ! size of the buffer buf
          DOUBLE PRECISION, INTENT(inout), &
               DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf               ! data buffer
        END FUNCTION h5ltread_dataset_ndl7_c
@@ -5457,20 +5457,18 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltmake_dataset_string_f
     !DEC$endif
     !
-
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     CHARACTER(len=*), INTENT(in) :: buf                ! data buffer
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: buflen                                  ! buffer length
+    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(size_t) :: buflen                          ! buffer length
 
     INTERFACE
        INTEGER FUNCTION h5ltmake_dataset_string_c(loc_id,namelen,dset_name,buflen,buf)
@@ -5481,8 +5479,8 @@ CONTAINS
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: buflen                                       ! lenght of data buffer
+         INTEGER(size_t) :: namelen                              ! length of name buffer
+         INTEGER(size_t) :: buflen                               ! length of data buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: buf                     ! data buffer
        END FUNCTION h5ltmake_dataset_string_c
@@ -5520,7 +5518,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltread_dataset_string_f
     !DEC$endif
     !
@@ -5529,7 +5527,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     CHARACTER(len=*), INTENT(inout) :: buf             ! data buffer
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltread_dataset_string_c(loc_id,namelen,dset_name,buf)
@@ -5540,7 +5538,7 @@ CONTAINS
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(inout) :: buf                  ! data buffer
        END FUNCTION h5ltread_dataset_string_c
@@ -5587,7 +5585,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltset_attribute_int_f
     !DEC$endif
     !
@@ -5598,8 +5596,8 @@ CONTAINS
     INTEGER(size_t),  INTENT(in) :: size               ! size of attribute array
     INTEGER :: errcode                                 ! error code
     INTEGER, INTENT(in), DIMENSION(*) :: buf           ! data buffer
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: attrlen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(size_t) :: attrlen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltset_attribute_int_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf)
@@ -5611,8 +5609,8 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: attrlen                                      ! lenght of attr name buffer
+         INTEGER(size_t) :: namelen                              ! length of name buffer
+         INTEGER(size_t) :: attrlen                              ! length of attr name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
          INTEGER(size_t),  INTENT(in) :: size                    ! size of attribute array
@@ -5654,7 +5652,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltset_attribute_float_f
     !DEC$endif
     !
@@ -5665,8 +5663,8 @@ CONTAINS
     INTEGER(size_t),  INTENT(in) :: size               ! size of attribute array
     INTEGER :: errcode                                 ! error code
     REAL, INTENT(in), DIMENSION(*) :: buf              ! data buffer
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: attrlen                                 ! name length
+    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(size_t) :: attrlen                         ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltset_attribute_float_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf)
@@ -5678,8 +5676,8 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: attrlen                                      ! lenght of attr name buffer
+         INTEGER(size_t) :: namelen                              ! length of name buffer
+         INTEGER(size_t) :: attrlen                              ! length of attr name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
          INTEGER(size_t),  INTENT(in) :: size                    ! size of attribute array
@@ -5721,7 +5719,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltset_attribute_double_f
     !DEC$endif
     !
@@ -5732,8 +5730,8 @@ CONTAINS
     INTEGER(size_t),  INTENT(in) :: size               ! size of attribute array
     INTEGER :: errcode                                 ! error code
     DOUBLE PRECISION, INTENT(in), DIMENSION(*) :: buf  ! data buffer
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: attrlen                                 ! name length
+    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(size_t) :: attrlen                         ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltset_attribute_double_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf)
@@ -5745,8 +5743,8 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: attrlen                                      ! lenght of attr name buffer
+         INTEGER(size_t) :: namelen                              ! length of name buffer
+         INTEGER(size_t) :: attrlen                              ! length of attr name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
          INTEGER(size_t),  INTENT(in) :: size                    ! size of attribute array
@@ -5788,7 +5786,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltset_attribute_string_f
     !DEC$endif
     !
@@ -5798,9 +5796,9 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: attr_name          ! name of the attribute
     INTEGER :: errcode                                 ! error code
     CHARACTER(len=*), INTENT(in) :: buf                ! data buffer
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: attrlen                                 ! name length
-    INTEGER :: buflen                                  ! data buffer length
+    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(size_t) :: attrlen                         ! name length
+    INTEGER(size_t) :: buflen                          ! data buffer length
 
     INTERFACE
        INTEGER FUNCTION h5ltset_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buflen,buf)
@@ -5812,9 +5810,9 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: attrlen                                      ! lenght of attr name buffer
-         INTEGER :: buflen                                       ! data buffer length
+         INTEGER(size_t) :: namelen                              ! length of name buffer
+         INTEGER(size_t) :: attrlen                              ! length of attr name buffer
+         INTEGER(size_t) :: buflen                               ! data buffer length
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
          CHARACTER(len=*), INTENT(in) :: buf                     ! data buffer
@@ -5857,7 +5855,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_int_f
     !DEC$endif
     !
@@ -5867,8 +5865,8 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: attr_name          ! name of the attribute
     INTEGER :: errcode                                 ! error code
     INTEGER, INTENT(inout), DIMENSION(*) :: buf        ! data buffer
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: attrlen                                 ! name length
+    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(size_t) :: attrlen                         ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_int_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
@@ -5880,11 +5878,11 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: attrlen                                      ! lenght of attr name buffer
+         INTEGER(size_t) :: namelen                              ! length of name buffer
+         INTEGER(size_t) :: attrlen                              ! length of attr name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
-         INTEGER, INTENT(inout), DIMENSION(*) :: buf             ! data buffer
+         INTEGER, INTENT(inout), DIMENSION(*) :: buf     ! data buffer
        END FUNCTION h5ltget_attribute_int_c
     END INTERFACE
 
@@ -5922,7 +5920,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_float_f
     !DEC$endif
     !
@@ -5932,8 +5930,8 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: attr_name          ! name of the attribute
     INTEGER :: errcode                                 ! error code
     REAL, INTENT(inout), DIMENSION(*) :: buf           ! data buffer
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: attrlen                                 ! name length
+    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(size_t) :: attrlen                         ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_float_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
@@ -5945,8 +5943,8 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: attrlen                                      ! lenght of attr name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
+         INTEGER(size_t) :: attrlen                                      ! length of attr name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
          REAL, INTENT(inout), DIMENSION(*) :: buf                ! data buffer
@@ -5986,7 +5984,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_double_f
     !DEC$endif
     !
@@ -5996,8 +5994,8 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: attr_name          ! name of the attribute
     INTEGER :: errcode                                 ! error code
     DOUBLE PRECISION,INTENT(inout),DIMENSION(*) :: buf ! data buffer
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: attrlen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(size_t) :: attrlen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_double_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
@@ -6009,8 +6007,8 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: attrlen                                      ! lenght of attr name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
+         INTEGER(size_t) :: attrlen                                      ! length of attr name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
          DOUBLE PRECISION, INTENT(inout), DIMENSION(*) :: buf    ! data buffer
@@ -6050,7 +6048,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_string_f
     !DEC$endif
     !
@@ -6060,8 +6058,8 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: attr_name          ! name of the attribute
     INTEGER :: errcode                                 ! error code
     CHARACTER(len=*), INTENT(inout) :: buf             ! data buffer
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: attrlen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(size_t) :: attrlen                                 ! name length
     INTEGER(size_t) :: buf_size                        ! buf size
 
     INTERFACE
@@ -6074,8 +6072,8 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: attrlen                                      ! lenght of attr name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
+         INTEGER(size_t) :: attrlen                                      ! length of attr name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
          CHARACTER(len=*), INTENT(inout) :: buf                  ! data buffer
@@ -6121,7 +6119,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_dataset_ndims_f
     !DEC$endif
     !
@@ -6130,7 +6128,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER,          INTENT(inout) :: rank            ! rank
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltget_dataset_ndims_c(loc_id,namelen,dset_name,rank)
@@ -6141,7 +6139,7 @@ CONTAINS
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER,          INTENT(inout) :: rank                 ! rank
        END FUNCTION h5ltget_dataset_ndims_c
@@ -6178,7 +6176,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltfind_dataset_f
     !DEC$endif
     !
@@ -6186,7 +6184,7 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltfind_dataset_c(loc_id,namelen,dset_name)
@@ -6197,7 +6195,7 @@ CONTAINS
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
        END FUNCTION h5ltfind_dataset_c
     END INTERFACE
@@ -6236,7 +6234,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_dataset_info_f
     !DEC$endif
     !
@@ -6247,7 +6245,7 @@ CONTAINS
     INTEGER, INTENT(inout)         :: type_class       ! type class
     INTEGER(size_t), INTENT(inout) :: type_size        ! type size
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltget_dataset_info_c(loc_id,namelen,dset_name,dims,type_class,type_size)
@@ -6258,7 +6256,7 @@ CONTAINS
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: dset_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims      ! dimensions
          INTEGER, INTENT(inout)         :: type_class            ! type class
@@ -6304,7 +6302,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_ndims_f
     !DEC$endif
     !
@@ -6314,8 +6312,8 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: attr_name          ! name of the attribute
     INTEGER,          INTENT(inout) :: rank            ! rank
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: attrlen                                 ! name length
+    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(size_t) :: attrlen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_ndims_c(loc_id,namelen,dset_name,attrlen,attr_name,rank)
@@ -6327,8 +6325,8 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: attrlen                                      ! lenght of attr name buffer
+         INTEGER(size_t) :: namelen                                      ! length of name buffer
+         INTEGER(size_t) :: attrlen                                      ! length of attr name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
          INTEGER,          INTENT(inout) :: rank                 ! rank
@@ -6371,7 +6369,7 @@ CONTAINS
 
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltget_attribute_info_f
     !DEC$endif
     !
@@ -6383,8 +6381,8 @@ CONTAINS
     INTEGER, INTENT(inout)         :: type_class       ! type class
     INTEGER(size_t), INTENT(inout) :: type_size        ! type size
     INTEGER :: errcode                                 ! error code
-    INTEGER :: namelen                                 ! name length
-    INTEGER :: attrlen                                 ! name length
+    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(size_t) :: attrlen                                 ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltget_attribute_info_c(loc_id,namelen,dset_name,attrlen,attr_name,dims,type_class,type_size)
@@ -6396,8 +6394,8 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dset_name
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER :: namelen                                      ! lenght of name buffer
-         INTEGER :: attrlen                                      ! lenght of attr name buffer
+         INTEGER(size_t) :: namelen                              ! length of name buffer
+         INTEGER(size_t) :: attrlen                                      ! length of attr name buffer
          CHARACTER(len=*), INTENT(in) :: dset_name               ! name of the dataset
          CHARACTER(len=*), INTENT(in) :: attr_name               ! name of the attribute
          INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims      ! dimensions
@@ -6434,7 +6432,7 @@ CONTAINS
     IMPLICIT NONE
     !
     !This definition is needed for Windows DLLs
-    !DEC$if defined(BUILD_HDF5_DLL)
+    !DEC$if defined(BUILD_HDF5_HL_DLL)
     !DEC$attributes dllexport :: h5ltpath_valid_f
     !DEC$endif
     !
@@ -6445,7 +6443,7 @@ CONTAINS
     LOGICAL         , INTENT(OUT) :: path_valid          ! Object status
     INTEGER         , INTENT(OUT) :: errcode             ! Error code: 0 on success and -1 on failure
 
-    INTEGER :: pathlen
+    INTEGER(size_t) :: pathlen
     INTEGER :: check_object_valid_c
     INTEGER :: status
 
@@ -6459,7 +6457,7 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: path
          INTEGER(hid_t),   INTENT(in) :: loc_id  
          CHARACTER(len=*), INTENT(in) :: path
-         INTEGER :: pathlen
+         INTEGER(size_t) :: pathlen
          INTEGER :: check_object_valid_c
        END FUNCTION h5ltpath_valid_c
     END INTERFACE

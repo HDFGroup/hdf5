@@ -34,12 +34,12 @@
 ! ***        H 5 T   T E S T S
 ! *****************************************
 
-!/****************************************************************
+!***************************************************************
 !**
 !**  test_array_compound_atomic(): Test basic array datatype code.
 !**  Tests 1-D array of compound datatypes (with no array fields)
 !**
-!****************************************************************/
+!***************************************************************
 !
 
 MODULE TH5T_F03
@@ -1419,7 +1419,7 @@ SUBROUTINE t_enum(total_error)
      ! Insert enumerated value for memtype.
      !
      val(1) = i
-     CALL H5Tenum_insert_f(memtype, TRIM(names(i+1)), val(1), error)
+     CALL H5Tenum_insert_f(memtype, TRIM(names(i+1)), C_LOC(val(1)), error)
      CALL check("H5Tenum_insert_f", error, total_error)
      !
      ! Insert enumerated value for filetype.  We must first convert
@@ -1428,7 +1428,11 @@ SUBROUTINE t_enum(total_error)
      f_ptr = C_LOC(val(1))
      CALL H5Tconvert_f(M_BASET, F_BASET, INT(1,SIZE_T), f_ptr, error)
      CALL check("H5Tconvert_f",error, total_error)
-     CALL H5Tenum_insert_f(filetype, TRIM(names(i+1)), val(1), error)
+     IF(i.GE.1)THEN ! test both F90 and F03 APIs
+        CALL H5Tenum_insert_f(filetype, TRIM(names(i+1)), f_ptr, error)
+     ELSE
+        CALL H5Tenum_insert_f(filetype, TRIM(names(i+1)), val(1), error)
+     ENDIF
      CALL check("H5Tenum_insert_f",error, total_error)
   ENDDO
   !
@@ -3134,7 +3138,7 @@ SUBROUTINE t_enum_conv(total_error)
     ENUMERATOR :: E1_RED, E1_GREEN, E1_BLUE, E1_WHITE, E1_BLACK
   END ENUM
 
-  INTEGER :: val
+  INTEGER(KIND(E1_RED)), TARGET :: val
 
   ! Enumerated data array 
   ! Some values are out of range for testing. The library should accept them
@@ -3185,19 +3189,19 @@ SUBROUTINE t_enum_conv(total_error)
   ! Initialize enum data.
   !
   val = E1_RED
-  CALL H5Tenum_insert_f(dtype, "RED", val, error)
+  CALL H5Tenum_insert_f(dtype, "RED", C_LOC(val), error)
   CALL check("h5tenum_insert_f",error, total_error)
   val = E1_GREEN
-  CALL H5Tenum_insert_f(dtype, "GREEN", val, error)
+  CALL H5Tenum_insert_f(dtype, "GREEN", C_LOC(val), error)
   CALL check("h5tenum_insert_f",error, total_error)
   val = E1_BLUE
-  CALL H5Tenum_insert_f(dtype, "BLUE", val, error)
+  CALL H5Tenum_insert_f(dtype, "BLUE", C_LOC(val), error)
   CALL check("h5tenum_insert_f",error, total_error)
   val = E1_WHITE
-  CALL H5Tenum_insert_f(dtype, "WHITE", val, error)
+  CALL H5Tenum_insert_f(dtype, "WHITE", C_LOC(val), error)
   CALL check("h5tenum_insert_f",error, total_error)
   val = E1_BLACK
-  CALL H5Tenum_insert_f(dtype, "BLACK", val, error)
+  CALL H5Tenum_insert_f(dtype, "BLACK", C_LOC(val), error)
   CALL check("h5tenum_insert_f",error, total_error)
   !
   ! Create dataspace.  Setting maximum size to be the current size.

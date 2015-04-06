@@ -81,25 +81,25 @@ print_stats (const char *prefix,
     double  u_time, s_time;
 
     u_time = ((double)(r_stop->ru_utime.tv_sec)+
-        (double)(r_stop->ru_utime.tv_usec)/1000000.0) -
+        (double)(r_stop->ru_utime.tv_usec)/1000000.0F) -
        ((double)(r_start->ru_utime.tv_sec)+
-        (double)(r_start->ru_utime.tv_usec)/1000000.0);
+        (double)(r_start->ru_utime.tv_usec)/1000000.0F);
 
     s_time = ((double)(r_stop->ru_stime.tv_sec)+
-        (double)(r_stop->ru_stime.tv_usec)/1000000.0) -
+        (double)(r_stop->ru_stime.tv_usec)/1000000.0F) -
        ((double)(r_start->ru_stime.tv_sec)+
-        (double)(r_start->ru_stime.tv_usec)/1000000.0);
+        (double)(r_start->ru_stime.tv_usec)/1000000.0F);
 #endif
 #ifndef H5_HAVE_SYS_TIMEB
     e_time = ((double)(t_stop->tv_sec)+
-        (double)(t_stop->tv_usec)/1000000.0) -
+        (double)(t_stop->tv_usec)/1000000.0F) -
        ((double)(t_start->tv_sec)+
-        (double)(t_start->tv_usec)/1000000.0);
+        (double)(t_start->tv_usec)/1000000.0F);
 #else
     e_time = ((double)(t_stop->tv_sec)+
-        (double)(t_stop->tv_usec)/1000.0) -
+        (double)(t_stop->tv_usec)/1000.0F) -
        ((double)(t_start->tv_sec)+
-        (double)(t_start->tv_usec)/1000.0);
+        (double)(t_start->tv_usec)/1000.0F);
 #endif
     bw = (double)nbytes / e_time;
 
@@ -191,7 +191,7 @@ main (void)
      * 1998-11-06 ptl
      */
     printf ("I/O request size is %1.1fMB\n",
-      (double)(hssize_t)(size[0]*size[1])/1024.0*1024);
+      (double)(hssize_t)(size[0]*size[1])/1024.0F*1024);
 
     /* Open the files */
     file = H5Fcreate (HDF5_FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

@@ -90,7 +90,7 @@ ReadCode(void)
         RawCode += (0x10000 * Raster[ByteOffset + 2]);
 
     RawCode >>= (BitOffset % 8);
-    BitOffset += CodeSize;
+    BitOffset += (int)CodeSize;
     return (RawCode & ReadMask);
 }
 

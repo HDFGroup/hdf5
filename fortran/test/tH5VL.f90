@@ -226,7 +226,6 @@ CONTAINS
           INTEGER(SIZE_T)  max_len
           INTEGER(HID_T) ::  vl_type_id
           LOGICAL        ::  vl_flag
-          LOGICAL        ::  differ
 
           !
           ! Initialize the vl_int_data array.

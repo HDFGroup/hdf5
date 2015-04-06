@@ -277,7 +277,7 @@ H5Dread_multi(hid_t dxpl_id, size_t count, H5D_rw_multi_t *info)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iiz*Dm", dxpl_id, count, info);
+    H5TRACE3("e", "iz*Dm", dxpl_id, count, info);
 
     if(count <= 0)
         HGOTO_DONE(SUCCEED)
@@ -499,7 +499,7 @@ H5Dwrite_multi(hid_t dxpl_id, size_t count, const H5D_rw_multi_t *info)
     herr_t  ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "iiz*Dm", dxpl_id, count, info);
+    H5TRACE3("e", "iz*Dm", dxpl_id, count, info);
 
     if(count <= 0)
         HGOTO_DONE(SUCCEED)

@@ -313,7 +313,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'G':
                     if(!HDstrcmp(modifier, "h")) {
                         float x = (float)va_arg(ap, double);
-                        n = fprintf(stream, format_templ, x);
+                        n = fprintf(stream, format_templ, (double)x);
                     } else if(!*modifier || !HDstrcmp(modifier, "l")) {
                         double x = va_arg(ap, double);
                         n = fprintf(stream, format_templ, x);

@@ -85,6 +85,7 @@ DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) :
 DataSpace::DataSpace(const hid_t existing_id) : IdComponent()
 {
     id = existing_id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -93,7 +94,7 @@ DataSpace::DataSpace(const hid_t existing_id) : IdComponent()
 ///\param	original - IN: DataSpace object to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace(const DataSpace& original) : IdComponent(original)
+DataSpace::DataSpace(const DataSpace& original) : IdComponent()
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id

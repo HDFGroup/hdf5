@@ -47,9 +47,6 @@ namespace H5 {
 class H5_DLLCPP H5Object : public H5Location {
    public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Copy constructor: makes copy of an H5Object object.
-	H5Object(const H5Object& original);
-
 	// Gets the name of this HDF5 object, i.e., Group, DataSet, or
 	// DataType.
 	ssize_t getObjName(char *obj_name, size_t buf_size = 0) const;
@@ -63,8 +60,18 @@ class H5_DLLCPP H5Object : public H5Location {
 	// Default constructor
 	H5Object();
 
+        // *** Deprecation warning ***
+        // The following two constructors are no longer appropriate after the
+        // data member "id" had been moved to the sub-classes.
+        // The copy constructor is a noop and is removed in 1.8.15 and the
+        // other will be removed from 1.10 release, and then from 1.8 if its
+        // removal does not raise any problems in two 1.10 releases.
+
 	// Creates a copy of an existing object giving the object id
 	H5Object( const hid_t object_id );
+
+	// Copy constructor: makes copy of an H5Object object.
+	// H5Object(const H5Object& original);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

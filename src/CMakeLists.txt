@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_SRC C CXX)
 
 #-----------------------------------------------------------------------------
@@ -482,6 +482,7 @@ set (H5PL_SRCS
 
 set (H5PL_HDRS
     ${HDF5_SRC_DIR}/H5PLextern.h
+    ${HDF5_SRC_DIR}/H5PLpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5PL" "${H5PL_HDRS}" "${H5PL_SRCS}" )
 
@@ -770,14 +771,14 @@ set (H5_PRIVATE_HEADERS
 # specific type checks inside
 #-----------------------------------------------------------------------------
 #add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
-#TARGET_C_PROPERTIES (H5detect " " " ")
+#TARGET_C_PROPERTIES (H5detect STATIC " " " ")
 IF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   SET (LOCAL_OPT_FLAG "-O0")
 ELSE (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   SET (LOCAL_OPT_FLAG " ")
 ENDIF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 ADD_EXECUTABLE (H5detect ${HDF5_SRC_DIR}/H5detect.c)
-TARGET_C_PROPERTIES (H5detect ${LOCAL_OPT_FLAG} " ")
+TARGET_C_PROPERTIES (H5detect STATIC ${LOCAL_OPT_FLAG} " ")
 
 if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
@@ -792,7 +793,7 @@ add_custom_command (
 )
 
 add_executable (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
-TARGET_C_PROPERTIES (H5make_libsettings " " " ")
+TARGET_C_PROPERTIES (H5make_libsettings STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
 endif (MSVC OR MINGW)
@@ -859,7 +860,7 @@ set (common_SRCS ${common_SRCS} ${HDF5_BINARY_DIR}/H5overflow.h)
 set_source_files_properties (${HDF5_BINARY_DIR}/H5overflow.h GENERATED)
 
 add_library (${HDF5_LIB_TARGET} ${LIB_TYPE} ${common_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS})
-TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} " " " ")
+TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} ${LIB_TYPE} " " " ")
 target_link_libraries (${HDF5_LIB_TARGET} ${LINK_LIBS})
 if (NOT WIN32)
   target_link_libraries (${HDF5_LIB_TARGET} dl)

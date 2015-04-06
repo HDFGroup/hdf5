@@ -1,0 +1,4 @@
+tcompound_enum.h5
+    enuberated 8bit type nested in compount type.  Original file provided
+    by a user (HDFFV-8667) as a test file. Used h5copy to extract only the
+    Compound type dataset.

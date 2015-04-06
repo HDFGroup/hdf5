@@ -110,7 +110,7 @@
  *		SO MAY CAUSE H5_trace() TO BE INVOKED RECURSIVELY OR MAY
  *		CAUSE LIBRARY INITIALIZATIONS THAT ARE NOT DESIRED.
  *
- * Return:	void
+ * Return:	Execution time for an API call
  *
  * Programmer:	Robb Matzke
  *              Tuesday, June 16, 1998
@@ -129,34 +129,34 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     void		*vp = NULL;
     FILE		*out = H5_debug_g.trace;
     H5_timer_t          event_time;
-    static H5_timer_t   first_time = {0.0, 0.0, 0.0};
+    static H5_timer_t   first_time = {0.0F, 0.0F, 0.0F};
     static int          current_depth = 0;
     static int          last_call_depth = 0;
 
     /* FUNC_ENTER() should not be called */
 
     if(!out)
-        return 0.0;	/*tracing is off*/
+        return 0.0F;	/*tracing is off*/
     va_start(ap, type);
 
     if(H5_debug_g.ttop) {
         if(returning) {
             if(current_depth > 1) {
                 --current_depth;
-                return 0.0;
+                return 0.0F;
             } /* end if */
         } /* end if */
         else {
             if(current_depth > 0) {
                 /*do not update last_call_depth*/
                 current_depth++;
-                return 0.0;
+                return 0.0F;
             } /* end if */
         } /* end else */
     } /* end if */
 
-    /* Get tim for event */
-    if(HDfabs(first_time.etime) < 0.0000000001)
+    /* Get time for event */
+    if(HDfabs(first_time.etime) < 0.0000000001F)
         /* That is == 0.0, but direct comparison between floats is bad */
         H5_timer_begin(&first_time);
     if(H5_debug_g.ttimes)

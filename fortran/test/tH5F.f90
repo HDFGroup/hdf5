@@ -141,13 +141,11 @@ CONTAINS
           CALL h5fcreate_f(fix_filename1, H5F_ACC_TRUNC_F, file1_id, error)
                CALL check("h5fcreate_f",error,total_error)
 
-
           !
           !Create group "/G" inside file "mount1.h5".
           !
           CALL h5gcreate_f(file1_id, "/G", gid, error)
                CALL check("h5gcreate_f",error,total_error)
-
           !
           !close file and group identifiers.
           !

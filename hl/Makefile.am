@@ -43,7 +43,7 @@ DIST_SUBDIRS=src test tools c++ fortran examples
 
 # Install examples
 install-examples uninstall-examples:
-	@@SETX@; for d in examples $(HDF5_INTERFACES); do               \
+	for d in examples $(HDF5_INTERFACES); do               \
 	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
 	done
 
