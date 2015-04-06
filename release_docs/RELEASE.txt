@@ -57,8 +57,16 @@ New Features
 
     Configuration
     -------------
-    - cmake minimum changed to 3.1
-      (ADB - 2015/02/01)
+    - cmake configure files now support components when packaged with cpack.
+      Windows cpack support WiX packaging, cmake will look for WiX and NSIS
+      in standard loactions.
+      (ADB - 2015/04/01 HDFFV-8968)
+      
+    - cmake default options changed to align with autotools configure defaults.
+      (ADB - 2015/04/01 HDFFV-8074)
+      
+    - cmake minimum changed to 3.1.
+      (ADB - 2015/04/01 HDFFV-9006)
       
     - cmakehdf5: configure options added to enable or disable the building of
       different API's and testings. See "cmakehdf5 --help" for details.
@@ -219,6 +227,20 @@ New Features
 
       (DER - 2015-04-01, HDFFV-9100)
  
+    - Added functions to control the value of H5PL_no_plugin_g without using an
+      environment variable.
+      
+      Sometimes it is necessary for an application to disable the use of dynamically
+      loaded plugin libraries without requiring the library to built with plugin
+      support disabled or to set an environment variable to disable plugin support 
+      globally.
+      
+      Two new functions (H5PLset_loading_state() and H5PLget_loading_state())
+      were added to the HDF5 C library. These functions require a parameter that
+      indicates which type of dynamically loaded plugin is enabled or disabled.
+      
+      (ADB - 2015-03-17, HDFFV-85200
+      
     Parallel Library
     ----------------
     - None
