@@ -130,6 +130,9 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	virtual void p_setId(const hid_t new_id);
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
+
+	// Friend function to set DataSpace id.  For library use only.
+	friend void f_DataSpace_setId(DataSpace *dspace, hid_t new_id);
 };
 #ifndef H5_NO_NAMESPACE
 }

@@ -270,8 +270,9 @@ DataSpace Attribute::getSpace() const
    // If the dataspace id is valid, create and return the DataSpace object
    if( dataspace_id > 0 )
    {
-      DataSpace dataspace( dataspace_id );
-      return( dataspace );
+	DataSpace dataspace;
+	f_DataSpace_setId(&dataspace, dataspace_id);
+	return(dataspace);
    }
    else
    {
