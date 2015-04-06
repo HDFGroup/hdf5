@@ -106,7 +106,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
+DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object()
 {
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
@@ -148,13 +148,18 @@ DataType::DataType(const DataType& original) : H5Object()
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 // Description
-//		This is so that when a predefined type is passed in, a
-//		copy of it is made, not just a duplicate of the HDF5 id.
+//		Copying the type so that when a predefined type is passed in,
+//		a copy of it is made, not just a duplicate of the HDF5 id.
+//		Note: calling DataType::copy will invoke DataType::close()
+//		unnecessarily and will produce undefined behavior.
+//		-BMR, Apr 2015
 //--------------------------------------------------------------------------
 DataType::DataType(const PredType& pred_type) : H5Object()
 {
-   // use DataType::copy to make a copy of this predefined type
-   copy(pred_type);
+    // call C routine to copy the datatype
+    id = H5Tcopy( pred_type.getId() );
+    if (id < 0)
+	throw DataTypeIException("DataType constructor", "H5Tcopy failed");
 }
 
 //--------------------------------------------------------------------------
