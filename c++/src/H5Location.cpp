@@ -195,7 +195,7 @@ Attribute H5Location::openAttribute( const unsigned int idx ) const
 			H5_ITER_INC, (hsize_t)idx, H5P_DEFAULT, H5P_DEFAULT);
    if( attr_id > 0 )
    {
-	Attribute attr( attr_id );
+	Attribute attr;
 	f_Attribute_setId(&attr, attr_id);
 	return(attr);
    }

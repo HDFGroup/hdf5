@@ -59,8 +59,7 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 
 	// Returns the number of opened object IDs (files, datasets, groups
 	// and datatypes) in the same file.
-	ssize_t getObjCount(unsigned types) const;
-	ssize_t getObjCount() const;
+	ssize_t getObjCount(unsigned types = H5F_OBJ_ALL) const;
 
 	// Retrieves a list of opened object IDs (files, datasets, groups
 	// and datatypes) in the same file.

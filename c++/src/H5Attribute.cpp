@@ -74,7 +74,8 @@ Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent()
 //--------------------------------------------------------------------------
 Attribute::Attribute(const hid_t existing_id) : AbstractDs(), IdComponent()
 {
-   id = existing_id;
+    id = existing_id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------

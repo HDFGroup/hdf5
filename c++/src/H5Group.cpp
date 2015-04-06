@@ -85,6 +85,7 @@ hid_t Group::getLocId() const
 Group::Group(const hid_t existing_id) : H5Object(), CommonFG()
 {
     id = existing_id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
