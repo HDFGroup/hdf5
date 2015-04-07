@@ -251,7 +251,12 @@ New Features
       
     Parallel Library
     ----------------
-    - None
+    - Attached an attribute destroy callback to MPI_COMM_SELF that
+      shuts down the HDF5 library when MPI_COMM_SELF is destroyed,
+      i.e. on MPI_Finalize. This should fix several issues that users
+      see when they forget to close HDF5 objects before calling
+      MPI_Finalize(). 
+      (MSC - 2015/02/25, HDFFV-883)
  
     Tools
     -----
@@ -375,6 +380,15 @@ Bug Fixes since HDF5-1.8.14
     - Fixed a potential memory error when performing parallel I/O on a dataset
       with a single chunk, and at least one process has nothing to do.
       (NAF - 2015/02/16)
+
+    - Fixed problem with parallel tests where they failed beyond a
+      certain number of ranks. All tests should work for any arbitrary
+      number of ranks. 
+      (MSC - 2014/11/06, HDFFV-1027,8962,8963)
+
+    - Fixed problem with enabling MPE. Users should use the community
+      maintained MPE on github (http://git.mpich.org/mpe.git/). 
+      (MSC - 2015/02/20, 9135)
 
     Performance
     -------------
