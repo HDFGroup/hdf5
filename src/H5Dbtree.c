@@ -926,8 +926,7 @@ H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 /*-------------------------------------------------------------------------
  * Function:	H5D__btree_idx_insert
  *
- * Purpose:	Create the chunk it if it doesn't exist, or reallocate the
- *              chunk if its size changed.
+ * Purpose:	Insert chunk entry into the indexing structure.
  *
  * Return:	Non-negative on success/Negative on failure
  *

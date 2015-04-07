@@ -418,8 +418,7 @@ H5VM_hyper_disjointp(unsigned n,
         HGOTO_DONE(TRUE)
 
     for(u = 0; u < n; u++) {
-        HDassert(size1[u] < HSIZET_MAX);
-        HDassert(size2[u] < HSIZET_MAX);
+        HDcompile_assert(sizeof(uint32_t) <= sizeof(hsize_t));
 
         if(0 == size1[u] || 0 == size2[u])
             HGOTO_DONE(TRUE)
@@ -1264,16 +1263,14 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, April 21, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
     const hsize_t *down_nchunks, hsize_t *chunk_idx)
 {
-    hsize_t	scaled_coord[H5VM_HYPER_NDIMS];	/* Scaled, coordinates, in terms of chunks */
-    unsigned    u;                      /* Local index variable */
+    hsize_t scaled_coord[H5VM_HYPER_NDIMS];	/* Scaled, coordinates, in terms of chunks */
+    unsigned u;                 /* Local index variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1284,11 +1281,11 @@ H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
     HDassert(chunk_idx);
 
     /* Compute the scaled coordinates for actual coordinates */
-    for(u=0; u<ndims; u++)
-        scaled_coord[u]=coord[u]/chunk[u];
+    for(u = 0; u < ndims; u++)
+        scaled_coord[u] = coord[u] / chunk[u];
 
     /* Compute the chunk index */
-    *chunk_idx=H5VM_array_offset_pre(ndims,down_nchunks,scaled_coord); /*lint !e772 scaled_coord will always be initialized */
+    *chunk_idx = H5VM_array_offset_pre(ndims,down_nchunks,scaled_coord); /*lint !e772 scaled_coord will always be initialized */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VM_chunk_index() */
