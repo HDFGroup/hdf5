@@ -227,6 +227,14 @@ New Features
 
       (DER - 2015-04-01, HDFFV-9100)
  
+    - Modified H5Pset_istore_k and H5Pset_sym_k functions to validate the ik
+      value to not exceed the max v1 btree entries (2 bytes).
+      The functions didn't check the value of ik. When 2*ik exceeded 2 bytes
+      storage, data was lost in the file, e.g., some chunks would be
+      overwritten.  
+
+      (VC - 2015-03-24, HDFFV-9173)
+
     - Added functions to control the value of H5PL_no_plugin_g without using an
       environment variable.
       
@@ -239,7 +247,7 @@ New Features
       were added to the HDF5 C library. These functions require a parameter that
       indicates which type of dynamically loaded plugin is enabled or disabled.
       
-      (ADB - 2015-03-17, HDFFV-85200
+      (ADB - 2015-03-17, HDFFV-8520)
       
     Parallel Library
     ----------------
