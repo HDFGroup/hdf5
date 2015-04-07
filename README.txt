@@ -8,7 +8,7 @@ specific to this release of the library.  Several INSTALL* files can also be
 found in the release_docs/ directory:  INSTALL contains instructions for 
 compiling and installing the library;  INSTALL_parallel contains instructions 
 for installing the parallel version of the library;  similarly-named files
-contain instructions for VMS and several environments on MS Windows systems. 
+contain instructions for several environments on MS Windows systems. 
 
 Documentation for this release can be found at the following URL:
     http://www.hdfgroup.org/HDF5/doc/.
