@@ -1469,8 +1469,6 @@
 ./tools/testfiles/tcompound.h5
 ./tools/testfiles/tcompound2.h5
 ./tools/testfiles/tcompound_complex.h5
-./tools/testfiles/tcompound_enum.ddl
-./tools/testfiles/tcompound_enum.h5
 ./tools/testfiles/tdatareg.h5
 ./tools/testfiles/tdatareg.ddl 
 ./tools/testfiles/tdataregR.ddl 
@@ -2128,6 +2126,7 @@
 ./tools/h5diff/testfiles/tmpSingleSiteBethe.output.h5
 
 #test files for h5repack
+./tools/h5repack/testfiles/README
 ./tools/h5repack/testfiles/h5repack_attr.h5
 ./tools/h5repack/testfiles/h5repack_attr_refs.h5
 ./tools/h5repack/testfiles/h5repack_deflate.h5
@@ -2145,6 +2144,8 @@
 ./tools/h5repack/testfiles/h5repack_layout3.h5
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5
 ./tools/h5repack/testfiles/h5repack_named_dtypes.h5
+./tools/h5repack/testfiles/h5repack_nested_8bit_enum_deflated.h5
+./tools/h5repack/testfiles/h5repack_nested_8bit_enum.h5
 ./tools/h5repack/testfiles/h5repack_nbit.h5
 ./tools/h5repack/testfiles/h5repack_objs.h5
 ./tools/h5repack/testfiles/h5repack_refs.h5
