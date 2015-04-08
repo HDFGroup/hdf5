@@ -771,14 +771,6 @@ Known Problems
 * Make provided by Solaris fails in "make check". Solaris users should use
   gmake to build and install the HDF5 software. (AKC - 2013/10/08 - HDFFV-8534)
 
-* The h5dump and h5diff utilities occasionally produce different output
-  between Linux and Windows systems. This is caused by lower-level library
-  routines that fail to write fill values to the user's buffer when reading
-  unallocated chunks from datasets that have a fill value set to
-  H5D_FILL_VALUE_DEFAULT. Due to platform differences the return of
-  spurious data values has only been encountered on Windows 32-bit systems.
-  (Issue HDFFV-8247; JP - 2013/03/27)
-
 * The C++ and FORTRAN bindings are not currently working on FreeBSD with the
   native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
   ports (and probably gcc releases after that).
