@@ -282,8 +282,34 @@ New Features
 
     C++ API
     -------
-    - None
+    - New wrappers for C functions H5P[s/g]et_libver_bounds
 
+      The following wrappers are added to class H5::FileAccPropList
+	// Sets bounds on versions of library format to be used when creating
+	// or writing objects.
+	void setLibverBounds(H5F_libver_t libver_low, H5F_libver_t libver_high) const;
+	// Gets the current settings for the library version format bounds.
+	void getLibverBounds(H5F_libver_t& libver_low, H5F_libver_t& libver_high) const;
+
+      (BMR, 2015-04-06, Part of HDFFV-9167)
+
+    - New wrappers to get the object header's version
+
+      The following wrappers are added to class H5::CommonFG
+	// Returns the object header version of an object in a file or group,
+	// given the object's name.
+	unsigned childObjVersion(const char* objname) const;
+	unsigned childObjVersion(const H5std_string& objname) const;
+
+      (BMR, 2015-04-06)
+
+    - New DataType constructor:
+
+      Added a DataType constructor that takes a PredType object, and this
+      constructor will invoke H5Tcopy to generate another datatype id, from a
+      predefined datatype.
+
+      (BMR, 2015-04-06)
 
 
 Support for New Platforms, Languages, and Compilers
@@ -455,7 +481,37 @@ Bug Fixes since HDF5-1.8.14
 
     C++ API
     ------
-    - None
+    - Combining two H5File::getObjCount overloaded methods
+
+      The following two methods
+	ssize_t getObjCount(unsigned types) const;
+	ssize_t getObjCount() const;
+      are combined into one:
+	ssize_t getObjCount(unsigned types = H5F_OBJ_ALL) const;
+
+      (BMR, 2015-04-06)
+
+    - Many warnings are removed
+
+      Many warnings such as conversion, unused variables, missing base
+      class initialization, and initializing base classes in wrong order.
+
+      (BMR, 2015-04-06)
+
+    - Functionality deprecation
+
+      The following two constructors of classes: AbstractDs, IdComponent,
+      H5Location, and H5Object are no longer appropriate after the data member
+      "id" had been moved from IdComponent to the sub-classes in previous
+      releases.
+	<Classname>(const hid_t h5_id);
+	<Classname>(const <Classname>& original);
+      The copy constructors were noop and removed in 1.8.15.  The other
+      constructors will be removed from 1.10 release, and then from 1.8.17
+      if their removal does not cause any problems.
+
+      (BMR, 2015-04-06)
+
 
     High-Level APIs:
     ------
