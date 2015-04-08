@@ -830,9 +830,6 @@ Known Problems
   to a larger value.
   (AKC - 2011/05/07)
 
-* The C++ and FORTRAN bindings are not currently working on FreeBSD.
-  (QAK - 2011/04/26)
-
 * Shared Fortran libraries are not quite working on AIX. While they are
   generated when --enable-shared is specified, the fortran and hl/fortran
   tests fail. the issue. HL and C++ shared libraries should now be 
