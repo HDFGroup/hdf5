@@ -265,9 +265,9 @@ typedef struct H5D_chunk_ud_t {
 
     /* Upward */
     unsigned    idx_hint;               /*index of chunk in cache, if present */
+    haddr_t	addr;			/*file address of chunk */
     uint32_t	nbytes;			/*size of stored data	*/
     unsigned	filter_mask;		/*excluded filters	*/
-    haddr_t	addr;			/*file address of chunk */
 } H5D_chunk_ud_t;
 
 /* Typedef for "generic" chunk callbacks */
@@ -365,9 +365,9 @@ typedef struct H5D_chunk_map_t {
 typedef struct H5D_chunk_cached_t {
     hbool_t     valid;                          /*whether cache info is valid*/
     hsize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
+    haddr_t	addr;				/*file address of chunk */
     uint32_t	nbytes;				/*size of stored data	*/
     unsigned	filter_mask;			/*excluded filters	*/
-    haddr_t	addr;				/*file address of chunk */
 } H5D_chunk_cached_t;
 
 /* The raw data chunk cache */
