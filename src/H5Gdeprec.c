@@ -322,7 +322,7 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Open the group */
-    if((grp = H5G__open_name(&loc, name, H5P_DEFAULT, H5AC_dxpl_id)) == NULL)
+    if((grp = H5G__open_name(&loc, name, H5P_DEFAULT, H5AC_ind_dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an atom for the group */
