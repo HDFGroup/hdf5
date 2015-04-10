@@ -160,41 +160,32 @@ done:
 
 /****if* H5Pf/h5pget_class_c
  * NAME
- *        h5pget_class_c
+ *  h5pget_class_c
  * PURPOSE
- *     Call H5Pget_class to determine property list class
+ *  Call H5Pget_class to determine property list class
  * INPUTS
- *      prp_id - identifier of the dataspace
+ *  prp_id    - identifier of the dataspace
  * OUTPUTS
- *     classtype - class type; possible values are:
- *              H5P_ROOT_F       -1
- *              H5P_FILE_CREATE_F     0
- *              H5P_FILE_ACCESS_F     1
- *              H5P_DATASET_CREATE_F  2
- *              H5P_DATASET_XFER_F    3
- *              H5P_FILE_MOUNT_F      4
+ *  classtype - class type
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Saturday, August 14, 1999
+ *  Saturday, August 14, 1999
  * SOURCE
 */
 
 int_f
-nh5pget_class_c ( hid_t_f *prp_id , int_f *classtype)
+nh5pget_class_c ( hid_t_f *prp_id , hid_t_f *classtype)
 /******/
 {
     hid_t c_classtype;
     int_f ret_value = 0;
 
-    c_classtype = H5Pget_class((hid_t)*prp_id);
-    if(c_classtype == H5P_ROOT) {
-      *classtype = H5P_ROOT;
+    if( (c_classtype = H5Pget_class((hid_t)*prp_id)) < 0)
        HGOTO_DONE(FAIL)
-    }
 
-    *classtype = (int_f)c_classtype;
+    *classtype = (hid_t_f)c_classtype;
 
 done:
     return ret_value;

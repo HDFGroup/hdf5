@@ -2914,7 +2914,6 @@ h5tools_print_virtual_selection(hid_t vspace, hid_t dcpl_id, size_t index,
     h5tools_render_element(stream, info, ctx, buffer, curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    dump_fill_value
  *

@@ -36,7 +36,7 @@ configure_file (${HDF5_CPP_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @O
 
 add_executable (cpp_testhdf5 ${CPP_TEST_SRCS} )
 TARGET_NAMING (cpp_testhdf5 ${LIB_TYPE})
-TARGET_C_PROPERTIES (cpp_testhdf5 " " " ")
+TARGET_C_PROPERTIES (cpp_testhdf5 ${LIB_TYPE} " " " ")
 target_link_libraries (cpp_testhdf5
     ${HDF5_CPP_LIB_TARGET}
     ${HDF5_LIB_TARGET}

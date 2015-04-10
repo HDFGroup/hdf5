@@ -40,10 +40,10 @@ FileAccPropList::FileAccPropList() : PropList( H5P_FILE_ACCESS ) {}
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList copy constructor
 ///\brief	Copy Constructor: makes a copy of the original
-///		FileAccPropList object.
+///\param	original - IN: FileAccPropList instance to copy
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FileAccPropList::FileAccPropList(const FileAccPropList& orig) : PropList(orig) {}
+FileAccPropList::FileAccPropList(const FileAccPropList& original) : PropList(original) {}
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList overloaded constructor
@@ -661,6 +661,67 @@ unsigned FileAccPropList::getGcReferences() const
       throw PropListIException("FileAccPropList::getGcReferences", "H5Pget_gc_references failed");
    }
    return( gc_ref );
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::setLibverBounds
+///\brief	Sets bounds on versions of library format to be used when creating
+///		or writing objects.
+///\param	libver_low  - IN: Earliest version of the library that will be
+///				  used for creating or writing objects
+///\param	libver_high - IN: Latest version of the library that will be
+///\exception	H5::PropListIException
+///\par Description
+///		Valid values of \a libver_low are as follows:
+///		\li \c H5F_LIBVER_EARLIEST   (Default)
+///		\li \c H5F_LIBVER_18
+///		\li \c H5F_LIBVER_LATEST
+///
+///		Valid values of \a libver_high are as follows:
+///		\li \c H5F_LIBVER_18
+///		\li \c H5F_LIBVER_LATEST   (Default)
+///
+///		For more details, please refer to
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetLibverBounds
+// Programmer:  Binh-Minh Ribler - March, 2015
+//--------------------------------------------------------------------------
+void FileAccPropList::setLibverBounds(H5F_libver_t libver_low, H5F_libver_t libver_high) const
+{
+    herr_t ret_value = H5Pset_libver_bounds(id, libver_low, libver_high);
+    if (ret_value < 0)
+    {
+	throw PropListIException("FileAccPropList::setLibverBounds", "H5Pset_libver_bounds failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileAccPropList::getLibverBounds
+///\brief	Gets the current settings for the library version format bounds
+///		from a file access property list.
+///\param	libver_low  - OUT: Earliest version of the library that will be
+///				   used for creating or writing objects
+///\param	libver_high - OUT: Latest version of the library that will be
+///				   used for creating or writing objects
+///\exception	H5::PropListIException
+///\par Description
+///		On success, the argument \a libver_low can have the following
+///		values:
+///		\li \c H5F_LIBVER_EARLIEST
+///		\li \c H5F_LIBVER_18
+///		\li \c H5F_LIBVER_LATEST
+///
+///		and \a libver_high:
+///		\li \c H5F_LIBVER_18
+///		\li \c H5F_LIBVER_LATEST
+// Programmer:  Binh-Minh Ribler - March, 2015
+//--------------------------------------------------------------------------
+void FileAccPropList::getLibverBounds(H5F_libver_t& libver_low, H5F_libver_t& libver_high) const
+{
+    herr_t ret_value = H5Pget_libver_bounds(id, &libver_low, &libver_high);
+    if( ret_value < 0 )
+    {
+	throw PropListIException("FileAccPropList::getLibverBounds", "H5Pget_libver_bounds failed");
+    }
 }
 
 //--------------------------------------------------------------------------

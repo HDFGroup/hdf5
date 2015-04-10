@@ -324,7 +324,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 {
     H5D_t       *dset = NULL;
     H5G_loc_t   loc;                    /* Object location of group */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datset */
+    hid_t       dxpl_id = H5AC_ind_dxpl_id; /* dxpl to use to open datset */
     hid_t       ret_value;
 
     FUNC_ENTER_API(FAIL)

@@ -57,7 +57,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(in), OPTIONAL :: dimname  ! The dimension name
     INTEGER :: errcode                                 ! Error code
 
-    INTEGER:: dimname_len                              ! length of dimname (if present)
+    INTEGER(SIZE_T) :: dimname_len                     ! length of dimname (if present)
 
     INTERFACE
        INTEGER FUNCTION H5DSset_scale_c(dsid, dimname, dimname_len )
@@ -70,7 +70,7 @@ CONTAINS
          !DEC$ATTRIBUTES reference :: dimname  
          INTEGER(hid_t),   INTENT(in) :: dsid     ! The dataset to be made a Dimension Scale
          CHARACTER(LEN=*), INTENT(in) :: dimname  ! The dimension name
-         INTEGER, INTENT(in) :: dimname_len
+         INTEGER(SIZE_T),  INTENT(in) :: dimname_len
        END FUNCTION H5DSset_scale_c
     END INTERFACE
 
@@ -78,7 +78,7 @@ CONTAINS
        dimname_len = LEN(dimname)
        errcode = H5DSset_scale_c(dsid, dimname, dimname_len )
     ELSE
-       errcode = H5DSset_scale_c(dsid, " ", 0 )
+       errcode = H5DSset_scale_c(dsid, " ", INT(0,SIZE_T) )
     ENDIF
 
   END SUBROUTINE H5DSset_scale_f
@@ -348,7 +348,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(in) :: label  ! The label
     INTEGER :: errcode                     ! Error code
 
-    INTEGER :: label_len  ! Length of label
+    INTEGER(SIZE_T) :: label_len  ! Length of label
     INTEGER :: c_idx
 
     INTERFACE
@@ -363,7 +363,7 @@ CONTAINS
          INTEGER(hid_t),   INTENT(in) :: did        ! The dataset
          INTEGER       ,   INTENT(in) :: idx        ! The dimension
          CHARACTER(LEN=*), INTENT(in) :: label      ! The label
-         INTEGER,          INTENT(in) :: label_len  ! Length of label
+         INTEGER(SIZE_T),  INTENT(in) :: label_len  ! Length of label
        END FUNCTION H5DSset_label_c
     END INTERFACE
 

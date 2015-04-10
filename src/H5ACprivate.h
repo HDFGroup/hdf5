@@ -195,20 +195,10 @@ typedef H5C_t	H5AC_t;
 /* Metadata specific properties for FAPL */
 /* (Only used for parallel I/O) */
 #ifdef H5_HAVE_PARALLEL
-/* Definitions for "block before metadata write" property */
-#define H5AC_BLOCK_BEFORE_META_WRITE_NAME       "H5AC_block_before_meta_write"
-#define H5AC_BLOCK_BEFORE_META_WRITE_SIZE       sizeof(unsigned)
-#define H5AC_BLOCK_BEFORE_META_WRITE_DEF        0
-
 /* Definitions for "collective metadata write" property */
 #define H5AC_COLLECTIVE_META_WRITE_NAME         "H5AC_collective_metadata_write"
 #define H5AC_COLLECTIVE_META_WRITE_SIZE         sizeof(unsigned)
 #define H5AC_COLLECTIVE_META_WRITE_DEF          0
-
-/* Definitions for "library internal" property */
-#define H5AC_LIBRARY_INTERNAL_NAME       "H5AC_library_internal"
-#define H5AC_LIBRARY_INTERNAL_SIZE       sizeof(unsigned)
-#define H5AC_LIBRARY_INTERNAL_DEF        0
 #endif /* H5_HAVE_PARALLEL */
 
 #define H5AC_METADATA_TAG_NAME           "H5AC_metadata_tag"

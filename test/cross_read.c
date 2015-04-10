@@ -100,15 +100,15 @@ static int check_data(const char *dsetname, hid_t fid, hbool_t floating_number)
     for (j = 0; j < NX; j++) {
         for (i = 0; i < NY; i++) {
             data_in[j][i] = ((double)(i + j + 1))/3;
-            data_out[j][i] = 0;
+            data_out[j][i] = 0.0F;
 
             int_data_in[j][i] = i + j;
             int_data_out[j][i] = 0;
         }
     }
     for (i = 0; i < NY; i++) {
-        data_in[NX][i] = -2.2;
-        data_out[NX][i] = 0;
+        data_in[NX][i] = -2.2F;
+        data_out[NX][i] = 0.0F;
 
         int_data_in[NX][i] = -2;
         int_data_out[NX][i] = 0;
@@ -126,7 +126,7 @@ static int check_data(const char *dsetname, hid_t fid, hbool_t floating_number)
 	/* Check results */
 	for (j=0; j<(NX+1); j++) {
 	    for (i=0; i<NY; i++) {
-		if (!DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001)) {
+		if (!DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001F)) {
 		    if (!nerrors++) {
 			H5_FAILED();
 			printf("element [%d][%d] is %g but should have been %g\n",
@@ -213,116 +213,46 @@ static int open_dataset(char *fname)
     nerrors += check_data(DATASETNAME1, file, TRUE);
 
     TESTING("dataset of LE FLOAT with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME2, file, TRUE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
  
     TESTING("dataset of BE FLOAT with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME3, file, TRUE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
 
     TESTING("dataset of LE DOUBLE with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME4, file, TRUE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
  
     TESTING("dataset of BE DOUBLE with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME5, file, TRUE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
  
     TESTING("dataset of LE CHAR with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME6, file, FALSE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
  
     TESTING("dataset of BE CHAR with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME7, file, FALSE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
  
     TESTING("dataset of LE SHORT with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME8, file, FALSE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
  
     TESTING("dataset of BE SHORT with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME9, file, FALSE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
 
     TESTING("dataset of LE INT with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME10, file, FALSE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
  
     TESTING("dataset of BE INT with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME11, file, FALSE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
 
     TESTING("dataset of LE LONG LONG with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME12, file, FALSE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
  
     TESTING("dataset of BE LONG LONG with scale-offset filter");
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     nerrors += check_data(DATASETNAME13, file, FALSE);
-#else /*H5_HAVE_FILTER_SCALEOFFSET*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SCALEOFFSET*/
 
     TESTING("dataset of LE FLOAT with Fletcher32 filter");
-#ifdef H5_HAVE_FILTER_FLETCHER32
     nerrors += check_data(DATASETNAME14, file, TRUE);
-#else /*H5_HAVE_FILTER_FLETCHER32*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_FLETCHER32*/
  
     TESTING("dataset of BE FLOAT with Fletcher32 filter");
-#ifdef H5_HAVE_FILTER_FLETCHER32
     nerrors += check_data(DATASETNAME15, file, TRUE);
-#else /*H5_HAVE_FILTER_FLETCHER32*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_FLETCHER32*/
  
     TESTING("dataset of LE FLOAT with Deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -357,36 +287,16 @@ static int open_dataset(char *fname)
 #endif /*H5_HAVE_FILTER_SZIP*/
 
     TESTING("dataset of LE FLOAT with Shuffle filter");
-#ifdef H5_HAVE_FILTER_SHUFFLE
     nerrors += check_data(DATASETNAME20, file, TRUE);
-#else /*H5_HAVE_FILTER_SHUFFLE*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SHUFFLE*/
 
     TESTING("dataset of BE FLOAT with Shuffle filter");
-#ifdef H5_HAVE_FILTER_SHUFFLE
     nerrors += check_data(DATASETNAME21, file, TRUE);
-#else /*H5_HAVE_FILTER_SHUFFLE*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_SHUFFLE*/
 
     TESTING("dataset of LE FLOAT with Nbit filter");
-#ifdef H5_HAVE_FILTER_NBIT
     nerrors += check_data(DATASETNAME22, file, TRUE);
-#else /*H5_HAVE_FILTER_NBIT*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_NBIT*/
 
     TESTING("dataset of BE FLOAT with Nbit filter");
-#ifdef H5_HAVE_FILTER_NBIT
     nerrors += check_data(DATASETNAME23, file, TRUE);
-#else /*H5_HAVE_FILTER_NBIT*/
-    SKIPPED();
-    puts(not_supported);
-#endif /*H5_HAVE_FILTER_NBIT*/
 
     if(H5Fclose(file))
         TEST_ERROR

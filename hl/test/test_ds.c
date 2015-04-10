@@ -3126,7 +3126,7 @@ static int test_simple(void)
     if(H5DSget_scale_name(dsid, name_out, (size_t)name_len+1) < 0)
         goto out;
 
-    if(HDstrncmp("Latitude set 0",name_out, name_len)!=0)
+    if(HDstrncmp("Latitude set 0",name_out, (size_t)name_len)!=0)
         goto out;
     if(name_out) {
         HDfree(name_out);

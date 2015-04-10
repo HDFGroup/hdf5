@@ -24,7 +24,7 @@ namespace H5 {
 //! Class IntType operates on HDF5 integer datatype.
 class H5_DLLCPP IntType : public AtomType {
    public:
-	// Creates a integer type using a predefined type
+	// Creates an integer type using a predefined type
 	IntType(const PredType& pred_type);
 
 	// Gets the integer datatype of the specified dataset

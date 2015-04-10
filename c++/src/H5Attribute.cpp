@@ -74,7 +74,8 @@ Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent()
 //--------------------------------------------------------------------------
 Attribute::Attribute(const hid_t existing_id) : AbstractDs(), IdComponent()
 {
-   id = existing_id;
+    id = existing_id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -270,8 +271,9 @@ DataSpace Attribute::getSpace() const
    // If the dataspace id is valid, create and return the DataSpace object
    if( dataspace_id > 0 )
    {
-      DataSpace dataspace( dataspace_id );
-      return( dataspace );
+	DataSpace dataspace;
+	f_DataSpace_setId(&dataspace, dataspace_id);
+	return(dataspace);
    }
    else
    {
@@ -392,10 +394,12 @@ H5std_string Attribute::getName() const
 //--------------------------------------------------------------------------
 H5std_string Attribute::getName(size_t len) const
 {
-   H5std_string attr_name;
-   ssize_t name_size = getName(attr_name, len);
-   return(attr_name);
-   // let caller catch exception if any
+    H5std_string attr_name;
+    ssize_t name_size = getName(attr_name, len);
+    if (name_size < 0)
+	return("");
+    else
+	return(attr_name);
 }
 
 //--------------------------------------------------------------------------

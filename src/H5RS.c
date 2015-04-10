@@ -139,7 +139,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 H5RS_str_t *
-H5RS_wrap(const char *s)
+H5RS_wrap(char *s)
 {
     H5RS_str_t *ret_value;   /* Return value */
 
@@ -150,7 +150,7 @@ H5RS_wrap(const char *s)
         HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set the internal fields */
-    ret_value->s = (char *)s;      /* (Cast away const OK - QAK) */
+    ret_value->s = s;
     ret_value->wrapped = 1;
     ret_value->n = 1;
 

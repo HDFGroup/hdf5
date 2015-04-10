@@ -270,7 +270,7 @@ nomatch:
         ent = c;
 
         if (free_ent < maxmaxcode) {
-            CodeTabOf (i) = free_ent++; /* code -> hashtable */
+	    CodeTabOf (i) = (unsigned short)free_ent++; /* code -> hashtable */
             HashTabOf (i) = fcode;
         } else {
             cl_block();
@@ -313,9 +313,9 @@ output(int code)
     cur_accum &= masks[cur_bits];
 
     if (cur_bits > 0)
-        cur_accum |= ((long)code << cur_bits);
+        cur_accum |= (unsigned long)((long)code << cur_bits);
     else
-        cur_accum = code;
+        cur_accum = (unsigned long)code;
 
     cur_bits += n_bits;
 
@@ -437,7 +437,7 @@ static char accum[ 256 ];
 static void
 char_out(int c)
 {
-    accum[ a_count++ ] = c;
+    accum[ a_count++ ] = (char)c;
 
     if (a_count >= 254)
         flush_char();

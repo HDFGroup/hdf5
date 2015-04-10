@@ -517,6 +517,9 @@ H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk)
 
     /* Set values */
     if (ik > 0) {
+	if((ik * 2) >= HDF5_BTREE_IK_MAX_ENTRIES)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "istore IK value exceeds maximum B-tree entries");
+
         if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
         btree_k[H5B_SNODE_ID] = ik;
@@ -613,6 +616,9 @@ H5Pset_istore_k(hid_t plist_id, unsigned ik)
     /* Check arguments */
     if (ik == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "istore IK value must be positive");
+
+    if((ik * 2) >= HDF5_BTREE_IK_MAX_ENTRIES)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "istore IK value exceeds maximum B-tree entries");
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))

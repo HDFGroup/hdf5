@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.215], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.216], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -110,7 +110,7 @@ AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_CPPFLAGS])
 AC_SUBST([AM_LDFLAGS])
 
-## Make sure flags are set to something (otherwise macros may set them later).
+## Make sure flags are initialized.
 AM_CFLAGS="${AM_CFLAGS}"
 AM_CXXFLAGS="${AM_CXXFLAGS}"
 AM_FCFLAGS="${AM_FCFLAGS}"
@@ -130,12 +130,6 @@ saved_user_CXXFLAGS="$CXXFLAGS"
 saved_user_FCFLAGS="$FCFLAGS"
 saved_user_LDFLAGS="$LDFLAGS"
 saved_user_CPPFLAGS="$CPPFLAGS"
-
-## Different compilers may need default libraries. They are specified in
-## the config/* files, so we put this statement here so that it'll be
-## set by the code which follows...
-##
-DEFAULT_LIBS=""
 
 ## Support F9X variable to define Fortran compiler if FC variable is
 ## not used.  This should be deprecated in the future.
@@ -193,15 +187,9 @@ AC_SUBST([UNAME_INFO]) UNAME_INFO=`uname -a`
 ## ----------------------------------------------------------------------
 ## Some platforms have broken basename, and/or xargs programs. Check
 ## that it actually does what it's supposed to do. Catch this early
-## since configure relies upon them heavily and there's no use continuing
-## if it's broken.
+## since configure and scripts relies upon them heavily and there's 
+## no use continuing if it's broken.
 ##
-
-## Avoid depending upon Character Ranges.
-## These are defined by autoconf.
-## as_cr_letters='abcdefghijklmnopqrstuvwxyz'
-## as_cr_LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-
 AC_MSG_CHECKING([if basename works])
 BASENAME_TEST="`basename /foo/bar/baz/qux/basename_works`"
 if test $BASENAME_TEST != "basename_works"; then
@@ -210,6 +198,7 @@ else
   AC_MSG_RESULT([yes])
 fi
 
+## xargs basename used in configure to get the CC_BASENAME value
 AC_MSG_CHECKING([if xargs works])
 XARGS_TEST="`echo /foo/bar/baz/qux/xargs_works | xargs basename`"
 if test $XARGS_TEST != "xargs_works"; then
@@ -254,12 +243,6 @@ case $host_os in
     ;;
   freebsd*)
     host_os_novers=freebsd
-    ;;
-  irix5.*)
-    host_os_novers=irix5.x
-    ;;
-  irix6.*)
-    host_os_novers=irix6.x
     ;;
   osf4.*)
     host_os_novers=osf4.x
@@ -538,7 +521,7 @@ AC_SUBST(HL_FOR) HL_FOR=""
 AC_MSG_CHECKING([if high level library is enabled])
 AC_ARG_ENABLE([hl],
      [AS_HELP_STRING([--enable-hl],
-                     [Enable the high-level library [default=yes]])],
+                     [Enable the high level library [default=yes]])],
      [HDF5_HL=$enableval],
      [HDF5_HL=yes])
 
@@ -587,6 +570,7 @@ AC_PROG_INSTALL
 
 ## ----------------------------------------------------------------------
 ## Set up ${TR} which is used to process DEBUG_PKG.
+
 AC_PATH_PROG([TR], [tr])
 
 
@@ -694,80 +678,14 @@ fi
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
 
 ## ----------------------------------------------------------------------
-## Disable C++ shared libraries if +DD64 flag is detected.
-##
-AC_SUBST([H5_CXX_SHARED])
-H5_CXX_SHARED="no"
-if test "X${HDF_CXX}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
-  AC_MSG_CHECKING([if shared C++ libraries are supported])
-  H5_CXX_SHARED="yes"
-
-  ## Disable C++ shared libraries if DD64 flag is being used.
-  
-  if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'DD64') > /dev/null; then
-    H5_CXX_SHARED="no"
-    CHECK_WARN="Shared C++ libraries not currently supported with +DD64 flag."
-  fi
-
-  ## Report results of check(s)
-  
-  if test "X${H5_CXX_SHARED}" = "Xno"; then
-    AC_MSG_RESULT([no])
-    AC_MSG_WARN([$CHECK_WARN])
-    if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-      AC_MSG_WARN([Disabling shared C++ libraries.])
-      AC_MSG_WARN([To override this behavior, please use --enable-unsupported configure option.])
-      if test "X${enable_static}" = "Xno"; then
-        AC_MSG_ERROR([both static and shared C++ libraries are disabled])
-      fi
-    else
-      AC_MSG_WARN([Allowing unsupported C++ shared librares due to use of --enable-unsupported flag])
-    fi
-  else
-    AC_MSG_RESULT([yes])
-  fi
-fi
-
-AM_CONDITIONAL([CXX_SHARED_CONDITIONAL], [test "X$H5_CXX_SHARED" = "Xyes"])
-
-## ----------------------------------------------------------------------
-## pgcc version 6.0x have optimization (-O, -O2 or -O3) problem.  Detect
-## these versions and add option "-Mx,28,0x8" to the compiler to avoid
-## the problem if optimization is enabled.
-##
-
-if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_production" = "Xyes"; then
-    echo 'adding compiler flag to avoid optimization problem in pgcc'
-    CC="${CC-cc} -Mx,28,0x8"
-fi
-
-## ----------------------------------------------------------------------
-## Shared libraries are not currently supported under Cygwin, so configure
-## disables them unless --enable-unsupported has been supplied by the user.
-
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  case "`uname`" in
-    CYGWIN*)
-      if test "X${enable_shared}" = "Xyes"; then
-        echo '    warning: shared libraries are not supported on Cygwin!'
-        echo '    disabling shared libraries'
-        echo '    use --enable-unsupported to override this warning and keep shared libraries enabled'
-      fi
-      enable_shared="no"
-      ;;
-  esac
-fi
-
-## ----------------------------------------------------------------------
-## Windows won't create DLLs without the following macro.
-##
-AC_LIBTOOL_WIN32_DLL
-
-## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
 ## or disabled, it should happen before these macros.
 LT_PREREQ([2.2])
-LT_INIT([dlopen])
+
+## ----------------------------------------------------------------------
+## dlopen - This will use an improved version of libtool
+## win32-dll - This will build clean dlls on win32 platforms.
+LT_INIT([dlopen,win32-dll])
 
 ## ----------------------------------------------------------------------
 ## Check if we should install only statically linked executables.
@@ -833,79 +751,6 @@ case "X-$RPATH" in
     AC_MSG_ERROR([\'$enableval\' is not a valid rpath type])
     ;;
 esac
-
-## ----------------------------------------------------------------------
-## Sometimes makes think the `.PATH:' appearing before the first rule
-## with an action should override the `all' default target. So we have
-## to decide what the proper syntax is.
-##
-AC_MSG_CHECKING([how make searches directories])
-while true; do #for break
-  ## The most common method is `VPATH=DIR1 DIR2 ...'
-  cat >maketest <<EOF
-VPATH=$srcdir/config $srcdir/src $srcdir/bin
-.c.o:
-	cp $< H5.o
-
-foo: H5.o
-	rm -f H5.o
-	@echo works
-EOF
-
-  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    SEARCH_RULE='VPATH='
-    SEARCH_SEP=' '
-    AC_MSG_RESULT([VPATH=DIR1 DIR2 ...])
-    break
-  fi
-
-  ## The second most common method is like above except with the
-  ## directories separated by colons.
-  cat >maketest <<EOF
-VPATH=$srcdir/config:$srcdir/src:$srcdir/bin
-.c.o:
-	cp $< H5.o
-
-foo: H5.o
-	rm -f H5.o
-	@echo works
-EOF
-
-  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    SEARCH_RULE='VPATH='
-    SEARCH_SEP=':'
-    AC_MSG_RESULT([VPATH=DIR1:DIR2:...])
-    break
-  fi
-
-  ## pmake uses the construct `.PATH: DIR1 DIR2
-  cat >maketest <<EOF
-.PATH: $srcdir/config $srcdir/src $srcdir/bin
-.c.o:
-	cp $< H5.o
-
-foo: H5.o
-	rm -f H5.o
-	@echo works
-EOF
-
-  if (MAKE= ${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    SEARCH_RULE='.PATH: '
-    SEARCH_SEP=' '
-    AC_MSG_RESULT([.PATH: DIR1 DIR2 ...])
-    break
-  fi
-
-  ## No way for make to search directories
-  SEARCH_RULE='## SEARCH DISABLED: '
-  SEARCH_SEP=' '
-  AC_MSG_RESULT([it doesn't])
-  if test ! -f configure; then
-    AC_MSG_ERROR([${MAKE-make} requires the build and source directories to be the same])
-  fi
-  break
-done
-rm maketest
 
 ## ----------------------------------------------------------------------
 ## pmake will throw an error if variables are undefined in a Makefile.
@@ -989,8 +834,6 @@ if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
   AC_CHECK_LIB([nsl], [xdr_int])
 fi
 
-dnl AC_CHECK_LIB([coug], [main])		## ...for ASCI/Red
-
 ## ----------------------------------------------------------------------
 ## Check for system header files.
 ##
@@ -1035,7 +878,7 @@ case "$host" in
     ## many problems with including them.
     AC_CHECK_HEADERS([sys/sysinfo.h sys/proc.h])
     ;;
-  mips*-sgi*-irix*)
+  mips*-sgi*)
     ## The <sys/fpu.h> is needed on the SGI machines to turn off
     ## denormalized floating-point values going to zero.  We do *not*
     ## attempt to locate these files on other systems because there
@@ -1121,7 +964,7 @@ case "$host_cpu-$host_vendor-$host_os" in
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
-    AM_CPPFLAGS="-D_GNU_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
 
     ## Also add BSD support on Linux systems, so <features.h> defines
     ## __USE_BSD, which is required to get the prototype for strdup
@@ -1131,7 +974,12 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
     ## however, we do not do this since it breaks the big test on some 
     ## older platforms.
-    AM_CPPFLAGS="-D_BSD_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_BSD_SOURCE $H5_CPPFLAGS"
+
+    ## _BSD_SOURCE is deprecated as of glibc 2.20, in favor of _DEFAULT_SOURCE.
+    ## To avoid warnings, we define _DEFAULT_SOURCE in addition to _BSD_SOURCE,
+    ## which should work for all versions of glibc.
+    H5_CPPFLAGS="-D_DEFAULT_SOURCE $H5_CPPFLAGS"
     ;;
 esac
 
@@ -1307,15 +1155,6 @@ case $withval in
         ;;
     esac
 
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$dmalloc_inc" = "X/usr/include"; then
-      dmalloc_inc=""
-    fi
-    if test "X$dmalloc_lib" = "X/usr/lib"; then
-      dmalloc_lib=""
-    fi
-
     saved_CPPFLAGS="$CPPFLAGS"
     saved_AM_CPPFLAGS="$AM_CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
@@ -1373,7 +1212,7 @@ case $withval in
     ;;
   no)
     HAVE_ZLIB="no"
-    AC_MSG_CHECKING([for GNU zlib])
+    AC_MSG_CHECKING([for zlib])
     AC_MSG_RESULT([suppressed])
     ;;
   *)
@@ -1390,15 +1229,6 @@ case $withval in
         fi
         ;;
     esac
-
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$zlib_inc" = "X/usr/include"; then
-      zlib_inc=""
-    fi
-    if test "X$zlib_lib" = "X/usr/lib"; then
-      zlib_lib=""
-    fi
 
     saved_CPPFLAGS="$CPPFLAGS"
     saved_AM_CPPFLAGS="$AM_CPPFLAGS"
@@ -1490,15 +1320,6 @@ case $withval in
         ;;
     esac
     
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$szlib_inc" = "X/usr/include"; then
-      szlib_inc=""
-    fi 
-    if test "X$szlib_lib" = "X/usr/lib"; then
-      szlib_lib=""
-    fi
-    
     saved_CPPFLAGS="$CPPFLAGS"
     saved_AM_CPPFLAGS="$AM_CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
@@ -1545,18 +1366,18 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
   AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
 
   AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
-        [AC_TRY_RUN([
-        #include <szlib.h>
-        
-        int main(void)
-        {       
+        [AC_RUN_IFELSE(
+            [AC_LANG_PROGRAM([
+                #include "szlib.h"
+            ],[[
                 /* SZ_encoder_enabled returns 1 if encoder is present */
-            if(SZ_encoder_enabled() == 1)
-                exit(0);
-            else
-                exit(1);
-        }
-        ], [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)])
+                if(SZ_encoder_enabled() == 1)
+                    exit(0);
+                else
+                    exit(1);
+            ]])]
+        , [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)]
+   )
     
   AC_DEFINE([HAVE_FILTER_SZIP], [1], 
             [Define if support for szip filter is enabled])
@@ -1596,8 +1417,14 @@ AC_CACHE_SAVE
 AC_MSG_CHECKING([for thread safe support])
 AC_ARG_ENABLE([threadsafe],
               [AS_HELP_STRING([--enable-threadsafe],
-                              [Enable thread-safe capability])],
+                              [Enable thread-safe capability. This will disable the high-level library.
+                              You can override this behavior by specifying --enable-hl and --enable-unsupported.
+                              [default=no]])],
               [THREADSAFE=$enableval])
+
+## NOTE: The high-level, C++, and Fortran interfaces are not compatible
+## with the thread-safety option because the lock is not hoisted
+## into the higher-level API calls.
 
 ## The --enable-threadsafe flag is not compatible with --enable-cxx.
 ## If the user tried to specify both flags, throw an error, unless
@@ -1608,13 +1435,14 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
-## --enable-threadsafe is also incompatible with --enable-fortran, unless
+## --enable-threadsafe is also incompatible with --enable-fortran unless
 ## --enable-unsupported has been specified on the configure line.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
     AC_MSG_ERROR([--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
   fi
 fi
+
 
 case "X-$THREADSAFE" in
   X-|X-no)
@@ -1634,32 +1462,31 @@ if test "X$THREADSAFE" = "Xyes"; then
     AC_DEFINE([HAVE_THREADSAFE], [1], [Define if we have thread safe support])
 
     ## ----------------------------------------------------------------------
-    ## Is the pthreads library present?  It has a header file `pthread.h' and
+    ## Is the Pthreads library present?  It has a header file `pthread.h' and
     ## a library `-lpthread' and their locations might be specified with the
     ## `--with-pthread' command-line switch.  The value is an include path
     ## and/or a library path.  If the library path is specified then it must
     ## be preceded by a comma.
     ##
     ## Thread-safety in HDF5 only uses Pthreads via configure, so the
-    ## default is "yes", though this only has an effect when
+    ## default is "check", though this only has an effect when
     ## --enable-threadsafe is specified.
     AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
     AC_ARG_WITH([pthread],
                 [AS_HELP_STRING([--with-pthread=DIR],
-                                [Specify alternative path to Pthreads library when thread-safe capability is built])],,
-                [withval=yes])
+                                [Specify alternative path to Pthreads library when
+                                thread-safe capability is built.])],,
+                [withval=check])
 
     case "$withval" in
-      yes)
+      check | yes)
         AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
         if test "x$HAVE_PTHREAD" = "xyes"; then
           AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
         fi
         ;;
       no)
-        AC_MSG_CHECKING([for pthread])
-        AC_MSG_RESULT([suppressed])
-        unset HAVE_PTHREAD
+        AC_MSG_ERROR([Must use Pthreads with thread safety])
         ;;
       *)
         case "$withval" in
@@ -1674,15 +1501,6 @@ if test "X$THREADSAFE" = "Xyes"; then
             fi
             ;;
         esac
-
-        ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-        ## can mess some compilers up.
-        if test "X$pthread_inc" = "X/usr/include"; then
-          pthread_inc=""
-        fi
-        if test "X$pthread_lib" = "X/usr/lib"; then
-          pthread_lib=""
-        fi
 
         if test -n "$pthread_inc"; then
           saved_CPPFLAGS="$CPPFLAGS"
@@ -1708,6 +1526,44 @@ if test "X$THREADSAFE" = "Xyes"; then
         fi
         ;;
     esac
+
+    ## ----------------------------------------------------------------------
+    ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
+    ## is supported on this system
+    ##
+    ## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
+    ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
+    ## supported a priori. POSIX.1-2001 requires that a conformant
+    ## system need only support one of SYSTEM or PROCESS scopes.
+    ##
+    ## For cross-compiling, we've added a pessimistic 'no'. You can
+    ## hand-hack the config file if you know otherwise.
+    AC_MSG_CHECKING([Pthreads supports system scope])
+    AC_CACHE_VAL([hdf5_cv_system_scope_threads],
+      [AC_RUN_IFELSE(
+        [AC_LANG_PROGRAM([
+            #if STDC_HEADERS
+            #include <stdlib.h>
+            #include <pthread.h>
+            #endif
+        ],[
+              pthread_attr_t attribute;
+              int ret;
+
+              pthread_attr_init(&attribute);
+              ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+              exit(ret==0 ? 0 : 1);
+        ])]
+      , [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no], [hdf5_cv_system_scope_threads=no])])
+
+    if test ${hdf5_cv_system_scope_threads} = "yes"; then
+      AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
+                [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+      AC_MSG_NOTICE([Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM).])
+    fi
 fi
 
 ## ----------------------------------------------------------------------
@@ -1814,85 +1670,7 @@ AC_CHECK_FUNCS([gethostname getpwuid getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
-AC_CHECK_FUNCS([tmpfile asprintf vasprintf waitpid])
-
-## Check for vsnprintf() separately, so we can detect situations where it
-## doesn't return the correct size for formatted strings that are too large
-## for the buffer provided
-AC_CHECK_FUNCS([vsnprintf],
-
-    ## Check if vsnprintf() returns correct size for strings that don't fit
-    ## into the size allowed.  If vsnprintf() works correctly on this platform,
-    ## it should return a value of 42 for the test below
-    ##
-    ## Note that vsnprintf fails in two different ways:
-    ##         - In IRIX64, calls to vnsprintf() with a formatted string that
-    ##                 is larger than the buffer size allowed incorrectly
-    ##                 return the size of the buffer minus one.
-    ##         - In HP/UX, calls to vsnprintf() with a formatted string that
-    ##                 is larger than the buffer size allowed incorrectly
-    ##                 return (-1)
-    AC_MSG_CHECKING([if vsnprintf returns correct value])
-
-    AC_CACHE_VAL([hdf5_cv_vsnprintf_works],
-        AC_TRY_RUN([
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-int test_vsnprintf(const char *fmt,...)
-{
-    va_list     ap;
-    char *s = malloc(16);
-    int ret;
-
-    va_start(ap, fmt);
-    ret=vsnprintf(s,16,"%s",ap);
-    va_end(ap);
-
-    return(ret!=42 ? 1 : 0);
-}
-
-int main(void)
-{
-    exit(test_vsnprintf("%s","A string that is longer than 16 characters"));
-}
-   ],[hdf5_cv_vsnprintf_works=yes],[hdf5_cv_vsnprintf_works=no],))
-
-       if test ${hdf5_cv_vsnprintf_works} = "yes"; then
-          AC_MSG_RESULT([yes])
-          AC_DEFINE([VSNPRINTF_WORKS], [1],
-                    [Define if vsnprintf() returns the correct value for formatted strings that don't fit into size allowed])
-       else
-          AC_MSG_RESULT([no])
-       fi
-    ,)
-
-## ----------------------------------------------------------------------
-## Check that a lone colon can be used as an argument
-## This is not true on Cray X1, which interprets a lone colon as a
-## system command.
-##
-AC_CACHE_CHECK([if lone colon can be used as an argument],
-               [hdf5_cv_lone_colon],
-               [
-  echo "int main(int argc, char * argv[]) {return 0;}" > conftest.c
-  $CC $CFLAGS conftest.c -o a.out> /dev/null 2> /dev/null
-  echo "./a.out :" > conftest.sh
-  chmod 700 conftest.sh
-
-  ./conftest.sh 2> conftest.out
-  rm -f a.out
-  TEST_OUTPUT=`cat conftest.out`
-
-  if test "X$TEST_OUTPUT" = "X"; then
-    hdf5_cv_lone_colon=yes
-  else
-    hdf5_cv_lone_colon=no
-  fi
-               ])
-
-AC_SUBST([H5_LONE_COLON]) H5_LONE_COLON="$hdf5_cv_lone_colon"
+AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
 
 ## ----------------------------------------------------------------------
 ## Check compiler characteristics
@@ -1943,55 +1721,24 @@ AC_MSG_CHECKING([how to print long long])
 AC_CACHE_VAL([hdf5_cv_printf_ll], [
 
 for hdf5_cv_printf_ll in l ll L q unknown; do
-   AC_TRY_RUN([
-     #include <stdio.h>
-     #include <stdlib.h>
-     #include <string.h>
-
-     int main(void)
-     {
-	char *s = malloc(128);
-	long long x = (long long)1048576 * (long long)1048576;
-	sprintf(s,"%${hdf5_cv_printf_ll}d",x);
-	exit(strcmp(s,"1099511627776"));
-     }
-   ], [break],,[continue])
+   AC_RUN_IFELSE(
+        [AC_LANG_PROGRAM([
+            #include <stdio.h>
+            #include <stdlib.h>
+            #include <string.h>
+        ],[[
+            char *s = malloc(128);
+            long long x = (long long)1048576 * (long long)1048576;
+            sprintf(s,"%${hdf5_cv_printf_ll}d",x);
+            exit(strcmp(s,"1099511627776"));
+        ]])]
+   , [break],,[continue])
 done])
 
 AC_MSG_RESULT([%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u])
 AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"], 
                    [Width for printf() for type `long long' or `__int64', use `ll'])
 
-## ----------------------------------------------------------------------
-## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
-## is supported on this system
-##
-AC_MSG_CHECKING([Threads support system scope])
-AC_CACHE_VAL([hdf5_cv_system_scope_threads],
-  [AC_TRY_RUN([
-    #if STDC_HEADERS
-    #include <stdlib.h>
-    #include <pthread.h>
-    #endif
-
-    int main(void)
-    {
-      pthread_attr_t attribute;
-      int ret;
-
-      pthread_attr_init(&attribute);
-      ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-      exit(ret==0 ? 0 : 1);
-    }
-  ], [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no],)])
-
-if test ${hdf5_cv_system_scope_threads} = "yes"; then
-  AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
-            [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
 
 ## ----------------------------------------------------------------------
 ## Turn on debugging by setting compiler flags
@@ -2375,15 +2122,6 @@ if test -n "$PARALLEL"; then
           ;;
       esac
   
-      ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-      ## can mess some compilers up.
-      if test "X$mpe_inc" = "X/usr/include"; then
-        mpe_inc=""
-      fi
-      if test "X$mpe_lib" = "X/usr/lib"; then
-        mpe_lib=""
-      fi
-  
       if test -n "$mpe_inc"; then
         saved_CPPFLAGS="$CPPFLAGS"
         saved_AM_CPPFLAGS="$AM_CPPFLAGS"
@@ -2411,75 +2149,6 @@ if test -n "$PARALLEL"; then
     AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
   fi
 fi
-
-
-## ----------------------------------------------------------------------
-## Turn on internal I/O filters by setting macros in header files
-## Internal I/O filters are contained entirely within the library and do
-## not depend on external headers or libraries.  The shuffle filter is
-## an example of an internal filter, while the gzip filter is an example of
-## an external filter.  Each external filter is controlled with an
-## "--with-foo=" configure flag.
-##
-AC_SUBST([FILTERS])
-AC_SUBST([USE_FILTER_SHUFFLE]) USE_FILTER_SHUFFLE="no"
-AC_SUBST([USE_FILTER_FLETCHER32]) USE_FILTER_FLETCHER32="no"
-AC_SUBST([USE_FILTER_NBIT]) USE_FILTER_NBIT="no"
-AC_SUBST([USE_FILTER_SCALEOFFSET]) USE_FILTER_SCALEOFFSET="no"
-AC_MSG_CHECKING([for I/O filters])
-AC_ARG_ENABLE([filters],
-              [AS_HELP_STRING([--enable-filters=all],
-                              [Turn on all internal I/O filters. One may
-                               also specify a comma-separated list of filters
-                               or the word no.  The default is all internal
-                               I/O filters.])],
-              [FILTERS=$enableval])
-
-## Eventually: all_filters="shuffle,foo,bar,baz"
-all_filters="shuffle,fletcher32,nbit,scaleoffset"
-case "X-$FILTERS" in
-  X-|X-all)
-    FILTERS=$all_filters
-    AC_MSG_RESULT([all ($FILTERS)])
-    ;;
-  X-no|X-none)
-    AC_MSG_RESULT([none])
-    FILTERS="none"
-    ;;
-  *)
-    AC_MSG_RESULT([$FILTERS])
-    ;;
-esac
-
-if test -n "$FILTERS"; then
-  for filter in `echo $FILTERS | tr ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
-    ## ------------------------------------------------------------------
-    ## Have to use separate 'if' construct for each filter, so that
-    ## autoheader can detect the AC_DEFINE for each one...
-    ##
-    if test $filter = "SHUFFLE"; then
-      AC_DEFINE([HAVE_FILTER_SHUFFLE], [1],
-                [Define if support for shuffle filter is enabled])
-      USE_FILTER_SHUFFLE="yes"
-    fi
-    if test $filter = "FLETCHER32"; then
-      AC_DEFINE([HAVE_FILTER_FLETCHER32], [1],
-                [Define if support for Fletcher32 checksum is enabled])
-      USE_FILTER_FLETCHER32="yes"
-    fi
-    if test $filter = "NBIT"; then
-      AC_DEFINE([HAVE_FILTER_NBIT], [1],
-                [Define if support for nbit filter is enabled])
-      USE_FILTER_NBIT="yes"
-    fi
-    if test $filter = "SCALEOFFSET"; then
-      AC_DEFINE([HAVE_FILTER_SCALEOFFSET], [1],
-                [Define if support for scaleoffset filter is enabled])
-      USE_FILTER_SCALEOFFSET="yes"
-    fi
-  done
-fi
-
 
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
@@ -2565,61 +2234,6 @@ else
 fi
 
 ## ----------------------------------------------------------------------
-## Decide whether the data accuracy has higher priority during data
-## conversions.  If not, some hard conversions will still be prefered even
-## though the data may be wrong (for example, some compilers don't 
-## support denormalized floating values) to maximize speed.
-## 
-AC_MSG_CHECKING([whether data accuracy is guaranteed during data conversions])
-AC_ARG_ENABLE([dconv-accuracy],
-              [AS_HELP_STRING([--enable-dconv-accuracy],
-                              [if data accuracy is guaranteed during 
-                              data conversions [default=yes]])],
-              [DATA_ACCURACY=$enableval], [DATA_ACCURACY=yes])
-
-if test "$DATA_ACCURACY" = "yes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([WANT_DATA_ACCURACY], [1],
-            [Data accuracy is prefered to speed during data conversions])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can handle converting
-## denormalized floating-point values.
-## (This flag should be set for all machines, except for the Crays, where
-## the cache value is set in it's config file)
-##
-AC_MSG_CHECKING([if converting denormalized floating-point values is possible])
-AC_CACHE_VAL([hdf5_cv_convert_denormal_float], [hdf5_cv_convert_denormal_float=yes])
-
-if test ${hdf5_cv_convert_denormal_float} = "yes"; then
-  AC_DEFINE([CONVERT_DENORMAL_FLOAT], [1],
-            [Define if your system can handle converting denormalized floating-point values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can handle converting
-## floating-point to long long values.
-## (This flag should be _unset_ for all machines, except for Windows, where
-## it's set in the custom Windows H5pubconf.h file)
-##
-AC_MSG_CHECKING([if converting floating-point values to long long is not working])
-AC_CACHE_VAL([hdf5_cv_convert_float_llong_not_works], [hdf5_cv_convert_float_llong_not_works=no])
-
-if test ${hdf5_cv_convert_float_llong_not_works} = "yes"; then
-  AC_DEFINE([HW_FP_TO_LLONG_NOT_WORKS], [1],
-            [Define if your system can't handle converting floating-point values to long long.])
-  AC_MSG_RESULT([true])
-else
-  AC_MSG_RESULT([false])
-fi
-
-## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine has window style pathname,
 ## that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
 ## (This flag should be _unset_ for all machines, except for Windows, where
@@ -2638,515 +2252,6 @@ case "`uname`" in
     ;;
 esac
 
-## -----------------------------------------------------------------------
-## Set flag to indicate that the machine can handle conversion from 
-## long double to integers accurately.  This flag should be set "yes" for 
-## all machines except all SGIs.  For SGIs, some conversions are
-## incorrect and its cache value is set "no" in its config/irix6.x and 
-## irix5.x.
-##
-AC_MSG_CHECKING([if converting from long double to integers is accurate])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_ldouble_to_integer_accurate=${hdf5_cv_ldouble_to_integer_accurate=no}
-else
-   AC_CACHE_VAL([hdf5_cv_ldouble_to_integer_accurate], [hdf5_cv_ldouble_to_integer_accurate=yes])
-fi
-
-if test "${hdf5_cv_ldouble_to_integer_accurate}" = "yes"; then
-  AC_DEFINE([LDOUBLE_TO_INTEGER_ACCURATE], [1],
-            [Define if your system can convert long double to integers accurately.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## -----------------------------------------------------------------------
-## Set flag to indicate that the machine can do conversion from 
-## long double to integers regardless of accuracy.  This flag should be 
-## set "yes" for all machines except HP-UX 11.00.  For HP-UX 11.00, the
-## compiler has 'floating exception' when converting 'long double' to all 
-## integers except 'unsigned long long'.  Other HP-UX systems are unknown
-## yet. (1/8/05 - SLU)
-
-AC_MSG_CHECKING([if converting from long double to integers works])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_ldouble_to_integer_works=${hdf5_cv_ldouble_to_integer_works=no}
-else
-   AC_CACHE_VAL([hdf5_cv_ldouble_to_integer_works],
-        [AC_TRY_RUN([
-        int main(void)
-        {
-            void *align;
-            long double ld= 9701917572145405952.00L;
-            unsigned char v1;
-            short v2;
-            unsigned int v3;
-            int  ret = 0;
-
-            align = (void*)malloc(sizeof(long double));
-            memcpy(align, &ld, sizeof(long double));
-
-            /*For HU-UX11.00, there's floating exception(core dump) when doing some of casting
-             *from 'long double' to integers*/
-            v1=(unsigned char)(*((long double*)align));
-            v2=(short)(*((long double*)align));
-            v3=(unsigned int)(*((long double*)align));
-
-    done:
-            exit(ret);
-        }
-        ], [hdf5_cv_ldouble_to_integer_works=yes], [hdf5_cv_ldouble_to_integer_works=no],)])
-fi
-
-if test ${hdf5_cv_ldouble_to_integer_works} = "yes"; then
-  AC_DEFINE([LDOUBLE_TO_INTEGER_WORKS], [1],
-            [Define if your system can convert from long double to integer values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## -----------------------------------------------------------------------
-## Set flag to indicate that the machine can handle conversion from 
-## integers to long double.  (This flag should be set "yes" for all 
-## machines except all SGIs, where some conversions are
-## incorrect and its cache value is set "no" in its config/irix6.x and 
-## irix5.x) 
-##
-AC_MSG_CHECKING([if accurately converting from integers to long double])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_integer_to_ldouble_accurate=${hdf5_cv_integer_to_ldouble_accurate=no}
-else
-   AC_CACHE_VAL([hdf5_cv_integer_to_ldouble_accurate], [hdf5_cv_integer_to_ldouble_accurate=yes])
-fi
-
-if test ${hdf5_cv_integer_to_ldouble_accurate} = "yes"; then
-  AC_DEFINE([INTEGER_TO_LDOUBLE_ACCURATE], [1],
-            [Define if your system can accurately convert from integers to long double values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can accurately convert
-## 'unsigned long' to 'float' values.
-## (This flag should be set for all machines, except for Pathscale compiler
-## on Sandia's Linux machine where the compiler interprets 'unsigned long'
-## values as negative when the first bit of 'unsigned long' is on during 
-## the conversion to float.) 
-##
-AC_MSG_CHECKING([if accurately converting unsigned long to float values])
-
-AC_CACHE_VAL([hdf5_cv_ulong_to_float_accurate],
-    [AC_TRY_RUN([
-    int main(void)
-    {
-        int           ret = 0;
-        unsigned long l1;
-        unsigned long l2;
-        unsigned long l3;
-        float f1;
-        float f2;
-        float f3;
-
-
-        if(sizeof(unsigned long)==8) {
-            l1 = 0xffffffffffffffffUL;
-            l2 = 0xffffffffffff0000UL;
-            l3 = 0xf000000000000000UL;
-
-            f1 = (float)l1;
-            f2 = (float)l2;
-            f3 = (float)l3;
-
-            if((f1 < 0) || (f2 < 0) || (f3 < 0))
-                ret = 1;
-        }
-
-done:
-        exit(ret);
-    }
-    ], [hdf5_cv_ulong_to_float_accurate=yes], [hdf5_cv_ulong_to_float_accurate=no],)])
-
-if test ${hdf5_cv_ulong_to_float_accurate} = "yes"; then
-  AC_DEFINE([ULONG_TO_FLOAT_ACCURATE], [1],
-            [Define if your system accurately converting unsigned long to float values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can accurately convert
-## 'unsigned (long) long' values to 'float' and 'double' values.
-## (This flag should be set for all machines, except for the SGIs, where
-## the cache value is set in the config/irix6.x config file) and Solaris
-## 64-bit machines, where the short program below tests if round-up is 
-## correctly handled.
-##
-AC_MSG_CHECKING([if accurately converting unsigned long long to floating-point values])
-
-if test ${host_os_novers} = "solaris2.x"; then
-    AC_CACHE_VAL([hdf5_cv_ulong_to_fp_bottom_bit_accurate],
-    [AC_TRY_RUN([
-    int main(void)
-    {
-        unsigned long l1;
-        unsigned long l2;
-        unsigned long l3;
-        unsigned long l4;
-        unsigned long long ld1;
-        unsigned long long ld2;
-        unsigned long long ld3;
-        unsigned long long ld4;
-        double        d1, d2, d3, d4;
-        unsigned char s[8];
-        int           ret = 0;
-
-        if(sizeof(unsigned long)==8) {
-            l1 = 0xf000000000000b00UL; /*Round-down case*/
-            l2 = 0xf000000000000401UL; /*Round-up case*/
-            l3 = 0xf000000000000400UL; /*Round-down case*/
-            l4 = 0xf000000000000c00UL; /*Round-up case*/
-            
-            d1 = (double)l1;
-            d2 = (double)l2;
-            d3 = (double)l3;
-            d4 = (double)l4;
-        } else if(sizeof(unsigned long long)==8) { 
-            ld1 = 0xf000000000000b00ULL; /*Round-down case*/
-            ld2 = 0xf000000000000401ULL; /*Round-up case*/
-            ld3 = 0xf000000000000400ULL; /*Round-down case*/
-            ld4 = 0xf000000000000c00ULL; /*Round-up case*/
-            
-            d1 = (double)ld1;
-            d2 = (double)ld2;
-            d3 = (double)ld3;
-            d4 = (double)ld4;
-        } else {
-            ret = 1;
-            goto done;
-        }
-        
-        memcpy(s, &d1, 8);
-        if(s[7]!=1)
-            ret = 1;
-
-        memcpy(s, &d2, 8);
-        if(s[7]!=1)
-            ret = 1;
-
-        memcpy(s, &d3, 8);
-        if(s[7]!=0)
-            ret = 1;
-
-        memcpy(s, &d4, 8);
-        if(s[7]!=2)
-            ret = 1;
-
-done:
-        exit(ret);
-    }
-    ], [hdf5_cv_ulong_to_fp_bottom_bit_accurate=yes], [hdf5_cv_ulong_to_fp_bottom_bit_accurate=no],)])
-else
-    AC_CACHE_VAL([hdf5_cv_ulong_to_fp_bottom_bit_accurate], [hdf5_cv_ulong_to_fp_bottom_bit_accurate=yes])
-fi
-
-if test ${hdf5_cv_ulong_to_fp_bottom_bit_accurate} = "yes"; then
-  AC_DEFINE([ULONG_TO_FP_BOTTOM_BIT_ACCURATE], [1],
-            [Define if your system can accurately convert unsigned (long) long values to floating-point values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can accurately convert
-## 'float' or 'double' to 'unsigned long long' values.
-## (This flag should be set for all machines, except for PGI compiler 
-## where round-up happens when the fraction of float-point value is greater 
-## than 0.5.
-##
-AC_MSG_CHECKING([if accurately roundup converting floating-point to unsigned long long values])
-
-AC_CACHE_VAL([hdf5_cv_fp_to_ullong_accurate],
-    [AC_TRY_RUN([
-    int main(void)
-    {
-        float  f = 111.60f;
-        double d = 222.55L;
-        unsigned long long l1 = (unsigned long long)f;
-        unsigned long long l2 = (unsigned long long)d;
-        int           ret = 0;
-
-        if(l1 == 112) 
-            ret = 1;
-        if(l2 == 223) 
-            ret = 1;
-
-done:
-        exit(ret);
-    }
-    ], [hdf5_cv_fp_to_ullong_accurate=yes], [hdf5_cv_fp_to_ullong_accurate=no],)])
-
-if test ${hdf5_cv_fp_to_ullong_accurate} = "yes"; then
-  AC_DEFINE([FP_TO_ULLONG_ACCURATE], [1],
-            [Define if your system roundup accurately converting floating-point to unsigned long long values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can accurately convert
-## 'float', 'double' or 'long double' to 'unsigned long long' values.
-## (This flag should be set for all machines, except for HP-UX machines
-## where the maximal number for unsigned long long is 0x7fffffffffffffff
-## during conversion.
-##
-AC_MSG_CHECKING([if right maximum converting floating-point to unsigned long long values])
-
-AC_CACHE_VAL([hdf5_cv_fp_to_ullong_right_maximum],
-    [AC_TRY_RUN([
-    int main(void)
-    {
-        float  f = 9701917572145405952.00f;
-        double d1 = 9701917572145405952.00L;
-        long double d2 = 9701917572145405952.00L;
-        double d3 = 2e40L;
-        unsigned long long l1 = (unsigned long long)f;
-        unsigned long long l2 = (unsigned long long)d1;
-        unsigned long long l3 = (unsigned long long)d2;
-        unsigned long long l4;
-        unsigned long long l5 = 0x7fffffffffffffffULL;
-        int           ret = 0;
-
-        if(l1 <= l5 || l2 <= l5 || l3 <= l5) 
-            ret = 1;
-
-        l4 = (unsigned long long)d3;
-        if(l4 <= l5)
-            ret = 1;
-
-done:
-        exit(ret);
-    }
-    ], [hdf5_cv_fp_to_ullong_right_maximum=yes], [hdf5_cv_fp_to_ullong_right_maximum=no],)])
-
-if test ${hdf5_cv_fp_to_ullong_right_maximum} = "yes"; then
-  AC_DEFINE([FP_TO_ULLONG_RIGHT_MAXIMUM], [1],
-            [Define if your system has right maximum convert floating-point to unsigned long long values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can accurately convert
-## 'long double' to 'unsigned int' values.  (This flag should be set for 
-## all machines, except for some Intel compilers on some Linux.)
-##
-AC_MSG_CHECKING([if correctly converting long double to unsigned int values])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_ldouble_to_uint_accurate=${hdf5_cv_ldouble_to_uint_accurate=no}
-else
-   AC_CACHE_VAL([hdf5_cv_ldouble_to_uint_accurate],
-        [AC_TRY_RUN([
-        int main(void)
-        {
-            long double ld = 2733248032.9183987530L;
-            unsigned int i;
-            int           ret = 0;
-
-            i = (unsigned int)ld;
-            if(i!=2733248032 && i!=2733248031 && i!=2733248033)
-                ret = 1;
-
-    done:
-            exit(ret);
-        }
-        ], [hdf5_cv_ldouble_to_uint_accurate=yes], [hdf5_cv_ldouble_to_uint_accurate=no],)])
-fi
-
-if test ${hdf5_cv_ldouble_to_uint_accurate} = "yes"; then
-  AC_DEFINE([LDOUBLE_TO_UINT_ACCURATE], [1],
-            [Define if your system can convert long double to unsigned int values correctly.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can _compile_
-## 'unsigned long long' to 'float' and 'double' typecasts.
-## (This flag should be set for all machines, except for under Windows when
-## compiled with Visual Studio 6, where the macro value is set in the
-## src/H5pubconf.h file)
-##
-AC_MSG_CHECKING([if compiling unsigned long long to floating-point typecasts work])
-AC_CACHE_VAL([hdf5_cv_ullong_to_fp_cast_works], [hdf5_cv_ullong_to_fp_cast_works=yes])
-
-if test ${hdf5_cv_ullong_to_fp_cast_works} = "yes"; then
-  AC_DEFINE([ULLONG_TO_FP_CAST_WORKS], [1],
-            [Define if your system can compile unsigned long long to floating-point casts.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can _compile_
-## 'long long' to 'float' and 'double' typecasts.
-## (This flag should be set for all machines, except for under Windows when
-## compiled with Visual Studio 6, where the macro value is set in the
-## src/H5pubconf.h file)
-##
-AC_MSG_CHECKING([if compiling long long to floating-point typecasts work])
-AC_CACHE_VAL([hdf5_cv_llong_to_fp_cast_works], [hdf5_cv_llong_to_fp_cast_works=yes])
-
-if test ${hdf5_cv_llong_to_fp_cast_works} = "yes"; then
-  AC_DEFINE([LLONG_TO_FP_CAST_WORKS], [1],
-            [Define if your system can compile long long to floating-point casts.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can convert from
-## 'unsigned long long' to 'long double' without precision loss.
-## (This flag should be set for all machines, except for FreeBSD(sleipnir)
-## where the last 2 bytes of mantissa are lost when compiler tries to do 
-## the conversion, and Cygwin where compiler doesn't do rounding correctly.)
-##
-AC_MSG_CHECKING([if converting unsigned long long to long double with precision])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_ullong_to_ldouble_precision=${hdf5_cv_ullong_to_ldouble_precision=no}
-else
-   AC_CACHE_VAL([hdf5_cv_ullong_to_ldouble_precision],
-        [AC_TRY_RUN([
-        #include <stdlib.h>
-        #include <string.h>
-
-        int main(void)
-        {
-            /* General variables */
-            int endian;
-            int tst_value = 1; 
-            int ret = 0;
-
-            /* For FreeBSD */
-            unsigned long long l = 0xa601e80bda85fcefULL;
-            long double ld;
-            unsigned char *c1, *c2;
-            size_t size;
-
-            /* For Cygwin */
-            unsigned long long l_cyg = 0xfffffffffffffff0ULL;
-            long double ld_cyg;
-            unsigned char *c2_cyg;
-            size_t size_cyg;
-            
-            
-            /* Determine this system's endianess */
-            c1 = (unsigned char*)calloc(1, sizeof(int));
-            memcpy((void*)c1, &tst_value, sizeof(int));
-            if(c1[0]==1)
-                endian = 0;  /* little endian */
-            else 
-                endian = 1;  /* big endian */
-            
-            /* For FreeBSD */     
-            size = sizeof(long double);
-            memset(&ld, 0, size); 
-            ld = (long double)l;
-
-            c2 = (unsigned char*)calloc(1, size);
-            memcpy((void*)c2, &ld, size);
-
-            /* Test if the last 2 bytes of mantissa are lost.  Mainly for FreeBSD on Intel
-             * architecture(sleipnir) where it happens. */        
-            /*if(endian==0 && c2[0]==0 && c2[1]==0)*/ /*little endian*/
-            if(endian==0 && c2[0]==0) { /*little endian*/
-                ret = 1;
-                goto done;
-            }
-
-            /* For Cygwin */
-            size_cyg = sizeof(long double);
-            memset(&ld_cyg, 0, size); 
-            ld_cyg = (long double)l_cyg;
-
-            c2_cyg = (unsigned char*)calloc(1, size_cyg);
-            memcpy((void*)c2_cyg, &ld_cyg, size_cyg);
-
-            /* Test if the last 4 bytes(roughly) of mantissa are rounded up.  Mainly for Cygwin
-             * where the values like 0xffffffffffffffff,  0xfffffffffffffffe, ..., 
-             * 0xfffffffffffff000 ... are rounded up as 0x0000403f8000000000000000 
-             * instead of 0x0000403effffffffffffffff, 0x0000403efffffffffffffffe, ..., 
-             * 0x0000403efffffffffffff000 ...
-             */    
-            if(endian==0 && c2_cyg[0]==0 && c2_cyg[1]==0 && c2_cyg[2]==0 && c2_cyg[3]==0)
-                ret = 1;
-
-    done:
-            if(c1)
-                free(c1);
-            if(c2)
-                free(c2);
-            if(c2_cyg)
-                free(c2_cyg);
-            exit(ret);
-        }
-        ], [hdf5_cv_ullong_to_ldouble_precision=yes], [hdf5_cv_ullong_to_ldouble_precision=no],)])
-fi
-
-if test ${hdf5_cv_ullong_to_ldouble_precision} = "yes"; then
-  AC_DEFINE([ULLONG_TO_LDOUBLE_PRECISION], [1],
-            [Define if your system can convert unsigned long long to long double with correct precision.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can handle overflow converting
-## all floating-point to all integer types.
-## (This flag should be set for all machines, except for Cray X1 where
-## floating exception is generated when the floating-point value is greater
-## than the maximal integer value).
-##
-AC_MSG_CHECKING([if overflows normally converting floating-point to integer values])
-
-AC_CACHE_VAL([hdf5_cv_fp_to_integer_overflow_works],
-    [AC_TRY_RUN([
-    int main(void)
-    {
-        float  f = 2147483648.0f;
-        int    i;
-
-        i = (int)f;
-
-done:
-        exit(0);
-    }
-    ], [hdf5_cv_fp_to_integer_overflow_works=yes], [hdf5_cv_fp_to_integer_overflow_works=no],)])
-
-if test ${hdf5_cv_fp_to_integer_overflow_works} = "yes"; then
-  AC_DEFINE([FP_TO_INTEGER_OVERFLOW_WORKS], [1],
-            [Define if your system can handle overflow converting floating-point to integer values.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
 ## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine is using a special algorithm to convert
 ## 'long double' to '(unsigned) long' values.  (This flag should only be set for 
@@ -3162,61 +2267,60 @@ if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_cv_ldouble_to_long_special=${hdf5_cv_ldouble_to_long_special=no}
 else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_long_special],
-        [AC_TRY_RUN([
-        int main(void)
-        {
-            long double         ld = 20041683600089727.779961L;
-            long                ll;
-            unsigned long       ull;
-            unsigned char       s[16];
-            unsigned char       s2[8];
-            int                 ret = 1;
-            
-            if(sizeof(long double) == 16 && sizeof(long) == 8) {
-                /*make sure the long double type has 16 bytes in size and 
-                 * 11 bits of exponent.  If it is,
-                 *the bit sequence should be like below.  It's not 
-                 *a decent way to check but this info isn't available. */   
-                memcpy(s, &ld, 16);
-                if(s[0]==0x43 && s[1]==0x51 && s[2]==0xcc && s[3]==0xf3 &&
-                    s[4]==0x85 && s[5]==0xeb && s[6]==0xc8 && s[7]==0xa0 &&
-                    s[8]==0xbf && s[9]==0xcc && s[10]==0x2a && s[11]==0x3c) {
+        [AC_RUN_IFELSE(
+            [AC_LANG_PROGRAM([
+                #include <string.h>
+            ],[[
+                long double         ld = 20041683600089727.779961L;
+                long                ll;
+                unsigned long       ull;
+                unsigned char       s[16];
+                unsigned char       s2[8];
+                int                 ret = 1;
+                
+                if(sizeof(long double) == 16 && sizeof(long) == 8) {
+                    /*make sure the long double type has 16 bytes in size and 
+                     * 11 bits of exponent.  If it is,
+                     *the bit sequence should be like below.  It's not 
+                     *a decent way to check but this info isn't available. */   
+                    memcpy(s, &ld, 16);
+                    if(s[0]==0x43 && s[1]==0x51 && s[2]==0xcc && s[3]==0xf3 &&
+                        s[4]==0x85 && s[5]==0xeb && s[6]==0xc8 && s[7]==0xa0 &&
+                        s[8]==0xbf && s[9]==0xcc && s[10]==0x2a && s[11]==0x3c) {
 
-                    /* Assign the hexadecimal value of long double type. */
-                    s[0]=0x43; s[1]=0x51; s[2]=0xcc; s[3]=0xf3;
-                    s[4]=0x85; s[5]=0xeb; s[6]=0xc8; s[7]=0xa0;
-                    s[8]=0xbf; s[9]=0xcc; s[10]=0x2a; s[11]=0x3c;
-                    s[12]=0x3d; s[13]=0x85; s[14]=0x56; s[15]=0x20;
+                        /* Assign the hexadecimal value of long double type. */
+                        s[0]=0x43; s[1]=0x51; s[2]=0xcc; s[3]=0xf3;
+                        s[4]=0x85; s[5]=0xeb; s[6]=0xc8; s[7]=0xa0;
+                        s[8]=0xbf; s[9]=0xcc; s[10]=0x2a; s[11]=0x3c;
+                        s[12]=0x3d; s[13]=0x85; s[14]=0x56; s[15]=0x20;
 
-                    memcpy(&ld, s, 16);
+                        memcpy(&ld, s, 16);
 
-                    ll = (long)ld;
-                    memcpy(s2, &ll, 8);
+                        ll = (long)ld;
+                        memcpy(s2, &ll, 8);
 
-                    /* The library's algorithm converts it to 0x 00 47 33 ce 17 af 22 82
-                     * and gets wrong value 20041683600089730 on the IBM Power6 Linux.
-                     * But the IBM Power6 Linux converts it to 0x00 47 33 ce 17 af 22 7f
-                     * and gets the correct value 20041683600089727.  It uses some special
-                     * algorithm.  We're going to define the macro and skip the test until
-                     * we can figure out how they do it. */
-                    if(s2[0]==0x00 && s2[1]==0x47 && s2[2]==0x33 && s2[3]==0xce &&
-                       s2[4]==0x17 && s2[5]==0xaf && s2[6]==0x22 && s2[7]==0x7f)
-                        ret = 0;
+                        /* The library's algorithm converts it to 0x 00 47 33 ce 17 af 22 82
+                         * and gets wrong value 20041683600089730 on the IBM Power6 Linux.
+                         * But the IBM Power6 Linux converts it to 0x00 47 33 ce 17 af 22 7f
+                         * and gets the correct value 20041683600089727.  It uses some special
+                         * algorithm.  We're going to define the macro and skip the test until
+                         * we can figure out how they do it. */
+                        if(s2[0]==0x00 && s2[1]==0x47 && s2[2]==0x33 && s2[3]==0xce &&
+                           s2[4]==0x17 && s2[5]==0xaf && s2[6]==0x22 && s2[7]==0x7f)
+                            ret = 0;
 
-                    ull = (unsigned long)ld;
-                    memcpy(s2, &ull, 8);
+                        ull = (unsigned long)ld;
+                        memcpy(s2, &ull, 8);
 
-                    /* The unsigned long is the same as signed long. */
-                    if(s2[0]==0x00 && s2[1]==0x47 && s2[2]==0x33 && s2[3]==0xce &&
-                       s2[4]==0x17 && s2[5]==0xaf && s2[6]==0x22 && s2[7]==0x7f)
-                        ret = 0;
-                }    
-            }   
-            
-    done:
-            exit(ret);
-        }
-        ], [hdf5_cv_ldouble_to_long_special=yes], [hdf5_cv_ldouble_to_long_special=no],)])
+                        /* The unsigned long is the same as signed long. */
+                        if(s2[0]==0x00 && s2[1]==0x47 && s2[2]==0x33 && s2[3]==0xce &&
+                           s2[4]==0x17 && s2[5]==0xaf && s2[6]==0x22 && s2[7]==0x7f)
+                            ret = 0;
+                    }    
+                }   
+                exit(ret);
+        ]])]
+    , [hdf5_cv_ldouble_to_long_special=yes], [hdf5_cv_ldouble_to_long_special=no],)])
 fi
 
 if test ${hdf5_cv_ldouble_to_long_special} = "yes"; then
@@ -3241,63 +2345,63 @@ if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_cv_long_to_ldouble_special=${hdf5_cv_long_to_ldouble_special=no}
 else
    AC_CACHE_VAL([hdf5_cv_long_to_ldouble_special],
-        [AC_TRY_RUN([
-        int main(void)
-        {
-            long double         ld;
-            long                ll;
-            unsigned long       ull;
-            unsigned char       s[16];
-            int                 flag=0, ret=1;
-        
-            /*Determine if long double has 16 byte in size, 11 bit exponent, and
-             *the bias is 0x3ff */ 
-            if(sizeof(long double) == 16) { 
-                ld = 1.0L;
-                memcpy(s, &ld, 16);
-                if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
-                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00) 
-                    flag = 1; 
-            }
-             
-            if(flag==1 && sizeof(long)==8) {
-                ll = 0x003fffffffffffffL;
-                ld = (long double)ll;
-                memcpy(s, &ld, 16);
-                /* The library converts the value to 0x434fffffffffffff8000000000000000.
-                 * In decimal it is 18014398509481982.000000, one value short of the original.
-                 * The IBM Power6 Linux converts it to 0x4350000000000000bff0000000000000.
-                 * The value is correct in decimal. It uses some special
-                 * algorithm.  We're going to define the macro and skip the test until
-                 * we can figure out how they do it. */
-                if(s[0]==0x43 && s[1]==0x50 && s[2]==0x00 && s[3]==0x00 &&
-                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00 &&
-                    s[8]==0xbf && s[9]==0xf0 && s[10]==0x00 && s[11]==0x00 &&
-                    s[12]==0x00 && s[13]==0x00 && s[14]==0x00 && s[15]==0x00)
-                    ret = 0;
-            }        
-            if(flag==1 && sizeof(unsigned long)==8) {
-                ull = 0xffffffffffffffffUL;
-                ld = (long double)ull;
-                memcpy(s, &ld, 16);
-                /* Use a different value from signed long to test. The problem is the same
-                 * for both long and unsigned long. The value is 18446744073709551615.
-                 * The library converts the value to 0x43effffffffffffffe000000000000000.
-                 * In decimal it's 18446744073709548544.000000, very different from the original.
-                 * The IBM Power6 Linux converts it to 0x43f0000000000000bff0000000000000.
-                 * The value is correct in decimal. It uses some special
-                 * algorithm.  We're going to define the macro and skip the test until
-                 * we can figure out how they do it. */
-                if(s[0]==0x43 && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
-                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00 &&
-                    s[8]==0xbf && s[9]==0xf0 && s[10]==0x00 && s[11]==0x00 &&
-                    s[12]==0x00 && s[13]==0x00 && s[14]==0x00 && s[15]==0x00)
-                    ret = 0;
-            }        
-    done:
-            exit(ret);
-        }
-        ], [hdf5_cv_long_to_ldouble_special=yes], [hdf5_cv_long_to_ldouble_special=no],)])
+        [AC_RUN_IFELSE(
+            [AC_LANG_PROGRAM([
+                #include <string.h>
+            ],[[
+                long double         ld;
+                long                ll;
+                unsigned long       ull;
+                unsigned char       s[16];
+                int                 flag=0, ret=1;
+            
+                /*Determine if long double has 16 byte in size, 11 bit exponent, and
+                 *the bias is 0x3ff */ 
+                if(sizeof(long double) == 16) { 
+                    ld = 1.0L;
+                    memcpy(s, &ld, 16);
+                    if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
+                        s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00) 
+                        flag = 1; 
+                }
+                 
+                if(flag==1 && sizeof(long)==8) {
+                    ll = 0x003fffffffffffffL;
+                    ld = (long double)ll;
+                    memcpy(s, &ld, 16);
+                    /* The library converts the value to 0x434fffffffffffff8000000000000000.
+                     * In decimal it is 18014398509481982.000000, one value short of the original.
+                     * The IBM Power6 Linux converts it to 0x4350000000000000bff0000000000000.
+                     * The value is correct in decimal. It uses some special
+                     * algorithm.  We're going to define the macro and skip the test until
+                     * we can figure out how they do it. */
+                    if(s[0]==0x43 && s[1]==0x50 && s[2]==0x00 && s[3]==0x00 &&
+                        s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00 &&
+                        s[8]==0xbf && s[9]==0xf0 && s[10]==0x00 && s[11]==0x00 &&
+                        s[12]==0x00 && s[13]==0x00 && s[14]==0x00 && s[15]==0x00)
+                        ret = 0;
+                }        
+                if(flag==1 && sizeof(unsigned long)==8) {
+                    ull = 0xffffffffffffffffUL;
+                    ld = (long double)ull;
+                    memcpy(s, &ld, 16);
+                    /* Use a different value from signed long to test. The problem is the same
+                     * for both long and unsigned long. The value is 18446744073709551615.
+                     * The library converts the value to 0x43effffffffffffffe000000000000000.
+                     * In decimal it's 18446744073709548544.000000, very different from the original.
+                     * The IBM Power6 Linux converts it to 0x43f0000000000000bff0000000000000.
+                     * The value is correct in decimal. It uses some special
+                     * algorithm.  We're going to define the macro and skip the test until
+                     * we can figure out how they do it. */
+                    if(s[0]==0x43 && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
+                        s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00 &&
+                        s[8]==0xbf && s[9]==0xf0 && s[10]==0x00 && s[11]==0x00 &&
+                        s[12]==0x00 && s[13]==0x00 && s[14]==0x00 && s[15]==0x00)
+                        ret = 0;
+                }        
+                exit(ret);
+        ]])]
+    , [hdf5_cv_long_to_ldouble_special=yes], [hdf5_cv_long_to_ldouble_special=no],)])
 fi
 
 if test ${hdf5_cv_long_to_ldouble_special} = "yes"; then
@@ -3309,154 +2413,8 @@ else
 fi
 
 ## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can accurately convert
-## 'long double' to '(unsigned) long long' values.  (This flag should be set for 
-## all machines, except for Mac OS 10.4 and SGI IRIX64 6.5.  When the bit sequence
-## of long double is 0x4351ccf385ebc8a0bfcc2a3c..., the values of (unsigned)long long
-## start to go wrong on these two machines.  Adjusting it higher to 
-## 0x4351ccf385ebc8a0dfcc... or 0x4351ccf385ebc8a0ffcc... will make the converted 
-## values wildly wrong.  This test detects this wrong behavior and disable the test.  
-##
-AC_MSG_CHECKING([if correctly converting long double to (unsigned) long long values])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_ldouble_to_llong_accurate=${hdf5_cv_ldouble_to_llong_accurate=no}
-else
-   AC_CACHE_VAL([hdf5_cv_ldouble_to_llong_accurate],
-        [AC_TRY_RUN([
-        int main(void)
-        {
-            long double         ld = 20041683600089727.779961L;
-            long long           ll;
-            unsigned long long  ull;
-            unsigned char       s[16];
-            int                 ret = 0;
-            
-            if(sizeof(long double) == 16) {
-                /*make sure the long double type is the same as the failing type 
-                 *which has 16 bytes in size and 11 bits of exponent.  If it is,
-                 *the bit sequence should be like below.  It's not 
-                 *a decent way to check but this info isn't available. */   
-                memcpy(s, &ld, 16);
-                if(s[0]==0x43 && s[1]==0x51 && s[2]==0xcc && s[3]==0xf3 &&
-                    s[4]==0x85 && s[5]==0xeb && s[6]==0xc8 && s[7]==0xa0 &&
-                    s[8]==0xbf && s[9]==0xcc && s[10]==0x2a && s[11]==0x3c) {
-
-                    /*slightly adjust the bit sequence (s[8]=0xdf).  The converted
-                     *values will go wild on Mac OS 10.4 and IRIX64 6.5.*/ 
-                    s[0]=0x43; s[1]=0x51; s[2]=0xcc; s[3]=0xf3;
-                    s[4]=0x85; s[5]=0xeb; s[6]=0xc8; s[7]=0xa0;
-                    s[8]=0xdf; s[9]=0xcc; s[10]=0x2a; s[11]=0x3c;
-                    s[12]=0x3d; s[13]=0x85; s[14]=0x56; s[15]=0x20;
-
-                    memcpy(&ld, s, 16);
-                    ll = (long long)ld;
-                    ull = (unsigned long long)ld;
-                    
-                    if(ll != 20041683600089728 || ull != 20041683600089728)
-                        ret = 1;
-                }    
-            }    
-    done:
-            exit(ret);
-        }
-        ], [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no],)])
-fi
-
-if test ${hdf5_cv_ldouble_to_llong_accurate} = "yes"; then
-  AC_DEFINE([LDOUBLE_TO_LLONG_ACCURATE], [1],
-            [Define if your system can convert long double to (unsigned) long long values correctly.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine can accurately convert
-## '(unsigned) long long' to 'long double' values.  (This flag should be set for 
-## all machines, except for Mac OS 10.4, when the bit sequences are 003fff...,
-## 007fff..., 00ffff..., 01ffff..., ..., 7fffff..., the converted values are twice
-## as big as they should be. 
-##
-AC_MSG_CHECKING([if correctly converting (unsigned) long long to long double values])
-
-if test ${ac_cv_sizeof_long_double} = 0; then
-   hdf5_cv_llong_to_ldouble_correct=${hdf5_cv_llong_to_ldouble_correct=no}
-else
-   AC_CACHE_VAL([hdf5_cv_llong_to_ldouble_correct],
-        [AC_TRY_RUN([
-        int main(void)
-        {
-            long double         ld;
-            long long           ll;
-            unsigned long long  ull;
-            unsigned char       s[16];
-            int                 flag=0, ret=0;
-        
-            /*Determine if long double has 16 byte in size, 11 bit exponent, and
-             *the bias is 0x3ff */ 
-            if(sizeof(long double) == 16) { 
-                ld = 1.0L;
-                memcpy(s, &ld, 16);
-                if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
-                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00) 
-                    flag = 1; 
-            }
-             
-            if(flag==1 && sizeof(long long)==8) {
-                ll = 0x01ffffffffffffffLL;
-                ld = (long double)ll;
-                memcpy(s, &ld, 16);
-                /*Check if the bit sequence is as supposed to be*/
-                if(s[0]!=0x43 || s[1]!=0x7f || s[2]!=0xff || s[3]!=0xff ||
-                    s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
-                    s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
-                    ret = 1;
-            }        
-            if(flag==1 && sizeof(unsigned long long)==8) {
-                ull = 0x01ffffffffffffffULL;
-                ld = (long double)ull;
-                memcpy(s, &ld, 16);
-                if(s[0]!=0x43 || s[1]!=0x7f || s[2]!=0xff || s[3]!=0xff ||
-                    s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
-                    s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
-                    ret = 1;
-            }        
-    done:
-            exit(ret);
-        }
-        ], [hdf5_cv_llong_to_ldouble_correct=yes], [hdf5_cv_llong_to_ldouble_correct=no],)])
-fi
-
-if test ${hdf5_cv_llong_to_ldouble_correct} = "yes"; then
-  AC_DEFINE([LLONG_TO_LDOUBLE_CORRECT], [1],
-            [Define if your system can convert (unsigned) long long to long double values correctly.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
-## Set the flag to indicate that the machine generates bad code
-## for the H5VM_log2_gen() routine in src/H5VMprivate.h
-## (This flag should be set to no for all machines, except for SGI IRIX64,
-## where the cache value is set to yes in it's config file)
-##
-AC_MSG_CHECKING([if bad code for log2 routine is generated])
-AC_CACHE_VAL([hdf5_cv_bad_log2_code_generated], [hdf5_cv_bad_log2_code_generated=no])
-
-if test ${hdf5_cv_bad_log2_code_generated} = "yes"; then
-  AC_DEFINE([BAD_LOG2_CODE_GENERATED], [1],
-            [Define if your system generates wrong code for log2 routine.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
-fi
-
-## ----------------------------------------------------------------------
 ## Set some variables for general configuration information to be saved
-## and installed with the libraries.
+## and installed with the libraries (used to generate libhdf5.settings).
 ##
 
 ## HDF5 version from the first line of the README.txt file.
@@ -3565,53 +2523,6 @@ else
   pwd=pwd
 fi
 AC_SUBST([ROOT]) ROOT="`$pwd`"
-
-## ----------------------------------------------------------------------
-## Move any compiler-specific libraries into the main LIBS varaible.
-## 
-LIBS="$DEFAULT_LIBS $LIBS"
-
-## ----------------------------------------------------------------------
-## Determine the runtime libraries we may need to include in the
-## libtools command so that executables will find the correct dynamic
-## libraries.
-## 
-AC_SUBST([DYNAMIC_DIRS]) DYNAMIC_DIRS=""
-
-if test -n "$AM_LDFLAGS $LDFLAGS"; then
-  for d in $AM_LDFLAGS $LDFLAGS ; do
-    case "$d" in
-      -L*)
-        d="`echo $d | sed -e 's/-L//g'`"
-        case "$d" in
-          .*)
-            ## If the path isn't absolute, make it so by
-            ## prepending the ROOT directory to it.
-            d=${ROOT}/$d
-            ;;
-        esac
-        DYNAMIC_DIRS="-R${d} $DYNAMIC_DIRS"
-        ;;
-    esac
-  done
-fi
-
-if test -n "$AM_CPPFLAGS"; then
-  TEMP_CPPFLAGS=""
-  for d in $AM_CPPFLAGS ; do
-    case "$d" in
-      -I.*)
-        ## If the path isn't absolute, make it so by prepending
-        ## the ROOT directory to it.
-        d="`echo $d | sed -e 's/-I//g'`"
-        d="-I${ROOT}/${d}"
-        ;;
-    esac
-    TEMP_CPPFLAGS="$d $TEMP_CPPFLAGS"
-  done
-  AM_CPPFLAGS=$TEMP_CPPFLAGS
-fi
-
 
 ## ----------------------------------------------------------------------
 ## Some programs shouldn't be built by default (e.g., programs to generate
@@ -3819,17 +2730,7 @@ AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 
 ## The directory search list
 AC_SUBST([SEARCH]) SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
-cmd='echo $SEARCH |sed "s/ /'$SEARCH_SEP'/g"'
-SEARCH="$SEARCH_RULE`eval $cmd`"
 export SEARCH
-
-## We don't need to say when we're entering directories if we're using
-## GNU make because make does it for us.
-if test "X$GMAKE" = "Xyes"; then
-  AC_SUBST([SETX]) SETX=":"
-else
-  AC_SUBST([SETX]) SETX="set -x"
-fi
 
 ## Some cleanup stuff
 rm -f conftest conftest.o conftest.c dummy.o *.mod
@@ -3865,23 +2766,6 @@ touch ./config/stamp2
 
 ## Finally the makefiles
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
-
-## Post processing to patch up some deficiencies in libtool
-case $host_os in
-  linux* | freebsd* )
-    ## If gcc is not used, need to set $wl to use "-Wl,"
-    if $CC -v 2>&1 | grep '^gcc' > /dev/null ; then
-      : using gcc
-    else
-      echo 'fixing $wl in' $ofile
-ed - $ofile <<EOF 2> /dev/null
-g/^wl=""/s//wl="-Wl,"/
-w
-q
-EOF
-    fi
-    ;;
-esac
 
 ## Are we compiling static libraries, shared libraries, or both?  This
 ## is only used for the libhdf5.settings file. We can't just look at

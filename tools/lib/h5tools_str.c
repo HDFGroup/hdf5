@@ -155,11 +155,7 @@ h5tools_str_append(h5tools_str_t *str/*in,out*/, const char *fmt, ...)
          * to lack of buffer size, so try one more time after realloc more
          * buffer size before return NULL. 
          */
-        if (nchars < 0 
-#ifndef H5_VSNPRINTF_WORKS
-                && (HDstrlen(str->s) < str->nalloc)
-#endif
-                ) {
+        if (nchars < 0) {
             /* failure, such as bad format */
             return NULL;
         }
@@ -809,7 +805,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     float tempfloat;
 
                     HDmemcpy(&tempfloat, vp, sizeof(float));
-                    h5tools_str_append(str, OPT(info->fmt_float, "%g"), tempfloat);
+                    h5tools_str_append(str, OPT(info->fmt_float, "%g"), (double)tempfloat);
                 }
                 else if (sizeof(double) == nsize) {
                     /* if (H5Tequal(type, H5T_NATIVE_DOUBLE)) */

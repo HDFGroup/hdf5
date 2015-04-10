@@ -141,7 +141,7 @@ const char *FILENAME[] = {
 #define H5L_DIM1 100
 #define H5L_DIM2 100
 
-#define FILTER_FILESIZE_MAX_FRACTION .9
+#define FILTER_FILESIZE_MAX_FRACTION 0.9F
 
 /* Creation order macros */
 #define CORDER_GROUP_NAME       "corder_group"
