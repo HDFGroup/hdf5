@@ -72,14 +72,27 @@ New Features
       different API's and testings. See "cmakehdf5 --help" for details.
       (AKC - 2014/12/09 HDFFV-8932)
 
-    - Remove restriction for building shared when parallel is
-      enabled. --disable-shared has to be used explicitly if user wishes to
-      disable shared libraries.
+    - Building Shared and Parallel 
+
+      When --enable-parallel is specified, configure used to disable
+      shared by default.
+
+      Remove restriction for building shared when parallel is
+      enabled. --disable-shared has to be used explicitly if user
+      wishes to disable shared libraries.
+
       (MSC - 2015/02/19 HDFFV-9069)
 
-    - Remove infering parallel compilers to enable
-      parallel. --enable-parallel has to be used explicitly to build
+    - Infering Parallel Compilers
+
+      configure was trying to infer if a compiler is a parallel
+      compiler with MPI support and enable parallel even if the user
+      did not explicitly enabled parallel. This should not happen.
+
+      Disable infering parallel compilers to enable parallel HDF5
+      build. --enable-parallel has to be used explicitly to build
       parallel HDF5 regardless of the compiler type being used.
+
       (MSC - 2015/02/19 HDFFV-9068)
 
     - Remove option to enable or disable large file support. It will
@@ -252,11 +265,18 @@ New Features
       
     Parallel Library
     ----------------
-    - Attached an attribute destroy callback to MPI_COMM_SELF that
+    - MPI_Finalize and HDF5 Library shutdown.
+
+      Calling HDF5 routines after MPI_Finalize has been closed should
+      not be done, since those routines might call MPI functions that
+      would not be possible to do after finalizing the MPI library.
+
+      Attached an attribute destroy callback to MPI_COMM_SELF that
       shuts down the HDF5 library when MPI_COMM_SELF is destroyed,
       i.e. on MPI_Finalize. This should fix several issues that users
       see when they forget to close HDF5 objects before calling
-      MPI_Finalize(). 
+      MPI_Finalize().  
+
       (MSC - 2015/02/25, HDFFV-883)
  
     Tools
@@ -417,9 +437,15 @@ Bug Fixes since HDF5-1.8.14
       number of ranks. 
       (MSC - 2014/11/06, HDFFV-1027,8962,8963)
 
-    - Fixed problem with enabling MPE. Users should use the community
+    - MPE Support
+
+      Enabling MPE was causing HDF5 build to fail. Support for it was
+      dropped at some point in time.
+
+      Fixed problem with enabling MPE. Users should use the community
       maintained MPE on github (http://git.mpich.org/mpe.git/). 
-      (MSC - 2015/02/20, 9135)
+
+      (MSC - 2015/02/20, HDFFV-9135)
 
     Performance
     -------------
