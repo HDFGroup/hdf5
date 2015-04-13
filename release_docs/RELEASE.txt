@@ -57,16 +57,17 @@ New Features
 
     Configuration
     -------------
-    - cmake configure files now support components when packaged with cpack.
-      Windows cpack support WiX packaging, cmake will look for WiX and NSIS
-      in standard loactions.
-      (ADB - 2015/04/01 HDFFV-8968)
+    - CMake
+    
+      Improvements made to the CMake build system.
+        
+      Default options  were changed to align with the autotools configure
+      defaults. CMake configure files now support components when packaged
+      with cpack. Windows CPack supports WiX packaging, and will look for
+      WiX and NSIS in standard locations.
+      The CMake minimum has been changed to 3.1.
       
-    - cmake default options changed to align with autotools configure defaults.
-      (ADB - 2015/04/01 HDFFV-8074)
-      
-    - cmake minimum changed to 3.1.
-      (ADB - 2015/04/01 HDFFV-9006)
+      (ADB - 2015/04/01 HDFFV-8074, 8968, 9006)
       
     - cmakehdf5: configure options added to enable or disable the building of
       different API's and testings. See "cmakehdf5 --help" for details.
