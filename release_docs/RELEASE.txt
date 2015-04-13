@@ -191,10 +191,11 @@ New Features
 
       (DER - 2015-03-09, HDFFV-9083 and 9085)
 
-    - Added -D_DEFAULT_SOURCE to CPPFLAGS on Linux systems. This is the
-      replacement for -D_BSD_SOURCE in versions of glibc since 2.19. Since both
-      are defined, it should work for all versions of glibc. Defining both
-      suppresses the warning about defining _BSD_SOURCE.
+    - Added -D_DEFAULT_SOURCE to CPPFLAGS on Linux systems
+
+      This is the replacement for -D_BSD_SOURCE in versions of glibc since 2.19.
+      Since both are defined, it should work for all versions of glibc. Defining
+      both suppresses the warning about defining _BSD_SOURCE.
 
       (NAF - 2015-04-02, HDFFV-9079)
 
@@ -395,11 +396,15 @@ Bug Fixes since HDF5-1.8.14
 
       (MSB - 2015/3/10, HDFFV-7959)
 
-    - Fixed bugs in H5Sextent_copy that resulted in leaked memory and incorrect
-      number of elements selected.
+    - Fixed bugs in H5Sextent_copy
+
+      H5Sextent_copy would not free the previous extent, resulting in a memory
+      leak.  Also, H5Sextent_copy would not update the number of elements
+      selected if the selection was "all", causing various problems.  These
+      issues have been fixed.
 
       (NAF - 2015/04/02)
-       
+
 
     Parallel Library
     ----------------
