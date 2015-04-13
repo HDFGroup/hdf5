@@ -336,7 +336,8 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    - Support for Mac OS X Yosemeti 10.10 added (AKC - 2015/03/04, HDFFV-9007)
+    - Support for Linux 3.10.0-123.20.1.el7 added (LK - 2015/04/01) 
+    - Support for Mac OS X Yosemite 10.10 added (AKC - 2015/03/04, HDFFV-9007)
     - Support for AIX 6.1 added and AIX 5.3 is retired. (AKC - 2015/01/09)
 
 Bug Fixes since HDF5-1.8.14
@@ -625,7 +626,7 @@ They are built with the configure process unless specified otherwise.
                                   applications running on Intel(R) 64; 
                                       Version 15.0.1.133 Build 20141023
 
-    Linux 2.6.32-431.11.2.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.32-431.11.2.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (platypus)                       Version 4.4.7 20120313
                                      Version 4.8.2, Version 4.9.2
@@ -634,6 +635,13 @@ They are built with the configure process unless specified otherwise.
                                       Version 14.10-0 
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
+                                     Version 15.0.1.133 Build 20141023
+
+    Linux 3.10.0-123.20.1.el7     GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (moohan)                         Version 4.8.2 20140120 (Red Hat 4.8.2-16)
+                                  Intel(R) C Intel(R) 64 Compiler XE for
+                                  applications running on Intel(R) 64, 
                                      Version 15.0.1.133 Build 20141023
 
     Linux 2.6.32-431.29.2.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-4)
@@ -672,7 +680,7 @@ They are built with the configure process unless specified otherwise.
     64-bit    			  gfortran GNU Fortran (GCC) 4.8.2
     (wren/quail)                  Intel icc/icpc/ifort version 14.0.2
 
-    Mac OS X Yosemeti 10.10.2     Apple clang/clang++ version 6.0 from Xcode 6.1.1
+    Mac OS X Yosemite 10.10.2     Apple clang/clang++ version 6.0 from Xcode 6.1.1
     64-bit    			  gfortran GNU Fortran (GCC) 4.9.2
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.1
 
