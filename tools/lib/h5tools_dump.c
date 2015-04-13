@@ -2890,15 +2890,33 @@ h5tools_print_virtual_selection(hid_t vspace, hid_t dcpl_id, size_t index,
             h5tools_str_append(buffer, " %s", h5tools_dump_header_format->virtualselectionblockend);
             break;
         case H5S_SEL_HYPERSLABS:    /* "New-style" hyperslab selection defined  */
+            ctx->need_prefix = TRUE;
+            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
             h5tools_str_reset(buffer);
             if (H5Sis_regular_hyperslab(vspace)) {
                 h5tools_str_append(buffer, "%s %s ", VDS_REG_HYPERSLAB, h5tools_dump_header_format->virtualselectionblockbegin);
+                h5tools_render_element(stream, info, ctx, buffer, curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
+
+                h5tools_str_reset(buffer);
                 h5tools_str_dump_space_slabs(buffer, vspace, info, ctx);
             }
             else {
                 h5tools_str_append(buffer, "%s %s ", VDS_IRR_HYPERSLAB, h5tools_dump_header_format->virtualselectionblockbegin);
+                h5tools_render_element(stream, info, ctx, buffer, curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
+                ctx->indent_level++;
+                ctx->need_prefix = TRUE;
+                h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+                h5tools_str_reset(buffer);
                 h5tools_str_dump_space_blocks(buffer, vspace, info);
+                ctx->indent_level--;
             }
+            h5tools_render_element(stream, info, ctx, buffer, curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
+            ctx->need_prefix = TRUE;
+            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+            h5tools_str_reset(buffer);
             h5tools_str_append(buffer, "%s", h5tools_dump_header_format->virtualselectionblockend);
             break;
         case H5S_SEL_ALL:    /* Entire extent selected   */
@@ -3000,11 +3018,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s %s", STORAGE_LAYOUT, BEGIN);
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-
-    ctx->indent_level++;
-
-    ctx->need_prefix = TRUE;
-    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
     stl = H5Pget_layout(dcpl_id);
     switch (stl) {
@@ -3243,21 +3256,12 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         ctx->need_prefix = TRUE;
                         h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
 
-/*EIP
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s", END);
-*/
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
                     }
                     ctx->indent_level--;
                 }
-
-                ctx->need_prefix = TRUE;
-                h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-
-                h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "%s", END);
-                h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
             }
             break;
         default:
@@ -3265,8 +3269,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_str_append(&buffer, "%s", "Unknown layout");
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
     }/*switch*/
-
-    ctx->indent_level--;
 
     ctx->need_prefix = TRUE;
     h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);

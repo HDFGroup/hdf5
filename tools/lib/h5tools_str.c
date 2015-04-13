@@ -438,11 +438,9 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace,
     H5Sget_regular_hyperslab(rspace, start, stride, count, block);
 
     /* Print hyperslab information */
-    h5tools_str_append(str, "%s", "\n");
-    h5tools_str_indent(str, info, ctx);
 
     /* Start coordinates */
-    h5tools_str_append(str, "%s ", START);
+    h5tools_str_append(str, "%s%s ", info->line_indent, START);
     for (j = 0; j < ndims; j++)
         h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", start[j]);
     h5tools_str_append(str, ")");
@@ -478,8 +476,6 @@ h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace,
             h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", block[j]);
     }
     h5tools_str_append(str, ")");
-    h5tools_str_append(str, "%s", "\n");
-    h5tools_str_indent(str, info, ctx);
 }
 
 /*-------------------------------------------------------------------------
@@ -523,8 +519,7 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace,
         for (i = 0; i < nblocks; i++) {
             int j;
 
-            h5tools_str_append(str, info->dset_blockformat_pre, i ? "," OPTIONAL_LINE_BREAK " " : "",
-                               (unsigned long)i);
+            h5tools_str_append(str, info->dset_blockformat_pre, i ? "," OPTIONAL_LINE_BREAK " " : "", (unsigned long)i);
 
             /* Start coordinates and opposite corner */
             for (j = 0; j < ndims; j++)
