@@ -3022,6 +3022,10 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     stl = H5Pget_layout(dcpl_id);
     switch (stl) {
         case H5D_CHUNKED:
+            ctx->indent_level++;
+            ctx->need_prefix = TRUE;
+            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "%s ", CHUNKED);
 
@@ -3084,8 +3088,13 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT, storage_size);
             }
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
+            ctx->indent_level--;
             break;
         case H5D_COMPACT:
+            ctx->indent_level++;
+            ctx->need_prefix = TRUE;
+            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "%s", COMPACT);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
@@ -3096,6 +3105,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "SIZE " HSIZE_T_FORMAT, storage_size);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
+            ctx->indent_level--;
             break;
         case H5D_CONTIGUOUS:
             {
@@ -3107,7 +3117,11 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                  * EXTERNAL_FILE
                  *-------------------------------------------------------------------------
                  */
+                ctx->indent_level++;
                 if (next) {
+                    ctx->need_prefix = TRUE;
+                    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer, "%s", CONTIGUOUS);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
@@ -3143,6 +3157,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 else {
                     haddr_t ioffset;
 
+                    ctx->need_prefix = TRUE;
+                    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer, "%s", CONTIGUOUS);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
@@ -3162,6 +3179,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     h5tools_str_append(&buffer, "OFFSET "H5_PRINTF_HADDR_FMT, ioffset);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t) ncols, (hsize_t) 0, (hsize_t) 0);
                 }
+                ctx->indent_level--;
             }
             break;
         case H5D_VIRTUAL:
