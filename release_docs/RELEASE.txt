@@ -549,7 +549,13 @@ Bug Fixes since HDF5-1.8.14
 
     Fortran High-Level APIs:
     ------------------------
-    - Fixed mismatching integer type for internal library C interface function H5tbmake_table_c.
+
+    - Internal library fix for missing argument declaration.
+    
+      In Interface block for h5tbmake_table_c, "max_char_size_field_names" is listed as an input, but in the 
+      argument definitions it is "INTEGER :: max_char_size". This caused no known problems with the Fortran HL API.
+
+      Fixed missing argument definition.
        
       (MSB - 2015/2/18 - HDFFV-8559)
       
