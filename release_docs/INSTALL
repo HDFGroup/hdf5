@@ -288,21 +288,22 @@ CONTENTS
 
             $ ./configure --enable-fortran
             $ ./configure --enable-cxx
-        
-        Configuration will halt if a working Fortran 90 or 95 compiler or
-        C++ compiler is not found. Currently, the Fortran configure tests
-        for these compilers in order: f90, pgf90, f95. To use an
-        alternate compiler specify it with the FC variable:
 
-            $ FC=/usr/local/bin/g95 ./configure --enable-fortran
+        Additionally, --enable-fortran --enable-fortran2003 enables Fortran
+        2003 APIs. Configuration will halt if a working Fortran 90/95 compiler 
+        (or a working Fortran 2003 compiler in the case of 
+	--enable-fortran2003) was specified or C++ compiler is not found. 
+        Currently, the Fortran configure tests for these compilers in order: 
+	gfortran ifort pgf90 pathf90 pathf95 xlf90 xlf95 xlf2003 f90 epcf90 f95 
+        fort lf95 g95 ifc efc gfc. To use an alternate compiler specify it with 
+	the FC variable:
+
+            $ FC=/usr/local/bin/gfortran ./configure --enable-fortran --enable-fortran2003
 
         Note: The Fortran and C++ interfaces are not supported on all the
               platforms the main HDF5 Library supports. Also, the Fortran
               interface supports parallel HDF5 while the C++ interface does
               not.
-
-        Note: See sections 4.7 and 4.8 for building the Fortran library with
-              Intel or PGI compilers. 
 
 4.3.6. Specifying other programs
         The build system has been tuned for use with GNU make which is
@@ -599,34 +600,6 @@ A.1.  Building and testing with Intel compilers
         UPDATE: This is now done automatically by the configure script. 
         However, if you still experience a problem, you may want to check this 
         line in the libtool file and make sure that it has the correct value.
-
-      * To build the Fortran library using Intel compiler on Linux 2.4, 
-        one has to perform the following steps:
-          x Use the -fpp -DDEC$=DEC_ -DMS$=MS_ compiler flags to disable
-            DEC and MS compiler directives in source files in the fortran/src, 
-            fortran/test, and fortran/examples directories.
-            E.g.,  setenv F9X 'ifc -fpp -DDEC$=DEC_ -DMS$=MS_'
-            Do not use double quotes since $ is interpreted in them.
-
-          x If Version 6.0 of Fortran compiler is used, the build fails in 
-            the fortran/test directory and then in the fortran/examples 
-            directory.  To proceed, edit the work.pcl files in those 
-            directories to contain two lines:
-
-                    work.pc
-                    ../src/work.pc 
-
-          x Do the same in the fortran/examples directory.
-
-          x A problem with work.pc files was resolved for the newest version 
-            of the compiler (7.0).
-
-       * To build the Fortran library on IA32, follow the steps described 
-         above, except that the DEC and MS compiler directives should be 
-         removed manually or use a patch from HDF FTP server:
-
-             ftp://ftp.hdfgroup.org/HDF5/current/
-
 
 A.2.  Building and testing with PGI compilers
         When PGI C and C++ compilers are used (pgcc or pgCC), you will need to 
