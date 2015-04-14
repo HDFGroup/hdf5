@@ -242,11 +242,14 @@ New Features
 
       (DER - 2015-04-01, HDFFV-9100)
  
-    - Modified H5Pset_istore_k and H5Pset_sym_k functions to validate the ik
-      value to not exceed the max v1 btree entries (2 bytes).
-      The functions didn't check the value of ik. When 2*ik exceeded 2 bytes
-      storage, data was lost in the file, e.g., some chunks would be
-      overwritten.  
+    - H5Pset_istore_k and H5Pset_sym_k
+
+      These two functions didn't check the value of the input parameter "ik". 
+      When 2*ik exceeded 2 bytes storage, data was lost in the file, 
+      e.g., some chunks would be overwritten.  
+
+      Added validation of "ik" to not exceed the max v1 btree entries (2 bytes)
+      to these two routines.
 
       (VC - 2015-03-24, HDFFV-9173)
 
