@@ -53,7 +53,7 @@
 */
 
 int_f
-nh5lcopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *dest_loc_id,
+h5lcopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *dest_loc_id,
 	     _fcd dest_name, size_t_f *dest_namelen,
 	     hid_t_f *lcpl_id, hid_t_f *lapl_id)
 /******/
@@ -110,7 +110,7 @@ done:
 */
 
 int_f
-nh5lcreate_external_c(_fcd file_name, size_t_f *file_namelen, _fcd obj_name, size_t_f *obj_namelen,
+h5lcreate_external_c(_fcd file_name, size_t_f *file_namelen, _fcd obj_name, size_t_f *obj_namelen,
 		      hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
 		      hid_t_f *lcpl_id, hid_t_f *lapl_id)
 /******/
@@ -170,7 +170,7 @@ done:
 */
 
 int_f
-nh5ldelete_c ( hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id )
+h5ldelete_c ( hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id )
 /******/
 {
   char *c_name = NULL;
@@ -218,7 +218,7 @@ done:
 */
 
 int_f
-nh5lcreate_soft_c(_fcd target_path, size_t_f *target_path_len,
+h5lcreate_soft_c(_fcd target_path, size_t_f *target_path_len,
 		  hid_t_f *link_loc_id,
 		  _fcd link_name, size_t_f *link_name_len,
 		  hid_t_f *lcpl_id, hid_t_f *lapl_id )
@@ -275,7 +275,7 @@ nh5lcreate_soft_c(_fcd target_path, size_t_f *target_path_len,
  * SOURCE
 */
 int_f
-nh5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen,
+h5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		  hid_t_f *link_loc_id,
 		  _fcd link_name, size_t_f *link_namelen,
 		  hid_t_f *lcpl_id, hid_t_f *lapl_id )
@@ -344,7 +344,7 @@ nh5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen,
  * SOURCE
 */
 int_f
-nh5ldelete_by_idx_c (hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
+h5ldelete_by_idx_c (hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		     int_f *index_field, int_f *order, hsize_t_f *n, hid_t_f *lapl_id)
 /******/
 {
@@ -397,7 +397,7 @@ done:
  * SOURCE
 */
 int_f
-nh5lexists_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, int_f *link_exists)
+h5lexists_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, int_f *link_exists)
 /******/
 {
   char *c_name = NULL;          /* Buffer to hold C string */
@@ -456,7 +456,7 @@ done:
  * SOURCE
 */
 int_f
-nh5lget_info_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
+h5lget_info_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
 		int_f *cset, int_f *corder, int_f *corder_valid, int_f *link_type,
 		haddr_t_f *address, size_t_f *val_size,
 		hid_t_f *lapl_id)
@@ -525,7 +525,7 @@ done:
  * SOURCE
 */
 int_f
-nh5lget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
+h5lget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		      int_f *index_field, int_f *order, hsize_t_f *n,
 		      int_f *link_type, int_f *corder_valid, int_f *corder, int_f *cset,  haddr_t_f *address, size_t_f *val_size, hid_t_f *lapl_id)
 /******/
@@ -588,7 +588,7 @@ done:
  * SOURCE
 */
 int_f
-nh5lis_registered_c(int_f *link_cls_id)
+h5lis_registered_c(int_f *link_cls_id)
 /******/
 {
     int_f ret_value;      /* Return value */
@@ -643,7 +643,7 @@ nh5lis_registered_c(int_f *link_cls_id)
  * SOURCE
 */
 int_f
-nh5lmove_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *dest_loc_id,
+h5lmove_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *dest_loc_id,
 	   _fcd dest_name, size_t_f *dest_namelen, hid_t_f *lcpl_id, hid_t_f *lapl_id)
 /******/
 {
@@ -701,7 +701,7 @@ done:
  * SOURCE
 */
 int_f
-nh5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
+h5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		      int_f *index_field, int_f *order, hsize_t_f *n,
 		      size_t_f *size, _fcd name, hid_t_f *lapl_id)
 /******/
@@ -774,7 +774,7 @@ done:
 /*  * SOURCE */
 /* *\/ */
 /* int_f */
-/* nh5lget_val_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, */
+/* h5lget_val_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, */
 /* 	       size_t_f *size, _fcd linkval_buff, */
 /* 	       hid_t_f *lapl_id) */
 /* { */
@@ -842,7 +842,7 @@ done:
 
 /* int_f */
 
-/* nh5lregistered_c(int_f *version, int_f *class_id, */
+/* h5lregistered_c(int_f *version, int_f *class_id, */
 /* 		 _fcd comment, size_t_f *comment_len, */
 /* 		 _fcd create_func, size_t_f *create_func_len, */
 /* 		 _fcd move_func, size_t_f *move_func_len, */
@@ -938,7 +938,7 @@ done:
  * SOURCE
 */
 int_f
-nh5lget_val_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, size_t_f *size,
+h5lget_val_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, size_t_f *size,
 	      void *linkval_buff, hid_t_f *lapl_id)
 /******/
 {    

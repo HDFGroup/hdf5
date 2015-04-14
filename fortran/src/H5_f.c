@@ -32,15 +32,15 @@
  *  types - array with the predefined Native Fortran
  *          type, its element and length must be the
  *          same as the types array defined in the
- *          H5f90global.f90
+ *          H5f90global.F90
  *  floatingtypes - array with the predefined Floating Fortran
  *                   type, its element and length must be the
  *                   same as the floatingtypes array defined in the
- *                   H5f90global.f90
+ *                   H5f90global.F90
  *  integertypes - array with the predefined Integer Fortran
  *                 type, its element and length must be the
  *                 same as the integertypes array defined in the
- *                 H5f90global.f90
+ *                 H5f90global.F90
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -274,24 +274,24 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
  *  types         - array with the predefined Native Fortran
  *                  type, its element and length must be the
  *                  same as the types array defined in the
- *                  H5f90global.f90
+ *                  H5f90global.F90
  *  lentypes      - length of the types array, which must be the
  *                  same as the length of types array defined
- *                  in the H5f90global.f90
+ *                  in the H5f90global.F90
  *  floatingtypes - array with the predefined Floating Fortran
  *                  type, its element and length must be the
  *                  same as the floatingtypes array defined in the
- *                  H5f90global.f90
+ *                  H5f90global.F90
  *  floatinglen   - length of the floatingtypes array, which must be the
  *                  same as the length of floatingtypes array defined
- *                  in the H5f90global.f90
+ *                  in the H5f90global.F90
  *  integertypes  - array with the predefined Integer Fortran
  *                  type, its element and length must be the
  *                  same as the integertypes array defined in the
- *                  H5f90global.f90
+ *                  H5f90global.F90
  *  integerlen    - length of the floatingtypes array, which must be the
  *                  same as the length of floatingtypes array defined
- *                  in the H5f90global.f90
+ *                  in the H5f90global.F90
  * RETURNS
  *   0 on success, -1 on failure
  * AUTHOR

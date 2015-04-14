@@ -43,7 +43,7 @@
  * SOURCE
 */
 int_f
-nh5rcreate_object_c(haddr_t_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
+h5rcreate_object_c(haddr_t_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
 /******/
 {
      char *c_name = NULL;
@@ -69,7 +69,7 @@ done:
      if(c_name)
          HDfree(c_name);
      return ret_value;
-} /* nh5rcreate_object_c() */
+} /* h5rcreate_object_c() */
 
 /****if* H5Rf/h5rcreate_region_c
  * NAME
@@ -94,7 +94,7 @@ done:
  * SOURCE
 */
 int_f
-nh5rcreate_region_c(int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *space_id)
+h5rcreate_region_c(int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *space_id)
 /******/
 {
      char *c_name = NULL;
@@ -120,7 +120,7 @@ done:
      if(c_name)
          HDfree(c_name);
      return ret_value;
-} /* end nh5rcreate_region_c() */
+} /* end h5rcreate_region_c() */
 
 /****if* H5Rf/h5rcreate_ptr_c
  * NAME
@@ -185,7 +185,7 @@ h5rcreate_ptr_c (void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *r
  * SOURCE
 */
 int_f
-nh5rdereference_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
+h5rdereference_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
 /******/
 {
      hdset_reg_ref_t ref_c;
@@ -206,7 +206,7 @@ nh5rdereference_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id)
 
 done:
      return ret_value;
-} /* end nh5rdereference_region_c() */
+} /* end h5rdereference_region_c() */
 
 /****if* H5Rf/h5rdereference_object_c
  * NAME
@@ -228,7 +228,7 @@ done:
  * SOURCE
 */
 int_f
-nh5rdereference_object_c(hid_t_f *dset_id, haddr_t_f *ref, hid_t_f *obj_id)
+h5rdereference_object_c(hid_t_f *dset_id, haddr_t_f *ref, hid_t_f *obj_id)
 /******/
 {
      hid_t c_obj_id;
@@ -246,7 +246,7 @@ nh5rdereference_object_c(hid_t_f *dset_id, haddr_t_f *ref, hid_t_f *obj_id)
 
 done:
      return ret_value;
-} /* end nh5rdereference_object_c() */
+} /* end h5rdereference_object_c() */
 
 /****if* H5Rf/h5rdereference_ptr_c
  * NAME
@@ -306,7 +306,7 @@ h5rdereference_ptr_c (hid_t_f *obj_id, int_f *ref_type, void *ref, hid_t_f *ref_
  * SOURCE
 */
 int_f
-nh5rget_region_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
+h5rget_region_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
 /******/
 {
      hid_t c_space_id;
@@ -327,7 +327,7 @@ nh5rget_region_region_c(hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
 
 done:
      return ret_value;
-} /* end nh5rget_region_region_c() */
+} /* end h5rget_region_region_c() */
 
 /****if* H5Rf/h5rget_region_ptr_c
  * NAME
@@ -366,7 +366,7 @@ h5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id)
 
 done:
      return ret_value;
-} /* end nh5rget_region_ptr_c() */
+} /* end h5rget_region_ptr_c() */
 
 
 /****if* H5Rf/h5rget_object_type_obj_c
@@ -390,7 +390,7 @@ done:
  * SOURCE
 */
 int_f
-nh5rget_object_type_obj_c(hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type)
+h5rget_object_type_obj_c(hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type)
 /******/
 {
      H5O_type_t c_obj_type;
@@ -408,7 +408,7 @@ nh5rget_object_type_obj_c(hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type)
 
 done:
      return ret_value;
-} /* end nh5rget_object_type_obj_c() */
+} /* end h5rget_object_type_obj_c() */
 
 /****if* H5Rf/h5rget_name_object_c
  * NAME
@@ -434,7 +434,7 @@ done:
  * SOURCE
 */
 int_f
-nh5rget_name_object_c(hid_t_f *loc_id, haddr_t_f *ref, _fcd name, size_t_f *name_len, size_t_f *size_default)
+h5rget_name_object_c(hid_t_f *loc_id, haddr_t_f *ref, _fcd name, size_t_f *name_len, size_t_f *size_default)
 /******/
 {
      hobj_ref_t ref_c = (hobj_ref_t)*ref;
@@ -466,7 +466,7 @@ done:
      if(c_buf) 
          HDfree(c_buf);
      return ret_value;
-} /* end nh5rget_name_object_c() */
+} /* end h5rget_name_object_c() */
 
 /****if* H5Rf/h5rget_name_region_c
  * NAME
@@ -492,7 +492,7 @@ done:
  * SOURCE
 */
 int_f
-nh5rget_name_region_c(hid_t_f *loc_id, int_f *ref, _fcd name, size_t_f *name_len, size_t_f *size_default)
+h5rget_name_region_c(hid_t_f *loc_id, int_f *ref, _fcd name, size_t_f *name_len, size_t_f *size_default)
 /******/
 {
      hdset_reg_ref_t ref_c;

@@ -59,13 +59,13 @@ MODULE H5L
 !*****
 
 !type specifies the link class. Valid values include the following:
-!     	H5L_TYPE_HARD 	Hard link
-!     	H5L_TYPE_SOFT 	Soft link
-!     	H5L_TYPE_EXTERNAL     	External link
-!     	H5L_TYPE_ERROR 	Error 
+!     	H5L_TYPE_HARD 	  Hard link
+!     	H5L_TYPE_SOFT 	  Soft link
+!     	H5L_TYPE_EXTERNAL External link
+!     	H5L_TYPE_ERROR 	  Error 
 !cset specifies the character set in which the link name is encoded. Valid values include the following:
 !     	H5T_CSET_ASCII 	US ASCII
-!     	H5T_CSET_UTF8     	UTF-8 Unicode encoding 
+!     	H5T_CSET_UTF8   UTF-8 Unicode encoding 
 
 CONTAINS
 
@@ -118,16 +118,13 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5lcopy_c(src_loc_id, src_name, src_namelen, dest_loc_id, dest_name, dest_namelen, &
-            lcpl_id_default, lapl_id_default)
+            lcpl_id_default, lapl_id_default) BIND(C,name='h5lcopy_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LCOPY_C'::h5lcopy_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: src_name, dest_name
          INTEGER(HID_T), INTENT(IN) :: src_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: src_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: src_name
          INTEGER(HID_T), INTENT(IN) :: dest_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: dest_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: dest_name
 
          INTEGER(HID_T) :: lcpl_id_default
          INTEGER(HID_T) :: lapl_id_default
@@ -185,14 +182,11 @@ CONTAINS
     INTEGER(SIZE_T) :: namelen
 
     INTERFACE
-       INTEGER FUNCTION h5ldelete_c(loc_id, name, namelen, lapl_id_default)
+       INTEGER FUNCTION h5ldelete_c(loc_id, name, namelen, lapl_id_default) BIND(C,name='h5ldelete_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LDELETE_C'::h5ldelete_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(SIZE_T) :: namelen
        END FUNCTION h5ldelete_c
@@ -251,16 +245,13 @@ CONTAINS
        INTEGER FUNCTION h5lcreate_soft_c(target_path, target_path_len, &
             link_loc_id, &
             link_name,link_name_len, &
-            lcpl_id_default, lapl_id_default )
+            lcpl_id_default, lapl_id_default ) BIND(C,NAME='h5lcreate_soft_c')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_SOFT_C'::h5lcreate_soft_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: target_path, link_name
-         CHARACTER(LEN=*), INTENT(IN) :: target_path
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: target_path
          INTEGER(SIZE_T) :: target_path_len
          INTEGER(HID_T), INTENT(IN) ::   link_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: link_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name
          INTEGER(SIZE_T) :: link_name_len
          INTEGER(HID_T) :: lcpl_id_default
          INTEGER(HID_T) :: lapl_id_default
@@ -330,17 +321,13 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5lcreate_hard_c(obj_loc_id, obj_name, obj_namelen, &
-            link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default)
-
+            link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='h5lcreate_hard_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_HARD_C'::h5lcreate_hard_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name, link_name
          INTEGER(HID_T), INTENT(IN) :: obj_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: link_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name
          INTEGER(SIZE_T) :: obj_namelen
          INTEGER(SIZE_T) :: link_namelen
          INTEGER(HID_T) :: lcpl_id_default
@@ -411,17 +398,13 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5lcreate_external_c(file_name, file_namelen, obj_name, obj_namelen, &
-            link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default)
-
+            link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='h5lcreate_external_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_EXTERNAL_C'::h5lcreate_external_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: file_name, obj_name, link_name
-         CHARACTER(LEN=*), INTENT(IN) :: file_name
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: file_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: link_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name
          INTEGER(SIZE_T) :: file_namelen
          INTEGER(SIZE_T) :: obj_namelen
          INTEGER(SIZE_T) :: link_namelen
@@ -502,14 +485,12 @@ CONTAINS
     INTEGER(SIZE_T) :: group_namelen
 
     INTERFACE
-       INTEGER FUNCTION h5ldelete_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, lapl_id_default)
+       INTEGER FUNCTION h5ldelete_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, lapl_id_default) &
+            BIND(C,NAME='h5ldelete_by_idx_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LDELETE_BY_IDX_C'::h5ldelete_by_idx_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: group_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: group_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
          INTEGER, INTENT(IN) :: index_field
          INTEGER, INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(IN) :: n
@@ -561,18 +542,16 @@ CONTAINS
                                           ! Link access property list identifier.
 !*****
     INTEGER :: link_exists_c
-    INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T)  :: namelen
+    INTEGER(HID_T)  :: lapl_id_default
+    INTEGER(SIZE_T) :: namelen
 
     INTERFACE
-       INTEGER FUNCTION h5lexists_c(loc_id, name, namelen, lapl_id_default, link_exists_c)
+       INTEGER FUNCTION h5lexists_c(loc_id, name, namelen, lapl_id_default, link_exists_c) &
+            BIND(C,NAME='h5lexists_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LEXISTS_C'::h5lexists_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T), INTENT(IN) :: namelen
          INTEGER, INTENT(OUT) :: link_exists_c
          INTEGER(HID_T) :: lapl_id_default
@@ -667,14 +646,11 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5lget_info_c(link_loc_id, link_name, link_namelen, &
             cset, corder, corder_valid, link_type, address, val_size, &
-            lapl_id_default)
+            lapl_id_default) BIND(C,NAME='h5lget_info_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_INFO_C'::h5lget_info_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: link_name
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: link_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name
          INTEGER, INTENT(OUT) :: cset
          INTEGER, INTENT(OUT) :: corder
          INTEGER, INTENT(OUT) :: link_type
@@ -781,14 +757,12 @@ CONTAINS
 !
     INTERFACE
        INTEGER FUNCTION h5lget_info_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
-            link_type, corder_valid, corder, cset, address, val_size, lapl_id_default)
+            link_type, corder_valid, corder, cset, address, val_size, lapl_id_default) &
+            BIND(C,NAME='h5lget_info_by_idx_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_INFO_BY_IDX_C'::h5lget_info_by_idx_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: group_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: group_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
          INTEGER(SIZE_T)  :: group_namelen
          INTEGER, INTENT(IN) :: index_field
          INTEGER, INTENT(IN) :: order
@@ -849,11 +823,8 @@ CONTAINS
                                         ! 0 on success and -1 on failure
 !*****
     INTERFACE
-       INTEGER FUNCTION h5lis_registered_c(link_cls_id)
+       INTEGER FUNCTION h5lis_registered_c(link_cls_id) BIND(C,NAME='h5lis_registered_c')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LIS_REGISTERED_C'::h5lis_registered_c
-         !DEC$ENDIF
          INTEGER, INTENT(IN) :: link_cls_id  ! User-defined link class identifier
        END FUNCTION h5lis_registered_c
     END INTERFACE
@@ -917,18 +888,15 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
-            dest_name, dest_namelen, lcpl_id_default, lapl_id_default)
+            dest_name, dest_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='h5lmove_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LMOVE_C'::h5lmove_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: src_name, dest_name
          INTEGER(HID_T), INTENT(IN) :: src_loc_id
 
-         CHARACTER(LEN=*), INTENT(IN) :: src_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: src_name
          INTEGER(SIZE_T) :: src_namelen
          INTEGER(HID_T), INTENT(IN) :: dest_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: dest_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: dest_name
          INTEGER(SIZE_T) :: dest_namelen
 
          INTEGER(HID_T) :: lcpl_id_default
@@ -1007,21 +975,18 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
-             size_default, name, lapl_id_default)
+             size_default, name, lapl_id_default) BIND(C,NAME='h5lget_name_by_idx_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_NAME_BY_IDX_C'::h5lget_name_by_idx_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: group_name, name
          INTEGER(HID_T), INTENT(IN) :: loc_id
 
-         CHARACTER(LEN=*), INTENT(IN) :: group_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
          INTEGER(SIZE_T)  :: group_namelen
          INTEGER, INTENT(IN) :: index_field
          INTEGER, INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(IN) :: n
          INTEGER(SIZE_T) :: size_default
-         CHARACTER(LEN=*), INTENT(OUT) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
          INTEGER(HID_T) :: lapl_id_default
        END FUNCTION h5lget_name_by_idx_c
     END INTERFACE
@@ -1116,7 +1081,7 @@ CONTAINS
 !!$         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_VAL_BY_IDX_C'::h5lget_val_by_idx_c
 !!$         !DEC$ENDIF
 !!$         INTEGER(HID_T), INTENT(IN) :: loc_id
-!!$         CHARACTER(LEN=*), INTENT(IN) :: group_name
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
 !!$         INTEGER(SIZE_T)  :: group_namelen
 !!$         INTEGER, INTENT(IN) :: index_field
 !!$         INTEGER, INTENT(IN) :: order
@@ -1197,7 +1162,7 @@ CONTAINS
 !!$         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_VAL_C'::h5lget_val_c
 !!$         !DEC$ENDIF
 !!$         INTEGER(HID_T), INTENT(IN) :: link_loc_id  ! File or group identifier.
-!!$         CHARACTER(LEN=*), INTENT(IN) :: link_name  ! Link whose value is to be returned.
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name  ! Link whose value is to be returned.
 !!$         INTEGER :: link_namelen
 !!$         INTEGER(SIZE_T), INTENT(IN) :: size        !  Maximum number of characters of link value to be returned.
 !!$
@@ -1290,13 +1255,13 @@ CONTAINS
 !!$         !DEC$ENDIF
 !!$         INTEGER, INTENT(IN) :: version      ! Version number of this struct
 !!$         INTEGER, INTENT(IN) :: class_id     ! Link class identifier
-!!$         CHARACTER(LEN=*), INTENT(IN) :: comment      ! Comment for debugging
-!!$         CHARACTER(LEN=*), INTENT(IN) :: create_func  ! Callback during link creation
-!!$         CHARACTER(LEN=*), INTENT(IN) :: move_func    ! Callback after moving link
-!!$         CHARACTER(LEN=*), INTENT(IN) :: copy_func    ! Callback after copying link
-!!$         CHARACTER(LEN=*), INTENT(IN) :: trav_func    ! The main traversal function
-!!$         CHARACTER(LEN=*), INTENT(IN) :: del_func     ! Callback for link deletion
-!!$         CHARACTER(LEN=*), INTENT(IN) :: query_func   ! Callback for queries
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: comment      ! Comment for debugging
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: create_func  ! Callback during link creation
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: move_func    ! Callback after moving link
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: copy_func    ! Callback after copying link
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: trav_func    ! The main traversal function
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: del_func     ! Callback for link deletion
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: query_func   ! Callback for queries
 !!$         INTEGER, INTENT(OUT) :: hdferr   ! Error code:
 !!$                                          ! 0 on success and -1 on failure
 !!$         INTEGER :: comment_len

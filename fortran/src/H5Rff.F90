@@ -7,10 +7,7 @@
 !  fortran/src/H5Rff.f90
 !
 ! PURPOSE
-!  This file contains Fortran interfaces for H5R functions. It includes
-!  all the functions that are independent on whether the Fortran 2003 functions
-!  are enabled or disabled.
-!
+!  This file contains Fortran interfaces for H5R functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -53,6 +50,7 @@ MODULE H5R
   !             INTEGER ref(REF_REG_BUF_LEN)
   !        END TYPE
   !
+
   INTERFACE h5rget_object_type_f
 
      MODULE PROCEDURE h5rget_object_type_obj_f
@@ -196,12 +194,8 @@ CONTAINS
     INTEGER(HADDR_T) :: ref_f          ! Local buffer to pass reference
 
     INTERFACE
-       INTEGER FUNCTION h5rget_object_type_obj_c(dset_id, ref_f, obj_type)
+       INTEGER FUNCTION h5rget_object_type_obj_c(dset_id, ref_f, obj_type) BIND(C, NAME='h5rget_object_type_obj_c')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RGET_OBJECT_TYPE_OBJ_C':: h5rget_object_type_obj_c
-         !DEC$ENDIF
-         !              INTEGER, PARAMETER :: REF_OBJ_BUF_LEN = 2
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HADDR_T) :: ref_f
          INTEGER, INTENT(OUT) :: obj_type
@@ -252,13 +246,10 @@ CONTAINS
     INTEGER :: ref_f(REF_REG_BUF_LEN)          ! Local buffer to pass reference
 
     INTERFACE
-       INTEGER FUNCTION h5rget_region_region_c(dset_id, ref_f, space_id)
+       INTEGER FUNCTION h5rget_region_region_c(dset_id, ref_f, space_id) BIND(C, NAME='h5rget_region_region_c')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RGET_REGION_REGION_C':: h5rget_region_region_c
-         !DEC$ENDIF
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
-         !              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3
          INTEGER :: ref_f(REF_REG_BUF_LEN)
          INTEGER(HID_T), INTENT(OUT) :: space_id
        END FUNCTION h5rget_region_region_c
@@ -394,16 +385,13 @@ CONTAINS
     INTEGER :: ref_f(REF_REG_BUF_LEN)      ! Local buffer to pass reference
 
     INTERFACE
-       INTEGER FUNCTION h5rcreate_region_c(ref_f, loc_id, name, namelen, space_id)
+       INTEGER FUNCTION h5rcreate_region_c(ref_f, loc_id, name, namelen, space_id) BIND(C,NAME='h5rcreate_region_c')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RCREATE_REGION_C':: h5rcreate_region_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
-         !              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3
+         IMPORT :: C_CHAR
+         IMPLICIT NONE
          INTEGER :: ref_f(REF_REG_BUF_LEN)
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER :: namelen
          INTEGER(HID_T), INTENT(IN) :: space_id
        END FUNCTION h5rcreate_region_c

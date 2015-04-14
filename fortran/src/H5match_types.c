@@ -9,7 +9,7 @@
  * PURPOSE
  *  C Program to match C types to Fortran types.
  *  Creates the files H5f90i_gen.h for the C code and
- *  H5fortran_types.f90 for the Fortran code.
+ *  H5fortran_types.F90 for the Fortran code.
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -45,7 +45,7 @@ FILE * c_header;
 FILE * fort_header;
 
 #define CFILE "H5f90i_gen.h"
-#define FFILE "H5fortran_types.f90"
+#define FFILE "H5fortran_types.F90"
 
 /* Prototypes for the write routines */
 void writeTypedef(const char* c_typedef, const char* c_type, unsigned int size);
