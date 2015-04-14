@@ -6,11 +6,6 @@
 ! PURPOSE
 !  This module provides fortran specific helper functions for the HDF library
 !
-! USES
-!  H5LIB_PROVISIONAL - This module provides helper functions for Fortran 2003
-!                      only features. If Fortran 2003 functions are enabled then
-!                      H5_ff_F03.f90 is compiled, else H5_ff_F90.f90,
-!                      which is just a place holder blank module, is compiled.
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
@@ -37,9 +32,6 @@
 
 MODULE H5LIB
 
-  USE H5LIB_PROVISIONAL  ! helper functions for Fortran 2003 features:
-                         !       pre-Fortran 2003 - empty module
-                         !       Forttran 2003    - contains functions
   USE H5GLOBAL
 
 CONTAINS
@@ -405,5 +397,43 @@ CONTAINS
     ENDIF
 
   END FUNCTION h5kind_to_type
+
+!****f* H5LIB_PROVISIONAL/h5offsetof
+!
+! NAME
+!  h5offsetof
+!
+! PURPOSE
+!  Computes the offset in memory
+!
+! Inputs:
+!  start - starting pointer address
+!  end 	 - ending pointer address
+!
+! Outputs:
+!  offset - offset of a member within the derived type
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Augest 25, 2008
+!
+! ACKNOWLEDGEMENTS
+!  Joe Krahn
+!
+! Fortran2003 Interface:
+  FUNCTION h5offsetof(start,end) RESULT(offset)
+    USE, INTRINSIC :: ISO_C_BINDING
+    USE H5GLOBAL
+    IMPLICIT NONE
+    INTEGER(SIZE_T) :: offset
+    TYPE(C_PTR), VALUE, INTENT(IN) :: start, end
+!*****
+    INTEGER(C_INTPTR_T) :: int_address_start, int_address_end
+    int_address_start = TRANSFER(start, int_address_start)
+    int_address_end   = TRANSFER(end  , int_address_end  )
+
+    offset = int_address_end - int_address_start
+
+  END FUNCTION h5offsetof
 
 END MODULE H5LIB

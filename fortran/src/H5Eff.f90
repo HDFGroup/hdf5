@@ -247,5 +247,66 @@ CONTAINS
     hdferr = h5eget_minor_c(error_no, name)
   END SUBROUTINE h5eget_minor_f
 
+!****s* H5E/h5eset_auto_f
+!
+! NAME
+!  h5eset_auto_f
+!
+! PURPOSE
+!  Returns settings for automatic error stack traversal function and its data.
+!
+! Inputs:
+!  printflag   - Flag to turn automatic error printing on or off;
+!                possible values are:
+!                  printon (1)
+!                  printoff(0)
+!  estack_id   - Error stack identifier.
+!  func        - Function to be called upon an error condition.
+!  client_data - Data passed to the error function
+!  
+! Outputs:
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  July 10, 2009
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5eset_auto_f(printflag, hdferr, estack_id, func, client_data)
+    USE, INTRINSIC :: ISO_C_BINDING
+    INTEGER       , INTENT(IN)            :: printflag
+    INTEGER       , INTENT(OUT)           :: hdferr
+    INTEGER(HID_T), INTENT(IN) , OPTIONAL :: estack_id
+    TYPE(C_FUNPTR), INTENT(IN) , OPTIONAL :: func
+    TYPE(C_PTR)   , INTENT(IN) , OPTIONAL :: client_data
+!*****
+    INTEGER(HID_T) :: estack_id_default
+    TYPE(C_FUNPTR) :: func_default
+    TYPE(C_PTR)    :: client_data_default
+    INTERFACE
+       INTEGER FUNCTION h5eset_auto2_c(printflag, estack_id, func, client_data) &
+            BIND(C, NAME='h5eset_auto2_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_funptr
+         USE H5GLOBAL
+         INTEGER :: printflag
+         INTEGER(HID_T) :: estack_id
+!!$         TYPE(C_FUNPTR) :: func
+!!$         TYPE(C_PTR), VALUE :: client_data
+         TYPE(C_FUNPTR), VALUE :: func
+         TYPE(C_PTR), VALUE :: client_data
+       END FUNCTION h5eset_auto2_c
+    END INTERFACE
+
+    estack_id_default = -1
+    func_default = C_NULL_FUNPTR
+    client_data_default = C_NULL_PTR
+
+    IF(PRESENT(estack_id)) estack_id_default = estack_id
+    IF(PRESENT(func)) func_default = func
+    IF(PRESENT(client_data)) client_data_default = client_data
+
+    hdferr = h5eset_auto2_c(printflag, estack_id_default, func_default, client_data_default)
+  END SUBROUTINE h5eset_auto_f
+
 END MODULE H5E
 

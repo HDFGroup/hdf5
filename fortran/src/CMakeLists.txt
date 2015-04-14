@@ -156,17 +156,6 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 )
 
 #-----------------------------------------------------------------------------
-# Fortran 2003 standard
-#-----------------------------------------------------------------------------
-if (HDF5_ENABLE_F2003)
-  # F2003 features are enabled
-  set (F_STATUS "_F03")
-else (HDF5_ENABLE_F2003)
-  # F2003 features are not enabled
-  set (F_STATUS "_F90")
-endif (HDF5_ENABLE_F2003)
-
-#-----------------------------------------------------------------------------
 # Fortran Real Size
 #-----------------------------------------------------------------------------
 if (FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
@@ -186,7 +175,6 @@ set (f90_F_SRCS
 
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.f90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5_ff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_ff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff.f90
@@ -201,15 +189,6 @@ set (f90_F_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Sff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Tff.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zff.f90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff${F_STATUS}.f90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff${F_STATUS}.f90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5Eff${F_STATUS}.f90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5Fff${F_STATUS}.f90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5Lff${F_STATUS}.f90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5Off${F_STATUS}.f90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5Pff${F_STATUS}.f90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5Rff${F_STATUS}.f90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5Tff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_DBLE_Interface${F_DBLE}.f90
 )
 

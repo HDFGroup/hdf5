@@ -940,5 +940,33 @@ MODULE H5GLOBAL
 !!$      EQUIVALENCE(H5F_flags(1), H5F_SCOPE_GLOBAL_F)
 !!$      EQUIVALENCE(H5F_flags(2), H5F_SCOPE_LOCAL_F)
 
+CONTAINS
+
+  SUBROUTINE C2F_string(c_string, f_string)
+
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    CHARACTER(KIND=C_CHAR, LEN=*), INTENT(IN) :: c_string
+    CHARACTER(LEN=*), INTENT(OUT) :: f_string
+    INTEGER(SIZE_T) :: c_len, f_len
+
+    ! Find the length of the C string by located the null terminator
+    c_len = MAX(INDEX(c_string,C_NULL_CHAR, KIND=SIZE_T)-1,1)
+    ! Find the length of the Fortran string
+    f_len = LEN(f_string)
+
+    ! CASE (1): C string is equal to or larger then Fortran character buffer,
+    !           so fill the entire Fortran buffer. 
+    IF(c_len.GE.f_len)THEN !
+       f_string(1:f_len) = c_string(1:f_len)
+
+    ! CASE (2): C string is smaller then Fortran character buffer, 
+    !           so copy C string and blank pad remaining characters.
+    ELSE
+       f_string(1:c_len) = c_string(1:c_len)
+       f_string(c_len+1:f_len) =' '
+    ENDIF
+  END SUBROUTINE C2F_string
+  
 END MODULE H5GLOBAL
 

@@ -26,6 +26,37 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! NOTES
+!
+!  (A) C_LOC and character strings according to the Fortran 2003 standard:
+!
+!  15.1.2.5 C_LOC(X)
+!
+!  Argument. X shall either
+!
+!  (1) have interoperable type and type parameters and be
+!    (a) a variable that has the TARGET attribute and is interoperable,
+!    (b) an allocated allocatable variable that has the TARGET attribute
+!        and is not an array of zero size, or
+!    (c) an associated scalar pointer, or
+!  (2) be a nonpolymorphic scalar, have no length type parameters, and be
+!    (a) a nonallocatable, nonpointer variable that has the TARGET attribute,
+!    (b) an allocated allocatable variable that has the TARGET attribute, or
+!    (c) an associated pointer.
+!
+!  - When X is a character, for interoperability the standard is:
+!
+!  15.2.1 Interoperability of intrinsic types
+!
+!  ...if the type is character, interoperability also requires that the length type parameter
+!  be omitted or be specified by an initialization expression whose value is one.
+!
+!  THEREFORE compilers that have not extended the standard  require
+!
+!  CHARACTER(LEN=1), TARGET :: chr
+!  or
+!  CHARACTER, TARGET :: chr
+!
+!  (B)
 !                         *** IMPORTANT ***
 !  If you add a new H5A function you must add the function name to the
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
@@ -42,6 +73,95 @@ MODULE H5A
 !  Windows DEC Visual Fortran and OSF compilers happy and do right things.
 !  05/01/02 EP
 !
+  INTERFACE h5awrite_f
+     MODULE PROCEDURE h5awrite_integer_scalar
+     MODULE PROCEDURE h5awrite_integer_1
+     MODULE PROCEDURE h5awrite_integer_2
+     MODULE PROCEDURE h5awrite_integer_3
+     MODULE PROCEDURE h5awrite_integer_4
+     MODULE PROCEDURE h5awrite_integer_5
+     MODULE PROCEDURE h5awrite_integer_6
+     MODULE PROCEDURE h5awrite_integer_7
+     MODULE PROCEDURE h5awrite_char_scalar
+     MODULE PROCEDURE h5awrite_char_1
+     MODULE PROCEDURE h5awrite_char_2
+     MODULE PROCEDURE h5awrite_char_3
+     MODULE PROCEDURE h5awrite_char_4
+     MODULE PROCEDURE h5awrite_char_5
+     MODULE PROCEDURE h5awrite_char_6
+     MODULE PROCEDURE h5awrite_char_7
+     MODULE PROCEDURE h5awrite_real_scalar
+     MODULE PROCEDURE h5awrite_real_1
+     MODULE PROCEDURE h5awrite_real_2
+     MODULE PROCEDURE h5awrite_real_3
+     MODULE PROCEDURE h5awrite_real_4
+     MODULE PROCEDURE h5awrite_real_5
+     MODULE PROCEDURE h5awrite_real_6
+     MODULE PROCEDURE h5awrite_real_7
+     ! This is the preferred way to call h5awrite
+     ! by passing an address
+     MODULE PROCEDURE h5awrite_ptr
+
+  END INTERFACE
+
+  INTERFACE h5aread_f
+
+     MODULE PROCEDURE h5aread_integer_scalar
+     MODULE PROCEDURE h5aread_integer_1
+     MODULE PROCEDURE h5aread_integer_2
+     MODULE PROCEDURE h5aread_integer_3
+     MODULE PROCEDURE h5aread_integer_4
+     MODULE PROCEDURE h5aread_integer_5
+     MODULE PROCEDURE h5aread_integer_6
+     MODULE PROCEDURE h5aread_integer_7
+     MODULE PROCEDURE h5aread_char_scalar
+     MODULE PROCEDURE h5aread_char_1
+     MODULE PROCEDURE h5aread_char_2
+     MODULE PROCEDURE h5aread_char_3
+     MODULE PROCEDURE h5aread_char_4
+     MODULE PROCEDURE h5aread_char_5
+     MODULE PROCEDURE h5aread_char_6
+     MODULE PROCEDURE h5aread_char_7
+     MODULE PROCEDURE h5aread_real_scalar
+     MODULE PROCEDURE h5aread_real_1
+     MODULE PROCEDURE h5aread_real_2
+     MODULE PROCEDURE h5aread_real_3
+     MODULE PROCEDURE h5aread_real_4
+     MODULE PROCEDURE h5aread_real_5
+     MODULE PROCEDURE h5aread_real_6
+     MODULE PROCEDURE h5aread_real_7
+
+     ! This is the preferred way to call h5aread
+     ! by passing an address
+     MODULE PROCEDURE h5aread_ptr
+
+  END INTERFACE
+
+!  Interface for the function used to pass the C pointer of the buffer
+!  to the C H5Awrite routine
+
+  INTERFACE
+     INTEGER FUNCTION h5awrite_f_c(attr_id, mem_type_id, buf) BIND(C, NAME='h5awrite_f_c')
+       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
+       USE H5GLOBAL
+       INTEGER(HID_T), INTENT(IN) :: attr_id
+       INTEGER(HID_T), INTENT(IN) :: mem_type_id
+       TYPE(C_PTR), VALUE :: buf
+     END FUNCTION h5awrite_f_c
+  END INTERFACE
+
+!  Interface for the function used to pass the C pointer of the buffer
+!  to the C H5Aread routine
+
+  INTERFACE
+     INTEGER FUNCTION h5aread_f_c(attr_id, mem_type_id, buf) BIND(C, NAME='h5aread_f_c')
+       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
+       USE H5GLOBAL
+       INTEGER(HID_T), INTENT(IN) :: attr_id
+       INTEGER(HID_T), INTENT(IN) :: mem_type_id
+       TYPE(C_PTR), VALUE :: buf
+     END FUNCTION h5aread_f_c
+  END INTERFACE
 
 CONTAINS
 
@@ -80,7 +200,8 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE h5acreate_f(loc_id, name, type_id, space_id, attr_id, &
-                                 hdferr, acpl_id, aapl_id )
+       hdferr, acpl_id, aapl_id )
+    USE ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Attribute name
@@ -95,37 +216,33 @@ CONTAINS
 
     INTEGER(HID_T) :: acpl_id_default
     INTEGER(HID_T) :: aapl_id_default
-    INTEGER(SIZE_T) :: namelen
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
     INTERFACE
-       INTEGER FUNCTION h5acreate_c(loc_id, name, namelen, type_id, &
-            space_id, acpl_id_default, aapl_id_default, attr_id)
+       INTEGER(HID_T) FUNCTION H5Acreate2(loc_id, name, type_id, &
+            space_id, acpl_id_default, aapl_id_default) BIND(C,NAME='H5Acreate2')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ACREATE_C'::h5acreate_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
-         INTEGER(SIZE_T) :: namelen
-         INTEGER(HID_T), INTENT(IN) :: type_id
-         INTEGER(HID_T), INTENT(IN) :: space_id
-         INTEGER(HID_T) :: acpl_id_default
-         INTEGER(HID_T) :: aapl_id_default
-         INTEGER(HID_T), INTENT(OUT) :: attr_id
-       END FUNCTION h5acreate_c
+         INTEGER(HID_T), INTENT(IN), VALUE :: loc_id
+         CHARACTER(LEN=1), DIMENSION(*), INTENT(IN) :: name
+         INTEGER(HID_T), INTENT(IN), VALUE :: type_id
+         INTEGER(HID_T), INTENT(IN), VALUE :: space_id
+         INTEGER(HID_T), INTENT(IN), VALUE :: acpl_id_default
+         INTEGER(HID_T), INTENT(IN), VALUE :: aapl_id_default
+       END FUNCTION H5Acreate2
     END INTERFACE
 
     acpl_id_default = H5P_DEFAULT_F
     aapl_id_default = H5P_DEFAULT_F
-    namelen = LEN(name)
     IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
     IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
 
-    hdferr = h5acreate_c(loc_id, name, namelen, type_id, space_id, &
-         acpl_id_default, aapl_id_default, attr_id)
+    c_name = TRIM(name)//C_NULL_CHAR
+    attr_id = h5acreate2(loc_id, c_name, type_id, space_id, &
+         acpl_id_default, aapl_id_default)
+
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
 
   END SUBROUTINE h5acreate_f
-
 
 !
 !****s* H5A/h5aopen_name_f
@@ -154,37 +271,36 @@ CONTAINS
 !  port).  February 27, 2001
 !
 ! SOURCE
-  SUBROUTINE h5aopen_name_f(obj_id, name, attr_id, hdferr)
+  SUBROUTINE H5Aopen_name_f(obj_id, name, attr_id, hdferr)
+    USE ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
     INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 !*****
-    INTEGER(SIZE_T) :: namelen
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER FUNCTION h5aopen_name_c(obj_id, name, namelen, attr_id)
+       INTEGER(HID_T) FUNCTION H5Aopen_name(obj_id, name) BIND(C,NAME='H5Aopen_name')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_NAME_C'::h5aopen_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
-         INTEGER(HID_T), INTENT(IN) :: obj_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
-         INTEGER(SIZE_T) :: namelen
-         INTEGER(HID_T), INTENT(OUT) :: attr_id
-       END FUNCTION h5aopen_name_c
+         INTEGER(HID_T), INTENT(IN), VALUE :: obj_id
+         CHARACTER(LEN=1), DIMENSION(*), INTENT(IN) :: name
+       END FUNCTION H5Aopen_name
     END INTERFACE
 
-    namelen = LEN(name)
-    hdferr = h5aopen_name_c(obj_id, name, namelen, attr_id)
-  END SUBROUTINE h5aopen_name_f
+    c_name = TRIM(name)//C_NULL_CHAR
+    attr_id = H5Aopen_name(obj_id, c_name)
+
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
+
+  END SUBROUTINE H5Aopen_name_f
 !
-!****s* H5A/h5aopen_idx_f
+!****s* H5A/H5Aopen_idx_f
 !
 ! NAME
-!  h5aopen_idx_f
+!  H5Aopen_idx_f
 !
 ! PURPOSE
 !  Opens the attribute specified by its index.
@@ -207,7 +323,8 @@ CONTAINS
 !  port).  February 27, 2001
 !
 ! SOURCE
-  SUBROUTINE h5aopen_idx_f(obj_id, index, attr_id, hdferr)
+  SUBROUTINE H5Aopen_idx_f(obj_id, index, attr_id, hdferr)
+    USE ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier
     INTEGER, INTENT(IN) :: index            ! Attribute index
@@ -216,24 +333,25 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5aopen_idx_c(obj_id, index, attr_id)
+       INTEGER(HID_T) FUNCTION H5Aopen_idx(obj_id, index) BIND(C,NAME='H5Aopen_idx')
+         USE ISO_C_BINDING
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_IDX_C'::h5aopen_idx_c
-         !DEC$ENDIF
          INTEGER(HID_T), INTENT(IN) :: obj_id
-         INTEGER, INTENT(IN) :: index
-         INTEGER(HID_T), INTENT(OUT) :: attr_id
-       END FUNCTION h5aopen_idx_c
+         INTEGER(C_INT), INTENT(IN) :: index
+       END FUNCTION H5Aopen_idx
     END INTERFACE
 
-    hdferr = h5aopen_idx_c(obj_id, index, attr_id)
-  END SUBROUTINE h5aopen_idx_f
+    attr_id = H5Aopen_idx(obj_id, INT(index, C_INT))
+
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
+
+  END SUBROUTINE H5Aopen_idx_f
 !
-!****s* H5A/h5aget_space_f
+!****s* H5A/H5Aget_space_f
 !
 ! NAME
-!  h5aget_space_f
+!  H5Aget_space_f
 !
 ! PURPOSE
 !  Gets a copy of the dataspace for an attribute.
@@ -256,30 +374,31 @@ CONTAINS
 !
 !
 ! SOURCE
-  SUBROUTINE h5aget_space_f(attr_id, space_id, hdferr)
+  SUBROUTINE H5Aget_space_f(attr_id, space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
     INTEGER(HID_T), INTENT(OUT) :: space_id ! Attribute dataspace identifier
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5aget_space_c(attr_id, space_id)
+       INTEGER(HID_T) FUNCTION H5Aget_space(attr_id) BIND(C,NAME='H5Aget_space')
+         USE ISO_C_BINDING
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_SPACE_C'::h5aget_space_c
-         !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: attr_id
-         INTEGER(HID_T), INTENT(OUT) :: space_id
-       END FUNCTION h5aget_space_c
+         INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
+       END FUNCTION H5Aget_space
     END INTERFACE
     
-    hdferr = h5aget_space_c(attr_id, space_id)
-  END SUBROUTINE h5aget_space_f
+    space_id = H5Aget_space(attr_id)
+
+    hdferr = 0
+    IF(space_id.LT.0) hdferr = -1
+
+  END SUBROUTINE H5Aget_space_f
 !
-!****s* H5A/h5aget_type_f
+!****s* H5A/H5Aget_type_f
 !
 ! NAME
-!  h5aget_type_f
+!  H5Aget_type_f
 !
 ! PURPOSE
 !  Gets an attribute datatype.
@@ -300,30 +419,31 @@ CONTAINS
 !  port).  February 27, 2001
 !
 ! SOURCE
-  SUBROUTINE h5aget_type_f(attr_id, type_id, hdferr)
+  SUBROUTINE H5Aget_type_f(attr_id, type_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
     INTEGER(HID_T), INTENT(OUT) :: type_id ! Attribute datatype identifier
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5aget_type_c(attr_id, type_id)
+       INTEGER(HID_T) FUNCTION H5Aget_type(attr_id) BIND(C,NAME='H5Aget_type')
+         USE ISO_C_BINDING
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_TYPE_C'::h5aget_type_c
-         !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: attr_id
-         INTEGER(HID_T), INTENT(OUT) :: type_id
-       END FUNCTION h5aget_type_c
+         INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
+       END FUNCTION H5Aget_type
     END INTERFACE
     
-    hdferr = h5aget_type_c(attr_id, type_id)
-  END SUBROUTINE h5aget_type_f
+    type_id = H5Aget_type(attr_id)
+
+    hdferr = 0
+    IF(type_id.LT.0) hdferr = -1
+
+  END SUBROUTINE H5Aget_type_f
 !
-!****s* H5A/h5aget_name_f
+!****s* H5A/H5Aget_name_f
 !
 ! NAME
-!  h5aget_name_f
+!  H5Aget_name_f
 !
 ! PURPOSE
 !  Gets an attribute name.
@@ -346,35 +466,39 @@ CONTAINS
 !
 !
 ! SOURCE
-  SUBROUTINE h5aget_name_f(attr_id, size, buf, hdferr)
+  SUBROUTINE H5Aget_name_f(attr_id, size, buf, hdferr)
+    USE ISO_C_BINDING
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
-    INTEGER(SIZE_T), INTENT(IN) :: size    ! Buffer size
-    CHARACTER(LEN=*), INTENT(INOUT) :: buf ! Buffer to hold attribute name
-    INTEGER, INTENT(OUT) :: hdferr ! Error code:
-                                   ! name length is successful, -1 if fail
+    INTEGER(HID_T), INTENT(IN) :: attr_id
+    INTEGER(SIZE_T), INTENT(IN) :: size
+    CHARACTER(LEN=*), INTENT(INOUT) :: buf
+    INTEGER, INTENT(OUT) :: hdferr
+    
+    CHARACTER(KIND=C_CHAR, LEN=LEN(buf)+1) :: c_buf
+    
 !*****
     INTERFACE
-       INTEGER FUNCTION h5aget_name_c(attr_id, size, buf)
+       INTEGER FUNCTION H5Aget_name(attr_id, size, buf) BIND(C, NAME='H5Aget_name')
+         USE ISO_C_BINDING
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_NAME_C'::h5aget_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: buf
-         INTEGER(HID_T), INTENT(IN) :: attr_id
-         INTEGER(SIZE_T), INTENT(IN) :: size
-         CHARACTER(LEN=*), INTENT(OUT) :: buf
-       END FUNCTION h5aget_name_c
+         INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
+         INTEGER(SIZE_T), INTENT(IN), VALUE :: size
+         CHARACTER(KIND=C_CHAR, LEN=1), DIMENSION(*), INTENT(OUT) :: buf
+       END FUNCTION H5Aget_name
     END INTERFACE
 
-    hdferr = h5aget_name_c(attr_id, size, buf)
-  END SUBROUTINE h5aget_name_f
+    ! add 1 for the null char
+    hdferr = H5Aget_name(attr_id, size+1, c_buf)
+
+    CALL C2F_string(c_buf, buf)
+
+  END SUBROUTINE H5Aget_name_f
 
 !
-!****s* H5A/h5aget_name_by_idx_f
+!****s* H5A/H5Aget_name_by_idx_f
 !
 ! NAME
-!  h5aget_name_by_idx_f
+!  H5Aget_name_by_idx_f
 !
 ! PURPOSE
 !  Gets an attribute name, by attribute index position.
@@ -475,11 +599,77 @@ CONTAINS
 
 
   END SUBROUTINE h5aget_name_by_idx_f
+!!$  SUBROUTINE H5Aget_name_by_idx_f(loc_id, obj_name, idx_type, order, &
+!!$       n, name, hdferr, size, lapl_id)
+!!$    USE ISO_C_BINDING
+!!$    IMPLICIT NONE
+!!$    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
+!!$    CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
+!!$                                              !  from which attribute is to be removed *TEST* check NULL
+!!$    INTEGER, INTENT(IN) :: idx_type ! Type of index; Possible values are:
+!!$                                    !    H5_INDEX_UNKNOWN_F   - Unknown index type
+!!$                                    !    H5_INDEX_NAME_F       - Index on names
+!!$                                    !    H5_INDEX_CRT_ORDER_F  - Index on creation order
+!!$                                    !    H5_INDEX_N_F 	      - Number of indices defined
+!!$
+!!$    INTEGER, INTENT(IN) :: order    ! Order in which to iterate over index; Possible values are:
+!!$                                    !    H5_ITER_UNKNOWN_F   - Unknown order
+!!$                                    !    H5_ITER_INC_F      - Increasing order
+!!$                                    !    H5_ITER_DEC_F       - Decreasing order
+!!$                                    !    H5_ITER_NATIVE_F    - No particular order, whatever is fastest
+!!$                                    !    H5_ITER_N_F 	    - Number of iteration orders
+!!$    INTEGER(HSIZE_T), INTENT(IN) :: n !  Attribute’s position in index
+!!$    CHARACTER(LEN=*), INTENT(OUT) :: name ! Attribute name
+!!$    INTEGER, INTENT(OUT) :: hdferr    ! Error code:
+!!$                                      ! Returns attribute name size,
+!!$                                      ! -1 if fail
+!!$    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list
+!!$    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size  ! Indicates the size, in the number of characters, 
+!!$                                                    ! of the attribute
+!!$!*****
+!!$    INTEGER(HID_T) :: lapl_id_default
+!!$    INTEGER(SIZE_T) :: obj_namelen
+!!$    INTEGER(SIZE_T) :: size_default, c_size
+!!$    CHARACTER(KIND=C_CHAR, LEN=LEN(name)+1) :: c_name
+!!$
+!!$    INTERFACE
+!!$       INTEGER FUNCTION H5Aget_name_by_idx(loc_id, obj_name, idx_type, order, &
+!!$            n, name, size_default, lapl_id_default) BIND(C, NAME='H5Aget_name_by_idx')
+!!$         USE ISO_C_BINDING
+!!$         USE H5GLOBAL
+!!$         INTEGER(HID_T), INTENT(IN) :: loc_id
+!!$         CHARACTER(KIND=C_CHAR, LEN=1), DIMENSION(*), INTENT(IN) :: obj_name
+!!$         INTEGER(C_INT), INTENT(IN) :: idx_type
+!!$         INTEGER(C_INT), INTENT(IN) :: order
+!!$         INTEGER(HSIZE_T), INTENT(IN) :: n
+!!$         CHARACTER(KIND=C_CHAR,LEN=1), DIMENSION(*), INTENT(OUT) :: name
+!!$         INTEGER(SIZE_T) :: size_default
+!!$         INTEGER(HID_T)  :: lapl_id_default
+!!$       END FUNCTION H5Aget_name_by_idx
+!!$    END INTERFACE
+!!$
+!!$    obj_namelen = LEN(obj_name)
+!!$    lapl_id_default = H5P_DEFAULT_F
+!!$    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+!!$
+!!$    size_default = LEN(name)
+!!$
+!!$    c_size = H5Aget_name_by_idx(loc_id, TRIM(obj_name)//C_NULL_CHAR, INT(idx_type,C_INT), INT(order,C_INT), &
+!!$         n, c_name, size_default, lapl_id_default)
+!!$
+!!$    IF(c_size.LT.0) THEN
+!!$       hdferr = -1
+!!$    ELSE
+!!$       CALL C2F_string(c_name, name)
+!!$       IF(PRESENT(size)) size = c_size
+!!$    ENDIF
+!!$
+!!$  END SUBROUTINE H5Aget_name_by_idx_f
 !
-!****s* H5A/h5aget_num_attrs_f
+!****s* H5A/H5Aget_num_attrs_f
 !
 ! NAME
-!  h5aget_num_attrs_f
+!  H5Aget_num_attrs_f
 !
 ! PURPOSE
 !  Determines the number of attributes attached to an object.
@@ -509,11 +699,8 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5aget_num_attrs_c(obj_id, attr_num)
+       INTEGER FUNCTION h5aget_num_attrs_c(obj_id, attr_num) BIND(C,name='h5aget_num_attrs_c')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_NUM_ATTRS_C'::h5aget_num_attrs_c
-         !DEC$ENDIF
          INTEGER(HID_T), INTENT(IN) :: obj_id
          INTEGER, INTENT(OUT) :: attr_num
        END FUNCTION h5aget_num_attrs_c
@@ -523,10 +710,10 @@ CONTAINS
   END SUBROUTINE h5aget_num_attrs_f
 
 !
-!****s* H5A/h5adelete_f
+!****s* H5A/H5Adelete_f
 !
 ! NAME
-!  h5adelete_f
+!  H5Adelete_f
 !
 ! PURPOSE
 !  Deletes an attribute of an object (group, dataset or
@@ -548,7 +735,7 @@ CONTAINS
 !  port).  February 27, 2001
 !
 ! SOURCE
-  SUBROUTINE h5adelete_f(obj_id, name, hdferr)
+  SUBROUTINE H5Adelete_f(obj_id, name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id  ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Attribute name
@@ -557,27 +744,24 @@ CONTAINS
     INTEGER(SIZE_T) :: namelen
 
     INTERFACE
-       INTEGER FUNCTION h5adelete_c(obj_id, name, namelen)
+       INTEGER FUNCTION H5Adelete_c(obj_id, name, namelen) BIND(C,NAME='h5adelete_c')
+         USE ISO_C_BINDING
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_C'::h5adelete_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: obj_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T) :: namelen
-       END FUNCTION h5adelete_c
+       END FUNCTION H5Adelete_c
     END INTERFACE
 
     namelen = LEN(name)
-    hdferr = h5adelete_c(obj_id, name, namelen)
-  END SUBROUTINE h5adelete_f
+    hdferr = H5Adelete_c(obj_id, name, namelen)
+  END SUBROUTINE H5Adelete_f
 
 !
-!****s* H5A/h5aclose_f
+!****s* H5A/H5Aclose_f
 !
 ! NAME
-!  h5aclose_f
+!  H5Aclose_f
 !
 ! PURPOSE
 !  Closes the specified attribute.
@@ -597,30 +781,28 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  February 27, 2001
 ! SOURCE
-  SUBROUTINE h5aclose_f(attr_id, hdferr)
+
+  SUBROUTINE H5Aclose_f(attr_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5aclose_c(attr_id)
+       INTEGER FUNCTION H5Aclose(attr_id) BIND(C, NAME='H5Aclose')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ACLOSE_C'::h5aclose_c
-         !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: attr_id
-       END FUNCTION h5aclose_c
+         INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
+       END FUNCTION H5Aclose
     END INTERFACE
 
-    hdferr = h5aclose_c(attr_id)
-  END SUBROUTINE h5aclose_f
+    hdferr = INT(H5Aclose(attr_id))
+  END SUBROUTINE H5Aclose_f
 
 !
-!****s* H5A/h5aget_storage_size_f
+!****s* H5A/H5Aget_storage_size_f
 !
 ! NAME
-!  h5aget_storage_size_f
+!  H5Aget_storage_size_f
 !
 ! PURPOSE
 !  Returns the amount of storage required for an attribute.
@@ -635,7 +817,7 @@ CONTAINS
 !  January, 2008
 !
 ! SOURCE
-  SUBROUTINE h5aget_storage_size_f(attr_id, size, hdferr)
+  SUBROUTINE H5Aget_storage_size_f(attr_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
     INTEGER(HSIZE_T), INTENT(OUT) :: size  ! Attribute storage requirement
@@ -643,24 +825,25 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5aget_storage_size_c(attr_id, size)
+       INTEGER(HSIZE_T) FUNCTION H5Aget_storage_size(attr_id) BIND(C,NAME='H5Aget_storage_size')
+         USE ISO_C_BINDING
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_STORAGE_SIZE_C'::h5aget_storage_size_c
-         !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: attr_id
-         INTEGER(HSIZE_T), INTENT(OUT) :: size
-       END FUNCTION h5aget_storage_size_c
+         INTEGER(HID_T),  INTENT(IN), VALUE :: attr_id
+       END FUNCTION H5Aget_storage_size
     END INTERFACE
 
-    hdferr = h5aget_storage_size_c(attr_id, size)
-  END SUBROUTINE h5aget_storage_size_f
+    size = H5Aget_storage_size(attr_id)
+
+    hdferr = 0
+    IF(size.LT.0) hdferr = -1
+
+  END SUBROUTINE H5Aget_storage_size_f
 
 !
-!****s* H5A/h5aget_create_plist_f
+!****s* H5A/H5Aget_create_plist_f
 !
 ! NAME
-!  h5aget_create_plist_f
+!  H5Aget_create_plist_f
 !
 ! PURPOSE
 !  Gets an attribute creation property list identifier
@@ -676,33 +859,29 @@ CONTAINS
 !  January, 2008
 !
 ! SOURCE
-  SUBROUTINE h5aget_create_plist_f(attr_id, creation_prop_id, hdferr)
+  SUBROUTINE H5Aget_create_plist_f(attr_id, creation_prop_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Identifier of the attribute
     INTEGER(HID_T), INTENT(OUT) :: creation_prop_id   ! Identifier for the attribute’s creation property
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
     INTERFACE
-       INTEGER FUNCTION h5aget_create_plist_c(attr_id, creation_prop_id)
+       INTEGER(HID_T) FUNCTION H5Aget_create_plist(attr_id) BIND(C,NAME='H5Aget_create_plist')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_CREATE_PLIST_C'::h5aget_create_plist_c
-         !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: attr_id
-         INTEGER(HID_T), INTENT(OUT) :: creation_prop_id
-       END FUNCTION h5aget_create_plist_c
+         INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
+       END FUNCTION H5Aget_create_plist
     END INTERFACE
 
-    hdferr = h5aget_create_plist_c(attr_id, creation_prop_id)
-  END SUBROUTINE h5aget_create_plist_f
+    creation_prop_id = H5Aget_create_plist(attr_id)
+
+  END SUBROUTINE H5Aget_create_plist_f
 
 !
-!****s* H5A/h5arename_by_name_f
+!****s* H5A/H5Arename_by_name_f
 !
 ! NAME
-!  h5arename_by_name_f
+!  H5Arename_by_name_f
 !
 ! PURPOSE
 !  Renames an attribute
@@ -723,7 +902,7 @@ CONTAINS
 !  January, 2008
 !
 ! SOURCE
-  SUBROUTINE h5arename_by_name_f(loc_id, obj_name, old_attr_name, new_attr_name, &
+  SUBROUTINE H5Arename_by_name_f(loc_id, obj_name, old_attr_name, new_attr_name, &
         hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
@@ -742,12 +921,13 @@ CONTAINS
     INTEGER(SIZE_T) :: new_attr_namelen
 
     INTERFACE
-       INTEGER FUNCTION h5arename_by_name_c(loc_id, obj_name, obj_namelen, &
+       INTEGER FUNCTION H5Arename_by_name_c(loc_id, obj_name, obj_namelen, &
             old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen, &
             lapl_id_default)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ARENAME_BY_NAME_C'::h5arename_by_name_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ARENAME_BY_NAME_C'::H5Arename_by_name_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: obj_name, old_attr_name, new_attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -759,7 +939,7 @@ CONTAINS
          INTEGER(SIZE_T) :: new_attr_namelen
          INTEGER(HID_T) :: lapl_id_default
 
-       END FUNCTION h5arename_by_name_c
+       END FUNCTION H5Arename_by_name_c
     END INTERFACE
 
     obj_namelen = LEN(obj_name)
@@ -769,17 +949,17 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default=lapl_id
 
-    hdferr = h5arename_by_name_c(loc_id, obj_name, obj_namelen, &
+    hdferr = H5Arename_by_name_c(loc_id, obj_name, obj_namelen, &
          old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen, &
          lapl_id_default)
 
-  END SUBROUTINE h5arename_by_name_f
+  END SUBROUTINE H5Arename_by_name_f
 
 !
-!****s* H5A/h5aopen_f
+!****s* H5A/H5Aopen_f
 !
 ! NAME
-!  h5aopen_f
+!  H5Aopen_f
 !
 ! PURPOSE
 !  Opens an attribute for an object specified by object
@@ -800,7 +980,7 @@ CONTAINS
 !  January, 2008
 !
 ! SOURCE
-  SUBROUTINE h5aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id)
+  SUBROUTINE H5Aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id      ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Attribute name
@@ -815,10 +995,11 @@ CONTAINS
     INTEGER(SIZE_T) :: attr_namelen
 
     INTERFACE
-       INTEGER FUNCTION h5aopen_c(obj_id, attr_name, attr_namelen, aapl_id_default, attr_id)
+       INTEGER FUNCTION H5Aopen_c(obj_id, attr_name, attr_namelen, aapl_id_default, attr_id)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_C'::h5aopen_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_C'::H5Aopen_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(HID_T), INTENT(IN) :: obj_id
@@ -826,7 +1007,7 @@ CONTAINS
          INTEGER(HID_T) :: aapl_id_default
          INTEGER(SIZE_T) :: attr_namelen
          INTEGER(HID_T), INTENT(OUT) :: attr_id
-       END FUNCTION h5aopen_c
+       END FUNCTION H5Aopen_c
     END INTERFACE
 
     attr_namelen = LEN(attr_name)
@@ -834,15 +1015,15 @@ CONTAINS
     aapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
 
-    hdferr = h5aopen_c(obj_id, attr_name, attr_namelen, aapl_id_default, attr_id)
+    hdferr = H5Aopen_c(obj_id, attr_name, attr_namelen, aapl_id_default, attr_id)
 
-  END SUBROUTINE h5aopen_f
+  END SUBROUTINE H5Aopen_f
 
 !
-!****s* H5A/h5adelete_by_idx_f
+!****s* H5A/H5Adelete_by_idx_f
 !
 ! NAME
-!  h5adelete_by_idx_f
+!  H5Adelete_by_idx_f
 !
 ! PURPOSE
 !  Deletes an attribute from an object according to index order
@@ -874,7 +1055,7 @@ CONTAINS
 !  January, 2008
 !
 ! SOURCE
-  SUBROUTINE h5adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
+  SUBROUTINE H5Adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
@@ -900,10 +1081,11 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5adelete_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default)
+       INTEGER FUNCTION H5Adelete_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_IDX_C'::h5adelete_by_idx_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_IDX_C'::H5Adelete_by_idx_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: obj_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -913,22 +1095,22 @@ CONTAINS
          INTEGER(HSIZE_T), INTENT(IN) :: n
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(SIZE_T) :: obj_namelen
-       END FUNCTION h5adelete_by_idx_c
+       END FUNCTION H5Adelete_by_idx_c
     END INTERFACE
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
     obj_namelen = LEN(obj_name)
-    hdferr = h5adelete_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default)
+    hdferr = H5Adelete_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default)
 
-  END SUBROUTINE h5adelete_by_idx_f
+  END SUBROUTINE H5Adelete_by_idx_f
 
 !
-!****s* H5A/h5adelete_by_name_f
+!****s* H5A/H5Adelete_by_name_f
 !
 ! NAME
-!  h5adelete_by_name_f
+!  H5Adelete_by_name_f
 !
 ! PURPOSE
 !  Removes an attribute from a specified location
@@ -946,7 +1128,7 @@ CONTAINS
 !  January, 2008
 !
 ! SOURCE
-  SUBROUTINE h5adelete_by_name_f(loc_id, obj_name, attr_name, hdferr, lapl_id)
+  SUBROUTINE H5Adelete_by_name_f(loc_id, obj_name, attr_name, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
@@ -962,10 +1144,11 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5adelete_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default)
+       INTEGER FUNCTION H5Adelete_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_NAME_C'::h5adelete_by_name_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_NAME_C'::H5Adelete_by_name_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: obj_name, attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -974,7 +1157,7 @@ CONTAINS
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(SIZE_T) :: attr_namelen
          INTEGER(SIZE_T) :: obj_namelen
-       END FUNCTION h5adelete_by_name_c
+       END FUNCTION H5Adelete_by_name_c
     END INTERFACE
 
     obj_namelen = LEN(obj_name)
@@ -983,15 +1166,15 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5adelete_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default)
+    hdferr = H5Adelete_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default)
 
-  END SUBROUTINE h5adelete_by_name_f
+  END SUBROUTINE H5Adelete_by_name_f
 
 !
-!****s* H5A/h5aopen_by_idx_f
+!****s* H5A/H5Aopen_by_idx_f
 !
 ! NAME
-!  h5aopen_by_idx_f
+!  H5Aopen_by_idx_f
 !
 ! PURPOSE
 !  Opens an existing attribute that is attached to an object specified by location and name
@@ -1013,7 +1196,7 @@ CONTAINS
 !  January, 2008
 !
 ! SOURCE
-  SUBROUTINE h5aopen_by_idx_f(loc_id, obj_name, idx_type, order, n, attr_id, hdferr, aapl_id, lapl_id)
+  SUBROUTINE H5Aopen_by_idx_f(loc_id, obj_name, idx_type, order, n, attr_id, hdferr, aapl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object to which attribute is attached
@@ -1041,11 +1224,12 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5aopen_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, &
+       INTEGER FUNCTION H5Aopen_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, &
             aapl_id_default, lapl_id_default, attr_id)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_BY_IDX_C'::h5aopen_by_idx_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_BY_IDX_C'::H5Aopen_by_idx_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: obj_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1057,7 +1241,7 @@ CONTAINS
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(SIZE_T) :: obj_namelen
          INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier
-       END FUNCTION h5aopen_by_idx_c
+       END FUNCTION H5Aopen_by_idx_c
     END INTERFACE
 
     obj_namelen = LEN(obj_name)
@@ -1067,16 +1251,16 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5aopen_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, &
+    hdferr = H5Aopen_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, &
          aapl_id_default, lapl_id_default, attr_id)
 
-  END SUBROUTINE h5aopen_by_idx_f
+  END SUBROUTINE H5Aopen_by_idx_f
 
 !
-!****s* H5A/h5aget_info_f
+!****s* H5A/H5Aget_info_f
 !
 ! NAME
-!  h5aget_info_f
+!  H5Aget_info_f
 !
 ! PURPOSE
 !  Retrieves attribute information, by attribute identifier
@@ -1096,7 +1280,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  January, 2008
 ! SOURCE
-  SUBROUTINE h5aget_info_f(attr_id, f_corder_valid, corder, cset, data_size, hdferr)
+  SUBROUTINE H5Aget_info_f(attr_id, f_corder_valid, corder, cset, data_size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
 
@@ -1110,10 +1294,11 @@ CONTAINS
     INTEGER :: corder_valid
 
     INTERFACE
-       INTEGER FUNCTION h5aget_info_c(attr_id, corder_valid, corder, cset, data_size)
+       INTEGER FUNCTION H5Aget_info_c(attr_id, corder_valid, corder, cset, data_size)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_C'::h5aget_info_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_C'::H5Aget_info_c
          !DEC$ENDIF
          INTEGER(HID_T), INTENT(IN) :: attr_id
 
@@ -1121,22 +1306,22 @@ CONTAINS
          INTEGER, INTENT(OUT) :: corder
          INTEGER, INTENT(OUT) :: cset
          INTEGER(HSIZE_T), INTENT(OUT) :: data_size
-       END FUNCTION h5aget_info_c
+       END FUNCTION H5Aget_info_c
     END INTERFACE
 
-    hdferr = h5aget_info_c(attr_id, corder_valid, corder, cset, data_size)
+    hdferr = H5Aget_info_c(attr_id, corder_valid, corder, cset, data_size)
 
     f_corder_valid =.FALSE.
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.
 
 
-  END SUBROUTINE h5aget_info_f
+  END SUBROUTINE H5Aget_info_f
 
 !
-!****s* H5A/h5aget_info_by_idx_f
+!****s* H5A/H5Aget_info_by_idx_f
 !
 ! NAME
-!  h5aget_info_by_idx_f
+!  H5Aget_info_by_idx_f
 !
 ! PURPOSE
 !  Retrieves attribute information, by attribute index position
@@ -1162,7 +1347,7 @@ CONTAINS
 !  January, 2008
 !
 ! SOURCE
-  SUBROUTINE h5aget_info_by_idx_f(loc_id, obj_name, idx_type, order, n, &
+  SUBROUTINE H5Aget_info_by_idx_f(loc_id, obj_name, idx_type, order, n, &
        f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Object identifier
@@ -1194,11 +1379,12 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5aget_info_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default, &
+       INTEGER FUNCTION H5Aget_info_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default, &
             corder_valid, corder, cset, data_size)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_BY_IDX_C'::h5aget_info_by_idx_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_BY_IDX_C'::H5Aget_info_by_idx_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: obj_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1213,7 +1399,7 @@ CONTAINS
          INTEGER(HSIZE_T), INTENT(OUT) :: data_size
 
          INTEGER(SIZE_T)  :: obj_namelen
-       END FUNCTION h5aget_info_by_idx_c
+       END FUNCTION H5Aget_info_by_idx_c
     END INTERFACE
 
     obj_namelen = LEN(obj_name)
@@ -1221,19 +1407,19 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(present(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5aget_info_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default, &
+    hdferr = H5Aget_info_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default, &
             corder_valid, corder, cset, data_size)
 
     f_corder_valid =.FALSE.
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.
 
-  END SUBROUTINE h5aget_info_by_idx_f
+  END SUBROUTINE H5Aget_info_by_idx_f
 
 !
-!****s* H5A/h5aget_info_by_name_f
+!****s* H5A/H5Aget_info_by_name_f
 !
 ! NAME
-!  h5aget_info_by_name_f
+!  H5Aget_info_by_name_f
 !
 ! PURPOSE
 !  Retrieves attribute information, by attribute name
@@ -1257,7 +1443,7 @@ CONTAINS
 !  January, 2008
 !
 ! SOURCE
-  SUBROUTINE h5aget_info_by_name_f(loc_id, obj_name, attr_name, &
+  SUBROUTINE H5Aget_info_by_name_f(loc_id, obj_name, attr_name, &
        f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
@@ -1279,11 +1465,12 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5aget_info_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, &
+       INTEGER FUNCTION H5Aget_info_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, &
             corder_valid, corder, cset, data_size)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_BY_NAME_C'::h5aget_info_by_name_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_BY_NAME_C'::H5Aget_info_by_name_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: obj_name, attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1297,7 +1484,7 @@ CONTAINS
          INTEGER, INTENT(OUT) :: cset
          INTEGER(HSIZE_T), INTENT(OUT) :: data_size
 
-       END FUNCTION h5aget_info_by_name_c
+       END FUNCTION H5Aget_info_by_name_c
     END INTERFACE
 
     obj_namelen = LEN(obj_name)
@@ -1306,19 +1493,19 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5aget_info_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, &
+    hdferr = H5Aget_info_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, &
             corder_valid, corder, cset, data_size)
 
     f_corder_valid =.FALSE.
     IF (corder_valid .EQ. 1) f_corder_valid =.TRUE.
 
-  END SUBROUTINE h5aget_info_by_name_f
+  END SUBROUTINE H5Aget_info_by_name_f
 
 !
-!****s* H5A/h5acreate_by_name_f
+!****s* H5A/H5Acreate_by_name_f
 !
 ! NAME
-!  h5acreate_by_name_f
+!  H5Acreate_by_name_f
 !
 ! PURPOSE
 !  Creates an attribute attached to a specified object
@@ -1342,7 +1529,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  February, 2008
 ! SOURCE
-  SUBROUTINE h5acreate_by_name_f(loc_id, obj_name, attr_name, type_id, space_id, attr, hdferr, &
+  SUBROUTINE H5Acreate_by_name_f(loc_id, obj_name, attr_name, type_id, space_id, attr, hdferr, &
        acpl_id, aapl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T),   INTENT(IN)  :: loc_id
@@ -1365,11 +1552,12 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5acreate_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
+       INTEGER FUNCTION H5Acreate_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
             type_id, space_id, acpl_id_default, aapl_id_default, lapl_id_default, attr)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ACREATE_BY_NAME_C'::h5acreate_by_name_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ACREATE_BY_NAME_C'::H5Acreate_by_name_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: obj_name, attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1384,7 +1572,7 @@ CONTAINS
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(HID_T), INTENT(OUT) :: attr
 
-       END FUNCTION h5acreate_by_name_c
+       END FUNCTION H5Acreate_by_name_c
     END INTERFACE
 
     obj_namelen = LEN(obj_name)
@@ -1398,9 +1586,9 @@ CONTAINS
     IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5acreate_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
+    hdferr = H5Acreate_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
             type_id, space_id, acpl_id_default, aapl_id_default, lapl_id_default, attr)
-  END SUBROUTINE h5acreate_by_name_f
+  END SUBROUTINE H5Acreate_by_name_f
 
 !
 !****s* H5A/H5Aexists_f
@@ -1424,7 +1612,7 @@ CONTAINS
 !  February, 2008
 !
 ! SOURCE
-  SUBROUTINE h5aexists_f(obj_id, attr_name, attr_exists, hdferr)
+  SUBROUTINE H5Aexists_f(obj_id, attr_name, attr_exists, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id      ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Attribute name
@@ -1436,27 +1624,28 @@ CONTAINS
     INTEGER(SIZE_T) :: attr_namelen
 
     INTERFACE
-       INTEGER FUNCTION h5aexists_c(obj_id, attr_name, attr_namelen, attr_exists_c)
+       INTEGER FUNCTION H5Aexists_c(obj_id, attr_name, attr_namelen, attr_exists_c)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AEXISTS_C'::h5aexists_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AEXISTS_C'::H5Aexists_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(HID_T), INTENT(IN) :: obj_id
          CHARACTER(LEN=*), INTENT(IN) :: attr_name
          INTEGER(SIZE_T) :: attr_namelen
          INTEGER(HID_T) :: attr_exists_c
-       END FUNCTION h5aexists_c
+       END FUNCTION H5Aexists_c
     END INTERFACE
 
     attr_namelen = LEN(attr_name)
 
-    hdferr = h5aexists_c(obj_id, attr_name, attr_namelen, attr_exists_c)
+    hdferr = H5Aexists_c(obj_id, attr_name, attr_namelen, attr_exists_c)
 
     attr_exists = .FALSE.
     IF(attr_exists_c.GT.0) attr_exists = .TRUE.
 
-  END SUBROUTINE h5aexists_f
+  END SUBROUTINE H5Aexists_f
 
 !
 !****s* H5A/H5Aexists_by_name_f
@@ -1483,7 +1672,7 @@ CONTAINS
 !  February, 2008
 !
 ! SOURCE
-  SUBROUTINE h5aexists_by_name_f(loc_id, obj_name, attr_name, attr_exists, hdferr, lapl_id)
+  SUBROUTINE H5Aexists_by_name_f(loc_id, obj_name, attr_name, attr_exists, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id     ! Location identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Object name either relative to loc_id,
@@ -1501,10 +1690,11 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5aexists_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, attr_exists_c)
+       INTEGER FUNCTION H5Aexists_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, attr_exists_c)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AEXISTS_BY_NAME_C'::h5aexists_by_name_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AEXISTS_BY_NAME_C'::H5Aexists_by_name_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: obj_name, attr_name 
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1514,7 +1704,7 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(IN) :: attr_namelen
          INTEGER(HID_T), INTENT(IN) :: lapl_id_default
          INTEGER, INTENT(OUT) :: attr_exists_c
-       END FUNCTION h5aexists_by_name_c
+       END FUNCTION H5Aexists_by_name_c
     END INTERFACE
 
     attr_namelen = LEN(attr_name)
@@ -1523,12 +1713,12 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5aexists_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, attr_exists_c)
+    hdferr = H5Aexists_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, attr_exists_c)
 
     attr_exists = .FALSE.
     IF(attr_exists_c.GT.0) attr_exists = .TRUE.
 
-  END SUBROUTINE h5aexists_by_name_f
+  END SUBROUTINE H5Aexists_by_name_f
 !
 !****s* H5A/H5Aopen_by_name_f
 !
@@ -1554,7 +1744,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  February, 2008
 ! SOURCE
-  SUBROUTINE h5aopen_by_name_f(loc_id, obj_name, attr_name, attr_id, hdferr, aapl_id, lapl_id)
+  SUBROUTINE H5Aopen_by_name_f(loc_id, obj_name, attr_name, attr_id, hdferr, aapl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Location identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Object name either relative to loc_id,
@@ -1574,11 +1764,12 @@ CONTAINS
     INTEGER(SIZE_T) :: attr_namelen
 
     INTERFACE
-       INTEGER FUNCTION h5aopen_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
+       INTEGER FUNCTION H5Aopen_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
             aapl_id_default, lapl_id_default, attr_id)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_BY_NAME_C'::h5aopen_by_name_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_BY_NAME_C'::H5Aopen_by_name_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: obj_name, attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1589,7 +1780,7 @@ CONTAINS
          INTEGER(HID_T) :: aapl_id_default
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(HID_T), INTENT(OUT) :: attr_id
-       END FUNCTION h5aopen_by_name_c
+       END FUNCTION H5Aopen_by_name_c
     END INTERFACE
 
     attr_namelen = LEN(attr_name)
@@ -1600,16 +1791,16 @@ CONTAINS
     IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5aopen_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
+    hdferr = H5Aopen_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
          aapl_id_default, lapl_id_default, attr_id)
 
-  END SUBROUTINE h5aopen_by_name_f
+  END SUBROUTINE H5Aopen_by_name_f
 
 !
-!****s* H5A/h5arename_f
+!****s* H5A/H5Arename_f
 !
 ! NAME
-!  h5arename_f
+!  H5Arename_f
 !
 ! PURPOSE
 !  Renames an attribute
@@ -1632,7 +1823,7 @@ CONTAINS
 !
 
 ! SOURCE
-  SUBROUTINE h5arename_f(loc_id, old_attr_name, new_attr_name, hdferr)
+  SUBROUTINE H5Arename_f(loc_id, old_attr_name, new_attr_name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: old_attr_name ! Prior attribute name
@@ -1644,11 +1835,12 @@ CONTAINS
     INTEGER(SIZE_T) :: new_attr_namelen
 
     INTERFACE
-       INTEGER FUNCTION h5arename_c(loc_id, &
+       INTEGER FUNCTION H5Arename_c(loc_id, &
             old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen)
+         USE ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ARENAME_C'::h5arename_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ARENAME_C'::H5Arename_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: old_attr_name, new_attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1657,16 +1849,1112 @@ CONTAINS
          CHARACTER(LEN=*), INTENT(IN) :: new_attr_name
          INTEGER(SIZE_T) :: new_attr_namelen
 
-       END FUNCTION h5arename_c
+       END FUNCTION H5Arename_c
     END INTERFACE
 
     old_attr_namelen = LEN(old_attr_name)
     new_attr_namelen = LEN(new_attr_name)
 
-    hdferr = h5arename_c(loc_id, &
+    hdferr = H5Arename_c(loc_id, &
          old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen)
 
-  END SUBROUTINE h5arename_f
+  END SUBROUTINE H5Arename_f
+
+
+!****s* H5A (F03)/H5Awrite_f_F90
+!
+! NAME
+!  H5Awrite_f_F90
+!
+! PURPOSE
+!  Writes an attribute.
+!
+! Inputs:
+!  attr_id     - Attribute identifier
+!  memtype_id  - Attribute datatype identifier  (in memory)
+!  dims        - Array to hold corresponding dimension sizes of data buffer buf;
+!                dim(k) has value of the k-th dimension of buffer buf;
+!                values are ignored if buf is a scalar
+!  buf 	       - Data buffer; may be a scalar or an array
+!
+! Outputs:
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  Elena Pourmal
+!  August 12, 1999
+!
+! HISTORY
+!  Explicit Fortran interfaces are added for
+!  called C functions (it is needed for Windows
+!  port).  February 27, 2001
+!
+!  dims parameter was added to make code portable;
+!  Aprile 4, 2001
+!
+!  Changed buf intent to INOUT to be consistant
+!  with how the C functions handles it. The pg
+!  compiler will return 0 if a buf value is not set.
+!  February, 2008
+!
+! NOTES
+!  This function is overloaded to write INTEGER,
+!  REAL, DOUBLE PRECISION and CHARACTER buffers
+!  up to 7 dimensions.
+!
+! Fortran90 Interface:
+!!  SUBROUTINE H5Awrite_f(attr_id, memtype_id, buf, dims, hdferr) 
+!!    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
+!!    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
+!!    TYPE            , INTENT(IN)               :: buf
+!!    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+!!    INTEGER         , INTENT(OUT)              :: hdferr
+!*****
+
+
+  SUBROUTINE H5Awrite_integer_scalar(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(IN), TARGET :: buf                 ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr                     ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf)
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_integer_scalar
+
+  SUBROUTINE H5Awrite_integer_1(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(IN) , &
+         DIMENSION(dims(1)), TARGET :: buf  ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Awrite_integer_1
+
+
+  SUBROUTINE H5Awrite_integer_2(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(IN) , &
+         DIMENSION(dims(1),dims(2)), TARGET :: buf
+                                            ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_integer_2
+
+  SUBROUTINE H5Awrite_integer_3(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    INTEGER, INTENT(IN), DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_integer_3
+
+
+  SUBROUTINE H5Awrite_integer_4(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims! Array to story buf dimension sizes
+    INTEGER, INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_integer_4
+
+
+  SUBROUTINE H5Awrite_integer_5(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_integer_5
+
+
+  SUBROUTINE H5Awrite_integer_6(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Awrite_integer_6
+
+
+  SUBROUTINE H5Awrite_integer_7(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(IN), DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), &
+         TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_integer_7
+
+
+  SUBROUTINE H5Awrite_real_scalar(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(IN), TARGET :: buf          ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf)
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Awrite_real_scalar
+
+  SUBROUTINE H5Awrite_real_1(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(IN), &
+         DIMENSION(dims(1)), TARGET :: buf  ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_real_1
+
+
+  SUBROUTINE H5Awrite_real_2(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(IN), &
+         DIMENSION(dims(1),dims(2)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_real_2
+
+
+  SUBROUTINE H5Awrite_real_3(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL, INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Awrite_real_3
+
+
+  SUBROUTINE H5Awrite_real_4(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL, INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Awrite_real_4
+
+
+  SUBROUTINE H5Awrite_real_5(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL, INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf)
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Awrite_real_5
+
+
+  SUBROUTINE H5Awrite_real_6(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Awrite_real_6
+
+
+  SUBROUTINE H5Awrite_real_7(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Awrite_real_7
+
+  SUBROUTINE H5Awrite_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id               ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id            ! Attribute datatype
+                                                        !  identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims  ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(IN) :: buf                 ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr                      ! Error code
+
+    CALL H5Awrite_char_scalar_fix(attr_id, memtype_id, buf, LEN(buf), dims, hdferr)
+
+  END SUBROUTINE H5Awrite_char_scalar
+
+  SUBROUTINE H5Awrite_char_scalar_fix(attr_id, memtype_id, buf, buf_len, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id               ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id            ! Attribute datatype
+                                                        !  identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims  ! Array to story buf dimension sizes
+    INTEGER, INTENT(IN)  :: buf_len
+    CHARACTER(LEN=buf_len), INTENT(IN), TARGET :: buf   ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr                      ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1:1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_char_scalar_fix
+
+  SUBROUTINE H5Awrite_char_1(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(IN), DIMENSION(dims(1)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1)(1:1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_char_1
+
+  SUBROUTINE H5Awrite_char_2(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims  ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(IN), &
+         DIMENSION(dims(1),dims(2)), TARGET :: buf  ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1)(1:1))
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_char_2
+
+  SUBROUTINE H5Awrite_char_3(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1)(1:1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_char_3
+
+  SUBROUTINE H5Awrite_char_4(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1)(1:1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_char_4
+
+  SUBROUTINE H5Awrite_char_5(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1)(1:1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_char_5
+
+
+  SUBROUTINE H5Awrite_char_6(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1)(1:1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_char_6
+
+  SUBROUTINE H5Awrite_char_7(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1)(1:1))
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Awrite_char_7
+
+!****s* H5A (F03)/H5Awrite_f_F03
+!
+! NAME
+!  H5Awrite_f_F03
+!
+! PURPOSE
+!  Writes an attribute.
+!
+! Inputs:
+!  attr_id     - Attribute identifier
+!  memtype_id  - Attribute datatype identifier  (in memory)
+!  buf 	       - Data buffer; may be a scalar or an array
+!
+! Outputs:
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  Elena Pourmal
+!  August 12, 1999
+!
+! HISTORY
+!  Explicit Fortran interfaces are added for
+!  called C functions (it is needed for Windows
+!  port).  February 27, 2001
+!
+! NOTES
+!  This function is overloaded to write INTEGER,
+!  REAL, DOUBLE PRECISION and CHARACTER buffers
+!  up to 7 dimensions.
+!
+! Fortran2003 Interface:
+!!  SUBROUTINE H5Awrite_f(attr_id, memtype_id, buf, hdferr) 
+!!    INTEGER(HID_T)  , INTENT(IN)  :: attr_id
+!!    INTEGER(HID_T)  , INTENT(IN)  :: memtype_id
+!!    TYPE(C_PTR)     , INTENT(IN)  :: buf
+!!    INTEGER         , INTENT(OUT) :: hdferr
+!*****
+
+  SUBROUTINE H5Awrite_ptr(attr_id, mem_type_id, buf, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id     ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    TYPE(C_PTR), INTENT(IN), TARGET :: buf
+    INTEGER, INTENT(OUT) :: hdferr            ! Error code
+
+    hdferr = H5Awrite_f_c(attr_id, mem_type_id, buf)
+
+  END SUBROUTINE H5Awrite_ptr
+
+!****s* H5A (F03)/H5Aread_f_F90
+!
+! NAME
+!  H5Aread_f_F90
+!
+! PURPOSE
+!  Reads an attribute.
+!
+! Inputs:
+!  attr_id     - Attribute identifier
+!  memtype_id  - Attribute datatype identifier  (in memory)
+!  dims        - Array to hold corresponding dimension sizes of data buffer buf;
+!                dim(k) has value of the k-th dimension of buffer buf;
+!                values are ignored if buf is a scalar
+!
+! Outputs:
+!  buf 	       - Data buffer; may be a scalar or an array
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  Elena Pourmal
+!  August 12, 1999
+!
+! HISTORY
+!  Explicit Fortran interfaces are added for
+!  called C functions (it is needed for Windows
+!  port).  February 27, 2001
+!
+!  dims parameter was added to make code portable;
+!  Aprile 4, 2001
+!
+!  Changed buf intent to INOUT to be consistant
+!  with how the C functions handles it. The pg
+!  compiler will return 0 if a buf value is not set.
+!  February, 2008
+!
+! NOTES
+!  This function is overloaded to write INTEGER,
+!  REAL, DOUBLE PRECISION and CHARACTER buffers
+!  up to 7 dimensions.
+! Fortran90 Interface:
+!!  SUBROUTINE H5Aread_f(attr_id, memtype_id, buf, dims, hdferr) 
+!!    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
+!!    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
+!!    TYPE            , INTENT(INOUT)            :: buf
+!!    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+!!    INTEGER         , INTENT(OUT)              :: hdferr
+!*****
+  SUBROUTINE H5Aread_integer_scalar(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(INOUT), TARGET :: buf              ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code 
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf)
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_integer_scalar
+
+  SUBROUTINE H5Aread_integer_1(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(INOUT), DIMENSION(dims(1)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_integer_1
+
+
+  SUBROUTINE H5Aread_integer_2(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(INOUT),DIMENSION(dims(1),dims(2)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_integer_2
+
+
+  SUBROUTINE H5Aread_integer_3(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_integer_3
+
+
+  SUBROUTINE H5Aread_integer_4(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_integer_4
+
+
+  SUBROUTINE H5Aread_integer_5(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_integer_5
+
+
+  SUBROUTINE H5Aread_integer_6(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_integer_6
+
+
+  SUBROUTINE H5Aread_integer_7(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    INTEGER, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_integer_7
+
+
+  SUBROUTINE H5Aread_real_scalar(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(INOUT), TARGET :: buf                 ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf)
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_real_scalar
+
+  SUBROUTINE H5Aread_real_1(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(INOUT), &
+         DIMENSION(dims(1)), TARGET :: buf  ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_real_1
+
+
+  SUBROUTINE H5Aread_real_2(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_real_2
+
+
+  SUBROUTINE H5Aread_real_3(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
+                                            ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_real_3
+
+
+  SUBROUTINE H5Aread_real_4(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_real_4
+
+
+  SUBROUTINE H5Aread_real_5(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_real_5
+
+
+  SUBROUTINE H5Aread_real_6(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_real_6
+
+
+  SUBROUTINE H5Aread_real_7(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    REAL, INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE H5Aread_real_7
+
+  SUBROUTINE H5Aread_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(INOUT) :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+
+    CALL H5Aread_char_scalar_fix(attr_id, memtype_id, buf, LEN(buf), hdferr)
+
+  END SUBROUTINE H5Aread_char_scalar
+
+  SUBROUTINE H5Aread_char_scalar_fix(attr_id, memtype_id, buf, buf_len, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER, INTENT(IN)  :: buf_len
+    CHARACTER(LEN=buf_len), INTENT(INOUT), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1:1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Aread_char_scalar_fix
+
+  SUBROUTINE H5Aread_char_1(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(INOUT), &
+         DIMENSION(dims(1)), TARGET :: buf  ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1)(1:1))
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Aread_char_1
+
+
+  SUBROUTINE H5Aread_char_2(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2)), TARGET :: buf  ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1)(1:1))
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Aread_char_2
+
+
+  SUBROUTINE H5Aread_char_3(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1)(1:1))
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Aread_char_3
+
+  SUBROUTINE H5Aread_char_4(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1)(1:1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Aread_char_4
+
+  SUBROUTINE H5Aread_char_5(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1)(1:1))
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Aread_char_5
+
+
+  SUBROUTINE H5Aread_char_6(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1)(1:1))
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Aread_char_6
+
+
+  SUBROUTINE H5Aread_char_7(attr_id, memtype_id, buf, dims, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                             ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims ! Array to story buf dimension sizes
+    CHARACTER(LEN=*), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr           ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1)(1:1))
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE H5Aread_char_7
+
+
+!****s* H5A (F03)/H5Aread_f_F03
+!
+! NAME
+!  H5Aread_f_F03
+!
+! PURPOSE
+!  Reads an attribute.
+!
+! Inputs:
+!  attr_id     - Attribute identifier
+!  memtype_id  - Attribute datatype identifier  (in memory)
+!
+! Outputs:
+!  buf 	       - Data buffer; may be a scalar or an array
+!  hdferr      - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  Elena Pourmal
+!  August 12, 1999
+!
+! HISTORY
+!  Explicit Fortran interfaces are added for
+!  called C functions (it is needed for Windows
+!  port).  February 27, 2001
+!
+!  dims parameter was added to make code portable;
+!  Aprile 4, 2001
+!
+!  Changed buf intent to INOUT to be consistant
+!  with how the C functions handles it. The pg
+!  compiler will return 0 if a buf value is not set.
+!  February, 2008
+!
+! NOTES
+!  This function is overloaded to write INTEGER,
+!  REAL, DOUBLE PRECISION and CHARACTER buffers
+!  up to 7 dimensions.
+! Fortran2003 Interface:
+!!  SUBROUTINE H5Aread_f(attr_id, memtype_id, buf, hdferr) 
+!!    INTEGER(HID_T)  , INTENT(IN)    :: attr_id
+!!    INTEGER(HID_T)  , INTENT(IN)    :: memtype_id
+!!    TYPE(C_PTR)     , INTENT(INOUT) :: buf
+!!    INTEGER         , INTENT(OUT)   :: hdferr
+!*****
+
+  SUBROUTINE H5Aread_ptr(attr_id, mem_type_id, buf, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id     ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    TYPE(C_PTR), INTENT(INOUT), TARGET :: buf
+    INTEGER, INTENT(OUT) :: hdferr            ! Error code
+
+    hdferr = H5Aread_f_c(attr_id, mem_type_id, buf)
+
+  END SUBROUTINE H5Aread_ptr
 
 END MODULE H5A
 

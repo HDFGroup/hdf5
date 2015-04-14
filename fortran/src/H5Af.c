@@ -960,7 +960,7 @@ done:
  * SOURCE
 */
 int_f
-nh5adelete_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen)
+h5adelete_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen)
 /******/
 {
     char *c_name = NULL;        /* Buffer to hold C string */
@@ -1109,7 +1109,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aget_num_attrs_c (hid_t_f *obj_id, int_f *attr_num)
+h5aget_num_attrs_c (hid_t_f *obj_id, int_f *attr_num)
 /******/
 {
     H5O_info_t oinfo;           /* Object info */
