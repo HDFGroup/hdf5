@@ -67,12 +67,7 @@
 MODULE H5A
 
   USE H5GLOBAL
-!
-!  On Windows there are no big (integer*8) integers, so overloading
-!  for bug #670 does not work. I have to use DEC compilation directives to make
-!  Windows DEC Visual Fortran and OSF compilers happy and do right things.
-!  05/01/02 EP
-!
+
   INTERFACE h5awrite_f
      MODULE PROCEDURE h5awrite_integer_scalar
      MODULE PROCEDURE h5awrite_integer_1
@@ -101,11 +96,9 @@ MODULE H5A
      ! This is the preferred way to call h5awrite
      ! by passing an address
      MODULE PROCEDURE h5awrite_ptr
-
   END INTERFACE
 
   INTERFACE h5aread_f
-
      MODULE PROCEDURE h5aread_integer_scalar
      MODULE PROCEDURE h5aread_integer_1
      MODULE PROCEDURE h5aread_integer_2
@@ -130,16 +123,13 @@ MODULE H5A
      MODULE PROCEDURE h5aread_real_5
      MODULE PROCEDURE h5aread_real_6
      MODULE PROCEDURE h5aread_real_7
-
      ! This is the preferred way to call h5aread
      ! by passing an address
      MODULE PROCEDURE h5aread_ptr
-
   END INTERFACE
 
 !  Interface for the function used to pass the C pointer of the buffer
 !  to the C H5Awrite routine
-
   INTERFACE
      INTEGER FUNCTION h5awrite_f_c(attr_id, mem_type_id, buf) BIND(C, NAME='h5awrite_f_c')
        USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
@@ -152,7 +142,6 @@ MODULE H5A
 
 !  Interface for the function used to pass the C pointer of the buffer
 !  to the C H5Aread routine
-
   INTERFACE
      INTEGER FUNCTION h5aread_f_c(attr_id, mem_type_id, buf) BIND(C, NAME='h5aread_f_c')
        USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
@@ -201,6 +190,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5acreate_f(loc_id, name, type_id, space_id, attr_id, &
        hdferr, acpl_id, aapl_id )
+    USE H5GLOBAL
     USE ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! Object identifier
@@ -220,9 +210,9 @@ CONTAINS
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Acreate2(loc_id, name, type_id, &
             space_id, acpl_id_default, aapl_id_default) BIND(C,NAME='H5Acreate2')
-         USE H5GLOBAL
+         IMPORT :: C_CHAR, HID_T
          INTEGER(HID_T), INTENT(IN), VALUE :: loc_id
-         CHARACTER(LEN=1), DIMENSION(*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(HID_T), INTENT(IN), VALUE :: type_id
          INTEGER(HID_T), INTENT(IN), VALUE :: space_id
          INTEGER(HID_T), INTENT(IN), VALUE :: acpl_id_default
@@ -284,8 +274,9 @@ CONTAINS
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Aopen_name(obj_id, name) BIND(C,NAME='H5Aopen_name')
          USE H5GLOBAL
+         IMPORT :: C_CHAR
          INTEGER(HID_T), INTENT(IN), VALUE :: obj_id
-         CHARACTER(LEN=1), DIMENSION(*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        END FUNCTION H5Aopen_name
     END INTERFACE
 
@@ -483,14 +474,14 @@ CONTAINS
          USE H5GLOBAL
          INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
          INTEGER(SIZE_T), INTENT(IN), VALUE :: size
-         CHARACTER(KIND=C_CHAR, LEN=1), DIMENSION(*), INTENT(OUT) :: buf
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buf
        END FUNCTION H5Aget_name
     END INTERFACE
 
     ! add 1 for the null char
     hdferr = H5Aget_name(attr_id, size+1, c_buf)
 
-    CALL C2F_string(c_buf, buf)
+    CALL H5_Fortran_string_c2f(c_buf, buf)
 
   END SUBROUTINE H5Aget_name_f
 
@@ -638,11 +629,11 @@ CONTAINS
 !!$         USE ISO_C_BINDING
 !!$         USE H5GLOBAL
 !!$         INTEGER(HID_T), INTENT(IN) :: loc_id
-!!$         CHARACTER(KIND=C_CHAR, LEN=1), DIMENSION(*), INTENT(IN) :: obj_name
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
 !!$         INTEGER(C_INT), INTENT(IN) :: idx_type
 !!$         INTEGER(C_INT), INTENT(IN) :: order
 !!$         INTEGER(HSIZE_T), INTENT(IN) :: n
-!!$         CHARACTER(KIND=C_CHAR,LEN=1), DIMENSION(*), INTENT(OUT) :: name
+!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
 !!$         INTEGER(SIZE_T) :: size_default
 !!$         INTEGER(HID_T)  :: lapl_id_default
 !!$       END FUNCTION H5Aget_name_by_idx

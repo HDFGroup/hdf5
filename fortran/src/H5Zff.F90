@@ -45,7 +45,7 @@ CONTAINS
 !  Unregisters specified filetr
 !
 ! INPUTS
-!  filter - filter; may have one of the following values:
+!  filter - Filter; may have one of the following values:
 !            H5Z_FILTER_DEFLATE_F
 !            H5Z_FILTER_SZIP_F
 !            H5Z_FILTER_NBIT_F
@@ -54,7 +54,7 @@ CONTAINS
 !            H5Z_FILTER_FLETCHER32_F
 !            
 ! OUTPUTS
-!  hdferr - error code
+!  hdferr - Error code
 !            Success:  0
 !            Failure: -1
 !
@@ -84,11 +84,17 @@ CONTAINS
 !  Queries if filter is available
 !
 ! INPUTS
-!  filter 	 - filter
+!  filter 	 - Filter; may be one of the following:
+!                   H5Z_FILTER_DEFLATE_F
+!                   H5Z_FILTER_SZIP_F
+!                   H5Z_FILTER_NBIT_F
+!                   H5Z_FILTER_SCALEOFFSET_F
+!                   H5Z_FILTER_SHUFFLE_F
+!                   H5Z_FILTER_FLETCHER32_F
 ! OUTPUTS
-!  status 	 - status; .TRUE. if filter is available,
+!  status 	 - Flag; .TRUE. if filter is available,
 !                  .FALSE. otherwise
-!  hdferr:	 - error code
+!  hdferr:	 - Error code
 !                   Success:  0
 !                   Failure: -1
 !
@@ -99,17 +105,9 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
     IMPLICIT NONE
-    INTEGER, INTENT(IN)  :: filter      ! Filter; may be one of the following:
-                                        !   H5Z_FILTER_DEFLATE_F
-                                        !   H5Z_FILTER_SZIP_F
-                                        !   H5Z_FILTER_NBIT_F
-                                        !   H5Z_FILTER_SCALEOFFSET_F
-                                        !   H5Z_FILTER_SHUFFLE_F
-                                        !   H5Z_FILTER_FLETCHER32_F
-    LOGICAL, INTENT(OUT) :: status      ! Flag, idicates if filter
-                                        ! is availble  not ( TRUE or
-                                        ! FALSE)
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER, INTENT(IN)  :: filter
+    LOGICAL, INTENT(OUT) :: status
+    INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTEGER :: flag                     ! "TRUE/FALSE/ERROR from C"
 
@@ -136,13 +134,20 @@ CONTAINS
 !  available
 !
 ! INPUTS
-!  filter 	 - filter
+!  filter 	 - Filter; may be one of the following:
+!                   H5Z_FILTER_DEFLATE_F
+!                   H5Z_FILTER_SZIP_F
+!                   H5Z_FILTER_NBIT_F
+!                   H5Z_FILTER_SCALEOFFSET_F
+!                   H5Z_FILTER_SHUFFLE_F
+!                   H5Z_FILTER_FLETCHER32_Ffilter
 ! OUTPUTS
-!  config_flags  - Bit vector possibly containing the
+!  config_flags  - Flag, indicates if filter has its encoder 
+!                  and/or decoder available, possibly containing the
 !                  following values:
 !                     H5Z_FILTER_ENCODE_ENABLED_F
 !                     H5Z_FILTER_DECODE_ENABLED_F
-!  hdferr:	 - error code
+!  hdferr:	 - Error code
 !                   Success:  0
 !                   Failure: -1
 !
@@ -152,17 +157,9 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
     IMPLICIT NONE
-    INTEGER, INTENT(IN)  :: filter      ! Filter; may be one of the following:
-                                        !   H5Z_FILTER_DEFLATE_F
-                                        !   H5Z_FILTER_SZIP_F
-                                        !   H5Z_FILTER_NBIT_F
-                                        !   H5Z_FILTER_SCALEOFFSET_F
-                                        !   H5Z_FILTER_SHUFFLE_F
-                                        !   H5Z_FILTER_FLETCHER32_F
-    INTEGER, INTENT(OUT) :: config_flags! Flag, indicates if filter
-                                        ! has its encoder and/or decoder
-                                        ! available
-    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER, INTENT(IN)  :: filter
+    INTEGER, INTENT(OUT) :: config_flags
+    INTEGER, INTENT(OUT) :: hdferr
 !*****
 
     INTERFACE

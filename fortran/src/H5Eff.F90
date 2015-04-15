@@ -35,6 +35,7 @@
 
 MODULE H5E
 
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR
   USE H5GLOBAL
 
   !Turn on automatic printing of errors
@@ -79,11 +80,9 @@ CONTAINS
     INTEGER(HID_T) :: estack_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5eclear_c(estack_id_default)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ECLEAR_C'::h5eclear_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5eclear_c(estack_id_default) BIND(C,NAME='h5eclear_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T) :: estack_id_default
        END FUNCTION h5eclear_c
     END INTERFACE
@@ -118,29 +117,22 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE h5eprint_f(hdferr, name)
-    CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: name ! File name
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: name
+    INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTEGER :: namelen
 
     INTERFACE
-       INTEGER FUNCTION h5eprint_c1(name, namelen)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5EPRINT_C1'::h5eprint_c1
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5eprint_c1(name, namelen) BIND(C,NAME='h5eprint_c1')
+         IMPORT :: C_CHAR
+         IMPLICIT NONE
          INTEGER :: namelen
-         CHARACTER(LEN=*),INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        END FUNCTION h5eprint_c1
     END INTERFACE
 
     INTERFACE
-       INTEGER FUNCTION h5eprint_c2()
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5EPRINT_C2'::h5eprint_c2
-         !DEC$ENDIF
+       INTEGER FUNCTION h5eprint_c2()  BIND(C,NAME='h5eprint_c2')
        END FUNCTION h5eprint_c2
     END INTERFACE
     namelen = LEN(NAME)
@@ -186,14 +178,12 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5eget_major_c(error_no, name, namelen)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5EGET_MAJOR_C'::h5eget_major_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5eget_major_c(error_no, name, namelen)  BIND(C,NAME='h5eget_major_c')
+         IMPORT :: C_CHAR
+         IMPORT :: SIZE_T
+         IMPLICIT NONE
          INTEGER :: error_no
-         CHARACTER(LEN=*) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
          INTEGER(SIZE_T), INTENT(IN) :: namelen
        END FUNCTION h5eget_major_c
     END INTERFACE
@@ -233,14 +223,10 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5eget_minor_c(error_no, name)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5EGET_MINOR_C'::h5eget_minor_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5eget_minor_c(error_no, name) BIND(C,NAME='h5eget_minor_c')
+         IMPORT :: C_CHAR
          INTEGER :: error_no
-         CHARACTER(LEN=*) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
        END FUNCTION h5eget_minor_c
     END INTERFACE
 
@@ -286,12 +272,10 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5eset_auto2_c(printflag, estack_id, func, client_data) &
             BIND(C, NAME='h5eset_auto2_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_funptr
-         USE H5GLOBAL
+         IMPORT :: c_ptr, c_funptr
+         IMPORT :: HID_T
          INTEGER :: printflag
          INTEGER(HID_T) :: estack_id
-!!$         TYPE(C_FUNPTR) :: func
-!!$         TYPE(C_PTR), VALUE :: client_data
          TYPE(C_FUNPTR), VALUE :: func
          TYPE(C_PTR), VALUE :: client_data
        END FUNCTION h5eset_auto2_c

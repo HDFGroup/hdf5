@@ -82,6 +82,8 @@
 !*****
 
 MODULE H5D
+  
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
   USE H5GLOBAL
 
   INTERFACE h5dextend_f
@@ -178,8 +180,9 @@ MODULE H5D
           mem_space_id_default ,                         &
           file_space_id_default,                         &
           xfer_prp_default, buf ) BIND(C, NAME='h5dwrite_f_c')
-       USE H5GLOBAL
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
+       IMPORT :: c_ptr
+       IMPORT :: HID_T
+       IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: dset_id
        INTEGER(HID_T), INTENT(IN) :: mem_type_id
        INTEGER(HID_T) :: mem_space_id_default
@@ -197,8 +200,9 @@ MODULE H5D
           mem_space_id_default,                         &
           file_space_id_default,                        &
           xfer_prp_default, buf) BIND(C, NAME='h5dread_f_c')
-       USE H5GLOBAL
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
+       IMPORT :: c_ptr
+       IMPORT :: HID_T
+       IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: dset_id
        INTEGER(HID_T), INTENT(IN) :: mem_type_id
        INTEGER(HID_T) :: mem_space_id_default
@@ -220,8 +224,9 @@ MODULE H5D
   INTERFACE
      INTEGER FUNCTION h5dfill_c(f_ptr_fill_value, fill_type_id, space_id, &
           f_ptr_buf, mem_type_id) BIND(C, NAME='h5dfill_c')
-       USE H5GLOBAL
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
+       IMPORT :: c_ptr
+       IMPORT :: HID_T
+       IMPLICIT NONE
        TYPE(C_PTR), VALUE :: f_ptr_fill_value
        INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
        INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -292,14 +297,13 @@ CONTAINS
 !
     INTERFACE
        INTEGER FUNCTION h5dcreate_c(loc_id, name, namelen, type_id, &
-            space_id, lcpl_id_default, dcpl_id_default, dapl_id_default, dset_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DCREATE_C'::h5dcreate_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+            space_id, lcpl_id_default, dcpl_id_default, dapl_id_default, dset_id) &
+            BIND(C,NAME='h5dcreate_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER :: namelen
          INTEGER(HID_T), INTENT(IN) :: type_id
          INTEGER(HID_T), INTENT(IN) :: space_id
@@ -370,14 +374,13 @@ CONTAINS
     INTEGER(HID_T) :: dapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5dopen_c(loc_id, name, namelen, dapl_id_default, dset_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DOPEN_C'::h5dopen_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5dopen_c(loc_id, name, namelen, dapl_id_default, dset_id) &
+            BIND(C,NAME='h5dopen_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER :: namelen
          INTEGER(HID_T), INTENT(IN) :: dapl_id_default
          INTEGER(HID_T), INTENT(OUT) :: dset_id
@@ -422,11 +425,10 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5dclose_c(dset_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DCLOSE_C'::h5dclose_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5dclose_c(dset_id) &
+            BIND(C,NAME='h5dclose_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
        END FUNCTION h5dclose_c
     END INTERFACE
@@ -470,11 +472,10 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr                ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5dget_type_c (dataset_id, datatype_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DGET_TYPE_C'::h5dget_type_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5dget_type_c(dataset_id, datatype_id) &
+            BIND(C,NAME='h5dget_type_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dataset_id
          INTEGER(HID_T), INTENT(OUT) :: datatype_id
        END FUNCTION h5dget_type_c
@@ -522,11 +523,10 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr                ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5dset_extent_c(dataset_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DSET_EXTENT_C'::h5dset_extent_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5dset_extent_c(dataset_id, size) &
+            BIND(C,NAME='h5dset_extent_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dataset_id
          INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
        END FUNCTION h5dset_extent_c
@@ -567,11 +567,9 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr             ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5dget_create_plist_c(dataset_id, plist_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DGET_CREATE_PLIST_C'::h5dget_create_plist_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5dget_create_plist_c(dataset_id, plist_id) &
+            BIND(C,NAME='h5dget_create_plist_c')
+         IMPORT :: HID_T
          INTEGER(HID_T), INTENT(IN) :: dataset_id
          INTEGER(HID_T), INTENT(OUT) :: plist_id
        END FUNCTION h5dget_create_plist_c
@@ -607,11 +605,9 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5dget_storage_size_c(dataset_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DGET_STORAGE_SIZE_C'::h5dget_storage_size_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5dget_storage_size_c(dataset_id, size) &
+            BIND(C,NAME='h5dget_storage_size_c')
+         IMPORT :: HID_T, HSIZE_T
          INTEGER(HID_T), INTENT(IN) :: dataset_id
          INTEGER(HSIZE_T), INTENT(OUT)  :: size
        END FUNCTION h5dget_storage_size_c
@@ -653,11 +649,9 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr                ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5dvlen_get_max_len_c(dataset_id, type_id, space_id, len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DVLEN_GET_MAX_LEN_C'::h5dvlen_get_max_len_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5dvlen_get_max_len_c(dataset_id, type_id, space_id, len) &
+            BIND(C,NAME='h5dvlen_get_max_len_c')
+         IMPORT :: HID_T, SIZE_T
          INTEGER(HID_T), INTENT(IN) :: dataset_id
          INTEGER(HID_T), INTENT(IN) :: type_id
          INTEGER(HID_T), INTENT(IN) :: space_id
@@ -699,11 +693,9 @@ CONTAINS
     INTEGER, INTENT(OUT)       :: hdferr   ! Error code
   !*****
     INTERFACE
-       INTEGER FUNCTION h5dget_space_status_c(dset_id, flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DGET_SPACE_STATUS_C'::h5dget_space_status_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5dget_space_status_c(dset_id, flag) &
+            BIND(C,NAME='h5dget_space_status_c')
+         IMPORT :: HID_T
          INTEGER(HID_T) :: dset_id
          INTEGER        :: flag
        END FUNCTION h5dget_space_status_c
@@ -754,11 +746,10 @@ CONTAINS
     !  MS FORTRAN needs explicit interface for C functions called here.
     !
     INTERFACE
-       INTEGER FUNCTION h5dcreate_anon_c(loc_id, type_id, space_id, dcpl_id_default, dapl_id_default, dset_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DCREATE_ANON_C'::h5dcreate_anon_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5dcreate_anon_c(loc_id, type_id, space_id, dcpl_id_default, dapl_id_default, dset_id) &
+            BIND(C,NAME='h5dcreate_anon_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
          INTEGER(HID_T), INTENT(IN) :: type_id
          INTEGER(HID_T), INTENT(IN) :: space_id
@@ -788,8 +779,7 @@ CONTAINS
     INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: len ! Array to store
                                                      ! the length of each
                                                      ! element
-    INTEGER, INTENT(IN), &
-         DIMENSION(dims(1),dims(2)), TARGET :: buf   ! Data buffer
+    INTEGER, INTENT(IN), DIMENSION(dims(1),dims(2)), TARGET :: buf   ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
@@ -802,11 +792,10 @@ CONTAINS
        INTEGER FUNCTION h5dwrite_vl_integer_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims, len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_VL_INTEGER_C'::h5dwrite_vl_integer_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims, len) &
+            BIND(C,NAME='h5dwrite_vl_integer_c')
+         IMPORT :: HID_T, HSIZE_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -814,8 +803,7 @@ CONTAINS
          INTEGER(HID_T) :: xfer_prp_default
          INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
          INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: len
-         INTEGER, INTENT(IN), &
-              DIMENSION(dims(1),dims(2)) :: buf
+         INTEGER, INTENT(IN), DIMENSION(dims(1),dims(2)) :: buf
        END FUNCTION h5dwrite_vl_integer_c
     END INTERFACE
 
@@ -860,11 +848,10 @@ CONTAINS
        INTEGER FUNCTION h5dread_vl_integer_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims, len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_VL_INTEGER_C'::h5dread_vl_integer_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims, len) &
+            BIND(C,NAME='h5dread_vl_integer_c')
+         IMPORT :: HID_T, HSIZE_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -872,8 +859,7 @@ CONTAINS
          INTEGER(HID_T) :: xfer_prp_default
          INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
          INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*) :: len
-         INTEGER, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2)) :: buf
+         INTEGER, INTENT(INOUT), DIMENSION(dims(1),dims(2)) :: buf
        END FUNCTION h5dread_vl_integer_c
     END INTERFACE
 
@@ -917,11 +903,10 @@ CONTAINS
        INTEGER FUNCTION h5dwrite_vl_real_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims, len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_VL_REAL_C'::h5dwrite_vl_real_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims, len) &
+            BIND(C,NAME='h5dwrite_vl_real_c')
+         IMPORT :: HID_T, HSIZE_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -975,11 +960,10 @@ CONTAINS
        INTEGER FUNCTION h5dread_vl_real_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims, len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_VL_REAL_C'::h5dread_vl_real_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims, len) &
+            BIND(C,NAME='h5dread_vl_real_c')
+         IMPORT :: HID_T, HSIZE_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1010,13 +994,13 @@ CONTAINS
   SUBROUTINE h5dwrite_vl_string(dset_id, mem_type_id, buf, dims, str_len, &
        hdferr, &
        mem_space_id, file_space_id, xfer_prp)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims   ! Number of strings
     INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: str_len ! Array to store the length of each element
-    CHARACTER(LEN=*), INTENT(IN), &
-         DIMENSION(dims(2)) :: buf  ! Data buffer
+    CHARACTER(LEN=*), INTENT(IN), DIMENSION(dims(2)) :: buf  ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
@@ -1031,12 +1015,11 @@ CONTAINS
             mem_space_id_default, &
             file_space_id_default, &
             ! xfer_prp_default, tmp_buf, dims, str_len)
-            xfer_prp_default, buf, dims, str_len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_VL_STRING_C'::h5dwrite_vl_string_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: buf
+            xfer_prp_default, buf, dims, str_len) &
+            BIND(C,NAME='h5dwrite_vl_string_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, HSIZE_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1044,7 +1027,7 @@ CONTAINS
          INTEGER(HID_T) :: xfer_prp_default
          INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims
          INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: str_len
-         CHARACTER(LEN=*), DIMENSION(dims(2)) :: buf
+         CHARACTER(KIND=C_CHAR), DIMENSION(dims(2)) :: buf
        END FUNCTION
     END INTERFACE
 
@@ -1064,8 +1047,7 @@ CONTAINS
   END SUBROUTINE h5dwrite_vl_string
 
   SUBROUTINE h5dread_vl_string(dset_id, mem_type_id, buf, dims, str_len, &
-                                         hdferr, &
-                                         mem_space_id, file_space_id, xfer_prp)
+       hdferr, mem_space_id, file_space_id, xfer_prp)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1088,12 +1070,11 @@ CONTAINS
        INTEGER FUNCTION h5dread_vl_string_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims, str_len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_VL_STRING_C'::h5dread_vl_string_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: buf
+            xfer_prp_default, buf, dims, str_len) &
+            BIND(C,NAME='h5dread_vl_string_c')
+         IMPORT :: c_char
+         IMPORT :: HID_T, HSIZE_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1101,7 +1082,7 @@ CONTAINS
          INTEGER(HID_T) :: xfer_prp_default
          INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims
          INTEGER(SIZE_T), INTENT(OUT), DIMENSION(*) :: str_len
-         CHARACTER(LEN=*), DIMENSION(dims(2)) :: buf
+         CHARACTER(KIND=C_CHAR), DIMENSION(dims(2)) :: buf
        END FUNCTION h5dread_vl_string_c
     END INTERFACE
 
@@ -1152,18 +1133,16 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr                ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5dget_space_c(dataset_id, dataspace_id)
-       USE H5GLOBAL
-       !DEC$IF DEFINED(HDF5F90_WINDOWS)
-       !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DGET_SPACE_C'::h5dget_space_c
-       !DEC$ENDIF
-       INTEGER(HID_T), INTENT(IN) :: dataset_id
-       INTEGER(HID_T), INTENT(OUT) :: dataspace_id
-     END FUNCTION h5dget_space_c
-  END INTERFACE
+       INTEGER FUNCTION h5dget_space_c(dataset_id, dataspace_id) BIND(C,NAME='h5dget_space_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN) :: dataset_id
+         INTEGER(HID_T), INTENT(OUT) :: dataspace_id
+       END FUNCTION h5dget_space_c
+    END INTERFACE
 
-  hdferr = h5dget_space_c(dataset_id, dataspace_id)
-END SUBROUTINE h5dget_space_f
+    hdferr = h5dget_space_c(dataset_id, dataspace_id)
+  END SUBROUTINE h5dget_space_f
 
 !****s* H5D/h5dget_access_plist_f
 !
@@ -1185,26 +1164,24 @@ END SUBROUTINE h5dget_space_f
 !  April 13, 2009
 !
 ! SOURCE
-SUBROUTINE h5dget_access_plist_f(dset_id, plist_id, hdferr)
-  IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN)  :: dset_id
-  INTEGER(HID_T), INTENT(OUT) :: plist_id 
-  INTEGER       , INTENT(OUT) :: hdferr  
-!*****
-  INTERFACE
-     INTEGER FUNCTION h5dget_access_plist_c(dset_id, plist_id)
-       USE H5GLOBAL
-       !DEC$IF DEFINED(HDF5F90_WINDOWS)
-       !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DGET_ACCESS_PLIST_C'::h5dget_access_plist_c
-       !DEC$ENDIF
-       INTEGER(HID_T), INTENT(IN) :: dset_id
-       INTEGER(HID_T), INTENT(OUT) :: plist_id
-     END FUNCTION h5dget_access_plist_c
-  END INTERFACE
+  SUBROUTINE h5dget_access_plist_f(dset_id, plist_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: dset_id
+    INTEGER(HID_T), INTENT(OUT) :: plist_id 
+    INTEGER       , INTENT(OUT) :: hdferr  
+    !*****
+    INTERFACE
+       INTEGER FUNCTION h5dget_access_plist_c(dset_id, plist_id) BIND(C,NAME='h5dget_access_plist_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN) :: dset_id
+         INTEGER(HID_T), INTENT(OUT) :: plist_id
+       END FUNCTION h5dget_access_plist_c
+    END INTERFACE
+    
+    hdferr = h5dget_access_plist_c(dset_id, plist_id)
   
-  hdferr = h5dget_access_plist_c(dset_id, plist_id)
-  
-END SUBROUTINE h5dget_access_plist_f
+  END SUBROUTINE h5dget_access_plist_f
 
 
   SUBROUTINE h5dwrite_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
@@ -1263,11 +1240,10 @@ END SUBROUTINE h5dget_access_plist_f
     INTERFACE
        INTEGER FUNCTION h5dwrite_ref_reg_c(dset_id, mem_type_id,&
             mem_space_id_default, &
-            file_space_id_default, xfer_prp_default, ref_buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_REF_REG_C'::h5dwrite_ref_reg_c
-         !DEC$ENDIF
+            file_space_id_default, xfer_prp_default, ref_buf, dims) &
+            BIND(C,NAME='h5dwrite_ref_reg_c')
+         IMPORT :: HID_T, HSIZE_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T) :: xfer_prp_default
@@ -2185,7 +2161,6 @@ END SUBROUTINE h5dget_access_plist_f
 
   SUBROUTINE h5dread_reference_dsetreg(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2206,11 +2181,10 @@ END SUBROUTINE h5dget_access_plist_f
     INTERFACE
        INTEGER FUNCTION h5dread_ref_reg_c(dset_id, mem_type_id,&
             mem_space_id_default, &
-            file_space_id_default, xfer_prp_default, ref_buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_REF_REG_C'::h5dread_ref_reg_c
-         !DEC$ENDIF
+            file_space_id_default, xfer_prp_default, ref_buf, dims) &
+            BIND(C,NAME='h5dread_ref_reg_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T) :: xfer_prp_default
@@ -3353,7 +3327,6 @@ END SUBROUTINE h5dget_access_plist_f
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5dvlen_reclaim_f(type_id, space_id, plist_id, buf, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)    :: type_id
     INTEGER(HID_T), INTENT(IN)    :: space_id
@@ -3364,8 +3337,9 @@ END SUBROUTINE h5dget_access_plist_f
 
     INTERFACE
        INTEGER FUNCTION h5dvlen_reclaim_c(type_id, space_id, plist_id, buf) BIND(C, NAME='h5dvlen_reclaim_c')
-         USE H5GLOBAL
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+         IMPORT :: C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T) :: type_id
          INTEGER(HID_T) :: space_id
          INTEGER(HID_T) :: plist_id

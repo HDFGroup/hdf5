@@ -42,9 +42,9 @@ else
    AM_LDFLAGS+=-static
 endif
 
-# Include HDF5.F90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
+# Include HDF5.F90 if parallel is disabled, HDF5mpiof* if parallel is enabled
 if BUILD_PARALLEL_CONDITIONAL
-   PARALLEL_COND_SRC = H5FDmpiof.c HDF5mpio.F90 H5FDmpioff.F90
+   PARALLEL_COND_SRC = H5FDmpiof.c HDF5.F90 H5FDmpioff.F90
 else
    PARALLEL_COND_SRC = HDF5.F90
 endif
@@ -219,13 +219,13 @@ HDF5.lo:             $(srcdir)/HDF5.F90 H5f90global.lo H5_ff.lo H5Aff.lo  \
                      H5Sff.lo H5Tff.lo H5Zff.lo \
                      H5_DBLE_Interface$(F_DBLE).lo 
 H5FDmpioff.lo:       $(srcdir)/H5FDmpioff.F90 H5f90global.lo
-HDF5mpio.lo:         $(srcdir)/H5FDmpioff.F90 H5f90global.lo H5_ff.lo \
-		     H5Aff.lo  \
-                     H5Dff.lo \
-		     H5Eff.lo \
-                     H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo \
-		     H5Off.lo H5Pff.lo H5Rff.lo \
-                     H5Sff.lo H5Tff.lo H5Zff.lo \
-	             H5_DBLE_Interface$(F_DBLE).lo H5FDmpioff.lo
+#HDF5mpio.lo:         $(srcdir)/H5FDmpioff.F90 H5f90global.lo H5_ff.lo \
+#		     H5Aff.lo  \
+#                     H5Dff.lo \
+#		     H5Eff.lo \
+#                     H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo \
+#		     H5Off.lo H5Pff.lo H5Rff.lo \
+#                     H5Sff.lo H5Tff.lo H5Zff.lo \
+#	             H5_DBLE_Interface$(F_DBLE).lo H5FDmpioff.lo
 
 include $(top_srcdir)/config/conclude.am

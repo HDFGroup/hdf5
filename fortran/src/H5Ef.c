@@ -42,7 +42,7 @@
  * SOURCE
 */
 int_f
-nh5eclear_c(hid_t_f *estack_id )
+h5eclear_c(hid_t_f *estack_id )
 /******/
 {
   int_f ret_value = 0;
@@ -78,7 +78,7 @@ done:
  * SOURCE
 */
 int_f
-nh5eprint_c1(_fcd name, int_f* namelen)
+h5eprint_c1(_fcd name, int_f* namelen)
 /******/
 {
     FILE *file = NULL;
@@ -124,7 +124,7 @@ done:
  * SOURCE
 */
 int_f
-nh5eprint_c2(void)
+h5eprint_c2(void)
 /******/
 {
     int_f ret_value = 0;
@@ -159,7 +159,7 @@ done:
  * SOURCE
 */
 int_f
-nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
+h5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
 /******/
 {
     char *c_name = NULL;
@@ -207,7 +207,7 @@ done:
  * SOURCE
 */
 int_f
-nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
+h5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
 /******/
 {
     char *c_name = NULL;
@@ -254,7 +254,7 @@ done:
  * SOURCE
 */
 int_f
-nh5eset_auto_c(int_f* printflag)
+h5eset_auto_c(int_f* printflag)
 /******/
 {
     herr_t status = -1;
@@ -290,7 +290,7 @@ done:
  * SOURCE
 */
 /* int_f */
-/* nh5eset_auto2_c(hid_t_f *estack_id, H5E_auto2_t *func, void *client_data) */
+/* h5eset_auto2_c(hid_t_f *estack_id, H5E_auto2_t *func, void *client_data) */
 /* /\******\/ */
 /* { */
 /*   int ret_val = -1; */

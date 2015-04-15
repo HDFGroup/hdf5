@@ -655,11 +655,9 @@ CONTAINS
        INTEGER FUNCTION h5dwrite_double_s_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_S_C'::h5dwrite_double_s_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dwrite_double_s_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -703,19 +701,13 @@ CONTAINS
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
-
-    !            INTEGER, EXTERNAL :: h5dwrite_double_1_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_1_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_1_C'::h5dwrite_double_1_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dwrite_double_1_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -760,19 +752,13 @@ CONTAINS
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
-
-    !            INTEGER, EXTERNAL :: h5dwrite_double_2_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_2_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_2_C'::h5dwrite_double_2_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dwrite_double_2_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -825,11 +811,9 @@ CONTAINS
        INTEGER FUNCTION h5dwrite_double_3_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_3_C'::h5dwrite_double_3_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dwrite_double_3_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -874,19 +858,13 @@ CONTAINS
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
-
-    !            INTEGER, EXTERNAL :: h5dwrite_double_4_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_4_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_4_C'::h5dwrite_double_4_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dwrite_double_4_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -931,19 +909,13 @@ CONTAINS
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
-
-    !            INTEGER, EXTERNAL :: h5dwrite_double_5_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_5_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_5_C'::h5dwrite_double_5_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dwrite_double_5_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -989,19 +961,13 @@ CONTAINS
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
-
-    !            INTEGER, EXTERNAL :: h5dwrite_double_6_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dwrite_double_6_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_6_C'::h5dwrite_double_6_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dwrite_double_6_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1055,11 +1021,9 @@ CONTAINS
        INTEGER FUNCTION h5dwrite_double_7_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_7_C'::h5dwrite_double_7_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dwrite_double_7_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1110,11 +1074,9 @@ CONTAINS
        INTEGER FUNCTION h5dread_double_s_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_S_C'::h5dread_double_s_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dread_double_s_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1166,11 +1128,9 @@ CONTAINS
        INTEGER FUNCTION h5dread_double_1_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_1_C'::h5dread_double_1_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dread_double_1_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1215,19 +1175,13 @@ CONTAINS
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
-
-    !            INTEGER, EXTERNAL :: h5dread_double_2_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dread_double_2_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_2_C'::h5dread_double_2_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dread_double_2_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1238,7 +1192,6 @@ CONTAINS
               DIMENSION(dims(1),dims(2)) :: buf
        END FUNCTION h5dread_double_2_c
     END INTERFACE
-
 
     xfer_prp_default = H5P_DEFAULT_F
     mem_space_id_default = H5S_ALL_F
@@ -1273,18 +1226,13 @@ CONTAINS
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
 
-    !            INTEGER, EXTERNAL :: h5dread_double_3_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dread_double_3_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_3_C'::h5dread_double_3_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dread_double_3_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1330,19 +1278,13 @@ CONTAINS
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
-
-    !            INTEGER, EXTERNAL :: h5dread_double_4_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dread_double_4_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_4_C'::h5dread_double_4_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dread_double_4_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1388,18 +1330,13 @@ CONTAINS
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
 
-    !            INTEGER, EXTERNAL :: h5dread_double_5_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dread_double_5_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_5_C'::h5dread_double_5_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dread_double_5_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1446,18 +1383,13 @@ CONTAINS
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
 
-    !            INTEGER, EXTERNAL :: h5dread_double_6_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dread_double_6_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_6_C'::h5dread_double_6_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dread_double_6_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1504,18 +1436,13 @@ CONTAINS
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
 
-    !            INTEGER, EXTERNAL :: h5dread_double_7_c
-    !  MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dread_double_7_c(dset_id, mem_type_id, &
             mem_space_id_default, &
             file_space_id_default, &
-            xfer_prp_default, buf, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_7_C'::h5dread_double_7_c
-         !DEC$ENDIF
+            xfer_prp_default, buf, dims) BIND(C,NAME='h5dread_double_7_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HID_T), INTENT(IN) :: mem_type_id
          INTEGER(HID_T)  :: mem_space_id_default
@@ -1574,16 +1501,11 @@ CONTAINS
     INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
     INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier
 
-    !            INTEGER, EXTERNAL :: h5dfill_double_c
-    ! MS FORTRAN needs explicit interface for C functions called here.
-    !
     INTERFACE
        INTEGER FUNCTION h5dfill_double_c(fill_value, fill_type_id, space_id, &
-            buf, mem_type_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DFILL_DOUBLE_C'::h5dfill_double_c
-         !DEC$ENDIF
+            buf, mem_type_id) BIND(C,NAME='h5dfill_double_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          DOUBLE PRECISION, INTENT(IN) :: fill_value  ! Fill value
          INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
          INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier

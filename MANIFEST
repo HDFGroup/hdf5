@@ -312,7 +312,6 @@
 ./fortran/src/H5test_kind_STORAGE_SIZE.F90
 ./fortran/src/H5match_types.c
 ./fortran/src/HDF5.F90
-./fortran/src/HDF5mpio.F90
 ./fortran/src/Makefile.am
 ./fortran/src/Makefile.in
 ./fortran/src/README

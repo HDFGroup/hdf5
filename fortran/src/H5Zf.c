@@ -58,18 +58,18 @@ h5zunregister_c (int_f *filter)
 }
 /****if* H5Zf/h5zfiletr_avail_c
  * NAME
- *        h5zfiletr_avail_c
+ *  h5zfiletr_avail_c
  * PURPOSE
- *     Call H5Zfilter_avail to find if filter is available
+ *  Call H5Zfilter_avail to find if filter is available
  * INPUTS
- *      filter - filter identifier
+ *  filter - filter identifier
  * OUTPUTS
- *     flag - status flag
+ *  flag - status flag
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Wednesday, March 12, 2003
+ *  Wednesday, March 12, 2003
  * HISTORY
  *
  * SOURCE
@@ -94,17 +94,17 @@ h5zfilter_avail_c ( int_f *filter , int_f *flag )
  * NAME
  *        h5zget_filter_info_c
  * PURPOSE
- *     Call H5Zget_filter_info to find if filter has its encoder
- *              and/or its decoder available
+ *  Call H5Zget_filter_info to find if filter has its encoder
+ *  and/or its decoder available
  * INPUTS
- *      filter - filter identifier
+ *  filter - filter identifier
  * OUTPUTS
- *     flag - status flag
+ *  flag - status flag
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Nat Furrer and James Laird
- *              Wednesday, June 16, 2004
+ *  Wednesday, June 16, 2004
  * HISTORY
  *
  * SOURCE

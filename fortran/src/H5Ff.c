@@ -45,7 +45,7 @@
  * SOURCE
 */
 int_f
-nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, hid_t_f *acc_prp, hid_t_f *file_id)
+h5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, hid_t_f *acc_prp, hid_t_f *file_id)
 /******/
 {
      int ret_value = -1;
@@ -111,7 +111,7 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
  * SOURCE
 */
 int_f
-nh5fflush_c (hid_t_f *object_id, int_f *scope)
+h5fflush_c (hid_t_f *object_id, int_f *scope)
 /******/
 {
      int ret_value = -1;
@@ -153,7 +153,7 @@ nh5fflush_c (hid_t_f *object_id, int_f *scope)
  * HISTORY
 */
 int_f
-nh5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hid_t_f *acc_prp)
+h5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hid_t_f *acc_prp)
 /******/
 {
      int ret_value = -1;
@@ -209,7 +209,7 @@ nh5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, h
  * SOURCE
 */
 int_f
-nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
+h5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
 /******/
 {
      int ret_value = -1;
@@ -260,7 +260,7 @@ nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
  * SOURCE
 */
 int_f
-nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hid_t_f *file_id)
+h5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hid_t_f *file_id)
 /******/
 {
      int ret_value = -1;
@@ -320,7 +320,7 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
  * SOURCE
 */
 int_f
-nh5freopen_c (hid_t_f *file_id1, hid_t_f *file_id2)
+h5freopen_c (hid_t_f *file_id1, hid_t_f *file_id2)
 /******/
 {
      int ret_value = -1;
@@ -353,7 +353,7 @@ nh5freopen_c (hid_t_f *file_id1, hid_t_f *file_id2)
  * SOURCE
 */
 int_f
-nh5fget_create_plist_c (hid_t_f *file_id, hid_t_f *prop_id)
+h5fget_create_plist_c (hid_t_f *file_id, hid_t_f *prop_id)
 /******/
 {
      int ret_value = -1;
@@ -388,7 +388,7 @@ nh5fget_create_plist_c (hid_t_f *file_id, hid_t_f *prop_id)
  * SOURCE
 */
 int_f
-nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id)
+h5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id)
 /******/
 {
      int ret_value = -1;
@@ -425,7 +425,7 @@ nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id)
  * SOURCE
 */
 int_f
-nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
+h5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
 /******/
 {
      int ret_value = -1;
@@ -468,7 +468,7 @@ nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
 */
 
 int_f
-nh5fclose_c ( hid_t_f *file_id )
+h5fclose_c ( hid_t_f *file_id )
 /******/
 {
   int ret_value = 0;
@@ -500,7 +500,7 @@ nh5fclose_c ( hid_t_f *file_id )
 */
 
 int_f
-nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, size_t_f * obj_count)
+h5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, size_t_f * obj_count)
 /******/
 {
   int ret_value = 0;
@@ -538,7 +538,7 @@ nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, size_t_f * obj_count)
  * SOURCE
 */
 int_f
-nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, size_t_f *max_objs, 
+h5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, size_t_f *max_objs, 
     hid_t_f *obj_ids, size_t_f *num_objs)
 /******/
 {
@@ -584,7 +584,7 @@ nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, size_t_f *max_objs,
 */
 
 int_f
-nh5fget_freespace_c ( hid_t_f *file_id , hssize_t_f *free_space)
+h5fget_freespace_c ( hid_t_f *file_id , hssize_t_f *free_space)
 /******/
 {
   int ret_value = 0;
@@ -616,7 +616,7 @@ nh5fget_freespace_c ( hid_t_f *file_id , hssize_t_f *free_space)
  * SOURCE
 */
 int_f
-nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
+h5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
 /******/
 {
     char *c_buf = NULL;           /* Buffer to hold C string */
@@ -663,7 +663,7 @@ done:
  * SOURCE
 */
 int_f
-nh5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size)
+h5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size)
 /******/
 {
     hsize_t size_c;
