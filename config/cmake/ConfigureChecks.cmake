@@ -111,45 +111,6 @@ endif (WINDOWS)
 # ----------------------------------------------------------------------
 
 CHECK_FUNCTION_EXISTS (difftime          H5_HAVE_DIFFTIME)
-#CHECK_FUNCTION_EXISTS (gettimeofday      H5_HAVE_GETTIMEOFDAY)
-#  Since gettimeofday is not defined any where standard, lets look in all the
-#  usual places. On MSVC we are just going to use ::clock()
-if (NOT MSVC)
-  if ("H5_HAVE_TIME_GETTIMEOFDAY" MATCHES "^H5_HAVE_TIME_GETTIMEOFDAY$")
-    TRY_COMPILE (HAVE_TIME_GETTIMEOFDAY
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_EXT_DIR}/GetTimeOfDayTest.cpp
-        COMPILE_DEFINITIONS -DTRY_TIME_H
-        OUTPUT_VARIABLE OUTPUT
-    )
-    if (HAVE_TIME_GETTIMEOFDAY STREQUAL "TRUE")
-      set (H5_HAVE_TIME_GETTIMEOFDAY "1" CACHE INTERNAL "H5_HAVE_TIME_GETTIMEOFDAY")
-      set (H5_HAVE_GETTIMEOFDAY "1" CACHE INTERNAL "H5_HAVE_GETTIMEOFDAY")
-    endif (HAVE_TIME_GETTIMEOFDAY STREQUAL "TRUE")
-  endif ("H5_HAVE_TIME_GETTIMEOFDAY" MATCHES "^H5_HAVE_TIME_GETTIMEOFDAY$")
-
-  if ("H5_HAVE_SYS_TIME_GETTIMEOFDAY" MATCHES "^H5_HAVE_SYS_TIME_GETTIMEOFDAY$")
-    TRY_COMPILE (HAVE_SYS_TIME_GETTIMEOFDAY
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_EXT_DIR}/GetTimeOfDayTest.cpp
-        COMPILE_DEFINITIONS -DTRY_SYS_TIME_H
-        OUTPUT_VARIABLE OUTPUT
-    )
-    if (HAVE_SYS_TIME_GETTIMEOFDAY STREQUAL "TRUE")
-      set (H5_HAVE_SYS_TIME_GETTIMEOFDAY "1" CACHE INTERNAL "H5_HAVE_SYS_TIME_GETTIMEOFDAY")
-      set (H5_HAVE_GETTIMEOFDAY "1" CACHE INTERNAL "H5_HAVE_GETTIMEOFDAY")
-    endif (HAVE_SYS_TIME_GETTIMEOFDAY STREQUAL "TRUE")
-  endif ("H5_HAVE_SYS_TIME_GETTIMEOFDAY" MATCHES "^H5_HAVE_SYS_TIME_GETTIMEOFDAY$")
-
-  if (NOT HAVE_SYS_TIME_GETTIMEOFDAY AND NOT H5_HAVE_GETTIMEOFDAY)
-    message (STATUS "---------------------------------------------------------------")
-    message (STATUS "Function 'gettimeofday()' was not found. HDF5 will use its")
-    message (STATUS "  own implementation.. This can happen on older versions of")
-    message (STATUS "  MinGW on Windows. Consider upgrading your MinGW installation")
-    message (STATUS "  to a newer version such as MinGW 3.12")
-    message (STATUS "---------------------------------------------------------------")
-  endif (NOT HAVE_SYS_TIME_GETTIMEOFDAY AND NOT H5_HAVE_GETTIMEOFDAY)
-endif (NOT MSVC)
 
 # Find the library containing clock_gettime()
 if (NOT WINDOWS)
@@ -317,12 +278,6 @@ endif (H5_BAD_LOG2_CODE_GENERATED MATCHES ^H5_BAD_LOG2_CODE_GENERATED$)
 # Check if pointer alignments are enforced
 #
 H5ConversionTests (H5_NO_ALIGNMENT_RESTRICTIONS "Checking IF alignment restrictions are strictly enforced")
-
-# Define a macro for Cygwin (on XP only) where the compiler has rounding
-#   problem converting from unsigned long long to long double */
-if (CYGWIN)
-  set (H5_CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM 1)
-endif (CYGWIN)
 
 # -----------------------------------------------------------------------
 # wrapper script variables

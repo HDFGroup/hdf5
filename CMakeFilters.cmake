@@ -1,16 +1,4 @@
 
-#-----------------------------------------------------------------------------
-# Options for HDF5 Filters
-#-----------------------------------------------------------------------------
-MACRO (HDF5_SETUP_FILTERS FILTER)
-  option (HDF5_USE_FILTER_${FILTER} "Use the ${FILTER} Filter" ON)
-  if (HDF5_USE_FILTER_${FILTER})
-    set (H5_HAVE_FILTER_${FILTER} 1)
-    set (FILTERS "${FILTERS} ${FILTER}")
-  endif (HDF5_USE_FILTER_${FILTER})
-  # message (STATUS "Filter ${FILTER} is ${HDF5_USE_FILTER_${FILTER}}")
-ENDMACRO (HDF5_SETUP_FILTERS)
-
 include (ExternalProject)
 #option (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO SVN TGZ)" "NO")
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO SVN TGZ)")
