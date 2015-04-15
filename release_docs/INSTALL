@@ -1,4 +1,3 @@
-
 Instructions for the Installation of HDF5 Software
 ==================================================
 
@@ -13,25 +12,25 @@ CONTENTS
         1. Obtaining HDF5
 
         2. Quick installation
-        2.1. Windows
-        2.2. Red Storm (Cray XT3)
+        2.1. UNIX platforms
+        2.2. Windows and Cygwin
 
         3. HDF5 dependencies
-        3.1. Zlib
-        3.2  Szip (optional)
-        3.3. MPI and MPI-IO
+        3.1. Make
+        3.2. Zlib
+        3.3  Szip (optional)
+        3.4. MPI and MPI-IO
 
         4. Full installation instructions for source distributions
         4.1. Unpacking the distribution
         4.1.1. Non-compressed tar archive (*.tar)
-        4.1.2. Compressed tar archive (*.tar.Z)
-        4.1.3. Gzip'd tar archive (*.tar.gz)
-        4.1.4. Bzip'd tar archive (*.tar.bz2)
+        4.1.2. Gzip'd tar archive (*.tar.gz)
+        4.1.3. Bzip'd tar archive (*.tar.bz2)
         4.2. Source versus build directories
         4.3. Configuring
         4.3.1. Specifying the installation directories
         4.3.2. Using an alternate C compiler
-        4.3.3. Configuring for 64-bit support
+        4.3.3. Configuring for 32 or 64-bit support
         4.3.4. Additional compilation flags
         4.3.5. Compiling HDF5 wrapper libraries
         4.3.6. Specifying other programs
@@ -74,6 +73,7 @@ CONTENTS
 
 
 2. Quick installation
+2.1. UNIX platforms
         For those who don't like to read ;-) the following steps can be used
         to configure, build, test, and install the HDF5 Library, header files,
         and support programs. For example, to install HDF5 version X.Y.Z at
@@ -92,6 +92,12 @@ CONTENTS
 
             $ tar zxf hdf5-X.Y.Z.tar.gz
 
+        Some versions even auto-recognize the file is in compressed format
+        and will do uncompression automatically. The step above can be
+        further simplified to the following:
+
+            $ tar xf hdf5-X.Y.Z.tar.gz
+
         <configure_flags> above refers to the configure flags appropriate
         to your installation.  For example, to install HDF5 with the 
         Fortran and C++ interfaces and with SZIP compression, the 
@@ -103,28 +109,25 @@ CONTENTS
         In this case, PATH_TO_SZIP would be replaced with the path to the 
         installed location of the SZIP library.
 
-2.1. Windows
+2.2. Windows and Cygwin
         Users of Microsoft Windows should see the INSTALL_Windows files for
-        detailed instructions.  INSTALL_Cygwin and INSTALL_MinGW also exist for 
-        those platforms.
-
-2.2. Red Storm (Cray XT3)
-        Users of the Red Storm machine, after reading this file, should read
-        the Red Storm section in the INSTALL_parallel file for specific
-        instructions for the Red Storm machine.  The same instructions would
-        probably work for other Cray XT3 systems, but they have not been
-        verified.
+        detailed instructions.  INSTALL_Cygwin also exists for those platforms.
 
 
 3. HDF5 dependencies
-3.1. Zlib
+3.1. Make
+        The building of HDF5 Library employs some Gnu Make (gmake)
+        features. Either gmake or compatible make is needed for the building
+        and installation of the Library.
+
+3.2. Zlib
         The HDF5 Library includes a predefined compression filter that 
         uses the "deflate" method for chunked datasets. If zlib-1.1.2 or
         later is found, HDF5 will use it.  Otherwise, HDF5's predefined
         compression method will degenerate to a no-op; the compression
         filter will succeed but the data will not be compressed.
 
-3.2. Szip (optional)
+3.3. Szip (optional)
         The HDF5 Library includes a predefined compression filter that
         uses the extended-Rice lossless compression algorithm for chunked
         datasets. For more information about Szip compression and license
@@ -151,7 +154,7 @@ CONTENTS
         check the "I/O filters (external):" line in the configure output,
         summary section, printed to the standard output.
 
-3.3. MPI and MPI-IO
+3.4. MPI and MPI-IO
         The parallel version of the library is built upon the foundation
         provided by MPI and MPI-IO. If these libraries are not available
         when HDF5 is configured, only a serial version of HDF5 can be built.
@@ -168,23 +171,22 @@ CONTENTS
 
             $ tar xf hdf5-X.Y.Z.tar
 
-4.1.2. Compressed tar archive (*.tar.Z)
-
-            $ uncompress -c < hdf5-X.Y.Z.tar.Z | tar xf -
-            Or
-            $ tar Zxf hdf5-X.Y.Z.tar.Z
-
-4.1.3. Gzip'd tar archive (*.tar.gz)
+4.1.2. Gzip'd tar archive (*.tar.gz)
 
             $ gunzip < hdf5-X.Y.Z.tar.gz | tar xf -
             Or
             $ tar zxf hdf5-X.Y.Z.tar.gz
+            Or
+            $ tar xf hdf5-X.Y.Z.tar.gz
 
-4.1.4. Bzip'd tar archive (*.tar.bz2)
+4.1.3. Bzip'd tar archive (*.tar.bz2)
 
             $ bunzip2 < hdf5-X.Y.Z.tar.bz2 | tar xf -
             Or
             $ tar jxf hdf5-X.Y.Z.tar.bz2
+            Or
+            $ tar xf hdf5-X.Y.Z.tar.bz2
+
 
 4.2. Source versus build directories
         On most systems the build can occur in a directory other than the
@@ -246,17 +248,22 @@ CONTENTS
 
             $ CC=cc ./configure
 
-        A parallel version of HDF5 can be built by specifying `mpicc'
-        as the C compiler.  (The `--enable-parallel' flag documented
-        below is optional in this case.)  Using the `mpicc' compiler
-        will insure that the correct MPI and MPI-IO header files and
-        libraries are used.
+        A parallel version of HDF5 can be built by specifying `mpicc' as
+        the C compiler.   Using the `mpicc' compiler will insure that the
+        correct MPI and MPI-IO header files and libraries are used.
 
-            $ CC=/usr/local/mpi/bin/mpicc ./configure
+            $ CC=/usr/local/mpi/bin/mpicc ./configure --enable-parallel
 
-4.3.3. Configuring for 64-bit support
-        Several machine architectures support 32-bit or 64-bit binaries.
+4.3.3. Configuring for 64 or 32 bit support
+        Some machine architectures support 32-bit or 64-bit binaries.
         The options below describe how to enable support for different options.
+
+        Users compiling on 64-bit Linux systems may generate 32-bit binary
+        with the following flags:
+
+            $ CC='gcc -m32' ./configure
+            OR
+            $ CFLAGS='-m32' ./configure
 
         Users compiling on older Solaris machines using the Sun compiler and
         desiring to build the distribution with 64-bit support may need to
@@ -271,7 +278,7 @@ CONTENTS
               ./configure --enable-fortran
         Parallel: (C++ not supported with parallel)
             $ CFLAGS=-q64 FCFLAGS=-q64 AR='ar -X 64'\
-              ./configure --enable-fortran
+              ./configure --enable-parallel --enable-fortran
 
 4.3.4. Additional compilation flags
         If addtional flags must be passed to the compilation commands,
@@ -292,11 +299,11 @@ CONTENTS
         Additionally, --enable-fortran --enable-fortran2003 enables Fortran
         2003 APIs. Configuration will halt if a working Fortran 90/95 compiler 
         (or a working Fortran 2003 compiler in the case of 
-	--enable-fortran2003) was specified or C++ compiler is not found. 
+        --enable-fortran2003) was specified or C++ compiler is not found. 
         Currently, the Fortran configure tests for these compilers in order: 
-	gfortran ifort pgf90 pathf90 pathf95 xlf90 xlf95 xlf2003 f90 epcf90 f95 
+        gfortran ifort pgf90 pathf90 pathf95 xlf90 xlf95 xlf2003 f90 epcf90 f95 
         fort lf95 g95 ifc efc gfc. To use an alternate compiler specify it with 
-	the FC variable:
+        the FC variable:
 
             $ FC=/usr/local/bin/gfortran ./configure --enable-fortran --enable-fortran2003
 
@@ -362,7 +369,7 @@ CONTENTS
               LDFLAGS=-L/usr/unsup/lib \
               ./configure
 
-        HDF5 includes Szip as a predefined compression method (see 3.2).  
+        HDF5 includes Szip as a predefined compression method (see 3.3).  
         To enable Szip compression, the HDF5 Library must be configured 
         and built using the Szip Library:
 
@@ -421,7 +428,7 @@ CONTENTS
         HDF5 can also print a trace of all API function calls, their 
         arguments, and the return values. To enable or disable the
         ability to trace the API say `--enable-trace' (the default for
-        snapthots) or `--disable-trace' (the default for public releases). 
+        snapshots) or `--disable-trace' (the default for public releases). 
         The tracing must also be enabled at runtime to see any output 
         (see "Debugging HDF5 Applications," reference above).
 
@@ -500,11 +507,10 @@ CONTENTS
 4.6. Installing HDF5
         The HDF5 Library, include files, and support programs can be
         installed in a (semi-)public place by saying `make install'. The
-        files are installed under the directory specified with
-        `--prefix=DIR' (default is 'hdf5') in directories named `lib',
-        `include', and `bin'. The directories, if not existing, will be
-        created automatically, provided the mkdir command supports the -p
-        option.
+        files are installed under the directory specified with `--prefix=DIR'
+        (default is 'hdf5' in the build directory) in directories named `lib',
+        `include', and `bin'. The directories, if not existing, will be created
+        automatically, provided the mkdir command supports the -p option.
 
         If `make install' fails because the install command at your site
         somehow fails, you may use the install-sh that comes with the
