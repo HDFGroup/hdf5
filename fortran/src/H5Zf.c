@@ -40,7 +40,7 @@
  * SOURCE
 */
 int_f
-nh5zunregister_c (int_f *filter)
+h5zunregister_c (int_f *filter)
 /******/
 {
      int ret_value = -1;
@@ -51,9 +51,7 @@ nh5zunregister_c (int_f *filter)
       * Call H5Zunregister function.
       */
      c_filter = (H5Z_filter_t)*filter;
-     printf(" filter # %d \n", (int)c_filter);
      status = H5Zunregister(c_filter);
-     printf("From C zunregister %d \n", status);
      if (status < 0) return ret_value;
      ret_value = 0;
      return ret_value;
@@ -78,7 +76,7 @@ nh5zunregister_c (int_f *filter)
 */
 
 int_f
-nh5zfilter_avail_c ( int_f *filter , int_f *flag )
+h5zfilter_avail_c ( int_f *filter , int_f *flag )
 /******/
 {
   int ret_value = 0;
@@ -113,7 +111,7 @@ nh5zfilter_avail_c ( int_f *filter , int_f *flag )
 */
 
 int_f
-nh5zget_filter_info_c ( int_f *filter , int_f *flag )
+h5zget_filter_info_c ( int_f *filter , int_f *flag )
 /******/
 {
   int ret_value = 0;

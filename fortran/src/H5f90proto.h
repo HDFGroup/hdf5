@@ -1239,15 +1239,9 @@ H5_FCDLL int_f nh5dont_atexit_c(void);
 /*
  * Functions from H5Zf.c
  */
-#define nh5zunregister_c    H5_FC_FUNC_(h5zunregister_c, H5ZUNREGISTER_C)
-#define nh5zfilter_avail_c  H5_FC_FUNC_(h5zfilter_avail_c, H5ZFILTER_AVAIL_C)
-#define nh5zget_filter_info_c H5_FC_FUNC_(h5zget_filter_info_c, H5ZGET_FILTER_INFO_C)
-
-
-H5_FCDLL int_f nh5zunregister_c (int_f *filter);
-H5_FCDLL int_f nh5zfilter_avail_c (int_f *filter, int_f *flag);
-H5_FCDLL int_f nh5zget_filter_info_c (int_f *filter, int_f *flag);
-
+H5_FCDLL int_f h5zunregister_c (int_f *filter);
+H5_FCDLL int_f h5zfilter_avail_c (int_f *filter, int_f *flag);
+H5_FCDLL int_f h5zget_filter_info_c (int_f *filter, int_f *flag);
 
 /*
  * Functions from H5Lf.c

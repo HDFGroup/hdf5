@@ -4,25 +4,22 @@
 !  MODULE H5Z
 !
 ! PURPOSE
-!  This file contains Fortran interfaces for H5Z functions. It includes
-!  all the functions that are independent on whether the Fortran 2003 functions
-!  are enabled or disabled.
-!
+!  This file contains Fortran interfaces for H5Z functions.
 !
 ! COPYRIGHT
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!  Copyright by The HDF Group.                                               *
-!  Copyright by the Board of Trustees of the University of Illinois.         *
-!  All rights reserved.                                                      *
-!  *
-!  This file is part of HDF5.  The full HDF5 copyright notice, including     *
-!  terms governing use, modification, and redistribution, is contained in    *
-!  the files COPYING and Copyright.html.  COPYING can be found at the root   *
-!  of the source code distribution tree; Copyright.html can be found at the  *
-!  root level of an installed copy of the electronic HDF5 document set and   *
-!  is linked from the top-level documents page.  It can also be found at     *
-!  http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-!  access to either file, you may request a copy from help@hdfgroup.org.     *
+!  Copyright by The HDF Group.                                                 *
+!  Copyright by the Board of Trustees of the University of Illinois.           *
+!  All rights reserved.                                                        *
+!                                                                              *
+!  This file is part of HDF5.  The full HDF5 copyright notice, including       *
+!  terms governing use, modification, and redistribution, is contained in      *
+!  the files COPYING and Copyright.html.  COPYING can be found at the root     *
+!  of the source code distribution tree; Copyright.html can be found at the    *
+!  root level of an installed copy of the electronic HDF5 document set and     *
+!  is linked from the top-level documents page.  It can also be found at       *
+!  http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have            *
+!  access to either file, you may request a copy from help@hdfgroup.org.       *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! NOTES
@@ -69,18 +66,14 @@ CONTAINS
   SUBROUTINE h5zunregister_f(filter, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN)  :: filter
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code
+    INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTERFACE
-       INTEGER FUNCTION h5zunregister_c (filter)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ZUNREGISTER_C':: h5zunregister_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5zunregister_c(filter) BIND(C,NAME='h5zunregister_c')
          INTEGER, INTENT(IN) :: filter
        END FUNCTION h5zunregister_c
     END INTERFACE
-    hdferr = h5zunregister_c (filter)
+    hdferr = h5zunregister_c(filter)
   END SUBROUTINE h5zunregister_f
 
 !****s* H5Z/h5zfilter_avail_f
@@ -121,11 +114,8 @@ CONTAINS
     INTEGER :: flag                     ! "TRUE/FALSE/ERROR from C"
 
     INTERFACE
-       INTEGER FUNCTION h5zfilter_avail_c(filter, flag)
+       INTEGER FUNCTION h5zfilter_avail_c(filter, flag) BIND(C,NAME='h5zfilter_avail_c')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ZFILTER_AVAIL_C'::h5zfilter_avail_c
-         !DEC$ENDIF
          INTEGER, INTENT(IN) :: filter
          INTEGER :: flag
        END FUNCTION h5zfilter_avail_c
@@ -176,11 +166,8 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5zget_filter_info_c(filter, config_flags)
+       INTEGER FUNCTION h5zget_filter_info_c(filter, config_flags) BIND(C,NAME='h5zget_filter_info_c')
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ZGET_FILTER_INFO_C'::h5zget_filter_info_c
-         !DEC$ENDIF
          INTEGER, INTENT(IN) :: filter
          INTEGER, INTENT(OUT) :: config_flags
        END FUNCTION h5zget_filter_info_c
