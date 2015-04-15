@@ -88,10 +88,6 @@
 /* Define if Darwin or Mac OS X */
 #cmakedefine H5_HAVE_DARWIN @H5_HAVE_DARWIN@
 
-/* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
-   */
-#cmakedefine H5_HAVE_DECL_TZNAME @H5_HAVE_DECL_TZNAME@
-
 /* Define to 1 if you have the `difftime' function. */
 #cmakedefine H5_HAVE_DIFFTIME @H5_HAVE_DIFFTIME@
 
@@ -167,12 +163,6 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #cmakedefine H5_HAVE_GETTIMEOFDAY @H5_HAVE_GETTIMEOFDAY@
 
-/* Define to 1 if you have the `gettimeofday' function declared in time.h . */
-#cmakedefine H5_HAVE_TIME_GETTIMEOFDAY @H5_HAVE_TIME_GETTIMEOFDAY@
-
-/* Define to 1 if you have the `gettimeofday' function declared in sys/time.h . */
-#cmakedefine H5_HAVE_SYS_TIME_GETTIMEOFDAY @H5_HAVE_SYS_TIME_GETTIMEOFDAY@
-
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #cmakedefine H5_HAVE_GET_FPC_CSR @H5_HAVE_GET_FPC_CSR@
 
@@ -200,15 +190,6 @@
 
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #cmakedefine H5_HAVE_LIBMPE @H5_HAVE_LIBMPE@
-
-/* Define to 1 if you have the `mpi' library (-lmpi). */
-#cmakedefine H5_HAVE_LIBMPI @H5_HAVE_LIBMPI@
-
-/* Define to 1 if you have the `mpich' library (-lmpich). */
-#cmakedefine H5_HAVE_LIBMPICH @H5_HAVE_LIBMPICH@
-
-/* Define to 1 if you have the `mpio' library (-lmpio). */
-#cmakedefine H5_HAVE_LIBMPIO @H5_HAVE_LIBMPIO@
 
 /* Define to 1 if you have the `nsl' library (-lnsl). */
 #cmakedefine H5_HAVE_LIBNSL @H5_HAVE_LIBNSL@
@@ -278,9 +259,6 @@
 
 /* Define to 1 if you have the `setsysinfo' function. */
 #cmakedefine H5_HAVE_SETSYSINFO @H5_HAVE_SETSYSINFO@
-
-/* Define to 1 if you have the `sigaction' function. */
-#cmakedefine H5_HAVE_SIGACTION @H5_HAVE_SIGACTION@
 
 /* Define to 1 if you have the `siglongjmp' function. */
 #cmakedefine H5_HAVE_SIGLONGJMP @H5_HAVE_SIGLONGJMP@
@@ -363,9 +341,6 @@
 /* Define to 1 if you have the <sys/timeb.h> header file. */
 #cmakedefine H5_HAVE_SYS_TIMEB_H @H5_HAVE_SYS_TIMEB_H@
 
-/* Define to 1 if you have the <time.h> header file. */
-#cmakedefine H5_HAVE_TIME_H @H5_HAVE_TIME_H@
-
 /* Define to 1 if you have the <sys/time.h> header file. */
 #cmakedefine H5_HAVE_SYS_TIME_H @H5_HAVE_SYS_TIME_H@
 
@@ -395,9 +370,6 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine H5_HAVE_UNISTD_H @H5_HAVE_UNISTD_H@
-
-/* Define to 1 if you have the `asprintf' function. */
-#cmakedefine H5_HAVE_ASPRINTF @H5_HAVE_ASPRINTF@
 
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine H5_HAVE_VASPRINTF @H5_HAVE_VASPRINTF@
@@ -620,9 +592,6 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #cmakedefine H5_TIME_WITH_SYS_TIME @H5_TIME_WITH_SYS_TIME@
 
-/* Define to 1 if your <sys/time.h> declares `struct tm'. */
-#cmakedefine H5_TM_IN_SYS_TIME @H5_TM_IN_SYS_TIME@
-
 /* Define using v1.6 public API symbols by default */
 #cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
 
@@ -680,9 +649,5 @@
 
 /* Define to `long' if <sys/types.h> does not define. */
 #cmakedefine H5_ssize_t
-
-#if defined(__cplusplus) && defined(inline)
-#undef inline
-#endif
 
 #endif
