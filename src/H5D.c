@@ -329,7 +329,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
     H5O_loc_t    oloc;            	/* Dataset object location */
     H5O_type_t   obj_type;              /* Type of object at location */
     hbool_t      loc_found = FALSE;     /* Location at 'name' found */
-    hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
+    hid_t        dxpl_id = H5AC_ind_dxpl_id;    /* dxpl to use to open datset */
     hid_t        ret_value;
 
     FUNC_ENTER_API(FAIL)
