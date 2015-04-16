@@ -49,7 +49,7 @@
  * SOURCE
 */
 int_f
-nh5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
+h5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
 	     hid_t_f *grp_id, hid_t_f *lcpl_id, hid_t_f *gcpl_id, hid_t_f *gapl_id )
 /******/
 {
@@ -117,7 +117,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5gopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *gapl_id, hid_t_f *grp_id)
+h5gopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *gapl_id, hid_t_f *grp_id)
 /******/
 {
      char *c_name = NULL;
@@ -169,7 +169,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
+h5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
     _fcd obj_name, int_f *obj_namelen, int_f *obj_type)
 /******/
 {
@@ -248,7 +248,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5gn_members_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
+h5gn_members_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
 /******/
 {
     char *c_name = NULL;
@@ -290,7 +290,7 @@ DONE:
 */
 
 int_f
-nh5gclose_c(hid_t_f *grp_id)
+h5gclose_c(hid_t_f *grp_id)
 /******/
 {
     int ret_value = 0;
@@ -323,7 +323,7 @@ nh5gclose_c(hid_t_f *grp_id)
 */
 
 int_f
-nh5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name,
+h5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name,
     int_f *current_namelen, _fcd new_name, int_f *new_namelen)
 /******/
 {
@@ -410,7 +410,7 @@ DONE:
 */
 
 int_f
-nh5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen,
+h5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen,
     int_f *link_type, hid_t_f *new_loc_id, _fcd new_name, int_f *new_namelen)
 /******/
 {
@@ -485,7 +485,7 @@ DONE:
 */
 
 int_f
-nh5gunlink_c(hid_t_f *loc_id, _fcd name, int_f *namelen)
+h5gunlink_c(hid_t_f *loc_id, _fcd name, int_f *namelen)
 /******/
 {
     char *c_name = NULL;
@@ -530,7 +530,7 @@ DONE:
 */
 
 int_f
-nh5gmove_c(hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, int_f*dst_namelen)
+h5gmove_c(hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, int_f*dst_namelen)
 /******/
 {
     char *c_src_name = NULL, *c_dst_name = NULL;
@@ -582,7 +582,7 @@ DONE:
 */
 
 int_f
-nh5gmove2_c(hid_t_f *src_loc_id, _fcd src_name, int_f *src_namelen, hid_t_f *dst_loc_id, _fcd dst_name, int_f*dst_namelen)
+h5gmove2_c(hid_t_f *src_loc_id, _fcd src_name, int_f *src_namelen, hid_t_f *dst_loc_id, _fcd dst_name, int_f*dst_namelen)
 /******/
 {
     char *c_src_name = NULL, *c_dst_name = NULL;
@@ -633,7 +633,7 @@ DONE:
 */
 
 int_f
-nh5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size,
+h5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size,
     _fcd value)
 /******/
 {
@@ -697,7 +697,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment,
+h5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment,
     int_f *commentlen)
 /******/
 {
@@ -746,7 +746,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize,
+h5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize,
     _fcd comment)
 /******/
 {
@@ -810,7 +810,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5gcreate_anon_c(hid_t_f *loc_id, hid_t_f *gcpl_id, hid_t_f *gapl_id, hid_t_f *grp_id)
+h5gcreate_anon_c(hid_t_f *loc_id, hid_t_f *gcpl_id, hid_t_f *gapl_id, hid_t_f *grp_id)
 /******/
 {
 
@@ -842,7 +842,7 @@ done:
  * SOURCE
 */
 int_f
-nh5gget_create_plist_c(hid_t_f *grp_id, hid_t_f *gcpl_id )
+h5gget_create_plist_c(hid_t_f *grp_id, hid_t_f *gcpl_id )
 /******/
 {
   int_f ret_value=0; /* Return value */
@@ -886,7 +886,7 @@ done:
  * SOURCE
 */
 int_f
-nh5gget_info_c (hid_t_f *group_id, int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted )
+h5gget_info_c (hid_t_f *group_id, int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted )
 /******/
 {
 
@@ -950,7 +950,7 @@ done:
  * SOURCE
 */
 int_f
-nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
+h5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		      int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id,
 		      int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted )
 /******/
@@ -1020,7 +1020,7 @@ nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
  * SOURCE
 */
 int_f
-nh5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, hid_t_f *lapl_id,
+h5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, hid_t_f *lapl_id,
 		       int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted)
 /******/
 {

@@ -286,50 +286,31 @@ H5_FCDLL int_f h5dwrite_f_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *me
 H5_FCDLL int_f h5dread_f_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id, 
 				   hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf);
 H5_FCDLL int_f h5dvlen_reclaim_c (hid_t_f *type_id ,  hid_t_f *space_id, hid_t_f *plist_id, void *buf);
+
 /*
  * Functions from H5Gf.c
  */
-#define nh5gcreate_c      H5_FC_FUNC_(h5gcreate_c, H5GCREATE_C)
-#define nh5gclose_c       H5_FC_FUNC_(h5gclose_c, H5GCLOSE_C)
-#define nh5gopen_c        H5_FC_FUNC_(h5gopen_c, H5GOPEN_C)
-#define nh5gget_obj_info_idx_c H5_FC_FUNC_(h5gget_obj_info_idx_c, H5GGET_OBJ_INFO_IDX_C)
-#define nh5gn_members_c   H5_FC_FUNC_(h5gn_members_c, H5GN_MEMBERS_C)
-#define nh5glink_c        H5_FC_FUNC_(h5glink_c, H5GLINK_C)
-#define nh5glink2_c        H5_FC_FUNC_(h5glink2_c, H5GLINK2_C)
-#define nh5gunlink_c      H5_FC_FUNC_(h5gunlink_c, H5GUNLINK_C)
-#define nh5gmove_c        H5_FC_FUNC_(h5gmove_c, H5GMOVE_C)
-#define nh5gmove2_c        H5_FC_FUNC_(h5gmove2_c, H5GMOVE2_C)
-#define nh5gget_linkval_c   H5_FC_FUNC_(h5gget_linkval_c, H5GGET_LINKVAL_C)
-#define nh5gset_comment_c   H5_FC_FUNC_(h5gset_comment_c, H5GSET_COMMENT_C)
-#define nh5gget_comment_c   H5_FC_FUNC_(h5gget_comment_c, H5GGET_COMMENT_C)
-#define nh5gcreate_anon_c      H5_FC_FUNC_(h5gcreate_anon_c, H5GCREATE_ANON_C)
-#define nh5gget_create_plist_c H5_FC_FUNC_(h5gget_create_plist_c, H5GGET_CREATE_PLIST_C)
-#define nh5gget_info_c  H5_FC_FUNC_(h5gget_info_c, H5GGET_INFO_C)
-#define nh5gget_info_by_idx_c  H5_FC_FUNC_(h5gget_info_by_idx_c, H5GGET_INFO_BY_IDX_C)
-#define nh5gget_info_by_name_c  H5_FC_FUNC_(h5gget_info_by_name_c, H5GGET_INFO_BY_NAME_C)
-
-
-H5_FCDLL int_f nh5gcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,  hid_t_f *grp_id,
+H5_FCDLL int_f h5gcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,  hid_t_f *grp_id,
 			     hid_t_f *lcpl_id, hid_t_f *gcpl_id, hid_t_f *gapl_id);
-H5_FCDLL int_f nh5gopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *gapl_id, hid_t_f *grp_id);
-H5_FCDLL int_f nh5gclose_c ( hid_t_f *grp_id );
-H5_FCDLL int_f nh5gget_obj_info_idx_c (hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx, _fcd obj_name, int_f *obj_namelen, int_f *obj_type);
-H5_FCDLL int_f nh5gn_members_c (hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers);
-H5_FCDLL int_f nh5glink_c (hid_t_f *loc_id, int_f *link_type, _fcd current_name, int_f *current_namelen, _fcd new_name, int_f *new_namelen);
-H5_FCDLL int_f nh5glink2_c (hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen, int_f *link_type, hid_t_f *new_loc_id, _fcd new_name, int_f *new_namelen);
-H5_FCDLL int_f nh5gunlink_c (hid_t_f *loc_id, _fcd name, int_f *namelen);
-H5_FCDLL int_f nh5gmove_c (hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, int_f *dst_namelen);
-H5_FCDLL int_f nh5gmove2_c (hid_t_f *src_loc_id, _fcd src_name, int_f *src_namelen, hid_t_f *dst_loc_id,_fcd dst_name, int_f *dst_namelen);
-H5_FCDLL int_f nh5gget_linkval_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _fcd value );
-H5_FCDLL int_f nh5gset_comment_c (hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment, int_f *commentlen);
-H5_FCDLL int_f nh5gget_comment_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize, _fcd comment);
-H5_FCDLL int_f nh5gcreate_anon_c (hid_t_f *loc_id, hid_t_f *gcpl_id, hid_t_f *gapl_id, hid_t_f *grp_id);
-H5_FCDLL int_f nh5gget_create_plist_c(hid_t_f *grp_id, hid_t_f *gcpl_id );
-H5_FCDLL int_f nh5gget_info_c (hid_t_f *group_id, int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted);
-H5_FCDLL int_f nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
+H5_FCDLL int_f h5gopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *gapl_id, hid_t_f *grp_id);
+H5_FCDLL int_f h5gclose_c ( hid_t_f *grp_id );
+H5_FCDLL int_f h5gget_obj_info_idx_c (hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx, _fcd obj_name, int_f *obj_namelen, int_f *obj_type);
+H5_FCDLL int_f h5gn_members_c (hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers);
+H5_FCDLL int_f h5glink_c (hid_t_f *loc_id, int_f *link_type, _fcd current_name, int_f *current_namelen, _fcd new_name, int_f *new_namelen);
+H5_FCDLL int_f h5glink2_c (hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen, int_f *link_type, hid_t_f *new_loc_id, _fcd new_name, int_f *new_namelen);
+H5_FCDLL int_f h5gunlink_c (hid_t_f *loc_id, _fcd name, int_f *namelen);
+H5_FCDLL int_f h5gmove_c (hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, int_f *dst_namelen);
+H5_FCDLL int_f h5gmove2_c (hid_t_f *src_loc_id, _fcd src_name, int_f *src_namelen, hid_t_f *dst_loc_id,_fcd dst_name, int_f *dst_namelen);
+H5_FCDLL int_f h5gget_linkval_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _fcd value );
+H5_FCDLL int_f h5gset_comment_c (hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment, int_f *commentlen);
+H5_FCDLL int_f h5gget_comment_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize, _fcd comment);
+H5_FCDLL int_f h5gcreate_anon_c (hid_t_f *loc_id, hid_t_f *gcpl_id, hid_t_f *gapl_id, hid_t_f *grp_id);
+H5_FCDLL int_f h5gget_create_plist_c(hid_t_f *grp_id, hid_t_f *gcpl_id );
+H5_FCDLL int_f h5gget_info_c (hid_t_f *group_id, int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted);
+H5_FCDLL int_f h5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 				     int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id,
 				     int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted);
-H5_FCDLL int_f nh5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, hid_t_f *lapl_id,
+H5_FCDLL int_f h5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, hid_t_f *lapl_id,
 				      int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted);
 
 /*
