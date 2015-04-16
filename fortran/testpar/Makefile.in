@@ -114,7 +114,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/H5config.h
+CONFIG_HEADER = $(top_builddir)/src/H5config.h \
+	$(top_builddir)/fortran/src/H5config_f.inc
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = parallel_test$(EXEEXT)
@@ -140,7 +141,7 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src -I$(top_builddir)/fortran/src
 FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
 LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)

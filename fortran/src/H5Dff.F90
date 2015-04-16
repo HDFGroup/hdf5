@@ -293,8 +293,6 @@ CONTAINS
 
     INTEGER :: namelen ! Name length
 
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
        INTEGER FUNCTION h5dcreate_c(loc_id, name, namelen, type_id, &
             space_id, lcpl_id_default, dcpl_id_default, dapl_id_default, dset_id) &
@@ -1099,6 +1097,47 @@ CONTAINS
          buf, dims, str_len)
     RETURN
   END SUBROUTINE h5dread_vl_string
+
+!
+!****s* H5D/h5dget_offset_f
+!
+! NAME
+!  h5dget_offset_f
+!
+! PURPOSE
+!  Returns dataset address in file.
+!
+! INPUTS
+!  dataset_id  - Dataset identifier.
+! OUTPUTS
+!  offset      - The offset in bytes.
+!  hdferr      - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  April 16, 2015
+!
+! SOURCE
+  SUBROUTINE h5dget_offset_f(dset_id, offset, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)    :: dset_id
+    INTEGER(HADDR_T), INTENT(OUT) :: offset 
+    INTEGER, INTENT(OUT)          :: hdferr
+!*****
+    INTERFACE
+       INTEGER(HADDR_T) FUNCTION h5dget_offset(dset_id) BIND(C,NAME='H5Dget_offset')
+         IMPORT :: HID_T, HADDR_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: dset_id
+       END FUNCTION h5dget_offset
+    END INTERFACE
+
+    offset = h5dget_offset(dset_id)
+    
+    hdferr = 0
+    IF(offset .LT. 0) hdferr = -1
+
+  END SUBROUTINE h5dget_offset_f
 
 !
 !****s* H5D/h5dget_space_f

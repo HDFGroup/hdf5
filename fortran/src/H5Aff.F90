@@ -66,6 +66,7 @@
 
 MODULE H5A
 
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_char, c_int, C_NULL_CHAR
   USE H5GLOBAL
 
   INTERFACE h5awrite_f
@@ -190,8 +191,6 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5acreate_f(loc_id, name, type_id, space_id, attr_id, &
        hdferr, acpl_id, aapl_id )
-    USE H5GLOBAL
-    USE ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Attribute name
@@ -210,7 +209,8 @@ CONTAINS
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Acreate2(loc_id, name, type_id, &
             space_id, acpl_id_default, aapl_id_default) BIND(C,NAME='H5Acreate2')
-         IMPORT :: C_CHAR, HID_T
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
          INTEGER(HID_T), INTENT(IN), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(HID_T), INTENT(IN), VALUE :: type_id
@@ -262,7 +262,6 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE H5Aopen_name_f(obj_id, name, attr_id, hdferr)
-    USE ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
@@ -273,8 +272,8 @@ CONTAINS
 
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Aopen_name(obj_id, name) BIND(C,NAME='H5Aopen_name')
-         USE H5GLOBAL
          IMPORT :: C_CHAR
+         IMPORT :: HID_T
          INTEGER(HID_T), INTENT(IN), VALUE :: obj_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        END FUNCTION H5Aopen_name
@@ -315,7 +314,6 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE H5Aopen_idx_f(obj_id, index, attr_id, hdferr)
-    USE ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier
     INTEGER, INTENT(IN) :: index            ! Attribute index
@@ -325,8 +323,8 @@ CONTAINS
 
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Aopen_idx(obj_id, index) BIND(C,NAME='H5Aopen_idx')
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T
+         IMPORT :: C_INT
          INTEGER(HID_T), INTENT(IN) :: obj_id
          INTEGER(C_INT), INTENT(IN) :: index
        END FUNCTION H5Aopen_idx
@@ -458,7 +456,6 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE H5Aget_name_f(attr_id, size, buf, hdferr)
-    USE ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
     INTEGER(SIZE_T), INTENT(IN) :: size
@@ -781,7 +778,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Aclose(attr_id) BIND(C, NAME='H5Aclose')
-         USE H5GLOBAL
+         IMPORT :: HID_T
          INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aclose
     END INTERFACE
@@ -817,8 +814,7 @@ CONTAINS
 
     INTERFACE
        INTEGER(HSIZE_T) FUNCTION H5Aget_storage_size(attr_id) BIND(C,NAME='H5Aget_storage_size')
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, HSIZE_T
          INTEGER(HID_T),  INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aget_storage_size
     END INTERFACE
@@ -859,7 +855,7 @@ CONTAINS
 !*****
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Aget_create_plist(attr_id) BIND(C,NAME='H5Aget_create_plist')
-         USE H5GLOBAL
+         IMPORT :: HID_T
          INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
        END FUNCTION H5Aget_create_plist
     END INTERFACE
@@ -915,8 +911,7 @@ CONTAINS
        INTEGER FUNCTION H5Arename_by_name_c(loc_id, obj_name, obj_namelen, &
             old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen, &
             lapl_id_default)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ARENAME_BY_NAME_C'::H5Arename_by_name_c
          !DEC$ENDIF
@@ -987,8 +982,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Aopen_c(obj_id, attr_name, attr_namelen, aapl_id_default, attr_id)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_C'::H5Aopen_c
          !DEC$ENDIF
@@ -1073,8 +1067,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Adelete_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_IDX_C'::H5Adelete_by_idx_c
          !DEC$ENDIF
@@ -1136,8 +1129,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Adelete_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_NAME_C'::H5Adelete_by_name_c
          !DEC$ENDIF
@@ -1217,8 +1209,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION H5Aopen_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, &
             aapl_id_default, lapl_id_default, attr_id)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_BY_IDX_C'::H5Aopen_by_idx_c
          !DEC$ENDIF
@@ -1286,8 +1277,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Aget_info_c(attr_id, corder_valid, corder, cset, data_size)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, HSIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_C'::H5Aget_info_c
          !DEC$ENDIF
@@ -1372,8 +1362,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION H5Aget_info_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default, &
             corder_valid, corder, cset, data_size)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_BY_IDX_C'::H5Aget_info_by_idx_c
          !DEC$ENDIF
@@ -1458,8 +1447,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION H5Aget_info_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, &
             corder_valid, corder, cset, data_size)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_BY_NAME_C'::H5Aget_info_by_name_c
          !DEC$ENDIF
@@ -1545,8 +1533,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION H5Acreate_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
             type_id, space_id, acpl_id_default, aapl_id_default, lapl_id_default, attr)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ACREATE_BY_NAME_C'::H5Acreate_by_name_c
          !DEC$ENDIF
@@ -1616,8 +1603,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Aexists_c(obj_id, attr_name, attr_namelen, attr_exists_c)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AEXISTS_C'::H5Aexists_c
          !DEC$ENDIF
@@ -1682,8 +1668,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Aexists_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, attr_exists_c)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AEXISTS_BY_NAME_C'::H5Aexists_by_name_c
          !DEC$ENDIF
@@ -1757,8 +1742,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION H5Aopen_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
             aapl_id_default, lapl_id_default, attr_id)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_BY_NAME_C'::H5Aopen_by_name_c
          !DEC$ENDIF
@@ -1828,8 +1812,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION H5Arename_c(loc_id, &
             old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen)
-         USE ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: HID_T, SIZE_T
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ARENAME_C'::H5Arename_c
          !DEC$ENDIF

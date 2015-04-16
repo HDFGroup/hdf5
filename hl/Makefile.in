@@ -110,7 +110,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/H5config.h
+CONFIG_HEADER = $(top_builddir)/src/H5config.h \
+	$(top_builddir)/fortran/src/H5config_f.inc
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)

@@ -1,0 +1,4 @@
+! fortran/src/H5config_f.inc. Generated from fortran/src/H5config_f.inc.in by configure
+
+! Define if we have parallel support
+#undef HAVE_PARALLEL

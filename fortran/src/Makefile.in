@@ -99,9 +99,9 @@ host_triplet = @host@
 DIST_COMMON = $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/lt_vers.am \
 	$(top_srcdir)/config/conclude.am $(srcdir)/Makefile.in \
-	$(srcdir)/Makefile.am $(top_srcdir)/bin/mkinstalldirs \
-	$(srcdir)/h5fc.in $(top_srcdir)/bin/depcomp \
-	$(top_srcdir)/bin/test-driver README
+	$(srcdir)/Makefile.am $(srcdir)/H5config_f.inc.in \
+	$(top_srcdir)/bin/mkinstalldirs $(srcdir)/h5fc.in \
+	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/test-driver README
 
 # Some Fortran compilers can't build shared libraries, so sometimes we
 # want to build a shared C library and a static Fortran library.  If so,
@@ -117,7 +117,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/H5config.h
+CONFIG_HEADER = $(top_builddir)/src/H5config.h H5config_f.inc
 CONFIG_CLEAN_FILES = h5fc
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -251,7 +251,8 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
+am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
+	$(LISP)H5config_f.inc.in
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
 # *not* preserved.
@@ -812,7 +813,7 @@ TEST_PROG_CHKEXE = $(TEST_PROG:=.chkexe_)
 TEST_PROG_PARA_CHKEXE = $(TEST_PROG_PARA:=.chkexe_)
 TEST_SCRIPT_CHKSH = $(TEST_SCRIPT:=.chkexe_)
 TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chkexe_)
-all: $(BUILT_SOURCES)
+all: $(BUILT_SOURCES) H5config_f.inc
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
@@ -848,6 +849,17 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+
+H5config_f.inc: stamp-h2
+	@test -f $@ || rm -f stamp-h2
+	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h2
+
+stamp-h2: $(srcdir)/H5config_f.inc.in $(top_builddir)/config.status
+	@rm -f stamp-h2
+	cd $(top_builddir) && $(SHELL) ./config.status fortran/src/H5config_f.inc
+
+distclean-hdr:
+	-rm -f H5config_f.inc stamp-h2
 h5fc: $(top_builddir)/config.status $(srcdir)/h5fc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
@@ -1201,7 +1213,7 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) H5config_f.inc all-local
 installdirs:
 	for dir in "$(DESTDIR)$(libdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -1252,7 +1264,7 @@ distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-local distclean-tags
+	distclean-hdr distclean-local distclean-tags
 
 dvi: dvi-am
 
@@ -1321,14 +1333,14 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 	check-am clean clean-generic clean-libLTLIBRARIES \
 	clean-libtool clean-local clean-noinstPROGRAMS cscopelist-am \
 	ctags ctags-am distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-local distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-data-local install-dvi \
-	install-dvi-am install-exec install-exec-am install-exec-local \
-	install-html install-html-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	distclean-hdr distclean-libtool distclean-local distclean-tags \
+	distdir dvi dvi-am html html-am info info-am install \
+	install-am install-data install-data-am install-data-local \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-exec-local install-html install-html-am install-info \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic maintainer-clean-local mostlyclean \
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	mostlyclean-local pdf pdf-am ps ps-am recheck tags tags-am \

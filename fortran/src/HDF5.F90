@@ -27,6 +27,8 @@
 !
 !*****
 
+#include "H5config_f.inc"
+
 MODULE HDF5
   USE H5GLOBAL
   USE H5F
