@@ -33,9 +33,9 @@
 !
 !*****
 
-MODULE H5R
+MODULE H5R 
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_SIGNED_CHAR
   USE H5GLOBAL
-  USE, INTRINSIC :: ISO_C_BINDING
 
   ! If you change the value of these parameters, do not forget to change corresponding
   ! values in the H5f90.h file.
@@ -96,8 +96,9 @@ MODULE H5R
   INTERFACE
      INTEGER FUNCTION h5rget_name_ptr_c(loc_id, ref_type, ref, name, name_len, size_default) &
           BIND(C, NAME='h5rget_name_ptr_c')
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr
-       USE H5GLOBAL
+       IMPORT :: c_char, c_ptr
+       IMPORT :: HID_T, SIZE_T
+       IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: loc_id
        INTEGER, INTENT(IN) :: ref_type
        TYPE(C_PTR), INTENT(IN), VALUE :: ref
@@ -110,8 +111,9 @@ MODULE H5R
   INTERFACE
      INTEGER FUNCTION h5rdereference_ptr_c(obj_id, ref_type, ref, ref_obj_id) &
           BIND(C, NAME='h5rdereference_ptr_c')
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
-       USE H5GLOBAL
+       IMPORT :: c_ptr
+       IMPORT :: HID_T
+       IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: obj_id
        INTEGER, INTENT(IN) :: ref_type
        TYPE(C_PTR), INTENT(IN), VALUE :: ref
@@ -122,8 +124,9 @@ MODULE H5R
   INTERFACE
      INTEGER FUNCTION h5rcreate_ptr_c(ref, loc_id, name, namelen, ref_type, space_id) &
           BIND(C, NAME='h5rcreate_ptr_c')
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr
-       USE H5GLOBAL
+       IMPORT :: c_ptr, c_char
+       IMPORT :: HID_T
+       IMPLICIT NONE
        TYPE(C_PTR), VALUE :: ref
        INTEGER(HID_T), INTENT(IN) :: loc_id
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
@@ -136,8 +139,9 @@ MODULE H5R
   INTERFACE
      INTEGER FUNCTION h5rget_region_ptr_c(dset_id, ref, space_id) &
           BIND(C, NAME='h5rget_region_ptr_c')
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
-       USE H5GLOBAL
+       IMPORT :: c_ptr
+       IMPORT :: HID_T
+       IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: dset_id
        TYPE(C_PTR), VALUE :: ref
        INTEGER(HID_T), INTENT(OUT) :: space_id
@@ -195,7 +199,8 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5rget_object_type_obj_c(dset_id, ref_f, obj_type) BIND(C, NAME='h5rget_object_type_obj_c')
-         USE H5GLOBAL
+         IMPORT :: HID_T, HADDR_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER(HADDR_T) :: ref_f
          INTEGER, INTENT(OUT) :: obj_type
@@ -247,7 +252,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5rget_region_region_c(dset_id, ref_f, space_id) BIND(C, NAME='h5rget_region_region_c')
-         USE H5GLOBAL
+         IMPORT :: HID_T, REF_REG_BUF_LEN
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dset_id
          INTEGER :: ref_f(REF_REG_BUF_LEN)
@@ -386,7 +391,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5rcreate_region_c(ref_f, loc_id, name, namelen, space_id) BIND(C,NAME='h5rcreate_region_c')
-         USE H5GLOBAL
+         IMPORT :: HID_T, REF_REG_BUF_LEN
          IMPORT :: C_CHAR
          IMPLICIT NONE
          INTEGER :: ref_f(REF_REG_BUF_LEN)
@@ -763,8 +768,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5rget_obj_type_c(loc_id, ref_type, ref, obj_type) &
             BIND(C, NAME='h5rget_obj_type_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
-         USE H5GLOBAL
+         IMPORT :: C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
          INTEGER, INTENT(IN) :: ref_type
          TYPE(C_PTR), VALUE :: ref
