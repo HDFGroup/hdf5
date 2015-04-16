@@ -4,7 +4,7 @@
 !  MODULE H5I
 !
 !  FILE
-!  fortran/src/H5Iff.f90
+!  fortran/src/H5Iff.F90
 !
 ! PURPOSE
 !  This file contains Fortran interfaces for H5I functions.
@@ -34,7 +34,8 @@
 !*****
 
 MODULE H5I
-
+  
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
   USE H5GLOBAL
 
 CONTAINS
@@ -87,11 +88,9 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5iget_type_c(obj_id, TYPE)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5IGET_TYPE_C':: h5iget_type_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5iget_type_c(obj_id, TYPE) BIND(C, NAME='h5iget_type_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: obj_id
          INTEGER, INTENT(OUT) :: TYPE
        END FUNCTION h5iget_type_c
@@ -133,14 +132,12 @@ CONTAINS
                                               !   -1 if fail
 !*****
     INTERFACE
-       INTEGER FUNCTION h5iget_name_c(obj_id, buf, buf_size, name_size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5IGET_NAME_C'::h5iget_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: buf
+       INTEGER FUNCTION h5iget_name_c(obj_id, buf, buf_size, name_size) BIND(C, NAME='h5iget_name_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: obj_id
-         CHARACTER(LEN=*), INTENT(OUT) :: buf
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buf
          INTEGER(SIZE_T), INTENT(IN) :: buf_size
          INTEGER(SIZE_T), INTENT(OUT) :: name_size
        END FUNCTION h5iget_name_c
@@ -176,11 +173,9 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5iinc_ref_c(obj_id, ref_count)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5IINC_REF_C':: h5iinc_ref_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5iinc_ref_c(obj_id, ref_count) BIND(C, NAME='h5iinc_ref_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: obj_id
          INTEGER, INTENT(OUT) :: ref_count
        END FUNCTION h5iinc_ref_c
@@ -215,11 +210,9 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5idec_ref_c(obj_id, ref_count)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5IDEC_REF_C':: h5idec_ref_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5idec_ref_c(obj_id, ref_count) BIND(C, NAME='h5idec_ref_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: obj_id
          INTEGER, INTENT(OUT) :: ref_count
        END FUNCTION h5idec_ref_c
@@ -254,11 +247,9 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5iget_ref_c(obj_id, ref_count)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5IGET_REF_C':: h5iget_ref_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5iget_ref_c(obj_id, ref_count) BIND(C, NAME='h5iget_ref_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: obj_id
          INTEGER, INTENT(OUT) :: ref_count
        END FUNCTION h5iget_ref_c
@@ -292,11 +283,9 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 !*****
     INTERFACE
-       INTEGER FUNCTION h5iget_file_id_c(obj_id, file_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5IGET_FILE_ID_C':: h5iget_file_id_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5iget_file_id_c(obj_id, file_id) BIND(C, NAME='h5iget_file_id_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN)  :: obj_id
          INTEGER(HID_T), INTENT(OUT) :: file_id
        END FUNCTION h5iget_file_id_c
@@ -332,11 +321,9 @@ CONTAINS
     INTEGER  :: c_valid ! 0 = .false, 1 = .true.
     
     INTERFACE
-       INTEGER FUNCTION h5iis_valid_c(id, c_valid)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5IIS_VALID_C':: h5iis_valid_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5iis_valid_c(id, c_valid) BIND(C, NAME='h5iis_valid_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN)  :: id   ! Identifier 
          INTEGER  :: c_valid
        END FUNCTION h5iis_valid_c

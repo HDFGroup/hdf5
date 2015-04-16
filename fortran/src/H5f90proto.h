@@ -1037,21 +1037,13 @@ H5_FCDLL int_f h5rget_obj_type_c (hid_t_f *loc_id, int_f *ref_type, void *ref, i
 /*
  * Functions from H5If.c
  */
-#define nh5iget_type_c    H5_FC_FUNC_(h5iget_type_c, H5IGET_TYPE_C)
-#define nh5iget_name_c    H5_FC_FUNC_(h5iget_name_c, H5IGET_NAME_C)
-#define nh5iinc_ref_c     H5_FC_FUNC_(h5iinc_ref_c, H5IINC_REF_C)
-#define nh5idec_ref_c     H5_FC_FUNC_(h5idec_ref_c, H5IDEC_REF_C)
-#define nh5iget_ref_c     H5_FC_FUNC_(h5iget_ref_c, H5IGET_REF_C)
-#define nh5iget_file_id_c H5_FC_FUNC_(h5iget_file_id_c, H5IGET_FILE_ID_C)
-#define nh5iis_valid_c    H5_FC_FUNC_(h5iis_valid_c, H5IIS_VALID_C)
-
-H5_FCDLL int_f nh5iget_type_c(hid_t_f *obj_id, int_f *type);
-H5_FCDLL int_f nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size);
-H5_FCDLL int_f nh5iinc_ref_c(hid_t_f *obj_id, int_f *ref_count);
-H5_FCDLL int_f nh5idec_ref_c(hid_t_f *obj_id, int_f *ref_count);
-H5_FCDLL int_f nh5iget_ref_c(hid_t_f *obj_id, int_f *ref_count);
-H5_FCDLL int_f nh5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id);
-H5_FCDLL int_f nh5iis_valid_c(hid_t_f *obj_id, int_f *c_valid);
+H5_FCDLL int_f h5iget_type_c(hid_t_f *obj_id, int_f *type);
+H5_FCDLL int_f h5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size);
+H5_FCDLL int_f h5iinc_ref_c(hid_t_f *obj_id, int_f *ref_count);
+H5_FCDLL int_f h5idec_ref_c(hid_t_f *obj_id, int_f *ref_count);
+H5_FCDLL int_f h5iget_ref_c(hid_t_f *obj_id, int_f *ref_count);
+H5_FCDLL int_f h5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id);
+H5_FCDLL int_f h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid);
 
 /*
  * Functions from H5Ef.c

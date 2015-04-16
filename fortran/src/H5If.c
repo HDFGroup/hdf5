@@ -42,7 +42,7 @@
  * SOURCE
 */
 int_f
-nh5iget_type_c (hid_t_f *obj_id, int_f *type)
+h5iget_type_c (hid_t_f *obj_id, int_f *type)
 /******/
 {
      int ret_value = -1;
@@ -83,7 +83,7 @@ nh5iget_type_c (hid_t_f *obj_id, int_f *type)
  * SOURCE
 */
 int_f
-nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size)
+h5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size)
 /******/
 {
      int ret_value = -1;
@@ -135,7 +135,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5iinc_ref_c(hid_t_f *obj_id, int_f *ref_count)
+h5iinc_ref_c(hid_t_f *obj_id, int_f *ref_count)
 /******/
 {
      int ret_value;
@@ -171,7 +171,7 @@ done:
  * SOURCE
 */
 int_f
-nh5idec_ref_c(hid_t_f *obj_id, int_f *ref_count)
+h5idec_ref_c(hid_t_f *obj_id, int_f *ref_count)
 /******/
 {
      int ret_value;
@@ -208,7 +208,7 @@ done:
  * SOURCE
 */
 int_f
-nh5iget_ref_c(hid_t_f *obj_id, int_f *ref_count)
+h5iget_ref_c(hid_t_f *obj_id, int_f *ref_count)
 /******/
 {
      int ret_value;
@@ -245,7 +245,7 @@ done:
  * SOURCE
 */
 int_f
-nh5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id)
+h5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id)
 /******/
 {
      int ret_value;
@@ -276,7 +276,7 @@ done:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5iis_valid_c(hid_t_f *obj_id, int_f *c_valid)
+h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid)
 {
      int ret_value;
      htri_t c_ret_value;
