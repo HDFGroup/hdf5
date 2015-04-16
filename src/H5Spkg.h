@@ -34,6 +34,10 @@
 #define H5S_VALID_MAX	0x01
 #define H5S_VALID_PERM	0x02
 
+/* Flags for serialization of selections */
+#define H5S_SELECT_FLAG_UNLIM   0x01
+#define H5S_SELECT_FLAG_BITS    (H5S_SELECT_FLAG_UNLIM)
+
 /* Length of stack-allocated sequences for "project intersect" routines */
 #define H5S_PROJECT_INTERSECT_NSEQS 256
 
@@ -109,13 +113,18 @@ struct H5S_hyper_span_info_t {
 typedef struct {
     hbool_t diminfo_valid;                      /* Whether the dataset has valid diminfo */
     H5S_hyper_dim_t opt_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
+    H5S_hyper_dim_t opt_unlim_diminfo[H5S_MAX_RANK]; /* per-dim selections info */
     H5S_hyper_dim_t app_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
 	/* 'opt_diminfo' points to a [potentially] optimized version of the user's
          * hyperslab information.  'app_diminfo' points to the actual parameters
          * that the application used for setting the hyperslab selection.  These
          * are only used for re-gurgitating the original values used to set the
          * hyperslab to the application when it queries the hyperslab selection
-         * information. */
+         * information.  'opt_unlim_diminfo' is similar to opt_diminfo but
+         * contains H5S_UNLIMITED in the count or block of the unlimited
+         * dimension (if any). */
+    int unlim_dim;                              /* Dimension where selection is unlimited, or -1 if none */
+    hsize_t num_elem_non_unlim;                 /* # of elements in a "slice" excluding the unlimited dimension */
     H5S_hyper_span_info_t *span_lst; /* List of hyperslab span information */
 } H5S_hyper_sel_t;
 
@@ -133,9 +142,11 @@ typedef htri_t (*H5S_sel_is_valid_func_t)(const H5S_t *space);
 /* Method to determine number of bytes required to store current selection */
 typedef hssize_t (*H5S_sel_serial_size_func_t)(const H5S_t *space);
 /* Method to store current selection in "serialized" form (a byte sequence suitable for storing on disk) */
-typedef herr_t (*H5S_sel_serialize_func_t)(const H5S_t *space, uint8_t **p);
-/* Method to store create selection from "serialized" form (a byte sequence suitable for storing on disk) */
-typedef herr_t (*H5S_sel_deserialize_func_t)(H5S_t *space, const uint8_t **p);
+typedef herr_t (*H5S_sel_serialize_func_t)(const H5F_t *f, const H5S_t *space,
+    uint8_t **p);
+/* Method to create selection from "serialized" form (a byte sequence suitable for storing on disk) */
+typedef herr_t (*H5S_sel_deserialize_func_t)(const H5F_t *f, H5S_t *space,
+    uint32_t version, uint8_t flags, const uint8_t **p);
 /* Method to determine smallest n-D bounding box containing the current selection */
 typedef herr_t (*H5S_sel_bounds_func_t)(const H5S_t *space, hsize_t *start, hsize_t *end);
 /* Method to determine linear offset of initial element in selection within dataspace */
@@ -255,6 +266,7 @@ H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
 H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
     const H5S_t *dst_space, const H5S_t *src_intersect_space,
     H5S_t *proj_space);
+H5_DLL herr_t H5S__hyper_update_extent_offset(H5S_t *space);
 
 /* Testing functions */
 #ifdef H5S_TESTING

@@ -416,11 +416,11 @@ test_api(test_api_config_t config, hid_t fapl)
     const char  *src_dset[4] = {"src_dset1....", "src_dset2.....", "src_dset3......", "src_dset4......."}; /* Source dataset names (different lengths) */
     char        tmp_filename[32];
     char        tmp_dsetname[32];
-    hsize_t     dims[4] = {10, 20, 0, 0}; /* Data space current size */
-    hsize_t     start[4];       /* Hyperslab start */
-    hsize_t     stride[4];      /* Hyperslab stride */
-    hsize_t     count[4];       /* Hyperslab count */
-    hsize_t     block[4];       /* Hyperslab block */
+    hsize_t     dims[2] = {10, 20}; /* Data space current size */
+    hsize_t     start[2];       /* Hyperslab start */
+    hsize_t     stride[2];      /* Hyperslab stride */
+    hsize_t     count[2];       /* Hyperslab count */
+    hsize_t     block[2];       /* Hyperslab block */
     hsize_t     coord[10];      /* Point selection array */
     size_t      size_out;
     unsigned    i;
@@ -2457,7 +2457,7 @@ test_basic_io(unsigned config, hid_t fapl)
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
     } /* end if */
-#
+
     /* Read data directly from source dataset */
     /* Select hyperslab in memory space */
     start[0] = 0;

@@ -1644,6 +1644,9 @@ done:
  *		then increments the pointer to the first byte after the
  *		address.  An undefined value is stored as all 1's.
  *
+ *              Note this function is almost identical to H5F_size_encode.
+ *              Changes should be made in both places.
+ *
  * Return:	void
  *
  * Programmer:	Robb Matzke
@@ -1715,6 +1718,9 @@ H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
  *
  *		If the value read is all 1's then the address is returned
  *		with an undefined value.
+ *
+ *              Note this function is almost identical to H5F_size_decode.
+ *              Changes should be made in both places.
  *
  * Return:	void
  *
@@ -1803,6 +1809,127 @@ H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*o
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_addr_decode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_size_encode
+ *
+ * Purpose:     Encodes a size into the buffer pointed to by *PP and then
+ *              increments the pointer to the first byte after the size.
+ *              An undefined value is stored as all 1's.  If size cannot
+ *              be HSIZE_UNDEF, then you can use H5F_ENCODE_LENGTH
+ *              instead.
+ *
+ *              Note this function is almost identical to H5F_addr_encode
+ *              and H5F_addr_encode_len.  Changes should be made in both
+ *              places.
+ *
+ * Return:      void
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, April 10, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_size_encode(const H5F_t *f, uint8_t **pp/*in,out*/, hsize_t size)
+{
+    unsigned    u;              /* Local index variable */
+
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(pp && *pp);
+
+    if(size != HSIZE_UNDEF) {
+        for(u = 0; u < H5F_SIZEOF_SIZE(f); u++) {
+            *(*pp)++ = (uint8_t)(size & 0xff);
+            size >>= 8;
+        } /* end for */
+        HDassert("overflow" && 0 == size);
+    } /* end if */
+    else {
+        for(u = 0; u < H5F_SIZEOF_SIZE(f); u++)
+            *(*pp)++ = 0xff;
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5F_size_encode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_size_decode
+ *
+ * Purpose:     Decodes a size from the buffer pointed to by *PP and
+ *              updates the pointer to point to the next byte after the
+ *              size.
+ *
+ *              If the value read is all 1's then the size is returned
+ *              with an undefined value.  If size cannot be HSIZE_UNDEF,
+ *              then you can use H5F_DECODE_LENGTH instead.
+ *
+ *              Note this function is almost identical to H5F_addr_decode
+ *              and H5F_addr_decode_len.  Changes should be made in both
+ *              places.
+ *
+ * Return:      void
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, April 10, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_size_decode(const H5F_t *f, const uint8_t **pp/*in,out*/,
+    hsize_t *size_p/*out*/)
+{
+    hbool_t         all_zero = TRUE;    /* True if address was all zeroes */
+    unsigned        u;          /* Local index variable */
+
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(pp && *pp);
+    HDassert(size_p);
+
+    /* Reset value in destination */
+    *size_p = 0;
+
+    /* Decode bytes from size */
+    for(u = 0; u < H5F_SIZEOF_SIZE(f); u++) {
+        uint8_t	    c;          /* Local decoded byte */
+
+        /* Get decoded byte (and advance pointer) */
+        c = *(*pp)++;
+
+        /* Check for non-undefined size byte value */
+        if(c != 0xff)
+            all_zero = FALSE;
+
+        if(u < sizeof(*size_p)) {
+            haddr_t	    tmp = c;    /* Local copy of size, for casting */
+
+            /* Shift decoded byte to correct position */
+            tmp <<= (u * 8);    /*use tmp to get casting right */
+
+            /* Merge into already decoded bytes */
+            *size_p |= tmp;
+        } /* end if */
+        else
+            if(!all_zero)
+                HDassert(0 == **pp);    /*overflow */
+    } /* end for */
+
+    /* If 'all_zero' is still TRUE, the size_p was entirely composed of '0xff'
+     * bytes, which is the encoded form of 'HSIZE_UNDEF', so set the destination
+     * to that value */
+    if(all_zero)
+        *size_p = HSIZE_UNDEF;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5F_size_decode() */
 
 
 /*-------------------------------------------------------------------------

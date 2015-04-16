@@ -39,8 +39,10 @@ static herr_t H5S_all_get_seq_list(const H5S_t *space, unsigned flags,
 static herr_t H5S_all_release(H5S_t *space);
 static htri_t H5S_all_is_valid(const H5S_t *space);
 static hssize_t H5S_all_serial_size(const H5S_t *space);
-static herr_t H5S_all_serialize(const H5S_t *space, uint8_t **p);
-static herr_t H5S_all_deserialize(H5S_t *space, const uint8_t **p);
+static herr_t H5S_all_serialize(const H5F_t *f, const H5S_t *space,
+    uint8_t **p);
+static herr_t H5S_all_deserialize(const H5F_t *f, H5S_t *space,
+    uint32_t version, uint8_t flags, const uint8_t **p);
 static herr_t H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_all_offset(const H5S_t *space, hsize_t *off);
 static htri_t H5S_all_is_contiguous(const H5S_t *space);
@@ -512,7 +514,7 @@ H5S_all_serial_size (const H5S_t UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_all_serialize (const H5S_t *space, uint8_t **p)
+H5S_all_serialize(const H5F_t UNUSED *f, const H5S_t *space, uint8_t **p)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -553,7 +555,8 @@ H5S_all_serialize (const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_all_deserialize(H5S_t *space, const uint8_t UNUSED **p)
+H5S_all_deserialize(const H5F_t UNUSED *f, H5S_t *space,
+    uint32_t UNUSED version, uint8_t UNUSED flags, const uint8_t UNUSED **p)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 

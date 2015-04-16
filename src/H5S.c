@@ -521,6 +521,12 @@ H5S_extent_copy(H5S_t *dst, const H5S_t *src)
         if(H5S_select_all(dst, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
+    /* If the selection is 'hyper', update the selection due to changed extent
+     */
+    if(H5S_GET_SELECT_TYPE(dst) == H5S_SEL_HYPERSLABS)
+        if(H5S__hyper_update_extent_offset(dst) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_extent_copy() */
@@ -1356,6 +1362,12 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
         if(H5S_select_all(space, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
+    /* If the selection is 'hyper', update the selection due to changed
+     * extent */
+    if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS)
+        if(H5S__hyper_update_extent_offset(space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5S_set_extent_simple() */
@@ -1579,7 +1591,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
         buf += extent_size;
 
         /* Encode the selection part of dataspace.  */
-        if(H5S_SELECT_SERIALIZE(obj, &buf) < 0)
+        if(H5S_SELECT_SERIALIZE(f, obj, &buf) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode select space")
     } /* end else */
 
@@ -1698,7 +1710,7 @@ H5S_decode(const unsigned char *buf)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     /* Decode the select part of dataspace.  I believe this part always exists. */
-    if(H5S_SELECT_DESERIALIZE(&ds, &buf) < 0)
+    if(H5S_SELECT_DESERIALIZE(f, &ds, &buf) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode space selection")
 
     /* Set return value */
@@ -1988,6 +2000,12 @@ H5S_set_extent_real(H5S_t *space, const hsize_t *size)
     if(H5S_SEL_ALL == H5S_GET_SELECT_TYPE(space))
         if(H5S_select_all(space, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+
+    /* If the selection is 'hyper', update the selection due to changed
+     * extent */
+    if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS)
+        if(H5S__hyper_update_extent_offset(space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
 
     /* Mark the dataspace as no longer shared if it was before */
     if(H5O_msg_reset_share(H5O_SDSPACE_ID, space) < 0)

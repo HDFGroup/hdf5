@@ -294,11 +294,11 @@ H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
                         heap_block_p += tmp_size;
 
                         /* Source selection */
-                        if(H5S_SELECT_DESERIALIZE(&(mesg->storage.u.virt.list[i].source_select), &heap_block_p) < 0)
+                        if(H5S_SELECT_DESERIALIZE(f, &(mesg->storage.u.virt.list[i].source_select), &heap_block_p) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode source space selection")
 
                         /* Virtual selection */
-                        if(H5S_SELECT_DESERIALIZE(&(mesg->storage.u.virt.list[i].virtual_select), &heap_block_p) < 0)
+                        if(H5S_SELECT_DESERIALIZE(f, &(mesg->storage.u.virt.list[i].virtual_select), &heap_block_p) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode virtual space selection")
                     } /* end for */
 
@@ -510,11 +510,11 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                     heap_block_p += str_size[(2 * i) + 1];
 
                     /* Source selection */
-                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
+                    if(H5S_SELECT_SERIALIZE(f, mesg->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize source selection")
 
                     /* Virtual selection */
-                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].virtual_select, &heap_block_p) < 0)
+                    if(H5S_SELECT_SERIALIZE(f, mesg->storage.u.virt.list[i].virtual_select, &heap_block_p) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize virtual selection")
                 } /* end for */
 

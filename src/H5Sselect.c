@@ -63,7 +63,9 @@ static herr_t H5S_select_iter_next_block(H5S_sel_iter_t *iter);
 herr_t
 H5S_select_offset(H5S_t *space, const hssize_t *offset)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(space);
@@ -76,7 +78,14 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
     /* Indicate that the offset was changed */
     space->select.offset_changed = TRUE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    /* If the selection is 'hyper', update the selection due to changed offset
+     */
+    if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS)
+        if(H5S__hyper_update_extent_offset(space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_offset() */
 
 
@@ -258,7 +267,7 @@ H5S_select_serial_size(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_serialize(const H5S_t *space, uint8_t **p)
+H5S_select_serialize(const H5F_t *f, const H5S_t *space, uint8_t **p)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -268,7 +277,7 @@ H5S_select_serialize(const H5S_t *space, uint8_t **p)
     HDassert(p);
 
     /* Call the selection type's serialize function */
-    ret_value=(*space->select.type->serialize)(space,p);
+    ret_value = (*space->select.type->serialize)(f, space, p);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_serialize() */
@@ -450,11 +459,13 @@ H5S_select_valid(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_deserialize (H5S_t **space, const uint8_t **p)
+H5S_select_deserialize(const H5F_t *f, H5S_t **space, const uint8_t **p)
 {
     H5S_t *tmp_space;       /* Pointer to actual dataspace to use, either
                                *space or a newly allocated one */
     uint32_t sel_type;      /* Pointer to the selection type */
+    uint32_t version;       /* Version number */
+    uint8_t flags = 0;      /* Flags */
     herr_t ret_value=FAIL;  /* return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -472,8 +483,23 @@ H5S_select_deserialize (H5S_t **space, const uint8_t **p)
     /* Decode selection type */
     UINT32DECODE(*p, sel_type);
 
-    /* Skip over the remainder of the header */
-    *p += 12;
+    /* Decode version */
+    UINT32DECODE(*p, version);
+
+    if(version >= (uint32_t)2) {
+        /* Decode flags */
+        flags = *(*p)++;
+
+        /* Check for unknown flags */
+        if(flags & ~H5S_SELECT_FLAG_BITS)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "unknown flag for selection")
+
+        /* Skip over the remainder of the header */
+        *p += 4;
+    } /* end if */
+    else
+        /* Skip over the remainder of the header */
+        *p += 8;
 
     /* Decode and check or patch rank for point and hyperslab selections */
     if((sel_type == H5S_SEL_POINTS) || (sel_type == H5S_SEL_HYPERSLABS)) {
@@ -494,19 +520,19 @@ H5S_select_deserialize (H5S_t **space, const uint8_t **p)
     /* Make routine for selection type */
     switch(sel_type) {
         case H5S_SEL_POINTS:         /* Sequence of points selected */
-            ret_value = (*H5S_sel_point->deserialize)(tmp_space, p);
+            ret_value = (*H5S_sel_point->deserialize)(f, tmp_space, version, flags, p);
             break;
 
         case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-            ret_value = (*H5S_sel_hyper->deserialize)(tmp_space, p);
+            ret_value = (*H5S_sel_hyper->deserialize)(f, tmp_space, version, flags, p);
             break;
 
         case H5S_SEL_ALL:            /* Entire extent selected */
-            ret_value = (*H5S_sel_all->deserialize)(tmp_space, p);
+            ret_value = (*H5S_sel_all->deserialize)(f, tmp_space, version, flags, p);
             break;
 
         case H5S_SEL_NONE:           /* Nothing selected */
-            ret_value = (*H5S_sel_none->deserialize)(tmp_space, p);
+            ret_value = (*H5S_sel_none->deserialize)(f, tmp_space, version, flags, p);
             break;
 
         default:

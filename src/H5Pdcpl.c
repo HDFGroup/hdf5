@@ -1833,7 +1833,11 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
     if(H5D_VIRTUAL != layout.type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
-    /* Get the virtual space */
+    /* Attempt to open source dataset and patch extent if extent status is not
+     * H5O_VIRTUAL_STATUS_CORRECT, otherwise if status is
+     * H5O_VIRTUAL_STATUS_INVALID, patch with bounds of selection VDSINC */
+
+    /* Get the source space */
     if(index >= layout.storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);

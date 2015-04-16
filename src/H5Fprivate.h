@@ -662,6 +662,12 @@ H5_DLL void H5F_addr_encode_len(size_t addr_len, uint8_t **pp, haddr_t addr);
 H5_DLL void H5F_addr_decode(const H5F_t *f, const uint8_t **pp, haddr_t *addr_p);
 H5_DLL void H5F_addr_decode_len(size_t addr_len, const uint8_t **pp, haddr_t *addr_p);
 
+/* Size-related functions */
+H5_DLL void H5F_size_encode(const H5F_t *f, uint8_t **pp/*in,out*/,
+    hsize_t size);
+H5_DLL void H5F_size_decode(const H5F_t *f, const uint8_t **pp/*in,out*/,
+    hsize_t *size_p/*out*/);
+
 /* File access property list callbacks */
 H5_DLL herr_t H5P_facc_close(hid_t dxpl_id, void *close_data);
 
