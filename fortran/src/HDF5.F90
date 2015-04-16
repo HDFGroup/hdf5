@@ -26,9 +26,6 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !*****
-
-#include "H5config_f.inc"
-
 MODULE HDF5
   USE H5GLOBAL
   USE H5F
@@ -46,8 +43,4 @@ MODULE HDF5
   USE H5Z
   USE H5_DBLE_INTERFACE
   USE H5LIB
-#ifdef H5_HAVE_PARALLEL
-  USE H5FDMPIO
-#endif
-
 END MODULE HDF5

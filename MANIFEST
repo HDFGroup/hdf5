@@ -280,8 +280,6 @@
 ./fortran/src/H5Dff.F90
 ./fortran/src/H5Ef.c
 ./fortran/src/H5Eff.F90
-./fortran/src/H5FDmpiof.c
-./fortran/src/H5FDmpioff.F90
 ./fortran/src/H5Ff.c
 ./fortran/src/H5Fff.F90
 ./fortran/src/H5Gf.c

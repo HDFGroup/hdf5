@@ -42,21 +42,6 @@ else
    AM_LDFLAGS+=-static
 endif
 
-# Include HDF5.F90 if parallel is disabled, HDF5mpiof* if parallel is enabled
-if BUILD_PARALLEL_CONDITIONAL
-   PARALLEL_COND_SRC = H5FDmpiof.c HDF5.F90 H5FDmpioff.F90
-else
-   PARALLEL_COND_SRC = HDF5.F90
-endif
-
-# Check if the compiler supports the Fortran 2003 standard
-# which should include the intrinsic module iso_c_binding
-if FORTRAN_2003_CONDITIONAL_F
-   F_STATUS = _F03
-else
-   F_STATUS = _F90
-endif
-
 #   Condition for including/excluding the DBLE interfaces for when the 
 #   default REAL is of type DOUBLE PRECISION.
 #   We do not include the double precision interfaces if the defaut REAL is
@@ -75,7 +60,7 @@ libhdf5_fortran_la_SOURCES=H5f90global.F90 \
           H5Tff.F90 H5Zff.F90                                            \
 	  H5_DBLE_Interface$(F_DBLE).F90 \
           H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
-          H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c  $(PARALLEL_COND_SRC)
+          H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c HDF5.f90
 
 # HDF5 Fortran library depends on HDF5 Library. 
 libhdf5_fortran_la_LIBADD=$(LIBHDF5)
@@ -210,22 +195,13 @@ H5Rff.lo:            $(srcdir)/H5Rff.F90 H5f90global.lo
 H5Sff.lo:            $(srcdir)/H5Sff.F90 H5f90global.lo
 H5Tff.lo:            $(srcdir)/H5Tff.F90 H5f90global.lo
 H5Zff.lo:            $(srcdir)/H5Zff.F90 H5f90global.lo
-H5_DBLE_Interface$(F_DBLE).lo:  $(srcdir)/H5_DBLE_Interface$(F_DBLE).F90
+H5_DBLE_Interface$(F_DBLE).lo:  $(srcdir)/H5_DBLE_Interface$(F_DBLE).F90 H5f90global.lo
 HDF5.lo:             $(srcdir)/HDF5.F90 H5f90global.lo H5_ff.lo H5Aff.lo  \
                      H5Dff.lo \
                      H5Eff.lo \
 		     H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo \
 	             H5Off.lo H5Pff.lo H5Rff.lo \
                      H5Sff.lo H5Tff.lo H5Zff.lo \
-                     H5_DBLE_Interface$(F_DBLE).lo 
-H5FDmpioff.lo:       $(srcdir)/H5FDmpioff.F90 H5f90global.lo
-#HDF5mpio.lo:         $(srcdir)/H5FDmpioff.F90 H5f90global.lo H5_ff.lo \
-#		     H5Aff.lo  \
-#                     H5Dff.lo \
-#		     H5Eff.lo \
-#                     H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo \
-#		     H5Off.lo H5Pff.lo H5Rff.lo \
-#                     H5Sff.lo H5Tff.lo H5Zff.lo \
-#	             H5_DBLE_Interface$(F_DBLE).lo H5FDmpioff.lo
+                     H5_DBLE_Interface$(F_DBLE).lo
 
 include $(top_srcdir)/config/conclude.am

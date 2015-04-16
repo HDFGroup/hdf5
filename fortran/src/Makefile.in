@@ -150,22 +150,12 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_fortran_la_DEPENDENCIES = $(LIBHDF5)
-am__libhdf5_fortran_la_SOURCES_DIST = H5f90global.F90 \
-	H5fortran_types.F90 H5_ff.F90 H5Aff.F90 H5Dff.F90 H5Eff.F90 \
-	H5Fff.F90 H5Gff.F90 H5Iff.F90 H5Lff.F90 H5Off.F90 H5Pff.F90 \
-	H5Rff.F90 H5Sff.F90 H5Tff.F90 H5Zff.F90 \
-	H5_DBLE_Interface$(F_DBLE).F90 H5f90kit.c H5_f.c H5Af.c H5Df.c \
-	H5Ef.c H5Ff.c H5Gf.c H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c \
-	H5Tf.c H5Zf.c HDF5.F90 H5FDmpiof.c H5FDmpioff.F90
-@BUILD_PARALLEL_CONDITIONAL_FALSE@am__objects_1 = HDF5.lo
-@BUILD_PARALLEL_CONDITIONAL_TRUE@am__objects_1 = H5FDmpiof.lo HDF5.lo \
-@BUILD_PARALLEL_CONDITIONAL_TRUE@	H5FDmpioff.lo
 am_libhdf5_fortran_la_OBJECTS = H5f90global.lo H5fortran_types.lo \
 	H5_ff.lo H5Aff.lo H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo \
 	H5Lff.lo H5Off.lo H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo \
 	H5_DBLE_Interface$(F_DBLE).lo H5f90kit.lo H5_f.lo H5Af.lo \
 	H5Df.lo H5Ef.lo H5Ff.lo H5Gf.lo H5If.lo H5Lf.lo H5Of.lo \
-	H5Pf.lo H5Rf.lo H5Sf.lo H5Tf.lo H5Zf.lo $(am__objects_1)
+	H5Pf.lo H5Rf.lo H5Sf.lo H5Tf.lo H5Zf.lo HDF5.lo
 libhdf5_fortran_la_OBJECTS = $(am_libhdf5_fortran_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -241,9 +231,16 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
+FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+AM_V_FC = $(am__v_FC_@AM_V@)
+am__v_FC_ = $(am__v_FC_@AM_DEFAULT_V@)
+am__v_FC_0 = @echo "  FC      " $@;
+am__v_FC_1 = 
 SOURCES = $(libhdf5_fortran_la_SOURCES) $(H5fortran_detect_SOURCES) \
 	H5match_types.c $(H5test_kind_SOURCES)
-DIST_SOURCES = $(am__libhdf5_fortran_la_SOURCES_DIST) \
+DIST_SOURCES = $(libhdf5_fortran_la_SOURCES) \
 	$(H5fortran_detect_SOURCES) H5match_types.c \
 	$(am__H5test_kind_SOURCES_DIST)
 am__can_run_installinfo = \
@@ -729,15 +726,6 @@ lib_LTLIBRARIES = libhdf5_fortran.la
 
 # Add libtool numbers to the HDF5 Fortran library (from config/lt_vers.am)
 libhdf5_fortran_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
-@BUILD_PARALLEL_CONDITIONAL_FALSE@PARALLEL_COND_SRC = HDF5.F90
-
-# Include HDF5.F90 if parallel is disabled, HDF5mpiof* if parallel is enabled
-@BUILD_PARALLEL_CONDITIONAL_TRUE@PARALLEL_COND_SRC = H5FDmpiof.c HDF5.F90 H5FDmpioff.F90
-@FORTRAN_2003_CONDITIONAL_F_FALSE@F_STATUS = _F90
-
-# Check if the compiler supports the Fortran 2003 standard
-# which should include the intrinsic module iso_c_binding
-@FORTRAN_2003_CONDITIONAL_F_TRUE@F_STATUS = _F03
 @FORTRAN_DEFAULT_REALisDBLE_F_FALSE@F_DBLE = Include
 
 #   Condition for including/excluding the DBLE interfaces for when the 
@@ -754,7 +742,7 @@ libhdf5_fortran_la_SOURCES = H5f90global.F90 \
           H5Tff.F90 H5Zff.F90                                            \
 	  H5_DBLE_Interface$(F_DBLE).F90 \
           H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
-          H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c  $(PARALLEL_COND_SRC)
+          H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c HDF5.f90
 
 
 # HDF5 Fortran library depends on HDF5 Library. 
@@ -817,7 +805,7 @@ all: $(BUILT_SOURCES) H5config_f.inc
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .F90 .c .lo .log .o .obj .sh .sh$(EXEEXT) .trs
+.SUFFIXES: .F90 .c .f90 .lo .log .o .obj .sh .sh$(EXEEXT) .trs
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/lt_vers.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -931,7 +919,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Af.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Df.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ef.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDmpiof.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ff.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Gf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5If.Plo@am__quote@
@@ -975,6 +962,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+.f90.o:
+	$(AM_V_FC)$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
+
+.f90.obj:
+	$(AM_V_FC)$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) `$(CYGPATH_W) '$<'`
+
+.f90.lo:
+	$(AM_V_FC)$(LTFCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1445,15 +1441,14 @@ H5Rff.lo:            $(srcdir)/H5Rff.F90 H5f90global.lo
 H5Sff.lo:            $(srcdir)/H5Sff.F90 H5f90global.lo
 H5Tff.lo:            $(srcdir)/H5Tff.F90 H5f90global.lo
 H5Zff.lo:            $(srcdir)/H5Zff.F90 H5f90global.lo
-H5_DBLE_Interface$(F_DBLE).lo:  $(srcdir)/H5_DBLE_Interface$(F_DBLE).F90
+H5_DBLE_Interface$(F_DBLE).lo:  $(srcdir)/H5_DBLE_Interface$(F_DBLE).F90 H5f90global.lo
 HDF5.lo:             $(srcdir)/HDF5.F90 H5f90global.lo H5_ff.lo H5Aff.lo  \
                      H5Dff.lo \
                      H5Eff.lo \
 		     H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo \
 	             H5Off.lo H5Pff.lo H5Rff.lo \
                      H5Sff.lo H5Tff.lo H5Zff.lo \
-                     H5_DBLE_Interface$(F_DBLE).lo 
-H5FDmpioff.lo:       $(srcdir)/H5FDmpioff.F90 H5f90global.lo
+                     H5_DBLE_Interface$(F_DBLE).lo
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
@@ -1649,14 +1644,6 @@ check-vfd: $(LIB) $(PROGS) $(chk_TESTS)
 	        HDF5_DRIVER=$$vfd $(MAKE) $(AM_MAKEFLAGS) check || exit 1;    \
 	    fi;                                                               \
 	done
-#HDF5mpio.lo:         $(srcdir)/H5FDmpioff.F90 H5f90global.lo H5_ff.lo \
-#		     H5Aff.lo  \
-#                     H5Dff.lo \
-#		     H5Eff.lo \
-#                     H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo \
-#		     H5Off.lo H5Pff.lo H5Rff.lo \
-#                     H5Sff.lo H5Tff.lo H5Zff.lo \
-#	             H5_DBLE_Interface$(F_DBLE).lo H5FDmpioff.lo
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -192,21 +192,11 @@ set (f90_F_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_DBLE_Interface${F_DBLE}.F90
 )
 
-#-----------------------------------------------------------------------------
-# Add H5FDMPIO if parallel
-#-----------------------------------------------------------------------------
-if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
-  set (f90_F_SRCS
-    ${f90_F_SRCS}
-    ${HDF5_F90_SRC_SOURCE_DIR}/HDF5mpio.F90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5FDmpioff.F90
-  )
-else (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
-  set (f90_F_SRCS
+set (f90_F_SRCS
     ${f90_F_SRCS}
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
-  )
-endif (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
+)
+
 set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 
 #-----------------------------------------------------------------------------
