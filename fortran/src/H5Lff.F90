@@ -4,9 +4,7 @@
 !  MODULE H5L
 !
 ! PURPOSE
-!  This file contains Fortran interfaces for H5L functions. It includes
-!  all the functions that are independent on whether the Fortran 2003 functions
-!  are enabled or disabled.
+!  This file contains Fortran interfaces for H5L functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -34,8 +32,8 @@
 
 MODULE H5L
 
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_INT
   USE H5GLOBAL
-  USE ISO_C_BINDING
 
   IMPLICIT NONE
 
@@ -119,8 +117,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5lcopy_c(src_loc_id, src_name, src_namelen, dest_loc_id, dest_name, dest_namelen, &
             lcpl_id_default, lapl_id_default) BIND(C,name='h5lcopy_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
-         USE H5GLOBAL
+         IMPORT ::  c_char
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: src_loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: src_name
          INTEGER(HID_T), INTENT(IN) :: dest_loc_id
@@ -183,8 +182,9 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5ldelete_c(loc_id, name, namelen, lapl_id_default) BIND(C,name='h5ldelete_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
-         USE H5GLOBAL
+         IMPORT :: c_char
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(HID_T) :: lapl_id_default
@@ -246,8 +246,9 @@ CONTAINS
             link_loc_id, &
             link_name,link_name_len, &
             lcpl_id_default, lapl_id_default ) BIND(C,NAME='h5lcreate_soft_c')
-         USE H5GLOBAL
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
+         IMPORT :: c_char
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: target_path
          INTEGER(SIZE_T) :: target_path_len
          INTEGER(HID_T), INTENT(IN) ::   link_loc_id
@@ -322,8 +323,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5lcreate_hard_c(obj_loc_id, obj_name, obj_namelen, &
             link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='h5lcreate_hard_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
-         USE H5GLOBAL
+         IMPORT :: c_char
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: obj_loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
@@ -399,8 +401,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5lcreate_external_c(file_name, file_namelen, obj_name, obj_namelen, &
             link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='h5lcreate_external_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
-         USE H5GLOBAL
+         IMPORT :: c_char
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: file_name
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
@@ -487,8 +490,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ldelete_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, lapl_id_default) &
             BIND(C,NAME='h5ldelete_by_idx_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
-         USE H5GLOBAL
+         IMPORT :: c_char
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
          INTEGER, INTENT(IN) :: index_field
@@ -548,8 +552,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5lexists_c(loc_id, name, namelen, lapl_id_default, link_exists_c) &
             BIND(C,NAME='h5lexists_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
-         USE H5GLOBAL
+         IMPORT :: c_char
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T), INTENT(IN) :: namelen
@@ -647,8 +652,9 @@ CONTAINS
        INTEGER FUNCTION h5lget_info_c(link_loc_id, link_name, link_namelen, &
             cset, corder, corder_valid, link_type, address, val_size, &
             lapl_id_default) BIND(C,NAME='h5lget_info_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
-         USE H5GLOBAL
+         IMPORT :: c_char
+         IMPORT :: HID_T, SIZE_T, HADDR_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name
          INTEGER, INTENT(OUT) :: cset
@@ -759,8 +765,9 @@ CONTAINS
        INTEGER FUNCTION h5lget_info_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
             link_type, corder_valid, corder, cset, address, val_size, lapl_id_default) &
             BIND(C,NAME='h5lget_info_by_idx_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
-         USE H5GLOBAL
+         IMPORT :: c_char
+         IMPORT :: HID_T, SIZE_T, HSIZE_T, HADDR_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
          INTEGER(SIZE_T)  :: group_namelen
@@ -824,7 +831,7 @@ CONTAINS
 !*****
     INTERFACE
        INTEGER FUNCTION h5lis_registered_c(link_cls_id) BIND(C,NAME='h5lis_registered_c')
-         USE H5GLOBAL
+         IMPLICIT NONE
          INTEGER, INTENT(IN) :: link_cls_id  ! User-defined link class identifier
        END FUNCTION h5lis_registered_c
     END INTERFACE
@@ -889,8 +896,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
             dest_name, dest_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='h5lmove_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
-         USE H5GLOBAL
+         IMPORT :: c_char
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: src_loc_id
 
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: src_name
@@ -976,8 +984,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
              size_default, name, lapl_id_default) BIND(C,NAME='h5lget_name_by_idx_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
-         USE H5GLOBAL
+         IMPORT :: c_char
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
 
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
@@ -1346,8 +1355,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5literate_c(group_id, index_type, order, idx, op, op_data) &
             BIND(C, NAME='h5literate_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_funptr
-         USE H5GLOBAL
+         IMPORT :: c_ptr, c_funptr
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: group_id
          INTEGER, INTENT(IN) :: index_type
          INTEGER, INTENT(IN) :: order
@@ -1430,8 +1440,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5literate_by_name_c(loc_id, name, namelen, index_type, order,&
             idx, op, op_data, lapl_id_default) BIND(C, NAME='h5literate_by_name_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr, c_funptr
-         USE H5GLOBAL
+         IMPORT :: c_char, c_ptr, c_funptr
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN) :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T) , INTENT(IN) :: namelen

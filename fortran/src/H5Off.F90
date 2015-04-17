@@ -7,9 +7,7 @@
 !  fortran/src/H5Off.f90
 !
 ! PURPOSE
-!  This file contains Fortran interfaces for H5O functions. It includes
-!  all the functions that are independent on whether the Fortran 2003 functions
-!  are enabled or disabled.
+!  This file contains Fortran interfaces for H5O functions.
 !
 !
 ! COPYRIGHT
