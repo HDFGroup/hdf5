@@ -637,6 +637,19 @@ AC_SUBST([RUNPARALLEL])
 AC_SUBST([TESTPARALLEL])
 
 ## ----------------------------------------------------------------------
+## Disable shared libraries on CYGWIN. (LK - 04/16/15)
+## A number of tests run by "make check" fail on CYGWIN, so for HDF5 v1.8.15
+## we will change the default for shared libraries to disabled.
+
+
+case "`uname`" in
+  CYGWIN*)
+    enable_shared="no"
+    CHECK_WARN="Shared libraries are not currently supported on CYGWIN."
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Fortran libraries are not currently supported on Mac. Disable them.
 ## (this is overridable with --enable-unsupported).
 ##
@@ -686,6 +699,8 @@ LT_PREREQ([2.2])
 ## dlopen - This will use an improved version of libtool
 ## win32-dll - This will build clean dlls on win32 platforms.
 LT_INIT([dlopen,win32-dll])
+
+
 
 ## ----------------------------------------------------------------------
 ## Check if we should install only statically linked executables.
@@ -2898,6 +2913,12 @@ cat >> src/H5config.h <<EOF
 #undef inline
 #endif
 EOF
+
+## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
+## linker flags:  -l with no library name; -l <libname>, specifically gfortran or m.
+## This sed script corrects "-l <libname>" first and then "-l " with no library name.
+## If the order is not preserved, all instances of "-l " will be removed.
+sed -e '/^postdeps/ s/-l \([a-zA-Z]\)/-l\1/g' -e '/^postdeps/ s/-l //g' -i libtool
 
 ## show the configure settings
 cat src/libhdf5.settings

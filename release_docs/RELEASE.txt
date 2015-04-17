@@ -1383,6 +1383,11 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* "make check" fails on CYGWIN when building shared lib files is enabled.  The
+   default on Cygwin has been changed to disable shared.  It can be enabled with
+   the --enable-shared configure option but is likely to fail "make check"
+   with GCC compilers. (LK -2015/04/16)
+
 * CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
   catches some undefined behavior in the alignment algorithm of the macro DETECT_I
   in H5detect.c (Issue 8147).  Since the algorithm is trying to detect the alignment 
