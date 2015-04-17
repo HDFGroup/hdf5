@@ -938,7 +938,6 @@ H5_FCDLL int_f h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid);
 /*
  * Functions from H5Ef.c
  */
-#define nprocess_buffer  H5_FC_FUNC_(process_buffer, PROCESS_BUFFER)
 
 H5_FCDLL int_f h5eclear_c(hid_t_f *estack_id);
 H5_FCDLL int_f h5eprint_c1(_fcd name, int_f* namelen);
@@ -947,7 +946,6 @@ H5_FCDLL int_f h5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen);
 H5_FCDLL int_f h5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen);
 H5_FCDLL int_f h5eset_auto_c(int_f* printflag);
 H5_FCDLL int_f h5eset_auto2_c(int_f* printflag, hid_t_f *estack_id, H5E_auto2_t func, void *client_data);
-H5_FCDLL int_f nprocess_buffer(hid_t_f *estack_id,void **buffer);
 
 /*
  * Functions from H5f.c

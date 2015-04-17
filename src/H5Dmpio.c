@@ -863,7 +863,7 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
             if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->coords,
                     chunk_info->index, &udata) < 0)
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk address")
-            ctg_store.contig.dset_addr = udata.addr;
+            ctg_store.contig.dset_addr = udata.chunk_block.offset;
         } /* end else */
 
         /* Set up the base storage address for this chunk */
@@ -1592,7 +1592,7 @@ if(H5DEBUG(D))
             if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id,
                     chunk_info->coords, chunk_info->index, &udata) < 0)
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
-            chunk_addr = udata.addr;
+            chunk_addr = udata.chunk_block.offset;
         } /* end if */
         else
             chunk_addr = total_chunk_addr_array[chunk_info->index];
