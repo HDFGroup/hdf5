@@ -61,10 +61,11 @@ New Features
     
       Improvements made to the CMake build system.
         
-      Default options  were changed to align with the autotools configure
+      The default options were changed to align with the Autotools configure
       defaults. CMake configure files now support components when packaged
-      with cpack. Windows CPack supports WiX packaging, and will look for
-      WiX and NSIS in standard locations.
+      with CPack. Windows CPack supports WiX packaging, and will look for
+      WiX and NSIS in the standard locations. 
+      
       The CMake minimum has been changed to 3.1.
       
       (ADB - 2015/04/01 HDFFV-8074, 8968, 9006)
@@ -73,34 +74,37 @@ New Features
       different API's and testings. See "cmakehdf5 --help" for details.
       (AKC - 2014/12/09 HDFFV-8932)
 
-    - Building Shared and Parallel 
+    - Building Shared and Parallel Made Explicit
 
       When --enable-parallel is specified, configure used to disable
       shared by default.
 
-      Remove restriction for building shared when parallel is
+      Removed the restriction for building shared when parallel is
       enabled. --disable-shared has to be used explicitly if user
       wishes to disable shared libraries.
 
       (MSC - 2015/02/19 HDFFV-9069)
 
-    - Infering Parallel Compilers
+    - Inferring Parallel Compilers
 
       configure was trying to infer if a compiler is a parallel
       compiler with MPI support and enable parallel even if the user
-      did not explicitly enabled parallel. This should not happen.
+      did not explicitly enable parallel. This should not happen.
 
-      Disable infering parallel compilers to enable parallel HDF5
+      Disabled inferring parallel compilers to enable parallel HDF5
       build. --enable-parallel has to be used explicitly to build
       parallel HDF5 regardless of the compiler type being used.
 
       (MSC - 2015/02/19 HDFFV-9068)
 
-    - Remove option to enable or disable large file support. It will
+    - Large File Support Configuration Option
+      
+      Removed the option to enable or disable large file support. It will
       always be enabled.
+      
       (MSC - 2015/02/19 HDFFV-9097)
 
-    - Removed configuration feature
+    - Removed Configuration Feature
 
       When configure detected that the CodeWarrior compiler was being used it
       would define a symbol that caused a test in test/tfile.c to be skipped
@@ -111,9 +115,9 @@ New Features
 
       (DER - 2015/02/21, HDFFV-9080)
 
-    - VMS build/test files have been removed
+    - VMS Build/Test Files Have Been Removed
 
-      HDF5 no longer supports VMS and the files were getting out of date.
+      HDF5 no longer supports VMS, and the files were getting out of date.
       Since we have no access to a VMS machine, there is no way for us to
       maintain them.
 
@@ -125,7 +129,7 @@ New Features
 
       (DER - 2015-02-26, HDFFV-9147)
 
-    - Removal of --with-default-vfd configure option
+    - Removal of --with-default-vfd configure Option
 
       In theory, this option was intended to allow setting a default
       VFD that would be used by the library. In practice, the feature
@@ -136,33 +140,34 @@ New Features
 
       (DER - 2015-02-26, HDFFV-9081)
 
-    - Direct VFD configure behavior
+    - Direct VFD configure Behavior
 
-      The configure options for Linux now allow the direct VFD to built
+      The configure options for Linux now allow the Direct VFD to build
       without passing additional compiler options/defines like _GNU_SOURCE.
       Passing --enable-direct-vfd is now all that is needed to enable
       the feature.
 
-      The direct VFD is now disabled by default since it is intended for
+      The Direct VFD is now disabled by default since it is intended for
       specialized audiences. It was previously enabled by default, but the
       configure script did not set correct POSIX levels, etc. making this
       a moot point.
 
-      Note that the direct VFD can only be configured on Linux when
+      Note that the Direct VFD can only be configured on Linux when
       the O_DIRECT flag to open()/create() and posix_memalign() function
       are available. This is unchanged from previous behavior.
 
       (DER - 2015-02-26, HDFFV-9057, 7567, 9088, 7566)
 
-    - _POSIX_C_SOURCE, _GNU_SOURCE, and _BSD_SOURCE no longer exported to
-      h5cc and other compiler wrappers.
+    - _POSIX_C_SOURCE, _GNU_SOURCE, and _BSD_SOURCE No Longer Exported 
+      to h5cc and Other Compiler Wrappers
 
-      These definitions are not required for using API functions and may
-      conflict with user code requirements.
+      The _POSIX_C_SOURCE, _GNU_SOURCE, and _BSD_SOURCE definitions are 
+      not required for using API functions and may conflict with user 
+      code requirements.
 
       (DER - 2015-03-08, HDFFV-9152)
 
-    - Removed the --enable-filters option from configure.
+    - Removed the --enable-filters Option from configure
 
       This option allowed the user to disable selected internal filters,
       presumably to make the library smaller. It has been removed since
@@ -171,32 +176,32 @@ New Features
       the library at large due to the large number of #ifdefs that would
       be required.
 
-      Note that this features applied to internal filters such as suffle
-      and n-bit, not external filters like gzip or szip. Those are still
+      Note that this features applied to internal filters such as shuffle
+      and n-bit and not external filters like gzip or Szip. Those are still
       enabled or disabled via their own configure options.
 
       (DER - 2015-03-08, HDFFV-9086)
 
-    - Removed obsolete time functionality from configure and C library
+    - Removed Obsolete Time Functionality from configure and the C Library
 
       The library contained some residual functionality from obsolete
-      time zone handling code. This has been removed and the configure
+      time zone handling code. This has been removed, and the configure
       checks for the time functions have been cleaned up.
 
       * Lumped all the time functionality together in configure.ac.
         This was previously more spread out due to Solaris issues
         with the ordering of certain checks.
 
-      * Removes processing that handles __tm_gmtoff members of struct
+      * Removed processing that handles __tm_gmtoff members of struct
         tm. (libc-4)
 
-      * Removes BSDgettimeofday(). (IRIX 5.3)
+      * Removed BSDgettimeofday(). (IRIX 5.3)
 
-      * Removes timezone struct handling in gettimeofday(). (considered
-        harmful)
+      * Removed timezone struct handling in gettimeofday() (considered
+        harmful).
 
-      Note that the HDF5 library stores timestamps in a platform-independent
-      manner, so old files can still be read. This only affects convering
+      Note that the HDF5 Library stores timestamps in a platform-independent
+      manner, so old files can still be read. This only affects converting
       system time to HDF5 timestamps.
 
       The library currently uses the tm_gmtoff member of the tm struct
@@ -205,7 +210,7 @@ New Features
 
       (DER - 2015-03-09, HDFFV-9083 and 9085)
 
-    - Added -D_DEFAULT_SOURCE to CPPFLAGS on Linux systems
+    - Added -D_DEFAULT_SOURCE to CPPFLAGS on Linux Systems
 
       This is the replacement for -D_BSD_SOURCE in versions of glibc since 2.19.
       Since both are defined, it should work for all versions of glibc. Defining
@@ -215,7 +220,7 @@ New Features
 
     Library
     -------
-    - Added memory allocation functions that use the library's allocator.
+    - Added Memory Allocation Functions that Use the Library's Allocator
 
       HDF5 filters may need to allocate or resize the buffer that is passed
       to them from the library. If the filter has been compiled separately
@@ -245,31 +250,32 @@ New Features
     - H5Pset_istore_k and H5Pset_sym_k
 
       These two functions didn't check the value of the input parameter "ik". 
-      When 2*ik exceeded 2 bytes storage, data was lost in the file, 
-      e.g., some chunks would be overwritten.  
+      When 2*ik exceeded 2 bytes of storage, data was lost in the file; 
+      for example, some chunks would be overwritten.  
 
       Added validation of "ik" to not exceed the max v1 btree entries (2 bytes)
       to these two routines.
 
       (VC - 2015-03-24, HDFFV-9173)
 
-    - Added functions to control the value of H5PL_no_plugin_g without using an
-      environment variable.
+    - Added Functions to Control the Value of H5PL_no_plugin_g without 
+      Using an Environment Variable
       
-      Sometimes it is necessary for an application to disable the use of dynamically
-      loaded plugin libraries without requiring the library to built with plugin
-      support disabled or to set an environment variable to disable plugin support 
-      globally.
+      Sometimes it is necessary for an application to disable the use of 
+      dynamically loaded plugin libraries without requiring the library to 
+      be built with plugin support disabled or to set an environment 
+      variable to disable plugin support globally.
       
       Two new functions (H5PLset_loading_state() and H5PLget_loading_state())
-      were added to the HDF5 C library. These functions require a parameter that
-      indicates which type of dynamically loaded plugin is enabled or disabled.
+      were added to the HDF5 C Library. These functions require a parameter 
+      that indicates which type of dynamically loaded plugin is enabled or 
+      disabled.
       
       (ADB - 2015-03-17, HDFFV-8520)
       
     Parallel Library
     ----------------
-    - MPI_Finalize and HDF5 Library shutdown.
+    - MPI_Finalize and HDF5 Library Shutdown
 
       Calling HDF5 routines after MPI_Finalize has been closed should
       not be done, since those routines might call MPI functions that
@@ -277,9 +283,9 @@ New Features
 
       Attached an attribute destroy callback to MPI_COMM_SELF that
       shuts down the HDF5 library when MPI_COMM_SELF is destroyed,
-      i.e. on MPI_Finalize. This should fix several issues that users
-      see when they forget to close HDF5 objects before calling
-      MPI_Finalize().  
+      in other words, on MPI_Finalize. This should fix several issues 
+      that users see when they forget to close HDF5 objects before 
+      calling MPI_Finalize().  
 
       (MSC - 2015/02/25, HDFFV-883)
  
@@ -293,48 +299,49 @@ New Features
 
     Fortran API
     -----------
-    - Added new global variables (equivalent to the C definitions--minus the '_F'):
-         H5G_UDLINK_F  
-         H5G_SAME_LOC_F
-	 H5O_TYPE_UNKNOWN_F
-	 H5O_TYPE_GROUP_F
-	 H5O_TYPE_DATASET_F
-	 H5O_NAMED_DATATYPE_F
-	 H5O_TYPE_NTYPES_F
-
-	 (MSB, 2015-2-3, HDFFV-9040)
+    - Added Global Variables 
+    
+      These new global variables are equivalent to the C definitions 
+      without the '_F':
+      
+      H5G_UDLINK_F  
+      H5G_SAME_LOC_F
+      H5O_TYPE_UNKNOWN_F
+      H5O_TYPE_GROUP_F
+      H5O_TYPE_DATASET_F
+      H5O_NAMED_DATATYPE_F
+      H5O_TYPE_NTYPES_F
+      
+      (MSB - 2015/02/03, HDFFV-9040)
 
 
     C++ API
     -------
-    - New wrappers for C functions H5P[s/g]et_libver_bounds
+    - New Wrappers for C Functions H5P[s/g]et_libver_bounds
 
-      The following wrappers are added to class H5::FileAccPropList
-	// Sets bounds on versions of library format to be used when creating
-	// or writing objects.
-	void setLibverBounds(H5F_libver_t libver_low, H5F_libver_t libver_high) const;
-	// Gets the current settings for the library version format bounds.
-	void getLibverBounds(H5F_libver_t& libver_low, H5F_libver_t& libver_high) const;
+      Wrappers were added to class H5::FileAccPropList for the 
+      C Functions H5Pget_libver_bounds and H5Pset_libver_bounds.
 
-      (BMR, 2015-04-06, Part of HDFFV-9167)
+      (BMR, 2015/04/06, Part of HDFFV-9167)
 
-    - New wrappers to get the object header's version
+    - New Wrappers to Get the Object Header's Version
 
       The following wrappers are added to class H5::CommonFG
-	// Returns the object header version of an object in a file or group,
-	// given the object's name.
-	unsigned childObjVersion(const char* objname) const;
-	unsigned childObjVersion(const H5std_string& objname) const;
+      Returns the object header version of an object in a file or group,
+      given the object's name.
+      
+      unsigned childObjVersion(const char* objname) const;
+      unsigned childObjVersion(const H5std_string& objname) const;
 
-      (BMR, 2015-04-06)
+      (BMR, 2015/04/06)
 
-    - New DataType constructor:
+    - New DataType Constructor
 
       Added a DataType constructor that takes a PredType object, and this
-      constructor will invoke H5Tcopy to generate another datatype id, from a
-      predefined datatype.
+      constructor will invoke H5Tcopy to generate another datatype id 
+      from a predefined datatype.
 
-      (BMR, 2015-04-06)
+      (BMR, 2015/04/06)
 
 
 Support for New Platforms, Languages, and Compilers
@@ -348,7 +355,7 @@ Bug Fixes since HDF5-1.8.14
 
     Configuration
     -------------
-    - Windows installer incorrect display of PATH environment variable.
+    - Windows Installer Incorrect Display of PATH Environment Variable
     
       In the Windows installer, the dialog box where the user can elect to
       add the product's bin path to the %PATH% environment variable displayed
@@ -370,20 +377,20 @@ Bug Fixes since HDF5-1.8.14
 
     Library
     -------
-    - Incorrect usage of list in CMake COMPILE_DEFINITIONS set_property
+    - Incorrect Usage of List in CMake COMPILE_DEFINITIONS set_property
     
-      The CMake command, set_property with COMPILE_DEFINITIONS property
+      The CMake command set_property with COMPILE_DEFINITIONS property
       needs a quoted semi-colon separated list of values. CMake will
       transform the list to a series of -D{value} for the compile.
       
       (ADB - 2014/12/09, HDFV-9041)
       
-    - Fixed compile errors on Windows w/ Visual Studio and CMake when
-      UNICODE is defined.
+    - Fixed Compile Errors on Windows w/ Visual Studio and CMake When
+      UNICODE is Defined
     
-      The HDF5 library could not be built on Windows with Visual Studio when
-      UNICODE was defined. This was due to incorrect use of the TEXT() macro
-      and some Win32 API functions that take TCHAR parameters. The faulty
+      The HDF5 Library could not be built on Windows with Visual Studio when
+      UNICODE was defined. This was due to the incorrect use of the TEXT() 
+      macro and some Win32 API functions that take TCHAR parameters. The faulty
       code was a part of the filter plugin functionality. This was a
       compile-time error that only affected users who build HDF5 from source
       and define UNICODE, usually when HDF5 is being built as a part of a
@@ -401,7 +408,7 @@ Bug Fixes since HDF5-1.8.14
       
       (DER - 2015/02/22, HDFFV-8927)
 
-    - Addition of error tracing functionality to several C API calls
+    - Addition of Error Tracing Functionality to Several C API Calls
 
       A bug in a text processing script caused API calls that return a
       pointer to not receive error tracing macros/functionality.
@@ -412,16 +419,18 @@ Bug Fixes since HDF5-1.8.14
 
       (DER - 2015/02/26, HDFFV-9141)
 
-    - H5Rdereference now checks for HADDR_UNDEF or uninitialized references
+    - H5Rdereference Now Checks for HADDR_UNDEF or Uninitialized References
 
-      When passed HADDR_UNDEF or uninitialized references, the previous behavior of 
-      H5Rdereference was to continue to process the reference as a valid address. 
-      H5Rdereference was changed to return immediately (with an error message)
-      if the references are HADDR_UNDEF or uninitialized.
+      When passed HADDR_UNDEF or uninitialized references, the previous 
+      behavior of H5Rdereference was to continue to process the reference 
+      as a valid address. 
+      
+      H5Rdereference was changed to return immediately (with an error 
+      message) if the references are HADDR_UNDEF or uninitialized.
 
       (MSB - 2015/3/10, HDFFV-7959)
 
-    - Fixed bugs in H5Sextent_copy
+    - Fixed Bugs in H5Sextent_copy
 
       H5Sextent_copy would not free the previous extent, resulting in a memory
       leak.  Also, H5Sextent_copy would not update the number of elements
@@ -433,13 +442,20 @@ Bug Fixes since HDF5-1.8.14
 
     Parallel Library
     ----------------
-    - Fixed a potential memory error when performing parallel I/O on a dataset
-      with a single chunk, and at least one process has nothing to do.
+    - Fixed a Potential Memory Error
+      
+      Fixed a potential memory error when performing parallel I/O on a 
+      dataset with a single chunk, and at least one process has nothing 
+      to do.
+      
       (NAF - 2015/02/16)
 
-    - Fixed problem with parallel tests where they failed beyond a
+    - Parallel Test Problem Fixed
+      
+      Fixed problem with parallel tests where they failed beyond a
       certain number of ranks. All tests should work for any arbitrary
       number of ranks. 
+      
       (MSC - 2014/11/06, HDFFV-1027,8962,8963)
 
     - MPE Support
@@ -458,91 +474,126 @@ Bug Fixes since HDF5-1.8.14
 
     Tools
     -----
-    - Fixed h5repack crashed on enumerated 8-bit type nested in compound
-      type. (AKC - 2015.03/31, HDFFV-8667)
-    - Fixed h52gif crashed if instructed to convert images other than 8bit
-      images. (AKC - 2015/03/31, HDFFV-8957)
-    - Benchpar.c in perform is retired. (AKC - 2014/12/19, HDFFV-8156)
-    - The perform directory is moved to tools/perform for easier maintenance.
+    - h5repack
+      
+      Fixed an h5repack bug. h5repack would crash on enumerated 8-bit 
+      datatype nested in compound datatype. 
+      
+      (AKC - 2015/03/31, HDFFV-8667)
+      
+    - h52gif
+      
+      Fixed an h52gif bug. h52gif would crash if instructed to convert 
+      images other than 8-bit images. 
+      
+      (AKC - 2015/03/31, HDFFV-8957)
+      
+    - Benchpar.c Retired
+      
+      Benchpar.c in perform was retired. 
+      
+      (AKC - 2014/12/19, HDFFV-8156)
+      
+    - Moved perform Directory
+      
+      The perform directory was moved to tools/perform for easier 
+      maintenance.
+      
       (AKC - 2014/12/17, HDFFV-9046)
-
+      
     Fortran API
     ------------
-    - ISSUE: Fortran fails with --enable-fortran2003 and Intel 15.x compilers.
+    - Fortran Fails with --enable-fortran2003 and Intel 15.x Compilers
       
       Added BIND(C) to the offending APIs. 
 
-      The Fortran Library (--enable-fortran2003)  now works using Intel 15.x 
+      The Fortran Library (--enable-fortran2003) now works using Intel 15.x 
       without the need for any additional compilers flags. 
+      
       (MSB - 2015/1/26, HDFFV-9049)
 
-    - ISSUE: h5tenum_insert_f does not work with default 8 byte integers (xlf compiler)
+    - h5tenum_insert_f Does Not Work with Default 8 Byte Integers 
+      (xlf compiler)
       
-      * In the Fortran 90 API, 'value' is no longer cast into the C int type. Therefore, if
-        h5tenum_insert_f is passed an 8 byte integer (via -i8) then 'value' is written as 
-	the same type as the default Fortran integer type (which can be 8 bytes).
+      In the Fortran 90 API, 'value' is no longer cast into the C int type. 
+      Therefore, if h5tenum_insert_f is passed an 8 byte integer (via -i8) 
+      then 'value' is written as the same type as the default Fortran 
+      integer type (which can be 8 bytes).
+      
+      A new Fortran 2003 API was added which is more in line with the C 
+      API and users are strongly encouraged to use the Fortran 2003 API 
+      instead of the Fortran 90 API.
 
-      * A new Fortran 2003 API was added which is more in line with the C API and users are strongly 
-        encouraged to use the Fortran 2003 API instead of the Fortran 90 API.
-
-	SUBROUTINE h5tenum_insert_f(type_id, name, value, hdferr)
- 	 INTEGER(HID_T)  , INTENT(IN) :: type_id
- 	 CHARACTER(LEN=*), INTENT(IN) :: name
- 	 TYPE(C_PTR)     , INTENT(IN) :: value
- 	 INTEGER, INTENT(OUT) :: hdferr
+      SUBROUTINE h5tenum_insert_f(type_id, name, value, hdferr)
+      INTEGER(HID_T)  , INTENT(IN) :: type_id
+      CHARACTER(LEN=*), INTENT(IN) :: name
+      TYPE(C_PTR)     , INTENT(IN) :: value
+      INTEGER, INTENT(OUT) :: hdferr
 
       (MSB - 2015/2/19, HDFFV-8908)
 
-    - ISSUE: The following Fortran APIs never returned the error state (i.e. the APIs
-      always returned a positive number), they were corrected to return a negative number as
-      described in the Reference Manual if an error occurred:
+    - Some Fortran APIs Never Returned the Error State
+      
+      Some Fortran APIs never returned the error state: they 
+      would always return a positive number. The APIs include 
+      the following:
+      
+      h5fget_file_image_f
+      h5lget_name_by_idx_f
+      h5oget_comment_by_name_f
 
-        h5fget_file_image_f
-        h5lget_name_by_idx_f
-        h5oget_comment_by_name_f
+      They were corrected to return a negative number as described in 
+      the Reference Manual if an error occurred. 
 
       (MSB - 2015/3/19, HDF5-239)
 
-    - ISSUE: h5pget_class_f is an ill-functioning API
+    - Fixed h5pget_class_f 
 
-      h5pget_class_f never correlated the class identifier to the property list class name (as indicated
-      in the HDF5 Reference Manual), but instead returned a property list class identifier as a INTEGER.
-      However, the INTEGER needed to be of type INTEGER(HID_T) to be correct.
+      h5pget_class_f never correlated the class identifier to the property 
+      list class name as indicated in the HDF5 Reference Manual; it instead 
+      returned a property list class identifier as an INTEGER. The INTEGER 
+      needed to be of type INTEGER(HID_T) to be correct.
 
-      RESOLUTION: the h5pget_class_f API was changed to return an INTEGER(HID_T) property list class 
-      identifier instead of an INTEGER. This mimics the intended behavior of the C API.
+      The h5pget_class_f API was changed to return an INTEGER(HID_T) 
+      property list class identifier instead of an INTEGER. This mimics the 
+      intended behavior of the C API.
 
       (MSB - 2015/3/16, HDFFV5-9162)
 
-
     C++ API
     ------
-    - Combining two H5File::getObjCount overloaded methods
+    - Combined Two H5File::getObjCount Overloaded Methods
 
       The following two methods
-	ssize_t getObjCount(unsigned types) const;
-	ssize_t getObjCount() const;
-      are combined into one:
-	ssize_t getObjCount(unsigned types = H5F_OBJ_ALL) const;
+      
+      ssize_t getObjCount(unsigned types) const;
+      ssize_t getObjCount() const;
+      
+      were combined into one:
+      
+      ssize_t getObjCount(unsigned types = H5F_OBJ_ALL) const;
 
-      (BMR, 2015-04-06)
+      (BMR - 2015/04/06)
 
-    - Many warnings are removed
+    - Many Warnings Were Removed
 
       Many warnings such as conversion, unused variables, missing base
-      class initialization, and initializing base classes in wrong order.
+      class initialization, and initializing base classes in wrong order 
+      were removed.
 
-      (BMR, 2015-04-06)
+      (BMR, 2015/04/06)
 
-    - Functionality deprecation
+    - Functionality Deprecation
 
-      The following two constructors of classes: AbstractDs, IdComponent,
+      The following two constructors of classes AbstractDs, IdComponent,
       H5Location, and H5Object are no longer appropriate after the data member
       "id" had been moved from IdComponent to the sub-classes in previous
       releases.
-	<Classname>(const hid_t h5_id);
-	<Classname>(const <Classname>& original);
-      The copy constructors were noop and removed in 1.8.15.  The other
+      
+      <Classname>(const hid_t h5_id);
+      <Classname>(const <Classname>& original);
+      
+      The copy constructors were no-op and removed in 1.8.15.  The other
       constructors will be removed from 1.10 release, and then from 1.8.17
       if their removal does not cause any problems.
 
@@ -551,7 +602,7 @@ Bug Fixes since HDF5-1.8.14
 
     High-Level APIs:
     ------
-    - Suppress warnings from flex/bison-generated code.
+    - Suppress Warnings from Flex/Bison-generated Code
 
       Warning suppression #pragmas, etc. have been added to H5LTparse.c and
       H5LTanalyze.c. We have no control over this code since it's created by
@@ -559,41 +610,44 @@ Bug Fixes since HDF5-1.8.14
 
       (DER - 2015/03/08 - HDFFV-9149)
 
-    - Changed hdf5_hl.h to include the hdf5 main library "hdf5.h"
+    - Changed hdf5_hl.h to Include the HDF5 Main Library "hdf5.h"
 
       User's no longer need to include both hdf5_hl.h and hdf5.h
 
-      (MSB - 2015/2/14 - HDFFV-8685)
+      (MSB - 2015/2/14, HDFFV-8685)
 
    
-    - ISSUE: H5PTcreate_fl does not convert to memory type.
+    - H5PTcreate_fl Does Not Convert to Memory Datatype
 
-      H5PTcreate_fl now converts to the table's native memory datatype to fix 
-      the problem of handling BE and LE packet tables.
+      H5PTcreate_fl now converts to the table's native memory datatype 
+      to fix the problem of handling BE and LE packet tables.
 
       (MSB - 2015/2/26 - HDFFV-9042)
 
-
-    - ISSUE: H5LT attribute functions fail to create attributes whose name 
+    - Fix for H5LT Attribute Functions
+      
+      H5LT attribute functions fail to create attributes whose name 
       is a substring of an existing attribute.
 
       H5LT attribute functions can now create attributes whose name 
       is a substring of an existing attribute.
 
-      (MSB - 2015/2/24 - HDFFV-9132)
+      (MSB - 2015/2/24, HDFFV-9132)
     
 
     Fortran High-Level APIs:
     ------------------------
 
-    - Internal library fix for missing argument declaration.
+    - Internal Library Fix for Missing Argument Declaration
     
-      In Interface block for h5tbmake_table_c, "max_char_size_field_names" is listed as an input, but in the 
-      argument definitions it is "INTEGER :: max_char_size". This caused no known problems with the Fortran HL API.
+      In Interface block for h5tbmake_table_c, "max_char_size_field_names" 
+      is listed as an input, but in the argument definitions it is 
+      "INTEGER :: max_char_size". This caused no known problems with the 
+      Fortran HL API.
 
       Fixed missing argument definition.
        
-      (MSB - 2015/2/18 - HDFFV-8559)
+      (MSB - 2015/2/18, HDFFV-8559)
       
 
     Testing
@@ -805,7 +859,7 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
-* On windows platforms in debug configurations, the VFD flush1 tests will fail
+* On Windows platforms in debug configurations, the VFD flush1 tests will fail
   with the split and multi VFD drivers. These tests will display a modal debug 
   dialog which must be answered or wait for the test timeout to expire.
   (ADB - 2014/06/23 - HDFFV-8851)
