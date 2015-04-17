@@ -33,6 +33,7 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatypes         			*/
@@ -238,8 +239,8 @@ typedef struct H5D_chk_idx_info_t {
  * The chunk's file address, filter mask and size on disk are not key values.
  */
 typedef struct H5D_chunk_rec_t {
-    uint32_t	nbytes;				/* Size of stored data	*/
     hsize_t	offset[H5O_LAYOUT_NDIMS];	/* Logical offset to start */
+    uint32_t	nbytes;				/* Size of stored data	*/
     unsigned	filter_mask;			/* Excluded filters	*/
     haddr_t     chunk_addr;                     /* Address of chunk in file */
 } H5D_chunk_rec_t;
@@ -265,8 +266,7 @@ typedef struct H5D_chunk_ud_t {
 
     /* Upward */
     unsigned    idx_hint;               /*index of chunk in cache, if present */
-    haddr_t	addr;			/*file address of chunk */
-    uint32_t	nbytes;			/*size of stored data	*/
+    H5F_block_t chunk_block;            /*offset/length of chunk in file */
     unsigned	filter_mask;		/*excluded filters	*/
 } H5D_chunk_ud_t;
 
@@ -496,7 +496,7 @@ typedef struct H5D_rdcc_ent_t {
     hsize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
     uint32_t	rd_count;	/*bytes remaining to be read		*/
     uint32_t	wr_count;	/*bytes remaining to be written		*/
-    haddr_t     chunk_addr;     /*address of chunk in file		*/
+    H5F_block_t chunk_block;    /*offset/length of chunk in file        */
     uint8_t	*chunk;		/*the unfiltered chunk data		*/
     unsigned	idx;		/*index in hash table			*/
     struct H5D_rdcc_ent_t *next;/*next item in doubly-linked list	*/
