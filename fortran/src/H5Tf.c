@@ -46,7 +46,7 @@
  * SOURCE
 */
 int_f
-nh5topen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *tapl_id)
+h5topen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *tapl_id)
 /******/
 {
     char *c_name = NULL;
@@ -101,7 +101,7 @@ done:
  * SOURCE
 */
 int_f
-nh5tcommit_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id,
+h5tcommit_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id,
 	     hid_t_f *lcpl_id, hid_t_f *tcpl_id, hid_t_f *tapl_id)
 /******/
 {
@@ -142,7 +142,7 @@ done:
 */
 
 int_f
-nh5tclose_c ( hid_t_f *type_id )
+h5tclose_c ( hid_t_f *type_id )
 /******/
 {
   int ret_value = 0;
@@ -174,7 +174,7 @@ nh5tclose_c ( hid_t_f *type_id )
 */
 
 int_f
-nh5tcopy_c ( hid_t_f *type_id , hid_t_f *new_type_id)
+h5tcopy_c ( hid_t_f *type_id , hid_t_f *new_type_id)
 /******/
 {
   int ret_value = 0;
@@ -209,7 +209,7 @@ nh5tcopy_c ( hid_t_f *type_id , hid_t_f *new_type_id)
 */
 
 int_f
-nh5tequal_c ( hid_t_f *type1_id , hid_t_f *type2_id, int_f *c_flag)
+h5tequal_c ( hid_t_f *type1_id , hid_t_f *type2_id, int_f *c_flag)
 /******/
 {
   int ret_value = -1;
@@ -257,7 +257,7 @@ nh5tequal_c ( hid_t_f *type1_id , hid_t_f *type2_id, int_f *c_flag)
 */
 
 int_f
-nh5tget_class_c ( hid_t_f *type_id , int_f *classtype)
+h5tget_class_c ( hid_t_f *type_id , int_f *classtype)
 /******/
 {
   int ret_value = 0;
@@ -310,7 +310,7 @@ nh5tget_class_c ( hid_t_f *type_id , int_f *classtype)
 */
 
 int_f
-nh5tget_order_c ( hid_t_f *type_id , int_f *order)
+h5tget_order_c ( hid_t_f *type_id , int_f *order)
 /******/
 {
   int ret_value = -1;
@@ -353,7 +353,7 @@ nh5tget_order_c ( hid_t_f *type_id , int_f *order)
 */
 
 int_f
-nh5tset_order_c ( hid_t_f *type_id , int_f *order)
+h5tset_order_c ( hid_t_f *type_id , int_f *order)
 /******/
 {
   int ret_value = 0;
@@ -392,7 +392,7 @@ nh5tset_order_c ( hid_t_f *type_id , int_f *order)
 */
 
 int_f
-nh5tget_size_c ( hid_t_f *type_id , size_t_f *size)
+h5tget_size_c ( hid_t_f *type_id , size_t_f *size)
 /******/
 {
   int ret_value = -1;
@@ -427,7 +427,7 @@ nh5tget_size_c ( hid_t_f *type_id , size_t_f *size)
 */
 
 int_f
-nh5tset_size_c ( hid_t_f *type_id , size_t_f *size)
+h5tset_size_c ( hid_t_f *type_id , size_t_f *size)
 /******/
 {
   int ret_value = -1;
@@ -463,7 +463,7 @@ nh5tset_size_c ( hid_t_f *type_id , size_t_f *size)
 */
 
 int_f
-nh5tget_precision_c ( hid_t_f *type_id , size_t_f *precision)
+h5tget_precision_c ( hid_t_f *type_id , size_t_f *precision)
 /******/
 {
   int ret_value = -1;
@@ -497,7 +497,7 @@ nh5tget_precision_c ( hid_t_f *type_id , size_t_f *precision)
 */
 
 int_f
-nh5tset_precision_c ( hid_t_f *type_id , size_t_f *precision)
+h5tset_precision_c ( hid_t_f *type_id , size_t_f *precision)
 /******/
 {
   int ret_value = -1;
@@ -534,7 +534,7 @@ nh5tset_precision_c ( hid_t_f *type_id , size_t_f *precision)
 */
 
 int_f
-nh5tget_offset_c ( hid_t_f *type_id , size_t_f *offset)
+h5tget_offset_c ( hid_t_f *type_id , size_t_f *offset)
 /******/
 {
   int ret_value = -1;
@@ -570,7 +570,7 @@ nh5tget_offset_c ( hid_t_f *type_id , size_t_f *offset)
 */
 
 int_f
-nh5tset_offset_c ( hid_t_f *type_id , size_t_f *offset)
+h5tset_offset_c ( hid_t_f *type_id , size_t_f *offset)
 /******/
 {
   int ret_value = -1;
@@ -609,7 +609,7 @@ nh5tset_offset_c ( hid_t_f *type_id , size_t_f *offset)
 */
 
 int_f
-nh5tget_pad_c ( hid_t_f *type_id , int_f * lsbpad, int_f * msbpad)
+h5tget_pad_c ( hid_t_f *type_id , int_f * lsbpad, int_f * msbpad)
 /******/
 {
   int ret_value = -1;
@@ -651,7 +651,7 @@ nh5tget_pad_c ( hid_t_f *type_id , int_f * lsbpad, int_f * msbpad)
 */
 
 int_f
-nh5tset_pad_c ( hid_t_f *type_id, int_f * lsbpad, int_f* msbpad )
+h5tset_pad_c ( hid_t_f *type_id, int_f * lsbpad, int_f* msbpad )
 /******/
 {
   int ret_value = -1;
@@ -688,7 +688,7 @@ nh5tset_pad_c ( hid_t_f *type_id, int_f * lsbpad, int_f* msbpad )
 */
 
 int_f
-nh5tget_sign_c ( hid_t_f *type_id , int_f *sign)
+h5tget_sign_c ( hid_t_f *type_id , int_f *sign)
 /******/
 {
   int ret_value = -1;
@@ -722,7 +722,7 @@ nh5tget_sign_c ( hid_t_f *type_id , int_f *sign)
 */
 
 int_f
-nh5tset_sign_c ( hid_t_f *type_id , int_f* sign)
+h5tset_sign_c ( hid_t_f *type_id , int_f* sign)
 /******/
 {
   int ret_value = -1;
@@ -763,7 +763,7 @@ nh5tset_sign_c ( hid_t_f *type_id , int_f* sign)
 */
 
 int_f
-nh5tget_fields_c ( hid_t_f *type_id , size_t_f *spos, size_t_f *epos, size_t_f* esize, size_t_f* mpos, size_t_f* msize)
+h5tget_fields_c ( hid_t_f *type_id , size_t_f *spos, size_t_f *epos, size_t_f* esize, size_t_f* mpos, size_t_f* msize)
 /******/
 {
   int ret_value = -1;
@@ -806,7 +806,7 @@ nh5tget_fields_c ( hid_t_f *type_id , size_t_f *spos, size_t_f *epos, size_t_f* 
 */
 
 int_f
-nh5tset_fields_c ( hid_t_f *type_id, size_t_f *spos, size_t_f *epos, size_t_f* esize, size_t_f* mpos, size_t_f* msize)
+h5tset_fields_c ( hid_t_f *type_id, size_t_f *spos, size_t_f *epos, size_t_f* esize, size_t_f* mpos, size_t_f* msize)
 /******/
 {
   int ret_value = -1;
@@ -848,7 +848,7 @@ nh5tset_fields_c ( hid_t_f *type_id, size_t_f *spos, size_t_f *epos, size_t_f* e
 */
 
 int_f
-nh5tget_ebias_c ( hid_t_f *type_id , size_t_f *ebias)
+h5tget_ebias_c ( hid_t_f *type_id , size_t_f *ebias)
 /******/
 {
   int ret_value = -1;
@@ -884,7 +884,7 @@ nh5tget_ebias_c ( hid_t_f *type_id , size_t_f *ebias)
 */
 
 int_f
-nh5tset_ebias_c ( hid_t_f *type_id , size_t_f *ebias)
+h5tset_ebias_c ( hid_t_f *type_id , size_t_f *ebias)
 /******/
 {
   int ret_value = -1;
@@ -922,7 +922,7 @@ nh5tset_ebias_c ( hid_t_f *type_id , size_t_f *ebias)
 */
 
 int_f
-nh5tget_norm_c ( hid_t_f *type_id , int_f *norm)
+h5tget_norm_c ( hid_t_f *type_id , int_f *norm)
 /******/
 {
   int ret_value = -1;
@@ -958,7 +958,7 @@ nh5tget_norm_c ( hid_t_f *type_id , int_f *norm)
 */
 
 int_f
-nh5tset_norm_c ( hid_t_f *type_id , int_f *norm)
+h5tset_norm_c ( hid_t_f *type_id , int_f *norm)
 /******/
 {
   int ret_value = -1;
@@ -998,7 +998,7 @@ nh5tset_norm_c ( hid_t_f *type_id , int_f *norm)
 */
 
 int_f
-nh5tget_inpad_c ( hid_t_f *type_id , int_f * padtype)
+h5tget_inpad_c ( hid_t_f *type_id , int_f * padtype)
 /******/
 {
   int ret_value = -1;
@@ -1038,7 +1038,7 @@ nh5tget_inpad_c ( hid_t_f *type_id , int_f * padtype)
 */
 
 int_f
-nh5tset_inpad_c ( hid_t_f *type_id, int_f * padtype)
+h5tset_inpad_c ( hid_t_f *type_id, int_f * padtype)
 /******/
 {
   int ret_value = -1;
@@ -1077,7 +1077,7 @@ nh5tset_inpad_c ( hid_t_f *type_id, int_f * padtype)
 */
 
 int_f
-nh5tget_cset_c ( hid_t_f *type_id , int_f * cset)
+h5tget_cset_c ( hid_t_f *type_id , int_f * cset)
 /******/
 {
   int ret_value = -1;
@@ -1116,7 +1116,7 @@ nh5tget_cset_c ( hid_t_f *type_id , int_f * cset)
 */
 
 int_f
-nh5tset_cset_c ( hid_t_f *type_id, int_f * cset)
+h5tset_cset_c ( hid_t_f *type_id, int_f * cset)
 /******/
 {
   int ret_value = -1;
@@ -1153,7 +1153,7 @@ nh5tset_cset_c ( hid_t_f *type_id, int_f * cset)
  * SOURCE
 */
 int_f
-nh5tget_strpad_c ( hid_t_f *type_id , int_f * strpad)
+h5tget_strpad_c ( hid_t_f *type_id , int_f * strpad)
 /******/
 {
   int ret_value = -1;
@@ -1192,7 +1192,7 @@ nh5tget_strpad_c ( hid_t_f *type_id , int_f * strpad)
 */
 
 int_f
-nh5tset_strpad_c ( hid_t_f *type_id, int_f * strpad)
+h5tset_strpad_c ( hid_t_f *type_id, int_f * strpad)
 /******/
 {
   int ret_value = -1;
@@ -1230,7 +1230,7 @@ nh5tset_strpad_c ( hid_t_f *type_id, int_f * strpad)
 */
 
 int_f
-nh5tget_nmembers_c ( hid_t_f *type_id , int_f * num_members)
+h5tget_nmembers_c ( hid_t_f *type_id , int_f * num_members)
 /******/
 {
   int ret_value = -1;
@@ -1266,7 +1266,7 @@ nh5tget_nmembers_c ( hid_t_f *type_id , int_f * num_members)
 */
 
 int_f
-nh5tget_member_name_c ( hid_t_f *type_id ,int_f* idx, _fcd member_name, int_f *namelen)
+h5tget_member_name_c ( hid_t_f *type_id ,int_f* idx, _fcd member_name, int_f *namelen)
 /******/
 {
   int ret_value = -1;
@@ -1307,7 +1307,7 @@ nh5tget_member_name_c ( hid_t_f *type_id ,int_f* idx, _fcd member_name, int_f *n
  * SOURCE
 */
 int_f
-nh5tget_member_index_c (hid_t_f *type_id, _fcd name, int_f *namelen, int_f *idx)
+h5tget_member_index_c (hid_t_f *type_id, _fcd name, int_f *namelen, int_f *idx)
 /******/
 {
      int ret_value = -1;
@@ -1360,7 +1360,7 @@ DONE:
 */
 
 int_f
-nh5tget_member_offset_c ( hid_t_f *type_id ,int_f* member_no, size_t_f * offset)
+h5tget_member_offset_c ( hid_t_f *type_id ,int_f* member_no, size_t_f * offset)
 /******/
 {
   int ret_value = -1;
@@ -1393,7 +1393,7 @@ nh5tget_member_offset_c ( hid_t_f *type_id ,int_f* member_no, size_t_f * offset)
 */
 
 int_f
-nh5tget_array_dims_c ( hid_t_f *type_id , hsize_t_f * dims)
+h5tget_array_dims_c ( hid_t_f *type_id , hsize_t_f * dims)
 /******/
 {
     hsize_t c_dims[H5S_MAX_RANK];
@@ -1436,7 +1436,7 @@ DONE:
 */
 
 int_f
-nh5tget_array_ndims_c ( hid_t_f *type_id , int_f * ndims)
+h5tget_array_ndims_c ( hid_t_f *type_id , int_f * ndims)
 /******/
 {
   int ret_value = -1;
@@ -1473,7 +1473,7 @@ nh5tget_array_ndims_c ( hid_t_f *type_id , int_f * ndims)
 */
 
 int_f
-nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id)
+h5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id)
 /******/
 {
   int ret_value = -1;
@@ -1512,7 +1512,7 @@ nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id)
 */
 
 int_f
-nh5tget_member_type_c ( hid_t_f *type_id ,int_f* field_idx, hid_t_f * datatype)
+h5tget_member_type_c ( hid_t_f *type_id ,int_f* field_idx, hid_t_f * datatype)
 /******/
 {
   int ret_value = -1;
@@ -1544,7 +1544,7 @@ nh5tget_member_type_c ( hid_t_f *type_id ,int_f* field_idx, hid_t_f * datatype)
 */
 
 int_f
-nh5tcreate_c(int_f *cls, size_t_f *size, hid_t_f *type_id)
+h5tcreate_c(int_f *cls, size_t_f *size, hid_t_f *type_id)
 /******/
 {
   int ret_value = -1;
@@ -1583,7 +1583,7 @@ nh5tcreate_c(int_f *cls, size_t_f *size, hid_t_f *type_id)
 */
 
 int_f
-nh5tinsert_c(hid_t_f *type_id, _fcd name, int_f* namelen, size_t_f *offset, hid_t_f * field_id)
+h5tinsert_c(hid_t_f *type_id, _fcd name, int_f* namelen, size_t_f *offset, hid_t_f * field_id)
 /******/
 {
   int ret_value = -1;
@@ -1622,7 +1622,7 @@ nh5tinsert_c(hid_t_f *type_id, _fcd name, int_f* namelen, size_t_f *offset, hid_
 */
 
 int_f
-nh5tpack_c(hid_t_f * type_id)
+h5tpack_c(hid_t_f * type_id)
 /******/
 {
   int ret_value = -1;
@@ -1657,7 +1657,7 @@ nh5tpack_c(hid_t_f * type_id)
  * SOURCE
 */
 int_f
-nh5tarray_create_c(hid_t_f * base_id, int_f *rank, hsize_t_f* dims, hid_t_f* type_id)
+h5tarray_create_c(hid_t_f * base_id, int_f *rank, hsize_t_f* dims, hid_t_f* type_id)
 /******/
 {
     hsize_t c_dims[H5S_MAX_RANK];
@@ -1704,7 +1704,7 @@ DONE:
 */
 
 int_f
-nh5tenum_create_c ( hid_t_f *parent_id , hid_t_f *new_type_id)
+h5tenum_create_c ( hid_t_f *parent_id , hid_t_f *new_type_id)
 /******/
 {
   int ret_value = 0;
@@ -1740,7 +1740,7 @@ nh5tenum_create_c ( hid_t_f *parent_id , hid_t_f *new_type_id)
 */
 
 int_f
-nh5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
+h5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
 /******/
 {
   int ret_value = -1;
@@ -1784,7 +1784,7 @@ nh5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
 */
 
 int_f
-nh5tenum_nameof_c(hid_t_f *type_id, int_f* value, _fcd name, size_t_f* namelen)
+h5tenum_nameof_c(hid_t_f *type_id, int_f* value, _fcd name, size_t_f* namelen)
 /******/
 {
   int ret_value = -1;
@@ -1828,7 +1828,7 @@ nh5tenum_nameof_c(hid_t_f *type_id, int_f* value, _fcd name, size_t_f* namelen)
 */
 
 int_f
-nh5tenum_valueof_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
+h5tenum_valueof_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
 /******/
 {
   int ret_value = -1;
@@ -1867,7 +1867,7 @@ nh5tenum_valueof_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
 */
 
 int_f
-nh5tget_member_value_c(hid_t_f *type_id, int_f* member_no, int_f* value)
+h5tget_member_value_c(hid_t_f *type_id, int_f* member_no, int_f* value)
 /******/
 {
   int ret_value = -1;
@@ -1904,7 +1904,7 @@ nh5tget_member_value_c(hid_t_f *type_id, int_f* member_no, int_f* value)
  * SOURCE
 */
 int_f
-nh5tset_tag_c(hid_t_f* type_id, _fcd tag, int_f* namelen)
+h5tset_tag_c(hid_t_f* type_id, _fcd tag, int_f* namelen)
 /******/
 {
   int ret_value = -1;
@@ -1942,7 +1942,7 @@ nh5tset_tag_c(hid_t_f* type_id, _fcd tag, int_f* namelen)
  * SOURCE
 */
 int_f
-nh5tget_tag_c(hid_t_f* type_id, _fcd tag, size_t_f* tag_size, int_f* taglen)
+h5tget_tag_c(hid_t_f* type_id, _fcd tag, size_t_f* tag_size, int_f* taglen)
 /******/
 {
   int ret_value = -1;
@@ -1978,7 +1978,7 @@ nh5tget_tag_c(hid_t_f* type_id, _fcd tag, size_t_f* tag_size, int_f* taglen)
  * SOURCE
 */
 int_f
-nh5tvlen_create_c(hid_t_f* type_id, hid_t_f *vltype_id)
+h5tvlen_create_c(hid_t_f* type_id, hid_t_f *vltype_id)
 /******/
 {
   int ret_value = -1;
@@ -2014,7 +2014,7 @@ nh5tvlen_create_c(hid_t_f* type_id, hid_t_f *vltype_id)
 */
 
 int_f
-nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag )
+h5tis_variable_str_c ( hid_t_f *type_id , int_f *flag )
 /******/
 {
   int ret_value = 0;
@@ -2050,7 +2050,7 @@ nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag )
 */
 
 int_f
-nh5tget_member_class_c ( hid_t_f *type_id ,  int_f *member_no, int_f *cls )
+h5tget_member_class_c ( hid_t_f *type_id ,  int_f *member_no, int_f *cls )
 /******/
 {
   int ret_value = 0;
@@ -2087,7 +2087,7 @@ nh5tget_member_class_c ( hid_t_f *type_id ,  int_f *member_no, int_f *cls )
  * SOURCE
 */
 int_f
-nh5tcommit_anon_c(hid_t_f *loc_id, hid_t_f *dtype_id,
+h5tcommit_anon_c(hid_t_f *loc_id, hid_t_f *dtype_id,
 		  hid_t_f *tcpl_id, hid_t_f *tapl_id)
 /******/
 {
@@ -2121,7 +2121,7 @@ nh5tcommit_anon_c(hid_t_f *loc_id, hid_t_f *dtype_id,
  * SOURCE
 */
 int_f
-nh5tcommitted_c(hid_t_f *dtype_id)
+h5tcommitted_c(hid_t_f *dtype_id)
 /******/
 {
   int_f ret_value;
@@ -2157,7 +2157,7 @@ nh5tcommitted_c(hid_t_f *dtype_id)
 */
 
 int_f
-nh5tdecode_c ( _fcd buf, hid_t_f *obj_id )
+h5tdecode_c ( _fcd buf, hid_t_f *obj_id )
 /******/
 {
   int ret_value = -1;
@@ -2201,7 +2201,7 @@ nh5tdecode_c ( _fcd buf, hid_t_f *obj_id )
 */
 
 int_f
-nh5tencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
+h5tencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
 /******/
 {
   int ret_value = -1;
@@ -2270,7 +2270,7 @@ nh5tencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
 */
 
 int_f
-nh5tget_create_plist_c ( hid_t_f *dtype_id,  hid_t_f *dtpl_id)
+h5tget_create_plist_c ( hid_t_f *dtype_id,  hid_t_f *dtpl_id)
 /******/
 {
     int_f ret_value=-1;          /* Return value */
@@ -2304,7 +2304,7 @@ nh5tget_create_plist_c ( hid_t_f *dtype_id,  hid_t_f *dtpl_id)
 */
 
 int_f
-nh5tcompiler_conv_c ( hid_t_f *src_id, hid_t_f *dst_id, int_f *c_flag)
+h5tcompiler_conv_c ( hid_t_f *src_id, hid_t_f *dst_id, int_f *c_flag)
 /******/
 {
   int ret_value = -1;
@@ -2338,7 +2338,7 @@ nh5tcompiler_conv_c ( hid_t_f *src_id, hid_t_f *dst_id, int_f *c_flag)
 */
 
 int_f
-nh5tget_native_type_c(hid_t_f *dtype_id, int_f *direction, hid_t_f *native_dtype_id)
+h5tget_native_type_c(hid_t_f *dtype_id, int_f *direction, hid_t_f *native_dtype_id)
 /******/
 {
   int ret_value = -1;
