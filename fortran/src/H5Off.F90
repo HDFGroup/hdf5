@@ -38,8 +38,8 @@
 
 MODULE H5O
 
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR, C_INT64_T, C_LONG, C_INT, C_LOC
   USE H5GLOBAL
-  USE, INTRINSIC :: ISO_C_BINDING
 
   IMPLICIT NONE
 
@@ -142,15 +142,13 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5olink_c(object_id, new_loc_id, new_link_name, new_link_namelen, &
-            lcpl_id_default, lapl_id_default)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OLINK_C'::h5olink_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: new_link_name
+            lcpl_id_default, lapl_id_default) BIND(C,NAME='h5olink_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: object_id
          INTEGER(HID_T), INTENT(IN) :: new_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: new_link_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: new_link_name
          INTEGER(SIZE_T) :: new_link_namelen
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(HID_T) :: lcpl_id_default
@@ -205,14 +203,12 @@ CONTAINS
     INTEGER(SIZE_T) :: namelen
 
     INTERFACE
-       INTEGER FUNCTION h5oopen_c(loc_id, name, namelen, lapl_id_default, obj_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OOPEN_C'::h5oopen_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5oopen_c(loc_id, name, namelen, lapl_id_default, obj_id) BIND(C,NAME='h5oopen_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(SIZE_T) :: namelen
          INTEGER(HID_T), INTENT(OUT) :: obj_id
@@ -253,11 +249,9 @@ CONTAINS
     INTEGER       , INTENT(OUT) :: hdferr
 !*****
     INTERFACE
-       INTEGER FUNCTION h5oclose_c(object_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OCLOSE_C'::h5oclose_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5oclose_c(object_id) BIND(C,NAME='h5oclose_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: object_id
        END FUNCTION h5oclose_c
     END INTERFACE
@@ -294,11 +288,9 @@ CONTAINS
     INTEGER         , INTENT(OUT) :: hdferr
 !*****
     INTERFACE
-       INTEGER FUNCTION h5oopen_by_addr_c(loc_id, addr, obj_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OOPEN_BY_ADDR_C'::h5oopen_by_addr_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5oopen_by_addr_c(loc_id, addr, obj_id) BIND(C,NAME='h5oopen_by_addr_c')
+         IMPORT :: HID_T, HADDR_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
          INTEGER(HADDR_T), INTENT(IN) :: addr
          INTEGER(HID_T), INTENT(OUT) :: obj_id
@@ -350,16 +342,15 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5ocopy_c(src_loc_id, src_name, src_name_len, &
-            dst_loc_id, dst_name, dst_name_len, ocpypl_id_default, lcpl_id_default)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OCOPY_C'::h5ocopy_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: src_name, dst_name
+            dst_loc_id, dst_name, dst_name_len, ocpypl_id_default, lcpl_id_default) &
+            BIND(C,NAME='h5ocopy_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN) :: src_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: src_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: src_name
          INTEGER(HID_T)  , INTENT(IN) :: dst_loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: dst_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: dst_name
          INTEGER(HID_T)  , INTENT(IN) :: ocpypl_id_default
          INTEGER(HID_T)  , INTENT(IN) :: lcpl_id_default
          INTEGER(SIZE_T)              :: src_name_len, dst_name_len
@@ -405,11 +396,9 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5odecr_refcount_c(object_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ODECR_REFCOUNT_C'::h5odecr_refcount_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5odecr_refcount_c(object_id) BIND(C,NAME='h5odecr_refcount_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN) :: object_id
        END FUNCTION h5odecr_refcount_c
     END INTERFACE
@@ -456,14 +445,13 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5oexists_by_name_c(loc_id, name, namelen, lapl_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OEXISTS_BY_NAME_C'::h5oexists_by_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5oexists_by_name_c(loc_id, name, namelen, lapl_id) &
+            BIND(C,NAME='h5oexists_by_name_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T) , INTENT(IN) :: namelen
          INTEGER(HID_T)  , INTENT(IN) :: lapl_id
 
@@ -523,14 +511,13 @@ CONTAINS
     INTEGER(HSSIZE_T) :: bufsize_default
 
     INTERFACE
-       INTEGER FUNCTION h5oget_comment_c(obj_id, comment, commentsize_default, bufsize)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OGET_COMMENT_C'::h5oget_comment_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: comment
+       INTEGER FUNCTION h5oget_comment_c(obj_id, comment, commentsize_default, bufsize) &
+            BIND(C,NAME='h5oget_comment_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T, HSSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN)  :: obj_id
-         CHARACTER(LEN=*), INTENT(OUT) :: comment
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: comment
          INTEGER(SIZE_T) , INTENT(IN)  :: commentsize_default
          INTEGER(HSSIZE_T) , INTENT(OUT) :: bufsize
        END FUNCTION h5oget_comment_c
@@ -584,16 +571,14 @@ CONTAINS
     INTEGER(HID_T)  :: lapl_id_default
     INTERFACE
        INTEGER FUNCTION h5oget_comment_by_name_c(loc_id, name, name_size, &
-            comment, commentsize_default, bufsize_default, lapl_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OGET_COMMENT_BY_NAME_C'::h5oget_comment_by_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: comment, name
+            comment, commentsize_default, bufsize_default, lapl_id) BIND(C,NAME='h5oget_comment_by_name_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN)  :: loc_id
-         CHARACTER(LEN=*), INTENT(IN)  :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN)  :: name
          INTEGER(SIZE_T) , INTENT(IN)  :: name_size
-         CHARACTER(LEN=*), INTENT(OUT) :: comment
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: comment
          INTEGER(SIZE_T) , INTENT(IN)  :: commentsize_default
          INTEGER(SIZE_T) , INTENT(OUT) :: bufsize_default
          INTEGER(HID_T)  , INTENT(IN)  :: lapl_id
@@ -638,11 +623,9 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5oincr_refcount_c(obj_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OINCR_REFCOUNT_C'::h5oincr_refcount_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5oincr_refcount_c(obj_id) BIND(C,NAME='h5oincr_refcount_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN) :: obj_id
        END FUNCTION h5oincr_refcount_c
     END INTERFACE
@@ -694,14 +677,13 @@ CONTAINS
     INTEGER(HID_T)  :: lapl_id_default
     
     INTERFACE
-       INTEGER FUNCTION h5oopen_by_idx_c(loc_id, group_name, group_namelen, index_type, order, n, obj_id, lapl_id_default)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OOPEN_BY_IDX_C'::h5oopen_by_idx_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: group_name
+       INTEGER FUNCTION h5oopen_by_idx_c(loc_id, group_name, group_namelen, index_type, order, n, obj_id, lapl_id_default) &
+            BIND(C,NAME='h5oopen_by_idx_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN)  :: loc_id
-         CHARACTER(LEN=*), INTENT(IN)  :: group_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN)  :: group_name
          INTEGER(SIZE_T) , INTENT(IN)  :: group_namelen
          INTEGER         , INTENT(IN)  :: index_type
          INTEGER         , INTENT(IN)  :: order
@@ -749,14 +731,12 @@ CONTAINS
     INTEGER(SIZE_T) :: commentlen
 
     INTERFACE
-       INTEGER FUNCTION h5oset_comment_c(obj_id, comment, commentlen)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OSET_COMMENT_C'::h5oset_comment_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: comment
+       INTEGER FUNCTION h5oset_comment_c(obj_id, comment, commentlen) BIND(C,NAME='h5oset_comment_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN) :: obj_id
-         CHARACTER(LEN=*), INTENT(IN) :: comment
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: comment
          INTEGER(SIZE_T) , INTENT(IN) :: commentlen
 
        END FUNCTION h5oset_comment_c
@@ -805,16 +785,15 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION h5oset_comment_by_name_c(loc_id, name, namelen, comment, commentlen, lapl_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OSET_COMMENT_BY_NAME_C'::h5oset_comment_by_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name, comment
+       INTEGER FUNCTION h5oset_comment_by_name_c(loc_id, name, namelen, comment, commentlen, lapl_id) &
+            BIND(C,NAME='h5oset_comment_by_name_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: comment
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: comment
          INTEGER(SIZE_T) , INTENT(IN) :: commentlen
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T) , INTENT(IN) :: namelen
          INTEGER(HID_T)  , INTENT(IN) :: lapl_id
        END FUNCTION h5oset_comment_by_name_c
@@ -860,7 +839,6 @@ CONTAINS
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5ovisit_f(object_id, index_type, order, op, op_data, return_value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: object_id
     INTEGER, INTENT(IN) :: index_type 
@@ -875,8 +853,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ovisit_c(object_id, index_type, order, op, op_data) &
             BIND(C, NAME='h5ovisit_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_funptr
-         USE H5GLOBAL
+         IMPORT :: C_FUNPTR, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: object_id
          INTEGER, INTENT(IN) :: index_type
          INTEGER, INTENT(IN) :: order
@@ -921,8 +900,6 @@ CONTAINS
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5oget_info_by_name_f(loc_id, name, object_info, hdferr, lapl_id)
-
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: loc_id
     CHARACTER(LEN=*), INTENT(IN)            :: name
@@ -937,8 +914,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, object_info) &
             BIND(C, NAME='h5oget_info_by_name_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr
-         USE H5GLOBAL
+         IMPORT :: c_char, c_ptr
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN)  :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER(SIZE_T) , INTENT(IN)  :: namelen
@@ -992,8 +970,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5oget_info_c(object_id, object_info) &
             BIND(C, NAME='h5oget_info_c')
-         USE H5GLOBAL
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
+         IMPORT :: C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN)  :: object_id
          TYPE(C_PTR), VALUE          :: object_info
        END FUNCTION h5oget_info_c
@@ -1053,8 +1032,8 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5oget_info_by_idx_c(loc_id, group_name, namelen, &
             index_field, order, n, lapl_id_default, object_info) BIND(C, NAME='h5oget_info_by_idx_c')
-         USE H5GLOBAL
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr, c_funptr
+         IMPORT :: c_char, c_ptr, c_funptr
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
          INTEGER(HID_T)  , INTENT(IN)  :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
          INTEGER(SIZE_T) , INTENT(IN)  :: namelen
@@ -1114,7 +1093,6 @@ CONTAINS
 ! Fortran2003 Interface:
   SUBROUTINE h5ovisit_by_name_f(loc_id, object_name, index_type, order, op, op_data, &
        return_value, hdferr, lapl_id)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)             :: loc_id
     CHARACTER(LEN=*), INTENT(IN)             :: object_name
@@ -1134,8 +1112,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
             op, op_data, lapl_id) BIND(C, NAME='h5ovisit_by_name_c')
-         USE, INTRINSIC :: ISO_C_BINDING
-         USE H5GLOBAL
+         IMPORT :: C_CHAR, C_PTR, C_FUNPTR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T)  , INTENT(IN) :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: object_name
          INTEGER(SIZE_T)              :: namelen
