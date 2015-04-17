@@ -100,71 +100,38 @@ H5_FCDLL int_f h5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size);
 /*
  * Functions from H5Sf.c
  */
-#define nh5screate_simple_c      H5_FC_FUNC_(h5screate_simple_c, H5SCREATE_SIMPLE_C)
-#define nh5sclose_c              H5_FC_FUNC_(h5sclose_c, H5SCLOSE_C)
-#define nh5screate_c             H5_FC_FUNC_(h5screate_c, H5SCREATE_C)
-#define nh5scopy_c               H5_FC_FUNC_(h5scopy_c, H5SCOPY_C)
-#define nh5sget_select_hyper_nblocks_c H5_FC_FUNC_(h5sget_select_hyper_nblocks_c, H5SGET_SELECT_HYPER_NBLOCKS_C)
-#define nh5sget_select_hyper_blocklist_c H5_FC_FUNC_(h5sget_select_hyper_blocklist_c, H5SGET_SELECT_HYPER_BLOCKLIST_C)
-#define nh5sget_select_elem_npoints_c H5_FC_FUNC_(h5sget_select_elem_npoints_c, H5SGET_SELECT_ELEM_NPOINTS_C)
-#define nh5sget_select_elem_pointlist_c H5_FC_FUNC_(h5sget_select_elem_pointlist_c, H5SGET_SELECT_ELEM_POINTLIST_C)
-#define nh5sget_select_bounds_c  H5_FC_FUNC_(h5sget_select_bounds_c, H5SGET_SELECT_BOUNDS_C)
-#define nh5sselect_all_c         H5_FC_FUNC_(h5sselect_all_c, H5SSELECT_ALL_C)
-#define nh5sselect_none_c        H5_FC_FUNC_(h5sselect_none_c, H5SSELECT_NONE_C)
-#define nh5sselect_valid_c       H5_FC_FUNC_(h5sselect_valid_c, H5SSELECT_VALID_C)
-#define nh5sget_simple_extent_npoints_c H5_FC_FUNC_(h5sget_simple_extent_npoints_c, H5SGET_SIMPLE_EXTENT_NPOINTS_C)
-#define nh5sget_select_npoints_c H5_FC_FUNC_(h5sget_select_npoints_c, H5SGET_SELECT_NPOINTS_C)
-#define nh5sget_simple_extent_ndims_c H5_FC_FUNC_(h5sget_simple_extent_ndims_c, H5SGET_SIMPLE_EXTENT_NDIMS_C)
-#define nh5sget_simple_extent_type_c  H5_FC_FUNC_(h5sget_simple_extent_type_c, H5SGET_SIMPLE_EXTENT_TYPE_C)
-#define nh5soffset_simple_c      H5_FC_FUNC_(h5soffset_simple_c, H5SOFFSET_SIMPLE_C)
-#define nh5sset_extent_simple_c  H5_FC_FUNC_(h5sset_extent_simple_c, H5SSET_EXTENT_SIMPLE_C)
-#define nh5sis_simple_c          H5_FC_FUNC_(h5sis_simple_c, H5SIS_SIMPLE_C)
-#define nh5sextent_class_c       H5_FC_FUNC_(h5sextent_class_c, H5SEXTENT_CLASS_C)
-#define nh5sget_simple_extent_dims_c H5_FC_FUNC_(h5sget_simple_extent_dims_c, H5SGET_SIMPLE_EXTENT_DIMS_C)
-#define nh5sextent_copy_c        H5_FC_FUNC_(h5sextent_copy_c, H5SEXTENT_COPY_C)
-#define nh5sset_extent_none_c    H5_FC_FUNC_(h5sset_extent_none_c, H5SSET_EXTENT_NONE_C)
-#define nh5sselect_hyperslab_c   H5_FC_FUNC_(h5sselect_hyperslab_c, H5SSELECT_HYPERSLAB_C)
-#define nh5scombine_hyperslab_c   H5_FC_FUNC_(h5scombine_hyperslab_c, H5SCOMBINE_HYPERSLAB_C)
-#define nh5scombine_select_c   H5_FC_FUNC_(h5scombine_select_c, H5SCOMBINE_SELECT_C)
-#define nh5sselect_select_c   H5_FC_FUNC_(h5sselect_select_c, H5SSELECT_SELECT_C)
-#define nh5sget_select_type_c   H5_FC_FUNC_(h5sget_select_type_c, H5SGET_SELECT_TYPE_C)
-#define nh5sselect_elements_c    H5_FC_FUNC_(h5sselect_elements_c, H5SSELECT_ELEMENTS_C)
-#define nh5sdecode_c    H5_FC_FUNC_(h5sdecode_c, H5SDECODE_C)
-#define nh5sencode_c    H5_FC_FUNC_(h5sencode_c, H5SENCODE_C)
-#define nh5sextent_equal_c    H5_FC_FUNC_(h5sextent_equal_c, H5SEXTENT_EQUAL_C)
-
-H5_FCDLL int_f nh5screate_simple_c ( int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *space_id );
-H5_FCDLL int_f nh5sclose_c ( hid_t_f *space_id );
-H5_FCDLL int_f nh5screate_c ( int_f *classtype, hid_t_f *space_id );
-H5_FCDLL int_f nh5scopy_c ( hid_t_f *space_id , hid_t_f *new_space_id);
-H5_FCDLL int_f nh5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks);
-H5_FCDLL int_f nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock, hsize_t_f * num_blocks, hsize_t_f * buf);
-H5_FCDLL int_f nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end);
-H5_FCDLL int_f nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points);
-H5_FCDLL int_f nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint, hsize_t_f * numpoints, hsize_t_f * buf);
-H5_FCDLL int_f nh5sselect_all_c ( hid_t_f *space_id );
-H5_FCDLL int_f nh5sselect_none_c ( hid_t_f *space_id );
-H5_FCDLL int_f nh5sselect_valid_c ( hid_t_f *space_id , int_f *flag );
-H5_FCDLL int_f nh5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints );
-H5_FCDLL int_f nh5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints );
-H5_FCDLL int_f nh5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims );
-H5_FCDLL int_f nh5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype);
-H5_FCDLL int_f nh5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset);
-H5_FCDLL int_f nh5sset_extent_simple_c ( hid_t_f *space_id , int_f *rank, hsize_t_f * current_size, hsize_t_f *maximum_size);
-H5_FCDLL int_f nh5sis_simple_c ( hid_t_f *space_id , int_f *flag );
-H5_FCDLL int_f nh5sextent_class_c ( hid_t_f *space_id , int_f *classtype);
-H5_FCDLL int_f nh5sget_simple_extent_dims_c ( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *maxdims);
-H5_FCDLL int_f nh5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id);
-H5_FCDLL int_f nh5sset_extent_none_c ( hid_t_f *space_id );
-H5_FCDLL int_f nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block);
-H5_FCDLL int_f nh5sget_select_type_c ( hid_t_f *space_id , int_f *op);
-H5_FCDLL int_f nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements, hsize_t_f *coord);
-H5_FCDLL int_f nh5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id);
-H5_FCDLL int_f nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id);
-H5_FCDLL int_f nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id);
-H5_FCDLL int_f nh5sdecode_c ( _fcd buf, hid_t_f *obj_id );
-H5_FCDLL int_f nh5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc );
-H5_FCDLL int_f nh5sextent_equal_c ( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal);
+H5_FCDLL int_f h5screate_simple_c ( int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *space_id );
+H5_FCDLL int_f h5sclose_c ( hid_t_f *space_id );
+H5_FCDLL int_f h5screate_c ( int_f *classtype, hid_t_f *space_id );
+H5_FCDLL int_f h5scopy_c ( hid_t_f *space_id , hid_t_f *new_space_id);
+H5_FCDLL int_f h5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks);
+H5_FCDLL int_f h5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock, hsize_t_f * num_blocks, hsize_t_f * buf);
+H5_FCDLL int_f h5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end);
+H5_FCDLL int_f h5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points);
+H5_FCDLL int_f h5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint, hsize_t_f * numpoints, hsize_t_f * buf);
+H5_FCDLL int_f h5sselect_all_c ( hid_t_f *space_id );
+H5_FCDLL int_f h5sselect_none_c ( hid_t_f *space_id );
+H5_FCDLL int_f h5sselect_valid_c ( hid_t_f *space_id , int_f *flag );
+H5_FCDLL int_f h5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints );
+H5_FCDLL int_f h5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints );
+H5_FCDLL int_f h5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims );
+H5_FCDLL int_f h5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype);
+H5_FCDLL int_f h5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset);
+H5_FCDLL int_f h5sset_extent_simple_c ( hid_t_f *space_id , int_f *rank, hsize_t_f * current_size, hsize_t_f *maximum_size);
+H5_FCDLL int_f h5sis_simple_c ( hid_t_f *space_id , int_f *flag );
+H5_FCDLL int_f h5sextent_class_c ( hid_t_f *space_id , int_f *classtype);
+H5_FCDLL int_f h5sget_simple_extent_dims_c ( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *maxdims);
+H5_FCDLL int_f h5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id);
+H5_FCDLL int_f h5sset_extent_none_c ( hid_t_f *space_id );
+H5_FCDLL int_f h5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block);
+H5_FCDLL int_f h5sget_select_type_c ( hid_t_f *space_id , int_f *op);
+H5_FCDLL int_f h5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements, hsize_t_f *coord);
+H5_FCDLL int_f h5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id);
+H5_FCDLL int_f h5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id);
+H5_FCDLL int_f h5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id);
+H5_FCDLL int_f h5sdecode_c ( _fcd buf, hid_t_f *obj_id );
+H5_FCDLL int_f h5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc );
+H5_FCDLL int_f h5sextent_equal_c ( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal);
 
 /*
  * Functions from H5Df.c

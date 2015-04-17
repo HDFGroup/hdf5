@@ -46,7 +46,7 @@
 */
 
 int_f
-nh5screate_simple_c ( int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *space_id )
+h5screate_simple_c ( int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *space_id )
 /******/
 {
     hsize_t c_dims[H5S_MAX_RANK];
@@ -91,7 +91,7 @@ done:
 */
 
 int_f
-nh5sclose_c ( hid_t_f *space_id )
+h5sclose_c ( hid_t_f *space_id )
 /******/
 {
   int ret_value = 0;
@@ -122,7 +122,7 @@ nh5sclose_c ( hid_t_f *space_id )
 */
 
 int_f
-nh5screate_c ( int_f *classtype, hid_t_f *space_id )
+h5screate_c ( int_f *classtype, hid_t_f *space_id )
 /******/
 {
   H5S_class_t c_classtype;
@@ -156,7 +156,7 @@ nh5screate_c ( int_f *classtype, hid_t_f *space_id )
 */
 
 int_f
-nh5scopy_c( hid_t_f *space_id , hid_t_f *new_space_id)
+h5scopy_c( hid_t_f *space_id , hid_t_f *new_space_id)
 /******/
 {
   int ret_value = 0;
@@ -194,7 +194,7 @@ nh5scopy_c( hid_t_f *space_id , hid_t_f *new_space_id)
 */
 
 int_f
-nh5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
+h5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
 /******/
 {
   int ret_value = 0;
@@ -232,7 +232,7 @@ nh5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
 */
 
 int_f
-nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
+h5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
 /******/
 {
   int ret_value = 0;
@@ -278,7 +278,7 @@ nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
 */
 
 int_f
-nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
+h5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
                                   hsize_t_f *num_blocks, hsize_t_f *buf)
 /******/
 {
@@ -351,7 +351,7 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
 */
 
 int_f
-nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
+h5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
 /******/
 {
     hid_t c_space_id;
@@ -406,7 +406,7 @@ done:
 */
 
 int_f
-nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
+h5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
                                   hsize_t_f * numpoints, hsize_t_f * buf)
 /******/
 {
@@ -467,7 +467,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
 */
 
 int_f
-nh5sselect_all_c ( hid_t_f *space_id )
+h5sselect_all_c ( hid_t_f *space_id )
 /******/
 {
   int ret_value = 0;
@@ -496,7 +496,7 @@ nh5sselect_all_c ( hid_t_f *space_id )
 */
 
 int_f
-nh5sselect_none_c ( hid_t_f *space_id )
+h5sselect_none_c ( hid_t_f *space_id )
 /******/
 {
   int ret_value = 0;
@@ -529,7 +529,7 @@ nh5sselect_none_c ( hid_t_f *space_id )
 */
 
 int_f
-nh5sselect_valid_c ( hid_t_f *space_id , int_f *flag )
+h5sselect_valid_c ( hid_t_f *space_id , int_f *flag )
 /******/
 {
   int ret_value = 0;
@@ -564,7 +564,7 @@ nh5sselect_valid_c ( hid_t_f *space_id , int_f *flag )
 */
 
 int_f
-nh5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
+h5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
 /******/
 {
   int ret_value = 0;
@@ -599,7 +599,7 @@ nh5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
 */
 
 int_f
-nh5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints )
+h5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints )
 /******/
 {
   int ret_value = 0;
@@ -634,7 +634,7 @@ nh5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints )
 */
 
 int_f
-nh5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
+h5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
 /******/
 {
   int ret_value = 0;
@@ -670,7 +670,7 @@ nh5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
 */
 
 int_f
-nh5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
+h5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
 /******/
 {
   int ret_value = 0;
@@ -709,7 +709,7 @@ nh5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
 */
 
 int_f
-nh5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset)
+h5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset)
 /******/
 {
     hid_t c_space_id;
@@ -758,7 +758,7 @@ done:
 */
 
 int_f
-nh5sset_extent_simple_c ( hid_t_f *space_id , int_f *rank, hsize_t_f *current_size, hsize_t_f *maximum_size)
+h5sset_extent_simple_c ( hid_t_f *space_id , int_f *rank, hsize_t_f *current_size, hsize_t_f *maximum_size)
 /******/
 {
     hsize_t c_current_size[H5S_MAX_RANK];
@@ -804,7 +804,7 @@ done:
 */
 
 int_f
-nh5sget_simple_extent_dims_c ( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *maxdims)
+h5sget_simple_extent_dims_c ( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *maxdims)
 /******/
 {
     hid_t c_space_id;
@@ -858,7 +858,7 @@ done:
 */
 
 int_f
-nh5sis_simple_c ( hid_t_f *space_id , int_f *flag )
+h5sis_simple_c ( hid_t_f *space_id , int_f *flag )
 /******/
 {
   int ret_value = 0;
@@ -892,7 +892,7 @@ nh5sis_simple_c ( hid_t_f *space_id , int_f *flag )
 */
 
 int_f
-nh5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id)
+h5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id)
 /******/
 {
   int ret_value = 0;
@@ -924,7 +924,7 @@ nh5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id)
 */
 
 int_f
-nh5sset_extent_none_c ( hid_t_f *space_id )
+h5sset_extent_none_c ( hid_t_f *space_id )
 /******/
 {
   int ret_value = 0;
@@ -962,7 +962,7 @@ nh5sset_extent_none_c ( hid_t_f *space_id )
 */
 
 int_f
-nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block)
+h5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block)
 /******/
 {
     hsize_t c_start[H5S_MAX_RANK];
@@ -1023,7 +1023,7 @@ done:
 */
 
 int_f
-nh5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id)
+h5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id)
 /******/
 {
   int ret_value = -1;
@@ -1102,7 +1102,7 @@ DONE:
 */
 
 int_f
-nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id)
+h5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id)
 /******/
 {
   int ret_value = -1;
@@ -1141,7 +1141,7 @@ nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t
 */
 
 int_f
-nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
+h5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
 /******/
 {
   int ret_value = -1;
@@ -1177,7 +1177,7 @@ nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
  * SOURCE
 */
 int_f
-nh5sget_select_type_c ( hid_t_f *space_id , int_f *type)
+h5sget_select_type_c ( hid_t_f *space_id , int_f *type)
 /******/
 {
   int ret_value = -1;
@@ -1216,7 +1216,7 @@ nh5sget_select_type_c ( hid_t_f *space_id , int_f *type)
 */
 
 int_f
-nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsize_t_f *coord)
+h5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsize_t_f *coord)
 /******/
 {
   int ret_value = -1;
@@ -1272,7 +1272,7 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
 */
 
 int_f
-nh5sdecode_c ( _fcd buf, hid_t_f *obj_id )
+h5sdecode_c ( _fcd buf, hid_t_f *obj_id )
 /******/
 {
   int ret_value = -1;
@@ -1316,7 +1316,7 @@ nh5sdecode_c ( _fcd buf, hid_t_f *obj_id )
 */
 
 int_f
-nh5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
+h5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
 /******/
 {
   int ret_value = -1;
@@ -1387,7 +1387,7 @@ nh5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
 */
 
 int_f
-nh5sextent_equal_c ( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal)
+h5sextent_equal_c ( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal)
 /******/
 {
   int ret_value = -1;
