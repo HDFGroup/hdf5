@@ -113,7 +113,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5zfilter_avail_c(filter, flag) BIND(C,NAME='h5zfilter_avail_c')
-         USE H5GLOBAL
+         IMPLICIT NONE
          INTEGER, INTENT(IN) :: filter
          INTEGER :: flag
        END FUNCTION h5zfilter_avail_c
@@ -164,7 +164,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5zget_filter_info_c(filter, config_flags) BIND(C,NAME='h5zget_filter_info_c')
-         USE H5GLOBAL
+         IMPLICIT NONE
          INTEGER, INTENT(IN) :: filter
          INTEGER, INTENT(OUT) :: config_flags
        END FUNCTION h5zget_filter_info_c
