@@ -126,14 +126,11 @@ static herr_t
 H5D__efl_construct(H5F_t *f, H5D_t *dset)
 {
     size_t dt_size;                     /* Size of datatype */
-    hsize_t dim[H5O_LAYOUT_NDIMS];	/* Current size of data in elements */
-    hsize_t max_dim[H5O_LAYOUT_NDIMS];  /* Maximum size of data in elements */
     hssize_t stmp_size;                 /* Temporary holder for raw data size */
     hsize_t tmp_size;                   /* Temporary holder for raw data size */
     hsize_t max_points;                 /* Maximum elements */
     hsize_t max_storage;                /* Maximum storage size */
-    int ndims;                          /* Rank of dataspace */
-    int i;                              /* Local index variable */
+    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -149,11 +146,9 @@ H5D__efl_construct(H5F_t *f, H5D_t *dset)
      */
 
     /* Check for invalid dataset dimensions */
-    if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dim, max_dim)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage")
-    for(i = 1; i < ndims; i++)
-        if(max_dim[i] > dim[i])
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "only the first dimension can be extendible")
+    for(u = 1; u < dset->shared->ndims; u++)
+        if(dset->shared->max_dims[u] > dset->shared->curr_dims[u])
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "only the first dimension can be extendible")
 
     /* Retrieve the size of the dataset's datatype */
     if(0 == (dt_size = H5T_get_size(dset->shared->type)))

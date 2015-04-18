@@ -326,8 +326,6 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
     H5F_block_t old_chunk;              /* Offset/length of old chunk */
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     hbool_t need_insert = FALSE;        /* Whether the chunk needs to be inserted into the index */
-    int         space_ndims;            /* Dataset's space rank */
-    hsize_t     space_dim[H5O_LAYOUT_NDIMS];    /* Dataset's dataspace dimensions */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
@@ -338,12 +336,8 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
         if(H5D__alloc_storage(dset, dxpl_id, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
 
-    /* Retrieve the dataset dimensions */
-    if((space_ndims = H5S_get_simple_extent_dims(dset->shared->space, space_dim, NULL)) < 0)
-         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple dataspace info")
-
     /* Calculate the index of this chunk */
-    if(H5VM_chunk_index((unsigned)space_ndims, offset,
+    if(H5VM_chunk_index(dset->shared->ndims, offset,
             layout->u.chunk.dim, layout->u.chunk.down_chunks, &chunk_idx) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
 
@@ -475,23 +469,15 @@ done:
 herr_t
 H5D__chunk_set_info(const H5D_t *dset)
 {
-    hsize_t curr_dims[H5O_LAYOUT_NDIMS];    /* Curr. size of dataset dimensions */
-    int sndims;                 /* Rank of dataspace */
-    unsigned ndims;             /* Rank of dataspace */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(dset);
 
-    /* Get the dim info for dataset */
-    if((sndims = H5S_get_simple_extent_dims(dset->shared->space, curr_dims, NULL)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
-    H5_ASSIGN_OVERFLOW(ndims, sndims, int, unsigned);
-
     /* Set the base layout information */
-    if(H5D__chunk_set_info_real(&dset->shared->layout.u.chunk, ndims, curr_dims) < 0)
+    if(H5D__chunk_set_info_real(&dset->shared->layout.u.chunk, dset->shared->ndims, dset->shared->curr_dims) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout's chunk info")
 
     /* Call the index's "resize" callback */
@@ -519,10 +505,7 @@ static herr_t
 H5D__chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
 {
     const H5T_t *type = dset->shared->type;      /* Convenience pointer to dataset's datatype */
-    hsize_t max_dims[H5O_LAYOUT_NDIMS];          /* Maximum size of data in elements */
-    hsize_t dims[H5O_LAYOUT_NDIMS];              /* Dimension size of data in elements */
     uint64_t chunk_size;        /* Size of chunk in bytes */
-    int ndims;                  /* Rank of dataspace */
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -537,9 +520,7 @@ H5D__chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "no chunk information set?")
 
     /* Set up layout information */
-    if((ndims = H5S_GET_EXTENT_NDIMS(dset->shared->space)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get rank")
-    if(dset->shared->layout.u.chunk.ndims != (unsigned)ndims)
+    if(dset->shared->layout.u.chunk.ndims != dset->shared->ndims)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dimensionality of chunks doesn't match the dataspace")
 
     /* Increment # of chunk dimensions, to account for datatype size as last element */
@@ -553,10 +534,6 @@ H5D__chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
     /* Set the last dimension of the chunk size to the size of the datatype */
     dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = (uint32_t)H5T_GET_SIZE(type);
 
-    /* Get local copy of dataset dimensions (for sanity checking) */
-    if(H5S_get_simple_extent_dims(dset->shared->space, dims, max_dims) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to query maximum dimensions")
-
     /* Sanity check dimensions */
     for(u = 0; u < dset->shared->layout.u.chunk.ndims - 1; u++) {
         /* Don't allow zero-sized chunk dimensions */
@@ -568,7 +545,7 @@ H5D__chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
          * the maximum dimension size. If any dimension size is zero, there
          * will be no such restriction.
          */
-        if(dims[u] && max_dims[u] != H5S_UNLIMITED && max_dims[u] < dset->shared->layout.u.chunk.dim[u])
+        if(dset->shared->curr_dims[u] && dset->shared->max_dims[u] != H5S_UNLIMITED && dset->shared->max_dims[u] < dset->shared->layout.u.chunk.dim[u])
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be <= maximum dimension size for fixed-sized dimensions")
     } /* end for */
 
@@ -3297,8 +3274,8 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     H5D_chunk_coll_info_t chunk_info; /* chunk address information for doing I/O */
 #endif /* H5_HAVE_PARALLEL */
     hbool_t	carry;          /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
-    int         space_ndims;    /* Dataset's space rank */
-    hsize_t     space_dim[H5O_LAYOUT_NDIMS];    /* Dataset's dataspace dimensions */
+    unsigned    space_ndims;    /* Dataset's space rank */
+    const hsize_t *space_dim;   /* Dataset's dataspace dimensions */
     const uint32_t *chunk_dim = layout->u.chunk.dim; /* Convenience pointer to chunk dimensions */
     unsigned    op_dim;                 /* Current operating dimension */
     H5D_fill_buf_info_t fb_info;        /* Dataset's fill buffer info */
@@ -3313,9 +3290,8 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
 
     /* Retrieve the dataset dimensions */
-    if((space_ndims = H5S_get_simple_extent_dims(dset->shared->space, space_dim, NULL)) < 0)
-         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple dataspace info")
-    space_dim[space_ndims] = layout->u.chunk.dim[space_ndims];
+    space_dim = dset->shared->curr_dims;
+    space_ndims = dset->shared->ndims;
 
     /* The last dimension in chunk_offset is always 0 */
     chunk_offset[space_ndims] = (hsize_t)0;
@@ -3429,7 +3405,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
      * certain dimension, max_unalloc is updated in order to avoid allocating
      * those chunks again.
      */
-    for(op_dim = 0; op_dim < (unsigned)space_ndims; op_dim++) {
+    for(op_dim = 0; op_dim < space_ndims; op_dim++) {
         H5D_chunk_ud_t udata;   /* User data for querying chunk info */
         int i;                  /* Local index variable */
 
@@ -3438,7 +3414,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             continue;
         else {
             /* Reset the chunk offset indices */
-            HDmemset(chunk_offset, 0, ((unsigned)space_ndims * sizeof(chunk_offset[0])));
+            HDmemset(chunk_offset, 0, (space_ndims * sizeof(chunk_offset[0])));
             chunk_offset[op_dim] = min_unalloc[op_dim];
 
             carry = FALSE;
@@ -3456,7 +3432,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                 hsize_t chunk_idx;
 
                 /* Calculate the index of this chunk */
-                if(H5VM_chunk_index((unsigned)space_ndims, chunk_offset,
+                if(H5VM_chunk_index(space_ndims, chunk_offset,
                         layout->u.chunk.dim, layout->u.chunk.down_chunks,
                         &chunk_idx) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
@@ -3473,7 +3449,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                 unsigned u;             /* Local index variable */
                 hbool_t outside_orig = FALSE;
 
-                for(u = 0; u < (unsigned)space_ndims; u++) {
+                for(u = 0; u < space_ndims; u++) {
                     HDassert(chunk_offset[u] < space_dim[u]);
                     if(chunk_offset[u] >= old_dim[u])
                         outside_orig = TRUE;
@@ -4018,14 +3994,13 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     const H5O_layout_t     *layout = &(dset->shared->layout);   /* Dataset's layout */
     const H5D_rdcc_t       *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
     H5D_rdcc_ent_t         *ent = NULL;	        /* Cache entry  */
-    int                     space_ndims;        /* Dataset's space rank */
-    hsize_t                 space_dim[H5O_LAYOUT_NDIMS]; /* Current dataspace dimensions */
+    unsigned                space_ndims;        /* Dataset's space rank */
+    const hsize_t          *space_dim;          /* Current dataspace dimensions */
     unsigned                op_dim;             /* Current operating dimension */
     hbool_t                 shrunk_dim[H5O_LAYOUT_NDIMS]; /* Dimensions which have shrunk */
     H5D_chunk_it_ud1_t      udata;      /* Chunk index iterator user data */
     hbool_t                 udata_init = FALSE; /* Whether the chunk index iterator user data has been initialized */
     H5D_chunk_common_ud_t   idx_udata;          /* User data for index removal routine */
-    H5D_chunk_ud_t          chk_udata;          /* User data for getting chunk info */
     H5S_t                  *chunk_space = NULL;         /* Dataspace for a chunk */
     hsize_t                 chunk_dim[H5O_LAYOUT_NDIMS];   /* Chunk dimensions */
     hsize_t                 chunk_offset[H5O_LAYOUT_NDIMS]; /* Offset of current chunk */
@@ -4047,10 +4022,8 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Go get the rank & dimensions (including the element size) */
-    if((space_ndims = H5S_get_simple_extent_dims(dset->shared->space, space_dim,
-            NULL)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
-    space_dim[space_ndims] = layout->u.chunk.dim[space_ndims];
+    space_dim = dset->shared->curr_dims;
+    space_ndims = dset->shared->ndims;
 
     /* The last dimension in chunk_offset is always 0 */
     chunk_offset[space_ndims] = (hsize_t)0;
@@ -4069,14 +4042,14 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     /* (also copy the chunk dimensions into 'hsize_t' array for creating dataspace) */
     /* (also compute the dimensions which have been shrunk) */
     elmts_per_chunk = 1;
-    for(u = 0; u < (unsigned)space_ndims; u++) {
+    for(u = 0; u < space_ndims; u++) {
         elmts_per_chunk *= layout->u.chunk.dim[u];
 	chunk_dim[u] = layout->u.chunk.dim[u];
 	shrunk_dim[u] = space_dim[u] < old_dim[u];
     } /* end for */
 
     /* Create a dataspace for a chunk & set the extent */
-    if(NULL == (chunk_space = H5S_create_simple((unsigned)space_ndims, chunk_dim, NULL)))
+    if(NULL == (chunk_space = H5S_create_simple(space_ndims, chunk_dim, NULL)))
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
     /* Reset hyperslab start array */
@@ -4160,7 +4133,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     if(has_fill)
         for(ent = rdcc->head; ent; ent = ent->next)
             /* Check for chunk offset outside of new dimensions */
-            for(u = 0; u < (unsigned)space_ndims; u++)
+            for(u = 0; u < space_ndims; u++)
                 if((hsize_t)ent->offset[u] >= space_dim[u]) {
                     /* Mark the entry as "deleted" */
                     ent->deleted = TRUE;
@@ -4176,12 +4149,12 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
             HDassert((hsize_t) max_mod_chunk_off[op_dim] >= min_mod_chunk_off[op_dim]);
 
             /* Reset the chunk offset indices */
-            HDmemset(chunk_offset, 0, ((unsigned)space_ndims * sizeof(chunk_offset[0])));
+            HDmemset(chunk_offset, 0, (space_ndims * sizeof(chunk_offset[0])));
             chunk_offset[op_dim] = min_mod_chunk_off[op_dim];
 
             /* Initialize "dims_outside_fill" array */
             ndims_outside_fill = 0;
-            for(u = 0; u < (unsigned)space_ndims; u++)
+            for(u = 0; u < space_ndims; u++)
                 if((hssize_t)chunk_offset[u] > max_fill_chunk_off[u]) {
                     dims_outside_fill[u] = TRUE;
                     ndims_outside_fill++;
@@ -4196,7 +4169,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
             int i;	                        /* Local index variable */
 
             /* Calculate the index of this chunk */
-            if(H5VM_chunk_index((unsigned)space_ndims, chunk_offset,
+            if(H5VM_chunk_index(space_ndims, chunk_offset,
                     layout->u.chunk.dim, layout->u.chunk.down_chunks,
                     &(chk_io_info.store->chunk.index)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
@@ -4210,12 +4183,14 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write fill value")
             } /* end if */
             else {
+                H5D_chunk_ud_t          chk_udata;          /* User data for getting chunk info */
+
 #ifndef NDEBUG
                 /* Make sure this chunk is really outside the new dimensions */
                 {
                     hbool_t outside_dim = FALSE;
 
-                    for(u = 0; u < (unsigned)space_ndims; u++)
+                    for(u = 0; u < space_ndims; u++)
                         if(chunk_offset[u] >= space_dim[u]) {
                             outside_dim = TRUE;
                             break;
@@ -4501,7 +4476,7 @@ H5D__chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
     HDassert(dset->shared->layout.u.chunk.ndims > 0 && dset->shared->layout.u.chunk.ndims <= H5O_LAYOUT_NDIMS);
 
     /* Get the rank */
-    rank = dset->shared->layout.u.chunk.ndims-1;
+    rank = dset->shared->layout.u.chunk.ndims - 1;
     HDassert(rank > 0);
 
     /* 1-D dataset's chunks can't have their index change */

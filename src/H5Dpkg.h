@@ -325,9 +325,9 @@ typedef struct H5D_chunk_info_t {
     uint32_t chunk_points;      /* Number of elements selected in chunk */
     hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
     H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
-    unsigned fspace_shared;     /* Indicate that the file space for a chunk is shared and shouldn't be freed */
+    hbool_t fspace_shared;      /* Indicate that the file space for a chunk is shared and shouldn't be freed */
     H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
-    unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
+    hbool_t mspace_shared;      /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
 } H5D_chunk_info_t;
 
 /* Main structure holding the mapping between file chunks and memory */
@@ -417,6 +417,11 @@ typedef struct H5D_shared_t {
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5O_layout_t        layout;         /* Data layout                  */
     hbool_t             checked_filters;/* TRUE if dataset passes can_apply check */
+
+    /* Cached dataspace info */
+    unsigned            ndims;          /* The dataset's dataspace rank */
+    hsize_t             curr_dims[H5S_MAX_RANK];    /* The curr. size of dataset dimensions */
+    hsize_t             max_dims[H5S_MAX_RANK];     /* The max. size of dataset dimensions */ 
 
     /* Buffered/cached information for types of raw data storage*/
     struct {
