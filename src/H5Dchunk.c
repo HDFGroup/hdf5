@@ -325,7 +325,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
     hsize_t chunk_idx;                  /* Global index of chunk */
     H5F_block_t old_chunk;              /* Offset/length of old chunk */
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
-    hbool_t     need_insert = FALSE;    /* Whether the chunk needs to be inserted into the index */
+    hbool_t need_insert = FALSE;        /* Whether the chunk needs to be inserted into the index */
     int         space_ndims;            /* Dataset's space rank */
     hsize_t     space_dim[H5O_LAYOUT_NDIMS];    /* Dataset's dataspace dimensions */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -382,7 +382,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
 
     /* Make sure the address of the chunk is returned. */
     if(!H5F_addr_defined(udata.chunk_block.offset))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk address isn't defined")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk address isn't defined")
 
     /* Evict the (old) entry from the cache if present, but do not flush
      * it to disk */
@@ -745,10 +745,8 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     /* Set the number of dimensions for the memory dataspace */
     H5_ASSIGN_OVERFLOW(fm->m_ndims, sm_ndims, int, unsigned);
 
-    /* Get dim number and dimensionality for each dataspace */
+    /* Get rank for file dataspace */
     fm->f_ndims = f_ndims = dataset->shared->layout.u.chunk.ndims - 1;
-    if(H5S_get_simple_extent_dims(file_space, fm->f_dims, NULL) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
 
     /* Normalize hyperslab selections by adjusting them by the offset */
     /* (It might be worthwhile to normalize both the file and memory dataspaces

@@ -337,7 +337,6 @@ typedef struct H5D_chunk_map_t {
 
     const H5S_t *file_space;    /* Pointer to the file dataspace */
     unsigned f_ndims;           /* Number of dimensions for file dataspace */
-    hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
 
     const H5S_t *mem_space;     /* Pointer to the memory dataspace */
     H5S_t *mchunk_tmpl;         /* Dataspace template for new memory chunks */

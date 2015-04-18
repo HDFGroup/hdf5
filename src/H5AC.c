@@ -598,7 +598,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
-    herr_t ret_value = SUCCEED;      /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
