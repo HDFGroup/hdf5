@@ -2523,7 +2523,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
                 point_of_no_return = TRUE;
                 ent->chunk = NULL;
             } /* end else */
-            H5_ASSIGN_OVERFLOW(nbytes, udata.chunk_block.length, uint32_t, size_t);
+            H5_ASSIGN_OVERFLOW(nbytes, udata.chunk_block.length, hsize_t, size_t);
             if(H5Z_pipeline(&(dset->shared->dcpl_cache.pline), 0, &(udata.filter_mask), dxpl_cache->err_detect,
                      dxpl_cache->filter_cb, &nbytes, &alloc, &buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
@@ -2532,7 +2532,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
             if(nbytes > ((size_t)0xffffffff))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
 #endif /* H5_SIZEOF_SIZE_T > 4 */
-            H5_ASSIGN_OVERFLOW(udata.chunk_block.length, nbytes, size_t, uint32_t);
+            H5_ASSIGN_OVERFLOW(udata.chunk_block.length, nbytes, size_t, hsize_t);
 
             /* Indicate that the chunk must be allocated */
             must_alloc = TRUE;
@@ -2565,7 +2565,8 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
 
         /* Write the data to the file */
         HDassert(H5F_addr_defined(udata.chunk_block.offset));
-        if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, udata.chunk_block.length, dxpl_id, buf) < 0)
+        H5_CHECK_OVERFLOW(udata.chunk_block.length, hsize_t, size_t);
+        if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, (size_t)udata.chunk_block.length, dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
         /* Insert the chunk record into the index */

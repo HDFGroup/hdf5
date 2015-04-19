@@ -83,7 +83,7 @@ typedef struct H5D_type_info_t {
 
     /* Computed/derived values */
     size_t src_type_size;		/* Size of source type	*/
-    size_t dst_type_size;	        /* Size of destination type*/
+    size_t dst_type_size;	        /* Size of destination type */
     size_t max_type_size;	        /* Size of largest source/destination type */
     hbool_t is_conv_noop;               /* Whether the type conversion is a NOOP */
     hbool_t is_xform_noop;              /* Whether the data transform is a NOOP */

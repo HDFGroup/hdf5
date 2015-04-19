@@ -410,6 +410,29 @@ H5VM_log2_of2(uint32_t n)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VM_power2up
+ *
+ * Purpose:	Round up a number to the next power of 2
+ *
+ * Return:	Return the number which is a power of 2
+ *
+ * Programmer:	Vailin Choi; Nov 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_inline hsize_t UNUSED
+H5VM_power2up(hsize_t n)
+{
+    hsize_t     ret_value = 1;  /* Return value */
+
+    while(ret_value < n)
+        ret_value <<= 1;
+
+    return(ret_value);
+} /* H5VM_power2up */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VM_limit_enc_size
  *
  * Purpose:     Determine the # of bytes needed to encode values within a
