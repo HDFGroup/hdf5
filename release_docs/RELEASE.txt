@@ -1,4 +1,4 @@
-HDF5 version 1.8.15-pre3 currently under development
+HDF5 version 1.8.15-pre3 released on 2015-04-20
 ================================================================================
 
 INTRODUCTION

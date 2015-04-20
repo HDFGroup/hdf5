@@ -48,9 +48,6 @@ CONTENTS
 
         6. Support
 
-        A. Building and testing with other compilers
-        A.1.  Building and testing with Intel compilers
-        A.2.  Building and testing with PGI compilers
 
 *****************************************************************************
 
@@ -583,50 +580,4 @@ CONTENTS
 6. Support
         Support is described in the README file.
 
-
-*****************************************************************************
-                                APPENDICES
-*****************************************************************************
-
-A. Building and testing with other compilers
-A.1.  Building and testing with Intel compilers
-        When Intel compilers are used (icc or ecc), you will need to modify
-        the generated "libtool" program after configuration is finished.
-        On or around line 104 of the libtool file, there are lines which 
-        look like:
-
-            # How to pass a linker flag through the compiler.
-            wl=""
-
-        Change these lines to this:
-
-            # How to pass a linker flag through the compiler.
-            wl="-Wl,"
-
-        UPDATE: This is now done automatically by the configure script. 
-        However, if you still experience a problem, you may want to check this 
-        line in the libtool file and make sure that it has the correct value.
-
-A.2.  Building and testing with PGI compilers
-        When PGI C and C++ compilers are used (pgcc or pgCC), you will need to 
-        modify the generated "libtool" program after configuration is finished.
-        On or around line 104 of the libtool file, there are lines which 
-        look like this:
-
-            # How to pass a linker flag through the compiler.
-            wl=""
-
-        Change these lines to this:
-
-            # How to pass a linker flag through the compiler.
-            wl="-Wl,"
-
-        UPDATE: This is now done automatically by the configure script. However,
-        if you still experience a problem, you may want to check this line in
-        the libtool file and make sure that it has the correct value.
-
-        To build the HDF5 C++ Library with pgCC (version 4.0 and later), set
-        the environment variable CXX to "pgCC -tlocal"
-            setenv CXX "pgCC -tlocal"
-        before running the configure script.
 
