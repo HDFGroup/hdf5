@@ -48,7 +48,7 @@
  * SOURCE
 */
 int_f
-nh5acreate_c(hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *type_id,
+h5acreate_c(hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *type_id,
     hid_t_f *space_id, hid_t_f *crt_prp, hid_t_f *aapl, hid_t_f *attr_id)
 /*******/
 {
@@ -94,7 +94,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aopen_name_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *attr_id)
+h5aopen_name_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *attr_id)
 /*******/
 {
     char *c_name = NULL;          /* Buffer to hold C string */
@@ -140,92 +140,92 @@ done:
  * SOURCE
 */
 int_f
-nh5awritec_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5awritec_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 int_f
-nh5awritec_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5awritec_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
-}
-
-int_f
-nh5awritec_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
-/******/
-{
-     /*
-      * Call h5awrite_c  function.
-      */
-     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5awritec_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5awritec_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5awritec_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5awritec_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5awritec_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5awritec_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5awritec_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5awritec_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5awritec_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5awritec_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5awritec_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5awritec_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+h5awritec_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+/******/
+{
+     /*
+      * Call h5awrite_c  function.
+      */
+     return h5awrite_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 
@@ -249,254 +249,254 @@ nh5awritec_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
  * HISTORY
  * dims parameter added
  *                                           April 4, 2001
- *                Added nh5awrite_integer(real,double)_s,1-7 functions to eliminate
+ *                Added h5awrite_integer(real,double)_s,1-7 functions to eliminate
  *                complains about wrong parameters types in h5awrite_c function
  *                called by Fortran routines.
  *                                           October 9, 2006 EIP
  * SOURCE
 */
 int_f
-nh5awrite_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
      /*
       * Call h5awrite_c  function.
       */
-     return nh5awrite_c(attr_id, mem_type_id, buf, dims);
+     return h5awrite_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+h5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
 /******/
 {
     int_f ret_value=0;          /* Return value */
@@ -532,98 +532,98 @@ done:
  * HISTORY
  * dims parameter added.
  *                April 4, 2001
- *                Added nh5areadc_s,1-7 functions to eliminate
+ *                Added h5areadc_s,1-7 functions to eliminate
  *                complains about wrong parameters types in h5awrite_c function
  *                called by Fortran routines.
  *                                           October 9, 2006 EIP
  * SOURCE
 */
 int_f
-nh5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5areadc_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 int_f
-nh5areadc_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5areadc_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
-}
-
-int_f
-nh5areadc_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
-/******/
-{
-     /*
-      * Call h5aread_c  function.
-      */
-     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5areadc_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5areadc_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5areadc_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5areadc_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5areadc_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5areadc_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5areadc_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5areadc_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 int_f
-nh5areadc_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5areadc_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+}
+
+int_f
+h5areadc_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+/******/
+{
+     /*
+      * Call h5aread_c  function.
+      */
+     return h5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 int_f
-nh5areadc_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
+h5areadc_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
+     return h5aread_c(attr_id, mem_type_id, _fcdtocp(buf), dims);
 }
 
 
@@ -648,14 +648,14 @@ nh5areadc_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
  * HISTORY
  * dims paramete added.
  *                April 4, 2001
- *                Added nh5aread_integer(real,double)_s,1-7 functions to eliminate
+ *                Added h5aread_integer(real,double)_s,1-7 functions to eliminate
  *                complains about wrong parameters types in h5awrite_c function
  *                called by Fortran routines.
  *                                           October 9, 2006 EIP
  * SOURCE
 */
 int_f
-nh5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
     int_f ret_value=0;          /* Return value */
@@ -671,243 +671,243 @@ done:
 }
 
 int_f
-nh5aread_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 int_f
-nh5aread_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+h5aread_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
 /******/
 {
      /*
       * Call h5aread_c  function.
       */
-     return nh5aread_c(attr_id, mem_type_id, buf, dims);
+     return h5aread_c(attr_id, mem_type_id, buf, dims);
 }
 
 
@@ -929,7 +929,7 @@ nh5aread_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNU
 */
 
 int_f
-nh5aclose_c ( hid_t_f *attr_id )
+h5aclose_c ( hid_t_f *attr_id )
 /******/
 {
     int_f ret_value=0;          /* Return value */
@@ -1006,7 +1006,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aopen_idx_c (hid_t_f *obj_id, int_f *idx, hid_t_f *attr_id)
+h5aopen_idx_c (hid_t_f *obj_id, int_f *idx, hid_t_f *attr_id)
 /******/
 {
     int_f ret_value = 0;          /* Return value */
@@ -1041,7 +1041,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aget_space_c (hid_t_f *attr_id, hid_t_f *space_id)
+h5aget_space_c (hid_t_f *attr_id, hid_t_f *space_id)
 /******/
 {
     int_f ret_value=0;          /* Return value */
@@ -1075,7 +1075,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aget_type_c (hid_t_f *attr_id, hid_t_f *type_id)
+h5aget_type_c (hid_t_f *attr_id, hid_t_f *type_id)
 /******/
 {
     int_f ret_value=0;          /* Return value */
@@ -1148,7 +1148,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
+h5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
 /******/
 {
   size_t c_bufsize;
@@ -1199,7 +1199,7 @@ done:
 */
 
 int_f
-nh5aget_storage_size_c ( hid_t_f *attr_id,  hsize_t_f *size)
+h5aget_storage_size_c ( hid_t_f *attr_id,  hsize_t_f *size)
 /******/
 {
     int_f ret_value=0;          /* Return value */
@@ -1231,7 +1231,7 @@ done:
 */
 
 int_f
-nh5aget_create_plist_c ( hid_t_f *attr_id,  hid_t_f *creation_prop_id)
+h5aget_create_plist_c ( hid_t_f *attr_id,  hid_t_f *creation_prop_id)
 /******/
 {
     int_f ret_value=0;          /* Return value */
@@ -1271,7 +1271,7 @@ done:
 */
 
 int_f
-nh5arename_by_name_c( hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
+h5arename_by_name_c( hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		      _fcd old_attr_name, size_t_f *old_attr_namelen,
 		      _fcd new_attr_name, size_t_f *new_attr_namelen,
 		      hid_t_f *lapl_id )
@@ -1326,7 +1326,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aopen_c (hid_t_f *obj_id, _fcd attr_name, size_t_f *attr_namelen, hid_t_f *aapl_id, hid_t_f *attr_id)
+h5aopen_c (hid_t_f *obj_id, _fcd attr_name, size_t_f *attr_namelen, hid_t_f *aapl_id, hid_t_f *attr_id)
 /******/
 {
     char *c_attr_name = NULL;          /* Buffer to hold C string */
@@ -1374,7 +1374,7 @@ done:
  * SOURCE
 */
 int_f
-nh5adelete_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen, hid_t_f *lapl_id)
+h5adelete_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen, hid_t_f *lapl_id)
 /******/
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
@@ -1427,7 +1427,7 @@ done:
  * SOURCE
 */
 int_f
-nh5adelete_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
+h5adelete_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		     int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id)
 /******/
 {
@@ -1497,7 +1497,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aget_name_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
+h5aget_name_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		       int_f *idx_type, int_f *order, hsize_t_f *n, _fcd name,
 		       size_t_f *size, hid_t_f *lapl_id)
 /******/
@@ -1580,7 +1580,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aopen_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
+h5aopen_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		   int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *aapl_id, hid_t_f *lapl_id, hid_t_f *attr_id )
 /******/
 {
@@ -1630,7 +1630,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aget_info_c (hid_t_f *loc_id, int_f *corder_valid, int_f *corder,
+h5aget_info_c (hid_t_f *loc_id, int_f *corder_valid, int_f *corder,
 		int_f *cset, hsize_t_f *data_size )
 /******/
 {
@@ -1699,7 +1699,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aget_info_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
+h5aget_info_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id,
 		int_f *corder_valid, int_f *corder,
 		int_f *cset, hsize_t_f *data_size )
@@ -1766,7 +1766,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aget_info_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
+h5aget_info_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 			_fcd attr_name, size_t_f *attr_namelen, hid_t_f *lapl_id,
 			int_f *corder_valid, int_f *corder,
 			int_f *cset, hsize_t_f *data_size )
@@ -1841,7 +1841,7 @@ done:
  * SOURCE
 */
 int_f
-nh5acreate_by_name_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
+h5acreate_by_name_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
 		     _fcd attr_name, size_t_f *attr_namelen,  hid_t_f *type_id,
 		     hid_t_f *space_id, hid_t_f *acpl_id, hid_t_f *aapl_id,
 		     hid_t_f *lapl_id, hid_t_f *attr_id )
@@ -1896,7 +1896,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aexists_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *attr_exists)
+h5aexists_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *attr_exists)
 /******/
 {
   char *c_name = NULL;          /* Buffer to hold C string */
@@ -1944,7 +1944,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aexists_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen,
+h5aexists_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen,
 		      hid_t_f *lapl_id, int_f *attr_exists)
 /******/
 {
@@ -1999,7 +1999,7 @@ done:
  * SOURCE
 */
 int_f
-nh5aopen_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen,
+h5aopen_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen,
 		    hid_t_f *aapl_id, hid_t_f *lapl_id, hid_t_f *attr_id)
 /******/
 {
@@ -2053,7 +2053,7 @@ nh5aopen_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd 
 */
 
 int_f
-nh5arename_c( hid_t_f *loc_id,
+h5arename_c( hid_t_f *loc_id,
 		      _fcd old_attr_name, size_t_f *old_attr_namelen,
 		      _fcd new_attr_name, size_t_f *new_attr_namelen)
 /******/

@@ -60,7 +60,7 @@
 */
 
 int_f
-nh5pcreate_c ( hid_t_f *cls, hid_t_f *prp_id )
+h5pcreate_c ( hid_t_f *cls, hid_t_f *prp_id )
 /******/
 {
     hid_t c_prp_id;
@@ -93,7 +93,7 @@ done:
 */
 
 int_f
-nh5pclose_c ( hid_t_f *prp_id )
+h5pclose_c ( hid_t_f *prp_id )
 /******/
 {
     int_f ret_value = 0;
@@ -123,7 +123,7 @@ nh5pclose_c ( hid_t_f *prp_id )
  * SOURCE
 */
 int_f
-nh5pcopy_c ( hid_t_f *prp_id , hid_t_f *new_prp_id)
+h5pcopy_c ( hid_t_f *prp_id , hid_t_f *new_prp_id)
 /******/
 {
     hid_t c_new_prp_id;
@@ -158,7 +158,7 @@ done:
  * SOURCE
 */
 int_f
-nh5pequal_c ( hid_t_f *plist1_id , hid_t_f *plist2_id, int_f * c_flag)
+h5pequal_c ( hid_t_f *plist1_id , hid_t_f *plist2_id, int_f * c_flag)
 /******/
 {
     htri_t c_c_flag;
@@ -193,7 +193,7 @@ done:
 */
 
 int_f
-nh5pget_class_c ( hid_t_f *prp_id , hid_t_f *classtype)
+h5pget_class_c ( hid_t_f *prp_id , hid_t_f *classtype)
 /******/
 {
     hid_t c_classtype;
@@ -226,7 +226,7 @@ done:
 */
 
 int_f
-nh5pset_preserve_c ( hid_t_f *prp_id , int_f *flag)
+h5pset_preserve_c ( hid_t_f *prp_id , int_f *flag)
 /******/
 {
   int ret_value = 0;
@@ -261,7 +261,7 @@ nh5pset_preserve_c ( hid_t_f *prp_id , int_f *flag)
 */
 
 int_f
-nh5pget_preserve_c ( hid_t_f *prp_id , int_f *flag)
+h5pget_preserve_c ( hid_t_f *prp_id , int_f *flag)
 /******/
 {
   int ret_value = 0;
@@ -292,7 +292,7 @@ nh5pget_preserve_c ( hid_t_f *prp_id , int_f *flag)
 */
 
 int_f
-nh5pset_deflate_c ( hid_t_f *prp_id , int_f *level)
+h5pset_deflate_c ( hid_t_f *prp_id , int_f *level)
 /******/
 {
   int ret_value = 0;
@@ -328,7 +328,7 @@ nh5pset_deflate_c ( hid_t_f *prp_id , int_f *level)
 */
 
 int_f
-nh5pset_chunk_c ( hid_t_f *prp_id, int_f *rank, hsize_t_f *dims )
+h5pset_chunk_c ( hid_t_f *prp_id, int_f *rank, hsize_t_f *dims )
 /******/
 {
   int ret_value = -1;
@@ -372,7 +372,7 @@ DONE:
 */
 
 int_f
-nh5pget_chunk_c ( hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims )
+h5pget_chunk_c ( hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims )
 /******/
 {
   int ret_value = -1;
@@ -411,7 +411,7 @@ nh5pget_chunk_c ( hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims )
  * SOURCE
 */
 int_f
-nh5pset_fill_valuec_c (hid_t_f *prp_id, hid_t_f *type_id, _fcd fillvalue)
+h5pset_fill_valuec_c (hid_t_f *prp_id, hid_t_f *type_id, _fcd fillvalue)
 /******/
 {
      int ret_value = -1;
@@ -462,7 +462,7 @@ h5pset_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 }
 
 int_f
-nh5pset_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
+h5pset_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 /******/
 {
      /*
@@ -472,7 +472,7 @@ nh5pset_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue
 }
 
 int_f
-nh5pset_fill_value_real_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
+h5pset_fill_value_real_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 {
      /*
       * Call h5pset_fill_value_c  function.
@@ -481,7 +481,7 @@ nh5pset_fill_value_real_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 }
 
 int_f
-nh5pset_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
+h5pset_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 {
      /*
       * Call h5pset_fill_value_c  function.
@@ -504,13 +504,13 @@ nh5pset_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
  *  Elena Pourmal
  *  Saturday, August 14, 1999
  * HISTORY
- *  Fixed wrong call to C wrapper, was nh5pset_fill_value_c, changed
- *  to nh5pget_fill_value_c. MSB - 7/21/2014
+ *  Fixed wrong call to C wrapper, was h5pset_fill_value_c, changed
+ *  to h5pget_fill_value_c. MSB - 7/21/2014
  *
  * SOURCE
 */
 int_f
-nh5pget_fill_valuec_c (hid_t_f *prp_id, hid_t_f *type_id, _fcd fillvalue)
+h5pget_fill_valuec_c (hid_t_f *prp_id, hid_t_f *type_id, _fcd fillvalue)
 /******/
 {
      int ret_value = -1;
@@ -561,7 +561,7 @@ h5pget_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 }
 
 int_f
-nh5pget_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
+h5pget_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 {
      /*
       * Call h5pget_fill_value_c  function.
@@ -570,7 +570,7 @@ nh5pget_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue
 }
 
 int_f
-nh5pget_fill_value_real_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
+h5pget_fill_value_real_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 {
      /*
       * Call h5pget_fill_value_c  function.
@@ -579,7 +579,7 @@ nh5pget_fill_value_real_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 }
 
 int_f
-nh5pget_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
+h5pget_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 {
      /*
       * Call h5pget_fill_value_c  function.
@@ -610,7 +610,7 @@ nh5pget_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
  * SOURCE
 */
 int_f
-nh5pget_version_c (hid_t_f *prp_id, int_f * boot,int_f * freelist, int_f * stab, int_f *shhdr)
+h5pget_version_c (hid_t_f *prp_id, int_f * boot,int_f * freelist, int_f * stab, int_f *shhdr)
 /******/
 {
      int ret_value = -1;
@@ -662,7 +662,7 @@ nh5pget_version_c (hid_t_f *prp_id, int_f * boot,int_f * freelist, int_f * stab,
  * SOURCE
 */
 int_f
-nh5pget_userblock_c (hid_t_f *prp_id, hsize_t_f * size)
+h5pget_userblock_c (hid_t_f *prp_id, hsize_t_f * size)
 /******/
 {
      int ret_value = -1;
@@ -700,7 +700,7 @@ nh5pget_userblock_c (hid_t_f *prp_id, hsize_t_f * size)
  * SOURCE
 */
 int_f
-nh5pset_userblock_c (hid_t_f *prp_id, hsize_t_f * size)
+h5pset_userblock_c (hid_t_f *prp_id, hsize_t_f * size)
 /******/
 {
      int ret_value = -1;
@@ -740,7 +740,7 @@ nh5pset_userblock_c (hid_t_f *prp_id, hsize_t_f * size)
  * SOURCE
 */
 int_f
-nh5pget_sizes_c (hid_t_f *prp_id, size_t_f * sizeof_addr, size_t_f * sizeof_size)
+h5pget_sizes_c (hid_t_f *prp_id, size_t_f * sizeof_addr, size_t_f * sizeof_size)
 /******/
 {
      int ret_value = -1;
@@ -782,7 +782,7 @@ nh5pget_sizes_c (hid_t_f *prp_id, size_t_f * sizeof_addr, size_t_f * sizeof_size
  * SOURCE
 */
 int_f
-nh5pset_sizes_c (hid_t_f *prp_id, size_t_f * sizeof_addr, size_t_f * sizeof_size)
+h5pset_sizes_c (hid_t_f *prp_id, size_t_f * sizeof_addr, size_t_f * sizeof_size)
 /******/
 {
      int ret_value = -1;
@@ -821,7 +821,7 @@ nh5pset_sizes_c (hid_t_f *prp_id, size_t_f * sizeof_addr, size_t_f * sizeof_size
  * SOURCE
 */
 int_f
-nh5pset_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
+h5pset_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
 /******/
 {
      int ret_value = -1;
@@ -864,7 +864,7 @@ nh5pset_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
  * SOURCE
 */
 int_f
-nh5pget_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
+h5pget_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
 /******/
 {
      int ret_value = -1;
@@ -904,7 +904,7 @@ nh5pget_sym_k_c (hid_t_f *prp_id, int_f* ik, int_f* lk)
  * SOURCE
 */
 int_f
-nh5pset_istore_k_c (hid_t_f *prp_id, int_f* ik)
+h5pset_istore_k_c (hid_t_f *prp_id, int_f* ik)
 /******/
 {
      int ret_value = -1;
@@ -944,7 +944,7 @@ nh5pset_istore_k_c (hid_t_f *prp_id, int_f* ik)
  * SOURCE
 */
 int_f
-nh5pget_istore_k_c (hid_t_f *prp_id, int_f* ik)
+h5pget_istore_k_c (hid_t_f *prp_id, int_f* ik)
 /******/
 {
      int ret_value = -1;
@@ -982,7 +982,7 @@ nh5pget_istore_k_c (hid_t_f *prp_id, int_f* ik)
  * SOURCE
 */
 int_f
-nh5pget_driver_c (hid_t_f *prp_id, hid_t_f* driver)
+h5pget_driver_c (hid_t_f *prp_id, hid_t_f* driver)
 /******/
 {
      int ret_value = -1;
@@ -1019,7 +1019,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pset_fapl_stdio_c (hid_t_f *prp_id)
+h5pset_fapl_stdio_c (hid_t_f *prp_id)
 /******/
 {
      int ret_value = -1;
@@ -1056,7 +1056,7 @@ nh5pset_fapl_stdio_c (hid_t_f *prp_id)
  * SOURCE
 */
 int_f
-nh5pget_fapl_stdio_c (hid_t_f *prp_id, int_f* io)
+h5pget_fapl_stdio_c (hid_t_f *prp_id, int_f* io)
 /******/
 {
      int ret_value = -1;
@@ -1093,7 +1093,7 @@ nh5pget_fapl_stdio_c (hid_t_f *prp_id, int_f* io)
  * SOURCE
 */
 int_f
-nh5pset_fapl_sec2_c (hid_t_f *prp_id)
+h5pset_fapl_sec2_c (hid_t_f *prp_id)
 /******/
 {
      int ret_value = -1;
@@ -1131,7 +1131,7 @@ nh5pset_fapl_sec2_c (hid_t_f *prp_id)
  * SOURCE
 */
 int_f
-nh5pget_fapl_sec2_c (hid_t_f *prp_id, int_f* sec2)
+h5pget_fapl_sec2_c (hid_t_f *prp_id, int_f* sec2)
 /******/
 {
      int ret_value = -1;
@@ -1169,7 +1169,7 @@ nh5pget_fapl_sec2_c (hid_t_f *prp_id, int_f* sec2)
  * SOURCE
 */
 int_f
-nh5pset_alignment_c (hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment)
+h5pset_alignment_c (hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment)
 /******/
 {
      int ret_value = -1;
@@ -1208,7 +1208,7 @@ nh5pset_alignment_c (hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment
  * SOURCE
 */
 int_f
-nh5pget_alignment_c (hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment)
+h5pget_alignment_c (hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment)
 /******/
 {
      int ret_value = -1;
@@ -1249,7 +1249,7 @@ nh5pget_alignment_c (hid_t_f *prp_id, hsize_t_f* threshold, hsize_t_f* alignment
  * SOURCE
 */
 int_f
-nh5pset_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag)
+h5pset_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag)
 /******/
 {
      int ret_value = -1;
@@ -1289,7 +1289,7 @@ nh5pset_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag)
  * SOURCE
 */
 int_f
-nh5pget_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag)
+h5pget_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag)
 /******/
 {
      int ret_value = -1;
@@ -1331,7 +1331,7 @@ nh5pget_fapl_core_c (hid_t_f *prp_id, size_t_f* increment, int_f *flag)
  * SOURCE
 */
 int_f
-nh5pset_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist )
+h5pset_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist )
 /******/
 {
      int ret_value = -1;
@@ -1372,7 +1372,7 @@ nh5pset_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist
  * SOURCE
 */
 int_f
-nh5pget_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist)
+h5pget_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist)
 /******/
 {
      int ret_value = -1;
@@ -1417,7 +1417,7 @@ nh5pget_fapl_family_c(hid_t_f *prp_id, hsize_t_f* memb_size, hid_t_f* memb_plist
  * SOURCE
 */
 int_f
-nh5pset_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts,  size_t_f* rdcc_nbytes , real_f* rdcc_w0 )
+h5pset_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts,  size_t_f* rdcc_nbytes , real_f* rdcc_w0 )
 /******/
 {
      int ret_value = -1;
@@ -1469,7 +1469,7 @@ nh5pset_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts,  size
  * SOURCE
 */
 int_f
-nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts, size_t_f* rdcc_nbytes , real_f* rdcc_w0)
+h5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts, size_t_f* rdcc_nbytes , real_f* rdcc_w0)
 /******/
 {
      int ret_value = -1;
@@ -1518,7 +1518,7 @@ nh5pget_cache_c(hid_t_f *prp_id, int_f* mdc_nelmts, size_t_f* rdcc_nelmts, size_
  * SOURCE
 */
 int_f
-nh5pset_fapl_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* meta_plist, int_f* raw_len, _fcd raw_ext, hid_t_f * raw_plist)
+h5pset_fapl_split_c(hid_t_f *prp_id, int_f* meta_len, _fcd meta_ext, hid_t_f* meta_plist, int_f* raw_len, _fcd raw_ext, hid_t_f * raw_plist)
 /******/
 {
      int ret_value = -1;
@@ -1582,7 +1582,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pget_fapl_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, hid_t_f* meta_plist, size_t_f* raw_ext_size, _fcd raw_ext, hid_t_f * raw_plist)
+h5pget_fapl_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, hid_t_f* meta_plist, size_t_f* raw_ext_size, _fcd raw_ext, hid_t_f * raw_plist)
 /******/
 {
      int ret_value = -1;
@@ -1638,7 +1638,7 @@ nh5pget_fapl_split_c(hid_t_f *prp_id, size_t_f* meta_ext_size , _fcd meta_ext, h
  * SOURCE
 */
 int_f
-nh5pset_gc_references_c (hid_t_f *prp_id, int_f* gc_references)
+h5pset_gc_references_c (hid_t_f *prp_id, int_f* gc_references)
 /******/
 {
      int ret_value = -1;
@@ -1678,7 +1678,7 @@ nh5pset_gc_references_c (hid_t_f *prp_id, int_f* gc_references)
  * SOURCE
 */
 int_f
-nh5pget_gc_references_c (hid_t_f *prp_id, int_f* gc_references)
+h5pget_gc_references_c (hid_t_f *prp_id, int_f* gc_references)
 /******/
 {
      int ret_value = -1;
@@ -1715,7 +1715,7 @@ nh5pget_gc_references_c (hid_t_f *prp_id, int_f* gc_references)
  * SOURCE
 */
 int_f
-nh5pset_layout_c (hid_t_f *prp_id, int_f* layout)
+h5pset_layout_c (hid_t_f *prp_id, int_f* layout)
 /******/
 {
      int ret_value = -1;
@@ -1754,7 +1754,7 @@ nh5pset_layout_c (hid_t_f *prp_id, int_f* layout)
  * SOURCE
 */
 int_f
-nh5pget_layout_c (hid_t_f *prp_id, int_f* layout)
+h5pget_layout_c (hid_t_f *prp_id, int_f* layout)
 /******/
 {
      int ret_value = -1;
@@ -1793,7 +1793,7 @@ nh5pget_layout_c (hid_t_f *prp_id, int_f* layout)
  * SOURCE
 */
 int_f
-nh5pset_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values )
+h5pset_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values )
 /******/
 {
      int ret_value = -1;
@@ -1841,7 +1841,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pget_nfilters_c (hid_t_f *prp_id, int_f* nfilters)
+h5pget_nfilters_c (hid_t_f *prp_id, int_f* nfilters)
 /******/
 {
      int ret_value = -1;
@@ -1884,7 +1884,7 @@ nh5pget_nfilters_c (hid_t_f *prp_id, int_f* nfilters)
  *              MSB January 27, 2009
  *---------------------------------------------------------------------------*/
 int_f
-nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name, int_f* filter_id)
+h5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name, int_f* filter_id)
 /******/
 {
     unsigned int  c_flags;
@@ -1951,7 +1951,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, off_t_f* offset, hsize_t_f*bytes)
+h5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, off_t_f* offset, hsize_t_f*bytes)
 /******/
 {
      int ret_value = -1;
@@ -2002,7 +2002,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pget_external_count_c (hid_t_f *prp_id, int_f* count)
+h5pget_external_count_c (hid_t_f *prp_id, int_f* count)
 /******/
 {
      int ret_value = -1;
@@ -2044,7 +2044,7 @@ nh5pget_external_count_c (hid_t_f *prp_id, int_f* count)
  * SOURCE
 */
 int_f
-nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, off_t_f* offset, hsize_t_f*bytes)
+h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, off_t_f* offset, hsize_t_f*bytes)
 /******/
 {
      int ret_value = -1;
@@ -2108,7 +2108,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pset_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right)
+h5pset_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right)
 /******/
 {
      int ret_value = -1;
@@ -2153,7 +2153,7 @@ nh5pset_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* ri
  * SOURCE
 */
 int_f
-nh5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right)
+h5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right)
 /******/
 {
      int ret_value = -1;
@@ -2198,7 +2198,7 @@ nh5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* ri
 */
 
 int_f
-nh5pget_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
+h5pget_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
 /******/
 {
   int ret_value = -1;
@@ -2236,7 +2236,7 @@ nh5pget_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
 */
 
 int_f
-nh5pset_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
+h5pset_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
 /******/
 {
   int ret_value = -1;
@@ -2272,7 +2272,7 @@ nh5pset_fclose_degree_c ( hid_t_f *fapl_id , int_f *degree)
 */
 
 int_f
-nh5pset_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
+h5pset_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
 /******/
 {
   int ret_value = 0;
@@ -2305,7 +2305,7 @@ nh5pset_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
 */
 
 int_f
-nh5pget_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
+h5pget_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
 /******/
 {
   int ret_value = -1;
@@ -2339,7 +2339,7 @@ nh5pget_buffer_c ( hid_t_f *prp_id , hsize_t_f *size)
 */
 
 int_f
-nh5pfill_value_defined_c ( hid_t_f *prp_id , int_f *flag)
+h5pfill_value_defined_c ( hid_t_f *prp_id , int_f *flag)
 /******/
 {
   int ret_value = -1;
@@ -2373,7 +2373,7 @@ nh5pfill_value_defined_c ( hid_t_f *prp_id , int_f *flag)
 */
 
 int_f
-nh5pget_alloc_time_c ( hid_t_f *prp_id , int_f *flag)
+h5pget_alloc_time_c ( hid_t_f *prp_id , int_f *flag)
 /******/
 {
   int ret_value = -1;
@@ -2406,7 +2406,7 @@ nh5pget_alloc_time_c ( hid_t_f *prp_id , int_f *flag)
 */
 
 int_f
-nh5pset_alloc_time_c ( hid_t_f *prp_id , int_f *flag)
+h5pset_alloc_time_c ( hid_t_f *prp_id , int_f *flag)
 /******/
 {
   int ret_value = -1;
@@ -2440,7 +2440,7 @@ nh5pset_alloc_time_c ( hid_t_f *prp_id , int_f *flag)
 */
 
 int_f
-nh5pget_fill_time_c ( hid_t_f *prp_id , int_f *flag)
+h5pget_fill_time_c ( hid_t_f *prp_id , int_f *flag)
 /******/
 {
   int ret_value = -1;
@@ -2473,7 +2473,7 @@ nh5pget_fill_time_c ( hid_t_f *prp_id , int_f *flag)
 */
 
 int_f
-nh5pset_fill_time_c ( hid_t_f *prp_id , int_f *flag)
+h5pset_fill_time_c ( hid_t_f *prp_id , int_f *flag)
 /******/
 {
   int ret_value = -1;
@@ -2507,7 +2507,7 @@ nh5pset_fill_time_c ( hid_t_f *prp_id , int_f *flag)
 */
 
 int_f
-nh5pset_meta_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
+h5pset_meta_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
 /******/
 {
   int ret_value = 0;
@@ -2540,7 +2540,7 @@ nh5pset_meta_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
 */
 
 int_f
-nh5pget_meta_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
+h5pget_meta_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
 /******/
 {
   int ret_value = 0;
@@ -2573,7 +2573,7 @@ nh5pget_meta_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
 */
 
 int_f
-nh5pset_sieve_buf_size_c ( hid_t_f *prp_id , size_t_f *size)
+h5pset_sieve_buf_size_c ( hid_t_f *prp_id , size_t_f *size)
 /******/
 {
   int ret_value = 0;
@@ -2606,7 +2606,7 @@ nh5pset_sieve_buf_size_c ( hid_t_f *prp_id , size_t_f *size)
 */
 
 int_f
-nh5pget_sieve_buf_size_c ( hid_t_f *prp_id , size_t_f *size)
+h5pget_sieve_buf_size_c ( hid_t_f *prp_id , size_t_f *size)
 /******/
 {
   int ret_value = 0;
@@ -2639,7 +2639,7 @@ nh5pget_sieve_buf_size_c ( hid_t_f *prp_id , size_t_f *size)
 */
 
 int_f
-nh5pset_small_data_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
+h5pset_small_data_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
 /******/
 {
   int ret_value = 0;
@@ -2672,7 +2672,7 @@ nh5pset_small_data_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
 */
 
 int_f
-nh5pget_small_data_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
+h5pget_small_data_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
 /******/
 {
   int ret_value = 0;
@@ -2705,7 +2705,7 @@ nh5pget_small_data_block_size_c ( hid_t_f *prp_id , hsize_t_f *size)
 */
 
 int_f
-nh5pset_hyper_vector_size_c ( hid_t_f *prp_id , size_t_f *size)
+h5pset_hyper_vector_size_c ( hid_t_f *prp_id , size_t_f *size)
 /******/
 {
   int ret_value = 0;
@@ -2738,7 +2738,7 @@ nh5pset_hyper_vector_size_c ( hid_t_f *prp_id , size_t_f *size)
 */
 
 int_f
-nh5pget_hyper_vector_size_c ( hid_t_f *prp_id , size_t_f *size)
+h5pget_hyper_vector_size_c ( hid_t_f *prp_id , size_t_f *size)
 /******/
 {
   int ret_value = 0;
@@ -2771,7 +2771,7 @@ nh5pget_hyper_vector_size_c ( hid_t_f *prp_id , size_t_f *size)
  * SOURCE
 */
 int_f
-nh5pcreate_class_f90_c(hid_t_f *parent, _fcd name, int_f *name_len, hid_t_f *cls)
+h5pcreate_class_f90_c(hid_t_f *parent, _fcd name, int_f *name_len, hid_t_f *cls)
 /******/
 {
      int ret_value = -1;
@@ -2853,7 +2853,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pregisterc_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f UNUSED *value_len)
+h5pregisterc_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f UNUSED *value_len)
 /******/
 {
      int ret_value = -1;
@@ -2909,7 +2909,7 @@ DONE:
 }
 
 int_f
-nh5pregister_integer_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void *value)
+h5pregister_integer_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void *value)
 {
      /*
       * Call h5pregister_c function
@@ -2918,7 +2918,7 @@ nh5pregister_integer_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size,
 }
 
 int_f
-nh5pregister_real_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void *value)
+h5pregister_real_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void *value)
 {
      /*
       * Call h5pregister_c function
@@ -2927,7 +2927,7 @@ nh5pregister_real_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, vo
 }
 
 int_f
-nh5pregister_double_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void *value)
+h5pregister_double_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void *value)
 {
      /*
       * Call h5pregister_c function
@@ -2956,7 +2956,7 @@ nh5pregister_double_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, 
  * SOURCE
 */
 int_f
-nh5pinsertc_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f UNUSED *value_len)
+h5pinsertc_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f UNUSED *value_len)
 /******/
 {
      int_f ret_value = -1;
@@ -3012,7 +3012,7 @@ DONE:
 }
 
 int_f
-nh5pinsert_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *value)
+h5pinsert_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *value)
 {
      /*
       * Call h5pinsert_c function
@@ -3021,7 +3021,7 @@ nh5pinsert_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size,
 }
 
 int_f
-nh5pinsert_real_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *value)
+h5pinsert_real_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *value)
 {
      /*
       * Call h5pinsert_c function
@@ -3030,7 +3030,7 @@ nh5pinsert_real_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, vo
 }
 
 int_f
-nh5pinsert_double_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *value)
+h5pinsert_double_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *value)
 {
      /*
       * Call h5pinsert_c function
@@ -3058,7 +3058,7 @@ nh5pinsert_double_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, 
  * SOURCE
 */
 int_f
-nh5pexist_c(hid_t_f *cls, _fcd name, int_f *name_len)
+h5pexist_c(hid_t_f *cls, _fcd name, int_f *name_len)
 /******/
 {
      int_f ret_value = -1;
@@ -3099,7 +3099,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pisa_class_c(hid_t_f *plist, hid_t_f *cls)
+h5pisa_class_c(hid_t_f *plist, hid_t_f *cls)
 /******/
 {
      int_f ret_value = -1;
@@ -3138,7 +3138,7 @@ nh5pisa_class_c(hid_t_f *plist, hid_t_f *cls)
  * SOURCE
 */
 int_f
-nh5pget_size_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size)
+h5pget_size_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size)
 /******/
 {
      int_f ret_value = -1;
@@ -3180,7 +3180,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pget_nprops_c(hid_t_f *plist, size_t_f *nprops)
+h5pget_nprops_c(hid_t_f *plist, size_t_f *nprops)
 /******/
 {
      int_f ret_value = -1;
@@ -3218,7 +3218,7 @@ nh5pget_nprops_c(hid_t_f *plist, size_t_f *nprops)
  * SOURCE
 */
 int_f
-nh5pget_class_parent_c(hid_t_f *prp_id, hid_t_f *parent_id)
+h5pget_class_parent_c(hid_t_f *prp_id, hid_t_f *parent_id)
 /******/
 {
      int_f ret_value = -1;
@@ -3258,7 +3258,7 @@ nh5pget_class_parent_c(hid_t_f *prp_id, hid_t_f *parent_id)
  * SOURCE
 */
 int_f
-nh5pcopy_prop_c(hid_t_f *dst_id, hid_t_f *src_id, _fcd name, int_f *name_len)
+h5pcopy_prop_c(hid_t_f *dst_id, hid_t_f *src_id, _fcd name, int_f *name_len)
 /******/
 {
      int_f ret_value = -1;
@@ -3299,7 +3299,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5premove_c(hid_t_f *plid, _fcd name, int_f *name_len)
+h5premove_c(hid_t_f *plid, _fcd name, int_f *name_len)
 /******/
 {
      int_f ret_value = -1;
@@ -3339,7 +3339,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5punregister_c(hid_t_f *cls, _fcd name, int_f *name_len)
+h5punregister_c(hid_t_f *cls, _fcd name, int_f *name_len)
 /******/
 {
      int_f ret_value = -1;
@@ -3377,7 +3377,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pclose_class_c(hid_t_f *cls)
+h5pclose_class_c(hid_t_f *cls)
 /******/
 {
      int_f ret_value = -1;
@@ -3411,7 +3411,7 @@ nh5pclose_class_c(hid_t_f *cls)
  * SOURCE
 */
 int_f
-nh5pget_class_name_c(hid_t_f *cls, _fcd name, int_f *name_len)
+h5pget_class_name_c(hid_t_f *cls, _fcd name, int_f *name_len)
 /******/
 {
      int_f ret_value = -1;
@@ -3454,7 +3454,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5psetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f UNUSED *value_len)
+h5psetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f UNUSED *value_len)
 /******/
 {
      int_f ret_value = -1;
@@ -3507,7 +3507,7 @@ DONE:
 }
 
 int_f
-nh5pset_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
+h5pset_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 {
      /*
       * Call h5pset_c function
@@ -3516,7 +3516,7 @@ nh5pset_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 }
 
 int_f
-nh5pset_real_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
+h5pset_real_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 {
      /*
       * Call h5pset_c function
@@ -3525,7 +3525,7 @@ nh5pset_real_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 }
 
 int_f
-nh5pset_double_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
+h5pset_double_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 {
      /*
       * Call h5pset_c function
@@ -3552,7 +3552,7 @@ nh5pset_double_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
  * SOURCE
 */
 int_f
-nh5pgetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f UNUSED *value_len)
+h5pgetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f UNUSED *value_len)
 /******/
 {
      int_f ret_value = -1;
@@ -3606,7 +3606,7 @@ DONE:
 }
 
 int_f
-nh5pget_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
+h5pget_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 {
      /*
       * Call h5pget_c function
@@ -3615,7 +3615,7 @@ nh5pget_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 }
 
 int_f
-nh5pget_real_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
+h5pget_real_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 {
      /*
       * Call h5pget_c function
@@ -3624,7 +3624,7 @@ nh5pget_real_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 }
 
 int_f
-nh5pget_double_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
+h5pget_double_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 {
      /*
       * Call h5pget_c function
@@ -3652,7 +3652,7 @@ nh5pget_double_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 */
 
 int_f
-nh5pset_shuffle_c ( hid_t_f *prp_id )
+h5pset_shuffle_c ( hid_t_f *prp_id )
 /******/
 {
   int_f ret_value = 0;
@@ -3682,7 +3682,7 @@ nh5pset_shuffle_c ( hid_t_f *prp_id )
 */
 
 int_f
-nh5pset_fletcher32_c ( hid_t_f *prp_id )
+h5pset_fletcher32_c ( hid_t_f *prp_id )
 /******/
 {
   int_f ret_value = 0;
@@ -3714,7 +3714,7 @@ nh5pset_fletcher32_c ( hid_t_f *prp_id )
 */
 
 int_f
-nh5pset_edc_check_c ( hid_t_f *prp_id, int_f *flag )
+h5pset_edc_check_c ( hid_t_f *prp_id, int_f *flag )
 /******/
 {
   int_f ret_value = 0;
@@ -3748,7 +3748,7 @@ nh5pset_edc_check_c ( hid_t_f *prp_id, int_f *flag )
 */
 
 int_f
-nh5pget_edc_check_c ( hid_t_f *prp_id, int_f *flag )
+h5pget_edc_check_c ( hid_t_f *prp_id, int_f *flag )
 /******/
 {
   int_f ret_value = 0;
@@ -3780,7 +3780,7 @@ nh5pget_edc_check_c ( hid_t_f *prp_id, int_f *flag )
 */
 
 int_f
-nh5pset_family_offset_c ( hid_t_f *prp_id , hsize_t_f *offset)
+h5pset_family_offset_c ( hid_t_f *prp_id , hsize_t_f *offset)
 /******/
 {
   int_f ret_value = 0;
@@ -3819,8 +3819,8 @@ nh5pset_family_offset_c ( hid_t_f *prp_id , hsize_t_f *offset)
 */
 
 int_f
-/*nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, haddr_t_f *memb_addr, int_f *flag) */
-nh5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag)
+/*h5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, haddr_t_f *memb_addr, int_f *flag) */
+h5pset_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag)
 /******/
 {
   int_f ret_value = -1;
@@ -3901,7 +3901,7 @@ DONE:
 */
 
 int_f
-nh5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag)
+h5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag)
 /******/
 {
   int_f ret_value = -1;
@@ -3945,7 +3945,7 @@ nh5pset_fapl_multi_sc ( hid_t_f *prp_id , int_f *flag)
 */
 
 int_f
-nh5pget_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag, int_f *maxlen_out)
+h5pget_fapl_multi_c ( hid_t_f *prp_id , int_f *memb_map, hid_t_f *memb_fapl, _fcd memb_name, int_f *len, int_f *lenmax, real_f *memb_addr, int_f *flag, int_f *maxlen_out)
 /******/
 {
   int_f ret_value = -1;
@@ -4024,7 +4024,7 @@ HD5packFstring(tmp, _fcdtocp(memb_name), (size_t)(c_lenmax*H5FD_MEM_NTYPES));
 */
 
 int_f
-nh5pset_szip_c ( hid_t_f *prp_id , int_f *options_mask, int_f *pixels_per_block)
+h5pset_szip_c ( hid_t_f *prp_id , int_f *options_mask, int_f *pixels_per_block)
 /******/
 {
   int_f ret_value = -1;
@@ -4065,7 +4065,7 @@ nh5pset_szip_c ( hid_t_f *prp_id , int_f *options_mask, int_f *pixels_per_block)
 */
 
 int_f
-nh5pall_filters_avail_c ( hid_t_f *prp_id , int_f *status)
+h5pall_filters_avail_c ( hid_t_f *prp_id , int_f *status)
 /******/
 {
   int_f ret_value = -1;
@@ -4112,7 +4112,7 @@ nh5pall_filters_avail_c ( hid_t_f *prp_id , int_f *status)
  * SOURCE
 */
 int_f
-nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name)
+h5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name)
 /******/
 {
      unsigned int c_flags;
@@ -4175,7 +4175,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values )
+h5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values )
 /******/
 {
      int_f ret_value = -1;
@@ -4223,7 +4223,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5premove_filter_c (hid_t_f *prp_id, int_f* filter)
+h5premove_filter_c (hid_t_f *prp_id, int_f* filter)
 /******/
 {
      int_f ret_value = -1;
@@ -4263,7 +4263,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pget_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_dense )
+h5pget_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_dense )
 /******/
 {
   int ret_value = -1;
@@ -4303,7 +4303,7 @@ nh5pget_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_den
  * SOURCE
 */
 int_f
-nh5pset_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags )
+h5pset_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags )
 /******/
 {
   int ret_value = -1;
@@ -4345,7 +4345,7 @@ nh5pset_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags )
  * SOURCE
 */
 int_f
-nh5pset_shared_mesg_nindexes_c(hid_t_f *plist_id, int_f *nindexes )
+h5pset_shared_mesg_nindexes_c(hid_t_f *plist_id, int_f *nindexes )
 /******/
 {
   int ret_value = -1;
@@ -4389,7 +4389,7 @@ nh5pset_shared_mesg_nindexes_c(hid_t_f *plist_id, int_f *nindexes )
  * SOURCE
 */
 int_f
-nh5pset_shared_mesg_index_c(hid_t_f *fcpl_id, int_f *index_num, int_f *mesg_type_flags, int_f *min_mesg_size)
+h5pset_shared_mesg_index_c(hid_t_f *fcpl_id, int_f *index_num, int_f *mesg_type_flags, int_f *min_mesg_size)
 /******/
 {
   int ret_value = -1;
@@ -4427,7 +4427,7 @@ nh5pset_shared_mesg_index_c(hid_t_f *fcpl_id, int_f *index_num, int_f *mesg_type
  * SOURCE
 */
 int_f
-nh5pget_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags)
+h5pget_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags)
 /******/
 {
   int ret_value = -1;
@@ -4470,7 +4470,7 @@ nh5pget_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags)
  * SOURCE
 */
 int_f
-nh5pset_libver_bounds_c(hid_t_f *fapl_id, int_f *low, int_f *high )
+h5pset_libver_bounds_c(hid_t_f *fapl_id, int_f *low, int_f *high )
 /******/
 {
   int ret_value = -1;
@@ -4507,7 +4507,7 @@ nh5pset_libver_bounds_c(hid_t_f *fapl_id, int_f *low, int_f *high )
  * SOURCE
 */
 int_f
-nh5pset_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags )
+h5pset_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags )
 /******/
 {
   int ret_value = -1;
@@ -4542,7 +4542,7 @@ nh5pset_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags )
  * SOURCE
 */
 int_f
-nh5pget_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dense )
+h5pget_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dense )
 /******/
 {
   int ret_value = -1;
@@ -4584,7 +4584,7 @@ nh5pget_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_den
 */
 
 int_f
-nh5pget_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
+h5pget_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
 /******/
 {
   int ret_value = -1;
@@ -4624,7 +4624,7 @@ nh5pget_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
 */
 
 int_f
-nh5pset_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
+h5pset_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
 /******/
 {
   int ret_value = -1;
@@ -4667,7 +4667,7 @@ nh5pset_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
 */
 
 int_f
-nh5pset_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
+h5pset_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
 /******/
 {
   int ret_value = -1;
@@ -4706,7 +4706,7 @@ nh5pset_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
  * SOURCE
 */
 int_f
-nh5pget_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags)
+h5pget_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags)
 /******/
 {
   int ret_value = -1;
@@ -4751,7 +4751,7 @@ nh5pget_link_creation_order_c(hid_t_f *gcpl_id, int_f *crt_order_flags)
  * SOURCE
 */
 int_f
-nh5pset_char_encoding_c(hid_t_f *plist_id, int_f *encoding)
+h5pset_char_encoding_c(hid_t_f *plist_id, int_f *encoding)
 /******/
 {
   int ret_value = -1;
@@ -4793,7 +4793,7 @@ nh5pset_char_encoding_c(hid_t_f *plist_id, int_f *encoding)
  * SOURCE
 */
 int_f
-nh5pget_char_encoding_c(hid_t_f *plist_id, int_f *encoding)
+h5pget_char_encoding_c(hid_t_f *plist_id, int_f *encoding)
 /******/
 {
   int ret_value = -1;
@@ -4836,7 +4836,7 @@ nh5pget_char_encoding_c(hid_t_f *plist_id, int_f *encoding)
  * SOURCE
 */
 int_f
-nh5pset_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
+h5pset_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
 /******/
 {
   int ret_value = -1;
@@ -4875,7 +4875,7 @@ nh5pset_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
  * SOURCE
 */
 int_f
-nh5pget_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
+h5pget_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
 /******/
 {
   int ret_value = -1;
@@ -4919,7 +4919,7 @@ nh5pget_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
  * SOURCE
 */
 int_f
-nh5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_len, size_t_f *size)
+h5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_len, size_t_f *size)
 /******/
 {
     char *c_expression = NULL;          /* Buffer to hold C string */
@@ -4981,7 +4981,7 @@ done:
  * SOURCE
 */
 int_f
-nh5pset_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_len)
+h5pset_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_len)
 /******/
 {
      char* c_expression = NULL; /* Buffer to hold C string */
@@ -5030,7 +5030,7 @@ done:
  * SOURCE
 */
 int_f
-nh5pget_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
+h5pget_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
 /******/
 {
      int_f ret_value = -1; /* Return value */
@@ -5072,7 +5072,7 @@ nh5pget_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
  * SOURCE
 */
 int_f
-nh5pget_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_name_len)
+h5pget_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_name_len)
 /******/
 {
      int_f ret_value = -1; /* Return value */
@@ -5117,7 +5117,7 @@ nh5pget_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_nam
  * SOURCE
 */
 int_f
-nh5pset_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
+h5pset_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
 /******/
 {
      int_f ret_value = -1; /* Return value */
@@ -5157,7 +5157,7 @@ nh5pset_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
  * SOURCE
 */
 int_f
-nh5pset_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_name_len)
+h5pset_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_name_len)
 /******/
 {
      int_f ret_value = -1; /* Return value */
@@ -5193,7 +5193,7 @@ nh5pset_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_nam
  * SOURCE
 */
 int_f
-nh5pset_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dense )
+h5pset_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dense )
 /******/
 {
   int ret_value = -1;
@@ -5232,7 +5232,7 @@ nh5pset_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_den
  * SOURCE
 */
 int_f
-nh5pset_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_t_f UNUSED *block_size, size_t_f UNUSED *cbuf_size)
+h5pset_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_t_f UNUSED *block_size, size_t_f UNUSED *cbuf_size)
 /******/
 {
   int ret_value = -1;
@@ -5275,7 +5275,7 @@ nh5pset_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_
  * SOURCE
 */
 int_f
-nh5pget_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_t_f UNUSED *block_size, size_t_f UNUSED *cbuf_size)
+h5pget_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_t_f UNUSED *block_size, size_t_f UNUSED *cbuf_size)
 /******/
 {
   int ret_value = -1;
@@ -5322,7 +5322,7 @@ nh5pget_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_
  * SOURCE
 */
 int_f
-nh5pset_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_dense )
+h5pset_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_dense )
 /******/
 {
   int ret_value = -1;
@@ -5357,7 +5357,7 @@ nh5pset_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_den
  * SOURCE
 */
 int_f
-nh5pset_nbit_c(hid_t_f *plist_id )
+h5pset_nbit_c(hid_t_f *plist_id )
 /******/
 {
   int ret_value = -1;
@@ -5390,7 +5390,7 @@ nh5pset_nbit_c(hid_t_f *plist_id )
  * SOURCE
 */
 int_f
-nh5pset_scaleoffset_c(hid_t_f *plist_id, int_f *scale_type, int_f *scale_factor )
+h5pset_scaleoffset_c(hid_t_f *plist_id, int_f *scale_type, int_f *scale_factor )
 /******/
 {
   int ret_value = -1;
@@ -5425,7 +5425,7 @@ nh5pset_scaleoffset_c(hid_t_f *plist_id, int_f *scale_type, int_f *scale_factor 
  * SOURCE
 */
 int_f
-nh5pset_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
+h5pset_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
 /******/
 {
   int ret_value = -1;
@@ -5464,7 +5464,7 @@ nh5pset_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
  * SOURCE
 */
 int_f
-nh5pget_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
+h5pget_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
 /******/
 {
   int ret_value = -1;
@@ -5502,7 +5502,7 @@ nh5pget_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
  * SOURCE
 */
 int_f
-nh5pget_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
+h5pget_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
 /******/
 {
   int ret_value = -1;
@@ -5537,7 +5537,7 @@ nh5pget_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5pset_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nbytes, real_f *rdcc_w0)
+h5pset_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nbytes, real_f *rdcc_w0)
 {
   int ret_value = -1;
 
@@ -5568,7 +5568,7 @@ nh5pset_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nb
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5pget_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nbytes, real_f *rdcc_w0)
+h5pget_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nbytes, real_f *rdcc_w0)
 {
   int ret_value = -1;
   size_t c_rdcc_nslots;
@@ -5680,7 +5680,7 @@ h5pget_file_image_c(hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len_ptr)
  * SOURCE
 */
 int_f
-nh5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
+h5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
 /******/
 {
      int ret_value = -1;
@@ -5719,7 +5719,7 @@ nh5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
  * SOURCE
 */
 int_f
-nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
+h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
 /******/
 {
      int ret_value = -1;
@@ -5758,7 +5758,7 @@ nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info)
  * SOURCE
 */
 int_f
-nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
+h5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
 /******/
 {
      int ret_value = -1;
@@ -5809,7 +5809,7 @@ nh5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
  * SOURCE
 */
 int_f
-nh5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
+h5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
 /******/
 {
      int ret_value = -1;
@@ -5862,7 +5862,7 @@ nh5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode)
  * SOURCE
 */
 int_f
-nh5pget_mpio_actual_io_mode_c(hid_t_f *dxpl_id, int_f *actual_io_mode)
+h5pget_mpio_actual_io_mode_c(hid_t_f *dxpl_id, int_f *actual_io_mode)
 /******/
 {
   int ret_value = -1;

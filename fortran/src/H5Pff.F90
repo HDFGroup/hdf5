@@ -11,7 +11,7 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   Copyright by the Board of Trustees of the University of Illinois.         *S
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -35,6 +35,8 @@
 
 MODULE H5P
 
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_null_ptr, c_funptr, c_null_funptr, &
+       c_char, c_int, C_NULL_CHAR, C_LOC
   USE H5GLOBAL
   
   INTERFACE h5pset_fapl_multi_f
@@ -96,58 +98,58 @@ MODULE H5P
   INTERFACE
      INTEGER FUNCTION h5pget_fill_value_c(prp_id, type_id, fillvalue) &
           BIND(C, NAME='h5pget_fill_value_c')
-       USE H5GLOBAL
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
-       INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
-       INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
-                                             ! of fillvalue datatype
-                                             ! (in memory)
-       TYPE(C_PTR), VALUE :: fillvalue       ! Fillvalue
+       IMPORT :: c_ptr
+       IMPORT :: HID_T
+       IMPLICIT NONE
+       INTEGER(HID_T), INTENT(IN) :: prp_id
+       INTEGER(HID_T), INTENT(IN) :: type_id
+       TYPE(C_PTR), VALUE :: fillvalue
      END FUNCTION h5pget_fill_value_c
   END INTERFACE
 
   INTERFACE
      INTEGER FUNCTION h5pset_fill_value_c(prp_id, type_id, fillvalue) &
           BIND(C, NAME='h5pset_fill_value_c')
-       USE H5GLOBAL
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
-       INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
-       INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
-                                             ! of fillvalue datatype
-                                             ! (in memory)
-       TYPE(C_PTR), VALUE :: fillvalue       ! Fillvalue
+       IMPORT :: c_ptr
+       IMPORT :: HID_T
+       IMPLICIT NONE
+       INTEGER(HID_T), INTENT(IN) :: prp_id
+       INTEGER(HID_T), INTENT(IN) :: type_id
+       TYPE(C_PTR), VALUE :: fillvalue
      END FUNCTION h5pset_fill_value_c
   END INTERFACE
 
   INTERFACE
      INTEGER FUNCTION h5pset_c(prp_id, name, name_len, value) &
           BIND(C, NAME='h5pset_c')
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr
-       USE H5GLOBAL
-       INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
-       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name  ! Name of property to modify
+       IMPORT :: c_char, c_ptr
+       IMPORT :: HID_T
+       IMPLICIT NONE
+       INTEGER(HID_T), INTENT(IN) :: prp_id
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        INTEGER :: name_len
-       TYPE(C_PTR), VALUE :: value ! Property value
+       TYPE(C_PTR), VALUE :: value
      END FUNCTION h5pset_c
   END INTERFACE
 
   INTERFACE
      INTEGER FUNCTION h5pget_c(prp_id, name, name_len, value) &
           BIND(C, NAME='h5pget_c')
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr
-       USE H5GLOBAL
-       INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
-       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name  ! Name of property to modify
+       IMPORT :: c_char, c_ptr
+       IMPORT :: HID_T
+       INTEGER(HID_T), INTENT(IN) :: prp_id 
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        INTEGER :: name_len
-       TYPE(C_PTR), VALUE :: value ! Property value
+       TYPE(C_PTR), VALUE :: value
      END FUNCTION h5pget_c
   END INTERFACE
 
   INTERFACE
      INTEGER FUNCTION h5pregister_c(class, name, name_len, size, value) &
           BIND(C, NAME='h5pregister_c')
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr
-       USE H5GLOBAL
+       IMPORT :: c_char, c_ptr
+       IMPORT :: HID_T, SIZE_T
+       IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: class
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        INTEGER, INTENT(IN)         :: name_len
@@ -159,8 +161,9 @@ MODULE H5P
   INTERFACE
      INTEGER FUNCTION h5pinsert_c(plist, name, name_len, size, value) &
           BIND(C, NAME='h5pinsert_c')
-       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr
-       USE H5GLOBAL
+       IMPORT :: c_char, c_ptr
+       IMPORT :: HID_T, SIZE_T
+       IMPLICIT NONE
        INTEGER(HID_T), INTENT(IN) :: plist
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        INTEGER, INTENT(IN)         :: name_len
@@ -221,15 +224,11 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: prp_id
     INTEGER       , INTENT(OUT) :: hdferr
 !*****
-!            INTEGER, EXTERNAL :: h5pcreate_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pcreate_c(class, prp_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PCREATE_C'::h5pcreate_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pcreate_c(class, prp_id) &
+            BIND(C,NAME='h5pcreate_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: class
          INTEGER(HID_T), INTENT(OUT) :: prp_id
        END FUNCTION h5pcreate_c
@@ -281,15 +280,11 @@ CONTAINS
 !*****
     INTEGER :: flag_c
 
-!            INTEGER, EXTERNAL :: h5pset_preserve_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_preserve_c(prp_id, flag_c)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_PRESERVE_C'::h5pset_preserve_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_preserve_c(prp_id, flag_c) &
+            BIND(C,NAME='h5pset_preserve_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER ::  flag_c
        END FUNCTION h5pset_preserve_c
@@ -339,15 +334,11 @@ CONTAINS
 !*****
     INTEGER :: flag_c
 
-!            INTEGER, EXTERNAL :: h5pget_preserve_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_preserve_c(prp_id, flag_c)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_PRESERVE_C'::h5pget_preserve_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_preserve_c(prp_id, flag_c) &
+            BIND(C,NAME='h5pget_preserve_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER ::  flag_c
        END FUNCTION h5pget_preserve_c
@@ -394,11 +385,10 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5pget_class_c(prp_id, classtype)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_CLASS_C'::h5pget_class_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_class_c(prp_id, classtype) &
+            BIND(C,NAME='h5pget_class_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN)  :: prp_id
          INTEGER(HID_T), INTENT(OUT) :: classtype 
        END FUNCTION h5pget_class_c
@@ -441,15 +431,11 @@ CONTAINS
                                               ! 0 on success and -1 on failure
 !*****
 
-!            INTEGER, EXTERNAL :: h5pcopy_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pcopy_c(prp_id, new_prp_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PCOPY_C'::h5pcopy_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pcopy_c(prp_id, new_prp_id) &
+            BIND(C,NAME='h5pcopy_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(HID_T), INTENT(OUT) :: new_prp_id
        END FUNCTION h5pcopy_c
@@ -489,16 +475,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pclose_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pclose_c(prp_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PCLOSE_C'::h5pclose_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pclose_c(prp_id) &
+            BIND(C,NAME='h5pclose_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
        END FUNCTION h5pclose_c
     END INTERFACE
@@ -543,16 +524,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_chunk_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_chunk_c(prp_id, ndims, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_CHUNK_C'::h5pset_chunk_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_chunk_c(prp_id, ndims, dims) &
+            BIND(C,NAME='h5pset_chunk_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: ndims
          INTEGER(HSIZE_T), DIMENSION(ndims), INTENT(IN) :: dims
@@ -601,15 +577,12 @@ CONTAINS
                                          !  number of chunk dimensions on success,
                                          !  -1 on failure
 !*****
-!            INTEGER, EXTERNAL :: h5pget_chunk_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+
     INTERFACE
-       INTEGER FUNCTION h5pget_chunk_c(prp_id, ndims, dims)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_CHUNK_C'::h5pget_chunk_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_chunk_c(prp_id, ndims, dims) &
+            BIND(C,NAME='h5pget_chunk_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER :: ndims
          INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: dims
@@ -657,11 +630,10 @@ CONTAINS
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION h5pset_deflate_c(prp_id, level)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_DEFLATE_C'::h5pset_deflate_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_deflate_c(prp_id, level) &
+            BIND(C,NAME='h5pset_deflate_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: level
        END FUNCTION h5pset_deflate_c
@@ -716,15 +688,11 @@ CONTAINS
                                                 ! 0 on success and -1 on failure
 !*****
 
-!            INTEGER, EXTERNAL :: h5pget_version_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_version_c(prp_id, boot, freelist, stab, shhdr)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_VERSION_C'::h5pget_version_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_version_c(prp_id, boot, freelist, stab, shhdr) &
+            BIND(C,NAME='h5pget_version_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, DIMENSION(:), INTENT(OUT) :: boot 
          INTEGER, DIMENSION(:), INTENT(OUT) :: freelist 
@@ -769,16 +737,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_userblock_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_userblock_c(prp_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_USERBLOCK_C'::h5pset_userblock_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_userblock_c(prp_id, size) &
+            BIND(C,NAME='h5pset_userblock_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(HSIZE_T), INTENT(IN) :: size
        END FUNCTION h5pset_userblock_c
@@ -822,15 +785,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr               ! Error code
                                                  ! 0 on success and -1 on failure
 !*****
-!            INTEGER, EXTERNAL :: h5pget_userblock_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_userblock_c(prp_id, block_size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_USERBLOCK_C'::h5pget_userblock_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_userblock_c(prp_id, block_size) &
+            BIND(C,NAME='h5pget_userblock_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(HSIZE_T), INTENT(OUT) :: block_size
        END FUNCTION h5pget_userblock_c
@@ -876,15 +835,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr             ! Error code
                                                ! 0 on success and -1 on failure
 !*****
-!            INTEGER, EXTERNAL :: h5pset_sizes_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_sizes_c(prp_id, sizeof_addr, sizeof_size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_SIZES_C'::h5pset_sizes_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_sizes_c(prp_id, sizeof_addr, sizeof_size) &
+            BIND(C,NAME='h5pset_sizes_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
          INTEGER(SIZE_T), INTENT(IN) :: sizeof_addr
          INTEGER(SIZE_T), INTENT(IN) :: sizeof_size
@@ -932,15 +887,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr              ! Error code
                                                 ! 0 on success and -1 on failure
 !*****
-!            INTEGER, EXTERNAL :: h5pget_sizes_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_sizes_c(prp_id, sizeof_addr, sizeof_size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_SIZES_C'::h5pget_sizes_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_sizes_c(prp_id, sizeof_addr, sizeof_size) &
+            BIND(C,NAME='h5pget_sizes_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
          INTEGER(SIZE_T), INTENT(OUT) :: sizeof_addr
          INTEGER(SIZE_T), INTENT(OUT) :: sizeof_size
@@ -987,16 +938,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_sym_k_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_sym_k_c(prp_id, ik, lk)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_SYM_K_C'::h5pset_sym_k_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_sym_k_c(prp_id, ik, lk) &
+            BIND(C,NAME='h5pset_sym_k_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
          INTEGER, INTENT(IN) :: ik
          INTEGER, INTENT(IN) :: lk
@@ -1042,16 +988,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pget_sym_k_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_sym_k_c(prp_id, ik, lk)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_SYM_K_C'::h5pget_sym_k_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_sym_k_c(prp_id, ik, lk) &
+            BIND(C,NAME='h5pget_sym_k_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
          INTEGER, INTENT(OUT) :: ik
          INTEGER, INTENT(OUT) :: lk
@@ -1095,16 +1036,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_istore_k_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_istore_k_c(prp_id, ik)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_ISTORE_K_C'::h5pset_istore_k_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_istore_k_c(prp_id, ik) &
+            BIND(C,NAME='h5pset_istore_k_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: ik
        END FUNCTION h5pset_istore_k_c
@@ -1147,16 +1083,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pget_istore_k_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_istore_k_c(prp_id, ik)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_ISTORE_K_C'::h5pget_istore_k_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_istore_k_c(prp_id, ik) &
+            BIND(C,NAME='h5pget_istore_k_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(OUT) :: ik
        END FUNCTION h5pget_istore_k_c
@@ -1200,15 +1131,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           ! 0 on success and -1 on failure
 !*****
-!            INTEGER, EXTERNAL :: h5pget_driver_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_driver_c(prp_id, driver)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_DRIVER_C'::h5pget_driver_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_driver_c(prp_id, driver) &
+            BIND(C,NAME='h5pget_driver_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(HID_T), INTENT(OUT) :: driver
        END FUNCTION h5pget_driver_c
@@ -1249,16 +1176,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-    
-!            INTEGER, EXTERNAL :: h5pset_fapl_stdio_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_fapl_stdio_c(prp_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_STDIO_C'::h5pset_fapl_stdio_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_fapl_stdio_c(prp_id) &
+            BIND(C,NAME='h5pset_fapl_stdio_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
        END FUNCTION h5pset_fapl_stdio_c
     END INTERFACE
@@ -1337,16 +1259,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_fapl_sec2_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_fapl_sec2_c(prp_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_SEC2_C'::h5pset_fapl_sec2_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_fapl_sec2_c(prp_id) &
+            BIND(C,NAME='h5pset_fapl_sec2_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
        END FUNCTION h5pset_fapl_sec2_c
     END INTERFACE
@@ -1427,16 +1344,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr            ! Error code
                                               ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_alignment_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_alignment_c(prp_id, threshold, alignment)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_ALIGNMENT_C'::h5pset_alignment_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_alignment_c(prp_id, threshold, alignment) &
+            BIND(C,NAME='h5pset_alignment_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(HSIZE_T), INTENT(IN) :: threshold
          INTEGER(HSIZE_T), INTENT(IN) :: alignment
@@ -1482,15 +1394,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr             ! Error code
                                              ! 0 on success and -1 on failure
 !*****
-!            INTEGER, EXTERNAL :: h5pget_alignment_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_alignment_c(prp_id, threshold, alignment)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_ALIGNMENT_C'::h5pget_alignment_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_alignment_c(prp_id, threshold, alignment) &
+            BIND(C,NAME='h5pget_alignment_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(HSIZE_T), INTENT(OUT) :: threshold
          INTEGER(HSIZE_T), INTENT(OUT) :: alignment
@@ -1538,17 +1446,12 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-    INTEGER :: backing_store_flag 
-
-!            INTEGER, EXTERNAL :: h5pset_fapl_core_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+    INTEGER :: backing_store_flag
     INTERFACE
-       INTEGER FUNCTION h5pset_fapl_core_c(prp_id, increment, backing_store_flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_CORE_C'::h5pset_fapl_core_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_fapl_core_c(prp_id, increment, backing_store_flag) &
+            BIND(C,NAME='h5pset_fapl_core_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
          INTEGER(SIZE_T), INTENT(IN) :: increment 
          INTEGER :: backing_store_flag 
@@ -1600,11 +1503,10 @@ CONTAINS
     INTEGER :: backing_store_flag 
 
     INTERFACE
-       INTEGER FUNCTION h5pget_fapl_core_c(prp_id, increment, backing_store_flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FAPL_CORE_C'::h5pget_fapl_core_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_fapl_core_c(prp_id, increment, backing_store_flag) &
+            BIND(C,NAME='h5pget_fapl_core_c')
+         IMPORT :: HID_T,SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
          INTEGER(SIZE_T), INTENT(OUT) :: increment 
          INTEGER :: backing_store_flag 
@@ -1654,16 +1556,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr            ! Error code
                                               ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_fapl_family_f
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_fapl_family_c(prp_id, memb_size, memb_plist)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_FAMILY_C'::h5pset_fapl_family_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_fapl_family_c(prp_id, memb_size, memb_plist) &
+            BIND(C,NAME='h5pset_fapl_family_c')
+         IMPORT :: HID_T,HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(HSIZE_T), INTENT(IN) :: memb_size
          INTEGER(HID_T), INTENT(IN) :: memb_plist
@@ -1710,16 +1607,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr             ! Error code
                                                ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pget_fapl_family_f
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_fapl_family_c(prp_id, memb_size, memb_plist)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FAPL_FAMILY_C'::h5pget_fapl_family_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_fapl_family_c(prp_id, memb_size, memb_plist) &
+            BIND(C,NAME='h5pget_fapl_family_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(HSIZE_T), INTENT(OUT) :: memb_size
          INTEGER(HID_T), INTENT(OUT) :: memb_plist
@@ -1775,16 +1667,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr             ! Error code
                                                !  0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_cache_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_cache_c(prp_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_CACHE_C'::h5pset_cache_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_cache_c(prp_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0) &
+            BIND(C,NAME='h5pset_cache_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: mdc_nelmts 
          INTEGER(SIZE_T), INTENT(IN) :: rdcc_nelmts 
@@ -1844,15 +1731,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr               ! Error code
                                                  ! 0 on success and -1 on failure
 !*****
-!            INTEGER, EXTERNAL :: h5pget_cache_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_cache_c(prp_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_CACHE_C'::h5pget_cache_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_cache_c(prp_id,mdc_nelmts,rdcc_nelmts,rdcc_nbytes,rdcc_w0) &
+            BIND(C,NAME='h5pget_cache_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(OUT) :: mdc_nelmts 
          INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nelmts 
@@ -1911,22 +1794,16 @@ CONTAINS
                                              ! 0 on success and -1 on failure
 !*****
     INTEGER :: meta_len, raw_len
-
-!            INTEGER, EXTERNAL :: h5pset_fapl_split_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_fapl_split_c(prp_id,meta_len,meta_ext,meta_plist,raw_len,raw_ext,raw_plist)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_SPLIT_C'::h5pset_fapl_split_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: meta_ext
-         !DEC$ATTRIBUTES reference :: raw_ext
+       INTEGER FUNCTION h5pset_fapl_split_c(prp_id,meta_len,meta_ext,meta_plist,raw_len,raw_ext,raw_plist) &
+            BIND(C,NAME='h5pset_fapl_split_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
-         CHARACTER(LEN=*), INTENT(IN) :: meta_ext 
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: meta_ext 
          INTEGER(HID_T), INTENT(IN) :: meta_plist
-         CHARACTER(LEN=*), INTENT(IN) :: raw_ext
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: raw_ext
          INTEGER(HID_T), INTENT(IN) :: raw_plist 
          INTEGER :: meta_len, raw_len
        END FUNCTION h5pset_fapl_split_c
@@ -2025,16 +1902,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_gc_references_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_gc_references_c(prp_id, gc_reference)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_GC_REFERENCES_C'::h5pset_gc_references_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_gc_references_c(prp_id, gc_reference) &
+            BIND(C,NAME='h5pset_gc_references_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: gc_reference
        END FUNCTION h5pset_gc_references_c
@@ -2079,16 +1951,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pget_gc_references_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_gc_references_c(prp_id, gc_reference)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_GC_REFERENCES_C'::h5pget_gc_references_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_gc_references_c(prp_id, gc_reference) &
+            BIND(C,NAME='h5pget_gc_references_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(OUT) :: gc_reference
        END FUNCTION h5pget_gc_references_c
@@ -2140,16 +2007,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_layout_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_layout_c(prp_id, layout)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_LAYOUT_C'::h5pset_layout_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_layout_c(prp_id, layout) &
+            BIND(C,NAME='h5pset_layout_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: layout
        END FUNCTION h5pset_layout_c
@@ -2200,16 +2062,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pget_layout_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_layout_c(prp_id, layout)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_LAYOUT_C'::h5pget_layout_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_layout_c(prp_id, layout) &
+            BIND(C,NAME='h5pget_layout_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(OUT) :: layout
        END FUNCTION h5pget_layout_c
@@ -2256,16 +2113,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr                 ! Error code
                                                  ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_filter_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_filter_c(prp_id, filter, flags, cd_nelmts, cd_values)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FILTER_C'::h5pset_filter_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_filter_c(prp_id, filter, flags, cd_nelmts, cd_values) &
+            BIND(C,NAME='h5pset_filter_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
          INTEGER, INTENT(IN) :: filter 
          INTEGER, INTENT(IN) :: flags 
@@ -2312,16 +2164,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pget_nfilters_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_nfilters_c(prp_id, nfilters)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_NFILTERS_C'::h5pget_nfilters_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_nfilters_c(prp_id, nfilters) &
+            BIND(C,NAME='h5pget_nfilters_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(OUT) :: nfilters
        END FUNCTION h5pget_nfilters_c
@@ -2390,19 +2237,18 @@ CONTAINS
 !
     INTERFACE
        INTEGER FUNCTION h5pget_filter_c(prp_id, filter_number, flags, cd_nelmts,  &
-            cd_values, namelen, name, filter_id )
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FILTER_C'::h5pget_filter_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+            cd_values, namelen, name, filter_id ) &
+            BIND(C,NAME='h5pget_filter_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: filter_number 
          INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values
          INTEGER, INTENT(OUT) :: flags 
          INTEGER(SIZE_T), INTENT(INOUT) :: cd_nelmts
          INTEGER(SIZE_T), INTENT(IN) :: namelen
-         CHARACTER(LEN=*), INTENT(OUT) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
          INTEGER, INTENT(OUT) :: filter_id
        END FUNCTION h5pget_filter_c
     END INTERFACE
@@ -2455,18 +2301,16 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           ! 0 on success and -1 on failure
 !*****
-
     INTEGER :: namelen
 
     INTERFACE
-       INTEGER FUNCTION h5pset_external_c(prp_id, name,namelen, offset, bytes)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_EXTERNAL_C'::h5pset_external_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5pset_external_c(prp_id, name,namelen, offset, bytes) &
+            BIND(C,NAME='h5pset_external_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, OFF_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER :: namelen
          INTEGER(OFF_T), INTENT(IN) :: offset
          INTEGER(HSIZE_T), INTENT(IN) :: bytes
@@ -2513,15 +2357,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-!            INTEGER, EXTERNAL :: h5pget_external_count_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_external_count_c(prp_id, count)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_EXTERNAL_COUNT_C'::h5pget_external_count_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_external_count_c(prp_id, count) &
+            BIND(C,NAME='h5pget_external_count_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
          INTEGER, INTENT(OUT) :: count
        END FUNCTION h5pget_external_count_c
@@ -2580,21 +2420,16 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
                                              ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pget_external_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_external_c(prp_id, idx, name_size, name, offset, bytes)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_EXTERNAL_C'::h5pget_external_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5pget_external_c(prp_id, idx, name_size, name, offset, bytes) &
+            BIND(C,NAME='h5pget_external_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T, HSIZE_T, OFF_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: idx 
          INTEGER(SIZE_T), INTENT(IN) :: name_size
-         CHARACTER(LEN=*), INTENT(OUT) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
          INTEGER(OFF_T), INTENT(OUT) :: offset
          INTEGER(HSIZE_T), INTENT(OUT) :: bytes
        END FUNCTION h5pget_external_c
@@ -2643,16 +2478,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
                                     ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_btree_ratios_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION  h5pset_btree_ratios_c(prp_id, left, middle, right)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_BTREE_RATIOS_C'::h5pset_btree_ratios_c
-         !DEC$ENDIF
+       INTEGER FUNCTION  h5pset_btree_ratios_c(prp_id, left, middle, right) &
+            BIND(C,NAME='h5pset_btree_ratios_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          REAL, INTENT(IN) :: left
          REAL, INTENT(IN) :: middle
@@ -2703,17 +2533,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
                                     ! 0 on success and -1 on failure
 !*****
-
-
-!            INTEGER, EXTERNAL :: h5pget_btree_ratios_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION  h5pget_btree_ratios_c(prp_id, left, middle, right)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_BTREE_RATIOS_C'::h5pget_btree_ratios_c
-         !DEC$ENDIF
+       INTEGER FUNCTION  h5pget_btree_ratios_c(prp_id, left, middle, right) &
+            BIND(C,NAME='h5pget_btree_ratios_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          REAL, INTENT(OUT) :: left
          REAL, INTENT(OUT) :: middle
@@ -2764,16 +2588,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pget_fclose_degree_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_fclose_degree_c(fapl_id, degree)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FCLOSE_DEGREE_C'::h5pget_fclose_degree_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_fclose_degree_c(fapl_id, degree) &
+            BIND(C,NAME='h5pget_fclose_degree_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: fapl_id
          INTEGER, INTENT(OUT) :: degree
        END FUNCTION h5pget_fclose_degree_c
@@ -2818,13 +2637,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           ! 0 on success and -1 on failure
 !*****
-
     INTERFACE
-       INTEGER FUNCTION h5pset_fclose_degree_c(fapl_id, degree)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FCLOSE_DEGREE_C'::h5pset_fclose_degree_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_fclose_degree_c(fapl_id, degree) &
+            BIND(C,NAME='h5pset_fclose_degree_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: fapl_id
          INTEGER, INTENT(IN) :: degree
        END FUNCTION h5pset_fclose_degree_c
@@ -2868,11 +2685,10 @@ CONTAINS
     INTEGER                    :: c_flag
     
     INTERFACE
-       INTEGER FUNCTION h5pequal_c(plist1_id, plist2_id, c_flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PEQUAL_C'::h5pequal_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pequal_c(plist1_id, plist2_id, c_flag) &
+            BIND(C,NAME='h5pequal_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist1_id
          INTEGER(HID_T), INTENT(IN) :: plist2_id
          INTEGER, INTENT(OUT) :: c_flag
@@ -2916,11 +2732,10 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5pset_buffer_c(plist_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_BUFFER_C'::h5pset_buffer_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_buffer_c(plist_id, size) &
+            BIND(C,NAME='h5pset_buffer_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER(HSIZE_T), INTENT(IN) :: size
        END FUNCTION h5pset_buffer_c
@@ -2962,11 +2777,10 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5pget_buffer_c(plist_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_BUFFER_C'::h5pget_buffer_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_buffer_c(plist_id, size) &
+            BIND(C,NAME='h5pget_buffer_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER(HSIZE_T), INTENT(OUT) :: size
        END FUNCTION h5pget_buffer_c
@@ -3014,11 +2828,10 @@ CONTAINS
                                             ! 0 on success and -1 on failure
 !*****
     INTERFACE
-       INTEGER FUNCTION h5pfill_value_defined_c(plist_id, flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PFILL_VALUE_DEFINED_C'::h5pfill_value_defined_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pfill_value_defined_c(plist_id, flag) &
+            BIND(C,NAME='h5pfill_value_defined_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER, INTENT(OUT) :: flag
        END FUNCTION h5pfill_value_defined_c
@@ -3068,11 +2881,10 @@ CONTAINS
 !*****  
     
     INTERFACE
-       INTEGER FUNCTION h5pset_alloc_time_c(plist_id, flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_ALLOC_TIME_C'::h5pset_alloc_time_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_alloc_time_c(plist_id, flag) &
+            BIND(C,NAME='h5pset_alloc_time_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER, INTENT(IN) :: flag
        END FUNCTION h5pset_alloc_time_c
@@ -3122,11 +2934,10 @@ CONTAINS
 !*****
 
     INTERFACE
-       INTEGER FUNCTION h5pget_alloc_time_c(plist_id, flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_ALLOC_TIME_C'::h5pget_alloc_time_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_alloc_time_c(plist_id, flag) &
+            BIND(C,NAME='h5pget_alloc_time_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER, INTENT(OUT) :: flag
        END FUNCTION h5pget_alloc_time_c
@@ -3172,11 +2983,10 @@ CONTAINS
 !*****  
 
     INTERFACE
-       INTEGER FUNCTION h5pset_fill_time_c(plist_id, flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FILL_TIME_C'::h5pset_fill_time_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_fill_time_c(plist_id, flag) &
+            BIND(C,NAME='h5pset_fill_time_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER, INTENT(IN) :: flag
        END FUNCTION h5pset_fill_time_c
@@ -3223,11 +3033,10 @@ CONTAINS
 !*****   
   
     INTERFACE
-       INTEGER FUNCTION h5pget_fill_time_c(plist_id, flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FILL_TIME_C'::h5pget_fill_time_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_fill_time_c(plist_id, flag) &
+            BIND(C,NAME='h5pget_fill_time_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER, INTENT(OUT) :: flag
        END FUNCTION h5pget_fill_time_c
@@ -3266,11 +3075,10 @@ CONTAINS
                                             ! 0 on success and -1 on failure
 !*****
     INTERFACE
-       INTEGER FUNCTION h5pset_meta_block_size_c(plist_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_META_BLOCK_SIZE_C'::h5pset_meta_block_size_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_meta_block_size_c(plist_id, size) &
+            BIND(C,NAME='h5pset_meta_block_size_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER(HSIZE_T), INTENT(IN) :: size
        END FUNCTION h5pset_meta_block_size_c
@@ -3309,11 +3117,10 @@ CONTAINS
                                             ! 0 on success and -1 on failure
 !*****
     INTERFACE
-       INTEGER FUNCTION h5pget_meta_block_size_c(plist_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_META_BLOCK_SIZE_C'::h5pget_meta_block_size_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_meta_block_size_c(plist_id, size) &
+            BIND(C,NAME='h5pget_meta_block_size_c')
+         IMPORT :: HID_T, HSIZE_T 
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER(HSIZE_T), INTENT(OUT) :: size
        END FUNCTION h5pget_meta_block_size_c
@@ -3351,13 +3158,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                            ! 0 on success and -1 on failure
 !*****
-
     INTERFACE
-       INTEGER FUNCTION h5pset_sieve_buf_size_c(plist_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_SIEVE_BUF_SIZE_C'::h5pset_sieve_buf_size_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_sieve_buf_size_c(plist_id, size) &
+            BIND(C,NAME='h5pset_sieve_buf_size_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER(SIZE_T), INTENT(IN) :: size
        END FUNCTION h5pset_sieve_buf_size_c
@@ -3395,13 +3200,11 @@ CONTAINS
     INTEGER, INTENT(OUT)       :: hdferr   ! Error code
                                            ! 0 on success and -1 on failure
 !*****
-
     INTERFACE
-       INTEGER FUNCTION h5pget_sieve_buf_size_c(plist_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_SIEVE_BUF_SIZE_C'::h5pget_sieve_buf_size_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_sieve_buf_size_c(plist_id, size) &
+            BIND(C,NAME='h5pget_sieve_buf_size_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER(SIZE_T), INTENT(OUT) :: size
        END FUNCTION h5pget_sieve_buf_size_c
@@ -3439,13 +3242,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                            ! 0 on success and -1 on failure
 !*****
-
     INTERFACE
-       INTEGER FUNCTION h5pset_small_data_block_size_c(plist_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_SMALL_DATA_BLOCK_SIZE_C'::h5pset_small_data_block_size_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_small_data_block_size_c(plist_id, size) &
+            BIND(C,NAME='h5pset_small_data_block_size_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER(HSIZE_T), INTENT(IN) :: size
        END FUNCTION h5pset_small_data_block_size_c
@@ -3483,13 +3284,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
                                             ! 0 on success and -1 on failure
 !*****
-
     INTERFACE
-       INTEGER FUNCTION h5pget_small_data_block_size_c(plist_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_SMALL_DATA_BLOCK_SIZE_C'::h5pget_small_data_block_size_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_small_data_block_size_c(plist_id, size) &
+            BIND(C,NAME='h5pget_small_data_block_size_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER(HSIZE_T), INTENT(OUT) :: size
        END FUNCTION h5pget_small_data_block_size_c
@@ -3527,13 +3326,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                            ! 0 on success and -1 on failure
 !*****
-
     INTERFACE
-       INTEGER FUNCTION h5pset_hyper_vector_size_c(plist_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_HYPER_VECTOR_SIZE_C'::h5pset_hyper_vector_size_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_hyper_vector_size_c(plist_id, size) &
+            BIND(C,NAME='h5pset_hyper_vector_size_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER(SIZE_T), INTENT(IN) :: size
        END FUNCTION h5pset_hyper_vector_size_c
@@ -3571,13 +3368,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                            ! 0 on success and -1 on failure
 !*****
-
     INTERFACE
-       INTEGER FUNCTION h5pget_hyper_vector_size_c(plist_id, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_HYPER_VECTOR_SIZE_C'::h5pget_hyper_vector_size_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_hyper_vector_size_c(plist_id, size) &
+            BIND(C,NAME='h5pget_hyper_vector_size_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER(SIZE_T), INTENT(OUT) :: size
        END FUNCTION h5pget_hyper_vector_size_c
@@ -3620,14 +3415,13 @@ CONTAINS
     INTEGER :: name_len
     
     INTERFACE
-       INTEGER FUNCTION h5pexist_c(prp_id, name, name_len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PEXIST_C'::h5pexist_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5pexist_c(prp_id, name, name_len) &
+            BIND(C,NAME='h5pexist_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER, INTENT(IN)         :: name_len
        END FUNCTION h5pexist_c
     END INTERFACE
@@ -3678,14 +3472,13 @@ CONTAINS
     INTEGER :: name_len
     
     INTERFACE
-       INTEGER FUNCTION h5pget_size_c(prp_id, name, name_len, size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_SIZE_C'::h5pget_size_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5pget_size_c(prp_id, name, name_len, size) &
+            BIND(C,NAME='h5pget_size_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER, INTENT(IN)         :: name_len
          INTEGER(SIZE_T), INTENT(OUT) :: size
        END FUNCTION h5pget_size_c
@@ -3723,13 +3516,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
                                             ! 0 on success and -1 on failure
 !*****
-
     INTERFACE
-       INTEGER FUNCTION h5pget_nprops_c(prp_id, nprops)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_NPROPS_C'::h5pget_nprops_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_nprops_c(prp_id, nprops) &
+            BIND(C,NAME='h5pget_nprops_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(SIZE_T), INTENT(OUT) :: nprops
        END FUNCTION h5pget_nprops_c
@@ -3777,14 +3568,13 @@ CONTAINS
     INTEGER :: name_len
     
     INTERFACE
-       INTEGER FUNCTION h5pget_class_name_c(prp_id, name, name_len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_CLASS_NAME_C'::h5pget_class_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5pget_class_name_c(prp_id, name, name_len) &
+            BIND(C,NAME='h5pget_class_name_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
-         CHARACTER(LEN=*), INTENT(INOUT) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(INOUT) :: name
          INTEGER, INTENT(IN)         :: name_len
        END FUNCTION h5pget_class_name_c
     END INTERFACE
@@ -3827,13 +3617,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
                                     ! 0 on success and -1 on failure
 !*****
-
     INTERFACE
-       INTEGER FUNCTION h5pget_class_parent_c(prp_id, parent_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_CLASS_PARENT_C'::h5pget_class_parent_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_class_parent_c(prp_id, parent_id) &
+            BIND(C,NAME='h5pget_class_parent_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(HID_T), INTENT(OUT) :: parent_id
        END FUNCTION h5pget_class_parent_c
@@ -3873,11 +3661,10 @@ CONTAINS
                                     ! 0 on success and -1 on failure
 !*****
     INTERFACE
-       INTEGER FUNCTION h5pisa_class_c(plist, pclass)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PISA_CLASS_C'::h5pisa_class_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pisa_class_c(plist, pclass) &
+            BIND(C,NAME='h5pisa_class_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist
          INTEGER(HID_T), INTENT(IN) :: pclass
        END FUNCTION h5pisa_class_c
@@ -3925,15 +3712,14 @@ CONTAINS
     INTEGER :: name_len
     
     INTERFACE
-       INTEGER FUNCTION h5pcopy_prop_c(dst_id, src_id, name, name_len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PCOPY_PROP_C'::h5pcopy_prop_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5pcopy_prop_c(dst_id, src_id, name, name_len) &
+            BIND(C,NAME='h5pcopy_prop_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dst_id
          INTEGER(HID_T), INTENT(IN) :: src_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER, INTENT(IN)         :: name_len
        END FUNCTION h5pcopy_prop_c
     END INTERFACE
@@ -3974,14 +3760,13 @@ CONTAINS
     INTEGER :: name_len
     
     INTERFACE
-       INTEGER FUNCTION h5premove_c(plid, name, name_len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PREMOVE_C'::h5premove_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5premove_c(plid, name, name_len) &
+            BIND(C,NAME='h5premove_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plid 
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER, INTENT(IN)         :: name_len
        END FUNCTION h5premove_c
     END INTERFACE
@@ -4021,14 +3806,13 @@ CONTAINS
     INTEGER :: name_len
 
     INTERFACE
-       INTEGER FUNCTION h5punregister_c(class, name, name_len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PUNREGISTER_C'::h5punregister_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+       INTEGER FUNCTION h5punregister_c(class, name, name_len) &
+            BIND(C,NAME='h5punregister_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: class
-         CHARACTER(LEN=*), INTENT(IN) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER, INTENT(IN)         :: name_len
        END FUNCTION h5punregister_c
     END INTERFACE
@@ -4064,11 +3848,10 @@ CONTAINS
                                         ! 0 on success and -1 on failure
 !*****
     INTERFACE
-       INTEGER FUNCTION h5pclose_class_c(class)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PCLOSE_CLASS_C'::h5pclose_class_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pclose_class_c(class) &
+            BIND(C,NAME='h5pclose_class_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: class
        END FUNCTION h5pclose_class_c
     END INTERFACE
@@ -4100,16 +3883,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_shuffle_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_shuffle_c(prp_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_SHUFFLE_C'::h5pset_shuffle_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_shuffle_c(prp_id) &
+            BIND(C,NAME='h5pset_shuffle_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
        END FUNCTION h5pset_shuffle_c
     END INTERFACE
@@ -4147,16 +3925,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pset_edc_check_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_edc_check_c(prp_id, flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_EDC_CHECK_C'::h5pset_edc_check_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_edc_check_c(prp_id, flag) &
+            BIND(C,NAME='h5pset_edc_check_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: flag 
        END FUNCTION h5pset_edc_check_c
@@ -4197,16 +3970,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
 !*****
-
-!            INTEGER, EXTERNAL :: h5pget_edc_check_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_edc_check_c(prp_id, flag)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_EDC_CHECK_C'::h5pget_edc_check_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_edc_check_c(prp_id, flag) &
+            BIND(C,NAME='h5pget_edc_check_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(OUT) :: flag
        END FUNCTION h5pget_edc_check_c
@@ -4241,17 +4009,12 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
-!***** 
-
-!            INTEGER, EXTERNAL :: h5pset_fletcher32_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_fletcher32_c(prp_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FLETCHER32_C'::h5pset_fletcher32_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_fletcher32_c(prp_id) &
+            BIND(C,NAME='h5pset_fletcher32_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
        END FUNCTION h5pset_fletcher32_c
     END INTERFACE
@@ -4287,16 +4050,11 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                            ! 0 on success and -1 on failure
 !***** 
-
-!            INTEGER, EXTERNAL :: h5pset_family_offset_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_family_offset_c(prp_id, offset)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAMILY_OFFSET_C'::h5pset_family_offset_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_family_offset_c(prp_id, offset) &
+            BIND(C,NAME='h5pset_family_offset_c')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER(HSIZE_T), INTENT(IN) :: offset 
        END FUNCTION h5pset_family_offset_c
@@ -4346,17 +4104,15 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5pset_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, &
-            maxlen, memb_addr, flag)
-         USE H5GLOBAL
+            maxlen, memb_addr, flag) &
+            BIND(C,NAME='h5pset_fapl_multi_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
          IMPLICIT NONE
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_MULTI_C'::h5pset_fapl_multi_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: memb_name
          INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
          INTEGER, DIMENSION(*), INTENT(IN) :: memb_map
          INTEGER(HID_T), DIMENSION(*), INTENT(IN) :: memb_fapl
-         CHARACTER(LEN=*), DIMENSION(*), INTENT(IN) :: memb_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: memb_name
          REAL, DIMENSION(*), INTENT(IN) :: memb_addr
          INTEGER, DIMENSION(*) :: lenm
          INTEGER :: maxlen
@@ -4402,16 +4158,11 @@ CONTAINS
 !***** 
     INTEGER :: flag
 
-!            INTEGER, EXTERNAL :: h5pset_fapl_multi_sc
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_fapl_multi_sc(prp_id,flag) 
-         USE H5GLOBAL
+       INTEGER FUNCTION h5pset_fapl_multi_sc(prp_id,flag) &
+            BIND(C,NAME='h5pset_fapl_multi_sc')
+         IMPORT :: HID_T
          IMPLICIT NONE
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_MULTI_SC'::h5pset_fapl_multi_sc
-         !DEC$ENDIF
          INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
          INTEGER, INTENT(IN) :: flag
        END FUNCTION h5pset_fapl_multi_sc
@@ -4469,17 +4220,15 @@ CONTAINS
 !
     INTERFACE
        INTEGER FUNCTION h5pget_fapl_multi_c(prp_id, memb_map, memb_fapl, memb_name, lenm, &
-            maxlen, memb_addr, flag, c_maxlen_out)
-         USE H5GLOBAL
+            maxlen, memb_addr, flag, c_maxlen_out) &
+            BIND(C,NAME='h5pget_fapl_multi_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
          IMPLICIT NONE
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FAPL_MULTI_C'::h5pget_fapl_multi_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: memb_name
          INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
          INTEGER, DIMENSION(*), INTENT(OUT) :: memb_map
          INTEGER(HID_T), DIMENSION(*), INTENT(OUT) :: memb_fapl
-         CHARACTER(LEN=*), DIMENSION(*), INTENT(OUT) :: memb_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: memb_name
          REAL, DIMENSION(*), INTENT(OUT) :: memb_addr
          INTEGER, DIMENSION(*) :: lenm
          INTEGER :: maxlen
@@ -4536,17 +4285,12 @@ CONTAINS
                                             ! in each data block
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
-!***** 
-
-!  INTEGER, EXTERNAL :: h5pset_szip_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_szip_c(prp_id, options_mask, pixels_per_block) 
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_SZIP_C'::h5pset_szip_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_szip_c(prp_id, options_mask, pixels_per_block) &
+            BIND(C,NAME='h5pset_szip_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
          INTEGER, INTENT(IN) :: options_mask
          INTEGER, INTENT(IN) :: pixels_per_block
@@ -4591,16 +4335,12 @@ CONTAINS
 !***** 
     INTEGER :: status
 
-!            INTEGER, EXTERNAL :: h5pall_filters_avail_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pall_filters_avail_c(prp_id, status) 
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PALL_FILTERS_AVAIL_C'::h5pall_filters_avail_c
-         !DEC$ENDIF
-         INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
+       INTEGER FUNCTION h5pall_filters_avail_c(prp_id, status) &
+            BIND(C,NAME='h5pall_filters_avail_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(OUT) :: status
        END FUNCTION h5pall_filters_avail_c
     END INTERFACE
@@ -4651,27 +4391,21 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(OUT) :: name  ! Name of the filter
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                            ! 0 on success and -1 on failure
-!***** 
-
-
-!            INTEGER, EXTERNAL :: h5pget_filter_by_id_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
        INTEGER FUNCTION h5pget_filter_by_id_c(prp_id, filter_id, flags, cd_nelmts,  &
-            cd_values, namelen, name)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FILTER_BY_ID_C'::h5pget_filter_by_id_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: name
+            cd_values, namelen, name) &
+            BIND(C,NAME='h5pget_filter_by_id_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
          INTEGER, INTENT(IN) :: filter_id 
          INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values
          INTEGER, INTENT(OUT) :: flags 
          INTEGER(SIZE_T), INTENT(INOUT) :: cd_nelmts
          INTEGER(SIZE_T), INTENT(IN) :: namelen
-         CHARACTER(LEN=*), INTENT(OUT) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
        END FUNCTION h5pget_filter_by_id_c
     END INTERFACE
     
@@ -4715,17 +4449,12 @@ CONTAINS
     INTEGER, DIMENSION(*), INTENT(IN) :: cd_values ! Auxiliary data for the filter
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
-!***** 
-
-!            INTEGER, EXTERNAL :: h5pmodify_filter_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pmodify_filter_c(prp_id, filter, flags, cd_nelmts, cd_values)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PMODIFY_FILTER_C'::h5pmodify_filter_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pmodify_filter_c(prp_id, filter, flags, cd_nelmts, cd_values) &
+            BIND(C,NAME='h5pmodify_filter_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
          INTEGER, INTENT(IN) :: filter 
          INTEGER, INTENT(IN) :: flags 
@@ -4766,17 +4495,12 @@ CONTAINS
     INTEGER, INTENT(IN) :: filter        ! Filter to be removed
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                          ! 0 on success and -1 on failure
-!***** 
-
-!            INTEGER, EXTERNAL :: h5premove_filter_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5premove_filter_c(prp_id, filter)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PREMOVE_FILTER_C'::h5premove_filter_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5premove_filter_c(prp_id, filter) &
+            BIND(C,NAME='h5premove_filter_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id 
          INTEGER, INTENT(IN) :: filter 
        END FUNCTION h5premove_filter_c
@@ -4819,16 +4543,12 @@ CONTAINS
                                           ! (Default: 6)
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pget_attr_phase_change_c(ocpl_id, max_compact, min_dense)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_ATTR_PHASE_CHANGE_C'::h5pget_attr_phase_change_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_attr_phase_change_c(ocpl_id, max_compact, min_dense) &
+            BIND(C,NAME='h5pget_attr_phase_change_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: ocpl_id
          INTEGER, INTENT(OUT) :: max_compact
          INTEGER, INTENT(OUT) :: min_dense
@@ -4867,16 +4587,12 @@ CONTAINS
     INTEGER, INTENT(IN) :: crt_order_flags  ! Flags specifying whether to track and index attribute creation order
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
                                             ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION H5Pset_attr_creation_order_c(ocpl_id, crt_order_flags)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_ATTR_CREATION_ORDER_C'::h5pset_attr_creation_order_c
-         !DEC$ENDIF
+       INTEGER FUNCTION H5Pset_attr_creation_order_c(ocpl_id, crt_order_flags) &
+            BIND(C,NAME='h5pset_attr_creation_order_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: ocpl_id
          INTEGER, INTENT(IN) :: crt_order_flags
 
@@ -4920,12 +4636,10 @@ CONTAINS
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION h5pset_shared_mesg_nindexes_c(plist_id, nindexes)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_SHARED_MESG_NINDEXES_C'::h5pset_shared_mesg_nindexes_c
-         !DEC$ENDIF
-         
+       INTEGER FUNCTION h5pset_shared_mesg_nindexes_c(plist_id, nindexes) &
+            BIND(C,NAME='h5pset_shared_mesg_nindexes_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER, INTENT(IN) :: nindexes
 
@@ -4974,18 +4688,14 @@ CONTAINS
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION h5pset_shared_mesg_index_c(fcpl_id, index_num, mesg_type_flags, min_mesg_size)
-
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_SHARED_MESG_INDEX_C'::h5pset_shared_mesg_index_c
-         !DEC$ENDIF
-         
+       INTEGER FUNCTION h5pset_shared_mesg_index_c(fcpl_id, index_num, mesg_type_flags, min_mesg_size) &
+            BIND(C,NAME='h5pset_shared_mesg_index_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: fcpl_id 
          INTEGER, INTENT(IN) :: index_num
          INTEGER, INTENT(IN) :: mesg_type_flags
          INTEGER, INTENT(IN) :: min_mesg_size
-
        END FUNCTION H5pset_shared_mesg_index_c
     END INTERFACE
 
@@ -5027,15 +4737,12 @@ CONTAINS
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION h5pget_attr_creation_order_c(ocpl_id, crt_order_flags)
-
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_ATTR_CREATION_ORDER_C'::h5pget_attr_creation_order_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_attr_creation_order_c(ocpl_id, crt_order_flags) &
+            BIND(C,NAME='h5pget_attr_creation_order_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: ocpl_id
          INTEGER, INTENT(OUT) :: crt_order_flags
-
        END FUNCTION H5pget_attr_creation_order_c
     END INTERFACE
 
@@ -5084,12 +4791,10 @@ CONTAINS
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION h5pset_libver_bounds_c(fapl_id, low, high)
-
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_LIBVER_BOUNDS_C'::h5pset_libver_bounds_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_libver_bounds_c(fapl_id, low, high) &
+            BIND(C,NAME='h5pset_libver_bounds_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: fapl_id
          INTEGER, INTENT(IN) :: low
          INTEGER, INTENT(IN) :: high
@@ -5130,17 +4835,12 @@ CONTAINS
     INTEGER, INTENT(IN) :: crt_order_flags ! Creation order flag(s)
     INTEGER, INTENT(OUT) :: hdferr   ! Error code
                                      ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_link_creation_order_c(gcpl_id, crt_order_flags)
-
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_LINK_CREATION_ORDER_C'::h5pset_link_creation_order_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_link_creation_order_c(gcpl_id, crt_order_flags) &
+            BIND(C,NAME='h5pset_link_creation_order_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: gcpl_id
          INTEGER, INTENT(IN) :: crt_order_flags
 
@@ -5181,16 +4881,12 @@ CONTAINS
     INTEGER, INTENT(OUT) :: min_dense     ! Minimum number of attributes to be stored in dense storage
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pget_link_phase_change_c(gcpl_id, max_compact, min_dense)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_LINK_PHASE_CHANGE_C'::h5pget_link_phase_change_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_link_phase_change_c(gcpl_id, max_compact, min_dense) &
+            BIND(C,NAME='h5pget_link_phase_change_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: gcpl_id
          INTEGER, INTENT(OUT) :: max_compact
          INTEGER, INTENT(OUT) :: min_dense
@@ -5237,11 +4933,9 @@ CONTAINS
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION h5pget_obj_track_times_c(plist_id, status)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_OBJ_TRACK_TIMES_C'::h5pget_obj_track_times_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_obj_track_times_c(plist_id, status) &
+            BIND(C,NAME='h5pget_obj_track_times_c')
+         IMPORT :: HID_T
          INTEGER(HID_T), INTENT(IN) :: plist_id ! File creation property list identifier 
          INTEGER, INTENT(OUT) :: status
        END FUNCTION h5pget_obj_track_times_c
@@ -5303,11 +4997,10 @@ CONTAINS
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION h5pset_obj_track_times_c(plist_id, status)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_OBJ_TRACK_TIMES_C'::h5pset_obj_track_times_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_obj_track_times_c(plist_id, status) &
+            BIND(C,NAME='h5pset_obj_track_times_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id ! File creation property list identifier 
          INTEGER, INTENT(IN) :: status
        END FUNCTION h5pset_obj_track_times_c
@@ -5354,16 +5047,12 @@ CONTAINS
                                                ! upon the creation of an object
     INTEGER, INTENT(OUT) :: hdferr ! Error code
                                    ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_create_inter_group_c(lcpl_id, crt_intermed_group)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_CREATE_INTER_GROUP_C'::h5pset_create_inter_group_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_create_inter_group_c(lcpl_id, crt_intermed_group) &
+            BIND(C,NAME='h5pset_create_inter_group_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: lcpl_id
          INTEGER, INTENT(IN) :: crt_intermed_group
        END FUNCTION h5pset_create_inter_group_c
@@ -5402,17 +5091,12 @@ CONTAINS
     INTEGER, INTENT(OUT) :: crt_order_flags ! Creation order flag(s)
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
                                             ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pget_link_creation_order_c(gcpl_id, crt_order_flags)
-
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_LINK_CREATION_ORDER_C'::h5pget_link_creation_order_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_link_creation_order_c(gcpl_id, crt_order_flags) &
+            BIND(C,NAME='h5pget_link_creation_order_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: gcpl_id
          INTEGER, INTENT(OUT) :: crt_order_flags
 
@@ -5455,17 +5139,12 @@ CONTAINS
      	                                   !   H5T_CSET_UTF8_F  -> UTF-8 Unicode encoding
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                            ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_char_encoding_c(plist_id, encoding)
-
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_CHAR_ENCODING_C'::h5pset_char_encoding_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_char_encoding_c(plist_id, encoding) &
+            BIND(C,NAME='h5pset_char_encoding_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER, INTENT(IN) :: encoding
 
@@ -5510,17 +5189,12 @@ CONTAINS
      	                                   !  H5T_CSET_UTF8_F  -> UTF-8 Unicode encoding
     INTEGER, INTENT(OUT) :: hdferr   ! Error code
                                      ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pget_char_encoding_c(plist_id, encoding)
-
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_CHAR_ENCODING_C'::h5pget_char_encoding_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_char_encoding_c(plist_id, encoding) &
+            BIND(C,NAME='h5pget_char_encoding_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER, INTENT(OUT) :: encoding
 
@@ -5567,16 +5241,12 @@ CONTAINS
                                         !   H5O_COPY_WITHOUT_ATTR_FLAG_F
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
                                         ! 0 on success and -1 on failure
-!***** 
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_copy_object_c(ocp_plist_id, copy_options)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_COPY_OBJECT_C'::h5pset_copy_object_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_copy_object_c(ocp_plist_id, copy_options) &
+            BIND(C,NAME='h5pset_copy_object_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: ocp_plist_id
          INTEGER, INTENT(IN) :: copy_options
        END FUNCTION h5pset_copy_object_c
@@ -5620,16 +5290,12 @@ CONTAINS
                                                !   H5O_COPY_WITHOUT_ATTR_FLAG_F
     INTEGER, INTENT(OUT) :: hdferr             ! Error code
                                                ! 0 on success and -1 on failure
-!***** 
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pget_copy_object_c(ocp_plist_id, copy_options)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_COPY_OBJECT_C'::h5pget_copy_object_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_copy_object_c(ocp_plist_id, copy_options) &
+            BIND(C,NAME='h5pget_copy_object_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: ocp_plist_id
          INTEGER, INTENT(OUT) :: copy_options
        END FUNCTION h5pget_copy_object_c
@@ -5677,18 +5343,14 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
     INTEGER :: expression_len
     INTEGER(SIZE_T) :: size_default
 
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pget_data_transform_c(plist_id, expression, expression_len, size_default)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_DATA_TRANSFORM_C'::h5pget_data_transform_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: expression
+       INTEGER FUNCTION h5pget_data_transform_c(plist_id, expression, expression_len, size_default) &
+            BIND(C,NAME='h5pget_data_transform_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id 
-         CHARACTER(LEN=*), INTENT(OUT) :: expression 
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: expression 
          INTEGER(SIZE_T) :: size_default
          INTEGER :: expression_len
        END FUNCTION h5pget_data_transform_c
@@ -5734,17 +5396,14 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !***** 
     INTEGER :: expression_len
 
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
-       INTEGER FUNCTION h5pset_data_transform_c(plist_id, expression, expression_len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_DATA_TRANSFORM_C'::h5pset_data_transform_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: expression
+       INTEGER FUNCTION h5pset_data_transform_c(plist_id, expression, expression_len) &
+            BIND(C,NAME='h5pset_data_transform_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id 
-         CHARACTER(LEN=*), INTENT(IN) :: expression
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: expression
          INTEGER :: expression_len
        END FUNCTION h5pset_data_transform_c
     END INTERFACE
@@ -5782,16 +5441,12 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
     INTEGER(SIZE_T), INTENT(OUT) :: size_hint ! Hint for size of local heap
     INTEGER, INTENT(OUT) :: hdferr            ! Error code
                                               ! 0 on success and -1 on failure
-!***** 
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pget_local_heap_size_hint_c(gcpl_id, size_hint)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_LOCAL_HEAP_SIZE_HINT_C'::h5pget_local_heap_size_hint_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_local_heap_size_hint_c(gcpl_id, size_hint) &
+            BIND(C,NAME='h5pget_local_heap_size_hint_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: gcpl_id
          INTEGER(SIZE_T), INTENT(OUT) :: size_hint
        END FUNCTION H5Pget_local_heap_size_hint_c
@@ -5834,16 +5489,12 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
     INTEGER, INTENT(OUT) :: est_name_len    ! Estimated average length of link names
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
                                             ! 0 on success and -1 on failure
-!***** 
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pget_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_EST_LINK_INFO_C'::h5pget_est_link_info_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_est_link_info_c(gcpl_id, est_num_entries, est_name_len) &
+            BIND(C,NAME='h5pget_est_link_info_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: gcpl_id  
          INTEGER, INTENT(OUT) :: est_num_entries
          INTEGER, INTENT(OUT) :: est_name_len
@@ -5882,16 +5533,12 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
     INTEGER(SIZE_T), INTENT(IN) :: size_hint ! Hint for size of local heap
     INTEGER, INTENT(OUT) :: hdferr           ! Error code
                                              ! 0 on success and -1 on failure
-!***** 
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_local_heap_size_hint_c(gcpl_id, size_hint)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_LOCAL_HEAP_SIZE_HINT_C'::h5pset_local_heap_size_hint_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_local_heap_size_hint_c(gcpl_id, size_hint) &
+            BIND(C,NAME='h5pset_local_heap_size_hint_c')
+         IMPORT :: HID_T, SIZE_T 
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: gcpl_id
          INTEGER(SIZE_T), INTENT(IN) :: size_hint
        END FUNCTION h5pset_local_heap_size_hint_c
@@ -5931,16 +5578,12 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
     INTEGER, INTENT(IN) :: est_name_len    ! Estimated average length of link names
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                            ! 0 on success and -1 on failure
-!***** 
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_EST_LINK_INFO_C'::h5pset_est_link_info_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_est_link_info_c(gcpl_id, est_num_entries, est_name_len) &
+            BIND(C,NAME='h5pset_est_link_info_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: gcpl_id  
          INTEGER, INTENT(IN) :: est_num_entries
          INTEGER, INTENT(IN) :: est_name_len
@@ -5981,20 +5624,15 @@ SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
     INTEGER, INTENT(IN) :: min_dense      ! Minimum number of attributes to be stored in dense storage
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_link_phase_change_c(gcpl_id, max_compact, min_dense)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_LINK_PHASE_CHANGE_C'::h5pset_link_phase_change_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_link_phase_change_c(gcpl_id, max_compact, min_dense) &
+            BIND(C,NAME='h5pset_link_phase_change_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: gcpl_id
          INTEGER, INTENT(IN) :: max_compact
          INTEGER, INTENT(IN) :: min_dense
-
        END FUNCTION h5pset_link_phase_change_c
     END INTERFACE
 
@@ -6033,16 +5671,12 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
     INTEGER(SIZE_T), INTENT(IN) :: cbuf_size  ! Copy buffer size
     INTEGER, INTENT(OUT) :: hdferr            ! Error code
                                               ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_DIRECT_C'::h5pset_fapl_direct_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size) &
+            BIND(C,NAME='h5pset_fapl_direct_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: fapl_id 
          INTEGER(SIZE_T), INTENT(IN) :: alignment
          INTEGER(SIZE_T), INTENT(IN) :: block_size
@@ -6085,16 +5719,12 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
     INTEGER(SIZE_T), INTENT(OUT) :: cbuf_size   ! Copy buffer size
     INTEGER, INTENT(OUT) :: hdferr              ! Error code
                                                 ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pget_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_FAPL_DIRECT_C'::h5pget_fapl_direct_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size) &
+            BIND(C,NAME='h5pget_fapl_direct_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: fapl_id 
          INTEGER(SIZE_T), INTENT(OUT) :: alignment
          INTEGER(SIZE_T), INTENT(OUT) :: block_size
@@ -6139,16 +5769,12 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
                                           ! (Default: 6)
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           ! 0 on success and -1 on failure
-!***** 
-!
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pset_attr_phase_change_c(ocpl_id, max_compact, min_dense)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_ATTR_PHASE_CHANGE_C'::h5pset_attr_phase_change_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_attr_phase_change_c(ocpl_id, max_compact, min_dense) &
+            BIND(C,NAME='h5pset_attr_phase_change_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: ocpl_id
          INTEGER, INTENT(IN) :: max_compact
          INTEGER, INTENT(IN) :: min_dense
@@ -6185,11 +5811,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER       , INTENT(OUT) :: hdferr
 !*****
     INTERFACE
-       INTEGER FUNCTION H5Pset_nbit_c(plist_id)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_NBIT_C'::h5pset_nbit_c
-         !DEC$ENDIF
+       INTEGER FUNCTION H5Pset_nbit_c(plist_id) &
+            BIND(C,NAME='h5pset_nbit_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
        END FUNCTION H5Pset_nbit_c
     END INTERFACE
@@ -6231,11 +5856,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !***** 
 
     INTERFACE
-       INTEGER FUNCTION h5pset_scaleoffset_c(plist_id, scale_type, scale_factor)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_SCALEOFFSET_C'::h5pset_scaleoffset_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_scaleoffset_c(plist_id, scale_type, scale_factor) &
+            BIND(C,NAME='h5pset_scaleoffset_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER, INTENT(IN) :: scale_type
          INTEGER, INTENT(IN) :: scale_factor
@@ -6278,16 +5902,12 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER(SIZE_T), INTENT(IN) :: nlinks ! Maximum number of links to traverse
     INTEGER, INTENT(OUT) :: hdferr        ! Error code   
                                           ! 0 on success and -1 on failure
-!*****      
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****     
     INTERFACE
-       INTEGER FUNCTION h5pset_nlinks_c(lapl_id, nlinks)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_NLINKS_C'::h5pset_nlinks_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_nlinks_c(lapl_id, nlinks) &
+            BIND(C,NAME='h5pset_nlinks_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: lapl_id
          INTEGER(SIZE_T), INTENT(IN) :: nlinks
        END FUNCTION h5pset_nlinks_c
@@ -6326,15 +5946,12 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER(SIZE_T), INTENT(OUT) :: nlinks ! Maximum number of links to traverse
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                            ! 0 on success and -1 on failure
-!***** 
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+!*****
     INTERFACE
-       INTEGER FUNCTION h5pget_nlinks_c(lapl_id, nlinks)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_NLINKS_C'::h5pget_nlinks_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_nlinks_c(lapl_id, nlinks) &
+            BIND(C,NAME='h5pget_nlinks_c')
+         IMPORT :: HID_T, SIZE_T 
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: lapl_id
          INTEGER(SIZE_T), INTENT(OUT) :: nlinks
        END FUNCTION h5pget_nlinks_c
@@ -6380,11 +5997,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
                                                ! 0 on success and -1 on failure
 !***** 
     INTERFACE
-       INTEGER FUNCTION h5pget_create_inter_group_c(lcpl_id, crt_intermed_group)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_CREATE_INTER_GROUP_C'::h5pget_create_inter_group_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_create_inter_group_c(lcpl_id, crt_intermed_group) &
+            BIND(C,NAME='h5pget_create_inter_group_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: lcpl_id
          INTEGER, INTENT(IN) :: crt_intermed_group
        END FUNCTION h5pget_create_inter_group_c
@@ -6449,11 +6065,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !*****       
 
     INTERFACE
-       INTEGER FUNCTION h5pset_chunk_cache_c(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_CHUNK_CACHE_C'::h5pset_chunk_cache_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pset_chunk_cache_c(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0) &
+            BIND(C,NAME='h5pset_chunk_cache_c')
+         IMPORT :: HID_T, SIZE_T 
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dapl_id
          INTEGER(SIZE_T), INTENT(IN) :: rdcc_nslots
          INTEGER(SIZE_T), INTENT(IN) :: rdcc_nbytes
@@ -6507,11 +6122,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
                                                 ! 0 on success and -1 on failure
 !*****    
     INTERFACE
-       INTEGER FUNCTION h5pget_chunk_cache_c(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_CHUNK_CACHE_C'::h5pget_chunk_cache_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_chunk_cache_c(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0) &
+            BIND(C,NAME='h5pget_chunk_cache_c')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: dapl_id
          INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nslots
          INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes
@@ -6569,7 +6183,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
 
   SUBROUTINE h5pset_fill_value_integer(prp_id, type_id, fillvalue, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
@@ -6628,7 +6241,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !*****
 
   SUBROUTINE h5pget_fill_value_integer(prp_id, type_id, fillvalue, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
@@ -6646,7 +6258,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
 
   SUBROUTINE h5pset_fill_value_real(prp_id, type_id, fillvalue, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
@@ -6664,7 +6275,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
 
   SUBROUTINE h5pget_fill_value_real(prp_id, type_id, fillvalue, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
@@ -6681,7 +6291,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_fill_value_real
 
   SUBROUTINE h5pset_fill_value_char(prp_id, type_id, fillvalue, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
@@ -6698,7 +6307,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_fill_value_char
 
   SUBROUTINE h5pget_fill_value_char(prp_id, type_id, fillvalue, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
@@ -6776,7 +6384,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !*****
 
   SUBROUTINE h5pset_fill_value_ptr(prp_id, type_id, fillvalue, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
     INTEGER(HID_T), INTENT(IN) :: type_id   ! Datatype identifier of
@@ -6833,7 +6440,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !*****
 
   SUBROUTINE h5pget_fill_value_ptr(prp_id, type_id, fillvalue, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
@@ -6878,7 +6484,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!    INTEGER         , INTENT(OUT) :: hdferr
 !*****
   SUBROUTINE h5pset_integer(prp_id, name, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id   ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of property to modify
@@ -6896,10 +6501,9 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_integer
 
   SUBROUTINE h5pset_real(prp_id, name, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name ! Name of property to modify
+    CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name ! Name of property to modify
     REAL,   INTENT(IN), TARGET :: value  ! Property value
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
     INTEGER :: name_len
@@ -6913,7 +6517,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_real
 
   SUBROUTINE h5pset_char(prp_id, name, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Name of property to modify
@@ -6981,7 +6584,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !*****
 
   SUBROUTINE h5pget_integer(prp_id, name, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Name of property to modify
@@ -6998,7 +6600,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_integer
 
   SUBROUTINE h5pget_real(prp_id, name, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name ! Name of property to modify
@@ -7014,7 +6615,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_real
 
   SUBROUTINE h5pget_char(prp_id, name, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id   ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of property to modify
@@ -7075,7 +6675,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!    INTEGER         , INTENT(OUT) :: hdferr
 !*****
   SUBROUTINE h5pset_ptr(prp_id, name, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -7115,7 +6714,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!    INTEGER         , INTENT(OUT) :: hdferr
 !*****
   SUBROUTINE h5pget_ptr(prp_id, name, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -7164,7 +6762,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!    INTEGER         , INTENT(OUT) :: hdferr  
 !*****
   SUBROUTINE h5pregister_integer(class, name, size, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: class    ! Property list class identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of property to register
@@ -7182,7 +6779,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pregister_integer
 
   SUBROUTINE h5pregister_real(class, name, size, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
@@ -7200,7 +6796,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pregister_real
 
   SUBROUTINE h5pregister_char(class, name, size, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: class     ! Property list class identifier
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Name of property to register
@@ -7266,7 +6861,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !*****
 
   SUBROUTINE h5pregister_ptr(class, name, size, value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
@@ -7312,7 +6906,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!    INTEGER         , INTENT(OUT) :: hdferr
 !*****
   SUBROUTINE h5pinsert_integer(plist, name, size, value, hdferr)
-    USE iso_c_binding
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist    ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of property to insert
@@ -7329,7 +6922,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pinsert_integer
 
   SUBROUTINE h5pinsert_real(plist, name, size, value, hdferr)
-    USE iso_c_binding
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert
@@ -7347,7 +6939,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pinsert_real
 
   SUBROUTINE h5pinsert_char(plist, name, size, value, hdferr)
-    USE iso_c_binding
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist      ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name     ! Name of property to insert
@@ -7415,7 +7006,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!    INTEGER         , INTENT(OUT) :: hdferr
 !*****
   SUBROUTINE h5pinsert_ptr(plist, name, size, value, hdferr)
-    USE iso_c_binding
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist  ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name ! Name of property to insert
@@ -7468,8 +7058,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !  M. Scot Breitenfeld, July 3, 2008
 !
 ! Fortran2003 Interface:
-  SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr, create, create_data, copy, copy_data, close, close_data)
-    USE iso_c_binding
+  SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr, create, create_data, &
+       copy, copy_data, CLOSE, close_data)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: parent
     CHARACTER(LEN=*), INTENT(IN)  :: name
@@ -7484,9 +7074,9 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTERFACE
        INTEGER FUNCTION h5pcreate_class_c(parent, name, name_len, class, &
             create, create_data, copy, copy_data, close, close_data) &
-          BIND(C, NAME='h5pcreate_class_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr, c_funptr
-         USE H5GLOBAL
+            BIND(C, NAME='h5pcreate_class_c')
+         IMPORT :: c_char, c_ptr, c_funptr
+         IMPORT :: HID_T
          INTEGER(HID_T), INTENT(IN) :: parent
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER, INTENT(IN)         :: name_len
@@ -7542,7 +7132,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5pset_file_image_f(fapl_id, buf_ptr, buf_len, hdferr)
-    USE iso_c_binding
     IMPLICIT NONE
     INTEGER(HID_T) , INTENT(IN)  :: fapl_id
     TYPE(C_PTR)    , INTENT(IN)  :: buf_ptr
@@ -7552,8 +7141,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTERFACE
        INTEGER FUNCTION h5pset_file_image_c(fapl_id, buf_ptr, buf_len) &
             BIND(C, NAME='h5pset_file_image_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
-         USE H5GLOBAL
+         IMPORT :: c_ptr
+         IMPORT :: HID_T, SIZE_T
          INTEGER(HID_T), INTENT(IN) :: fapl_id
          TYPE(C_PTR), VALUE :: buf_ptr
          INTEGER(SIZE_T), INTENT(IN)  :: buf_len
@@ -7597,7 +7186,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5pget_file_image_f(fapl_id, buf_ptr, buf_len_ptr, hdferr)
-    USE iso_c_binding
     IMPLICIT NONE
     INTEGER(HID_T) , INTENT(IN)                :: fapl_id
     TYPE(C_PTR)    , INTENT(OUT), DIMENSION(*) :: buf_ptr
@@ -7608,8 +7196,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTERFACE
        INTEGER FUNCTION h5pget_file_image_c(fapl_id, buf_ptr, buf_len_ptr) &
             BIND(C, NAME='h5pget_file_image_c')
-         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
-         USE H5GLOBAL
+         IMPORT :: c_ptr
+         IMPORT :: HID_T, SIZE_T
          INTEGER(HID_T), INTENT(IN) :: fapl_id
          TYPE(C_PTR), DIMENSION(*), INTENT(OUT)  :: buf_ptr
          INTEGER(SIZE_T), INTENT(OUT)  :: buf_len_ptr
@@ -7782,11 +7370,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER       , INTENT(OUT) :: hdferr
 !***** 
     INTERFACE
-       INTEGER FUNCTION h5pget_mpio_actual_io_mode_c(dxpl_id, actual_io_mode)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_MPIO_ACTUAL_IO_MODE_C'::h5pget_mpio_actual_io_mode_c
-         !DEC$ENDIF
+       INTEGER FUNCTION h5pget_mpio_actual_io_mode_c(dxpl_id, actual_io_mode) &
+            BIND(C,NAME='h5pget_mpio_actual_io_mode_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN)  :: dxpl_id
          INTEGER       , INTENT(OUT) :: actual_io_mode
        END FUNCTION h5pget_mpio_actual_io_mode_c

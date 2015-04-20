@@ -555,19 +555,16 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5aget_name_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, &
-            n, name, size_default, lapl_id_default)
-         USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_NAME_BY_IDX_C'::h5aget_name_by_idx_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name, name
+            n, name, size_default, lapl_id_default) BIND(C,NAME='h5aget_name_by_idx_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T, SIZE_T, HSIZE_T
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER, INTENT(IN) :: idx_type
          INTEGER, INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(IN) :: n
-
-         CHARACTER(LEN=*), INTENT(OUT) :: name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
          INTEGER(SIZE_T) :: size_default
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(SIZE_T) :: obj_namelen
@@ -910,18 +907,16 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION H5Arename_by_name_c(loc_id, obj_name, obj_namelen, &
             old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen, &
-            lapl_id_default)
+            lapl_id_default) BIND(C,NAME='h5arename_by_name_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ARENAME_BY_NAME_C'::H5Arename_by_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name, old_attr_name, new_attr_name
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T) :: obj_namelen
-         CHARACTER(LEN=*), INTENT(IN) :: old_attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: old_attr_name
          INTEGER(SIZE_T) :: old_attr_namelen
-         CHARACTER(LEN=*), INTENT(IN) :: new_attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: new_attr_name
          INTEGER(SIZE_T) :: new_attr_namelen
          INTEGER(HID_T) :: lapl_id_default
 
@@ -981,14 +976,12 @@ CONTAINS
     INTEGER(SIZE_T) :: attr_namelen
 
     INTERFACE
-       INTEGER FUNCTION H5Aopen_c(obj_id, attr_name, attr_namelen, aapl_id_default, attr_id)
+       INTEGER FUNCTION H5Aopen_c(obj_id, attr_name, attr_namelen, aapl_id_default, attr_id) &
+            BIND(C,NAME='h5aopen_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_C'::H5Aopen_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(HID_T), INTENT(IN) :: obj_id
-         CHARACTER(LEN=*), INTENT(IN) :: attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
          INTEGER(HID_T) :: aapl_id_default
          INTEGER(SIZE_T) :: attr_namelen
          INTEGER(HID_T), INTENT(OUT) :: attr_id
@@ -1066,14 +1059,13 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION H5Adelete_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default)
+       INTEGER FUNCTION H5Adelete_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default) &
+            BIND(C,NAME='h5adelete_by_idx_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_IDX_C'::H5Adelete_by_idx_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER, INTENT(IN) :: idx_type
          INTEGER, INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(IN) :: n
@@ -1128,15 +1120,13 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION H5Adelete_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default)
+       INTEGER FUNCTION H5Adelete_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default) &
+            BIND(C,NAME='h5adelete_by_name_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_NAME_C'::H5Adelete_by_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name, attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
-         CHARACTER(LEN=*), INTENT(IN) :: attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(SIZE_T) :: attr_namelen
          INTEGER(SIZE_T) :: obj_namelen
@@ -1208,14 +1198,11 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Aopen_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, &
-            aapl_id_default, lapl_id_default, attr_id)
+            aapl_id_default, lapl_id_default, attr_id) BIND(C,NAME='h5aopen_by_idx_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_BY_IDX_C'::H5Aopen_by_idx_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER, INTENT(IN) :: idx_type
          INTEGER, INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(IN) :: n
@@ -1276,11 +1263,9 @@ CONTAINS
     INTEGER :: corder_valid
 
     INTERFACE
-       INTEGER FUNCTION H5Aget_info_c(attr_id, corder_valid, corder, cset, data_size)
+       INTEGER FUNCTION H5Aget_info_c(attr_id, corder_valid, corder, cset, data_size) BIND(C,NAME='h5aget_info_c')
          IMPORT :: HID_T, HSIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_C'::H5Aget_info_c
-         !DEC$ENDIF
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: attr_id
 
          INTEGER, INTENT(OUT) :: corder_valid
@@ -1360,15 +1345,12 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION H5Aget_info_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default, &
-            corder_valid, corder, cset, data_size)
+       INTEGER FUNCTION h5aget_info_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, n, lapl_id_default, &
+            corder_valid, corder, cset, data_size) BIND(C,NAME='h5aget_info_by_idx_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_BY_IDX_C'::H5Aget_info_by_idx_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER, INTENT(IN) :: idx_type
          INTEGER, INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(IN) :: n
@@ -1446,16 +1428,14 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Aget_info_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, &
-            corder_valid, corder, cset, data_size)
+            corder_valid, corder, cset, data_size) BIND(C,NAME='h5aget_info_by_name_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_BY_NAME_C'::H5Aget_info_by_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name, attr_name
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T), INTENT(IN) :: obj_namelen
-         CHARACTER(LEN=*), INTENT(IN) :: attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
          INTEGER(SIZE_T), INTENT(IN) :: attr_namelen
          INTEGER(HID_T) :: lapl_id_default
          INTEGER, INTENT(OUT) :: corder_valid
@@ -1532,16 +1512,15 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Acreate_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
-            type_id, space_id, acpl_id_default, aapl_id_default, lapl_id_default, attr)
+            type_id, space_id, acpl_id_default, aapl_id_default, lapl_id_default, attr) &
+            BIND(C,NAME='h5acreate_by_name_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ACREATE_BY_NAME_C'::H5Acreate_by_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name, attr_name
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T), INTENT(IN) :: obj_namelen
-         CHARACTER(LEN=*), INTENT(IN) :: attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
          INTEGER(SIZE_T), INTENT(IN) :: attr_namelen
          INTEGER(HID_T), INTENT(IN) :: type_id
          INTEGER(HID_T), INTENT(IN) :: space_id
@@ -1602,14 +1581,12 @@ CONTAINS
     INTEGER(SIZE_T) :: attr_namelen
 
     INTERFACE
-       INTEGER FUNCTION H5Aexists_c(obj_id, attr_name, attr_namelen, attr_exists_c)
+       INTEGER FUNCTION H5Aexists_c(obj_id, attr_name, attr_namelen, attr_exists_c) BIND(C,NAME='h5aexists_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AEXISTS_C'::H5Aexists_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: attr_name
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: obj_id
-         CHARACTER(LEN=*), INTENT(IN) :: attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
          INTEGER(SIZE_T) :: attr_namelen
          INTEGER(HID_T) :: attr_exists_c
        END FUNCTION H5Aexists_c
@@ -1667,16 +1644,15 @@ CONTAINS
     INTEGER(HID_T) :: lapl_id_default
 
     INTERFACE
-       INTEGER FUNCTION H5Aexists_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, lapl_id_default, attr_exists_c)
+       INTEGER FUNCTION H5Aexists_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
+            lapl_id_default, attr_exists_c) BIND(C,NAME='h5aexists_by_name_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AEXISTS_BY_NAME_C'::H5Aexists_by_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name, attr_name 
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T), INTENT(IN) :: obj_namelen
-         CHARACTER(LEN=*), INTENT(IN) :: attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
          INTEGER(SIZE_T), INTENT(IN) :: attr_namelen
          INTEGER(HID_T), INTENT(IN) :: lapl_id_default
          INTEGER, INTENT(OUT) :: attr_exists_c
@@ -1741,16 +1717,14 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Aopen_by_name_c(loc_id, obj_name, obj_namelen, attr_name, attr_namelen, &
-            aapl_id_default, lapl_id_default, attr_id)
+            aapl_id_default, lapl_id_default, attr_id) BIND(C,NAME='h5aopen_by_name_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_BY_NAME_C'::H5Aopen_by_name_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name, attr_name
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T), INTENT(IN) :: obj_namelen
-         CHARACTER(LEN=*), INTENT(IN) :: attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: attr_name
          INTEGER(SIZE_T), INTENT(IN) :: attr_namelen
          INTEGER(HID_T) :: aapl_id_default
          INTEGER(HID_T) :: lapl_id_default
@@ -1811,18 +1785,15 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION H5Arename_c(loc_id, &
-            old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen)
+            old_attr_name, old_attr_namelen, new_attr_name, new_attr_namelen) BIND(C,NAME='h5arename_c')
+         IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ARENAME_C'::H5Arename_c
-         !DEC$ENDIF
-         !DEC$ATTRIBUTES reference :: old_attr_name, new_attr_name
+         IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: old_attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: old_attr_name
          INTEGER(SIZE_T) :: old_attr_namelen
-         CHARACTER(LEN=*), INTENT(IN) :: new_attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: new_attr_name
          INTEGER(SIZE_T) :: new_attr_namelen
-
        END FUNCTION H5Arename_c
     END INTERFACE
 
