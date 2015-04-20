@@ -694,10 +694,10 @@ CONTAINS
          IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: prp_id
-         INTEGER, DIMENSION(:), INTENT(OUT) :: boot 
-         INTEGER, DIMENSION(:), INTENT(OUT) :: freelist 
-         INTEGER, DIMENSION(:), INTENT(OUT) :: stab
-         INTEGER, DIMENSION(:), INTENT(OUT) :: shhdr
+         INTEGER, DIMENSION(*), INTENT(OUT) :: boot 
+         INTEGER, DIMENSION(*), INTENT(OUT) :: freelist 
+         INTEGER, DIMENSION(*), INTENT(OUT) :: stab
+         INTEGER, DIMENSION(*), INTENT(OUT) :: shhdr
        END FUNCTION h5pget_version_c
     END INTERFACE
     
