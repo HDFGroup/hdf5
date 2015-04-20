@@ -23,18 +23,8 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
-# See if the F2008 intrinsic STORAGE_SIZE and C_SIZEOF are supported. If not then
-# fall back to F2003. If F2003 not supported then use F90 for the tests.
-
-set_source_files_properties (tf_F90.f90 tf_F03.f90 tf_F08.f90 tf.f90 PROPERTIES LANGUAGE Fortran)
-if (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
- add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf_F08.f90 tf.f90)
-elseif (HDF5_ENABLE_F2003)
- add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf_F03.f90 tf.f90)
-else (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
- add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf_F90.f90 tf.f90) 
-endif (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
-
+set_source_files_properties (tf.F90 PROPERTIES LANGUAGE Fortran)
+add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.F90)
 
 set (SHARED_LINK_FLAGS " ")
 if (WIN32)

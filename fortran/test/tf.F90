@@ -27,11 +27,33 @@
 !  h5_cleanup_f, h5_exit_f, h5_env_nocleanup_f,dreal_eqv
 !
 !*****
+
+#include "H5config_f.inc"
+
 MODULE TH5_MISC
 
-  USE TH5_MISC_PROVISIONAL
+  USE ISO_C_BINDING
 
   IMPLICIT NONE
+
+  INTEGER, PARAMETER :: sp = SELECTED_REAL_KIND(5)  ! This should map to REAL*4 on most modern processors
+  INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(10) ! This should map to REAL*8 on most modern processors
+
+  ! generic compound datatype
+  TYPE, BIND(C) :: comp_datatype
+    REAL :: a
+    INTEGER :: x
+    DOUBLE PRECISION :: y
+    CHARACTER(LEN=1) :: z
+  END TYPE comp_datatype
+
+  PUBLIC :: H5_SIZEOF
+  INTERFACE H5_SIZEOF
+     MODULE PROCEDURE H5_SIZEOF_CMPD
+     MODULE PROCEDURE H5_SIZEOF_CHR
+     MODULE PROCEDURE H5_SIZEOF_I
+     MODULE PROCEDURE H5_SIZEOF_SP,H5_SIZEOF_DP
+  END INTERFACE
 
 CONTAINS
 
@@ -390,4 +412,109 @@ CONTAINS
     IF(status.EQ.1) HDF5_NOCLEANUP = .TRUE.
     
   END SUBROUTINE h5_env_nocleanup_f
+
+! ---------------------------------------------------------------------------------------------------
+! H5_SIZEOF routines
+!
+! NOTES
+!   (1) The Sun/Oracle compiler has the following restrictions on the SIZEOF intrinsic function:
+!
+!     "The SIZEOF intrinsic cannot be applied to arrays of an assumed size, characters of a 
+!      length that is passed, or subroutine calls or names. SIZEOF returns default INTEGER*4 data. 
+!      If compiling for a 64-bit environment, the compiler will issue a warning if the result overflows 
+!      the INTEGER*4 data range. To use SIZEOF in a 64-bit environment with arrays larger 
+!      than the INTEGER*4 limit (2 Gbytes), the SIZEOF function and 
+!      the variables receiving the result must be declared INTEGER*8."
+!
+!    Thus, we can not overload the H5_SIZEOF function to handle arrays (as used in tH5P_F03.f90), or
+!    characters that do not have a set length (as used in tH5P_F03.f90), sigh...
+!
+!   (2) F08+TS29113 requires C interoperable variable as argument for C_SIZEOF.
+!
+!   (3) Unfortunately we need to wrap the C_SIZEOF/STORAGE_SIZE functions to handle different
+!       data types from the various tests.
+!
+! ---------------------------------------------------------------------------------------------------
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
+!DEC$attributes dllexport :: h5_sizeof_cmpd
+!DEC$endif
+  INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_CMPD(a)
+    IMPLICIT NONE
+    TYPE(comp_datatype), INTENT(in) :: a
+
+#ifdef H5_FORTRAN_FORTRAN_HAVE_C_SIZEOF
+    H5_SIZEOF_CMPD = C_SIZEOF(a)
+#else
+    H5_SIZEOF_CMPD = SIZEOF(a)
+#endif
+
+  END FUNCTION H5_SIZEOF_CMPD
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
+!DEC$attributes dllexport :: h5_sizeof_chr
+!DEC$endif
+  INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_CHR(a)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(in) :: a
+
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    H5_SIZEOF_CHR = storage_size(a, c_size_t)/storage_size(c_char_'a',c_size_t)
+#else
+    H5_SIZEOF_CHR = SIZEOF(a)
+#endif
+
+  END FUNCTION H5_SIZEOF_CHR
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
+!DEC$attributes dllexport :: h5_sizeof_i
+!DEC$endif
+  INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_I(a)
+    IMPLICIT NONE
+    INTEGER, INTENT(in):: a
+
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    H5_SIZEOF_I = storage_size(a, c_size_t)/storage_size(c_char_'a',c_size_t)
+#else
+    H5_SIZEOF_I = SIZEOF(a)
+#endif
+
+  END FUNCTION H5_SIZEOF_I
+
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
+!DEC$attributes dllexport :: h5_sizeof_sp
+!DEC$endif
+  INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_SP(a)
+    IMPLICIT NONE
+    REAL(sp), INTENT(in):: a
+
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    H5_SIZEOF_SP = storage_size(a, c_size_t)/storage_size(c_char_'a',c_size_t)
+#else
+    H5_SIZEOF_SP = SIZEOF(a)
+#endif
+
+  END FUNCTION H5_SIZEOF_SP
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
+!DEC$attributes dllexport :: h5_sizeof_dp
+!DEC$endif
+  INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_DP(a)
+    IMPLICIT NONE
+    REAL(dp), INTENT(in):: a
+
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    H5_SIZEOF_DP = storage_size(a, c_size_t)/storage_size(c_char_'a',c_size_t)
+#else
+    H5_SIZEOF_DP = SIZEOF(a)
+#endif
+
+  END FUNCTION H5_SIZEOF_DP
+
 END MODULE TH5_MISC

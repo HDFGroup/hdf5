@@ -103,20 +103,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_fortran_la_LIBADD =
-am__libh5test_fortran_la_SOURCES_DIST = tf_F90.f90 tf.f90 t.c \
-	tf_F03.f90 tf_F08.f90
-@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_libh5test_fortran_la_OBJECTS = tf_F90.lo \
-@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.lo \
-@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.lo
-@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_libh5test_fortran_la_OBJECTS = tf_F03.lo \
-@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.lo \
-@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.lo
-@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@am_libh5test_fortran_la_OBJECTS = tf_F03.lo \
-@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.lo \
-@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.lo
-@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@am_libh5test_fortran_la_OBJECTS = tf_F08.lo \
-@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.lo \
-@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.lo
+am_libh5test_fortran_la_OBJECTS = tf.lo t.lo
 libh5test_fortran_la_OBJECTS = $(am_libh5test_fortran_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -192,6 +179,24 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src -I$(top_builddir)/fortran
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
+PPFCCOMPILE = $(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_FCFLAGS) $(FCFLAGS)
+LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(FC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_FCFLAGS) $(FCFLAGS)
+AM_V_PPFC = $(am__v_PPFC_@AM_V@)
+am__v_PPFC_ = $(am__v_PPFC_@AM_DEFAULT_V@)
+am__v_PPFC_0 = @echo "  PPFC    " $@;
+am__v_PPFC_1 = 
+FCLD = $(FC)
+FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_FCLD = $(am__v_FCLD_@AM_V@)
+am__v_FCLD_ = $(am__v_FCLD_@AM_DEFAULT_V@)
+am__v_FCLD_0 = @echo "  FCLD    " $@;
+am__v_FCLD_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -217,20 +222,12 @@ AM_V_FC = $(am__v_FC_@AM_V@)
 am__v_FC_ = $(am__v_FC_@AM_DEFAULT_V@)
 am__v_FC_0 = @echo "  FC      " $@;
 am__v_FC_1 = 
-FCLD = $(FC)
-FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-AM_V_FCLD = $(am__v_FCLD_@AM_V@)
-am__v_FCLD_ = $(am__v_FCLD_@AM_DEFAULT_V@)
-am__v_FCLD_0 = @echo "  FCLD    " $@;
-am__v_FCLD_1 = 
 SOURCES = $(libh5test_fortran_la_SOURCES) $(fflush1_SOURCES) \
 	$(fflush2_SOURCES) $(fortranlib_test_SOURCES) \
 	$(fortranlib_test_1_8_SOURCES) $(fortranlib_test_F03_SOURCES)
-DIST_SOURCES = $(am__libh5test_fortran_la_SOURCES_DIST) \
-	$(fflush1_SOURCES) $(fflush2_SOURCES) \
-	$(fortranlib_test_SOURCES) $(fortranlib_test_1_8_SOURCES) \
+DIST_SOURCES = $(libh5test_fortran_la_SOURCES) $(fflush1_SOURCES) \
+	$(fflush2_SOURCES) $(fortranlib_test_SOURCES) \
+	$(fortranlib_test_1_8_SOURCES) \
 	$(am__fortranlib_test_F03_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -742,30 +739,7 @@ noinst_LTLIBRARIES = libh5test_fortran.la
 # Our main targets, the tests themselves
 TEST_PROG = fortranlib_test fflush1 fflush2 fortranlib_test_1_8 \
 	$(am__append_2)
-
-# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
-# compiled first
-@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@libh5test_fortran_la_SOURCES = tf_F90.f90 \
-@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.f90 \
-@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.c
-
-# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
-# compiled first
-@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@libh5test_fortran_la_SOURCES = tf_F03.f90 \
-@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.f90 \
-@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.c
-
-# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
-# compiled first
-@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@libh5test_fortran_la_SOURCES = tf_F03.f90 \
-@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.f90 \
-@FORTRAN_HAVE_C_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.c
-
-# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
-# compiled first
-@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@libh5test_fortran_la_SOURCES = tf_F08.f90 \
-@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf.f90 \
-@FORTRAN_HAVE_C_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_TRUE@	t.c
+libh5test_fortran_la_SOURCES = tf.F90 t.c
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
@@ -813,7 +787,7 @@ TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chkexe_)
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .f90 .lo .log .o .obj .sh .sh$(EXEEXT) .trs
+.SUFFIXES: .F90 .c .f90 .lo .log .o .obj .sh .sh$(EXEEXT) .trs
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -896,6 +870,15 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t.Plo@am__quote@
+
+.F90.o:
+	$(AM_V_PPFC)$(PPFCCOMPILE) -c -o $@ $<
+
+.F90.obj:
+	$(AM_V_PPFC)$(PPFCCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.F90.lo:
+	$(AM_V_PPFC)$(LTPPFCCOMPILE) -c -o $@ $<
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -726,12 +726,6 @@ FORTRAN_DEFAULT_REALisDBLE_F_FALSE
 FORTRAN_DEFAULT_REALisDBLE_F_TRUE
 FORTRAN_2003_CONDITIONAL_F_FALSE
 FORTRAN_2003_CONDITIONAL_F_TRUE
-FORTRAN_HAVE_STORAGE_SIZE_FALSE
-FORTRAN_HAVE_STORAGE_SIZE_TRUE
-FORTRAN_HAVE_C_SIZEOF_FALSE
-FORTRAN_HAVE_C_SIZEOF_TRUE
-FORTRAN_HAVE_SIZEOF_FALSE
-FORTRAN_HAVE_SIZEOF_TRUE
 FCLIBS
 F9XMODEXT
 F9XMODFLAG
@@ -6539,6 +6533,23 @@ rm -f core conftest.err conftest.$ac_objext \
 
 
 
+  ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
+  if test "X$HAVE_C_SIZEOF_FORTRAN" = "Xno" && test "X$HAVE_C_SIZEOF_FORTRAN" = "Xno"; then
+    as_fn_error $? "Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE" "$LINENO" 5
+  fi
+
+
+$as_echo "#define FORTRAN_HAVE_STORAGE_SIZE 1" >>confdefs.h
+
+
+
+$as_echo "#define FORTRAN_HAVE_C_SIZEOF 1" >>confdefs.h
+
+
+
+$as_echo "#define FORTRAN_HAVE_SIZEOF 1" >>confdefs.h
+
+
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
 
@@ -6634,30 +6645,6 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-
- if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
-  FORTRAN_HAVE_SIZEOF_TRUE=
-  FORTRAN_HAVE_SIZEOF_FALSE='#'
-else
-  FORTRAN_HAVE_SIZEOF_TRUE='#'
-  FORTRAN_HAVE_SIZEOF_FALSE=
-fi
-
- if test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
-  FORTRAN_HAVE_C_SIZEOF_TRUE=
-  FORTRAN_HAVE_C_SIZEOF_FALSE='#'
-else
-  FORTRAN_HAVE_C_SIZEOF_TRUE='#'
-  FORTRAN_HAVE_C_SIZEOF_FALSE=
-fi
-
- if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"; then
-  FORTRAN_HAVE_STORAGE_SIZE_TRUE=
-  FORTRAN_HAVE_STORAGE_SIZE_FALSE='#'
-else
-  FORTRAN_HAVE_STORAGE_SIZE_TRUE='#'
-  FORTRAN_HAVE_STORAGE_SIZE_FALSE=
-fi
 
  if test "X$HAVE_FORTRAN_2003" = "Xyes"; then
   FORTRAN_2003_CONDITIONAL_F_TRUE=
@@ -30221,18 +30208,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${FORTRAN_HAVE_SIZEOF_TRUE}" && test -z "${FORTRAN_HAVE_SIZEOF_FALSE}"; then
-  as_fn_error $? "conditional \"FORTRAN_HAVE_SIZEOF\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${FORTRAN_HAVE_C_SIZEOF_TRUE}" && test -z "${FORTRAN_HAVE_C_SIZEOF_FALSE}"; then
-  as_fn_error $? "conditional \"FORTRAN_HAVE_C_SIZEOF\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${FORTRAN_HAVE_STORAGE_SIZE_TRUE}" && test -z "${FORTRAN_HAVE_STORAGE_SIZE_FALSE}"; then
-  as_fn_error $? "conditional \"FORTRAN_HAVE_STORAGE_SIZE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${FORTRAN_2003_CONDITIONAL_F_TRUE}" && test -z "${FORTRAN_2003_CONDITIONAL_F_FALSE}"; then

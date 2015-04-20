@@ -159,15 +159,7 @@ H5fortran_detect.F90: H5test_kind$(EXEEXT)
 # H5test_kind.F90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
 
-if FORTRAN_HAVE_STORAGE_SIZE
-  H5test_kind_SOURCES = H5test_kind_STORAGE_SIZE.F90
-else 
-if FORTRAN_HAVE_SIZEOF
-  H5test_kind_SOURCES = H5test_kind_SIZEOF.F90
-else
-  H5test_kind_SOURCES = H5test_kind.F90
-endif
-endif
+H5test_kind_SOURCES = H5test_kind.f90
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API=yes
@@ -180,7 +172,6 @@ H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
 H5fortran_types.lo:  H5fortran_types.F90
 H5fortran_detect.lo: H5fortran_detect.F90
 H5test_kind.lo:      $(srcdir)/H5test_kind.F90
-H5test_kind_SIZEOF.lo: $(srcdir)/H5test_kind_SIZEOF.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo

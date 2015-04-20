@@ -30,6 +30,15 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
 
+/* Define if we have Fortran intrinsic C_SIZEOF */
+#undef FORTRAN_HAVE_C_SIZEOF
+
+/* Define if we have Fortran intrinsic SIZEOF */
+#undef FORTRAN_HAVE_SIZEOF
+
+/* Define if we have Fortran intrinsic STORAGE_SIZE */
+#undef FORTRAN_HAVE_STORAGE_SIZE
+
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 

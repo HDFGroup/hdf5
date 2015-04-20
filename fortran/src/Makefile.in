@@ -172,11 +172,7 @@ H5fortran_detect_LDADD = $(LDADD)
 H5match_types_SOURCES = H5match_types.c
 H5match_types_OBJECTS = H5match_types.$(OBJEXT)
 H5match_types_LDADD = $(LDADD)
-am__H5test_kind_SOURCES_DIST = H5test_kind.F90 H5test_kind_SIZEOF.F90 \
-	H5test_kind_STORAGE_SIZE.F90
-@FORTRAN_HAVE_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_H5test_kind_OBJECTS = H5test_kind.$(OBJEXT)
-@FORTRAN_HAVE_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_H5test_kind_OBJECTS = H5test_kind_SIZEOF.$(OBJEXT)
-@FORTRAN_HAVE_STORAGE_SIZE_TRUE@am_H5test_kind_OBJECTS = H5test_kind_STORAGE_SIZE.$(OBJEXT)
+am_H5test_kind_OBJECTS = H5test_kind.$(OBJEXT)
 H5test_kind_OBJECTS = $(am_H5test_kind_OBJECTS)
 H5test_kind_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -242,7 +238,7 @@ SOURCES = $(libhdf5_fortran_la_SOURCES) $(H5fortran_detect_SOURCES) \
 	H5match_types.c $(H5test_kind_SOURCES)
 DIST_SOURCES = $(libhdf5_fortran_la_SOURCES) \
 	$(H5fortran_detect_SOURCES) H5match_types.c \
-	$(am__H5test_kind_SOURCES_DIST)
+	$(H5test_kind_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -772,12 +768,10 @@ BUILT_SOURCES = H5f90i_gen.h
 # Automake knows how to build fortran programs if we tell it the source
 # files.
 H5fortran_detect_SOURCES = H5fortran_detect.F90
-@FORTRAN_HAVE_SIZEOF_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@H5test_kind_SOURCES = H5test_kind.F90
-@FORTRAN_HAVE_SIZEOF_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@H5test_kind_SOURCES = H5test_kind_SIZEOF.F90
 
 # H5test_kind.F90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
-@FORTRAN_HAVE_STORAGE_SIZE_TRUE@H5test_kind_SOURCES = H5test_kind_STORAGE_SIZE.F90
+H5test_kind_SOURCES = H5test_kind.f90
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API = yes
@@ -1426,7 +1420,6 @@ H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
 H5fortran_types.lo:  H5fortran_types.F90
 H5fortran_detect.lo: H5fortran_detect.F90
 H5test_kind.lo:      $(srcdir)/H5test_kind.F90
-H5test_kind_SIZEOF.lo: $(srcdir)/H5test_kind_SIZEOF.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo

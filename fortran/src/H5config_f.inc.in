@@ -2,3 +2,12 @@
 
 ! Define if we have parallel support
 #undef HAVE_PARALLEL
+
+! Define if the intrinsic function STORAGE_SIZE exists
+#undef FORTRAN_HAVE_STORAGE_SIZE
+
+! Define if the intrinsic function SIZEOF exists
+#undef FORTRAN_HAVE_SIZEOF
+
+! Define if the intrinsic function C_SIZEOF exists
+#undef FORTRAN_HAVE_C_SIZEOF

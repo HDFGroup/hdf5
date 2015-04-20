@@ -441,9 +441,20 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## See if the fortran compiler supports the intrinsic function "C_SIZEOF"
   PAC_PROG_FC_C_SIZEOF
-
+	
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
-  PAC_PROG_FC_STORAGE_SIZE	
+  PAC_PROG_FC_STORAGE_SIZE
+
+  ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
+  if test "X$HAVE_C_SIZEOF_FORTRAN" = "Xno" && test "X$HAVE_C_SIZEOF_FORTRAN" = "Xno"; then
+    AC_MSG_ERROR([Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE])
+  fi
+
+  AC_DEFINE([FORTRAN_HAVE_STORAGE_SIZE], [1], [Define if we have Fortran intrinsic STORAGE_SIZE])
+
+  AC_DEFINE([FORTRAN_HAVE_C_SIZEOF], [1], [Define if we have Fortran intrinsic C_SIZEOF])
+	
+  AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
 
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
@@ -468,9 +479,6 @@ fi
 ## Change back to the C language
 AC_LANG_POP(Fortran)
 
-AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"])
-AM_CONDITIONAL([FORTRAN_HAVE_C_SIZEOF], [test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"])
-AM_CONDITIONAL([FORTRAN_HAVE_STORAGE_SIZE], [test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_2003_CONDITIONAL_F], [test "X$HAVE_FORTRAN_2003" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
 

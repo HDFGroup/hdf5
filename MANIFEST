@@ -306,8 +306,6 @@
 ./fortran/src/H5f90kit.c
 ./fortran/src/H5f90proto.h
 ./fortran/src/H5test_kind.F90
-./fortran/src/H5test_kind_SIZEOF.F90
-./fortran/src/H5test_kind_STORAGE_SIZE.F90
 ./fortran/src/H5match_types.c
 ./fortran/src/HDF5.F90
 ./fortran/src/H5config_f.inc.in
@@ -327,10 +325,7 @@
 ./fortran/test/fortranlib_test_F03.f90
 ./fortran/test/t.c
 ./fortran/test/t.h
-./fortran/test/tf.f90
-./fortran/test/tf_F90.f90
-./fortran/test/tf_F03.f90
-./fortran/test/tf_F08.f90
+./fortran/test/tf.F90
 ./fortran/test/tH5A.f90
 ./fortran/test/tH5A_1_8.f90
 ./fortran/test/tH5D.f90
