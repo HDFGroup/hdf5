@@ -708,32 +708,20 @@ H5_FCDLL int_f h5eset_auto2_c(int_f* printflag, hid_t_f *estack_id, H5E_auto2_t 
 /*
  * Functions from H5f.c
  */
-#define nh5open_c            H5_FC_FUNC_(h5open_c, H5OPEN_C)
-#define nh5close_c           H5_FC_FUNC_(h5close_c, H5CLOSE_C)
-#define nh5init_types_c      H5_FC_FUNC_(h5init_types_c, H5INIT_TYPES_C)
-#define nh5close_types_c     H5_FC_FUNC_(h5close_types_c, H5CLOSE_TYPES_C)
-#define nh5init_flags_c      H5_FC_FUNC_(h5init_flags_c, H5INIT_FLAGS_C)
-#define nh5init1_flags_c     H5_FC_FUNC_(h5init1_flags_c, H5INIT1_FLAGS_C)
-#define nh5get_libversion_c  H5_FC_FUNC_(h5get_libversion_c, H5GET_LIBVERSION_C)
-#define nh5check_version_c   H5_FC_FUNC_(h5check_version_c, H5CHECK_VERSION_C)
-#define nh5garbage_collect_c H5_FC_FUNC_(h5garbage_collect_c, H5GARBAGE_COLLECT_C)
-#define nh5dont_atexit_c     H5_FC_FUNC_(h5dont_atexit_c, H5DONT_ATEXIT_C)
-
-
-H5_FCDLL int_f nh5open_c(void);
-H5_FCDLL int_f nh5close_c(void);
-H5_FCDLL int_f nh5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes);
-H5_FCDLL int_f nh5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *floatinglen, hid_t_f *integertypes, int_f *integerlen);
-H5_FCDLL int_f nh5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
+H5_FCDLL int_f h5open_c(void);
+H5_FCDLL int_f h5close_c(void);
+H5_FCDLL int_f h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes);
+H5_FCDLL int_f h5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *floatinglen, hid_t_f *integertypes, int_f *integerlen);
+H5_FCDLL int_f h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
 			       int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
 			       int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
 			       hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
 			       hsize_t_f *h5s_hsize_flags, int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags);
-H5_FCDLL int_f nh5init1_flags_c(int_f *h5lib_flags);
-H5_FCDLL int_f nh5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum);
-H5_FCDLL int_f nh5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum);
-H5_FCDLL int_f nh5garbage_collect_c(void);
-H5_FCDLL int_f nh5dont_atexit_c(void);
+H5_FCDLL int_f h5init1_flags_c(int_f *h5lib_flags);
+H5_FCDLL int_f h5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum);
+H5_FCDLL int_f h5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum);
+H5_FCDLL int_f h5garbage_collect_c(void);
+H5_FCDLL int_f h5dont_atexit_c(void);
 
 /*
  * Functions from H5Zf.c

@@ -49,7 +49,7 @@
  * SOURCE
 */
 int_f
-nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes )
+h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes )
 /******/
 {
     int ret_value = -1;
@@ -300,7 +300,7 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
  * SOURCE
  */
 int_f
-nh5close_types_c( hid_t_f * types, int_f *lentypes,
+h5close_types_c( hid_t_f * types, int_f *lentypes,
                   hid_t_f * floatingtypes, int_f* floatinglen,
                   hid_t_f * integertypes,  int_f * integerlen )
 /******/
@@ -368,7 +368,7 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  * SOURCE
  */
 int_f
-nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags, 
+h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags, 
 		 int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
                  int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
                  int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
@@ -708,7 +708,7 @@ nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 }
 
 int_f
-nh5init1_flags_c(int_f *h5lib_flags)
+h5init1_flags_c(int_f *h5lib_flags)
 /******/
 {
     int ret_value = -1;
@@ -734,7 +734,7 @@ nh5init1_flags_c(int_f *h5lib_flags)
  * SOURCE
  */
 int_f
-nh5open_c(void)
+h5open_c(void)
 /******/
 {
     int ret_value = -1;
@@ -755,7 +755,7 @@ nh5open_c(void)
  * SOURCE
  */
 int_f
-nh5close_c(void)
+h5close_c(void)
 /******/
 {
     int ret_value = -1;
@@ -788,7 +788,7 @@ nh5close_c(void)
  *
  */
 int_f
-nh5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
+h5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
 /******/
 {
 
@@ -826,7 +826,7 @@ nh5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
  * SOURCE
  */
 int_f
-nh5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
+h5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
 /******/
 {
     int ret_value = -1;
@@ -855,7 +855,7 @@ nh5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
  * SOURCE
  */
 int_f
-nh5garbage_collect_c(void)
+h5garbage_collect_c(void)
 /******/
 {
     int ret_value = -1;
@@ -878,7 +878,7 @@ nh5garbage_collect_c(void)
  * SOURCE
  */
 int_f
-nh5dont_atexit_c(void)
+h5dont_atexit_c(void)
 /******/
 {
     int ret_value = -1;
