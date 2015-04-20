@@ -1,3 +1,4 @@
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
@@ -66,10 +67,6 @@
  * template macro is the H5T_INIT_TYPE() macro below.
  *
  */
-
-/* Define the code template for types which need no extra initialization for the "GUTS" in the H5T_INIT_TYPE macro */
-#define H5T_INIT_TYPE_NONE_CORE {					      \
-}
 
 /* Define the code template for bitfields for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_BITFIELD_CORE {					      \
@@ -1986,7 +1983,7 @@ H5T_detect_class(const H5T_t *dt, H5T_class_t cls, hbool_t from_api)
         case H5T_VLEN:
         case H5T_ENUM:
             HGOTO_DONE(H5T_detect_class(dt->shared->parent, cls, from_api));
-
+            break;
         case H5T_NO_CLASS:
         case H5T_INTEGER:
         case H5T_FLOAT:
@@ -3240,12 +3237,12 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                     HDassert(tmp != NULL);
 
                     /* Apply the accumulated size change to the offset of the field */
-                    new_dt->shared->u.compnd.memb[i].offset += accum_change;
+                    new_dt->shared->u.compnd.memb[i].offset += (size_t) accum_change;
 
                     if(old_dt->shared->u.compnd.sorted != H5T_SORT_VALUE) {
                         for(old_match = -1, j = 0; j < old_dt->shared->u.compnd.nmembs; j++) {
                             if(!HDstrcmp(new_dt->shared->u.compnd.memb[i].name, old_dt->shared->u.compnd.memb[j].name)) {
-                                old_match = j;
+                                old_match = (int) j;
                                 break;
                             } /* end if */
                         } /* end for */
@@ -3255,19 +3252,20 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "fields in datatype corrupted");
                     } /* end if */
                     else
-                        old_match = i;
+                        old_match = (int) i;
 
                     /* If the field changed size, add that change to the accumulated size change */
                     if(new_dt->shared->u.compnd.memb[i].type->shared->size != old_dt->shared->u.compnd.memb[old_match].type->shared->size) {
                         /* Adjust the size of the member */
                         new_dt->shared->u.compnd.memb[i].size = (old_dt->shared->u.compnd.memb[old_match].size*tmp->shared->size)/old_dt->shared->u.compnd.memb[old_match].type->shared->size;
 
-                        accum_change += (new_dt->shared->u.compnd.memb[i].type->shared->size - old_dt->shared->u.compnd.memb[old_match].type->shared->size);
+                        accum_change += (int) (new_dt->shared->u.compnd.memb[i].type->shared->size - old_dt->shared->u.compnd.memb[old_match].type->shared->size);
+                        HDassert(accum_change >= 0);
                     } /* end if */
                 } /* end for */
 
                 /* Apply the accumulated size change to the size of the compound struct */
-                new_dt->shared->size += accum_change;
+                new_dt->shared->size += (size_t) accum_change;
 
                 }
                 break;
@@ -3313,6 +3311,13 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                 new_dt->shared->size=new_dt->shared->u.array.nelem*new_dt->shared->parent->shared->size;
                 break;
 
+            case H5T_NO_CLASS:
+            case H5T_INTEGER:
+            case H5T_FLOAT:
+            case H5T_TIME:
+            case H5T_STRING:
+            case H5T_BITFIELD:
+            case H5T_NCLASSES:
             default:
                 break;
         } /* end switch */
@@ -3530,6 +3535,16 @@ H5T__free(H5T_t *dt)
             H5MM_xfree(dt->shared->u.opaque.tag);
             break;
 
+        case H5T_NO_CLASS:
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_REFERENCE:
+        case H5T_VLEN:
+        case H5T_ARRAY:
+        case H5T_NCLASSES:
         default:
             break;
     } /* end switch */
@@ -3796,11 +3811,14 @@ H5T_set_size(H5T_t *dt, size_t size)
             case H5T_ARRAY:
             case H5T_REFERENCE:
                 HDassert("can't happen" && 0);
+                break;
             case H5T_NO_CLASS:
             case H5T_NCLASSES:
                 HDassert("invalid type" && 0);
+                break;
             default:
                 HDassert("not implemented yet" && 0);
+                break;
         }
 
         /* Commit (if we didn't convert this type to a VL string) */
@@ -3875,7 +3893,6 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
     unsigned	*idx1 = NULL, *idx2 = NULL;
     size_t	base_size;
     hbool_t	swapped;
-    int	i, j;
     unsigned u;
     int	tmp;
     int	ret_value = 0;
@@ -3930,24 +3947,32 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             for(u = 0; u < dt1->shared->u.compnd.nmembs; u++)
                 idx1[u] = idx2[u] = u;
             if(dt1->shared->u.enumer.nmembs > 1) {
-                for(i = dt1->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i)
+                int i;
+
+                for(i = (int) dt1->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+                    int j;
+
                     for(j = 0, swapped=FALSE; j < i; j++)
                         if(HDstrcmp(dt1->shared->u.compnd.memb[idx1[j]].name,
                                  dt1->shared->u.compnd.memb[idx1[j + 1]].name) > 0) {
-                            tmp = idx1[j];
+                            unsigned tmp_idx = idx1[j];
                             idx1[j] = idx1[j + 1];
-                            idx1[j + 1] = tmp;
+                            idx1[j + 1] = tmp_idx;
                             swapped = TRUE;
                         }
-                for(i = dt2->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i)
+                }
+                for(i = (int) dt2->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+                    int j;
+
                     for(j = 0, swapped = FALSE; j<i; j++)
                         if(HDstrcmp(dt2->shared->u.compnd.memb[idx2[j]].name,
                                  dt2->shared->u.compnd.memb[idx2[j + 1]].name) > 0) {
-                            tmp = idx2[j];
+                            unsigned tmp_idx = idx2[j];
                             idx2[j] = idx2[j + 1];
-                            idx2[j + 1] = tmp;
+                            idx2[j + 1] = tmp_idx;
                             swapped = TRUE;
                         }
+                }
             } /* end if */
 
 #ifdef H5T_DEBUG
@@ -4007,28 +4032,39 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
             for (u=0; u<dt1->shared->u.enumer.nmembs; u++)
                 idx1[u] = u;
-            if(dt1->shared->u.enumer.nmembs > 1)
-                for (i=dt1->shared->u.enumer.nmembs-1, swapped=TRUE; swapped && i>=0; --i)
-                    for (j=0, swapped=FALSE; j<i; j++)
+            if(dt1->shared->u.enumer.nmembs > 1) {
+                int i;
+                for (i = (int) dt1->shared->u.enumer.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+                    int j;
+
+                    for (j = 0, swapped = FALSE; j < i; j++)
                         if (HDstrcmp(dt1->shared->u.enumer.name[idx1[j]],
                                  dt1->shared->u.enumer.name[idx1[j+1]]) > 0) {
-                            tmp = idx1[j];
+                            unsigned tmp_idx = idx1[j];
                             idx1[j] = idx1[j+1];
-                            idx1[j+1] = tmp;
+                            idx1[j+1] = tmp_idx;
                             swapped = TRUE;
                         }
+                }
+            }
             for (u=0; u<dt2->shared->u.enumer.nmembs; u++)
                 idx2[u] = u;
-            if(dt2->shared->u.enumer.nmembs > 1)
-                for (i=dt2->shared->u.enumer.nmembs-1, swapped=TRUE; swapped && i>=0; --i)
-                    for (j=0, swapped=FALSE; j<i; j++)
+            if(dt2->shared->u.enumer.nmembs > 1) {
+                int i;
+
+                for (i = (int) dt2->shared->u.enumer.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
+                    int j;
+
+                    for (j = 0, swapped = FALSE; j < i; j++)
                         if (HDstrcmp(dt2->shared->u.enumer.name[idx2[j]],
                                  dt2->shared->u.enumer.name[idx2[j+1]]) > 0) {
-                            tmp = idx2[j];
+                            unsigned tmp_idx = idx2[j];
                             idx2[j] = idx2[j+1];
-                            idx2[j+1] = tmp;
+                            idx2[j+1] = tmp_idx;
                             swapped = TRUE;
                         }
+                }
+            }
 
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
@@ -4148,6 +4184,14 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                 HGOTO_DONE(1);
             break;
 
+        case H5T_NO_CLASS:
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_REFERENCE:
+        case H5T_NCLASSES:
         default:
             /*
              * Atomic datatypes...
@@ -4255,13 +4299,23 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                         case H5R_BADTYPE:
                         case H5R_MAXTYPE:
                             HDassert("invalid type" && 0);
+                            break;
                         default:
                             HDassert("not implemented yet" && 0);
+                            break;
                     }
                     break;
 
+                case H5T_NO_CLASS:
+                case H5T_OPAQUE:
+                case H5T_COMPOUND:
+                case H5T_ENUM:
+                case H5T_VLEN:
+                case H5T_ARRAY:
+                case H5T_NCLASSES:
                 default:
                     HDassert("not implemented yet" && 0);
+                    break;
             }
         break;
     } /* end switch */
@@ -4535,7 +4589,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
         } /* end if */
         if(cmp > 0)
             md++;
-        HDmemmove(H5T_g.path + md + 1, H5T_g.path + md, (H5T_g.npaths - md) * sizeof(H5T_path_t*));
+        HDmemmove(H5T_g.path + md + 1, H5T_g.path + md, (size_t) (H5T_g.npaths - md) * sizeof(H5T_path_t*));
         H5T_g.npaths++;
 	H5T_g.path[md] = path;
 	table = path;
@@ -5000,6 +5054,17 @@ H5T_is_sensible(const H5T_t *dt)
                 ret_value=FALSE;
             break;
 
+        case H5T_NO_CLASS:
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
+        case H5T_VLEN:
+        case H5T_ARRAY:
+        case H5T_NCLASSES:
         default:
             /* Assume all other datatype are sensible to store on disk */
             ret_value=TRUE;
@@ -5082,7 +5147,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                     H5T_t *memb_type;   /* Member's datatype pointer */
 
                     /* Apply the accumulated size change to the offset of the field */
-                    dt->shared->u.compnd.memb[i].offset += accum_change;
+                    dt->shared->u.compnd.memb[i].offset += (size_t) accum_change;
 
                     /* Set the member type pointer (for convenience) */
                     memb_type=dt->shared->u.compnd.memb[i].type;
@@ -5105,13 +5170,14 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                             dt->shared->u.compnd.memb[i].size = (dt->shared->u.compnd.memb[i].size*memb_type->shared->size)/old_size;
 
                             /* Add that change to the accumulated size change */
-                            accum_change += (memb_type->shared->size - (int)old_size);
+                            accum_change += (int) (memb_type->shared->size - old_size);
+                            HDassert(accum_change >= 0);
                         } /* end if */
                     } /* end if */
                 } /* end for */
 
                 /* Apply the accumulated size change to the datatype */
-                dt->shared->size = (size_t)(dt->shared->size + accum_change);
+                dt->shared->size = dt->shared->size + (size_t) accum_change;
                 break;
 
             case H5T_VLEN: /* Recurse on the VL information if it's VL, compound or array, then free VL sequence */
@@ -5145,6 +5211,15 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                 } /* end if */
                 break;
 
+            case H5T_NO_CLASS:
+            case H5T_INTEGER:
+            case H5T_FLOAT:
+            case H5T_TIME:
+            case H5T_STRING:
+            case H5T_BITFIELD:
+            case H5T_OPAQUE:
+            case H5T_ENUM:
+            case H5T_NCLASSES:
             default:
                 break;
         } /* end switch */
@@ -5235,6 +5310,15 @@ H5T_upgrade_version_cb(H5T_t *dt, void *op_value)
                 dt->shared->version = dt->shared->parent->shared->version;
             break;
 
+        case H5T_NO_CLASS:
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
+        case H5T_NCLASSES:
         default:
             break;
     } /* end switch */
