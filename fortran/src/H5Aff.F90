@@ -494,7 +494,7 @@ CONTAINS
 
     hdferr = h5aget_name_c(attr_id, size, buf)
   END SUBROUTINE h5aget_name_f
-
+!!$
 !!$  SUBROUTINE H5Aget_name_f(attr_id, size, buf, hdferr)
 !!$    IMPLICIT NONE
 !!$    INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -503,9 +503,10 @@ CONTAINS
 !!$    INTEGER, INTENT(OUT) :: hdferr
 !!$!*****
 !!$    CHARACTER(KIND=C_CHAR, LEN=LEN(buf)+1) :: c_buf
+!!$    INTEGER(SIZE_T) :: size_out
 !!$    
 !!$    INTERFACE
-!!$       INTEGER FUNCTION H5Aget_name(attr_id, size, buf) BIND(C, NAME='H5Aget_name')
+!!$       INTEGER(SIZE_T) FUNCTION H5Aget_name(attr_id, size, buf) BIND(C, NAME='H5Aget_name')
 !!$         IMPORT :: C_CHAR
 !!$         IMPORT :: HID_T, SIZE_T
 !!$         INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
@@ -515,11 +516,14 @@ CONTAINS
 !!$    END INTERFACE
 !!$
 !!$    ! add 1 for the null char
-!!$    PRINT*,H5Aget_name(attr_id, size + 1_SIZE_T, c_buf)
-!!$    hdferr = INT(H5Aget_name(attr_id, size + 1_SIZE_T, c_buf))
-!!$
-!!$    CALL H5_Fortran_string_c2f(c_buf, buf)
-!!$
+!!$    size_out = H5Aget_name(attr_id, size + 1_SIZE_T, c_buf)
+!!$    
+!!$    hdferr = 0
+!!$    IF(size_out.LT.0)THEN
+!!$       hdferr = -1
+!!$    ELSE
+!!$       CALL H5_Fortran_string_c2f(c_buf, buf)
+!!$    ENDIF
 !!$
 !!$  END SUBROUTINE H5Aget_name_f
 

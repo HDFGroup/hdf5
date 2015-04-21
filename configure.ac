@@ -149,7 +149,6 @@ AC_MSG_RESULT([done])
 ## MPE: whether MPE option is enabled. Default no.
 ## STATIC_EXEC: whether static-exec is enabled. Default no.
 ## HDF_FORTRAN: whether Fortran is enabled. Default no.
-## HDF_FORTRAN2003: whether Fortran 2003 is enabled. Default no.
 ## FC: Fortran compiler.
 ## HDF_CXX: whether C++ is enabled. Default no.
 ## CXX: C++ compiler.
@@ -168,9 +167,7 @@ AC_SUBST([EXTERNAL_FILTERS])
 AC_SUBST([MPE]) MPE=no
 AC_SUBST([STATIC_EXEC]) STATIC_EXEC=no
 AC_SUBST([HDF_FORTRAN]) HDF_FORTRAN=no
-AC_SUBST([HDF_FORTRAN2003]) HDF_FORTRAN2003=no
 AC_SUBST([FC]) HDF_FORTRAN=no
-AC_SUBST([FC2003]) HDF_FORTRAN2003=no
 AC_SUBST([HDF_CXX]) HDF_CXX=no
 AC_SUBST([CXX]) HDF_CXX=no
 AC_SUBST([HDF5_HL]) HDF5_HL=yes
@@ -362,31 +359,6 @@ else
   echo "no"
 fi
 
-
-## ----------------------------------------------------------------------
-## Check if they would like the Fortran 2003 interface compiled
-##
-AC_MSG_CHECKING([if Fortran 2003 interface enabled])
-AC_ARG_ENABLE([fortran2003],
-              [AS_HELP_STRING([--enable-fortran2003],
-                              [Compile the Fortran 2003 interface, must also specify --enable-fortran [default=no]])],
-              [HDF_FORTRAN2003=$enableval])
-
-## ----------------------------------------------------------------------
-## Check to make sure --enable-fortran is present if --enable-fortran2003 
-## was specified
-
-if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xno"; then
-  echo "no"
-  AC_MSG_ERROR([--enable-fortran must be used with --enable-fortran2003])
-else
-  if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xyes"; then
-    echo "yes"
-  else
-    echo "no"
-  fi
-fi
-
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
 ## We will output an include file for Fortran, H5config_f.inc which 
@@ -397,7 +369,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     [sed -i '1d;s%^/\* \(.*\) \*/%\1%;s/#define /#define H5_/;s/#undef /#undef H5_/' fortran/src/H5config_f.inc])
 
   AC_SUBST([FC]) HDF_FORTRAN=yes
-  AC_SUBST([HAVE_FORTRAN_2003])
 		
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
 
@@ -462,17 +433,15 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
   fi
 
-  if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
-    ## Checking if the compiler supports the required Fortran 2003 features and
-    ## disable Fortran 2003 if it does not.
-    PAC_PROG_FC_HAVE_F2003_REQUIREMENTS
+  ## Checking if the compiler supports the required Fortran 2003 features and
+  ## disable Fortran 2003 if it does not.
+  PAC_PROG_FC_HAVE_F2003_REQUIREMENTS
  
-    if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
-      AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
-    else
-      HAVE_FORTRAN_2003="yes"
-    fi
+  if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
+    AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
+  else
+    HAVE_FORTRAN_2003="yes"
   fi
 else
   FC="no"
@@ -480,8 +449,6 @@ fi
 
 ## Change back to the C language
 AC_LANG_POP(Fortran)
-
-AM_CONDITIONAL([FORTRAN_2003_CONDITIONAL_F], [test "X$HAVE_FORTRAN_2003" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Check if they would like the C++ interface compiled

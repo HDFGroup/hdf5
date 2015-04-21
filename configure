@@ -722,8 +722,6 @@ am__fastdepCXX_TRUE
 CXXDEPMODE
 ac_ct_CXX
 CXXFLAGS
-FORTRAN_2003_CONDITIONAL_F_FALSE
-FORTRAN_2003_CONDITIONAL_F_TRUE
 FCLIBS
 F9XMODEXT
 F9XMODFLAG
@@ -740,7 +738,6 @@ HSIZE_T
 HADDR_T
 R_INTEGER
 R_LARGE
-HAVE_FORTRAN_2003
 HDF5_INTERFACES
 am__fastdepCC_FALSE
 am__fastdepCC_TRUE
@@ -770,9 +767,7 @@ INSTRUMENT
 HDF5_HL
 CXX
 HDF_CXX
-FC2003
 FC
-HDF_FORTRAN2003
 HDF_FORTRAN
 STATIC_EXEC
 MPE
@@ -872,7 +867,6 @@ enable_maintainer_mode
 enable_dependency_tracking
 enable_unsupported
 enable_fortran
-enable_fortran2003
 enable_cxx
 enable_hl
 enable_shared
@@ -1553,8 +1547,6 @@ Optional Features:
                           speeds up one-time build
   --enable-unsupported    Allow unsupported combinations of configure options
   --enable-fortran        Compile the Fortran 90/95 interface [default=no]
-  --enable-fortran2003    Compile the Fortran 2003 interface, must also
-                          specify --enable-fortran [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
   --enable-hl             Enable the high level library [default=yes]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -3853,7 +3845,6 @@ $as_echo "done" >&6; }
 ## MPE: whether MPE option is enabled. Default no.
 ## STATIC_EXEC: whether static-exec is enabled. Default no.
 ## HDF_FORTRAN: whether Fortran is enabled. Default no.
-## HDF_FORTRAN2003: whether Fortran 2003 is enabled. Default no.
 ## FC: Fortran compiler.
 ## HDF_CXX: whether C++ is enabled. Default no.
 ## CXX: C++ compiler.
@@ -3872,9 +3863,7 @@ $as_echo "done" >&6; }
  MPE=no
  STATIC_EXEC=no
  HDF_FORTRAN=no
- HDF_FORTRAN2003=no
  HDF_FORTRAN=no
- HDF_FORTRAN2003=no
  HDF_CXX=no
  HDF_CXX=no
  HDF5_HL=yes
@@ -5128,33 +5117,6 @@ else
   echo "no"
 fi
 
-
-## ----------------------------------------------------------------------
-## Check if they would like the Fortran 2003 interface compiled
-##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran 2003 interface enabled" >&5
-$as_echo_n "checking if Fortran 2003 interface enabled... " >&6; }
-# Check whether --enable-fortran2003 was given.
-if test "${enable_fortran2003+set}" = set; then :
-  enableval=$enable_fortran2003; HDF_FORTRAN2003=$enableval
-fi
-
-
-## ----------------------------------------------------------------------
-## Check to make sure --enable-fortran is present if --enable-fortran2003
-## was specified
-
-if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xno"; then
-  echo "no"
-  as_fn_error $? "--enable-fortran must be used with --enable-fortran2003" "$LINENO" 5
-else
-  if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xyes"; then
-    echo "yes"
-  else
-    echo "no"
-  fi
-fi
-
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
 ## We will output an include file for Fortran, H5config_f.inc which
@@ -5165,7 +5127,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
 
    HDF_FORTRAN=yes
-
 
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
 
@@ -6554,10 +6515,9 @@ $as_echo "#define FORTRAN_HAVE_SIZEOF 1" >>confdefs.h
 
   fi
 
-  if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
-    ## Checking if the compiler supports the required Fortran 2003 features and
-    ## disable Fortran 2003 if it does not.
+  ## Checking if the compiler supports the required Fortran 2003 features and
+  ## disable Fortran 2003 if it does not.
 
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
 $as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HDF... " >&6; }
@@ -6590,11 +6550,10 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
 
-    if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
-      as_fn_error $? "Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003" "$LINENO" 5
-    else
-      HAVE_FORTRAN_2003="yes"
-    fi
+  if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
+    as_fn_error $? "Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003" "$LINENO" 5
+  else
+    HAVE_FORTRAN_2003="yes"
   fi
 else
   FC="no"
@@ -6606,15 +6565,6 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-
- if test "X$HAVE_FORTRAN_2003" = "Xyes"; then
-  FORTRAN_2003_CONDITIONAL_F_TRUE=
-  FORTRAN_2003_CONDITIONAL_F_FALSE='#'
-else
-  FORTRAN_2003_CONDITIONAL_F_TRUE='#'
-  FORTRAN_2003_CONDITIONAL_F_FALSE=
-fi
 
 
 ## ----------------------------------------------------------------------
@@ -30171,10 +30121,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${FORTRAN_2003_CONDITIONAL_F_TRUE}" && test -z "${FORTRAN_2003_CONDITIONAL_F_FALSE}"; then
-  as_fn_error $? "conditional \"FORTRAN_2003_CONDITIONAL_F\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
