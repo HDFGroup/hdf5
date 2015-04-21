@@ -341,9 +341,7 @@ static herr_t
 H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 {
     htri_t changed;                     /* Flag to indicate that the dataspace was successfully extended */
-    H5S_t *space;                       /* Dataset's dataspace */
-    int     rank;                       /* Dataspace # of dimensions */
-    hsize_t curr_dims[H5O_LAYOUT_NDIMS];/* Current dimension sizes */
+    hsize_t old_dims[H5S_MAX_RANK];     /* Current (i.e. old, if changed) dimension sizes */
     H5O_fill_t *fill;                   /* Dataset's fill value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -364,20 +362,30 @@ H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
      */
 
     /* Retrieve the current dimensions */
-    space = dataset->shared->space;
-    if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
+    HDcompile_assert(sizeof(old_dims) == sizeof(dataset->shared->curr_dims));
+    HDmemcpy(old_dims, dataset->shared->curr_dims, H5S_MAX_RANK * sizeof(old_dims[0]));
 
     /* Increase the size of the data space */
-    if((changed = H5S_extend(space, size)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to increase size of data space")
+    if((changed = H5S_extend(dataset->shared->space, size)) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to increase size of dataspace")
 
     /* Updated the dataset's info if the dataspace was successfully extended */
     if(changed) {
+        /* Get the extended dimension sizes */
+        /* (Need to retrieve this here, since the 'size' dimensions could
+         *  extend one dimension but be smaller in a different dimension,
+         *  and the dataspace's extent is the larger of the current and
+         *  'size' dimension values. - QAK)
+         */
+        if(H5S_get_simple_extent_dims(dataset->shared->space, dataset->shared->curr_dims, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
+
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dataset->shared->layout.type) {
+            /* Update general information for chunks */
             if(H5D__chunk_set_info(dataset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks")
+            /* Update the chunk cache indices */
             if(H5D__chunk_update_cache(dataset, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
         } /* end if */
@@ -385,8 +393,7 @@ H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 	/* Allocate space for the new parts of the dataset, if appropriate */
         fill = &dataset->shared->dcpl_cache.fill;
         if(fill->alloc_time == H5D_ALLOC_TIME_EARLY)
-            if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_EXTEND, FALSE,
-                    curr_dims) < 0)
+            if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_EXTEND, FALSE, old_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
 
         /* Mark the dataspace as dirty, for later writing to the file */

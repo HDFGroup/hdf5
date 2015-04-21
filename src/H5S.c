@@ -2144,14 +2144,13 @@ H5S_extend(H5S_t *space, const hsize_t *size)
     HDassert(size);
 
     /* Check through all the dimensions to see if modifying the dataspace is allowed */
-    for(u = 0; u < space->extent.rank; u++) {
-        if(space->extent.size[u]<size[u]) {
-            if(space->extent.max && H5S_UNLIMITED!=space->extent.max[u] &&
-                    space->extent.max[u]<size[u])
+    for(u = 0; u < space->extent.rank; u++)
+        if(space->extent.size[u] < size[u]) {
+            if(space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
+                    space->extent.max[u] < size[u])
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be increased")
             ret_value++;
         } /* end if */
-    } /* end for */
 
     /* Update */
     if(ret_value) {
