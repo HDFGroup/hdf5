@@ -137,42 +137,6 @@ H5_FCDLL void HD5packFstring (char *src, char *dest, size_t len);
 #define nh5ltget_attribute_ndims_c  H5_FC_FUNC_(h5ltget_attribute_ndims_c, H5LTGET_ATTRIBUTE_NDIMS_C)
 #define nh5ltget_attribute_info_c   H5_FC_FUNC_(h5ltget_attribute_info_c, H5LTGET_ATTRIBUTE_INFO_C)
 #define nh5ltpath_valid_c           H5_FC_FUNC_(h5ltpath_valid_c, H5LTPATH_VALID_C)
-
-
-/*-------------------------------------------------------------------------
-* Table
-*-------------------------------------------------------------------------
-*/
-#define nh5tbmake_table_c           H5_FC_FUNC_(h5tbmake_table_c, H5TBMAKE_TABLE_C)
-#define nh5tbwrite_field_name_c     H5_FC_FUNC_(h5tbwrite_field_name_c, H5TBWRITE_FIELD_NAME_C)
-#define nh5tbwrite_field_name_int_c    H5_FC_FUNC_(h5tbwrite_field_name_int_c, H5TBWRITE_FIELD_NAME_INT_C)
-#define nh5tbwrite_field_name_fl_c     H5_FC_FUNC_(h5tbwrite_field_name_fl_c, H5TBWRITE_FIELD_NAME_FL_C)
-#define nh5tbwrite_field_name_dl_c     H5_FC_FUNC_(h5tbwrite_field_name_dl_c, H5TBWRITE_FIELD_NAME_DL_C)
-#define nh5tbwrite_field_name_st_c     H5_FC_FUNC_(h5tbwrite_field_name_st_c, H5TBWRITE_FIELD_NAME_ST_C)
-#define nh5tbread_field_name_c      H5_FC_FUNC_(h5tbread_field_name_c, H5TBREAD_FIELD_NAME_C)
-#define nh5tbread_field_name_int_c     H5_FC_FUNC_(h5tbread_field_name_int_c, H5TBREAD_FIELD_NAME_INT_C)
-#define nh5tbread_field_name_fl_c      H5_FC_FUNC_(h5tbread_field_name_fl_c, H5TBREAD_FIELD_NAME_FL_C)
-#define nh5tbread_field_name_dl_c      H5_FC_FUNC_(h5tbread_field_name_dl_c, H5TBREAD_FIELD_NAME_DL_C)
-#define nh5tbread_field_name_st_c      H5_FC_FUNC_(h5tbread_field_name_st_c, H5TBREAD_FIELD_NAME_ST_C)
-#define nh5tbwrite_field_index_c    H5_FC_FUNC_(h5tbwrite_field_index_c, H5TBWRITE_FIELD_INDEX_C)
-#define nh5tbwrite_field_index_int_c   H5_FC_FUNC_(h5tbwrite_field_index_int_c, H5TBWRITE_FIELD_INDEX_INT_C)
-#define nh5tbwrite_field_index_fl_c    H5_FC_FUNC_(h5tbwrite_field_index_fl_c, H5TBWRITE_FIELD_INDEX_FL_C)
-#define nh5tbwrite_field_index_dl_c    H5_FC_FUNC_(h5tbwrite_field_index_dl_c, H5TBWRITE_FIELD_INDEX_DL_C)
-#define nh5tbwrite_field_index_st_c    H5_FC_FUNC_(h5tbwrite_field_index_st_c, H5TBWRITE_FIELD_INDEX_ST_C)
-#define nh5tbread_field_index_c     H5_FC_FUNC_(h5tbread_field_index_c, H5TBREAD_FIELD_INDEX_C)
-#define nh5tbread_field_index_int_c    H5_FC_FUNC_(h5tbread_field_index_int_c, H5TBREAD_FIELD_INDEX_INT_C)
-#define nh5tbread_field_index_fl_c     H5_FC_FUNC_(h5tbread_field_index_fl_c, H5TBREAD_FIELD_INDEX_FL_C)
-#define nh5tbread_field_index_dl_c     H5_FC_FUNC_(h5tbread_field_index_dl_c, H5TBREAD_FIELD_INDEX_DL_C)
-#define nh5tbread_field_index_st_c     H5_FC_FUNC_(h5tbread_field_index_st_c, H5TBREAD_FIELD_INDEX_ST_C)
-#define nh5tbinsert_field_c         H5_FC_FUNC_(h5tbinsert_field_c, H5TBINSERT_FIELD_C)
-#define nh5tbinsert_field_int_c        H5_FC_FUNC_(h5tbinsert_field_int_c, H5TBINSERT_FIELD_INT_C)
-#define nh5tbinsert_field_fl_c         H5_FC_FUNC_(h5tbinsert_field_fl_c, H5TBINSERT_FIELD_FL_C)
-#define nh5tbinsert_field_dl_c         H5_FC_FUNC_(h5tbinsert_field_dl_c, H5TBINSERT_FIELD_DL_C)
-#define nh5tbinsert_field_st_c         H5_FC_FUNC_(h5tbinsert_field_st_c, H5TBINSERT_FIELD_ST_C)
-#define nh5tbdelete_field_c         H5_FC_FUNC_(h5tbdelete_field_c, H5TBDELETE_FIELD_C)
-#define nh5tbget_table_info_c       H5_FC_FUNC_(h5tbget_table_info_c, H5TBGET_TABLE_INFO_C)
-#define nh5tbget_field_info_c       H5_FC_FUNC_(h5tbget_field_info_c, H5TBGET_FIELD_INFO_C)
-
 /*
  *  Functions from H5DSfc.c
  */
@@ -1287,7 +1251,7 @@ h5imis_palette_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbmake_table_c(size_t_f *namelen1,
+h5tbmake_table_c(size_t_f *namelen1,
                   _fcd name1,
                   hid_t_f *loc_id,
                   size_t_f *namelen,
@@ -1305,7 +1269,7 @@ nh5tbmake_table_c(size_t_f *namelen1,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbwrite_field_name_c(hid_t_f *loc_id,
+h5tbwrite_field_name_c(hid_t_f *loc_id,
                         size_t_f *namelen,
                         _fcd name,
                         size_t_f *namelen1,
@@ -1317,7 +1281,7 @@ nh5tbwrite_field_name_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbwrite_field_name_int_c(hid_t_f *loc_id,
+h5tbwrite_field_name_int_c(hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd name,
                             size_t_f *namelen1,
@@ -1329,7 +1293,7 @@ nh5tbwrite_field_name_int_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbwrite_field_name_fl_c(hid_t_f *loc_id,
+h5tbwrite_field_name_fl_c(hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            size_t_f *namelen1,
@@ -1341,7 +1305,7 @@ nh5tbwrite_field_name_fl_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbwrite_field_name_dl_c(hid_t_f *loc_id,
+h5tbwrite_field_name_dl_c(hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            size_t_f *namelen1,
@@ -1353,7 +1317,7 @@ nh5tbwrite_field_name_dl_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbwrite_field_name_st_c(hid_t_f *loc_id,
+h5tbwrite_field_name_st_c(hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            size_t_f *namelen1,
@@ -1365,7 +1329,7 @@ nh5tbwrite_field_name_st_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbread_field_name_c(hid_t_f *loc_id,
+h5tbread_field_name_c(hid_t_f *loc_id,
                        size_t_f *namelen,
                        _fcd name,
                        size_t_f *namelen1,
@@ -1377,7 +1341,7 @@ nh5tbread_field_name_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbread_field_name_int_c(hid_t_f *loc_id,
+h5tbread_field_name_int_c(hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            size_t_f *namelen1,
@@ -1389,7 +1353,7 @@ nh5tbread_field_name_int_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbread_field_name_fl_c(hid_t_f *loc_id,
+h5tbread_field_name_fl_c(hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           size_t_f *namelen1,
@@ -1401,7 +1365,7 @@ nh5tbread_field_name_fl_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbread_field_name_dl_c(hid_t_f *loc_id,
+h5tbread_field_name_dl_c(hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           size_t_f *namelen1,
@@ -1413,7 +1377,7 @@ nh5tbread_field_name_dl_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbread_field_name_st_c(hid_t_f *loc_id,
+h5tbread_field_name_st_c(hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           size_t_f *namelen1,
@@ -1425,7 +1389,7 @@ nh5tbread_field_name_st_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbwrite_field_index_c(hid_t_f *loc_id,
+h5tbwrite_field_index_c(hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *field_index,
@@ -1436,7 +1400,7 @@ nh5tbwrite_field_index_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbwrite_field_index_int_c(hid_t_f *loc_id,
+h5tbwrite_field_index_int_c(hid_t_f *loc_id,
                              size_t_f *namelen,
                              _fcd name,
                              int_f *field_index,
@@ -1447,7 +1411,7 @@ nh5tbwrite_field_index_int_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbwrite_field_index_fl_c(hid_t_f *loc_id,
+h5tbwrite_field_index_fl_c(hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd name,
                             int_f *field_index,
@@ -1458,7 +1422,7 @@ nh5tbwrite_field_index_fl_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbwrite_field_index_dl_c(hid_t_f *loc_id,
+h5tbwrite_field_index_dl_c(hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd name,
                             int_f *field_index,
@@ -1469,7 +1433,7 @@ nh5tbwrite_field_index_dl_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbwrite_field_index_st_c(hid_t_f *loc_id,
+h5tbwrite_field_index_st_c(hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd name,
                             int_f *field_index,
@@ -1480,7 +1444,7 @@ nh5tbwrite_field_index_st_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbread_field_index_c(hid_t_f *loc_id,
+h5tbread_field_index_c(hid_t_f *loc_id,
                         size_t_f *namelen,
                         _fcd name,
                         int_f *field_index,
@@ -1491,7 +1455,7 @@ nh5tbread_field_index_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbread_field_index_int_c(hid_t_f *loc_id,
+h5tbread_field_index_int_c(hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd name,
                             int_f *field_index,
@@ -1502,7 +1466,7 @@ nh5tbread_field_index_int_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbread_field_index_fl_c(hid_t_f *loc_id,
+h5tbread_field_index_fl_c(hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            int_f *field_index,
@@ -1513,7 +1477,7 @@ nh5tbread_field_index_fl_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbread_field_index_dl_c(hid_t_f *loc_id,
+h5tbread_field_index_dl_c(hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            int_f *field_index,
@@ -1524,7 +1488,7 @@ nh5tbread_field_index_dl_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbread_field_index_st_c(hid_t_f *loc_id,
+h5tbread_field_index_st_c(hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            int_f *field_index,
@@ -1535,7 +1499,7 @@ nh5tbread_field_index_st_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbinsert_field_c(hid_t_f *loc_id,
+h5tbinsert_field_c(hid_t_f *loc_id,
                     size_t_f *namelen,
                     _fcd name,
                     size_t_f *namelen1,
@@ -1546,7 +1510,7 @@ nh5tbinsert_field_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbinsert_field_int_c(hid_t_f *loc_id,
+h5tbinsert_field_int_c(hid_t_f *loc_id,
                         size_t_f *namelen,
                         _fcd name,
                         size_t_f *namelen1,
@@ -1556,7 +1520,7 @@ nh5tbinsert_field_int_c(hid_t_f *loc_id,
                         void *buf);
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbinsert_field_fl_c(hid_t_f *loc_id,
+h5tbinsert_field_fl_c(hid_t_f *loc_id,
                        size_t_f *namelen,
                        _fcd name,
                        size_t_f *namelen1,
@@ -1566,7 +1530,7 @@ nh5tbinsert_field_fl_c(hid_t_f *loc_id,
                        void *buf);
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbinsert_field_dl_c(hid_t_f *loc_id,
+h5tbinsert_field_dl_c(hid_t_f *loc_id,
                        size_t_f *namelen,
                        _fcd name,
                        size_t_f *namelen1,
@@ -1576,7 +1540,7 @@ nh5tbinsert_field_dl_c(hid_t_f *loc_id,
                        void *buf);
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbinsert_field_st_c(hid_t_f *loc_id,
+h5tbinsert_field_st_c(hid_t_f *loc_id,
                        size_t_f *namelen,
                        _fcd name,
                        size_t_f *namelen1,
@@ -1586,7 +1550,7 @@ nh5tbinsert_field_st_c(hid_t_f *loc_id,
                        void *buf);
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbdelete_field_c(hid_t_f *loc_id,
+h5tbdelete_field_c(hid_t_f *loc_id,
                     size_t_f *namelen,
                     _fcd name,
                     size_t_f *namelen1,
@@ -1595,7 +1559,7 @@ nh5tbdelete_field_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbget_table_info_c(hid_t_f *loc_id,
+h5tbget_table_info_c(hid_t_f *loc_id,
                       size_t_f *namelen,
                       _fcd name,
                       hsize_t_f *nfields,
@@ -1603,7 +1567,7 @@ nh5tbget_table_info_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5tbget_field_info_c(hid_t_f *loc_id,
+h5tbget_field_info_c(hid_t_f *loc_id,
                       size_t_f *namelen,
                       _fcd name,
                       hsize_t_f *nfields,
