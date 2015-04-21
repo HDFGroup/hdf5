@@ -461,9 +461,9 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(in) :: a
 
 #ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
-    H5_SIZEOF_CHR = storage_size(a, c_size_t)/storage_size(c_char_'a',c_size_t)
+    H5_SIZEOF_CHR = storage_size(a(1:1), c_size_t)/storage_size(c_char_'a',c_size_t)
 #else
-    H5_SIZEOF_CHR = SIZEOF(a)
+    H5_SIZEOF_CHR = SIZEOF(a(1:1))
 #endif
 
   END FUNCTION H5_SIZEOF_CHR

@@ -7433,8 +7433,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
             BIND(C,NAME='h5pset_fapl_mpio_c')
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN)  :: prp_id 
-         INTEGER       , INTENT(IN)  :: comm
+         INTEGER(HID_T), INTENT(IN) :: prp_id 
+         INTEGER       , INTENT(IN) :: comm
          INTEGER       , INTENT(IN) :: info
        END FUNCTION h5pset_fapl_mpio_c
     END INTERFACE
