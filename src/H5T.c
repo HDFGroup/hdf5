@@ -3260,7 +3260,7 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                         new_dt->shared->u.compnd.memb[i].size = (old_dt->shared->u.compnd.memb[old_match].size*tmp->shared->size)/old_dt->shared->u.compnd.memb[old_match].type->shared->size;
 
                         accum_change += (int) (new_dt->shared->u.compnd.memb[i].type->shared->size - old_dt->shared->u.compnd.memb[old_match].type->shared->size);
-                        HDassert(accum_change >= 0);
+                        /* HDassert(accum_change >= 0); */
                     } /* end if */
                 } /* end for */
 
@@ -5171,7 +5171,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 
                             /* Add that change to the accumulated size change */
                             accum_change += (int) (memb_type->shared->size - old_size);
-                            HDassert(accum_change >= 0);
+                            /* HDassert(accum_change >= 0); */
                         } /* end if */
                     } /* end if */
                 } /* end for */
