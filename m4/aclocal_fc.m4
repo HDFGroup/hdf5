@@ -111,39 +111,6 @@ AC_DEFUN([PAC_PROG_FC_STORAGE_SIZE],[
 
 ])
 
-dnl Check to see if -r8 was specified to determine if we need to
-dnl compile the DOUBLE PRECISION interfaces.
-
-AC_DEFUN([PAC_PROG_FC_DEFAULT_REALisDBLE],[
-  FORTRAN_DEFAULT_REALisDBLE="no"	
-  AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
-  
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-     MODULE type_mod
-       INTERFACE h5t	
-         MODULE PROCEDURE h5t_real
-         MODULE PROCEDURE h5t_dble
-       END INTERFACE
-     CONTAINS
-       SUBROUTINE h5t_real(r)
-         REAL :: r
-       END SUBROUTINE h5t_real
-       SUBROUTINE h5t_dble(d)
-         DOUBLE PRECISION :: d
-       END SUBROUTINE h5t_dble
-     END MODULE type_mod
-     PROGRAM main
-       USE type_mod
-       REAL :: r
-       DOUBLE PRECISION :: d
-       CALL h5t(r)
-       CALL h5t(d)
-     END PROGRAM main
-    ])], [AC_MSG_RESULT([no])], 
-         [AC_MSG_RESULT([yes])
-            FORTRAN_DEFAULT_REALisDBLE="yes"])
-])
-
 dnl Checking if the compiler supports the required Fortran 2003 features and
 dnl disable Fortran 2003 if it does not.
 

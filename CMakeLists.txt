@@ -886,16 +886,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools
 endif (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
 
 #-----------------------------------------------------------------------------
-# Check if Fortran's default real is double precision. If it is and HL is 
-# being built then configure should fail due to bug HDFFV-889.
-#-----------------------------------------------------------------------------
- if (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB )
-   if (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
-     message (FATAL_ERROR " **** Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use HDF5_BUILD_HL_LIB:BOOL=OFF **** ")
-   endif (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
- endif (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB )
-
-#-----------------------------------------------------------------------------
 # Generate the H5pubconf.h file containing user settings needed by compilation
 #-----------------------------------------------------------------------------
 configure_file (${HDF_RESOURCES_DIR}/H5pubconf.h.in ${HDF5_BINARY_DIR}/H5pubconf.h @ONLY)

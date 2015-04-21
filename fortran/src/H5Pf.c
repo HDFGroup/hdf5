@@ -394,36 +394,6 @@ h5pget_chunk_c ( hid_t_f *prp_id, int_f *max_rank, hsize_t_f *dims )
   return ret_value;
 }
 
-/****if* H5Pf/h5pset_fill_valuec_c
- * NAME
- *  h5pset_fill_valuec_c
- * PURPOSE
- *  Call h5pset_fill_value_c to a character fill value
- * INPUTS
- *  prp_id - property list identifier
- *  type_id - datatype identifier (fill value is of type type_id)
- *  fillvalue  - character value
- * RETURNS
- *  0 on success, -1 on failure
- *  Saturday, August 14, 1999
- * AUTHOR
- *  Elena Pourmal
- * SOURCE
-*/
-int_f
-h5pset_fill_valuec_c (hid_t_f *prp_id, hid_t_f *type_id, _fcd fillvalue)
-/******/
-{
-     int ret_value = -1;
-
-     /*
-      * Call h5pset_fill_value_c  function.
-      */
-     ret_value = h5pset_fill_value_c(prp_id, type_id, _fcdtocp(fillvalue));
-
-     return ret_value;
-}
-
 /****if* H5Pf/h5pset_fill_value_c
  * NAME
  *  h5pset_fill_value_c
@@ -458,68 +428,6 @@ h5pset_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
 
      if (ret < 0) return ret_value;
      ret_value = 0;
-     return ret_value;
-}
-
-int_f
-h5pset_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
-/******/
-{
-     /*
-      * Call h5pset_fill_value_c  function.
-      */
-     return h5pset_fill_value_c(prp_id, type_id, fillvalue);
-}
-
-int_f
-h5pset_fill_value_real_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
-{
-     /*
-      * Call h5pset_fill_value_c  function.
-      */
-     return h5pset_fill_value_c(prp_id, type_id, fillvalue);
-}
-
-int_f
-h5pset_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
-{
-     /*
-      * Call h5pset_fill_value_c  function.
-      */
-     return h5pset_fill_value_c(prp_id, type_id, fillvalue);
-}
-
-/****if* H5Pf/h5pget_fill_valuec_c
- * NAME
- *  h5pget_fill_valuec_c
- * PURPOSE
- *  Call h5pget_fill_value_c to a character fill value
- * INPUTS
- *  prp_id     - property list identifier
- *  type_id    - datatype identifier (fill value is of type type_id)
- *  fillvalue - character value
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Saturday, August 14, 1999
- * HISTORY
- *  Fixed wrong call to C wrapper, was h5pset_fill_value_c, changed
- *  to h5pget_fill_value_c. MSB - 7/21/2014
- *
- * SOURCE
-*/
-int_f
-h5pget_fill_valuec_c (hid_t_f *prp_id, hid_t_f *type_id, _fcd fillvalue)
-/******/
-{
-     int ret_value = -1;
-
-     /*
-      * Call h5pget_fill_value_c function.
-      */
-     ret_value = h5pget_fill_value_c(prp_id, type_id, _fcdtocp(fillvalue));
-
      return ret_value;
 }
 
@@ -558,33 +466,6 @@ h5pget_fill_value_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
      if (ret < 0) return ret_value;
      ret_value = 0;
      return ret_value;
-}
-
-int_f
-h5pget_fill_value_integer_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
-{
-     /*
-      * Call h5pget_fill_value_c  function.
-      */
-     return h5pget_fill_value_c(prp_id, type_id, fillvalue);
-}
-
-int_f
-h5pget_fill_value_real_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
-{
-     /*
-      * Call h5pget_fill_value_c  function.
-      */
-     return h5pget_fill_value_c(prp_id, type_id, fillvalue);
-}
-
-int_f
-h5pget_fill_value_double_c (hid_t_f *prp_id, hid_t_f *type_id, void *fillvalue)
-{
-     /*
-      * Call h5pget_fill_value_c  function.
-      */
-     return h5pget_fill_value_c(prp_id, type_id, fillvalue);
 }
 
 /****if* H5Pf/h5pget_version_c
@@ -2831,40 +2712,6 @@ DONE:
      return ret_value;
 }
 
-
-/****if* H5Pf/h5pregisterc_c
- * NAME
- *  h5pregisterc_c
- * PURPOSE
- *  Call h5pregister_c to registers a permanent property
- * INPUTS
- *  class - property list class identifier
- *  name   - name of the new property
- *  name_len - length of the "name" buffer
- *  size - property size
- *  value - property value of character type
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
- * SOURCE
-*/
-int_f
-h5pregisterc_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f UNUSED *value_len)
-/******/
-{
-     int ret_value = -1;
-
-     /*
-      * Call h5pregister_c function
-      */
-      ret_value = h5pregister_c(cls, name, name_len, size, _fcdtocp(value));
-      return ret_value;
-}
-
 /****if* H5Pf/h5pregister_c
  * NAME
  *  h5pregister_c
@@ -2908,66 +2755,6 @@ DONE:
      return ret_value;
 }
 
-int_f
-h5pregister_integer_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void *value)
-{
-     /*
-      * Call h5pregister_c function
-      */
-     return h5pregister_c(cls, name, name_len, size, value);
-}
-
-int_f
-h5pregister_real_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void *value)
-{
-     /*
-      * Call h5pregister_c function
-      */
-     return h5pregister_c(cls, name, name_len, size, value);
-}
-
-int_f
-h5pregister_double_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void *value)
-{
-     /*
-      * Call h5pregister_c function
-      */
-     return h5pregister_c(cls, name, name_len, size, value);
-}
-
-/****if* H5Pf/h5pinsertc_c
- * NAME
- *  h5pinsertc_c
- * PURPOSE
- *  Call h5pinsert_c to register a temporary property
- * INPUTS
- *  plist - property list identifier
- *  name   - name of the new property
- *  name_len - length of the "name" buffer
- *  size - property size
- *  value - property value of character type
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- * HISTORY
- *
- * SOURCE
-*/
-int_f
-h5pinsertc_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f UNUSED *value_len)
-/******/
-{
-     int_f ret_value = -1;
-
-     /*
-      * Call h5pinsert_c function
-      */
-      ret_value = h5pinsert_c(plist, name, name_len, size, _fcdtocp(value));
-      return ret_value;
-}
-
 /****if* H5Pf/h5pinsert_c
  * NAME
  *  h5pinsert_c
@@ -3009,33 +2796,6 @@ DONE:
      if(c_name)
          HDfree(c_name);
      return ret_value;
-}
-
-int_f
-h5pinsert_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *value)
-{
-     /*
-      * Call h5pinsert_c function
-      */
-     return h5pinsert_c(plist, name, name_len, size, value);
-}
-
-int_f
-h5pinsert_real_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *value)
-{
-     /*
-      * Call h5pinsert_c function
-      */
-     return h5pinsert_c(plist, name, name_len, size, value);
-}
-
-int_f
-h5pinsert_double_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void *value)
-{
-     /*
-      * Call h5pinsert_c function
-      */
-     return h5pinsert_c(plist, name, name_len, size, value);
 }
 
 /****if* H5Pf/h5pexist_c
@@ -3434,38 +3194,6 @@ DONE:
      return ret_value;
 }
 
-/****if* H5Pf/h5psetc_c
- * NAME
- *        h5psetc_c
- * PURPOSE
- *     Call h5setc_c to set property with the character string value
- * INPUTS
- *      plist - property list identifier
- *              name   - name of property
- *              name_len - length of the "name" buffer
- *              value - property value of character type
- * RETURNS
- *     0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *              October 11, 2002
- * HISTORY
- *
- * SOURCE
-*/
-int_f
-h5psetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f UNUSED *value_len)
-/******/
-{
-     int_f ret_value = -1;
-
-     /*
-      * Call h5pset_c function
-      */
-      ret_value = h5pset_c(plist, name, name_len, _fcdtocp(value));
-      return ret_value;
-}
-
 /****if* H5Pf/h5pset_c
  * NAME
  *  h5pset_c
@@ -3504,64 +3232,6 @@ h5pset_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
 DONE:
      if(c_name != NULL) HDfree(c_name);
      return ret_value;
-}
-
-int_f
-h5pset_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
-{
-     /*
-      * Call h5pset_c function
-      */
-     return h5pset_c(plist, name, name_len, value);
-}
-
-int_f
-h5pset_real_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
-{
-     /*
-      * Call h5pset_c function
-      */
-     return h5pset_c(plist, name, name_len, value);
-}
-
-int_f
-h5pset_double_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
-{
-     /*
-      * Call h5pset_c function
-      */
-     return h5pset_c(plist, name, name_len, value);
-}
-/****if* H5Pf/h5pgetc_c
- * NAME
- *        h5pgetc_c
- * PURPOSE
- *     Call h5set_c to set property with the character string value
- * INPUTS
- *      plist - property list identifier
- *              name   - name of property
- *              name_len - length of the "name" buffer
- * Output:      value - property value of character type
- * RETURNS
- *     0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *              October 11, 2002
- * HISTORY
- *
- * SOURCE
-*/
-int_f
-h5pgetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f UNUSED *value_len)
-/******/
-{
-     int_f ret_value = -1;
-
-     /*
-      * Call h5pget_c function
-      */
-      ret_value = h5pget_c(plist, name, name_len, _fcdtocp(value));
-      return ret_value;
 }
 
 /****if* H5Pf/h5pget_c
@@ -3604,34 +3274,6 @@ DONE:
      if(c_name != NULL) HDfree(c_name);
      return ret_value;
 }
-
-int_f
-h5pget_integer_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
-{
-     /*
-      * Call h5pget_c function
-      */
-     return h5pget_c(plist, name, name_len, value);
-}
-
-int_f
-h5pget_real_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
-{
-     /*
-      * Call h5pget_c function
-      */
-     return h5pget_c(plist, name, name_len, value);
-}
-
-int_f
-h5pget_double_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
-{
-     /*
-      * Call h5pget_c function
-      */
-     return h5pget_c(plist, name, name_len, value);
-}
-
 
 /****if* H5Pf/h5pset_shuffle_c
  * NAME

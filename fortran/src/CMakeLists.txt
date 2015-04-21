@@ -145,17 +145,6 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 )
 
 #-----------------------------------------------------------------------------
-# Fortran Real Size
-#-----------------------------------------------------------------------------
-if (FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
-  # default real is 4 bytes, so include double signatures
-  set (F_DBLE "Include")
-else (FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
-  # default real is 8 bytes, so exclude double signatures
-  set (F_DBLE "Exclude")
-endif (FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
-
-#-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
 set (f90_F_SRCS
@@ -178,7 +167,6 @@ set (f90_F_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Sff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Tff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zff.F90
-    ${HDF5_F90_SRC_SOURCE_DIR}/H5_DBLE_Interface${F_DBLE}.F90
 )
 
 set (f90_F_SRCS
@@ -262,17 +250,6 @@ set (mod_files
     ${MOD_BUILD_DIR}/h5s.mod
     ${MOD_BUILD_DIR}/h5t.mod
     ${MOD_BUILD_DIR}/h5z.mod
-    ${MOD_BUILD_DIR}/h5a_provisional.mod
-    ${MOD_BUILD_DIR}/h5d_provisional.mod
-    ${MOD_BUILD_DIR}/h5e_provisional.mod
-    ${MOD_BUILD_DIR}/h5f_provisional.mod
-    ${MOD_BUILD_DIR}/h5l_provisional.mod
-    ${MOD_BUILD_DIR}/h5lib_provisional.mod
-    ${MOD_BUILD_DIR}/h5o_provisional.mod
-    ${MOD_BUILD_DIR}/h5p_provisional.mod
-    ${MOD_BUILD_DIR}/h5r_provisional.mod
-    ${MOD_BUILD_DIR}/h5t_provisional.mod
-    ${MOD_BUILD_DIR}/h5_dble_interface.mod
 )
 install (
     FILES

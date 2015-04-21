@@ -722,8 +722,6 @@ am__fastdepCXX_TRUE
 CXXDEPMODE
 ac_ct_CXX
 CXXFLAGS
-FORTRAN_DEFAULT_REALisDBLE_F_FALSE
-FORTRAN_DEFAULT_REALisDBLE_F_TRUE
 FORTRAN_2003_CONDITIONAL_F_FALSE
 FORTRAN_2003_CONDITIONAL_F_TRUE
 FCLIBS
@@ -6556,48 +6554,6 @@ $as_echo "#define FORTRAN_HAVE_SIZEOF 1" >>confdefs.h
 
   fi
 
-  ## Check to see if -r8 was specified to determine if we need to
-  ## compile the DOUBLE PRECISION interfaces.
-
-  FORTRAN_DEFAULT_REALisDBLE="no"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran default REAL is DOUBLE PRECISION" >&5
-$as_echo_n "checking if Fortran default REAL is DOUBLE PRECISION... " >&6; }
-
-  cat > conftest.$ac_ext <<_ACEOF
-
-     MODULE type_mod
-       INTERFACE h5t
-         MODULE PROCEDURE h5t_real
-         MODULE PROCEDURE h5t_dble
-       END INTERFACE
-     CONTAINS
-       SUBROUTINE h5t_real(r)
-         REAL :: r
-       END SUBROUTINE h5t_real
-       SUBROUTINE h5t_dble(d)
-         DOUBLE PRECISION :: d
-       END SUBROUTINE h5t_dble
-     END MODULE type_mod
-     PROGRAM main
-       USE type_mod
-       REAL :: r
-       DOUBLE PRECISION :: d
-       CALL h5t(r)
-       CALL h5t(d)
-     END PROGRAM main
-
-_ACEOF
-if ac_fn_fc_try_compile "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-            FORTRAN_DEFAULT_REALisDBLE="yes"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-
   if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
     ## Checking if the compiler supports the required Fortran 2003 features and
@@ -6658,14 +6614,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 else
   FORTRAN_2003_CONDITIONAL_F_TRUE='#'
   FORTRAN_2003_CONDITIONAL_F_FALSE=
-fi
-
- if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
-  FORTRAN_DEFAULT_REALisDBLE_F_TRUE=
-  FORTRAN_DEFAULT_REALisDBLE_F_FALSE='#'
-else
-  FORTRAN_DEFAULT_REALisDBLE_F_TRUE='#'
-  FORTRAN_DEFAULT_REALisDBLE_F_FALSE=
 fi
 
 
@@ -7422,12 +7370,6 @@ if test "X$HDF5_HL" = "Xyes"; then
 
 $as_echo "#define INCLUDE_HL 1" >>confdefs.h
 
-
-  ## If Fortran's default real is double precision and HL is being built then configure
-  ## should fail due to bug HDFFV-889.
-  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
-    as_fn_error $? "Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl." "$LINENO" 5
-  fi
 else
  echo "no"
 fi
@@ -30218,10 +30160,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${FORTRAN_2003_CONDITIONAL_F_TRUE}" && test -z "${FORTRAN_2003_CONDITIONAL_F_FALSE}"; then
   as_fn_error $? "conditional \"FORTRAN_2003_CONDITIONAL_F\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${FORTRAN_DEFAULT_REALisDBLE_F_TRUE}" && test -z "${FORTRAN_DEFAULT_REALisDBLE_F_FALSE}"; then
-  as_fn_error $? "conditional \"FORTRAN_DEFAULT_REALisDBLE_F\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
