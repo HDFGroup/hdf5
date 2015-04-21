@@ -53,7 +53,7 @@ static herr_t H5S_hyper_get_seq_list(const H5S_t *space, unsigned flags,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S_hyper_release(H5S_t *space);
 static htri_t H5S_hyper_is_valid(const H5S_t *space);
-static hssize_t H5S_hyper_serial_size(const H5S_t *space);
+static hssize_t H5S_hyper_serial_size(const H5F_t *f, const H5S_t *space);
 static herr_t H5S_hyper_serialize(const H5F_t *f, const H5S_t *space,
     uint8_t **p);
 static herr_t H5S_hyper_deserialize(const H5F_t *f, H5S_t *space,
@@ -1976,7 +1976,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S_hyper_serial_size(const H5S_t *space)
+H5S_hyper_serial_size(const H5F_t *f, const H5S_t *space)
 {
     unsigned u;                 /* Counter */
     hsize_t block_count;       /* block counter for regular hyperslabs */
@@ -1986,24 +1986,41 @@ H5S_hyper_serial_size(const H5S_t *space)
 
     HDassert(space);
 
-    /* Basic number of bytes required to serialize hyperslab selection:
-     *  <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> +
-     *      <length (4 bytes)> + <rank (4 bytes)> + <# of blocks (4 bytes)> = 24 bytes
-     */
-    ret_value = 24;
+    /* Check for version (right now, an unlimited dimension is the only thing
+     * that would bump the version) */
+    if(space->select.sel_info.hslab->unlim_dim >= 0)
+        /* Version 2 */
+        /* Size required is always:
+         * <type (4 bytes)> + <version (4 bytes)> + <flags (1 byte)> +
+         * <length (4 bytes)> + <rank (4 bytes)> +
+         * (4 * <rank> * <start/stride/count/block (sizeof_size bytes)>) =
+         * 17 + (4 * sizeof_size) bytes
+         */
+        ret_value = (hssize_t)17 + ((hssize_t)4 * (hssize_t)space->extent.rank
+                * (hssize_t)H5F_SIZEOF_SIZE(f));
+    else {
+        /* Version 1 */
+        /* Basic number of bytes required to serialize hyperslab selection:
+         * <type (4 bytes)> + <version (4 bytes)> + <padding (4 bytes)> +
+         * <length (4 bytes)> + <rank (4 bytes)> + <# of blocks (4 bytes)>
+         * = 24 bytes
+         */
+        ret_value = 24;
 
-    /* Check for a "regular" hyperslab selection */
-    if(space->select.sel_info.hslab->diminfo_valid) {
-        /* Check each dimension */
-        for(block_count = 1, u = 0; u < space->extent.rank; u++)
-            block_count *= space->select.sel_info.hslab->opt_diminfo[u].count;
-    } /* end if */
-    else
-        /* Spin through hyperslab spans, adding 8 * rank bytes for each block */
-        block_count = H5S_hyper_span_nblocks(space->select.sel_info.hslab->span_lst);
+        /* Check for a "regular" hyperslab selection */
+        if(space->select.sel_info.hslab->diminfo_valid) {
+            /* Check each dimension */
+            for(block_count = 1, u = 0; u < space->extent.rank; u++)
+                block_count *= space->select.sel_info.hslab->opt_diminfo[u].count;
+        } /* end if */
+        else
+            /* Spin through hyperslab spans, adding 8 * rank bytes for each
+             * block */
+            block_count = H5S_hyper_span_nblocks(space->select.sel_info.hslab->span_lst);
 
-    H5_CHECK_OVERFLOW((8 * space->extent.rank * block_count), hsize_t, hssize_t);
-    ret_value += (hssize_t)(8 * block_count * space->extent.rank);
+        H5_CHECK_OVERFLOW((8 * space->extent.rank * block_count), hsize_t, hssize_t);
+        ret_value += (hssize_t)(8 * block_count * space->extent.rank);
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_serial_size() */
@@ -2339,29 +2356,15 @@ H5S_hyper_deserialize(const H5F_t *f, H5S_t *space, uint32_t UNUSED version,
         /* Iterate over dimensions */
         for(i = 0; i < space->extent.rank; i++) {
             /* Decode start/stride/block/count */
-            H5F_size_decode(f, p, &space->select.sel_info.hslab->opt_unlim_diminfo[i].start);
-            H5F_size_decode(f, p, &space->select.sel_info.hslab->opt_unlim_diminfo[i].stride);
-            H5F_size_decode(f, p, &space->select.sel_info.hslab->opt_unlim_diminfo[i].count);
-            if(space->select.sel_info.hslab->opt_unlim_diminfo[i].count == H5S_UNLIMITED) {
-                if(space->select.sel_info.hslab->unlim_dim >= 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "cannot have more than one unlimited dimension in selection")
-                space->select.sel_info.hslab->unlim_dim = (int)i;
-            } /* end if */
-            H5F_size_decode(f, p, &space->select.sel_info.hslab->opt_unlim_diminfo[i].block);
-            if(space->select.sel_info.hslab->opt_unlim_diminfo[i].block == H5S_UNLIMITED) {
-                if(space->select.sel_info.hslab->unlim_dim >= 0)
-                    HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "cannot have more than one unlimited dimension in selection")
-                space->select.sel_info.hslab->unlim_dim = (int)i;
-            } /* end if */
+            H5F_size_decode(f, p, &start[i]);
+            H5F_size_decode(f, p, &stride[i]);
+            H5F_size_decode(f, p, &count[i]);
+            H5F_size_decode(f, p, &block[i]);
         } /* end for */
 
-        /* Copy opt_unlim_diminfo to app_diminfo */
-        HDassert(sizeof(space->select.sel_info.hslab->app_diminfo) == sizeof(space->select.sel_info.hslab->opt_unlim_diminfo));
-        HDmemcpy(space->select.sel_info.hslab->app_diminfo, space->select.sel_info.hslab->opt_unlim_diminfo, sizeof(space->select.sel_info.hslab->app_diminfo));
-
-        /* Update selection due to match current extent */
-        if(H5S__hyper_update_extent_offset(space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
+        /* Select the hyperslab to the current selection */
+        if((ret_value = H5S_select_hyperslab(space, H5S_SELECT_SET, start, stride, count, block)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
     } /* end if */
     else {
         /* decode the number of points */
@@ -9546,7 +9549,7 @@ H5S__hyper_update_extent_offset(H5S_t *space)
 
     /* Check for single block in unlimited dimension */
     if(hslab->opt_diminfo[hslab->unlim_dim].count == (hsize_t)1) {
-        HDassert(hslab->opt_diminfo[hslab->unlim_dim].block = H5S_UNLIMITED);
+        HDassert(hslab->opt_diminfo[hslab->unlim_dim].block == H5S_UNLIMITED);
 
         /* Calculate actual block size for this extent */
         hslab->opt_diminfo[hslab->unlim_dim].block =

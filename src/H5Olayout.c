@@ -473,12 +473,12 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                     block_size += str_size[(2 * i) + 1];
 
                     /* Source selection */
-                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_select)) < 0)
+                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(f, mesg->storage.u.virt.list[i].source_select)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
                     block_size += (size_t)select_serial_size;
 
                     /* Virtual dataset selection */
-                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].virtual_select)) < 0)
+                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(f, mesg->storage.u.virt.list[i].virtual_select)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
                     block_size += (size_t)select_serial_size;
                 } /* end for */

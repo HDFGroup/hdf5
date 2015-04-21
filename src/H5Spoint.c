@@ -40,7 +40,7 @@ static herr_t H5S_point_get_seq_list(const H5S_t *space, unsigned flags,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S_point_release(H5S_t *space);
 static htri_t H5S_point_is_valid(const H5S_t *space);
-static hssize_t H5S_point_serial_size(const H5S_t *space);
+static hssize_t H5S_point_serial_size(const H5F_t *f, const H5S_t *space);
 static herr_t H5S_point_serialize(const H5F_t *f, const H5S_t *space,
     uint8_t **p);
 static herr_t H5S_point_deserialize(const H5F_t *f, H5S_t *space,
@@ -773,7 +773,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S_point_serial_size (const H5S_t *space)
+H5S_point_serial_size(const H5F_t UNUSED *f, const H5S_t *space)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
     hssize_t ret_value;         /* return value */

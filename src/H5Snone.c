@@ -39,7 +39,7 @@ static herr_t H5S_none_get_seq_list(const H5S_t *space, unsigned flags,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S_none_release(H5S_t *space);
 static htri_t H5S_none_is_valid(const H5S_t *space);
-static hssize_t H5S_none_serial_size(const H5S_t *space);
+static hssize_t H5S_none_serial_size(const H5F_t *f, const H5S_t *space);
 static herr_t H5S_none_serialize(const H5F_t *f, const H5S_t *space,
     uint8_t **p);
 static herr_t H5S_none_deserialize(const H5F_t *f, H5S_t *space,
@@ -446,7 +446,7 @@ H5S_none_is_valid(const H5S_t UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S_none_serial_size(const H5S_t UNUSED *space)
+H5S_none_serial_size(const H5F_t UNUSED *f, const H5S_t UNUSED *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

@@ -52,8 +52,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
-    const hsize_t *dims, const hsize_t *max);
 static htri_t H5S_is_simple(const H5S_t *sdim);
 static herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
 static H5S_t *H5S_decode(const unsigned char *buf);
@@ -1278,7 +1276,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     }
 
     /* Do it */
-    if (H5S_set_extent_simple(space, (unsigned)rank, dims, max)<0)
+    if (H5S__set_extent_simple(space, (unsigned)rank, dims, max)<0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set simple extent")
 
 done:
@@ -1287,7 +1285,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_set_extent_simple
+ * Function:	H5S__set_extent_simple
  *
  * Purpose:	This is where the real work happens for
  *		H5Sset_extent_simple().
@@ -1301,14 +1299,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
+herr_t
+H5S__set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
 		       const hsize_t *max)
 {
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(rank <= H5S_MAX_RANK);
@@ -1370,7 +1368,7 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5S_set_extent_simple() */
+} /* H5S__set_extent_simple() */
 
 
 /*-------------------------------------------------------------------------
@@ -1481,7 +1479,7 @@ H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
     /* Create the space and set the extent */
     if(NULL==(ret_value=H5S_create(H5S_SIMPLE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, NULL, "can't create simple dataspace")
-    if(H5S_set_extent_simple(ret_value,rank,dims,maxdims)<0)
+    if(H5S__set_extent_simple(ret_value,rank,dims,maxdims)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "can't set dimensions")
 
 done:
@@ -1564,7 +1562,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size")
 
     /* Find out the size of buffer needed for selection */
-    if((sselect_size = H5S_SELECT_SERIAL_SIZE(obj)) < 0)
+    if((sselect_size = H5S_SELECT_SERIAL_SIZE(f, obj)) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace selection size")
     H5_ASSIGN_OVERFLOW(select_size, sselect_size, hssize_t, size_t);
 

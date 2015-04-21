@@ -227,7 +227,7 @@ H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
  *-------------------------------------------------------------------------
  */
 hssize_t
-H5S_select_serial_size(const H5S_t *space)
+H5S_select_serial_size(const H5F_t *f, const H5S_t *space)
 {
     hssize_t ret_value;   /* Return value */
 
@@ -236,7 +236,7 @@ H5S_select_serial_size(const H5S_t *space)
     HDassert(space);
 
     /* Call the selection type's serial_size function */
-    ret_value=(*space->select.type->serial_size)(space);
+    ret_value=(*space->select.type->serial_size)(f, space);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_serial_size() */
@@ -508,9 +508,14 @@ H5S_select_deserialize(const H5F_t *f, H5S_t **space, const uint8_t **p)
         /* Decode the rank of the point selection */
         UINT32DECODE(*p,rank);
 
-        if(!*space)
+        if(!*space) {
+            hsize_t dims[H5S_MAX_RANK];
+
             /* Patch the rank of the allocated dataspace */
-            tmp_space->extent.rank = rank;
+            (void)HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
+            if(H5S__set_extent_simple(tmp_space, rank, dims, NULL) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions")
+        } /* end if */
         else
             /* Verify the rank of the provided dataspace */
             if(rank != tmp_space->extent.rank)

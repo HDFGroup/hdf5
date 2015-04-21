@@ -140,7 +140,7 @@ typedef herr_t (*H5S_sel_release_func_t)(H5S_t *space);
 /* Method to determine if current selection is valid for dataspace */
 typedef htri_t (*H5S_sel_is_valid_func_t)(const H5S_t *space);
 /* Method to determine number of bytes required to store current selection */
-typedef hssize_t (*H5S_sel_serial_size_func_t)(const H5S_t *space);
+typedef hssize_t (*H5S_sel_serial_size_func_t)(const H5F_t *f, const H5S_t *space);
 /* Method to store current selection in "serialized" form (a byte sequence suitable for storing on disk) */
 typedef herr_t (*H5S_sel_serialize_func_t)(const H5F_t *f, const H5S_t *space,
     uint8_t **p);
@@ -258,6 +258,8 @@ H5_DLLVAR const H5S_select_class_t H5S_sel_none[1];
 H5_DLLVAR const H5S_select_class_t H5S_sel_point[1];
 
 /* Extent functions */
+H5_DLL herr_t H5S__set_extent_simple(H5S_t *space, unsigned rank,
+    const hsize_t *dims, const hsize_t *max);
 H5_DLL herr_t H5S_extent_release(H5S_extent_t *extent);
 H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
     hbool_t copy_max);

@@ -125,7 +125,7 @@ typedef struct H5S_sel_iter_t {
 #define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)             ((*(S)->select.type->get_seq_list)(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
 #define H5S_SELECT_VALID(S)             ((*(S)->select.type->is_valid)(S))
 #define H5S_SELECT_RELEASE(S)           ((*(S)->select.type->release)(S))
-#define H5S_SELECT_SERIAL_SIZE(S)       ((*(S)->select.type->serial_size)(S))
+#define H5S_SELECT_SERIAL_SIZE(F,S)     ((*(S)->select.type->serial_size)(F,S))
 #define H5S_SELECT_SERIALIZE(F,S,BUF)   ((*(S)->select.type->serialize)(F,S,BUF))
 #define H5S_SELECT_BOUNDS(S,START,END)  ((*(S)->select.type->bounds)(S,START,END))
 #define H5S_SELECT_OFFSET(S, OFFSET)    ((*(S)->select.type->offset)(S, OFFSET))
@@ -151,7 +151,7 @@ typedef struct H5S_sel_iter_t {
 #define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)       (H5S_select_get_seq_list(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
 #define H5S_SELECT_VALID(S)             (H5S_select_valid(S))
 #define H5S_SELECT_RELEASE(S)           (H5S_select_release(S))
-#define H5S_SELECT_SERIAL_SIZE(S)       (H5S_select_serial_size(S))
+#define H5S_SELECT_SERIAL_SIZE(F,S)     (H5S_select_serial_size(F,S))
 #define H5S_SELECT_SERIALIZE(F,S,BUF)   (H5S_select_serialize(F,S,BUF))
 #define H5S_SELECT_BOUNDS(S,START,END)  (H5S_get_select_bounds(S,START,END))
 #define H5S_SELECT_OFFSET(S, OFFSET)    (H5S_get_select_offset(S, OFFSET))
@@ -228,7 +228,7 @@ H5_DLL herr_t H5S_select_release(H5S_t *ds);
 H5_DLL herr_t H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
-H5_DLL hssize_t H5S_select_serial_size(const H5S_t *space);
+H5_DLL hssize_t H5S_select_serial_size(const H5F_t *f, const H5S_t *space);
 H5_DLL herr_t H5S_select_serialize(const H5F_t *f, const H5S_t *space,
     uint8_t **p);
 H5_DLL htri_t H5S_select_is_contiguous(const H5S_t *space);
