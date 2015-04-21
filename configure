@@ -6534,21 +6534,27 @@ rm -f core conftest.err conftest.$ac_objext \
 
 
   ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
-  if test "X$HAVE_C_SIZEOF_FORTRAN" = "Xno" && test "X$HAVE_C_SIZEOF_FORTRAN" = "Xno"; then
+  if test "X$HAVE_SIZEOF_FORTRAN" = "Xno" && test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xno"; then
     as_fn_error $? "Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE" "$LINENO" 5
   fi
 
+  if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"; then
 
 $as_echo "#define FORTRAN_HAVE_STORAGE_SIZE 1" >>confdefs.h
 
+  fi
 
+  if  test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
 
 $as_echo "#define FORTRAN_HAVE_C_SIZEOF 1" >>confdefs.h
 
+  fi
 
+  if  test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
 
 $as_echo "#define FORTRAN_HAVE_SIZEOF 1" >>confdefs.h
 
+  fi
 
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.

@@ -446,15 +446,21 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   PAC_PROG_FC_STORAGE_SIZE
 
   ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
-  if test "X$HAVE_C_SIZEOF_FORTRAN" = "Xno" && test "X$HAVE_C_SIZEOF_FORTRAN" = "Xno"; then
+  if test "X$HAVE_SIZEOF_FORTRAN" = "Xno" && test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xno"; then
     AC_MSG_ERROR([Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE])
   fi
+  
+  if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_STORAGE_SIZE], [1], [Define if we have Fortran intrinsic STORAGE_SIZE])
+  fi
 
-  AC_DEFINE([FORTRAN_HAVE_STORAGE_SIZE], [1], [Define if we have Fortran intrinsic STORAGE_SIZE])
-
-  AC_DEFINE([FORTRAN_HAVE_C_SIZEOF], [1], [Define if we have Fortran intrinsic C_SIZEOF])
+  if  test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_C_SIZEOF], [1], [Define if we have Fortran intrinsic C_SIZEOF])
+  fi
 	
-  AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
+  if  test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
+  fi
 
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
