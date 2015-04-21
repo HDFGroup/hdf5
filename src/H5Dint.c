@@ -1957,6 +1957,7 @@ H5D__get_storage_size(H5D_t *dset, hid_t dxpl_id, hsize_t *storage_size)
         case H5D_VIRTUAL:
             /* Just set to 0 until private data is implemented VDSINC */
             *storage_size = 0;
+            break;
 
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
