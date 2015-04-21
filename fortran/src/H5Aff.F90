@@ -2242,7 +2242,7 @@ CONTAINS
                                                 ! identifier  (in memory)
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
     REAL(KIND=C_DOUBLE), INTENT(IN), &
-         DIMENSION(dims(1),dims(2),dims(3)) :: buf
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
     ! Attribute data
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
     TYPE(C_PTR) :: f_ptr
