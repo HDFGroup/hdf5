@@ -23,6 +23,7 @@ makelog="#${progname}_2build.log"
 testlog="#${progname}_3test.log"
 packlog="#${progname}_4pack.log"
 installlog="#${progname}_5install.log"
+config_summary=libhdf5.settings
 exit_code=0
 
 # This command should be in the source directory's bin/
@@ -212,9 +213,9 @@ if [ $? != 0 ]; then
     echo $vers failed. Aborted.
     exit 1
 fi
-echo Running Cmake for HDF5-${version} ...
-
+echo Running Cmake for HDF5-${version} ...  
 #      4. Configure the C library, tools and tests with this command:
+#         If successful, append the configure summary to the configure logfile.
 STEP "Configure..." "cmake \
     -C $cacheinit \
     $build_cpp_lib \
@@ -225,7 +226,8 @@ STEP "Configure..." "cmake \
     $build_tools \
     $with_zlib \
     $with_szlib \
-    $srcdir" $configlog
+    $srcdir" $configlog &&\
+    cat $config_summary >> $configlog
       
 #      5. Build the C library, tools and tests with this command:
 STEP "Build the library, tools and tests, ..." "cmake --build . --config Release" $makelog
