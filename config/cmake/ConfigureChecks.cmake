@@ -370,10 +370,7 @@ H5ConversionTests (H5_FP_TO_INTEGER_OVERFLOW_WORKS  "Checking IF overflows norma
 # The machine's conversion gets the correct value.  We define the macro and disable
 # this kind of test until we figure out what algorithm they use.
 #
-if (H5_LDOUBLE_TO_LONG_SPECIAL MATCHES ^H5_LDOUBLE_TO_LONG_SPECIAL$)
-  set (H5_LDOUBLE_TO_LONG_SPECIAL 0 CACHE INTERNAL "Define if your system converts long double to (unsigned) long values with special algorithm")
-  message (STATUS "Checking IF your system converts long double to (unsigned) long values with special algorithm... no")
-endif (H5_LDOUBLE_TO_LONG_SPECIAL MATCHES ^H5_LDOUBLE_TO_LONG_SPECIAL$)
+H5ConversionTests (H5_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your system converts long double to (unsigned) long values with special algorithm")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine is using a special algorithm
 # to convert some values of '(unsigned) long' to 'long double' values.  
@@ -382,10 +379,7 @@ endif (H5_LDOUBLE_TO_LONG_SPECIAL MATCHES ^H5_LDOUBLE_TO_LONG_SPECIAL$)
 # ..., 7fffff..., the compiler uses a unknown algorithm.  We define a 
 # macro and skip the test for now until we know about the algorithm.
 #
-if (H5_LONG_TO_LDOUBLE_SPECIAL MATCHES ^H5_LONG_TO_LDOUBLE_SPECIAL$)
-  set (H5_LONG_TO_LDOUBLE_SPECIAL 0 CACHE INTERNAL "Define if your system can convert (unsigned) long to long double values with special algorithm")
-  message (STATUS "Checking IF your system can convert (unsigned) long to long double values with special algorithm... no")
-endif (H5_LONG_TO_LDOUBLE_SPECIAL MATCHES ^H5_LONG_TO_LDOUBLE_SPECIAL$)
+H5ConversionTests (H5_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can convert (unsigned) long to long double values with special algorithm")
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can accurately convert
 # 'long double' to '(unsigned) long long' values.  (This flag should be set for

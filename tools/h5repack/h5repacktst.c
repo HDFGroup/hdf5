@@ -472,8 +472,6 @@ int main (void)
 
     TESTING("    addding shuffle filter");
 
-#ifdef H5_HAVE_FILTER_SHUFFLE
-
     /*-------------------------------------------------------------------------
     * test an individual object option
     *-------------------------------------------------------------------------
@@ -495,9 +493,6 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
 
     /*-------------------------------------------------------------------------
     * test all objects option
@@ -505,8 +500,6 @@ int main (void)
     */
 
     TESTING("    addding shuffle filter to all");
-
-#ifdef H5_HAVE_FILTER_SHUFFLE
 
     /* fs_type = H5F_FILE_SPACE_ALL_PERSIST; fs_size = 1 */
     if (h5repack_init (&pack_options, 0, FALSE, H5_INC_ENUM(H5F_file_space_type_t, fs_type), ++fs_size) < 0)
@@ -525,13 +518,9 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
+
 
     TESTING("    adding checksum filter");
-
-#ifdef H5_HAVE_FILTER_FLETCHER32
 
     /*-------------------------------------------------------------------------
     * test an individual object option
@@ -554,9 +543,6 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
 
     /*-------------------------------------------------------------------------
     * test all objects option
@@ -565,8 +551,6 @@ int main (void)
 
 
     TESTING("    adding checksum filter to all");
-
-#ifdef H5_HAVE_FILTER_FLETCHER32
 
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
@@ -584,9 +568,6 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
 
 
     TESTING("    filter queue fletcher, shuffle, deflate, szip");
@@ -600,16 +581,10 @@ int main (void)
         GOERROR;
     if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options) < 0)
         GOERROR;
-
-#if defined (H5_HAVE_FILTER_FLETCHER32)
     if (h5repack_addfilter("dset1:FLET",&pack_options) < 0)
         GOERROR;
-#endif
-
-#ifdef H5_HAVE_FILTER_SHUFFLE
     if (h5repack_addfilter("dset1:SHUF",&pack_options) < 0)
         GOERROR;
-#endif
 
 #if defined (H5_HAVE_FILTER_SZIP)
     if (szip_can_encode) {
@@ -1088,7 +1063,6 @@ int main (void)
 
     TESTING("    copy of shuffle filter");
 
-#ifdef H5_HAVE_FILTER_SHUFFLE
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
     if (h5repack(FNAME9,FNAME9OUT,&pack_options) < 0)
@@ -1101,13 +1075,10 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
+
 
     TESTING("    removing shuffle filter");
 
-#ifdef H5_HAVE_FILTER_SHUFFLE
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
     if (h5repack_addfilter("dset_shuffle:NONE",&pack_options) < 0)
@@ -1122,13 +1093,10 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
+
 
     TESTING("    copy of fletcher filter");
 
-#ifdef H5_HAVE_FILTER_FLETCHER32
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
     if (h5repack(FNAME10,FNAME10OUT,&pack_options) < 0)
@@ -1141,13 +1109,10 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
+
 
     TESTING("    removing fletcher filter");
 
-#ifdef H5_HAVE_FILTER_FLETCHER32
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
     if (h5repack_addfilter("dset_fletcher32:NONE",&pack_options) < 0)
@@ -1162,14 +1127,10 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
 
 
     TESTING("    copy of nbit filter");
 
-#ifdef H5_HAVE_FILTER_NBIT
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
     if (h5repack(FNAME12,FNAME12OUT,&pack_options) < 0)
@@ -1182,13 +1143,10 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
+
 
     TESTING("    removing nbit filter");
 
-#ifdef H5_HAVE_FILTER_NBIT
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
     if (h5repack_addfilter("dset_nbit:NONE",&pack_options) < 0)
@@ -1203,14 +1161,10 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
 
 
     TESTING("    adding nbit filter");
 
-#ifdef H5_HAVE_FILTER_NBIT
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
     if (h5repack_addfilter("dset_int31:NBIT",&pack_options) < 0)
@@ -1225,14 +1179,10 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
 
 
     TESTING("    copy of scaleoffset filter");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
     if (h5repack(FNAME13,FNAME13OUT,&pack_options) < 0)
@@ -1245,13 +1195,10 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
+
 
     TESTING("    removing scaleoffset filter");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
     if (h5repack_addfilter("dset_scaleoffset:NONE",&pack_options) < 0)
@@ -1266,14 +1213,10 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
 
 
     TESTING("    adding scaleoffset filter");
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
     if (h5repack_addfilter("dset_none:SOFF=31,IN",&pack_options) < 0)
@@ -1288,10 +1231,6 @@ int main (void)
         GOERROR;
 
     PASSED();
-#else
-    SKIPPED();
-#endif
-
 
 
     /*-------------------------------------------------------------------------
@@ -1307,9 +1246,7 @@ int main (void)
 
     TESTING("    filter conversion from deflate to szip");
 
-#if defined (H5_HAVE_FILTER_SZIP) \
-    && defined (H5_HAVE_FILTER_DEFLATE) \
-    && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_HAVE_FILTER_DEFLATE)
 
     if (szip_can_encode) {
   /* fs_type = H5F_FILE_SPACE_VFD; fs_size = 4 */
@@ -1336,9 +1273,7 @@ int main (void)
 
     TESTING("    filter conversion from szip to deflate");
 
-#if defined (H5_HAVE_FILTER_SZIP) \
-    && defined (H5_HAVE_FILTER_DEFLATE) \
-    && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_HAVE_FILTER_DEFLATE)
 
     if (szip_can_encode) {
         if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
@@ -1370,8 +1305,7 @@ int main (void)
 
     TESTING("    removing all filters");
 
-#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_HAVE_FILTER_DEFLATE) \
-    && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
+#if defined (H5_HAVE_FILTER_SZIP) && defined (H5_HAVE_FILTER_DEFLATE)
 
     if (h5repack_init (&pack_options, 0, FALSE, fs_type, fs_size) < 0)
         GOERROR;
@@ -2396,13 +2330,12 @@ int make_shuffle(hid_t loc_id)
     * shuffle
     *-------------------------------------------------------------------------
     */
-#if defined (H5_HAVE_FILTER_SHUFFLE)
+
     /* set the shuffle filter */
     if (H5Pset_shuffle(dcpl) < 0)
         goto out;
     if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf) < 0)
         goto out;
-#endif
 
 
     /*-------------------------------------------------------------------------
@@ -2463,7 +2396,7 @@ int make_fletcher32(hid_t loc_id)
     * fletcher32
     *-------------------------------------------------------------------------
     */
-#if defined (H5_HAVE_FILTER_FLETCHER32)
+
     /* remove the filters from the dcpl */
     if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
         goto out;
@@ -2472,7 +2405,6 @@ int make_fletcher32(hid_t loc_id)
         goto out;
     if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf) < 0)
         goto out;
-#endif
 
     /*-------------------------------------------------------------------------
     * close space and dcpl
@@ -2537,7 +2469,6 @@ int make_nbit(hid_t loc_id)
         goto out;
     }
 
-#if defined H5_HAVE_FILTER_NBIT
     /* remove the filters from the dcpl */
     if(H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
     {
@@ -2571,7 +2502,6 @@ int make_nbit(hid_t loc_id)
         goto out;
     }
     H5Dclose(dsid);
-#endif
 
     /*-------------------------------------------------------------------------
     * close
@@ -2633,7 +2563,6 @@ int make_scaleoffset(hid_t loc_id)
 
     dtid = H5Tcopy(H5T_NATIVE_INT);
 
-#if defined (H5_HAVE_FILTER_SCALEOFFSET)
     /* remove the filters from the dcpl */
     if(H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0) {
         H5Tclose(dtid);
@@ -2662,7 +2591,6 @@ int make_scaleoffset(hid_t loc_id)
     }
     H5Tclose(dtid);
     H5Dclose(dsid);
-#endif
 
     /*-------------------------------------------------------------------------
     * close space and dcpl
@@ -2696,10 +2624,8 @@ int make_all_filters(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
     hid_t    sid;  /* dataspace ID */
-#if defined (H5_HAVE_FILTER_NBIT)
     hid_t    dtid;
     hid_t    dsid;
-#endif /* H5_HAVE_FILTER_NBIT */
 #if defined (H5_HAVE_FILTER_SZIP)
     unsigned szip_options_mask=H5_SZIP_ALLOW_K13_OPTION_MASK|H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block=8;
@@ -2729,17 +2655,13 @@ int make_all_filters(hid_t loc_id)
     if (H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
         goto out;
 
-#if defined (H5_HAVE_FILTER_SHUFFLE)
     /* set the shuffle filter */
     if (H5Pset_shuffle(dcpl) < 0)
         goto out;
-#endif
 
-#if defined (H5_HAVE_FILTER_FLETCHER32)
     /* set the checksum filter */
     if (H5Pset_fletcher32(dcpl) < 0)
         goto out;
-#endif
 
 #if defined (H5_HAVE_FILTER_SZIP)
     if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1)
@@ -2765,7 +2687,6 @@ int make_all_filters(hid_t loc_id)
     if (make_dset(loc_id,"dset_all",sid,dcpl,buf) < 0)
         goto out;
 
-#if defined (H5_HAVE_FILTER_FLETCHER32)
     /* remove the filters from the dcpl */
     if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
         goto out;
@@ -2774,7 +2695,6 @@ int make_all_filters(hid_t loc_id)
         goto out;
     if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf) < 0)
         goto out;
-#endif
 
 
     /* Make sure encoding is enabled */
@@ -2796,7 +2716,6 @@ int make_all_filters(hid_t loc_id)
 #endif
 
 
-#if defined (H5_HAVE_FILTER_SHUFFLE)
     /* remove the filters from the dcpl */
     if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
         goto out;
@@ -2805,7 +2724,6 @@ int make_all_filters(hid_t loc_id)
         goto out;
     if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf) < 0)
         goto out;
-#endif
 
 
 #if defined (H5_HAVE_FILTER_DEFLATE)
@@ -2821,7 +2739,6 @@ int make_all_filters(hid_t loc_id)
 
 
 
-#if defined (H5_HAVE_FILTER_NBIT)
     /* remove the filters from the dcpl */
     if (H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
         goto out;
@@ -2842,8 +2759,6 @@ int make_all_filters(hid_t loc_id)
         return -1;
     if(H5Dclose(dsid) < 0)
         return -1;
-#endif
-
 
     if(H5Sclose(sid) < 0)
         goto out;

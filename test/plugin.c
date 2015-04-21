@@ -456,14 +456,14 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_read_with_filters
+ * Function:    test_read_with_filters
  *
- * Purpose:	Tests reading dataset created with dynamically loaded filters
+ * Purpose: Tests reading dataset created with dynamically loaded filters
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:  Success:    0
+ *      Failure:    -1
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              14 March 2013
  *
  *-------------------------------------------------------------------------
@@ -471,7 +471,7 @@ error:
 static herr_t
 test_read_with_filters(hid_t file)
 {
-    hid_t	dset;                 /* Dataset ID */
+    hid_t   dset;                 /* Dataset ID */
 
     /*----------------------------------------------------------
      * STEP 1: Test deflation by itself.
@@ -522,6 +522,76 @@ test_read_with_filters(hid_t file)
     return 0;
 
 error:
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_noread_data
+ *
+ * Purpose: Tests not reading data
+ *
+ * Return:  Success:    0
+ *      Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_noread_data(hid_t dataset, int *origin_data)
+{
+    int                 check[DSET_DIM1][DSET_DIM2];
+    const hsize_t   size[2] = {DSET_DIM1, DSET_DIM2};           /* Dataspace dimensions */
+    int                 *data_p = origin_data;
+    size_t      i, j;        /* Local index variables */
+
+    /* Read the dataset back */
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) >= 0)
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	test_noread_with_filters
+ *
+ * Purpose:	Tests reading dataset created with dynamically loaded filters disabled
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_noread_with_filters(hid_t file)
+{
+    hid_t	dset;                 /* Dataset ID */
+    int     plugin_state;         /* status of plugins */
+    TESTING("Testing DYNLIB1 filter with plugins disabled");
+
+    /* disable filter plugin */
+    if(H5PLget_loading_state(&plugin_state) < 0) TEST_ERROR
+    plugin_state = plugin_state & ~H5PL_FILTER_PLUGIN;
+    if(H5PLset_loading_state(plugin_state) < 0) TEST_ERROR
+
+    if((dset = H5Dopen2(file,DSET_DYNLIB1_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
+
+    if(test_noread_data(dset, (int *)points_dynlib1) < 0) TEST_ERROR
+
+    if(H5Dclose(dset) < 0) TEST_ERROR
+
+    /* re-enable filter plugin */
+    plugin_state = plugin_state | H5PL_FILTER_PLUGIN;
+    if(H5PLset_loading_state(plugin_state) < 0) TEST_ERROR
+
+    return 0;
+
+error:
+    /* re-enable filter plugin */
+    plugin_state = plugin_state | H5PL_FILTER_PLUGIN;
+    if(H5PLset_loading_state(plugin_state) < 0) TEST_ERROR
     return -1;
 }
 
@@ -712,6 +782,17 @@ main(void)
 
     /* Open the groups with filters */
     nerrors += (test_groups_with_filters(file) < 0	? 1 : 0);
+
+    /* Close the library so that all loaded plugin libraries are unloaded */
+    h5_reset();
+    fapl = h5_fileaccess();
+
+    /* Reopen the file for testing data reading */
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        TEST_ERROR
+
+    /* Read the data with disabled filters */
+    nerrors += (test_noread_with_filters(file) < 0  ? 1 : 0);
 
     if(H5Fclose(file) < 0)
         TEST_ERROR 

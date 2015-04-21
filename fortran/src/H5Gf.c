@@ -178,7 +178,7 @@ nh5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
     char *c_name = NULL;
     size_t c_obj_namelen;
     char *c_obj_name = NULL;
-    hsize_t c_idx = *idx;
+    hsize_t c_idx = (hsize_t)*idx;
     hid_t gid = (-1);                 /* Temporary group ID */
     int ret_value = -1;
 
@@ -191,7 +191,7 @@ nh5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
     /*
      * Allocate buffer to hold name of the object
      */
-    c_obj_namelen = *obj_namelen;
+    c_obj_namelen = (size_t)*obj_namelen;
     if(c_obj_namelen)
        if(NULL == (c_obj_name = (char *)HDmalloc(c_obj_namelen + 1)))
            goto DONE;
@@ -352,6 +352,23 @@ nh5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name,
                 goto DONE;
             break;
 
+    /* Cases below were added to remove the warnings in gcc 4.9.2 and probably other */
+        case H5L_TYPE_EXTERNAL:
+            ret_value = -1;
+                goto DONE;
+            break;
+
+        case H5L_TYPE_MAX:
+            ret_value = -1;
+                goto DONE;
+            break;
+
+        case H5L_TYPE_ERROR:
+            ret_value = -1;
+                goto DONE;
+            break;
+    /* End of the warnings fix */
+ 
         default:        /* Unknown/unhandled link type */
             goto DONE;
     } /* end switch */
@@ -421,6 +438,22 @@ nh5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen,
             if(H5Lcreate_soft(c_cur_name, (hid_t)*new_loc_id, c_new_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
                 goto DONE;
             break;
+    /* Cases below were added to remove the warnings in gcc 4.9.2 and probably other */
+        case H5L_TYPE_EXTERNAL:
+            ret_value = -1;
+                goto DONE;
+            break;
+
+        case H5L_TYPE_MAX:
+            ret_value = -1;
+                goto DONE;
+            break;
+
+        case H5L_TYPE_ERROR:
+            ret_value = -1;
+                goto DONE;
+            break;
+    /* End of the warnings fix */
 
         default:        /* Unknown/unhandled link type */
             goto DONE;

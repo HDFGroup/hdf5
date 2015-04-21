@@ -24,10 +24,6 @@ srcdir=@srcdir@
 
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
-USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
-USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
-USE_FILTER_NBIT="@USE_FILTER_NBIT@"
-USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
 
 TESTNAME=h5repack
 EXIT_SUCCESS=0
@@ -742,40 +738,24 @@ fi
 
 # shuffle with individual object
 arg="h5repack_layout.h5 -f dset2:SHUF  -l dset2:CHUNK=20x10"
-if test $USE_FILTER_SHUFFLE != "yes"  ; then
- SKIP $arg
-else
- TOOLTEST shuffle_individual $arg 
-fi
+TOOLTEST shuffle_individual $arg 
   
 
 # shuffle for all
 arg="h5repack_layout.h5 -f SHUF"
-if test $USE_FILTER_SHUFFLE != "yes"  ; then
- SKIP $arg
-else
- TOOLTEST shuffle_all $arg
-fi
+TOOLTEST shuffle_all $arg
   
 # fletcher32  with individual object
 arg="h5repack_layout.h5 -f dset2:FLET  -l dset2:CHUNK=20x10"
-if test $USE_FILTER_FLETCHER32 != "yes"  ; then
- SKIP $arg
-else
- TOOLTEST fletcher_individual $arg
-fi
+TOOLTEST fletcher_individual $arg
 
 # fletcher32 for all
 arg="h5repack_layout.h5 -f FLET"
-if test $USE_FILTER_FLETCHER32 != "yes"  ; then
- SKIP $arg
-else
- TOOLTEST fletcher_all $arg
-fi
+TOOLTEST fletcher_all $arg
 
 # all filters
 arg="h5repack_layout.h5 -f dset2:SHUF -f dset2:FLET -f dset2:SZIP=8,NN -f dset2:GZIP=1 -l dset2:CHUNK=20x10"
-if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SHUFFLE != "yes" -o $USE_FILTER_FLETCHER32 != "yes" -o $USE_FILTER_DEFLATE != "yes" ; then
+if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
  TOOLTEST all_filters $arg
@@ -828,87 +808,47 @@ fi
     
 # shuffle copy
 arg="h5repack_shuffle.h5"
-if test $USE_FILTER_SHUFFLE != "yes" ; then
- SKIP $arg
-else
- TOOLTEST shuffle_copy $arg
-fi
+TOOLTEST shuffle_copy $arg
 
 # shuffle remove
 arg="h5repack_shuffle.h5 -f dset_shuffle:NONE"
-if test $USE_FILTER_SHUFFLE != "yes" ; then
- SKIP $arg
-else
- TOOLTEST shuffle_remove $arg
-fi
+TOOLTEST shuffle_remove $arg
 
 # fletcher32 copy
 arg="h5repack_fletcher.h5"
-if test $USE_FILTER_FLETCHER32 != "yes" ; then
- SKIP $arg
-else
- TOOLTEST fletcher_copy $arg
-fi
+TOOLTEST fletcher_copy $arg
 
 # fletcher32 remove
 arg="h5repack_fletcher.h5 -f dset_fletcher32:NONE"
-if test $USE_FILTER_FLETCHER32 != "yes" ; then
- SKIP $arg
-else
- TOOLTEST fletcher_remove $arg
-fi        
+TOOLTEST fletcher_remove $arg
 
 # nbit copy
 arg="h5repack_nbit.h5"
-if test $USE_FILTER_NBIT != "yes" ; then
- SKIP $arg
-else
- TOOLTEST nbit_copy $arg
-fi
+TOOLTEST nbit_copy $arg
 
 # nbit remove
 arg="h5repack_nbit.h5 -f dset_nbit:NONE"
-if test $USE_FILTER_NBIT != "yes" ; then
- SKIP $arg
-else
- TOOLTEST nbit_remove $arg
-fi        
+TOOLTEST nbit_remove $arg
 
 # nbit add
 arg="h5repack_nbit.h5 -f dset_int31:NBIT"
-if test $USE_FILTER_NBIT != "yes" ; then
- SKIP $arg
-else
- TOOLTEST nbit_add $arg
-fi
+TOOLTEST nbit_add $arg
 
 # scaleoffset copy
 arg="h5repack_soffset.h5"
-if test $USE_FILTER_SCALEOFFSET != "yes" ; then
- SKIP $arg
-else
- TOOLTEST scale_copy $arg
-fi
+TOOLTEST scale_copy $arg
 
 # scaleoffset add
 arg="h5repack_soffset.h5 -f dset_none:SOFF=31,IN"
-if test $USE_FILTER_SCALEOFFSET != "yes" ; then
- SKIP $arg
-else
- TOOLTEST scale_add $arg
-fi
+TOOLTEST scale_add $arg
 
 # scaleoffset remove
 arg="h5repack_soffset.h5 -f dset_scaleoffset:NONE"
-if test $USE_FILTER_SCALEOFFSET != "yes" ; then
- SKIP $arg
-else
- TOOLTEST scale_remove $arg
-fi        
+TOOLTEST scale_remove $arg
 
 # remove all  filters
 arg="h5repack_filters.h5 -f NONE"
-if test $USE_FILTER_FLETCHER32 != "yes" -o $USE_FILTER_DEFLATE != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SHUFFLE != "yes"  -o $USE_FILTER_NBIT != "yes"  -o $USE_FILTER_SCALEOFFSET != "yes"  ; then
+if test $USE_FILTER_DEFLATE != "yes" -o $USE_FILTER_SZIP != "yes" -o $USE_FILTER_SZIP_ENCODER != "yes" ; then
  SKIP $arg
 else
  TOOLTEST remove_all $arg
@@ -1061,7 +1001,7 @@ fi
 # several global filters
 
 arg="h5repack_layout.h5 --filter GZIP=1 --filter SHUF"
-if test $USE_FILTER_DEFLATE != "yes" -o $USE_FILTER_SHUFFLE != "yes" ; then
+if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
  TOOLTEST global_filters $arg

@@ -28,7 +28,7 @@
 #define NTESTELEM	10000
 
 /* Epsilon for floating-point comparisons */
-#define FP_EPSILON 0.000001
+#define FP_EPSILON 0.000001F
 
 /*
  * Offset from alinged memory returned by malloc().  This can be used to test
@@ -3299,7 +3299,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             if(check_expo[0]<(-(int)dst_ebias) || check_expo[1]<(-(int)dst_ebias)) {
                 int expo_diff=check_expo[0]-check_expo[1];
                 int valid_bits=(int)((dst_ebias+dst_msize)+MIN(check_expo[0],check_expo[1]))-1;
-                double epsilon=1.0;
+                double epsilon=1.0F;
 
                 /* Re-scale the mantissas based on any exponent difference */
                 if(expo_diff!=0)

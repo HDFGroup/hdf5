@@ -217,9 +217,7 @@ test_filter_read(void)
     unsigned    disable_partial_chunk_filters; /* Whether filters are disabled on partial chunks */
     herr_t      hrc;
     const char *filename;
-#ifdef H5_HAVE_FILTER_FLETCHER32
     hsize_t     fletcher32_size;       /* Size of dataset with Fletcher32 checksum */
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     hsize_t     deflate_size;       /* Size of dataset with deflate filter */
@@ -231,13 +229,11 @@ test_filter_read(void)
     unsigned szip_pixels_per_block=4;
 #endif /* H5_HAVE_FILTER_SZIP */
 
-#ifdef H5_HAVE_FILTER_SHUFFLE
     hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
-#endif /* H5_HAVE_FILTER_SHUFFLE */
 
-#if(defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP) && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
-    hsize_t     combo_size;     /* Size of dataset with shuffle+deflate filter */
-#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
+#if(defined H5_HAVE_FILTER_DEFLATE || defined H5_HAVE_FILTER_SZIP)
+    hsize_t     combo_size;     /* Size of dataset with multiple filters */
+#endif /* H5_HAVE_FILTER_DEFLATE || H5_HAVE_FILTER_SZIP */
 
     filename = GetTestParameters();
 
@@ -358,6 +354,7 @@ test_filter_read(void)
         }
 #endif /* H5_HAVE_FILTER_SZIP */
     } /* end for */
+
 
     /*----------------------------------------------------------
      * STEP 4: Test shuffling by itself.

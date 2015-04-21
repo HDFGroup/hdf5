@@ -480,6 +480,48 @@
 #  define H5_DEC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)-1))
 #endif
 
+/* Double constant wrapper
+ * 
+ * Quiets gcc warnings from -Wunsuffixed-float-constants.
+ *
+ * This is a really annoying warning since the standard specifies that
+ * constants of type double do NOT get a suffix so there's no way
+ * to specify a constant of type double. To quiet gcc, we specify floating
+ * point constants as type long double and cast to double.
+ *
+ * Note that this macro only needs to be used where using a double
+ * is important. For most code, suffixing constants with F will quiet the
+ * compiler and not produce erroneous code.
+ */
+#define H5_DOUBLE(S) ((double) S ## L)
+
+/*
+ * Methods to compare the equality of floating-point values:
+ *
+ *    1. H5_XXX_ABS_EQUAL - check if the difference is smaller than the
+ *       Epsilon value.  The Epsilon values, FLT_EPSILON, DBL_EPSILON,
+ *       and LDBL_EPSILON, are defined by compiler in float.h.
+ *
+ *    2. H5_XXX_REL_EQUAL - check if the relative difference is smaller than a
+ *       predefined value M.  See if two values are relatively equal.
+ *       It's the developer's responsibility not to pass in the value 0, which
+ *       may cause the equation to fail.
+ */
+#define H5_FLT_ABS_EQUAL(X,Y)       (HDfabsf(X-Y) < FLT_EPSILON)
+#define H5_DBL_ABS_EQUAL(X,Y)       (HDfabs (X-Y) < DBL_EPSILON)
+#define H5_LDBL_ABS_EQUAL(X,Y)      (HDfabsl(X-Y) < LDBL_EPSILON)
+
+#define H5_FLT_REL_EQUAL(X,Y,M)     (HDfabsf((Y-X) / X) < M)
+#define H5_DBL_REL_EQUAL(X,Y,M)     (HDfabs ((Y-X) / X) < M)
+#define H5_LDBL_REL_EQUAL(X,Y,M)    (HDfabsl((Y-X) / X) < M)
+
+/* KiB, MiB, GiB, TiB, EiB - Used in profiling and timing code */
+#define H5_KB (1024.0F)
+#define H5_MB (1024.0F * 1024.0F)
+#define H5_GB (1024.0F * 1024.0F * 1024.0F)
+#define H5_TB (1024.0F * 1024.0F * 1024.0F * 1024.0F)
+#define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
+
 /*
  * Data types and functions for timing certain parts of the library.
  */

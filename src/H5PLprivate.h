@@ -19,18 +19,8 @@
 #ifndef _H5PLprivate_H
 #define _H5PLprivate_H
 
-/* Keep the following in sync with the package's "external" header */
-
-/*******************/
-/* Public Typedefs */
-/*******************/
-
-/* Plugin type */
-typedef enum H5PL_type_t {
-    H5PL_TYPE_ERROR        = -1,  /*error                    */
-    H5PL_TYPE_FILTER       = 0,   /*filter                   */
-    H5PL_TYPE_NONE         = 1    /*this must be last!       */
-} H5PL_type_t;
+/* Include package's public header */
+#include "H5PLpublic.h"
 
 /* Private headers needed by this file */
 #include "H5private.h"          /* Generic Functions                    */
@@ -57,7 +47,6 @@ typedef enum H5PL_type_t {
 
 /* Internal API routines */
 H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, int type_id);
-H5_DLL htri_t H5PL_no_plugin(void);
 
 #endif /* _H5PLprivate_H */
 

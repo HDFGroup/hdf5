@@ -1121,7 +1121,7 @@ case "$host_cpu-$host_vendor-$host_os" in
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
-    AM_CPPFLAGS="-D_GNU_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
 
     ## Also add BSD support on Linux systems, so <features.h> defines
     ## __USE_BSD, which is required to get the prototype for strdup
@@ -1131,7 +1131,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
     ## however, we do not do this since it breaks the big test on some 
     ## older platforms.
-    AM_CPPFLAGS="-D_BSD_SOURCE $AM_CPPFLAGS"
+    H5_CPPFLAGS="-D_BSD_SOURCE $H5_CPPFLAGS"
     ;;
 esac
 
@@ -2411,75 +2411,6 @@ if test -n "$PARALLEL"; then
     AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
   fi
 fi
-
-
-## ----------------------------------------------------------------------
-## Turn on internal I/O filters by setting macros in header files
-## Internal I/O filters are contained entirely within the library and do
-## not depend on external headers or libraries.  The shuffle filter is
-## an example of an internal filter, while the gzip filter is an example of
-## an external filter.  Each external filter is controlled with an
-## "--with-foo=" configure flag.
-##
-AC_SUBST([FILTERS])
-AC_SUBST([USE_FILTER_SHUFFLE]) USE_FILTER_SHUFFLE="no"
-AC_SUBST([USE_FILTER_FLETCHER32]) USE_FILTER_FLETCHER32="no"
-AC_SUBST([USE_FILTER_NBIT]) USE_FILTER_NBIT="no"
-AC_SUBST([USE_FILTER_SCALEOFFSET]) USE_FILTER_SCALEOFFSET="no"
-AC_MSG_CHECKING([for I/O filters])
-AC_ARG_ENABLE([filters],
-              [AS_HELP_STRING([--enable-filters=all],
-                              [Turn on all internal I/O filters. One may
-                               also specify a comma-separated list of filters
-                               or the word no.  The default is all internal
-                               I/O filters.])],
-              [FILTERS=$enableval])
-
-## Eventually: all_filters="shuffle,foo,bar,baz"
-all_filters="shuffle,fletcher32,nbit,scaleoffset"
-case "X-$FILTERS" in
-  X-|X-all)
-    FILTERS=$all_filters
-    AC_MSG_RESULT([all ($FILTERS)])
-    ;;
-  X-no|X-none)
-    AC_MSG_RESULT([none])
-    FILTERS="none"
-    ;;
-  *)
-    AC_MSG_RESULT([$FILTERS])
-    ;;
-esac
-
-if test -n "$FILTERS"; then
-  for filter in `echo $FILTERS | tr ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
-    ## ------------------------------------------------------------------
-    ## Have to use separate 'if' construct for each filter, so that
-    ## autoheader can detect the AC_DEFINE for each one...
-    ##
-    if test $filter = "SHUFFLE"; then
-      AC_DEFINE([HAVE_FILTER_SHUFFLE], [1],
-                [Define if support for shuffle filter is enabled])
-      USE_FILTER_SHUFFLE="yes"
-    fi
-    if test $filter = "FLETCHER32"; then
-      AC_DEFINE([HAVE_FILTER_FLETCHER32], [1],
-                [Define if support for Fletcher32 checksum is enabled])
-      USE_FILTER_FLETCHER32="yes"
-    fi
-    if test $filter = "NBIT"; then
-      AC_DEFINE([HAVE_FILTER_NBIT], [1],
-                [Define if support for nbit filter is enabled])
-      USE_FILTER_NBIT="yes"
-    fi
-    if test $filter = "SCALEOFFSET"; then
-      AC_DEFINE([HAVE_FILTER_SCALEOFFSET], [1],
-                [Define if support for scaleoffset filter is enabled])
-      USE_FILTER_SCALEOFFSET="yes"
-    fi
-  done
-fi
-
 
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
@@ -3865,23 +3796,6 @@ touch ./config/stamp2
 
 ## Finally the makefiles
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
-
-## Post processing to patch up some deficiencies in libtool
-case $host_os in
-  linux* | freebsd* )
-    ## If gcc is not used, need to set $wl to use "-Wl,"
-    if $CC -v 2>&1 | grep '^gcc' > /dev/null ; then
-      : using gcc
-    else
-      echo 'fixing $wl in' $ofile
-ed - $ofile <<EOF 2> /dev/null
-g/^wl=""/s//wl="-Wl,"/
-w
-q
-EOF
-    fi
-    ;;
-esac
 
 ## Are we compiling static libraries, shared libraries, or both?  This
 ## is only used for the libhdf5.settings file. We can't just look at

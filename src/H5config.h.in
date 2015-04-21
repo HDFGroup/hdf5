@@ -98,18 +98,6 @@
 /* Define if support for deflate (zlib) filter is enabled */
 #undef HAVE_FILTER_DEFLATE
 
-/* Define if support for Fletcher32 checksum is enabled */
-#undef HAVE_FILTER_FLETCHER32
-
-/* Define if support for nbit filter is enabled */
-#undef HAVE_FILTER_NBIT
-
-/* Define if support for scaleoffset filter is enabled */
-#undef HAVE_FILTER_SCALEOFFSET
-
-/* Define if support for shuffle filter is enabled */
-#undef HAVE_FILTER_SHUFFLE
-
 /* Define if support for szip filter is enabled */
 #undef HAVE_FILTER_SZIP
 
