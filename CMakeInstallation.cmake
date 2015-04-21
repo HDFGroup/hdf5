@@ -139,7 +139,7 @@ configure_file (
 )
 install (
     FILES ${HDF5_BINARY_DIR}/libhdf5.settings
-    DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+    DESTINATION ${HDF5_INSTALL_LIB_DIR}
     COMPONENT libraries
 )
 
