@@ -300,7 +300,7 @@ static int test_dsets( void )
 
     for (i = 0; i < DIM; i++)
     {
-        if ( data_float_in[i] != data_float_out[i] ) {
+        if(!FLT_ABS_EQUAL(data_float_in[i],data_float_out[i])) {
             goto out;
         }
     }
@@ -311,7 +311,7 @@ static int test_dsets( void )
 
     for (i = 0; i < DIM; i++)
     {
-        if ( data_float_in[i] != data_float_out[i] ) {
+        if(!FLT_ABS_EQUAL(data_float_in[i],data_float_out[i])) {
             goto out;
         }
     }
@@ -336,7 +336,7 @@ static int test_dsets( void )
 
     for (i = 0; i < DIM; i++)
     {
-        if ( data_double_in[i] != data_double_out[i] ) {
+        if(!DBL_ABS_EQUAL(data_double_in[i],data_double_out[i])) {
             goto out;
         }
     }
@@ -347,7 +347,7 @@ static int test_dsets( void )
 
     for (i = 0; i < DIM; i++)
     {
-        if ( data_double_in[i] != data_double_out[i] ) {
+        if(!DBL_ABS_EQUAL(data_double_in[i],data_double_out[i])) {
             goto out;
         }
     }
@@ -959,7 +959,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     for (i = 0; i < 5; i++)
     {
-        if ( attr_float_in[i] != attr_float_out[i] ) {
+        if(!FLT_ABS_EQUAL(attr_float_in[i],attr_float_out[i])) {
             return -1;
         }
     }
@@ -970,7 +970,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     for (i = 0; i < 5; i++)
     {
-        if ( attr_float_in[i] != attr_float_out[i] ) {
+        if(!FLT_ABS_EQUAL(attr_float_in[i],attr_float_out[i])) {
             return -1;
         }
     }
@@ -1003,7 +1003,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     for (i = 0; i < 5; i++)
     {
-        if ( attr_double_in[i] != attr_double_out[i] ) {
+        if(!DBL_ABS_EQUAL(attr_double_in[i],attr_double_out[i])) {
             return -1;
         }
     }
@@ -1014,7 +1014,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     for (i = 0; i < 5; i++)
     {
-        if ( attr_double_in[i] != attr_double_out[i] ) {
+        if(!DBL_ABS_EQUAL(attr_double_in[i],attr_double_out[i])) {
             return -1;
         }
     }
@@ -1046,7 +1046,7 @@ static herr_t make_attributes( hid_t loc_id, const char* obj_name )
 
     TESTING("H5LTget_attribute_info");
 
-    if(NULL==(dims_out = (hsize_t*) HDmalloc( sizeof(hsize_t) * rank_out ))) return -1;
+    if(NULL==(dims_out = (hsize_t*) HDmalloc( sizeof(hsize_t) * (size_t)rank_out ))) return -1;
 
     if ( H5LTget_attribute_info( loc_id, obj_name, ATTR2_NAME, dims_out, &type_class, &type_size) < 0 ) {
         HDfree( dims_out );

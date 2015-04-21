@@ -60,7 +60,6 @@ int main( void )
   int        compress  = 0;
   hsize_t    nfields_out;
   hsize_t    nrecords_out;
-  herr_t     status;
 
   /* Initialize field_type */
   string_type = H5Tcopy( H5T_C_S1 );
@@ -75,12 +74,12 @@ int main( void )
  file_id = H5Fcreate( "ex_table_06.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* Make a table */
- status=H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS,dst_size,
+ H5TBmake_table( "Table Title",file_id,TABLE_NAME,NFIELDS,NRECORDS,dst_size,
                        field_names, dst_offset, field_type,
                        chunk_size, fill_data, compress, NULL);
 
  /* Get table info  */
- status=H5TBget_table_info (file_id,TABLE_NAME, &nfields_out, &nrecords_out );
+ H5TBget_table_info (file_id,TABLE_NAME, &nfields_out, &nrecords_out );
 
  /* print */
  printf ("Table has %d fields and %d records\n",(int)nfields_out,(int)nrecords_out);

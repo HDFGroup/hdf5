@@ -53,9 +53,9 @@ const size_t		ATTR_MAX_DIMS = 7;
 
 /* 3-D dataset with fixed dimensions */
 const int SPACE1_RANK = 3;
-const int SPACE1_DIM1 = 3;
-const int SPACE1_DIM2 = 15;
-const int SPACE1_DIM3 = 13;
+const hsize_t SPACE1_DIM1 = 3;
+const hsize_t SPACE1_DIM2 = 15;
+const hsize_t SPACE1_DIM3 = 13;
 
 /* Object names */
 const H5std_string DSET1_NAME("Dataset1");
@@ -65,7 +65,7 @@ const H5std_string TYPE1_NAME("/Type");
 /* Attribute Rank & Dimensions */
 const H5std_string ATTR1_NAME("Attr1");
 const int ATTR1_RANK = 1;
-const int ATTR1_DIM1 = 3;
+const hsize_t ATTR1_DIM1 = 3;
 int attr_data1[ATTR1_DIM1]={512,-234,98123}; /* Test data for 1st attribute */
 
 // File attribute, using the same rank and dimensions as ATTR1_NAME's
@@ -74,8 +74,8 @@ const H5std_string FATTR2_NAME("File Attr2");
 
 const H5std_string ATTR2_NAME("Attr2");
 const int ATTR2_RANK = 2;
-const int ATTR2_DIM1 = 2;
-const int ATTR2_DIM2 = 2;
+const hsize_t ATTR2_DIM1 = 2;
+const hsize_t ATTR2_DIM2 = 2;
 int attr_data2[ATTR2_DIM1][ATTR2_DIM2]={{7614,-416},{197814,-3}}; /* Test data for 2nd attribute */
 
 const H5std_string ATTR3_NAME("Attr3");
@@ -123,7 +123,7 @@ static void test_attr_basic_write()
     hsize_t dims2[] = {ATTR1_DIM1};
     hsize_t dims3[] = {ATTR2_DIM1,ATTR2_DIM2};
     int     read_data1[ATTR1_DIM1]={0}; // Buffer for reading 1st attribute
-    int     i;
+    hsize_t i;
 
     // Output message about test being performed
     SUBTEST("Basic Attribute Writing Functions");
@@ -384,7 +384,7 @@ static void test_attr_getname()
 static void test_attr_rename()
 {
     int read_data1[ATTR1_DIM1]={0}; // Buffer for reading the attribute
-    int i;
+    hsize_t i;
 
     // Output message about test being performed
     SUBTEST("Checking for Existence and Renaming Attribute");
@@ -493,7 +493,7 @@ static void test_attr_rename()
 ********************************************************************/
 static void test_attr_basic_read()
 {
-    int i, j;
+    hsize_t i, j;
 
     // Output message about test being performed
     SUBTEST("Basic Attribute Reading Functions");
@@ -624,7 +624,6 @@ static void test_attr_compound_read()
     size_t      size;   // Attribute datatype size as stored in file
     size_t      offset; // Attribute datatype field offset
     struct attr4_struct read_data4[ATTR4_DIM1][ATTR4_DIM2]; // Buffer for reading 4th attribute
-    hsize_t i,j;
 
     // Output message about test being performed
     SUBTEST("Basic Attribute Functions");
@@ -654,7 +653,7 @@ static void test_attr_compound_read()
 
 	// Get the dims of the dataspace and verify them
 	int ndims = space.getSimpleExtentDims(dims);
-	if(dims[0]!=ATTR4_DIM1)
+	verify_val(ndims, ATTR4_RANK, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
         verify_val((long)dims[0], (long)ATTR4_DIM1, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
         verify_val((long)dims[1], (long)ATTR4_DIM2, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
 
@@ -673,13 +672,14 @@ static void test_attr_compound_read()
 
 	// Verify that the fields have the same names as when the type
 	// was created
-	for(i=0; i<fields; i++)
+	int j;
+	for(j=0; j<fields; j++)
 	{
-	    H5std_string fieldname = datatype.getMemberName(i);
+	    H5std_string fieldname = datatype.getMemberName(j);
 	    if(!((fieldname == ATTR4_FIELDNAME1) ||
 		(fieldname == ATTR4_FIELDNAME2) ||
 		(fieldname == ATTR4_FIELDNAME3)))
-            TestErrPrintf("%d:invalid field name for field #%d: %s\n",__LINE__,i,fieldname.c_str());
+            TestErrPrintf("%d:invalid field name for field #%d: %s\n",__LINE__,j,fieldname.c_str());
 	} /* end for */
 
 	offset = datatype.getMemberOffset(0);
@@ -729,12 +729,13 @@ static void test_attr_compound_read()
 	attr.read(datatype, read_data4);
 
 	// Verify values read in
-	for(i=0; i<ATTR4_DIM1; i++)
-	    for(j=0; j<ATTR4_DIM2; j++)
-		if(HDmemcmp(&attr_data4[i][j],&read_data4[i][j],sizeof(struct attr4_struct))) {
-		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",__LINE__,i,j,attr_data4[i][j].i,i,j,read_data4[i][j].i);
-		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",__LINE__,i,j,attr_data4[i][j].d,i,j,read_data4[i][j].d);
-		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",__LINE__,i,j,attr_data4[i][j].c,i,j,read_data4[i][j].c);
+	hsize_t ii, jj;
+	for(ii=0; ii<ATTR4_DIM1; ii++)
+	    for(jj=0; jj<ATTR4_DIM2; jj++)
+		if(HDmemcmp(&attr_data4[ii][jj],&read_data4[ii][jj],sizeof(struct attr4_struct))) {
+		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",__LINE__,ii,jj,attr_data4[ii][jj].i,ii,jj,read_data4[ii][jj].i);
+		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",__LINE__,ii,jj,attr_data4[ii][jj].d,ii,jj,read_data4[ii][jj].d);
+		    TestErrPrintf("%d:attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",__LINE__,ii,jj,attr_data4[ii][jj].c,ii,jj,read_data4[ii][jj].c);
              } /* end if */
 
 	// Verify name
@@ -928,7 +929,7 @@ static void test_attr_mult_read()
     int     read_data1[ATTR1_DIM1]={0}; // Buffer for reading 1st attribute
     int     read_data2[ATTR2_DIM1][ATTR2_DIM2]={{0}}; // Buffer for reading 2nd attribute
     double  read_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3]={{{0}}}; // Buffer for reading 3rd attribute
-    int     i,j,k;
+    hsize_t i,j,k;
 
 	// Output message about test being performed
     SUBTEST("Multiple Attribute Reading Functions");
@@ -959,7 +960,7 @@ static void test_attr_mult_read()
 	// Get the dims of the dataspace and verify them
 	hsize_t dims[ATTR_MAX_DIMS];    // Attribute dimensions
 	int ndims = space.getSimpleExtentDims(dims);
-	if(dims[0]!=ATTR1_DIM1)
+	if ((long)dims[0] != (long)ATTR1_DIM1)
 	    TestErrPrintf("%d:attribute dimensions different: dims[0]=%d, should be %d\n",__LINE__,(int)dims[0],ATTR1_DIM1);
 
 	/* Verify Datatype */
@@ -1010,10 +1011,9 @@ static void test_attr_mult_read()
 
 	// Get the dims of the dataspace and verify them
 	ndims = space.getSimpleExtentDims(dims);
-	if(dims[0]!=ATTR2_DIM1)
-	    TestErrPrintf("%d:attribute dimensions different: dims[0]=%d, should be %d\n",__LINE__,(int)dims[0],ATTR2_DIM1);
-	if(dims[1]!=ATTR2_DIM2)
-	    TestErrPrintf("%d:attribute dimensions different: dims[1]=%d, should be %d\n",__LINE__,(int)dims[1],ATTR2_DIM2);
+
+        verify_val((long)dims[0], (long)ATTR2_DIM1, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
+        verify_val((long)dims[1], (long)ATTR2_DIM2, "DataSpace::getSimpleExtentDims",__LINE__, __FILE__);
 
 	/* Verify Datatype */
 

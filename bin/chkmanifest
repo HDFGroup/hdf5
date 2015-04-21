@@ -79,12 +79,14 @@ done
 #
 # First get a list of all the pending files with svn stat and
 # check those.
-svn_stat="$(svn stat -q)"
+svn_stat=`svn stat -q`
 for file in $svn_stat; do
+
     # Newly added files are not listed by svn ls, which
-    # we check below..
-    # The line listing them starts with 'A'.
-    letter="$(echo $file | head -c 1)"
+    # we check later.
+
+    # The line listing new files starts with 'A'.
+    letter=`echo $file | head -c 1`
     if [ "$letter" = "A" ]; then
         # Convert the seven Subversion status columns to './' so it matches
         # the manifest file name.
@@ -106,7 +108,7 @@ done
 
 # Next check svn ls, which gets a list of all files that are
 # checked in.
-svn_ls="$(svn ls -R)"
+svn_ls=`svn ls -R`
 for file in $svn_ls; do
     path="./${file}"
     # Ignore directories

@@ -109,7 +109,7 @@ static void test_classes()
 {
     SUBTEST("PredType::getClass()");
     try {
-	int curr_nerrors = GetTestNumErrs();
+	// maybe later, int curr_nerrors = GetTestNumErrs();
 
 	// PredType::NATIVE_INT should be in H5T_INTEGER class
 	H5T_class_t tcls = PredType::NATIVE_INT.getClass();

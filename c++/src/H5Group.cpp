@@ -51,7 +51,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub Group.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group() : H5Object(), id(H5I_INVALID_HID) {}
+Group::Group() : H5Object(), CommonFG(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	Group copy constructor
@@ -59,7 +59,7 @@ Group::Group() : H5Object(), id(H5I_INVALID_HID) {}
 ///\param	original - IN: Original group to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group(const Group& original) : H5Object(original)
+Group::Group(const Group& original) : H5Object(), CommonFG()
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
@@ -82,7 +82,7 @@ hid_t Group::getLocId() const
 ///\param	existing_id - IN: Id of an existing group
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group(const hid_t existing_id) : H5Object()
+Group::Group(const hid_t existing_id) : H5Object(), CommonFG()
 {
     id = existing_id;
 }
@@ -100,7 +100,7 @@ Group::Group(const hid_t existing_id) : H5Object()
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
+Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), CommonFG(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(loc.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
@@ -115,7 +115,7 @@ Group::Group(const H5Location& loc, const void* ref, H5R_type_t ref_type, const 
 ///\exception	H5::ReferenceException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
+Group::Group(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), CommonFG(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
 }

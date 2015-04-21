@@ -1581,7 +1581,7 @@ test_h5s_compound_scalar_read(void)
     if(HDmemcmp(&space4_data,&rdata,sizeof(struct space4_struct))) {
         printf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c1);
         printf("scalar data different: space4_data.u=%u, read_data4.u=%u\n",space4_data.u,rdata.u);
-        printf("scalar data different: space4_data.f=%f, read_data4.f=%f\n",space4_data.f,rdata.f);
+        printf("scalar data different: space4_data.f=%f, read_data4.f=%f\n",(double)space4_data.f,(double)rdata.f);
         TestErrPrintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c2);
      } /* end if */
 
@@ -1684,7 +1684,7 @@ test_h5s_chunk(void)
         for(j=0; j<3; j++) {
             /* Check if the two values are within 0.001% range. */
             if(!DBL_REL_EQUAL(chunk_data_dbl[i][j], chunk_data_flt[i][j], 0.00001F))
-                TestErrPrintf("%u: chunk_data_dbl[%d][%d]=%e, chunk_data_flt[%d][%d]=%e\n", (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j, chunk_data_flt[i][j]);
+                TestErrPrintf("%u: chunk_data_dbl[%d][%d]=%e, chunk_data_flt[%d][%d]=%e\n", (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j, (double)chunk_data_flt[i][j]);
         } /* end for */
     } /* end for */
 } /* test_h5s_chunk() */
