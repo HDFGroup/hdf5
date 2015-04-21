@@ -7428,8 +7428,19 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
                                 ! as defined in MPI_FILE_OPEN of MPI-2
     INTEGER, INTENT(OUT) :: hdferr ! Error code
 !*****
-    INTEGER, EXTERNAL :: h5pset_fapl_mpio_c
+    INTERFACE
+       INTEGER FUNCTION h5pset_fapl_mpio_c(prp_id, comm, info) &
+            BIND(C,NAME='h5pset_fapl_mpio_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN)  :: prp_id 
+         INTEGER       , INTENT(IN)  :: comm
+         INTEGER       , INTENT(IN) :: info
+       END FUNCTION h5pset_fapl_mpio_c
+    END INTERFACE
+
     hdferr = h5pset_fapl_mpio_c(prp_id, comm, info)
+
   END SUBROUTINE h5pset_fapl_mpio_f
 
 !****s* H5P/h5pget_fapl_mpio_f
@@ -7460,8 +7471,19 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
                                  ! as defined in MPI_FILE_OPEN of MPI-2
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
 !*****
-    INTEGER, EXTERNAL :: h5pget_fapl_mpio_c
+    INTERFACE
+       INTEGER FUNCTION h5pget_fapl_mpio_c(prp_id, comm, info) &
+            BIND(C,NAME='h5pget_fapl_mpio_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN)  :: prp_id 
+         INTEGER       , INTENT(OUT) :: comm
+         INTEGER       , INTENT(OUT) :: info
+       END FUNCTION h5pget_fapl_mpio_c
+    END INTERFACE
+
     hdferr = h5pget_fapl_mpio_c(prp_id, comm, info)
+
   END SUBROUTINE h5pget_fapl_mpio_f
 
 !****s* H5P/h5pset_dxpl_mpio_f
@@ -7492,7 +7514,16 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
                                           ! H5FD_MPIO_COLLECTIVE_F
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
 !*****
-    INTEGER, EXTERNAL :: h5pset_dxpl_mpio_c
+    INTERFACE
+       INTEGER FUNCTION h5pset_dxpl_mpio_c(prp_id, data_xfer_mode) &
+            BIND(C,NAME='h5pset_dxpl_mpio_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN)  :: prp_id 
+         INTEGER       , INTENT(IN) :: data_xfer_mode
+       END FUNCTION h5pset_dxpl_mpio_c
+    END INTERFACE
+
     hdferr = h5pset_dxpl_mpio_c(prp_id, data_xfer_mode)
   END SUBROUTINE h5pset_dxpl_mpio_f
 
@@ -7525,7 +7556,16 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
                                            ! H5FD_MPIO_COLLECTIVE_F
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER, EXTERNAL :: h5pget_dxpl_mpio_c
+    INTERFACE
+       INTEGER FUNCTION h5pget_dxpl_mpio_c(prp_id, data_xfer_mode) &
+            BIND(C,NAME='h5pget_dxpl_mpio_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN)  :: prp_id 
+         INTEGER       , INTENT(OUT) :: data_xfer_mode
+       END FUNCTION h5pget_dxpl_mpio_c
+    END INTERFACE
+
     hdferr = h5pget_dxpl_mpio_c(prp_id, data_xfer_mode)
   END SUBROUTINE h5pget_dxpl_mpio_f
 
