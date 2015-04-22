@@ -70,8 +70,9 @@ New Features
       
       (ADB - 2015/04/01 HDFFV-8074, 8968, 9006)
       
-    - cmakehdf5: configure options added to enable or disable the building of
-      different API's and testings. See "cmakehdf5 --help" for details.
+    - cmakehdf5 for Cmake building.
+      Added configure options to support the building of Fortran or CXX API,
+      to enable/disable testings. Use "cmakehdf5 --help" for details.
       (AKC - 2014/12/09 HDFFV-8932)
 
     - Building Shared and Parallel Made Explicit
@@ -474,31 +475,31 @@ Bug Fixes since HDF5-1.8.14
 
     Tools
     -----
-    - h5repack
-      
-      Fixed an h5repack bug. h5repack would crash on enumerated 8-bit 
-      datatype nested in compound datatype. 
-      
-      (AKC - 2015/03/31, HDFFV-8667)
-      
-    - h52gif
-      
-      Fixed an h52gif bug. h52gif would crash if instructed to convert 
-      images other than 8-bit images. 
-      
+    - h5repack crashed on enumerated 8-bit type.
+
+      Previous version 1.8.14 introduced an error that caused the reading
+      of enumerated 8-bit type nested in compound type to fail.
+
+      Fixed library code responsible for reading the particular type.
+      (AKC - 2015.03/31, HDFFV-8667)
+
+    - h52gif crashed non-8bit images.
+
+      h52gif crashed if instructed to convert images other than 8bit images.
+
+      h52gif could handle only 8bit images. Added code to detect non-8bit
+      images and flag them as failure.  Update tool document page to reflect
+      the limit.
       (AKC - 2015/03/31, HDFFV-8957)
-      
-    - Benchpar.c Retired
-      
-      Benchpar.c in perform was retired. 
-      
+
+    - perform/benchpar.c retired.
+
+      benchpar.c has not been built for a long time and its original purpose
+      is not needed any more.
       (AKC - 2014/12/19, HDFFV-8156)
-      
-    - Moved perform Directory
-      
-      The perform directory was moved to tools/perform for easier 
-      maintenance.
-      
+
+    - Source perform/ directory moved to tools/perform.
+      The perform directory is moved to tools/perform for easier maintenance.
       (AKC - 2014/12/17, HDFFV-9046)
       
     Fortran API
