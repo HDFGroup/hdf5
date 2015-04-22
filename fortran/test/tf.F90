@@ -458,12 +458,12 @@ CONTAINS
 !DEC$endif
   INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_CHR(a)
     IMPLICIT NONE
-    CHARACTER(LEN=*), INTENT(in) :: a
+    CHARACTER(LEN=1), INTENT(in) :: a
 
 #ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
-    H5_SIZEOF_CHR = storage_size(a(1:1), c_size_t)/storage_size(c_char_'a',c_size_t)
+    H5_SIZEOF_CHR = storage_size(a, c_size_t)/storage_size(c_char_'a',c_size_t)
 #else
-    H5_SIZEOF_CHR = SIZEOF(a(1:1))
+    H5_SIZEOF_CHR = SIZEOF(a)
 #endif
 
   END FUNCTION H5_SIZEOF_CHR
