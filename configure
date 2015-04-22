@@ -26405,13 +26405,13 @@ all_packages="ac,b,b2,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
 case "X-$DEBUG_PKG" in
   X-yes)
     DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
-    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
+##    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: default ($DEBUG_PKG)" >&5
 $as_echo "default ($DEBUG_PKG)" >&6; }
     ;;
   X-all)
     DEBUG_PKG=$all_packages
-    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
+##    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: all ($DEBUG_PKG)" >&5
 $as_echo "all ($DEBUG_PKG)" >&6; }
     ;;
