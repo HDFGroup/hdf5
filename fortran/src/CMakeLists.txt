@@ -19,6 +19,16 @@ if (WIN32)
   endif (BUILD_SHARED_LIBS)
 endif (WIN32)
 
+# configure for Fortran preprocessor
+
+# Define Parallel variable for passing to H5config_f.inc.cmake
+set (CMAKE_H5_HAVE_PARALLEL 0)
+if (H5_HAVE_PARALLEL)
+  set (CMAKE_H5_HAVE_PARALLEL 1)
+endif (H5_HAVE_PARALLEL)
+
+configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5config_f.inc.cmake ${CMAKE_BINARY_DIR}/H5config_f.inc @ONLY)
+
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
 # H5test_kind.F90         used to generate H5fortran_detect.F90
@@ -120,12 +130,6 @@ set (f90CStub_C_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zf.c
 )
 
-if (H5_HAVE_PARALLEL)
-  set (f90CStub_C_SRCS
-      ${f90CStub_C_SRCS}
-      ${HDF5_F90_SRC_SOURCE_DIR}/H5FDmpiof.c
-  )
-endif (H5_HAVE_PARALLEL)
 set_source_files_properties (${f90CStub_C_SRCS} PROPERTIES LANGUAGE C)
 
 set (f90CStub_C_HDRS
