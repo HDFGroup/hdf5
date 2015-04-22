@@ -860,11 +860,6 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
-* "make check" fails on CYGWIN when building shared lib files is enabled.  The
-   default on Cygwin has been changed to disable shared.  It can be enabled with 
-   the --enable-shared configure option but is likely to fail "make check"
-   with GCC compilers. (LK -2015/04/16)
- 
 * On Windows platforms in debug configurations, the VFD flush1 tests will fail
   with the split and multi VFD drivers. These tests will display a modal debug 
   dialog which must be answered or wait for the test timeout to expire.

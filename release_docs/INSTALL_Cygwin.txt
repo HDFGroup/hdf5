@@ -259,11 +259,6 @@ Build, Test and Install HDF5 on Cygwin
    dt_arith tests may fail due to the use of fork. This is a known issue
    with cygwin on Windows.
 
-   "make check" fails when building shared lib files is enabled.  The default
-   on Cygwin has been changed to disable shared.  It can be enabled with
-   the --enable-shared configure option but is likely to fail "make check" 
-   with GCC compilers.
-
 -----------------------------------------------------------------------
 
 Need Further assistance, email help@hdfgroup.org

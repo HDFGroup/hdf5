@@ -637,19 +637,6 @@ AC_SUBST([RUNPARALLEL])
 AC_SUBST([TESTPARALLEL])
 
 ## ----------------------------------------------------------------------
-## Disable shared libraries on CYGWIN. (LK - 04/16/15)
-## A number of tests run by "make check" fail on CYGWIN, so for HDF5 v1.8.15
-## we will change the default for shared libraries to disabled.
-
-
-case "`uname`" in
-  CYGWIN*)
-    enable_shared="no"
-    CHECK_WARN="Shared libraries are not currently supported on CYGWIN."
-    ;;
-esac
-
-## ----------------------------------------------------------------------
 ## Fortran libraries are not currently supported on Mac. Disable them.
 ## (this is overridable with --enable-unsupported).
 ##
@@ -689,6 +676,23 @@ if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
 fi
 
 AM_CONDITIONAL([FORTRAN_SHARED_CONDITIONAL], [test "X$H5_FORTRAN_SHARED" = "Xyes"])
+
+## ----------------------------------------------------------------------
+## Shared libraries are not currently supported under Cygwin, so configure
+## disables them unless --enable-unsupported has been supplied by the user.
+
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  case "`uname`" in
+    CYGWIN*)
+      if test "X${enable_shared}" = "Xyes"; then
+        echo '    warning: shared libraries are not supported on Cygwin!'
+        echo '    disabling shared libraries'
+        echo '    use --enable-unsupported to override this warning and keep shared libraries enabled'
+      fi
+      enable_shared="no"
+      ;;
+  esac
+fi
 
 ## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
