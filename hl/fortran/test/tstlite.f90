@@ -1335,6 +1335,7 @@ END SUBROUTINE test_datasets
 
 SUBROUTINE test_attributes()
 
+  USE ISO_C_BINDING
   USE H5LT ! module of H5LT
   USE HDF5 ! module of HDF5 library
 
@@ -1358,8 +1359,8 @@ SUBROUTINE test_attributes()
 !  CHARACTER(LEN=18)                 :: bufr_c_lg       ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: buf2            ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: bufr2           ! Data buffer
-  REAL, DIMENSION(DIM1)             :: buf3            ! Data buffer
-  REAL, DIMENSION(DIM1)             :: bufr3           ! Data buffer
+  REAL(C_FLOAT), DIMENSION(DIM1)             :: buf3            ! Data buffer
+  REAL(C_FLOAT), DIMENSION(DIM1)             :: bufr3           ! Data buffer
   DOUBLE PRECISION, DIMENSION(DIM1) :: buf4            ! Data buffer
   DOUBLE PRECISION, DIMENSION(DIM1) :: bufr4           ! Data buffer
   INTEGER        :: errcode                            ! Error flag

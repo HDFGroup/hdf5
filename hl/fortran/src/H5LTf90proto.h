@@ -27,116 +27,6 @@
 H5_FCDLL char*  HD5f2cstring (_fcd fdesc, size_t len);
 H5_FCDLL void HD5packFstring (char *src, char *dest, size_t len);
 
-
-/*
- *  Functions from H5LTfc.c
- */
-#define nh5ltmake_dataset_c       H5_FC_FUNC_(h5ltmake_dataset_c, H5LTMAKE_DATASET_C)
-#define nh5ltmake_dataset_int1_c  H5_FC_FUNC_(h5ltmake_dataset_int1_c, H5LTMAKE_DATASET_INT1_C)
-#define nh5ltmake_dataset_int2_c  H5_FC_FUNC_(h5ltmake_dataset_int2_c, H5LTMAKE_DATASET_INT2_C)
-#define nh5ltmake_dataset_int3_c  H5_FC_FUNC_(h5ltmake_dataset_int3_c, H5LTMAKE_DATASET_INT3_C)
-#define nh5ltmake_dataset_int4_c  H5_FC_FUNC_(h5ltmake_dataset_int4_c, H5LTMAKE_DATASET_INT4_C)
-#define nh5ltmake_dataset_int5_c  H5_FC_FUNC_(h5ltmake_dataset_int5_c, H5LTMAKE_DATASET_INT5_C)
-#define nh5ltmake_dataset_int6_c  H5_FC_FUNC_(h5ltmake_dataset_int6_c, H5LTMAKE_DATASET_INT6_C)
-#define nh5ltmake_dataset_int7_c  H5_FC_FUNC_(h5ltmake_dataset_int7_c, H5LTMAKE_DATASET_INT7_C)
-#define nh5ltmake_dataset_fl1_c   H5_FC_FUNC_(h5ltmake_dataset_fl1_c, H5LTMAKE_DATASET_FL1_C)
-#define nh5ltmake_dataset_fl2_c   H5_FC_FUNC_(h5ltmake_dataset_fl2_c, H5LTMAKE_DATASET_FL2_C)
-#define nh5ltmake_dataset_fl3_c   H5_FC_FUNC_(h5ltmake_dataset_fl3_c, H5LTMAKE_DATASET_FL3_C)
-#define nh5ltmake_dataset_fl4_c   H5_FC_FUNC_(h5ltmake_dataset_fl4_c, H5LTMAKE_DATASET_FL4_C)
-#define nh5ltmake_dataset_fl5_c   H5_FC_FUNC_(h5ltmake_dataset_fl5_c, H5LTMAKE_DATASET_FL5_C)
-#define nh5ltmake_dataset_fl6_c   H5_FC_FUNC_(h5ltmake_dataset_fl6_c, H5LTMAKE_DATASET_FL6_C)
-#define nh5ltmake_dataset_fl7_c   H5_FC_FUNC_(h5ltmake_dataset_fl7_c, H5LTMAKE_DATASET_FL7_C)
-#define nh5ltmake_dataset_dl1_c   H5_FC_FUNC_(h5ltmake_dataset_dl1_c, H5LTMAKE_DATASET_DL1_C)
-#define nh5ltmake_dataset_dl2_c   H5_FC_FUNC_(h5ltmake_dataset_dl2_c, H5LTMAKE_DATASET_DL2_C)
-#define nh5ltmake_dataset_dl3_c   H5_FC_FUNC_(h5ltmake_dataset_dl3_c, H5LTMAKE_DATASET_DL3_C)
-#define nh5ltmake_dataset_dl4_c   H5_FC_FUNC_(h5ltmake_dataset_dl4_c, H5LTMAKE_DATASET_DL4_C)
-#define nh5ltmake_dataset_dl5_c   H5_FC_FUNC_(h5ltmake_dataset_dl5_c, H5LTMAKE_DATASET_DL5_C)
-#define nh5ltmake_dataset_dl6_c   H5_FC_FUNC_(h5ltmake_dataset_dl6_c, H5LTMAKE_DATASET_DL6_C)
-#define nh5ltmake_dataset_dl7_c   H5_FC_FUNC_(h5ltmake_dataset_dl7_c, H5LTMAKE_DATASET_DL7_C)
-#define nh5ltmake_dataset_nint1_c H5_FC_FUNC_(h5ltmake_dataset_nint1_c, H5LTMAKE_DATASET_NINT1_C)
-#define nh5ltmake_dataset_nint2_c H5_FC_FUNC_(h5ltmake_dataset_nint2_c, H5LTMAKE_DATASET_NINT2_C)
-#define nh5ltmake_dataset_nint3_c H5_FC_FUNC_(h5ltmake_dataset_nint3_c, H5LTMAKE_DATASET_NINT3_C)
-#define nh5ltmake_dataset_nint4_c H5_FC_FUNC_(h5ltmake_dataset_nint4_c, H5LTMAKE_DATASET_NINT4_C)
-#define nh5ltmake_dataset_nint5_c H5_FC_FUNC_(h5ltmake_dataset_nint5_c, H5LTMAKE_DATASET_NINT5_C)
-#define nh5ltmake_dataset_nint6_c H5_FC_FUNC_(h5ltmake_dataset_nint6_c, H5LTMAKE_DATASET_NINT6_C)
-#define nh5ltmake_dataset_nint7_c H5_FC_FUNC_(h5ltmake_dataset_nint7_c, H5LTMAKE_DATASET_NINT7_C)
-#define nh5ltmake_dataset_nfl1_c  H5_FC_FUNC_(h5ltmake_dataset_nfl1_c, H5LTMAKE_DATASET_NFL1_C)
-#define nh5ltmake_dataset_nfl2_c  H5_FC_FUNC_(h5ltmake_dataset_nfl2_c, H5LTMAKE_DATASET_NFL2_C)
-#define nh5ltmake_dataset_nfl3_c  H5_FC_FUNC_(h5ltmake_dataset_nfl3_c, H5LTMAKE_DATASET_NFL3_C)
-#define nh5ltmake_dataset_nfl4_c  H5_FC_FUNC_(h5ltmake_dataset_nfl4_c, H5LTMAKE_DATASET_NFL4_C)
-#define nh5ltmake_dataset_nfl5_c  H5_FC_FUNC_(h5ltmake_dataset_nfl5_c, H5LTMAKE_DATASET_NFL5_C)
-#define nh5ltmake_dataset_nfl6_c  H5_FC_FUNC_(h5ltmake_dataset_nfl6_c, H5LTMAKE_DATASET_NFL6_C)
-#define nh5ltmake_dataset_nfl7_c  H5_FC_FUNC_(h5ltmake_dataset_nfl7_c, H5LTMAKE_DATASET_NFL7_C)
-#define nh5ltmake_dataset_ndl1_c  H5_FC_FUNC_(h5ltmake_dataset_ndl1_c, H5LTMAKE_DATASET_NDL1_C)
-#define nh5ltmake_dataset_ndl2_c  H5_FC_FUNC_(h5ltmake_dataset_ndl2_c, H5LTMAKE_DATASET_NDL2_C)
-#define nh5ltmake_dataset_ndl3_c  H5_FC_FUNC_(h5ltmake_dataset_ndl3_c, H5LTMAKE_DATASET_NDL3_C)
-#define nh5ltmake_dataset_ndl4_c  H5_FC_FUNC_(h5ltmake_dataset_ndl4_c, H5LTMAKE_DATASET_NDL4_C)
-#define nh5ltmake_dataset_ndl5_c  H5_FC_FUNC_(h5ltmake_dataset_ndl5_c, H5LTMAKE_DATASET_NDL5_C)
-#define nh5ltmake_dataset_ndl6_c  H5_FC_FUNC_(h5ltmake_dataset_ndl6_c, H5LTMAKE_DATASET_NDL6_C)
-#define nh5ltmake_dataset_ndl7_c  H5_FC_FUNC_(h5ltmake_dataset_ndl7_c, H5LTMAKE_DATASET_NDL7_C)
-#define nh5ltread_dataset_c       H5_FC_FUNC_(h5ltread_dataset_c, H5LTREAD_DATASET_C)
-#define nh5ltread_dataset_int1_c         H5_FC_FUNC_(h5ltread_dataset_int1_c, H5LTREAD_DATASET_INT1_C)
-#define nh5ltread_dataset_int2_c         H5_FC_FUNC_(h5ltread_dataset_int2_c, H5LTREAD_DATASET_INT2_C)
-#define nh5ltread_dataset_int3_c         H5_FC_FUNC_(h5ltread_dataset_int3_c, H5LTREAD_DATASET_INT3_C)
-#define nh5ltread_dataset_int4_c         H5_FC_FUNC_(h5ltread_dataset_int4_c, H5LTREAD_DATASET_INT4_C)
-#define nh5ltread_dataset_int5_c         H5_FC_FUNC_(h5ltread_dataset_int5_c, H5LTREAD_DATASET_INT5_C)
-#define nh5ltread_dataset_int6_c         H5_FC_FUNC_(h5ltread_dataset_int6_c, H5LTREAD_DATASET_INT6_C)
-#define nh5ltread_dataset_int7_c         H5_FC_FUNC_(h5ltread_dataset_int7_c, H5LTREAD_DATASET_INT7_C)
-#define nh5ltread_dataset_fl1_c         H5_FC_FUNC_(h5ltread_dataset_fl1_c, H5LTREAD_DATASET_FL1_C)
-#define nh5ltread_dataset_fl2_c         H5_FC_FUNC_(h5ltread_dataset_fl2_c, H5LTREAD_DATASET_FL2_C)
-#define nh5ltread_dataset_fl3_c         H5_FC_FUNC_(h5ltread_dataset_fl3_c, H5LTREAD_DATASET_FL3_C)
-#define nh5ltread_dataset_fl4_c         H5_FC_FUNC_(h5ltread_dataset_fl4_c, H5LTREAD_DATASET_FL4_C)
-#define nh5ltread_dataset_fl5_c         H5_FC_FUNC_(h5ltread_dataset_fl5_c, H5LTREAD_DATASET_FL5_C)
-#define nh5ltread_dataset_fl6_c         H5_FC_FUNC_(h5ltread_dataset_fl6_c, H5LTREAD_DATASET_FL6_C)
-#define nh5ltread_dataset_fl7_c         H5_FC_FUNC_(h5ltread_dataset_fl7_c, H5LTREAD_DATASET_FL7_C)
-#define nh5ltread_dataset_dl1_c         H5_FC_FUNC_(h5ltread_dataset_dl1_c, H5LTREAD_DATASET_DL1_C)
-#define nh5ltread_dataset_dl2_c         H5_FC_FUNC_(h5ltread_dataset_dl2_c, H5LTREAD_DATASET_DL2_C)
-#define nh5ltread_dataset_dl3_c         H5_FC_FUNC_(h5ltread_dataset_dl3_c, H5LTREAD_DATASET_DL3_C)
-#define nh5ltread_dataset_dl4_c         H5_FC_FUNC_(h5ltread_dataset_dl4_c, H5LTREAD_DATASET_DL4_C)
-#define nh5ltread_dataset_dl5_c         H5_FC_FUNC_(h5ltread_dataset_dl5_c, H5LTREAD_DATASET_DL5_C)
-#define nh5ltread_dataset_dl6_c         H5_FC_FUNC_(h5ltread_dataset_dl6_c, H5LTREAD_DATASET_DL6_C)
-#define nh5ltread_dataset_dl7_c         H5_FC_FUNC_(h5ltread_dataset_dl7_c, H5LTREAD_DATASET_DL7_C)
-#define nh5ltread_dataset_nint1_c         H5_FC_FUNC_(h5ltread_dataset_nint1_c, H5LTREAD_DATASET_NINT1_C)
-#define nh5ltread_dataset_nint2_c         H5_FC_FUNC_(h5ltread_dataset_nint2_c, H5LTREAD_DATASET_NINT2_C)
-#define nh5ltread_dataset_nint3_c         H5_FC_FUNC_(h5ltread_dataset_nint3_c, H5LTREAD_DATASET_NINT3_C)
-#define nh5ltread_dataset_nint4_c         H5_FC_FUNC_(h5ltread_dataset_nint4_c, H5LTREAD_DATASET_NINT4_C)
-#define nh5ltread_dataset_nint5_c         H5_FC_FUNC_(h5ltread_dataset_nint5_c, H5LTREAD_DATASET_NINT5_C)
-#define nh5ltread_dataset_nint6_c         H5_FC_FUNC_(h5ltread_dataset_nint6_c, H5LTREAD_DATASET_NINT6_C)
-#define nh5ltread_dataset_nint7_c         H5_FC_FUNC_(h5ltread_dataset_nint7_c, H5LTREAD_DATASET_NINT7_C)
-#define nh5ltread_dataset_nfl1_c         H5_FC_FUNC_(h5ltread_dataset_nfl1_c, H5LTREAD_DATASET_NFL1_C)
-#define nh5ltread_dataset_nfl2_c         H5_FC_FUNC_(h5ltread_dataset_nfl2_c, H5LTREAD_DATASET_NFL2_C)
-#define nh5ltread_dataset_nfl3_c         H5_FC_FUNC_(h5ltread_dataset_nfl3_c, H5LTREAD_DATASET_NFL3_C)
-#define nh5ltread_dataset_nfl4_c         H5_FC_FUNC_(h5ltread_dataset_nfl4_c, H5LTREAD_DATASET_NFL4_C)
-#define nh5ltread_dataset_nfl5_c         H5_FC_FUNC_(h5ltread_dataset_nfl5_c, H5LTREAD_DATASET_NFL5_C)
-#define nh5ltread_dataset_nfl6_c         H5_FC_FUNC_(h5ltread_dataset_nfl6_c, H5LTREAD_DATASET_NFL6_C)
-#define nh5ltread_dataset_nfl7_c         H5_FC_FUNC_(h5ltread_dataset_nfl7_c, H5LTREAD_DATASET_NFL7_C)
-#define nh5ltread_dataset_ndl1_c         H5_FC_FUNC_(h5ltread_dataset_ndl1_c, H5LTREAD_DATASET_NDL1_C)
-#define nh5ltread_dataset_ndl2_c         H5_FC_FUNC_(h5ltread_dataset_ndl2_c, H5LTREAD_DATASET_NDL2_C)
-#define nh5ltread_dataset_ndl3_c         H5_FC_FUNC_(h5ltread_dataset_ndl3_c, H5LTREAD_DATASET_NDL3_C)
-#define nh5ltread_dataset_ndl4_c         H5_FC_FUNC_(h5ltread_dataset_ndl4_c, H5LTREAD_DATASET_NDL4_C)
-#define nh5ltread_dataset_ndl5_c         H5_FC_FUNC_(h5ltread_dataset_ndl5_c, H5LTREAD_DATASET_NDL5_C)
-#define nh5ltread_dataset_ndl6_c         H5_FC_FUNC_(h5ltread_dataset_ndl6_c, H5LTREAD_DATASET_NDL6_C)
-#define nh5ltread_dataset_ndl7_c         H5_FC_FUNC_(h5ltread_dataset_ndl7_c, H5LTREAD_DATASET_NDL7_C)
-#define nh5ltmake_dataset_string_c  H5_FC_FUNC_(h5ltmake_dataset_string_c, H5LTMAKE_DATASET_STRING_C)
-#define nh5ltread_dataset_string_c  H5_FC_FUNC_(h5ltread_dataset_string_c, H5LTREAD_DATASET_STRING_C)
-
-#define nh5ltset_attribute_int_c    H5_FC_FUNC_(h5ltset_attribute_int_c, H5LTSET_ATTRIBUTE_INT_C)
-#define nh5ltset_attribute_float_c  H5_FC_FUNC_(h5ltset_attribute_float_c, H5LTSET_ATTRIBUTE_FLOAT_C)
-#define nh5ltset_attribute_double_c H5_FC_FUNC_(h5ltset_attribute_double_c, H5LTSET_ATTRIBUTE_DOUBLE_C)
-#define nh5ltset_attribute_string_c H5_FC_FUNC_(h5ltset_attribute_string_c, H5LTSET_ATTRIBUTE_STRING_C)
-
-#define nh5ltget_attribute_int_c    H5_FC_FUNC_(h5ltget_attribute_int_c, H5LTGET_ATTRIBUTE_INT_C)
-#define nh5ltget_attribute_float_c  H5_FC_FUNC_(h5ltget_attribute_float_c, H5LTGET_ATTRIBUTE_FLOAT_C)
-#define nh5ltget_attribute_double_c H5_FC_FUNC_(h5ltget_attribute_double_c, H5LTGET_ATTRIBUTE_DOUBLE_C)
-#define nh5ltget_attribute_string_c H5_FC_FUNC_(h5ltget_attribute_string_c, H5LTGET_ATTRIBUTE_STRING_C)
-
-#define nh5ltget_dataset_ndims_c    H5_FC_FUNC_(h5ltget_dataset_ndims_c, H5LTGET_DATASET_NDIMS_C)
-#define nh5ltfind_dataset_c         H5_FC_FUNC_(h5ltfind_dataset_c, H5LTFIND_DATASET_C)
-#define nh5ltget_dataset_info_c     H5_FC_FUNC_(h5ltget_dataset_info_c, H5LTGET_DATASET_INFO_C)
-
-#define nh5ltget_attribute_ndims_c  H5_FC_FUNC_(h5ltget_attribute_ndims_c, H5LTGET_ATTRIBUTE_NDIMS_C)
-#define nh5ltget_attribute_info_c   H5_FC_FUNC_(h5ltget_attribute_info_c, H5LTGET_ATTRIBUTE_INFO_C)
-#define nh5ltpath_valid_c           H5_FC_FUNC_(h5ltpath_valid_c, H5LTPATH_VALID_C)
 /*
  *  Functions from H5DSfc.c
  */
@@ -176,10 +66,13 @@ HDF5_HL_F90CSTUBDLL
 int_f
 h5dsget_num_scales_c( hid_t_f *did, int_f *idx, int_f *num_scales);
 
+/*
+ *  Functions from H5LTfc.c
+ */
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_c (hid_t_f *loc_id,
+h5ltmake_dataset_c (hid_t_f *loc_id,
                      size_t_f *namelen,
                      _fcd name,
                      int_f *rank,
@@ -189,7 +82,7 @@ nh5ltmake_dataset_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_int1_c (hid_t_f *loc_id,
+h5ltmake_dataset_int1_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -199,7 +92,7 @@ nh5ltmake_dataset_int1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_int2_c (hid_t_f *loc_id,
+h5ltmake_dataset_int2_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -209,7 +102,7 @@ nh5ltmake_dataset_int2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_int3_c (hid_t_f *loc_id,
+h5ltmake_dataset_int3_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -219,7 +112,7 @@ nh5ltmake_dataset_int3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_int4_c (hid_t_f *loc_id,
+h5ltmake_dataset_int4_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -229,7 +122,7 @@ nh5ltmake_dataset_int4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_int5_c (hid_t_f *loc_id,
+h5ltmake_dataset_int5_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -239,7 +132,7 @@ nh5ltmake_dataset_int5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_int6_c (hid_t_f *loc_id,
+h5ltmake_dataset_int6_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -249,7 +142,7 @@ nh5ltmake_dataset_int6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_int7_c (hid_t_f *loc_id,
+h5ltmake_dataset_int7_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -260,7 +153,7 @@ nh5ltmake_dataset_int7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_fl1_c (hid_t_f *loc_id,
+h5ltmake_dataset_fl1_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -270,7 +163,7 @@ nh5ltmake_dataset_fl1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_fl2_c (hid_t_f *loc_id,
+h5ltmake_dataset_fl2_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -280,7 +173,7 @@ nh5ltmake_dataset_fl2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_fl3_c (hid_t_f *loc_id,
+h5ltmake_dataset_fl3_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -290,7 +183,7 @@ nh5ltmake_dataset_fl3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_fl4_c (hid_t_f *loc_id,
+h5ltmake_dataset_fl4_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -300,7 +193,7 @@ nh5ltmake_dataset_fl4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_fl5_c (hid_t_f *loc_id,
+h5ltmake_dataset_fl5_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -310,7 +203,7 @@ nh5ltmake_dataset_fl5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_fl6_c (hid_t_f *loc_id,
+h5ltmake_dataset_fl6_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -320,7 +213,7 @@ nh5ltmake_dataset_fl6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_fl7_c (hid_t_f *loc_id,
+h5ltmake_dataset_fl7_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -331,7 +224,7 @@ nh5ltmake_dataset_fl7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_dl1_c (hid_t_f *loc_id,
+h5ltmake_dataset_dl1_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -341,7 +234,7 @@ nh5ltmake_dataset_dl1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_dl2_c (hid_t_f *loc_id,
+h5ltmake_dataset_dl2_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -351,7 +244,7 @@ nh5ltmake_dataset_dl2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_dl3_c (hid_t_f *loc_id,
+h5ltmake_dataset_dl3_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -361,7 +254,7 @@ nh5ltmake_dataset_dl3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_dl4_c (hid_t_f *loc_id,
+h5ltmake_dataset_dl4_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -371,7 +264,7 @@ nh5ltmake_dataset_dl4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_dl5_c (hid_t_f *loc_id,
+h5ltmake_dataset_dl5_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -381,7 +274,7 @@ nh5ltmake_dataset_dl5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_dl6_c (hid_t_f *loc_id,
+h5ltmake_dataset_dl6_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -391,7 +284,7 @@ nh5ltmake_dataset_dl6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_dl7_c (hid_t_f *loc_id,
+h5ltmake_dataset_dl7_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank,
@@ -401,7 +294,7 @@ nh5ltmake_dataset_dl7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nint1_c (hid_t_f *loc_id,
+h5ltmake_dataset_nint1_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            int_f *rank,
@@ -411,7 +304,7 @@ nh5ltmake_dataset_nint1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nint2_c (hid_t_f *loc_id,
+h5ltmake_dataset_nint2_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            int_f *rank,
@@ -421,7 +314,7 @@ nh5ltmake_dataset_nint2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nint3_c (hid_t_f *loc_id,
+h5ltmake_dataset_nint3_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            int_f *rank,
@@ -431,7 +324,7 @@ nh5ltmake_dataset_nint3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nint4_c (hid_t_f *loc_id,
+h5ltmake_dataset_nint4_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            int_f *rank,
@@ -441,7 +334,7 @@ nh5ltmake_dataset_nint4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nint5_c (hid_t_f *loc_id,
+h5ltmake_dataset_nint5_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            int_f *rank,
@@ -451,7 +344,7 @@ nh5ltmake_dataset_nint5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nint6_c (hid_t_f *loc_id,
+h5ltmake_dataset_nint6_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            int_f *rank,
@@ -461,7 +354,7 @@ nh5ltmake_dataset_nint6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nint7_c (hid_t_f *loc_id,
+h5ltmake_dataset_nint7_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            int_f *rank,
@@ -471,7 +364,7 @@ nh5ltmake_dataset_nint7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nfl1_c (hid_t_f *loc_id,
+h5ltmake_dataset_nfl1_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -481,7 +374,7 @@ nh5ltmake_dataset_nfl1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nfl2_c (hid_t_f *loc_id,
+h5ltmake_dataset_nfl2_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -491,7 +384,7 @@ nh5ltmake_dataset_nfl2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nfl3_c (hid_t_f *loc_id,
+h5ltmake_dataset_nfl3_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -501,7 +394,7 @@ nh5ltmake_dataset_nfl3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nfl4_c (hid_t_f *loc_id,
+h5ltmake_dataset_nfl4_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -511,7 +404,7 @@ nh5ltmake_dataset_nfl4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nfl5_c (hid_t_f *loc_id,
+h5ltmake_dataset_nfl5_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -521,7 +414,7 @@ nh5ltmake_dataset_nfl5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nfl6_c (hid_t_f *loc_id,
+h5ltmake_dataset_nfl6_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -531,7 +424,7 @@ nh5ltmake_dataset_nfl6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_nfl7_c (hid_t_f *loc_id,
+h5ltmake_dataset_nfl7_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -541,7 +434,7 @@ nh5ltmake_dataset_nfl7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_ndl1_c (hid_t_f *loc_id,
+h5ltmake_dataset_ndl1_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -551,7 +444,7 @@ nh5ltmake_dataset_ndl1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_ndl2_c (hid_t_f *loc_id,
+h5ltmake_dataset_ndl2_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -561,7 +454,7 @@ nh5ltmake_dataset_ndl2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_ndl3_c (hid_t_f *loc_id,
+h5ltmake_dataset_ndl3_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -571,7 +464,7 @@ nh5ltmake_dataset_ndl3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_ndl4_c (hid_t_f *loc_id,
+h5ltmake_dataset_ndl4_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -581,7 +474,7 @@ nh5ltmake_dataset_ndl4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_ndl5_c (hid_t_f *loc_id,
+h5ltmake_dataset_ndl5_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -591,7 +484,7 @@ nh5ltmake_dataset_ndl5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_ndl6_c (hid_t_f *loc_id,
+h5ltmake_dataset_ndl6_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -601,7 +494,7 @@ nh5ltmake_dataset_ndl6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_ndl7_c (hid_t_f *loc_id,
+h5ltmake_dataset_ndl7_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           int_f *rank,
@@ -611,7 +504,7 @@ nh5ltmake_dataset_ndl7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_c (hid_t_f *loc_id,
+h5ltread_dataset_c (hid_t_f *loc_id,
                      size_t_f *namelen,
                      _fcd name,
                      hid_t_f *type_id,
@@ -621,7 +514,7 @@ nh5ltread_dataset_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_int1_c (hid_t_f *loc_id,
+h5ltread_dataset_int1_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -630,7 +523,7 @@ nh5ltread_dataset_int1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_int2_c (hid_t_f *loc_id,
+h5ltread_dataset_int2_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -639,7 +532,7 @@ nh5ltread_dataset_int2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_int3_c (hid_t_f *loc_id,
+h5ltread_dataset_int3_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -648,7 +541,7 @@ nh5ltread_dataset_int3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_int4_c (hid_t_f *loc_id,
+h5ltread_dataset_int4_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -657,7 +550,7 @@ nh5ltread_dataset_int4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_int5_c (hid_t_f *loc_id,
+h5ltread_dataset_int5_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -666,7 +559,7 @@ nh5ltread_dataset_int5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_int6_c (hid_t_f *loc_id,
+h5ltread_dataset_int6_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -675,7 +568,7 @@ nh5ltread_dataset_int6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_int7_c (hid_t_f *loc_id,
+h5ltread_dataset_int7_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -684,7 +577,7 @@ nh5ltread_dataset_int7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_fl1_c (hid_t_f *loc_id,
+h5ltread_dataset_fl1_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -693,7 +586,7 @@ nh5ltread_dataset_fl1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_fl2_c (hid_t_f *loc_id,
+h5ltread_dataset_fl2_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -702,7 +595,7 @@ nh5ltread_dataset_fl2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_fl3_c (hid_t_f *loc_id,
+h5ltread_dataset_fl3_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -711,7 +604,7 @@ nh5ltread_dataset_fl3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_fl4_c (hid_t_f *loc_id,
+h5ltread_dataset_fl4_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -720,7 +613,7 @@ nh5ltread_dataset_fl4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_fl5_c (hid_t_f *loc_id,
+h5ltread_dataset_fl5_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -729,7 +622,7 @@ nh5ltread_dataset_fl5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_fl6_c (hid_t_f *loc_id,
+h5ltread_dataset_fl6_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -739,7 +632,7 @@ nh5ltread_dataset_fl6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_fl7_c (hid_t_f *loc_id,
+h5ltread_dataset_fl7_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -748,7 +641,7 @@ nh5ltread_dataset_fl7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_dl1_c (hid_t_f *loc_id,
+h5ltread_dataset_dl1_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -757,7 +650,7 @@ nh5ltread_dataset_dl1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_dl2_c (hid_t_f *loc_id,
+h5ltread_dataset_dl2_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -766,7 +659,7 @@ nh5ltread_dataset_dl2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_dl3_c (hid_t_f *loc_id,
+h5ltread_dataset_dl3_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -775,7 +668,7 @@ nh5ltread_dataset_dl3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_dl4_c (hid_t_f *loc_id,
+h5ltread_dataset_dl4_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -784,7 +677,7 @@ nh5ltread_dataset_dl4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_dl5_c (hid_t_f *loc_id,
+h5ltread_dataset_dl5_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -793,7 +686,7 @@ nh5ltread_dataset_dl5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_dl6_c (hid_t_f *loc_id,
+h5ltread_dataset_dl6_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -802,7 +695,7 @@ nh5ltread_dataset_dl6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_dl7_c (hid_t_f *loc_id,
+h5ltread_dataset_dl7_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          hid_t_f *type_id,
@@ -811,7 +704,7 @@ nh5ltread_dataset_dl7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nint1_c (hid_t_f *loc_id,
+h5ltread_dataset_nint1_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            hid_t_f *type_id,
@@ -820,7 +713,7 @@ nh5ltread_dataset_nint1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nint2_c (hid_t_f *loc_id,
+h5ltread_dataset_nint2_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            hid_t_f *type_id,
@@ -829,7 +722,7 @@ nh5ltread_dataset_nint2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nint3_c (hid_t_f *loc_id,
+h5ltread_dataset_nint3_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            hid_t_f *type_id,
@@ -838,7 +731,7 @@ nh5ltread_dataset_nint3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nint4_c (hid_t_f *loc_id,
+h5ltread_dataset_nint4_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            hid_t_f *type_id,
@@ -847,7 +740,7 @@ nh5ltread_dataset_nint4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nint5_c (hid_t_f *loc_id,
+h5ltread_dataset_nint5_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            hid_t_f *type_id,
@@ -856,7 +749,7 @@ nh5ltread_dataset_nint5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nint6_c (hid_t_f *loc_id,
+h5ltread_dataset_nint6_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            hid_t_f *type_id,
@@ -865,7 +758,7 @@ nh5ltread_dataset_nint6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nint7_c (hid_t_f *loc_id,
+h5ltread_dataset_nint7_c (hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd name,
                            hid_t_f *type_id,
@@ -874,7 +767,7 @@ nh5ltread_dataset_nint7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nfl1_c (hid_t_f *loc_id,
+h5ltread_dataset_nfl1_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -883,7 +776,7 @@ nh5ltread_dataset_nfl1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nfl2_c (hid_t_f *loc_id,
+h5ltread_dataset_nfl2_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -892,7 +785,7 @@ nh5ltread_dataset_nfl2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nfl3_c (hid_t_f *loc_id,
+h5ltread_dataset_nfl3_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -901,7 +794,7 @@ nh5ltread_dataset_nfl3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nfl4_c (hid_t_f *loc_id,
+h5ltread_dataset_nfl4_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -910,7 +803,7 @@ nh5ltread_dataset_nfl4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nfl5_c (hid_t_f *loc_id,
+h5ltread_dataset_nfl5_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -919,7 +812,7 @@ nh5ltread_dataset_nfl5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nfl6_c (hid_t_f *loc_id,
+h5ltread_dataset_nfl6_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -928,7 +821,7 @@ nh5ltread_dataset_nfl6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_nfl7_c (hid_t_f *loc_id,
+h5ltread_dataset_nfl7_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -937,7 +830,7 @@ nh5ltread_dataset_nfl7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_ndl1_c (hid_t_f *loc_id,
+h5ltread_dataset_ndl1_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -946,7 +839,7 @@ nh5ltread_dataset_ndl1_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_ndl2_c (hid_t_f *loc_id,
+h5ltread_dataset_ndl2_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -955,7 +848,7 @@ nh5ltread_dataset_ndl2_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_ndl3_c (hid_t_f *loc_id,
+h5ltread_dataset_ndl3_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -964,7 +857,7 @@ nh5ltread_dataset_ndl3_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_ndl4_c (hid_t_f *loc_id,
+h5ltread_dataset_ndl4_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -973,7 +866,7 @@ nh5ltread_dataset_ndl4_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_ndl5_c (hid_t_f *loc_id,
+h5ltread_dataset_ndl5_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -982,7 +875,7 @@ nh5ltread_dataset_ndl5_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_ndl6_c (hid_t_f *loc_id,
+h5ltread_dataset_ndl6_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -991,7 +884,7 @@ nh5ltread_dataset_ndl6_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_ndl7_c (hid_t_f *loc_id,
+h5ltread_dataset_ndl7_c (hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           hid_t_f *type_id,
@@ -1000,7 +893,7 @@ nh5ltread_dataset_ndl7_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltset_attribute_int_c(hid_t_f *loc_id,
+h5ltset_attribute_int_c(hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd dsetname,
                          size_t_f *attrnamelen,
@@ -1010,7 +903,7 @@ nh5ltset_attribute_int_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltset_attribute_float_c(hid_t_f *loc_id,
+h5ltset_attribute_float_c(hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd dsetname,
                            size_t_f *attrnamelen,
@@ -1020,7 +913,7 @@ nh5ltset_attribute_float_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltset_attribute_double_c(hid_t_f *loc_id,
+h5ltset_attribute_double_c(hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd dsetname,
                             size_t_f *attrnamelen,
@@ -1030,7 +923,7 @@ nh5ltset_attribute_double_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltset_attribute_string_c(hid_t_f *loc_id,
+h5ltset_attribute_string_c(hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd dsetname,
                             size_t_f *attrnamelen,
@@ -1041,7 +934,7 @@ nh5ltset_attribute_string_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltget_attribute_int_c(hid_t_f *loc_id,
+h5ltget_attribute_int_c(hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd dsetname,
                          size_t_f *attrnamelen,
@@ -1050,7 +943,7 @@ nh5ltget_attribute_int_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltget_attribute_float_c(hid_t_f *loc_id,
+h5ltget_attribute_float_c(hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd dsetname,
                            size_t_f *attrnamelen,
@@ -1059,7 +952,7 @@ nh5ltget_attribute_float_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltget_attribute_double_c(hid_t_f *loc_id,
+h5ltget_attribute_double_c(hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd dsetname,
                             size_t_f *attrnamelen,
@@ -1068,7 +961,7 @@ nh5ltget_attribute_double_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltget_attribute_string_c(hid_t_f *loc_id,
+h5ltget_attribute_string_c(hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd dsetname,
                             size_t_f *attrnamelen,
@@ -1078,20 +971,20 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltget_dataset_ndims_c(hid_t_f *loc_id,
+h5ltget_dataset_ndims_c(hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          int_f *rank);
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltfind_dataset_c(hid_t_f *loc_id,
+h5ltfind_dataset_c(hid_t_f *loc_id,
                     size_t_f *namelen,
                     _fcd name);
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltget_dataset_info_c(hid_t_f *loc_id,
+h5ltget_dataset_info_c(hid_t_f *loc_id,
                         size_t_f *namelen,
                         _fcd name,
                         hsize_t_f *dims,
@@ -1100,7 +993,7 @@ nh5ltget_dataset_info_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltget_attribute_ndims_c(hid_t_f *loc_id,
+h5ltget_attribute_ndims_c(hid_t_f *loc_id,
                            size_t_f *namelen,
                            _fcd dsetname,
                            size_t_f *attrnamelen,
@@ -1108,7 +1001,7 @@ nh5ltget_attribute_ndims_c(hid_t_f *loc_id,
                            int_f *rank);
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltget_attribute_info_c(hid_t_f *loc_id,
+h5ltget_attribute_info_c(hid_t_f *loc_id,
                           size_t_f *namelen,
                           _fcd name,
                           size_t_f *attrnamelen,
@@ -1119,7 +1012,7 @@ nh5ltget_attribute_info_c(hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltmake_dataset_string_c (hid_t_f *loc_id,
+h5ltmake_dataset_string_c (hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd name,
                             size_t_f *buflen,
@@ -1127,14 +1020,14 @@ nh5ltmake_dataset_string_c (hid_t_f *loc_id,
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltread_dataset_string_c (hid_t_f *loc_id,
+h5ltread_dataset_string_c (hid_t_f *loc_id,
                             size_t_f *namelen,
                             _fcd name,
                             char *buf);
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5ltpath_valid_c(hid_t_f *loc_id, 
+h5ltpath_valid_c(hid_t_f *loc_id, 
                   _fcd path, 
                   size_t_f *pathlen, 
                   int_f *check_object_valid_c);
