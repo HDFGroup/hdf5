@@ -2237,8 +2237,7 @@ H5S_hyper_serialize(const H5F_t *f, const H5S_t *space, uint8_t **p)
 
             /* Work on other dimensions if necessary */
             if(fast_dim > 0) {
-                int
-                temp_dim;           /* Temporary rank holder */
+                int temp_dim;           /* Temporary rank holder */
 
                 /* Reset the block counts */
                 tmp_count[fast_dim]=diminfo[fast_dim].count;
@@ -9169,7 +9168,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     hsize_t             proj_down_dims[H5S_MAX_RANK];
     H5S_hyper_span_info_t *curr_span_tree[H5S_MAX_RANK];
     H5S_hyper_span_t    *prev_span[H5S_MAX_RANK];
-    hsize_t             curr_span_dim[H5S_MAX_RANK];
+    hsize_t             curr_span_up_dim[H5S_MAX_RANK];
     unsigned            proj_rank;
     hsize_t             low;
     hsize_t             high;
@@ -9189,11 +9188,11 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     /* Assert that src_space and src_intersect_space have same extent and there
      * are no point selections? */
 
-    /* Initialize prev_space, curr_span_tree, and curr_span_dim */
+    /* Initialize prev_space, curr_span_tree, and curr_span_up_dim */
     for(i = 0; i < H5S_MAX_RANK; i++) {
         curr_span_tree[i] = NULL;
         prev_span[i] = NULL;
-        curr_span_dim[i] = (hsize_t)0;
+        curr_span_up_dim[i] = (hsize_t)0;
     } /* end for */
 
     /* Save rank of projected space */
@@ -9383,15 +9382,15 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                      * the plane of the span currently being built (i.e. it's
                      * finished being built) */
                     for(i = proj_rank - 1; ((i > 0)
-                            && (((proj_off / proj_down_dims[i - 1])
-                            % proj_space->extent.size[i - 1])
-                            != curr_span_dim[i - 1])); i--) {
+                            && ((proj_off / proj_down_dims[i - 1])
+                            != curr_span_up_dim[i - 1])); i--) {
                         if(curr_span_tree[i]) {
                             HDassert(prev_span[i]);
 
                             /* Append complete lower dimension span tree to
                              * current dimension */
-                            if(H5S_hyper_append_span(&prev_span[i - 1], &curr_span_tree[i - 1], curr_span_dim[i - 1], curr_span_dim[i - 1], curr_span_tree[i], NULL) < 0)
+                            low = curr_span_up_dim[i - 1] % proj_space->extent.size[i - 1];
+                            if(H5S_hyper_append_span(&prev_span[i - 1], &curr_span_tree[i - 1], low, low, curr_span_tree[i], NULL) < 0)
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
                             /* Reset lower dimension's span tree and previous
@@ -9403,8 +9402,8 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                             prev_span[i] = NULL;
                         } /* end if */
 
-                        /* Update curr_span_dim */
-                        curr_span_dim[i - 1] = (proj_off / proj_down_dims[i - 1]) % proj_space->extent.size[i - 1];
+                        /* Update curr_span_up_dim */
+                        curr_span_up_dim[i - 1] = proj_off / proj_down_dims[i - 1];
                     } /* end for */
 
                     /* Compute bounds for new span in lowest dimension */
@@ -9438,7 +9437,8 @@ loop_end:
             HDassert(prev_span[i]);
 
             /* Append remaining span tree to higher dimension */
-            if(H5S_hyper_append_span(&prev_span[i - 1], &curr_span_tree[i - 1], curr_span_dim[i - 1], curr_span_dim[i - 1], curr_span_tree[i], NULL) < 0)
+            low = curr_span_up_dim[i - 1] % proj_space->extent.size[i - 1];
+            if(H5S_hyper_append_span(&prev_span[i - 1], &curr_span_tree[i - 1], low, low, curr_span_tree[i], NULL) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
 
             /* Reset span tree */
@@ -9545,7 +9545,7 @@ H5S__hyper_update_extent_offset(H5S_t *space)
         hslab->span_lst = NULL;
     } /* end if */
 
-    /* Initialize opt_diminfo wit opt_unlim_diminfo */
+    /* Initialize opt_diminfo with opt_unlim_diminfo */
     hslab->opt_diminfo[hslab->unlim_dim] = hslab->opt_unlim_diminfo[hslab->unlim_dim];
 
     /* Check for selection outside extent */
