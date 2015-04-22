@@ -3692,6 +3692,9 @@ H5S_hyper_add_span_element(H5S_t *space, unsigned rank, hsize_t *coords)
         /* Reset "regular" hyperslab flag */
         space->select.sel_info.hslab->diminfo_valid = FALSE;
 
+        /* Set unlim_dim */
+        space->select.sel_info.hslab->unlim_dim = -1;
+
         /* Set # of elements in selection */
         space->select.num_elem = 1;
     } /* end if */
@@ -4400,6 +4403,9 @@ H5S_hyper_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *off
     /* Allocate space for the hyperslab selection information */
     if(NULL == (new_space->select.sel_info.hslab = H5FL_MALLOC(H5S_hyper_sel_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab info")
+
+    /* Set unlim_dim */
+    new_space->select.sel_info.hslab->unlim_dim = -1;
 
     /* Check for a "regular" hyperslab selection */
     if(base_space->select.sel_info.hslab->diminfo_valid) {
@@ -7056,6 +7062,9 @@ H5S_generate_hyperslab (H5S_t *space, H5S_seloper_t op,
         /* Allocate space for the hyperslab selection information */
         if((space->select.sel_info.hslab=H5FL_MALLOC(H5S_hyper_sel_t))==NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab info")
+
+        /* Set unlim_dim */
+        space->select.sel_info.hslab->unlim_dim = -1;
     } /* end if */
 
     /* Combine tmp_space (really space) & new_space, with the result in space */
@@ -7565,6 +7574,9 @@ H5S_combine_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     if((new_space->select.sel_info.hslab=H5FL_CALLOC(H5S_hyper_sel_t))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate hyperslab info")
 
+    /* Set unlim_dim */
+    new_space->select.sel_info.hslab->unlim_dim = -1;
+
     /* Combine space1 & space2, with the result in new_space */
     if(H5S_operate_hyperslab(new_space,space1->select.sel_info.hslab->span_lst,op,space2->select.sel_info.hslab->span_lst,FALSE,&span2_owned)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, NULL, "can't clip hyperslab information")
@@ -7693,6 +7705,9 @@ H5S_select_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
     /* Allocate space for the hyperslab selection information */
     if((space1->select.sel_info.hslab=H5FL_CALLOC(H5S_hyper_sel_t))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab info")
+
+    /* Set unlim_dim */
+    space1->select.sel_info.hslab->unlim_dim = -1;
 
     /* Combine tmp_spans (from space1) & spans from space2, with the result in space1 */
     if(H5S_operate_hyperslab(space1,tmp_spans,op,space2->select.sel_info.hslab->span_lst,FALSE,&span2_owned)<0)
@@ -9202,11 +9217,14 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
     /* Allocate space for the hyperslab selection information (note this sets
      * diminfo_valid to FALSE, diminfo arrays to 0, and span list to NULL) */
-    if((proj_space->select.sel_info.hslab = H5FL_CALLOC(H5S_hyper_sel_t))==NULL)
+    if((proj_space->select.sel_info.hslab = H5FL_CALLOC(H5S_hyper_sel_t)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab info")
 
     /* Set selection type */
     proj_space->select.type = H5S_sel_hyper;
+
+    /* Set unlim_dim */
+    proj_space->select.sel_info.hslab->unlim_dim = -1;
 
     /* Initialize source space iterator */
     if(H5S_select_iter_init(&ss_iter, src_space, (size_t)1) < 0)
