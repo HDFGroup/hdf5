@@ -39,10 +39,10 @@ set_target_properties (${HDF5_HL_F90_C_LIB_TARGET} PROPERTIES
 # Fortran Modules
 #-----------------------------------------------------------------------------
 set (HDF5_HL_F90_F_SRCS
-    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DSff.f90
-    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5TBff.f90
-    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTff.f90
-    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMff.f90
+    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DSff.F90
+    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5TBff.F90
+    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTff.F90
+    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMff.F90
 )
 set_source_files_properties (${HDF5_HL_F90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 
