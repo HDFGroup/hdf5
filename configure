@@ -26419,7 +26419,7 @@ $as_echo "all ($DEBUG_PKG)" >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: none" >&5
 $as_echo "none" >&6; }
     DEBUG_PKG=
-    H5_CPPFLAGS="$H5_CPPFLAGS -DNDEBUG"
+##    H5_CPPFLAGS="$H5_CPPFLAGS -DNDEBUG"
     ;;
   *)
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $DEBUG_PKG" >&5
