@@ -9384,7 +9384,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                      * finished being built) */
                     for(i = proj_rank - 1; ((i > 0)
                             && (((proj_off / proj_down_dims[i - 1])
-                            % proj_space->extent.size[i])
+                            % proj_space->extent.size[i - 1])
                             != curr_span_dim[i - 1])); i--) {
                         if(curr_span_tree[i]) {
                             HDassert(prev_span[i]);
@@ -9404,7 +9404,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                         } /* end if */
 
                         /* Update curr_span_dim */
-                        curr_span_dim[i - 1] = (proj_off / proj_down_dims[i - 1]) % proj_space->extent.size[i];
+                        curr_span_dim[i - 1] = (proj_off / proj_down_dims[i - 1]) % proj_space->extent.size[i - 1];
                     } /* end for */
 
                     /* Compute bounds for new span in lowest dimension */
