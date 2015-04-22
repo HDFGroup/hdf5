@@ -116,7 +116,7 @@ main (void)
       * Find the number of mappings.
       */
      status = H5Pget_virtual_count (dcpl, &num_map);
-     printf(" Number of mappings is %d\n", num_map);
+     printf(" Number of mappings is %lu\n", (unsigned long)num_map);
 
      /* 
       * Get mapping parameters for each mapping.
