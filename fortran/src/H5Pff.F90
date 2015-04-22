@@ -33,8 +33,9 @@
 
 MODULE H5P
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_null_ptr, c_funptr, c_null_funptr, &
-       c_char, c_int, C_NULL_CHAR, C_LOC, C_DOUBLE, C_FLOAT
+!  Can't specify ONLY because of a bug in gfortran < v4.7 Bug: 45190, 37829
+  USE, INTRINSIC :: ISO_C_BINDING !, ONLY : c_ptr, c_null_ptr, c_funptr, c_null_funptr, &
+!       c_char, c_int, C_NULL_CHAR, C_LOC, C_DOUBLE, C_FLOAT
   USE H5GLOBAL
   
   INTERFACE h5pset_fapl_multi_f

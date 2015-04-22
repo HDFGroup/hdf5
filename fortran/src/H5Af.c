@@ -118,24 +118,6 @@ done:
     return ret_value;
 }
 
-int_f
-h5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
-/******/
-{
-    int_f ret_value=0;          /* Return value */
-
-     /*
-      * Call H5Awrite function.
-      */
-     if (H5Awrite((hid_t)*attr_id, (hid_t)*mem_type_id, buf) < 0)
-        HGOTO_DONE(FAIL);
-
-done:
-     return ret_value;
-}
-
-
-
 /****if* H5Af/h5aclose_c
  * NAME
  *        h5aclose_c
