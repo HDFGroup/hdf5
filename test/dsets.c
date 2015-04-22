@@ -25,24 +25,16 @@
 
 #include "h5test.h"
 #include "H5srcdir.h"
-#include "H5Dpublic.h"
 #include "H5VMprivate.h"
-#ifdef H5_HAVE_SZLIB_H
-#   include "szlib.h"
-#endif
-
-/*
- * This file needs to access private datatypes from the H5D package.
- */
-#define H5D_PACKAGE
-#define H5D_TESTING
-#include "H5Dpkg.h"
 
 /*
  * This file needs to access private datatypes from the H5Z package.
  */
 #define H5Z_PACKAGE
 #include "H5Zpkg.h"
+#ifdef H5_HAVE_SZLIB_H
+#   include "szlib.h"
+#endif
 
 
 const char *FILENAME[] = {

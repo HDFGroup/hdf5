@@ -104,6 +104,7 @@ class H5_DLLCPP IdComponent {
 	// Sets the identifier of this object to a new value. - this one
 	// doesn't increment reference count
 	virtual void p_setId(const hid_t new_id) = 0;
+	//virtual void p_setId(const hid_t new_id);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

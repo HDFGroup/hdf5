@@ -488,6 +488,8 @@
                                                     if it is changed, the code
                                                     must compensate. -QAK
                                                  */
+#define HDF5_BTREE_IK_MAX_ENTRIES       65536 	/* 2^16 - 2 bytes for storing entries (children) */
+						/* See format specification on version 1 B-trees */
 
 /* Default file space handling strategy */
 #define H5F_FILE_SPACE_STRATEGY_DEF	        H5F_FILE_SPACE_ALL

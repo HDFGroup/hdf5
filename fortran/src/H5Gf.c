@@ -67,7 +67,7 @@ nh5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
     /*
      * Call H5Gcreate function.
      */
-    if(*size_hint == OBJECT_NAMELEN_DEFAULT_F ){
+    if(*size_hint == (size_t_f)OBJECT_NAMELEN_DEFAULT_F ){
       c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name,(hid_t)*lcpl_id,(hid_t)*gcpl_id,(hid_t)*gapl_id);}
     else {
       /* Create the group creation property list */

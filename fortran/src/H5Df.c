@@ -632,7 +632,7 @@ nh5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      * Allocate temporary buffer and copy references from Fortran.
      */
     n = (unsigned int)*dims;
-    buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*(n));
+    buf_c = (hobj_ref_t*)HDmalloc(sizeof(hobj_ref_t)*n);
     if ( buf_c != NULL ) {
         for (i = 0; i < n; i++)
              HDmemcpy(&buf_c[i], &buf[i], sizeof(haddr_t));
@@ -699,7 +699,7 @@ nh5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_
      /*
       * Allocate temporary buffer and copy references from Fortran.
       */
-      buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t)*(n));
+     buf_c = (hdset_reg_ref_t *)HDmalloc(sizeof(hdset_reg_ref_t)*n);
       if ( buf_c != NULL ) {
       for (i = 0; i < n; i++) {
            HDmemcpy(&buf_c[i], buf, H5R_DSET_REG_REF_BUF_SIZE);
@@ -1722,7 +1722,7 @@ nh5dread_vl_integer_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_s
 
   max_len = (size_t)dims[0];
   num_elem = H5Sget_select_npoints(c_mem_space_id);
-  if(num_elem != dims[1]) return ret_value;
+  if(num_elem != (hssize_t)dims[1]) return ret_value;
 
   c_buf = (hvl_t *)HDmalloc((size_t)num_elem * sizeof(hvl_t));
   if (c_buf == NULL) return ret_value;
@@ -2037,7 +2037,7 @@ nh5dread_vl_real_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
 
   max_len = (size_t)dims[0];
   num_elem = H5Sget_select_npoints(c_mem_space_id);
-  if(num_elem != dims[1]) return ret_value;
+  if(num_elem != (hssize_t)dims[1]) return ret_value;
 
   c_buf = (hvl_t *)HDmalloc((size_t)num_elem * sizeof(hvl_t));
   if (c_buf == NULL) return ret_value;

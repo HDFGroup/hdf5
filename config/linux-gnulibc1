@@ -38,6 +38,9 @@ fi
 # Figure out PGI C compiler flags
 . $srcdir/config/pgi-flags
 
+# Figure out CCE C compiler flags
+. $srcdir/config/cce-flags
+
 # Figure out Intel C compiler flags
 . $srcdir/config/intel-flags
 
@@ -89,10 +92,13 @@ else
     esac
 fi
 
-# Figure out PGI F90 compiler flags
+# Figure out PGI FC compiler flags
 . $srcdir/config/pgi-fflags
 
-# Figure out Intel F90 compiler flags
+# Figure out CCE FC compiler flags
+. $srcdir/config/cce-fflags
+
+# Figure out Intel FC compiler flags
 . $srcdir/config/intel-fflags
 
 case $FC_BASENAME in
@@ -125,6 +131,10 @@ if test -z "$CXX"; then
 fi
 
 # compiler version strings
+
+# check if the compiler_version_info is already set
+if test -z "$cc_version_info"; then
+
 case $CC in
     # whatever matches *pgcc* will also match *gcc*, so this one must come first
     *pgcc*)
@@ -153,7 +163,11 @@ case $CC in
         ;;
 esac
 
+fi
+
 # get fortran version info
+# check if the compiler_version_info is already set
+if test -z "$fc_version_info"; then
 case $FC in
     *gfortran*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS --version 2>&1 |\
@@ -199,9 +213,11 @@ case $FC in
         echo "No match to get fc_version_info for $FC"
         ;;
 esac
-
+fi
 
 # get c++ version info
+# check if the compiler_version_info is already set
+if test -z "$cxx_version_info"; then
 case $CXX in
     *g++*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
@@ -226,4 +242,4 @@ case $CXX in
         echo "No match to get cxx_version_info for $CXX"
         ;;
 esac
-
+fi

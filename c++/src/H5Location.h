@@ -151,7 +151,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 	H5Location(const hid_t loc_id);
 
 	// Copy constructor.
-	H5Location(const H5Location& original);
+	// H5Location(const H5Location& original);
 
 	// Creates a reference to an HDF5 object or a dataset region.
 	void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
@@ -166,6 +166,10 @@ class H5_DLLCPP H5Location : public IdComponent {
 
 	// Retrieves the type of object that an object reference points to.
 	H5O_type_t p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const;
+
+        // Sets the identifier of this object to a new value. - this one
+        // doesn't increment reference count
+        virtual void p_setId(const hid_t new_id) = 0;
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

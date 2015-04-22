@@ -965,6 +965,7 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                               "Index Type:", "v2 B-tree");
                     break;
 
+                case H5D_CHUNK_IDX_NTYPES:
                 default:
                     HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
                               "Index Type:", "Unknown", (unsigned)mesg->u.chunk.idx_type);

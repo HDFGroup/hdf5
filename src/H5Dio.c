@@ -303,7 +303,7 @@ H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
         hsize_t *direct_offset;
         uint32_t direct_datasize;
 	hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
-	unsigned u;
+	unsigned u;                 /* Local index variable */
 
         /* Get the dataset transfer property list */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))

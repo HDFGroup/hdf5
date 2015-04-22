@@ -36,23 +36,12 @@
 /* Define if building universal (internal helper macro) */
 #cmakedefine H5_AC_APPLE_UNIVERSAL_BUILD @H5_AC_APPLE_UNIVERSAL_BUILD@
 
-/* Define if your system generates wrong code for log2 routine. */
-#cmakedefine H5_BAD_LOG2_CODE_GENERATED @H5_BAD_LOG2_CODE_GENERATED@
-
 /* Define if the memory buffers being written to disk should be cleared before
    writing. */
 #cmakedefine H5_CLEAR_MEMORY @H5_CLEAR_MEMORY@
 
-/* Define if your system can handle converting denormalized floating-point
-   values. */
-#cmakedefine H5_CONVERT_DENORMAL_FLOAT @H5_CONVERT_DENORMAL_FLOAT@
-
 /* Define if C++ compiler recognizes offsetof */
 #cmakedefine H5_CXX_HAVE_OFFSETOF @H5_CXX_HAVE_OFFSETOF@
-
-/* Define a macro for Cygwin (on XP only) where the compiler has rounding
-   problem converting from unsigned long long to long double */
-#cmakedefine H5_CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM @H5_CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM@
 
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
@@ -73,18 +62,6 @@
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #define @H5_FC_FUNC_@
-
-/* Define if your system can handle overflow converting floating-point to
-   integer values. */
-#cmakedefine H5_FP_TO_INTEGER_OVERFLOW_WORKS @H5_FP_TO_INTEGER_OVERFLOW_WORKS@
-
-/* Define if your system roundup accurately converting floating-point to
-   unsigned long long values. */
-#cmakedefine H5_FP_TO_ULLONG_ACCURATE @H5_FP_TO_ULLONG_ACCURATE@
-
-/* Define if your system has right maximum convert floating-point to unsigned
-   long long values. */
-#cmakedefine H5_FP_TO_ULLONG_RIGHT_MAXIMUM @H5_FP_TO_ULLONG_RIGHT_MAXIMUM@
 
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
@@ -217,9 +194,6 @@
 
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #cmakedefine H5_HAVE_LIBDMALLOC @H5_HAVE_LIBDMALLOC@
-
-/* Define to 1 if you have the `lmpe' library (-llmpe). */
-#cmakedefine H5_HAVE_LIBLMPE @H5_HAVE_LIBLMPE@
 
 /* Define to 1 if you have the `m' library (-lm). */
 #cmakedefine H5_HAVE_LIBM @H5_HAVE_LIBM@
@@ -449,41 +423,12 @@
 /* Define to 1 if you have the `_scrsize' function. */
 #cmakedefine H5_HAVE__SCRSIZE @H5_HAVE__SCRSIZE@
 
-/* Define if your system can't handle converting floating-point values to long
-   long. */
-#cmakedefine H5_HW_FP_TO_LLONG_NOT_WORKS @H5_HW_FP_TO_LLONG_NOT_WORKS@
-
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #cmakedefine H5_INCLUDE_HL @H5_INCLUDE_HL@
-
-/* Define if your system can accurately convert from integers to long double
-   values. */
-#cmakedefine H5_INTEGER_TO_LDOUBLE_ACCURATE @H5_INTEGER_TO_LDOUBLE_ACCURATE@
-
-/* Define if your system can convert long double to integers accurately. */
-#cmakedefine H5_LDOUBLE_TO_INTEGER_ACCURATE @H5_LDOUBLE_TO_INTEGER_ACCURATE@
-
-/* Define if your system can convert from long double to integer values. */
-#cmakedefine H5_LDOUBLE_TO_INTEGER_WORKS @H5_LDOUBLE_TO_INTEGER_WORKS@
-
-/* Define if your system can convert long double to (unsigned) long long
-   values correctly. */
-#cmakedefine H5_LDOUBLE_TO_LLONG_ACCURATE @H5_LDOUBLE_TO_LLONG_ACCURATE@
 
 /* Define if your system converts long double to (unsigned) long values with
    special algorithm. */
 #cmakedefine H5_LDOUBLE_TO_LONG_SPECIAL @H5_LDOUBLE_TO_LONG_SPECIAL@
-
-/* Define if your system can convert long double to unsigned int values
-   correctly. */
-#cmakedefine H5_LDOUBLE_TO_UINT_ACCURATE @H5_LDOUBLE_TO_UINT_ACCURATE@
-
-/* Define if your system can compile long long to floating-point casts. */
-#cmakedefine H5_LLONG_TO_FP_CAST_WORKS @H5_LLONG_TO_FP_CAST_WORKS@
-
-/* Define if your system can convert (unsigned) long long to long double
-   values correctly. */
-#cmakedefine H5_LLONG_TO_LDOUBLE_CORRECT @H5_LLONG_TO_LDOUBLE_CORRECT@
 
 /* Define if your system can convert (unsigned) long to long double values
    with special algorithm. */
@@ -678,22 +623,6 @@
 /* Define to 1 if your <sys/time.h> declares `struct tm'. */
 #cmakedefine H5_TM_IN_SYS_TIME @H5_TM_IN_SYS_TIME@
 
-/* Define if your system can compile unsigned long long to floating-point
-   casts. */
-#cmakedefine H5_ULLONG_TO_FP_CAST_WORKS @H5_ULLONG_TO_FP_CAST_WORKS@
-
-/* Define if your system can convert unsigned long long to long double with
-   correct precision. */
-#cmakedefine H5_ULLONG_TO_LDOUBLE_PRECISION @H5_ULLONG_TO_LDOUBLE_PRECISION@
-
-/* Define if your system accurately converting unsigned long to float values.
-   */
-#cmakedefine H5_ULONG_TO_FLOAT_ACCURATE @H5_ULONG_TO_FLOAT_ACCURATE@
-
-/* Define if your system can accurately convert unsigned (long) long values to
-   floating-point values. */
-#cmakedefine H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE @H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE@
-
 /* Define using v1.6 public API symbols by default */
 #cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
 
@@ -707,13 +636,6 @@
 
 /* Version number of package */
 #define H5_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
-
-/* Define if vsnprintf() returns the correct value for formatted strings that
-   don't fit into size allowed */
-#cmakedefine H5_VSNPRINTF_WORKS @H5_VSNPRINTF_WORKS@
-
-/* Data accuracy is prefered to speed during data conversions */
-#cmakedefine H5_WANT_DATA_ACCURACY @H5_WANT_DATA_ACCURACY@
 
 /* Check exception handling functions during data conversions */
 #cmakedefine H5_WANT_DCONV_EXCEPTION @H5_WANT_DCONV_EXCEPTION@

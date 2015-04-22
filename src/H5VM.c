@@ -418,8 +418,7 @@ H5VM_hyper_disjointp(unsigned n,
         HGOTO_DONE(TRUE)
 
     for(u = 0; u < n; u++) {
-        HDassert(size1[u] < HSIZET_MAX);
-        HDassert(size2[u] < HSIZET_MAX);
+        HDcompile_assert(sizeof(uint32_t) <= sizeof(hsize_t));
 
         if(0 == size1[u] || 0 == size2[u])
             HGOTO_DONE(TRUE)

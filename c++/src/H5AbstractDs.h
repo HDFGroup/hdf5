@@ -28,6 +28,7 @@ class FloatType;
 class IntType;
 class StrType;
 class VarLenType;
+class DataSpace;
 
 /*! \class AbstractDs
     \brief AbstractDs is an abstract base class, inherited by Attribute

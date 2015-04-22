@@ -741,11 +741,25 @@ static void test_attr_compound_read()
 	// Verify name
 	H5std_string attr_name = attr.getName();
 	verify_val(attr_name, ATTR4_NAME, "Attribute::getName", __LINE__, __FILE__);
-	PASSED();
     } // end try block
 
     catch (Exception E) {
 	issue_fail_msg("test_attr_compound_read()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+    try
+    {
+	// Now, try truncating the file to make sure reference counting is good.
+	// If any references to ids in the previous block are left unterminated,
+	// the truncating will fail, because the file will not be closed in
+	// the file.close() above.
+	H5File file1(FILE_COMPOUND, H5F_ACC_TRUNC);
+
+	PASSED();
+    } // end try block
+
+    catch (FileIException E) {
+	issue_fail_msg("test_attr_compound_read()", __LINE__, __FILE__, "Unable to truncate file, possibly because some objects are left opened");
     }
 }   // test_attr_compound_read()
 

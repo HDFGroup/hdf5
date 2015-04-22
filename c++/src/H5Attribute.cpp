@@ -74,7 +74,8 @@ Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent()
 //--------------------------------------------------------------------------
 Attribute::Attribute(const hid_t existing_id) : AbstractDs(), IdComponent()
 {
-   id = existing_id;
+    id = existing_id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -270,8 +271,9 @@ DataSpace Attribute::getSpace() const
    // If the dataspace id is valid, create and return the DataSpace object
    if( dataspace_id > 0 )
    {
-      DataSpace dataspace( dataspace_id );
-      return( dataspace );
+	DataSpace dataspace;
+	f_DataSpace_setId(&dataspace, dataspace_id);
+	return(dataspace);
    }
    else
    {
