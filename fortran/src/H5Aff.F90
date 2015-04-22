@@ -66,7 +66,8 @@
 
 MODULE H5A
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_char, c_int, C_NULL_CHAR, C_LOC, C_FLOAT, C_DOUBLE
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_char, c_int, C_NULL_CHAR, C_LOC, &
+	C_FLOAT, C_DOUBLE, C_LONG_DOUBLE
   USE H5GLOBAL
 
   INTERFACE h5awrite_f
@@ -102,6 +103,14 @@ MODULE H5A
      MODULE PROCEDURE h5awrite_c_double_5
      MODULE PROCEDURE h5awrite_c_double_6
      MODULE PROCEDURE h5awrite_c_double_7
+     MODULE PROCEDURE h5awrite_c_long_double_scalar
+     MODULE PROCEDURE h5awrite_c_long_double_1
+     MODULE PROCEDURE h5awrite_c_long_double_2
+     MODULE PROCEDURE h5awrite_c_long_double_3
+     MODULE PROCEDURE h5awrite_c_long_double_4
+     MODULE PROCEDURE h5awrite_c_long_double_5
+     MODULE PROCEDURE h5awrite_c_long_double_6
+     MODULE PROCEDURE h5awrite_c_long_double_7
      ! This is the preferred way to call h5awrite
      ! by passing an address
      MODULE PROCEDURE h5awrite_ptr
@@ -140,6 +149,14 @@ MODULE H5A
      MODULE PROCEDURE h5aread_c_double_5
      MODULE PROCEDURE h5aread_c_double_6
      MODULE PROCEDURE h5aread_c_double_7
+     MODULE PROCEDURE h5aread_c_long_double_scalar
+     MODULE PROCEDURE h5aread_c_long_double_1
+     MODULE PROCEDURE h5aread_c_long_double_2
+     MODULE PROCEDURE h5aread_c_long_double_3
+     MODULE PROCEDURE h5aread_c_long_double_4
+     MODULE PROCEDURE h5aread_c_long_double_5
+     MODULE PROCEDURE h5aread_c_long_double_6
+     MODULE PROCEDURE h5aread_c_long_double_7
      ! This is the preferred way to call h5aread
      ! by passing an address
      MODULE PROCEDURE h5aread_ptr
@@ -2325,6 +2342,149 @@ CONTAINS
 
   END SUBROUTINE h5awrite_c_double_7
 
+
+  SUBROUTINE h5awrite_c_long_double_scalar(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), TARGET :: buf     ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf)
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5awrite_c_long_double_scalar
+
+
+  SUBROUTINE h5awrite_c_long_double_1(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1)), TARGET :: buf ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5awrite_c_long_double_1
+
+
+  SUBROUTINE h5awrite_c_long_double_2(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE h5awrite_c_long_double_2
+
+
+  SUBROUTINE h5awrite_c_long_double_3(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5awrite_c_long_double_3
+
+
+  SUBROUTINE h5awrite_c_long_double_4(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5awrite_c_long_double_4
+
+
+  SUBROUTINE h5awrite_c_long_double_5(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5awrite_c_long_double_5
+
+
+  SUBROUTINE h5awrite_c_long_double_6(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5awrite_c_long_double_6
+
+
+  SUBROUTINE h5awrite_c_long_double_7(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
+
+    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE h5awrite_c_long_double_7
+
   SUBROUTINE H5Awrite_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id               ! Attribute identifier
@@ -2972,6 +3132,145 @@ CONTAINS
 
     hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_c_double_7
+
+  SUBROUTINE h5aread_c_long_double_scalar(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(INOUT), TARGET :: buf    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf)
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5aread_c_long_double_scalar
+
+  SUBROUTINE h5aread_c_long_double_1(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(INOUT), &
+         DIMENSION(dims(1)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5aread_c_long_double_1
+
+
+  SUBROUTINE h5aread_c_long_double_2(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5aread_c_long_double_2
+
+  SUBROUTINE h5aread_c_long_double_3(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
+                                            ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5aread_c_long_double_3
+
+  SUBROUTINE h5aread_c_long_double_4(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5aread_c_long_double_4
+
+
+  SUBROUTINE h5aread_c_long_double_5(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+
+  END SUBROUTINE h5aread_c_long_double_5
+
+
+  SUBROUTINE h5aread_c_long_double_6(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5aread_c_long_double_6
+
+
+  SUBROUTINE h5aread_c_long_double_7(attr_id, memtype_id,  buf, dims, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
+    INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype
+                                                ! identifier  (in memory)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes
+    REAL(KIND=C_LONG_DOUBLE), INTENT(INOUT), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf
+    ! Attribute data
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+    TYPE(C_PTR) :: f_ptr
+
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
+
+    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
+  END SUBROUTINE h5aread_c_long_double_7
 
   SUBROUTINE H5Aread_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
     IMPLICIT NONE
