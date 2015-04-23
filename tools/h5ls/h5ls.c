@@ -1764,6 +1764,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
     double      utilization;    /* percent utilization of storage */
     H5T_class_t tclass;         /* datatype class identifier */
     int         i;
+    H5D_layout_t     stl;
     hsize_t             curr_pos = 0;        /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
@@ -1779,20 +1780,93 @@ dataset_list2(hid_t dset, const char UNUSED *name)
         space = H5Dget_space(dset);
         type = H5Dget_type(dset);
 
-        /* Print information about chunked storage */
-        if (H5D_CHUNKED==H5Pget_layout(dcpl)) {
-            hsize_t     chsize[64];     /* chunk size in elements */
+        stl = H5Pget_layout(dcpl);
+        switch (stl) {
+            case H5D_CHUNKED:
+                {
+                    hsize_t     chsize[64];     /* chunk size in elements */
 
-            ndims = H5Pget_chunk(dcpl, (int)NELMTS(chsize), chsize/*out*/);
-            h5tools_str_append(&buffer, "    %-10s {", "Chunks:");
-            total = H5Tget_size(type);
-            for (i=0; i<ndims; i++) {
-                h5tools_str_append(&buffer, "%s"HSIZE_T_FORMAT, i?", ":"", chsize[i]);
-                total *= chsize[i];
-            }
-            h5tools_str_append(&buffer, "} "HSIZE_T_FORMAT" bytes\n", total);
+                    ndims = H5Pget_chunk(dcpl, (int)NELMTS(chsize), chsize/*out*/);
+                    h5tools_str_append(&buffer, "    %-10s {", "Chunks:");
+                    total = H5Tget_size(type);
+                    for (i=0; i<ndims; i++) {
+                        h5tools_str_append(&buffer, "%s"HSIZE_T_FORMAT, i?", ":"", chsize[i]);
+                        total *= chsize[i];
+                    }
+                    h5tools_str_append(&buffer, "} "HSIZE_T_FORMAT" bytes\n", total);
+                }
+                break;
+            case H5D_COMPACT:
+                break;
+            case H5D_CONTIGUOUS:
+                /* Print information about external storage */
+                if((nf = H5Pget_external_count(dcpl)) > 0) {
+                    for(i = 0, max_len = 0; i < nf; i++) {
+                        if(H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, NULL, NULL) < 0)
+                            continue;
+                        n = print_string(NULL, f_name, TRUE);
+                        max_len = MAX(max_len, n);
+                    } /* end for */
+                    h5tools_str_append(&buffer, "    %-10s %d external file%s\n",
+                            "Extern:", nf, 1==nf?"":"s");
+                    h5tools_str_append(&buffer, "        %4s %10s %10s %10s %s\n",
+                            "ID", "DSet-Addr", "File-Addr", "Bytes", "File");
+                    h5tools_str_append(&buffer, "        %4s %10s %10s %10s ",
+                            "----", "----------", "----------", "----------");
+                    for (i=0; i<max_len; i++) h5tools_str_append(&buffer, "-");
+                    h5tools_str_append(&buffer, "\n");
+                    for (i=0, total=0; i<nf; i++) {
+                        if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset, &f_size)<0) {
+                            h5tools_str_append(&buffer,
+                                    "        #%03d %10"HSIZE_T_FORMAT"u %10s %10s ***ERROR*** %s\n",
+                                    i, total, "", "",
+                                    i+1<nf?"Following addresses are incorrect":"");
+                        }
+                        else if (H5S_UNLIMITED==f_size) {
+                            h5tools_str_append(&buffer, "        #%03d %10"HSIZE_T_FORMAT"u %10"HSIZE_T_FORMAT"u %10s ",
+                                    i, total, (hsize_t)f_offset, "INF");
+                            print_string(&buffer, f_name, TRUE);
+                        }
+                        else {
+                            h5tools_str_append(&buffer, "        #%03d %10"HSIZE_T_FORMAT"u %10"HSIZE_T_FORMAT"u %10"HSIZE_T_FORMAT"u ",
+                                    i, total, (hsize_t)f_offset, f_size);
+                            print_string(&buffer, f_name, TRUE);
+                        }
+                        h5tools_str_append(&buffer, "\n");
+                        total += f_size;
+                    }
+                    h5tools_str_append(&buffer, "        %4s %10s %10s %10s ",
+                            "----", "----------", "----------", "----------");
+                    for (i=0; i<max_len; i++)
+                        h5tools_str_append(&buffer, "-");
+                    h5tools_str_append(&buffer, "\n");
+                } /* end if */
+                break;
+            case H5D_VIRTUAL:
+                {
+                    size_t vmaps;
+
+                    H5Pget_virtual_count(dcpl, &vmaps);
+
+                    if (vmaps) {
+                        size_t next;
+                        ssize_t ssize_out;
+
+                        h5tools_str_append(&buffer, "    %-10s {%ld} Files {\n", "Maps:", vmaps);
+                        for (next = 0; next < (unsigned) vmaps; next++) {
+                            ssize_out = H5Pget_virtual_filename(dcpl, next, NULL, 0);
+                            H5Pget_virtual_filename(dcpl, next, f_name, sizeof(f_name));
+                            h5tools_str_append(&buffer, "    %-10s        ", " ");
+                            print_string(&buffer, f_name, TRUE);
+                            h5tools_str_append(&buffer, "\n");
+                        }
+                        h5tools_str_append(&buffer, "     %-10s}\n", " ");
+                    }
+                }
+                break;
+            default:
+                break;
         }
-
         /* Print total raw storage size */
         total = (hsize_t)H5Sget_simple_extent_npoints(space) * H5Tget_size(type);
         used = H5Dget_storage_size(dset);
@@ -1835,49 +1909,6 @@ dataset_list2(hid_t dset, const char UNUSED *name)
         }
 
         h5tools_str_append(&buffer, "\n");
-
-        /* Print information about external strorage */
-        if((nf = H5Pget_external_count(dcpl)) > 0) {
-            for(i = 0, max_len = 0; i < nf; i++) {
-                if(H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, NULL, NULL) < 0)
-                    continue;
-                n = print_string(NULL, f_name, TRUE);
-                max_len = MAX(max_len, n);
-            } /* end for */
-            h5tools_str_append(&buffer, "    %-10s %d external file%s\n",
-                    "Extern:", nf, 1==nf?"":"s");
-            h5tools_str_append(&buffer, "        %4s %10s %10s %10s %s\n",
-                    "ID", "DSet-Addr", "File-Addr", "Bytes", "File");
-            h5tools_str_append(&buffer, "        %4s %10s %10s %10s ",
-                    "----", "----------", "----------", "----------");
-            for (i=0; i<max_len; i++) h5tools_str_append(&buffer, "-");
-            h5tools_str_append(&buffer, "\n");
-            for (i=0, total=0; i<nf; i++) {
-                if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset, &f_size)<0) {
-                    h5tools_str_append(&buffer, 
-                            "        #%03d %10"HSIZE_T_FORMAT"u %10s %10s ***ERROR*** %s\n",
-                            i, total, "", "",
-                            i+1<nf?"Following addresses are incorrect":"");
-                } 
-                else if (H5S_UNLIMITED==f_size) {
-                    h5tools_str_append(&buffer, "        #%03d %10"HSIZE_T_FORMAT"u %10"HSIZE_T_FORMAT"u %10s ",
-                            i, total, (hsize_t)f_offset, "INF");
-                    print_string(&buffer, f_name, TRUE);
-                } 
-                else {
-                    h5tools_str_append(&buffer, "        #%03d %10"HSIZE_T_FORMAT"u %10"HSIZE_T_FORMAT"u %10"HSIZE_T_FORMAT"u ",
-                            i, total, (hsize_t)f_offset, f_size);
-                    print_string(&buffer, f_name, TRUE);
-                }
-                h5tools_str_append(&buffer, "\n");
-                total += f_size;
-            }
-            h5tools_str_append(&buffer, "        %4s %10s %10s %10s ",
-                    "----", "----------", "----------", "----------");
-            for (i=0; i<max_len; i++)
-                h5tools_str_append(&buffer, "-");
-            h5tools_str_append(&buffer, "\n");
-        } /* end if */
 
         /* Print information about raw data filters */
         if((nf = H5Pget_nfilters(dcpl)) > 0) {
