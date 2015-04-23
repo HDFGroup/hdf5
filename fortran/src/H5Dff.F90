@@ -101,7 +101,6 @@ MODULE H5D
   END INTERFACE
 
   INTERFACE h5dwrite_f
-
      MODULE PROCEDURE h5dwrite_reference_obj
      MODULE PROCEDURE h5dwrite_reference_dsetreg
      MODULE PROCEDURE h5dwrite_integer_scalar
@@ -144,15 +143,12 @@ MODULE H5D
      MODULE PROCEDURE h5dwrite_c_long_double_5
      MODULE PROCEDURE h5dwrite_c_long_double_6
      MODULE PROCEDURE h5dwrite_c_long_double_7
-
      ! This is the preferred way to call h5dwrite
      ! by passing an address
      MODULE PROCEDURE h5dwrite_ptr
-
   END INTERFACE
 
   INTERFACE h5dread_f
-
      MODULE PROCEDURE h5dread_reference_obj
      MODULE PROCEDURE h5dread_reference_dsetreg
      MODULE PROCEDURE h5dread_integer_scalar
@@ -195,7 +191,6 @@ MODULE H5D
      MODULE PROCEDURE h5dread_c_long_double_5
      MODULE PROCEDURE h5dread_c_long_double_6
      MODULE PROCEDURE h5dread_c_long_double_7
-
      ! This is the preferred way to call h5dread
      ! by passing an address
      MODULE PROCEDURE h5dread_ptr
@@ -247,6 +242,7 @@ MODULE H5D
      MODULE PROCEDURE h5dfill_integer
      MODULE PROCEDURE h5dfill_c_float
      MODULE PROCEDURE h5dfill_c_double
+     MODULE PROCEDURE h5dfill_c_long_double
      MODULE PROCEDURE h5dfill_char
   END INTERFACE
 
@@ -3947,6 +3943,39 @@ CONTAINS
 
   END SUBROUTINE h5dwrite_c_double_7
 
+  SUBROUTINE h5dwrite_c_long_double_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
+       mem_space_id, file_space_id, xfer_prp)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), TARGET :: buf ! Data buffer
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
+
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
+    TYPE(C_PTR) :: f_ptr
+
+    xfer_prp_default = H5P_DEFAULT_F
+    mem_space_id_default = H5S_ALL_F
+    file_space_id_default = H5S_ALL_F
+
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
+    f_ptr = C_LOC(buf)
+
+    hdferr = h5dwrite_f_c(dset_id, mem_type_id, mem_space_id_default, &
+         file_space_id_default, xfer_prp_default, f_ptr)
+
+  END SUBROUTINE h5dwrite_c_long_double_scalar
 
   SUBROUTINE h5dwrite_c_long_double_1(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
@@ -3982,6 +4011,218 @@ CONTAINS
          file_space_id_default, xfer_prp_default, f_ptr)
 
   END SUBROUTINE h5dwrite_c_long_double_1
+
+  SUBROUTINE h5dwrite_c_long_double_2(dset_id, mem_type_id, buf, dims, hdferr, &
+       mem_space_id, file_space_id, xfer_prp)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2)), TARGET :: buf
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
+
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
+    TYPE(C_PTR) :: f_ptr
+
+    xfer_prp_default = H5P_DEFAULT_F
+    mem_space_id_default = H5S_ALL_F
+    file_space_id_default = H5S_ALL_F
+
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
+    f_ptr = C_LOC(buf(1,1))
+
+    hdferr = h5dwrite_f_c(dset_id, mem_type_id, mem_space_id_default, &
+         file_space_id_default, xfer_prp_default, f_ptr)
+
+  END SUBROUTINE h5dwrite_c_long_double_2
+
+  SUBROUTINE h5dwrite_c_long_double_3(dset_id, mem_type_id, buf, dims, hdferr, &
+       mem_space_id, file_space_id, xfer_prp)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
+
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
+    TYPE(C_PTR) :: f_ptr
+
+    xfer_prp_default = H5P_DEFAULT_F
+    mem_space_id_default = H5S_ALL_F
+    file_space_id_default = H5S_ALL_F
+
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
+    f_ptr = C_LOC(buf(1,1,1))
+
+    hdferr = h5dwrite_f_c(dset_id, mem_type_id, mem_space_id_default, &
+         file_space_id_default, xfer_prp_default, f_ptr)
+
+  END SUBROUTINE h5dwrite_c_long_double_3
+
+  SUBROUTINE h5dwrite_c_long_double_4(dset_id, mem_type_id, buf, dims, hdferr, &
+       mem_space_id, file_space_id, xfer_prp)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
+
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
+    TYPE(C_PTR) :: f_ptr
+
+    xfer_prp_default = H5P_DEFAULT_F
+    mem_space_id_default = H5S_ALL_F
+    file_space_id_default = H5S_ALL_F
+
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
+    f_ptr = C_LOC(buf(1,1,1,1))
+
+    hdferr = h5dwrite_f_c(dset_id, mem_type_id, mem_space_id_default, &
+         file_space_id_default, xfer_prp_default, f_ptr)
+
+  END SUBROUTINE h5dwrite_c_long_double_4
+
+  SUBROUTINE h5dwrite_c_long_double_5(dset_id, mem_type_id, buf, dims, hdferr, &
+       mem_space_id, file_space_id, xfer_prp)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
+
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
+    TYPE(C_PTR) :: f_ptr
+
+    xfer_prp_default = H5P_DEFAULT_F
+    mem_space_id_default = H5S_ALL_F
+    file_space_id_default = H5S_ALL_F
+
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
+    f_ptr = C_LOC(buf(1,1,1,1,1))
+
+    hdferr = h5dwrite_f_c(dset_id, mem_type_id, mem_space_id_default, &
+         file_space_id_default, xfer_prp_default, f_ptr)
+
+  END SUBROUTINE h5dwrite_c_long_double_5
+
+  SUBROUTINE h5dwrite_c_long_double_6(dset_id, mem_type_id, buf, dims, hdferr, &
+       mem_space_id, file_space_id, xfer_prp)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf
+    ! Data buffer
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
+
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
+    TYPE(C_PTR) :: f_ptr
+
+    xfer_prp_default = H5P_DEFAULT_F
+    mem_space_id_default = H5S_ALL_F
+    file_space_id_default = H5S_ALL_F
+
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
+    f_ptr = C_LOC(buf(1,1,1,1,1,1))
+
+    hdferr = h5dwrite_f_c(dset_id, mem_type_id, mem_space_id_default, &
+         file_space_id_default, xfer_prp_default, f_ptr)
+
+  END SUBROUTINE h5dwrite_c_long_double_6
+
+  SUBROUTINE h5dwrite_c_long_double_7(dset_id, mem_type_id, buf, dims, hdferr, &
+       mem_space_id, file_space_id, xfer_prp)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), &
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf
+    ! Data buffer
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    ! Memory dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    ! Transfer property list identifier
+
+    INTEGER(HID_T) :: xfer_prp_default
+    INTEGER(HID_T) :: mem_space_id_default
+    INTEGER(HID_T) :: file_space_id_default
+    TYPE(C_PTR) :: f_ptr
+
+    xfer_prp_default = H5P_DEFAULT_F
+    mem_space_id_default = H5S_ALL_F
+    file_space_id_default = H5S_ALL_F
+
+    if (present(xfer_prp)) xfer_prp_default = xfer_prp
+    if (present(mem_space_id))  mem_space_id_default = mem_space_id
+    if (present(file_space_id)) file_space_id_default = file_space_id
+    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
+
+    hdferr = h5dwrite_f_c(dset_id, mem_type_id, mem_space_id_default, &
+         file_space_id_default, xfer_prp_default, f_ptr)
+
+  END SUBROUTINE h5dwrite_c_long_double_7
 
 !****s* H5D (F03)/h5dwrite_f_F03
 !
@@ -4260,6 +4501,30 @@ CONTAINS
          f_ptr_buf, mem_type_id)
 
   END SUBROUTINE h5dfill_c_double
+
+  SUBROUTINE h5dfill_c_long_double(fill_value, space_id, buf,  hdferr)
+    IMPLICIT NONE
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), TARGET :: fill_value  ! Fill value
+    INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
+    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), DIMENSION(*), TARGET :: buf ! Memory buffer to fill in
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+    INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+    INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier
+
+    TYPE(C_PTR) :: f_ptr_fill_valuer ! C pointer to fill_value
+    TYPE(C_PTR) :: f_ptr_buf ! C pointer to buf
+
+    f_ptr_fill_valuer = C_LOC(fill_value)
+    f_ptr_buf = C_LOC(buf(1))
+
+    fill_type_id = H5T_NATIVE_DOUBLE
+    mem_type_id  = H5T_NATIVE_DOUBLE
+
+    hdferr = h5dfill_c(f_ptr_fill_valuer, fill_type_id, space_id, &
+         f_ptr_buf, mem_type_id)
+
+  END SUBROUTINE h5dfill_c_long_double
 
 !
 ! NAME		
