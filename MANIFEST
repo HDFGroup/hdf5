@@ -2322,6 +2322,7 @@
 ./hl/fortran/examples/ex_ds1.f90
 ./hl/fortran/examples/exlite.f90
 ./hl/fortran/examples/run-hlfortran-ex.sh.in
+./hl/fortran/src/hdf5_hl_fortrandll.def.in
 ./hl/fortran/src/H5DSfc.c
 ./hl/fortran/src/H5DSff.F90
 ./hl/fortran/src/H5IMcc.c
