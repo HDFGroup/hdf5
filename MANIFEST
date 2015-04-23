@@ -2507,3 +2507,7 @@
 ./tools/misc/CMakeTests.cmake
 ./tools/perform/CMakeLists.txt
 ./tools/perform/CMakeTests.cmake
+
+# CMake-specific User Scripts
+./config/cmake/scripts/CTestScipt.cmake   _DO_NOT_DISTRIBUTE_
+./config/cmake/scripts/HDF518config.cmake   _DO_NOT_DISTRIBUTE_
