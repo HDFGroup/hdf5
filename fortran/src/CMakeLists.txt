@@ -39,7 +39,6 @@ configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5config_f.inc.cmake ${CMAKE_BINARY_D
 add_executable (H5test_FortranHavekind
       ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind.F90
   )
-set (H5_TEST_KIND_NAME "h5test_kind_mod")
 
 if (WIN32 AND MSVC)
   if (BUILD_SHARED_LIBS)
