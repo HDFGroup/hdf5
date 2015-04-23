@@ -23,8 +23,15 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! NOTES
-!                         *** IMPORTANT ***
-!  If you add a new H5T function you must add the function name to the
+!
+!       _____ __  __ _____   ____  _____ _______       _   _ _______
+!      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
+! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
+! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
+! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
+!      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
+!                             
+!  If you add a new function here then you MUST add the function name to the
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
@@ -36,7 +43,7 @@ MODULE H5T
   USE H5GLOBAL
   IMPLICIT NONE
 
-!****t* H5T (F03)/hvl_t
+!****t* H5T/hvl_t
 ! Fortran2003 Derived Type:
   TYPE hvl_t
      INTEGER(size_t) :: len ! Length of VL data (in base type units)
@@ -2912,7 +2919,7 @@ CONTAINS
     hdferr = h5tget_native_type_c(dtype_id, direction, native_dtype_id)
   END SUBROUTINE h5tget_native_type_f
 
-!****s* H5T (F03)/H5Tconvert_f_F03
+!****s* H5T/H5Tconvert_f_F03
 !
 ! NAME
 !  H5Tconvert_f
@@ -2975,7 +2982,7 @@ CONTAINS
 
   END SUBROUTINE h5tconvert_f
 !
-!****s* (F03) H5T/h5tenum_insert_f90
+!****s* H5T/h5tenum_insert_f90
 !
 ! NAME
 !  h5tenum_insert_f
@@ -3024,7 +3031,7 @@ CONTAINS
   END SUBROUTINE h5tenum_insert_f90
 
 !
-!****s* (F03) H5T/h5tenum_insert_f03
+!****s* H5T/h5tenum_insert_f03
 !
 ! NAME
 !  h5tenum_insert_f
