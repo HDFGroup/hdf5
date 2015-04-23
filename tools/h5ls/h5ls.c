@@ -1852,7 +1852,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
                         size_t next;
                         ssize_t ssize_out;
 
-                        h5tools_str_append(&buffer, "    %-10s {%ld} Files {\n", "Maps:", vmaps);
+                        h5tools_str_append(&buffer, "    %-10s {%ld} Source Files {\n", "Maps:", vmaps);
                         for (next = 0; next < (unsigned) vmaps; next++) {
                             ssize_out = H5Pget_virtual_filename(dcpl, next, NULL, 0);
                             H5Pget_virtual_filename(dcpl, next, f_name, sizeof(f_name));
