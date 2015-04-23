@@ -3208,7 +3208,7 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
         switch(new_dt->shared->type) {
             case H5T_COMPOUND:
                 {
-                int accum_change = 0;    /* Amount of change in the offset of the fields */
+                ssize_t accum_change = 0; /* Amount of change in the offset of the fields */
 
                 /*
                 * Copy all member fields to new type, then overwrite the
@@ -3236,6 +3236,10 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                     new_dt->shared->u.compnd.memb[i].type = tmp;
                     HDassert(tmp != NULL);
 
+                    /* Range check against compound member's offset */
+                    if ((accum_change < 0) && ((ssize_t) new_dt->shared->u.compnd.memb[i].offset < accum_change))
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, NULL, "invalid field size in datatype");
+
                     /* Apply the accumulated size change to the offset of the field */
                     new_dt->shared->u.compnd.memb[i].offset += (size_t) accum_change;
 
@@ -3259,14 +3263,16 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                         /* Adjust the size of the member */
                         new_dt->shared->u.compnd.memb[i].size = (old_dt->shared->u.compnd.memb[old_match].size*tmp->shared->size)/old_dt->shared->u.compnd.memb[old_match].type->shared->size;
 
-                        accum_change += (int) (new_dt->shared->u.compnd.memb[i].type->shared->size - old_dt->shared->u.compnd.memb[old_match].type->shared->size);
-                        /* HDassert(accum_change >= 0); */
+                        accum_change += (ssize_t) (new_dt->shared->u.compnd.memb[i].type->shared->size - old_dt->shared->u.compnd.memb[old_match].type->shared->size);
                     } /* end if */
                 } /* end for */
 
+                /* Range check against datatype size */
+                if ((accum_change < 0) && ((ssize_t) new_dt->shared->size < accum_change))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, NULL, "invalid field size in datatype");
+
                 /* Apply the accumulated size change to the size of the compound struct */
                 new_dt->shared->size += (size_t) accum_change;
-
                 }
                 break;
 
@@ -5106,7 +5112,6 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
     htri_t changed;    /* Whether H5T_set_loc changed the type (even if the size didn't change) */
     htri_t ret_value = 0;   /* Indicate that success, but no location change */
     unsigned i;             /* Local index variable */
-    int accum_change;       /* Amount of change in the offset of the fields */
     size_t old_size;        /* Previous size of a field */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -5140,11 +5145,18 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                 break;
 
             case H5T_COMPOUND:  /* Check each field and recurse on VL, compound and array type */
+                {
+                ssize_t accum_change = 0; /* Amount of change in the offset of the fields */
+
                 /* Sort the fields based on offsets */
                 H5T__sort_value(dt, NULL);
 
-                for (i=0,accum_change=0; i<dt->shared->u.compnd.nmembs; i++) {
+                for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
                     H5T_t *memb_type;   /* Member's datatype pointer */
+
+                    /* Range check against compound member's offset */
+                    if ((accum_change < 0) && ((ssize_t) dt->shared->u.compnd.memb[i].offset < accum_change))
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid field size in datatype");
 
                     /* Apply the accumulated size change to the offset of the field */
                     dt->shared->u.compnd.memb[i].offset += (size_t) accum_change;
@@ -5170,14 +5182,18 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                             dt->shared->u.compnd.memb[i].size = (dt->shared->u.compnd.memb[i].size*memb_type->shared->size)/old_size;
 
                             /* Add that change to the accumulated size change */
-                            accum_change += (int) (memb_type->shared->size - old_size);
-                            /* HDassert(accum_change >= 0); */
+                            accum_change += (ssize_t) (memb_type->shared->size - old_size);
                         } /* end if */
                     } /* end if */
                 } /* end for */
 
+                /* Range check against datatype size */
+                if ((accum_change < 0) && ((ssize_t) dt->shared->size < accum_change))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid field size in datatype");
+
                 /* Apply the accumulated size change to the datatype */
-                dt->shared->size = dt->shared->size + (size_t) accum_change;
+                dt->shared->size += (size_t) accum_change;
+                }
                 break;
 
             case H5T_VLEN: /* Recurse on the VL information if it's VL, compound or array, then free VL sequence */
