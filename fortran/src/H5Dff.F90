@@ -79,9 +79,11 @@
 !
 !*****
 
+#include "H5config_f.inc"
+
 MODULE H5D
   
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_FLOAT, C_DOUBLE, C_LOC, C_LONG_DOUBLE
+  USE, INTRINSIC :: ISO_C_BINDING
   USE H5GLOBAL
 
   INTERFACE h5dextend_f
@@ -135,6 +137,7 @@ MODULE H5D
      MODULE PROCEDURE h5dwrite_c_double_5
      MODULE PROCEDURE h5dwrite_c_double_6
      MODULE PROCEDURE h5dwrite_c_double_7
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5dwrite_c_long_double_scalar
      MODULE PROCEDURE h5dwrite_c_long_double_1
      MODULE PROCEDURE h5dwrite_c_long_double_2
@@ -143,6 +146,7 @@ MODULE H5D
      MODULE PROCEDURE h5dwrite_c_long_double_5
      MODULE PROCEDURE h5dwrite_c_long_double_6
      MODULE PROCEDURE h5dwrite_c_long_double_7
+#endif
      ! This is the preferred way to call h5dwrite
      ! by passing an address
      MODULE PROCEDURE h5dwrite_ptr
@@ -183,6 +187,7 @@ MODULE H5D
      MODULE PROCEDURE h5dread_c_double_5
      MODULE PROCEDURE h5dread_c_double_6
      MODULE PROCEDURE h5dread_c_double_7
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5dread_c_long_double_scalar
      MODULE PROCEDURE h5dread_c_long_double_1
      MODULE PROCEDURE h5dread_c_long_double_2
@@ -191,6 +196,7 @@ MODULE H5D
      MODULE PROCEDURE h5dread_c_long_double_5
      MODULE PROCEDURE h5dread_c_long_double_6
      MODULE PROCEDURE h5dread_c_long_double_7
+#endif
      ! This is the preferred way to call h5dread
      ! by passing an address
      MODULE PROCEDURE h5dread_ptr
@@ -242,7 +248,9 @@ MODULE H5D
      MODULE PROCEDURE h5dfill_integer
      MODULE PROCEDURE h5dfill_c_float
      MODULE PROCEDURE h5dfill_c_double
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5dfill_c_long_double
+#endif
      MODULE PROCEDURE h5dfill_char
   END INTERFACE
 
@@ -3378,6 +3386,7 @@ CONTAINS
 
   END SUBROUTINE h5dread_c_double_7
 
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5dread_c_long_double_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
     IMPLICIT NONE
@@ -3661,6 +3670,7 @@ CONTAINS
          file_space_id_default, xfer_prp_default, f_ptr)
 
   END SUBROUTINE h5dread_c_long_double_7
+#endif
 
   SUBROUTINE h5dwrite_c_double_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
@@ -3943,6 +3953,7 @@ CONTAINS
 
   END SUBROUTINE h5dwrite_c_double_7
 
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5dwrite_c_long_double_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
     IMPLICIT NONE
@@ -4223,6 +4234,7 @@ CONTAINS
          file_space_id_default, xfer_prp_default, f_ptr)
 
   END SUBROUTINE h5dwrite_c_long_double_7
+#endif
 
 !****s* H5D (F03)/h5dwrite_f_F03
 !
@@ -4502,6 +4514,7 @@ CONTAINS
 
   END SUBROUTINE h5dfill_c_double
 
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5dfill_c_long_double(fill_value, space_id, buf,  hdferr)
     IMPLICIT NONE
     REAL(KIND=C_LONG_DOUBLE), INTENT(IN), TARGET :: fill_value  ! Fill value
@@ -4525,7 +4538,7 @@ CONTAINS
          f_ptr_buf, mem_type_id)
 
   END SUBROUTINE h5dfill_c_long_double
-
+#endif
 !
 ! NAME		
 !  h5dfill_char

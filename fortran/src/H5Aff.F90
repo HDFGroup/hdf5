@@ -64,10 +64,12 @@
 !
 !*****
 
+#include "H5config_f.inc"
+
 MODULE H5A
 
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr, c_char, c_int, C_NULL_CHAR, C_LOC, &
-	C_FLOAT, C_DOUBLE, C_LONG_DOUBLE
+  USE, INTRINSIC :: ISO_C_BINDING
+
   USE H5GLOBAL
 
   INTERFACE h5awrite_f
@@ -103,6 +105,7 @@ MODULE H5A
      MODULE PROCEDURE h5awrite_c_double_5
      MODULE PROCEDURE h5awrite_c_double_6
      MODULE PROCEDURE h5awrite_c_double_7
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5awrite_c_long_double_scalar
      MODULE PROCEDURE h5awrite_c_long_double_1
      MODULE PROCEDURE h5awrite_c_long_double_2
@@ -111,6 +114,7 @@ MODULE H5A
      MODULE PROCEDURE h5awrite_c_long_double_5
      MODULE PROCEDURE h5awrite_c_long_double_6
      MODULE PROCEDURE h5awrite_c_long_double_7
+#endif
      ! This is the preferred way to call h5awrite
      ! by passing an address
      MODULE PROCEDURE h5awrite_ptr
@@ -149,6 +153,7 @@ MODULE H5A
      MODULE PROCEDURE h5aread_c_double_5
      MODULE PROCEDURE h5aread_c_double_6
      MODULE PROCEDURE h5aread_c_double_7
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5aread_c_long_double_scalar
      MODULE PROCEDURE h5aread_c_long_double_1
      MODULE PROCEDURE h5aread_c_long_double_2
@@ -157,6 +162,7 @@ MODULE H5A
      MODULE PROCEDURE h5aread_c_long_double_5
      MODULE PROCEDURE h5aread_c_long_double_6
      MODULE PROCEDURE h5aread_c_long_double_7
+#endif
      ! This is the preferred way to call h5aread
      ! by passing an address
      MODULE PROCEDURE h5aread_ptr
@@ -2323,7 +2329,6 @@ CONTAINS
     hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_c_double_6
 
-
   SUBROUTINE h5awrite_c_double_7(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
@@ -2342,7 +2347,7 @@ CONTAINS
 
   END SUBROUTINE h5awrite_c_double_7
 
-
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5awrite_c_long_double_scalar(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier
@@ -2357,7 +2362,6 @@ CONTAINS
 
     hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5awrite_c_long_double_scalar
-
 
   SUBROUTINE h5awrite_c_long_double_1(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
@@ -2484,6 +2488,7 @@ CONTAINS
     hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
 
   END SUBROUTINE h5awrite_c_long_double_7
+#endif
 
   SUBROUTINE H5Awrite_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
     IMPLICIT NONE
@@ -3133,6 +3138,8 @@ CONTAINS
     hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_c_double_7
 
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+
   SUBROUTINE h5aread_c_long_double_scalar(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier
@@ -3271,6 +3278,8 @@ CONTAINS
 
     hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)
   END SUBROUTINE h5aread_c_long_double_7
+
+#endif
 
   SUBROUTINE H5Aread_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
     IMPLICIT NONE

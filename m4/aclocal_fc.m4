@@ -111,6 +111,41 @@ AC_DEFUN([PAC_PROG_FC_STORAGE_SIZE],[
 
 ])
 
+dnl Check to see C_LONG_DOUBLE is available, and if it 
+dnl is different from C_DOUBLE
+
+AC_DEFUN([PAC_PROG_FC_HAVE_C_LONG_DOUBLE],[
+  HAVE_C_LONG_DOUBLE_FORTRAN="no"	
+  AC_MSG_CHECKING([if Fortran C_LONG_DOUBLE is valid])
+  
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+     MODULE type_mod
+       USE ISO_C_BINDING
+       INTERFACE h5t	
+         MODULE PROCEDURE h5t_c_double
+         MODULE PROCEDURE h5t_c_long_double
+       END INTERFACE
+     CONTAINS
+       SUBROUTINE h5t_c_double(r)
+         REAL(KIND=C_DOUBLE) :: r
+       END SUBROUTINE h5t_c_double
+       SUBROUTINE h5t_c_long_double(d)
+         REAL(KIND=C_LONG_DOUBLE) :: d
+       END SUBROUTINE h5t_c_long_double
+     END MODULE type_mod
+     PROGRAM main
+       USE ISO_C_BINDING
+       USE type_mod
+       REAL(KIND=C_DOUBLE)      :: r
+       REAL(KIND=C_LONG_DOUBLE) :: d
+       CALL h5t(r)
+       CALL h5t(d)
+     END PROGRAM main
+    ])], [AC_MSG_RESULT([yes]) 
+            HAVE_C_LONG_DOUBLE_FORTRAN="yes"], 
+         [AC_MSG_RESULT([no])])
+])
+
 dnl Checking if the compiler supports the required Fortran 2003 features and
 dnl disable Fortran 2003 if it does not.
 

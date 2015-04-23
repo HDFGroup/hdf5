@@ -30,6 +30,7 @@
 !  Windows dll file 'hdf5_hl_fortrandll.def.in' in the hl/fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
+#include "H5config_f.inc"
 
 MODULE h5tb
   
@@ -37,12 +38,13 @@ MODULE h5tb
   USE h5fortran_types
   USE hdf5
 
-
   INTERFACE h5tbwrite_field_name_f
      MODULE PROCEDURE h5tbwrite_field_name_f_int
      MODULE PROCEDURE h5tbwrite_field_name_f_c_float
      MODULE PROCEDURE h5tbwrite_field_name_f_c_double
+#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5tbwrite_field_name_f_c_long_double
+#endif
      MODULE PROCEDURE h5tbwrite_field_name_f_string
   END INTERFACE
   
@@ -50,7 +52,9 @@ MODULE h5tb
      MODULE PROCEDURE h5tbread_field_name_f_int
      MODULE PROCEDURE h5tbread_field_name_f_c_float
      MODULE PROCEDURE h5tbread_field_name_f_c_double
+#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5tbread_field_name_f_c_long_double
+#endif
      MODULE PROCEDURE h5tbread_field_name_f_string
   END INTERFACE
   
@@ -58,7 +62,9 @@ MODULE h5tb
      MODULE PROCEDURE h5tbwrite_field_index_f_int
      MODULE PROCEDURE h5tbwrite_field_index_f_c_float
      MODULE PROCEDURE h5tbwrite_field_index_f_c_double
+#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5tbwrite_field_index_f_c_long_double
+#endif
      MODULE PROCEDURE h5tbwrite_field_index_f_string
   END INTERFACE
   
@@ -66,7 +72,9 @@ MODULE h5tb
      MODULE PROCEDURE h5tbread_field_index_f_int
      MODULE PROCEDURE h5tbread_field_index_f_c_float
      MODULE PROCEDURE h5tbread_field_index_f_c_double
+#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5tbread_field_index_f_c_long_double
+#endif
      MODULE PROCEDURE h5tbread_field_index_f_string
   END INTERFACE
   
@@ -74,7 +82,9 @@ MODULE h5tb
      MODULE PROCEDURE h5tbinsert_field_f_int
      MODULE PROCEDURE h5tbinsert_field_f_c_float
      MODULE PROCEDURE h5tbinsert_field_f_c_double
+#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5tbinsert_field_f_c_long_double
+#endif
      MODULE PROCEDURE h5tbinsert_field_f_string
   END INTERFACE
 
@@ -98,7 +108,6 @@ MODULE h5tb
      END FUNCTION h5tbwrite_field_name_c
   END INTERFACE
 
-    
   INTERFACE
      INTEGER FUNCTION h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name, &
           start,nrecords,type_size,buf) &
@@ -404,6 +413,7 @@ CONTAINS
     
   END SUBROUTINE h5tbwrite_field_name_f_c_double
 
+#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5tbwrite_field_name_f_c_long_double(loc_id,&
        dset_name,&
        field_name,&
@@ -436,6 +446,7 @@ CONTAINS
          start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbwrite_field_name_f_c_long_double
+#endif
 
   SUBROUTINE h5tbwrite_field_name_f_string(loc_id,&
        dset_name,&
@@ -583,6 +594,7 @@ CONTAINS
 
   END SUBROUTINE h5tbread_field_name_f_c_double
 
+#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5tbread_field_name_f_c_long_double(loc_id,&
        dset_name,&
        field_name,&
@@ -614,6 +626,7 @@ CONTAINS
          start,nrecords,type_size,f_ptr)
 
   END SUBROUTINE h5tbread_field_name_f_c_long_double
+#endif
 
   SUBROUTINE h5tbread_field_name_f_string(loc_id,&
        dset_name,&
@@ -753,6 +766,7 @@ CONTAINS
     
   END SUBROUTINE h5tbwrite_field_index_f_c_double
 
+#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5tbwrite_field_index_f_c_long_double(loc_id,&
        dset_name,&
        field_index,&
@@ -782,6 +796,7 @@ CONTAINS
          start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbwrite_field_index_f_c_long_double
+#endif
 
   SUBROUTINE h5tbwrite_field_index_f_string(loc_id,&
        dset_name,&
@@ -916,6 +931,7 @@ CONTAINS
 
   END SUBROUTINE h5tbread_field_index_f_c_double
 
+#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5tbread_field_index_f_c_long_double(loc_id,&
        dset_name,&
        field_index,&
@@ -944,6 +960,7 @@ CONTAINS
          start,nrecords,type_size,f_ptr)
 
   END SUBROUTINE h5tbread_field_index_f_c_long_double
+#endif
 
   SUBROUTINE h5tbread_field_index_f_string(loc_id,&
        dset_name,&
@@ -1076,6 +1093,7 @@ CONTAINS
     
   END SUBROUTINE h5tbinsert_field_f_c_double
 
+#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5tbinsert_field_f_c_long_double(loc_id,&
        dset_name,&
        field_name,&
@@ -1104,6 +1122,7 @@ CONTAINS
          field_type,field_index,f_ptr)
     
   END SUBROUTINE h5tbinsert_field_f_c_long_double
+#endif
 
   SUBROUTINE h5tbinsert_field_f_string(loc_id,&
        dset_name,&

@@ -30,6 +30,9 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
 
+/* Define if we have Fortran C_LONG_DOUBLE */
+#undef FORTRAN_HAVE_C_LONG_DOUBLE
+
 /* Define if we have Fortran intrinsic C_SIZEOF */
 #undef FORTRAN_HAVE_C_SIZEOF
 

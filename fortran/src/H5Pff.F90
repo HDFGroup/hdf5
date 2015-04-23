@@ -33,9 +33,7 @@
 
 MODULE H5P
 
-!  Can't specify ONLY because of a bug in gfortran < v4.7 Bug: 45190, 37829
-  USE, INTRINSIC :: ISO_C_BINDING !, ONLY : c_ptr, c_null_ptr, c_funptr, c_null_funptr, &
-!       c_char, c_int, C_NULL_CHAR, C_LOC, C_DOUBLE, C_FLOAT
+  USE, INTRINSIC :: ISO_C_BINDING
   USE H5GLOBAL
   
   INTERFACE h5pset_fapl_multi_f
@@ -47,7 +45,9 @@ MODULE H5P
      MODULE PROCEDURE h5pset_fill_value_integer
      MODULE PROCEDURE h5pset_fill_value_c_float
      MODULE PROCEDURE h5pset_fill_value_c_double
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5pset_fill_value_c_long_double
+#endif
      MODULE PROCEDURE h5pset_fill_value_char
      ! Recommended procedure:
      MODULE PROCEDURE h5pset_fill_value_ptr
@@ -58,7 +58,9 @@ MODULE H5P
      MODULE PROCEDURE h5pget_fill_value_integer
      MODULE PROCEDURE h5pget_fill_value_c_float
      MODULE PROCEDURE h5pget_fill_value_c_double
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5pget_fill_value_c_long_double
+#endif
      MODULE PROCEDURE h5pget_fill_value_char
      ! Recommended procedure:
      MODULE PROCEDURE h5pget_fill_value_ptr
@@ -69,7 +71,9 @@ MODULE H5P
      MODULE PROCEDURE h5pset_integer
      MODULE PROCEDURE h5pset_c_float
      MODULE PROCEDURE h5pset_c_double
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5pset_c_long_double
+#endif
      MODULE PROCEDURE h5pset_char
      ! Recommended procedure:
      MODULE PROCEDURE h5pset_ptr
@@ -80,7 +84,9 @@ MODULE H5P
      MODULE PROCEDURE h5pget_integer
      MODULE PROCEDURE h5pget_c_float
      MODULE PROCEDURE h5pget_c_double
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5pget_c_long_double
+#endif
      ! Recommended procedure:
      MODULE PROCEDURE h5pget_ptr
   END INTERFACE
@@ -89,7 +95,9 @@ MODULE H5P
      MODULE PROCEDURE h5pregister_integer
      MODULE PROCEDURE h5pregister_c_float
      MODULE PROCEDURE h5pregister_c_double
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5pregister_c_long_double
+#endif
      ! Recommended procedure:
      MODULE PROCEDURE h5pregister_ptr
   END INTERFACE
@@ -98,7 +106,9 @@ MODULE H5P
      MODULE PROCEDURE h5pinsert_integer
      MODULE PROCEDURE h5pinsert_c_float
      MODULE PROCEDURE h5pinsert_c_double
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5pinsert_c_long_double
+#endif
      MODULE PROCEDURE h5pinsert_char
      ! Recommended procedure:
      MODULE PROCEDURE h5pinsert_ptr
@@ -6295,6 +6305,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
   END SUBROUTINE h5pset_fill_value_c_double
 
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5pset_fill_value_c_long_double(prp_id, type_id, fillvalue, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
@@ -6308,6 +6319,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     f_ptr = C_LOC(fillvalue)
     hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
   END SUBROUTINE h5pset_fill_value_c_long_double
+#endif
 
   SUBROUTINE h5pget_fill_value_c_float(prp_id, type_id, fillvalue, hdferr)
     IMPLICIT NONE
@@ -6340,6 +6352,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_fill_value_c_double
 
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   SUBROUTINE h5pget_fill_value_c_long_double(prp_id, type_id, fillvalue, &
        hdferr)
     IMPLICIT NONE
@@ -6355,6 +6368,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
 
   END SUBROUTINE h5pget_fill_value_c_long_double
+#endif
 
   SUBROUTINE h5pset_fill_value_char(prp_id, type_id, fillvalue, hdferr)
     IMPLICIT NONE
@@ -6617,6 +6631,9 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
 
   END SUBROUTINE h5pset_c_double
+
+
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
 !
 !****s* H5P (F90)/h5pset_c_long_double
 !
@@ -6654,6 +6671,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
 
   END SUBROUTINE h5pset_c_long_double
+#endif
 
   SUBROUTINE h5pset_char(prp_id, name, value, hdferr)
     IMPLICIT NONE
@@ -6790,6 +6808,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
   END SUBROUTINE h5pget_c_double
 
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
 !****s* H5P (F90)/h5pget_c_long_double
 !
 ! NAME
@@ -6826,6 +6845,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     name_len = LEN(name)
     hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
   END SUBROUTINE h5pget_c_long_double
+#endif
 
   SUBROUTINE h5pget_char(prp_id, name, value, hdferr)
     IMPLICIT NONE
@@ -7049,7 +7069,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pregister_c_double
 
-
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
 !
 !****s* H5P/h5pregister_c_long_double
 !
@@ -7092,6 +7112,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pregister_c(class, name, name_len, size, f_ptr)
 
   END SUBROUTINE h5pregister_c_long_double
+#endif
 
   SUBROUTINE h5pregister_char(class, name, size, value, hdferr)
     IMPLICIT NONE
@@ -7277,6 +7298,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pinsert_c_double
 
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
 !****s* H5P (F90)/h5pinsert_c_long_double
 !
 ! NAME
@@ -7317,6 +7339,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pinsert_c(plist, name , name_len, size, f_ptr)
 
   END SUBROUTINE h5pinsert_c_long_double
+#endif
 
   SUBROUTINE h5pinsert_char(plist, name, size, value, hdferr)
     IMPLICIT NONE

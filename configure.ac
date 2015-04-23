@@ -401,6 +401,16 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
+  ## Checking if the compiler supports the required Fortran 2003 features and
+  ## stopping if it does not.
+  PAC_PROG_FC_HAVE_F2003_REQUIREMENTS
+ 
+  if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
+    AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
+  else
+    HAVE_FORTRAN_2003="yes"
+  fi
+
   ## --------------------------------------------------------------------
   ## Define wrappers for the C compiler to use Fortran function names
   ##
@@ -416,6 +426,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
   PAC_PROG_FC_STORAGE_SIZE
 
+  ## See if C_LONG_DOUBLE is available, and if it is different from C_DOUBLE
+  PAC_PROG_FC_HAVE_C_LONG_DOUBLE
+	
   ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
   if test "X$HAVE_SIZEOF_FORTRAN" = "Xno" && test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xno"; then
     AC_MSG_ERROR([Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE])
@@ -433,15 +446,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
   fi
 
-
-  ## Checking if the compiler supports the required Fortran 2003 features and
-  ## disable Fortran 2003 if it does not.
-  PAC_PROG_FC_HAVE_F2003_REQUIREMENTS
- 
-  if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
-    AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
-  else
-    HAVE_FORTRAN_2003="yes"
+  if test "X$HAVE_C_LONG_DOUBLE_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_C_LONG_DOUBLE], [1], [Define if we have Fortran C_LONG_DOUBLE])
   fi
 else
   FC="no"
