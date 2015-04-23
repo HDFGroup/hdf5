@@ -14,12 +14,26 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 !
-! This file contains FORTRAN90 interfaces for H5TB functions
+! This file contains FORTRAN interfaces for H5TB functions
+!
+!
+! NOTES
+!
+!       _____ __  __ _____   ____  _____ _______       _   _ _______
+!      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
+! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
+! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
+! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
+!      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
+!                             
+!  If you add a new function here then you MUST add the function name to the
+!  Windows dll file 'hdf5_hl_fortrandll.def.in' in the hl/fortran/src directory.
+!  This is needed for Windows based operating systems.
 !
 
 MODULE h5tb
   
-  USE ISO_C_BINDING
+  USE, INTRINSIC :: ISO_C_BINDING
   USE h5fortran_types
   USE hdf5
 
@@ -28,6 +42,7 @@ MODULE h5tb
      MODULE PROCEDURE h5tbwrite_field_name_f_int
      MODULE PROCEDURE h5tbwrite_field_name_f_c_float
      MODULE PROCEDURE h5tbwrite_field_name_f_c_double
+     MODULE PROCEDURE h5tbwrite_field_name_f_c_long_double
      MODULE PROCEDURE h5tbwrite_field_name_f_string
   END INTERFACE
   
@@ -35,6 +50,7 @@ MODULE h5tb
      MODULE PROCEDURE h5tbread_field_name_f_int
      MODULE PROCEDURE h5tbread_field_name_f_c_float
      MODULE PROCEDURE h5tbread_field_name_f_c_double
+     MODULE PROCEDURE h5tbread_field_name_f_c_long_double
      MODULE PROCEDURE h5tbread_field_name_f_string
   END INTERFACE
   
@@ -42,6 +58,7 @@ MODULE h5tb
      MODULE PROCEDURE h5tbwrite_field_index_f_int
      MODULE PROCEDURE h5tbwrite_field_index_f_c_float
      MODULE PROCEDURE h5tbwrite_field_index_f_c_double
+     MODULE PROCEDURE h5tbwrite_field_index_f_c_long_double
      MODULE PROCEDURE h5tbwrite_field_index_f_string
   END INTERFACE
   
@@ -49,6 +66,7 @@ MODULE h5tb
      MODULE PROCEDURE h5tbread_field_index_f_int
      MODULE PROCEDURE h5tbread_field_index_f_c_float
      MODULE PROCEDURE h5tbread_field_index_f_c_double
+     MODULE PROCEDURE h5tbread_field_index_f_c_long_double
      MODULE PROCEDURE h5tbread_field_index_f_string
   END INTERFACE
   
@@ -56,7 +74,106 @@ MODULE h5tb
      MODULE PROCEDURE h5tbinsert_field_f_int
      MODULE PROCEDURE h5tbinsert_field_f_c_float
      MODULE PROCEDURE h5tbinsert_field_f_c_double
+     MODULE PROCEDURE h5tbinsert_field_f_c_long_double
      MODULE PROCEDURE h5tbinsert_field_f_string
+  END INTERFACE
+
+  INTERFACE
+     INTEGER FUNCTION h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+          start,nrecords,type_size,buf) &
+          BIND(C,NAME='h5tbwrite_field_name_c')
+       IMPORT :: C_CHAR, C_PTR
+       IMPORT :: HID_T, SIZE_T, HSIZE_T
+       IMPLICIT NONE
+       INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
+       INTEGER(hsize_t), INTENT(in) :: start                            ! start record
+       INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
+       INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
+       TYPE(C_PTR), VALUE :: buf                                        ! data buffer
+       INTEGER :: errcode                                               ! error code
+       INTEGER(size_t) :: namelen                                       ! name length
+       INTEGER(size_t) :: namelen1                                      ! name length
+     END FUNCTION h5tbwrite_field_name_c
+  END INTERFACE
+
+    
+  INTERFACE
+     INTEGER FUNCTION h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name, &
+          start,nrecords,type_size,buf) &
+          BIND(C,NAME='h5tbread_field_name_c')
+       IMPORT :: C_CHAR, C_PTR
+       IMPORT :: HID_T, SIZE_T, HSIZE_T
+       IMPLICIT NONE
+       INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
+       INTEGER(hsize_t), INTENT(in) :: start                            ! start record
+       INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
+       INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
+       TYPE(C_PTR), VALUE :: buf                                        ! data buffer
+       INTEGER :: errcode                                               ! error code
+       INTEGER(size_t) :: namelen                                       ! name length
+       INTEGER(size_t) :: namelen1                                      ! name length
+     END FUNCTION h5tbread_field_name_c
+  END INTERFACE
+
+  INTERFACE
+     INTEGER FUNCTION h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+          start,nrecords,type_size,buf) &
+          BIND(C,NAME='h5tbwrite_field_index_c')
+       IMPORT :: C_CHAR, C_PTR
+       IMPORT :: HID_T, SIZE_T, HSIZE_T
+       IMPLICIT NONE
+       INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
+       INTEGER, INTENT(in) :: field_index                               ! index
+       INTEGER(hsize_t), INTENT(in) :: start                            ! start record
+       INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
+       INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
+       TYPE(C_PTR), VALUE :: buf                                        ! data buffer
+       INTEGER :: errcode                                               ! error code
+       INTEGER(size_t) :: namelen                                       ! name length
+     END FUNCTION h5tbwrite_field_index_c
+  END INTERFACE
+
+  INTERFACE
+     INTEGER FUNCTION h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+          start,nrecords,type_size,buf) &
+          BIND(C,NAME='h5tbread_field_index_c')
+       IMPORT :: C_CHAR, C_PTR
+       IMPORT :: HID_T, SIZE_T, HSIZE_T
+       IMPLICIT NONE
+       INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
+       INTEGER, INTENT(in) :: field_index                               ! index
+       INTEGER(hsize_t), INTENT(in) :: start                            ! start record
+       INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
+       INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
+       TYPE(C_PTR), VALUE :: buf                                        ! data buffer
+       INTEGER :: errcode                                               ! error code
+       INTEGER(size_t) :: namelen                                       ! name length
+     END FUNCTION h5tbread_field_index_c
+  END INTERFACE
+
+
+  INTERFACE
+     INTEGER FUNCTION h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+          field_type,field_index,buf) &
+          BIND(C,NAME='h5tbinsert_field_c')
+       IMPORT :: C_CHAR, C_PTR
+       IMPORT :: HID_T, SIZE_T, HSIZE_T
+       IMPLICIT NONE
+       INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name                        ! name of the dataset
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name                       ! name of the field
+       INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
+       INTEGER, INTENT(in) :: field_index                               ! field_index
+       TYPE(C_PTR), VALUE :: buf                                        ! data buffer
+       INTEGER(size_t) :: namelen                                       ! name length
+       INTEGER(size_t) :: namelen1                                      ! name length length
+     END FUNCTION h5tbinsert_field_c
   END INTERFACE
   
 CONTAINS
@@ -92,12 +209,6 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbmake_table_f
-!DEC$endif
-!
     CHARACTER(LEN=*), INTENT(in) :: table_title                      ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
@@ -115,7 +226,6 @@ CONTAINS
     INTEGER(size_t), DIMENSION(1:nfields) :: char_len_field_names    ! field name lengths
     INTEGER(size_t) :: max_char_size_field_names                     ! character len of field names
     INTEGER(hsize_t) :: i                                            ! general purpose integer
-
 
     INTERFACE
        INTEGER FUNCTION h5tbmake_table_c(namelen1,&
@@ -183,7 +293,6 @@ CONTAINS
 
   END SUBROUTINE h5tbmake_table_f
 
-
 !-------------------------------------------------------------------------
 ! Function: h5tbwrite_field_name_f_int
 !
@@ -209,65 +318,26 @@ CONTAINS
        errcode )
     
     IMPLICIT NONE
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbwrite_field_name_f_int
-!DEC$endif
-!
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
+    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf                         ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
+    TYPE(C_PTR) :: f_ptr
     
-    INTERFACE
-       INTEGER FUNCTION h5tbwrite_field_name_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbwrite_field_name_int_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length
-       END FUNCTION h5tbwrite_field_name_int_c
-    END INTERFACE
-    
+    f_ptr = C_LOC(buf(1))
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbwrite_field_name_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbwrite_field_name_f_int
-  
-!-------------------------------------------------------------------------
-! Function: h5tbwrite_field_name_f_c_float
-!
-! Purpose: Writes one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
 
   SUBROUTINE h5tbwrite_field_name_f_c_float(loc_id,&
        dset_name,&
@@ -279,65 +349,27 @@ CONTAINS
        errcode )
     
     IMPLICIT NONE
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbwrite_field_name_f_c_float
-!DEC$endif
-!
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*) :: buf              ! data buffer
+    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf              ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
+    TYPE(C_PTR) :: f_ptr
     
-    INTERFACE
-       INTEGER FUNCTION h5tbwrite_field_name_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbwrite_field_name_fl_c')
-         IMPORT :: C_CHAR, C_FLOAT
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*) :: buf              ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length
-       END FUNCTION h5tbwrite_field_name_fl_c
-    END INTERFACE
+    f_ptr = C_LOC(buf(1))
     
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbwrite_field_name_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbwrite_field_name_f_c_float
-
-!-------------------------------------------------------------------------
-! Function: h5tbwrite_field_name_f_c_double
-!
-! Purpose: Writes one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
 
   SUBROUTINE h5tbwrite_field_name_f_c_double(loc_id,&
        dset_name,&
@@ -349,12 +381,6 @@ CONTAINS
        errcode )
     
     IMPLICIT NONE
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbwrite_field_name_f_c_double
-!DEC$endif
-!
 
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
@@ -362,53 +388,54 @@ CONTAINS
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*) :: buf                ! data buffer
+    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1                                      ! name length
+    INTEGER(size_t) :: namelen1
+    TYPE(C_PTR) :: f_ptr
     
-    INTERFACE
-       INTEGER FUNCTION h5tbwrite_field_name_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbwrite_field_name_dl_c')
-         IMPORT :: C_CHAR, C_DOUBLE
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*) :: buf                ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length
-       END FUNCTION h5tbwrite_field_name_dl_c
-    END INTERFACE
+    f_ptr = C_LOC(buf(1))
     
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbwrite_field_name_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbwrite_field_name_f_c_double
 
-!-------------------------------------------------------------------------
-! Function: h5tbwrite_field_name_f_string
-!
-! Purpose: Writes one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
+  SUBROUTINE h5tbwrite_field_name_f_c_long_double(loc_id,&
+       dset_name,&
+       field_name,&
+       start,&
+       nrecords,&
+       type_size,&
+       buf,&
+       errcode )
+    
+    IMPLICIT NONE
+
+    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
+    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
+    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
+    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
+    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
+    REAL(KIND=C_LONG_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf! data buffer
+    INTEGER :: errcode                                               ! error code
+    INTEGER(size_t) :: namelen                                       ! name length
+    INTEGER(size_t) :: namelen1
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1))
+    
+    namelen  = LEN(dset_name)
+    namelen1 = LEN(field_name)
+    
+    errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         start,nrecords,type_size,f_ptr)
+    
+  END SUBROUTINE h5tbwrite_field_name_f_c_long_double
 
   SUBROUTINE h5tbwrite_field_name_f_string(loc_id,&
        dset_name,&
@@ -421,49 +448,25 @@ CONTAINS
 
     IMPLICIT NONE
 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbwrite_field_name_f_string
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
+    CHARACTER(LEN=*), INTENT(in), DIMENSION(*), TARGET :: buf        ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1                                      ! name length
-
-    INTERFACE
-       INTEGER FUNCTION h5tbwrite_field_name_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbwrite_field_name_st_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name                        ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name                       ! name of the field
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         CHARACTER(KIND=C_CHAR), INTENT(in), DIMENSION(*) :: buf                ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                               ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length
-       END FUNCTION h5tbwrite_field_name_st_c
-    END INTERFACE
+    INTEGER(size_t) :: namelen1
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1)(1:1))
 
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbwrite_field_name_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbwrite_field_name_f_string
 
@@ -494,66 +497,27 @@ CONTAINS
 
     IMPLICIT NONE
 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbread_field_name_f_int
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
+    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf                 ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1                                      ! name length
+    INTEGER(size_t) :: namelen1
+    TYPE(C_PTR) :: f_ptr
     
-    INTERFACE
-       INTEGER FUNCTION h5tbread_field_name_int_c(loc_id,namelen,dset_name,namelen1,field_name, &
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbread_field_name_int_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length
-       END FUNCTION h5tbread_field_name_int_c
-    END INTERFACE
+    f_ptr = C_LOC(buf(1))                                    ! name length
 
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbread_field_name_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbread_field_name_f_int
-
-!-------------------------------------------------------------------------
-! Function: h5tbread_field_name_f_c_float
-!
-! Purpose: Reads one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
 
   SUBROUTINE h5tbread_field_name_f_c_float(loc_id,&
        dset_name,&
@@ -565,67 +529,27 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbread_field_name_f_c_float
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*) :: buf              ! data buffer
+    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf      ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
+    TYPE(C_PTR) :: f_ptr
     
-    INTERFACE
-       INTEGER FUNCTION h5tbread_field_name_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbread_field_name_fl_c')
-         IMPORT :: C_CHAR, C_FLOAT
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*) :: buf              ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length
-       END FUNCTION h5tbread_field_name_fl_c
-    END INTERFACE
+    f_ptr = C_LOC(buf(1)) 
 
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbread_field_name_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         start,nrecords,type_size,f_ptr)
 
   END SUBROUTINE h5tbread_field_name_f_c_float
-
-!-------------------------------------------------------------------------
-! Function: h5tbread_field_name_f_c_double
-!
-! Purpose: Reads one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
 
   SUBROUTINE h5tbread_field_name_f_c_double(loc_id,&
        dset_name,&
@@ -637,67 +561,59 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbread_field_name_f_c_double
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*) :: buf             ! data buffer
+    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
-
-    INTERFACE
-       INTEGER FUNCTION h5tbread_field_name_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbread_field_name_dl_c')
-         IMPORT :: C_CHAR, C_DOUBLE
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*) :: buf                ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length
-       END FUNCTION h5tbread_field_name_dl_c
-    END INTERFACE
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1)) 
     
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbread_field_name_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         start,nrecords,type_size,f_ptr)
 
   END SUBROUTINE h5tbread_field_name_f_c_double
 
-!-------------------------------------------------------------------------
-! Function: h5tbread_field_name_f_string
-!
-! Purpose: Reads one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
+  SUBROUTINE h5tbread_field_name_f_c_long_double(loc_id,&
+       dset_name,&
+       field_name,&
+       start,&
+       nrecords,&
+       type_size,&
+       buf,&
+       errcode )
+
+    IMPLICIT NONE
+    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
+    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
+    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
+    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
+    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
+    REAL(KIND=C_LONG_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
+    INTEGER :: errcode                                               ! error code
+    INTEGER(size_t) :: namelen                                       ! name length
+    INTEGER(size_t) :: namelen1                                      ! name length
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1)) 
+    
+    namelen  = LEN(dset_name)
+    namelen1 = LEN(field_name)
+    
+    errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         start,nrecords,type_size,f_ptr)
+
+  END SUBROUTINE h5tbread_field_name_f_c_long_double
 
   SUBROUTINE h5tbread_field_name_f_string(loc_id,&
        dset_name,&
@@ -709,50 +625,25 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbread_field_name_f_string
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
+    CHARACTER(LEN=*), INTENT(in), DIMENSION(*), TARGET :: buf        ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
-
-    INTERFACE
-       INTEGER FUNCTION h5tbread_field_name_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbread_field_name_st_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name                        ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name                       ! name of the field
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: buf          ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length
-       END FUNCTION h5tbread_field_name_st_c
-    END INTERFACE
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1)(1:1)) 
 
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbread_field_name_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbread_field_name_f_string
 
@@ -782,64 +673,25 @@ CONTAINS
        errcode )
     
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbwrite_field_index_f_int
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     INTEGER, INTENT(in) :: field_index                               ! index
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
+    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf                 ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
-
-    INTERFACE
-       INTEGER FUNCTION h5tbwrite_field_index_int_c(loc_id,namelen,dset_name,field_index,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbwrite_field_index_int_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name                        ! name of the dataset
-         INTEGER, INTENT(in) :: field_index                               ! index
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-       END FUNCTION h5tbwrite_field_index_int_c
-    END INTERFACE
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1))
 
     namelen  = LEN(dset_name)
     
-    errcode = h5tbwrite_field_index_int_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbwrite_field_index_f_int
-
-!-------------------------------------------------------------------------
-! Function: h5tbwrite_field_index_f_c_float
-!
-! Purpose: Writes one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
 
   SUBROUTINE h5tbwrite_field_index_f_c_float(loc_id,&
        dset_name,&
@@ -851,66 +703,25 @@ CONTAINS
        errcode )
     
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbwrite_field_index_f_c_float
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     INTEGER, INTENT(in) :: field_index                               ! index
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*) :: buf              ! data buffer
+    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf      ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
+    TYPE(C_PTR) :: f_ptr
     
-    INTERFACE
-       INTEGER FUNCTION h5tbwrite_field_index_fl_c(loc_id,namelen,dset_name,field_index,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbwrite_field_index_fl_c')
-         IMPORT :: C_CHAR, C_FLOAT
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name                        ! name of the dataset
-         INTEGER, INTENT(in) :: field_index                               ! index
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*) :: buf              ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-       END FUNCTION h5tbwrite_field_index_fl_c
-    END INTERFACE
+    f_ptr = C_LOC(buf(1)) 
     
     namelen  = LEN(dset_name)
     
-    errcode = h5tbwrite_field_index_fl_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbwrite_field_index_f_c_float
-
-
-
-!-------------------------------------------------------------------------
-! Function: h5tbwrite_field_index_f_c_double
-!
-! Purpose: Writes one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
 
   SUBROUTINE h5tbwrite_field_index_f_c_double(loc_id,&
        dset_name,&
@@ -922,64 +733,55 @@ CONTAINS
        errcode )
     
     IMPLICIT NONE
-    
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbwrite_field_index_f_c_double
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     INTEGER, INTENT(in) :: field_index                               ! index
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*) :: buf             ! data buffer
+    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
+    TYPE(C_PTR) :: f_ptr
     
-    INTERFACE
-       INTEGER FUNCTION h5tbwrite_field_index_dl_c(loc_id,namelen,dset_name,field_index,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbwrite_field_index_dl_c')
-         IMPORT :: C_CHAR, C_DOUBLE
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         INTEGER, INTENT(in) :: field_index                               ! index
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*) :: buf                ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-       END FUNCTION h5tbwrite_field_index_dl_c
-    END INTERFACE
-    
+    f_ptr = C_LOC(buf(1))
+
     namelen  = LEN(dset_name)
     
-    errcode = h5tbwrite_field_index_dl_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbwrite_field_index_f_c_double
 
-!-------------------------------------------------------------------------
-! Function: h5tbwrite_field_index_f_string
-!
-! Purpose: Writes one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
+  SUBROUTINE h5tbwrite_field_index_f_c_long_double(loc_id,&
+       dset_name,&
+       field_index,&
+       start,&
+       nrecords,&
+       type_size,&
+       buf,&
+       errcode )
+    
+    IMPLICIT NONE
+    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
+    INTEGER, INTENT(in) :: field_index                               ! index
+    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
+    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
+    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
+    REAL(KIND=C_LONG_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
+    INTEGER :: errcode                                               ! error code
+    INTEGER(size_t) :: namelen                                       ! name length
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1))
+
+    namelen  = LEN(dset_name)
+    
+    errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+         start,nrecords,type_size,f_ptr)
+    
+  END SUBROUTINE h5tbwrite_field_index_f_c_long_double
 
   SUBROUTINE h5tbwrite_field_index_f_string(loc_id,&
        dset_name,&
@@ -991,47 +793,22 @@ CONTAINS
        errcode )
     
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbwrite_field_index_f_string
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     INTEGER, INTENT(in) :: field_index                               ! index
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
+    CHARACTER(LEN=*), INTENT(in), DIMENSION(*), TARGET :: buf                ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
-
-    INTERFACE
-       INTEGER FUNCTION h5tbwrite_field_index_st_c(loc_id,namelen,dset_name,field_index,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbwrite_field_index_st_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         INTEGER, INTENT(in) :: field_index                               ! index
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: buf ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-       END FUNCTION h5tbwrite_field_index_st_c
-    END INTERFACE
+    TYPE(C_PTR) :: f_ptr
     
+    f_ptr = C_LOC(buf(1)(1:1))
     namelen  = LEN(dset_name)
     
-    errcode = h5tbwrite_field_index_st_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbwrite_field_index_f_string
 
@@ -1061,63 +838,24 @@ CONTAINS
        errcode )
     
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport ::h5tbread_field_index_f_int
-!DEC$endif
-!
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     INTEGER, INTENT(in) :: field_index                               ! index
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
+    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf                 ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
+    TYPE(C_PTR) :: f_ptr
     
-    INTERFACE
-       INTEGER FUNCTION h5tbread_field_index_int_c(loc_id,namelen,dset_name,field_index,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbread_field_index_int_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name                        ! name of the dataset
-         INTEGER, INTENT(in) :: field_index                               ! index
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-       END FUNCTION h5tbread_field_index_int_c
-    END INTERFACE
-    
+    f_ptr = C_LOC(buf(1))
     namelen  = LEN(dset_name)
     
-    errcode = h5tbread_field_index_int_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbread_field_index_f_int
-
-!-------------------------------------------------------------------------
-! Function: h5tbread_field_index_f_c_float
-!
-! Purpose: Reads one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
 
   SUBROUTINE h5tbread_field_index_f_c_float(loc_id,&
        dset_name,&
@@ -1130,63 +868,24 @@ CONTAINS
 
     IMPLICIT NONE
 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbread_field_index_f_c_float
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     INTEGER, INTENT(in) :: field_index                               ! index
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*) :: buf                            ! data buffer
+    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf      ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
-
-    INTERFACE
-       INTEGER FUNCTION h5tbread_field_index_fl_c(loc_id,namelen,dset_name,field_index,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbread_field_index_fl_c')
-         IMPORT :: C_CHAR, C_FLOAT
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name                        ! name of the dataset
-         INTEGER, INTENT(in) :: field_index                               ! index
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*) :: buf                            ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-       END FUNCTION h5tbread_field_index_fl_c
-    END INTERFACE
+    TYPE(C_PTR) :: f_ptr
     
+    f_ptr = C_LOC(buf(1))
     namelen  = LEN(dset_name)
     
-    errcode = h5tbread_field_index_fl_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbread_field_index_f_c_float
-
-!-------------------------------------------------------------------------
-! Function: h5tbread_field_index_f_c_double
-!
-! Purpose: Reads one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
 
   SUBROUTINE h5tbread_field_index_f_c_double(loc_id,&
        dset_name,&
@@ -1198,64 +897,53 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbread_field_index_f_c_double
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     INTEGER, INTENT(in) :: field_index                               ! index
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*) :: buf                ! data buffer
+    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
+    TYPE(C_PTR) :: f_ptr
     
-    INTERFACE
-       INTEGER FUNCTION h5tbread_field_index_dl_c(loc_id,namelen,dset_name,field_index,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbread_field_index_dl_c')
-         IMPORT :: C_CHAR, C_DOUBLE
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name                        ! name of the dataset
-         INTEGER, INTENT(in) :: field_index                               ! index
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*) :: buf                ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-       END FUNCTION h5tbread_field_index_dl_c
-    END INTERFACE
-    
+    f_ptr = C_LOC(buf(1))
     namelen  = LEN(dset_name)
     
-    errcode = h5tbread_field_index_dl_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+         start,nrecords,type_size,f_ptr)
 
   END SUBROUTINE h5tbread_field_index_f_c_double
 
-!-------------------------------------------------------------------------
-! Function: h5tbread_field_index_f_string
-!
-! Purpose: Reads one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 12, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
+  SUBROUTINE h5tbread_field_index_f_c_long_double(loc_id,&
+       dset_name,&
+       field_index,&
+       start,&
+       nrecords,&
+       type_size,&
+       buf,&
+       errcode )
+
+    IMPLICIT NONE
+    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
+    INTEGER, INTENT(in) :: field_index                               ! index
+    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
+    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
+    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
+    REAL(KIND=C_LONG_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
+    INTEGER :: errcode                                               ! error code
+    INTEGER(size_t) :: namelen                                       ! name length
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1))
+    namelen  = LEN(dset_name)
+    
+    errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+         start,nrecords,type_size,f_ptr)
+
+  END SUBROUTINE h5tbread_field_index_f_c_long_double
 
   SUBROUTINE h5tbread_field_index_f_string(loc_id,&
        dset_name,&
@@ -1267,52 +955,27 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbread_field_index_f_string
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     INTEGER, INTENT(in) :: field_index                               ! index
     INTEGER(hsize_t), INTENT(in) :: start                            ! start record
     INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
     INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
+    CHARACTER(LEN=*), INTENT(in), DIMENSION(*), TARGET :: buf        ! data buffer
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
+    TYPE(C_PTR) :: f_ptr
     
-    INTERFACE
-       INTEGER FUNCTION h5tbread_field_index_st_c(loc_id,namelen,dset_name,field_index,&
-            start,nrecords,type_size,buf) &
-            BIND(C,NAME='h5tbread_field_index_st_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         INTEGER, INTENT(in) :: field_index                               ! index
-         INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-         INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-         INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: buf ! data buffer
-         INTEGER :: errcode                                               ! error code
-         INTEGER(size_t) :: namelen                                       ! name length
-       END FUNCTION h5tbread_field_index_st_c
-    END INTERFACE
-
+    f_ptr = C_LOC(buf(1)(1:1))
     namelen  = LEN(dset_name)
     
-    errcode = h5tbread_field_index_st_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,buf)
+    errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
+         start,nrecords,type_size,f_ptr)
     
   END SUBROUTINE h5tbread_field_index_f_string
 
 !-------------------------------------------------------------------------
-! Function: h5tbinsert_field_f_int
+! Function: h5tbinsert_field_f
 !
 ! Purpose: Inserts one field
 !
@@ -1334,64 +997,26 @@ CONTAINS
        buf,&
        errcode )
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbinsert_field_f_int
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
     INTEGER, INTENT(in) :: field_index                               ! field_index
-    INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
+    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf                 ! data buffer
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
     INTEGER :: errcode                                               ! error code
-
-    INTERFACE
-       INTEGER FUNCTION h5tbinsert_field_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            field_type,field_index,buf) &
-            BIND(C,NAME='h5tbinsert_field_int_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name                        ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name                       ! name of the field
-         INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
-         INTEGER, INTENT(in) :: field_index                               ! field_index
-         INTEGER, INTENT(in), DIMENSION(*) :: buf                         ! data buffer
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length length
-       END FUNCTION h5tbinsert_field_int_c
-    END INTERFACE
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1))
 
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbinsert_field_int_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         field_type,field_index,buf)
+    errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         field_type,field_index,f_ptr)
 
   END SUBROUTINE h5tbinsert_field_f_int
-  
-!-------------------------------------------------------------------------
-! Function: h5tbinsert_field_f_c_float
-!
-! Purpose: Inserts one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 13, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
 
   SUBROUTINE h5tbinsert_field_f_c_float(loc_id,&
        dset_name,&
@@ -1401,66 +1026,26 @@ CONTAINS
        buf,&
        errcode )
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbinsert_field_f_c_float
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
     INTEGER, INTENT(in) :: field_index                               ! field_index
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*) :: buf                            ! data buffer
+    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf      ! data buffer
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
     INTEGER :: errcode                                               ! error code
-
-    INTERFACE
-       INTEGER FUNCTION h5tbinsert_field_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            field_type,field_index,buf) &
-            BIND(C,NAME='h5tbinsert_field_fl_c')
-         IMPORT :: C_CHAR, C_FLOAT
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
-         INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
-         INTEGER, INTENT(in) :: field_index                               ! field_index
-         REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*) :: buf                            ! data buffer
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length length
-       END FUNCTION h5tbinsert_field_fl_c
-    END INTERFACE
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1))
 
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbinsert_field_fl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         field_type,field_index,buf)
+    errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         field_type,field_index,f_ptr)
     
   END SUBROUTINE h5tbinsert_field_f_c_float
-
-
-
-!-------------------------------------------------------------------------
-! Function: h5tbinsert_field_f_c_double
-!
-! Purpose: Inserts one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 13, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
 
   SUBROUTINE h5tbinsert_field_f_c_double(loc_id,&
        dset_name,&
@@ -1470,65 +1055,55 @@ CONTAINS
        buf,&
        errcode )
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbinsert_field_f_c_double
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
     INTEGER, INTENT(in) :: field_index                               ! field_index
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*) :: buf                ! data buffer
+    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
     INTEGER :: errcode                                               ! error code
-
-
-    INTERFACE
-       INTEGER FUNCTION h5tbinsert_field_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            field_type,field_index,buf) &
-            BIND(C,NAME='h5tbinsert_field_dl_c')
-         IMPORT :: C_CHAR, C_DOUBLE
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
-         INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
-         INTEGER, INTENT(in) :: field_index                               ! field_index
-         REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*) :: buf             ! data buffer
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length length
-       END FUNCTION h5tbinsert_field_dl_c
-    END INTERFACE
+    TYPE(C_PTR) :: f_ptr
     
+    f_ptr = C_LOC(buf(1))
+
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
  
-    errcode = h5tbinsert_field_dl_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         field_type,field_index,buf)
+    errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         field_type,field_index,f_ptr)
     
   END SUBROUTINE h5tbinsert_field_f_c_double
 
-!-------------------------------------------------------------------------
-! Function: h5tbinsert_field_f_string
-!
-! Purpose: Inserts one field
-!
-! Programmer: pvn@ncsa.uiuc.edu
-!
-! Date: October 13, 2004
-!
-! Comments:
-!
-! Modifications:
-!
-!-------------------------------------------------------------------------
+  SUBROUTINE h5tbinsert_field_f_c_long_double(loc_id,&
+       dset_name,&
+       field_name,&
+       field_type,&
+       field_index,&
+       buf,&
+       errcode )
+    IMPLICIT NONE
+    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
+    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
+    INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
+    INTEGER, INTENT(in) :: field_index                               ! field_index
+    REAL(KIND=C_LONG_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
+    INTEGER(size_t) :: namelen                                       ! name length
+    INTEGER(size_t) :: namelen1                                      ! name length
+    INTEGER :: errcode                                               ! error code
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1))
+
+    namelen  = LEN(dset_name)
+    namelen1 = LEN(field_name)
+ 
+    errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         field_type,field_index,f_ptr)
+    
+  END SUBROUTINE h5tbinsert_field_f_c_long_double
 
   SUBROUTINE h5tbinsert_field_f_string(loc_id,&
        dset_name,&
@@ -1538,47 +1113,24 @@ CONTAINS
        buf,&
        errcode )
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbinsert_field_f_string
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
     INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
     INTEGER, INTENT(in) :: field_index                               ! field_index
-    CHARACTER(LEN=*), INTENT(in), DIMENSION(*) :: buf                ! data buffer
+    CHARACTER(LEN=*), INTENT(in), DIMENSION(*), TARGET :: buf        ! data buffer
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
     INTEGER :: errcode                                               ! error code
-
-    INTERFACE
-       INTEGER FUNCTION h5tbinsert_field_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
-            field_type,field_index,buf) &
-            BIND(C,NAME='h5tbinsert_field_st_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
-         IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name    ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: field_name   ! name of the field
-         INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
-         INTEGER, INTENT(in) :: field_index                               ! field_index
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: buf ! data buffer
-         INTEGER(size_t) :: namelen                                       ! name length
-         INTEGER(size_t) :: namelen1                                      ! name length length
-       END FUNCTION h5tbinsert_field_st_c
-    END INTERFACE
+    TYPE(C_PTR) :: f_ptr
+    
+    f_ptr = C_LOC(buf(1)(1:1))
     
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
     
-    errcode = h5tbinsert_field_st_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         field_type,field_index,buf)
+    errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
+         field_type,field_index,f_ptr)
     
   END SUBROUTINE h5tbinsert_field_f_string
 
@@ -1602,14 +1154,6 @@ CONTAINS
        field_name,&
        errcode )
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbdelete_field_f
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
@@ -1665,14 +1209,6 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbget_table_info_f
-!DEC$endif
-!
-
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER(hsize_t), INTENT(inout):: nfields          ! nfields
@@ -1729,12 +1265,6 @@ CONTAINS
        errcode, maxlen_out )
     
     IMPLICIT NONE
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_HL_DLL)
-!DEC$attributes dllexport :: h5tbget_field_info_f
-!DEC$endif
-!
     INTEGER(hid_t),   INTENT(in) :: loc_id                                ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                             ! name of the dataset
     INTEGER(hsize_t), INTENT(in) :: nfields                               ! nfields

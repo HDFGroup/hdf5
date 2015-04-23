@@ -21,7 +21,6 @@ PROGRAM table_test
 
   CALL test_table1()
 
-
 END PROGRAM table_test
 
 

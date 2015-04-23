@@ -1361,8 +1361,8 @@ SUBROUTINE test_attributes()
   INTEGER, DIMENSION(DIM1)          :: bufr2           ! Data buffer
   REAL(C_FLOAT), DIMENSION(DIM1)             :: buf3            ! Data buffer
   REAL(C_FLOAT), DIMENSION(DIM1)             :: bufr3           ! Data buffer
-  DOUBLE PRECISION, DIMENSION(DIM1) :: buf4            ! Data buffer
-  DOUBLE PRECISION, DIMENSION(DIM1) :: bufr4           ! Data buffer
+  REAL(C_DOUBLE), DIMENSION(DIM1) :: buf4            ! Data buffer
+  REAL(C_DOUBLE), DIMENSION(DIM1) :: bufr4           ! Data buffer
   INTEGER        :: errcode                            ! Error flag
   INTEGER        :: i, n                               ! general purpose integer
   INTEGER(SIZE_T) size                                 ! size of attribute array

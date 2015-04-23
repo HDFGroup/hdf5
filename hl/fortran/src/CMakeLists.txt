@@ -2,6 +2,16 @@ cmake_minimum_required (VERSION 3.1.0)
 PROJECT(HDF5_HL_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
+# configure def file for shared libs on windows
+if (WIN32)
+  if (BUILD_SHARED_LIBS)
+    if (MSVC)
+      configure_file (${HDF5_HL_F90_SRC_SOURCE_DIR}/hdf5_hl_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_hl_fortrandll.def @ONLY)
+    endif (MSVC)
+  endif (BUILD_SHARED_LIBS)
+endif (WIN32)
+
+#-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (
