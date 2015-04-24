@@ -53,7 +53,7 @@ PROGRAM test_kind
   IMPLICIT NONE
   INTEGER :: i, j, ii, ir, last, ikind_numbers(10), rkind_numbers(10)
   INTEGER :: ji, jr, jd
-#ifdef HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   REAL(KIND=C_LONG_DOUBLE) :: c_longdble
 #endif
   REAL(KIND=C_DOUBLE) :: c_dble
@@ -249,7 +249,7 @@ WRITE(*,'(40(A,/))') &
      j = rkind_numbers(i)
      WRITE(*, "("" CALL r"", i2.2,""()"")") j
   ENDDO
-#ifdef HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
 
 # ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
   sizeof_var = STORAGE_SIZE(c_longdble, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
