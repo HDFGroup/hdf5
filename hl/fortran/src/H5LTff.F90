@@ -58,7 +58,7 @@ MODULE h5lt
      MODULE PROCEDURE h5ltmake_dataset_f_c_double5
      MODULE PROCEDURE h5ltmake_dataset_f_c_double6
      MODULE PROCEDURE h5ltmake_dataset_f_c_double7
-#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5ltmake_dataset_f_c_long_double1
      MODULE PROCEDURE h5ltmake_dataset_f_c_long_double2
      MODULE PROCEDURE h5ltmake_dataset_f_c_long_double3
@@ -91,7 +91,7 @@ MODULE h5lt
      MODULE PROCEDURE h5ltread_dataset_f_c_double5
      MODULE PROCEDURE h5ltread_dataset_f_c_double6
      MODULE PROCEDURE h5ltread_dataset_f_c_double7
-#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5ltread_dataset_f_c_long_double1
      MODULE PROCEDURE h5ltread_dataset_f_c_long_double2
      MODULE PROCEDURE h5ltread_dataset_f_c_long_double3
@@ -127,7 +127,7 @@ MODULE h5lt
      MODULE PROCEDURE h5ltmake_dataset_c_double_f_5
      MODULE PROCEDURE h5ltmake_dataset_c_double_f_6
      MODULE PROCEDURE h5ltmake_dataset_c_double_f_7
-#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5ltmake_dataset_c_long_double_f_1
      MODULE PROCEDURE h5ltmake_dataset_c_long_double_f_2
      MODULE PROCEDURE h5ltmake_dataset_c_long_double_f_3
@@ -153,7 +153,7 @@ MODULE h5lt
      MODULE PROCEDURE h5ltmake_dataset_c_double_f_5
      MODULE PROCEDURE h5ltmake_dataset_c_double_f_6
      MODULE PROCEDURE h5ltmake_dataset_c_double_f_7
-#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5ltmake_dataset_c_long_double_f_1
      MODULE PROCEDURE h5ltmake_dataset_c_long_double_f_2
      MODULE PROCEDURE h5ltmake_dataset_c_long_double_f_3
@@ -189,7 +189,7 @@ MODULE h5lt
      MODULE PROCEDURE h5ltread_dataset_c_double_f_5
      MODULE PROCEDURE h5ltread_dataset_c_double_f_6
      MODULE PROCEDURE h5ltread_dataset_c_double_f_7
-#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5ltread_dataset_c_long_double_f_1
      MODULE PROCEDURE h5ltread_dataset_c_long_double_f_2
      MODULE PROCEDURE h5ltread_dataset_c_long_double_f_3
@@ -215,7 +215,7 @@ MODULE h5lt
      MODULE PROCEDURE h5ltread_dataset_c_double_f_5
      MODULE PROCEDURE h5ltread_dataset_c_double_f_6
      MODULE PROCEDURE h5ltread_dataset_c_double_f_7
-#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
      MODULE PROCEDURE h5ltread_dataset_c_long_double_f_1
      MODULE PROCEDURE h5ltread_dataset_c_long_double_f_2
      MODULE PROCEDURE h5ltread_dataset_c_long_double_f_3
@@ -848,7 +848,7 @@ CONTAINS
 
   END SUBROUTINE h5ltmake_dataset_f_c_double7
 
-#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   !-------------------------------------------------------------------------
   ! Function(s): h5ltmake_dataset_f_c_long_double(1-7)
   !
@@ -1606,7 +1606,7 @@ CONTAINS
 
   END SUBROUTINE h5ltread_dataset_f_c_double7
 
-#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   !-------------------------------------------------------------------------
   ! Function(s): h5ltread_dataset_f_c_long_double(1-7)
   !
@@ -2309,7 +2309,7 @@ CONTAINS
 
   END SUBROUTINE h5ltmake_dataset_c_double_f_7
 
-#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   !-------------------------------------------------------------------------
   ! Function(s): h5ltmake_dataset_c_long_double_f_(1-7)
   !
@@ -2974,7 +2974,7 @@ CONTAINS
 
   END SUBROUTINE h5ltread_dataset_c_double_f_7
 
-#ifdef FORTRAN_HAVE_C_LONG_DOUBLE
+#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   !-------------------------------------------------------------------------
   ! Function9s): h5ltread_dataset_c_long_double_f_(1-7)
   !
