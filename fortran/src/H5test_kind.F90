@@ -49,9 +49,17 @@
 #include "H5config_f.inc"
 
 PROGRAM test_kind
+  USE, INTRINSIC :: ISO_C_BINDING
   IMPLICIT NONE
   INTEGER :: i, j, ii, ir, last, ikind_numbers(10), rkind_numbers(10)
   INTEGER :: ji, jr, jd
+#ifdef HAVE_C_LONG_DOUBLE
+  REAL(KIND=C_LONG_DOUBLE) :: c_longdble
+#endif
+  REAL(KIND=C_DOUBLE) :: c_dble
+  REAL(KIND=C_FLOAT) :: c_flt
+  INTEGER :: sizeof_var
+
   last = -1
   ii = 0
 
@@ -225,7 +233,8 @@ WRITE(*,'(40(A,/))') &
 
   WRITE(*,*) "PROGRAM H5test_kind"
   WRITE(*,*) "USE H5test_kind_mod"
-  WRITE(*,*) "WRITE(*,*) "" /*generating header file*/ """
+  WRITE(*,*) "CHARACTER(LEN=2) :: jchr2"
+  WRITE(*,*) "WRITE(*,*) "" /*generated header file*/ """
   ji = 0
   WRITE(*, "("" CALL i"", i2.2,""()"")") ji
   jr = 0
@@ -240,6 +249,43 @@ WRITE(*,'(40(A,/))') &
      j = rkind_numbers(i)
      WRITE(*, "("" CALL r"", i2.2,""()"")") j
   ENDDO
+#ifdef HAVE_C_LONG_DOUBLE
+
+# ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+  sizeof_var = STORAGE_SIZE(c_longdble, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+# else
+  sizeof_var = SIZEOF(c_longdble)
+# endif
+
+  WRITE(*,'(A,I0)')" WRITE(jchr2,'(I2)') ", C_LONG_DOUBLE
+  WRITE(*,'(A)')' WRITE(*,*) "#define C_LONG_DOUBLE_KIND "'//"//ADJUSTL(jchr2)"
+  WRITE(*,'(A,I0)')" WRITE(jchr2,'(I2)') ", sizeof_var
+  WRITE(*,'(A)')' WRITE(*,*) "#define C_LONG_DOUBLE_SIZEOF "'//"//ADJUSTL(jchr2)"
+#else
+  WRITE(*,'(A)')' WRITE(*,*) "#define C_LONG_DOUBLE_KIND -1"'
+  WRITE(*,'(A)')' WRITE(*,*) "#define C_LONG_DOUBLE_SIZEOF -1"'
+#endif
+
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+  sizeof_var = STORAGE_SIZE(c_dble, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+#else
+  sizeof_var = SIZEOF(c_dble)
+#endif
+  WRITE(*,'(A,I0)')" WRITE(jchr2,'(I2)') ", C_DOUBLE
+  WRITE(*,'(A)')' WRITE(*,*) "#define C_DOUBLE_KIND "'//"//ADJUSTL(jchr2)"
+  WRITE(*,'(A,I0)')" WRITE(jchr2,'(I2)') ", sizeof_var
+  WRITE(*,'(A)')' WRITE(*,*) "#define C_DOUBLE_SIZEOF "'//"//ADJUSTL(jchr2)"
+
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+  sizeof_var = STORAGE_SIZE(c_flt, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+#else
+  sizeof_var = SIZEOF(c_flt)
+#endif
+  WRITE(*,'(A,I0)')" WRITE(jchr2,'(I2)') ", C_FLOAT
+  WRITE(*,'(A)')' WRITE(*,*) "#define C_FLOAT_KIND "'//"//ADJUSTL(jchr2)"
+  WRITE(*,'(A,I0)')" WRITE(jchr2,'(I2)') ", sizeof_var
+  WRITE(*,'(A)')' WRITE(*,*) "#define C_FLOAT_SIZEOF "'//"//ADJUSTL(jchr2)"
+
   WRITE(*,*) "END PROGRAM H5test_kind"
 
 END PROGRAM test_kind
