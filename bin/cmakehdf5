@@ -149,7 +149,7 @@ INSTALL_HDF5()
 	    # copy the contents to the install location
 	    cp -R "/Volumes/$basename/HDF_Group" hdf5
 	    # unmount the DMG file
-	    hdiutil umount $install_file
+	    hdiutil unmount /Volumes/$basename
 	    ;;
 	*) 		# unknown/unsupported OS.
 	    echo "INSTALL_HDF5: Error--unknown/unsupported OS($myos)"
