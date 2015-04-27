@@ -1755,6 +1755,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
     size_t      cd_nelmts;      /* filter client number of values */
     size_t      cd_num;         /* filter client data counter */
     char        f_name[256];    /* filter/file name */
+    char        dset_name[256];    /* filter/file name */
     char        s[64];          /* temporary string buffer */
     off_t       f_offset;       /* offset in external file */
     hsize_t     f_size;         /* bytes used in external file */
@@ -1856,8 +1857,12 @@ dataset_list2(hid_t dset, const char UNUSED *name)
                         for (next = 0; next < (unsigned) vmaps; next++) {
                             ssize_out = H5Pget_virtual_filename(dcpl, next, NULL, 0);
                             H5Pget_virtual_filename(dcpl, next, f_name, sizeof(f_name));
+                            ssize_out = H5Pget_virtual_dsetname(dcpl, next, NULL, 0);
+                            H5Pget_virtual_dsetname(dcpl, next, dset_name, sizeof(dset_name));
                             h5tools_str_append(&buffer, "    %-10s        ", " ");
                             print_string(&buffer, f_name, TRUE);
+                            h5tools_str_append(&buffer, "   ");
+                            print_string(&buffer, dset_name, TRUE);
                             h5tools_str_append(&buffer, "\n");
                         }
                         h5tools_str_append(&buffer, "     %-10s}\n", " ");
