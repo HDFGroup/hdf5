@@ -5301,7 +5301,6 @@ h5pget_file_image_c(hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len_ptr)
 }
 
 #ifdef H5_HAVE_PARALLEL
-
 /****if* H5Pf/h5pset_fapl_mpio_c
  * NAME
  *        h5pset_fapl_mpio_c

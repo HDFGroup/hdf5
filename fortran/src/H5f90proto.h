@@ -18,6 +18,7 @@
 #define _H5f90proto_H
 
 #include "H5public.h"
+#include "H5f90.h"
 
 H5_FCDLL char * HD5f2cstring (_fcd fdesc, size_t len);
 H5_FCDLL void HD5packFstring(char *src, char *dest, size_t len);
@@ -405,10 +406,6 @@ H5_FCDLL int_f h5pget_external_count_c (hid_t_f *prp_id, int_f* count);
 H5_FCDLL int_f h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, off_t_f* offset, hsize_t_f*bytes);
 H5_FCDLL int_f h5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right);
 H5_FCDLL int_f h5pset_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right);
-H5_FCDLL int_f h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
-H5_FCDLL int_f h5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
-H5_FCDLL int_f h5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
-H5_FCDLL int_f h5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
 H5_FCDLL int_f h5pset_fclose_degree_c(hid_t_f *fapl, int_f *degree);
 H5_FCDLL int_f h5pget_fclose_degree_c(hid_t_f *fapl, int_f *degree);
 H5_FCDLL int_f h5pget_buffer_c(hid_t_f *plist, hsize_t_f *size);
@@ -489,7 +486,13 @@ H5_FCDLL int_f h5pset_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks);
 H5_FCDLL int_f h5pget_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks);
 H5_FCDLL int_f h5pset_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nbytes, real_f *rdcc_w0);
 H5_FCDLL int_f h5pget_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nbytes, real_f *rdcc_w0);
+#ifdef H5_HAVE_PARALLEL
 H5_FCDLL int_f h5pget_mpio_actual_io_mode_c(hid_t_f *dxpl_id, int_f *actual_io_mode);
+H5_FCDLL int_f h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
+H5_FCDLL int_f h5pset_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);
+H5_FCDLL int_f h5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
+H5_FCDLL int_f h5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
+#endif
 /*
  * Functions frome H5Rf.c
  */

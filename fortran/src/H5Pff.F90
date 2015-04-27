@@ -29,7 +29,7 @@
 !  This is needed for Windows based operating systems.
 !*****
 
-#include "H5config_f.inc"
+#include <H5config_f.inc>
 
 MODULE H5P
 
@@ -43,11 +43,6 @@ MODULE H5P
 
   INTERFACE h5pset_fill_value_f
      MODULE PROCEDURE h5pset_fill_value_integer
-     MODULE PROCEDURE h5pset_fill_value_c_float
-     MODULE PROCEDURE h5pset_fill_value_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-     MODULE PROCEDURE h5pset_fill_value_c_long_double
-#endif
      MODULE PROCEDURE h5pset_fill_value_char
      ! Recommended procedure:
      MODULE PROCEDURE h5pset_fill_value_ptr
@@ -56,11 +51,6 @@ MODULE H5P
 
   INTERFACE h5pget_fill_value_f
      MODULE PROCEDURE h5pget_fill_value_integer
-     MODULE PROCEDURE h5pget_fill_value_c_float
-     MODULE PROCEDURE h5pget_fill_value_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-     MODULE PROCEDURE h5pget_fill_value_c_long_double
-#endif
      MODULE PROCEDURE h5pget_fill_value_char
      ! Recommended procedure:
      MODULE PROCEDURE h5pget_fill_value_ptr
@@ -69,11 +59,6 @@ MODULE H5P
 
   INTERFACE h5pset_f
      MODULE PROCEDURE h5pset_integer
-     MODULE PROCEDURE h5pset_c_float
-     MODULE PROCEDURE h5pset_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-     MODULE PROCEDURE h5pset_c_long_double
-#endif
      MODULE PROCEDURE h5pset_char
      ! Recommended procedure:
      MODULE PROCEDURE h5pset_ptr
@@ -82,33 +67,19 @@ MODULE H5P
 
   INTERFACE h5pget_f
      MODULE PROCEDURE h5pget_integer
-     MODULE PROCEDURE h5pget_c_float
-     MODULE PROCEDURE h5pget_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-     MODULE PROCEDURE h5pget_c_long_double
-#endif
+     MODULE PROCEDURE h5pget_char
      ! Recommended procedure:
      MODULE PROCEDURE h5pget_ptr
   END INTERFACE
 
   INTERFACE h5pregister_f
      MODULE PROCEDURE h5pregister_integer
-     MODULE PROCEDURE h5pregister_c_float
-     MODULE PROCEDURE h5pregister_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-     MODULE PROCEDURE h5pregister_c_long_double
-#endif
      ! Recommended procedure:
      MODULE PROCEDURE h5pregister_ptr
   END INTERFACE
 
   INTERFACE h5pinsert_f
      MODULE PROCEDURE h5pinsert_integer
-     MODULE PROCEDURE h5pinsert_c_float
-     MODULE PROCEDURE h5pinsert_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-     MODULE PROCEDURE h5pinsert_c_long_double
-#endif
      MODULE PROCEDURE h5pinsert_char
      ! Recommended procedure:
      MODULE PROCEDURE h5pinsert_ptr
@@ -6275,101 +6246,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_fill_value_integer
 
-
-  SUBROUTINE h5pset_fill_value_c_float(prp_id, type_id, fillvalue, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
-                                          ! of fillvalue datatype
-                                          ! (in memory)
-    REAL(KIND=C_FLOAT), INTENT(IN), TARGET :: fillvalue ! Fillvalue
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(fillvalue)
-    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
-
-  END SUBROUTINE h5pset_fill_value_c_float
-
-  SUBROUTINE h5pset_fill_value_c_double(prp_id, type_id, fillvalue, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
-                                          ! of fillvalue datatype
-                                          ! (in memory)
-    REAL(KIND=C_DOUBLE), INTENT(IN), TARGET :: fillvalue   ! Fillvalue
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(fillvalue)
-    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
-  END SUBROUTINE h5pset_fill_value_c_double
-
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-  SUBROUTINE h5pset_fill_value_c_long_double(prp_id, type_id, fillvalue, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
-                                          ! of fillvalue datatype
-                                          ! (in memory)
-    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), TARGET :: fillvalue   ! Fillvalue
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(fillvalue)
-    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
-  END SUBROUTINE h5pset_fill_value_c_long_double
-#endif
-
-  SUBROUTINE h5pget_fill_value_c_float(prp_id, type_id, fillvalue, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
-                                          ! of fillvalue datatype
-                                          ! (in memory)
-    REAL(KIND=C_FLOAT), INTENT(OUT), TARGET :: fillvalue  ! Fillvalue
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-    TYPE(C_PTR) :: f_ptr                    ! C address
-
-    f_ptr = C_LOC(fillvalue)
-    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
-
-  END SUBROUTINE h5pget_fill_value_c_float
-
-  SUBROUTINE h5pget_fill_value_c_double(prp_id, type_id, fillvalue, &
-       hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
-                                          ! of fillvalue datatype
-                                          ! (in memory)
-    REAL(KIND=C_DOUBLE), INTENT(IN), TARGET :: fillvalue   ! Fillvalue
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(fillvalue)
-    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
-
-  END SUBROUTINE h5pget_fill_value_c_double
-
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-  SUBROUTINE h5pget_fill_value_c_long_double(prp_id, type_id, fillvalue, &
-       hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
-                                          ! of fillvalue datatype
-                                          ! (in memory)
-    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), TARGET :: fillvalue   ! Fillvalue
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(fillvalue)
-    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)
-
-  END SUBROUTINE h5pget_fill_value_c_long_double
-#endif
-
   SUBROUTINE h5pset_fill_value_char(prp_id, type_id, fillvalue, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
@@ -6578,101 +6454,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pset_integer
 
-  SUBROUTINE h5pset_c_float(prp_id, name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name ! Name of property to modify
-    REAL(KIND=C_FLOAT),   INTENT(IN), TARGET :: value  ! Property value
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code
-    INTEGER :: name_len
-    TYPE(C_PTR) :: f_ptr
-
-    f_ptr = C_LOC(value)
-
-    name_len = LEN(name)
-    hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
-
-  END SUBROUTINE h5pset_c_float
-
-!
-!****s* H5P (F90)/h5pset_c_double
-!
-! NAME
-!  h5pset_c_double
-!
-! PURPOSE
-!  Sets a property list value
-!
-! INPUTS
-!  prp_id 	 - iproperty list identifier to modify
-!  name 	 - name of property to modify
-!  value 	 - value to set property to
-! OUTPUTS
-!  hdferr:	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 9, 2002
-! SOURCE
-  SUBROUTINE h5pset_c_double(prp_id, name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name    ! Name of property to modify
-    REAL(KIND=C_DOUBLE),   INTENT(IN), TARGET :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-!*****
-    INTEGER :: name_len
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(value)
-
-    name_len = LEN(name)
-    hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
-
-  END SUBROUTINE h5pset_c_double
-
-
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-!
-!****s* H5P (F90)/h5pset_c_long_double
-!
-! NAME
-!  h5pset_c_long_double
-!
-! PURPOSE
-!  Sets a property list value
-!
-! INPUTS
-!  prp_id 	 - iproperty list identifier to modify
-!  name 	 - name of property to modify
-!  value 	 - value to set property to
-! OUTPUTS
-!  hdferr:	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 9, 2002
-! SOURCE
-  SUBROUTINE h5pset_c_long_double(prp_id, name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name    ! Name of property to modify
-    REAL(KIND=C_LONG_DOUBLE),   INTENT(IN), TARGET :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-!*****
-    INTEGER :: name_len
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(value)
-
-    name_len = LEN(name)
-    hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
-
-  END SUBROUTINE h5pset_c_long_double
-#endif
-
   SUBROUTINE h5pset_char(prp_id, name, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
@@ -6756,97 +6537,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_integer
 
-  SUBROUTINE h5pget_c_float(prp_id, name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name ! Name of property to modify
-    REAL(KIND=C_FLOAT),   INTENT(OUT), TARGET :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code
-    INTEGER :: name_len
-    TYPE(C_PTR) :: f_ptr
-
-    f_ptr = C_LOC(value)
-
-    name_len = LEN(name)
-    hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
-  END SUBROUTINE h5pget_c_float
-
-!****s* H5P (F90)/h5pget_c_double
-!
-! NAME
-!  h5pget_c_double
-!
-! PURPOSE
-!  Gets a property list value
-!
-! INPUTS
-!  prp_id 	 - iproperty list identifier to modify
-!  name 	 - name of property to modify
-! OUTPUTS
-!  value 	 - value of property
-!  hdferr	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 9, 2002
-!
-! SOURCE
-  SUBROUTINE h5pget_c_double(prp_id, name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name     ! Name of property to modify
-    REAL(KIND=C_DOUBLE),   INTENT(OUT), TARGET :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr           ! Error code
-!*****
-    INTEGER :: name_len
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(value)
-
-    name_len = LEN(name)
-    hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
-  END SUBROUTINE h5pget_c_double
-
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-!****s* H5P (F90)/h5pget_c_long_double
-!
-! NAME
-!  h5pget_c_long_double
-!
-! PURPOSE
-!  Gets a property list value
-!
-! INPUTS
-!  prp_id 	 - iproperty list identifier to modify
-!  name 	 - name of property to modify
-! OUTPUTS
-!  value 	 - value of property
-!  hdferr	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 9, 2002
-!
-! SOURCE
-  SUBROUTINE h5pget_c_long_double(prp_id, name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name     ! Name of property to modify
-    REAL(KIND=C_LONG_DOUBLE),   INTENT(OUT), TARGET :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr           ! Error code
-!*****
-    INTEGER :: name_len
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(value)
-
-    name_len = LEN(name)
-    hdferr = h5pget_c(prp_id, name, name_len, f_ptr)
-  END SUBROUTINE h5pget_c_long_double
-#endif
-
   SUBROUTINE h5pget_char(prp_id, name, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id   ! Property list identifier
@@ -6878,7 +6568,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     DEALLOCATE(chr)
 
   END SUBROUTINE h5pget_char
-
 
 !
 !****s* H5P (F03)/h5pset_f_F03
@@ -7009,110 +6698,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pregister_integer
 
-  SUBROUTINE h5pregister_c_float(class, name, size, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
-    INTEGER(SIZE_T), INTENT(IN) :: size   ! size of the property value
-    REAL(KIND=C_FLOAT),   INTENT(IN), TARGET :: value   ! Property value
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-    INTEGER :: name_len
-    TYPE(C_PTR) :: f_ptr
-
-    f_ptr = C_LOC(value)
-
-    name_len = LEN(name)
-    hdferr = h5pregister_c(class, name, name_len, size, f_ptr)
-
-  END SUBROUTINE h5pregister_c_float
-
-!
-!****s* H5P (F90)/h5pregister_c_double
-!
-! NAME
-!  h5pregister_c_double
-!
-! PURPOSE
-!  Registers a permanent property with a property list class.
-!
-! INPUTS
-!  class 	 - property list class to register
-!                  permanent property within
-!  name 	 - name of property to register
-!  size 	 - size of property in bytes
-!  value 	 - default value for property in newly
-!                  created property lists
-! OUTPUTS
-!  hdferr	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 10, 2002
-!
-! SOURCE
-  SUBROUTINE h5pregister_c_double(class, name, size, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: class     ! Property list class identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name    ! Name of property to register
-    INTEGER(SIZE_T), INTENT(IN) :: size     ! Size of the property value
-    REAL(KIND=C_DOUBLE),   INTENT(IN), TARGET :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-!*****
-    INTEGER :: name_len
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(value)
-
-    name_len = LEN(name)
-    hdferr = h5pregister_c(class, name, name_len, size, f_ptr)
-
-  END SUBROUTINE h5pregister_c_double
-
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-!
-!****s* H5P/h5pregister_c_long_double
-!
-! NAME
-!  h5pregister_c_long_double
-!
-! PURPOSE
-!  Registers a permanent property with a property list class.
-!
-! INPUTS
-!  class 	 - property list class to register
-!                  permanent property within
-!  name 	 - name of property to register
-!  size 	 - size of property in bytes
-!  value 	 - default value for property in newly
-!                  created property lists
-! OUTPUTS
-!  hdferr	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 10, 2002
-!
-! SOURCE
-  SUBROUTINE h5pregister_c_long_double(class, name, size, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: class     ! Property list class identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name    ! Name of property to register
-    INTEGER(SIZE_T), INTENT(IN) :: size     ! Size of the property value
-    REAL(KIND=C_LONG_DOUBLE),   INTENT(IN), TARGET :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-!*****
-    INTEGER :: name_len
-    TYPE(C_PTR) :: f_ptr                  ! C address
-
-    f_ptr = C_LOC(value)
-
-    name_len = LEN(name)
-    hdferr = h5pregister_c(class, name, name_len, size, f_ptr)
-
-  END SUBROUTINE h5pregister_c_long_double
-#endif
 
   SUBROUTINE h5pregister_char(class, name, size, value, hdferr)
     IMPLICIT NONE
@@ -7239,107 +6824,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     name_len = LEN(name)
     hdferr = h5pinsert_c(plist, name , name_len, size, f_ptr)
   END SUBROUTINE h5pinsert_integer
-
-  SUBROUTINE h5pinsert_c_float(plist, name, size, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert
-    INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value
-    REAL(KIND=C_FLOAT),   INTENT(IN), TARGET :: value   ! Property value
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-    INTEGER :: name_len
-    TYPE(c_ptr) :: f_ptr
-
-    f_ptr = c_loc(value)
-
-    name_len = LEN(name)
-    hdferr = h5pinsert_c(plist, name , name_len, size, f_ptr)
-
-  END SUBROUTINE h5pinsert_c_float
-
-!****s* H5P (F90)/h5pinsert_c_double
-!
-! NAME
-!
-!  h5pinsert_c_double
-!
-! PURPOSE
-!  Registers a temporary property with a property list class.
-!
-! INPUTS
-!  plist 	 - property list identifier
-!                  permanent property within
-!  name 	 - name of property to insert
-!  size 	 - size of property in bytes
-!  value 	 - initial value for the property
-! OUTPUTS
-!  hdferr	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 10, 2002
-! SOURCE
-  SUBROUTINE h5pinsert_c_double(plist, name, size, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert
-    INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value
-    REAL(KIND=C_DOUBLE), INTENT(IN), TARGET :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-!*****
-    INTEGER :: name_len
-    TYPE(c_ptr) :: f_ptr
-
-    f_ptr = c_loc(value)
-
-    name_len = LEN(name)
-    hdferr = h5pinsert_c(plist, name , name_len, size, f_ptr)
-
-  END SUBROUTINE h5pinsert_c_double
-
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-!****s* H5P (F90)/h5pinsert_c_long_double
-!
-! NAME
-!
-!  h5pinsert_c_long_double
-!
-! PURPOSE
-!  Registers a temporary property with a property list class.
-!
-! INPUTS
-!  plist 	 - property list identifier
-!                  permanent property within
-!  name 	 - name of property to insert
-!  size 	 - size of property in bytes
-!  value 	 - initial value for the property
-! OUTPUTS
-!  hdferr	 - error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  October 10, 2002
-! SOURCE
-  SUBROUTINE h5pinsert_c_long_double(plist, name, size, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier
-    CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert
-    INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value
-    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), TARGET :: value ! Property value
-    INTEGER, INTENT(OUT) :: hdferr        ! Error code
-!*****
-    INTEGER :: name_len
-    TYPE(c_ptr) :: f_ptr
-
-    f_ptr = c_loc(value)
-
-    name_len = LEN(name)
-    hdferr = h5pinsert_c(plist, name , name_len, size, f_ptr)
-
-  END SUBROUTINE h5pinsert_c_long_double
-#endif
 
   SUBROUTINE h5pinsert_char(plist, name, size, value, hdferr)
     IMPLICIT NONE
@@ -7612,9 +7096,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_file_image_f
 
 ! Fortran interfaces for H5P functions needed by parallel MPI programs.
-
 #ifdef H5_HAVE_PARALLEL
-
 !****s* H5P/h5pset_fapl_mpio_f
 !
 ! NAME

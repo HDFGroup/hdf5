@@ -46,12 +46,12 @@
 !
 !*****
 
-#include "H5config_f.inc"
+#include <H5config_f.inc>
 
 PROGRAM test_kind
   USE, INTRINSIC :: ISO_C_BINDING
   IMPLICIT NONE
-  INTEGER :: i, j, ii, ir, last, ikind_numbers(10), rkind_numbers(10)
+  INTEGER :: i, j, k, ii, ir, last, ikind_numbers(10), rkind_numbers(10)
   INTEGER :: ji, jr, jd
 #ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   REAL(KIND=C_LONG_DOUBLE) :: c_longdble
@@ -59,6 +59,29 @@ PROGRAM test_kind
   REAL(KIND=C_DOUBLE) :: c_dble
   REAL(KIND=C_FLOAT) :: c_flt
   INTEGER :: sizeof_var
+  CHARACTER(LEN=2) :: chr2
+! subroutine rank of array being passed in
+  CHARACTER(LEN=2), DIMENSION(1:8), PARAMETER :: chr_rank=(/"_0","_1","_2","_3","_4","_5","_6","_7"/)
+  CHARACTER(LEN=70), DIMENSION(1:8), PARAMETER :: rank_dim_line=(/ &
+       '                                                                    ', &
+       ', DIMENSION(dims(1))                                                ', &
+       ', DIMENSION(dims(1),dims(2))                                        ', &
+       ', DIMENSION(dims(1),dims(2),dims(3))                                ', &
+       ', DIMENSION(dims(1),dims(2),dims(3),dims(4))                        ', &
+       ', DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5))                ', &
+       ', DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6))        ', &
+       ', DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7))' &
+            /)
+  CHARACTER(LEN=37), DIMENSION(1:8), PARAMETER :: f_ptr_line=(/ &
+       '    f_ptr = C_LOC(buf)               ', &
+       '    f_ptr = C_LOC(buf(1))            ', &
+       '    f_ptr = C_LOC(buf(1,1))          ', &
+       '    f_ptr = C_LOC(buf(1,1,1))        ', &
+       '    f_ptr = C_LOC(buf(1,1,1,1))      ', &
+       '    f_ptr = C_LOC(buf(1,1,1,1,1))    ', &
+       '    f_ptr = C_LOC(buf(1,1,1,1,1,1))  ', &
+       '    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))' &
+            /)
 
   last = -1
   ii = 0
@@ -287,6 +310,357 @@ WRITE(*,'(40(A,/))') &
   WRITE(*,'(A)')' WRITE(*,*) "#define C_FLOAT_SIZEOF "'//"//ADJUSTL(jchr2)"
 
   WRITE(*,*) "END PROGRAM H5test_kind"
+
+
+! Generate Fortran H5* interfaces having multiple KIND interfaces.
+!
+! Developer's notes:
+!
+! Only interfaces with arrays of rank 7 and less are provided. Even-though, the F2008 
+! standard extended the maximum rank to 15, it was decided that they should use the
+! new APIs to handle this use case. Handling rank 7 and less is for backward compatibility
+! with the Fortran 90/95 APIs codes which could never handle rank 15 array sizes.
+
+  OPEN(11,FILE='H5_KINDff.F90')
+  WRITE(11,'(a)') "MODULE H5_KIND"
+
+  WRITE(11,'(A)') '  USE, INTRINSIC :: ISO_C_BINDING'
+  WRITE(11,'(A)') '  USE H5GLOBAL'
+
+  WRITE(11,'(A)') '  USE H5A'
+  WRITE(11,'(A)') '  USE H5D'
+  WRITE(11,'(A)') '  USE H5P'
+  WRITE(11,'(A)') '  IMPLICIT NONE'
+
+! H5Awrite_f
+  WRITE(11,'(A)') "  INTERFACE h5awrite_f"
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5awrite_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+! H5Aread_f
+  WRITE(11,'(A)') "  INTERFACE h5aread_f"
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5aread_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+! H5Dwrite_f
+  WRITE(11,'(A)') "  INTERFACE h5dwrite_f"
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5dwrite_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+! H5Dread_f
+  WRITE(11,'(A)') "  INTERFACE h5dread_f"
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5dread_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+! H5Pset_fill_value_f
+  WRITE(11,'(A)') "  INTERFACE h5pset_fill_value_f"
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(A)') "     MODULE PROCEDURE h5pset_fill_value_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+! H5Pget_fill_value_f
+  WRITE(11,'(A)') "  INTERFACE h5pget_fill_value_f"
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(A)') "     MODULE PROCEDURE h5pget_fill_value_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+! H5Pset_f
+  WRITE(11,'(A)') "  INTERFACE h5pset_f"
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(A)') "     MODULE PROCEDURE h5pset_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+! H5Pget_f
+  WRITE(11,'(A)') "  INTERFACE h5pget_f"
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(A)') "     MODULE PROCEDURE h5pget_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+! H5Pregister_f
+  WRITE(11,'(A)') "  INTERFACE h5pregister_f"
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(A)') "     MODULE PROCEDURE h5pregister_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+! H5Pinsert_f
+  WRITE(11,'(A)') "  INTERFACE h5pinsert_f"
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(A)') "     MODULE PROCEDURE h5pinsert_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+  WRITE(11,'(A)') 'CONTAINS'
+!**********************
+! H5A interfaces
+!**********************
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+     DO j = 1, 8
+        WRITE(11,'(A)') '  SUBROUTINE h5awrite_kind_'//TRIM(ADJUSTL(chr2))&
+             &//'_rank'//chr_rank(j)//'(attr_id, memtype_id, buf, dims, hdferr)'
+        WRITE(11,'(A)') '    IMPLICIT NONE'
+        WRITE(11,'(A)') '    INTEGER(HID_T)    , INTENT(IN) :: attr_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T)    , INTENT(IN) :: memtype_id'
+        WRITE(11,'(A)') '    INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(*) :: dims'
+        WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER           , INTENT(OUT) :: hdferr'
+        WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+        
+        WRITE(11,'(A)') f_ptr_line(j)
+        WRITE(11,'(A)') '    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)'
+        WRITE(11,'(A)') '  END SUBROUTINE h5awrite_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+     ENDDO
+  ENDDO
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+     DO j = 1, 8
+        WRITE(11,'(A)') '  SUBROUTINE h5aread_kind_'//TRIM(ADJUSTL(chr2))&
+             &//'_rank'//chr_rank(j)//'(attr_id, memtype_id, buf, dims, hdferr)'
+        WRITE(11,'(A)') '    IMPLICIT NONE'
+        WRITE(11,'(A)') '    INTEGER(HID_T)    , INTENT(IN) :: attr_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T)    , INTENT(IN) :: memtype_id'
+        WRITE(11,'(A)') '    INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(*) :: dims'
+        WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(INOUT)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER           , INTENT(OUT) :: hdferr'
+        WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+        
+        WRITE(11,'(A)') f_ptr_line(j)
+        WRITE(11,'(A)') '    hdferr = H5Aread_f_c(attr_id, memtype_id, f_ptr)'
+        WRITE(11,'(A)') '  END SUBROUTINE h5aread_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+     ENDDO
+  ENDDO
+!**********************
+! H5D interfaces
+!**********************
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+     DO j = 1, 8
+        WRITE(11,'(A)') '  SUBROUTINE h5dread_kind_'//TRIM(ADJUSTL(chr2))&
+             &//'_rank'//chr_rank(j)//'(dset_id, mem_type_id, buf, dims, hdferr, &'
+        WRITE(11,'(A)') '       mem_space_id, file_space_id, xfer_prp)'
+        WRITE(11,'(A)') '    USE, INTRINSIC :: ISO_C_BINDING'
+        WRITE(11,'(A)') '    IMPLICIT NONE'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: dset_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: mem_type_id'
+        WRITE(11,'(A)') '    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims'
+        WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(INOUT)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
+        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp'
+        WRITE(11,'(A)') '    INTEGER(HID_T) :: xfer_prp_default'
+        WRITE(11,'(A)') '    INTEGER(HID_T) :: mem_space_id_default'
+        WRITE(11,'(A)') '    INTEGER(HID_T) :: file_space_id_default'
+        WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+        WRITE(11,'(A)') '    xfer_prp_default = H5P_DEFAULT_F'
+        WRITE(11,'(A)') '    mem_space_id_default = H5S_ALL_F'
+        WRITE(11,'(A)') '    file_space_id_default = H5S_ALL_F'
+        WRITE(11,'(A)') '    IF(PRESENT(xfer_prp)) xfer_prp_default = xfer_prp'
+        WRITE(11,'(A)') '    IF(PRESENT(mem_space_id))  mem_space_id_default = mem_space_id'
+        WRITE(11,'(A)') '    IF(PRESENT(file_space_id)) file_space_id_default = file_space_id'
+        WRITE(11,'(A)') f_ptr_line(j)
+        WRITE(11,'(A)') '    hdferr = h5dread_f_c(dset_id, mem_type_id, mem_space_id_default, &'
+        WRITE(11,'(A)') '         file_space_id_default, xfer_prp_default, f_ptr)'
+        WRITE(11,'(A)') '  END SUBROUTINE h5dread_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+
+     ENDDO
+  ENDDO
+
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+     DO j = 1, 8
+        WRITE(11,'(A)') '  SUBROUTINE h5dwrite_kind_'//TRIM(ADJUSTL(chr2))&
+             &//'_rank'//chr_rank(j)//'(dset_id, mem_type_id, buf, dims, hdferr, &'
+        WRITE(11,'(A)') '       mem_space_id, file_space_id, xfer_prp)'
+        WRITE(11,'(A)') '    USE, INTRINSIC :: ISO_C_BINDING'
+        WRITE(11,'(A)') '    IMPLICIT NONE'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: dset_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: mem_type_id'
+        WRITE(11,'(A)') '    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims'
+        WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
+        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp'
+        WRITE(11,'(A)') '    INTEGER(HID_T) :: xfer_prp_default'
+        WRITE(11,'(A)') '    INTEGER(HID_T) :: mem_space_id_default'
+        WRITE(11,'(A)') '    INTEGER(HID_T) :: file_space_id_default'
+        WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+        WRITE(11,'(A)') '    xfer_prp_default  = H5P_DEFAULT_F'
+        WRITE(11,'(A)') '    mem_space_id_default = H5S_ALL_F'
+        WRITE(11,'(A)') '    file_space_id_default = H5S_ALL_F'
+        WRITE(11,'(A)') '    IF(PRESENT(xfer_prp)) xfer_prp_default = xfer_prp'
+        WRITE(11,'(A)') '    IF(PRESENT(mem_space_id))  mem_space_id_default = mem_space_id'
+        WRITE(11,'(A)') '    IF(PRESENT(file_space_id)) file_space_id_default = file_space_id'
+        WRITE(11,'(A)') f_ptr_line(j)
+        WRITE(11,'(A)') '    hdferr = h5dwrite_f_c(dset_id, mem_type_id, mem_space_id_default, &'
+        WRITE(11,'(A)') '         file_space_id_default, xfer_prp_default, f_ptr)'
+        WRITE(11,'(A)') '  END SUBROUTINE h5dwrite_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+     ENDDO
+  ENDDO
+
+!**********************
+! H5P interfaces
+!**********************
+! H5Pset_fill_value_f
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+     WRITE(11,'(A)') '  SUBROUTINE h5pset_fill_value_kind_'//TRIM(ADJUSTL(chr2))&
+          &//'(prp_id, type_id, fillvalue, hdferr)'
+     WRITE(11,'(A)') '    IMPLICIT NONE'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: prp_id'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: type_id'
+     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'), INTENT(IN), TARGET :: fillvalue' 
+     WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr '
+     WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr '
+     WRITE(11,'(A)') '    f_ptr = C_LOC(fillvalue)'
+     WRITE(11,'(A)') '    hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)'
+     WRITE(11,'(A)') '  END SUBROUTINE h5pset_fill_value_kind_'//TRIM(ADJUSTL(chr2))
+  ENDDO
+
+! H5Pget_fill_value_f
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+     WRITE(11,'(A)') '  SUBROUTINE h5pget_fill_value_kind_'//TRIM(ADJUSTL(chr2))&
+          &//'(prp_id, type_id, fillvalue, hdferr)'
+     WRITE(11,'(A)') '    IMPLICIT NONE'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: prp_id'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: type_id'
+     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'), INTENT(OUT), TARGET :: fillvalue'
+     WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
+     WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+     WRITE(11,'(A)') '    f_ptr = C_LOC(fillvalue)'
+     WRITE(11,'(A)') '    hdferr = h5pget_fill_value_c(prp_id, type_id, f_ptr)'
+     WRITE(11,'(A)') '  END SUBROUTINE h5pget_fill_value_kind_'//TRIM(ADJUSTL(chr2))
+  ENDDO
+
+! H5Pset_f
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+     WRITE(11,'(A)') '  SUBROUTINE h5pset_kind_'//TRIM(ADJUSTL(chr2))&
+          &//'(prp_id, name, value, hdferr)'
+     WRITE(11,'(A)') '    IMPLICIT NONE'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: prp_id'
+     WRITE(11,'(A)') '    CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name'
+     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'), INTENT(IN), TARGET :: value'
+     WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
+     WRITE(11,'(A)') '    INTEGER :: name_len'
+     WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+     WRITE(11,'(A)') '    f_ptr = C_LOC(value)'
+     WRITE(11,'(A)') '    name_len = LEN(name)'
+     WRITE(11,'(A)') '    hdferr = h5pget_c(prp_id, name, name_len, f_ptr)'
+     
+     WRITE(11,'(A)') '  END SUBROUTINE h5pset_kind_'//TRIM(ADJUSTL(chr2))
+  ENDDO
+
+! H5Pget_f
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+     WRITE(11,'(A)') '  SUBROUTINE h5pget_kind_'//TRIM(ADJUSTL(chr2))&
+          &//'(prp_id, name, value, hdferr)'
+     WRITE(11,'(A)') '    IMPLICIT NONE'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: prp_id'
+     WRITE(11,'(A)') '    CHARACTER(LEN=*), INTENT(IN) :: name'
+     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),   INTENT(OUT), TARGET :: value'
+     WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
+     WRITE(11,'(A)') '    INTEGER :: name_len'
+     WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+     WRITE(11,'(A)') '    f_ptr = C_LOC(value)'
+     WRITE(11,'(A)') '    name_len = LEN(name)'
+     WRITE(11,'(A)') '    hdferr = h5pget_c(prp_id, name, name_len, f_ptr)'
+     WRITE(11,'(A)') '  END SUBROUTINE h5pget_kind_'//TRIM(ADJUSTL(chr2))
+  ENDDO
+
+! H5Pregister_f
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+     WRITE(11,'(A)') 'SUBROUTINE h5pregister_kind_'//TRIM(ADJUSTL(chr2))&
+          &//'(class, name, size, value, hdferr)'
+     WRITE(11,'(A)') '  IMPLICIT NONE'
+     WRITE(11,'(A)') '  INTEGER(HID_T), INTENT(IN) :: class'
+     WRITE(11,'(A)') '  CHARACTER(LEN=*), INTENT(IN) :: name'
+     WRITE(11,'(A)') '  INTEGER(SIZE_T), INTENT(IN) :: size'
+     WRITE(11,'(A)') '  REAL(KIND='//TRIM(ADJUSTL(chr2))//'), INTENT(IN), TARGET :: value'
+     WRITE(11,'(A)') '  INTEGER, INTENT(OUT) :: hdferr'
+     WRITE(11,'(A)') '  INTEGER :: name_len'
+     WRITE(11,'(A)') '  TYPE(C_PTR) :: f_ptr'
+     WRITE(11,'(A)') '  f_ptr = C_LOC(value)'
+     WRITE(11,'(A)') '  name_len = LEN(name)'
+     WRITE(11,'(A)') '  hdferr = h5pregister_c(class, name, name_len, size, f_ptr)'
+     WRITE(11,'(A)') 'END SUBROUTINE h5pregister_kind_'//TRIM(ADJUSTL(chr2))
+  ENDDO
+
+! H5Pinsert_f
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+     WRITE(11,'(A)') '  SUBROUTINE h5pinsert_kind_'//TRIM(ADJUSTL(chr2))&
+          &//'(plist, name, size, value, hdferr)'
+     WRITE(11,'(A)') '    IMPLICIT NONE'
+     WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: plist'
+     WRITE(11,'(A)') '    CHARACTER(LEN=*), INTENT(IN) :: name'
+     WRITE(11,'(A)') '    INTEGER(SIZE_T), INTENT(IN) :: size'
+     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'),   INTENT(IN), TARGET :: value'
+     WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
+     WRITE(11,'(A)') '    INTEGER :: name_len'
+     WRITE(11,'(A)') '    TYPE(c_ptr) :: f_ptr'
+     WRITE(11,'(A)') '    f_ptr = c_loc(value)'
+     WRITE(11,'(A)') '    name_len = LEN(name)'
+     WRITE(11,'(A)') '    hdferr = h5pinsert_c(plist, name , name_len, size, f_ptr)'
+     WRITE(11,'(A)') '  END SUBROUTINE h5pinsert_kind_'//TRIM(ADJUSTL(chr2))
+  ENDDO
+
+  WRITE(11,'(A)') 'END MODULE H5_KIND'
 
 END PROGRAM test_kind
 
