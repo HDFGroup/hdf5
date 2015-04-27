@@ -126,6 +126,40 @@ STEP()
 }
 
 
+# Install the generated installation image file.  Different platform uses
+# different image files.
+# Linux: HDF5-<version>-Linux.sh file
+# Mac OS X: Not implemented yet
+# Others: Not implemented yet
+INSTALL_HDF5()
+{
+    myos="`uname -s`"
+    case "$myos" in
+	Linux)
+	    install_file=./HDF5-${version}-Linux.sh
+	    $install_file  --skip-license $*
+	    ;;
+	Darwin)		# Mac OSX DMG file
+	    install_file=HDF5-${version}-Darwin.dmg
+	    test -d hdf5 || mkdir hdf5
+	    basename=`basename $install_file .dmg`
+	    # mount the DMG file as /Volumes/$basename
+	    # echo 'Y' as yes for license.
+	    echo Y | hdiutil mount $install_file
+	    # copy the contents to the install location
+	    cp -R "/Volumes/$basename/HDF_Group" hdf5
+	    # unmount the DMG file
+	    hdiutil umount $install_file
+	    ;;
+	*) 		# unknown/unsupported OS.
+	    echo "INSTALL_HDF5: Error--unknown/unsupported OS($myos)"
+	    return 1
+	    ;;
+    esac
+    return 0
+}
+
+
 #==========
 # main
 #==========
@@ -239,7 +273,8 @@ STEP "Test the library and tools..." "ctest . -C Release" $testlog
 STEP "Create an install image..." "cpack -C Release CPackConfig.cmake" $packlog
       
 #      8. Install with this command:
-STEP "Install..." "./HDF5-${version}-Linux.sh --skip-license" $installlog
+#STEP "Install..." "./HDF5-${version}-Linux.sh --skip-license" $installlog
+STEP "Install..." "INSTALL_HDF5" $installlog
 # save the last exit code
 exit_code=$?
 
