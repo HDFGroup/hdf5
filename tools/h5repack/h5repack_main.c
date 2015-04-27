@@ -97,7 +97,7 @@ static void usage(const char *prog) {
 	printf("   -f FILT, --filter=FILT  Filter type\n");
 	printf("   -l LAYT, --layout=LAYT  Layout type\n");
 	printf("   -B S, --buf_size=S      memory buffer size[%llu]\n", H5TOOLS_MALLOCSIZE);
-	printf("   -C S, --cache_size=S    Raw data chunk cache size\n");
+	printf("   -C S, --cache_size=S    Raw data chunk cache size in bytes\n");
 	printf("   -O, --no-h5ocopy        Do not use H5Ocopy at all [use]\n");
 	printf("   -R, --readonly          Read only, no create or write output [off]\n");
 	printf("   -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy\n");
