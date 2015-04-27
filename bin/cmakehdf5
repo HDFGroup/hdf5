@@ -52,6 +52,7 @@ build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
 build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
 with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT=ON	# enable zlib filter default on
 with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT=OFF	# enables zlib filter default off
+shared_lib=-DBUILD_SHARED_LIBS:BOOL=ON		# enables shared lib; default on
 
 
 #=============
@@ -81,16 +82,14 @@ Usage: $progname [<options>]
     enable or disable c++ API. Default is off.
   --enable-hl | --disable-hl:
     enable or disable high level API. Default is on.
+  --enable-shared | --disable-shared:
+    enable or disable shared lib. Default is on.
   --enable-tools | --disable-tools:
     enable or disable building tools. Default is on.
   --enable-testing | --disable-testing:
     enable or disable building tests. Default is on.
-  --with-zlib=INC,LIB | --without-zlib:
+  --with-zlib | --without-zlib:
     Use zlib library for external deflate I/O filter. Default is on.
-    INC and LIB are the include and lib directories.
-  --with-szlib=INC,LIB| --without-szlib:
-    Use szip library for external szip library I/O filter. Default is off.
-    INC and LIB are the include and lib directories.
   --help: shows details help page
 EOF
 }
@@ -201,6 +200,12 @@ while [ $# -gt 0 ]; do
 	--disable-hl)
 	    build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=OFF
 	    ;;
+	--enable-shared)
+	    shared_lib=-DBUILD_SHARED_LIBS:BOOL=ON
+	    ;;
+	--disable-shared)
+	    shared_lib=-DBUILD_SHARED_LIBS:BOOL=OFF
+	    ;;
 	--enable-tools)
 	    build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON
 	    ;;
@@ -212,6 +217,12 @@ while [ $# -gt 0 ]; do
 	    ;;
 	--disable-testing)
 	    build_testing=-DBUILD_TESTING:BOOL=OFF
+	    ;;
+	--with-zlib)
+	    with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
+	    ;;
+	--without-zlib)
+	    with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF
 	    ;;
 	--help)
 	    # print the detail help page and exit
@@ -256,6 +267,7 @@ STEP "Configure..." "cmake \
     $build_fortran \
     $enable_f2003 \
     $build_hl_lib \
+    $shared_lib \
     $build_testing \
     $build_tools \
     $with_zlib \
