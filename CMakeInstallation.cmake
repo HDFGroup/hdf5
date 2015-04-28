@@ -596,24 +596,28 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
         GROUP Applications
         INSTALL_TYPES Full Developer User
     )
-    CPACK_ADD_COMPONENT (hlcpplibraries 
-        DISPLAY_NAME "HDF5 HL C++ Libraries" 
-        DEPENDS hllibraries
-        GROUP Runtime
-        INSTALL_TYPES Full Developer User
-    )
-    CPACK_ADD_COMPONENT (hlcppheaders 
-        DISPLAY_NAME "HDF5 HL C++ Headers" 
-        DEPENDS hlcpplibraries
-        GROUP Development
-        INSTALL_TYPES Full Developer
-    )
-    CPACK_ADD_COMPONENT (hlfortlibraries 
-        DISPLAY_NAME "HDF5 HL Fortran Libraries" 
-        DEPENDS fortlibraries
-        GROUP Runtime
-        INSTALL_TYPES Full Developer User
-    )
+    if (HDF5_BUILD_CPP_LIB)
+      CPACK_ADD_COMPONENT (hlcpplibraries 
+          DISPLAY_NAME "HDF5 HL C++ Libraries" 
+          DEPENDS hllibraries
+          GROUP Runtime
+          INSTALL_TYPES Full Developer User
+      )
+      CPACK_ADD_COMPONENT (hlcppheaders 
+          DISPLAY_NAME "HDF5 HL C++ Headers" 
+          DEPENDS hlcpplibraries
+          GROUP Development
+          INSTALL_TYPES Full Developer
+      )
+    endif (HDF5_BUILD_CPP_LIB)
+    if (HDF5_BUILD_FORTRAN)
+      CPACK_ADD_COMPONENT (hlfortlibraries 
+          DISPLAY_NAME "HDF5 HL Fortran Libraries" 
+          DEPENDS fortlibraries
+          GROUP Runtime
+          INSTALL_TYPES Full Developer User
+      )
+    endif (HDF5_BUILD_FORTRAN)
   endif (HDF5_BUILD_HL_LIB)
   
 endif (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)

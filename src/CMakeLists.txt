@@ -770,16 +770,8 @@ set (H5_PRIVATE_HEADERS
 # Setup the H5Detect utility which generates H5Tinit with platform
 # specific type checks inside
 #-----------------------------------------------------------------------------
-#add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
-#TARGET_C_PROPERTIES (H5detect STATIC " " " ")
-IF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  SET (LOCAL_OPT_FLAG "-O0")
-ELSE (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  SET (LOCAL_OPT_FLAG " ")
-ENDIF (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-ADD_EXECUTABLE (H5detect ${HDF5_SRC_DIR}/H5detect.c)
-TARGET_C_PROPERTIES (H5detect STATIC ${LOCAL_OPT_FLAG} " ")
-
+add_executable (H5detect ${HDF5_SRC_DIR}/H5detect.c)
+TARGET_C_PROPERTIES (H5detect STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
 endif (MSVC OR MINGW)

@@ -813,6 +813,16 @@ if (BUILD_TESTING)
 endif (BUILD_TESTING)
 
 #-----------------------------------------------------------------------------
+# Option to build HDF5 Tools
+#-----------------------------------------------------------------------------
+if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
+  option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
+  if (HDF5_BUILD_TOOLS)
+    add_subdirectory (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
+  endif (HDF5_BUILD_TOOLS)
+endif (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
+
+#-----------------------------------------------------------------------------
 # Option to build examples
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
@@ -892,16 +902,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
     endif (HDF5_BUILD_HL_LIB)
   endif (HDF5_BUILD_CPP_LIB)
 endif (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
-
-#-----------------------------------------------------------------------------
-# Option to build HDF5 Tools
-#-----------------------------------------------------------------------------
-if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
-  option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
-  if (HDF5_BUILD_TOOLS)
-    add_subdirectory (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
-  endif (HDF5_BUILD_TOOLS)
-endif (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
 
 #-----------------------------------------------------------------------------
 # Check if Fortran's default real is double precision. If it is and HL is 
