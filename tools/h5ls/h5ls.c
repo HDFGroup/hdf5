@@ -1855,17 +1855,17 @@ dataset_list2(hid_t dset, const char UNUSED *name)
             for (i=0, total=0; i<nf; i++) {
                 if (H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, &f_offset, &f_size)<0) {
                     h5tools_str_append(&buffer, 
-                            "        #%03d %10"HSIZE_T_FORMAT"u %10s %10s ***ERROR*** %s\n",
+                            "        #%03d %10"H5_PRINTF_LL_WIDTH"u %10s %10s ***ERROR*** %s\n",
                             i, total, "", "",
                             i+1<nf?"Following addresses are incorrect":"");
                 } 
                 else if (H5S_UNLIMITED==f_size) {
-                    h5tools_str_append(&buffer, "        #%03d %10"HSIZE_T_FORMAT"u %10"HSIZE_T_FORMAT"u %10s ",
+                    h5tools_str_append(&buffer, "        #%03d %10"H5_PRINTF_LL_WIDTH"u %10"H5_PRINTF_LL_WIDTH"u %10s ",
                             i, total, (hsize_t)f_offset, "INF");
                     print_string(&buffer, f_name, TRUE);
                 } 
                 else {
-                    h5tools_str_append(&buffer, "        #%03d %10"HSIZE_T_FORMAT"u %10"HSIZE_T_FORMAT"u %10"HSIZE_T_FORMAT"u ",
+                    h5tools_str_append(&buffer, "        #%03d %10"H5_PRINTF_LL_WIDTH"u %10"H5_PRINTF_LL_WIDTH"u %10"H5_PRINTF_LL_WIDTH"u ",
                             i, total, (hsize_t)f_offset, f_size);
                     print_string(&buffer, f_name, TRUE);
                 }
