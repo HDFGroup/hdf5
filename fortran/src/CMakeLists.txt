@@ -31,7 +31,7 @@ configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5config_f.inc.cmake ${CMAKE_BINARY_D
 
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
-# H5test_kind.F90         used to generate H5fortran_detect.F90
+# H5test_kind.F90         used to generate H5fortran_detect.F90 and H5_KINDff.F90
 # H5fortran_detect.F90    used to generate H5fort_type_defines.h
 # H5fort_type_defines.h   used to generate H5f90i_gen.h + H5fortran_types.F90
 #-----------------------------------------------------------------------------
@@ -65,6 +65,11 @@ add_custom_command (
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5test_FortranHavekind
 )
+add_custom_target (h5_kindff
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+    DEPENDS H5test_FortranHavekind ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.F90
+)
+set_target_properties (h5_kindff PROPERTIES LINKER_LANGUAGE Fortran)
 #-----------------------------------------------------------------------------
 add_executable (H5fortran_detect
     ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
@@ -136,7 +141,7 @@ set (f90CStub_C_HDRS
     ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
 )
 
-add_library (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} ${f90CStub_C_SRCS} ${f90CStub_C_HDRS})
+add_library (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} ${f90CStub_C_SRCS} ${f90CStub_C_HDRS} ${h5_kindff})
 TARGET_C_PROPERTIES (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} " " " ")
 target_link_libraries (${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIB_TARGET}")
@@ -153,6 +158,7 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 set (f90_F_SRCS
     # generated files
     ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+    ${HDF5_F90_BINARY_DIR}/H5_KINDff.F90
 
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.F90
@@ -253,6 +259,7 @@ set (mod_files
     ${MOD_BUILD_DIR}/h5s.mod
     ${MOD_BUILD_DIR}/h5t.mod
     ${MOD_BUILD_DIR}/h5z.mod
+    ${MOD_BUILD_DIR}/h5_kind.mod
 )
 install (
     FILES

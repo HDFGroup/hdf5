@@ -62,6 +62,7 @@ PROGRAM test_kind
   CHARACTER(LEN=2) :: chr2
 ! subroutine rank of array being passed in
   CHARACTER(LEN=2), DIMENSION(1:8), PARAMETER :: chr_rank=(/"_0","_1","_2","_3","_4","_5","_6","_7"/)
+! rank definitions
   CHARACTER(LEN=70), DIMENSION(1:8), PARAMETER :: rank_dim_line=(/ &
        '                                                                    ', &
        ', DIMENSION(dims(1))                                                ', &
@@ -72,6 +73,7 @@ PROGRAM test_kind
        ', DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6))        ', &
        ', DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7))' &
             /)
+! pointer to the buffer
   CHARACTER(LEN=37), DIMENSION(1:8), PARAMETER :: f_ptr_line=(/ &
        '    f_ptr = C_LOC(buf)               ', &
        '    f_ptr = C_LOC(buf(1))            ', &
@@ -312,7 +314,7 @@ WRITE(*,'(40(A,/))') &
   WRITE(*,*) "END PROGRAM H5test_kind"
 
 
-! Generate Fortran H5* interfaces having multiple KIND interfaces.
+! (c) Generate Fortran H5* interfaces having multiple KIND interfaces.
 !
 ! Developer's notes:
 !
@@ -322,6 +324,38 @@ WRITE(*,'(40(A,/))') &
 ! with the Fortran 90/95 APIs codes which could never handle rank 15 array sizes.
 
   OPEN(11,FILE='H5_KINDff.F90')
+WRITE(*,'(40(A,/))') &
+'!****h* ROBODoc/H5_KINDff.F90',&
+'!',&
+'! NAME',&
+'!  H5_KIND',&
+'! ',&
+'! PURPOSE',&
+'!  This module is generated at build by H5test_kind.F90 to handle all the',&
+'!  detected REAL KINDs for APIs being passed REAL KINDs. Currently these ',&
+'!  are H5A, H5D and H5P APIs',&
+'!',&
+'! COPYRIGHT',&
+'! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
+'!   Copyright by The HDF Group.                                               *',&
+'!   Copyright by the Board of Trustees of the University of Illinois.         *',&
+'!   All rights reserved.                                                      *',&
+'!                                                                             *',&
+'!   This file is part of HDF5.  The full HDF5 copyright notice, including     *',&
+'!   terms governing use, modification, and redistribution, is contained in    *',&
+'!   the files COPYING and Copyright.html.  COPYING can be found at the root   *',&
+'!   of the source code distribution tree; Copyright.html can be found at the  *',&
+'!   root level of an installed copy of the electronic HDF5 document set and   *',&
+'!   is linked from the top-level documents page.  It can also be found at     *',&
+'!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *',&
+'!   access to either file, you may request a copy from help@hdfgroup.org.     *',&
+'! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
+'!',&
+'! AUTHOR',&
+'!  H5test_kind.F90',&
+'!',&
+'!*****'
+
   WRITE(11,'(a)') "MODULE H5_KIND"
 
   WRITE(11,'(A)') '  USE, INTRINSIC :: ISO_C_BINDING'
@@ -331,8 +365,12 @@ WRITE(*,'(40(A,/))') &
   WRITE(11,'(A)') '  USE H5D'
   WRITE(11,'(A)') '  USE H5P'
   WRITE(11,'(A)') '  IMPLICIT NONE'
-
+!***************
+! H5A INTERFACES
+!***************
+!
 ! H5Awrite_f
+!
   WRITE(11,'(A)') "  INTERFACE h5awrite_f"
   DO i = 1, ir
      j = rkind_numbers(i)
@@ -353,7 +391,10 @@ WRITE(*,'(40(A,/))') &
      ENDDO
   END DO
   WRITE(11,'(A)') "  END INTERFACE"
-
+!***************
+! H5D INTERFACES
+!***************
+!
 ! H5Dwrite_f
   WRITE(11,'(A)') "  INTERFACE h5dwrite_f"
   DO i = 1, ir
@@ -376,6 +417,10 @@ WRITE(*,'(40(A,/))') &
   END DO
   WRITE(11,'(A)') "  END INTERFACE"
 
+!***************
+! H5P INTERFACES
+!***************
+!
 ! H5Pset_fill_value_f
   WRITE(11,'(A)') "  INTERFACE h5pset_fill_value_f"
   DO i = 1, ir
@@ -431,9 +476,12 @@ WRITE(*,'(40(A,/))') &
   WRITE(11,'(A)') "  END INTERFACE"
 
   WRITE(11,'(A)') 'CONTAINS'
+
 !**********************
-! H5A interfaces
+! H5A APIs
 !**********************
+!
+! H5Awrite_f
   DO i = 1, ir
      k = rkind_numbers(i)
      WRITE(chr2,'(I2)') k
@@ -453,6 +501,8 @@ WRITE(*,'(40(A,/))') &
         WRITE(11,'(A)') '  END SUBROUTINE h5awrite_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      ENDDO
   ENDDO
+!
+! H5Aread_f
   DO i = 1, ir
      k = rkind_numbers(i)
      WRITE(chr2,'(I2)') k
@@ -472,9 +522,12 @@ WRITE(*,'(40(A,/))') &
         WRITE(11,'(A)') '  END SUBROUTINE h5aread_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      ENDDO
   ENDDO
+
 !**********************
-! H5D interfaces
+! H5D APIs
 !**********************
+!
+! h5dread_f
   DO i = 1, ir
      k = rkind_numbers(i)
      WRITE(chr2,'(I2)') k
@@ -509,7 +562,8 @@ WRITE(*,'(40(A,/))') &
 
      ENDDO
   ENDDO
-
+!
+! h5dwrite_f
   DO i = 1, ir
      k = rkind_numbers(i)
      WRITE(chr2,'(I2)') k
@@ -545,8 +599,9 @@ WRITE(*,'(40(A,/))') &
   ENDDO
 
 !**********************
-! H5P interfaces
+! H5P APIs
 !**********************
+!
 ! H5Pset_fill_value_f
   DO i = 1, ir
      k = rkind_numbers(i)
