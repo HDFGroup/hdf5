@@ -107,7 +107,7 @@ h5ltget_attribute_c(hid_t_f *loc_id,
                          _fcd dsetname,
                          size_t_f *attrnamelen,
                          _fcd attrname,
-		         void *buf, char* dtype);
+		         void *buf, char* dtype, size_t_f *sizeof_val);
 
 HDF5_HL_F90CSTUBDLL
 int_f

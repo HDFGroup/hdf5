@@ -598,7 +598,7 @@ h5ltget_attribute_c(hid_t_f *loc_id,
                          _fcd dsetname,
                          size_t_f *attrnamelen,
                          _fcd attrname,
-		         void *buf, char *dtype, size_t_f *size_f)
+		         void *buf, char *dtype, size_t_f *sizeof_val)
 {
     int     ret_value = -1;
     herr_t  ret;
@@ -623,18 +623,18 @@ h5ltget_attribute_c(hid_t_f *loc_id,
     c_loc_id = (hid_t)*loc_id;
 
     if( HDstrncmp(dtype,"I",1) == 0) {
-      if((size_t)*size_f == sizeof(int))
+      if((size_t)*sizeof_val == sizeof(int))
 	ret = H5LTget_attribute(c_loc_id,c_name,c_attrname,H5T_NATIVE_INT,buf);
-      else if ((size_t)*size_f == sizeof(long))
+      else if ((size_t)*sizeof_val == sizeof(long))
 	ret = H5LTget_attribute(c_loc_id,c_name,c_attrname,H5T_NATIVE_LONG,buf);
-      else if ((size_t)*size_f == sizeof(long long))
+      else if ((size_t)*sizeof_val == sizeof(long long))
 	ret = H5LTget_attribute(c_loc_id,c_name,c_attrname,H5T_NATIVE_LLONG,buf);
       else
         goto done;
     } else if ( HDstrncmp(dtype,"R",1) == 0 ) {
-      if((size_t)*size_f == sizeof(float))
+      if((size_t)*sizeof_val == sizeof(float))
 	ret = H5LTget_attribute(c_loc_id,c_name,c_attrname,H5T_NATIVE_FLOAT,buf);
-      else if((size_t)*size_f == sizeof(double))
+      else if((size_t)*sizeof_val == sizeof(double))
 	ret = H5LTget_attribute(c_loc_id,c_name,c_attrname,H5T_NATIVE_DOUBLE,buf);
       else
         goto done;
