@@ -60,16 +60,12 @@ set_target_properties (H5test_FortranHavekind PROPERTIES
 set (CMD $<TARGET_FILE:H5test_FortranHavekind>)
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
+           ${HDF5_F90_BINARY_DIR}/H5KINDff.F90
     COMMAND ${CMD}
     ARGS > ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5test_FortranHavekind
 )
-add_custom_target (h5_kindff
-    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-    DEPENDS H5test_FortranHavekind ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.F90
-)
-set_target_properties (h5_kindff PROPERTIES LINKER_LANGUAGE Fortran)
 #-----------------------------------------------------------------------------
 add_executable (H5fortran_detect
     ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
@@ -141,7 +137,7 @@ set (f90CStub_C_HDRS
     ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
 )
 
-add_library (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} ${f90CStub_C_SRCS} ${f90CStub_C_HDRS} ${h5_kindff})
+add_library (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} ${f90CStub_C_SRCS} ${f90CStub_C_HDRS})
 TARGET_C_PROPERTIES (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} " " " ")
 target_link_libraries (${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIB_TARGET}")
@@ -158,7 +154,6 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 set (f90_F_SRCS
     # generated files
     ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
-    ${HDF5_F90_BINARY_DIR}/H5_KINDff.F90
 
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.F90
@@ -180,6 +175,7 @@ set (f90_F_SRCS
 
 set (f90_F_SRCS
     ${f90_F_SRCS}
+    ${HDF5_F90_BINARY_DIR}/H5_KINDff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
 )
 
