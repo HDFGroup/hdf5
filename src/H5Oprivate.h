@@ -433,6 +433,7 @@ typedef struct H5O_storage_virtual_ent_t {
     hsize_t unlim_extent_source;        /* Extent of unlimited dimension in source dset last time virtual_select was patched to match selection */
     hsize_t unlim_extent_virtual;       /* Extent of unlimited dimension in virtual dset last time source_select was patched to match selection */
     hsize_t clip_size_virtual;          /* Size selection would be clipped to in virtual selection, ignoring other mappings, when source extent == unlim_extent_source */
+    hsize_t clip_size_virtual_incl_trail; /* Like above, but includes gap after last block */
     hsize_t clip_size_source;           /* Size selection would be clipped to in source selection when virtual extent == unlim_extent_virtual */
     H5O_virtual_space_status_t source_space_status; /* Extent patching status of source_select */
     H5O_virtual_space_status_t virtual_space_status; /* Extent patching status of virtual_select */

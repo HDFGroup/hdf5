@@ -9741,8 +9741,8 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_hyper_get_clip_extent(const H5S_t *clip_space,
-    const H5S_t *match_space, hsize_t *clip_space_unlim_extent)
+H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
+    hsize_t *clip_size, hsize_t *clip_size_incl_trail)
 {
     const H5S_hyper_sel_t *clip_hslab; /* Convenience pointer to hyperslab info */
     const H5S_hyper_sel_t *match_hslab; /* Convenience pointer to hyperslab info */
@@ -9759,7 +9759,7 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space,
     HDassert(match_space);
     match_hslab = match_space->select.sel_info.hslab;
     HDassert(match_space);
-    HDassert(clip_space_unlim_extent);
+    HDassert(clip_size);
     HDassert(clip_hslab->unlim_dim >= 0);
     HDassert(match_hslab->unlim_dim >= 0);
     HDassert(clip_hslab->num_elem_non_unlim == match_hslab->num_elem_non_unlim);
@@ -9767,17 +9767,25 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space,
     /* Calculate number of slices */
     num_slices = match_space->select.num_elem / match_hslab->num_elem_non_unlim;
 
-    if(num_slices == 0)
-        *clip_space_unlim_extent = 0;
+    if(num_slices == 0) {
+        *clip_size = 0;
+        if(clip_size_incl_trail) {
+            HDassert(0 && "Checking code coverage..."); //VDSINC
+            *clip_size_incl_trail = clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start;
+        } //VDSINC
+    } /* end if */
     else if(clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block == H5S_UNLIMITED) {
-        HDassert(0 && "Checking code coverage..."); //VDSINC
         /* Unlimited block, just set the extent large enough for the block size
          * to match num_slices */
         HDassert(clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].count == (hsize_t)1);
 
-        *clip_space_unlim_extent =
+        *clip_size =
                 clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
                 + num_slices;
+        if(clip_size_incl_trail) {
+            HDassert(0 && "Checking code coverage..."); //VDSINC
+            *clip_size_incl_trail = *clip_size;
+        } //VDSINC
     } /* end if */
     else {
         /* Unlimited count, need to match extent so a block (possibly) gets cut
@@ -9793,20 +9801,34 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space,
 
         if(rem_slices > 0) {
             HDassert(0 && "Checking code coverage..."); //VDSINC
-            /* Must end extent in middle of partial block */
-            *clip_space_unlim_extent =
+            /* Must end extent in middle of partial block (or beginning of empty
+             * block if include_trailing_space and rem_slices == 0) */
+            *clip_size =
                     clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
                     + (count
                     * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride)
                     + rem_slices;
-        } //VDSINC
-        else
+            if(clip_size_incl_trail) {
+                HDassert(0 && "Checking code coverage..."); //VDSINC
+                *clip_size_incl_trail = *clip_size;
+            } //VDSINC
+        } /* end if */
+        else {
             /* End extent at end of last block */
-            *clip_space_unlim_extent =
+            *clip_size =
                     clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
                     + ((count - (hsize_t)1)
                     * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride)
                     + clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block;
+            if(clip_size_incl_trail) {
+                HDassert(0 && "Checking code coverage..."); //VDSINC
+                /* Include gap after last block */
+                *clip_size_incl_trail =
+                        clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
+                        + (count
+                        * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride);
+            } //VDSINC
+        } /* end else */
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

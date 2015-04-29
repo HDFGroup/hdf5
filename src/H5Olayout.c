@@ -309,6 +309,7 @@ H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
                         mesg->storage.u.virt.list[i].unlim_extent_virtual = HSIZE_UNDEF;
                         mesg->storage.u.virt.list[i].clip_size_source = HSIZE_UNDEF;
                         mesg->storage.u.virt.list[i].clip_size_virtual = HSIZE_UNDEF;
+                        mesg->storage.u.virt.list[i].clip_size_virtual_incl_trail = HSIZE_UNDEF;
 
                         /* Update min_dims */
                         if(H5D_virtual_update_min_dims(mesg, i) < 0)
