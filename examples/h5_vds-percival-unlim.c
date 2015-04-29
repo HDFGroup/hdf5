@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FILE         "vds-percival-unlim.h5"
+#define VFILE        "vds-percival-unlim.h5"
 #define DATASET      "VDS-Percival-unlim"
 #define VDSDIM0       H5S_UNLIMITED 
 #define VDSDIM1       10 
@@ -100,7 +100,7 @@ main (void)
         status = H5Fclose (file);
     }    
 
-    file = H5Fcreate (FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    vfile = H5Fcreate (VFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create VDS dataspace.  */
     vspace = H5Screate_simple (RANK, vdsdims, vdsdims_max);
@@ -147,6 +147,7 @@ main (void)
                 dcpl, H5P_DEFAULT);
     status = H5Sclose (vspace);
     status = H5Sclose (src_space);
+    status = H5Pclose (dcpl);
     /* Let's get space of the VDS and its dimension; we should get 40x10x10 */
     vspace = H5Dget_space (vdset);
     H5Sget_simple_extent_dims (vspace, vdsdims_out, vdsdims_max_out);
@@ -188,13 +189,12 @@ main (void)
         status = H5Dwrite (dset, H5T_NATIVE_INT, mem_space, src_space, H5P_DEFAULT,
                     wdata);
         status = H5Sclose (src_space);
-        status = H5Pclose (dcpl);
         status = H5Dclose (dset);
         status = H5Fclose (file);
       }
 
     /* Let's get space of the VDS and its dimension; we should get 80x10x10 */
-    vspace = H5Dget_space (dset);
+    vspace = H5Dget_space (vdset);
     H5Sget_simple_extent_dims (vspace, vdsdims_out, vdsdims_max_out);
     printf ("VDS dimensions second time \n");
     printf (" Current: ");
@@ -212,7 +212,7 @@ main (void)
     /*
      * Open file and dataset using the default properties.
      */
-    vfile = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    vfile = H5Fopen (VFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     vdset = H5Dopen (vfile, DATASET, H5P_DEFAULT);
 
     /*

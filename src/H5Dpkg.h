@@ -611,7 +611,6 @@ H5_DLL herr_t H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage
 H5_DLL herr_t H5D__contig_delete(H5F_t *f, hid_t dxpl_id,
     const H5O_storage_t *store);
 
-
 /* Functions that operate on chunked dataset storage */
 H5_DLL htri_t H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr,
     hbool_t write_op);
@@ -660,6 +659,7 @@ H5_DLL herr_t H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src
 
 /* Functions that operate on virtual dataset storage */
 H5_DLL herr_t H5D__virtual_copy_layout(H5O_layout_t *layout);
+H5_DLL herr_t H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D__virtual_reset_layout(H5O_layout_t *layout);
 H5_DLL herr_t H5D__virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage);
 H5_DLL herr_t H5D__virtual_copy(H5F_t *f_src,

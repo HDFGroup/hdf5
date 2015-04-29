@@ -191,7 +191,7 @@ H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
     } /* end if */
     else {
         /* Layout class */
-        mesg->type = (H5D_layout_t)*p++;
+        mesg->type = mesg->storage.type = (H5D_layout_t)*p++;
 
         /* Interpret the rest of the message according to the layout class */
         switch(mesg->type) {
@@ -251,6 +251,7 @@ H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
                 mesg->storage.u.virt.list_nused = 0;
                 mesg->storage.u.virt.list = NULL;
                 mesg->storage.u.virt.list_nalloc = 0;
+                mesg->storage.u.virt.set_extent_max = TRUE;
 
                 /* Decode heap block if it exists */
                 if(mesg->storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF) {
@@ -300,6 +301,18 @@ H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
                         /* Virtual selection */
                         if(H5S_SELECT_DESERIALIZE(f, &(mesg->storage.u.virt.list[i].virtual_select), &heap_block_p) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode virtual space selection")
+
+                        /* unlim_dim fields */
+                        mesg->storage.u.virt.list[i].unlim_dim_source = H5S_get_select_unlim_dim(mesg->storage.u.virt.list[i].source_select);
+                        mesg->storage.u.virt.list[i].unlim_dim_virtual = H5S_get_select_unlim_dim(mesg->storage.u.virt.list[i].virtual_select);
+                        mesg->storage.u.virt.list[i].unlim_extent_source = HSIZE_UNDEF;
+                        mesg->storage.u.virt.list[i].unlim_extent_virtual = HSIZE_UNDEF;
+                        mesg->storage.u.virt.list[i].clip_size_source = HSIZE_UNDEF;
+                        mesg->storage.u.virt.list[i].clip_size_virtual = HSIZE_UNDEF;
+
+                        /* Update min_dims */
+                        if(H5D_virtual_update_min_dims(mesg, i) < 0)
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to update virtual dataset minimum dimensions")
                     } /* end for */
 
                     /* Read stored checksum */

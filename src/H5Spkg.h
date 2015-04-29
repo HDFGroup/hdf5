@@ -124,6 +124,7 @@ typedef struct {
          * contains H5S_UNLIMITED in the count or block of the unlimited
          * dimension (if any). */
     int unlim_dim;                              /* Dimension where selection is unlimited, or -1 if none */
+    hsize_t unlim_dim_clip_size;                /* Size to which the selection is clipped in unlimited dimension */
     hsize_t num_elem_non_unlim;                 /* # of elements in a "slice" excluding the unlimited dimension */
     H5S_hyper_span_info_t *span_lst; /* List of hyperslab span information */
 } H5S_hyper_sel_t;
@@ -151,6 +152,8 @@ typedef herr_t (*H5S_sel_deserialize_func_t)(const H5F_t *f, H5S_t *space,
 typedef herr_t (*H5S_sel_bounds_func_t)(const H5S_t *space, hsize_t *start, hsize_t *end);
 /* Method to determine linear offset of initial element in selection within dataspace */
 typedef herr_t (*H5S_sel_offset_func_t)(const H5S_t *space, hsize_t *offset);
+/* Method to get unlimited dimension of selection (or -1 for none) */
+typedef int (*H5S_sel_unlim_dim_func_t)(const H5S_t *space);
 /* Method to determine if current selection is contiguous */
 typedef htri_t (*H5S_sel_is_contiguous_func_t)(const H5S_t *space);
 /* Method to determine if current selection is a single block */
@@ -180,6 +183,7 @@ typedef struct {
     H5S_sel_deserialize_func_t deserialize;     /* Method to store create selection from "serialized" form (a byte sequence suitable for storing on disk) */
     H5S_sel_bounds_func_t bounds;               /* Method to determine to smallest n-D bounding box containing the current selection */
     H5S_sel_offset_func_t offset;               /* Method to determine linear offset of initial element in selection within dataspace */
+    H5S_sel_unlim_dim_func_t unlim_dim;              /* Method to get unlimited dimension of selection (or -1 for none) */
     H5S_sel_is_contiguous_func_t is_contiguous; /* Method to determine if current selection is contiguous */
     H5S_sel_is_single_func_t is_single;         /* Method to determine if current selection is a single block */
     H5S_sel_is_regular_func_t is_regular;       /* Method to determine if current selection is "regular" */
@@ -268,7 +272,6 @@ H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
 H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
     const H5S_t *dst_space, const H5S_t *src_intersect_space,
     H5S_t *proj_space);
-H5_DLL herr_t H5S__hyper_update_extent_offset(H5S_t *space);
 
 /* Testing functions */
 #ifdef H5S_TESTING

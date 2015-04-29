@@ -43,6 +43,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
+#include "H5Sprivate.h"         /* Dataspaces                           */
 #include "H5Tprivate.h"		/* Datatypes 				*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
@@ -56,12 +57,12 @@
 #define H5D_DEF_STORAGE_CONTIG_INIT   {HADDR_UNDEF, (hsize_t)0}
 #define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, HADDR_UNDEF,  NULL, {{HADDR_UNDEF, NULL}}}
 #define H5D_DEF_LAYOUT_CHUNK_INIT    {(unsigned)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
-#define H5D_DEF_STORAGE_VIRTUAL_INIT  {{HADDR_UNDEF, 0}, 0, NULL, 0}
+#define H5D_DEF_STORAGE_VIRTUAL_INIT  {{HADDR_UNDEF, 0}, 0, NULL, 0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, TRUE}
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 #define H5D_DEF_STORAGE_COMPACT  {H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }}
 #define H5D_DEF_STORAGE_CONTIG   {H5D_CONTIGUOUS, { .contig = H5D_DEF_STORAGE_CONTIG_INIT }}
 #define H5D_DEF_STORAGE_CHUNK    {H5D_CHUNKED, { .chunk = H5D_DEF_STORAGE_CHUNK_INIT }}
-#define H5D_DEF_STORAGE_VIRTUAL  {H5D_CHUNKED, { .virt = H5D_DEF_STORAGE_VIRTUAL_INIT }}
+#define H5D_DEF_STORAGE_VIRTUAL  {H5D_VIRTUAL, { .virt = H5D_DEF_STORAGE_VIRTUAL_INIT }}
 #define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_COMPACT}
 #define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_CONTIG}
 #define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, H5D_DEF_STORAGE_CHUNK}
@@ -75,7 +76,7 @@
 #define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
 #define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
 #define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
-#define H5D_DEF_LAYOUT_VIRTUAL  {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
+#define H5D_DEF_LAYOUT_VIRTUAL  {H5D_VIRTUAL, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CHUNK_INIT}, {H5D_CONTIGUOUS, H5D_DEF_STORAGE_CONTIG_INIT}}
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
 /* ========  Dataset creation properties ======== */
@@ -1669,8 +1670,20 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")
     if(NULL == (layout.storage.u.virt.list[layout.storage.u.virt.list_nused].virtual_select = H5S_copy(vspace, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
+    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].unlim_dim_source = H5S_get_select_unlim_dim(src_space);
+    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].unlim_dim_virtual = H5S_get_select_unlim_dim(vspace);
+    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].unlim_extent_source = HSIZE_UNDEF;
+    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].unlim_extent_virtual = HSIZE_UNDEF;
+    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].clip_size_source = HSIZE_UNDEF;
+    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].clip_size_virtual = HSIZE_UNDEF;
     layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_space_status = H5O_VIRTUAL_STATUS_USER;
     layout.storage.u.virt.list[layout.storage.u.virt.list_nused].virtual_space_status = H5O_VIRTUAL_STATUS_USER;
+
+    /* Update min_dims */
+    if(H5D_virtual_update_min_dims(&layout, layout.storage.u.virt.list_nused) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to update virtual dataset minimum dimensions")
+
+    /* Finish adding entry */
     layout.storage.u.virt.list_nused++;
     adding_entry = FALSE;
 
@@ -1786,6 +1799,11 @@ H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
     if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].virtual_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
 
+    /* Clip selection to extent */
+    if(H5S_get_select_unlim_dim(space) >= 0)
+        if(H5S_hyper_clip_to_extent(space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection")
+
     /* Register ID */
     if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space")
@@ -1843,6 +1861,11 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
     if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].source_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")
+
+    /* Clip selection to extent */
+    if(H5S_get_select_unlim_dim(space) >= 0)
+        if(H5S_hyper_clip_to_extent(space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection")
 
     /* Register ID */
     if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)

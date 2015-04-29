@@ -81,7 +81,7 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
     /* If the selection is 'hyper', update the selection due to changed offset
      */
     if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS)
-        if(H5S__hyper_update_extent_offset(space) < 0)
+        if(H5S_hyper_clip_to_extent(space) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
 
 done:
@@ -695,6 +695,44 @@ H5S_get_select_offset(const H5S_t *space, hsize_t *offset)
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_get_select_offset() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_unlim_dim
+ PURPOSE
+    Gets the unlimited dimension in the selection, or -1 if there is no
+    unlimited dimension.
+ USAGE
+    int H5S_get_select_unlim_dim(space)
+        const H5S_t *space;     IN: Dataspace pointer of selection to query
+ RETURNS
+    Unlimited dimension in the selection, or -1 if there is no unlimited
+    dimension (never fails)
+ DESCRIPTION
+    Gets the unlimited dimension in the selection, or -1 if there is no
+    unlimited dimension.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+        Currently only implemented for hyperslab selections, all others
+        simply return -1.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int
+H5S_get_select_unlim_dim(const H5S_t *space)
+{
+    herr_t ret_value;        /* return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(space);
+
+    ret_value = (*space->select.type->unlim_dim)(space);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5S_get_select_unlim_dim() */
 
 
 /*--------------------------------------------------------------------------

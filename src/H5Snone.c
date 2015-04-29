@@ -46,6 +46,7 @@ static herr_t H5S_none_deserialize(const H5F_t *f, H5S_t *space,
     uint32_t version, uint8_t flags, const uint8_t **p);
 static herr_t H5S_none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_none_offset(const H5S_t *space, hsize_t *off);
+static int H5S_none_unlim_dim(const H5S_t *space);
 static htri_t H5S_none_is_contiguous(const H5S_t *space);
 static htri_t H5S_none_is_single(const H5S_t *space);
 static htri_t H5S_none_is_regular(const H5S_t *space);
@@ -77,6 +78,7 @@ const H5S_select_class_t H5S_sel_none[1] = {{
     H5S_none_deserialize,
     H5S_none_bounds,
     H5S_none_offset,
+    H5S_none_unlim_dim,
     H5S_none_is_contiguous,
     H5S_none_is_single,
     H5S_none_is_regular,
@@ -609,6 +611,31 @@ H5S_none_offset(const H5S_t UNUSED *space, hsize_t UNUSED *offset)
 
     FUNC_LEAVE_NOAPI(FAIL)
 }   /* H5S_none_offset() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_none_unlim_dim
+ PURPOSE
+    Return unlimited dimension of selection, or -1 if none
+ USAGE
+    VDSINC
+ RETURNS
+    Unlimited dimension of selection, or -1 if none (never fails).
+ DESCRIPTION
+    VDSINC
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int
+H5S_none_unlim_dim(const H5S_t UNUSED *space)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+    FUNC_LEAVE_NOAPI(-1)
+} /* end H5S_none_unlim_dim() */
 
 
 /*--------------------------------------------------------------------------

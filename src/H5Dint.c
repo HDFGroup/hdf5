@@ -2346,6 +2346,8 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */
 
+    /* Make this function work with virtual layout VDSINC */
+
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D__set_extent() */
@@ -2766,6 +2768,11 @@ H5D_get_space(H5D_t *dset)
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* If the layout is virtual, update the extent */
+    if(dset->shared->layout.type == H5D_VIRTUAL)
+        if(H5D__virtual_set_extent_unlim(dset, H5AC_ind_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update virtual dataset extent")
 
     /* Read the data space message and return a data space object */
     if(NULL == (space = H5S_copy(dset->shared->space, FALSE, TRUE)))

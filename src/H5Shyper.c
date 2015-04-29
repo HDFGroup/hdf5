@@ -60,6 +60,7 @@ static herr_t H5S_hyper_deserialize(const H5F_t *f, H5S_t *space,
     uint32_t version, uint8_t flags, const uint8_t **p);
 static herr_t H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_hyper_offset(const H5S_t *space, hsize_t *offset);
+static int H5S_hyper_unlim_dim(const H5S_t *space);
 static htri_t H5S_hyper_is_contiguous(const H5S_t *space);
 static htri_t H5S_hyper_is_single(const H5S_t *space);
 static htri_t H5S_hyper_is_regular(const H5S_t *space);
@@ -96,6 +97,7 @@ const H5S_select_class_t H5S_sel_hyper[1] = {{
     H5S_hyper_deserialize,
     H5S_hyper_bounds,
     H5S_hyper_offset,
+    H5S_hyper_unlim_dim,
     H5S_hyper_is_contiguous,
     H5S_hyper_is_single,
     H5S_hyper_is_regular,
@@ -1655,6 +1657,7 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
             dst_hslab->app_diminfo[u] = src_hslab->app_diminfo[u];
         } /* end for */
     } /* end for */
+    dst_hslab->unlim_dim_clip_size = src_hslab->unlim_dim_clip_size;
     dst_hslab->num_elem_non_unlim = src_hslab->num_elem_non_unlim;
     dst->select.sel_info.hslab->span_lst=src->select.sel_info.hslab->span_lst;
 
@@ -1681,7 +1684,7 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
 
         if(!extent_equal)
             /* Update selection due to changed extent */
-            if(H5S__hyper_update_extent_offset(dst) < 0)
+            if(H5S_hyper_clip_to_extent(dst) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
     } /* end if */
 
@@ -1906,7 +1909,7 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
         for(ret_value = 1, u = 0; u < space->extent.rank; u++) {
             if(diminfo[u].block == (hsize_t)0)
                 HGOTO_DONE((hsize_t)0)
-            ret_value *= diminfo[u].count;;
+            ret_value *= diminfo[u].count;
         } /* end for */
     } /* end if */
     else
@@ -2976,6 +2979,31 @@ H5S_hyper_offset(const H5S_t *space, hsize_t *offset)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_hyper_offset() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_unlim_dim
+ PURPOSE
+    Return unlimited dimension of selection, or -1 if none
+ USAGE
+    VDSINC
+ RETURNS
+    Unlimited dimension of selection, or -1 if none (never fails).
+ DESCRIPTION
+    VDSINC
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int
+H5S_hyper_unlim_dim(const H5S_t *space)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+    FUNC_LEAVE_NOAPI(space->select.sel_info.hslab->unlim_dim)
+} /* end H5S_hyper_get_unlim_dim() */
 
 
 /*--------------------------------------------------------------------------
@@ -6683,6 +6711,10 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         /* Save unlim_dim */
         space->select.sel_info.hslab->unlim_dim = unlim_dim;
 
+        /* Initialize unlim_dim_clip_size to H5S_UNLIMITED so the selection is
+         * clipped by H5S__hyper_clip_unlim() no matter what the extent is */
+        space->select.sel_info.hslab->unlim_dim_clip_size = H5S_UNLIMITED;
+
         /* Indicate that the dimension information is valid */
         space->select.sel_info.hslab->diminfo_valid = TRUE;
 
@@ -6693,17 +6725,24 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         if(unlim_dim >= 0) {
             space->select.sel_info.hslab->num_elem_non_unlim = (hsize_t)1;
             for(u = 0; u < space->extent.rank; u++) {
+                /* Save start/stride/count/block */
                 space->select.sel_info.hslab->opt_unlim_diminfo[u].start = start[u];
                 space->select.sel_info.hslab->opt_unlim_diminfo[u].stride = opt_stride[u];
                 space->select.sel_info.hslab->opt_unlim_diminfo[u].count = opt_count[u];
                 space->select.sel_info.hslab->opt_unlim_diminfo[u].block = opt_block[u];
 
+                /* Calculate num_elem_non_unlim */
                 if((int)u != unlim_dim)
                     space->select.sel_info.hslab->num_elem_non_unlim *= (opt_count[u] * opt_block[u]);
             } /* end for */
 
+            /* Initialize unlim_dim_clip_size to H5S_UNLIMITED so the selection
+             * is clipped by H5S__hyper_clip_to_extent() no matter what the
+             * extent is */
+            space->select.sel_info.hslab->unlim_dim_clip_size = H5S_UNLIMITED;
+
             /* Set opt_diminfo or span tree based on extent */
-            if(H5S__hyper_update_extent_offset(space) < 0)
+            if(H5S_hyper_clip_to_extent(space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't set selection based on extent")
         } /* end if */
     } /* end if */
@@ -7133,13 +7172,19 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
     /* Check for unlimited dimension */
     for(u = 0; u<space->extent.rank; u++)
         if((count[u] == H5S_UNLIMITED) || (block[u] == H5S_UNLIMITED)) {
-            if(unlim_dim >= 0)
+            if(unlim_dim >= 0) {
+                HDassert(0 && "Checking code coverage..."); //VDSINC
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "cannot have more than one unlimited dimension in selection")
+            } //VDSINC
             else {
-                if(op != H5S_SELECT_SET)
+                if(op != H5S_SELECT_SET) {
+                    HDassert(0 && "Checking code coverage..."); //VDSINC
                     HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "cannot use unlimited selection to modify existing selection")
-                if(count[u] == block[u] /* == H5S_UNLIMITED */)
+                } //VDSINC
+                if(count[u] == block[u] /* == H5S_UNLIMITED */) {
+                    HDassert(0 && "Checking code coverage..."); //VDSINC
                     HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "count and block cannot both be unlimited")
+                } //VDSINC
                 unlim_dim = (int)u;
             } /* end else */
         } /* end if */
@@ -7336,6 +7381,11 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         /* Save unlim_dim */
         space->select.sel_info.hslab->unlim_dim = unlim_dim;
 
+        /* Initialize unlim_dim_clip_size to H5S_UNLIMITED so the selection is
+         * clipped by H5S__hyper_clip_to_extent() no matter what the extent is
+         */
+        space->unlim_dim_clip_size = H5S_UNLIMITED;
+
         /* Indicate that the dimension information is valid */
         space->select.sel_info.hslab->diminfo_valid=TRUE;
 
@@ -7356,7 +7406,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             } /* end for */
 
             /* Set opt_diminfo or span tree based on extent */
-            if(H5S__hyper_update_extent_offset(space) < 0)
+            if(H5S__hyper_clip_to_extent(space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't set selection based on extent")
         } /* end if */
     } /* end if */
@@ -7365,8 +7415,10 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         HDassert(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS);
 
         /* Cannot modify unlimited selections */
-        if(space->select.sel_info.hslab->unlim_dim >= 0)
+        if(space->select.sel_info.hslab->unlim_dim >= 0) {
+            HDassert(0 && "Checking code coverage..."); //VDSINC
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "cannot modify unlimited selection")
+        } //VDSINC
 
         /* Check if there's no hyperslab span information currently */
         if(space->select.sel_info.hslab->span_lst==NULL)
@@ -9502,40 +9554,39 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S__hyper_update_extent_offset
+    H5S_hyper_clip_unlim
  PURPOSE
-    Updates the hyperslab selection after a change to the dataspace extent
-    or offset
+    Clips the unlimited dimension of the hyperslab selection to the
+    specified size
  USAGE
     VDSINC
  RETURNS
     Non-negative on success/Negative on failure.
  DESCRIPTION
-    since unlimited selections are internally described as limited
-    selections with maximal size, these internal selections need to be
-    updated whenever the maximum size changes.  This function
-    recaluculates the unlimited dimension (if any) of the hyperslab
-    selection when the extent or offset is changed.  
+    This function recalculates the internal description of the hyperslab
+    to make the unlimited dimension extend to the specified extent.  
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
+    Note this function takes the offset into account.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S__hyper_update_extent_offset(H5S_t *space)
+H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
 {
     H5S_hyper_sel_t *hslab;     /* Convenience pointer to hyperslab info */
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check parameters */
     HDassert(space);
     hslab = space->select.sel_info.hslab;
     HDassert(hslab);
+    HDassert(hslab->unlim_dim >= 0);
 
-    /* Check for unlimited dimension */
-    if(hslab->unlim_dim < 0)
+    /* Check for no need to change size */
+    if(clip_size == hslab->unlim_dim_clip_size)
         HGOTO_DONE(SUCCEED)
 
     /* Free previous spans, if any */
@@ -9548,10 +9599,10 @@ H5S__hyper_update_extent_offset(H5S_t *space)
     /* Initialize opt_diminfo with opt_unlim_diminfo */
     hslab->opt_diminfo[hslab->unlim_dim] = hslab->opt_unlim_diminfo[hslab->unlim_dim];
 
-    /* Check for selection outside extent */
+    /* Check for selection outside clip size */
     if((hsize_t)((hssize_t)hslab->opt_diminfo[hslab->unlim_dim].start
             + space->select.offset[hslab->unlim_dim])
-            >= space->extent.size[hslab->unlim_dim]) {
+            >= clip_size) {
         if(hslab->opt_diminfo[hslab->unlim_dim].block == H5S_UNLIMITED)
             hslab->opt_diminfo[hslab->unlim_dim].block = 0;
         else
@@ -9569,11 +9620,11 @@ H5S__hyper_update_extent_offset(H5S_t *space)
     if(hslab->opt_diminfo[hslab->unlim_dim].count == (hsize_t)1) {
         HDassert(hslab->opt_diminfo[hslab->unlim_dim].block == H5S_UNLIMITED);
 
-        /* Calculate actual block size for this extent */
+        /* Calculate actual block size for this clip size */
         hslab->opt_diminfo[hslab->unlim_dim].block =
                 (hsize_t)((hssize_t)space->extent.size[hslab->unlim_dim]
-                - ((hssize_t)hslab->opt_diminfo[hslab->unlim_dim].start
-                + space->select.offset[hslab->unlim_dim]));
+                - ((hssize_t)hslab->opt_diminfo[hslab->unlim_dim].start)
+                + space->select.offset[hslab->unlim_dim]);
 
         /* Calculate number of elements */
         space->select.num_elem = hslab->opt_diminfo[hslab->unlim_dim].block
@@ -9588,7 +9639,7 @@ H5S__hyper_update_extent_offset(H5S_t *space)
 
         /* Calculate initial count (last block may be partial) */
         hslab->opt_diminfo[hslab->unlim_dim].count =
-                ((hsize_t)((hssize_t)space->extent.size[hslab->unlim_dim]
+                ((hsize_t)((hssize_t)clip_size
                 - ((hssize_t)hslab->opt_diminfo[hslab->unlim_dim].start
                 + space->select.offset[hslab->unlim_dim])
                 + (hssize_t)hslab->opt_diminfo[hslab->unlim_dim].stride
@@ -9605,7 +9656,7 @@ H5S__hyper_update_extent_offset(H5S_t *space)
         if(((hslab->opt_diminfo[hslab->unlim_dim].stride
                 * (hslab->opt_diminfo[hslab->unlim_dim].count - (hsize_t)1))
                 + hslab->opt_diminfo[hslab->unlim_dim].block - (hsize_t)1)
-                 > ((hsize_t)((hssize_t)space->extent.size[hslab->unlim_dim]
+                 > ((hsize_t)((hssize_t)clip_size
                 - (hssize_t)hslab->opt_diminfo[hslab->unlim_dim].start
                 + space->select.offset[hslab->unlim_dim]))) {
             /* Last block is partial, need to construct compound selection */
@@ -9616,9 +9667,150 @@ H5S__hyper_update_extent_offset(H5S_t *space)
             hslab->diminfo_valid = TRUE;
     } /* end else */
 
+    /* Save clip size */
+    hslab->unlim_dim_clip_size = clip_size;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S__hyper_update_extent_offset() */
+} /* end H5S_hyper_clip_unlim() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_clip_to_extent
+ PURPOSE
+    Updates the hyperslab selection after a change to the dataspace extent
+    or offset
+ USAGE
+    VDSINC
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    Since unlimited selections are internally described as limited
+    selections with maximal size, these internal selections need to be
+    updated whenever the maximum size changes.  This function
+    recaluculates the unlimited dimension (if any) of the hyperslab
+    selection when the extent or offset is changed.  
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Note this function takes the offset into account.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_clip_to_extent(H5S_t *space)
+{
+    H5S_hyper_sel_t *hslab;     /* Convenience pointer to hyperslab info */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check parameters */
+    HDassert(space);
+    hslab = space->select.sel_info.hslab;
+    HDassert(hslab);
+
+    /* Check for unlimited dimension */
+    if(hslab->unlim_dim < 0)
+        HGOTO_DONE(SUCCEED)
+
+    /* Clip unlimited selection to extent */
+    if(H5S_hyper_clip_unlim(space, space->extent.size[hslab->unlim_dim]) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_hyper_clip_to_extent() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_get_clip_extent
+ PURPOSE
+    VDSINC
+ USAGE
+    VDSINC
+ RETURNS
+    Non-negative on success/Negative on failure.
+ DESCRIPTION
+    VDSINC
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Note this assumes the offset has been normalized.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_get_clip_extent(const H5S_t *clip_space,
+    const H5S_t *match_space, hsize_t *clip_space_unlim_extent)
+{
+    const H5S_hyper_sel_t *clip_hslab; /* Convenience pointer to hyperslab info */
+    const H5S_hyper_sel_t *match_hslab; /* Convenience pointer to hyperslab info */
+    hsize_t num_slices;
+    hsize_t count;
+    hsize_t rem_slices;
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Check parameters */
+    HDassert(clip_space);
+    clip_hslab = clip_space->select.sel_info.hslab;
+    HDassert(clip_hslab);
+    HDassert(match_space);
+    match_hslab = match_space->select.sel_info.hslab;
+    HDassert(match_space);
+    HDassert(clip_space_unlim_extent);
+    HDassert(clip_hslab->unlim_dim >= 0);
+    HDassert(match_hslab->unlim_dim >= 0);
+    HDassert(clip_hslab->num_elem_non_unlim == match_hslab->num_elem_non_unlim);
+
+    /* Calculate number of slices */
+    num_slices = match_space->select.num_elem / match_hslab->num_elem_non_unlim;
+
+    if(num_slices == 0)
+        *clip_space_unlim_extent = 0;
+    else if(clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block == H5S_UNLIMITED) {
+        HDassert(0 && "Checking code coverage..."); //VDSINC
+        /* Unlimited block, just set the extent large enough for the block size
+         * to match num_slices */
+        HDassert(clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].count == (hsize_t)1);
+
+        *clip_space_unlim_extent =
+                clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
+                + num_slices;
+    } /* end if */
+    else {
+        /* Unlimited count, need to match extent so a block (possibly) gets cut
+         * off so the number of slices matches num_slices */
+        HDassert(clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].count == H5S_UNLIMITED);
+
+        /* Calculate number of complete blocks in clip_space */
+        count = num_slices / clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block;
+
+        /* Calculate slices remaining */
+        rem_slices = num_slices - (count
+                * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block);
+
+        if(rem_slices > 0) {
+            HDassert(0 && "Checking code coverage..."); //VDSINC
+            /* Must end extent in middle of partial block */
+            *clip_space_unlim_extent =
+                    clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
+                    + (count
+                    * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride)
+                    + rem_slices;
+        } //VDSINC
+        else
+            /* End extent at end of last block */
+            *clip_space_unlim_extent =
+                    clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
+                    + ((count - (hsize_t)1)
+                    * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride)
+                    + clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block;
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5S_hyper_get_clip_extent() */
 
 
 /*--------------------------------------------------------------------------

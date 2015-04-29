@@ -522,7 +522,7 @@ H5S_extent_copy(H5S_t *dst, const H5S_t *src)
     /* If the selection is 'hyper', update the selection due to changed extent
      */
     if(H5S_GET_SELECT_TYPE(dst) == H5S_SEL_HYPERSLABS)
-        if(H5S__hyper_update_extent_offset(dst) < 0)
+        if(H5S_hyper_clip_to_extent(dst) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
 
 done:
@@ -1363,7 +1363,7 @@ H5S__set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
     /* If the selection is 'hyper', update the selection due to changed
      * extent */
     if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS)
-        if(H5S__hyper_update_extent_offset(space) < 0)
+        if(H5S_hyper_clip_to_extent(space) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
 
 done:
@@ -1883,7 +1883,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5S_set_extent
  *
- * Purpose:     Modify the dimensions of a dataspace. Based on H5S_extend
+ * Purpose:     Modify the dimensions of a dataspace. Based on H5S_extend.
+ *
+ *              Note that this function does *not* clip unlimited
+ *              selections, because it is not currently necessary to do
+ *              that anywhere this function is called.  If this becomes
+ *              necessary (if the selection could be unlimited and the
+ *              clip size is not being handled separately), this function
+ *              must be updated to (optionally) clip the selection.
  *
  * Return:      Success: Non-negative
  *              Failure: Negative
@@ -1966,6 +1973,13 @@ H5S_has_extent(const H5S_t *ds)
  *
  * Purpose:     Modify the dimensions of a dataspace. Based on H5S_extend
  *
+ *              Note that this function does *not* clip unlimited
+ *              selections, because it is not currently necessary to do
+ *              that anywhere this function is called.  If this becomes
+ *              necessary (if the selection could be unlimited and the
+ *              clip size is not being handled separately), this function
+ *              must be updated to (optionally) clip the selection.
+ *
  * Return:      Success: Non-negative
  *              Failure: Negative
  *
@@ -1998,12 +2012,6 @@ H5S_set_extent_real(H5S_t *space, const hsize_t *size)
     if(H5S_SEL_ALL == H5S_GET_SELECT_TYPE(space))
         if(H5S_select_all(space, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
-
-    /* If the selection is 'hyper', update the selection due to changed
-     * extent */
-    if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS)
-        if(H5S__hyper_update_extent_offset(space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
 
     /* Mark the dataspace as no longer shared if it was before */
     if(H5O_msg_reset_share(H5O_SDSPACE_ID, space) < 0)
