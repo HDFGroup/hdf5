@@ -593,15 +593,9 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 
         /* Check if we should delete this node or not */
         if(delete_node) {
-            /* Decrement the number of IDs in the type */
-            (type_ptr->id_count)--;
-
-            /* Remove the node from the list */
-            if(NULL == H5SL_remove(type_ptr->ids, &cur->id))
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, FAIL, "can't remove ID node from skip list")
-
-            /* Free the node */
-            cur = H5FL_FREE(H5I_id_info_t, cur);
+            /* Remove the node from the type */
+            if(NULL == H5I__remove_common(type_ptr, cur->id))
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, FAIL, "can't remove ID node")
         } /* end if */
     } /* end for */
 
@@ -1208,8 +1202,6 @@ done:
 int
 H5I_dec_ref(hid_t id)
 {
-    H5I_type_t		type;		/*type the object is in*/
-    H5I_id_type_t	*type_ptr;	/*ptr to the type	*/
     H5I_id_info_t	*id_ptr;	/*ptr to the new ID	*/
     int ret_value;                      /* Return value */
 
@@ -1218,17 +1210,9 @@ H5I_dec_ref(hid_t id)
     /* Sanity check */
     HDassert(id >= 0);
 
-    /* Check arguments */
-    type = H5I_TYPE(id);
-    if(type <= H5I_BADID || type >= H5I_next_type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
-    type_ptr = H5I_id_type_list_g[type];
-    if(NULL == type_ptr || type_ptr->init_count <= 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
-
     /* General lookup of the ID */
-    if(NULL == (id_ptr = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id)))
-	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID")
+    if(NULL == (id_ptr = H5I__find_id(id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID")
 
     /*
      * If this is the last reference to the object then invoke the type's
@@ -1246,6 +1230,11 @@ H5I_dec_ref(hid_t id)
      * file.  We have to close the dataset anyway. (SLU - 2010/9/7)
      */
     if(1 == id_ptr->count) {
+        H5I_id_type_t	*type_ptr;		/*ptr to the type	*/
+
+        /* Get the ID's type */
+        type_ptr = H5I_id_type_list_g[H5I_TYPE(id)];
+
         /* (Casting away const OK -QAK) */
         if(!type_ptr->cls->free_func || (type_ptr->cls->free_func)((void *)id_ptr->obj_ptr) >= 0) {
             /* Remove the node from the type */
@@ -1409,8 +1398,6 @@ done:
 int
 H5I_inc_ref(hid_t id, hbool_t app_ref)
 {
-    H5I_type_t		type;		/*type the object is in*/
-    H5I_id_type_t	*type_ptr;	/*ptr to the type	*/
     H5I_id_info_t	*id_ptr;	/*ptr to the ID		*/
     int ret_value;                      /* Return value */
 
@@ -1419,16 +1406,8 @@ H5I_inc_ref(hid_t id, hbool_t app_ref)
     /* Sanity check */
     HDassert(id >= 0);
 
-    /* Check arguments */
-    type = H5I_TYPE(id);
-    if(type <= H5I_BADID || type >= H5I_next_type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
-    type_ptr = H5I_id_type_list_g[type];
-    if(!type_ptr || type_ptr->init_count <= 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
-
     /* General lookup of the ID */
-    if(NULL == (id_ptr = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id)))
+    if(NULL == (id_ptr = H5I__find_id(id)))
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID")
 
     /* Adjust reference counts */
@@ -1494,8 +1473,6 @@ done:
 int
 H5I_get_ref(hid_t id, hbool_t app_ref)
 {
-    H5I_type_t		type;		/*type the object is in*/
-    H5I_id_type_t	*type_ptr;	/*ptr to the type	*/
     H5I_id_info_t	*id_ptr;	/*ptr to the ID		*/
     int ret_value;                      /* Return value */
 
@@ -1504,16 +1481,8 @@ H5I_get_ref(hid_t id, hbool_t app_ref)
     /* Sanity check */
     HDassert(id >= 0);
 
-    /* Check arguments */
-    type = H5I_TYPE(id);
-    if(type <= H5I_BADID || type >= H5I_next_type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
-    type_ptr = H5I_id_type_list_g[type];
-    if(!type_ptr || type_ptr->init_count <= 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
-
     /* General lookup of the ID */
-    if(NULL == (id_ptr = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id)))
+    if(NULL == (id_ptr = H5I__find_id(id)))
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID")
 
     /* Set return value */
@@ -2016,20 +1985,20 @@ done:
 static H5I_id_info_t *
 H5I__find_id(hid_t id)
 {
-    H5I_id_type_t	*type_ptr;		/*ptr to the type	*/
     H5I_type_t		type;			/*ID's type		*/
+    H5I_id_type_t	*type_ptr;		/*ptr to the type	*/
     H5I_id_info_t	*ret_value;		/*return value		*/
 
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
     type = H5I_TYPE(id);
-    if (type <= H5I_BADID || type >= H5I_next_type)
-        HGOTO_DONE(NULL);
+    if(type <= H5I_BADID || type >= H5I_next_type)
+	HGOTO_DONE(NULL)
 
     type_ptr = H5I_id_type_list_g[type];
-    if (!type_ptr || type_ptr->init_count <= 0)
-        HGOTO_DONE(NULL);
+    if(!type_ptr || type_ptr->init_count <= 0)
+	HGOTO_DONE(NULL)
 
     /* Locate the ID node for the ID */
     ret_value = (H5I_id_info_t *)H5SL_search(type_ptr->ids, &id);
