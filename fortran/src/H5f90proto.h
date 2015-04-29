@@ -146,12 +146,10 @@ H5_FCDLL int_f h5dclose_c ( hid_t_f *dset_id );
 H5_FCDLL int_f h5dwrite_vl_integer_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims, size_t_f *len);
 H5_FCDLL int_f h5dwrite_vl_real_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, real_f *buf, hsize_t_f *dims, size_t_f *len);
 H5_FCDLL int_f h5dwrite_vl_string_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims, size_t_f *len);
-H5_FCDLL int_f h5dwrite_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, haddr_t_f *buf, hsize_t_f *dims);
 H5_FCDLL int_f h5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims);
 H5_FCDLL int_f h5dread_vl_integer_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f *buf, hsize_t_f *dims, size_t_f *len);
 H5_FCDLL int_f h5dread_vl_real_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, real_f *buf, hsize_t_f *dims, size_t_f *len);
 H5_FCDLL int_f h5dread_vl_string_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims, size_t_f *len);
-H5_FCDLL int_f h5dread_ref_obj_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, haddr_t_f * buf, hsize_t_f *dims);
 H5_FCDLL int_f h5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, int_f * buf, hsize_t_f *dims);
 H5_FCDLL int_f h5dget_access_plist_c (hid_t_f *dset_id, hid_t_f *plist_id);
 H5_FCDLL int_f h5dget_space_c ( hid_t_f *dset_id , hid_t_f *space_id);
@@ -201,10 +199,8 @@ H5_FCDLL int_f h5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f 
  */
 
 H5_FCDLL int_f h5acreate_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *type_id, hid_t_f *space_id, hid_t_f *crt_prp, hid_t_f *aapl,  hid_t_f *attr_id);
-H5_FCDLL int_f h5aopen_name_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *attr_id);
 H5_FCDLL int_f h5awrite_f_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf);
 H5_FCDLL int_f h5aread_f_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf);
-H5_FCDLL int_f h5aclose_c ( hid_t_f *attr_id );
 H5_FCDLL int_f h5adelete_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen);
 H5_FCDLL int_f h5aopen_idx_c (hid_t_f *obj_id, int_f *idx, hid_t_f *attr_id);
 H5_FCDLL int_f h5aget_space_c (hid_t_f *attr_id, hid_t_f *space_id);
@@ -426,7 +422,6 @@ H5_FCDLL int_f h5pcreate_class_c(hid_t_f *parent, _fcd name, int_f *name_len, hi
 				  H5P_cls_create_func_t create, void *create_data,
 				  H5P_cls_copy_func_t copy, void *copy_data,
 				  H5P_cls_close_func_t close, void *close_data);
-H5_FCDLL int_f h5pcreate_class_f90_c(hid_t_f *parent, _fcd name, int_f *name_len, hid_t_f *cls);
 H5_FCDLL int_f h5pregister_c(hid_t_f *cls, _fcd name, int_f * name_len, size_t_f *size, void *value);
 H5_FCDLL int_f h5pregisterc_c(hid_t_f *cls, _fcd name, int_f * name_len, size_t_f *size, _fcd value, int_f *value_len);
 H5_FCDLL int_f h5pinsert_c(hid_t_f  *plist, _fcd name, int_f *name_len, size_t_f *size, void *value);
@@ -496,17 +491,12 @@ H5_FCDLL int_f h5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f* data_xfer_mode);
 /*
  * Functions frome H5Rf.c
  */
-H5_FCDLL int_f h5rcreate_object_c (haddr_t_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen);
 H5_FCDLL int_f h5rcreate_region_c (int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *space_id);
 H5_FCDLL int_f h5rcreate_ptr_c (void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *ref_type, hid_t_f *space_id);
-H5_FCDLL int_f h5rdereference_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *obj_id);
-H5_FCDLL int_f h5rdereference_object_c (hid_t_f *dset_id, haddr_t_f *ref, hid_t_f *obj_id);
 H5_FCDLL int_f h5rdereference_ptr_c (hid_t_f *obj_id, int_f *ref_type, void *ref, hid_t_f *ref_obj_id);
 H5_FCDLL int_f h5rget_region_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *space_id);
 H5_FCDLL int_f h5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id);
 H5_FCDLL int_f h5rget_object_type_obj_c (hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type);
-H5_FCDLL int_f h5rget_name_object_c (hid_t_f *loc_id, haddr_t_f *ref, _fcd name, size_t_f *name_len, size_t_f *size_default);
-H5_FCDLL int_f h5rget_name_region_c (hid_t_f *loc_id, int_f *ref, _fcd name, size_t_f *name_len, size_t_f *size_default);
 H5_FCDLL int_f h5rget_name_ptr_c (hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t_f *name_len, size_t_f *size_default);
 H5_FCDLL int_f h5rget_obj_type_c (hid_t_f *loc_id, int_f *ref_type, void *ref, int_f *obj_type);
 /*
