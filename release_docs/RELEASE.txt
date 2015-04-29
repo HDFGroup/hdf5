@@ -356,6 +356,13 @@ Bug Fixes since HDF5-1.8.14
 
     Configuration
     -------------
+    - Make uninstall generated "test: argument expected".
+      The error is due to $EXAMPLETOPDIR is used without setting a value first.
+
+      Fixed by assign it with the proper value.
+
+      (AKC - 2015/04/29, HDFFV-9298) 
+
     - Windows Installer Incorrect Display of PATH Environment Variable
     
       In the Windows installer, the dialog box where the user can elect to
