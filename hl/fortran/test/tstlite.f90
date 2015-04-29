@@ -578,6 +578,7 @@ END SUBROUTINE test_dataset3D
 
 SUBROUTINE test_datasetND(rank)
 
+  USE, INTRINSIC :: ISO_C_BINDING
   USE H5LT ! module of H5LT
   USE HDF5 ! module of HDF5 library
 
@@ -628,6 +629,7 @@ SUBROUTINE test_datasetND(rank)
   INTEGER          :: type_class
   INTEGER(SIZE_T)  :: type_size
   CHARACTER(LEN=1) :: ichr1
+  TYPE(C_PTR) :: f_ptr
 
   WRITE(ichr1,'(I1.1)') rank
   CALL test_begin(' Make/Read datasets ('//ichr1//'D)        ')
@@ -768,7 +770,8 @@ SUBROUTINE test_datasetND(rank)
   IF(rank.EQ.4)THEN
      CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims(1:rank), H5T_NATIVE_INTEGER, ibuf_4, errcode)
   ELSE IF(rank.EQ.5)THEN
-     CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims(1:rank), H5T_NATIVE_INTEGER, ibuf_5, errcode)
+     f_ptr = C_LOC(ibuf_5(1,1,1,1,1))
+     CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims(1:rank), H5T_NATIVE_INTEGER, f_ptr, errcode)
   ELSE IF(rank.EQ.6)THEN
      CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims(1:rank), H5T_NATIVE_INTEGER, ibuf_6, errcode)
   ELSE IF(rank.EQ.7)THEN
@@ -782,7 +785,8 @@ SUBROUTINE test_datasetND(rank)
   IF(rank.EQ.4)THEN
      CALL h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_INTEGER, ibufr_4, dims(1:rank), errcode)
   ELSE IF(rank.EQ.5)THEN
-     CALL h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_INTEGER, ibufr_5, dims(1:rank), errcode)
+     f_ptr = C_LOC(ibufr_5(1,1,1,1,1))
+     CALL h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_INTEGER, f_ptr, dims(1:rank), errcode)
   ELSE IF(rank.EQ.6)THEN
      CALL h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_INTEGER, ibufr_6, dims(1:rank), errcode)
   ELSE IF(rank.EQ.7)THEN
@@ -844,7 +848,8 @@ SUBROUTINE test_datasetND(rank)
   IF(rank.EQ.4)THEN
      CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims(1:rank), H5T_NATIVE_REAL, rbuf_4, errcode)
   ELSE IF(rank.EQ.5)THEN
-     CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims(1:rank), H5T_NATIVE_REAL, rbuf_5, errcode)
+     f_ptr = C_LOC(rbuf_5(1,1,1,1,1))
+     CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims(1:rank), H5T_NATIVE_REAL, f_ptr, errcode)
   ELSE IF(rank.EQ.6)THEN
      CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims(1:rank), H5T_NATIVE_REAL, rbuf_6, errcode)
   ELSE IF(rank.EQ.7)THEN
@@ -858,7 +863,8 @@ SUBROUTINE test_datasetND(rank)
   IF(rank.EQ.4)THEN
      CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, rbufr_4, dims(1:rank), errcode)
   ELSE IF(rank.EQ.5)THEN
-     CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, rbufr_5, dims(1:rank), errcode)
+     f_ptr = C_LOC(rbufr_5(1,1,1,1,1))
+     CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, f_ptr, dims(1:rank), errcode)
   ELSE IF(rank.EQ.6)THEN
      CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, rbufr_6, dims(1:rank), errcode)
   ELSE IF(rank.EQ.7)THEN

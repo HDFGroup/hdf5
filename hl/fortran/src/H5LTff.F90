@@ -30,7 +30,8 @@
 !  This is needed for Windows based operating systems.
 !
 
-#include "H5config_f.inc"
+#include <H5config_f.inc>
+
 MODULE h5lt
   USE, INTRINSIC :: ISO_C_BINDING
   USE h5fortran_types
@@ -67,6 +68,7 @@ MODULE h5lt
      MODULE PROCEDURE h5ltmake_dataset_f_c_long_double6
      MODULE PROCEDURE h5ltmake_dataset_f_c_long_double7
 #endif
+     MODULE PROCEDURE h5ltmake_dataset_f_ptr
   END INTERFACE
 
   INTERFACE h5ltread_dataset_f
@@ -100,6 +102,7 @@ MODULE h5lt
      MODULE PROCEDURE h5ltread_dataset_f_c_long_double6
      MODULE PROCEDURE h5ltread_dataset_f_c_long_double7
 #endif
+     MODULE PROCEDURE h5ltread_dataset_f_ptr
   END INTERFACE
 
   INTERFACE h5ltmake_dataset_int_f
@@ -277,7 +280,7 @@ MODULE h5lt
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,dtype) &
+     INTEGER FUNCTION h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,dtype, SizeOf) &
           BIND(C,NAME='h5ltget_attribute_c')
        IMPORT :: C_CHAR, C_PTR
        IMPORT :: HID_T, SIZE_T, HSIZE_T
@@ -290,7 +293,8 @@ MODULE h5lt
        TYPE(C_PTR), VALUE :: buf                                     ! data buffer
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the
                                                                      ! the buffer:
-                                                                     ! R=Real, D=DOUBLE, I=Interger, C=Character
+                                                                     ! R=Real, D=DOUBLE, I=Interger
+       INTEGER(size_t) :: SizeOf                                     ! Sizeof the buf datatype
      END FUNCTION h5ltget_attribute_c
   END INTERFACE
 
@@ -298,6 +302,46 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Make/Read dataset functions
   !-------------------------------------------------------------------------
+
+  !-------------------------------------------------------------------------
+  ! Function(s): h5ltmake_dataset_f_ptr
+  !
+  ! Purpose: Creates and writes a dataset of a type TYPE_ID
+  !
+  ! Return: Success: 0, Failure: -1
+  !
+  ! Programmer: M. Scot Breitenfeld
+  !
+  ! Date: APR 29, 2015
+  !
+  ! Comments:
+  !
+  ! Modifications: 
+  !
+  !-------------------------------------------------------------------------
+
+  SUBROUTINE h5ltmake_dataset_f_ptr(loc_id,&
+       dset_name,&
+       rank,&
+       dims,&
+       type_id,&
+       buf,&
+       errcode )
+
+    IMPLICIT NONE
+    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
+    CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
+    INTEGER,          INTENT(in) :: rank               ! rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
+    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
+    TYPE(C_PTR) :: buf                                 ! data buffer
+    INTEGER :: errcode                                 ! error code
+    INTEGER(size_t) :: namelen                         ! name length
+
+    namelen = LEN(dset_name)
+    errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
+
+  END SUBROUTINE h5ltmake_dataset_f_ptr
 
   !-------------------------------------------------------------------------
   ! Function(s): h5ltmake_dataset_f_int(1-7)
@@ -1027,6 +1071,43 @@ CONTAINS
   END SUBROUTINE h5ltmake_dataset_f_c_long_double7
 
 #endif
+  !-------------------------------------------------------------------------
+  ! Function(s): h5ltread_dataset_f_ptr
+  !
+  ! Purpose: Read a dataset of a type TYPE_ID
+  !
+  ! Return: Success: 0, Failure: -1
+  !
+  ! Programmer: M. Scot Breitenfeld
+  !
+  ! Date: Apr 29, 2015
+  !
+  ! Comments:
+  !
+  ! Modifications:
+  !
+  !-------------------------------------------------------------------------
+
+  SUBROUTINE h5ltread_dataset_f_ptr(loc_id,&
+       dset_name,&
+       type_id,&
+       buf,&
+       dims,&
+       errcode )
+
+    IMPLICIT NONE
+    INTEGER(hid_t),   INTENT(in) :: loc_id              ! file or group identifier
+    CHARACTER(LEN=*), INTENT(in) :: dset_name           ! name of the dataset
+    INTEGER(hid_t),   INTENT(in) :: type_id             ! datatype identifier
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims  ! size of the buffer buf
+    TYPE(C_PTR) :: buf                                  ! data buffer
+    INTEGER :: errcode                                  ! error code
+    INTEGER(size_t) :: namelen 
+
+    namelen = LEN(dset_name)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id, buf, dims)
+
+  END SUBROUTINE h5ltread_dataset_f_ptr
 
   !-------------------------------------------------------------------------
   ! Function(s): h5ltread_dataset_f_int(1-7)
@@ -3414,6 +3495,44 @@ CONTAINS
   END SUBROUTINE h5ltset_attribute_string_f
 
   !-------------------------------------------------------------------------
+  ! Function: h5ltget_attribute_f
+  !
+  ! Purpose: Reads an attribute named ATTR_NAME
+  !
+  ! Return: Success: 0, Failure: -1
+  !
+  ! Programmer: M. Scot Breitenfeld
+  !
+  ! Date: Apr 29, 2015
+  !
+  ! Comments:
+  !
+  ! Modifications:
+  !
+  !-------------------------------------------------------------------------
+
+!!$  SUBROUTINE h5ltget_attribute_f(loc_id,&
+!!$       dset_name,&
+!!$       attr_name,&
+!!$       buf,&
+!!$       errcode )
+!!$
+!!$    IMPLICIT NONE
+!!$    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
+!!$    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
+!!$    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
+!!$    INTEGER :: errcode                                 ! error code
+!!$    TYPE(C_PTR) :: buf! data buffer
+!!$    INTEGER(size_t) :: namelen                         ! name length
+!!$    INTEGER(size_t) :: attrlen                         ! name length
+!!$
+!!$    namelen = LEN(dset_name)
+!!$    attrlen = LEN(attr_name)
+!!$    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,'I'//C_NULL_CHAR)
+!!$
+!!$  END SUBROUTINE h5ltget_attribute_f
+
+  !-------------------------------------------------------------------------
   ! Function: h5ltget_attribute_int_f
   !
   ! Purpose: Reads an attribute named ATTR_NAME
@@ -3445,15 +3564,20 @@ CONTAINS
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER(size_t) :: attrlen                         ! name length       
     TYPE(C_PTR) :: f_ptr
+    INTEGER(size_t) :: SizeOf
 
-    f_ptr = C_LOC(buf(1))    
+    f_ptr = C_LOC(buf(1))   
 
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    SizeOf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+#else
+    SizeOf = SIZEOF(buf(1))
+#endif
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'I'//C_NULL_CHAR)
+    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'I'//C_NULL_CHAR, SizeOf)
 
   END SUBROUTINE h5ltget_attribute_int_f
-
 
   !-------------------------------------------------------------------------
   ! Function: h5ltget_attribute_float_f
@@ -3487,12 +3611,17 @@ CONTAINS
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER(size_t) :: attrlen                         ! name length          
     TYPE(C_PTR) :: f_ptr
+    INTEGER(size_t) :: SizeOf
 
     f_ptr = C_LOC(buf(1))
-
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    SizeOf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+#else
+    SizeOf = SIZEOF(buf(1))
+#endif
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR)
+    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR, SizeOf)
 
   END SUBROUTINE h5ltget_attribute_float_f
 
@@ -3528,12 +3657,19 @@ CONTAINS
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER(size_t) :: attrlen                                 ! name length
     TYPE(C_PTR) :: f_ptr
+    INTEGER(size_t) :: SizeOf
 
-    f_ptr = C_LOC(buf(1))
+    f_ptr = C_LOC(buf(1))   
+
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    SizeOf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+#else
+    SizeOf = SIZEOF(buf(1))
+#endif
 
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'D'//C_NULL_CHAR)
+    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR, SizeOf)
 
   END SUBROUTINE h5ltget_attribute_double_f
 
