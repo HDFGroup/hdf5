@@ -234,6 +234,9 @@ MODULE H5GLOBAL
   !
   ! H5F flags (DO NOT FORGET TO UPDATE WHEN NEW FLAGS ARE ADDED !)
   !
+  ! NOTE: H5F_ACC_DEBUG is deprecated (nonfunctional) but retained for
+  !       backward compatibility since it's in the public API.
+  !
   ! H5F flags declaration
   !
   INTEGER, PARAMETER :: H5F_FLAGS_LEN = 19
