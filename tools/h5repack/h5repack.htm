@@ -1,0 +1,437 @@
+
+
+<!--
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by The HDF Group.                                               *
+  * Copyright by the Board of Trustees of the University of Illinois.         *
+  * All rights reserved.                                                      *
+  *                                                                           *
+  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+  * terms governing use, modification, and redistribution, is contained in    *
+  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+  * of the source code distribution tree; Copyright.html can be found at the  *
+  * root level of an installed copy of the electronic HDF5 document set and   *
+  * is linked from the top-level documents page.  It can also be found at     *
+  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+  * access to either file, you may request a copy from help@hdfgroup.org.     *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ -->
+
+
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5repack" -->
+<hr>
+<dl>
+
+<dt><div align=right><font color=999999 size=-1><i>
+    Last modified: 10 September 2013
+    </i></font></div>
+
+<dt><strong>Tool Name:</strong>  <a name="Tools-Repack">h5repack</a>
+
+<dt><strong>Syntax:</strong>
+    <dd><code>h5repack </code> 
+        [<em>OPTIONS</em>]
+        <em>in_file</em>
+        <em>out_file</em> 
+      <p>
+    <dd><code>h5repack </code> 
+        <code>-i</code> <em>in_file</em>
+        <code>-o</code> <em>out_file</em>
+        [<em>OPTIONS</em>]
+
+      <p>
+<dt><strong>Purpose:</strong>
+    <dd>Copies an HDF5 file to a new file with or without compression 
+        and/or chunking.
+
+      <p>
+<dt><strong>Description:</strong>
+    <dd><code>h5repack</code> is a command line tool that 
+      applies HDF5 filters to an input file <em>in_file</em>, 
+      saving the output in a new output file, <em>out_file</em>.
+
+      <p>
+<dt><strong>Options and Parameters:</strong>
+    <dd>
+    <dl>
+        <dt><code>-i</code> <em>in_file</em>
+            <dd>Input HDF5 file
+            <p>
+        <dt><code>-o</code> <em>out_file</em>
+            <dd>Output HDF5 file
+            <p>
+        <dt><code>-h</code> 
+            &nbsp;&nbsp;or&nbsp;
+            <code>--help</code>
+            <dd>Print help message.
+            <p>
+        <dt><code>-v</code>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--verbose</code>
+            <dd>Print verbose output.
+            <p>
+        <dt><code>-V</code> 
+            &nbsp;&nbsp;or&nbsp;
+            <code>--version</code>
+            <dd>Print version number.
+            <p>
+        <dt><code>-n</code>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--native</code>
+            <dd>Use native HDF5 datatypes when repacking. 
+                <br>
+                (Default behavior is to use original file datatypes.)
+                <br>
+                <em>Note that this is a change in default behavior; 
+                    prior to Release 1.6.6, <code>h5repack</code> generated
+                    files only with native datatypes.</em>
+            <p>
+        <dt><code>-L</code> 
+            &nbsp;&nbsp;or&nbsp;
+            <code>--latest</code>
+            <dd>Use latest version of the HDF5 file format.
+            <p>
+        <dt><code>-c</code> <em>max_compact_links</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--compact</code>=<em>max_compact_links</em>
+            <dd>Set the maximum number of links, <em>max_compact_links</em>, 
+                that can be stored in a group header message (compact format).
+            <p>
+        <dt><code>-d</code> <em>min_indexed_links</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--indexed</code>=<em>min_indexed_links</em>
+            <dd>Set the minimum number of links, <em>min_indexed_links</em>, 
+                in the indexed format.
+                <p>
+                <em>max_compact_links</em> and <em>min_indexed_links</em>
+                are closely related and the first must be equal to or 
+                greater than the second.
+                In the general case, however, performance will suffer, 
+                possibly dramatically, if they are equal; 
+                performance can be improved by tuning the gap between 
+                the two values to minimize unnecessary thrashing
+                between the compact storage and indexed storage modes
+                as group size waxes and wanes.
+                The relationship between <em>max_compact_links</em> and 
+                <em>min_indexed_links</em> is most important when 
+                group sizes are highly dynamic; that relationship is much
+                less important in files with a stable structure.
+                Compact mode is space and performance-efficient when groups
+                have small numbers of members;
+                indexed mode requires slightly more storage space, 
+                but provides increasingly better performance as the 
+                number of members in each group increases.
+            <p>
+        <dt><code>-m</code> <em>size</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--minimum</code>=<em>size</em>
+            <dd>Apply filter(s) only to objects whose size in bytes is
+              equal to or greater than <em>size</em>. 
+              <br>
+              <em>size</em> must be an integer greater than one
+              ( <code>1</code> ).
+              <p>
+              <i>Default:</i>&nbsp; 
+              If no size is specified, a threshold of 1024 bytes is assumed.
+            <p>
+        <dt><code>-u</code> <em>file</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--ublock</code>=<em>file</em>
+            <dd>Specify name of file containing user block data to be added.
+            <p>
+        <dt><code>-b</code> <em>user_block_size</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--block</code>=<em>user_block_size</em>
+            <dd>Set size in bytes of user block to be added.
+                <br>
+                <em>user_block_size</em> must be <code>512</code> or greater
+                and a power of <code>2</code>.
+                <p>
+                <i>Default:</i>&nbsp; <code>1024</code>
+            <p>
+        <dt><code>-M</code> <em>size</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--metadata_block_size</code>=<em>size</em>
+            <dd>Metadata block size to be used when <code>h5repack</code>
+            calls <a href="RM_H5P.html#Property-SetMetaBlockSize">
+            <code>H5Pset_meta_block_size</code></a>.
+            <br>
+            <em>size</em> must be a non-negative integer.
+            <p>
+        <dt><code>-t</code> <em>alignment_threshold</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--threshold</code>=<em>alignment_threshold</em>
+            <dd>Set threshold value for <code>H5Pset_alignment</code> call.
+            <br>
+            <em>alignment_threshold</em> must be an integer.
+            <p>
+        <dt><code>-a</code> <em>alignment</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--alignment</code>=<em>alignment</em>
+            <dd>Set alignment value for <code>H5Pset_alignment</code> call.
+            <br>
+            <em>alignment</em> must be a positive integer.
+            <p>
+
+<!-- NEW PAGE -->
+
+        <dt><code>-s</code> <em>min_size</em>[:<em>header_type</em>]
+            &nbsp;&nbsp;or&nbsp;
+            <code>--ssize</code>=<em>min_size</em>[:<em>header_type</em>]
+            <dd>Set the minimum size of optionally specified types 
+            of shared object header messages.
+            <p>
+            <em>min_size</em> is the minimum size, in bytes, of a 
+            shared object header message.  Header messages smaller than the
+            specified size will not be shared.
+            <p>
+            <em>header_type</em> specifies the type(s) of header message that 
+            this minimum size is to be applied to.
+            Valid values of <em>header_type</em> are any of the following:
+            <br><code>&nbsp;&nbsp;dspace&nbsp;</code> 
+                for dataspace header messages
+            <br><code>&nbsp;&nbsp;dtype&nbsp;&nbsp;</code> 
+                for datatype header messages
+            <br><code>&nbsp;&nbsp;fill&nbsp;&nbsp;&nbsp;</code> 
+                for fill values
+            <br><code>&nbsp;&nbsp;pline&nbsp;&nbsp;</code> 
+                for property list header messages
+            <br><code>&nbsp;&nbsp;attr&nbsp;&nbsp;&nbsp;</code> 
+                for attribute header messages
+            <br>If <em>header_type</em> is not specified, 
+            <em>min_size</em> will be applied to all header messages.
+            <p>
+        <dt><code>-f</code> <em>filter</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--filter</code>=<em>filter</em>
+            <dd>Filter type
+                <p>
+                <em>filter</em> is a string of the following format:
+                <dir>
+                <em>list_of_objects</em> : <em>name_of_filter</em>[=<em>filter_parameters</em>]
+                <p>
+                <em>list_of_objects</em> is a comma separated list of object 
+                names meaning apply the filter(s) only to those objects. 
+                If no object names are specified, the filter is applied to 
+                all objects.
+                <p>
+                <em>name_of_filter</em> can be one of the following:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>GZIP</code>, to apply the HDF5 GZIP filter 
+                    (GZIP compression)
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>SZIP</code>, to apply the HDF5 SZIP filter 
+                    (SZIP compression)
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>SHUF</code>, to apply the HDF5 shuffle filter
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>FLET</code>, to apply the HDF5 checksum filter
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>NBIT</code>, to apply the HDF5 N-bit filter
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>SOFF</code>, to apply the HDF5 scale/offset filter
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>UD</code>, to apply a user-defined filter
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>NONE</code>, to remove any filter(s)
+                <p>
+                <em>filter_parameters</em> conveys optional compression 
+                    information:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>GZIP=</code><em>deflation_level</em> from 1-9
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>SZIP=</code><em>pixels_per_block,coding_method</em> 
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <em>pixels_per_block</em> is a even number 
+                    in the range 2-32.
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <em>coding_method</em> is 
+                    <code>EC</code> or <code>NN</code>.
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>SHUF</code> (no parameter)
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>FLET</code> (no parameter)
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>NBIT</code> (no parameter)
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>SOFF=</code><em>scale_factor,scale_type</em>
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <em>scale_factor</em> is an integer.
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <em>scale_type</em> is either <code>IN</code> or 
+                    <code>DS</code>.
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>UD=</code><em>filter_id,nfilter_params,value_1[,value_2,....,value_n]</em>
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <em>filter_id</em> is the filter identifier.
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <em>nfilter_params</em> is the number of filter parameters.
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <em>value_1</em> through <em>value_n</em> are the values
+                        of each filter parameter.
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    Number of values must match the value of
+                        <em>nfilter_params</em>.
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>NONE</code> (no parameter)
+                </dir>
+            <p>
+
+<!-- NEW PAGE -->
+
+        <dt><code>-l</code> <em>layout</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--layout</code>=<em>layout</em>
+            <dd>Layout type
+                <p>
+                <em>layout</em> is a string of the following format:<br>
+                <dir>
+                <em>list_of_objects</em> : <em>layout_type</em>[=<em>layout_parameters</em>]
+                <p>
+                <em>list_of_objects</em> is a comma separated list of object 
+                names, meaning that layout information is supplied for those 
+                objects.  If no object names are specified, the layout 
+                is applied to all objects.
+                <p>
+                <em>layout_type</em> can be one of the following:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>CHUNK</code>, to apply chunking layout
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>COMPA</code>, to apply compact layout
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>CONTI</code>, to apply contiguous layout
+                <p>
+                <em>layout_parameters</em> is present only in the 
+                <code>CHUNK</code> case and specifies the chunk size of 
+                each dimension in the  following format with no intervening 
+                spaces:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code><em>dim_1</em> &times; <em>dim_2</em> &times; ... 
+                    <em>dim_n</em></code>
+                </dd>
+                </dir>
+            <p>
+        <dt><code>-e</code> <em>file</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--file</code>=<em>file</em>
+            <dd>File containing values to be passed in for the 
+                <code>-f</code> (or <code>--filter</code>) and 
+                <code>-l</code> (or <code>--layout</code>) options. 
+                <br>
+                This file contains only the filter and layout flags.
+            <p>
+
+        <dt><code>-S</code> <em>fs_strategy</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--fs_strategy</code>=<em>fs_strategy</em>
+            <dd>The type of file space management strategy to use for the 
+            output file
+            <p>
+            <em>fs_strategy</em> is a string as listed below:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>ALL_PERSIST</code>: Use persistent free-space 
+                     managers, aggregators and virtual file
+                     driver for file space allocation
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>ALL</code>: Use non-persistent free-space managers, 
+                     aggregators and virtual file driver for file space 
+                     allocation
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>AGGR_VFD</code>: Use aggregators and virtual file 
+                     driver for file space allocation
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>VFD</code>: Use virtual file driver for 
+                     file space allocation
+            <p>
+
+        <dt><code>-T</code> <em>fs_threshold</em>
+            &nbsp;&nbsp;or&nbsp;
+            <code>--fs_threshold</code>=<em>fs_threshold</em>
+            <dd>The free-space section threshold to use for the output file.
+            <p>
+            <em>fs_threshold</em> is the minimum size (in bytes) of 
+            free-space sections to be tracked by
+            the library's free-space managers.
+            <p>
+        <dt><em>in_file</em>
+            <dd>Input HDF5 file
+            <p>
+        <dt><em>out_file</em>
+            <dd>Output HDF5 file
+    </dl>
+
+    <p>
+<dt><strong>Exit Status:</strong></dt>
+    <dd><table border=0>
+        <tr valign=top align=left>
+            <td>0</td>
+            <td>Succeeded.</td>
+        </tr>
+        <tr valign=top align=left>
+            <td>&gt;0&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>An error occurred.</td>
+        </tr>
+    </table>
+
+<dt><strong>Examples:</strong>
+    <dd>
+    <ol>
+        <li><code>h5repack -f GZIP=1 -v file1 file2 </code>
+            <br>
+            Applies GZIP compression to all objects in <code>file1</code> 
+            and saves the output in <code>file2</code>.
+            Prints verbose output.
+            <br>&nbsp;
+        <li><code>h5repack -f dset1:SZIP=8,NN file1 file2 </code>
+            <br>
+            Applies SZIP compression only to object <code>dset1</code>.
+            <br>&nbsp;
+        <li><code>h5repack -l dset1,dset2:CHUNK=20x10 file1 file2</code>
+            <br>
+            Applies chunked layout to objects <code>dset1</code> 
+            and <code>dset2</code>.
+            <br>&nbsp;
+        <li><code>h5repack -f UD=307,1,9 file1 file2</code>
+            <br>
+            Adds <code>bzip2</code> filter to all datasets.
+            <br>
+    </ol>
+
+        <p>
+<dt><strong>History:</strong>
+    <dd><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Change</strong></td></tr>
+        <tr>
+          <td valign="top">1.8.12</td>
+          <td valign="top">
+            Added user-defined filter parameter (<code>UD</code>) to 
+            <code>-f <i>filter</i></code>, <code>--filter=<i>filter</i></code>
+            option for use in read and write operations.</td></tr>
+        <tr>
+          <td valign="top">1.8.9</td>
+          <td valign="top">
+            <code>-M <i>number</i>, --medata_block_size=<i>number</i></code>
+            option introduced in this release.</td></tr>
+        <tr>
+          <td valign="top">1.8.1</td>
+          <td valign="top">
+            Original syntax restored; both the new and the original syntax
+            are now supported.</td></tr>
+        <tr>
+          <td valign="top">1.8.0</td>
+          <td valign="top">
+            <code>h5repack</code> command line syntax changed in this 
+            release.</td></tr>
+        <tr>
+          <td valign="top">1.6.2</td>
+          <td valign="top">
+            <code>h5repack</code> introduced in this release.</td></tr>
+    </table></dd>
+</dl>
+
+
