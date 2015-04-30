@@ -280,7 +280,7 @@ MODULE h5lt
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,dtype, SizeOf) &
+     INTEGER FUNCTION h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,dtype, SizeOf_buf) &
           BIND(C,NAME='h5ltget_attribute_c')
        IMPORT :: C_CHAR, C_PTR
        IMPORT :: HID_T, SIZE_T, HSIZE_T
@@ -294,7 +294,7 @@ MODULE h5lt
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the
                                                                      ! the buffer:
                                                                      ! R=Real, D=DOUBLE, I=Interger
-       INTEGER(size_t) :: SizeOf                                     ! Sizeof the buf datatype
+       INTEGER(size_t) :: SizeOf_buf                                 ! Sizeof the buf datatype
      END FUNCTION h5ltget_attribute_c
   END INTERFACE
 
@@ -3564,18 +3564,18 @@ CONTAINS
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER(size_t) :: attrlen                         ! name length       
     TYPE(C_PTR) :: f_ptr
-    INTEGER(size_t) :: SizeOf
+    INTEGER(size_t) :: SizeOf_buf
 
     f_ptr = C_LOC(buf(1))   
 
 #ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
-    SizeOf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+    SizeOf_buf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
-    SizeOf = SIZEOF(buf(1))
+    SizeOf_buf = SIZEOF(buf(1))
 #endif
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'I'//C_NULL_CHAR, SizeOf)
+    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'I'//C_NULL_CHAR, SizeOf_buf)
 
   END SUBROUTINE h5ltget_attribute_int_f
 
@@ -3611,17 +3611,17 @@ CONTAINS
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER(size_t) :: attrlen                         ! name length          
     TYPE(C_PTR) :: f_ptr
-    INTEGER(size_t) :: SizeOf
+    INTEGER(size_t) :: SizeOf_buf
 
     f_ptr = C_LOC(buf(1))
 #ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
-    SizeOf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+    SizeOf_buf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
-    SizeOf = SIZEOF(buf(1))
+    SizeOf_buf = SIZEOF(buf(1))
 #endif
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR, SizeOf)
+    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR, SizeOf_buf)
 
   END SUBROUTINE h5ltget_attribute_float_f
 
@@ -3657,19 +3657,19 @@ CONTAINS
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER(size_t) :: attrlen                                 ! name length
     TYPE(C_PTR) :: f_ptr
-    INTEGER(size_t) :: SizeOf
+    INTEGER(size_t) :: SizeOf_buf
 
     f_ptr = C_LOC(buf(1))   
 
 #ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
-    SizeOf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+    SizeOf_buf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
-    SizeOf = SIZEOF(buf(1))
+    SizeOf_buf = SIZEOF(buf(1))
 #endif
 
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR, SizeOf)
+    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR, SizeOf_buf)
 
   END SUBROUTINE h5ltget_attribute_double_f
 
