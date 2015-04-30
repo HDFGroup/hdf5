@@ -55,6 +55,10 @@
  *      and 'size' callbacks for places to change when updating this. */
 #define H5O_SDSPACE_VERSION_LATEST H5O_SDSPACE_VERSION_2
 
+/* Maximum dimension size (highest value that is not a special value e.g.
+ * H5S_UNLIMITED) */
+#define H5S_MAX_SIZE            ((hsize_t)(hssize_t)(-2))
+
 
 /*
  * Dataspace extent information
@@ -124,7 +128,7 @@ typedef struct {
          * contains H5S_UNLIMITED in the count or block of the unlimited
          * dimension (if any). */
     int unlim_dim;                              /* Dimension where selection is unlimited, or -1 if none */
-    hsize_t unlim_dim_clip_size;                /* Size to which the selection is clipped in unlimited dimension */
+    hssize_t unlim_dim_clip_size;               /* Size to which the selection is clipped in unlimited dimension */
     hsize_t num_elem_non_unlim;                 /* # of elements in a "slice" excluding the unlimited dimension */
     H5S_hyper_span_info_t *span_lst; /* List of hyperslab span information */
 } H5S_hyper_sel_t;

@@ -13375,7 +13375,6 @@ test_hyper_unlim(void)
         if(HDmemcmp(&blocklist[6], eblock2, sizeof(eblock2)))
             ERROR("H5Sget_select_hyper_blocklist");
 
-#if 0 //VDSINC
     /* Set offset of selection */
     ret = H5Soffset_simple(sid, offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
@@ -13393,10 +13392,10 @@ test_hyper_unlim(void)
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
 
     /* Verify blocklist */
-    eblock1[1] = 1;
-    eblock1[4] = 6;
-    eblock2[1] = 1;
-    eblock2[4] = 6;
+    eblock1[1] = 2;
+    eblock1[4] = 7;
+    eblock2[1] = 2;
+    eblock2[4] = 7;
     if(HDmemcmp(blocklist, eblock1, sizeof(eblock1))) {
         if(HDmemcmp(blocklist, eblock2, sizeof(eblock2)))
             ERROR("H5Sget_select_hyper_blocklist");
@@ -13408,9 +13407,9 @@ test_hyper_unlim(void)
             ERROR("H5Sget_select_hyper_blocklist");
 
     /* Reset offset of selection */
-    ret = H5Soffset_simple(sid, NULL);
+    offset[1] = (hssize_t)0;
+    ret = H5Soffset_simple(sid, offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
-#endif
 
     /*
      * Now try with multiple blocks in unlimited dimension
@@ -13454,7 +13453,6 @@ test_hyper_unlim(void)
         if(HDmemcmp(&blocklist[6], eblock2, sizeof(eblock2)))
             ERROR("H5Sget_select_hyper_blocklist");
 
-#if 0 //VDSINC
     /* Shrink dataspace */
     dims[1] = 3;
     ret = H5Sset_extent_simple(sid, 3, dims, mdims);
@@ -13476,7 +13474,6 @@ test_hyper_unlim(void)
     eblock1[4] = 2;
     if(HDmemcmp(blocklist, eblock1, sizeof(eblock1)))
         ERROR("H5Sget_select_hyper_blocklist");
-#endif //VDSINC
 
     /* Extend dataspace */
     dims[1] = 4;
@@ -13521,7 +13518,6 @@ test_hyper_unlim(void)
     if(HDmemcmp(blocklist, eblock1, sizeof(eblock1)))
         ERROR("H5Sget_select_hyper_blocklist");
 
-#if 0 //VDSINC
     /* Extend dataspace */
     dims[1] = 6;
     ret = H5Sset_extent_simple(sid, 3, dims, mdims);
@@ -13552,6 +13548,7 @@ test_hyper_unlim(void)
             ERROR("H5Sget_select_hyper_blocklist");
 
     /* Set offset of selection */
+    offset[1] = (hssize_t)-1;
     ret = H5Soffset_simple(sid, offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
 
@@ -13568,10 +13565,10 @@ test_hyper_unlim(void)
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
 
     /* Verify blocklist */
-    eblock1[1] = 1;
-    eblock1[4] = 2;
-    eblock2[1] = 4;
-    eblock2[4] = 5;
+    eblock1[1] = 2;
+    eblock1[4] = 3;
+    eblock2[1] = 5;
+    eblock2[4] = 6;
     if(HDmemcmp(blocklist, eblock1, sizeof(eblock1))) {
         if(HDmemcmp(blocklist, eblock2, sizeof(eblock2)))
             ERROR("H5Sget_select_hyper_blocklist");
@@ -13600,15 +13597,15 @@ test_hyper_unlim(void)
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
 
     /* Verify blocklist */
-    eblock1[1] = 5;
-    eblock1[4] = 5;
+    eblock1[1] = 2;
+    eblock1[4] = 2;
     if(HDmemcmp(blocklist, eblock1, sizeof(eblock1)))
         ERROR("H5Sget_select_hyper_blocklist");
 
     /* Reset offset of selection */
-    ret = H5Soffset_simple(sid, NULL);
+    offset[1] = (hssize_t)0;
+    ret = H5Soffset_simple(sid, offset);
     CHECK(ret, FAIL, "H5Soffset_simple");
-#endif //VDSINC
 
     //VDSINC write test saving unlim selection to file as region reference
 
