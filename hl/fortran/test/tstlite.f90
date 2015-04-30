@@ -599,19 +599,19 @@ SUBROUTINE test_datasetND(rank)
   CHARACTER(LEN=5), PARAMETER :: dsetname4 = "dset4"          ! Dataset name
   INTEGER(HID_T) :: file_id                                   ! File identifier
   INTEGER(HSIZE_T), DIMENSION(7) :: dims
-  INTEGER(HSIZE_T), DIMENSION(7) :: dimsr                     ! Dataset dimensions
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:) :: ibuf_4          ! Data buffer
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:) :: ibufr_4         ! Data buffer
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:) :: ibuf_5        ! Data buffer
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:) :: ibufr_5       ! Data buffer
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:,:) :: ibuf_6      ! Data buffer
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:,:) :: ibufr_6     ! Data buffer
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:) :: ibuf_7    ! Data buffer
-  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:) :: ibufr_7   ! Data buffer
+  INTEGER(HSIZE_T), DIMENSION(7) :: dimsr                       ! Dataset dimensions
+  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:) :: ibuf_4            ! Data buffer
+  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:) :: ibufr_4           ! Data buffer
+  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:), TARGET :: ibuf_5  ! Data buffer
+  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:), TARGET :: ibufr_5 ! Data buffer
+  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:,:) :: ibuf_6        ! Data buffer
+  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:,:) :: ibufr_6       ! Data buffer
+  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:) :: ibuf_7      ! Data buffer
+  INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:) :: ibufr_7     ! Data buffer
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rbuf_4                ! Data buffer
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:) :: rbufr_4               ! Data buffer
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:,:) :: rbuf_5              ! Data buffer
-  REAL, ALLOCATABLE, DIMENSION(:,:,:,:,:) :: rbufr_5             ! Data buffer
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:,:), TARGET :: rbuf_5      ! Data buffer
+  REAL, ALLOCATABLE, DIMENSION(:,:,:,:,:), TARGET :: rbufr_5     ! Data buffer
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:,:,:) :: rbuf_6            ! Data buffer
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:,:,:) :: rbufr_6           ! Data buffer
   REAL, ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:) :: rbuf_7          ! Data buffer
