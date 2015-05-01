@@ -1,37 +1,28 @@
-HDF5 version 1.8.15-pre7 released on 2015-04-30
+HDF5 version 1.8.15 currently under development
 ================================================================================
 
 INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.14 and 
-HDF5-1.8.15-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.15-*. 
-For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
-and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
+HDF5-1.8.15, and contains information on the platforms tested and 
+known problems in HDF5-1.8.15. 
 
-Links to the HDF5 1.8.14 source code, documentation, and additional materials
+Links to the HDF5 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.14 release can be obtained from:
+The HDF5 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.14 can be accessed directly at this location: 
+User documentation for HDF5 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
-New features in the HDF5-1.8.x release series, including brief general 
-descriptions of some new and modified APIs, are described in the "What's New 
-in 1.8.0?" document:
-
-     http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
-
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.15 (current 
-release) versus Release 1.8.14
+from Release to Release" document at this location:
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 

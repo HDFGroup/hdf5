@@ -1,16 +1,22 @@
-HDF5 version 1.8.15-pre7 released on 2015-04-30
+HDF5 version 1.8.15 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
 This release is fully functional for the API described in the documentation. 
-See the RELEASE.txt file in the release_docs/ directory for information 
-specific to this release of the library.  Several INSTALL* files can also be 
-found in the release_docs/ directory:  INSTALL contains instructions for 
-compiling and installing the library;  INSTALL_parallel contains instructions 
-for installing the parallel version of the library;  similarly-named files
-contain instructions for several environments on MS Windows systems. 
 
-Documentation for this release can be found at the following URL:
+See the RELEASE.txt file in the release_docs/ directory for information 
+specific to this release of the library.  
+
+Several INSTALL* files can also be found in the release_docs/ directory:  
+ - INSTALL contains instructions for compiling and installing the HDF5 library  
+ - INSTALL_parallel contains instructions for installing the parallel HDF5
+   library
+ - Similarly-named files contain instructions for building with CMake on 
+   Windows and UNIX systems. 
+
+The HDF5 website is located at http://hdfgroup.org/HDF5/
+
+Documentation for HDF5 can be found at the following URL:
     http://www.hdfgroup.org/HDF5/doc/.
 
 The following  mailing lists are currently set up for HDF5 Library users:
@@ -33,6 +39,4 @@ Periodic code snapshots are provided at the following URL:
 Please read the README.txt file in that directory before working with a 
 library snapshot.
 
-The HDF5 website is located at http://hdfgroup.org/HDF5/
-
-Bugs should be reported to help@hdfgroup.org.
+Bugs and requests should be sent to help@hdfgroup.org.
