@@ -573,6 +573,12 @@ typedef struct H5F_io_info_t {
     const struct H5P_genplist_t *dxpl;         /* DXPL object */
 } H5F_io_info_t;
 
+/* Concise info about a block of bytes in a file */
+typedef struct H5F_block_t {
+    haddr_t offset;             /* Offset of the block in the file */
+    hsize_t length;             /* Length of the block in the file */
+} H5F_block_t;
+
 
 /*****************************/
 /* Library-private Variables */

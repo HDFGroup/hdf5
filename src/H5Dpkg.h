@@ -34,6 +34,7 @@
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5B2private.h"        /* v2 B-trees                           */
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatypes         			*/
@@ -184,6 +185,7 @@ typedef struct {
 } H5D_contig_storage_t;
 
 typedef struct {
+    hsize_t index;          /* "Index" of chunk in dataset (must be first for TBBT routines) */
     hsize_t *offset;        /* Chunk's coordinates in elements */
 } H5D_chunk_storage_t;
 
@@ -257,8 +259,8 @@ typedef struct H5D_chk_idx_info_t {
  * The chunk's file address, filter mask and size on disk are not key values.
  */
 typedef struct H5D_chunk_rec_t {
-    uint32_t	nbytes;				/* Size of stored data	*/
     hsize_t	offset[H5O_LAYOUT_NDIMS];	/* Logical offset to start */
+    uint32_t	nbytes;				/* Size of stored data	*/
     unsigned	filter_mask;			/* Excluded filters	*/
     haddr_t     chunk_addr;                     /* Address of chunk in file */
 } H5D_chunk_rec_t;
@@ -286,12 +288,10 @@ typedef struct H5D_chunk_ud_t {
 
     /* Upward */
     unsigned    idx_hint;               /*index of chunk in cache, if present */
-    haddr_t	addr;			/*file address of chunk */
-    uint32_t	nbytes;			/*size of stored data	*/
+    H5F_block_t chunk_block;            /*offset/length of chunk in file */
     unsigned	filter_mask;		/*excluded filters	*/
     hbool_t     new_unfilt_chunk;       /*whether the chunk just became unfiltered */
     hsize_t    chunk_idx;              /*chunk index for EA, FA indexing */
-    hbool_t    need_insert;
     hbool_t    need_modify;
 } H5D_chunk_ud_t;
 
@@ -540,7 +540,7 @@ typedef struct H5D_rdcc_ent_t {
     hsize_t 	scaled[H5O_LAYOUT_NDIMS]; /*scaled chunk 'name' (coordinates) */
     uint32_t	rd_count;	/*bytes remaining to be read		*/
     uint32_t	wr_count;	/*bytes remaining to be written		*/
-    haddr_t     chunk_addr;     /*address of chunk in file		*/
+    H5F_block_t chunk_block;    /*offset/length of chunk in file        */
     hsize_t     chunk_idx;  	/*index of chunk in dataset             */
     uint8_t	*chunk;		/*the unfiltered chunk data		*/
     unsigned	idx;		/*index in hash table			*/

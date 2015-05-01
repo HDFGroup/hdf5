@@ -1035,8 +1035,7 @@ H5D_bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     HDassert(idx_info->storage);
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
-    HDassert(udata->need_insert || udata->need_modify);
-    HDassert(H5F_addr_defined(udata->addr));
+    HDassert(H5F_addr_defined(udata->chunk_block.offset));
 
     /* Check if the v2 B-tree is open yet */
     if(NULL == idx_info->storage->u.btree2.bt2) {
@@ -1054,16 +1053,15 @@ H5D_bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
 
     if(idx_info->pline->nused > 0) { /* filtered chunk */
 	bt2_udata.rec = &filt_rec;
-
-	filt_rec.addr = udata->addr;
-        filt_rec.nbytes = udata->nbytes;
+	filt_rec.addr = udata->chunk_block.offset;
+        filt_rec.nbytes = udata->chunk_block.length;
         filt_rec.filter_mask = udata->filter_mask;
 	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
 	    filt_rec.offset[u] = udata->common.offset[u];
     } else { /* non-filtered chunk */
 	bt2_udata.rec = &rec;
 
-	rec.addr = udata->addr;
+	rec.addr = udata->chunk_block.offset;
 	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
 	    rec.offset[u] = udata->common.offset[u];
     }
@@ -1075,7 +1073,6 @@ H5D_bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
 	if(H5B2_modify(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_mod_filt_cb, &filt_rec) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree")
     } else {
-	HDassert(udata->need_insert);
 
 	/* Insert record for object in v2 B-tree */
 	if(H5B2_insert(bt2, idx_info->dxpl_id, &bt2_udata) < 0)                
@@ -1205,8 +1202,8 @@ H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 	    HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
 	/* Set info for the chunk */
-        udata->addr = found_rec.addr;
-        udata->nbytes = found_rec.nbytes;
+        udata->chunk_block.offset = found_rec.addr;
+        udata->chunk_block.length = found_rec.nbytes;
         udata->filter_mask = found_rec.filter_mask;
     } /* end if */
     else { /* non-filtered chunk */
@@ -1230,12 +1227,15 @@ H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 	if(H5B2_find(bt2, idx_info->dxpl_id, &bt2_udata, H5D_bt2_found_cb, &found_rec) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in v2 B-tree")
 
-	udata->addr = found_rec.addr;
+	udata->chunk_block.offset = found_rec.addr;
 
 	/* Update the other (constant) information for the chunk */
-        udata->nbytes = idx_info->layout->size;
+	udata->chunk_block.length = idx_info->layout->size;
         udata->filter_mask = 0;
     } /* end else */
+
+    if(!H5F_addr_defined(udata->chunk_block.offset))
+	udata->chunk_block.length = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

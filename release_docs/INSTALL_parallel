@@ -49,9 +49,8 @@ more detailed explanations.
 ----------------------------
 HDF5 knows several parallel compilers: mpicc, hcc, mpcc, mpcc_r.  To build
 parallel HDF5 with one of the above, just set CC as it and configure.
-The "--enable-parallel" is optional in this case.
 
-    $ CC=/usr/local/mpi/bin/mpicc ./configure --prefix=<install-directory>
+    $ CC=/usr/local/mpi/bin/mpicc ./configure --enable-parallel --prefix=<install-directory>
     $ make		# build the library
     $ make check	# verify the correctness
 			# Read the Details section about parallel tests.
@@ -79,7 +78,7 @@ is supported.
 
 Then do the following steps:
 
-    $ ./configure --disable-shared --prefix=<install-directory>
+    $ ./configure --enable-parallel --disable-shared --prefix=<install-directory>
     $ make		# build the library
     $ make check	# verify the correctness
 			# Read the Details section about parallel tests.
@@ -176,8 +175,8 @@ a properly installed parallel compiler (e.g., MPICH's mpicc or IBM's mpcc_r)
 and supply the compiler name as the value of the CC environment variable.
 For examples,
 
-    $ CC=mpcc_r ./configure
-    $ CC=/usr/local/mpi/bin/mpicc ./configure
+    $ CC=mpcc_r ./configure --enable-parallel
+    $ CC=/usr/local/mpi/bin/mpicc ./configure --enable-parallel
 
 If no such a compiler command is available then you must use your normal
 C compiler along with the location(s) of MPI/MPI-IO files to be used.

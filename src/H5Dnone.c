@@ -207,10 +207,10 @@ H5D_none_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     udata->chunk_idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->max_down_chunks, udata->common.scaled);
 
     /* Calculate the address of the chunk */
-    udata->addr = idx_info->storage->idx_addr + udata->chunk_idx * idx_info->layout->size;
+    udata->chunk_block.offset = idx_info->storage->idx_addr + udata->chunk_idx * idx_info->layout->size;
 
     /* Update the other (constant) information for the chunk */
-    udata->nbytes = idx_info->layout->size;
+    udata->chunk_block.length = idx_info->layout->size;
     udata->filter_mask = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)

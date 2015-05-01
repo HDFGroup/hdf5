@@ -1047,7 +1047,6 @@ H5D_farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     HDassert(idx_info->storage);
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
-    HDassert(udata->need_insert);
 
     /* Check if the fixed array is open yet */
     if(NULL == idx_info->storage->u.farray.fa) {
@@ -1059,7 +1058,7 @@ H5D_farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     /* Set convenience pointer to fixed array structure */
     fa = idx_info->storage->u.farray.fa;
 
-    if(!H5F_addr_defined(udata->addr))
+    if(!H5F_addr_defined(udata->chunk_block.offset))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "The chunk should have allocated already")
     if(udata->chunk_idx != (udata->chunk_idx & 0xffffffff)) /* negative value */
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk index must be less than 2^32")
@@ -1068,8 +1067,8 @@ H5D_farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     if(idx_info->pline->nused > 0) {
         H5D_farray_filt_elmt_t elmt;            /* Fixed array element */
 
-	elmt.addr = udata->addr;
-        elmt.nbytes = udata->nbytes;
+	elmt.addr = udata->chunk_block.offset;
+        elmt.nbytes = udata->chunk_block.length;
         elmt.filter_mask = udata->filter_mask;
 
         /* Set the info for the chunk */
@@ -1078,7 +1077,7 @@ H5D_farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     } /* end if */
     else {
         /* Set the address for the chunk */
-        if(H5FA_set(fa, idx_info->dxpl_id, udata->chunk_idx, &udata->addr) < 0)
+        if(H5FA_set(fa, idx_info->dxpl_id, udata->chunk_idx, &udata->chunk_block.offset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk address")
     } /* end else */
 
@@ -1147,19 +1146,22 @@ H5D_farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
 
         /* Set the info for the chunk */
-        udata->addr = elmt.addr;
-        udata->nbytes = elmt.nbytes;
+        udata->chunk_block.offset = elmt.addr;
+        udata->chunk_block.length = elmt.nbytes;
         udata->filter_mask = elmt.filter_mask;
     } /* end if */
     else {
         /* Get the address for the chunk */
-        if(H5FA_get(fa, idx_info->dxpl_id, idx, &udata->addr) < 0)
+        if(H5FA_get(fa, idx_info->dxpl_id, idx, &udata->chunk_block.offset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
 
         /* Update the other (constant) information for the chunk */
-        udata->nbytes = idx_info->layout->size;
+	udata->chunk_block.length = idx_info->layout->size;
         udata->filter_mask = 0;
     } /* end else */
+
+    if(!H5F_addr_defined(udata->chunk_block.offset))
+	udata->chunk_block.length = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
