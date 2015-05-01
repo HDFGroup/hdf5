@@ -406,7 +406,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   PAC_PROG_FC_HAVE_F2003_REQUIREMENTS
  
   if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
-    AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
+    AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran])
   else
     HAVE_FORTRAN_2003="yes"
   fi

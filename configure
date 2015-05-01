@@ -5763,7 +5763,7 @@ rm -f core conftest.err conftest.$ac_objext \
 
 
   if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
-    as_fn_error $? "Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003" "$LINENO" 5
+    as_fn_error $? "Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran" "$LINENO" 5
   else
     HAVE_FORTRAN_2003="yes"
   fi
