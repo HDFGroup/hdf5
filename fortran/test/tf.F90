@@ -44,7 +44,7 @@ MODULE TH5_MISC
     REAL :: a
     INTEGER :: x
     DOUBLE PRECISION :: y
-    CHARACTER(KIND=C_CHAR, LEN=1) :: z
+    CHARACTER(KIND=C_CHAR) :: z
   END TYPE comp_datatype
 
   PUBLIC :: H5_SIZEOF

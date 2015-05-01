@@ -45,7 +45,7 @@ MODULE liter_cb_mod
 
   ! Custom group iteration callback data 
   TYPE, bind(c) ::  iter_info
-     CHARACTER(LEN=1), DIMENSION(1:10) :: name !  The name of the object 
+     CHARACTER(KIND=C_CHAR), DIMENSION(1:10) :: name !  The name of the object 
      INTEGER(c_int) :: TYPE    !  The TYPE of the object 
      INTEGER(c_int) :: command ! The TYPE of RETURN value 
   END TYPE iter_info
@@ -125,7 +125,7 @@ SUBROUTINE test_iter_group(total_error)
 
   USE HDF5 
   USE TH5_MISC
-  USE ISO_C_BINDING
+  USE, INTRINSIC :: ISO_C_BINDING
   USE liter_cb_mod
   IMPLICIT NONE
 
