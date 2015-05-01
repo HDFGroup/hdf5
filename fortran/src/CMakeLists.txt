@@ -60,7 +60,7 @@ set_target_properties (H5test_FortranHavekind PROPERTIES
 set (CMD $<TARGET_FILE:H5test_FortranHavekind>)
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
-           ${HDF5_F90_BINARY_DIR}/H5KINDff.F90
+           ${HDF5_F90_BINARY_DIR}/H5_KINDff.F90
     COMMAND ${CMD}
     ARGS > ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
@@ -175,7 +175,11 @@ set (f90_F_SRCS
 
 set (f90_F_SRCS
     ${f90_F_SRCS}
+    
+    # generated file
     ${HDF5_F90_BINARY_DIR}/H5_KINDff.F90
+    
+    # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
 )
 
