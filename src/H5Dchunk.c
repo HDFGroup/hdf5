@@ -337,9 +337,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
 
     /* Calculate the index of this chunk */
-    if(H5VM_chunk_index(dset->shared->ndims, offset,
-            layout->u.chunk.dim, layout->u.chunk.down_chunks, &chunk_idx) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
+    chunk_idx = H5VM_chunk_index(dset->shared->ndims, offset, layout->u.chunk.dim, layout->u.chunk.down_chunks);
 
     /* Find out the file address of the chunk (if any) */
     if(H5D__chunk_lookup(dset, dxpl_id, offset, chunk_idx, &udata) < 0)
@@ -1156,8 +1154,7 @@ H5D__create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t
     chunk_info->coords[fm->f_ndims] = 0;
 
     /* Calculate the index of this chunk */
-    if(H5VM_chunk_index(fm->f_ndims, chunk_info->coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_info->index) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    chunk_info->index = H5VM_chunk_index(fm->f_ndims, chunk_info->coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks);
 
     /* Copy selection for file's dataspace into chunk dataspace */
     if(H5S_select_copy(fm->single_space, fm->file_space, FALSE) < 0)
@@ -1215,7 +1212,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     hsize_t     sel_points;                 /* Number of elements in file selection */
     hsize_t     start_coords[H5O_LAYOUT_NDIMS];   /* Starting coordinates of selection */
     hsize_t     coords[H5O_LAYOUT_NDIMS];   /* Current coordinates of chunk */
-    hsize_t     end[H5O_LAYOUT_NDIMS];      /* Current coordinates of chunk */
+    hsize_t     end[H5O_LAYOUT_NDIMS];      /* Final coordinates of chunk */
     hsize_t     chunk_index;                /* Index of chunk */
     int         curr_dim;                   /* Current dimension to increment */
     unsigned    u;                          /* Local index variable */
@@ -1241,8 +1238,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     } /* end for */
 
     /* Calculate the index of this chunk */
-    if(H5VM_chunk_index(fm->f_ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    chunk_index = H5VM_chunk_index(fm->f_ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks);
 
     /* Iterate through each chunk in the dataset */
     while(sel_points) {
@@ -1358,8 +1354,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             } while(coords[curr_dim] > sel_end[curr_dim]);
 
             /* Re-calculate the index of this chunk */
-            if(H5VM_chunk_index(fm->f_ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+            chunk_index = H5VM_chunk_index(fm->f_ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks);
         } /* end if */
     } /* end while */
 
@@ -1501,14 +1496,14 @@ H5D__chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, cons
     H5D_chunk_info_t *chunk_info;               /* Chunk information for current chunk */
     hsize_t     coords_in_chunk[H5O_LAYOUT_NDIMS];        /* Coordinates of element in chunk */
     hsize_t     chunk_index;                    /* Chunk index */
+    hsize_t     scaled[H5S_MAX_RANK];	        /* Scaled coordinates for this chunk */
     unsigned    u;                              /* Local index variable */
     herr_t	ret_value = SUCCEED;            /* Return value		*/
 
     FUNC_ENTER_STATIC
 
     /* Calculate the index of this chunk */
-    if(H5VM_chunk_index(ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    chunk_index = H5VM_chunk_index_scaled(ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, scaled);
 
     /* Find correct chunk in file & memory skip list */
     if(chunk_index==fm->last_index) {
@@ -1561,7 +1556,7 @@ H5D__chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, cons
             /* Compute the chunk's coordinates */
             for(u = 0; u < fm->f_ndims; u++) {
                 H5_CHECK_OVERFLOW(fm->layout->u.chunk.dim[u], hsize_t, hssize_t);
-                chunk_info->coords[u] = (coords[u] / (hssize_t)fm->layout->u.chunk.dim[u]) * (hssize_t)fm->layout->u.chunk.dim[u];
+                chunk_info->coords[u] = scaled[u] * (hssize_t)fm->layout->u.chunk.dim[u];
             } /* end for */
             chunk_info->coords[fm->f_ndims] = 0;
 
@@ -1625,8 +1620,7 @@ H5D__chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
     FUNC_ENTER_STATIC
 
     /* Calculate the index of this chunk */
-    if(H5VM_chunk_index(ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks, &chunk_index) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+    chunk_index = H5VM_chunk_index(ndims, coords, fm->layout->u.chunk.dim, fm->layout->u.chunk.down_chunks);
 
     /* Find correct chunk in file & memory skip list */
     if(chunk_index == fm->last_index) {
@@ -1968,8 +1962,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         /* Get the actual chunk information from the skip list node */
         chunk_info = H5D_CHUNK_GET_NODE_INFO(fm, chunk_node);
 
-        /* Load the chunk into cache.  But if the whole chunk is written,
-         * simply allocate space instead of load the chunk. */
+        /* Look up the chunk */
         if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->coords, chunk_info->index, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 
@@ -1977,9 +1970,12 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         HDassert((H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) || 
                 (!H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
+        /* Determine if we should use the chunk cache */
         if((cacheable = H5D__chunk_cacheable(io_info, udata.chunk_block.offset, TRUE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable")
         if(cacheable) {
+            /* Load the chunk into cache.  But if the whole chunk is written,
+             * simply allocate space instead of load the chunk. */
             hbool_t entire_chunk = TRUE;       /* Whether whole chunk is selected */
 
             /* Pass in chunk's coordinates in a union. */
@@ -2409,7 +2405,7 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset,
         ent = dset->shared->cache.chunk.slot[udata->idx_hint];
 
         if(ent)
-            for(u = 0, found = TRUE; u < dset->shared->layout.u.chunk.ndims - 1; u++)
+            for(u = 0, found = TRUE; u < dset->shared->ndims; u++)
                 if(chunk_offset[u] != ent->offset[u]) {
                     found = FALSE;
                     break;
@@ -3432,12 +3428,8 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             {
                 hsize_t chunk_idx;
 
-                /* Calculate the index of this chunk */
-                if(H5VM_chunk_index(space_ndims, chunk_offset,
-                        layout->u.chunk.dim, layout->u.chunk.down_chunks,
-                        &chunk_idx) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
-
+                /* Look up this chunk */
+                chunk_idx = H5VM_chunk_index(space_ndims, chunk_offset, layout->u.chunk.dim, layout->u.chunk.down_chunks);
                 if(H5D__chunk_lookup(dset, dxpl_id, chunk_offset, chunk_idx, &udata) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 
@@ -4170,10 +4162,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
             int i;	                        /* Local index variable */
 
             /* Calculate the index of this chunk */
-            if(H5VM_chunk_index(space_ndims, chunk_offset,
-                    layout->u.chunk.dim, layout->u.chunk.down_chunks,
-                    &(chk_io_info.store->chunk.index)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
+            chk_io_info.store->chunk.index = H5VM_chunk_index(space_ndims, chunk_offset, layout->u.chunk.dim, layout->u.chunk.down_chunks);
 
             if(0 == ndims_outside_fill) {
                 HDassert(fill_dim[op_dim]);
@@ -4306,8 +4295,7 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     FUNC_ENTER_STATIC
 
     /* Compute the index for this chunk */
-    if(H5VM_chunk_index(rank, chunk_rec->offset, udata->common.layout->dim, udata->common.layout->down_chunks, &chunk_index) < 0)
-       HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, H5_ITER_ERROR, "can't get chunk index")
+    chunk_index = H5VM_chunk_index(rank, chunk_rec->offset, udata->common.layout->dim, udata->common.layout->down_chunks);
 
     /* Set it in the userdata to return */
     udata->chunk_addr[chunk_index] = chunk_rec->chunk_addr;
@@ -4497,8 +4485,7 @@ H5D__chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
         next = ent->next;
 
         /* Calculate the index of this chunk */
-        if(H5VM_chunk_index(rank, ent->offset, dset->shared->layout.u.chunk.dim, dset->shared->layout.u.chunk.down_chunks, &idx) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+        idx = H5VM_chunk_index(rank, ent->offset, dset->shared->layout.u.chunk.dim, dset->shared->layout.u.chunk.down_chunks);
 
         /* Compute the index for the chunk entry */
         old_idx = ent->idx;   /* Save for later */

@@ -388,7 +388,7 @@ typedef struct H5D_rdcc_t {
     struct H5D_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
     H5SL_t		*sel_chunks; /* Skip list containing information for each chunk selected */
     H5S_t		*single_space; /* Dataspace for single element I/O on chunks */
-    H5D_chunk_info_t *single_chunk_info;  /* Pointer to single chunk's info */
+    H5D_chunk_info_t    *single_chunk_info;  /* Pointer to single chunk's info */
 } H5D_rdcc_t;
 
 /* The raw data contiguous data cache */

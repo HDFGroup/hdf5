@@ -682,7 +682,6 @@ static herr_t
 H5D__cache_dataspace_info(const H5D_t *dset)
 {
     int sndims;                         /* Signed number of dimensions of dataspace rank */
-    unsigned u;                         /* Local index value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -2261,7 +2260,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          */
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dset->shared->layout.type) {
-            /* Update the cached chunk info */
+            /* Set the cached chunk info */
             if(H5D__chunk_set_info(dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks")
             if(H5D__chunk_update_cache(dset, dxpl_id) < 0)
