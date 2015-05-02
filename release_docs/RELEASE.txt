@@ -64,8 +64,16 @@ New Features
 
     Library
     -------
-    - 
-      (XYZ - YYYY/MM/DD HDFFV-####)
+
+    - H5F_ACC_DEBUG flag for H5Fopen/create: functionality removed
+
+      The symbol was used to emit some extra debugging information
+      for HDF Group developers in the multi VFD. The underlying
+      functionality has been removed due to disuse. The symbol
+      remains defined since it was visible in H5Fpublic.h but it
+      has been set to zero and has no effect anywhere in the library.
+
+      (DER - 2015-05-02, HDFFV-1074)
 
       
     Parallel Library

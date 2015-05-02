@@ -421,12 +421,14 @@ nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 
 /*
  *  H5F flags
+ *
+ *  H5F_ACC_DEBUG has no effect as of HDF5 1.8.16.
  */
     h5f_flags[0] = (int_f)H5F_ACC_RDWR;
     h5f_flags[1] = (int_f)H5F_ACC_RDONLY;
     h5f_flags[2] = (int_f)H5F_ACC_TRUNC;
     h5f_flags[3] = (int_f)H5F_ACC_EXCL;
-    h5f_flags[4] = (int_f)H5F_ACC_DEBUG;
+    h5f_flags[4] = (int_f)H5F_ACC_DEBUG;    /* nonfunctional */
     h5f_flags[5] = (int_f)H5F_SCOPE_LOCAL;
     h5f_flags[6] = (int_f)H5F_SCOPE_GLOBAL;
     h5f_flags[7] = (int_f)H5F_CLOSE_DEFAULT;

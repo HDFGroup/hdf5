@@ -234,6 +234,8 @@ MODULE H5GLOBAL
   !
   ! H5F flags (DO NOT FORGET TO UPDATE WHEN NEW FLAGS ARE ADDED !)
   !
+  ! H5F_ACC_DEBUG_F has no effect as of HDF5 1.8.16
+  !
   ! H5F flags declaration
   !
   INTEGER, PARAMETER :: H5F_FLAGS_LEN = 19

@@ -41,13 +41,15 @@
  * We're assuming that these constants are used rather early in the hdf5
  * session.
  *
+ * H5F_ACC_DEBUG no longer has any prints any special debug info. The symbol is
+ * being retained and will be listed as deprecated in HDF5 1.10.0.
  */
-#define H5F_ACC_RDONLY	(H5CHECK 0x0000u)	/*absence of rdwr => rd-only */
-#define H5F_ACC_RDWR	(H5CHECK 0x0001u)	/*open for read and write    */
-#define H5F_ACC_TRUNC	(H5CHECK 0x0002u)	/*overwrite existing files   */
-#define H5F_ACC_EXCL	(H5CHECK 0x0004u)	/*fail if file already exists*/
-#define H5F_ACC_DEBUG	(H5CHECK 0x0008u)	/*print debug info	     */
-#define H5F_ACC_CREAT	(H5CHECK 0x0010u)	/*create non-existing files  */
+#define H5F_ACC_RDONLY	(H5CHECK 0x0000u)	/*absence of rdwr => rd-only        */
+#define H5F_ACC_RDWR	(H5CHECK 0x0001u)	/*open for read and write           */
+#define H5F_ACC_TRUNC	(H5CHECK 0x0002u)	/*overwrite existing files          */
+#define H5F_ACC_EXCL	(H5CHECK 0x0004u)	/*fail if file already exists       */
+#define H5F_ACC_DEBUG	(H5CHECK 0x0000u)	/*print debug info (no longer used) */
+#define H5F_ACC_CREAT	(H5CHECK 0x0010u)	/*create non-existing files         */
 
 /* Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the
  * parent file. */
