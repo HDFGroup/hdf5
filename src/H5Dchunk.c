@@ -2478,7 +2478,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
     HDassert(!ent->locked);
 
     buf = ent->chunk;
-    if(ent->dirty && !ent->deleted) {
+    if(ent->dirty) {
 	H5D_chk_idx_info_t idx_info;    /* Chunked index info */
         H5D_chunk_ud_t 	udata;		/* pass through B-tree		*/
         hbool_t must_alloc = FALSE;     /* Whether the chunk must be allocated */
@@ -2658,8 +2658,12 @@ H5D__chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
 	rdcc->tail = ent->prev;
     ent->prev = ent->next = NULL;
 
+    /* Only clear hash table slot if chunk was not marked as deleted already */
+    if(!ent->deleted)
+        rdcc->slot[ent->idx] = NULL;
+
     /* Remove from cache */
-    rdcc->slot[ent->idx] = NULL;
+    HDassert(rdcc->slot[ent->idx] != ent);
     ent->idx = UINT_MAX;
     rdcc->nbytes_used -= dset->shared->layout.u.chunk.size;
     --rdcc->nused;
@@ -4120,19 +4124,6 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
             fill_dim[op_dim] = FALSE;
     } /* end for */
 
-    /* Check the cache for any entries that are outside the bounds.  Mark these
-     * entries as deleted so they are not flushed to disk accidentally.  This is
-     * only necessary if there are chunks that need to be filled. */
-    if(has_fill)
-        for(ent = rdcc->head; ent; ent = ent->next)
-            /* Check for chunk offset outside of new dimensions */
-            for(u = 0; u < space_ndims; u++)
-                if((hsize_t)ent->offset[u] >= space_dim[u]) {
-                    /* Mark the entry as "deleted" */
-                    ent->deleted = TRUE;
-                    break;
-                } /* end if */
-
     /* Main loop: fill or remove chunks */
     for(op_dim = 0; op_dim < (unsigned)space_ndims; op_dim++) {
         /* Check if modification along this dimension is really necessary */
@@ -4452,7 +4443,6 @@ H5D__chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
 {
     H5D_rdcc_t         *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
     H5D_rdcc_ent_t     *ent, *next;	/*cache entry  */
-    H5D_rdcc_ent_t     *old_ent;	/* Old cache entry  */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     unsigned            rank;	        /* Current # of dimensions */
@@ -4492,26 +4482,42 @@ H5D__chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
         ent->idx = H5D_CHUNK_HASH(dset->shared, idx);
 
         if(old_idx != ent->idx) {
+            H5D_rdcc_ent_t     *old_ent;	/* Old cache entry  */
+
             /* Check if there is already a chunk at this chunk's new location */
             old_ent = rdcc->slot[ent->idx];
             if(old_ent != NULL) {
-                HDassert(old_ent->locked == 0);
+                HDassert(old_ent->locked == FALSE);
+                HDassert(old_ent->deleted == FALSE);
 
-                /* Check if we are removing the entry we would walk to next */
-                if(old_ent == next)
-                    next = old_ent->next;
-
-                /* Remove the old entry from the cache */
-                if(H5D__chunk_cache_evict(dset, dxpl_id, dxpl_cache, old_ent, TRUE) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+                /* Mark the old entry as deleted, but do not evict (yet).
+                 * Make sure we do not make any calls to the index
+                 * until all chunks have updated indices! */
+                old_ent->deleted = TRUE;
             } /* end if */
 
             /* Insert this chunk into correct location in hash table */
             rdcc->slot[ent->idx] = ent;
 
-            /* Null out previous location */
-            rdcc->slot[old_idx] = NULL;
+            /* If this chunk was previously marked as deleted and therefore
+             * not in the hash table, reset the deleted flag.
+             * Otherwise clear the old hash table slot. */
+            if(ent->deleted)
+                ent->deleted = FALSE;
+            else
+                rdcc->slot[old_idx] = NULL;
         } /* end if */
+    } /* end for */
+
+    /* Evict chunks that are still marked as deleted */
+    for(ent = rdcc->head; ent; ent = next) {
+        /* Get the pointer to the next cache entry */
+        next = ent->next;
+
+        /* Remove the old entry from the cache */
+        if(ent->deleted)
+            if(H5D__chunk_cache_evict(dset, dxpl_id, dxpl_cache, ent, TRUE) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
     } /* end for */
 
 done:
