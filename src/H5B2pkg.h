@@ -326,16 +326,18 @@ H5_DLL herr_t H5B2_neighbor_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
 
 /* Routines for removing records */
 H5_DLL herr_t H5B2_remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    hbool_t *depth_decreased, void *swap_loc, unsigned depth, H5AC_info_t *parent_cache_info,
-    hbool_t * parent_cache_info_dirtied_ptr, H5B2_node_ptr_t *curr_node_ptr, void *udata,
-    H5B2_remove_t op, void *op_data);
+    hbool_t *depth_decreased, void *swap_loc, unsigned depth,
+    H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
+    H5B2_node_ptr_t *curr_node_ptr, void *udata, H5B2_remove_t op,
+    void *op_data);
 H5_DLL herr_t H5B2_remove_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *curr_node_ptr, void *udata, H5B2_remove_t op,
     void *op_data);
 H5_DLL herr_t H5B2_remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    hbool_t *depth_decreased, void *swap_loc, unsigned depth, H5AC_info_t *parent_cache_info,
-    hbool_t * parent_cache_info_dirtied_ptr, H5B2_node_ptr_t *curr_node_ptr, hsize_t idx,
-    H5B2_remove_t op, void *op_data);
+    hbool_t *depth_decreased, void *swap_loc, unsigned depth,
+    H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
+    H5B2_node_ptr_t *curr_node_ptr, hsize_t n, H5B2_remove_t op,
+    void *op_data);
 H5_DLL herr_t H5B2_remove_leaf_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *curr_node_ptr, unsigned idx, H5B2_remove_t op,
     void *op_data);

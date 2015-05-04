@@ -1858,7 +1858,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDtruncate(H5FD_t *file, hid_t dxpl_id, unsigned closing)
+H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
@@ -1897,7 +1897,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_truncate(H5FD_t *file, hid_t dxpl_id, unsigned closing)
+H5FD_truncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
