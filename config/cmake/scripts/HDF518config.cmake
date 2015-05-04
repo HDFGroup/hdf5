@@ -5,7 +5,7 @@
 #########################################################################
 
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
-set(CTEST_SOURCE_VERSION 1.8.15)
+set(CTEST_SOURCE_VERSION 1.8.15-pre7)
 set(CTEST_SOURCE_NAME hdf5-${CTEST_SOURCE_VERSION})
 set(CTEST_BINARY_NAME "build")
 set(CTEST_DASHBOARD_ROOT "${CTEST_SCRIPT_DIRECTORY}")
