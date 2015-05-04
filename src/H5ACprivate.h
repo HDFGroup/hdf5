@@ -42,7 +42,7 @@
 #define H5AC__TRACE_FILE_ENABLED	0
 #endif /* H5_METADATA_TRACE_FILE */
 
-/* Define global metadata tag values */
+/* Global metadata tag values */
 #define H5AC__INVALID_TAG      (haddr_t)0
 #define H5AC__IGNORE_TAG       (haddr_t)1
 #define H5AC__SUPERBLOCK_TAG   (haddr_t)2

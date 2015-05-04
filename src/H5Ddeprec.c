@@ -407,8 +407,7 @@ H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 	/* Allocate space for the new parts of the dataset, if appropriate */
         fill = &dataset->shared->dcpl_cache.fill;
         if(fill->alloc_time == H5D_ALLOC_TIME_EARLY)
-            if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_EXTEND, FALSE,
-                    old_dims) < 0)
+            if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_EXTEND, FALSE, old_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
 
         /* Mark the dataspace as dirty, for later writing to the file */

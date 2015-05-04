@@ -332,7 +332,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     hsize_t scaled[H5S_MAX_RANK];       /* Scaled coordinates for this chunk */
     H5F_block_t old_chunk;              /* Offset/length of old chunk */
-    hbool_t     need_insert = FALSE;    /* Whether the chunk needs to be inserted into the index */
+    hbool_t need_insert = FALSE;        /* Whether the chunk needs to be inserted into the index */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
@@ -380,7 +380,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
 
     /* Make sure the address of the chunk is returned. */
     if(!H5F_addr_defined(udata.chunk_block.offset))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk address isn't defined")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk address isn't defined")
 
     /* Evict the (old) entry from the cache if present, but do not flush
      * it to disk */
@@ -751,10 +751,8 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     /* Set the number of dimensions for the memory dataspace */
     H5_ASSIGN_OVERFLOW(fm->m_ndims, sm_ndims, int, unsigned);
 
-    /* Get dim number and dimensionality for each dataspace */
+    /* Get rank for file dataspace */
     fm->f_ndims = f_ndims = dataset->shared->layout.u.chunk.ndims - 1;
-    if(H5S_get_simple_extent_dims(file_space, fm->f_dims, NULL) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
 
     /* Normalize hyperslab selections by adjusting them by the offset */
     /* (It might be worthwhile to normalize both the file and memory dataspaces
@@ -2670,7 +2668,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
                 point_of_no_return = TRUE;
                 ent->chunk = NULL;
             } /* end else */
-            H5_ASSIGN_OVERFLOW(nbytes, udata.chunk_block.length, uint32_t, size_t);
+            H5_ASSIGN_OVERFLOW(nbytes, udata.chunk_block.length, hsize_t, size_t);
             if(H5Z_pipeline(&(dset->shared->dcpl_cache.pline), 0, &(udata.filter_mask), dxpl_cache->err_detect,
                      dxpl_cache->filter_cb, &nbytes, &alloc, &buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
@@ -2679,7 +2677,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
             if(nbytes > ((size_t)0xffffffff))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
 #endif /* H5_SIZEOF_SIZE_T > 4 */
-            H5_ASSIGN_OVERFLOW(udata.chunk_block.length, nbytes, size_t, uint32_t);
+            H5_ASSIGN_OVERFLOW(udata.chunk_block.length, nbytes, size_t, hsize_t);
 
             /* Indicate that the chunk must be allocated */
             must_alloc = TRUE;
@@ -2729,7 +2727,8 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
 
         /* Write the data to the file */
         HDassert(H5F_addr_defined(udata.chunk_block.offset));
-        if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, udata.chunk_block.length, dxpl_id, buf) < 0)
+        H5_CHECK_OVERFLOW(udata.chunk_block.length, hsize_t, size_t);
+        if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, (size_t)udata.chunk_block.length, dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
         /* Insert the chunk record into the index */
@@ -3798,7 +3797,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
      * those chunks again.
      */
     chunk_size = orig_chunk_size;
-    for(op_dim=0; op_dim<space_ndims; op_dim++) {
+    for(op_dim = 0; op_dim < space_ndims; op_dim++) {
         H5D_chunk_ud_t udata;   /* User data for querying chunk info */
         unsigned u;             /* Local index variable */
         int i;                  /* Local index variable */
@@ -4680,7 +4679,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
 
     /* Go get the rank & dimensions (including the element size) */
     space_dim = dset->shared->curr_dims;
-    space_ndims = dset->shared->ndims;;
+    space_ndims = dset->shared->ndims;
 
     /* The last dimension in chunk_offset is always 0 */
     chunk_offset[space_ndims] = (hsize_t)0;
@@ -5200,7 +5199,7 @@ H5D__chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
     HDassert(dset->shared->layout.u.chunk.ndims > 0 && dset->shared->layout.u.chunk.ndims <= H5O_LAYOUT_NDIMS);
 
     /* Get the rank */
-    rank = dset->shared->layout.u.chunk.ndims-1;
+    rank = dset->shared->layout.u.chunk.ndims - 1;
     HDassert(rank > 1);
 
     /* Fill the DXPL cache values for later use */

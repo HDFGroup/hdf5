@@ -103,7 +103,7 @@ typedef struct H5D_type_info_t {
 
     /* Computed/derived values */
     size_t src_type_size;		/* Size of source type	*/
-    size_t dst_type_size;	        /* Size of destination type*/
+    size_t dst_type_size;	        /* Size of destination type */
     size_t max_type_size;	        /* Size of largest source/destination type */
     hbool_t is_conv_noop;               /* Whether the type conversion is a NOOP */
     hbool_t is_xform_noop;              /* Whether the data transform is a NOOP */
@@ -352,9 +352,9 @@ typedef struct H5D_chunk_info_t {
     hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
     hsize_t scaled[H5O_LAYOUT_NDIMS];   /* Scaled coordinates of chunk (in file dataset's dataspace) */
     H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
-    unsigned fspace_shared;     /* Indicate that the file space for a chunk is shared and shouldn't be freed */
+    hbool_t fspace_shared;      /* Indicate that the file space for a chunk is shared and shouldn't be freed */
     H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
-    unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
+    hbool_t mspace_shared;      /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
 } H5D_chunk_info_t;
 
 /* Main structure holding the mapping between file chunks and memory */
@@ -364,7 +364,6 @@ typedef struct H5D_chunk_map_t {
 
     const H5S_t *file_space;    /* Pointer to the file dataspace */
     unsigned f_ndims;           /* Number of dimensions for file dataspace */
-    hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
 
     const H5S_t *mem_space;     /* Pointer to the memory dataspace */
     H5S_t *mchunk_tmpl;         /* Dataspace template for new memory chunks */
