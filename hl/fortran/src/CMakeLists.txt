@@ -65,7 +65,7 @@ if (BUILD_SHARED_LIBS)
         BUILD_HDF5_HL_DLL
     )
     if (MSVC)
-      set (SHARED_LINK_FLAGS "/DLL")
+      set (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_BINARY_DIR}/hdf5_hl_fortrandll.def")
     endif (MSVC)
   endif (WIN32)
 endif (BUILD_SHARED_LIBS)
