@@ -259,17 +259,19 @@ CONTAINS
 !*****
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
+! H5Aopen_name is deprecated
     INTERFACE
-       INTEGER(HID_T) FUNCTION H5Aopen_name(obj_id, name) BIND(C,NAME='H5Aopen_name')
+       INTEGER(HID_T) FUNCTION H5Aopen(obj_id, name, aapl_id) BIND(C,NAME='H5Aopen')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
          INTEGER(HID_T), INTENT(IN), VALUE :: obj_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-       END FUNCTION H5Aopen_name
+         INTEGER(HID_T), INTENT(IN), VALUE :: aapl_id
+       END FUNCTION H5Aopen
     END INTERFACE
 
     c_name = TRIM(name)//C_NULL_CHAR
-    attr_id = H5Aopen_name(obj_id, c_name)
+    attr_id = H5Aopen(obj_id, c_name, H5P_DEFAULT_F)
 
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
@@ -309,17 +311,17 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
 !*****
-
+!   H5Aopen_idx is deprecated in favor of the function H5Aopen_by_idx.
     INTERFACE
-       INTEGER(HID_T) FUNCTION H5Aopen_idx(obj_id, index) BIND(C,NAME='H5Aopen_idx')
+       INTEGER(HID_T) FUNCTION H5Aopen_by_idx(obj_id, index) BIND(C,NAME='H5Aopen_by_idx')
          IMPORT :: HID_T
          IMPORT :: C_INT
          INTEGER(HID_T), INTENT(IN) :: obj_id
          INTEGER(C_INT), INTENT(IN) :: index
-       END FUNCTION H5Aopen_idx
+       END FUNCTION H5Aopen_by_idx
     END INTERFACE
 
-    attr_id = H5Aopen_idx(obj_id, INT(index, C_INT))
+    attr_id = H5Aopen_by_idx(obj_id, INT(index, C_INT))
 
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
