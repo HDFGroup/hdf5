@@ -117,6 +117,18 @@ New Features
 
     Library:
     --------
+    - H5F_ACC_DEBUG labeled "deprecated"
+
+      The symbol was originally used to emit some extra debugging
+      informationi in the multi VFD. The underlying functionality
+      was removed due to disuse in HDF5 1.8.16 though the symbol
+      remained defined since it was visible in H5Fpublic.h.
+
+      In this release, the symbol has been labeled deprecated and will
+      not be defined when H5_NO_DEPRECATED_SYMBOLS is defined.
+
+      (DER - 2015-04-30, HDFFV-1074)
+  
     - The library can load filter libraries dynamically during runtime.  Users
       can set the search path through environment variable HDF5_PLUGIN_PATH
       and call H5Pset_filter to enable a dynamic filter. (SLU - 2013/04/08)

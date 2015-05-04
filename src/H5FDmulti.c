@@ -30,18 +30,11 @@
 
 /* Disable certain warnings in PC-Lint: */
 /*lint --emacro( {534, 830}, H5P_DEFAULT, H5P_FILE_ACCESS, H5P_DATASET_XFER) */
-/*lint --emacro( {534, 830}, H5F_ACC_DEBUG, H5F_ACC_RDWR) */
 /*lint --emacro( {534, 830}, H5FD_MULTI) */
 /*lint -esym( 534, H5Eclear2, H5Epush2) */
 
 #include "hdf5.h"
 
-/*
- * Define H5FD_MULTI_DEBUG if you want the ability to print debugging
- * messages to the standard error stream. Messages are only printed if the
- * file is opened with the H5F_ACC_DEBUG flag.
- */
-#define H5FD_MULTI_DEBUG
 
 #ifndef FALSE
 #define FALSE		0
@@ -796,19 +789,6 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
      * files at the end.
      */
     if (map_changed) {
-#ifdef H5FD_MULTI_DEBUG
-        if (file->flags & H5F_ACC_DEBUG) {
-            fprintf(stderr, "H5FD_MULTI: member map override\n");
-            fprintf(stderr, "    old value: ");
-            ALL_MEMBERS(mt) {
-                fprintf(stderr, "%s%d", mt?", ":"", (int)(file->fa.memb_map[mt]));
-            } END_MEMBERS;
-            fprintf(stderr, "\n    new value: ");
-            ALL_MEMBERS(mt) {
-                fprintf(stderr, "%s%d", mt?", ":"", (int)(map[mt]));
-            } END_MEMBERS;
-        }
-#endif
         /* Commit map */
         ALL_MEMBERS(mt) {
             file->fa.memb_map[mt] = map[mt];
@@ -821,11 +801,6 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
         } END_MEMBERS;
         ALL_MEMBERS(mt) {
             if (!in_use[mt] && file->memb[mt]) {
-#ifdef H5FD_MULTI_DEBUG
-                if (file->flags & H5F_ACC_DEBUG) {
-                    fprintf(stderr, "H5FD_MULTI: close member %d\n", (int)mt);
-                }
-#endif
                 (void)H5FDclose(file->memb[mt]);
                 file->memb[mt] = NULL;
             }
@@ -1109,20 +1084,10 @@ H5FD_multi_close(H5FD_t *_file)
     /* Close as many members as possible */
     ALL_MEMBERS(mt) {
 	if (file->memb[mt]) {
-#ifdef H5FD_MULTI_DEBUG
-	    if (file->flags & H5F_ACC_DEBUG) {
-		fprintf(stderr, "H5FD_MULTI: closing member %d\n", (int)mt);
-	    }
-#endif
 	    if (H5FDclose(file->memb[mt])<0) {
-#ifdef H5FD_MULTI_DEBUG
-		if (file->flags & H5F_ACC_DEBUG) {
-		    fprintf(stderr, "H5FD_MULTI: close failed\n");
-		}
-#endif
-		nerrors++;
+            nerrors++;
 	    } else {
-		file->memb[mt] = NULL;
+            file->memb[mt] = NULL;
 	    }
 	}
     } END_MEMBERS;
@@ -1895,18 +1860,10 @@ open_members(H5FD_multi_t *file)
          */
 	sprintf(tmp, file->fa.memb_name[mt], file->name);
 
-#ifdef H5FD_MULTI_DEBUG
-	if(file->flags & H5F_ACC_DEBUG)
-	    fprintf(stderr, "H5FD_MULTI: open member %d \"%s\"\n", (int)mt, tmp);
-#endif
 	H5E_BEGIN_TRY {
 	    file->memb[mt] = H5FDopen(tmp, file->flags, file->fa.memb_fapl[mt], HADDR_UNDEF);
 	} H5E_END_TRY;
 	if(!file->memb[mt]) {
-#ifdef H5FD_MULTI_DEBUG
-	    if(file->flags & H5F_ACC_DEBUG)
-		fprintf(stderr, "H5FD_MULTI: open failed for member %d\n", (int)mt);
-#endif
 	    if(!file->fa.relax || (file->flags & H5F_ACC_RDWR))
 		nerrors++;
 	}

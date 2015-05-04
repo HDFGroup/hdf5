@@ -73,9 +73,6 @@ H5File::H5File() : H5Location(), CommonFG(), id(H5I_INVALID_HID) {}
 ///					exists, and fail, otherwise
 ///		\li \c H5F_ACC_RDWR - Open file for read/write, if it already
 ///					exists, and fail, otherwise
-///		\li \c H5F_ACC_DEBUG - print debug information. This flag is
-///			used only by HDF5 library developers; it is neither
-///			tested nor supported for use in applications.
 ///\par
 ///		For info on file creation in the case of an already-open file,
 ///		please refer to the \b Special \b case section in the C layer
@@ -133,25 +130,25 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 {
     // These bits only set for creation, so if any of them are set,
     // create the file.
-    if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
+    if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC))
     {
-	hid_t create_plist_id = create_plist.getId();
-	hid_t access_plist_id = access_plist.getId();
-	id = H5Fcreate( name, flags, create_plist_id, access_plist_id );
-	if( id < 0 )  // throw an exception when open/create fail
-	{
-	    throw FileIException("H5File constructor", "H5Fcreate failed");
-	}
+        hid_t create_plist_id = create_plist.getId();
+        hid_t access_plist_id = access_plist.getId();
+        id = H5Fcreate( name, flags, create_plist_id, access_plist_id );
+        if( id < 0 )  // throw an exception when open/create fail
+        {
+            throw FileIException("H5File constructor", "H5Fcreate failed");
+        }
     }
     // Open the file if none of the bits above are set.
     else
     {
-	hid_t access_plist_id = access_plist.getId();
-	id = H5Fopen( name, flags, access_plist_id );
-	if( id < 0 )  // throw an exception when open/create fail
-	{
-	    throw FileIException("H5File constructor", "H5Fopen failed");
-	}
+        hid_t access_plist_id = access_plist.getId();
+        id = H5Fopen( name, flags, access_plist_id );
+        if( id < 0 )  // throw an exception when open/create fail
+        {
+            throw FileIException("H5File constructor", "H5Fopen failed");
+        }
     }
 }
 

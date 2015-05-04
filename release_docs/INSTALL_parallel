@@ -57,45 +57,7 @@ parallel HDF5 with one of the above, just set CC as it and configure.
     $ make install
 
 
-2.2. IBM SP
------------
-During the build stage, the H5detect is compiled and executed to generate
-the source file H5Tinit.c which is compiled as part of the HDF5 library. In
-parallel mode, make sure your environment variables are set correctly to
-execute a single process mpi application. Otherwise, multiple processes
-attempt to write to the same H5Tinit.c file, resulting in a scrambled
-source file.  Unfortunately, the setting varies from machine to machine.
-E.g., the following works for the IBM SP machine at LLNL.
-
-    setenv MP_PROCS     1
-    setenv MP_NODES     1
-    setenv MP_LABELIO   no
-    setenv MP_RMPOOL    0
-    setenv LLNL_COMPILE_SINGLE_THREADED TRUE    # for LLNL site only
-
-The shared library configuration is problematic.  So, only static library
-is supported.
-
-Then do the following steps:
-
-    $ ./configure --enable-parallel --disable-shared --prefix=<install-directory>
-    $ make		# build the library
-    $ make check	# verify the correctness
-			# Read the Details section about parallel tests.
-    $ make install
-
-We also suggest that you add "-qxlf90=autodealloc" to FCFLAGS when building
-parallel with fortran enabled.  This can be done by invoking:
-
-    setenv FCFLAGS -qxlf90=autodealloc		# 32 bit build
-or
-    setenv FCFLAGS "-q64 -qxlf90=autodealloc"	# 64 bit build
-
-prior to running configure.  Recall that the "-q64" is necessary for 64
-bit builds.
-
-
-2.3. Linux 2.4 and greater
+2.2. Linux 2.4 and greater
 --------------------------
 Be sure that your installation of MPICH was configured with the following
 configuration command-line option:
@@ -106,7 +68,7 @@ This allows for >2GB sized files on Linux systems and is only available with
 Linux kernels 2.4 and greater.
 
 
-2.4. Hopper (Cray XE6) (for v1.8 and later)
+2.3. Hopper (Cray XE6) (for v1.8 and later)
 -------------------------
 
 The following steps are for building HDF5 for the Hopper compute
@@ -177,14 +139,6 @@ For examples,
 
     $ CC=mpcc_r ./configure --enable-parallel
     $ CC=/usr/local/mpi/bin/mpicc ./configure --enable-parallel
-
-If no such a compiler command is available then you must use your normal
-C compiler along with the location(s) of MPI/MPI-IO files to be used.
-For example,
-
-    $ CPPFLAGS=-I/usr/local/mpi/include \
-      LDFLAGS=-L/usr/local/mpi/lib/LINUX/ch_p4 \
-      ./configure --enable-parallel=mpich
 
 If a parallel library is being built then configure attempts to determine how
 to run a parallel application on one processor and on many processors. If the
