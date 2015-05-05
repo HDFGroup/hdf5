@@ -213,7 +213,7 @@ main (void)
     //status = H5Pset_virtual_dataset_bounds (dapl, H5D_VDS_MIN);
     vdset = H5Dopen (vfile, DATASET, dapl);
 
-    /* Let's get space of the VDS and its dimension; we should get 32(16)x10x10 */
+    /* Let's get space of the VDS and its dimension; we should get 32(or 17)x10x10 */
     vspace = H5Dget_space (vdset);
     H5Sget_simple_extent_dims (vspace, vdsdims_out, vdsdims_max_out);
     printf ("VDS dimensions: ");
