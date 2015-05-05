@@ -417,7 +417,7 @@ typedef struct H5D_rdcc_t {
     struct H5D_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
     H5SL_t		*sel_chunks; /* Skip list containing information for each chunk selected */
     H5S_t		*single_space; /* Dataspace for single element I/O on chunks */
-    H5D_chunk_info_t *single_chunk_info;  /* Pointer to single chunk's info */
+    H5D_chunk_info_t    *single_chunk_info;  /* Pointer to single chunk's info */
 } H5D_rdcc_t;
 
 /* The raw data contiguous data cache */
@@ -533,7 +533,7 @@ typedef struct {
 typedef struct H5D_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
-    hbool_t     deleted;        /*chunk about to be deleted (do not flush) */
+    hbool_t     deleted;        /*chunk about to be deleted		*/
     unsigned    edge_chunk_state; /*states related to edge chunks (see above) */
     hsize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
     hsize_t 	scaled[H5O_LAYOUT_NDIMS]; /*scaled chunk 'name' (coordinates) */

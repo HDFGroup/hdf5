@@ -26,7 +26,7 @@ Obtaining HDF5 source code
    2. Obtain compressed (*.tar or *.zip) HDF5 source from
         http://www.hdfgroup.org/ftp/HDF5/current/src/
       and put it in "myhdfstuff".
-      Uncompress the file.
+      Uncompress the file. There should be a hdf5-1.8."X" folder.
 
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site. 
@@ -38,14 +38,19 @@ CMake version
 II. Quick Step Building HDF5 Libraries with CMake Script Mode
 ========================================================================
 This short set of instructions is written for users who want to quickly 
-build the HDF5 C, C++, Fortran, and High-level shared libraries and tools
-from the HDF5 source code package using the CMake tools. This procedure 
-will use the default settings in the config/cmake/cacheinit.cmake file.
+build the HDF5 C and C++ static libraries and tools with SZIP and ZLIB 
+compression included.  This procedure will use the default settings in 
+the config/cmake/cacheinit.cmake file.
 HDF Group recommends using the ctest script mode to build HDF5.
 
 The following files referenced below are available at the HDF web site:
     http://www.hdfgroup.org/HDF5/release/cmakebuild.html
 
+Single compressed file with all the files needed, including source:
+    hdf5-1.8.15-CMake.zip or hdf5-1.8.15-CMake.tar.gz
+
+Individual files
+-----------------------------------------------
 CMake build script:
     CTestScript.cmake
 
@@ -55,6 +60,7 @@ External compression szip and zlib libraries:
     
 Platform configuration files:
     HDF518config.cmake
+-----------------------------------------------
 
 To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
@@ -66,9 +72,9 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
    3. Download the CTestScript.cmake file to "myhdfstuff".
       CTestScript.cmake file should not be modified.    
        
-   4. Download the platform configuration file to "myhdfstuff".
-      Do not modify the file unless you want to change default build 
-      environment.
+   4. Download the platform configuration file, HDF518config.cmake,
+      to "myhdfstuff". Do not modify the file unless you want to change
+      default build environment. (See http://www.hdfgroup.org/HDF5/release/chgcmkbuild.html)
 
    5. From the "myhdfstuff" directory execute the CTest Script with the 
       following options:
@@ -78,22 +84,28 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
       On 64-bit Windows with Visual Studio 2012, execute:
          ctest -S HDF518config.cmake,64-VS2012 -C Release -VV -O hdf5.log
       On 32-bit Windows with Visual Studio 2013, execute:
-         ctest -S HDF518config.cmake,32-VS2012 -C Release -VV -O hdf5.log
+         ctest -S HDF518config.cmake,32-VS2013 -C Release -VV -O hdf5.log
       On 64-bit Windows with Visual Studio 2013, execute:
-         ctest -S HDF518config.cmake,64-VS2012 -C Release -VV -O hdf5.log
+         ctest -S HDF518config.cmake,64-VS2013 -C Release -VV -O hdf5.log
       On Linux and Mac, execute:
          ctest -S HDF518config.cmake -C Release -VV -O hdf5.log
 
       The command above will configure, build, test, and create an install 
-      package in the myhdfstuff/hdf5-1.8/build folder.
+      package in the myhdfstuff folder. It will have the format:
+          HDF5-1.8.NN-<platform>.<zip or tar.gz>
 
+          On Unix, <platform> will be "Linux". A similar .sh file will also be created.
+          On Windows, <platform> will be "win64" or "win32". If you have an 
+          installer on your system, you will also see a similar file that ends 
+          in either .exe (NSIS) or .msi (WiX).
+           
       The -S option uses the script version of ctest.
         
       The value for the -C option (as shown above, "-C Release") must 
       match the setting for CTEST_BUILD_CONFIGURATION in the platform 
       configuration file.
         
-      The -VV option is for verbose; use -V for less verbose.
+      The -VV option is for most verbose; use -V for less verbose.
         
       The "-O hdf5.log" option saves the output to a log file hdf5.log.
 
@@ -114,7 +126,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
 
       On Linux, change to the install destination directory 
       (create it if doesn't exist) and execute:
-                <path-to>/myhdfstuff/hdf5-1.8/build/HDF5-1.8."X"-Linux.sh
+                <path-to>/myhdfstuff/HDF5-1.8."X"-Linux.sh
       After accepting the license, the script will prompt:
         By default the HDF5 will be installed in:
         "<current directory>/HDF5-1.8."X"-Linux"
@@ -130,7 +142,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
          ------lib
          ------share
                 
-      On Mac you will find HDF5-1.8."X"-Darwin.dmg in the build folder. Click
+      On Mac you will find HDF5-1.8."X"-Darwin.dmg in the myhdfstuff folder. Click
       on the dmg file to proceed with installation. After accepting the license,
       there will be a folder with the following structure:      
          HDF_Group
@@ -142,7 +154,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
          ------share
       
       By default the installation will create the bin, include, lib and cmake
-      folders in the <install destination directory>/HDF_Group/HDF5/1.8.
+      folders in the <install destination directory>/HDF_Group/HDF5/1.8."X"
 
 
 ========================================================================
@@ -165,10 +177,10 @@ Notes: This short set of instructions is written for users who want to
       5. Configure the C library, tools and tests with one of the following commands:
 
          On Windows 32 bit
-           cmake -G "Visual Studio 11" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.8."X"
+           cmake -G "Visual Studio 11 2012" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.8."X"
 
          On Windows 64 bit
-           cmake -G "Visual Studio 11 Win64" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.8."X"
+           cmake -G "Visual Studio 11 2012 Win64" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..\hdf5-1.8."X"
       
          On Linux and Mac
            cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ../hdf5-1.8."X"
@@ -273,7 +285,7 @@ IV. Further considerations
             CTEST_USE_LAUNCHERS:BOOL=ON
             CMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF         
    
-   4. Windows developers should install NSIS to create an install image with CPack.
+   4. Windows developers should install NSIS or WiX to create an install image with CPack.
       Visual Studio Express users will not be able to package HDF5 into
       an install image executable.
    
@@ -281,7 +293,7 @@ IV. Further considerations
       the settings for the developers' environment. Then the only options needed
       on the command line are those options that are different. Example using HDF
       default cache file:
-           cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 11" \
+           cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 11 2012" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
@@ -360,12 +372,12 @@ These five steps are described in detail below.
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
-            * Visual Studio 12
-            * Visual Studio 12 Win64
-            * Visual Studio 11
-            * Visual Studio 11 Win64
-            * Visual Studio 10
-            * Visual Studio 10 Win64
+            * Visual Studio 12 2013
+            * Visual Studio 12 2013 Win64
+            * Visual Studio 11 2012
+            * Visual Studio 11 2012 Win64
+            * Visual Studio 10 2010
+            * Visual Studio 10 2010 Win64
 
         <options> is:
             * SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
@@ -432,7 +444,7 @@ These five steps are described in detail below.
 
       2.2  Preferred command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
       
-               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 11" \
+               cmake -C ../config/cmake/cacheinit.cmake -G "Visual Studio 11 2012" \
                -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF \
                -DCMAKE_BUILD_TYPE:STRING=Release ..
 
@@ -635,7 +647,7 @@ adding an option (${CTEST_SCRIPT_ARG}) to the platform configuration script.
 #########################################################################
 
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
-set(CTEST_SOURCE_VERSION 1.8.X)
+set(CTEST_SOURCE_VERSION 1.8.15-pre7)
 set(CTEST_SOURCE_NAME hdf5-${CTEST_SOURCE_VERSION})
 set(CTEST_BINARY_NAME "build")
 set(CTEST_DASHBOARD_ROOT "${CTEST_SCRIPT_DIRECTORY}")
@@ -742,10 +754,6 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
 ### disable Fortran; change OFF to ON in order to build FORTRAN libraries
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
-if(APPLE)
-  ### allow shared builds without fortran on MAC
-  set(NO_MAC_FORTRAN "TRUE")
-endif()
 
 ### disable test program builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_TESTING:BOOL=OFF")
@@ -774,21 +782,30 @@ if(WIN32)
 else()
   include(${CTEST_SCRIPT_DIRECTORY}/CTestScript.cmake)
   if(APPLE)
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}-Darwin.dmg")
-      file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}-Darwin.dmg" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+    if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-Darwin.dmg")
+      file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-Darwin.dmg" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
     endif()
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}-Darwin.tar.gz")
-      file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}-Darwin.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+    if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-Darwin.tar.gz")
+      file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-Darwin.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
     endif()
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}-Darwin.sh")
-      file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}-Darwin.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+    if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-Darwin.sh")
+      file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-Darwin.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
     endif()
   else()
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}-Linux.sh")
-      file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}-Linux.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
-    endif()
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}-Linux.tar.gz")
-      file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}-Linux.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+    if(CYGWIN)
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-CYGWIN.sh")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-CYGWIN.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+      endif()
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-CYGWIN.tar.gz")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-CYGWIN.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+      endif()
+    else()
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-Linux.sh")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-Linux.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+      endif()
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-Linux.tar.gz")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}-Linux.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+      endif()
     endif()
   endif()
 endif()
