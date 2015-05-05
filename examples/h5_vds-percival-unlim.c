@@ -64,13 +64,15 @@ main (void)
                  stride_out[3],
                  count_out[3],
                  block_out[3];
-    int          i, j;
+    int          i, j, k;
     H5D_layout_t layout;                     /* Storage layout */
     size_t       num_map;                    /* Number of mappings */
     ssize_t      len;                        /* Length of the string; also a return value */
     char         *filename;
     char         *dsetname;
     int          wdata[DIM0_1*DIM1*DIM2];
+    int          rdata[80][10][10];
+    int          a_rdata[20][10][10];
 
     /*
      * Create source files and datasets. This step is optional.
@@ -193,15 +195,6 @@ main (void)
         status = H5Fclose (file);
       }
 
-    /* Let's get space of the VDS and its dimension; we should get 80x10x10 */
-    vspace = H5Dget_space (vdset);
-    H5Sget_simple_extent_dims (vspace, vdsdims_out, vdsdims_max_out);
-    printf ("VDS dimensions second time \n");
-    printf (" Current: ");
-    for (i=0; i<RANK; i++)
-        printf (" %d ", (int)vdsdims_out[i]);
-    printf ("\n");
-
     status = H5Dclose (vdset);
     status = H5Fclose (vfile);    
      
@@ -283,8 +276,74 @@ main (void)
           free(dsetname);
       }
     /*
+     * Read data from VDS.
+     */
+    vspace = H5Dget_space (vdset);
+    H5Sget_simple_extent_dims (vspace, vdsdims_out, vdsdims_max_out);
+    printf ("VDS dimensions second time \n");
+    printf (" Current: ");
+    for (i=0; i<RANK; i++)
+        printf (" %d ", (int)vdsdims_out[i]);
+    printf ("\n");
+
+    /* Read all VDS data */
+
+    //EIP We should be able to do it by using H5S_ALL instead of making selection
+    // or using H5Sselect_all from vspace.
+    start[0] = 0;
+    start[1] = 0;
+    start[2] = 0;
+    count[0] = 1;
+    count[1] = 1;
+    count[2] = 1;
+    block[0] = vdsdims_out[0];
+    block[1] = vdsdims_out[1];
+    block[2] = vdsdims_out[2];
+
+    status = H5Sselect_hyperslab (vspace, H5S_SELECT_SET, start, NULL, count, block);
+    mem_space = H5Screate_simple(RANK, vdsdims_out, NULL);
+    status = H5Dread (vdset, H5T_NATIVE_INT, mem_space, vspace, H5P_DEFAULT,
+                    rdata);   
+    printf (" All data: \n");
+    for (i=0; i < (int)vdsdims_out[0]; i++) {
+        for (j=0; j < (int)vdsdims_out[1]; j++) {
+             printf ("(%d, %d, 0)", i, j);
+             for (k=0; k < (int)vdsdims_out[2]; k++) 
+                 printf (" %d ", rdata[i][j][k]);
+             printf ("\n");
+        }
+    }
+    /* Read VDS, but only data mapeed to dataset a.h5 */
+    start[0] = 0;
+    start[1] = 0;
+    start[2] = 0;
+    stride[0] = PLANE_STRIDE;
+    stride[1] = 1;
+    stride[2] = 1;
+    count[0] = 2*DIM0_1;
+    count[1] = 1;
+    count[2] = 1;
+    block[0] = 1;
+    block[1] = vdsdims_out[1];
+    block[2] = vdsdims_out[2];
+    dims[0] = 2*DIM0_1; 
+    status = H5Sselect_hyperslab (vspace, H5S_SELECT_SET, start, stride, count, block);
+    mem_space = H5Screate_simple(RANK, dims,  NULL);
+    status = H5Dread (vdset, H5T_NATIVE_INT, mem_space, vspace, H5P_DEFAULT,
+                    a_rdata);   
+    printf (" All data: \n");
+    for (i=0; i < 2*DIM0_1; i++) {
+        for (j=0; j < (int)vdsdims_out[1]; j++) {
+             printf ("(%d, %d, 0)", i, j);
+             for (k=0; k < (int)vdsdims_out[2]; k++) 
+                 printf (" %d ", a_rdata[i][j][k]);
+             printf ("\n");
+        }
+    }
+    /*
      * Close and release resources.
      */
+    status = H5Sclose(mem_space);
     status = H5Pclose (dcpl);
     status = H5Dclose (vdset);
     status = H5Fclose (vfile);
