@@ -152,6 +152,8 @@
 ./examples/h5_vds-eiger.c
 ./examples/h5_vds-simpleIO.c
 ./examples/h5_vds-percival.c
+./examples/h5_vds-percival-unlim.c
+./examples/h5_vds-percival-unlim-maxmin.c
 ./examples/testh5cc.sh.in
 ./examples/README
 

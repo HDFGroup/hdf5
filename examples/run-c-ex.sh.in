@@ -136,6 +136,10 @@ then
         rm h5_vds-simpleIO &&\
         RunTest h5_vds-percival &&\
         rm h5_vds-percival &&\
+        RunTest h5_vds-percival-unlim &&\
+        rm h5_vds-percival-unlim &&\
+        RunTest h5_vds-percival-unlim-maxmin&&\
+        rm h5_vds-percival-unlim-maxmin &&\
         RunTest h5_vds &&\
         rm h5_vds); then
         EXIT_VALUE=${EXIT_SUCCESS}

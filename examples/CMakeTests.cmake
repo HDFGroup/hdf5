@@ -46,6 +46,12 @@
           vds-excalibur.h5
           vds-exclim.h5
           vds-percival.h5
+          vds-percival-unlim.h5
+          vds-percival-unlim-maxmin.h5
+          a.h5
+          b.h5
+          c.h5
+          d.h5
           vds-simpleIO.h5
           vds-eiger.h5
   )

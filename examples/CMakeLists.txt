@@ -40,6 +40,8 @@ set (examples
     h5_vds-eiger
     h5_vds-simpleIO
     h5_vds-percival
+    h5_vds-percival-unlim
+    h5_vds-percival-unlim-maxmin
 )
 
 foreach (example ${examples})
