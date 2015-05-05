@@ -133,7 +133,6 @@ WRITE(*,'(40(A,/))') &
 '! COPYRIGHT',&
 '! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
 '!   Copyright by The HDF Group.                                               *',&
-'!   Copyright by the Board of Trustees of the University of Illinois.         *',&
 '!   All rights reserved.                                                      *',&
 '!                                                                             *',&
 '!   This file is part of HDF5.  The full HDF5 copyright notice, including     *',&
@@ -324,7 +323,7 @@ WRITE(*,'(40(A,/))') &
 ! with the Fortran 90/95 APIs codes which could never handle rank 15 array sizes.
 
   OPEN(11,FILE='H5_KINDff.F90')
-WRITE(*,'(40(A,/))') &
+  WRITE(11,'(40(A,/))') &
 '!****h* ROBODoc/H5_KINDff.F90',&
 '!',&
 '! NAME',&
@@ -338,7 +337,6 @@ WRITE(*,'(40(A,/))') &
 '! COPYRIGHT',&
 '! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
 '!   Copyright by The HDF Group.                                               *',&
-'!   Copyright by the Board of Trustees of the University of Illinois.         *',&
 '!   All rights reserved.                                                      *',&
 '!                                                                             *',&
 '!   This file is part of HDF5.  The full HDF5 copyright notice, including     *',&
