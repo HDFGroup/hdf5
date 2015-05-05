@@ -450,7 +450,7 @@ typedef struct H5O_storage_virtual_t {
     /* Not stored */
     size_t      list_nalloc;            /* Number of slots allocated          */
     hsize_t     min_dims[H5S_MAX_RANK]; /* Minimum extent of VDS (maximum of all non-unlimited selection bounds) */
-    hbool_t     set_extent_max;         /* Whether we set the extent by the maximum (TRUE) or minimum (FALSE) of unlimited selections */
+    H5D_vds_bounds_t bounds;         /* Whether we set the extent by the maximum (TRUE) or minimum (FALSE) of unlimited selections */
 } H5O_storage_virtual_t;
 
 typedef struct H5O_storage_t {

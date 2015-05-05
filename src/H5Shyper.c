@@ -1673,20 +1673,9 @@ H5S_hyper_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
             dst->select.sel_info.hslab->span_lst = H5S_hyper_copy_span(src->select.sel_info.hslab->span_lst);
     } /* end if */
 
-    /* If there is an unlimited dimension, we must update the selection if the
-     * extent changed */
-    if(dst_hslab->unlim_dim >= 0) {
-        htri_t extent_equal;
-
-        /* Check if the extent changed */
-        if((extent_equal = H5S_extent_equal(src, dst)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, FAIL, "dataspace comparison failed")
-
-        if(!extent_equal)
-            /* Update selection due to changed extent */
-            if(H5S_hyper_clip_to_extent(dst) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
-    } /* end if */
+    /* If there is an unlimited dimension, we must update the selection */
+    if(H5S_hyper_clip_to_extent(dst) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9843,14 +9832,12 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
                     + ((count - (hsize_t)1)
                     * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride)
                     + clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block;
-            if(clip_size_incl_trail) {
-                HDassert(0 && "Checking code coverage..."); //VDSINC
+            if(clip_size_incl_trail)
                 /* Include gap after last block */
                 *clip_size_incl_trail =
                         clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
                         + (count
                         * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride);
-            } //VDSINC
         } /* end else */
     } /* end else */
 

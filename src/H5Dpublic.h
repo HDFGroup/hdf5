@@ -94,6 +94,13 @@ typedef enum H5D_fill_value_t {
     H5D_FILL_VALUE_USER_DEFINED =2
 } H5D_fill_value_t;
 
+/* Values for VDS bounds option */
+typedef enum H5D_vds_bounds_t {
+    H5D_VDS_ERROR       = -1,
+    H5D_VDS_MAX         = 0,
+    H5D_VDS_MIN         = 1
+} H5D_vds_bounds_t;
+
 /********************/
 /* Public Variables */
 /********************/

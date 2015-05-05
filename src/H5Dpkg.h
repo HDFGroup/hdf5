@@ -666,6 +666,8 @@ H5_DLL herr_t H5D__virtual_copy(H5F_t *f_src,
     const H5O_storage_virtual_t *storage_src, H5F_t *f_dst,
     H5O_storage_virtual_t *storage_dst, H5T_t *dt_src, H5O_copy_t *cpy_info,
     hid_t dxpl_id);
+H5_DLL herr_t H5D__virtual_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
+    hid_t dapl_id);
 H5_DLL hbool_t H5D__virtual_is_space_alloc(const H5O_storage_t *storage);
 
 /* Functions that operate on EFL (External File List)*/

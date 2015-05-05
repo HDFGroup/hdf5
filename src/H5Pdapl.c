@@ -61,6 +61,11 @@
 #define H5D_ACS_PREEMPT_READ_CHUNKS_DEF         H5D_CHUNK_CACHE_W0_DEFAULT
 #define H5D_ACS_PREEMPT_READ_CHUNKS_ENC         H5P__encode_double
 #define H5D_ACS_PREEMPT_READ_CHUNKS_DEC         H5P__decode_double
+/* Definitions for VDS bounds option */
+#define H5D_ACS_VDS_BOUNDS_SIZE                 sizeof(H5D_vds_bounds_t)
+#define H5D_ACS_VDS_BOUNDS_DEF                  H5D_VDS_MAX
+#define H5D_ACS_VDS_BOUNDS_ENC                  H5P__dacc_vds_bounds_enc
+#define H5D_ACS_VDS_BOUNDS_DEC                  H5P__dacc_vds_bounds_dec
 
 /******************/
 /* Local Typedefs */
@@ -78,6 +83,10 @@
 
 /* Property class callbacks */
 static herr_t H5P__dacc_reg_prop(H5P_genclass_t *pclass);
+
+/* Property list callbacks */
+static herr_t H5P__dacc_vds_bounds_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dacc_vds_bounds_dec(const void **pp, void *value);
 
 
 /*********************/
@@ -133,6 +142,7 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
     size_t rdcc_nslots = H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF;      /* Default raw data chunk cache # of slots */
     size_t rdcc_nbytes = H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
     double rdcc_w0 = H5D_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
+    H5D_vds_bounds_t bounds_option = H5D_ACS_VDS_BOUNDS_DEF;    /* Default VDS bounds option */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -151,6 +161,12 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, H5D_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0, 
              NULL, NULL, NULL, H5D_ACS_PREEMPT_READ_CHUNKS_ENC, H5D_ACS_PREEMPT_READ_CHUNKS_DEC, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the VDS bounds option */
+    if(H5P_register_real(pclass, H5D_ACS_VDS_BOUNDS_NAME, H5D_ACS_VDS_BOUNDS_SIZE, &bounds_option,
+            NULL, NULL, NULL, H5D_ACS_VDS_BOUNDS_ENC, H5D_ACS_VDS_BOUNDS_DEC,
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -282,5 +298,147 @@ H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, doub
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_chunk_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_virtual_dataspace_bounds
+ *
+ * Purpose:     VDSINC
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              May 4, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_virtual_dataspace_bounds(hid_t plist_id, H5D_vds_bounds_t bounds_option)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check argument */
+    if((bounds_option != H5D_VDS_MAX) && (bounds_option != H5D_VDS_MIN))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid bounds option")
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Update property list */
+    if(H5P_set(plist, H5D_ACS_VDS_BOUNDS_NAME, &bounds_option) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_virtual_dataspace_bounds() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_virtual_dataspace_bounds
+ *
+ * Purpose:     VDSINC
+ *
+ * Return:      Success:        H5D_VDS_MAX or H5D_VDS_MIN
+ *              Failure:        H5D_VDS_ERROR
+ *
+ * Programmer:  Neil Fortner
+ *              May 4, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+H5D_vds_bounds_t
+H5Pget_virtual_dataspace_bounds(hid_t plist_id)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5D_vds_bounds_t ret_value;   /* Return value */
+
+    FUNC_ENTER_API(H5D_VDS_ERROR)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_VDS_ERROR, "can't find object for ID")
+
+    /* Get value from property list */
+    if(H5P_get(plist, H5D_ACS_VDS_BOUNDS_NAME, &ret_value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5D_VDS_ERROR, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_virtual_dataspace_bounds() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dacc_vds_bounds_enc
+ *
+ * Purpose:     Callback routine which is called whenever the vds bounds
+ *              property in the dataset access property list is encoded.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, May 5, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dacc_vds_bounds_enc(const void *value, void **_pp, size_t *size)
+{
+    const H5D_vds_bounds_t *bounds = (const H5D_vds_bounds_t *)value; /* Create local alias for values */
+    uint8_t **pp = (uint8_t **)_pp;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(bounds);
+    HDassert(size);
+
+    if(NULL != *pp)
+        /* Encode EDC property */
+        *(*pp)++ = (uint8_t)*bounds;
+
+    /* Size of EDC property */
+    (*size)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dacc_vds_bounds_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dacc_vds_bounds_dec
+ *
+ * Purpose:     Callback routine which is called whenever the vds bounds
+ *              property in the dataset access property list is encoded.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, May 5, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dacc_vds_bounds_dec(const void **_pp, void *_value)
+{
+    H5D_vds_bounds_t *bounds = (H5D_vds_bounds_t *)_value;         /* EDC property */
+    const uint8_t **pp = (const uint8_t **)_pp;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(bounds);
+
+    /* Decode EDC property */
+    *bounds = (H5D_vds_bounds_t)*(*pp)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dacc_vds_bounds_dec() */
 

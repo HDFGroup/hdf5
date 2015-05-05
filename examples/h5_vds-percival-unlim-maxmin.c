@@ -209,18 +209,27 @@ main (void)
      * min extents depending on the sizes of the underlying datasets
      */
     dapl = H5Pcreate (H5P_DATASET_ACCESS);
-    //status = H5Pset_virtual_dataset_bounds (dapl, H5D_VDS_MAX);
-    //status = H5Pset_virtual_dataset_bounds (dapl, H5D_VDS_MIN);
-    vdset = H5Dopen (vfile, DATASET, dapl);
 
-    /* Let's get space of the VDS and its dimension; we should get 32(or 17)x10x10 */
-    vspace = H5Dget_space (vdset);
-    H5Sget_simple_extent_dims (vspace, vdsdims_out, vdsdims_max_out);
-    printf ("VDS dimensions: ");
-    for (i=0; i<RANK; i++)
-        printf (" %d ", (int)vdsdims_out[i]);
-    printf ("\n");
+    for(i = 0; i < 2; i++) {
+        status = H5Pset_virtual_dataspace_bounds (dapl, i ? H5D_VDS_MAX : H5D_VDS_MIN);
+        vdset = H5Dopen (vfile, DATASET, dapl);
 
+        /* Let's get space of the VDS and its dimension; we should get 32(or 20)x10x10 */
+        vspace = H5Dget_space (vdset);
+        H5Sget_simple_extent_dims (vspace, vdsdims_out, vdsdims_max_out);
+        printf ("VDS dimensions, bounds = H5D_VDS_M%s: ", i ? "AX" : "IN");
+        for (j=0; j<RANK; j++)
+            printf (" %d ", (int)vdsdims_out[j]);
+        printf ("\n");
+
+        /* Close */
+        status = H5Dclose (vdset);
+        status = H5Sclose (vspace);
+    }
+
+    status = H5Pclose (dapl);
+
+    vdset = H5Dopen (vfile, DATASET, H5P_DEFAULT);
 
     /*
      * Get creation property list and mapping properties.

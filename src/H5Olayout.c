@@ -251,7 +251,7 @@ H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
                 mesg->storage.u.virt.list_nused = 0;
                 mesg->storage.u.virt.list = NULL;
                 mesg->storage.u.virt.list_nalloc = 0;
-                mesg->storage.u.virt.set_extent_max = TRUE;
+                mesg->storage.u.virt.bounds = H5D_VDS_ERROR;
 
                 /* Decode heap block if it exists */
                 if(mesg->storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF) {
