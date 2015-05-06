@@ -9607,7 +9607,7 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
 
         /* Calculate actual block size for this clip size */
         hslab->opt_diminfo[hslab->unlim_dim].block =
-                (hsize_t)((hssize_t)space->extent.size[hslab->unlim_dim]
+                (hsize_t)((hssize_t)clip_size
                 - ((hssize_t)hslab->opt_diminfo[hslab->unlim_dim].start
                 + space->select.offset[hslab->unlim_dim]));
 
