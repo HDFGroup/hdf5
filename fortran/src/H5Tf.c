@@ -26,9 +26,9 @@
 
 /****if* H5Tf/h5topen_c
  * NAME
- *        h5topen_c
+ *  h5topen_c
  * PURPOSE
- *     Call H5Topen2 to open a datatype
+ *  Call H5Topen2 to open a datatype
  * INPUTS
  *      loc_id - file or group identifier
  *              name - name of the datatype within file or  group
@@ -78,9 +78,9 @@ done:
 
 /****if* H5Tf/h5tcommit_c
  * NAME
- *        h5tcommit_c
+ *  h5tcommit_c
  * PURPOSE
- *     Call H5Tcommit2 to commit a datatype
+ *  Call H5Tcommit2 to commit a datatype
  * INPUTS
  *      loc_id - file or group identifier
  *              name - name of the datatype within file or  group
@@ -126,9 +126,9 @@ done:
 
 /****if* H5Tf/h5tclose_c
  * NAME
- *        h5tclose_c
+ *  h5tclose_c
  * PURPOSE
- *     Call H5Tclose to close the datatype
+ *  Call H5Tclose to close the datatype
  * INPUTS
  *      type_id - identifier of the datatype to be closed
  * RETURNS
@@ -156,9 +156,9 @@ nh5tclose_c ( hid_t_f *type_id )
 
 /****if* H5Tf/h5tcopy_c
  * NAME
- *        h5tcopy_c
+ *  h5tcopy_c
  * PURPOSE
- *     Call H5Tcopy to copy a datatype
+ *  Call H5Tcopy to copy a datatype
  * INPUTS
  *      type_id - identifier of the datatype to be copied
  * OUTPUTS
@@ -190,9 +190,9 @@ nh5tcopy_c ( hid_t_f *type_id , hid_t_f *new_type_id)
 
 /****if* H5Tf/h5tequal_c
  * NAME
- *        h5tequal_c
+ *  h5tequal_c
  * PURPOSE
- *     Call H5Tequal to copy a datatype
+ *  Call H5Tequal to copy a datatype
  * INPUTS
  *      type1_id - datatype identifier
  *              type2_id - datatype identifier
@@ -289,9 +289,9 @@ nh5tget_class_c ( hid_t_f *type_id , int_f *classtype)
 
 /****if* H5Tf/h5tget_order_c
  * NAME
- *        h5tget_order_c
+ *  h5tget_order_c
  * PURPOSE
- *     Call H5Tget_order to determine byte order
+ *  Call H5Tget_order to determine byte order
  * INPUTS
  *      type_id - identifier of the dataspace
  * OUTPUTS
@@ -333,9 +333,9 @@ nh5tget_order_c ( hid_t_f *type_id , int_f *order)
 
 /****if* H5Tf/h5tset_order_c
  * NAME
- *        h5tset_order_c
+ *  h5tset_order_c
  * PURPOSE
- *     Call H5Tset_order to set byte order
+ *  Call H5Tset_order to set byte order
  * INPUTS
  *      type_id - identifier of the dataspace
  *              order; possible values are:
@@ -374,9 +374,9 @@ nh5tset_order_c ( hid_t_f *type_id , int_f *order)
 
 /****if* H5Tf/h5tget_size_c
  * NAME
- *        h5tget_size_c
+ *  h5tget_size_c
  * PURPOSE
- *     Call H5Tget_size to get size of the datatype
+ *  Call H5Tget_size to get size of the datatype
  * INPUTS
  *      type_id - identifier of the dataspace
  * OUTPUTS
@@ -409,9 +409,9 @@ nh5tget_size_c ( hid_t_f *type_id , size_t_f *size)
 
 /****if* H5Tf/h5tset_size_c
  * NAME
- *        h5tset_size_c
+ *  h5tset_size_c
  * PURPOSE
- *     Call H5Tget_size to get size of the datatype
+ *  Call H5Tget_size to get size of the datatype
  * INPUTS
  *      type_id - identifier of the dataspace
  * OUTPUTS
@@ -445,9 +445,9 @@ nh5tset_size_c ( hid_t_f *type_id , size_t_f *size)
 
 /****if* H5Tf/h5tget_precision_c
  * NAME
- *        h5tget_precision_c
+ *  h5tget_precision_c
  * PURPOSE
- *     Call H5Tget_precision to get precision of the datatype
+ *  Call H5Tget_precision to get precision of the datatype
  * INPUTS
  *      type_id - identifier of the dataspace
  * OUTPUTS
@@ -480,9 +480,9 @@ nh5tget_precision_c ( hid_t_f *type_id , size_t_f *precision)
 
 /****if* H5Tf/h5tset_precision_c
  * NAME
- *        h5tset_precision_c
+ *  h5tset_precision_c
  * PURPOSE
- *     Call H5Tset_precision to set precision of the datatype
+ *  Call H5Tset_precision to set precision of the datatype
  * INPUTS
  *      type_id - identifier of the dataspace
  *              precision -  number of significant bits
@@ -515,9 +515,9 @@ nh5tset_precision_c ( hid_t_f *type_id , size_t_f *precision)
 
 /****if* H5Tf/h5tget_offset_c
  * NAME
- *        h5tget_offset_c
+ *  h5tget_offset_c
  * PURPOSE
- *     Call H5Tget_offset to get bit offset of the first
+ *  Call H5Tget_offset to get bit offset of the first
  *              significant bit of the datatype
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -552,9 +552,9 @@ nh5tget_offset_c ( hid_t_f *type_id , size_t_f *offset)
 
 /****if* H5Tf/h5tset_offset_c
  * NAME
- *        h5tset_offset_c
+ *  h5tset_offset_c
  * PURPOSE
- *     Call H5Tset_offset to set bit offset of the first
+ *  Call H5Tset_offset to set bit offset of the first
  *              significant bit of the datatype
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -588,9 +588,9 @@ nh5tset_offset_c ( hid_t_f *type_id , size_t_f *offset)
 
 /****if* H5Tf/h5tget_pad_c
  * NAME
- *        h5tget_pad_c
+ *  h5tget_pad_c
  * PURPOSE
- *     Call H5Tget_pad to get the padding type of the least and
+ *  Call H5Tget_pad to get the padding type of the least and
  *              most-significant bit padding
  *
  * INPUTS
@@ -629,11 +629,11 @@ nh5tget_pad_c ( hid_t_f *type_id , int_f * lsbpad, int_f * msbpad)
 
 /****if* H5Tf/h5tset_pad_c
  * NAME
- *        h5tset_pad_c
+ *  h5tset_pad_c
  * INPUTS
  *      type_id - identifier of the dataspace
  * PURPOSE
- *     Call H5Tset_pad to set the padding type of the least and
+ *  Call H5Tset_pad to set the padding type of the least and
  *              most-significant bit padding
  *
  * INPUTS
@@ -670,9 +670,9 @@ nh5tset_pad_c ( hid_t_f *type_id, int_f * lsbpad, int_f* msbpad )
 
 /****if* H5Tf/h5tget_sign_c
  * NAME
- *        h5tget_sign_c
+ *  h5tget_sign_c
  * PURPOSE
- *     Call H5Tget_sign to get sign type for an integer type
+ *  Call H5Tget_sign to get sign type for an integer type
  * INPUTS
  *      type_id - identifier of the dataspace
  * OUTPUTS
@@ -705,9 +705,9 @@ nh5tget_sign_c ( hid_t_f *type_id , int_f *sign)
 
 /****if* H5Tf/h5tset_sign_c
  * NAME
- *        h5tset_sign_c
+ *  h5tset_sign_c
  * PURPOSE
- *     Call H5Tset_sign to set sign type for an integer type
+ *  Call H5Tset_sign to set sign type for an integer type
  * INPUTS
  *      type_id - identifier of the dataspace
  *              sign - sign type for an integer typ
@@ -741,9 +741,9 @@ nh5tset_sign_c ( hid_t_f *type_id , int_f* sign)
 
 /****if* H5Tf/h5tget_fields_c
  * NAME
- *        h5tget_fields_c
+ *  h5tget_fields_c
  * PURPOSE
- *     Call H5Tget_fields to get floating point datatype
+ *  Call H5Tget_fields to get floating point datatype
  *              bit field information
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -785,9 +785,9 @@ nh5tget_fields_c ( hid_t_f *type_id , size_t_f *spos, size_t_f *epos, size_t_f* 
 
 /****if* H5Tf/h5tset_fields_c
  * NAME
- *        h5tset_fields_c
+ *  h5tset_fields_c
  * PURPOSE
- *     Call H5Tset_fields to set floating point datatype
+ *  Call H5Tset_fields to set floating point datatype
  *              bit field information
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -829,9 +829,9 @@ nh5tset_fields_c ( hid_t_f *type_id, size_t_f *spos, size_t_f *epos, size_t_f* e
 
 /****if* H5Tf/h5tget_ebias_c
  * NAME
- *        h5tget_ebias_c
+ *  h5tget_ebias_c
  * PURPOSE
- *     Call H5Tget_ebias to get  exponent bias of a
+ *  Call H5Tget_ebias to get  exponent bias of a
  *              floating-point type of the datatype
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -866,9 +866,9 @@ nh5tget_ebias_c ( hid_t_f *type_id , size_t_f *ebias)
 
 /****if* H5Tf/h5tset_ebias_c
  * NAME
- *        h5tset_ebias_c
+ *  h5tset_ebias_c
  * PURPOSE
- *     Call H5Tset_ebias to set exponent bias of a
+ *  Call H5Tset_ebias to set exponent bias of a
  *              floating-point type of the datatype
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -903,9 +903,9 @@ nh5tset_ebias_c ( hid_t_f *type_id , size_t_f *ebias)
 
 /****if* H5Tf/h5tget_norm_c
  * NAME
- *        h5tget_norm_c
+ *  h5tget_norm_c
  * PURPOSE
- *     Call H5Tget_norm to get mantissa normalization
+ *  Call H5Tget_norm to get mantissa normalization
  *              of a floating-point datatype
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -940,9 +940,9 @@ nh5tget_norm_c ( hid_t_f *type_id , int_f *norm)
 
 /****if* H5Tf/h5tset_norm_c
  * NAME
- *        h5tset_norm_c
+ *  h5tset_norm_c
  * PURPOSE
- *     Call H5Tset_norm to set mantissa normalization of
+ *  Call H5Tset_norm to set mantissa normalization of
  *              floating-point type of the datatype
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -977,9 +977,9 @@ nh5tset_norm_c ( hid_t_f *type_id , int_f *norm)
 
 /****if* H5Tf/h5tget_inpad_c
  * NAME
- *        h5tget_inpad_c
+ *  h5tget_inpad_c
  * PURPOSE
- *     Call H5Tget_inpad to get the padding type for
+ *  Call H5Tget_inpad to get the padding type for
  *              unused bits in floating-point datatypes
  *
  * INPUTS
@@ -1016,11 +1016,11 @@ nh5tget_inpad_c ( hid_t_f *type_id , int_f * padtype)
 
 /****if* H5Tf/h5tset_inpad_c
  * NAME
- *        h5tset_inpad_c
+ *  h5tset_inpad_c
  * INPUTS
  *      type_id - identifier of the dataspace
  * PURPOSE
- *     Call H5Tset_inpad to set the padding type
+ *  Call H5Tset_inpad to set the padding type
  *              unused bits in floating-point datatype
  *
  * INPUTS
@@ -1057,9 +1057,9 @@ nh5tset_inpad_c ( hid_t_f *type_id, int_f * padtype)
 
 /****if* H5Tf/h5tget_cset_c
  * NAME
- *        h5tget_cset_c
+ *  h5tget_cset_c
  * PURPOSE
- *     Call H5Tget_cset to get character set
+ *  Call H5Tget_cset to get character set
  *              type of a string datatype
  *
  * INPUTS
@@ -1095,11 +1095,11 @@ nh5tget_cset_c ( hid_t_f *type_id , int_f * cset)
 
 /****if* H5Tf/h5tset_cset_c
  * NAME
- *        h5tset_cset_c
+ *  h5tset_cset_c
  * INPUTS
  *      type_id - identifier of the dataspace
  * PURPOSE
- *     Call H5Tset_cset to set character set
+ *  Call H5Tset_cset to set character set
  *              type of a string datatype
  *
  * INPUTS
@@ -1135,9 +1135,9 @@ nh5tset_cset_c ( hid_t_f *type_id, int_f * cset)
 
 /****if* H5Tf/h5tget_strpad_c
  * NAME
- *        h5tget_strpad_c
+ *  h5tget_strpad_c
  * PURPOSE
- *     Call H5Tget_strpad to get string padding method
+ *  Call H5Tget_strpad to get string padding method
  *              for a string datatype
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -1171,11 +1171,11 @@ nh5tget_strpad_c ( hid_t_f *type_id , int_f * strpad)
 
 /****if* H5Tf/h5tset_strpad_c
  * NAME
- *        h5tset_strpad_c
+ *  h5tset_strpad_c
  * INPUTS
  *      type_id - identifier of the dataspace
  * PURPOSE
- *     Call H5Tset_strpad to set string padding method
+ *  Call H5Tset_strpad to set string padding method
  *              for a string datatype
  *
  * INPUTS
@@ -1211,9 +1211,9 @@ nh5tset_strpad_c ( hid_t_f *type_id, int_f * strpad)
 
 /****if* H5Tf/h5tget_nmembers_c
  * NAME
- *        h5tget_nmembers_c
+ *  h5tget_nmembers_c
  * PURPOSE
- *     Call H5Tget_nmembers to get number of fields
+ *  Call H5Tget_nmembers to get number of fields
  *              in a compound datatype
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -1246,9 +1246,9 @@ nh5tget_nmembers_c ( hid_t_f *type_id , int_f * num_members)
 
 /****if* H5Tf/h5tget_member_name_c
  * NAME
- *        h5tget_member_name_c
+ *  h5tget_member_name_c
  * PURPOSE
- *     Call H5Tget_member_name to get name
+ *  Call H5Tget_member_name to get name
  *              of a compound datatype
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -1287,9 +1287,9 @@ nh5tget_member_name_c ( hid_t_f *type_id ,int_f* idx, _fcd member_name, int_f *n
 }
 /****if* H5Tf/h5tget_member_index_c
  * NAME
- *        h5tget_member_index_c
+ *  h5tget_member_index_c
  * PURPOSE
- *     Call H5Tget_member_index to get an index of
+ *  Call H5Tget_member_index to get an index of
  *              the specified datatype filed or member.
  * INPUTS
  *      type_id - datatype identifier
@@ -1301,7 +1301,7 @@ nh5tget_member_name_c ( hid_t_f *type_id ,int_f* idx, _fcd member_name, int_f *n
  *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, September 26, 2002
+ *  Thursday, September 26, 2002
  * HISTORY
  *
  * SOURCE
@@ -1312,15 +1312,13 @@ nh5tget_member_index_c (hid_t_f *type_id, _fcd name, int_f *namelen, int_f *idx)
 {
      int ret_value = -1;
      char *c_name;
-     size_t c_namelen;
      hid_t c_type_id;
      int c_index;
 
      /*
       * Convert FORTRAN name to C name
       */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
+     c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -1340,9 +1338,9 @@ DONE:
 
 /****if* H5Tf/h5tget_member_offset_c
  * NAME
- *        h5tget_member_offset_c
+ *  h5tget_member_offset_c
  * PURPOSE
- *     Call H5Tget_member_offset to get byte offset of the
+ *  Call H5Tget_member_offset to get byte offset of the
  *              beginning of a field within a compound datatype with
  *              respect to the beginning of the compound data type datum
  * INPUTS
@@ -1367,12 +1365,8 @@ nh5tget_member_offset_c ( hid_t_f *type_id ,int_f* member_no, size_t_f * offset)
 {
   int ret_value = -1;
   size_t c_offset;
-  hid_t c_type_id;
-  unsigned c_member_no;
 
-  c_type_id = *type_id;
-  c_member_no = *member_no;
-  c_offset = H5Tget_member_offset(c_type_id, c_member_no);
+  c_offset = H5Tget_member_offset((hid_t)*type_id, (unsigned)*member_no);
   *offset = (size_t_f)c_offset;
   ret_value = 0;
   return ret_value;
@@ -1380,9 +1374,9 @@ nh5tget_member_offset_c ( hid_t_f *type_id ,int_f* member_no, size_t_f * offset)
 
 /****if* H5Tf/h5tget_array_dims_c
  * NAME
- *        h5tget_array_dims_c
+ *  h5tget_array_dims_c
  * PURPOSE
- *     Call H5Tget_array_dims2 to get
+ *  Call H5Tget_array_dims2 to get
  *              dimensions of array datatype
  * INPUTS
  *      type_id - identifier of the array datatype
@@ -1423,9 +1417,9 @@ DONE:
 
 /****if* H5Tf/h5tget_array_ndims_c
  * NAME
- *        h5tget_array_ndims_c
+ *  h5tget_array_ndims_c
  * PURPOSE
- *     Call H5Tget_array_ndims to get number
+ *  Call H5Tget_array_ndims to get number
  *              of dimensions of array datatype
  * INPUTS
  *      type_id - identifier of the array datatype
@@ -1460,9 +1454,9 @@ nh5tget_array_ndims_c ( hid_t_f *type_id , int_f * ndims)
 
 /****if* H5Tf/h5tget_super_c
  * NAME
- *        h5tget_super_c
+ *  h5tget_super_c
  * PURPOSE
- *     Call H5Tget_super to get base datatype from which
+ *  Call H5Tget_super to get base datatype from which
  *              datatype was derived
  * INPUTS
  *      type_id - identifier of the array datatype
@@ -1498,9 +1492,9 @@ nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id)
 
 /****if* H5Tf/h5tget_member_type_c
  * NAME
- *        h5tget_member_type_c
+ *  h5tget_member_type_c
  * PURPOSE
- *     Call H5Tget_member_type to get the identifier of a copy of
+ *  Call H5Tget_member_type to get the identifier of a copy of
  *              the datatype of the field
  * INPUTS
  *      type_id - identifier of the datatype
@@ -1511,7 +1505,7 @@ nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id)
  *     0 on success, -1 on failure
  * AUTHOR
  *  XIANGYANG SU
- *              Thursday, February 3, 2000
+ *  Thursday, February 3, 2000
  * HISTORY
  *
  * SOURCE
@@ -1522,12 +1516,8 @@ nh5tget_member_type_c ( hid_t_f *type_id ,int_f* field_idx, hid_t_f * datatype)
 /******/
 {
   int ret_value = -1;
-  hid_t c_type_id;
-  unsigned c_field_idx;
 
-  c_type_id = *type_id;
-  c_field_idx = *field_idx;
-  *datatype = (hid_t_f)H5Tget_member_type(c_type_id, c_field_idx);
+  *datatype = (hid_t_f)H5Tget_member_type((hid_t)*type_id, (unsigned)*field_idx);
   if(*datatype < 0) return ret_value;
 
   ret_value = 0;
@@ -1537,9 +1527,9 @@ nh5tget_member_type_c ( hid_t_f *type_id ,int_f* field_idx, hid_t_f * datatype)
 
 /****if* H5Tf/h5tcreate_c
  * NAME
- *        h5tcreate_c
+ *  h5tcreate_c
  * PURPOSE
- *     Call H5Tcreate to create a datatype
+ *  Call H5Tcreate to create a datatype
  * INPUTS
  *      cls - class type
  *     size - size of the class memeber
@@ -1573,20 +1563,20 @@ nh5tcreate_c(int_f *cls, size_t_f *size, hid_t_f *type_id)
 
 /****if* H5Tf/h5tinsert_c
  * NAME
- *        h5tinsert_c
+ *  h5tinsert_c
  * PURPOSE
- *     Call H5Tinsert to adds another member to the compound datatype
+ *  Call H5Tinsert to adds another member to the compound datatype
  * INPUTS
- *      type_id - identifier of the datatype
- *              name  - Name of the field to insert
- *              namelen - length of the name
- *              offset - Offset in memory structure of the field to insert
- *              field_id - datatype identifier of the new member
+ *  type_id  - identifier of the datatype
+ *  name     - Name of the field to insert
+ *  namelen - length of the name
+ *  offset   - Offset in memory structure of the field to insert
+ *  field_id - datatype identifier of the new member
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  XIANGYANG SU
- *              Thursday, February 3, 2000
+ *  Thursday, February 3, 2000
  * HISTORY
  *
  * SOURCE
@@ -1597,21 +1587,14 @@ nh5tinsert_c(hid_t_f *type_id, _fcd name, int_f* namelen, size_t_f *offset, hid_
 /******/
 {
   int ret_value = -1;
-  hid_t c_type_id;
-  hid_t c_field_id;
   char* c_name;
-  size_t c_namelen;
-  size_t c_offset;
   herr_t error;
 
-  c_offset =(size_t) *offset;
-  c_namelen = *namelen;
-  c_name = (char *)HD5f2cstring(name, c_namelen);
+  c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
   if (c_name == NULL) return ret_value;
 
-  c_type_id = *type_id;
-  c_field_id = *field_id;
-  error = H5Tinsert(c_type_id, c_name, c_offset, c_field_id);
+  error = H5Tinsert((hid_t)*type_id, c_name, (size_t)*offset, (hid_t)*field_id);
+
   HDfree(c_name);
   if(error < 0) return ret_value;
   ret_value = 0;
@@ -1621,18 +1604,18 @@ nh5tinsert_c(hid_t_f *type_id, _fcd name, int_f* namelen, size_t_f *offset, hid_
 
 /****if* H5Tf/h5tpack_c
  * NAME
- *        h5tpack_c
+ *  h5tpack_c
  * PURPOSE
- *     Call H5Tpack tor ecursively remove padding from
- *              within a compound datatype to make it more efficient
- *              (space-wise) to store that data
+ *  Call H5Tpack tor ecursively remove padding from
+ *  within a compound datatype to make it more efficient
+ *  (space-wise) to store that data
  * INPUTS
- *      type_id - identifier of the datatype
+ *  type_id - identifier of the datatype
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  XIANGYANG SU
- *              Thursday, February 3, 2000
+ *  Thursday, February 3, 2000
  * HISTORY
  *
  * SOURCE
@@ -1656,9 +1639,9 @@ nh5tpack_c(hid_t_f * type_id)
 
 /****if* H5Tf/h5tarray_create_c
  * NAME
- *        h5tarray_create_c
+ *  h5tarray_create_c
  * PURPOSE
- *     Call H5Tarray_create2 to create array datatype
+ *  Call H5Tarray_create2 to create array datatype
  * INPUTS
  *      base_id - identifier of array base datatype
  *              rank - array's rank
@@ -1668,7 +1651,7 @@ nh5tpack_c(hid_t_f * type_id)
  *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, November 16, 2000
+ *  Thursday, November 16, 2000
  * HISTORY
  *
  * SOURCE
@@ -1687,7 +1670,7 @@ nh5tarray_create_c(hid_t_f * base_id, int_f *rank, hsize_t_f* dims, hid_t_f* typ
      * Transpose dimension arrays because of C-FORTRAN storage order
      */
     for(u = 0; u < (unsigned)*rank ; u++)
-        c_dims[u] =  (hsize_t)dims[(*rank - u) - 1];
+      c_dims[u] =  (hsize_t)dims[((unsigned)*rank - u) - 1];
 
     if((c_type_id = H5Tarray_create2((hid_t)*base_id, (unsigned)*rank, c_dims)) < 0)
         goto DONE;
@@ -1702,19 +1685,19 @@ DONE:
 
 /****if* H5Tf/h5tenum_create_c
  * NAME
- *        h5tenum_create_c
+ *  h5tenum_create_c
  * PURPOSE
- *     Call H5Tenum_create to create a new enumeration datatype
+ *  Call H5Tenum_create to create a new enumeration datatype
  * INPUTS
- *      parent_id - Datatype identifier for the base datatype
+ *  parent_id - Datatype identifier for the base datatype
  * OUTPUTS
- *     new_type_id - datatype identifier for the new
- *                            enumeration datatype
+ *  new_type_id - datatype identifier for the new
+ *                enumeration datatype
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Xiangyang Su
- *              Tuesday, February 15, 1999
+ *  Tuesday, February 15, 1999
  * HISTORY
  *
  * SOURCE
@@ -1725,11 +1708,9 @@ nh5tenum_create_c ( hid_t_f *parent_id , hid_t_f *new_type_id)
 /******/
 {
   int ret_value = 0;
-  hid_t c_parent_id;
   hid_t c_new_type_id;
 
-  c_parent_id = *parent_id;
-  c_new_type_id = H5Tenum_create(c_parent_id);
+  c_new_type_id = H5Tenum_create((hid_t)*parent_id);
   if ( c_new_type_id < 0  ) ret_value = -1;
 
   *new_type_id = (hid_t_f)c_new_type_id;
@@ -1764,12 +1745,10 @@ nh5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
 {
   int ret_value = -1;
   char* c_name;
-  size_t c_namelen;
   herr_t error;
   int_f c_value;
 
-  c_namelen = *namelen;
-  c_name = (char *)HD5f2cstring(name, c_namelen);
+  c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
   if (c_name == NULL) return ret_value;
 
   c_value = *value;
@@ -1785,9 +1764,9 @@ nh5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
 
 /****if* H5Tf/h5tenum_nameof_c
  * NAME
- *        h5tenum_nameof_c
+ *  h5tenum_nameof_c
  * PURPOSE
- *     Call H5Tenum_nameof to find the symbol name that corresponds to
+ *  Call H5Tenum_nameof to find the symbol name that corresponds to
  *              the specified value of the enumeration datatype type
  * INPUTS
  *      type_id - identifier of the datatype
@@ -1829,9 +1808,9 @@ nh5tenum_nameof_c(hid_t_f *type_id, int_f* value, _fcd name, size_t_f* namelen)
 
 /****if* H5Tf/h5tenum_valueof_c
  * NAME
- *        h5tenum_valueof_c
+ *  h5tenum_valueof_c
  * PURPOSE
- *     Call H5Tenum_valueof to find the value of that corresponds to
+ *  Call H5Tenum_valueof to find the value of that corresponds to
  *              the specified name of the enumeration datatype type
  * INPUTS
  *      type_id - identifier of the datatype
@@ -1853,16 +1832,12 @@ nh5tenum_valueof_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
 /******/
 {
   int ret_value = -1;
-  hid_t c_type_id;
   char* c_name;
-  size_t c_namelen;
   herr_t error;
-  c_namelen = *namelen;
-  c_name = (char *)HD5f2cstring(name, c_namelen);
+  c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
   if (c_name == NULL) return ret_value;
 
-  c_type_id = *type_id;
-  error = H5Tenum_valueof(c_type_id, c_name, value);
+  error = H5Tenum_valueof((hid_t)*type_id, c_name, value);
   HDfree(c_name);
 
   if(error < 0) return ret_value;
@@ -1873,9 +1848,9 @@ nh5tenum_valueof_c(hid_t_f *type_id, _fcd name, int_f* namelen, int_f* value)
 
 /****if* H5Tf/h5tget_member_value_c
  * NAME
- *        h5tget_member_value_c
+ *  h5tget_member_value_c
  * PURPOSE
- *     Call H5Tget_member_value to get the value of an
+ *  Call H5Tget_member_value to get the value of an
  *              enumeration datatype member
  * INPUTS
  *      type_id - identifier of the datatype
@@ -1896,14 +1871,10 @@ nh5tget_member_value_c(hid_t_f *type_id, int_f* member_no, int_f* value)
 /******/
 {
   int ret_value = -1;
-  hid_t c_type_id;
-  unsigned c_member_no;
   int c_value;
   herr_t error;
 
-  c_type_id = *type_id;
-  c_member_no = *member_no;
-  error = H5Tget_member_value(c_type_id, c_member_no, &c_value);
+  error = H5Tget_member_value((hid_t)*type_id, (unsigned)*member_no, &c_value);
   if(error < 0) return ret_value;
 
   *value = (int_f)c_value;
@@ -1913,11 +1884,11 @@ nh5tget_member_value_c(hid_t_f *type_id, int_f* member_no, int_f* value)
 
 /****if* H5Tf/h5tset_tag_c
  * NAME
- *        h5tset_tag_c
+ *  h5tset_tag_c
  * INPUTS
  *      type_id - identifier of the dataspace
  * PURPOSE
- *     Call H5Tset_tag to set an opaque datatype tag
+ *  Call H5Tset_tag to set an opaque datatype tag
  * INPUTS
  *      type_id - identifier of the dataspace
  *              tag -  Unique ASCII string with which the opaque
@@ -1937,16 +1908,12 @@ nh5tset_tag_c(hid_t_f* type_id, _fcd tag, int_f* namelen)
 /******/
 {
   int ret_value = -1;
-  hid_t c_type_id;
   herr_t status;
   char* c_tag;
-  size_t c_namelen;
 
-  c_namelen = *namelen;
-  c_tag = (char *)HD5f2cstring(tag, c_namelen);
+  c_tag = (char *)HD5f2cstring(tag, (size_t)*namelen);
 
-  c_type_id = *type_id;
-  status = H5Tset_tag(c_type_id, c_tag);
+  status = H5Tset_tag((hid_t)*type_id, c_tag);
   HDfree(c_tag);
   if ( status < 0 ) return ret_value;
 
@@ -1956,7 +1923,7 @@ nh5tset_tag_c(hid_t_f* type_id, _fcd tag, int_f* namelen)
 
 /****if* H5Tf/h5tget_tag_c
  * NAME
- *        h5tget_tag_c
+ *  h5tget_tag_c
  * PURPOSE
  *  Call H5Tset_tag to set an opaque datatype tag
  * INPUTS
@@ -1994,9 +1961,9 @@ nh5tget_tag_c(hid_t_f* type_id, _fcd tag, size_t_f* tag_size, int_f* taglen)
 }
 /****if* H5Tf/h5tvlen_create_c
  * NAME
- *        h5tvlen_create_c
+ *  h5tvlen_create_c
  * PURPOSE
- *     Call H5Tvlen_create to create VL dtatype
+ *  Call H5Tvlen_create to create VL dtatype
  * INPUTS
  *      type_id - identifier of the base datatype
  * OUTPUTS
@@ -2027,9 +1994,9 @@ nh5tvlen_create_c(hid_t_f* type_id, hid_t_f *vltype_id)
 }
 /****if* H5Tf/h5tis_variable_str_c
  * NAME
- *        h5tis_variable_str_c
+ *  h5tis_variable_str_c
  * PURPOSE
- *     Call H5Tis_variable_str to detrmine if the datatype
+ *  Call H5Tis_variable_str to detrmine if the datatype
  *              is a variable string.
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -2062,9 +2029,9 @@ nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag )
 }
 /****if* H5Tf/h5tget_member_class_c
  * NAME
- *        h5tget_member_class_c
+ *  h5tget_member_class_c
  * PURPOSE
- *     Call H5Tget_member_class to detrmine ithe class of the compound
+ *  Call H5Tget_member_class to detrmine ithe class of the compound
  *		datatype member
  * INPUTS
  *      type_id - identifier of the dataspace
@@ -2102,9 +2069,9 @@ nh5tget_member_class_c ( hid_t_f *type_id ,  int_f *member_no, int_f *cls )
 
 /****if* H5Tf/h5tcommit_anon_c
  * NAME
- *        h5tcommit_anon_c
+ *  h5tcommit_anon_c
  * PURPOSE
- *     Call H5Tcommit_anon
+ *  Call H5Tcommit_anon
  * INPUTS
  *      loc_id - file or group identifier
  *              dtype_id - dataset identifier
@@ -2138,9 +2105,9 @@ nh5tcommit_anon_c(hid_t_f *loc_id, hid_t_f *dtype_id,
 
 /****if* H5Tf/h5tcommitted_c
  * NAME
- *        h5tcommitted_c
+ *  h5tcommitted_c
  * PURPOSE
- *     Call H5Tcommitted
+ *  Call H5Tcommitted
  *              dtype_id - dataset identifier
  * RETURNS
  *     a positive value, for TRUE, if the datatype has been committed,
@@ -2169,9 +2136,9 @@ nh5tcommitted_c(hid_t_f *dtype_id)
 
 /****if* H5Tf/h5tdecode_c
  * NAME
- *        h5tdecode_c
+ *  h5tdecode_c
  * PURPOSE
- *     Call H5Tdecode
+ *  Call H5Tdecode
  * INPUTS
  *
  *		buf     - Buffer for the data space object to be decoded.
@@ -2215,9 +2182,9 @@ nh5tdecode_c ( _fcd buf, hid_t_f *obj_id )
 
 /****if* H5Tf/h5tencode_c
  * NAME
- *        h5tencode_c
+ *  h5tencode_c
  * PURPOSE
- *     Call H5Tencode
+ *  Call H5Tencode
  * INPUTS
  *
  *            obj_id - Identifier of the object to be encoded.
@@ -2285,9 +2252,9 @@ nh5tencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
 
 /****if* H5Tf/h5tget_create_plist_c
  * NAME
- *        h5tget_create_plist_c
+ *  h5tget_create_plist_c
  * PURPOSE
- *     Call H5Tget_create_plist
+ *  Call H5Tget_create_plist
  * INPUTS
  *      dtype_id          - Datatype identifier
  * OUTPUTS
@@ -2317,9 +2284,9 @@ nh5tget_create_plist_c ( hid_t_f *dtype_id,  hid_t_f *dtpl_id)
 
 /****if* H5Tf/h5tcompiler_conv_c
  * NAME
- *        h5tcompiler_conv_c
+ *  h5tcompiler_conv_c
  * PURPOSE
- *     Call H5Tcompiler_conv
+ *  Call H5Tcompiler_conv
  * INPUTS
  *
  *              src_id - Identifier for the source datatype.
@@ -2351,9 +2318,9 @@ nh5tcompiler_conv_c ( hid_t_f *src_id, hid_t_f *dst_id, int_f *c_flag)
 }
 /****if* H5Tf/h5tget_native_type_c
  * NAME
- *        h5tget_native_type_c
+ *  h5tget_native_type_c
  * PURPOSE
- *     Call H5Tget_native_type
+ *  Call H5Tget_native_type
  * INPUTS
  *
  *              dtype_id         - Datatype identifier for the dataset datatype.
@@ -2449,13 +2416,11 @@ h5tenum_insert_ptr_c(hid_t_f *type_id, _fcd name, int_f* namelen, void *value)
   int ret_value = -1;
   hid_t status;
   char *c_name;
-  size_t c_namelen;
 
   /*
    * Convert FORTRAN name to C name
    */
-  c_namelen = *namelen;
-  c_name = (char *)HD5f2cstring(name, c_namelen);
+  c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
   if (c_name == NULL) return ret_value;
 
   status = H5Tenum_insert( (hid_t)*type_id, c_name, value);

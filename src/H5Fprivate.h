@@ -488,6 +488,8 @@
                                                     if it is changed, the code
                                                     must compensate. -QAK
                                                  */
+#define HDF5_BTREE_IK_MAX_ENTRIES       65536 	/* 2^16 - 2 bytes for storing entries (children) */
+						/* See format specification on version 1 B-trees */
 
 /* Default file space handling strategy */
 #define H5F_FILE_SPACE_STRATEGY_DEF	        H5F_FILE_SPACE_ALL
@@ -570,6 +572,12 @@ typedef struct H5F_io_info_t {
     const H5F_t *f;                     /* File object */
     const struct H5P_genplist_t *dxpl;         /* DXPL object */
 } H5F_io_info_t;
+
+/* Concise info about a block of bytes in a file */
+typedef struct H5F_block_t {
+    haddr_t offset;             /* Offset of the block in the file */
+    hsize_t length;             /* Length of the block in the file */
+} H5F_block_t;
 
 
 /*****************************/

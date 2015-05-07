@@ -523,7 +523,7 @@ test_attr_flush(hid_t fapl)
     CHECK(ret, FAIL, "H5Awrite");
 
     if(!DBL_ABS_EQUAL(rdata,0.0F))
-        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,0.0F);
+        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,(double)0.0F);
 
     ret=H5Fflush(fil, H5F_SCOPE_GLOBAL);
     CHECK(ret, FAIL, "H5Fflush");
@@ -532,7 +532,7 @@ test_attr_flush(hid_t fapl)
     CHECK(ret, FAIL, "H5Awrite");
 
     if(!DBL_ABS_EQUAL(rdata,0.0F))
-        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,0.0F);
+        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,(double)0.0F);
 
     ret=H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
     CHECK(ret, FAIL, "H5Awrite");
@@ -1016,7 +1016,7 @@ test_attr_scalar_read(hid_t fapl)
     /* Verify the floating-poing value in this way to avoid compiler warning. */
     if(!FLT_ABS_EQUAL(rdata, attr_data5))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
-	    "H5Aread", attr_data5, rdata, (int)__LINE__, __FILE__);
+	    "H5Aread", (double)attr_data5, (double)rdata, (int)__LINE__, __FILE__);
 
     /* Get the attribute's dataspace */
     sid = H5Aget_space(attr);

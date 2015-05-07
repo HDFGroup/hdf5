@@ -1187,7 +1187,7 @@ H5A_type(const H5A_t *attr)
  */
 htri_t
 H5A_exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
-                   hid_t lapl_id)
+                   hid_t lapl_id, hid_t dxpl_id)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
@@ -1203,12 +1203,12 @@ H5A_exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
     H5G_loc_reset(&obj_loc);
 
     /* Find the object's location */
-    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
     loc_found = TRUE;
 
     /* Check if the attribute exists */
-    if((ret_value = H5O_attr_exists(obj_loc.oloc, attr_name, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5O_attr_exists(obj_loc.oloc, attr_name, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:
@@ -2377,7 +2377,7 @@ done:
  */
 herr_t
 H5A_rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_name,
-                   const char *new_attr_name, hid_t lapl_id)
+                   const char *new_attr_name, hid_t lapl_id, hid_t dxpl_id)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
@@ -2400,7 +2400,7 @@ H5A_rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_nam
         loc_found = TRUE;
 
         /* Call attribute rename routine */
-        if(H5O_attr_rename(obj_loc.oloc, H5AC_dxpl_id, old_attr_name, new_attr_name) < 0)
+        if(H5O_attr_rename(obj_loc.oloc, dxpl_id, old_attr_name, new_attr_name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
     } /* end if */
 

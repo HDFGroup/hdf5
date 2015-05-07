@@ -20,6 +20,8 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
+#define IMAGE_WIDTH_MAX		65535	/* unsigned 16bits integer */
+#define IMAGE_HEIGHT_MAX	65535	/* unsigned 16bits integer */
 
 
 int EndianOrder;
@@ -147,6 +149,17 @@ int main(int argc , char **argv)
         if ( H5IMget_image_info( fid, image_name, &width, &height, &planes, interlace, &npals ) < 0 )
             goto out;
 
+	if (width > IMAGE_WIDTH_MAX || height > IMAGE_HEIGHT_MAX){
+	    fprintf(stderr, "HDF5 image is too large. Limit is %d by %d.\n", IMAGE_WIDTH_MAX, IMAGE_HEIGHT_MAX);
+	    goto out;
+	}
+
+	/* tool can handle single plane images only. */
+	if (planes > 1){
+	    fprintf(stderr, "Cannot handle multiple planes image\n");
+	    goto out;
+	}
+
         Image = (BYTE*) malloc( (size_t) width * (size_t) height );
 
         if ( H5IMread_image( fid, image_name, Image ) < 0 )
@@ -194,9 +207,9 @@ int main(int argc , char **argv)
             numcols = 256;
             for (i = 0 ; i < numcols ; i++)
             {
-                Red[i] = 255 - i;
-                Green[i] = 255 - i;
-                Blue[i] = 255 - i;
+	      Red[i] = (BYTE)(255 - i);
+	      Green[i] = (BYTE)(255 - i);
+	      Blue[i] = (BYTE)(255 - i);
             }
         }
         else
@@ -229,7 +242,7 @@ int main(int argc , char **argv)
             if (j==i)
             {
                 /* wasn't found */
-                pc2nc[i] = nc;
+	      pc2nc[i] = (BYTE)nc;
                 r1[nc] = Red[i];
                 g1[nc] = Green[i];
                 b1[nc] = Blue[i];

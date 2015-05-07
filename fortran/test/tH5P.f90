@@ -450,8 +450,6 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   INTEGER(size_t) rdcc_nelmts
   INTEGER(size_t) rdcc_nbytes
   REAL :: rdcc_w0
-  LOGICAL :: differ
-
 
   CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
   IF (error .NE. 0) THEN

@@ -1847,8 +1847,20 @@ test_misc11(void)
     ret = H5Pset_sizes(fcpl, (size_t)MISC11_SIZEOF_OFF, (size_t)MISC11_SIZEOF_LEN);
     CHECK(ret, FAIL, "H5Pset_sizes");
 
+    /* This should fail as (32770*2) will exceed ^16 - 2 bytes for storing btree entries */
+    H5E_BEGIN_TRY {
+	ret=H5Pset_sym_k(fcpl, 32770, 0);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Pset_sym_k");
+
     ret=H5Pset_sym_k(fcpl,MISC11_SYM_IK,MISC11_SYM_LK);
     CHECK(ret, FAIL, "H5Pset_sym_k");
+
+    /* This should fail as (32770*2) will exceed ^16 - 2 bytes for storing btree entries */
+    H5E_BEGIN_TRY {
+	ret=H5Pset_istore_k(fcpl, 32770);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Pset_istore_k");
 
     ret=H5Pset_istore_k(fcpl,MISC11_ISTORE_IK);
     CHECK(ret, FAIL, "H5Pset_istore_k");

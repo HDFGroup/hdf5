@@ -37,7 +37,7 @@ I. Preconditions
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
       web site. The HDF5 1.8.x product requires a minimum CMake version 
-      of 2.8.12.                     
+      of 3.1.0.                     
                                                                          
    2. You have installed the HDF5 library built with CMake, by executing 
       the HDF Install Utility (the *.exe file in the binary package for 
@@ -107,7 +107,7 @@ These steps are described in more detail below.
 
         <options> is:
             * BUILD_TESTING:BOOL=ON
-            * USE_SHARED_LIBS:BOOL=[ON | OFF]
+            * BUILD_SHARED_LIBS:BOOL=[ON | OFF]
 
    2. Configure the cache settings
 
@@ -131,7 +131,7 @@ These steps are described in more detail below.
 
       2.2  Alternative command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
       
-           cmake -G "Visual Studio 11" -DBUILD_TESTING:BOOL=ON -DUSE_SHARED_LIBS:BOOL=ON ..
+           cmake -G "Visual Studio 11" -DBUILD_TESTING:BOOL=ON ..
 
    3. Build HDF5 Applications
    

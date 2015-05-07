@@ -686,7 +686,7 @@ test_array_compound_atomic(void)
                 continue;
             } /* end if */
             if(!FLT_ABS_EQUAL(wdata[i][j].f, rdata[i][j].f)) {
-                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].f=%f, rdata[%d][%d].f=%f\n", (int)i, (int)j, wdata[i][j].f, (int)i, (int)j, rdata[i][j].f);
+                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].f=%f, rdata[%d][%d].f=%f\n", (int)i, (int)j, (double)wdata[i][j].f, (int)i, (int)j, (double)rdata[i][j].f);
                 continue;
             } /* end if */
         } /* end for */
@@ -929,7 +929,7 @@ test_array_compound_array(void)
             } /* end if */
             for(k=0; k<ARRAY1_DIM1; k++)
                 if(!FLT_ABS_EQUAL(wdata[i][j].f[k],rdata[i][j].f[k])) {
-                    TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].f[%d]=%f, rdata[%d][%d].f[%d]=%f\n",(int)i,(int)j,(int)k,wdata[i][j].f[k],(int)i,(int)j,(int)k,rdata[i][j].f[k]);
+                    TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].f[%d]=%f, rdata[%d][%d].f[%d]=%f\n",(int)i,(int)j,(int)k,(double)wdata[i][j].f[k],(int)i,(int)j,(int)k,(double)rdata[i][j].f[k]);
                     continue;
                 } /* end if */
         } /* end for */
@@ -1619,11 +1619,11 @@ test_array_bkg(void)
                 continue;
             }
             if(!FLT_ABS_EQUAL(cf[i].b[j],cfr[i].b[j])) {
-                TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
+                TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].b[j],(int)i,(int)j,(double)cfr[i].b[j]);
                 continue;
             }
             if(!DBL_ABS_EQUAL(cf[i].c[j],cfr[i].c[j])) {
-                TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
+                TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].c[j],(int)i,(int)j,(double)cfr[i].c[j]);
                 continue;
             }
         }
@@ -1686,7 +1686,7 @@ test_array_bkg(void)
     for (i=0; i< LENGTH; i++)
         for (j = 0; j < ALEN; j++)
             if(!FLT_ABS_EQUAL(fld[i].b[j],fldr[i].b[j])) {
-                TestErrPrintf("Field data doesn't match, fld[%d].b[%d]=%f, fldr[%d].b[%d]=%f\n",(int)i,(int)j,(float)fld[i].b[j],(int)i,(int)j,(float)fldr[i].b[j]);
+                TestErrPrintf("Field data doesn't match, fld[%d].b[%d]=%f, fldr[%d].b[%d]=%f\n",(int)i,(int)j,(double)fld[i].b[j],(int)i,(int)j,(double)fldr[i].b[j]);
                 continue;
             }
 
@@ -1712,11 +1712,11 @@ test_array_bkg(void)
                 continue;
             }
             if(!FLT_ABS_EQUAL(cf[i].b[j],cfr[i].b[j])) {
-                TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
+                TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].b[j],(int)i,(int)j,(double)cfr[i].b[j]);
                 continue;
             }
             if(!DBL_ABS_EQUAL(cf[i].c[j],cfr[i].c[j])) {
-                TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
+                TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].c[j],(int)i,(int)j,(double)cfr[i].c[j]);
                 continue;
             }
         }
@@ -1761,11 +1761,11 @@ test_array_bkg(void)
                 continue;
             }
             if(!FLT_ABS_EQUAL(cf[i].b[j],cfr[i].b[j])) {
-                TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].b[j],(int)i,(int)j,(float)cfr[i].b[j]);
+                TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].b[j],(int)i,(int)j,(double)cfr[i].b[j]);
                 continue;
             }
             if(!DBL_ABS_EQUAL(cf[i].c[j],cfr[i].c[j])) {
-                TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(float)cf[i].c[j],(int)i,(int)j,(float)cfr[i].c[j]);
+                TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].c[j],(int)i,(int)j,(double)cfr[i].c[j]);
                 continue;
             }
         }

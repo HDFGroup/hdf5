@@ -34,7 +34,7 @@ H5_FCTESTDLL int_f nh5_fixname_c
 H5_FCTESTDLL int_f nh5_cleanup_c
 (_fcd base_name, size_t_f *base_namelen, hid_t_f *fapl);
 
-H5_FCTESTDLL void nh5_exit_c
+H5_FCTESTDLL NORETURN void nh5_exit_c
 (int_f *status);
 
 H5_FCTESTDLL void nh5_env_nocleanup_c

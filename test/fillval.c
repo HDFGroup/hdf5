@@ -627,7 +627,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
            H5_FAILED();
            puts("    Got wrong fill value");
            printf("    Got rd_c.a=%f, rd_c.y=%f and rd_c.x=%d, rd_c.z=%c\n",
-                  rd_c.a, rd_c.y, rd_c.x, rd_c.z);
+                  (double)rd_c.a, rd_c.y, rd_c.x, rd_c.z);
         }
         if(H5Dclose(dset9) < 0) goto error;
         if(H5Pclose(dcpl) < 0) goto error;
@@ -700,7 +700,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
         H5_FAILED();
         puts("    Got wrong fill value");
         printf("    Got rd_c.a=%f, rd_c.y=%f and rd_c.x=%d, rd_c.z=%c\n",
-		rd_c.a, rd_c.y, rd_c.x, rd_c.z);
+		(double)rd_c.a, rd_c.y, rd_c.x, rd_c.z);
     }
     if(H5Dclose(dset8) < 0) goto error;
     if(H5Pclose(dcpl) < 0) goto error;
@@ -820,8 +820,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                        "Fill value: %f, %d, %f, %c\n",
                        hs_offset[0], hs_offset[1],
                        hs_offset[2], hs_offset[3],
-                       hs_offset[4], rd_c.a, rd_c.x, rd_c.y, rd_c.z,
-			fill_c.a, fill_c.x, fill_c.y, fill_c.z);
+                       hs_offset[4], (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z,
+			(double)fill_c.a, fill_c.x, fill_c.y, fill_c.z);
                 goto error;
             }
         }
@@ -888,8 +888,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                             hs_offset[0], hs_offset[1],
                             hs_offset[2], hs_offset[3],
                             hs_offset[4],
-                            buf_c[u].a, buf_c[u].x, buf_c[u].y, buf_c[u].z,
-                            fill_c.a, fill_c.x, fill_c.y, fill_c.z);
+                            (double)buf_c[u].a, buf_c[u].x, buf_c[u].y, buf_c[u].z,
+                            (double)fill_c.a, fill_c.x, fill_c.y, fill_c.z);
                     goto error;
                 } /* end if */
             } /* end for */
@@ -1002,7 +1002,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                            (long)hs_offset[0], (long)hs_offset[1],
                            (long)hs_offset[2], (long)hs_offset[3],
                            (long)hs_offset[4],
-			   rd_c.a, rd_c.x, rd_c.y, rd_c.z, should_be_c.a,
+			   (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z, (double)should_be_c.a,
 		           should_be_c.x,should_be_c.y,should_be_c.z);
                     goto error;
  		}
@@ -1021,7 +1021,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                            (long)hs_offset[0], (long)hs_offset[1],
                            (long)hs_offset[2], (long)hs_offset[3],
                            (long)hs_offset[4],
-                           rd_c.a, rd_c.x, rd_c.y, rd_c.z, should_be_c.a,
+                           (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z, (double)should_be_c.a,
                            should_be_c.x,should_be_c.y,should_be_c.z);
                     goto error;
                 }

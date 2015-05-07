@@ -1,0 +1,73 @@
+#							-*- shell-script -*-
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+
+
+# This file should be sourced into configure if the compiler is the
+# Cray Compiling Environment (CCE) compiler or a derivative.  It is careful not to do anything
+# if the compiler is not Cray; otherwise `cc_flags_set' is set to `yes'
+#
+
+# Get the compiler version in a way that works for cce
+# unless a compiler version is already known
+#
+#   cc_vendor:    The compiler name: Cray
+#   cc_version:   Version number: 8.3.0
+#
+if test X = "X$f9x_flags_set"; then
+    f9x_version="`$FC $FCFLAGS $H5_FCFLAGS -V 2>&1 |grep 'Cray'`"
+    if test X != "X$f9x_version"; then
+        f9x_vendor=cce
+        f9x_version=`echo $f9x_version |sed 's/.*Version \([-a-z0-9\.\-]*\).*/\1/'`
+        echo "compiler '$FC' is Cray $f9x_vendor-$f9x_version"
+	fc_version_info=$f9x_version
+    fi
+fi
+
+# Common Cray flags for various situations
+if test "X-cce" = "X-$f9x_vendor"; then
+    # Insert section about version specific problems from compiler flags here,
+    # if necessary.
+
+    arch=
+    # Architecture-specific flags
+    # Nothing currently. (Uncomment code below and modify to add any)
+    #case "$host_os-$host_cpu" in
+    #    *-i686)
+    #        arch="-march=i686"
+    #        ;;
+    #esac
+
+    # General
+    H5_FCFLAGS="${H5_FCFLAGS} -hnocaf"
+
+    # Production
+    # -Wl,-s to remove all symbols for smaller file
+    PROD_FCFLAGS="-O3 -Wl,-s"
+
+    # Debug
+    DEBUG_FCFLAGS="-g -O0"
+
+    # Profile
+    # Use this for profiling with gprof
+    PROFILE_FCFLAGS="-g -p"
+
+    # Flags are set
+    f9x_flags_set=yes
+fi
+
+# Clear f9x info if no flags set
+if test "X-$f9x_flags_set" = "X-"; then
+    f9x_vendor=
+    f9x_version=
+fi

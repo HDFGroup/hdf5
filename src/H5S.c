@@ -482,6 +482,12 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
     if(H5S_extent_copy(&(dst->extent), &(src->extent), TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent")
 
+    /* If the selection is 'all', update the number of elements selected in the
+     * destination space */
+    if(H5S_SEL_ALL == H5S_GET_SELECT_TYPE(dst))
+        if(H5S_select_all(dst, FALSE) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sextent_copy() */
@@ -2138,14 +2144,13 @@ H5S_extend(H5S_t *space, const hsize_t *size)
     HDassert(size);
 
     /* Check through all the dimensions to see if modifying the dataspace is allowed */
-    for(u = 0; u < space->extent.rank; u++) {
-        if(space->extent.size[u]<size[u]) {
-            if(space->extent.max && H5S_UNLIMITED!=space->extent.max[u] &&
-                    space->extent.max[u]<size[u])
+    for(u = 0; u < space->extent.rank; u++)
+        if(space->extent.size[u] < size[u]) {
+            if(space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
+                    space->extent.max[u] < size[u])
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be increased")
             ret_value++;
         } /* end if */
-    } /* end for */
 
     /* Update */
     if(ret_value) {
