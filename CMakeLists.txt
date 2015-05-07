@@ -472,7 +472,7 @@ endif (HDF5_DISABLE_COMPILER_WARNINGS)
 # CDash is configured to only allow 3000 warnings, so
 # break into groups (from the config/gnu-flags file)
 #-----------------------------------------------------------------------------
-if (NOT MSVC)
+if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
   if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline")
   else (NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
@@ -535,7 +535,7 @@ if (NOT MSVC)
 
     # Append more extra warning flags that only gcc 4.7+ know about
     set (H5_CFLAGS5 "${H5_CFLAGS5} -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
-endif (NOT MSVC)
+endif (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
   
 #-----------------------------------------------------------------------------
 # Option to allow the user to enable all warnings
@@ -548,7 +548,9 @@ if (HDF5_ENABLE_ALL_WARNINGS)
     string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
   else (MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic ${H5_CFLAGS1} ${H5_CFLAGS2} ${H5_CFLAGS3} ${H5_CFLAGS4}")
+    if (CMAKE_COMPILER_IS_GNUCC)
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic ${H5_CFLAGS1} ${H5_CFLAGS2} ${H5_CFLAGS3} ${H5_CFLAGS4}")
+    endif (CMAKE_COMPILER_IS_GNUCC)
   endif (MSVC)
 endif (HDF5_ENABLE_ALL_WARNINGS)
 
@@ -563,7 +565,9 @@ if (HDF5_ENABLE_GROUPZERO_WARNINGS)
     string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W1")
   else (MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic")
+    if (CMAKE_COMPILER_IS_GNUCC)
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic")
+    endif (CMAKE_COMPILER_IS_GNUCC)
   endif (MSVC)
 endif (HDF5_ENABLE_GROUPZERO_WARNINGS)
 
