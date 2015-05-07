@@ -1,8 +1,11 @@
-#########################################################################
-### For Windows ${CTEST_SCRIPT_ARG} is one of                         ###
-###    [64-VS2013, 32-VS2013, 64-VS2012, 32-VS2012]                   ###
-### ctest -S HDF518config.cmake,32-VS2012 -C Release -V -O hdf518.log ###
-#########################################################################
+##########################################################################
+### For Windows ${CTEST_SCRIPT_ARG} is one of                          ###
+###    [64-VS2013, 32-VS2013, 64-VS2012, 32-VS2012]                    ###
+### ctest -S HDF518config.cmake,32-VS2012 -C Release -VV -O hdf518.log ###
+###                                                                    ###
+### Other platforms do not use ${CTEST_SCRIPT_ARG}                     ###
+### ctest -S HDF518config.cmake -C Release -VV -O hdf518.log           ###
+##########################################################################
 
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 set(CTEST_SOURCE_VERSION 1.8.15)
@@ -90,14 +93,14 @@ set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8")
 ####  Change default configuration of options in config/cmake/cacheinit.cmake file ###
 ####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")
 
-### uncomment/comment and change the following lines for configuration options
+### uncomment/comment or change the following lines for configuration options
 
 ### comment the following line or change OFF to ON in order to build shared libraries
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
 
 ####      ext libraries       ####
 ### ext libs from tgz
-set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=TGZ -DTGZPATH:PATH=${CTEST_SCRIPT_DIRECTORY}")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=TGZ -DTGZPATH:PATH=\"${CTEST_SCRIPT_DIRECTORY}\"")
 ### ext libs from svn
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=SVN")
 ### ext libs on system
