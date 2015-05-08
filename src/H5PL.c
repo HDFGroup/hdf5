@@ -237,10 +237,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLget_loading_state(unsigned int* plugin_type)
+H5PLget_loading_state(unsigned int *plugin_type)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "*Iu", plugin_type);
 
     if(plugin_type)
         *plugin_type = H5PL_plugin_g;

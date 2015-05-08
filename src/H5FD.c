@@ -1845,7 +1845,7 @@ H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing)
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*xiIu", file, dxpl_id, closing);
+    H5TRACE3("e", "*xib", file, dxpl_id, closing);
 
     /* Check args */
     if(!file || !file->cls)
