@@ -129,7 +129,7 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr, hsize_t nelmts))
         hsize_t npages = ((nelmts + dblock->dblk_page_nelmts) - 1) / dblock->dblk_page_nelmts;
 
         /* Safely assign the number of pages */
-        H5_ASSIGN_OVERFLOW(/* To: */ dblock->npages, /* From: */ npages, /* From: */ hsize_t, /* To: */ size_t);
+        H5_CHECKED_ASSIGN(dblock->npages, size_t, npages, hsize_t);
 
 	/* Sanity check that we have at least 1 page */
 	HDassert(dblock->npages > 0);

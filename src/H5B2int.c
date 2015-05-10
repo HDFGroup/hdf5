@@ -382,13 +382,13 @@ H5B2_split_root(H5B2_hdr_t *hdr, hid_t dxpl_id)
 
     /* Update node info for new depth of tree */
     sz_max_nrec = H5B2_NUM_INT_REC(hdr, hdr->depth);
-    H5_ASSIGN_OVERFLOW(/* To: */ hdr->node_info[hdr->depth].max_nrec, /* From: */ sz_max_nrec, /* From: */ size_t, /* To: */ unsigned)
+    H5_CHECKED_ASSIGN(hdr->node_info[hdr->depth].max_nrec, unsigned, sz_max_nrec, size_t)
     hdr->node_info[hdr->depth].split_nrec = (hdr->node_info[hdr->depth].max_nrec * hdr->split_percent) / 100;
     hdr->node_info[hdr->depth].merge_nrec = (hdr->node_info[hdr->depth].max_nrec * hdr->merge_percent) / 100;
     hdr->node_info[hdr->depth].cum_max_nrec = ((hdr->node_info[hdr->depth].max_nrec + 1) *
         hdr->node_info[hdr->depth - 1].cum_max_nrec) + hdr->node_info[hdr->depth].max_nrec;
     u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[hdr->depth].cum_max_nrec);
-    H5_ASSIGN_OVERFLOW(/* To: */ hdr->node_info[hdr->depth].cum_max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ uint8_t)
+    H5_CHECKED_ASSIGN(hdr->node_info[hdr->depth].cum_max_nrec_size, uint8_t, u_max_nrec_size, unsigned)
     if(NULL == (hdr->node_info[hdr->depth].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[hdr->depth].max_nrec)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
     if(NULL == (hdr->node_info[hdr->depth].node_ptr_fac = H5FL_fac_init(sizeof(H5B2_node_ptr_t) * (hdr->node_info[hdr->depth].max_nrec + 1))))
@@ -546,7 +546,7 @@ H5B2_redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
             /* Count the number of records being moved */
             for(u = 0; u < move_nrec; u++)
                 moved_nrec += right_node_ptrs[u].all_nrec;
-            H5_ASSIGN_OVERFLOW(/* To: */ left_moved_nrec, /* From: */ moved_nrec, /* From: */ hsize_t, /* To: */ hssize_t)
+            H5_CHECKED_ASSIGN(left_moved_nrec, hssize_t, moved_nrec, hsize_t)
             right_moved_nrec -= (hssize_t)moved_nrec;
 
             /* Copy node pointers from right node to left */
@@ -600,7 +600,7 @@ H5B2_redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
             for(u = 0; u < move_nrec; u++)
                 moved_nrec += right_node_ptrs[u].all_nrec;
             left_moved_nrec -= (hssize_t)moved_nrec;
-            H5_ASSIGN_OVERFLOW(/* To: */ right_moved_nrec, /* From: */ moved_nrec, /* From: */ hsize_t, /* To: */ hssize_t)
+            H5_CHECKED_ASSIGN(right_moved_nrec, hssize_t, moved_nrec, hsize_t)
         } /* end if */
 
         /* Update number of records in child nodes */
@@ -1848,7 +1848,7 @@ H5B2_protect_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, haddr_t addr, unsigned nrec,
     /* Set up user data for callback */
     udata.f = hdr->f;
     udata.hdr = hdr;
-    H5_ASSIGN_OVERFLOW(/* To: */ udata.nrec, /* From: */ nrec, /* From: */ unsigned, /* To: */ uint16_t)
+    H5_CHECKED_ASSIGN(udata.nrec, uint16_t, nrec, unsigned)
 
     /* Protect the leaf node */
     if(NULL == (ret_value = (H5B2_leaf_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_BT2_LEAF, addr, &udata, rw)))
@@ -1968,8 +1968,8 @@ H5B2_protect_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, haddr_t addr,
     /* Set up user data for callback */
     udata.f = hdr->f;
     udata.hdr = hdr;
-    H5_ASSIGN_OVERFLOW(/* To: */ udata.nrec, /* From: */ nrec, /* From: */ unsigned, /* To: */ uint16_t)
-    H5_ASSIGN_OVERFLOW(/* To: */ udata.depth, /* From: */ depth, /* From: */ unsigned, /* To: */ uint16_t)
+    H5_CHECKED_ASSIGN(udata.nrec, uint16_t, nrec, unsigned)
+    H5_CHECKED_ASSIGN(udata.depth, uint16_t, depth, unsigned)
 
     /* Protect the internal node */
     if(NULL == (ret_value = (H5B2_internal_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_BT2_INT, addr, &udata, rw)))

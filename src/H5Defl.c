@@ -170,7 +170,7 @@ H5D__efl_construct(H5F_t *f, H5D_t *dset)
     stmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space);
     HDassert(stmp_size >= 0);
     tmp_size = (hsize_t)stmp_size * dt_size;
-    H5_ASSIGN_OVERFLOW(dset->shared->layout.storage.u.contig.size, tmp_size, hssize_t, hsize_t);
+    H5_CHECKED_ASSIGN(dset->shared->layout.storage.u.contig.size, hsize_t, tmp_size, hssize_t);
 
     /* Get the sieve buffer size for this dataset */
     dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(f);

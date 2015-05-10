@@ -284,7 +284,7 @@ H5D__btree_new_node(H5F_t *f, hid_t UNUSED dxpl_id, H5B_ins_t op,
      * The left key describes the storage of the UDATA chunk being
      * inserted into the tree.
      */
-    H5_ASSIGN_OVERFLOW(lt_key->nbytes, udata->chunk_block.length, hsize_t, uint32_t);
+    H5_CHECKED_ASSIGN(lt_key->nbytes, uint32_t, udata->chunk_block.length, hsize_t);
     lt_key->filter_mask = udata->filter_mask;
     for(u = 0; u < udata->common.layout->ndims; u++)
         lt_key->offset[u] = udata->common.offset[u];
@@ -548,7 +548,7 @@ H5D__btree_insert(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t addr, void *_lt_key,
 	    /* Set node's address (already re-allocated by main chunk routines) */
 	    HDassert(H5F_addr_defined(udata->chunk_block.offset));
             *new_node_p = udata->chunk_block.offset;
-            H5_ASSIGN_OVERFLOW(lt_key->nbytes, udata->chunk_block.length, hsize_t, uint32_t);
+            H5_CHECKED_ASSIGN(lt_key->nbytes, uint32_t, udata->chunk_block.length, hsize_t);
             lt_key->filter_mask = udata->filter_mask;
             *lt_key_changed = TRUE;
             ret_value = H5B_INS_CHANGE;
@@ -568,7 +568,7 @@ H5D__btree_insert(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t addr, void *_lt_key,
          * Split this node, inserting the new new node to the right of the
          * current node.  The MD_KEY is where the split occurs.
          */
-        H5_ASSIGN_OVERFLOW(md_key->nbytes, udata->chunk_block.length, hsize_t, uint32_t);
+        H5_CHECKED_ASSIGN(md_key->nbytes, uint32_t, udata->chunk_block.length, hsize_t);
         md_key->filter_mask = udata->filter_mask;
         for(u = 0; u < udata->common.layout->ndims; u++) {
             HDassert(0 == udata->common.offset[u] % udata->common.layout->dim[u]);

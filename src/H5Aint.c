@@ -255,7 +255,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* Get # of elements for attribute's dataspace */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, NULL, "dataspace is invalid")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
 
     HDassert(attr->shared->dt_size > 0);
     HDassert(attr->shared->ds_size > 0);
@@ -508,7 +508,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
     /* Get # of elements for attribute's dataspace */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
 
     /* If there's actually data elements for the attribute, make a copy of the data passed in */
     if(nelmts > 0) {
@@ -621,7 +621,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
     /* Create buffer for data to store on disk */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
 
     if(nelmts > 0) {
         /* Get the memory and file datatype sizes */
@@ -1680,7 +1680,7 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
         *last_attr = skip;
 
     /* Iterate over attribute messages */
-    H5_ASSIGN_OVERFLOW(/* To: */ u, /* From: */ skip, /* From: */ hsize_t, /* To: */ size_t)
+    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t)
     for(; u < atable->nattrs && !ret_value; u++) {
         /* Check which type of callback to make */
         switch(attr_op->op_type) {
@@ -2012,7 +2012,11 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
         *recompute_size = TRUE;
 
     /* Compute the size of the data */
-    H5_ASSIGN_OVERFLOW(attr_dst->shared->data_size, H5S_GET_EXTENT_NPOINTS(attr_dst->shared->ds) * H5T_get_size(attr_dst->shared->dt), hssize_t, size_t);
+    /* NOTE: This raises warnings. If we are going to be serious about
+     * expecting overflow here, we should implement testing similar to
+     * that described in CERT bulletins INT30-C and INT32-C.
+     */
+    H5_CHECKED_ASSIGN(attr_dst->shared->data_size, size_t, H5S_GET_EXTENT_NPOINTS(attr_dst->shared->ds) * H5T_get_size(attr_dst->shared->dt), hssize_t);
 
     /* Copy (& convert) the data, if necessary */
     if(attr_src->shared->data) {

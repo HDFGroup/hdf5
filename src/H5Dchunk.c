@@ -558,7 +558,7 @@ H5D__chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be < 4GB")
 
     /* Retain computed chunk size */
-    H5_ASSIGN_OVERFLOW(dset->shared->layout.u.chunk.size, chunk_size, uint64_t, uint32_t);
+    H5_CHECKED_ASSIGN(dset->shared->layout.u.chunk.size, uint32_t, chunk_size, uint64_t);
 
     /* Reset address and pointer of the array struct for the chunked storage index */
     if(H5D_chunk_idx_reset(&dset->shared->layout.storage.u.chunk, TRUE) < 0)
@@ -718,7 +718,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     if((sm_ndims = H5S_GET_EXTENT_NDIMS(mem_space)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
     /* Set the number of dimensions for the memory dataspace */
-    H5_ASSIGN_OVERFLOW(fm->m_ndims, sm_ndims, int, unsigned);
+    H5_CHECKED_ASSIGN(fm->m_ndims, unsigned, sm_ndims, int);
 
     /* Get rank for file dataspace */
     fm->f_ndims = f_ndims = dataset->shared->layout.u.chunk.ndims - 1;
@@ -1317,7 +1317,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
             /* Get number of elements selected in chunk */
             if((schunk_points = H5S_GET_SELECT_NPOINTS(tmp_fchunk)) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
-            H5_ASSIGN_OVERFLOW(new_chunk_info->chunk_points, schunk_points, hssize_t, uint32_t);
+            H5_CHECKED_ASSIGN(new_chunk_info->chunk_points, uint32_t, schunk_points, hssize_t);
 
             /* Decrement # of points left in file selection */
             sel_points -= (hsize_t)schunk_points;
@@ -1793,7 +1793,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     ctg_io_info.layout_ops = *H5D_LOPS_CONTIG;
 
     /* Initialize temporary contiguous storage info */
-    H5_ASSIGN_OVERFLOW(ctg_store.contig.dset_size, io_info->dset->shared->layout.u.chunk.size, uint32_t, hsize_t);
+    H5_CHECKED_ASSIGN(ctg_store.contig.dset_size, hsize_t, io_info->dset->shared->layout.u.chunk.size, uint32_t);
 
     /* Set up compact I/O info object */
     HDmemcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
@@ -1938,7 +1938,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     ctg_io_info.layout_ops = *H5D_LOPS_CONTIG;
 
     /* Initialize temporary contiguous storage info */
-    H5_ASSIGN_OVERFLOW(ctg_store.contig.dset_size, io_info->dset->shared->layout.u.chunk.size, uint32_t, hsize_t);
+    H5_CHECKED_ASSIGN(ctg_store.contig.dset_size, hsize_t, io_info->dset->shared->layout.u.chunk.size, uint32_t);
 
     /* Set up compact I/O info object */
     HDmemcpy(&cpt_io_info, io_info, sizeof(cpt_io_info));
@@ -2248,7 +2248,7 @@ H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *ud
     /* Stored the information to cache */
     HDmemcpy(last->offset, udata->common.offset, sizeof(hsize_t) * udata->common.layout->ndims);
     last->addr = udata->chunk_block.offset;
-    H5_ASSIGN_OVERFLOW(last->nbytes, udata->chunk_block.length, hsize_t, uint32_t);
+    H5_CHECKED_ASSIGN(last->nbytes, uint32_t, udata->chunk_block.length, hsize_t);
     last->filter_mask = udata->filter_mask;
 
     /* Indicate that the cached info is valid */
@@ -2517,7 +2517,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
                 point_of_no_return = TRUE;
                 ent->chunk = NULL;
             } /* end else */
-            H5_ASSIGN_OVERFLOW(nbytes, udata.chunk_block.length, hsize_t, size_t);
+            H5_CHECKED_ASSIGN(nbytes, size_t, udata.chunk_block.length, hsize_t);
             if(H5Z_pipeline(&(dset->shared->dcpl_cache.pline), 0, &(udata.filter_mask), dxpl_cache->err_detect,
                      dxpl_cache->filter_cb, &nbytes, &alloc, &buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
@@ -2526,7 +2526,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
             if(nbytes > ((size_t)0xffffffff))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
 #endif /* H5_SIZEOF_SIZE_T > 4 */
-            H5_ASSIGN_OVERFLOW(udata.chunk_block.length, nbytes, size_t, hsize_t);
+            H5_CHECKED_ASSIGN(udata.chunk_block.length, hsize_t, nbytes, size_t);
 
             /* Indicate that the chunk must be allocated */
             must_alloc = TRUE;
@@ -2835,7 +2835,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
 
     /* Get the chunk's size */
     HDassert(layout->u.chunk.size > 0);
-    H5_ASSIGN_OVERFLOW(chunk_size, layout->u.chunk.size, uint32_t, size_t);
+    H5_CHECKED_ASSIGN(chunk_size, size_t, layout->u.chunk.size, uint32_t);
 
     /* Check if the chunk is in the cache */
     if(UINT_MAX != udata->idx_hint) {
@@ -3000,8 +3000,8 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                 ent->chunk_block.offset = chunk_addr;
                 ent->chunk_block.length = chunk_alloc;
                 HDmemcpy(ent->offset, io_info->store->chunk.offset, sizeof(hsize_t) * layout->u.chunk.ndims);
-                H5_ASSIGN_OVERFLOW(ent->rd_count, chunk_size, size_t, uint32_t);
-                H5_ASSIGN_OVERFLOW(ent->wr_count, chunk_size, size_t, uint32_t);
+                H5_CHECKED_ASSIGN(ent->rd_count, uint32_t, chunk_size, size_t);
+                H5_CHECKED_ASSIGN(ent->wr_count, uint32_t, chunk_size, size_t);
                 ent->chunk = (uint8_t *)chunk;
 
                 /* Add it to the cache */
@@ -3321,7 +3321,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Get original chunk size */
-    H5_ASSIGN_OVERFLOW(orig_chunk_size, layout->u.chunk.size, uint32_t, size_t);
+    H5_CHECKED_ASSIGN(orig_chunk_size, size_t, layout->u.chunk.size, uint32_t);
 
     /* Check the dataset's fill-value status */
     if(H5P_is_fill_value_defined(fill, &fill_status) < 0)
@@ -3498,7 +3498,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             udata.common.storage = &layout->storage.u.chunk;
             udata.common.offset = chunk_offset;
             udata.chunk_block.offset = HADDR_UNDEF;
-            H5_ASSIGN_OVERFLOW(udata.chunk_block.length, chunk_size, size_t, uint32_t);
+            H5_CHECKED_ASSIGN(udata.chunk_block.length, uint32_t, chunk_size, size_t);
             udata.filter_mask = filter_mask;
 
             /* Allocate the chunk (with all processes) */
@@ -3656,9 +3656,9 @@ H5D__chunk_collective_fill(const H5D_t *dset, hid_t dxpl_id,
     leftover_blocks = chunk_info->num_io % mpi_size;
 
     /* Cast values to types needed by MPI */
-    H5_ASSIGN_OVERFLOW(blocks, num_blocks, size_t, int);
-    H5_ASSIGN_OVERFLOW(leftover, leftover_blocks, size_t, int);
-    H5_ASSIGN_OVERFLOW(block_len,  chunk_size, size_t, int);
+    H5_CHECKED_ASSIGN(blocks, int, num_blocks, size_t);
+    H5_CHECKED_ASSIGN(leftover, int, leftover_blocks, size_t);
+    H5_CHECKED_ASSIGN(block_len, int,  chunk_size, size_t);
 
     /* Allocate buffers */
     /* (MSC - should not need block_lens if MPI_type_create_hindexed_block is working) */
@@ -3787,7 +3787,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
 
     /* Get the chunk's size */
     HDassert(layout->u.chunk.size > 0);
-    H5_ASSIGN_OVERFLOW(chunk_size, layout->u.chunk.size, uint32_t, size_t);
+    H5_CHECKED_ASSIGN(chunk_size, size_t, layout->u.chunk.size, uint32_t);
 
     /* Get the info for the chunk in the file */
     if(H5D__chunk_lookup(dset, io_info->dxpl_id, chunk_offset, io_info->store->chunk.index, &chk_udata) < 0)
@@ -4558,7 +4558,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     FUNC_ENTER_STATIC
 
     /* Get 'size_t' local value for number of bytes in chunk */
-    H5_ASSIGN_OVERFLOW(nbytes, chunk_rec->nbytes, uint32_t, size_t);
+    H5_CHECKED_ASSIGN(nbytes, size_t, chunk_rec->nbytes, uint32_t);
 
     /* Check parameter for type conversion */
     if(udata->do_convert) {
@@ -4675,7 +4675,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         if(nbytes > ((size_t)0xffffffff))
             HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, H5_ITER_ERROR, "chunk too large for 32-bit length")
 #endif /* H5_SIZEOF_SIZE_T > 4 */
-        H5_ASSIGN_OVERFLOW(udata_dst.chunk_block.length, nbytes, size_t, uint32_t);
+        H5_CHECKED_ASSIGN(udata_dst.chunk_block.length, uint32_t, nbytes, size_t);
 	udata->buf = buf;
 	udata->buf_size = buf_size;
     } /* end if */
@@ -4777,7 +4777,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
         /* Get the dim info for dataset */
         if((sndims = H5S_extent_get_dims(ds_extent_src, curr_dims, NULL)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
-        H5_ASSIGN_OVERFLOW(ndims, sndims, int, unsigned);
+        H5_CHECKED_ASSIGN(ndims, unsigned, sndims, int);
 
         /* Set the source layout chunk information */
         if(H5D__chunk_set_info_real(layout_src, ndims, curr_dims) < 0)
@@ -4885,7 +4885,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
             do_convert = TRUE;
         } /* end if */
 
-        H5_ASSIGN_OVERFLOW(buf_size, layout_src->size, uint32_t, size_t);
+        H5_CHECKED_ASSIGN(buf_size, size_t, layout_src->size, uint32_t);
         reclaim_buf_size = 0;
     } /* end else */
 
