@@ -52,7 +52,7 @@
 #define H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME   "rdcc_nslots"   /* Size of raw data chunk cache(slots) */
 #define H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME   "rdcc_nbytes"   /* Size of raw data chunk cache(bytes) */
 #define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"       /* Preemption read chunks first */
-#define H5D_ACS_VDS_BOUNDS_NAME             "vds_bounds"    /* VDS bounds option */
+#define H5D_ACS_VDS_VIEW_NAME               "vds_view"      /* VDS view option */
 
 /* ======== Data transfer properties ======== */
 #define H5D_XFER_MAX_TEMP_BUF_NAME      "max_temp_buf"  /* Maximum temp buffer size */

@@ -1676,7 +1676,6 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     layout.storage.u.virt.list[layout.storage.u.virt.list_nused].unlim_extent_virtual = HSIZE_UNDEF;
     layout.storage.u.virt.list[layout.storage.u.virt.list_nused].clip_size_source = HSIZE_UNDEF;
     layout.storage.u.virt.list[layout.storage.u.virt.list_nused].clip_size_virtual = HSIZE_UNDEF;
-    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].clip_size_virtual_incl_trail = HSIZE_UNDEF;
     layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_space_status = H5O_VIRTUAL_STATUS_USER;
     layout.storage.u.virt.list[layout.storage.u.virt.list_nused].virtual_space_status = H5O_VIRTUAL_STATUS_USER;
 

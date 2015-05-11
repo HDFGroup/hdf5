@@ -161,7 +161,6 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
             layout->storage.u.virt.list[i].unlim_extent_virtual = orig_list[i].unlim_extent_virtual;
             layout->storage.u.virt.list[i].clip_size_source = orig_list[i].clip_size_source;
             layout->storage.u.virt.list[i].clip_size_virtual = orig_list[i].clip_size_virtual;
-            layout->storage.u.virt.list[i].clip_size_virtual_incl_trail = orig_list[i].clip_size_virtual_incl_trail;
             layout->storage.u.virt.list[i].source_space_status = orig_list[i].source_space_status;
             layout->storage.u.virt.list[i].virtual_space_status = orig_list[i].virtual_space_status;
         } /* end for */
@@ -333,10 +332,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
 {
     H5O_storage_virtual_t *storage;
     hsize_t     new_dims[H5S_MAX_RANK];
-    hsize_t     max_dims[H5S_MAX_RANK];
     hsize_t     curr_dims[H5S_MAX_RANK];
     hsize_t     clip_size;
-    hsize_t     clip_size_incl_trail;
     int         rank;
     hbool_t     changed = FALSE;        /* Whether the VDS extent changed */
     size_t      i;
@@ -348,17 +345,15 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
     HDassert(dset);
     storage = &dset->shared->layout.storage.u.virt;
     HDassert(dset->shared->layout.storage.type == H5D_VIRTUAL);
-    HDassert((storage->bounds == H5D_VDS_MAX) || (storage->bounds == H5D_VDS_MIN));
+    HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
     /* Get rank of VDS */
     if((rank = H5S_GET_EXTENT_NDIMS(dset->shared->space)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get number of dimensions")
 
-    /* Initialize new_dims and max_dims to HSIZE_UNDEF */
-    for(i = 0; i < (size_t)rank; i++) {
+    /* Initialize new_dims to HSIZE_UNDEF */
+    for(i = 0; i < (size_t)rank; i++)
         new_dims[i] = HSIZE_UNDEF;
-        max_dims[i] = HSIZE_UNDEF;
-    } /* end for */
 
     /* Iterate over mappings */
     for(i = 0; i < storage->list_nalloc; i++)
@@ -382,77 +377,40 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                 if(H5S_get_simple_extent_dims(storage->list[i].source_select, curr_dims, NULL) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get source space dimensions")
 
-                /* Check if we are setting extent by maximum or minimum of
-                 * mappings */
-                if(storage->bounds == H5D_VDS_MAX) {
-                    /* Check if the source extent in the unlimited dimension
-                     * changed since the last time the VDS extent/mapping
-                     * was updated */
-                    if(curr_dims[storage->list[i].unlim_dim_source]
-                            == storage->list[i].unlim_extent_source)
-                        /* Use cached result for clip size */
-                        clip_size = storage->list[i].clip_size_virtual;
-                    else {
-                        /* Get size that virtual selection would be clipped to
-                         * to match size of source selection */
-                        if(H5S_hyper_get_clip_extent(storage->list[i].virtual_select, storage->list[i].source_select, &clip_size, NULL) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get hyperslab clip size")
+                /* Check if the source extent in the unlimited dimension
+                 * changed since the last time the VDS extent/mapping
+                 * was updated */
+                if(curr_dims[storage->list[i].unlim_dim_source]
+                        == storage->list[i].unlim_extent_source)
+                    /* Use cached result for clip size */
+                    clip_size = storage->list[i].clip_size_virtual;
+                else {
+                    /* Get size that virtual selection would be clipped to
+                     * to match size of source selection */
+                    if(H5S_hyper_get_clip_extent(storage->list[i].virtual_select, storage->list[i].source_select, &clip_size, storage->view == H5D_VDS_FIRST_MISSING) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get hyperslab clip size")
 
-                        /* Clip virtual_select.  Note that if we used the cached
-                         * clip_size above, the selection will already be
-                         * clipped to the correct size. */
+                    /* If we are setting the extent by the last available data,
+                     * clip virtual_select.  Note that if we used the cached
+                     * clip_size above, the selection will already be clipped to
+                     * the correct size. */
+                    if(storage->view == H5D_VDS_LAST_AVAILABLE)
                         if(H5S_hyper_clip_unlim(storage->list[i].virtual_select, clip_size))
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection")
 
-                        /* Update cached values unlim_extent_source and
-                         * clip_size_virtual */
-                        storage->list[i].unlim_extent_source = curr_dims[storage->list[i].unlim_dim_source];
-                        storage->list[i].clip_size_virtual = clip_size;
-                    } /* end else */
-
-                    /* Update new_dims */
-                    if((new_dims[storage->list[i].unlim_dim_virtual] == HSIZE_UNDEF)
-                            || (clip_size
-                            > (hsize_t)new_dims[storage->list[i].unlim_dim_virtual]))
-                        new_dims[storage->list[i].unlim_dim_virtual] = clip_size;
-                } /* end if */
-                else {
-                    /* Check if the source extent in the unlimited dimension
-                     * changed since the last time the VDS extent/mapping was
-                     * updated */
-                    if(curr_dims[storage->list[i].unlim_dim_source]
-                            == storage->list[i].unlim_extent_source) {
-                        HDassert(0 && "Checking code coverage..."); //VDSINC
-                        /* Use cached result for clip size */
-                        clip_size = storage->list[i].clip_size_virtual;
-                        clip_size_incl_trail = storage->list[i].clip_size_virtual_incl_trail;
-                    } //VDSINC
-                    else {
-                        /* Get size that virtual selection would be clipped to
-                         * to match size of source selection.  Also get the clip
-                         * size including the trailing space (gap between
-                         * blocks). */
-                        if(H5S_hyper_get_clip_extent(storage->list[i].virtual_select, storage->list[i].source_select, &clip_size, &clip_size_incl_trail) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get hyperslab clip size")
-
-                        /* Update cached values unlim_extent_source,
-                         * clip_size_virtual, and clip_size_virtual_incl_trail
-                         */
-                        storage->list[i].unlim_extent_source = curr_dims[storage->list[i].unlim_dim_source];
-                        storage->list[i].clip_size_virtual = clip_size;
-                        storage->list[i].clip_size_virtual_incl_trail = clip_size_incl_trail;
-                    } /* end else */
-
-                    /* Update new_dims and max_dims */
-                    if((new_dims[storage->list[i].unlim_dim_virtual] == HSIZE_UNDEF)
-                            || (clip_size_incl_trail
-                            < (hsize_t)new_dims[storage->list[i].unlim_dim_virtual]))
-                        new_dims[storage->list[i].unlim_dim_virtual] = clip_size_incl_trail;
-                    if((max_dims[storage->list[i].unlim_dim_virtual] == HSIZE_UNDEF)
-                            || (clip_size
-                            > (hsize_t)max_dims[storage->list[i].unlim_dim_virtual]))
-                        max_dims[storage->list[i].unlim_dim_virtual] = clip_size;
+                    /* Update cached values unlim_extent_source and
+                     * clip_size_virtual */
+                    storage->list[i].unlim_extent_source = curr_dims[storage->list[i].unlim_dim_source];
+                    storage->list[i].clip_size_virtual = clip_size;
                 } /* end else */
+
+                /* Update new_dims */
+                if((new_dims[storage->list[i].unlim_dim_virtual] == HSIZE_UNDEF)
+                        || (storage->view == H5D_VDS_FIRST_MISSING ? (clip_size
+                        < (hsize_t)new_dims[storage->list[i].unlim_dim_virtual])
+                        : (clip_size
+                        > (hsize_t)new_dims[storage->list[i].unlim_dim_virtual])))
+                    new_dims[storage->list[i].unlim_dim_virtual] = clip_size;
             } /* end if */
         } /* end if */
 
@@ -460,15 +418,10 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
     if(H5S_get_simple_extent_dims(dset->shared->space, curr_dims, NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get VDS dimensions")
 
-    /* Calculate new extent.  Apply max_dims first, so min_dims takes precedent.
-     */
+    /* Calculate new extent */
     for(i = 0; i < (size_t)rank; i++) {
         if(new_dims[i] == HSIZE_UNDEF)
             new_dims[i] = curr_dims[i];
-        if((max_dims[i] != HSIZE_UNDEF) && (new_dims[i] > max_dims[i])) {
-            HDassert(0 && "Checking code coverage..."); //VDSINC
-            new_dims[i] = max_dims[i];
-        } //VDSINC
         if(new_dims[i] < storage->min_dims[i]) {
             HDassert(0 && "Checking code coverage..."); //VDSINC
             new_dims[i] = storage->min_dims[i];
@@ -479,7 +432,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
 
     /* If we did not change the VDS dimensions and we are setting the extent by
      * maximum, there is nothing more to update */
-    if(changed || (storage->bounds == H5D_VDS_MIN)) {
+    if(changed || (storage->view == H5D_VDS_FIRST_MISSING)) {
         /* Update VDS extent */
         if(changed)
             if(H5S_set_extent(dset->shared->space, new_dims) < 0)
@@ -500,7 +453,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
 
                 /* Check if we are setting extent by the minimum of mappings */
-                if(storage->bounds == H5D_VDS_MIN) {
+                if(storage->view == H5D_VDS_FIRST_MISSING) {
                     /* Clip virtual selection to extent (only necessary if the
                      * extent changed, otherwise it will already be clipped to
                      * the extent) */
@@ -512,15 +465,13 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                      * changed since the last time the VDS extent/mapping was
                      * updated */
                     if(new_dims[storage->list[i].unlim_dim_virtual]
-                            == storage->list[i].unlim_extent_virtual) {
-                        HDassert(0 && "Checking code coverage..."); //VDSINC
+                            == storage->list[i].unlim_extent_virtual)
                         /* Use cached result for clip size */
                         clip_size = storage->list[i].clip_size_source;
-                    } //VDSINC
                     else {
                         /* Get size that source selection will be clipped to to
                          * match size of virtual selection */
-                        if(H5S_hyper_get_clip_extent(storage->list[i].source_select, storage->list[i].virtual_select, &clip_size, NULL) < 0)
+                        if(H5S_hyper_get_clip_extent(storage->list[i].source_select, storage->list[i].virtual_select, &clip_size, FALSE) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get hyperslab clip size")
 
                         /* Update cached values unlim_extent_virtual and
@@ -675,8 +626,8 @@ H5D__virtual_init(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5D_t *dset,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dapl ID")
 
     /* Get bounds option */
-    if(H5P_get(dapl, H5D_ACS_VDS_BOUNDS_NAME, &dset->shared->layout.storage.u.virt.bounds) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache number of slots")
+    if(H5P_get(dapl, H5D_ACS_VDS_VIEW_NAME, &dset->shared->layout.storage.u.virt.view) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get virtual view option")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -770,7 +721,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     HDassert(file_space);
 
     storage = &io_info->dset->shared->layout.storage.u.virt;
-    HDassert((storage->bounds == H5D_VDS_MAX) || (storage->bounds == H5D_VDS_MIN));
+    HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
     /* Iterate over mappings */
     for(i = 0; i < storage->list_nused; i++) {
@@ -878,7 +829,7 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     HDassert(file_space);
 
     storage = &io_info->dset->shared->layout.storage.u.virt;
-    HDassert((storage->bounds == H5D_VDS_MAX) || (storage->bounds == H5D_VDS_MIN));
+    HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
     /* Iterate over mappings */
     for(i = 0; i < storage->list_nused; i++) {

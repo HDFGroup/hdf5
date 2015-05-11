@@ -62,10 +62,10 @@
 #define H5D_ACS_PREEMPT_READ_CHUNKS_ENC         H5P__encode_double
 #define H5D_ACS_PREEMPT_READ_CHUNKS_DEC         H5P__decode_double
 /* Definitions for VDS bounds option */
-#define H5D_ACS_VDS_BOUNDS_SIZE                 sizeof(H5D_vds_bounds_t)
-#define H5D_ACS_VDS_BOUNDS_DEF                  H5D_VDS_MAX
-#define H5D_ACS_VDS_BOUNDS_ENC                  H5P__dacc_vds_bounds_enc
-#define H5D_ACS_VDS_BOUNDS_DEC                  H5P__dacc_vds_bounds_dec
+#define H5D_ACS_VDS_VIEW_SIZE                   sizeof(H5D_vds_view_t)
+#define H5D_ACS_VDS_VIEW_DEF                    H5D_VDS_LAST_AVAILABLE
+#define H5D_ACS_VDS_VIEW_ENC                    H5P__dacc_vds_view_enc
+#define H5D_ACS_VDS_VIEW_DEC                    H5P__dacc_vds_view_dec
 
 /******************/
 /* Local Typedefs */
@@ -85,8 +85,8 @@
 static herr_t H5P__dacc_reg_prop(H5P_genclass_t *pclass);
 
 /* Property list callbacks */
-static herr_t H5P__dacc_vds_bounds_enc(const void *value, void **pp, size_t *size);
-static herr_t H5P__dacc_vds_bounds_dec(const void **pp, void *value);
+static herr_t H5P__dacc_vds_view_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dacc_vds_view_dec(const void **pp, void *value);
 
 
 /*********************/
@@ -142,7 +142,7 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
     size_t rdcc_nslots = H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF;      /* Default raw data chunk cache # of slots */
     size_t rdcc_nbytes = H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
     double rdcc_w0 = H5D_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
-    H5D_vds_bounds_t bounds_option = H5D_ACS_VDS_BOUNDS_DEF;    /* Default VDS bounds option */
+    H5D_vds_view_t virtual_view = H5D_ACS_VDS_VIEW_DEF;         /* Default VDS view option */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -162,9 +162,9 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
              NULL, NULL, NULL, H5D_ACS_PREEMPT_READ_CHUNKS_ENC, H5D_ACS_PREEMPT_READ_CHUNKS_DEC, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the VDS bounds option */
-    if(H5P_register_real(pclass, H5D_ACS_VDS_BOUNDS_NAME, H5D_ACS_VDS_BOUNDS_SIZE, &bounds_option,
-            NULL, NULL, NULL, H5D_ACS_VDS_BOUNDS_ENC, H5D_ACS_VDS_BOUNDS_DEC,
+    /* Register the VDS view option */
+    if(H5P_register_real(pclass, H5D_ACS_VDS_VIEW_NAME, H5D_ACS_VDS_VIEW_SIZE, &virtual_view,
+            NULL, NULL, NULL, H5D_ACS_VDS_VIEW_ENC, H5D_ACS_VDS_VIEW_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -302,7 +302,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pset_virtual_dataspace_bounds
+ * Function:    H5Pset_virtual_view
  *
  * Purpose:     VDSINC
  *
@@ -314,7 +314,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_virtual_dataspace_bounds(hid_t plist_id, H5D_vds_bounds_t bounds_option)
+H5Pset_virtual_view(hid_t plist_id, H5D_vds_view_t view)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* return value */
@@ -322,7 +322,7 @@ H5Pset_virtual_dataspace_bounds(hid_t plist_id, H5D_vds_bounds_t bounds_option)
     FUNC_ENTER_API(FAIL)
 
     /* Check argument */
-    if((bounds_option != H5D_VDS_MAX) && (bounds_option != H5D_VDS_MIN))
+    if((view != H5D_VDS_FIRST_MISSING) && (view != H5D_VDS_LAST_AVAILABLE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid bounds option")
 
     /* Get the plist structure */
@@ -330,20 +330,21 @@ H5Pset_virtual_dataspace_bounds(hid_t plist_id, H5D_vds_bounds_t bounds_option)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Update property list */
-    if(H5P_set(plist, H5D_ACS_VDS_BOUNDS_NAME, &bounds_option) < 0)
+    if(H5P_set(plist, H5D_ACS_VDS_VIEW_NAME, &view) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_virtual_dataspace_bounds() */
+} /* end H5Pset_virtual_view() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Pget_virtual_dataspace_bounds
+ * Function:    H5Pget_virtual_view
  *
  * Purpose:     VDSINC
  *
- * Return:      Success:        H5D_VDS_MAX or H5D_VDS_MIN
+ * Return:      Success:        H5D_VDS_FIRST_MISSING or
+ *                              H5D_VDS_LAST_AVAILABLE
  *              Failure:        H5D_VDS_ERROR
  *
  * Programmer:  Neil Fortner
@@ -351,11 +352,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5D_vds_bounds_t
-H5Pget_virtual_dataspace_bounds(hid_t plist_id)
+H5D_vds_view_t
+H5Pget_virtual_view(hid_t plist_id)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    H5D_vds_bounds_t ret_value;   /* Return value */
+    H5D_vds_view_t ret_value;   /* Return value */
 
     FUNC_ENTER_API(H5D_VDS_ERROR)
 
@@ -364,16 +365,16 @@ H5Pget_virtual_dataspace_bounds(hid_t plist_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_VDS_ERROR, "can't find object for ID")
 
     /* Get value from property list */
-    if(H5P_get(plist, H5D_ACS_VDS_BOUNDS_NAME, &ret_value) < 0)
+    if(H5P_get(plist, H5D_ACS_VDS_VIEW_NAME, &ret_value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5D_VDS_ERROR, "unable to set value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_virtual_dataspace_bounds() */
+} /* end H5Pget_virtual_view() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P__dacc_vds_bounds_enc
+ * Function:    H5P__dacc_vds_view_enc
  *
  * Purpose:     Callback routine which is called whenever the vds bounds
  *              property in the dataset access property list is encoded.
@@ -387,30 +388,30 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dacc_vds_bounds_enc(const void *value, void **_pp, size_t *size)
+H5P__dacc_vds_view_enc(const void *value, void **_pp, size_t *size)
 {
-    const H5D_vds_bounds_t *bounds = (const H5D_vds_bounds_t *)value; /* Create local alias for values */
+    const H5D_vds_view_t *view = (const H5D_vds_view_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(bounds);
+    HDassert(view);
     HDassert(size);
 
     if(NULL != *pp)
         /* Encode EDC property */
-        *(*pp)++ = (uint8_t)*bounds;
+        *(*pp)++ = (uint8_t)*view;
 
     /* Size of EDC property */
     (*size)++;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__dacc_vds_bounds_enc() */
+} /* end H5P__dacc_vds_view_enc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P__dacc_vds_bounds_dec
+ * Function:    H5P__dacc_vds_view_dec
  *
  * Purpose:     Callback routine which is called whenever the vds bounds
  *              property in the dataset access property list is encoded.
@@ -424,9 +425,9 @@ H5P__dacc_vds_bounds_enc(const void *value, void **_pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dacc_vds_bounds_dec(const void **_pp, void *_value)
+H5P__dacc_vds_view_dec(const void **_pp, void *_value)
 {
-    H5D_vds_bounds_t *bounds = (H5D_vds_bounds_t *)_value;         /* EDC property */
+    H5D_vds_view_t *view = (H5D_vds_view_t *)_value;
     const uint8_t **pp = (const uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
@@ -434,11 +435,11 @@ H5P__dacc_vds_bounds_dec(const void **_pp, void *_value)
     /* Sanity checks */
     HDassert(pp);
     HDassert(*pp);
-    HDassert(bounds);
+    HDassert(view);
 
     /* Decode EDC property */
-    *bounds = (H5D_vds_bounds_t)*(*pp)++;
+    *view = (H5D_vds_view_t)*(*pp)++;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__dacc_vds_bounds_dec() */
+} /* end H5P__dacc_vds_view_dec() */
 
