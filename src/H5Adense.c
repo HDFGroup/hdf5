@@ -538,7 +538,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     udata.common.shared_fheap = shared_fheap;
     udata.common.name = attr->shared->name;
     udata.common.name_hash = H5_checksum_lookup3(attr->shared->name, HDstrlen(attr->shared->name), 0);
-    H5_ASSIGN_OVERFLOW(udata.common.flags, mesg_flags, unsigned, uint8_t);
+    H5_CHECKED_ASSIGN(udata.common.flags, uint8_t, mesg_flags, unsigned);
     udata.common.corder = attr->shared->crt_idx;
     udata.common.found_op = NULL;
     udata.common.found_op_data = NULL;

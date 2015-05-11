@@ -566,6 +566,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     void *vol_dt = NULL;           /* datatype token created by VOL plugin */
     H5VL_object_t *obj = NULL;     /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t     dxpl_id = H5AC_ind_dxpl_id; /* dxpl to use to open datatype */
     hid_t     ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -591,7 +592,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 
     /* Create the datatype through the VOL */
     if(NULL == (vol_dt = H5VL_datatype_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                            name, tapl_id, H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                            name, tapl_id, dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
 
     /* Get an atom for the datatype */
@@ -600,7 +601,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 
 done:
     if (ret_value < 0 && vol_dt)
-        if(H5VL_datatype_close (vol_dt, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_datatype_close (vol_dt, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release datatype")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen2() */

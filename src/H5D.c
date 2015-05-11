@@ -338,6 +338,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
     void *dset = NULL;                /* dset token from VOL plugin */
     H5VL_object_t *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t dxpl_id = H5AC_ind_dxpl_id;    /* dxpl to use to open datset */
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -363,7 +364,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 
     /* Create the dataset through the VOL */
     if(NULL == (dset = H5VL_dataset_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, name, 
-                                         dapl_id, H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                         dapl_id, dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
 
     /* Get an atom for the dataset */
@@ -372,7 +373,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 
 done:
     if (ret_value < 0 && dset)
-        if(H5VL_dataset_close (dset, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_dataset_close (dset, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen2() */

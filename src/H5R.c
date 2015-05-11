@@ -611,7 +611,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
 
     /* Open the object through the VOL */
     if(NULL == (opened_obj = H5VL_object_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, &opened_type, 
-                                              H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                              H5AC_ind_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to dereference object")
 
     if((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
@@ -1054,7 +1054,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
 
     /* get the object type through the VOL */
     if(H5VL_object_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_REF_GET_NAME, 
-                       H5AC_dxpl_id, H5_REQUEST_NULL, 
+                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
                        &ret_value, name, size, ref_type, _ref) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 done:

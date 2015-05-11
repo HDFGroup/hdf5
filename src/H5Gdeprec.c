@@ -258,7 +258,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
 
         /* Set the non-default local heap size hint */
-        H5_ASSIGN_OVERFLOW(ginfo.lheap_size_hint, size_hint, size_t, uint32_t);
+        H5_CHECKED_ASSIGN(ginfo.lheap_size_hint, uint32_t, size_hint, size_t);
         if(H5P_set(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
     } /* end if */
@@ -342,7 +342,7 @@ H5Gopen1(hid_t loc_id, const char *name)
 
     /* Create the group through the VOL */
     if(NULL == (grp = H5VL_group_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, name, H5P_DEFAULT, 
-                                      H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                      H5AC_ind_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -351,7 +351,7 @@ H5Gopen1(hid_t loc_id, const char *name)
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen1() */

@@ -223,6 +223,7 @@ H5Topen1(hid_t loc_id, const char *name)
     H5T_t *dt = NULL;              /* upper level H5T_t for datatype */
     H5VL_object_t *obj = NULL;     /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t        dxpl_id = H5AC_ind_dxpl_id; /* dxpl to use to open datatype */
     hid_t     ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -242,7 +243,7 @@ H5Topen1(hid_t loc_id, const char *name)
     /* Create the datatype through the VOL */
     if(NULL == (vol_dt = H5VL_datatype_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
                                             name, H5P_DATATYPE_ACCESS_DEFAULT, 
-                                            H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                            dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype")
 
     /* Get an atom for the datatype */
@@ -251,7 +252,7 @@ H5Topen1(hid_t loc_id, const char *name)
 
 done:
     if (ret_value < 0 && dt)
-        if(H5VL_datatype_close (vol_dt, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_datatype_close (vol_dt, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release dataset")
 
     FUNC_LEAVE_API(ret_value)

@@ -245,7 +245,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
 
     /* Open the object through the VOL */
     if(NULL == (opened_obj = H5VL_object_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, &opened_type, 
-                                              H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                              H5AC_ind_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     /* Get an atom for the object */

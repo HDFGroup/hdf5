@@ -276,7 +276,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
                 if((snmemb = H5T_get_nmembers(dtype)) <= 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "compound data type doesn't have any member")
-                H5_ASSIGN_OVERFLOW(nmemb, snmemb, int, unsigned);
+                H5_CHECKED_ASSIGN(nmemb, unsigned, snmemb, int);
 
                 if(NULL == (memb_list   = (H5T_t **)H5MM_calloc(nmemb * sizeof(H5T_t *))))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory")
@@ -388,7 +388,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 /* Retrieve member info and insert members into new enum type */
                 if((snmemb = H5T_get_nmembers(dtype)) <= 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "enumerate data type doesn't have any member")
-                H5_ASSIGN_OVERFLOW(nmemb, snmemb, int, unsigned);
+                H5_CHECKED_ASSIGN(nmemb, unsigned, snmemb, int);
                 for(u = 0; u < nmemb; u++) {
                     if(NULL == (memb_name = H5T__get_member_name(dtype, u)))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member name")
@@ -429,7 +429,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                 /* Retrieve dimension information for array data type */
                 if((sarray_rank = H5T__get_array_ndims(dtype)) <= 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get dimension rank")
-                H5_ASSIGN_OVERFLOW(array_rank, sarray_rank, int, unsigned);
+                H5_CHECKED_ASSIGN(array_rank, unsigned, sarray_rank, int);
                 if(NULL == (dims = (hsize_t*)H5MM_malloc(array_rank * sizeof(hsize_t))))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot allocate memory")
                 if(H5T__get_array_dims(dtype, dims) < 0)

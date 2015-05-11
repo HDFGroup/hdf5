@@ -668,7 +668,7 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
 
     /* Read the data through the VOL */
     if((ret_value = H5VL_attr_read(attr->vol_obj, attr->vol_info->vol_cls, 
-                                   dtype_id, buf, H5AC_dxpl_id, H5_REQUEST_NULL)) < 0)
+                                   dtype_id, buf, H5AC_ind_dxpl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
 
 done:

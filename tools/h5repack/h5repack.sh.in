@@ -93,6 +93,8 @@ $SRC_H5REPACK_TESTFILES/h5repack_layouto.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layout2.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layout3.h5
 $SRC_H5REPACK_TESTFILES/h5repack_named_dtypes.h5
+$SRC_H5REPACK_TESTFILES/h5repack_nested_8bit_enum.h5
+$SRC_H5REPACK_TESTFILES/h5repack_nested_8bit_enum_deflated.h5
 $SRC_H5REPACK_TESTFILES/h5repack_nbit.h5
 $SRC_H5REPACK_TESTFILES/h5repack_objs.h5
 $SRC_H5REPACK_TESTFILES/h5repack_refs.h5
@@ -701,6 +703,12 @@ TOOLTEST hlink h5repack_hlink.h5
 TOOLTEST layout h5repack_layout.h5
 TOOLTEST early h5repack_early.h5
 
+# nested 8bit enum in both deflated and non-deflated datafiles
+if [ $USE_FILTER_DEFLATE != "yes" ]; then
+TOOLTEST nested_8bit_enum h5repack_nested_8bit_enum.h5
+else
+TOOLTEST nested_8bit_enum h5repack_nested_8bit_enum_deflated.h5
+fi
 
 # use h5repack_layout.h5 to write some filters  (this file has  no filters)
 

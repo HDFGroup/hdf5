@@ -21,6 +21,7 @@
 namespace H5 {
 #endif
 
+// Class forwarding
 class Group;
 class H5File;
 class ArrayType;

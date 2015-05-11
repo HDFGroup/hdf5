@@ -184,7 +184,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to determine file size")
 
     /* Compute the size of the speculative object header buffer */
-    H5_ASSIGN_OVERFLOW(spec_read_size, MIN(eoa - addr, H5O_SPEC_READ_SIZE), /* From: */ hsize_t, /* To: */ size_t);
+    H5_CHECKED_ASSIGN(spec_read_size, size_t, MIN(eoa - addr, H5O_SPEC_READ_SIZE), hsize_t);
 
     /* Attempt to speculatively read both object header prefix and first chunk */
     if(H5F_block_read(f, H5FD_MEM_OHDR, addr, spec_read_size, dxpl_id, read_buf) < 0)

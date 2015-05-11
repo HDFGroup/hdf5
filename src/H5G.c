@@ -472,7 +472,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 
     /* Create the group through the VOL */
     if(NULL == (grp = H5VL_group_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                      name, gapl_id, H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                      name, gapl_id, H5AC_ind_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Get an atom for the group */
@@ -481,7 +481,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen2() */
