@@ -10,6 +10,24 @@ PROJECT (HDF5 C CXX)
 # set CMAKE_INSTALL_PREFIX to the required install path.
 # Make install can be used to install all components for system-wide use.
 #
+if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
+    MESSAGE(FATAL_ERROR "\nERROR! ${PROJECT_NAME} DOES NOT SUPPORT IN SOURCE BUILDS!\n"
+      "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+      " == CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}\n"
+      "NEXT STEPS:\n"
+      "(1) Delete the CMakeCache.txt file and the CMakeFiles/ directory\n"
+      "     under the source directory for ${PROJECT_NAME}, otherwise you\n"
+      "     will not be able to configure ${PROJECT_NAME} correctly!\n"
+      "      * For example, on linux machines do:\n"
+      "        $ rm -r CMakeCache.txt CMakeFiles/\n"
+      "(2) Create a different directory and configure ${PROJECT_NAME} in that directory.\n"
+      "      * For example, on linux machines do:\n"
+      "        $ mkdir MY_BUILD\n"
+      "        $ cd MY_BUILD\n"
+      "        $ cmake [OPTIONS] ..\n"
+      )
+endif ()
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
 #
@@ -454,7 +472,7 @@ endif (HDF5_DISABLE_COMPILER_WARNINGS)
 # CDash is configured to only allow 3000 warnings, so
 # break into groups (from the config/gnu-flags file)
 #-----------------------------------------------------------------------------
-if (NOT MSVC)
+if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
   if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline")
   else (NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
@@ -517,7 +535,7 @@ if (NOT MSVC)
 
     # Append more extra warning flags that only gcc 4.7+ know about
     set (H5_CFLAGS5 "${H5_CFLAGS5} -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
-endif (NOT MSVC)
+endif (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
   
 #-----------------------------------------------------------------------------
 # Option to allow the user to enable all warnings
@@ -530,7 +548,9 @@ if (HDF5_ENABLE_ALL_WARNINGS)
     string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
   else (MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic ${H5_CFLAGS1} ${H5_CFLAGS2} ${H5_CFLAGS3} ${H5_CFLAGS4}")
+    if (CMAKE_COMPILER_IS_GNUCC)
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic ${H5_CFLAGS1} ${H5_CFLAGS2} ${H5_CFLAGS3} ${H5_CFLAGS4}")
+    endif (CMAKE_COMPILER_IS_GNUCC)
   endif (MSVC)
 endif (HDF5_ENABLE_ALL_WARNINGS)
 
@@ -545,7 +565,9 @@ if (HDF5_ENABLE_GROUPZERO_WARNINGS)
     string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W1")
   else (MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic")
+    if (CMAKE_COMPILER_IS_GNUCC)
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic")
+    endif (CMAKE_COMPILER_IS_GNUCC)
   endif (MSVC)
 endif (HDF5_ENABLE_GROUPZERO_WARNINGS)
 
@@ -763,7 +785,7 @@ endif (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT 
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
 #-----------------------------------------------------------------------------
-option (BUILD_TESTING "Build HDF5 Unit Testing" OFF)
+option (BUILD_TESTING "Build HDF5 Unit Testing" ON)
 if (BUILD_TESTING)
   set (DART_TESTING_TIMEOUT 1200
       CACHE INTEGER
@@ -793,6 +815,16 @@ if (BUILD_TESTING)
   include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
   configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 endif (BUILD_TESTING)
+
+#-----------------------------------------------------------------------------
+# Option to build HDF5 Tools
+#-----------------------------------------------------------------------------
+if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
+  option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
+  if (HDF5_BUILD_TOOLS)
+    add_subdirectory (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
+  endif (HDF5_BUILD_TOOLS)
+endif (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
 
 #-----------------------------------------------------------------------------
 # Option to build examples
@@ -874,16 +906,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
     endif (HDF5_BUILD_HL_LIB)
   endif (HDF5_BUILD_CPP_LIB)
 endif (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
-
-#-----------------------------------------------------------------------------
-# Option to build HDF5 Tools
-#-----------------------------------------------------------------------------
-if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
-  option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
-  if (HDF5_BUILD_TOOLS)
-    add_subdirectory (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
-  endif (HDF5_BUILD_TOOLS)
-endif (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
 
 #-----------------------------------------------------------------------------
 # Check if Fortran's default real is double precision. If it is and HL is 

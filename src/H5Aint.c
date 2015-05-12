@@ -255,7 +255,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* Get # of elements for attribute's dataspace */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, NULL, "dataspace is invalid")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
 
     HDassert(attr->shared->dt_size > 0);
     HDassert(attr->shared->ds_size > 0);
@@ -508,7 +508,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
     /* Get # of elements for attribute's dataspace */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
 
     /* If there's actually data elements for the attribute, make a copy of the data passed in */
     if(nelmts > 0) {
@@ -621,7 +621,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
     /* Create buffer for data to store on disk */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
 
     if(nelmts > 0) {
         /* Get the memory and file datatype sizes */
@@ -1187,7 +1187,7 @@ H5A_type(const H5A_t *attr)
  */
 htri_t
 H5A_exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
-                   hid_t lapl_id)
+                   hid_t lapl_id, hid_t dxpl_id)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
@@ -1203,12 +1203,12 @@ H5A_exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
     H5G_loc_reset(&obj_loc);
 
     /* Find the object's location */
-    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
     loc_found = TRUE;
 
     /* Check if the attribute exists */
-    if((ret_value = H5O_attr_exists(obj_loc.oloc, attr_name, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5O_attr_exists(obj_loc.oloc, attr_name, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:
@@ -1680,7 +1680,7 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
         *last_attr = skip;
 
     /* Iterate over attribute messages */
-    H5_ASSIGN_OVERFLOW(/* To: */ u, /* From: */ skip, /* From: */ hsize_t, /* To: */ size_t)
+    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t)
     for(; u < atable->nattrs && !ret_value; u++) {
         /* Check which type of callback to make */
         switch(attr_op->op_type) {
@@ -2012,7 +2012,11 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
         *recompute_size = TRUE;
 
     /* Compute the size of the data */
-    H5_ASSIGN_OVERFLOW(attr_dst->shared->data_size, H5S_GET_EXTENT_NPOINTS(attr_dst->shared->ds) * H5T_get_size(attr_dst->shared->dt), hssize_t, size_t);
+    /* NOTE: This raises warnings. If we are going to be serious about
+     * expecting overflow here, we should implement testing similar to
+     * that described in CERT bulletins INT30-C and INT32-C.
+     */
+    H5_CHECKED_ASSIGN(attr_dst->shared->data_size, size_t, H5S_GET_EXTENT_NPOINTS(attr_dst->shared->ds) * H5T_get_size(attr_dst->shared->dt), hssize_t);
 
     /* Copy (& convert) the data, if necessary */
     if(attr_src->shared->data) {
@@ -2377,7 +2381,7 @@ done:
  */
 herr_t
 H5A_rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_name,
-                   const char *new_attr_name, hid_t lapl_id)
+                   const char *new_attr_name, hid_t lapl_id, hid_t dxpl_id)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
@@ -2400,7 +2404,7 @@ H5A_rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_nam
         loc_found = TRUE;
 
         /* Call attribute rename routine */
-        if(H5O_attr_rename(obj_loc.oloc, H5AC_dxpl_id, old_attr_name, new_attr_name) < 0)
+        if(H5O_attr_rename(obj_loc.oloc, dxpl_id, old_attr_name, new_attr_name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
     } /* end if */
 

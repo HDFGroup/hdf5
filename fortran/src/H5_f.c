@@ -421,12 +421,17 @@ nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 
 /*
  *  H5F flags
+ *
+ *  Note that H5F_ACC_DEBUG is deprecated (nonfunctional) but retained
+ *  for backward compatibility since it's in the public API.
  */
     h5f_flags[0] = (int_f)H5F_ACC_RDWR;
     h5f_flags[1] = (int_f)H5F_ACC_RDONLY;
     h5f_flags[2] = (int_f)H5F_ACC_TRUNC;
     h5f_flags[3] = (int_f)H5F_ACC_EXCL;
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     h5f_flags[4] = (int_f)H5F_ACC_DEBUG;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     h5f_flags[5] = (int_f)H5F_SCOPE_LOCAL;
     h5f_flags[6] = (int_f)H5F_SCOPE_GLOBAL;
     h5f_flags[7] = (int_f)H5F_CLOSE_DEFAULT;

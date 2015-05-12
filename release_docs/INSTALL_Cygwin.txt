@@ -34,7 +34,7 @@ Preconditions:
     
     The following compilers are supported by HDF5 and included in the Cygwin
     package system:
-       gcc (4.7.3), which includes:
+       gcc (4.7.3 and 4.9.2), which includes:
             gcc4-core    : C compiler
             gcc4-g++     : C++ compiler
             gcc4-fortran : fortran compiler
@@ -72,7 +72,6 @@ Preconditions:
       
        The latest supported public release of SZIP is available from
        ftp://ftp.hdfgroup.org/lib-external/szip/2.1.
-
     
     2.3 Additional Utilities
     
@@ -259,6 +258,11 @@ Build, Test and Install HDF5 on Cygwin
    
    dt_arith tests may fail due to the use of fork. This is a known issue
    with cygwin on Windows.
+
+   "make check" fails when building shared lib files is enabled.  The default
+   on Cygwin has been changed to disable shared.  It can be enabled with
+   the --enable-shared configure option but is likely to fail "make check" 
+   with GCC compilers.
 
 -----------------------------------------------------------------------
 

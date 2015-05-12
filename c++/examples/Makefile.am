@@ -42,8 +42,8 @@ INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp \
 # Some of the examples depend on files created by running other examples
 readdata.chkexe_: create.chkexe_
 chunks.chkexe_: extend_ds.chkexe_
-h5tutr_rdwt.chkexe_: h5tutrcrtdat.chkexe
-h5tutrcrtatt.chkexe_: h5tutrcrtdat.chkexe
+h5tutr_rdwt.chkexe_: h5tutr_crtdat.chkexe
+h5tutrcrtatt.chkexe_: h5tutr_crtdat.chkexe
 h5tutr_crtgrpd.chkexe_: h5tutr_crtgrpar.chkexe
 
 # Tell conclude.am that these are C++ tests.
@@ -52,6 +52,7 @@ CXX_API=yes
 # Where to install examples
 # Note: no '/' after DESTDIR.  Explanation in commence.am
 EXAMPLEDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples/c++
+EXAMPLETOPDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples
 
 # How to build programs using h5c++
 $(EXTRA_PROG): $(H5CPP)

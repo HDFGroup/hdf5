@@ -133,7 +133,7 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
 
     /* Fill the selection in the memory buffer */
-    if(H5D__fill(fill, fill_type, buf, buf_type, space, H5AC_dxpl_id) < 0)
+    if(H5D__fill(fill, fill_type, buf, buf_type, space, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
 
 done:

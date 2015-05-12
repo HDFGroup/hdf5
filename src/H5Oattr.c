@@ -218,7 +218,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned UNUSED mesg_fl
         p += attr->shared->ds_size;
 
     /* Compute the size of the data */
-    H5_ASSIGN_OVERFLOW(attr->shared->data_size, H5S_GET_EXTENT_NPOINTS(attr->shared->ds) * H5T_get_size(attr->shared->dt), hsize_t, size_t);
+    H5_CHECKED_ASSIGN(attr->shared->data_size, size_t, H5S_GET_EXTENT_NPOINTS(attr->shared->ds) * H5T_get_size(attr->shared->dt), hsize_t);
 
     /* Go get the data */
     if(attr->shared->data_size) {

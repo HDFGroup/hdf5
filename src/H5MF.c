@@ -1383,7 +1383,7 @@ H5MF_get_free_sections(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, size_t nsects, 
             /* Query how many sections of this type */
 	    if(H5FS_sect_stats(f->shared->fs_man[ty], NULL, &hnums) < 0)
 		HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query free space stats")
-            H5_ASSIGN_OVERFLOW(nums, hnums, hsize_t, size_t);
+            H5_CHECKED_ASSIGN(nums, size_t, hnums, hsize_t);
 
             /* Increment total # of sections */
             total_sects += nums;

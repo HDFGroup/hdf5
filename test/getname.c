@@ -2402,7 +2402,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(H5Fclose(file2_id) < 0) TEST_ERROR
 
     /* Re-open the file and check that the anonymous datatypes persist */
-    if( (file2_id = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if( (file2_id = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Check the H5Iget_name does not return an error for anon committed datatypes */
     if((dtype_anon = H5Oopen_by_addr(file2_id, oinfo.addr)) < 0) TEST_ERROR

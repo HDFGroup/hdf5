@@ -785,7 +785,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
                 haddr_t new_eof;
 
                 /* Determine new size of memory buffer */
-                H5_ASSIGN_OVERFLOW(new_eof, file->increment * (file->eof / file->increment), hsize_t, size_t);
+                H5_CHECKED_ASSIGN(new_eof, size_t, file->increment * (file->eof / file->increment), hsize_t);
                 if(file->eof % file->increment)
                     new_eof += file->increment;
                 file->aligned_eof = new_eof;
@@ -1314,7 +1314,7 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
         size_t new_eof;
 
         /* Determine new size of memory buffer */
-        H5_ASSIGN_OVERFLOW(new_eof, file->increment * ((addr + size) / file->increment), hsize_t, size_t);
+        H5_CHECKED_ASSIGN(new_eof, size_t, file->increment * ((addr + size) / file->increment), hsize_t);
         if((addr + size) % file->increment)
             new_eof += file->increment;
 
@@ -1484,7 +1484,7 @@ H5FD_core_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t closing)
             new_eof = file->eoa;
         else { /* set eof to smallest multiple of increment that exceeds eoa */
             /* Determine new size of memory buffer */
-            H5_ASSIGN_OVERFLOW(new_eof, file->increment * (file->eoa / file->increment), hsize_t, size_t);
+            H5_CHECKED_ASSIGN(new_eof, size_t, file->increment * (file->eoa / file->increment), hsize_t);
             if(file->eoa % file->increment)
                 new_eof += file->increment;
         } /* end else */
