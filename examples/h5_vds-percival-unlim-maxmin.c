@@ -211,13 +211,13 @@ main (void)
     dapl = H5Pcreate (H5P_DATASET_ACCESS);
 
     for(i = 0; i < 2; i++) {
-        status = H5Pset_virtual_dataspace_bounds (dapl, i ? H5D_VDS_MAX : H5D_VDS_MIN);
+        status = H5Pset_virtual_view (dapl, i ? H5D_VDS_LAST_AVAILABLE : H5D_VDS_FIRST_MISSING);
         vdset = H5Dopen (vfile, DATASET, dapl);
 
         /* Let's get space of the VDS and its dimension; we should get 32(or 20)x10x10 */
         vspace = H5Dget_space (vdset);
         H5Sget_simple_extent_dims (vspace, vdsdims_out, vdsdims_max_out);
-        printf ("VDS dimensions, bounds = H5D_VDS_M%s: ", i ? "AX" : "IN");
+        printf ("VDS dimensions, bounds = H5D_VDS_%s: ", i ? "LAST_AVAILABLE" : "FIRST_MISSING");
         for (j=0; j<RANK; j++)
             printf (" %d ", (int)vdsdims_out[j]);
         printf ("\n");

@@ -9956,9 +9956,7 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
         rem_slices = num_slices - (count
                 * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block);
 
-        if(rem_slices > 0) {
-            HDassert(incl_trail && "Checking code coverage..."); //VDSINC
-            HDassert(!incl_trail && "Checking code coverage..."); //VDSINC
+        if(rem_slices > 0)
             /* Must end extent in middle of partial block (or beginning of empty
              * block if include_trailing_space and rem_slices == 0) */
             *clip_size =
@@ -9966,7 +9964,6 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
                     + (count
                     * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride)
                     + rem_slices;
-        } /* end if */
         else {
             if(incl_trail)
                 /* End extent just before first missing block */

@@ -235,8 +235,8 @@ H5D_virtual_update_min_dims(H5O_layout_t *layout, size_t idx)
     for(i = 0; i < rank; i++)
         /* Don't check unlimited dimensions in the selection */
         if((i != layout->storage.u.virt.list[idx].unlim_dim_virtual)
-                && (bounds_end[i] > layout->storage.u.virt.min_dims[i]))
-            layout->storage.u.virt.min_dims[i] = bounds_end[i];
+                && (bounds_end[i] >= layout->storage.u.virt.min_dims[i]))
+            layout->storage.u.virt.min_dims[i] = bounds_end[i] + (hsize_t)1;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -422,8 +422,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
     for(i = 0; i < (size_t)rank; i++) {
         if(new_dims[i] == HSIZE_UNDEF)
             new_dims[i] = curr_dims[i];
-        if(new_dims[i] < storage->min_dims[i]) {
-            HDassert(0 && "Checking code coverage..."); //VDSINC
+        else if(new_dims[i] < storage->min_dims[i]) {
+            //HDassert(0 && "Checking code coverage..."); //VDSINC
             new_dims[i] = storage->min_dims[i];
         } //VDSINC
         if(new_dims[i] != curr_dims[i])
