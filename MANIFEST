@@ -88,18 +88,16 @@
 ./config/COPYING
 ./config/BlankForm
 ./config/apple
+./config/cce-fflags
+./config/cce-flags
 ./config/commence.am
 ./config/conclude.am
-./config/craynv
-./config/dec-flags
 ./config/examples.am
 ./config/freebsd
 ./config/gnu-fflags
 ./config/gnu-flags
-./config/hpux11.23
 ./config/i386-pc-cygwin32
 ./config/i686-pc-cygwin
-./config/ia64-linux-gnu
 ./config/ibm-aix
 ./config/ibm-flags
 ./config/intel-fflags
@@ -109,15 +107,12 @@
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/lt_vers.am
-./config/nec-superux14.1
 ./config/Makefile.am.blank
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/powerpc-ibm-aix5.x
 ./config/solaris2.x
-./config/sv1-cray
 ./config/x86_64-pc-cygwin
-./config/x86_64-redstorm-linux-gnu
 
 ./config/site-specific/BlankForm
 
@@ -1246,6 +1241,9 @@
 # h5repack sources
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in
+./tools/h5repack/ccp_docs/CompressNChunk_RFC.docx
+./tools/h5repack/ccp_docs/CompressNChunk_RFC.pdf
+./tools/h5repack/ccp_docs/h5repack.htm
 ./tools/h5repack/dynlib_rpk.c
 ./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack_plugin.sh.in
@@ -1260,6 +1258,7 @@
 ./tools/h5repack/h5repack_verify.c
 ./tools/h5repack/h5repacktst.c
 ./tools/h5repack/testh5repack_detect_szip.c
+
 
 # h5ls sources
 ./tools/h5ls/Makefile.am
@@ -2130,6 +2129,7 @@
 ./tools/h5diff/testfiles/tmpSingleSiteBethe.output.h5
 
 #test files for h5repack
+./tools/h5repack/testfiles/README
 ./tools/h5repack/testfiles/h5repack_attr.h5
 ./tools/h5repack/testfiles/h5repack_attr_refs.h5
 ./tools/h5repack/testfiles/h5repack_deflate.h5
@@ -2147,6 +2147,8 @@
 ./tools/h5repack/testfiles/h5repack_layout3.h5
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5
 ./tools/h5repack/testfiles/h5repack_named_dtypes.h5
+./tools/h5repack/testfiles/h5repack_nested_8bit_enum_deflated.h5
+./tools/h5repack/testfiles/h5repack_nested_8bit_enum.h5
 ./tools/h5repack/testfiles/h5repack_nbit.h5
 ./tools/h5repack/testfiles/h5repack_objs.h5
 ./tools/h5repack/testfiles/h5repack_refs.h5
@@ -2338,6 +2340,8 @@
 ./hl/tools/gif2h5/writehdf.c
 ./hl/tools/gif2h5/h52gifgentst.c
 ./hl/tools/gif2h5/h52giftest.sh.in
+./hl/tools/gif2h5/testfiles/REAMDE
+./hl/tools/gif2h5/testfiles/ex_image2.h5
 ./hl/tools/gif2h5/testfiles/image1.gif
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
 
@@ -2507,3 +2511,7 @@
 ./tools/misc/CMakeTests.cmake
 ./tools/perform/CMakeLists.txt
 ./tools/perform/CMakeTests.cmake
+
+# CMake-specific User Scripts
+./config/cmake/scripts/CTestScript.cmake   _DO_NOT_DISTRIBUTE_
+./config/cmake/scripts/HDF518config.cmake   _DO_NOT_DISTRIBUTE_

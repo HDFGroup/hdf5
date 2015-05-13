@@ -20,7 +20,7 @@ usage: h5repack [OPTIONS] file1 file2
    -f FILT, --filter=FILT  Filter type
    -l LAYT, --layout=LAYT  Layout type
    -B S, --buf_size=S      memory buffer size[268435456]
-   -C S, --cache_size=S    Raw data chunk cache size
+   -C S, --cache_size=S    Raw data chunk cache size in bytes
    -O, --no-h5ocopy        Do not use H5Ocopy at all [use]
    -R, --readonly          Read only, no create or write output [off]
    -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy
