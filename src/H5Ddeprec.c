@@ -382,12 +382,56 @@ H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dataset->shared->layout.type) {
+            hbool_t update_chunks = FALSE;  /* Flag to indicate chunk cache update is needed */
+
+            /* Check if we need to track & update scaled dimension information */
+            if(dataset->shared->ndims > 1) {
+                unsigned u;         /* Local indicate variable */
+
+                /* Update scaled chunk information */
+                for(u = 0; u < dataset->shared->ndims; u++) {
+                    hsize_t scaled;             /* Scaled value */
+
+                    /* Compute the scaled dimension size value */
+                    scaled = size[u] / dataset->shared->layout.u.chunk.dim[u];
+
+                    /* Check if scaled dimension size changed */
+                    if(scaled != dataset->shared->cache.chunk.scaled_dims[u]) {
+                        hsize_t scaled_power2up;      /* New size value, rounded to next power of 2 */
+
+                        /* Update the scaled dimension size value for the current dimension */
+                        dataset->shared->cache.chunk.scaled_dims[u] = scaled;
+
+                        /* Check if algorithm for computing hash values will change */
+                        if((scaled > dataset->shared->cache.chunk.nslots &&
+                                    dataset->shared->cache.chunk.scaled_dims[u] <= dataset->shared->cache.chunk.nslots)
+                                || (scaled <= dataset->shared->cache.chunk.nslots &&
+                                    dataset->shared->cache.chunk.scaled_dims[u] > dataset->shared->cache.chunk.nslots))
+                            update_chunks = TRUE;
+
+                        /* Check if the number of bits required to encode the scaled size value changed */
+                        if(dataset->shared->cache.chunk.scaled_power2up[u] != (scaled_power2up = H5VM_power2up(scaled))) {
+                            /* Update the 'power2up' & 'encode_bits' values for the current dimension */
+                            dataset->shared->cache.chunk.scaled_power2up[u] = scaled_power2up;
+                            dataset->shared->cache.chunk.scaled_encode_bits[u] = H5VM_log2_gen(scaled_power2up);
+
+                            /* Indicate that the chunk cache indices should be updated */
+                            update_chunks = TRUE;
+                        } /* end if */
+                    } /* end if */
+                } /* end for */
+            } /* end if */
+
             /* Update general information for chunks */
             if(H5D__chunk_set_info(dataset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks")
-            /* Update the chunk cache indices */
-            if(H5D__chunk_update_cache(dataset, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
+
+            /* Check for updating chunk cache indices */
+            if(update_chunks) {
+                /* Update the chunk cache indices */
+                if(H5D__chunk_update_cache(dataset, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
+            } /* end if */
         } /* end if */
 
 	/* Allocate space for the new parts of the dataset, if appropriate */

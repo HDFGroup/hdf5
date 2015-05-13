@@ -61,8 +61,6 @@
     (io_info)->op_type = H5D_IO_OP_READ;                                \
     (io_info)->u.rbuf = buf
 
-#define H5D_CHUNK_HASH(D, ADDR) H5F_addr_hash(ADDR, (D)->cache.chunk.nslots)
-
 /* Flags for marking aspects of a dataset dirty */
 #define H5D_MARK_SPACE  0x01
 #define H5D_MARK_LAYOUT  0x02
@@ -165,8 +163,7 @@ typedef struct {
 } H5D_contig_storage_t;
 
 typedef struct {
-    hsize_t index;          /* "Index" of chunk in dataset (must be first for TBBT routines) */
-    hsize_t *offset;        /* Chunk's coordinates in elements */
+    hsize_t *scaled;        /* Scaled coordinates for a chunk */
 } H5D_chunk_storage_t;
 
 typedef struct {
@@ -239,7 +236,7 @@ typedef struct H5D_chk_idx_info_t {
  * The chunk's file address, filter mask and size on disk are not key values.
  */
 typedef struct H5D_chunk_rec_t {
-    hsize_t	offset[H5O_LAYOUT_NDIMS];	/* Logical offset to start */
+    hsize_t	scaled[H5O_LAYOUT_NDIMS];	/* Logical offset to start */
     uint32_t	nbytes;				/* Size of stored data	*/
     unsigned	filter_mask;			/* Excluded filters	*/
     haddr_t     chunk_addr;                     /* Address of chunk in file */
@@ -254,7 +251,7 @@ typedef struct H5D_chunk_common_ud_t {
     /* downward */
     const H5O_layout_chunk_t *layout;           /* Chunk layout description */
     const H5O_storage_chunk_t *storage;         /* Chunk storage description */
-    const hsize_t *offset;	                /* Logical offset of chunk */
+    const hsize_t *scaled;		        /* Scaled coordinates for a chunk */
 } H5D_chunk_common_ud_t;
 
 /* B-tree callback info for various operations */
@@ -320,7 +317,7 @@ typedef struct H5D_chunk_ops_t {
 typedef struct H5D_chunk_info_t {
     hsize_t index;              /* "Index" of chunk in dataset */
     uint32_t chunk_points;      /* Number of elements selected in chunk */
-    hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
+    hsize_t scaled[H5O_LAYOUT_NDIMS];   /* Scaled coordinates of chunk (in file dataset's dataspace) */
     H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
     hbool_t fspace_shared;      /* Indicate that the file space for a chunk is shared and shouldn't be freed */
     H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
@@ -360,7 +357,7 @@ typedef struct H5D_chunk_map_t {
 /* Cached information about a particular chunk */
 typedef struct H5D_chunk_cached_t {
     hbool_t     valid;                          /*whether cache info is valid*/
-    hsize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
+    hsize_t	scaled[H5O_LAYOUT_NDIMS];	/*scaled offset of chunk*/
     haddr_t	addr;				/*file address of chunk */
     uint32_t	nbytes;				/*size of stored data	*/
     unsigned	filter_mask;			/*excluded filters	*/
@@ -386,6 +383,11 @@ typedef struct H5D_rdcc_t {
     H5SL_t		*sel_chunks; /* Skip list containing information for each chunk selected */
     H5S_t		*single_space; /* Dataspace for single element I/O on chunks */
     H5D_chunk_info_t    *single_chunk_info;  /* Pointer to single chunk's info */
+
+    /* Cached information about scaled dataspace dimensions */
+    hsize_t             scaled_dims[H5S_MAX_RANK];          /* The scaled dim sizes */
+    hsize_t             scaled_power2up[H5S_MAX_RANK];      /* The scaled dim sizes, rounded up to next power of 2 */
+    unsigned            scaled_encode_bits[H5S_MAX_RANK];   /* The number of bits needed to encode the scaled dim sizes */
 } H5D_rdcc_t;
 
 /* The raw data contiguous data cache */
@@ -494,7 +496,7 @@ typedef struct H5D_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
     hbool_t     deleted;        /*chunk about to be deleted		*/
-    hsize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
+    hsize_t 	scaled[H5O_LAYOUT_NDIMS]; /*scaled chunk 'name' (coordinates) */
     uint32_t	rd_count;	/*bytes remaining to be read		*/
     uint32_t	wr_count;	/*bytes remaining to be written		*/
     H5F_block_t chunk_block;    /*offset/length of chunk in file        */
@@ -612,7 +614,7 @@ H5_DLL herr_t H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);
 H5_DLL hbool_t H5D__chunk_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL herr_t H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
-    const hsize_t *chunk_offset, hsize_t chunk_idx, H5D_chunk_ud_t *udata);
+    const hsize_t *scaled, H5D_chunk_ud_t *udata);
 H5_DLL void *H5D__chunk_lock(const H5D_io_info_t *io_info,
     H5D_chunk_ud_t *udata, hbool_t relax);
 H5_DLL herr_t H5D__chunk_unlock(const H5D_io_info_t *io_info,

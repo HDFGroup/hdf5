@@ -56,8 +56,6 @@ H5_DLL hsize_t H5VM_hyper_stride(unsigned n, const hsize_t *size,
 				 const hsize_t *total_size,
 				 const hsize_t *offset,
 				 hsize_t *stride);
-H5_DLL htri_t H5VM_hyper_disjointp(unsigned n, const hsize_t *offset1,
-    const uint32_t *size1, const hsize_t *offset2, const uint32_t *size2);
 H5_DLL htri_t H5VM_hyper_eq(unsigned n, const hsize_t *offset1,
 			    const hsize_t *size1, const hsize_t *offset2,
 			    const hsize_t *size2);
@@ -87,10 +85,14 @@ H5_DLL hsize_t H5VM_array_offset_pre(unsigned n,
     const hsize_t *acc, const hsize_t *offset);
 H5_DLL hsize_t H5VM_array_offset(unsigned n, const hsize_t *total_size,
     const hsize_t *offset);
+H5_DLL herr_t H5VM_array_calc_pre(hsize_t offset, unsigned n,
+    const hsize_t *down, hsize_t *coords);
 H5_DLL herr_t H5VM_array_calc(hsize_t offset, unsigned n,
     const hsize_t *total_size, hsize_t *coords);
 H5_DLL hsize_t H5VM_chunk_index(unsigned ndims, const hsize_t *coord,
     const uint32_t *chunk, const hsize_t *down_nchunks);
+H5_DLL void H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord,
+    const uint32_t *chunk, hsize_t *scaled);
 H5_DLL hsize_t H5VM_chunk_index_scaled(unsigned ndims, const hsize_t *coord,
     const uint32_t *chunk, const hsize_t *down_nchunks, hsize_t *scaled);
 H5_DLL ssize_t H5VM_opvv(size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[],
