@@ -13,7 +13,7 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
 #------------------------------------------------------------------------------
-# This is the list of files that are part of HDF5 source distribution. 
+# This is the list of files that are part of HDF5 source distribution.
 # All files have a `./' prefix and appear in lexicographic order.
 # Lines that end with _DO_NOT_DISTRIBUTE_ will not be included in a
 # release.  Blank lines and comments are ignored.  Comments must start
@@ -574,7 +574,7 @@
 ./src/H5Bdbg.c
 ./src/H5Bpkg.h
 ./src/H5Bprivate.h
-./src/H5Bpublic.h      
+./src/H5Bpublic.h
 ./src/H5B2.c
 ./src/H5B2cache.c
 ./src/H5B2dbg.c
@@ -582,7 +582,7 @@
 ./src/H5B2int.c
 ./src/H5B2pkg.h
 ./src/H5B2private.h
-./src/H5B2public.h    
+./src/H5B2public.h
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
@@ -736,7 +736,7 @@
 ./src/H5HFman.c
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
-./src/H5HFpublic.h  
+./src/H5HFpublic.h
 ./src/H5HFsection.c
 ./src/H5HFspace.c
 ./src/H5HFstat.c
@@ -1429,8 +1429,8 @@
 ./tools/testfiles/tattrintsize.ddl
 ./tools/testfiles/tattrintsize.h5
 ./tools/testfiles/tattrreg.h5
-./tools/testfiles/tattrreg.ddl 
-./tools/testfiles/tattrregR.ddl 
+./tools/testfiles/tattrreg.ddl
+./tools/testfiles/tattrregR.ddl
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/tbinary.h5
@@ -1469,8 +1469,8 @@
 ./tools/testfiles/tcompound2.h5
 ./tools/testfiles/tcompound_complex.h5
 ./tools/testfiles/tdatareg.h5
-./tools/testfiles/tdatareg.ddl 
-./tools/testfiles/tdataregR.ddl 
+./tools/testfiles/tdatareg.ddl
+./tools/testfiles/tdataregR.ddl
 ./tools/testfiles/tdeflate.ddl
 ./tools/testfiles/tdset-1.ddl
 ./tools/testfiles/tdset-2.ddl
@@ -2397,6 +2397,7 @@
 ./config/cmake/H5pubconf.h.in
 ./config/cmake/hdf5-config.cmake.in
 ./config/cmake/hdf5-config-version.cmake.in
+./config/cmake/HDFCompilerFlags.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
