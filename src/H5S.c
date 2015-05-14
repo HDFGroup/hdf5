@@ -482,6 +482,12 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
     if(H5S_extent_copy(&(dst->extent), &(src->extent), TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent")
 
+    /* If the selection is 'all', update the number of elements selected in the
+     * destination space */
+    if(H5S_SEL_ALL == H5S_GET_SELECT_TYPE(dst))
+        if(H5S_select_all(dst, FALSE) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Sextent_copy() */
@@ -1515,7 +1521,7 @@ H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
     /* Find out the size of buffer needed for selection */
     if((sselect_size = H5S_SELECT_SERIAL_SIZE(obj)) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace selection size")
-    H5_ASSIGN_OVERFLOW(select_size, sselect_size, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(select_size, size_t, sselect_size, hssize_t);
 
     /* Verify the size of buffer.  If it's not big enough, simply return the
      * right size without filling the buffer. */
@@ -2138,14 +2144,13 @@ H5S_extend(H5S_t *space, const hsize_t *size)
     HDassert(size);
 
     /* Check through all the dimensions to see if modifying the dataspace is allowed */
-    for(u = 0; u < space->extent.rank; u++) {
-        if(space->extent.size[u]<size[u]) {
-            if(space->extent.max && H5S_UNLIMITED!=space->extent.max[u] &&
-                    space->extent.max[u]<size[u])
+    for(u = 0; u < space->extent.rank; u++)
+        if(space->extent.size[u] < size[u]) {
+            if(space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
+                    space->extent.max[u] < size[u])
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be increased")
             ret_value++;
         } /* end if */
-    } /* end for */
 
     /* Update */
     if(ret_value) {

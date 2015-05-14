@@ -168,7 +168,7 @@ HDfprintf(stderr, "%s: off = %Hu\n", "H5HF_dtable_lookup", off);
     /* Check for offset in first row */
     if(off < dtable->num_id_first_row) {
         *row = 0;
-        H5_ASSIGN_OVERFLOW(/* To: */ *col, /* From: */ (off / dtable->cparam.start_block_size), /* From: */ hsize_t, /* To: */ unsigned);
+        H5_CHECKED_ASSIGN(*col, unsigned, (off / dtable->cparam.start_block_size), hsize_t);
     } /* end if */
     else {
         unsigned high_bit = H5VM_log2_gen(off);  /* Determine the high bit in the offset */
@@ -178,7 +178,7 @@ HDfprintf(stderr, "%s: off = %Hu\n", "H5HF_dtable_lookup", off);
 HDfprintf(stderr, "%s: high_bit = %u, off_mask = %Hu\n", "H5HF_dtable_lookup", high_bit, off_mask);
 #endif /* QAK */
         *row = (high_bit - dtable->first_row_bits) + 1;
-        H5_ASSIGN_OVERFLOW(/* To: */ *col, /* From: */ ((off - off_mask) / dtable->row_block_size[*row]), /* From: */ hsize_t, /* To: */ unsigned);
+        H5_CHECKED_ASSIGN(*col, unsigned, ((off - off_mask) / dtable->row_block_size[*row]), hsize_t);
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

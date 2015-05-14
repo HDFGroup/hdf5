@@ -3,16 +3,9 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
-/* Define if your system generates wrong code for log2 routine. */
-#undef BAD_LOG2_CODE_GENERATED
-
 /* Define if the memory buffers being written to disk should be cleared before
    writing. */
 #undef CLEAR_MEMORY
-
-/* Define if your system can handle converting denormalized floating-point
-   values. */
-#undef CONVERT_DENORMAL_FLOAT
 
 /* Define if C++ compiler recognizes offsetof */
 #undef CXX_HAVE_OFFSETOF
@@ -36,10 +29,6 @@
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
-
-/* Define if your system can handle overflow converting floating-point to
-   integer values. */
-#undef FP_TO_INTEGER_OVERFLOW_WORKS
 
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
@@ -367,24 +356,12 @@
 /* Define to 1 if you have the `_scrsize' function. */
 #undef HAVE__SCRSIZE
 
-/* Define if your system can't handle converting floating-point values to long
-   long. */
-#undef HW_FP_TO_LLONG_NOT_WORKS
-
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #undef INCLUDE_HL
-
-/* Define if your system can convert long double to (unsigned) long long
-   values correctly. */
-#undef LDOUBLE_TO_LLONG_ACCURATE
 
 /* Define if your system converts long double to (unsigned) long values with
    special algorithm. */
 #undef LDOUBLE_TO_LONG_SPECIAL
-
-/* Define if your system can convert (unsigned) long long to long double
-   values correctly. */
-#undef LLONG_TO_LDOUBLE_CORRECT
 
 /* Define if your system can convert (unsigned) long to long double values
    with special algorithm. */
@@ -567,13 +544,6 @@
 
 /* Version number of package */
 #undef VERSION
-
-/* Define if vsnprintf() returns the correct value for formatted strings that
-   don't fit into size allowed */
-#undef VSNPRINTF_WORKS
-
-/* Data accuracy is prefered to speed during data conversions */
-#undef WANT_DATA_ACCURACY
 
 /* Check exception handling functions during data conversions */
 #undef WANT_DCONV_EXCEPTION

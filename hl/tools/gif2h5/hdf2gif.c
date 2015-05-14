@@ -20,6 +20,8 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
+#define IMAGE_WIDTH_MAX		65535	/* unsigned 16bits integer */
+#define IMAGE_HEIGHT_MAX	65535	/* unsigned 16bits integer */
 
 
 int EndianOrder;
@@ -146,6 +148,17 @@ int main(int argc , char **argv)
         /* read image */
         if ( H5IMget_image_info( fid, image_name, &width, &height, &planes, interlace, &npals ) < 0 )
             goto out;
+
+	if (width > IMAGE_WIDTH_MAX || height > IMAGE_HEIGHT_MAX){
+	    fprintf(stderr, "HDF5 image is too large. Limit is %d by %d.\n", IMAGE_WIDTH_MAX, IMAGE_HEIGHT_MAX);
+	    goto out;
+	}
+
+	/* tool can handle single plane images only. */
+	if (planes > 1){
+	    fprintf(stderr, "Cannot handle multiple planes image\n");
+	    goto out;
+	}
 
         Image = (BYTE*) malloc( (size_t) width * (size_t) height );
 

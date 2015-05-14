@@ -42,8 +42,8 @@ if (BUILD_TESTING)
   # --------------------------------------------------------------------
   if (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
       add_executable (hl_h52gifgentest ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/h52gifgentst.c)
-      TARGET_NAMING (hl_h52gifgentest ${LIB_TYPE})
-      TARGET_C_PROPERTIES (hl_h52gifgentest ${LIB_TYPE} " " " ")
+      TARGET_NAMING (hl_h52gifgentest STATIC)
+      TARGET_C_PROPERTIES (hl_h52gifgentest STATIC " " " ")
       target_link_libraries (hl_h52gifgentest ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
       set_target_properties (hl_h52gifgentest PROPERTIES FOLDER generator/tools/hl)
     

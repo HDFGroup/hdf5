@@ -578,7 +578,7 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Allocate space for the buffer to serialize the sections into */
-    H5_ASSIGN_OVERFLOW(/* To: */ old_sect_size, /* From: */ udata->fspace->sect_size, /* From: */ hsize_t, /* To: */ size_t);
+    H5_CHECKED_ASSIGN(old_sect_size, size_t, udata->fspace->sect_size, hsize_t);
     if(NULL == (buf = H5FL_BLK_MALLOC(sect_block, (size_t)udata->fspace->sect_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -1038,7 +1038,7 @@ H5FS_cache_sinfo_size(const H5F_t UNUSED *f, const H5FS_sinfo_t *sinfo, size_t *
     HDassert(size_ptr);
 
     /* Set size value */
-    H5_ASSIGN_OVERFLOW(/* To: */ *size_ptr, /* From: */ sinfo->fspace->alloc_sect_size, /* From: */ hsize_t, /* To: */ size_t);
+    H5_CHECKED_ASSIGN(*size_ptr, size_t, sinfo->fspace->alloc_sect_size, hsize_t);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5FS_cache_sinfo_size() */

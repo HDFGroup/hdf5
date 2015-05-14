@@ -139,7 +139,7 @@ configure_file (
 )
 install (
     FILES ${HDF5_BINARY_DIR}/libhdf5.settings
-    DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+    DESTINATION ${HDF5_INSTALL_LIB_DIR}
     COMPONENT libraries
 )
 
@@ -389,7 +389,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
       set (CPACK_BUNDLE_ICON "${HDF_RESOURCES_EXT_DIR}/hdf.icns")
       set (CPACK_BUNDLE_PLIST "${HDF5_BINARY_DIR}/CMakeFiles/Info.plist")
       set (CPACK_APPLE_GUI_INFO_STRING "HDF5 (Hierarchical Data Format 5) Software Library and Utilities")
-      set (CPACK_APPLE_GUI_COPYRIGHT "Copyright © 2006-2014 by The HDF Group. All rights reserved.")
+      set (CPACK_APPLE_GUI_COPYRIGHT "Copyright © 2006-2015 by The HDF Group. All rights reserved.")
       set (CPACK_SHORT_VERSION_STRING "${CPACK_PACKAGE_VERSION}")
       set (CPACK_APPLE_GUI_BUNDLE_NAME "${HDF5_PACKAGE_STRING}")
       set (CPACK_APPLE_GUI_VERSION_STRING "${CPACK_PACKAGE_VERSION_STRING}")
@@ -466,10 +466,22 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
   if (HDF5_PACKAGE_EXTLIBS)
     if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
       if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
-        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};ZLIB;ALL;/")
+        if (WIN32)
+          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};ZLIB;ALL;/")
+        else (WIN32)
+          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};ZLIB;libraries;/")
+          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};ZLIB;headers;/")
+          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${ZLIB_INCLUDE_DIR_GEN};ZLIB;configinstall;/")
+        endif (WIN32)
       endif (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
       if (SZIP_FOUND AND SZIP_USE_EXTERNAL)
-        set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${SZIP_INCLUDE_DIR_GEN};SZIP;ALL;/")
+        if (WIN32)
+          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${SZIP_INCLUDE_DIR_GEN};SZIP;ALL;/")
+        else (WIN32)
+          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${SZIP_INCLUDE_DIR_GEN};SZIP;libraries;/")
+          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${SZIP_INCLUDE_DIR_GEN};SZIP;headers;/")
+          set (CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${SZIP_INCLUDE_DIR_GEN};SZIP;configinstall;/")
+        endif (WIN32)
       endif (SZIP_FOUND AND SZIP_USE_EXTERNAL)
     endif (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
   endif (HDF5_PACKAGE_EXTLIBS)
@@ -592,24 +604,28 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
         GROUP Applications
         INSTALL_TYPES Full Developer User
     )
-    CPACK_ADD_COMPONENT (hlcpplibraries 
-        DISPLAY_NAME "HDF5 HL C++ Libraries" 
-        DEPENDS hllibraries
-        GROUP Runtime
-        INSTALL_TYPES Full Developer User
-    )
-    CPACK_ADD_COMPONENT (hlcppheaders 
-        DISPLAY_NAME "HDF5 HL C++ Headers" 
-        DEPENDS hlcpplibraries
-        GROUP Development
-        INSTALL_TYPES Full Developer
-    )
-    CPACK_ADD_COMPONENT (hlfortlibraries 
-        DISPLAY_NAME "HDF5 HL Fortran Libraries" 
-        DEPENDS fortlibraries
-        GROUP Runtime
-        INSTALL_TYPES Full Developer User
-    )
+    if (HDF5_BUILD_CPP_LIB)
+      CPACK_ADD_COMPONENT (hlcpplibraries 
+          DISPLAY_NAME "HDF5 HL C++ Libraries" 
+          DEPENDS hllibraries
+          GROUP Runtime
+          INSTALL_TYPES Full Developer User
+      )
+      CPACK_ADD_COMPONENT (hlcppheaders 
+          DISPLAY_NAME "HDF5 HL C++ Headers" 
+          DEPENDS hlcpplibraries
+          GROUP Development
+          INSTALL_TYPES Full Developer
+      )
+    endif (HDF5_BUILD_CPP_LIB)
+    if (HDF5_BUILD_FORTRAN)
+      CPACK_ADD_COMPONENT (hlfortlibraries 
+          DISPLAY_NAME "HDF5 HL Fortran Libraries" 
+          DEPENDS fortlibraries
+          GROUP Runtime
+          INSTALL_TYPES Full Developer User
+      )
+    endif (HDF5_BUILD_FORTRAN)
   endif (HDF5_BUILD_HL_LIB)
   
 endif (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)

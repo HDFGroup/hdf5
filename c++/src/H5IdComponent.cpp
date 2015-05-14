@@ -46,6 +46,11 @@ namespace H5 {
 //--------------------------------------------------------------------------
 IdComponent::IdComponent(const hid_t h5_id) {}
 
+//void IdComponent::p_setId(const hid_t new_id)
+//{
+    //p_setId(new_id);
+//}
+
 //--------------------------------------------------------------------------
 // Function:	IdComponent copy constructor
 // Purpose:	This noop copy constructor is removed as a result of the data

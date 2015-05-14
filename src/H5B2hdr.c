@@ -160,7 +160,7 @@ HDmemset(hdr->page, 0, hdr->node_size);
 
     /* Initialize leaf node info */
     sz_max_nrec = H5B2_NUM_LEAF_REC(hdr->node_size, hdr->rrec_size);
-    H5_ASSIGN_OVERFLOW(/* To: */ hdr->node_info[0].max_nrec, /* From: */ sz_max_nrec, /* From: */ size_t, /* To: */ unsigned)
+    H5_CHECKED_ASSIGN(hdr->node_info[0].max_nrec, unsigned, sz_max_nrec, size_t)
     hdr->node_info[0].split_nrec = (hdr->node_info[0].max_nrec * hdr->split_percent) / 100;
     hdr->node_info[0].merge_nrec = (hdr->node_info[0].max_nrec * hdr->merge_percent) / 100;
     hdr->node_info[0].cum_max_nrec = hdr->node_info[0].max_nrec;
@@ -182,14 +182,14 @@ HDmemset(hdr->page, 0, hdr->node_size);
     /* Compute size to store # of records in each node */
     /* (uses leaf # of records because its the largest) */
     u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[0].max_nrec);
-    H5_ASSIGN_OVERFLOW(/* To: */ hdr->max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ uint8_t)
+    H5_CHECKED_ASSIGN(hdr->max_nrec_size, uint8_t, u_max_nrec_size, unsigned)
     HDassert(hdr->max_nrec_size <= H5B2_SIZEOF_RECORDS_PER_NODE);
 
     /* Initialize internal node info */
     if(depth > 0) {
         for(u = 1; u < (unsigned)(depth + 1); u++) {
             sz_max_nrec = H5B2_NUM_INT_REC(hdr, u);
-            H5_ASSIGN_OVERFLOW(/* To: */ hdr->node_info[u].max_nrec, /* From: */ sz_max_nrec, /* From: */ size_t, /* To: */ unsigned)
+            H5_CHECKED_ASSIGN(hdr->node_info[u].max_nrec, unsigned, sz_max_nrec, size_t)
             HDassert(hdr->node_info[u].max_nrec <= hdr->node_info[u - 1].max_nrec);
 
             hdr->node_info[u].split_nrec = (hdr->node_info[u].max_nrec * hdr->split_percent) / 100;
@@ -198,7 +198,7 @@ HDmemset(hdr->page, 0, hdr->node_size);
             hdr->node_info[u].cum_max_nrec = ((hdr->node_info[u].max_nrec + 1) *
                 hdr->node_info[u - 1].cum_max_nrec) + hdr->node_info[u].max_nrec;
             u_max_nrec_size = H5VM_limit_enc_size((uint64_t)hdr->node_info[u].cum_max_nrec);
-            H5_ASSIGN_OVERFLOW(/* To: */ hdr->node_info[u].cum_max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ uint8_t)
+            H5_CHECKED_ASSIGN(hdr->node_info[u].cum_max_nrec_size, uint8_t, u_max_nrec_size, unsigned)
 
             if(NULL == (hdr->node_info[u].nat_rec_fac = H5FL_fac_init(hdr->cls->nrec_size * hdr->node_info[u].max_nrec)))
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create node native key block factory")

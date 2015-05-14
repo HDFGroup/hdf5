@@ -77,8 +77,7 @@ H5FL_BLK_EXTERN(gheap_chunk);
  * largest data type is eight bytes.
  */
 #define H5HG_ALIGNMENT	8
-#define H5HG_ALIGN(X)	(size_t)(H5HG_ALIGNMENT*(((X)+H5HG_ALIGNMENT-1)/ \
-					 H5HG_ALIGNMENT))
+#define H5HG_ALIGN(X)	(H5HG_ALIGNMENT*(((X)+H5HG_ALIGNMENT-1)/H5HG_ALIGNMENT))
 #define H5HG_ISALIGNED(X) ((X)==H5HG_ALIGN(X))
 
 /*
@@ -86,20 +85,20 @@ H5FL_BLK_EXTERN(gheap_chunk);
  * that the stuff that follows the header is aligned.
  */
 #define H5HG_SIZEOF_HDR(f)						      \
-    H5HG_ALIGN(4 +			/*magic number		*/	      \
-	       1 +			/*version number	*/	      \
-	       3 +			/*reserved		*/	      \
-	       H5F_SIZEOF_SIZE(f))	/*collection size	*/
+    (size_t)H5HG_ALIGN(4 +			/*magic number		*/ \
+                       1 +			/*version number	*/ \
+                       3 +			/*reserved		*/ \
+                       H5F_SIZEOF_SIZE(f))	/*collection size	*/
 
 /*
  * The overhead associated with each object in the heap, always a multiple of
  * the alignment so that the stuff that follows the header is aligned.
  */
 #define H5HG_SIZEOF_OBJHDR(f)						      \
-    H5HG_ALIGN(2 +			/*object id number	*/	      \
-	       2 +			/*reference count	*/	      \
-	       4 +			/*reserved		*/	      \
-	       H5F_SIZEOF_SIZE(f))	/*object data size	*/
+    (size_t)H5HG_ALIGN(2 +			/*object id number	*/ \
+                       2 +			/*reference count	*/ \
+                       4 +			/*reserved		*/ \
+                       H5F_SIZEOF_SIZE(f))	/*object data size	*/
 
 /*
  * The initial guess for the number of messages in a collection.  We assume

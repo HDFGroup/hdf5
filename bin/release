@@ -50,31 +50,33 @@ Usage: $0 -d <dir> [-h] [--nocheck] [--private] <methods> ...
 This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
 for compressing the resulting tar archive (if none are given then
-"tar md5" is assumed):
+"tar" is assumed):
 
     tar		-- use tar and don't do any compressing.
     gzip	-- use gzip with "-9" and append ".gz" to the output name.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
     zip		-- convert all text files to DOS style and form a zip file for Windows use.
-    md5         -- produce a md5 checksum in addition to the archive.
     doc         -- produce the latest doc tree in addition to the archive.
+
+An md5 checksum is produced for each archive created and stored in the md5 file.
 
 Examples:
 
     $ bin/release -d /tmp
     /tmp/hdf5-1.8.13-RELEASE.txt
+    /tmp/hdf5-1.8.13.md5
     /tmp/hdf5-1.8.13.tar
-    /tmp/hdf5-1.8.13.tar.md5
 
     $ bin/release -d /tmp gzip
     /tmp/hdf5-1.8.13-RELEASE.txt
+    /tmp/hdf5-1.8.13.md5
     /tmp/hdf5-1.8.13.tar.gz
 
-    $ bin/release -d /tmp tar gzip zip md5
+    $ bin/release -d /tmp tar gzip zip
     /tmp/hdf5-1.8.13-RELEASE.txt
+    /tmp/hdf5-1.8.13.md5
     /tmp/hdf5-1.8.13.tar
     /tmp/hdf5-1.8.13.tar.gz
-    /tmp/hdf5-1.8.13.tar.md5
     /tmp/hdf5-1.8.13.tar.zip
 
 EOF
@@ -212,9 +214,9 @@ while [ -n "$1" ]; do
     esac
 done
 
-# Default methods are tar and md5
+# Default method is tar
 if [ "X$methods" = "X" ]; then
-    methods="tar md5"
+    methods="tar"
 fi
 
 # Create the temporay work directory.
@@ -289,26 +291,28 @@ test "$verbose" && echo "   Running tar..." 1>&2
 )
 
 # Compress
+MD5file=$HDF5_VERS.md5
+cp /dev/null $DEST/$MD5file
 for comp in $methods; do
     case $comp in
 	tar)
 	    cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
+	    (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file) 
 	    ;;
 	gzip)
 	    test "$verbose" && echo "   Running gzip..." 1>&2
 	    gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
+	    (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file) 
 	    ;;
 	bzip2)
 	    test "$verbose" && echo "   Running bzip2..." 1>&2
 	    bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
+	    (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file) 
 	    ;;
 	zip)
 	    test "$verbose" && echo "   Creating zip ball..." 1>&2
 	    tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
-	    ;;
-	md5)
-	    test "$verbose" && echo "   Creating checksum..." 1>&2
-	    (cd $tmpdir; md5sum $HDF5_VERS.tar ) > $DEST/$HDF5_VERS.tar.md5
+	    (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file) 
 	    ;;
 	doc)
 	    test "$verbose" && echo "   Creating docs..." 1>&2

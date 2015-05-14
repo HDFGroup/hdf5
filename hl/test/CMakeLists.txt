@@ -45,8 +45,8 @@ HL_ADD_EXE (test_table)
 # --------------------------------------------------------------------
 if (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
   add_executable (hl_gen_test_ds gen_test_ds.c)
-  TARGET_NAMING (hl_gen_test_ds ${LIB_TYPE})
-  TARGET_C_PROPERTIES (hl_gen_test_ds ${LIB_TYPE} " " " ")
+  TARGET_NAMING (hl_gen_test_ds STATIC)
+  TARGET_C_PROPERTIES (hl_gen_test_ds STATIC " " " ")
   target_link_libraries (hl_gen_test_ds
       ${HDF5_HL_LIB_TARGET}
       ${HDF5_LIB_TARGET}

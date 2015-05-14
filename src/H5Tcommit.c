@@ -558,7 +558,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     H5O_type_t   obj_type;              /* Type of object at location */
     H5G_loc_t    type_loc;              /* Group object for datatype */
     hbool_t      obj_found = FALSE;     /* Object at 'name' found */
-    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
+    hid_t        dxpl_id = H5AC_ind_dxpl_id; /* dxpl to use to open datatype */
     hid_t        ret_value = FAIL;      /* Return value */
 
     FUNC_ENTER_API(FAIL)

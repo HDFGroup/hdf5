@@ -1304,7 +1304,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     space_size[ndims] = elmt_size;
 
     /* Compute the maximum number of bytes required */
-    H5_ASSIGN_OVERFLOW(max_elem, nelmts, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(max_elem, size_t, nelmts, hssize_t);
 
     /* Loop, while elements left in selection */
     while(max_elem > 0 && user_ret == 0) {
@@ -2063,7 +2063,7 @@ H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *_b
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
 
     /* Compute the number of bytes to process */
-    H5_ASSIGN_OVERFLOW(max_elem, nelmts, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(max_elem, size_t, nelmts, hssize_t);
 
     /* Loop, while elements left in selection */
     while(max_elem > 0) {

@@ -7635,7 +7635,7 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
         /* Finish the span in the fastest changing dimension */
 
         /* Compute the number of bytes to attempt in this span */
-        H5_ASSIGN_OVERFLOW(span_size,((curr_span->high-abs_arr[fast_dim])+1)*elem_size,hsize_t,size_t);
+        H5_CHECKED_ASSIGN(span_size, size_t, ((curr_span->high-abs_arr[fast_dim])+1)*elem_size, hsize_t);
 
         /* Check number of bytes against upper bounds allowed */
         if(span_size>io_bytes_left)
@@ -7778,7 +7778,7 @@ H5S_hyper_get_seq_list_gen(const H5S_t *space,H5S_sel_iter_t *iter,
             loc_off += curr_span->pstride;
 
             /* Compute the number of elements to attempt in this span */
-            H5_ASSIGN_OVERFLOW(span_size, curr_span->nelem, hsize_t, size_t);
+            H5_CHECKED_ASSIGN(span_size, size_t, curr_span->nelem, hsize_t);
 
             /* Check number of elements against upper bounds allowed */
             if(span_size >= io_bytes_left) {
@@ -8108,7 +8108,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space, H5S_sel_iter_t *iter,
         loc += offset[u] * slab[u];
 
     /* Set the number of elements to write each time */
-    H5_ASSIGN_OVERFLOW(actual_elem, tdiminfo[fast_dim].block, hsize_t, size_t);
+    H5_CHECKED_ASSIGN(actual_elem, size_t, tdiminfo[fast_dim].block, hsize_t);
 
     /* Set the number of actual bytes */
     actual_bytes = actual_elem * elem_size;
@@ -8117,7 +8117,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space, H5S_sel_iter_t *iter,
     fast_dim_start = tdiminfo[fast_dim].start;
     fast_dim_stride = tdiminfo[fast_dim].stride;
     fast_dim_block = tdiminfo[fast_dim].block;
-    H5_ASSIGN_OVERFLOW(fast_dim_buf_off, slab[fast_dim] * fast_dim_stride, hsize_t, size_t);
+    H5_CHECKED_ASSIGN(fast_dim_buf_off, size_t, slab[fast_dim] * fast_dim_stride, hsize_t);
     fast_dim_offset = (hsize_t)((hssize_t)fast_dim_start + sel_off[fast_dim]);
 
     /* Compute the number of blocks which would fit into the buffer */
@@ -8138,7 +8138,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space, H5S_sel_iter_t *iter,
     /* Check if there is a partial row left (with full blocks) */
     if(tmp_count[fast_dim] > 0) {
         /* Get number of blocks in fastest dimension */
-        H5_ASSIGN_OVERFLOW(fast_dim_count, tdiminfo[fast_dim].count - tmp_count[fast_dim], hsize_t, size_t);
+        H5_CHECKED_ASSIGN(fast_dim_count, size_t, tdiminfo[fast_dim].count - tmp_count[fast_dim], hsize_t);
 
         /* Make certain this entire row will fit into buffer */
         fast_dim_count = MIN(fast_dim_count, tot_blk_count);
@@ -8223,7 +8223,7 @@ H5S_hyper_get_seq_list_opt(const H5S_t *space, H5S_sel_iter_t *iter,
     curr_rows = total_rows = (size_t)(tot_blk_count / tdiminfo[fast_dim].count);
 
     /* Reset copy of number of blocks in fastest dimension */
-    H5_ASSIGN_OVERFLOW(fast_dim_count, tdiminfo[fast_dim].count, hsize_t, size_t);
+    H5_CHECKED_ASSIGN(fast_dim_count, size_t, tdiminfo[fast_dim].count, hsize_t);
 
     /* Read in data until an entire sequence can't be written out any longer */
     while(curr_rows > 0) {
@@ -8528,7 +8528,7 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
     tot_blk_count = MIN(tot_blk_count, maxseq);
 
     /* Set the number of elements to write each time */
-    H5_ASSIGN_OVERFLOW(actual_elem, fast_dim_block, hsize_t, size_t);
+    H5_CHECKED_ASSIGN(actual_elem, size_t, fast_dim_block, hsize_t);
 
     /* Check for blocks to operate on */
     if(tot_blk_count > 0) {
@@ -8785,10 +8785,10 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
 
             /* Calculate the number of elements left in the sequence */
             if(tdiminfo[fast_dim].count == 1) {
-                H5_ASSIGN_OVERFLOW(leftover, tdiminfo[fast_dim].block - (iter->u.hyp.off[fast_dim] - tdiminfo[fast_dim].start), hsize_t, size_t);
+                H5_CHECKED_ASSIGN(leftover, size_t, tdiminfo[fast_dim].block - (iter->u.hyp.off[fast_dim] - tdiminfo[fast_dim].start), hsize_t);
             } /* end if */
             else {
-                H5_ASSIGN_OVERFLOW(leftover, tdiminfo[fast_dim].block - ((iter->u.hyp.off[fast_dim] - tdiminfo[fast_dim].start) % tdiminfo[fast_dim].stride), hsize_t, size_t);
+                H5_CHECKED_ASSIGN(leftover, size_t, tdiminfo[fast_dim].block - ((iter->u.hyp.off[fast_dim] - tdiminfo[fast_dim].start) % tdiminfo[fast_dim].stride), hsize_t);
             } /* end else */
 
             /* Make certain that we don't write too many */
@@ -8807,7 +8807,7 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
 
             /* Add a new sequence */
             off[0] = loc;
-            H5_ASSIGN_OVERFLOW(len[0], actual_elem * elem_size, hsize_t, size_t);
+            H5_CHECKED_ASSIGN(len[0], size_t, actual_elem * elem_size, hsize_t);
 
             /* Increment sequence array locations */
             off++;

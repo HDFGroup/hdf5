@@ -187,6 +187,10 @@ die "unable to read file: $RELEASE\n" unless -r $file;
 my $CONFIGURE = $file;
 $CONFIGURE =~ s/[^\/]*$/..\/configure.ac/;
 die "unable to read file: $CONFIGURE\n" unless -r $file;
+# cpp_doc_config
+my $CPP_DOC_CONFIG = $file;
+$CPP_DOC_CONFIG =~ s/[^\/]*$/..\/c++\/src\/cpp_doc_config/;
+die "unable to read file: $CPP_DOC_CONFIG\n"  unless -r $file;
 
 # Get the current version number.
 open FILE, $file or die "unable to open $file: $!\n";
@@ -234,7 +238,8 @@ if ($set) {
   $README = "";
   $RELEASE = "";
   $CONFIGURE = "";
-  $LT_VERS = "";
+  $CPP_DOC_CONFIG = "";
+  $LT_VERS = "";        
   @newver = @curver;
 }
 
@@ -308,6 +313,46 @@ if ($RELEASE) {
   print FILE @contents;
   close FILE;
 }
+
+# Update the c++/src/cpp_doc_config file
+if ($CPP_DOC_CONFIG) {
+  my $data = read_file($CPP_DOC_CONFIG);
+  my $version_string = sprintf("HDF5 version %d.%d.%d%s %s",
+                               @newver[0,1,2],
+                               $newver[3] eq "" ? "" : "-".$newver[3],
+                               "currently under development");
+
+  $data =~ s/PROJECT_NUMBER\s*=.*/PROJECT_NUMBER         = $version_string/;
+
+  write_file($CPP_DOC_CONFIG, $data);  
+}
+
+# helper function to read the file for updating c++/src/cpp_doc_config file.
+# The version string in that file is not at the top, so the string replacement
+# is not for the first line, and reading/writing the entire file as one string
+# facilitates the substring replacement.
+sub read_file {
+   my ($filename) = @_;
+
+    open my $in, $filename or die "Could not open '$filename' for reading $!";
+    local $/ = undef;
+    my $all = <$in>;
+    close $in;
+
+    return $all;
+}
+
+# helper function to write the file for updating c++/src/cpp_doc_config file.
+sub write_file {
+    my ($filename, $content) = @_;
+
+    open my $out, ">$filename" or die "Could not open '$filename' for writing $!";;
+    print $out $content;
+    close $out;
+
+    return;
+}
+
 
 sub gen_configure {
   my ($name, $conf) = @_;

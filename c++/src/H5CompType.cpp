@@ -227,7 +227,8 @@ hid_t CompType::p_get_member_type(unsigned member_num) const
 DataType CompType::getMemberDataType( unsigned member_num ) const
 {
    try {
-      DataType datatype(p_get_member_type(member_num));
+      DataType datatype;
+	f_DataType_setId(&datatype, p_get_member_type(member_num));
       return(datatype);
    }
    catch (DataTypeIException E) {
@@ -248,6 +249,7 @@ ArrayType CompType::getMemberArrayType( unsigned member_num ) const
 {
    try {
       ArrayType arraytype(p_get_member_type(member_num));
+	f_DataType_setId(&arraytype, p_get_member_type(member_num));
       return(arraytype);
    }
    catch (DataTypeIException E) {
@@ -268,6 +270,7 @@ CompType CompType::getMemberCompType( unsigned member_num ) const
 {
    try {
       CompType comptype(p_get_member_type(member_num));
+	f_DataType_setId(&comptype, p_get_member_type(member_num));
       return(comptype);
    }
    catch (DataTypeIException E) {
@@ -288,6 +291,7 @@ EnumType CompType::getMemberEnumType( unsigned member_num ) const
 {
    try {
       EnumType enumtype(p_get_member_type(member_num));
+	f_DataType_setId(&enumtype, p_get_member_type(member_num));
       return(enumtype);
    }
    catch (DataTypeIException E) {
@@ -308,6 +312,7 @@ IntType CompType::getMemberIntType( unsigned member_num ) const
 {
    try {
       IntType inttype(p_get_member_type(member_num));
+	f_DataType_setId(&inttype, p_get_member_type(member_num));
       return(inttype);
    }
    catch (DataTypeIException E) {
@@ -328,6 +333,7 @@ FloatType CompType::getMemberFloatType( unsigned member_num ) const
 {
    try {
       FloatType floatype(p_get_member_type(member_num));
+	f_DataType_setId(&floatype, p_get_member_type(member_num));
       return(floatype);
    }
    catch (DataTypeIException E) {
@@ -348,6 +354,7 @@ StrType CompType::getMemberStrType( unsigned member_num ) const
 {
    try {
       StrType strtype(p_get_member_type(member_num));
+	f_DataType_setId(&strtype, p_get_member_type(member_num));
       return(strtype);
    }
    catch (DataTypeIException E) {
@@ -368,6 +375,7 @@ VarLenType CompType::getMemberVarLenType( unsigned member_num ) const
 {
    try {
       VarLenType varlentype(p_get_member_type(member_num));
+	f_DataType_setId(&varlentype, p_get_member_type(member_num));
       return(varlentype);
    }
    catch (DataTypeIException E) {

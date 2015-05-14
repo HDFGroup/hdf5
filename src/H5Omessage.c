@@ -807,7 +807,7 @@ H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
 
     /* Count the messages of the correct type */
     msg_count = H5O_msg_count_real(oh, type);
-    H5_ASSIGN_OVERFLOW(ret_value, msg_count, unsigned, int);
+    H5_CHECKED_ASSIGN(ret_value, int, msg_count, unsigned);
 
 done:
     if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
@@ -2300,7 +2300,7 @@ H5O_msg_get_chunkno(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message type not found")
 
     /* Set return value */
-    H5_ASSIGN_OVERFLOW(ret_value, idx_msg->chunkno, unsigned, int);
+    H5_CHECKED_ASSIGN(ret_value, int, idx_msg->chunkno, unsigned);
 
 done:
     if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)

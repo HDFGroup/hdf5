@@ -27,8 +27,8 @@ if (BUILD_TESTING)
   # --------------------------------------------------------------------
   if (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     add_executable (h5dumpgentest ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)
-    TARGET_NAMING (h5dumpgentest ${LIB_TYPE})
-    TARGET_C_PROPERTIES (h5dumpgentest ${LIB_TYPE} " " " ")
+    TARGET_NAMING (h5dumpgentest STATIC)
+    TARGET_C_PROPERTIES (h5dumpgentest STATIC " " " ")
     target_link_libraries (h5dumpgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)
     

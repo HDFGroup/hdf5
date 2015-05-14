@@ -23,8 +23,8 @@ Compiling Options:
                        CPPFLAGS: @CPPFLAGS@
                     H5_CPPFLAGS: @H5_CPPFLAGS@
                     AM_CPPFLAGS: @AM_CPPFLAGS@
-               Shared Libraries: @H5_ENABLE_SHARED_LIB@
-               Static Libraries: @H5_ENABLE_STATIC_LIB@
+               Shared C Library: @H5_ENABLE_SHARED_LIB@
+               Static C Library: @H5_ENABLE_STATIC_LIB@
   Statically Linked Executables: @BUILD_STATIC_EXECS@
                         LDFLAGS: @CMAKE_SHARED_LINKER_FLAGS@
                      AM_LDFLAGS: @AM_LDFLAGS@
@@ -42,11 +42,16 @@ Languages:
 @BUILD_FORTRAN_CONDITIONAL_TRUE@                  Fortran Flags: @CMAKE_Fortran_FLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               H5 Fortran Flags: @H5_FCFLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               AM Fortran Flags: @AM_FCFLAGS@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@         Shared Fortran Library: @H5_ENABLE_SHARED_LIB@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@         Static Fortran Library: @H5_ENABLE_STATIC_LIB@
+
                             C++: @HDF5_BUILD_CPP_LIB@
 @BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CMAKE_CXX_COMPILER@
 @BUILD_CXX_CONDITIONAL_TRUE@                      C++ Flags: @CMAKE_CXX_FLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@                   H5 C++ Flags: @H5_CXXFLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@                   AM C++ Flags: @AM_CXXFLAGS@
+@BUILD_CXX_CONDITIONAL_TRUE@             Shared C++ Library: @H5_ENABLE_SHARED_LIB@
+@BUILD_CXX_CONDITIONAL_TRUE@             Static C++ Library: @H5_ENABLE_STATIC_LIB@
 
 Features:
 ---------
@@ -56,7 +61,6 @@ Features:
             Default API Mapping: @DEFAULT_API_VERSION@
  With Deprecated Public Symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@
          I/O filters (external): @EXTERNAL_FILTERS@
-         I/O filters (internal): @FILTERS@
                             MPE: @H5_HAVE_LIBLMPE@
                      Direct VFD: @H5_HAVE_DIRECT@
                         dmalloc: @H5_HAVE_LIBDMALLOC@

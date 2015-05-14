@@ -4023,10 +4023,6 @@ external_set_elink_acc_flags(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY;
     if(ret != FAIL) TEST_ERROR
     H5E_BEGIN_TRY {
-        ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_DEBUG);
-    } H5E_END_TRY;
-    if(ret != FAIL) TEST_ERROR
-    H5E_BEGIN_TRY {
         ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_CREAT);
     } H5E_END_TRY;
     if(ret != FAIL) TEST_ERROR

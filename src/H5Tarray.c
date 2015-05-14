@@ -202,7 +202,7 @@ H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
 
     /* Copy the array dimensions & compute the # of elements in the array */
     for(u = 0, ret_value->shared->u.array.nelem = 1; u < ndims; u++) {
-        H5_ASSIGN_OVERFLOW(ret_value->shared->u.array.dim[u], dim[u], hsize_t, size_t);
+        H5_CHECKED_ASSIGN(ret_value->shared->u.array.dim[u], size_t, dim[u], hsize_t);
         ret_value->shared->u.array.nelem *= (size_t)dim[u];
     } /* end for */
 

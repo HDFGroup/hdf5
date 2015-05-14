@@ -228,7 +228,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
     file = loc.oloc->file;
 
     /* Create reference */
-    if((ret_value = H5R_dereference(file, H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id, ref_type, _ref, TRUE)) < 0)
+    if((ret_value = H5R_dereference(file, H5P_DATASET_ACCESS_DEFAULT, H5AC_ind_dxpl_id, ref_type, _ref, TRUE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object")
 
 done:

@@ -73,9 +73,6 @@ H5File::H5File() : H5Location(), CommonFG(), id(H5I_INVALID_HID) {}
 ///					exists, and fail, otherwise
 ///		\li \c H5F_ACC_RDWR - Open file for read/write, if it already
 ///					exists, and fail, otherwise
-///		\li \c H5F_ACC_DEBUG - print debug information. This flag is
-///			used only by HDF5 library developers; it is neither
-///			tested nor supported for use in applications.
 ///\par
 ///		For info on file creation in the case of an already-open file,
 ///		please refer to the \b Special \b case section in the C layer
@@ -133,29 +130,48 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 {
     // These bits only set for creation, so if any of them are set,
     // create the file.
-    if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
+    if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC))
     {
-	hid_t create_plist_id = create_plist.getId();
-	hid_t access_plist_id = access_plist.getId();
-	id = H5Fcreate( name, flags, create_plist_id, access_plist_id );
-	if( id < 0 )  // throw an exception when open/create fail
-	{
-	    throw FileIException("H5File constructor", "H5Fcreate failed");
-	}
+        hid_t create_plist_id = create_plist.getId();
+        hid_t access_plist_id = access_plist.getId();
+        id = H5Fcreate( name, flags, create_plist_id, access_plist_id );
+        if( id < 0 )  // throw an exception when open/create fail
+        {
+            throw FileIException("H5File constructor", "H5Fcreate failed");
+        }
     }
     // Open the file if none of the bits above are set.
     else
     {
-	hid_t access_plist_id = access_plist.getId();
-	id = H5Fopen( name, flags, access_plist_id );
-	if( id < 0 )  // throw an exception when open/create fail
-	{
-	    throw FileIException("H5File constructor", "H5Fopen failed");
-	}
+        hid_t access_plist_id = access_plist.getId();
+        id = H5Fopen( name, flags, access_plist_id );
+        if( id < 0 )  // throw an exception when open/create fail
+        {
+            throw FileIException("H5File constructor", "H5Fopen failed");
+        }
     }
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
+
+//--------------------------------------------------------------------------
+// Function:	H5File overloaded constructor
+///\brief	Creates an H5File object using an existing file id.
+///\param	existing_id - IN: Id of an existing file
+// Programmer	Binh-Minh Ribler - 2015
+// Description
+//	Mar 29, 2015
+//		Added in responding to a request from user Jason Newton.
+//		However, it is not recommended to use the private member "id"
+//		in applications.  Unlike other situations, where similar
+//		constructor is needed by the library in order to return
+//		an object, H5File doesn't need it. -BMR (HDFFV-8766 partially)
+//--------------------------------------------------------------------------
+H5File::H5File(hid_t existing_id) : H5Location(), CommonFG()
+{
+    id = existing_id;
+    incRefCount(); // increment number of references to this id
+}
 
 //--------------------------------------------------------------------------
 // Function:	H5File copy constructor
@@ -225,6 +241,13 @@ bool H5File::isHdf5(const H5std_string& name )
 //--------------------------------------------------------------------------
 void H5File::openFile(const char* name, unsigned int flags, const FileAccPropList& access_plist)
 {
+    try {
+        close();
+    }
+    catch (Exception close_error) {
+        throw FileIException("H5File::openFile", close_error.getDetailMsg());
+    }
+
     hid_t access_plist_id = access_plist.getId();
     id = H5Fopen (name, flags, access_plist_id);
     if (id < 0)  // throw an exception when open fails
@@ -371,25 +394,6 @@ hssize_t H5File::getFreeSpace() const
 ssize_t H5File::getObjCount(unsigned types) const
 {
    ssize_t num_objs = H5Fget_obj_count(id, types);
-   if( num_objs < 0 )
-   {
-      throw FileIException("H5File::getObjCount", "H5Fget_obj_count failed");
-   }
-   return (num_objs);
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5File::getObjCount
-///\brief	This is an overloaded member function, provided for convenience.
-///		It takes no parameter and returns the object count of all
-///		object types.
-///\return	Number of opened object IDs
-///\exception	H5::FileIException
-// Programmer   Binh-Minh Ribler - May 2004
-//--------------------------------------------------------------------------
-ssize_t H5File::getObjCount() const
-{
-   ssize_t num_objs = H5Fget_obj_count(id, H5F_OBJ_ALL);
    if( num_objs < 0 )
    {
       throw FileIException("H5File::getObjCount", "H5Fget_obj_count failed");

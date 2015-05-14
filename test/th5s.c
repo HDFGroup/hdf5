@@ -2224,6 +2224,8 @@ test_h5s_extent_copy(void)
     hsize_t d3_dims1[3] = {10, 10, 10},         /* 3-D dimensions */
         d3_dims2[3] = {20, 20, 20},
         d3_dims3[3] = {H5S_UNLIMITED, H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t npoints[14];        /* Expected number of points in selection for each element in spaces */
+    hssize_t npoints_ret;       /* Number of points returned by H5Sget_select_npoints() */
     htri_t ext_equal;           /* Whether two dataspace extents are equal */
     const unsigned num_spaces = sizeof(spaces) / sizeof(spaces[0]);
     unsigned i, j;
@@ -2232,36 +2234,50 @@ test_h5s_extent_copy(void)
     /* Create dataspaces */
     spaces[0] = H5Screate(H5S_NULL);
     CHECK(spaces[0], FAIL, "H5Screate");
+    npoints[0] = (hsize_t)0;
 
     spaces[1] = H5Screate(H5S_SCALAR);
     CHECK(spaces[1], FAIL, "H5Screate");
+    npoints[1] = (hsize_t)1;
 
     spaces[2] = H5Screate_simple(1, d1_dims1, NULL);
     CHECK(spaces[2], FAIL, "H5Screate");
+    npoints[2] = d1_dims1[0];
     spaces[3] = H5Screate_simple(1, d1_dims2, NULL);
     CHECK(spaces[3], FAIL, "H5Screate");
+    npoints[3] = d1_dims2[0];
     spaces[4] = H5Screate_simple(1, d1_dims1, d1_dims2);
     CHECK(spaces[4], FAIL, "H5Screate");
+    npoints[4] = d1_dims1[0];
     spaces[5] = H5Screate_simple(1, d1_dims1, d1_dims3);
     CHECK(spaces[5], FAIL, "H5Screate");
+    npoints[5] = d1_dims1[0];
 
     spaces[6] = H5Screate_simple(2, d2_dims1, NULL);
     CHECK(spaces[6], FAIL, "H5Screate");
+    npoints[6] = d2_dims1[0] * d2_dims1[1];
     spaces[7] = H5Screate_simple(2, d2_dims2, NULL);
     CHECK(spaces[7], FAIL, "H5Screate");
+    npoints[7] = d2_dims2[0] * d2_dims2[1];
     spaces[8] = H5Screate_simple(2, d2_dims1, d2_dims2);
     CHECK(spaces[8], FAIL, "H5Screate");
+    npoints[8] = d2_dims1[0] * d2_dims1[1];
     spaces[9] = H5Screate_simple(2, d2_dims1, d2_dims3);
     CHECK(spaces[9], FAIL, "H5Screate");
+    npoints[9] = d2_dims1[0] * d2_dims1[1];
 
     spaces[10] = H5Screate_simple(3, d3_dims1, NULL);
     CHECK(spaces[10], FAIL, "H5Screate");
+    npoints[10] = d3_dims1[0] * d3_dims1[1] * d3_dims1[2];
     spaces[11] = H5Screate_simple(3, d3_dims2, NULL);
     CHECK(spaces[11], FAIL, "H5Screate");
+    npoints[11] = d3_dims2[0] * d3_dims2[1] * d3_dims2[2];
     spaces[12] = H5Screate_simple(3, d3_dims1, d3_dims2);
     CHECK(spaces[12], FAIL, "H5Screate");
+    npoints[12] = d3_dims1[0] * d3_dims1[1] * d3_dims1[2];
     spaces[13] = H5Screate_simple(3, d3_dims1, d3_dims3);
     CHECK(spaces[13], FAIL, "H5Screate");
+    npoints[13] = d3_dims1[0] * d3_dims1[1] * d3_dims1[2];
 
     tmp_space = H5Screate(H5S_NULL);
     CHECK(tmp_space, FAIL, "H5Screate");
@@ -2275,14 +2291,26 @@ test_h5s_extent_copy(void)
              * will test copying from i/j to i/j */
             ret = H5Sextent_copy(tmp_space, spaces[j]);
             CHECK(ret, FAIL, "H5Sextent_copy");
+
+            /* Verify that the extents are equal */
             ext_equal = H5Sextent_equal(tmp_space, spaces[j]);
             VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+
+            /* Verify that the correct number of elements is selected */
+            npoints_ret = H5Sget_select_npoints(tmp_space);
+            VERIFY((hsize_t)npoints_ret, npoints[j], "H5Sget_select_npoints");
 
             /* Copy from j to i */
             ret = H5Sextent_copy(tmp_space, spaces[i]);
             CHECK(ret, FAIL, "H5Sextent_copy");
+
+            /* Verify that the extents are equal */
             ext_equal = H5Sextent_equal(tmp_space, spaces[i]);
             VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+
+            /* Verify that the correct number of elements is selected */
+            npoints_ret = H5Sget_select_npoints(tmp_space);
+            VERIFY((hsize_t)npoints_ret, npoints[i], "H5Sget_select_npoints");
         } /* end for */
 
     /* Close dataspaces */
