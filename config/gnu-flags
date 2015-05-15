@@ -111,7 +111,14 @@ case "$cc_vendor-$cc_version" in
     PROD_CPPFLAGS=
 
     # Debug
-    DEBUG_CFLAGS="-Og -g -ftrapv -fno-common"
+    case "$cc_vendor-$cc_version" in
+      gcc-5.*)
+        DEBUG_CFLAGS="-Og -g -ftrapv -fno-common"
+        ;;
+      *)
+        DEBUG_CFLAGS="-g"
+        ;;
+    esac
     #DEBUG_CFLAGS="$DEBUG_CFLAGS -fsanitize=undefined"
     DEBUG_CPPFLAGS=
 
