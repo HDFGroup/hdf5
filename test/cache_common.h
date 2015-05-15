@@ -314,19 +314,19 @@ typedef struct test_entry_t
     hbool_t               destroyed;    /* entry has been destroyed since the
                                          * last time it was reset.
                                          */
-    int                 flush_dep_par_type; /* Entry type of flush dependency parent */
-    int                 flush_dep_par_idx; /* Index of flush dependency parent */
-    uint64_t            child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
+    int                   flush_dep_par_type; /* Entry type of flush dependency parent */
+    int                   flush_dep_par_idx; /* Index of flush dependency parent */
+    uint64_t              child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
                                         /* flush dependency heights of flush
                                          * dependency children
                                          */
-    unsigned            flush_dep_height; /* flush dependency height of entry */
-    hbool_t		pinned_from_client;	/* entry was pinned by client call */
-    hbool_t		pinned_from_cache;	/* entry was pinned by cache internally */
-    unsigned            flush_order;    /* Order that entry was flushed in */
+    unsigned              flush_dep_height; /* flush dependency height of entry */
+    hbool_t		  pinned_from_client;	/* entry was pinned by client call */
+    hbool_t		  pinned_from_cache;	/* entry was pinned by cache internally */
+    unsigned              flush_order;    /* Order that entry was flushed in */
 
-    unsigned            notify_after_insert_count;    /* Count of times that entry was inserted in cache */
-    unsigned            notify_before_evict_count;    /* Count of times that entry was removed in cache */
+    unsigned              notify_after_insert_count;    /* Count of times that entry was inserted in cache */
+    unsigned              notify_before_evict_count;    /* Count of times that entry was removed in cache */
 } test_entry_t;
 
 /* The following are cut down test versions of the hash table manipulation
@@ -410,6 +410,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
     }                                                                   \
 }
 
+
 /* Macros used in H5AC level tests */
 
 #define CACHE_CONFIGS_EQUAL(a, b, cmp_set_init, cmp_init_size)        \
@@ -424,26 +425,26 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
       ( (a).set_initial_size      == (b).set_initial_size ) ) &&      \
     ( ( ! cmp_init_size ) ||                                          \
       ( (a).initial_size          == (b).initial_size ) ) &&          \
-    ( (a).min_clean_fraction      == (b).min_clean_fraction ) &&      \
+    ( DBL_REL_EQUAL((a).min_clean_fraction, (b).min_clean_fraction, 0.00001 ) ) && \
     ( (a).max_size                == (b).max_size ) &&                \
     ( (a).min_size                == (b).min_size ) &&                \
     ( (a).epoch_length            == (b).epoch_length ) &&            \
     ( (a).incr_mode               == (b).incr_mode ) &&               \
-    ( (a).lower_hr_threshold      == (b).lower_hr_threshold ) &&      \
-    ( (a).increment               == (b).increment ) &&               \
+    ( DBL_REL_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold, 0.00001 ) ) && \
+    ( DBL_REL_EQUAL((a).increment, (b).increment, 0.00001 ) ) &&      \
     ( (a).apply_max_increment     == (b).apply_max_increment ) &&     \
     ( (a).max_increment           == (b).max_increment ) &&           \
     ( (a).flash_incr_mode         == (b).flash_incr_mode ) &&         \
-    ( (a).flash_multiple          == (b).flash_multiple ) &&          \
-    ( (a).flash_threshold         == (b).flash_threshold ) &&         \
+    ( DBL_REL_EQUAL((a).flash_multiple, (b).flash_multiple, 0.00001 ) ) && \
+    ( DBL_REL_EQUAL((a).flash_threshold, (b).flash_threshold, 0.00001 ) ) && \
     ( (a).decr_mode               == (b).decr_mode ) &&               \
-    ( (a).upper_hr_threshold      == (b).upper_hr_threshold ) &&      \
-    ( (a).decrement               == (b).decrement ) &&               \
+    ( DBL_REL_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold, 0.00001 ) ) && \
+    ( DBL_REL_EQUAL((a).decrement, (b).decrement, 0.00001 ) ) &&      \
     ( (a).apply_max_decrement     == (b).apply_max_decrement ) &&     \
     ( (a).max_decrement           == (b).max_decrement ) &&           \
     ( (a).epochs_before_eviction  == (b).epochs_before_eviction ) &&  \
     ( (a).apply_empty_reserve     == (b).apply_empty_reserve ) &&     \
-    ( (a).empty_reserve           == (b).empty_reserve ) &&           \
+    ( DBL_REL_EQUAL((a).empty_reserve, (b).empty_reserve, 0.00001 ) ) && \
     ( (a).dirty_bytes_threshold   == (b).dirty_bytes_threshold ) &&   \
     ( (a).metadata_write_strategy == (b).metadata_write_strategy ) )
 
@@ -537,7 +538,6 @@ extern const char * entry_type_names[NUMBER_OF_ENTRY_TYPES];
 herr_t check_write_permitted(const H5F_t * f,
                              hid_t dxpl_id,
                              hbool_t * write_permitted_ptr);
-
 
 /* callback table extern */
 

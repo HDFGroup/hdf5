@@ -21,7 +21,7 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	*/
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5A_init_interface
+#define H5_INTERFACE_INIT_FUNC	H5A__init_interface
 
 
 /***********/
@@ -126,9 +126,9 @@ done:
 
 /*--------------------------------------------------------------------------
 NAME
-   H5A_init_interface -- Initialize interface-specific information
+   H5A__init_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5A_init_interface()
+    herr_t H5A__init_interface()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -137,11 +137,11 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5A_init_interface(void)
+H5A__init_interface(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Create attribute ID type.
@@ -151,7 +151,7 @@ H5A_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_init_interface() */
+} /* end H5A__init_interface() */
 
 
 /*--------------------------------------------------------------------------

@@ -123,7 +123,7 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
     /*
      * Allocate free space structure
      */
-    if(NULL == (fspace = H5FS_new(f, nclasses, classes, cls_init_udata)))
+    if(NULL == (fspace = H5FS__new(f, nclasses, classes, cls_init_udata)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space free list")
 
     /* Initialize creation information for free space manager */
@@ -161,7 +161,7 @@ HDfprintf(stderr, "%s: fspace = %p, fspace->addr = %a\n", FUNC, fspace, fspace->
 
 done:
     if(!ret_value && fspace)
-        if(H5FS_hdr_dest(fspace) < 0)
+        if(H5FS__hdr_dest(fspace) < 0)
             HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header")
 
 #ifdef H5FS_DEBUG
@@ -573,7 +573,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d, fspace->rc = %u\n", FUNC, ret_va
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_new
+ * Function:	H5FS__new
  *
  * Purpose:	Create new free space manager structure
  *
@@ -586,14 +586,14 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d, fspace->rc = %u\n", FUNC, ret_va
  *-------------------------------------------------------------------------
  */
 H5FS_t *
-H5FS_new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes[],
+H5FS__new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes[],
     void *cls_init_udata)
 {
     H5FS_t *fspace = NULL;      /* Free space manager */
     size_t u;                   /* Local index variable */
     H5FS_t *ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments. */
     HDassert(nclasses == 0 || (nclasses > 0 && classes));
@@ -631,7 +631,7 @@ H5FS_new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes[
 
     /* Initialize non-zero information for new free space manager */
     fspace->addr = HADDR_UNDEF;
-    fspace->hdr_size = H5FS_HEADER_SIZE(f);
+    fspace->hdr_size = (size_t)H5FS_HEADER_SIZE(f);
     fspace->sect_addr = HADDR_UNDEF;
 
     /* Set return value */
@@ -649,7 +649,7 @@ done:
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FS_new() */
+} /* H5FS__new() */
 
 
 /*-------------------------------------------------------------------------
@@ -763,7 +763,7 @@ HDfprintf(stderr, "%s: Entering, fpace->addr = %a, fspace->rc = %u\n", FUNC, fsp
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header")
         } /* end if */
         else {
-            if(H5FS_hdr_dest(fspace) < 0)
+            if(H5FS__hdr_dest(fspace) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "unable to destroy free space header")
         } /* end else */
     } /* end if */
@@ -1005,7 +1005,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_hdr_dest
+ * Function:	H5FS__hdr_dest
  *
  * Purpose:	Destroys a free space header in memory.
  *
@@ -1018,12 +1018,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_hdr_dest(H5FS_t *fspace)
+H5FS__hdr_dest(H5FS_t *fspace)
 {
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -1047,7 +1047,7 @@ H5FS_hdr_dest(H5FS_t *fspace)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FS_hdr_dest() */
+} /* end H5FS__hdr_dest() */
 
 
 /*-------------------------------------------------------------------------

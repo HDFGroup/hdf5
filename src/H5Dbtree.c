@@ -49,11 +49,6 @@
 /* Local Macros */
 /****************/
 
-/*
- * Given a B-tree node return the dimensionality of the chunks pointed to by
- * that node.
- */
-#define H5D_BTREE_NDIMS(X)	(((X)->sizeof_rkey-8)/8)
 
 /******************/
 /* Local Typedefs */
@@ -74,7 +69,7 @@
  * The chunk's file address is part of the B-tree and not part of the key.
  */
 typedef struct H5D_btree_key_t {
-    hsize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
+    hsize_t	scaled[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
     uint32_t	nbytes;				/*size of stored data	*/
     unsigned	filter_mask;			/*excluded filters	*/
 } H5D_btree_key_t;
@@ -97,8 +92,9 @@ typedef struct H5D_btree_dbg_t {
 /* Local Prototypes */
 /********************/
 
+static herr_t H5D__btree_shared_free(void *_shared);
 static herr_t H5D__btree_shared_create(const H5F_t *f, H5O_storage_chunk_t *store,
-    unsigned ndims);
+    const H5O_layout_chunk_t *layout);
 
 /* B-tree iterator callbacks */
 static int H5D__btree_idx_iterate_cb(H5F_t *f, hid_t dxpl_id, const void *left_key,
@@ -203,6 +199,10 @@ H5B_class_t H5B_BTREE[1] = {{
 /* Local Variables */
 /*******************/
 
+/* Declare a free list to manage H5O_layout_chunk_t objects */
+H5FL_DEFINE_STATIC(H5O_layout_chunk_t);
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__btree_get_shared
@@ -287,7 +287,7 @@ H5D__btree_new_node(H5F_t *f, hid_t UNUSED dxpl_id, H5B_ins_t op,
     H5_CHECKED_ASSIGN(lt_key->nbytes, uint32_t, udata->chunk_block.length, hsize_t);
     lt_key->filter_mask = udata->filter_mask;
     for(u = 0; u < udata->common.layout->ndims; u++)
-        lt_key->offset[u] = udata->common.offset[u];
+        lt_key->scaled[u] = udata->common.scaled[u];
 
     /*
      * The right key might already be present.  If not, then add a zero-width
@@ -297,9 +297,8 @@ H5D__btree_new_node(H5F_t *f, hid_t UNUSED dxpl_id, H5B_ins_t op,
         rt_key->nbytes = 0;
         rt_key->filter_mask = 0;
         for(u = 0; u < udata->common.layout->ndims; u++) {
-            HDassert(udata->common.offset[u] + udata->common.layout->dim[u] >
-                udata->common.offset[u]);
-            rt_key->offset[u] = udata->common.offset[u] + udata->common.layout->dim[u];
+            HDassert(udata->common.scaled[u] + 1 > udata->common.scaled[u]);
+            rt_key->scaled[u] = udata->common.scaled[u] + 1;
         } /* end if */
     } /* end if */
 
@@ -342,7 +341,7 @@ H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key)
     HDassert(udata->layout->ndims > 0 && udata->layout->ndims <= H5O_LAYOUT_NDIMS);
 
     /* Compare the offsets but ignore the other fields */
-    ret_value = H5VM_vector_cmp_u(udata->layout->ndims, lt_key->offset, rt_key->offset);
+    ret_value = H5VM_vector_cmp_u(udata->layout->ndims, lt_key->scaled, rt_key->scaled);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_cmp2() */
@@ -397,18 +396,18 @@ H5D__btree_cmp3(void *_lt_key, void *_udata, void *_rt_key)
     /* indexed storage B-tree... */
     /* (Dump the B-tree with h5debug to look at it) -QAK */
     if(udata->layout->ndims == 2) {
-        if(udata->offset[0] > rt_key->offset[0])
+        if(udata->scaled[0] > rt_key->scaled[0])
             ret_value = 1;
-        else if(udata->offset[0] == rt_key->offset[0] &&
-                udata->offset[1] >= rt_key->offset[1])
+        else if(udata->scaled[0] == rt_key->scaled[0] &&
+                udata->scaled[1] >= rt_key->scaled[1])
             ret_value = 1;
-        else if(udata->offset[0] < lt_key->offset[0])
+        else if(udata->scaled[0] < lt_key->scaled[0])
             ret_value = (-1);
     } /* end if */
     else {
-        if(H5VM_vector_ge_u(udata->layout->ndims, udata->offset, rt_key->offset))
+        if(H5VM_vector_ge_u(udata->layout->ndims, udata->scaled, rt_key->scaled))
             ret_value = 1;
-        else if(H5VM_vector_lt_u(udata->layout->ndims, udata->offset, lt_key->offset))
+        else if(H5VM_vector_lt_u(udata->layout->ndims, udata->scaled, lt_key->scaled))
             ret_value = (-1);
     } /* end else */
 
@@ -460,7 +459,7 @@ H5D__btree_found(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr, const void
 
     /* Is this *really* the requested chunk? */
     for(u = 0; u < udata->common.layout->ndims; u++)
-        if(udata->common.offset[u] >= lt_key->offset[u] + udata->common.layout->dim[u])
+        if(udata->common.scaled[u] >= (lt_key->scaled[u] + 1))
             HGOTO_DONE(FALSE)
 
     /* Initialize return values */
@@ -472,6 +471,44 @@ H5D__btree_found(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr, const void
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_found() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__chunk_disjoint
+ *
+ * Purpose:	Determines if two chunks are disjoint.
+ *
+ * Return:	Success:	FALSE if they are not disjoint.
+ *				TRUE if they are disjoint.
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, May 6, 2015
+ *
+ * Note:	Assumes that the chunk offsets are scaled coordinates
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+H5D__chunk_disjoint(unsigned n, const hsize_t *scaled1, const hsize_t *scaled2)
+{
+    unsigned	u;                      /* Local index variable */
+    hbool_t     ret_value = FALSE;      /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(n);
+    HDassert(scaled1);
+    HDassert(scaled2);
+
+    /* Loop over two chunks, detecting disjointness and getting out quickly */
+    for(u = 0; u < n; u++)
+        if((scaled1[u] + 1) <= scaled2[u] || (scaled2[u] + 1) <= scaled1[u])
+            HGOTO_DONE(TRUE)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_disjoint() */
 
 
 /*-------------------------------------------------------------------------
@@ -538,8 +575,7 @@ H5D__btree_insert(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t addr, void *_lt_key,
         HGOTO_ERROR(H5E_STORAGE, H5E_UNSUPPORTED, H5B_INS_ERROR, "internal error")
 
     } else if(H5VM_vector_eq_u(udata->common.layout->ndims,
-				udata->common.offset, lt_key->offset) &&
-	       lt_key->nbytes > 0) {
+            udata->common.scaled, lt_key->scaled) && lt_key->nbytes > 0) {
         /*
          * Already exists.  If the new size is not the same as the old size
          * then we should reallocate storage.
@@ -558,22 +594,18 @@ H5D__btree_insert(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t addr, void *_lt_key,
             ret_value = H5B_INS_NOOP;
         }
 
-    } else if (H5VM_hyper_disjointp(udata->common.layout->ndims,
-				   lt_key->offset, udata->common.layout->dim,
-				   udata->common.offset, udata->common.layout->dim)) {
-        HDassert(H5VM_hyper_disjointp(udata->common.layout->ndims,
-				   rt_key->offset, udata->common.layout->dim,
-				   udata->common.offset, udata->common.layout->dim));
+    } else if (H5D__chunk_disjoint(udata->common.layout->ndims,
+				   lt_key->scaled, udata->common.scaled)) {
+        HDassert(H5D__chunk_disjoint(udata->common.layout->ndims,
+				   rt_key->scaled, udata->common.scaled));
         /*
          * Split this node, inserting the new new node to the right of the
          * current node.  The MD_KEY is where the split occurs.
          */
         H5_CHECKED_ASSIGN(md_key->nbytes, uint32_t, udata->chunk_block.length, hsize_t);
         md_key->filter_mask = udata->filter_mask;
-        for(u = 0; u < udata->common.layout->ndims; u++) {
-            HDassert(0 == udata->common.offset[u] % udata->common.layout->dim[u]);
-            md_key->offset[u] = udata->common.offset[u];
-        } /* end for */
+        for(u = 0; u < udata->common.layout->ndims; u++)
+            md_key->scaled[u] = udata->common.scaled[u];
 
 	HDassert(H5F_addr_defined(udata->chunk_block.offset));
         *new_node_p = udata->chunk_block.offset;
@@ -643,9 +675,10 @@ done:
 static herr_t
 H5D__btree_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
 {
-    H5D_btree_key_t	*key = (H5D_btree_key_t *) _key;
-    size_t		ndims;
-    unsigned		u;
+    const H5O_layout_chunk_t *layout;           /* Chunk layout description */
+    H5D_btree_key_t	*key = (H5D_btree_key_t *) _key;        /* Pointer to decoded key */
+    hsize_t             tmp_offset;             /* Temporary coordinate offset, from file */
+    unsigned		u;                      /* Local index variable */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -653,14 +686,21 @@ H5D__btree_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key
     HDassert(shared);
     HDassert(raw);
     HDassert(key);
-    ndims = H5D_BTREE_NDIMS(shared);
-    HDassert(ndims <= H5O_LAYOUT_NDIMS);
+    layout = (const H5O_layout_chunk_t *)shared->udata;
+    HDassert(layout);
+    HDassert(layout->ndims > 0 && layout->ndims <= H5O_LAYOUT_NDIMS);
 
     /* decode */
     UINT32DECODE(raw, key->nbytes);
     UINT32DECODE(raw, key->filter_mask);
-    for(u = 0; u < ndims; u++)
-	UINT64DECODE(raw, key->offset[u]);
+    for(u = 0; u < layout->ndims; u++) {
+        /* Retrieve coordinate offset */
+	UINT64DECODE(raw, tmp_offset);
+        HDassert(0 == (tmp_offset % layout->dim[u]));
+
+        /* Convert to a scaled offset */
+        key->scaled[u] = tmp_offset / layout->dim[u];
+    } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__btree_decode_key() */
@@ -681,9 +721,10 @@ H5D__btree_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key
 static herr_t
 H5D__btree_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
 {
+    const H5O_layout_chunk_t *layout;           /* Chunk layout description */
     const H5D_btree_key_t *key = (const H5D_btree_key_t *)_key;
-    size_t		ndims;
-    unsigned		u;
+    hsize_t             tmp_offset;             /* Temporary coordinate offset, from file */
+    unsigned		u;                      /* Local index variable */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -691,14 +732,18 @@ H5D__btree_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key
     HDassert(shared);
     HDassert(raw);
     HDassert(key);
-    ndims = H5D_BTREE_NDIMS(shared);
-    HDassert(ndims <= H5O_LAYOUT_NDIMS);
+    layout = (const H5O_layout_chunk_t *)shared->udata;
+    HDassert(layout);
+    HDassert(layout->ndims > 0 && layout->ndims <= H5O_LAYOUT_NDIMS);
 
     /* encode */
     UINT32ENCODE(raw, key->nbytes);
     UINT32ENCODE(raw, key->filter_mask);
-    for(u = 0; u < ndims; u++)
-	UINT64ENCODE(raw, key->offset[u]);
+    for(u = 0; u < layout->ndims; u++) {
+        /* Compute coordinate offset from scaled offset */
+        tmp_offset = key->scaled[u] * layout->dim[u];
+	UINT64ENCODE(raw, tmp_offset);
+    } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__btree_encode_key() */
@@ -733,11 +778,43 @@ H5D__btree_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
     HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "Filter mask:", key->filter_mask);
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
     for(u = 0; u < udata->ndims; u++)
-        HDfprintf(stream, "%s%Hd", u?", ":"", key->offset[u]);
+        HDfprintf(stream, "%s%Hd", u?", ":"", (key->scaled[u] * udata->common.layout->dim[u]));
     HDfputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__btree_debug_key() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__btree_shared_free
+ *
+ * Purpose:	Free "local" B-tree shared info
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 7, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__btree_shared_free(void *_shared)
+{
+    H5B_shared_t *shared = (H5B_shared_t *)_shared;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Free the chunk layout information */
+    shared->udata = H5FL_FREE(H5O_layout_chunk_t, shared->udata);
+
+    /* Chain up to the generic B-tree shared info free routine */
+    if(H5B_shared_free(shared) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free shared B-tree info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__btree_shared_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -753,9 +830,11 @@ H5D__btree_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__btree_shared_create(const H5F_t *f, H5O_storage_chunk_t *store, unsigned ndims)
+H5D__btree_shared_create(const H5F_t *f, H5O_storage_chunk_t *store,
+    const H5O_layout_chunk_t *layout)
 {
     H5B_shared_t *shared;               /* Shared B-tree node info */
+    H5O_layout_chunk_t *my_layout = NULL;      /* Pointer to copy of layout info */
     size_t	sizeof_rkey;	        /* Size of raw (disk) key	     */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -764,20 +843,27 @@ H5D__btree_shared_create(const H5F_t *f, H5O_storage_chunk_t *store, unsigned nd
     /* Set the raw key size */
     sizeof_rkey = 4 +			/*storage size		*/
                 4 +			/*filter mask		*/
-                ndims * 8;		/*dimension indices	*/
+                layout->ndims * 8;	/*dimension indices	*/
 
     /* Allocate & initialize global info for the shared structure */
     if(NULL == (shared = H5B_shared_new(f, H5B_BTREE, sizeof_rkey)))
-	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
 
     /* Set up the "local" information for this dataset's chunks */
-        /* <none> */
+    if(NULL == (my_layout = H5FL_MALLOC(H5O_layout_chunk_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk layout")
+    HDmemcpy(my_layout, layout, sizeof(H5O_layout_chunk_t));
+    shared->udata = my_layout;
 
     /* Make shared B-tree info reference counted */
-    if(NULL == (store->u.btree.shared = H5UC_create(shared, H5B_shared_free)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
+    if(NULL == (store->u.btree.shared = H5UC_create(shared, H5D__btree_shared_free)))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
 
 done:
+    if(ret_value < 0)
+        if(my_layout)
+            my_layout = H5FL_FREE(H5O_layout_chunk_t, my_layout);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_shared_create() */
 
@@ -813,7 +899,7 @@ H5D__btree_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t UNUSED *spac
     idx_info->storage->u.btree.dset_ohdr_addr = dset_ohdr_addr;
 
     /* Allocate the shared structure */
-    if(H5D__btree_shared_create(idx_info->f, idx_info->storage, idx_info->layout->ndims) < 0)
+    if(H5D__btree_shared_create(idx_info->f, idx_info->storage, idx_info->layout) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 
 done:
@@ -1006,8 +1092,8 @@ H5D__btree_idx_iterate_cb(H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
     /* Sanity check for memcpy() */
     HDcompile_assert(offsetof(H5D_chunk_rec_t, nbytes) == offsetof(H5D_btree_key_t, nbytes));
     HDcompile_assert(sizeof(chunk_rec.nbytes) == sizeof(lt_key->nbytes));
-    HDcompile_assert(offsetof(H5D_chunk_rec_t, offset) == offsetof(H5D_btree_key_t, offset));
-    HDcompile_assert(sizeof(chunk_rec.offset) == sizeof(lt_key->offset));
+    HDcompile_assert(offsetof(H5D_chunk_rec_t, scaled) == offsetof(H5D_btree_key_t, scaled));
+    HDcompile_assert(sizeof(chunk_rec.scaled) == sizeof(lt_key->scaled));
     HDcompile_assert(offsetof(H5D_chunk_rec_t, filter_mask) == offsetof(H5D_btree_key_t, filter_mask));
     HDcompile_assert(sizeof(chunk_rec.filter_mask) == sizeof(lt_key->filter_mask));
 
@@ -1144,7 +1230,7 @@ H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
         tmp_storage = *idx_info->storage;
 
         /* Set up the shared structure */
-        if(H5D__btree_shared_create(idx_info->f, &tmp_storage, idx_info->layout->ndims) < 0)
+        if(H5D__btree_shared_create(idx_info->f, &tmp_storage, idx_info->layout) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
 
         /* Set up B-tree user data */
@@ -1201,9 +1287,9 @@ H5D__btree_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     HDassert(!H5F_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Create shared B-tree info for each file */
-    if(H5D__btree_shared_create(idx_info_src->f, idx_info_src->storage, idx_info_src->layout->ndims) < 0)
+    if(H5D__btree_shared_create(idx_info_src->f, idx_info_src->storage, idx_info_src->layout) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for source shared B-tree info")
-    if(H5D__btree_shared_create(idx_info_dst->f, idx_info_dst->storage, idx_info_dst->layout->ndims) < 0)
+    if(H5D__btree_shared_create(idx_info_dst->f, idx_info_dst->storage, idx_info_dst->layout) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for destination shared B-tree info")
 
     /* Create the root of the B-tree that describes chunked storage in the dest. file */
@@ -1283,7 +1369,7 @@ H5D__btree_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     HDassert(index_size);
 
     /* Initialize the shared info for the B-tree traversal */
-    if(H5D__btree_shared_create(idx_info->f, idx_info->storage, idx_info->layout->ndims) < 0)
+    if(H5D__btree_shared_create(idx_info->f, idx_info->storage, idx_info->layout) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
     shared_init = TRUE;
 
@@ -1415,11 +1501,13 @@ done:
  */
 herr_t
 H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
-		 int fwidth, unsigned ndims)
+    int fwidth, unsigned ndims, const uint32_t *dim)
 {
     H5D_btree_dbg_t     udata;          /* User data for B-tree callback */
     H5O_storage_chunk_t storage;        /* Storage information for B-tree callback */
+    H5O_layout_chunk_t layout;          /* Layout information for B-tree callback */
     hbool_t     shared_init = FALSE;    /* Whether B-tree shared info is initialized */
+    unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1428,15 +1516,21 @@ H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent
     HDmemset(&storage, 0, sizeof(storage));
     storage.idx_type = H5D_CHUNK_IDX_BTREE;
 
+    /* Reset "fake" layout info */
+    HDmemset(&layout, 0, sizeof(layout));
+    layout.ndims = ndims;
+    for(u = 0; u < ndims; u++)
+        layout.dim[u] = dim[u];
+
     /* Allocate the shared structure */
-    if(H5D__btree_shared_create(f, &storage, ndims) < 0)
+    if(H5D__btree_shared_create(f, &storage, &layout) < 0)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
     shared_init = TRUE;
 
     /* Set up user data for callback */
-    udata.common.layout = NULL;
+    udata.common.layout = &layout;
     udata.common.storage = &storage;
-    udata.common.offset = NULL;
+    udata.common.scaled = NULL;
     udata.ndims = ndims;
 
     /* Dump the records for the B-tree */
@@ -1446,10 +1540,10 @@ done:
     if(shared_init) {
         /* Free the raw B-tree node buffer */
         if(NULL == storage.u.btree.shared)
-            HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
+            HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted shared info nil")
         else
             if(H5UC_DEC(storage.u.btree.shared) < 0)
-                HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
+                HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted shared info")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

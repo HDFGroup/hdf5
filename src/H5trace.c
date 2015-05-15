@@ -2387,7 +2387,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                             unsigned long iul = va_arg(ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
 
                             fprintf(out, "%lu", iul);
-                            asize[argno] = iul;
+                            asize[argno] = (hssize_t)iul;
                         } /* end else */
                         break;
 
@@ -2411,7 +2411,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                             unsigned long long iull = va_arg(ap, unsigned long long); /*lint !e732 Loss of sign not really occuring */
 
                             fprintf(out, "%llu", iull);
-                            asize[argno] = iull;
+                            asize[argno] = (hssize_t)iull;
                         } /* end else */
                         break;
 

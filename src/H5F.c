@@ -1404,6 +1404,7 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
     if(H5VL_file_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
                           H5VL_FILE_GET_INFO, type, finfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info2() */

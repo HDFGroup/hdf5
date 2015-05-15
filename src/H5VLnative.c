@@ -586,7 +586,7 @@ H5VL_native_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_
         if(NULL == (attr = H5O_attr_open_by_name(loc.oloc, attr_name, dxpl_id)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to load attribute info from object header for attribute: '%s'", attr_name)
         /* Finish initializing attribute */
-        if(H5A_open_common(&loc, attr) < 0)
+        if(H5A__open_common(&loc, attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to initialize attribute")
     }
     else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Aopen_by_name */
@@ -638,7 +638,7 @@ H5VL_native_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t dxpl_id, void
     if(NULL == (mem_type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     /* Go write the actual data to the attribute */
-    if((ret_value = H5A_read((H5A_t*)attr, mem_type, buf, dxpl_id)) < 0)
+    if((ret_value = H5A__read((H5A_t*)attr, mem_type, buf, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
 
 done:
@@ -669,7 +669,7 @@ H5VL_native_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t dxpl_i
     if(NULL == (mem_type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     /* Go write the actual data to the attribute */
-    if((ret_value = H5A_write((H5A_t*)attr, mem_type, buf, dxpl_id)) < 0)
+    if((ret_value = H5A__write((H5A_t*)attr, mem_type, buf, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
 done:
@@ -741,7 +741,7 @@ H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void UN
                 if(H5VL_OBJECT_BY_SELF == loc_params.type) {
                     attr = (H5A_t *)obj;
                     /* Call private function in turn */
-                    if(0 > (*ret_val = H5A_get_name(attr, buf_size, buf)))
+                    if(0 > (*ret_val = H5A__get_name(attr, buf_size, buf)))
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
                 }
                 else if(H5VL_OBJECT_BY_IDX == loc_params.type) {
@@ -788,7 +788,7 @@ H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void UN
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type) {
                     attr = (H5A_t *)obj;
-                    if(H5A_get_info(attr, ainfo) < 0)
+                    if(H5A__get_info(attr, ainfo) < 0)
                         HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get attribute info")
                 }
                 else if(H5VL_OBJECT_BY_NAME == loc_params.type) {
@@ -807,7 +807,7 @@ H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void UN
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
                     /* Get the attribute information */
-                    if(H5A_get_info(attr, ainfo) < 0)
+                    if(H5A__get_info(attr, ainfo) < 0)
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
                     /* Release resources */
@@ -831,7 +831,7 @@ H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void UN
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
                     /* Get the attribute information */
-                    if(H5A_get_info(attr, ainfo) < 0)
+                    if(H5A__get_info(attr, ainfo) < 0)
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
                     /* Release resources */
@@ -2096,24 +2096,23 @@ H5VL_native_file_optional(void *obj, hid_t dxpl_id, void UNUSED **req, va_list a
                 HDmemset(finfo, 0, sizeof(*finfo));
 
                 /* Get the size of the superblock and any superblock extensions */
-                if(H5F_super_size(f, dxpl_id, &finfo->super.super_size, 
-                                  &finfo->super.super_ext_size) < 0)
+                if(H5F__super_size(f, H5AC_ind_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
 
                 /* Get the size of any persistent free space */
-                if(H5MF_get_freespace(f, dxpl_id, &finfo->free.tot_space, 
-                                      &finfo->free.meta_size) < 0)
+                if(H5MF_get_freespace(f, H5AC_ind_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
 
                 /* Check for SOHM info */
                 if(H5F_addr_defined(f->shared->sohm_addr))
-                    if(H5SM_ih_size(f, dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
+                    if(H5SM_ih_size(f, H5AC_ind_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
 
                 /* Set version # fields */
                 finfo->super.version = f->shared->sblock->super_vers;
                 finfo->sohm.version = f->shared->sohm_vers;
                 finfo->free.version = HDF5_FREESPACE_VERSION;
+
                 break;
             }
         /* H5Fget_mdc_config */

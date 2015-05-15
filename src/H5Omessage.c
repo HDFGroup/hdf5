@@ -73,10 +73,10 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5O_msg_reset_real(const H5O_msg_class_t *type, void *native);
-static herr_t H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+static herr_t H5O__msg_reset_real(const H5O_msg_class_t *type, void *native);
+static herr_t H5O__msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned sequence, unsigned *oh_modified, void *_udata/*in,out*/);
-static herr_t H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t idx,
+static herr_t H5O__copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t idx,
     const H5O_msg_class_t *type, const void *mesg, unsigned mesg_flags,
     unsigned update_flags);
 
@@ -224,7 +224,7 @@ H5O_msg_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *t
         HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "unable to create new message")
 
     /* Copy the information for the message */
-    if(H5O_copy_mesg(f, dxpl_id, oh, idx, type, mesg, mesg_flags, update_flags) < 0)
+    if(H5O__copy_mesg(f, dxpl_id, oh, idx, type, mesg, mesg_flags, update_flags) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to write message")
 #ifdef H5O_DEBUG
 H5O_assert(oh);
@@ -426,7 +426,7 @@ H5O_msg_write_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *ty
     } /* end if */
 
     /* Copy the information for the message */
-    if(H5O_copy_mesg(f, dxpl_id, oh, idx, type, mesg, mesg_flags, update_flags) < 0)
+    if(H5O__copy_mesg(f, dxpl_id, oh, idx, type, mesg, mesg_flags, update_flags) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to write message")
 #ifdef H5O_DEBUG
 H5O_assert(oh);
@@ -586,7 +586,7 @@ H5O_msg_reset(unsigned type_id, void *native)
     HDassert(type);
 
     /* Call the "real" reset routine */
-    if(H5O_msg_reset_real(type, native) < 0)
+    if(H5O__msg_reset_real(type, native) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTRESET, FAIL, "unable to reset object header")
 
 done:
@@ -595,7 +595,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_msg_reset_real
+ * Function:	H5O__msg_reset_real
  *
  * Purpose:	Some message data structures have internal fields that
  *		need to be freed.  This function does that if appropriate
@@ -610,11 +610,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_msg_reset_real(const H5O_msg_class_t *type, void *native)
+H5O__msg_reset_real(const H5O_msg_class_t *type, void *native)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(type);
@@ -630,7 +630,7 @@ H5O_msg_reset_real(const H5O_msg_class_t *type, void *native)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_msg_reset_real() */
+} /* end H5O__msg_reset_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -719,7 +719,7 @@ H5O_msg_free_real(const H5O_msg_class_t *type, void *msg_native)
     HDassert(type);
 
     if(msg_native) {
-        H5O_msg_reset_real(type, msg_native);
+        H5O__msg_reset_real(type, msg_native);
         if(NULL != (type->free))
             (type->free)(msg_native);
         else
@@ -1049,7 +1049,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_msg_remove_cb
+ * Function:	H5O__msg_remove_cb
  *
  * Purpose:	Object header iterator callback routine to remove messages
  *              of a particular type that match a particular sequence number,
@@ -1064,14 +1064,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
+H5O__msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
     unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     htri_t try_remove = FALSE;         /* Whether to try removing a message */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(mesg);
@@ -1109,7 +1109,7 @@ H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_msg_remove_cb() */
+} /* end H5O__msg_remove_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1160,7 +1160,7 @@ H5O_msg_remove_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
 
     /* Iterate over the messages, deleting appropriate one(s) */
     op.op_type = H5O_MESG_OP_LIB;
-    op.u.lib_op = H5O_msg_remove_cb;
+    op.u.lib_op = H5O__msg_remove_cb;
     if(H5O_msg_iterate_real(f, oh, type, &op, &udata, dxpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "error iterating over messages")
 
@@ -1950,7 +1950,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_copy_mesg
+ * Function:	H5O__copy_mesg
  *
  * Purpose:	Make a copy of the native object for an object header's
  *              native message info
@@ -1963,7 +1963,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t idx,
+H5O__copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t idx,
     const H5O_msg_class_t *type, const void *mesg, unsigned mesg_flags,
     unsigned update_flags)
 {
@@ -1972,7 +1972,7 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t idx,
     hbool_t chk_dirtied = FALSE;                /* Flag for unprotecting chunk */
     herr_t      ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -1986,7 +1986,7 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t idx,
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header chunk")
 
     /* Reset existing native information for the header's message */
-    H5O_msg_reset_real(type, idx_msg->native);
+    H5O__msg_reset_real(type, idx_msg->native);
 
     /* Copy the native object for the message */
     if(NULL == (idx_msg->native = (type->copy)(mesg, idx_msg->native)))
@@ -2015,7 +2015,7 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header chunk")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_copy_mesg() */
+} /* end H5O__copy_mesg() */
 
 
 /*-------------------------------------------------------------------------

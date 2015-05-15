@@ -121,7 +121,7 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_fl_deserialize
+ * Function:	H5HL__fl_deserialize
  *
  * Purpose:	Deserialize the free list for a heap data block
  *
@@ -134,13 +134,13 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_fl_deserialize(H5HL_t *heap)
+H5HL__fl_deserialize(H5HL_t *heap)
 {
     H5HL_free_t *fl = NULL, *tail = NULL;      /* Heap free block nodes */
     hsize_t free_block;                 /* Offset of free block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(heap);
@@ -188,11 +188,11 @@ done:
             fl = H5FL_FREE(H5HL_free_t, fl);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HL_fl_deserialize() */
+} /* end H5HL__fl_deserialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_fl_serialize
+ * Function:	H5HL__fl_serialize
  *
  * Purpose:	Serialize the free list for a heap data block
  *
@@ -206,11 +206,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-H5HL_fl_serialize(const H5HL_t *heap)
+H5HL__fl_serialize(const H5HL_t *heap)
 {
     H5HL_free_t	*fl;                    /* Pointer to heap free list node */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check arguments */
     HDassert(heap);
@@ -231,7 +231,7 @@ H5HL_fl_serialize(const H5HL_t *heap)
     } /* end for */
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5HL_fl_serialize() */
+} /* end H5HL__fl_serialize() */
 
 
 /*-------------------------------------------------------------------------
@@ -300,11 +300,11 @@ H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Allocate space in memory for the heap */
     if(NULL == (heap = H5HL_new(udata->sizeof_size, udata->sizeof_addr, udata->sizeof_prfx)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate local heap structure")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate local heap structure")
 
     /* Allocate the heap prefix */
     if(NULL == (prfx = H5HL_prfx_new(heap)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate local heap prefix")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate local heap prefix")
 
     /* Store the prefix's address & length */
     heap->prfx_addr = udata->prfx_addr;
@@ -315,8 +315,9 @@ H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Free list head */
     H5F_DECODE_LENGTH_LEN(p, heap->free_block, udata->sizeof_size);
-    if(heap->free_block != H5HL_FREE_NULL && heap->free_block >= heap->dblk_size)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap free list")
+
+    if((heap->free_block != H5HL_FREE_NULL) && (heap->free_block >= heap->dblk_size))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap free list")
 
     /* Heap data address */
     H5F_addr_decode_len(udata->sizeof_addr, &p, &(heap->dblk_addr));
@@ -349,7 +350,7 @@ H5HL_prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
             } /* end else */
 
             /* Build free list */
-            if(H5HL_fl_deserialize(heap) < 0)
+            if(H5HL__fl_deserialize(heap) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list")
         } /* end if */
         else
@@ -455,7 +456,7 @@ H5HL_prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
             } /* end if */
 
             /* Serialize the free list into the heap data's image */
-            H5HL_fl_serialize(heap);
+            H5HL__fl_serialize(heap);
 
             /* Copy the heap data block into the cache image */
             HDmemcpy(p, heap->dblk_image, heap->dblk_size);
@@ -634,7 +635,7 @@ H5HL_datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(udata);
@@ -644,7 +645,7 @@ H5HL_datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Allocate space in memory for the heap data block */
     if(NULL == (dblk = H5HL_dblk_new(udata->heap)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Check for heap still retaining image */
     if(NULL == udata->heap->dblk_image) {
@@ -657,7 +658,7 @@ H5HL_datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
             HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read local heap data block")
 
         /* Build free list */
-        if(H5HL_fl_deserialize(udata->heap) < 0)
+        if(H5HL__fl_deserialize(udata->heap) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't initialize free list")
     } /* end if */
 
@@ -671,7 +672,7 @@ done:
     /* Release the [possibly partially initialized] local heap on errors */
     if(!ret_value && dblk)
         if(H5HL_dblk_dest(dblk) < 0)
-	    HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap data block")
+            HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to destroy local heap data block")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_datablock_load() */
@@ -714,7 +715,7 @@ H5HL_datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         heap->free_block = heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL;
 
         /* Serialize the free list into the heap data's image */
-        H5HL_fl_serialize(heap);
+        H5HL__fl_serialize(heap);
 
         /* Write the data block to the file */
         if(H5F_block_write(f, H5FD_MEM_LHEAP, heap->dblk_addr, heap->dblk_size, dxpl_id, heap->dblk_image) < 0)
@@ -754,7 +755,7 @@ H5HL_datablock_dest(H5F_t *f, void *_thing)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(dblk);
     HDassert(dblk->heap);
     HDassert(!dblk->heap->single_cache_obj);
@@ -804,7 +805,7 @@ H5HL_datablock_clear(H5F_t *f, void *_thing, hbool_t destroy)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(dblk);
 
     /* Mark local heap data block as clean */

@@ -102,14 +102,14 @@ H5FL_BLK_DEFINE(fa_page_init);
  */
 BEGIN_FUNC(PKG, ERR,
 H5FA_dblock_t *, NULL, NULL,
-H5FA__dblock_alloc(H5FA_hdr_t *hdr, hsize_t nelmts))
+H5FA__dblock_alloc(H5FA_hdr_t *hdr))
 
     /* Local variables */
     H5FA_dblock_t *dblock = NULL;          /* fixed array data block */
 
     /* Check arguments */
     HDassert(hdr);
-    HDassert(nelmts > 0);
+    HDassert(hdr->cparam.nelmts > 0);
 
     /* Allocate memory for the data block */
     if(NULL == (dblock = H5FL_CALLOC(H5FA_dblock_t)))
@@ -124,9 +124,9 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr, hsize_t nelmts))
     dblock->dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
 
     /* Check if this data block should be paged */
-    if(nelmts > dblock->dblk_page_nelmts) {
+    if(hdr->cparam.nelmts > dblock->dblk_page_nelmts) {
         /* Compute number of pages */
-        hsize_t npages = ((nelmts + dblock->dblk_page_nelmts) - 1) / dblock->dblk_page_nelmts;
+        hsize_t npages = ((hdr->cparam.nelmts + dblock->dblk_page_nelmts) - 1) / dblock->dblk_page_nelmts;
 
         /* Safely assign the number of pages */
         H5_CHECKED_ASSIGN(dblock->npages, size_t, npages, hsize_t);
@@ -146,10 +146,10 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr, hsize_t nelmts))
 	dblock->dblk_page_size = (dblock->dblk_page_nelmts * hdr->cparam.raw_elmt_size) + H5FA_SIZEOF_CHKSUM;
 
         /* Compute the # of elements on last page */
-        if(0 == nelmts % dblock->dblk_page_nelmts)
+        if(0 == hdr->cparam.nelmts % dblock->dblk_page_nelmts)
             dblock->last_page_nelmts = dblock->dblk_page_nelmts;
         else
-            dblock->last_page_nelmts = (size_t)(nelmts % dblock->dblk_page_nelmts);
+            dblock->last_page_nelmts = (size_t)(hdr->cparam.nelmts % dblock->dblk_page_nelmts);
     } /* end if */
     else {
         hsize_t dblk_size = hdr->cparam.nelmts * hdr->cparam.cls->nat_elmt_size;
@@ -186,24 +186,22 @@ END_FUNC(PKG)   /* end H5FA__dblock_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5FA__dblock_create(H5FA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty,
-    hsize_t nelmts))
+H5FA__dblock_create(H5FA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty))
 
     /* Local variables */
     H5FA_dblock_t *dblock = NULL;       /* fixed array data block */
     haddr_t dblock_addr;                /* fixed array data block address */
 
 #ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called, hdr->stats.nelmts = %Zu, nelmts = %Zu\n", FUNC, hdr->stats.nelmts, nelmts);
+HDfprintf(stderr, "%s: Called, hdr->stats.nelmts = %Zu, nelmts = %Zu\n", FUNC, hdr->stats.nelmts, hdr->cparam.nelmts);
 #endif /* H5FA_DEBUG */
 
     /* Sanity check */
     HDassert(hdr);
     HDassert(hdr_dirty);
-    HDassert(nelmts > 0);
 
     /* Allocate the data block */
-    if(NULL == (dblock = H5FA__dblock_alloc(hdr, nelmts)))
+    if(NULL == (dblock = H5FA__dblock_alloc(hdr)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
 
     /* Set size of data block on disk */
@@ -265,7 +263,7 @@ END_FUNC(PKG)   /* end H5FA__dblock_create() */
 BEGIN_FUNC(PKG, ERR,
 H5FA_dblock_t *, NULL, NULL,
 H5FA__dblock_protect(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr,
-    hsize_t dblk_nelmts, H5AC_protect_t rw))
+    H5AC_protect_t rw))
 
     /* Local variables */
     H5FA_dblock_cache_ud_t udata;      /* Information needed for loading data block */
@@ -277,11 +275,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Sanity check */
     HDassert(hdr);
     HDassert(H5F_addr_defined(dblk_addr));
-    HDassert(dblk_nelmts);
 
     /* Set up user data */
     udata.hdr = hdr;
-    udata.nelmts = dblk_nelmts;
 
     /* Protect the data block */
     if(NULL == (ret_value = (H5FA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblk_addr, &udata, rw)))
@@ -340,8 +336,7 @@ END_FUNC(PKG)   /* end H5FA__dblock_unprotect() */
  */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA__dblock_delete(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr,
-    hsize_t dblk_nelmts))
+H5FA__dblock_delete(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr))
 
     /* Local variables */
     H5FA_dblock_t *dblock = NULL;       /* Pointer to data block */
@@ -353,10 +348,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Sanity check */
     HDassert(hdr);
     HDassert(H5F_addr_defined(dblk_addr));
-    HDassert(dblk_nelmts > 0);
 
     /* Protect data block */
-    if(NULL == (dblock = H5FA__dblock_protect(hdr, dxpl_id, dblk_addr, dblk_nelmts, H5AC_WRITE)))
+    if(NULL == (dblock = H5FA__dblock_protect(hdr, dxpl_id, dblk_addr, H5AC_WRITE)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block, address = %llu", (unsigned long long)dblk_addr)
 
     /* Check if data block is paged */
