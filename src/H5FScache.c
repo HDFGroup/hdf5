@@ -38,7 +38,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 /****************/
@@ -167,7 +167,7 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     HDassert(udata);
 
     /* Allocate a new free space manager */
-    if(NULL == (fspace = H5FS_new(udata->f, udata->nclasses, udata->classes, udata->cls_init_udata)))
+    if(NULL == (fspace = H5FS__new(udata->f, udata->nclasses, udata->classes, udata->cls_init_udata)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set free space manager's internal information */
@@ -260,7 +260,7 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value && fspace)
-        if(H5FS_hdr_dest(fspace) < 0)
+        if(H5FS__hdr_dest(fspace) < 0)
             HDONE_ERROR(H5E_FSPACE, H5E_CANTFREE, NULL, "unable to destroy free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -463,7 +463,7 @@ H5FS_cache_hdr_dest(H5F_t *f, H5FS_t *fspace)
     } /* end if */
 
     /* Destroy free space header */
-    if(H5FS_hdr_dest(fspace) < 0)
+    if(H5FS__hdr_dest(fspace) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
 
 done:
@@ -865,14 +865,12 @@ H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H
         udata.sect_cnt_size = H5VM_limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
 
         /* Iterate over all the bins */
-        for(bin = 0; bin < sinfo->nbins; bin++) {
+        for(bin = 0; bin < sinfo->nbins; bin++)
             /* Check if there are any sections in this bin */
-            if(sinfo->bins[bin].bin_list) {
+            if(sinfo->bins[bin].bin_list)
                 /* Iterate over list of section size nodes for bin */
                 if(H5SL_iterate(sinfo->bins[bin].bin_list, H5FS_sinfo_serialize_node_cb, &udata) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_BADITER, FAIL, "can't iterate over section size nodes")
-            } /* end if */
-        } /* end for */
 
         /* Compute checksum */
         metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
