@@ -199,13 +199,12 @@ struct H5FA_t {
 /* Info needed for loading data block */
 typedef struct H5FA_dblock_cache_ud_t {
     H5FA_hdr_t *hdr;            /* Shared fixed array information */
-    hsize_t nelmts;             /* Number of elements in data block */
 } H5FA_dblock_cache_ud_t;
 
 /* Info needed for loading data block page */
 typedef struct H5FA_dblk_page_cache_ud_t {
     H5FA_hdr_t *hdr;            /* Shared fixed array information */
-    size_t nelmts;              /* Number of elements in data block page */
+    size_t      nelmts;         /* Number of elements in data block page */
 } H5FA_dblk_page_cache_ud_t;
 
 
@@ -244,19 +243,22 @@ H5_DLL herr_t H5FA__hdr_decr(H5FA_hdr_t *hdr);
 H5_DLL herr_t H5FA__hdr_fuse_incr(H5FA_hdr_t *hdr);
 H5_DLL size_t H5FA__hdr_fuse_decr(H5FA_hdr_t *hdr);
 H5_DLL herr_t H5FA__hdr_modified(H5FA_hdr_t *hdr);
+H5_DLL H5FA_hdr_t *H5FA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr,
+    void *ctx_udata, H5AC_protect_t rw);
+H5_DLL herr_t H5FA__hdr_unprotect(H5FA_hdr_t *hdr, hid_t dxpl_id, unsigned cache_flags);
 H5_DLL herr_t H5FA__hdr_delete(H5FA_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5FA__hdr_dest(H5FA_hdr_t *hdr);
 
 /* Data block routines */
-H5_DLL H5FA_dblock_t *H5FA__dblock_alloc(H5FA_hdr_t *hdr, hsize_t nelmts);
-H5_DLL haddr_t H5FA__dblock_create(H5FA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty, hsize_t nelmts);
+H5_DLL H5FA_dblock_t *H5FA__dblock_alloc(H5FA_hdr_t *hdr);
+H5_DLL haddr_t H5FA__dblock_create(H5FA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty);
 H5_DLL unsigned H5FA__dblock_sblk_idx(const H5FA_hdr_t *hdr, hsize_t idx);
 H5_DLL H5FA_dblock_t *H5FA__dblock_protect(H5FA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t dblk_addr, hsize_t dblk_nelmts, H5AC_protect_t rw);
+    haddr_t dblk_addr, H5AC_protect_t rw);
 H5_DLL herr_t H5FA__dblock_unprotect(H5FA_dblock_t *dblock, hid_t dxpl_id,
     unsigned cache_flags);
 H5_DLL herr_t H5FA__dblock_delete(H5FA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t dblk_addr, hsize_t dblk_nelmts);
+    haddr_t dblk_addr);
 H5_DLL herr_t H5FA__dblock_dest(H5FA_dblock_t *dblock);
 
 /* Data block page routines */

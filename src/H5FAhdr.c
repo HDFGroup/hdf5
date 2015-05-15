@@ -393,6 +393,70 @@ END_FUNC(PKG)   /* end H5FA__hdr_modified() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FA__hdr_protect
+ *
+ * Purpose:	Convenience wrapper around protecting fixed array header
+ *
+ * Return:	Non-NULL pointer to index block on success/NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug 12 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+H5FA_hdr_t *, NULL, NULL,
+H5FA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata,
+    H5AC_protect_t rw))
+
+    /* Local variables */
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(H5F_addr_defined(fa_addr));
+
+    /* Protect the header */
+    if(NULL == (ret_value = (H5FA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FARRAY_HDR, fa_addr, ctx_udata, rw)))
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array header, address = %llu", (unsigned long long)fa_addr)
+
+CATCH
+
+END_FUNC(PKG)   /* end H5FA__hdr_protect() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__hdr_unprotect
+ *
+ * Purpose:	Convenience wrapper around unprotecting fixed array header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug 12 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__hdr_unprotect(H5FA_hdr_t *hdr, hid_t dxpl_id, unsigned cache_flags))
+
+    /* Local variables */
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Unprotect the header */
+    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect fixed array hdr, address = %llu", (unsigned long long)hdr->addr)
+
+CATCH
+
+END_FUNC(PKG)   /* end H5EA__hdr_unprotect() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FA__hdr_delete
  *
  * Purpose:	Delete a fixed array, starting with the header
@@ -436,7 +500,7 @@ HDfprintf(stderr, "%s: hdr->dblk_addr = %a\n", FUNC, hdr->dblk_addr);
 #endif /* H5FA_DEBUG */
 
         /* Delete Fixed Array Data block */
-        if(H5FA__dblock_delete(hdr, dxpl_id, hdr->dblk_addr, hdr->cparam.nelmts) < 0)
+        if(H5FA__dblock_delete(hdr, dxpl_id, hdr->dblk_addr) < 0)
             H5E_THROW(H5E_CANTDELETE, "unable to delete fixed array data block")
     } /* end if */
 

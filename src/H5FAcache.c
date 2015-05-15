@@ -16,6 +16,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5FAcache.c
+ *			Jul  2 2009
+ *			Quincey Koziol <koziol@hdfgroup.org>
  *
  * Purpose:		Implement fixed array metadata cache methods.
  *
@@ -41,7 +43,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
@@ -517,10 +519,10 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(udata && udata->hdr && udata->nelmts > 0);
+    HDassert(udata && udata->hdr);
 
     /* Allocate the fixed array data block */
-    if(NULL == (dblock = H5FA__dblock_alloc(udata->hdr, udata->nelmts)))
+    if(NULL == (dblock = H5FA__dblock_alloc(udata->hdr)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
 
     /* Set the fixed array data block's information */
@@ -575,9 +577,9 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     if(!dblock->npages) {
         /* Decode elements in data block */
         /* Convert from raw elements on disk into native elements in memory */
-        if((udata->hdr->cparam.cls->decode)(p, dblock->elmts, (size_t)udata->nelmts, udata->hdr->cb_ctx) < 0)
+        if((udata->hdr->cparam.cls->decode)(p, dblock->elmts, (size_t)udata->hdr->stats.nelmts, udata->hdr->cb_ctx) < 0)
             H5E_THROW(H5E_CANTDECODE, "can't decode fixed array data elements")
-        p += (udata->nelmts * udata->hdr->cparam.raw_elmt_size);
+        p += (udata->hdr->stats.nelmts * udata->hdr->cparam.raw_elmt_size);
     } /* end if */
 
     /* Sanity check */
@@ -868,9 +870,6 @@ H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(udata && udata->hdr && udata->nelmts > 0);
-#ifdef QAK
-HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
-#endif /* QAK */
 
     /* Allocate the fixed array data block page */
     if(NULL == (dblk_page = H5FA__dblk_page_alloc(udata->hdr, udata->nelmts)))
