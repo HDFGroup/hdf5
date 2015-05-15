@@ -63,9 +63,6 @@ typedef struct H5A_iter_cb1 {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
-static herr_t H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
-static ssize_t H5A__get_name(H5A_t *attr, size_t buf_size, char *buf);
 
 /*********************/
 /* Package Variables */
@@ -608,120 +605,6 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5A__write
- PURPOSE
-    Actually write out data to an attribute
- USAGE
-    herr_t H5A__write (attr, mem_type, buf)
-        H5A_t *attr;         IN: Attribute to write
-        const H5T_t *mem_type;     IN: Memory datatype of buffer
-        const void *buf;           IN: Buffer of data to write
- RETURNS
-    Non-negative on success/Negative on failure
-
- DESCRIPTION
-    This function writes a complete attribute to disk.
---------------------------------------------------------------------------*/
-static herr_t
-H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
-{
-    uint8_t		*tconv_buf = NULL;	/* datatype conv buffer */
-    hbool_t             tconv_owned = FALSE;    /* Whether the datatype conv buffer is owned by attribute */
-    uint8_t		*bkg_buf = NULL;	/* temp conversion buffer */
-    hssize_t		snelmts;		/* elements in attribute */
-    size_t		nelmts;		    	/* elements in attribute */
-    H5T_path_t		*tpath = NULL;		/* conversion information*/
-    hid_t		src_id = -1, dst_id = -1;/* temporary type atoms */
-    size_t		src_type_size;		/* size of source type	*/
-    size_t		dst_type_size;		/* size of destination type*/
-    size_t		buf_size;		/* desired buffer size	*/
-    herr_t		ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, attr->oloc.addr, FAIL)
-
-    HDassert(attr);
-    HDassert(mem_type);
-    HDassert(buf);
-
-    /* Get # of elements for attribute's dataspace */
-    if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
-
-    /* If there's actually data elements for the attribute, make a copy of the data passed in */
-    if(nelmts > 0) {
-        /* Get the memory and file datatype sizes */
-        src_type_size = H5T_GET_SIZE(mem_type);
-        dst_type_size = H5T_GET_SIZE(attr->shared->dt);
-
-        /* Convert memory buffer into disk buffer */
-        /* Set up type conversion function */
-        if(NULL == (tpath = H5T_path_find(mem_type, attr->shared->dt, NULL, NULL, dxpl_id, FALSE)))
-            HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dst datatypes")
-
-        /* Check for type conversion required */
-        if(!H5T_path_noop(tpath)) {
-            if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL), FALSE)) < 0 ||
-                    (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->shared->dt, H5T_COPY_ALL), FALSE)) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-
-            /* Get the maximum buffer size needed and allocate it */
-            buf_size = nelmts * MAX(src_type_size, dst_type_size);
-            if(NULL == (tconv_buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
-            if(NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
-
-            /* Copy the user's data into the buffer for conversion */
-            HDmemcpy(tconv_buf, buf, (src_type_size * nelmts));
-
-            /* Perform datatype conversion */
-            if(H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
-
-            /* Free the previous attribute data buffer, if there is one */
-            if(attr->shared->data)
-                attr->shared->data = H5FL_BLK_FREE(attr_buf, attr->shared->data);
-
-            /* Set the pointer to the attribute data to the converted information */
-            attr->shared->data = tconv_buf;
-            tconv_owned = TRUE;
-        } /* end if */
-        /* No type conversion necessary */
-        else {
-            HDassert(dst_type_size == src_type_size);
-
-            /* Allocate the attribute buffer, if there isn't one */
-            if(attr->shared->data == NULL)
-                if(NULL == (attr->shared->data = H5FL_BLK_MALLOC(attr_buf, dst_type_size * nelmts)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-            /* Copy the attribute data into the user's buffer */
-            HDmemcpy(attr->shared->data, buf, (dst_type_size * nelmts));
-        } /* end else */
-
-        /* Modify the attribute in the object header */
-        if(H5O_attr_write(&(attr->oloc), dxpl_id, attr) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to modify attribute")
-    } /* end if */
-
-done:
-    /* Release resources */
-    if(src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
-    if(dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
-    if(tconv_buf && !tconv_owned)
-        tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
-    if(bkg_buf)
-        bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
-
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* H5A__write() */
-
-
-/*--------------------------------------------------------------------------
- NAME
     H5Aread
  PURPOSE
     Read in data from an attribute
@@ -761,109 +644,6 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aread() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5A__read
- PURPOSE
-    Actually read in data from an attribute
- USAGE
-    herr_t H5A__read (attr, mem_type, buf)
-        H5A_t *attr;         IN: Attribute to read
-        const H5T_t *mem_type;     IN: Memory datatype of buffer
-        void *buf;           IN: Buffer for data to read
- RETURNS
-    Non-negative on success/Negative on failure
-
- DESCRIPTION
-    This function reads a complete attribute from disk.
---------------------------------------------------------------------------*/
-static herr_t
-H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
-{
-    uint8_t		*tconv_buf = NULL;	/* datatype conv buffer*/
-    uint8_t		*bkg_buf = NULL;	/* background buffer */
-    hssize_t		snelmts;		/* elements in attribute */
-    size_t		nelmts;			/* elements in attribute*/
-    H5T_path_t		*tpath = NULL;		/* type conversion info	*/
-    hid_t		src_id = -1, dst_id = -1;/* temporary type atoms*/
-    size_t		src_type_size;		/* size of source type 	*/
-    size_t		dst_type_size;		/* size of destination type */
-    size_t		buf_size;		/* desired buffer size	*/
-    herr_t		ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    HDassert(attr);
-    HDassert(mem_type);
-    HDassert(buf);
-
-    /* Create buffer for data to store on disk */
-    if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
-
-    if(nelmts > 0) {
-        /* Get the memory and file datatype sizes */
-        src_type_size = H5T_GET_SIZE(attr->shared->dt);
-        dst_type_size = H5T_GET_SIZE(mem_type);
-
-        /* Check if the attribute has any data yet, if not, fill with zeroes */
-        if(attr->obj_opened && !attr->shared->data)
-            HDmemset(buf, 0, (dst_type_size * nelmts));
-        else {  /* Attribute exists and has a value */
-            /* Convert memory buffer into disk buffer */
-            /* Set up type conversion function */
-            if(NULL == (tpath = H5T_path_find(attr->shared->dt, mem_type, NULL, NULL, dxpl_id, FALSE)))
-                HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dst datatypes")
-
-            /* Check for type conversion required */
-            if(!H5T_path_noop(tpath)) {
-                if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->shared->dt, H5T_COPY_ALL), FALSE)) < 0 ||
-                        (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL), FALSE)) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-
-                /* Get the maximum buffer size needed and allocate it */
-                buf_size = nelmts * MAX(src_type_size, dst_type_size);
-                if(NULL == (tconv_buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
-                    HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
-                if(NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
-                    HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-                /* Copy the attribute data into the buffer for conversion */
-                HDmemcpy(tconv_buf, attr->shared->data, (src_type_size * nelmts));
-
-                /* Perform datatype conversion.  */
-                if(H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
-
-                /* Copy the converted data into the user's buffer */
-                HDmemcpy(buf, tconv_buf, (dst_type_size * nelmts));
-            } /* end if */
-            /* No type conversion necessary */
-            else {
-                HDassert(dst_type_size == src_type_size);
-
-                /* Copy the attribute data into the user's buffer */
-                HDmemcpy(buf, attr->shared->data, (dst_type_size * nelmts));
-            } /* end else */
-        } /* end else */
-    } /* end if */
-
-done:
-    /* Release resources */
-    if(src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
-    if(dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
-    if(tconv_buf)
-        tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
-    if(bkg_buf)
-	bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A__read() */
 
 
 /*--------------------------------------------------------------------------
@@ -1025,52 +805,6 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_name() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5A__get_name
- PURPOSE
-    Private function for H5Aget_name.  Gets a copy of the name for an
-    attribute
- RETURNS
-    This function returns the length of the attribute's name (which may be
-    longer than 'buf_size') on success or negative for failure.
- DESCRIPTION
-        This function retrieves the name of an attribute for an attribute ID.
-    Up to 'buf_size' characters are stored in 'buf' followed by a '\0' string
-    terminator.  If the name of the attribute is longer than 'buf_size'-1,
-    the string terminator is stored in the last position of the buffer to
-    properly terminate the string.
---------------------------------------------------------------------------*/
-static ssize_t
-H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
-{
-    size_t              copy_len, nbytes;
-    ssize_t		ret_value;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* get the real attribute length */
-    nbytes = HDstrlen(attr->shared->name);
-    HDassert((ssize_t)nbytes >= 0); /*overflow, pretty unlikely --rpm*/
-
-    /* compute the string length which will fit into the user's buffer */
-    copy_len = MIN(buf_size - 1, nbytes);
-
-    /* Copy all/some of the name */
-    if(buf && copy_len > 0) {
-        HDmemcpy(buf, attr->shared->name, copy_len);
-
-        /* Terminate the string */
-        buf[copy_len]='\0';
-    } /* end if */
-
-    /* Set return value */
-    ret_value = (ssize_t)nbytes;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A_get_name() */
 
 
 /*-------------------------------------------------------------------------
