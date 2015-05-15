@@ -237,7 +237,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_super_read
+ * Function:    H5F__super_read
  *
  * Purpose:     Reads the superblock from the file or from the BUF. If
  *              ADDR is a valid address, then it reads it from the file.
@@ -254,17 +254,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_read(H5F_t *f, hid_t dxpl_id)
+H5F__super_read(H5F_t *f, hid_t dxpl_id)
 {
     H5P_genplist_t     *dxpl;               /* DXPL object */
-    H5F_super_t *       sblock = NULL;      /* superblock structure                         */
+    H5F_super_t *       sblock = NULL;      /* Superblock structure */
     unsigned            sblock_flags = H5AC__NO_FLAGS_SET;       /* flags used in superblock unprotect call      */
     haddr_t             super_addr;         /* Absolute address of superblock */
-    H5AC_protect_t      rw;                 /* read/write permissions for file              */
+    H5AC_protect_t      rw;                 /* Read/write permissions for file  */
     hbool_t             dirtied = FALSE;    /* Bool for sblock protect call                 */
-    herr_t              ret_value = SUCCEED; /* return value                                */
+    herr_t              ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
+    FUNC_ENTER_PACKAGE_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
 
     /* Get the DXPL plist object for DXPL ID */
     if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -291,7 +291,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
 
     /* Look up the superblock */
     if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &dirtied, rw)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
 
     /* Mark the superblock dirty if it was modified during loading or VFD indicated to do so */
     if((H5AC_WRITE == rw) && (dirtied || H5F_HAS_FEATURE(f, H5FD_FEAT_DIRTY_SBLK_LOAD)))
@@ -299,7 +299,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
 
     /* Pin the superblock in the cache */
     if(H5AC_pin_protected_entry(sblock) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, FAIL, "unable to pin superblock")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTPIN, FAIL, "unable to pin superblock")
 
     /* Set the pointer to the pinned superblock */
     f->shared->sblock = sblock;
@@ -307,14 +307,14 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id)
 done:
     /* Release the superblock */
     if(sblock && H5AC_unprotect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, sblock, sblock_flags) < 0)
-        HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close superblock")
+        HDONE_ERROR(H5E_FILE, H5E_CANTUNPROTECT, FAIL, "unable to close superblock")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* end H5F_super_read() */
+} /* end H5F__super_read() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_super_init
+ * Function:    H5F__super_init
  *
  * Purpose:     Allocates the superblock for the file and initializes
  *              information about the superblock in memory.  Writes extension
@@ -330,7 +330,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_init(H5F_t *f, hid_t dxpl_id)
+H5F__super_init(H5F_t *f, hid_t dxpl_id)
 {
     H5F_super_t    *sblock = NULL;      /* Superblock cache structure                 */
     hbool_t         sblock_in_cache = FALSE;    /* Whether the superblock has been inserted into the metadata cache */
@@ -344,7 +344,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     hbool_t         ext_created = FALSE; /* Whether the extension has been created */
     herr_t          ret_value = SUCCEED; /* Return Value                              */
 
-    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
+    FUNC_ENTER_PACKAGE_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
 
     /* Allocate space for the superblock */
     if(NULL == (sblock = H5FL_CALLOC(H5F_super_t)))
@@ -594,7 +594,7 @@ done:
             } /* end if */
             else
                 /* Free superblock */
-                if(H5F_super_free(sblock) < 0)
+                if(H5F__super_free(sblock) < 0)
                     HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to destroy superblock")
 
             /* Reset variables in file structure */
@@ -603,7 +603,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* end H5F_super_init() */
+} /* end H5F__super_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -641,7 +641,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_super_free
+ * Function:    H5F__super_free
  *
  * Purpose:     Destroyer the file's superblock
  *
@@ -654,9 +654,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_free(H5F_super_t *sblock)
+H5F__super_free(H5F_super_t *sblock)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(sblock);
@@ -668,11 +668,11 @@ H5F_super_free(H5F_super_t *sblock)
     sblock = (H5F_super_t *)H5FL_FREE(H5F_super_t, sblock);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5F_super_free() */
+} /* H5F__super_free() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_super_size
+ * Function:    H5F__super_size
  *
  * Purpose:     Get storage size of the superblock and superblock extension
  *
@@ -685,11 +685,11 @@ H5F_super_free(H5F_super_t *sblock)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_size)
+H5F__super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_size)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(f);
@@ -725,7 +725,7 @@ H5F_super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_super_size() */
+} /* H5F__super_size() */
 
 
 /*-------------------------------------------------------------------------

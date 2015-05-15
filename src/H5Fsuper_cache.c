@@ -13,6 +13,17 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:		H5Fsuper_cache.c
+ *			Aug 15 2009
+ *			Quincey Koziol <koziol@hdfgroup.org>
+ *
+ * Purpose:		Implement file superblock & driver info metadata cache methods.
+ *
+ *-------------------------------------------------------------------------
+ */
+
 /****************/
 /* Module Setup */
 /****************/
@@ -133,7 +144,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_eq(addr, 0));
     HDassert(dirtied);
@@ -618,7 +629,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 done:
     /* Release the [possibly partially initialized] superblock on errors */
     if(!ret_value && sblock)
-        if(H5F_super_free(sblock) < 0)
+        if(H5F__super_free(sblock) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTFREE, NULL, "unable to destroy superblock data")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -779,7 +790,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
              * ultimately match it. */
             if ((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-            H5F_addr_encode(f, &p, rel_eof + sblock->base_addr);
+            H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
 
             /* Retrieve information for root group */
             if(NULL == (root_oloc = H5G_oloc(f->shared->root_grp)))
@@ -887,7 +898,7 @@ H5F_sblock_dest(H5F_t UNUSED *f, H5F_super_t* sblock)
     HDassert(sblock);
 
     /* Free superblock */
-    if(H5F_super_free(sblock) < 0)
+    if(H5F__super_free(sblock) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to destroy superblock")
 
 done:
