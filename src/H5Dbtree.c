@@ -195,7 +195,7 @@ H5B_class_t H5B_BTREE[1] = {{
     H5D__btree_remove,		/*remove		*/
     H5D__btree_decode_key,	/*decode		*/
     H5D__btree_encode_key,	/*encode		*/
-    H5D__btree_debug_key,	/*debug			*/
+    H5D__btree_debug_key	/*debug			*/
 }};
 
 
@@ -868,7 +868,7 @@ done:
 static herr_t
 H5D__btree_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
-    H5D_chunk_common_ud_t udata;             /* User data for B-tree callback */
+    H5D_chunk_common_ud_t udata;        /* User data for B-tree callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -939,7 +939,7 @@ H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 static herr_t
 H5D__btree_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
-    herr_t	ret_value = SUCCEED;		/* Return value */
+    herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1111,7 +1111,7 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 static herr_t
 H5D__btree_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *udata)
 {
-    herr_t	ret_value = SUCCEED;		/* Return value */
+    herr_t	ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_STATIC
 
