@@ -190,7 +190,6 @@ const H5AC_class_t H5AC_EARRAY_TEST[1] = {{
     (H5AC_size_func_t)earray_cache_test_size,
 }};
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	init_cparam

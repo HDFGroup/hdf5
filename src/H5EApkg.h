@@ -302,11 +302,12 @@ struct H5EA_t {
 
 /* Metadata cache callback user data types */
 
-/* Info needed for loading data block page */
-typedef struct H5EA_dblk_page_cache_ud_t {
+/* Info needed for loading super block */
+typedef struct H5EA_sblock_cache_ud_t {
     H5EA_hdr_t    *hdr;         /* Shared extensible array information */
-    H5EA_sblock_t *parent;      /* Pointer to parent object for data block page (super block) */
-} H5EA_dblk_page_cache_ud_t;
+    H5EA_iblock_t *parent;      /* Pointer to parent object for super block (index block) */
+    unsigned sblk_idx;          /* Index of super block */
+} H5EA_sblock_cache_ud_t;
 
 /* Info needed for loading data block */
 typedef struct H5EA_dblock_cache_ud_t {
@@ -315,12 +316,11 @@ typedef struct H5EA_dblock_cache_ud_t {
     size_t nelmts;              /* Number of elements in data block */
 } H5EA_dblock_cache_ud_t;
 
-/* Info needed for loading super block */
-typedef struct H5EA_sblock_cache_ud_t {
+/* Info needed for loading data block page */
+typedef struct H5EA_dblk_page_cache_ud_t {
     H5EA_hdr_t    *hdr;         /* Shared extensible array information */
-    H5EA_iblock_t *parent;      /* Pointer to parent object for super block (index block) */
-    unsigned sblk_idx;          /* Index of super block */
-} H5EA_sblock_cache_ud_t;
+    H5EA_sblock_t *parent;      /* Pointer to parent object for data block page (super block) */
+} H5EA_dblk_page_cache_ud_t;
 
 #ifdef H5EA_TESTING
 typedef struct H5EA__ctx_cb_t {
@@ -377,6 +377,9 @@ H5_DLL herr_t H5EA__hdr_decr(H5EA_hdr_t *hdr);
 H5_DLL herr_t H5EA__hdr_fuse_incr(H5EA_hdr_t *hdr);
 H5_DLL size_t H5EA__hdr_fuse_decr(H5EA_hdr_t *hdr);
 H5_DLL herr_t H5EA__hdr_modified(H5EA_hdr_t *hdr);
+H5_DLL H5EA_hdr_t *H5EA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr,
+    void *ctx_udata, H5AC_protect_t rw);
+H5_DLL herr_t H5EA__hdr_unprotect(H5EA_hdr_t *hdr, hid_t dxpl_id, unsigned cache_flags);
 H5_DLL herr_t H5EA__hdr_delete(H5EA_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5EA__hdr_dest(H5EA_hdr_t *hdr);
 
