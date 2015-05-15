@@ -92,7 +92,7 @@ typedef struct {
 
 static herr_t H5A__compact_build_table_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/);
-static herr_t H5A_dense_build_table_cb(const H5A_t *attr, void *_udata);
+static herr_t H5A__dense_build_table_cb(const H5A_t *attr, void *_udata);
 static int H5A__attr_cmp_name_inc(const void *attr1, const void *attr2);
 static int H5A__attr_cmp_name_dec(const void *attr1, const void *attr2);
 static int H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2);
@@ -283,13 +283,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_open_common
+ * Function:	H5A__open_common
  *
  * Purpose:
  *      Finishes initializing an attributes the open
  *
  * Usage:
- *  herr_t H5A_open_common(loc, name, dxpl_id)
+ *  herr_t H5A__open_common(loc, name, dxpl_id)
  *      const H5G_loc_t *loc;   IN: Pointer to group location for object
  *      H5A_t *attr;            IN/OUT: Pointer to attribute to initialize
  *
@@ -301,11 +301,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_open_common(const H5G_loc_t *loc, H5A_t *attr)
+H5A__open_common(const H5G_loc_t *loc, H5A_t *attr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(loc);
@@ -336,7 +336,7 @@ H5A_open_common(const H5G_loc_t *loc, H5A_t *attr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A_open_common() */
+} /* H5A__open_common() */
 
 
 /*-------------------------------------------------------------------------
@@ -383,7 +383,7 @@ H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to load attribute info from object header")
 
     /* Finish initializing attribute */
-    if(H5A_open_common(&obj_loc, attr) < 0)
+    if(H5A__open_common(&obj_loc, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to initialize attribute")
 
     /* Set return value */
@@ -448,7 +448,7 @@ H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_na
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to load attribute info from object header")
 
     /* Finish initializing attribute */
-    if(H5A_open_common(loc, attr) < 0)
+    if(H5A__open_common(loc, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to initialize attribute")
 
     /* Set return value */
@@ -466,223 +466,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_open_by_name() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5A_write
- PURPOSE
-    Actually write out data to an attribute
- USAGE
-    herr_t H5A_write (attr, mem_type, buf)
-        H5A_t *attr;         IN: Attribute to write
-        const H5T_t *mem_type;     IN: Memory datatype of buffer
-        const void *buf;           IN: Buffer of data to write
- RETURNS
-    Non-negative on success/Negative on failure
-
- DESCRIPTION
-    This function writes a complete attribute to disk.
---------------------------------------------------------------------------*/
-herr_t
-H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
-{
-    uint8_t		*tconv_buf = NULL;	/* datatype conv buffer */
-    hbool_t             tconv_owned = FALSE;    /* Whether the datatype conv buffer is owned by attribute */
-    uint8_t		*bkg_buf = NULL;	/* temp conversion buffer */
-    hssize_t		snelmts;		/* elements in attribute */
-    size_t		nelmts;		    	/* elements in attribute */
-    H5T_path_t		*tpath = NULL;		/* conversion information*/
-    hid_t		src_id = -1, dst_id = -1;/* temporary type atoms */
-    size_t		src_type_size;		/* size of source type	*/
-    size_t		dst_type_size;		/* size of destination type*/
-    size_t		buf_size;		/* desired buffer size	*/
-    herr_t		ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, attr->oloc.addr, FAIL)
-
-    HDassert(attr);
-    HDassert(mem_type);
-    HDassert(buf);
-
-    /* Get # of elements for attribute's dataspace */
-    if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
-
-    /* If there's actually data elements for the attribute, make a copy of the data passed in */
-    if(nelmts > 0) {
-        /* Get the memory and file datatype sizes */
-        src_type_size = H5T_GET_SIZE(mem_type);
-        dst_type_size = H5T_GET_SIZE(attr->shared->dt);
-
-        /* Convert memory buffer into disk buffer */
-        /* Set up type conversion function */
-        if(NULL == (tpath = H5T_path_find(mem_type, attr->shared->dt, NULL, NULL, dxpl_id, FALSE)))
-            HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dst datatypes")
-
-        /* Check for type conversion required */
-        if(!H5T_path_noop(tpath)) {
-            if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL), FALSE)) < 0 ||
-                    (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->shared->dt, H5T_COPY_ALL), FALSE)) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-
-            /* Get the maximum buffer size needed and allocate it */
-            buf_size = nelmts * MAX(src_type_size, dst_type_size);
-            if(NULL == (tconv_buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
-            if(NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
-
-            /* Copy the user's data into the buffer for conversion */
-            HDmemcpy(tconv_buf, buf, (src_type_size * nelmts));
-
-            /* Perform datatype conversion */
-            if(H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
-
-            /* Free the previous attribute data buffer, if there is one */
-            if(attr->shared->data)
-                attr->shared->data = H5FL_BLK_FREE(attr_buf, attr->shared->data);
-
-            /* Set the pointer to the attribute data to the converted information */
-            attr->shared->data = tconv_buf;
-            tconv_owned = TRUE;
-        } /* end if */
-        /* No type conversion necessary */
-        else {
-            HDassert(dst_type_size == src_type_size);
-
-            /* Allocate the attribute buffer, if there isn't one */
-            if(attr->shared->data == NULL)
-                if(NULL == (attr->shared->data = H5FL_BLK_MALLOC(attr_buf, dst_type_size * nelmts)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-            /* Copy the attribute data into the user's buffer */
-            HDmemcpy(attr->shared->data, buf, (dst_type_size * nelmts));
-        } /* end else */
-
-        /* Modify the attribute in the object header */
-        if(H5O_attr_write(&(attr->oloc), dxpl_id, attr) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to modify attribute")
-    } /* end if */
-
-done:
-    /* Release resources */
-    if(src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
-    if(dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
-    if(tconv_buf && !tconv_owned)
-        tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
-    if(bkg_buf)
-        bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
-
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* H5A_write() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5A_read
- PURPOSE
-    Actually read in data from an attribute
- USAGE
-    herr_t H5A_read (attr, mem_type, buf)
-        H5A_t *attr;         IN: Attribute to read
-        const H5T_t *mem_type;     IN: Memory datatype of buffer
-        void *buf;           IN: Buffer for data to read
- RETURNS
-    Non-negative on success/Negative on failure
-
- DESCRIPTION
-    This function reads a complete attribute from disk.
---------------------------------------------------------------------------*/
-herr_t
-H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
-{
-    uint8_t		*tconv_buf = NULL;	/* datatype conv buffer*/
-    uint8_t		*bkg_buf = NULL;	/* background buffer */
-    hssize_t		snelmts;		/* elements in attribute */
-    size_t		nelmts;			/* elements in attribute*/
-    H5T_path_t		*tpath = NULL;		/* type conversion info	*/
-    hid_t		src_id = -1, dst_id = -1;/* temporary type atoms*/
-    size_t		src_type_size;		/* size of source type 	*/
-    size_t		dst_type_size;		/* size of destination type */
-    size_t		buf_size;		/* desired buffer size	*/
-    herr_t		ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(attr);
-    HDassert(mem_type);
-    HDassert(buf);
-
-    /* Create buffer for data to store on disk */
-    if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
-    H5_CHECKED_ASSIGN(nelmts, size_t, snelmts, hssize_t);
-
-    if(nelmts > 0) {
-        /* Get the memory and file datatype sizes */
-        src_type_size = H5T_GET_SIZE(attr->shared->dt);
-        dst_type_size = H5T_GET_SIZE(mem_type);
-
-        /* Check if the attribute has any data yet, if not, fill with zeroes */
-        if(attr->obj_opened && !attr->shared->data)
-            HDmemset(buf, 0, (dst_type_size * nelmts));
-        else {  /* Attribute exists and has a value */
-            /* Convert memory buffer into disk buffer */
-            /* Set up type conversion function */
-            if(NULL == (tpath = H5T_path_find(attr->shared->dt, mem_type, NULL, NULL, dxpl_id, FALSE)))
-                HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dst datatypes")
-
-            /* Check for type conversion required */
-            if(!H5T_path_noop(tpath)) {
-                if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->shared->dt, H5T_COPY_ALL), FALSE)) < 0 ||
-                        (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL), FALSE)) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-
-                /* Get the maximum buffer size needed and allocate it */
-                buf_size = nelmts * MAX(src_type_size, dst_type_size);
-                if(NULL == (tconv_buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
-                    HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
-                if(NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
-                    HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-                /* Copy the attribute data into the buffer for conversion */
-                HDmemcpy(tconv_buf, attr->shared->data, (src_type_size * nelmts));
-
-                /* Perform datatype conversion.  */
-                if(H5T_convert(tpath, src_id, dst_id, nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTENCODE, FAIL, "datatype conversion failed")
-
-                /* Copy the converted data into the user's buffer */
-                HDmemcpy(buf, tconv_buf, (dst_type_size * nelmts));
-            } /* end if */
-            /* No type conversion necessary */
-            else {
-                HDassert(dst_type_size == src_type_size);
-
-                /* Copy the attribute data into the user's buffer */
-                HDmemcpy(buf, attr->shared->data, (dst_type_size * nelmts));
-            } /* end else */
-        } /* end else */
-    } /* end if */
-
-done:
-    /* Release resources */
-    if(src_id >= 0 && H5I_dec_ref(src_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
-    if(dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
-    if(tconv_buf)
-        tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
-    if(bkg_buf)
-	bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -826,54 +609,8 @@ done:
 } /* end H5Aget_create_plist() */
 
 
-/*--------------------------------------------------------------------------
- NAME
-    H5A_get_name
- PURPOSE
-    Private function for H5Aget_name.  Gets a copy of the name for an
-    attribute
- RETURNS
-    This function returns the length of the attribute's name (which may be
-    longer than 'buf_size') on success or negative for failure.
- DESCRIPTION
-        This function retrieves the name of an attribute for an attribute ID.
-    Up to 'buf_size' characters are stored in 'buf' followed by a '\0' string
-    terminator.  If the name of the attribute is longer than 'buf_size'-1,
-    the string terminator is stored in the last position of the buffer to
-    properly terminate the string.
---------------------------------------------------------------------------*/
-ssize_t
-H5A_get_name(H5A_t *attr, size_t buf_size, char *buf)
-{
-    size_t              copy_len, nbytes;
-    ssize_t		ret_value;
-
-    FUNC_ENTER_NOAPI_NOERR
-
-    /* get the real attribute length */
-    nbytes = HDstrlen(attr->shared->name);
-    HDassert((ssize_t)nbytes >= 0); /*overflow, pretty unlikely --rpm*/
-
-    /* compute the string length which will fit into the user's buffer */
-    copy_len = MIN(buf_size - 1, nbytes);
-
-    /* Copy all/some of the name */
-    if(buf && copy_len > 0) {
-        HDmemcpy(buf, attr->shared->name, copy_len);
-
-        /* Terminate the string */
-        buf[copy_len]='\0';
-    } /* end if */
-
-    /* Set return value */
-    ret_value = (ssize_t)nbytes;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A_get_name() */
-
-
 /*-------------------------------------------------------------------------
- * Function:	H5A_get_info
+ * Function:	H5A__get_info
  *
  * Purpose:	Retrieve information about an attribute.
  *
@@ -886,7 +623,7 @@ H5A_get_name(H5A_t *attr, size_t buf_size, char *buf)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo)
+H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo)
 {
     FUNC_ENTER_NOAPI_NOERR
 
@@ -907,7 +644,7 @@ H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo)
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5A_get_info() */
+} /* end H5A__get_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -1347,7 +1084,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_dense_build_table_cb
+ * Function:	H5A__dense_build_table_cb
  *
  * Purpose:	Callback routine for building table of attributes from dense
  *              attribute storage.
@@ -1362,12 +1099,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A_dense_build_table_cb(const H5A_t *attr, void *_udata)
+H5A__dense_build_table_cb(const H5A_t *attr, void *_udata)
 {
     H5A_dense_bt_ud_t *udata = (H5A_dense_bt_ud_t *)_udata;     /* 'User data' passed in */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(attr);
@@ -1387,7 +1124,7 @@ H5A_dense_build_table_cb(const H5A_t *attr, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_dense_build_table_cb() */
+} /* end H5A__dense_build_table_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1453,7 +1190,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
 
         /* Build iterator operator */
         attr_op.op_type = H5A_ATTR_OP_LIB;
-        attr_op.u.lib_op = H5A_dense_build_table_cb;
+        attr_op.u.lib_op = H5A__dense_build_table_cb;
 
         /* Iterate over the links in the group, building a table of the link messages */
         if(H5A_dense_iterate(f, dxpl_id, (hid_t)0, ainfo, H5_INDEX_NAME,
@@ -1689,7 +1426,7 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
                 H5A_info_t ainfo;               /* Info for attribute */
 
                 /* Get the attribute information */
-                if(H5A_get_info(atable->attrs[u], &ainfo) < 0)
+                if(H5A__get_info(atable->attrs[u], &ainfo) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5_ITER_ERROR, "unable to get attribute info")
 
                 /* Make the application callback */
@@ -2257,7 +1994,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5A_dense_post_copy_file_cb
+ * Function:    H5A__dense_post_copy_file_cb
  *
  * Purpose:     Callback routine for copying a dense attribute from SRC to DST.
  *
@@ -2271,13 +2008,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A_dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
+H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
 {
     H5A_dense_file_cp_ud_t *udata = (H5A_dense_file_cp_ud_t *)_udata;
     H5A_t *attr_dst = NULL;
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(attr_src);
@@ -2313,7 +2050,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close destination attribute")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_dense_post_copy_file_cb() */
+} /* end H5A__dense_post_copy_file_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -2354,7 +2091,7 @@ H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo
     udata.oloc_dst = dst_oloc;
 
     attr_op.op_type = H5A_ATTR_OP_LIB;
-    attr_op.u.lib_op = H5A_dense_post_copy_file_cb;
+    attr_op.u.lib_op = H5A__dense_post_copy_file_cb;
 
 
      if(H5A_dense_iterate(src_oloc->file, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
