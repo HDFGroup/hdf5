@@ -382,14 +382,6 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             drv_name[8] = '\0';
             p += 8; /* advance past name/version */
 
-            /* Check if driver matches driver information saved. Unfortunately, we can't push this
-             * function to each specific driver because we're checking if the driver is correct.
-             */
-            if(!HDstrncmp(drv_name, "NCSAfami", (size_t)8) && HDstrcmp(lf->cls->name, "family"))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "family driver should be used")
-            if(!HDstrncmp(drv_name, "NCSAmult", (size_t)8) && HDstrcmp(lf->cls->name, "multi"))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "multi driver should be used")
-
             /* Read in variable-sized portion of driver info block */
             if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE + drv_variable_size) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "set end of space allocation request failed")
@@ -397,7 +389,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read file driver information")
 
             /* Decode driver information */
-            if(H5FD_sb_decode(lf, drv_name, p) < 0)
+            if(H5FD_sb_load(lf, drv_name, p) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to decode driver information")
         } /* end if */
     } /* end if */
@@ -546,16 +538,8 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
                 if(NULL == H5O_msg_read(&ext_loc, H5O_DRVINFO_ID, &drvinfo, dxpl_id))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "driver info message not present")
 
-                /* Check if driver matches driver information saved. Unfortunately, we can't push this
-                 * function to each specific driver because we're checking if the driver is correct.
-                 */
-                if(!HDstrncmp(drvinfo.name, "NCSAfami", (size_t)8) && HDstrcmp(lf->cls->name, "family"))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "family driver should be used")
-                if(!HDstrncmp(drvinfo.name, "NCSAmult", (size_t)8) && HDstrcmp(lf->cls->name, "multi"))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "multi driver should be used")
-
                 /* Decode driver information */
-                if(H5FD_sb_decode(lf, drvinfo.name, drvinfo.buf) < 0)
+                if(H5FD_sb_load(lf, drvinfo.name, drvinfo.buf) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to decode driver information")
 
                 /* Reset driver info message */
