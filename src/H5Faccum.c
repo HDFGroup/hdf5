@@ -172,7 +172,7 @@ H5F__accum_read(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
                 /* Read the part before the metadata accumulator */
                 if(addr < accum->loc) {
                     /* Set the amount to read */
-                    H5_ASSIGN_OVERFLOW(amount_before, (accum->loc - addr), hsize_t, size_t);
+                    H5_CHECKED_ASSIGN(amount_before, size_t, (accum->loc - addr), hsize_t);
 
                     /* Make room for the metadata to read in */
                     HDmemmove(accum->buf + amount_before, accum->buf, accum->size);
@@ -193,7 +193,7 @@ H5F__accum_read(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
                     size_t amount_after;         /* Amount to read at a time */
 
                     /* Set the amount to read */
-                    H5_ASSIGN_OVERFLOW(amount_after, ((addr + size) - (accum->loc + accum->size)), hsize_t, size_t);
+                    H5_CHECKED_ASSIGN(amount_after, size_t, ((addr + size) - (accum->loc + accum->size)), hsize_t);
 
                     /* Dispatch to driver */
                     if(H5FD_read(fio_info->f->shared->lf, fio_info->dxpl, map_type, (accum->loc + accum->size), amount_after, (accum->buf + accum->size + amount_before)) < 0)
@@ -536,14 +536,14 @@ H5F__accum_write(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
                         size_t old_offset;  /* Offset of old data within the accumulator buffer */
 
                         /* Calculate the amount we will need to add to the accumulator size, based on the amount of overlap */
-                        H5_ASSIGN_OVERFLOW(add_size, (accum->loc - addr), hsize_t, size_t);
+                        H5_CHECKED_ASSIGN(add_size, size_t, (accum->loc - addr), hsize_t);
 
                         /* Check if we need to adjust accumulator size */
                         if(H5F__accum_adjust(accum, fio_info, H5F_ACCUM_PREPEND, add_size) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
 
                         /* Calculate the proper offset of the existing metadata */
-                        H5_ASSIGN_OVERFLOW(old_offset, (addr + size) - accum->loc, hsize_t, size_t);
+                        H5_CHECKED_ASSIGN(old_offset, size_t, (addr + size) - accum->loc, hsize_t);
 
                         /* Move the existing metadata to the proper location */
                         HDmemmove(accum->buf + size, accum->buf + old_offset, (accum->size - old_offset));
@@ -576,7 +576,7 @@ H5F__accum_write(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
                         size_t dirty_off;           /* Offset of dirty region */
 
                         /* Calculate the amount we will need to add to the accumulator size, based on the amount of overlap */
-                        H5_ASSIGN_OVERFLOW(add_size, (addr + size) - (accum->loc + accum->size), hsize_t, size_t);
+                        H5_CHECKED_ASSIGN(add_size, size_t, (addr + size) - (accum->loc + accum->size), hsize_t);
 
                         /* Check if we need to adjust accumulator size */
                         if(H5F__accum_adjust(accum, fio_info, H5F_ACCUM_APPEND, add_size) < 0)
@@ -885,7 +885,7 @@ H5F__accum_free(const H5F_io_info_t *fio_info, H5FD_mem_t UNUSED type, haddr_t a
                 size_t new_accum_size;      /* Size of new accumulator buffer */
 
                 /* Calculate the size of the overlap with the accumulator, etc. */
-                H5_ASSIGN_OVERFLOW(overlap_size, (addr + size) - accum->loc, haddr_t, size_t);
+                H5_CHECKED_ASSIGN(overlap_size, size_t, (addr + size) - accum->loc, haddr_t);
                 new_accum_size = accum->size - overlap_size;
 
                 /* Move the accumulator buffer information to eliminate the freed block */
@@ -919,7 +919,7 @@ H5F__accum_free(const H5F_io_info_t *fio_info, H5FD_mem_t UNUSED type, haddr_t a
             haddr_t dirty_start = accum->loc + accum->dirty_off;
 
             /* Calculate the size of the overlap with the accumulator */
-            H5_ASSIGN_OVERFLOW(overlap_size, (accum->loc + accum->size) - addr, haddr_t, size_t);
+            H5_CHECKED_ASSIGN(overlap_size, size_t, (accum->loc + accum->size) - addr, haddr_t);
 
             /* Check if block to free begins before end of dirty region */
             if(accum->dirty && H5F_addr_lt(addr, dirty_end)) {

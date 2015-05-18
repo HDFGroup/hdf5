@@ -225,7 +225,7 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     } /* end else */
 
     /* Assign the final value to the scanline */
-    H5_ASSIGN_OVERFLOW(cd_values[H5Z_SZIP_PARM_PPS],scanline,hsize_t,unsigned);
+    H5_CHECKED_ASSIGN(cd_values[H5Z_SZIP_PARM_PPS], unsigned, scanline, hsize_t);
 
     /* Get datatype's endianness order */
     if((dtype_order = H5T_get_order(type)) == H5T_ORDER_ERROR)
@@ -301,10 +301,10 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid deflate aggression level")
 
     /* Copy the filter parameters into the szip parameter block */
-    H5_ASSIGN_OVERFLOW(sz_param.options_mask,cd_values[H5Z_SZIP_PARM_MASK],unsigned,int);
-    H5_ASSIGN_OVERFLOW(sz_param.bits_per_pixel,cd_values[H5Z_SZIP_PARM_BPP],unsigned,int);
-    H5_ASSIGN_OVERFLOW(sz_param.pixels_per_block,cd_values[H5Z_SZIP_PARM_PPB],unsigned,int);
-    H5_ASSIGN_OVERFLOW(sz_param.pixels_per_scanline,cd_values[H5Z_SZIP_PARM_PPS],unsigned,int);
+    H5_CHECKED_ASSIGN(sz_param.options_mask, int, cd_values[H5Z_SZIP_PARM_MASK], unsigned);
+    H5_CHECKED_ASSIGN(sz_param.bits_per_pixel, int, cd_values[H5Z_SZIP_PARM_BPP], unsigned);
+    H5_CHECKED_ASSIGN(sz_param.pixels_per_block, int, cd_values[H5Z_SZIP_PARM_PPB], unsigned);
+    H5_CHECKED_ASSIGN(sz_param.pixels_per_scanline, int, cd_values[H5Z_SZIP_PARM_PPS], unsigned);
 
     /* Input; uncompress */
     if (flags & H5Z_FLAG_REVERSE) {
@@ -314,7 +314,7 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         /* Get the size of the uncompressed buffer */
         newbuf = *buf;
         UINT32DECODE(newbuf,stored_nalloc);
-        H5_ASSIGN_OVERFLOW(nalloc,stored_nalloc,uint32_t,size_t);
+        H5_CHECKED_ASSIGN(nalloc, size_t, stored_nalloc, uint32_t);
 
         /* Allocate space for the uncompressed buffer */
         if(NULL==(outbuf = H5MM_malloc(nalloc)))

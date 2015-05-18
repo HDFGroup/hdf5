@@ -977,7 +977,7 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_
         } /* end if */
         H5T_close(fill->type);
         fill->type = NULL;
-        H5_ASSIGN_OVERFLOW(fill->size, H5T_get_size(dset_type), size_t, ssize_t);
+        H5_CHECKED_ASSIGN(fill->size, ssize_t, H5T_get_size(dset_type), size_t);
 
         /* Note that the fill value info has changed */
         *fill_changed = TRUE;

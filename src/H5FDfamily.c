@@ -1165,7 +1165,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
 
     /* Read from each member */
     while(size > 0) {
-        H5_ASSIGN_OVERFLOW(u,addr /file->memb_size,hsize_t,unsigned);
+        H5_CHECKED_ASSIGN(u, unsigned, addr / file->memb_size, hsize_t);
 
         sub = addr % file->memb_size;
 
@@ -1234,7 +1234,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
 
     /* Write to each member */
     while (size>0) {
-        H5_ASSIGN_OVERFLOW(u,addr /file->memb_size,hsize_t,unsigned);
+        H5_CHECKED_ASSIGN(u, unsigned, addr / file->memb_size, hsize_t);
 
         sub = addr % file->memb_size;
 
