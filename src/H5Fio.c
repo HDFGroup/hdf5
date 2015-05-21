@@ -100,6 +100,9 @@ H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+#ifdef QAK
+HDfprintf(stderr, "%s: read from addr = %a, size = %Zu\n", FUNC, addr, size);
+#endif /* QAK */
 
     HDassert(f);
     HDassert(f->shared);

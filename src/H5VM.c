@@ -386,55 +386,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VM_hyper_disjointp
- *
- * Purpose:	Determines if two hyperslabs are disjoint.
- *
- * Return:	Success:	FALSE if they are not disjoint.
- *				TRUE if they are disjoint.
- *
- *		Failure:	A hyperslab of zero size is disjoint from all
- *				other hyperslabs.
- *
- * Programmer:	Robb Matzke
- *		Thursday, October 16, 1997
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5VM_hyper_disjointp(unsigned n,
-    const hsize_t *offset1, const uint32_t *size1,
-    const hsize_t *offset2, const uint32_t *size2)
-{
-    unsigned	u;
-    htri_t      ret_value = FALSE;        /* Return value */
-
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if(!n || !size1 || !size2)
-        HGOTO_DONE(TRUE)
-
-    for(u = 0; u < n; u++) {
-        HDcompile_assert(sizeof(uint32_t) <= sizeof(hsize_t));
-
-        if(0 == size1[u] || 0 == size2[u])
-            HGOTO_DONE(TRUE)
-        if(((offset1 ? offset1[u] : 0) < (offset2 ? offset2[u] : 0) &&
-                    ((offset1 ? offset1[u] : 0) + size1[u] <= (offset2 ? offset2[u] : 0))) ||
-                ((offset2 ? offset2[u] : 0) < (offset1 ? offset1[u] : 0) &&
-                    ((offset2 ? offset2[u] : 0) + size2[u] <= (offset1 ? offset1[u] : 0))))
-            HGOTO_DONE(TRUE)
-    } /* end for */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VM_hyper_disjointp() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5VM_hyper_fill
  *
  * Purpose:	Similar to memset() except it operates on hyperslabs...
@@ -1068,17 +1019,12 @@ H5VM_array_down(unsigned n, const hsize_t *total_size, hsize_t *down)
  * Programmer:	Quincey Koziol
  *		Tuesday, June 22, 1999
  *
- * Modifications:
- *              Use precomputed accumulator array
- *              Quincey Koziol
- *		Saturday, April 26, 2003
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
 H5VM_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
 {
-    int             i;		/*counter				*/
+    unsigned        u;		/* Local index variable */
     hsize_t	    ret_value;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1088,8 +1034,8 @@ H5VM_array_offset_pre(unsigned n, const hsize_t *acc, const hsize_t *offset)
     HDassert(offset);
 
     /* Compute offset in array */
-    for(i = (int)(n - 1), ret_value = 0; i >= 0; --i)
-        ret_value += acc[i] * offset[i];
+    for(u = 0, ret_value = 0; u < n; u++)
+        ret_value += acc[u] * offset[u];
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VM_array_offset_pre() */
@@ -1157,7 +1103,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5VM_array_calc_pre(hsize_t offset, unsigned n, const hsize_t *down,
     hsize_t *coords)
 {
@@ -1258,18 +1204,51 @@ done:
  *              The chunk index is placed in the CHUNK_IDX location for return
  *              from this function
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Chunk index on success (can't fail)
  *
  * Programmer:	Quincey Koziol
  *		Monday, April 21, 2003
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+hsize_t
 H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
-    const hsize_t *down_nchunks, hsize_t *chunk_idx)
+    const hsize_t *down_nchunks)
 {
     hsize_t scaled_coord[H5VM_HYPER_NDIMS];	/* Scaled, coordinates, in terms of chunks */
+    hsize_t chunk_idx;          /* Chunk index computed */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(ndims <= H5VM_HYPER_NDIMS);
+    HDassert(coord);
+    HDassert(chunk);
+    HDassert(down_nchunks);
+
+    /* Defer to H5VM_chunk_index_scaled */
+    chunk_idx = H5VM_chunk_index_scaled(ndims, coord, chunk, down_nchunks, scaled_coord);
+    
+    FUNC_LEAVE_NOAPI(chunk_idx)
+} /* end H5VM_chunk_index() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VM_chunk_scaled
+ *
+ * Purpose:	Compute the scaled coordinates for a chunk offset
+ *
+ * Return:	<none>
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, November 19, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
+    hsize_t *scaled)
+{
     unsigned u;                 /* Local index variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1278,17 +1257,86 @@ H5VM_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
     HDassert(ndims <= H5VM_HYPER_NDIMS);
     HDassert(coord);
     HDassert(chunk);
-    HDassert(chunk_idx);
+    HDassert(scaled);
 
     /* Compute the scaled coordinates for actual coordinates */
+    /* (Note that the 'scaled' array is an 'OUT' parameter) */
     for(u = 0; u < ndims; u++)
-        scaled_coord[u] = coord[u] / chunk[u];
+        scaled[u] = coord[u] / chunk[u];
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VM_chunk_scaled() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VM_chunk_index_scaled
+ *
+ * Purpose:	Given a coordinate offset (COORD), the size of each chunk
+ *              (CHUNK), the number of chunks in each dimension (NCHUNKS)
+ *              and the number of dimensions of all of these (NDIMS), calculate
+ *              a "chunk index" for the chunk that the coordinate offset is
+ *              located in.
+ *
+ *              The chunk index starts at 0 and increases according to the
+ *              fastest changing dimension, then the next fastest, etc.
+ *
+ *              For example, with a 3x5 chunk size and 6 chunks in the fastest
+ *              changing dimension and 3 chunks in the slowest changing
+ *              dimension, the chunk indices are as follows:
+ *
+ *              +-----+-----+-----+-----+-----+-----+
+ *              |     |     |     |     |     |     |
+ *              |  0  |  1  |  2  |  3  |  4  |  5  |
+ *              |     |     |     |     |     |     |
+ *              +-----+-----+-----+-----+-----+-----+
+ *              |     |     |     |     |     |     |
+ *              |  6  |  7  |  8  |  9  | 10  | 11  |
+ *              |     |     |     |     |     |     |
+ *              +-----+-----+-----+-----+-----+-----+
+ *              |     |     |     |     |     |     |
+ *              | 12  | 13  | 14  | 15  | 16  | 17  |
+ *              |     |     |     |     |     |     |
+ *              +-----+-----+-----+-----+-----+-----+
+ *
+ *              The chunk index is placed in the CHUNK_IDX location for return
+ *              from this function
+ *
+ * Note:	This routine is identical to H5VM_chunk_index(), except for
+ *		caching the scaled information.  Make changes in both places.
+ *
+ * Return:	Chunk index on success (can't fail)
+ *
+ * Programmer:	Vailin Choi
+ *		Monday, February 9, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5VM_chunk_index_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
+    const hsize_t *down_nchunks, hsize_t *scaled)
+{
+    hsize_t chunk_idx;          /* Computed chunk index */
+    unsigned u;                 /* Local index variable */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(ndims <= H5VM_HYPER_NDIMS);
+    HDassert(coord);
+    HDassert(chunk);
+    HDassert(down_nchunks);
+    HDassert(scaled);
+
+    /* Compute the scaled coordinates for actual coordinates */
+    /* (Note that the 'scaled' array is an 'OUT' parameter) */
+    for(u = 0; u < ndims; u++)
+        scaled[u] = coord[u] / chunk[u];
 
     /* Compute the chunk index */
-    *chunk_idx = H5VM_array_offset_pre(ndims,down_nchunks,scaled_coord); /*lint !e772 scaled_coord will always be initialized */
+    chunk_idx = H5VM_array_offset_pre(ndims, down_nchunks, scaled); /*lint !e772 scaled_coord will always be initialized */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5VM_chunk_index() */
+    FUNC_LEAVE_NOAPI(chunk_idx)
+} /* end H5VM_chunk_index_scaled() */
 
 
 /*-------------------------------------------------------------------------

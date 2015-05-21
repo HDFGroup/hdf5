@@ -2716,8 +2716,8 @@ H5O_get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
     hdr->version = oh->version;
 
     /* Set the number of messages & chunks */
-    H5_ASSIGN_OVERFLOW(hdr->nmesgs, oh->nmesgs, size_t, unsigned);
-    H5_ASSIGN_OVERFLOW(hdr->nchunks, oh->nchunks, size_t, unsigned);
+    H5_CHECKED_ASSIGN(hdr->nmesgs, unsigned, oh->nmesgs, size_t);
+    H5_CHECKED_ASSIGN(hdr->nchunks, unsigned, oh->nchunks, size_t);
 
     /* Set the status flags */
     hdr->flags = oh->flags;

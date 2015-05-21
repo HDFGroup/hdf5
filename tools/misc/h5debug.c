@@ -329,6 +329,7 @@ main(int argc, char *argv[])
          */
         H5B_subid_t subtype = (H5B_subid_t)sig[H5_SIZEOF_MAGIC];
         unsigned    ndims;
+        uint32_t    dim[H5O_LAYOUT_NDIMS];
 
         switch(subtype) {
             case H5B_SNODE_ID:
@@ -337,6 +338,7 @@ main(int argc, char *argv[])
                     HDfprintf(stderr, "\nWarning: Providing the group's local heap address will give more information\n");
                     HDfprintf(stderr, "B-tree symbol table node usage:\n");
                     HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <address of local heap>\n\n");
+                    HDexit(4);
                 } /* end if */
 
                 status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
@@ -347,12 +349,37 @@ main(int argc, char *argv[])
                 if(extra == 0) {
                     HDfprintf(stderr, "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
                     HDfprintf(stderr, "B-tree chunked storage node usage:\n");
-                    HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions>\n");
+                    HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> <slowest chunk dim>...<fastest chunk dim>\n");
                     HDexit(4);
                 } /* end if */
 
+                /* Build array of chunk dimensions */
                 ndims = (unsigned)extra;
-                status = H5D_btree_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
+                dim[0] = extra2;
+                if(ndims > 1)
+                    dim[1] = extra3;
+                if(ndims > 2)
+                    dim[2] = extra4;
+
+                /* Check for dimension error */
+                if(ndims > 3) {
+                    HDfprintf(stderr, "ERROR: Only 3 dimensions support currently (fix h5debug)\n");
+                    HDfprintf(stderr, "B-tree chunked storage node usage:\n");
+                    HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> <slowest chunk dim>...<fastest chunk dim>\n");
+                    HDexit(4);
+                } /* end for */
+                for(u = 0; u < ndims; u++)
+                    if(0 == dim[u]) {
+                        HDfprintf(stderr, "ERROR: Chunk dimensions should be >0\n");
+                        HDfprintf(stderr, "B-tree chunked storage node usage:\n");
+                        HDfprintf(stderr, "\th5debug <filename> <B-tree node address> <# of dimensions> <slowest chunk dim>...<fastest chunk dim>\n");
+                        HDexit(4);
+                    } /* end if */
+
+                /* Set the last dimension (the element size) to zero */
+                dim[ndims] = 0;
+
+                status = H5D_btree_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims, dim);
                 break;
 
             default:
@@ -367,7 +394,7 @@ main(int argc, char *argv[])
         const H5B2_class_t *cls = get_H5B2_class(sig);
         HDassert(cls);
 
-        status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
+        status = H5B2__hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
 
     } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -385,7 +412,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
+        status = H5B2__int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
 
     } else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -402,7 +429,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (haddr_t)extra3);
+        status = H5B2__leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (haddr_t)extra3);
 
     } else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -491,7 +518,7 @@ main(int argc, char *argv[])
         const H5EA_class_t *cls = get_H5EA_class(sig);
         HDassert(cls);
 
-   /* Check for enough valid parameters */
+        /* Check for enough valid parameters */
         if(extra == 0) {
             HDfprintf(stderr, "ERROR: Need object header address containing the layout message in order to dump header\n");
             HDfprintf(stderr, "Extensible array header block usage:\n");
@@ -559,11 +586,11 @@ main(int argc, char *argv[])
         const H5FA_class_t *cls = get_H5FA_class(sig);
         HDassert(cls);
 
-  /* Check for enough valid parameters */
+        /* Check for enough valid parameters */
         if(extra == 0) {
-      HDfprintf(stderr, "ERROR: Need object header address containing the layout message in order to dump header\n");
+            HDfprintf(stderr, "ERROR: Need object header address containing the layout message in order to dump header\n");
             HDfprintf(stderr, "Fixed array header block usage:\n");
-      HDfprintf(stderr, "\th5debug <filename> <Fixed Array header address> <object header address>\n");
+            HDfprintf(stderr, "\th5debug <filename> <Fixed Array header address> <object header address>\n");
             HDexit(4);
         } /* end if */
 

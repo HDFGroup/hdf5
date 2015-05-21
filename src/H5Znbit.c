@@ -803,7 +803,7 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     cd_values_index = 2;
 
     /* Set "local" parameter for number of elements in the chunk */
-    H5_ASSIGN_OVERFLOW(cd_values[cd_values_index++], npoints, hssize_t, unsigned);
+    H5_CHECKED_ASSIGN(cd_values[cd_values_index++], unsigned, npoints, hssize_t);
 
     /* Assume no need to compress now, will be changed to FALSE later if not */
     need_not_compress = TRUE;

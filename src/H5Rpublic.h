@@ -14,7 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This file contains public declarations for the H5S module.
+ * This file contains public declarations for the H5R module.
  */
 #ifndef _H5Rpublic_H
 #define _H5Rpublic_H

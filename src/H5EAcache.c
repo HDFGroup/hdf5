@@ -43,7 +43,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
@@ -577,6 +577,7 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     haddr_t             arr_addr;       /* Address of array header in the file */
+    size_t              u;              /* Local index variable */
 
     /* Sanity check */
     HDassert(f);
@@ -638,8 +639,6 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Decode data block addresses in index block */
     if(iblock->ndblk_addrs > 0) {
-        size_t u;               /* Local index variable */
-
         /* Decode addresses of data blocks in index block */
         for(u = 0; u < iblock->ndblk_addrs; u++)
             H5F_addr_decode(f, &p, &iblock->dblk_addrs[u]);
@@ -647,8 +646,6 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Decode super block addresses in index block */
     if(iblock->nsblk_addrs > 0) {
-        size_t u;               /* Local index variable */
-
         /* Decode addresses of super blocks in index block */
         for(u = 0; u < iblock->nsblk_addrs; u++)
             H5F_addr_decode(f, &p, &iblock->sblk_addrs[u]);
@@ -872,11 +869,7 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, H5EA_iblock_t *iblock))
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -1300,11 +1293,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, H5EA_sblock_t *sblock))
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -1662,11 +1651,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, H5EA_dblock_t *dblock))
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -1791,9 +1776,6 @@ H5EA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(udata && udata->hdr && udata->parent);
-#ifdef QAK
-HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
-#endif /* QAK */
 
     /* Allocate the extensible array data block page */
     if(NULL == (dblk_page = H5EA__dblk_page_alloc(udata->hdr, udata->parent)))
@@ -2014,11 +1996,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, H5EA_dblk_page_t *dblk
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH

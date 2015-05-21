@@ -100,6 +100,7 @@ typedef struct H5B_shared_t {
     size_t              sizeof_len;     /* Size of file lengths (in bytes)   */
     uint8_t	        *page;	        /* Disk page */
     size_t              *nkey;          /* Offsets of each native key in native key buffer */
+    void                *udata;         /* 'Local' info for a B-tree         */
 } H5B_shared_t;
 
 /*

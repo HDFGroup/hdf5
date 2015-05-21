@@ -509,7 +509,7 @@ H5P__decode_size_t(const void **_pp, void *_value)
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
-    H5_ASSIGN_OVERFLOW(*value, enc_value, uint64_t, size_t);
+    H5_CHECKED_ASSIGN(*value, size_t, enc_value, uint64_t);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__decode_size_t() */
@@ -550,7 +550,7 @@ H5P__decode_hsize_t(const void **_pp, void *_value)
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
-    H5_ASSIGN_OVERFLOW(*value, enc_value, uint64_t, hsize_t);
+    H5_CHECKED_ASSIGN(*value, hsize_t, enc_value, uint64_t);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__decode_hsize_t() */
