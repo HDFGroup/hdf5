@@ -61,11 +61,16 @@
 #define H5D_ACS_PREEMPT_READ_CHUNKS_DEF         H5D_CHUNK_CACHE_W0_DEFAULT
 #define H5D_ACS_PREEMPT_READ_CHUNKS_ENC         H5P__encode_double
 #define H5D_ACS_PREEMPT_READ_CHUNKS_DEC         H5P__decode_double
-/* Definitions for VDS bounds option */
+/* Definitions for VDS view option */
 #define H5D_ACS_VDS_VIEW_SIZE                   sizeof(H5D_vds_view_t)
 #define H5D_ACS_VDS_VIEW_DEF                    H5D_VDS_LAST_AVAILABLE
 #define H5D_ACS_VDS_VIEW_ENC                    H5P__dacc_vds_view_enc
 #define H5D_ACS_VDS_VIEW_DEC                    H5P__dacc_vds_view_dec
+/* Definitions for VDS printf gap */
+#define H5D_ACS_VDS_PRINTF_GAP_SIZE             sizeof(hsize_t)
+#define H5D_ACS_VDS_PRINTF_GAP_DEF              (hsize_t)0
+#define H5D_ACS_VDS_PRINTF_GAP_ENC              H5P__encode_hsize_t
+#define H5D_ACS_VDS_PRINTF_GAP_DEC              H5P__decode_hsize_t
 
 /******************/
 /* Local Typedefs */
@@ -143,6 +148,7 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
     size_t rdcc_nbytes = H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
     double rdcc_w0 = H5D_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
     H5D_vds_view_t virtual_view = H5D_ACS_VDS_VIEW_DEF;         /* Default VDS view option */
+    hsize_t printf_gap = H5D_ACS_VDS_PRINTF_GAP_DEF;            /* Default VDS printf gap */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -165,6 +171,12 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
     /* Register the VDS view option */
     if(H5P_register_real(pclass, H5D_ACS_VDS_VIEW_NAME, H5D_ACS_VDS_VIEW_SIZE, &virtual_view,
             NULL, NULL, NULL, H5D_ACS_VDS_VIEW_ENC, H5D_ACS_VDS_VIEW_DEC,
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the VDS printf gap */
+    if(H5P_register_real(pclass, H5D_ACS_VDS_PRINTF_GAP_NAME, H5D_ACS_VDS_PRINTF_GAP_SIZE, &printf_gap,
+            NULL, NULL, NULL, H5D_ACS_VDS_PRINTF_GAP_ENC, H5D_ACS_VDS_PRINTF_GAP_DEC,
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -366,7 +378,7 @@ H5Pget_virtual_view(hid_t plist_id)
 
     /* Get value from property list */
     if(H5P_get(plist, H5D_ACS_VDS_VIEW_NAME, &ret_value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5D_VDS_ERROR, "unable to set value")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_VDS_ERROR, "unable to get value")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -376,7 +388,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5P__dacc_vds_view_enc
  *
- * Purpose:     Callback routine which is called whenever the vds bounds
+ * Purpose:     Callback routine which is called whenever the vds view
  *              property in the dataset access property list is encoded.
  *
  * Return:      Success:        Non-negative
@@ -413,7 +425,7 @@ H5P__dacc_vds_view_enc(const void *value, void **_pp, size_t *size)
 /*-------------------------------------------------------------------------
  * Function:    H5P__dacc_vds_view_dec
  *
- * Purpose:     Callback routine which is called whenever the vds bounds
+ * Purpose:     Callback routine which is called whenever the vds view
  *              property in the dataset access property list is encoded.
  *
  * Return:      Success:        Non-negative
@@ -442,4 +454,78 @@ H5P__dacc_vds_view_dec(const void **_pp, void *_value)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__dacc_vds_view_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_virtual_printf_gap
+ *
+ * Purpose:     VDSINC
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              May 21, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    HDassert(0 && "Checking code coverage..."); //VDSINC
+    /* Check argument */
+    if(gap_size == HSIZE_UNDEF)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid printf gap size")
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Update property list */
+    if(H5P_set(plist, H5D_ACS_VDS_PRINTF_GAP_NAME, &gap_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_virtual_printf_gap() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_virtual_printf_gap
+ *
+ * Purpose:     VDSINC
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              May 21, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(H5D_VDS_ERROR)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_VDS_ERROR, "can't find object for ID")
+
+    /* Get value from property list */
+    if(gap_size) {
+        HDassert(0 && "Checking code coverage..."); //VDSINC
+        if(H5P_get(plist, H5D_ACS_VDS_PRINTF_GAP_NAME, gap_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_VDS_ERROR, "unable to get value")
+    } //VDSINC
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_virtual_printf_gap() */
 

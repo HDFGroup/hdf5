@@ -57,7 +57,7 @@
 #define H5D_DEF_STORAGE_CONTIG_INIT   {HADDR_UNDEF, (hsize_t)0}
 #define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, HADDR_UNDEF,  NULL, {{HADDR_UNDEF, NULL}}}
 #define H5D_DEF_LAYOUT_CHUNK_INIT    {(unsigned)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
-#define H5D_DEF_STORAGE_VIRTUAL_INIT  {{HADDR_UNDEF, 0}, 0, NULL, 0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, TRUE}
+#define H5D_DEF_STORAGE_VIRTUAL_INIT  {{HADDR_UNDEF, 0}, 0, NULL, 0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, H5D_VDS_ERROR, HSIZE_UNDEF}
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 #define H5D_DEF_STORAGE_COMPACT  {H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }}
 #define H5D_DEF_STORAGE_CONTIG   {H5D_CONTIGUOUS, { .contig = H5D_DEF_STORAGE_CONTIG_INIT }}
@@ -1599,7 +1599,9 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     H5S_t *vspace;              /* Virtual dataset space selection */
     H5S_t *src_space;           /* Source dataset space selection */
     hbool_t new_layout = FALSE; /* Whether we are adding a new virtual layout message to plist */
+    H5O_storage_virtual_ent_t *ent = NULL; /* Convenience pointer to new VDS entry */
     hbool_t adding_entry = FALSE; /* Whether we are in the middle of adding an entry */
+    H5O_storage_virtual_ent_t *old_list = NULL; /* List pointer previously on property list */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1638,16 +1640,22 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
 
     /* If the layout was not already virtual, Start with default virtual layout.
      * Otherwise, add the mapping to the current list. */
-    if(layout.type != H5D_VIRTUAL) {
+    if(layout.type == H5D_VIRTUAL)
+        /* Save old list pointer for error recovery */
+        old_list = layout.storage.u.virt.list;
+    else {
         new_layout = TRUE;
         HDmemcpy(&layout, &H5D_def_layout_virtual_g, sizeof(H5D_def_layout_virtual_g));
-    } /* end if */
+
+        HDassert(layout.storage.u.virt.list_nalloc == 0);
+    } /* end else */
 
     /* Expand list if necessary */
     if(layout.storage.u.virt.list_nalloc == 0) {
         /* Allocate initial entry list */
         if(NULL == (layout.storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc(H5D_VIRTUAL_DEF_LIST_SIZE * sizeof(H5O_storage_virtual_ent_t))))
             HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't allocate virtual dataset mapping list")
+        adding_entry = TRUE;
         layout.storage.u.virt.list_nalloc = H5D_VIRTUAL_DEF_LIST_SIZE;
     } /* end if */
     else if(layout.storage.u.virt.list_nused
@@ -1656,28 +1664,34 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
         /* Double size of entry list.  Make sure to zero out new memory. */
         if(NULL == (layout.storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_realloc(layout.storage.u.virt.list, (size_t)2 * layout.storage.u.virt.list_nalloc * sizeof(H5O_storage_virtual_ent_t))))
             HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't reallocate virtual dataset mapping list")
+        adding_entry = TRUE;
         (void)HDmemset(layout.storage.u.virt.list + layout.storage.u.virt.list_nalloc, 0, layout.storage.u.virt.list_nalloc * sizeof(H5O_storage_virtual_ent_t));
         layout.storage.u.virt.list_nalloc *= (size_t)2;
     } /* end if */
 
     /* Add virtual dataset mapping entry */
-    if(NULL == (layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_file_name = HDstrdup(src_file_name)))
+    ent = &layout.storage.u.virt.list[layout.storage.u.virt.list_nused];
+    if(NULL == (ent->source_dset.file_name = HDstrdup(src_file_name)))
         HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name")
     adding_entry = TRUE;
-    if(NULL == (layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_dset_name = HDstrdup(src_dset_name)))
+    if(NULL == (ent->source_dset.dset_name = HDstrdup(src_dset_name)))
         HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name")
-    if(NULL == (layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_select = H5S_copy(src_space, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")
-    if(NULL == (layout.storage.u.virt.list[layout.storage.u.virt.list_nused].virtual_select = H5S_copy(vspace, FALSE, TRUE)))
+    if(NULL == (ent->source_dset.virtual_select = H5S_copy(vspace, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
-    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].unlim_dim_source = H5S_get_select_unlim_dim(src_space);
-    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].unlim_dim_virtual = H5S_get_select_unlim_dim(vspace);
-    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].unlim_extent_source = HSIZE_UNDEF;
-    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].unlim_extent_virtual = HSIZE_UNDEF;
-    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].clip_size_source = HSIZE_UNDEF;
-    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].clip_size_virtual = HSIZE_UNDEF;
-    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_space_status = H5O_VIRTUAL_STATUS_USER;
-    layout.storage.u.virt.list[layout.storage.u.virt.list_nused].virtual_space_status = H5O_VIRTUAL_STATUS_USER;
+    if(NULL == (ent->source_select = H5S_copy(src_space, FALSE, TRUE)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")
+    if(H5D_virtual_parse_source_name(ent->source_dset.file_name, &ent->parsed_source_file_name, &ent->psfn_static_strlen, &ent->psfn_nsubs) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't parse source file name")
+    if(H5D_virtual_parse_source_name(ent->source_dset.dset_name, &ent->parsed_source_dset_name, &ent->psdn_static_strlen, &ent->psdn_nsubs) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't parse source dataset name")
+    ent->unlim_dim_source = H5S_get_select_unlim_dim(src_space);
+    ent->unlim_dim_virtual = H5S_get_select_unlim_dim(vspace);
+    ent->unlim_extent_source = HSIZE_UNDEF;
+    ent->unlim_extent_virtual = HSIZE_UNDEF;
+    ent->clip_size_source = HSIZE_UNDEF;
+    ent->clip_size_virtual = HSIZE_UNDEF;
+    ent->source_space_status = H5O_VIRTUAL_STATUS_USER;
+    ent->virtual_space_status = H5O_VIRTUAL_STATUS_USER;
 
     /* Update min_dims */
     if(H5D_virtual_update_min_dims(&layout, layout.storage.u.virt.list_nused) < 0)
@@ -1685,32 +1699,52 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
 
     /* Finish adding entry */
     layout.storage.u.virt.list_nused++;
-    adding_entry = FALSE;
-
-    /* Set chunk information in property list.  If we are adding a new layout,
-     * use H5P__set_layout so other fields are initialized properly.  If we are
-     * extending the layout, just use H5P_set directly so we don't mess with
-     * anything else. */
-    if(new_layout) {
-        if(H5P__set_layout(plist, &layout) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
-    } /* end if */
-    else
-        if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
 
 done:
+    /* Only need to do things if we started to add an entry */
     if(adding_entry) {
-        HDassert(ret_value < 0);
+        hbool_t free_list = FALSE;
 
-        /* Free incomplete entry */
-        layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_file_name = (char *)H5MM_xfree(layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_file_name);
-        layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_dset_name = (char *)H5MM_xfree(layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_dset_name);
-        if(layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_select
-                && H5S_close(layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_select) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
-        layout.storage.u.virt.list[layout.storage.u.virt.list_nused].source_select = NULL;
-        HDassert(layout.storage.u.virt.list[layout.storage.u.virt.list_nused].virtual_select == NULL);
+        /* Set chunk information in property list.  If we are adding a new layout,
+         * use H5P__set_layout so other fields are initialized properly.  If we are
+         * extending the layout, just use H5P_set directly so we don't mess with
+         * anything else. */
+        if(new_layout) {
+            if(H5P__set_layout(plist, &layout) < 0) {
+                HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
+                free_list = TRUE;
+            } /* end if */
+        } /* end if */
+        else
+            if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0) {
+                HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
+                if(old_list != layout.storage.u.virt.list)
+                    free_list = TRUE;
+            } /* end if */
+
+        /* Check if the entry has been partly allocated but not added to the
+         * property list or not included in list_nused */
+        if((ret_value < 0) && ent) {
+            HDassert(ret_value < 0);
+
+            /* Free incomplete entry */
+            ent->source_dset.file_name = (char *)H5MM_xfree(ent->source_dset.file_name);
+            ent->source_dset.dset_name = (char *)H5MM_xfree(ent->source_dset.dset_name);
+            if(ent->source_dset.virtual_select && H5S_close(ent->source_dset.virtual_select) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection")
+            ent->source_dset.virtual_select = NULL;
+            if(ent->source_select && H5S_close(ent->source_select) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+            ent->source_select = NULL;
+            H5D_virtual_free_parsed_name(ent->parsed_source_file_name);
+            ent->parsed_source_file_name = NULL;
+            H5D_virtual_free_parsed_name(ent->parsed_source_dset_name);
+            ent->parsed_source_dset_name = NULL;
+
+            /* Free list if necessary */
+            if(free_list)
+                layout.storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_xfree(layout.storage.u.virt.list);
+        } /* end if */
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -1796,7 +1830,7 @@ H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
     if(index >= layout.storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].virtual_select, FALSE, TRUE)))
+    if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].source_dset.virtual_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
 
     /* Clip selection to extent */
@@ -1918,10 +1952,10 @@ H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name/*out*/,
     if(index >= layout.storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    HDassert(layout.storage.u.virt.list[index].source_file_name);
+    HDassert(layout.storage.u.virt.list[index].source_dset.file_name);
     if(name && (size > 0))
-        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_file_name, size);
-    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_file_name);
+        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_dset.file_name, size);
+    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_dset.file_name);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1965,10 +1999,10 @@ H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name/*out*/,
     if(index >= layout.storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    HDassert(layout.storage.u.virt.list[index].source_dset_name);
+    HDassert(layout.storage.u.virt.list[index].source_dset.dset_name);
     if(name && (size > 0))
-        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_dset_name, size);
-    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_dset_name);
+        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_dset.dset_name, size);
+    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_dset.dset_name);
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -395,6 +395,8 @@ H5_DLL herr_t H5Pget_chunk_cache(hid_t dapl_id,
        double *rdcc_w0/*out*/);
 H5_DLL herr_t H5Pset_virtual_view(hid_t plist_id, H5D_vds_view_t view);
 H5_DLL H5D_vds_view_t H5Pget_virtual_view(hid_t plist_id);
+H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size);
+H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size);
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);

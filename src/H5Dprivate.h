@@ -53,6 +53,7 @@
 #define H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME   "rdcc_nbytes"   /* Size of raw data chunk cache(bytes) */
 #define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"       /* Preemption read chunks first */
 #define H5D_ACS_VDS_VIEW_NAME               "vds_view"      /* VDS view option */
+#define H5D_ACS_VDS_PRINTF_GAP_NAME         "vds_printf_gap" /* VDS printf gap size */
 
 /* ======== Data transfer properties ======== */
 #define H5D_XFER_MAX_TEMP_BUF_NAME      "max_temp_buf"  /* Maximum temp buffer size */
@@ -180,6 +181,11 @@ H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_ad
 
 /* Functions that operate on virtual storage */
 H5_DLL herr_t H5D_virtual_update_min_dims(H5O_layout_t *layout, size_t idx);
+H5_DLL herr_t H5D_virtual_parse_source_name(const char *source_name,
+    H5O_storage_virtual_name_seg_t **parsed_name, size_t *static_strlen,
+    size_t *nsubs);
+H5_DLL void H5D_virtual_free_parsed_name(
+    H5O_storage_virtual_name_seg_t *name_seg);
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,

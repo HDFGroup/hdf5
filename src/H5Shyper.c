@@ -9812,8 +9812,9 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
                     block[i] = H5S_MAX_SIZE;
 
             /* Generate span tree in selection */
-            if(H5S_hyper_generate_spans(space) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to generate span tree")
+            if(!hslab->span_lst)
+                if(H5S_hyper_generate_spans(space) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to generate span tree")
 
             /* Indicate that the regular dimensions are no longer valid */
             hslab->diminfo_valid = FALSE;
@@ -9983,6 +9984,89 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S_hyper_get_clip_extent() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_get_unlim_block
+ PURPOSE
+    VDSINC
+ USAGE
+    VDSINC
+ RETURNS
+    New space on success/NULL on failure.
+ DESCRIPTION
+    VDSINC
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Note this assumes the offset has been normalized.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+H5S_t *
+H5S_hyper_get_unlim_block(const H5S_t *space, hsize_t block_index)
+{
+    H5S_hyper_sel_t *hslab;     /* Convenience pointer to hyperslab info */
+    H5S_t *space_out = NULL;
+    hsize_t start[H5S_MAX_RANK];
+    hsize_t stride[H5S_MAX_RANK];
+    hsize_t count[H5S_MAX_RANK];
+    hsize_t block[H5S_MAX_RANK];
+    unsigned i;
+    H5S_t *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Check parameters */
+    HDassert(space);
+    hslab = space->select.sel_info.hslab;
+    HDassert(hslab);
+    HDassert(hslab->unlim_dim >= 0);
+    HDassert(hslab->opt_unlim_diminfo[hslab->unlim_dim].count == H5S_UNLIMITED);
+
+    /* Set block to clip_size in unlimited dimension, H5S_MAX_SIZE in
+     * others so only unlimited dimension is clipped */
+    for(i = 0; i < space->extent.rank; i++) {
+        if((int)i == hslab->unlim_dim){
+            //HDassert(0 && "Checking code coverage..."); //VDSINC
+            start[i] = hslab->opt_unlim_diminfo[i].start + (block_index
+                    * hslab->opt_unlim_diminfo[i].stride);
+            count[i] = (hsize_t)1;
+        } /* end if */
+        else {
+            //HDassert(0 && "Checking code coverage..."); //VDSINC
+            start[i] = hslab->opt_unlim_diminfo[i].start;
+            count[i] = hslab->opt_unlim_diminfo[i].count;
+        } /* end else */
+        stride[i] = hslab->opt_unlim_diminfo[i].stride;
+        block[i] = hslab->opt_unlim_diminfo[i].block;
+    } /* end for */
+
+    /* Create output space, copy extent */
+    if(NULL == (space_out = H5S_create(H5S_SIMPLE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, NULL, "unable to create output dataspace")
+    if(H5S_extent_copy_real(&space_out->extent, &space->extent, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "unable to copy destination space extent")
+
+    /* Set offset to zeros */
+    (void)HDmemset(space_out->select.offset, 0, (size_t)space_out->extent.rank * sizeof(space_out->select.offset[0]));
+    space_out->select.offset_changed = FALSE;
+
+    /* "And" selection with calculate block to perform clip operation */
+    if(H5S_select_hyperslab(space_out, H5S_SELECT_SET, start, stride, count, block) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "can't select hyperslab")
+
+    /* Set return value */
+    ret_value = space_out;
+
+done:
+    /* Free space on error */
+    if(!ret_value)
+        if(space_out && H5S_close(space_out) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, NULL, "unable to release dataspace")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_hyper_get_unlim_block */
 
 
 /*--------------------------------------------------------------------------
