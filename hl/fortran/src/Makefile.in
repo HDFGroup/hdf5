@@ -680,7 +680,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 209
+LT_VERS_REVISION = 210
 LT_VERS_AGE = 0
 
 # Our main target, the high-level fortran library
