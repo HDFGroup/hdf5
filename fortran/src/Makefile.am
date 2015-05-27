@@ -114,7 +114,7 @@ endif
 # and H5fortran_types.F90, which are included in the Fortran library.
 
 # These are the helper programs we need to build.
-noinst_PROGRAMS = H5match_types H5fortran_detect H5test_kind
+noinst_PROGRAMS = H5match_types H5test_kind
 
 # Tell Automake to create H5f90i_gen.h before it builds the library
 # sources.  When it creates H5f90i_gen.h, it will create
@@ -129,19 +129,19 @@ H5fortran_types.F90 H5f90i_gen.h: H5match_types$(EXEEXT)
 
 # H5fort_type_defines.h is created by running H5fortran_detect.
 # Obviously, H5fortran_detect needs to be built first.
-H5fort_type_defines.h: H5fortran_detect$(EXEEXT)
-	$(RUNSERIAL) ./H5fortran_detect$(EXEEXT) > H5fort_type_defines.h
+#H5fort_type_defines.h: H5fortran_detect$(EXEEXT)
+#	$(RUNSERIAL) ./H5fortran_detect$(EXEEXT) > H5fort_type_defines.h
 
-H5match_types.$(OBJEXT): H5fort_type_defines.h
+#H5match_types.$(OBJEXT): H5fort_type_defines.h
 
 # Automake knows how to build fortran programs if we tell it the source
 # files.
-H5fortran_detect_SOURCES = H5fortran_detect.F90
+#H5fortran_detect_SOURCES = H5fortran_detect.F90
 
 # H5test_kind.F90 generates H5Fortran_detect.F90 depending on if 
 # intrinsic function SIZEOF is available.
 
-H5fortran_detect.F90: H5test_kind$(EXEEXT)
+H5_KINDff.F90: H5test_kind$(EXEEXT)
 	$(RUNSERIAL) ./H5test_kind$(EXEEXT) > H5fortran_detect.F90
 
 # H5test_kind.F90 is included in the distribution, and Automake knows
@@ -157,8 +157,8 @@ FORTRAN_API=yes
 # doing a parallel make, some modules could be made way before the
 # modules they depend upon are actually made. *sigh*
 H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
-H5fortran_types.lo:  H5fortran_types.F90
-H5fortran_detect.lo: H5fortran_detect.F90
+#H5fortran_types.lo:  H5fortran_types.F90
+#H5fortran_detect.lo: H5fortran_detect.F90
 H5test_kind.lo:      $(srcdir)/H5test_kind.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo

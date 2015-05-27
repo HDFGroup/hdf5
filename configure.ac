@@ -156,6 +156,7 @@ AC_MSG_RESULT([done])
 ## INSTRUMENT: whether INSTRUMENT is enabled. No default set here.
 ## CODESTACK: whether CODESTACK is enabled. Default no.
 ## HAVE_DMALLOC: whether system has dmalloc support. Default no.
+## HAVE_FLOAT128: whether system has Quad-Precision Math Library. Default no.
 ## DIRECT_VFD: whether DIRECT_VFD is enabled. Default no.
 ## THREADSAFE: whether THREADSAFE is enabled. Default no.
 ## STATIC_SHARED: whether static and/or shared libraries are requested.
@@ -174,6 +175,7 @@ AC_SUBST([HDF5_HL]) HDF5_HL=yes
 AC_SUBST([INSTRUMENT])
 AC_SUBST([CODESTACK]) CODESTACK=no
 AC_SUBST([HAVE_DMALLOC]) HAVE_DMALLOC=no
+AC_SUBST([HAVE_FLOAT128]) HAVE_FLOAT128=no
 AC_SUBST([DIRECT_VFD]) DIRECT_VFD=no
 AC_SUBST([THREADSAFE]) THREADSAFE=no
 AC_SUBST([STATIC_SHARED])
@@ -343,6 +345,8 @@ case "X-$ALLOW_UNSUPPORTED" in
     ;;
 esac
 
+AC_CHECK_SIZEOF([long double], [8])
+
 ## ----------------------------------------------------------------------
 ## Check if they would like the Fortran interface compiled
 ##
@@ -428,6 +432,29 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## See if C_LONG_DOUBLE is available, and if it is different from C_DOUBLE
   PAC_PROG_FC_HAVE_C_LONG_DOUBLE
+
+  PAC_FC_NATIVE_INTEGER
+
+  PAC_FC_AVAIL_KINDS
+  PAC_FC_SIZEOF_INT_KINDS
+  PAC_FC_SIZEOF_REAL_KINDS
+
+  AC_SUBST([PAC_FC_ALL_REAL_KINDS])
+  AC_SUBST([PAC_FC_ALL_INTEGER_KINDS])
+  AC_SUBST([PAC_FC_ALL_REAL_KINDS_SIZEOF])
+  AC_SUBST([PAC_FC_ALL_INTEGER_KINDS_SIZEOF])  
+  AC_SUBST([PAC_FORTRAN_NATIVE_INTEGER_KIND])
+  AC_SUBST([PAC_FORTRAN_NATIVE_INTEGER_SIZEOF])
+  AC_SUBST([PAC_FORTRAN_NATIVE_REAL_KIND])
+  AC_SUBST([PAC_FORTRAN_NATIVE_REAL_SIZEOF])
+  AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_KIND])
+  AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF])
+
+  ##if test $PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF > ${ac_cv_sizeof_long_double}; then
+  ##  AC_MSG_ERROR([Fortran default DOUBLE PRECISION ("X$PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF" Bytes) can not be represented in C ])
+  ##fi
+
+  ##PAC_FC_AVAIL_INTEGER_MODELS
 	
   ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
   if test "X$HAVE_SIZEOF_FORTRAN" = "Xno" && test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xno"; then
@@ -449,6 +476,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   if test "X$HAVE_C_LONG_DOUBLE_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_C_LONG_DOUBLE], [1], [Define if we have Fortran C_LONG_DOUBLE])
   fi
+  AC_DEFINE([FORTRAN_SIZEOF_LONG_DOUBLE], [SIZEOF_LONG_DOUBLE], [Determine the size of C long double])
 else
   FC="no"
 fi
@@ -1022,7 +1050,7 @@ AC_CHECK_SIZEOF([long long], [8])
 AC_CHECK_SIZEOF([__int64], [8])
 AC_CHECK_SIZEOF([float], [4])
 AC_CHECK_SIZEOF([double], [8])
-AC_CHECK_SIZEOF([long double], [8])
+## MOVED EARLIER FOR FORTRAN --MSB-- AC_CHECK_SIZEOF([long double], [8])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
@@ -1078,6 +1106,17 @@ AC_CHECK_SIZEOF([off64_t], [8])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
+
+## Check for the __FLOAT128
+
+AC_MSG_CHECKING([for __float128])
+AC_TRY_COMPILE([],
+  [__float128 x;],
+  [AC_DEFINE([HAVE_FLOAT128], [1],
+            [__float128 is available])
+  AC_MSG_RESULT([yes])],
+  AC_MSG_RESULT([no])
+)
 
 ## ----------------------------------------------------------------------
 ## Check if the dev_t type is a scalar type (must come after the check for
@@ -2850,6 +2889,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  fortran/Makefile
                  fortran/src/h5fc
                  fortran/src/Makefile
+                 fortran/src/H5fort_type_defines.h
                  fortran/test/Makefile
                  fortran/testpar/Makefile
                  fortran/examples/Makefile

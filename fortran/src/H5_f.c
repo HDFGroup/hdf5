@@ -56,7 +56,7 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     hid_t c_type_id;
     size_t tmp_val;
 
-/* Fortran INTEGER is may not be the same as C in; do all checking to find
+/* Fortran INTEGER may not be the same as C; do all checking to find
    an appropriate size
 */
     if (sizeof(int_f) == sizeof(int)) {
@@ -174,44 +174,44 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
 	if ((types[9] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
     /*
-     * FIND H5T_NATIVE_REAL_4
+     * FIND H5T_NATIVE_REAL_C_FLOAT
      */
-    if (sizeof(real_4_f) == sizeof(float)) {
+    if (sizeof(real_C_FLOAT_f) == sizeof(float)) {
       if ((types[10] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /*end if */
-    else if (sizeof(real_4_f) == sizeof(double)) {
+    else if (sizeof(real_C_FLOAT_f) == sizeof(double)) {
       if ((types[10] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /*end if */
 #if H5_SIZEOF_LONG_DOUBLE!=0
-    else if (sizeof(real_4_f) == sizeof(long double)) {
+    else if (sizeof(real_C_FLOAT_f) == sizeof(long double)) {
 	if ((types[10] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     } /*end else */
 #endif
     /*
-     * FIND H5T_NATIVE_REAL_8
+     * FIND H5T_NATIVE_REAL_C_DOUBLE
      */
-    if (sizeof(real_8_f) == sizeof(float)) {
+    if (sizeof(real_C_DOUBLE_f) == sizeof(float)) {
       if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /*end if */
-    else if (sizeof(real_8_f) == sizeof(double)) {
+    else if (sizeof(real_C_DOUBLE_f) == sizeof(double)) {
       if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /*end if */
 #if H5_SIZEOF_LONG_DOUBLE!=0
-    else if (sizeof(real_8_f) == sizeof(long double)) {
+    else if (sizeof(real_C_DOUBLE_f) == sizeof(long double)) {
 	if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     } /*end else */
 #endif
     /*
-     * FIND H5T_NATIVE_REAL_16
+     * FIND H5T_NATIVE_REAL_C_LONG_DOUBLE
      */
-    if (sizeof(real_16_f) == sizeof(float)) {
+    if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(float)) {
       if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /*end if */
-    else if (sizeof(real_16_f) == sizeof(double)) {
+    else if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(double)) {
       if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /*end if */
 #if H5_SIZEOF_LONG_DOUBLE!=0
-    else if (sizeof(real_16_f) == sizeof(long double)) {
+    else if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(long double)) {
 	if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     } /*end else */
 #endif

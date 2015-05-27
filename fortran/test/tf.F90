@@ -76,7 +76,7 @@ CONTAINS
 !DEC$endif
   SUBROUTINE verify_real_kind_7(string,value,correct_value,total_error)
     USE HDF5
-    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4) !should map to REAL*4 on most modern processors
+    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_C_FLOAT) !should map to REAL*4 on most modern processors
     CHARACTER(LEN=*) :: string
     REAL(real_kind_7) :: value, correct_value
     INTEGER :: total_error

@@ -282,4 +282,193 @@ dnl   Try link a simple MPI program.
 dnl   Change to the C language
       AC_LANG_POP(Fortran)
 ])
-	
+
+dnl ------------------------------------------------------
+dnl Determine the available KINDs for REALs and INTEGERs
+dnl ------------------------------------------------------
+dnl
+dnl This is a runtime test.
+dnl
+AC_DEFUN([PAC_FC_AVAIL_KINDS],[
+AC_LANG_PUSH([Fortran])
+rm -f pac_fconftest.out
+AC_RUN_IFELSE([
+    AC_LANG_SOURCE([
+        PROGRAM main
+        IMPLICIT NONE
+        INTEGER :: ik, k, lastkind
+        lastkind=SELECTED_INT_KIND(1)
+        OPEN(8, FILE="pac_fconftest.out", form="formatted")
+        WRITE(8,'("ik:")',ADVANCE='NO') ! Find integer KINDs
+        DO ik=2,30
+             k = SELECTED_INT_KIND(ik)
+             IF (k .NE. lastkind) THEN
+                  WRITE(8,'(I0,A)',ADVANCE='NO') lastkind," "
+                  lastkind = k
+             ENDIF
+             IF (k .LE. 0) EXIT
+        ENDDO
+        IF (k.NE.lastkind) WRITE(8,'(I0,A)',ADVANCE='NO') k, " "
+	dnl WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
+        WRITE(8,'(/)')
+        WRITE(8,'("rk:")',ADVANCE='NO') ! Find real KINDs
+        lastkind=SELECTED_REAL_KIND(1)
+        DO ik=2,30
+             k = SELECTED_REAL_KIND(ik)
+             IF (k .NE. lastkind) THEN
+                  WRITE(8,'(I0,A)',ADVANCE='NO') lastkind," "
+                  lastkind = k
+             ENDIF
+             IF (k .LE. 0) EXIT
+        ENDDO
+        dnl WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
+        IF (k.NE.lastkind) WRITE(8,'(I0,A)',ADVANCE='NO') k, " "
+
+        END
+    ])
+],[
+    if test -s pac_fconftest.out ; then
+		
+     dnl   pac_flag="`sed -e 's/  */ /g' pac_fconftest.out | tr '\012' ','`"
+        pac_validIntKinds="`sed -n -e 's/^.*ik://p' pac_fconftest.out`"
+        pac_validRealKinds="`sed -n -e 's/^.*rk://p' pac_fconftest.out`"
+        PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
+        PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
+        AC_MSG_CHECKING([for Fortran INTEGER KINDs])
+        AC_MSG_RESULT([$PAC_FC_ALL_INTEGER_KINDS])
+	AC_MSG_CHECKING([for Fortran REAL KINDs])
+	AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])
+    else
+        AC_MSG_RESULT([Error])
+        AC_MSG_WARN([No output from test program!])
+    fi
+    dnl rm -f pac_fconftest.out
+],[
+    AC_MSG_RESULT([Error])
+    AC_MSG_WARN([Failed to run program to determine available KINDs])
+],[
+    dnl Even when cross_compiling=yes,
+    dnl pac_validKinds needs to be set for PAC_FC_INTEGER_MODEL_MAP()
+     dnl pac_validKinds="`echo \"$2\" | tr ',' ':'`"
+     dnl AC_MSG_RESULT([$2])
+     dnl ifelse([$1],[],[PAC_FC_ALL_INTEGER_MODELS=$2],[$1=$2])
+])
+AC_LANG_POP([Fortran])
+])
+
+AC_DEFUN([PAC_FC_SIZEOF_INT_KINDS],[
+AC_REQUIRE([PAC_FC_AVAIL_KINDS])
+AC_MSG_CHECKING([sizeof of available INTEGER KINDs])
+AC_LANG_PUSH([Fortran])
+pack_int_sizeof=""
+rm -f pac_fconftest.out
+for kind in $pac_validIntKinds; do
+  AC_LANG_CONFTEST([
+      AC_LANG_SOURCE([
+                program main
+                integer (kind=$kind) a
+                open(8, file="pac_fconftest.out", form="formatted")
+                write(8,'(I0)') sizeof(a)
+                close(8)
+                end
+            ])
+        ])
+        AC_RUN_IFELSE([],[
+            if test -s pac_fconftest.out ; then
+                sizes="`cat pac_fconftest.out`"
+                pack_int_sizeof="$pack_int_sizeof $sizes,"
+            else
+                AC_MSG_WARN([No output from test program!])
+            fi
+            rm -f pac_fconftest.out
+        ],[
+            AC_MSG_WARN([Fortran program fails to build or run!])
+        ],[
+            pack_int_sizeof="$2"
+        ])
+done
+PAC_FC_ALL_INTEGER_KINDS_SIZEOF="{ $pack_int_sizeof }"
+AC_MSG_RESULT([$PAC_FC_ALL_INTEGER_KINDS_SIZEOF])
+AC_LANG_POP([Fortran])
+])
+
+AC_DEFUN([PAC_FC_SIZEOF_REAL_KINDS],[
+AC_REQUIRE([PAC_FC_AVAIL_KINDS])
+AC_MSG_CHECKING([sizeof of available REAL KINDs])
+AC_LANG_PUSH([Fortran])
+pack_real_sizeof=""
+rm -f pac_fconftest.out
+for kind in $pac_validRealKinds; do
+  AC_LANG_CONFTEST([
+      AC_LANG_SOURCE([
+                program main
+                REAL (kind=$kind) :: a
+                open(8, file="pac_fconftest.out", form="formatted")
+                write(8,'(I0)') sizeof(a)
+                close(8)
+                end
+            ])
+        ])
+        AC_RUN_IFELSE([],[
+            if test -s pac_fconftest.out ; then
+                sizes="`cat pac_fconftest.out`"
+                pack_real_sizeof="$pack_real_sizeof $sizes,"
+            else
+                AC_MSG_WARN([No output from test program!])
+            fi
+            rm -f pac_fconftest.out
+        ],[
+            AC_MSG_WARN([Fortran program fails to build or run!])
+        ],[
+            pack_real_sizeof="$2"
+        ])
+done
+PAC_FC_ALL_REAL_KINDS_SIZEOF="{ $pack_real_sizeof }"
+AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS_SIZEOF])
+AC_LANG_POP([Fortran])
+])
+
+AC_DEFUN([PAC_FC_NATIVE_INTEGER],[
+AC_REQUIRE([PAC_FC_AVAIL_KINDS])
+AC_MSG_CHECKING([sizeof of native KINDS])
+AC_LANG_PUSH([Fortran])
+pack_int_sizeof=""
+rm -f pac_fconftest.out
+  AC_LANG_CONFTEST([
+      AC_LANG_SOURCE([
+                program main
+                integer a
+                real b
+                double precision c
+                open(8, file="pac_fconftest.out", form="formatted")
+                write(8,*) sizeof(a)
+	        write(8,*) kind(a)
+	        write(8,*) sizeof(b)
+	        write(8,*) kind(b)
+                write(8,*) sizeof(c)
+                write(8,*) kind(c)
+                close(8)
+                end
+            ])
+        ])
+        AC_RUN_IFELSE([],[
+            if test -s pac_fconftest.out ; then
+                PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '1p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '2p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '3p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '4p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '5p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '6p' pac_fconftest.out`"
+            else
+                AC_MSG_WARN([No output from test program!])
+            fi
+            rm -f pac_fconftest.out
+        ],[
+            AC_MSG_WARN([Fortran program fails to build or run!])
+        ],[
+            pack_int_sizeof="$2"
+        ])
+dnl PAC_FC_ALL_INTEGER_KINDS_SIZEOF="{ $pack_int_sizeof }"
+AC_MSG_RESULT([$pack_int_sizeof])
+AC_LANG_POP([Fortran])
+])

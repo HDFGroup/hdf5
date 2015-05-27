@@ -246,7 +246,7 @@ MODULE h5lt
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf,dims) &
+     INTEGER FUNCTION h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,buf) &
           BIND(C,NAME='h5ltread_dataset_c')
        IMPORT :: C_CHAR, C_PTR
        IMPORT :: HID_T, SIZE_T, HSIZE_T
@@ -255,13 +255,12 @@ MODULE h5lt
        INTEGER(hid_t),   INTENT(in) :: type_id                       ! datatype identifier
        INTEGER(size_t) :: namelen                                    ! length of name buffer
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name ! name of the dataset
-       INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims            ! size of the buffer buf
        TYPE(C_PTR), VALUE :: buf                                     ! data buffer
      END FUNCTION h5ltread_dataset_c
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf,dtype) &
+     INTEGER FUNCTION h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf,dtype, SizeOf_buf) &
           BIND(C,NAME='h5ltset_attribute_c')
        IMPORT :: C_CHAR, C_PTR
        IMPORT :: HID_T, SIZE_T, HSIZE_T
@@ -276,6 +275,7 @@ MODULE h5lt
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the
                                                                      ! the buffer:
                                                                      ! R=Real, D=DOUBLE, I=Interger, C=Character
+       INTEGER(size_t) :: SizeOf_buf                                 ! Sizeof the buf datatype
      END FUNCTION h5ltset_attribute_c
   END INTERFACE
 
@@ -1092,20 +1092,18 @@ CONTAINS
        dset_name,&
        type_id,&
        buf,&
-       dims,&
        errcode )
 
     IMPLICIT NONE
     INTEGER(hid_t),   INTENT(in) :: loc_id              ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name           ! name of the dataset
     INTEGER(hid_t),   INTENT(in) :: type_id             ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims  ! size of the buffer buf
     TYPE(C_PTR) :: buf                                  ! data buffer
     INTEGER :: errcode                                  ! error code
     INTEGER(size_t) :: namelen 
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id, buf, dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id, buf)
 
   END SUBROUTINE h5ltread_dataset_f_ptr
 
@@ -1146,7 +1144,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_int1
 
@@ -1188,7 +1186,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_int2
 
@@ -1213,7 +1211,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_int3
 
@@ -1234,7 +1232,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_int4
 
@@ -1255,7 +1253,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_int5
 
@@ -1293,7 +1291,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_int6
 
@@ -1314,7 +1312,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_int7
 
@@ -1356,7 +1354,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_float1
 
@@ -1381,7 +1379,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_float2
 
@@ -1406,7 +1404,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_float3
 
@@ -1427,7 +1425,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_float4
 
@@ -1448,7 +1446,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_float5
 
@@ -1486,7 +1484,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_float6
 
@@ -1507,7 +1505,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_float7
 
@@ -1549,7 +1547,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_double1
 
@@ -1574,7 +1572,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_double2
 
@@ -1599,7 +1597,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_double3
 
@@ -1620,7 +1618,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_double4
 
@@ -1641,7 +1639,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_double5
 
@@ -1662,7 +1660,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_double6
 
@@ -1683,7 +1681,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_double7
 
@@ -1725,7 +1723,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_long_double1
 
@@ -1750,7 +1748,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_long_double2
 
@@ -1775,7 +1773,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_long_double3
 
@@ -1796,7 +1794,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_long_double4
 
@@ -1817,7 +1815,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_long_double5
 
@@ -1838,7 +1836,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_long_double6
 
@@ -1859,7 +1857,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_c_long_double7
 #endif
@@ -2604,7 +2602,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_int_f_1
 
@@ -2627,7 +2625,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_int_f_2
 
@@ -2650,7 +2648,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_int_f_3
 
@@ -2669,7 +2667,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_int_f_4
 
@@ -2688,7 +2686,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_int_f_5
 
@@ -2707,7 +2705,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_int_f_6
 
@@ -2726,7 +2724,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_INTEGER,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_int_f_7
 
@@ -2767,7 +2765,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_float_f_1
 
@@ -2790,7 +2788,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_float_f_2
 
@@ -2813,7 +2811,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_float_f_3
 
@@ -2832,7 +2830,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_float_f_4
 
@@ -2851,7 +2849,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_float_f_5
 
@@ -2870,7 +2868,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_float_f_6
 
@@ -2889,7 +2887,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_REAL,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_float_f_7
 
@@ -2929,7 +2927,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_double_f_1
 
@@ -2952,7 +2950,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_double_f_2
 
@@ -2975,7 +2973,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_double_f_3
 
@@ -2994,7 +2992,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_double_f_4
 
@@ -3013,7 +3011,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_double_f_5
 
@@ -3032,7 +3030,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_double_f_6
 
@@ -3051,7 +3049,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_double_f_7
 
@@ -3092,7 +3090,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_long_double_f_1
 
@@ -3115,7 +3113,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_long_double_f_2
 
@@ -3138,7 +3136,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_long_double_f_3
 
@@ -3157,7 +3155,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_long_double_f_4
 
@@ -3176,7 +3174,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_long_double_f_5
 
@@ -3195,7 +3193,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_long_double_f_6
 
@@ -3214,7 +3212,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
 
     namelen = LEN(dset_name)
-    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr,dims)
+    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_c_long_double_f_7
 #endif
@@ -3320,6 +3318,61 @@ CONTAINS
   ! Make/Read attribute functions
   !-------------------------------------------------------------------------
 
+  !-------------------------------------------------------------------------
+  ! Function: h5ltset_attribute_f
+  !
+  ! Purpose: Create and write an attribute
+  !
+  ! Return: Success: 0, Failure: -1
+  !
+  ! Programmer: M. Scot Breitenfeld
+  !
+  ! Date: May 4, 2015
+  !
+  ! Comments:
+  !
+  ! Modifications:
+  !
+  !-------------------------------------------------------------------------
+
+  SUBROUTINE h5ltset_attribute_f(loc_id,&
+       dset_name,&
+       attr_name,&
+       buf,&
+       buf_type, SizeOf_buf_type, &
+       size,&
+       errcode )
+
+    IMPLICIT NONE
+    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
+    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
+    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
+    TYPE(C_PTR) :: buf                                 ! data buffer
+    CHARACTER(LEN=*), INTENT(in) :: buf_type           !
+    INTEGER(size_t),  INTENT(in) :: size               ! size of attribute array
+    INTEGER :: errcode                                 ! error code
+    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(size_t) :: attrlen                                 ! name length 
+
+    CHARACTER(KIND=C_CHAR) :: buf_type_uppercase  
+    INTEGER(size_t) :: SizeOf_buf_type
+
+    namelen = LEN(dset_name)
+    attrlen = LEN(attr_name)
+
+    buf_type_uppercase(1:1) = buf_type(1:1)
+    IF(buf_type_uppercase(1:1).EQ.'i')THEN
+       buf_type_uppercase(1:1) = 'I'
+    ELSE IF(buf_type_uppercase(1:1).EQ.'r')THEN
+       buf_type_uppercase(1:1) = 'R'
+    ELSE IF(buf_type_uppercase(1:1).EQ.'c')THEN
+       buf_type_uppercase(1:1) = 'C'
+    ENDIF
+
+    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,&
+         buf,buf_type_uppercase(1:1)//C_NULL_CHAR, SizeOf_buf_type)
+
+  END SUBROUTINE h5ltset_attribute_f
 
   !-------------------------------------------------------------------------
   ! Function: h5ltset_attribute_int_f
@@ -3355,12 +3408,20 @@ CONTAINS
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER(size_t) :: attrlen                                 ! name length          
     TYPE(C_PTR) :: f_ptr
+    INTEGER(size_t) :: SizeOf_buf_type
 
     f_ptr = C_LOC(buf(1:1))
 
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    SizeOf_buf_type = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+#else
+    SizeOf_buf_type = SIZEOF(buf(1))
+#endif
+
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,f_ptr,'I'//C_NULL_CHAR)
+    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,&
+         f_ptr,'I'//C_NULL_CHAR,SizeOf_buf_type)
 
   END SUBROUTINE h5ltset_attribute_int_f
 
@@ -3398,12 +3459,20 @@ CONTAINS
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER(size_t) :: attrlen                         ! name length             
     TYPE(C_PTR) :: f_ptr
+    INTEGER(size_t) :: SizeOf_buf_type
 
     f_ptr = C_LOC(buf(1))
 
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    SizeOf_buf_type = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+#else
+    SizeOf_buf_type = SIZEOF(buf(1))
+#endif
+
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,f_ptr,'R'//C_NULL_CHAR)
+    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,&
+         f_ptr,'R'//C_NULL_CHAR, SizeOf_buf_type)
 
   END SUBROUTINE h5ltset_attribute_float_f
 
@@ -3441,12 +3510,20 @@ CONTAINS
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER(size_t) :: attrlen                         ! name length
     TYPE(C_PTR) :: f_ptr
+    INTEGER(size_t) :: SizeOf_buf_type
 
     f_ptr = C_LOC(buf(1)) 
 
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    SizeOf_buf_type = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+#else
+    SizeOf_buf_type = SIZEOF(buf(1))
+#endif
+
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,f_ptr,'D'//C_NULL_CHAR)
+    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,&
+         f_ptr,'R'//C_NULL_CHAR,SizeOf_buf_type)
 
   END SUBROUTINE h5ltset_attribute_double_f
 
@@ -3484,13 +3561,21 @@ CONTAINS
     INTEGER(size_t) :: attrlen                         ! name length
     INTEGER(size_t) :: buflen                          ! data buffer length           
     TYPE(C_PTR) :: f_ptr
+    INTEGER(size_t) :: SizeOf_buf_type
 
     f_ptr = C_LOC(buf(1)(1:1))
+
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+    SizeOf_buf_type = STORAGE_SIZE(buf(1)(1:1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+#else
+    SizeOf_buf_type = SIZEOF((buf(1)(1:1))
+#endif
 
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
     buflen = LEN(buf)
-    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,buflen,f_ptr,'C'//C_NULL_CHAR)
+    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,buflen,&
+         f_ptr,'C'//C_NULL_CHAR, SizeOf_buf_type)
 
   END SUBROUTINE h5ltset_attribute_string_f
 
@@ -3511,26 +3596,40 @@ CONTAINS
   !
   !-------------------------------------------------------------------------
 
-!!$  SUBROUTINE h5ltget_attribute_f(loc_id,&
-!!$       dset_name,&
-!!$       attr_name,&
-!!$       buf,&
-!!$       errcode )
-!!$
-!!$    IMPLICIT NONE
-!!$    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-!!$    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-!!$    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-!!$    INTEGER :: errcode                                 ! error code
-!!$    TYPE(C_PTR) :: buf! data buffer
-!!$    INTEGER(size_t) :: namelen                         ! name length
-!!$    INTEGER(size_t) :: attrlen                         ! name length
-!!$
-!!$    namelen = LEN(dset_name)
-!!$    attrlen = LEN(attr_name)
-!!$    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,'I'//C_NULL_CHAR)
-!!$
-!!$  END SUBROUTINE h5ltget_attribute_f
+  SUBROUTINE h5ltget_attribute_f(loc_id,&
+       dset_name,&
+       attr_name,&
+       buf, buf_type, SizeOf_buf_type, &
+       errcode )
+
+    IMPLICIT NONE
+    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
+    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
+    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
+    INTEGER, INTENT(out) :: errcode                    ! error code
+    CHARACTER(LEN=*), INTENT(in) :: buf_type
+    TYPE(C_PTR) :: buf! data buffer
+    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(size_t) :: attrlen                         ! name length
+    CHARACTER(KIND=C_CHAR) :: buf_type_uppercase
+    INTEGER(size_t) :: SizeOf_buf_type
+
+    namelen = LEN(dset_name)
+    attrlen = LEN(attr_name)
+
+    buf_type_uppercase(1:1) = buf_type(1:1)
+    IF(buf_type_uppercase(1:1).EQ.'i')THEN
+       buf_type_uppercase(1:1) = 'I'
+    ELSE IF(buf_type_uppercase(1:1).EQ.'r')THEN
+       buf_type_uppercase(1:1) = 'R'
+    ELSE IF(buf_type_uppercase(1:1).EQ.'c')THEN
+       buf_type_uppercase(1:1) = 'C'
+    ENDIF
+    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name, &
+         buf, buf_type_uppercase//C_NULL_CHAR, SizeOf_buf_type)
+
+
+  END SUBROUTINE h5ltget_attribute_f
 
   !-------------------------------------------------------------------------
   ! Function: h5ltget_attribute_int_f

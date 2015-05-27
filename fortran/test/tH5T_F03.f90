@@ -739,10 +739,10 @@ END SUBROUTINE test_array_compound_atomic
     CALL h5tget_size_f(H5T_NATIVE_INTEGER, type_sizei, error)
     CALL check("h5tget_size_f", error, total_error)
     IF(h5_sizeof(cf(1)%b(1)).EQ.4_size_t)THEN
-       CALL h5tget_size_f(H5T_NATIVE_REAL_4, type_sizer, error)
+       CALL h5tget_size_f(H5T_NATIVE_REAL_C_FLOAT, type_sizer, error)
        CALL check("h5tget_size_f", error, total_error)
     ELSE IF(h5_sizeof(cf(1)%b(1)).EQ.8_size_t)THEN
-       CALL h5tget_size_f(H5T_NATIVE_REAL_8, type_sizer, error)
+       CALL h5tget_size_f(H5T_NATIVE_REAL_C_DOUBLE, type_sizer, error)
        CALL check("h5tget_size_f", error, total_error)
     ENDIF
 
@@ -757,8 +757,8 @@ END SUBROUTINE test_array_compound_atomic
     ! Initialize the data type IDs 
     ! ---------------------------- 
     dtsinfo%datatype(1) = H5T_NATIVE_INTEGER;
-    dtsinfo%datatype(2) = H5T_NATIVE_REAL_4;
-    dtsinfo%datatype(3) = H5T_NATIVE_REAL_8;
+    dtsinfo%datatype(2) = H5T_NATIVE_REAL_C_FLOAT;
+    dtsinfo%datatype(3) = H5T_NATIVE_REAL_C_DOUBLE;
 
 
     ! Initialize the names of data members 
@@ -866,7 +866,7 @@ END SUBROUTINE test_array_compound_atomic
     CALL h5tcreate_f(H5T_COMPOUND_F, sizeof_compound , type, error)
     CALL check("h5tcreate_f", error, total_error)
 
-    CALL h5tarray_create_f(H5T_NATIVE_REAL_4, 1, dima, array_dt, error)
+    CALL h5tarray_create_f(H5T_NATIVE_REAL_C_FLOAT, 1, dima, array_dt, error)
     CALL check("h5tarray_create_f", error, total_error)
 
     CALL h5tinsert_f(TYPE, "Two", 0_size_t, array_dt, error)
@@ -1023,8 +1023,8 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  !should map to INTEGER*4 on most modern processors
     INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(Fortran_INTEGER_8) !should map to INTEGER*8 on most modern processors
     
-    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4)   !should map to REAL*4 on most modern processors
-    INTEGER, PARAMETER :: real_kind_15 = SELECTED_REAL_KIND(Fortran_REAL_8)  !should map to REAL*8 on most modern processors
+    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_C_FLOAT)   !should map to REAL*4 on most modern processors
+    INTEGER, PARAMETER :: real_kind_15 = SELECTED_REAL_KIND(Fortran_REAL_C_DOUBLE)  !should map to REAL*8 on most modern processors
     
     CHARACTER(LEN=12), PARAMETER :: filename = "dsetf_F03.h5" ! File name
     CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"     ! Dataset name
@@ -2978,7 +2978,7 @@ SUBROUTINE test_nbit(total_error )
   USE ISO_C_BINDING
 
   IMPLICIT NONE
-  INTEGER, PARAMETER :: wp = SELECTED_REAL_KIND(Fortran_REAL_4) !should map to REAL*4 on most modern processors
+  INTEGER, PARAMETER :: wp = SELECTED_REAL_KIND(Fortran_REAL_C_FLOAT) !should map to REAL*4 on most modern processors
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(hid_t) :: file
   
@@ -3128,7 +3128,7 @@ SUBROUTINE t_enum_conv(total_error)
   INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4) !should map to INTEGER*4 on most modern processors
   INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(Fortran_INTEGER_8)!should map to INTEGER*8 on most modern processors
   
-  INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4)  !should map to REAL*4 on most modern processors
+  INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_C_FLOAT)  !should map to REAL*4 on most modern processors
 
   INTEGER(hid_t) :: cwg=-1, dtype=-1, space=-1, dset=-1 ! Handles
   INTEGER(hid_t) :: file ! Handles

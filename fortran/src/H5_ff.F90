@@ -379,12 +379,12 @@ CONTAINS
           h5_type = H5T_NATIVE_INTEGER_8
        ENDIF
     ELSE IF(flag.EQ.H5_REAL_KIND)THEN
-       IF(kind.EQ.Fortran_REAL_4)THEN
-          h5_type = H5T_NATIVE_REAL_4
-       ELSE IF(kind.EQ.Fortran_REAL_8)THEN
-          h5_type = H5T_NATIVE_REAL_8
-       ELSE IF(kind.EQ.Fortran_REAL_16)THEN
-          h5_type = H5T_NATIVE_REAL_16
+       IF(kind.EQ.Fortran_REAL_C_FLOAT)THEN
+          h5_type = H5T_NATIVE_REAL_C_FLOAT
+       ELSE IF(kind.EQ.Fortran_REAL_C_DOUBLE)THEN
+          h5_type = H5T_NATIVE_REAL_C_DOUBLE
+       ELSE IF(kind.EQ.Fortran_REAL_C_LONG_DOUBLE)THEN
+          h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
        ENDIF
     ENDIF
 

@@ -101,14 +101,14 @@ DIST_COMMON = $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(srcdir)/H5config_f.inc.in \
 	$(top_srcdir)/bin/mkinstalldirs $(srcdir)/h5fc.in \
-	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/test-driver README
+	$(srcdir)/H5fort_type_defines.h.in $(top_srcdir)/bin/depcomp \
+	$(top_srcdir)/bin/test-driver README
 
 # Some Fortran compilers can't build shared libraries, so sometimes we
 # want to build a shared C library and a static Fortran library.  If so,
 # pass the -static flag to the library linker.
 @FORTRAN_SHARED_CONDITIONAL_FALSE@am__append_1 = -static
-noinst_PROGRAMS = H5match_types$(EXEEXT) H5fortran_detect$(EXEEXT) \
-	H5test_kind$(EXEEXT)
+noinst_PROGRAMS = H5match_types$(EXEEXT) H5test_kind$(EXEEXT)
 TESTS =
 subdir = fortran/src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -118,7 +118,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h H5config_f.inc
-CONFIG_CLEAN_FILES = h5fc
+CONFIG_CLEAN_FILES = h5fc H5fort_type_defines.h
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -166,9 +166,6 @@ libhdf5_fortran_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
 	$(AM_FCFLAGS) $(FCFLAGS) $(libhdf5_fortran_la_LDFLAGS) \
 	$(LDFLAGS) -o $@
 PROGRAMS = $(noinst_PROGRAMS)
-am_H5fortran_detect_OBJECTS = H5fortran_detect.$(OBJEXT)
-H5fortran_detect_OBJECTS = $(am_H5fortran_detect_OBJECTS)
-H5fortran_detect_LDADD = $(LDADD)
 H5match_types_SOURCES = H5match_types.c
 H5match_types_OBJECTS = H5match_types.$(OBJEXT)
 H5match_types_LDADD = $(LDADD)
@@ -234,10 +231,9 @@ AM_V_FC = $(am__v_FC_@AM_V@)
 am__v_FC_ = $(am__v_FC_@AM_DEFAULT_V@)
 am__v_FC_0 = @echo "  FC      " $@;
 am__v_FC_1 = 
-SOURCES = $(libhdf5_fortran_la_SOURCES) $(H5fortran_detect_SOURCES) \
-	H5match_types.c $(H5test_kind_SOURCES)
-DIST_SOURCES = $(libhdf5_fortran_la_SOURCES) \
-	$(H5fortran_detect_SOURCES) H5match_types.c \
+SOURCES = $(libhdf5_fortran_la_SOURCES) H5match_types.c \
+	$(H5test_kind_SOURCES)
+DIST_SOURCES = $(libhdf5_fortran_la_SOURCES) H5match_types.c \
 	$(H5test_kind_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -518,6 +514,7 @@ H5_LDFLAGS = @H5_LDFLAGS@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
+HAVE_FLOAT128 = @HAVE_FLOAT128@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
@@ -564,6 +561,16 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
+PAC_FC_ALL_INTEGER_KINDS = @PAC_FC_ALL_INTEGER_KINDS@
+PAC_FC_ALL_INTEGER_KINDS_SIZEOF = @PAC_FC_ALL_INTEGER_KINDS_SIZEOF@
+PAC_FC_ALL_REAL_KINDS = @PAC_FC_ALL_REAL_KINDS@
+PAC_FC_ALL_REAL_KINDS_SIZEOF = @PAC_FC_ALL_REAL_KINDS_SIZEOF@
+PAC_FORTRAN_NATIVE_DOUBLE_KIND = @PAC_FORTRAN_NATIVE_DOUBLE_KIND@
+PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF = @PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF@
+PAC_FORTRAN_NATIVE_INTEGER_KIND = @PAC_FORTRAN_NATIVE_INTEGER_KIND@
+PAC_FORTRAN_NATIVE_INTEGER_SIZEOF = @PAC_FORTRAN_NATIVE_INTEGER_SIZEOF@
+PAC_FORTRAN_NATIVE_REAL_KIND = @PAC_FORTRAN_NATIVE_REAL_KIND@
+PAC_FORTRAN_NATIVE_REAL_SIZEOF = @PAC_FORTRAN_NATIVE_REAL_SIZEOF@
 PARALLEL = @PARALLEL@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PERL = @PERL@
@@ -753,10 +760,6 @@ MOSTLYCLEANFILES = H5fortran_types.F90 H5f90i_gen.h H5fort_type_defines.h \
 # H5fortran_types.F90 as a side effect.
 BUILT_SOURCES = H5f90i_gen.h
 
-# Automake knows how to build fortran programs if we tell it the source
-# files.
-H5fortran_detect_SOURCES = H5fortran_detect.F90
-
 # H5test_kind.F90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
 H5test_kind_SOURCES = H5test_kind.F90
@@ -832,6 +835,8 @@ distclean-hdr:
 	-rm -f H5config_f.inc stamp-h2
 h5fc: $(top_builddir)/config.status $(srcdir)/h5fc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+H5fort_type_defines.h: $(top_builddir)/config.status $(srcdir)/H5fort_type_defines.h.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -879,10 +884,6 @@ clean-noinstPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-
-H5fortran_detect$(EXEEXT): $(H5fortran_detect_OBJECTS) $(H5fortran_detect_DEPENDENCIES) $(EXTRA_H5fortran_detect_DEPENDENCIES) 
-	@rm -f H5fortran_detect$(EXEEXT)
-	$(AM_V_FCLD)$(FCLINK) $(H5fortran_detect_OBJECTS) $(H5fortran_detect_LDADD) $(LIBS)
 
 H5match_types$(EXEEXT): $(H5match_types_OBJECTS) $(H5match_types_DEPENDENCIES) $(EXTRA_H5match_types_DEPENDENCIES) 
 	@rm -f H5match_types$(EXEEXT)
@@ -1389,15 +1390,19 @@ H5fortran_types.F90 H5f90i_gen.h: H5match_types$(EXEEXT)
 
 # H5fort_type_defines.h is created by running H5fortran_detect.
 # Obviously, H5fortran_detect needs to be built first.
-H5fort_type_defines.h: H5fortran_detect$(EXEEXT)
-	$(RUNSERIAL) ./H5fortran_detect$(EXEEXT) > H5fort_type_defines.h
+#H5fort_type_defines.h: H5fortran_detect$(EXEEXT)
+#	$(RUNSERIAL) ./H5fortran_detect$(EXEEXT) > H5fort_type_defines.h
 
-H5match_types.$(OBJEXT): H5fort_type_defines.h
+#H5match_types.$(OBJEXT): H5fort_type_defines.h
+
+# Automake knows how to build fortran programs if we tell it the source
+# files.
+#H5fortran_detect_SOURCES = H5fortran_detect.F90
 
 # H5test_kind.F90 generates H5Fortran_detect.F90 depending on if 
 # intrinsic function SIZEOF is available.
 
-H5fortran_detect.F90: H5test_kind$(EXEEXT)
+H5_KINDff.F90: H5test_kind$(EXEEXT)
 	$(RUNSERIAL) ./H5test_kind$(EXEEXT) > H5fortran_detect.F90
 
 # Hardcode the dependencies of these files. There isn't a known way of
@@ -1405,8 +1410,8 @@ H5fortran_detect.F90: H5test_kind$(EXEEXT)
 # doing a parallel make, some modules could be made way before the
 # modules they depend upon are actually made. *sigh*
 H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
-H5fortran_types.lo:  H5fortran_types.F90
-H5fortran_detect.lo: H5fortran_detect.F90
+#H5fortran_types.lo:  H5fortran_types.F90
+#H5fortran_detect.lo: H5fortran_detect.F90
 H5test_kind.lo:      $(srcdir)/H5test_kind.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo

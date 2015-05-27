@@ -314,7 +314,6 @@ CONTAINS
      CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dt4_id, error)
      CALL check("h5tclose_f", error, total_error)
-
      !
      ! Create and store compound datatype with the character and
      ! array members.

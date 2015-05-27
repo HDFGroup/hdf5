@@ -86,8 +86,7 @@ h5ltread_dataset_c (hid_t_f *loc_id,
                      size_t_f *namelen,
                      _fcd name,
                      hid_t_f *type_id,
-                     void *buf,
-                     hsize_t_f *dims);
+                     void *buf);
 
 HDF5_HL_F90CSTUBDLL
 int_f
@@ -97,7 +96,7 @@ h5ltset_attribute_c(hid_t_f *loc_id,
 		    size_t_f *attrnamelen,
 		    _fcd attrname,
 		    size_t_f *size,
-		    void *buf, char *dtype);
+		    void *buf, char *dtype, size_t_f *sizeof_val);
 
 
 HDF5_HL_F90CSTUBDLL

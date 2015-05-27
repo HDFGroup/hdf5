@@ -14,3 +14,6 @@
 
 ! Define if the intrinsic function C_LONG_DOUBLE exists
 #undef FORTRAN_HAVE_C_LONG_DOUBLE
+
+! Define the size of C's long double
+#define H5_SIZEOF_LONG_DOUBLE

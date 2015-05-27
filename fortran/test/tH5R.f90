@@ -125,7 +125,6 @@ SUBROUTINE refobjtest(cleanup, total_error)
   CALL check("h5tcopy_f",error,total_error)
   CALL h5tcommit_f(file_id, "MyType", type_id, error)
   CALL check("h5tcommit_f",error,total_error)
-
   !
   !  Close dataspaces, groups and integer dataset
   !
@@ -232,7 +231,6 @@ SUBROUTINE refobjtest(cleanup, total_error)
   CALL check("h5dclose_f",error,total_error)
   CALL h5fclose_f(file_id, error)
   CALL check("h5fclose_f",error,total_error)
-
 
   IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
