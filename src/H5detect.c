@@ -40,7 +40,7 @@ static const char *FileHeader = "\n\
  *		Livermore National Laboratory.
  *
  *		Detects machine byte order and floating point
- *		format and generates a C source file (native.c)
+ *		format and generates a C source file (H5Tinit.c)
  *		to describe those paramters.
  *
  * Assumptions: We have an ANSI compiler.  We're on a Unix like
