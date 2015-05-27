@@ -259,7 +259,7 @@ H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
     /* Get the number of elements in the dataset's dataspace */
     if((snpoints = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "dataset has negative number of elements")
-    H5_ASSIGN_OVERFLOW(npoints, snpoints, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(npoints, size_t, snpoints, hssize_t);
 
     /* Initialize the fill value buffer */
     if(H5D__fill_init(&fb_info, NULL, NULL, NULL, NULL, NULL,
@@ -644,6 +644,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
     size_t sieve_size = (size_t)-1;   /* Size of sieve buffer */
     haddr_t rel_eoa;	        /* Relative end of file address	*/
     hsize_t max_data;           /* Actual maximum size of data to cache */
+    hsize_t min;                /* temporary minimum value (avoids some ugly macro nesting) */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -684,7 +685,8 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
             max_data = store_contig->dset_size - dst_off;
 
             /* Compute the size of the sieve buffer */
-            H5_ASSIGN_OVERFLOW(dset_contig->sieve_size, MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size), hsize_t, size_t);
+            min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size);
+            H5_CHECKED_ASSIGN(dset_contig->sieve_size, size_t, min, hsize_t);
 
             /* Read the new sieve buffer */
             if(H5F_block_read(file, H5FD_MEM_DRAW, dset_contig->sieve_loc, dset_contig->sieve_size, udata->dxpl_id, dset_contig->sieve_buf) < 0)
@@ -757,9 +759,13 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
                 /* Only need this when resizing sieve buffer */
                 max_data = store_contig->dset_size - dst_off;
 
-                /* Compute the size of the sieve buffer */
-                /* Don't read off the end of the file, don't read past the end of the data element and don't read more than the buffer size */
-                H5_ASSIGN_OVERFLOW(dset_contig->sieve_size, MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size), hsize_t, size_t);
+                /* Compute the size of the sieve buffer.
+                 * Don't read off the end of the file, don't read past
+                 * the end of the data element, and don't read more than
+                 * the buffer size.
+                 */
+                min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size); 
+                H5_CHECKED_ASSIGN(dset_contig->sieve_size, size_t, min, hsize_t);
 
                 /* Update local copies of sieve information */
                 sieve_start = dset_contig->sieve_loc;
@@ -915,6 +921,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
     size_t sieve_size = (size_t)-1; /* size of sieve buffer */
     haddr_t rel_eoa;	        /* Relative end of file address	*/
     hsize_t max_data;           /* Actual maximum size of data to cache */
+    hsize_t min;                /* temporary minimum value (avoids some ugly macro nesting) */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -960,7 +967,8 @@ if(dset_contig->sieve_size > len)
             max_data = store_contig->dset_size - dst_off;
 
             /* Compute the size of the sieve buffer */
-            H5_ASSIGN_OVERFLOW(dset_contig->sieve_size, MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size), hsize_t, size_t);
+            min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size); 
+            H5_CHECKED_ASSIGN(dset_contig->sieve_size, size_t, min, hsize_t);
 
             /* Check if there is any point in reading the data from the file */
             if(dset_contig->sieve_size > len) {
@@ -1075,9 +1083,13 @@ if(dset_contig->sieve_size > len)
                     /* Only need this when resizing sieve buffer */
                     max_data = store_contig->dset_size - dst_off;
 
-                    /* Compute the size of the sieve buffer */
-                    /* Don't read off the end of the file, don't read past the end of the data element and don't read more than the buffer size */
-                    H5_ASSIGN_OVERFLOW(dset_contig->sieve_size, MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size), hsize_t, size_t);
+                    /* Compute the size of the sieve buffer.
+                     * Don't read off the end of the file, don't read past
+                     * the end of the data element, and don't read more than
+                     * the buffer size.
+                     */
+                    min = MIN3(rel_eoa - dset_contig->sieve_loc, max_data, dset_contig->sieve_buf_size); 
+                    H5_CHECKED_ASSIGN(dset_contig->sieve_size, size_t, min, hsize_t);
 
                     /* Update local copies of sieve information */
                     sieve_start = dset_contig->sieve_loc;

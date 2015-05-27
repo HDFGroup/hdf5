@@ -88,9 +88,9 @@ H5FL_EXTERN(H5B_t);
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5B_node_dest(H5B_t *bt);
+H5_DLL herr_t H5B__node_dest(H5B_t *bt);
 #ifdef H5B_DEBUG
-herr_t H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type,
+herr_t H5B__assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type,
 			 void *udata);
 #endif
 

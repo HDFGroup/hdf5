@@ -467,7 +467,7 @@ H5G__link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip,
         *last_lnk += skip;
 
     /* Iterate over link messages */
-    H5_ASSIGN_OVERFLOW(/* To: */ u, /* From: */ skip, /* From: */ hsize_t, /* To: */ size_t)
+    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t)
     for(; u < ltable->nlinks && !ret_value; u++) {
         /* Make the callback */
         ret_value = (op)(&(ltable->lnks[u]), op_data);

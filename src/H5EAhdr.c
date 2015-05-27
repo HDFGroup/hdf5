@@ -612,6 +612,70 @@ END_FUNC(PKG)   /* end H5EA__hdr_modified() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5EA__hdr_protect
+ *
+ * Purpose:	Convenience wrapper around protecting extensible array header
+ *
+ * Return:	Non-NULL pointer to index block on success/NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Jul 31 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+H5EA_hdr_t *, NULL, NULL,
+H5EA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata,
+    H5AC_protect_t rw))
+
+    /* Local variables */
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(H5F_addr_defined(ea_addr));
+
+    /* Protect the header */
+    if(NULL == (ret_value = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, ctx_udata, rw)))
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
+
+CATCH
+
+END_FUNC(PKG)   /* end H5EA__hdr_protect() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__hdr_unprotect
+ *
+ * Purpose:	Convenience wrapper around unprotecting extensible array header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug  1 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__hdr_unprotect(H5EA_hdr_t *hdr, hid_t dxpl_id, unsigned cache_flags))
+
+    /* Local variables */
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Unprotect the header */
+    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_EARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array hdr, address = %llu", (unsigned long long)hdr->addr)
+
+CATCH
+
+END_FUNC(PKG)   /* end H5EA__hdr_unprotect() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5EA__hdr_delete
  *
  * Purpose:	Delete an extensible array, starting with the header
@@ -665,7 +729,7 @@ HDfprintf(stderr, "%s: hdr->idx_blk_addr = %a\n", FUNC, hdr->idx_blk_addr);
 CATCH
 
     /* Unprotect the header, deleting it if an error hasn't occurred */
-    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_EARRAY_HDR, hdr->addr, hdr, cache_flags) < 0)
+    if(H5EA__hdr_unprotect(hdr, dxpl_id, cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
 END_FUNC(PKG)   /* end H5EA__hdr_delete() */

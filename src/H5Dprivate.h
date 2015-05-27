@@ -176,7 +176,7 @@ H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_ad
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
-				int indent, int fwidth, unsigned ndims);
+    int indent, int fwidth, unsigned ndims, const uint32_t *dim);
 
 #endif /* _H5Dprivate_H */
 

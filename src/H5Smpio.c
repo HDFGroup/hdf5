@@ -94,13 +94,13 @@ H5S_mpio_all_type(const H5S_t *space, size_t elmt_size,
     /* Just treat the entire extent as a block of bytes */
     if((snelmts = (hssize_t)H5S_GET_EXTENT_NPOINTS(space)) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
+    H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
 
     total_bytes = (hsize_t)elmt_size * nelmts;
 
     /* fill in the return values */
     *new_type = MPI_BYTE;
-    H5_ASSIGN_OVERFLOW(*count, total_bytes, hsize_t, int);
+    H5_CHECKED_ASSIGN(*count, int, total_bytes, hsize_t);
     *is_derived_type = FALSE;
 
 done:
@@ -388,7 +388,7 @@ H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute,
     sel_iter_init = TRUE;	/* Selection iteration info has been initialized */
 
     /* Set the number of elements to iterate over */
-    H5_ASSIGN_OVERFLOW(max_elem, num_points, hsize_t, size_t);
+    H5_CHECKED_ASSIGN(max_elem, size_t, num_points, hsize_t);
 
     /* Loop, while elements left in selection */
     u = 0;

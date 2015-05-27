@@ -341,7 +341,7 @@
   ENDMACRO (ADD_H5_TEST_META)
 
   MACRO (ADD_H5_UD_TEST testname resultcode resultfile)
-    if (HDF5_BUILD_TOOLS AND NOT HDF5_ENABLE_USING_MEMCHECKER)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
           NAME H5REPACK_UD-${testname}-clearall-objects
@@ -382,7 +382,7 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_UD-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_UD-${testname}")
-    endif (HDF5_BUILD_TOOLS AND NOT HDF5_ENABLE_USING_MEMCHECKER)
+    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_UD_TEST)
 
 ##############################################################################

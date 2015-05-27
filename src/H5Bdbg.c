@@ -156,7 +156,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_assert
+ * Function:	H5B__assert
  *
  * Purpose:	Verifies that the tree is structured correctly.
  *
@@ -171,7 +171,7 @@ done:
  */
 #ifdef H5B_DEBUG
 herr_t
-H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void *udata)
+H5B__assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void *udata)
 {
     H5B_t	*bt = NULL;
     H5UC_t	*rc_shared;             /* Ref-counted shared info */
@@ -189,7 +189,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 	struct child_t	       *next;
     } *head = NULL, *tail = NULL, *prev = NULL, *cur = NULL, *tmp = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     if(0 == ncalls++) {
 	if(H5DEBUG(B))
@@ -285,6 +285,6 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B_assert() */
+} /* end H5B__assert() */
 #endif /* H5B_DEBUG */
 

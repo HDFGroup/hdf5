@@ -74,7 +74,7 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_hdr_debug
+ * Function:	H5B2__hdr_debug
  *
  * Purpose:	Prints debugging info about a B-tree header.
  *
@@ -87,7 +87,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
+H5B2__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     const H5B2_class_t *type, haddr_t obj_addr)
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header info */
@@ -97,7 +97,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -185,11 +185,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_hdr_debug() */
+} /* end H5B2__hdr_debug() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_int_debug
+ * Function:	H5B2__int_debug
  *
  * Purpose:	Prints debugging info about a B-tree internal node
  *
@@ -202,7 +202,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
+H5B2__int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec, unsigned depth, haddr_t obj_addr)
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
@@ -213,7 +213,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -251,7 +251,9 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree internal node
      */
-    if(NULL == (internal = H5B2_protect_internal(hdr, dxpl_id, addr, nrec, depth, H5AC_READ)))
+    H5_CHECK_OVERFLOW(nrec, unsigned, uint16_t);
+    H5_CHECK_OVERFLOW(depth, unsigned, uint16_t);
+    if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, addr, (uint16_t)nrec, (uint16_t)depth, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
 
     /* Print opening message */
@@ -317,11 +319,11 @@ done:
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree internal node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_int_debug() */
+} /* end H5B2__int_debug() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_leaf_debug
+ * Function:	H5B2__leaf_debug
  *
  * Purpose:	Prints debugging info about a B-tree leaf node
  *
@@ -334,7 +336,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
+H5B2__leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
     const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec, haddr_t obj_addr)
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
@@ -345,7 +347,7 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     char        temp_str[128];          /* Temporary string, for formatting */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.
@@ -383,7 +385,8 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Load the B-tree leaf node
      */
-    if(NULL == (leaf = H5B2_protect_leaf(hdr, dxpl_id, addr, nrec, H5AC_READ)))
+    H5_CHECK_OVERFLOW(nrec, unsigned, uint16_t);
+    if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, addr, (uint16_t)nrec, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
     /* Print opening message */
@@ -430,5 +433,5 @@ done:
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree leaf node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_leaf_debug() */
+} /* end H5B2__leaf_debug() */
 

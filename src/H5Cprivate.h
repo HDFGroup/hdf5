@@ -292,16 +292,15 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  * 		dirtied while protected.
  *
  * 		This field is set to FALSE in the protect call, and may
- * 		be set to TRUE by the
- * 		H5C_mark_entry_dirty()
- * 		call at an time prior to the unprotect call.
+ * 		be set to TRUE by the H5C_mark_entry_dirty() call at any 
+ *		time prior to the unprotect call.
  *
- * 		The H5C_mark_entry_dirty() call exists
- * 		as a convenience function for the fractal heap code which
- * 		may not know if an entry is protected or pinned, but knows
- * 		that is either protected or pinned.  The dirtied field was
- * 		added as in the parallel case, it is necessary to know
- * 		whether a protected entry was dirty prior to the protect call.
+ * 		The H5C_mark_entry_dirty() call exists as a convenience 
+ *		function for the fractal heap code which may not know if 
+ *		an entry is protected or pinned, but knows that is either 
+ *		protected or pinned.  The dirtied field was added as in 
+ *		the parallel case, it is necessary to know whether a 
+ *		protected entry is dirty prior to the protect call.
  *
  * is_protected: Boolean flag indicating whether this entry is protected
  *		(or locked, to use more conventional terms).  When it is
@@ -372,21 +371,22 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *		the entry is flushed for whatever reason.
  *
  * flush_me_last:  Boolean flag indicating that this entry should not be
- *                 flushed from the cache until all other entries without
- *                 the flush_me_last flag set have been flushed.
+ *		flushed from the cache until all other entries without
+ *              the flush_me_last flag set have been flushed.
  *
  * flush_me_collectively:  Boolean flag indicating that this entry needs
- *                         to be flushed collectively when in a parallel
- *                         situation.
+ *              to be flushed collectively when in a parallel situation.
  * 
- *      Note: At this time, the flush_me_last and flush_me_collectively
- *            flags will only be applied to one entry, the superblock,
- *            and the code utilizing these flags is protected with HDasserts
- *            to enforce this. This restraint can certainly be relaxed in
- *            the future if the the need for multiple entries getting flushed
- *            last or collectively arises, though the code allowing for that
- *            will need to be expanded and tested appropriately if that
- *            functionality is desired.
+ *		Note: 
+ *		
+ *		At this time, the flush_me_last and flush_me_collectively
+ *              flags will only be applied to one entry, the superblock,
+ *              and the code utilizing these flags is protected with HDasserts
+ *              to enforce this. This restraint can certainly be relaxed in
+ *              the future if the the need for multiple entries getting flushed
+ *              last or collectively arises, though the code allowing for that
+ *              will need to be expanded and tested appropriately if that
+ *              functionality is desired.
  *
  * clear_on_unprotect:  Boolean flag used only in PHDF5.  When H5C is used
  *		to implement the metadata cache In the parallel case, only
@@ -608,7 +608,7 @@ typedef struct H5C_cache_entry_t
 #ifdef H5_HAVE_PARALLEL
     hbool_t                     flush_me_collectively;
     hbool_t			clear_on_unprotect;
-    hbool_t		        flush_immediately;
+    hbool_t			flush_immediately;
 #endif /* H5_HAVE_PARALLEL */
     hbool_t			flush_in_progress;
     hbool_t			destroy_in_progress;
@@ -617,10 +617,10 @@ typedef struct H5C_cache_entry_t
     /* fields supporting the 'flush dependency' feature: */
 
     struct H5C_cache_entry_t *	flush_dep_parent;
-    uint64_t            child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
-    unsigned            flush_dep_height;
-    hbool_t		pinned_from_client;
-    hbool_t		pinned_from_cache;
+    uint64_t			child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
+    unsigned			flush_dep_height;
+    hbool_t			pinned_from_client;
+    hbool_t			pinned_from_cache;
 
     /* fields supporting the hash table: */
 
