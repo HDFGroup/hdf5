@@ -131,7 +131,7 @@ void writeTypedef(const char* c_typedef, const char* c_type, int size)
 void writeTypedefDefault(const char* c_typedef, int size)
 {
   assert(size %2 == 0);
-  fprintf(c_header, "typedef struct {c_%s_%u a; c_%s_%u b;} c_%s_%u\n", c_typedef, size / 2, c_typedef, size / 2, c_typedef, size);
+  fprintf(c_header, "typedef struct {c_%s_%u a; c_%s_%u b;} c_%s_%u;\n", c_typedef, size / 2, c_typedef, size / 2, c_typedef, size);
 }
 
 /* Create matching Fortran and C types by writing to both files */

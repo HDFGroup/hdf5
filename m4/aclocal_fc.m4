@@ -308,8 +308,8 @@ AC_RUN_IFELSE([
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
-        IF (k.NE.lastkind) WRITE(8,'(I0,A)',ADVANCE='NO') k, " "
-	dnl WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
+        dnl IF (k.NE.lastkind) WRITE(8,'(I0,A)',ADVANCE='NO') k, " "
+	IF (lastkind.NE.-1) WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
         WRITE(8,'(/)')
         WRITE(8,'("rk:")',ADVANCE='NO') ! Find real KINDs
         lastkind=SELECTED_REAL_KIND(1)
