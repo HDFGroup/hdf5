@@ -152,7 +152,7 @@ int main(void)
   int FoundRealSize[10];
   int FoundRealSizeKind[10];
   int i, j,flag;
-  char chrA[20],chrB[20];
+  char chrA[32],chrB[32];
   int H5_C_HAS_REAL_NATIVE_16;
 
   int IntKinds[] = H5_FORTRAN_INTEGER_KINDS;
