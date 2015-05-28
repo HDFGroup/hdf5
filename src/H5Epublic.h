@@ -165,7 +165,7 @@ H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
 H5_DLL ssize_t H5Eget_class_name(hid_t class_id, char *name, size_t size);
 H5_DLL herr_t H5Eset_current_stack(hid_t err_stack_id);
 H5_DLL herr_t H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
-    hid_t cls_id, hid_t maj_id, hid_t min_id, const char *msg, ...)__attribute__((format (printf, 8, 9)));
+    hid_t cls_id, hid_t maj_id, hid_t min_id, const char *msg, ...);
 H5_DLL herr_t H5Epop(hid_t err_stack, size_t count);
 H5_DLL herr_t H5Eprint2(hid_t err_stack, FILE *stream);
 H5_DLL herr_t H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t func,
