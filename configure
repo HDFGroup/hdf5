@@ -771,7 +771,6 @@ enable_shared
 STATIC_SHARED
 THREADSAFE
 DIRECT_VFD
-HAVE_FLOAT128
 HAVE_DMALLOC
 CODESTACK
 INSTRUMENT
@@ -3876,7 +3875,6 @@ $as_echo "done" >&6; }
 
  CODESTACK=no
  HAVE_DMALLOC=no
- HAVE_FLOAT128=no
  DIRECT_VFD=no
  THREADSAFE=no
 
@@ -7053,7 +7051,7 @@ else
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
-                IF (k.NE.lastkind) WRITE(8,'(I0,A)',ADVANCE='NO') k, " "
+        IF (lastkind.NE.-1) WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
 
         END
 
@@ -7209,7 +7207,7 @@ else
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
-                IF (k.NE.lastkind) WRITE(8,'(I0,A)',ADVANCE='NO') k, " "
+        IF (lastkind.NE.-1) WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
 
         END
 
@@ -24712,7 +24710,6 @@ fi
 rm -f confcache
 
 ## Check for the __FLOAT128
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __float128" >&5
 $as_echo_n "checking for __float128... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext

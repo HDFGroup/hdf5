@@ -206,15 +206,19 @@ int main(void)
 
   /* (b) Define c_float_x */
 
+  /* make sure we find long double first before checking for __float128
+   * ideally we need to match precision instead of matching sizeof */
+
+  int found_longdb = 0;
   for(i=0;i< H5_FORTRAN_NUM_REAL_KINDS;i++) {
-#ifdef HAVE_FLOAT128
-/* should fail */
-    if(sizeof(__float128) == RealKinds_SizeOf[i]) {
+#ifdef H5_HAVE_FLOAT128
+    if(sizeof(__float128) == RealKinds_SizeOf[i] && found_longdb == 1) {
       writeTypedef("float", "__float128", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_FLOAT128");
     } else
 #endif
     if(sizeof(long double) == RealKinds_SizeOf[i]) {
+      found_longdb = 1;
       writeTypedef("float", "long double", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE");
     } else if(sizeof(double) == RealKinds_SizeOf[i]) {

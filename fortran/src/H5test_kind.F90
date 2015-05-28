@@ -117,6 +117,8 @@ PROGRAM test_kind
      ENDIF
   ENDDO
 
+  GOTO 10
+
 !  Generate program information:
 
 WRITE(*,'(40(A,/))') &
@@ -312,6 +314,7 @@ WRITE(*,'(40(A,/))') &
 
   WRITE(*,*) "END PROGRAM H5test_kind"
 
+10 CONTINUE
 
 ! (c) Generate Fortran H5* interfaces having multiple KIND interfaces.
 !

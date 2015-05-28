@@ -321,8 +321,8 @@ AC_RUN_IFELSE([
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
-        dnl WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
-        IF (k.NE.lastkind) WRITE(8,'(I0,A)',ADVANCE='NO') k, " "
+        IF (lastkind.NE.-1) WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
+        dnl IF (k.NE.lastkind) WRITE(8,'(I0,A)',ADVANCE='NO') k, " "
 
         END
     ])

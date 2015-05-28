@@ -97,7 +97,7 @@
 /* Define if support for szip filter is enabled */
 #undef HAVE_FILTER_SZIP
 
-/* __float128 is available */
+/* Determine if __float128 is available */
 #undef HAVE_FLOAT128
 
 /* Define to 1 if you have the `fork' function. */
