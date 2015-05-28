@@ -4,9 +4,9 @@ HDF5 version 1.8.15-post1 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.14 and 
-HDF5-1.8.15, and contains information on the platforms tested and 
-known problems in HDF5-1.8.15. 
+Tnhis document describes the differences between HDF5-1.8.14 and 
+HDF5-1.8.15-patch1, and contains information on the platforms tested and 
+known problems in HDF5-1.8.15-patch1. 
 
 Links to the HDF5 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
@@ -36,6 +36,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
+- Bug Fixes since HDF5-1.8.15
 - Bug Fixes since HDF5-1.8.14
 - Supported Platforms
 - Supported Configuration Features Summary
@@ -341,6 +342,16 @@ Support for New Platforms, Languages, and Compilers
     - Support for Linux 3.10.0-123.20.1.el7 added (LK - 2015/04/01) 
     - Support for Mac OS X Yosemite 10.10 added (AKC - 2015/03/04, HDFFV-9007)
     - Support for AIX 6.1 added and AIX 5.3 is retired. (AKC - 2015/01/09)
+
+
+Bug Fixes since HDF5-1.8.15
+===========================
+    Library
+    -------
+    - Reverted the change to the H5api_adpt.h (rev. 26678) that caused 
+      compilation errors for the C++ HDF5 applications. 
+     (EIP - 2015/05/28, HDFFV-9384)
+
 
 Bug Fixes since HDF5-1.8.14
 ===========================
@@ -669,7 +680,7 @@ They are built with the configure process unless specified otherwise.
                                       Version 4.8.4, 4.9.2
                                   PGI C, Fortran, C++ Compilers for 32-bit
                                   applications;
-                                      Version 14.10-0
+                                      Version 15.4-0
                                   Intel(R) C, C++, Fortran Compiler for 32-bit
                                   applications;
                                       Version 15.0.1.133 (Build 20141023)
@@ -688,7 +699,7 @@ They are built with the configure process unless specified otherwise.
                                      Version 4.8.2, Version 4.9.2
                                   PGI C, Fortran, C++ for 64-bit target on 
                                   x86-64;
-                                      Version 14.10-0 
+                                      Version 15.4-0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 15.0.1.133 Build 20141023
