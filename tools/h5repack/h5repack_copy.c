@@ -359,6 +359,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 	if (options->verbose)
 		printf("Making file <%s>...\n", fnameout);
 
+	if (!readonly)
 	if ((fidout = H5Fcreate(fnameout, H5F_ACC_TRUNC, fcpl, fapl)) < 0) {
 		error_msg("<%s>: Could not create file\n", fnameout);
 		goto out;
@@ -368,6 +369,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 	 * write a new user block if requested
 	 *-------------------------------------------------------------------------
 	 */
+	if (!readonly)
 	if (options->ublock_size > 0) {
 		if (copy_user_block(options->ublock_filename, fnameout,
 				options->ublock_size) < 0) {
@@ -403,6 +405,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 	 * and create hard links
 	 *-------------------------------------------------------------------------
 	 */
+	if (!readonly)
 	if (do_copy_refobjs(fidin, fidout, travt, options) < 0) {
 		printf("h5repack: <%s>: Could not copy data to: %s\n", fnamein,
 				fnameout);
@@ -421,6 +424,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 		H5Pclose(fcpl);
 
 	H5Fclose(fidin);
+	if (!readonly)
 	H5Fclose(fidout);
 
 	/* stop timer and time if requested */
@@ -441,6 +445,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 	 *-------------------------------------------------------------------------
 	 */
 
+	if (!readonly)
 	if (ub_size > 0 && options->ublock_size == 0) {
 		if (copy_user_block(fnamein, fnameout, ub_size) < 0) {
 			error_msg("Could not copy user block. Exiting...\n");
@@ -462,6 +467,7 @@ out:
 			H5Pclose(fapl);
 			H5Pclose(fcpl);
 			H5Fclose(fidin);
+			if (!readonly)
 			H5Fclose(fidout);
 		}H5E_END_TRY;
 	if (travt)
@@ -768,6 +774,10 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 	htri_t is_named;
 	hbool_t limit_maxdims;
 	hsize_t size_dset;
+	int	readonly;
+
+	/* local variable initialization */
+	readonly = options->readonly;
 
 	/*-------------------------------------------------------------------------
 	 * copy the suppplied object list
@@ -795,7 +805,10 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 			 *-------------------------------------------------------------------------
 			 */
 		case H5TRAV_TYPE_GROUP:
+		{
 
+			if (readonly)
+			    break;
 			if (options->verbose) {
 				printf(FORMAT_OBJ, "group", travt->objs[i].name);
 			}
@@ -861,12 +874,14 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 				goto error;
 
 			break;
+		} /* case H5TRAV_TYPE_GROUP */
 
 			/*-------------------------------------------------------------------------
 			 * H5TRAV_TYPE_DATASET
 			 *-------------------------------------------------------------------------
 			 */
 		case H5TRAV_TYPE_DATASET:
+		{
 
 			has_filter = 0;
 			req_filter = 0;
@@ -912,6 +927,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 			if ((is_named = H5Tcommitted(ftype_id)) < 0)
 				goto error;
 			if (is_named)
+			    if (!readonly)
 				if ((wtype_id = copy_named_datatype(ftype_id, fidout,
 						&named_dt_head, travt, options)) < 0)
 					goto error;
@@ -1047,6 +1063,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 						 * modified dcpl; in that case use the original instead
 						 *-------------------------------------------------------------------------
 						 */
+						if (!readonly){
 						H5E_BEGIN_TRY
 							{
 								dset_out = H5Dcreate2(fidout,
@@ -1067,6 +1084,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 								goto error;
 							apply_f = 0;
 						}
+						} /* (!readonly) */
 
 						/*-------------------------------------------------------------------------
 						 * read/write
@@ -1084,6 +1102,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 								/* read/write: use the macro to check error, e.g. memory allocation error inside the library. */
 								CHECK_H5DRW_ERROR(H5Dread, dset_in, wtype_id,
 										H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+								if (!readonly)
 								CHECK_H5DRW_ERROR(H5Dwrite, dset_out, wtype_id,
 										H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 
@@ -1181,6 +1200,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 									CHECK_H5DRW_ERROR(H5Dread, dset_in,
 											wtype_id, hslab_space, f_space_id,
 											H5P_DEFAULT, hslab_buf);
+									if (!readonly)
 									CHECK_H5DRW_ERROR(H5Dwrite, dset_out,
 											wtype_id, hslab_space, f_space_id,
 											H5P_DEFAULT, hslab_buf);
@@ -1260,6 +1280,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 								options) < 0)
 							goto error;
 						/*close */
+						if (!readonly)
 						if (H5Dclose(dset_out) < 0)
 							goto error;
 
@@ -1342,12 +1363,16 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 			} /* end do we have request for filter/chunking */
 
 			break;
+		} /*case H5TRAV_TYPE_DATASET */
 
 			/*-------------------------------------------------------------------------
 			 * H5TRAV_TYPE_NAMED_DATATYPE
 			 *-------------------------------------------------------------------------
 			 */
 		case H5TRAV_TYPE_NAMED_DATATYPE:
+		{
+			if (readonly)
+			    break;
 
 			if (options->verbose)
 				printf(FORMAT_OBJ, "type", travt->objs[i].name);
@@ -1380,6 +1405,7 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 				goto error;
 
 			break;
+		 } /*case H5TRAV_TYPE_NAMED_DATATYPE */
 
 			/*-------------------------------------------------------------------------
 			 * H5TRAV_TYPE_LINK
@@ -1393,6 +1419,8 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 		case H5TRAV_TYPE_LINK:
 		case H5TRAV_TYPE_UDLINK: {
 
+			if (readonly)
+			    break;
 			if (options->verbose)
 				printf(FORMAT_OBJ, "link", travt->objs[i].name);
 
@@ -1403,8 +1431,8 @@ int do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt,
 			if (options->verbose)
 				printf(FORMAT_OBJ, "link", travt->objs[i].name);
 
-		}
 			break;
+		} /* case H5TRAV_TYPE_LINK and case H5TRAV_TYPE_UDLINK */
 
 		default:
 			goto error;

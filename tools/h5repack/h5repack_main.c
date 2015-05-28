@@ -608,7 +608,7 @@ dump_options(const pack_opt_t* options){
     printf("input file=%s\n", infile);
     printf("output file=%s\n", outfile);
     printf("no-h5ocopy=%d\n", options->no_h5ocopy);
-    printf("readonly=%d[NOT IMPLEMENTED YET]\n", options->readonly);
+    printf("readonly=%d\n", options->readonly);
     printf("cache_size=%lu\n", (unsigned long)options->cache_size);
     printf("buf_size=%lu (H5TOOLS_BUFSIZE=%llu, H5TOOLS_MALLOCSIZE=%llu) \n",
 	(unsigned long)options->buf_size, H5TOOLS_BUFSIZE, H5TOOLS_MALLOCSIZE);
