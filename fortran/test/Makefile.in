@@ -102,7 +102,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_fortran_la_LIBADD =
-am_libh5test_fortran_la_OBJECTS = tf.lo t.lo
+am_libh5test_fortran_la_OBJECTS = tf_gen.lo tf.lo t.lo
 libh5test_fortran_la_OBJECTS = $(am_libh5test_fortran_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -729,7 +729,7 @@ noinst_LTLIBRARIES = libh5test_fortran.la
 
 # Our main targets, the tests themselves
 TEST_PROG = fortranlib_test fflush1 fflush2 fortranlib_test_1_8 fortranlib_test_F03
-libh5test_fortran_la_SOURCES = tf.F90 t.c
+libh5test_fortran_la_SOURCES = tf_gen.F90 tf.F90  t.c
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
@@ -742,7 +742,7 @@ fortranlib_test_1_8_SOURCES = tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90 tH5MISC_1_8.f90
         fortranlib_test_1_8.f90
 
 fortranlib_test_F03_SOURCES = tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 \
-        tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90 tHDF5_F03.f90 fortranlib_test_F03.f90
+        tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.F90 tHDF5_F03.f90 fortranlib_test_F03.f90
 
 fflush1_SOURCES = fflush1.f90
 fflush2_SOURCES = fflush2.f90

@@ -41,7 +41,7 @@ TEST_PROG=fortranlib_test fflush1 fflush2 fortranlib_test_1_8 fortranlib_test_F0
 
 check_PROGRAMS=$(TEST_PROG)
 
-libh5test_fortran_la_SOURCES = tf.F90 t.c
+libh5test_fortran_la_SOURCES = tf_gen.F90 tf.F90  t.c
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
@@ -55,7 +55,7 @@ fortranlib_test_1_8_SOURCES = tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90 tH5MISC_1_8.f90
         fortranlib_test_1_8.f90
 
 fortranlib_test_F03_SOURCES = tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 \
-        tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90 tHDF5_F03.f90 fortranlib_test_F03.f90
+        tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.F90 tHDF5_F03.f90 fortranlib_test_F03.f90
 
 
 fflush1_SOURCES=fflush1.f90

@@ -126,7 +126,11 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
       if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
     } /*end if */
     else if (sizeof(int_1_f) == sizeof(long long)) {
-	if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
+      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
+    } /*end if */
+    else {
+      if ((types[6] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
+      if ( H5Tset_precision (types[6], 128) < 0) return ret_value;
     } /*end else */
     /*
      * FIND H5T_NATIVE_INTEGER_2
@@ -143,6 +147,10 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     else if (sizeof(int_2_f) == sizeof(long long)) {
 	if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
+    else {
+      if ((types[7] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
+      if ( H5Tset_precision (types[7], 128) < 0) return ret_value;
+    } /*end else */
     /*
      * FIND H5T_NATIVE_INTEGER_4
      */
@@ -157,6 +165,10 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     } /*end if */
     else if (sizeof(int_4_f) == sizeof(long long)) {
 	if ((types[8] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
+    } /*end else */
+    else {
+      if ((types[8] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
+      if ( H5Tset_precision (types[8], 128) < 0) return ret_value;
     } /*end else */
     /*
      * FIND H5T_NATIVE_INTEGER_8
@@ -173,6 +185,11 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     else if (sizeof(int_8_f) == sizeof(long long)) {
 	if ((types[9] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
+    else {
+      if ((types[9] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
+      if ( H5Tset_precision (types[9], 128) < 0) return ret_value;
+    } /*end else */
+
     /*
      * FIND H5T_NATIVE_REAL_C_FLOAT
      */
@@ -221,7 +238,36 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     if ((types[13] = (hid_t_f)H5Tcopy(H5T_NATIVE_B8))  < 0) return ret_value;
     if ((types[14] = (hid_t_f)H5Tcopy(H5T_NATIVE_B16)) < 0) return ret_value;
     if ((types[15] = (hid_t_f)H5Tcopy(H5T_NATIVE_B32)) < 0) return ret_value;
-    if ((types[16] = (hid_t_f)H5Tcopy(H5T_NATIVE_B64)) < 0) return ret_value;  
+    if ((types[16] = (hid_t_f)H5Tcopy(H5T_NATIVE_B64)) < 0) return ret_value;
+
+/* #ifdef -MSB-  */
+     /*
+     * FIND H5T_NATIVE_INTEGER_16
+     */
+    if (sizeof(int_16_f) == sizeof(char)) {
+      if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
+    } /*end if */
+    else if (sizeof(int_16_f) == sizeof(short)) {
+      if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_SHORT)) < 0) return ret_value;
+    } /*end if */
+    else if (sizeof(int_16_f) == sizeof(int)) {
+      if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
+    } /*end if */
+    else if (sizeof(int_16_f) == sizeof(long long)) {
+	if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
+    } /*end else */
+    else {
+      if ((types[17] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
+      if ( H5Tset_precision (types[17], 128) < 0) return ret_value;
+    } /*end else */
+
+
+/* #ifdef -MSB-  */
+     /*
+     * FIND H5T_NATIVE_FLOAT_128
+     */
+    if ((types[18] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
+    if ( H5Tset_precision (types[18], 128) < 0) return ret_value;
 
     if ((floatingtypes[0] = (hid_t_f)H5Tcopy(H5T_IEEE_F32BE)) < 0) return ret_value;
     if ((floatingtypes[1] = (hid_t_f)H5Tcopy(H5T_IEEE_F32LE)) < 0) return ret_value;

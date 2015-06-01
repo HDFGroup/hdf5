@@ -59,36 +59,6 @@ CONTAINS
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_TEST_DLL)
-!DEC$attributes dllexport :: dreal_eq
-!DEC$endif
-  LOGICAL FUNCTION dreal_eq(a,b)
-
-    ! Check if two double precision reals are equivalent
-    REAL(dp), INTENT (in):: a,b
-    REAL(dp), PARAMETER :: eps = 1.e-8
-    dreal_eq = ABS(a-b) .LT. eps
-
-  END FUNCTION dreal_eq
-
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_TEST_DLL)
-!DEC$attributes dllexport :: verify_real_kind_7
-!DEC$endif
-  SUBROUTINE verify_real_kind_7(string,value,correct_value,total_error)
-    USE HDF5
-    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_C_FLOAT) !should map to REAL*4 on most modern processors
-    CHARACTER(LEN=*) :: string
-    REAL(real_kind_7) :: value, correct_value
-    INTEGER :: total_error
-    IF (.NOT.dreal_eq( REAL(value,dp), REAL(correct_value, dp)) ) THEN
-       total_error=total_error+1
-       WRITE(*,*) "ERROR: INCORRECT REAL VALIDATION ", string
-    ENDIF
-    RETURN
-  END SUBROUTINE verify_real_kind_7
-
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_TEST_DLL)
 !DEC$attributes dllexport :: write_test_status
 !DEC$endif
   SUBROUTINE write_test_status( test_result, test_title, total_error)
@@ -139,84 +109,6 @@ CONTAINS
     ENDIF
     RETURN
   END SUBROUTINE check
-
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_TEST_DLL)
-!DEC$attributes dllexport :: verify
-!DEC$endif
-  SUBROUTINE VERIFY(string,value,correct_value,total_error)
-    CHARACTER(LEN=*) :: string
-    INTEGER :: value, correct_value, total_error
-    IF (value .NE. correct_value) THEN
-       total_error=total_error+1
-       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
-    ENDIF
-    RETURN
-  END SUBROUTINE verify
-
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_TEST_DLL)
-!DEC$attributes dllexport :: verify_INTEGER_HID_T
-!DEC$endif
-  SUBROUTINE verify_INTEGER_HID_T(string,value,correct_value,total_error)
-    USE HDF5	
-    CHARACTER(LEN=*) :: string
-    INTEGER(HID_T) :: value, correct_value
-    INTEGER :: total_error
-    IF (value .NE. correct_value) THEN
-       total_error=total_error+1
-       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
-    ENDIF
-    RETURN
-  END SUBROUTINE verify_INTEGER_HID_T
-
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_TEST_DLL)
-!DEC$attributes dllexport :: verify_Fortran_INTEGER_4
-!DEC$endif
-  SUBROUTINE verify_Fortran_INTEGER_4(string,value,correct_value,total_error)
-    USE HDF5
-    INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  ! should map to INTEGER*4 on most modern processors	
-    CHARACTER(LEN=*) :: string
-    INTEGER(int_kind_8) :: value, correct_value
-    INTEGER :: total_error
-    IF (value .NE. correct_value) THEN
-       total_error=total_error+1
-       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
-    ENDIF
-    RETURN
-  END SUBROUTINE verify_Fortran_INTEGER_4
-
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_TEST_DLL)
-!DEC$attributes dllexport :: verifyLogical
-!DEC$endif
-  SUBROUTINE verifyLogical(string,value,correct_value,total_error)
-    CHARACTER(LEN=*) :: string
-    LOGICAL :: value, correct_value
-    INTEGER :: total_error
-    IF (value .NEQV. correct_value) THEN
-       total_error = total_error + 1
-       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
-    ENDIF
-    RETURN
-  END SUBROUTINE verifyLogical
-  
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_TEST_DLL)
-!DEC$attributes dllexport :: verifyString
-!DEC$endif
-  SUBROUTINE verifyString(string, value,correct_value,total_error)
-    CHARACTER*(*) :: string
-    CHARACTER*(*) :: value, correct_value
-    INTEGER :: total_error
-    IF (TRIM(value) .NE. TRIM(correct_value)) THEN
-       total_error = total_error + 1
-       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
-    ENDIF
-    RETURN
-  END SUBROUTINE verifyString
-
 
 !----------------------------------------------------------------------
 ! Name:		h5_fixname_f

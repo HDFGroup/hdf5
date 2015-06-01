@@ -432,6 +432,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## See if C_LONG_DOUBLE is available, and if it is different from C_DOUBLE
   PAC_PROG_FC_HAVE_C_LONG_DOUBLE
 
+  ## See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
+  PAC_PROG_FC_ISO_FORTRAN_ENV
+
   PAC_FC_NATIVE_INTEGER
 
   PAC_FC_AVAIL_KINDS

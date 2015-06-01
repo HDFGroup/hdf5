@@ -377,6 +377,9 @@ CONTAINS
           h5_type = H5T_NATIVE_INTEGER_4
        ELSE IF(kind.EQ.Fortran_INTEGER_8)THEN
           h5_type = H5T_NATIVE_INTEGER_8
+! NEED ifdef -MSB-
+       ELSE IF(kind.EQ.Fortran_INTEGER_16)THEN
+          h5_type = H5T_NATIVE_INTEGER_16
        ENDIF
     ELSE IF(flag.EQ.H5_REAL_KIND)THEN
        IF(kind.EQ.Fortran_REAL_C_FLOAT)THEN
@@ -385,6 +388,9 @@ CONTAINS
           h5_type = H5T_NATIVE_REAL_C_DOUBLE
        ELSE IF(kind.EQ.Fortran_REAL_C_LONG_DOUBLE)THEN
           h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
+! NEED ifdef -MSB-
+       ELSE IF(kind.EQ.Fortran_REAL_C_FLOAT128)THEN
+          h5_type = H5T_NATIVE_FLOAT_128
        ENDIF
     ENDIF
 

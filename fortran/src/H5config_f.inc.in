@@ -15,5 +15,8 @@
 ! Define if the intrinsic function C_LONG_DOUBLE exists
 #undef FORTRAN_HAVE_C_LONG_DOUBLE
 
+! Define if the intrinsic module ISO_FORTRAN_ENV exists
+#undef HAVE_ISO_FORTRAN_ENV
+
 ! Define the size of C's long double
 #define H5_SIZEOF_LONG_DOUBLE

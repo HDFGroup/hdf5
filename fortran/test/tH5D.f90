@@ -40,6 +40,7 @@ CONTAINS
         SUBROUTINE datasettest(cleanup, total_error)
         USE HDF5 ! This module contains all necessary modules
         USE TH5_MISC
+        USE TH5_MISC_GEN
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup

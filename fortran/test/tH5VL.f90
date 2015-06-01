@@ -28,12 +28,13 @@
 !*****
 
 MODULE TH5VL
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
+  USE TH5_MISC_GEN
 
 CONTAINS
 
         SUBROUTINE vl_test_integer(cleanup, total_error)
-        USE HDF5 ! This module contains all necessary modules
-        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
@@ -194,8 +195,6 @@ CONTAINS
         END SUBROUTINE vl_test_integer
 
         SUBROUTINE vl_test_real(cleanup, total_error)
-        USE HDF5 ! This module contains all necessary modules
-        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup
@@ -328,18 +327,15 @@ CONTAINS
           CALL h5dread_vl_f(dset_id, vltype_id, vl_real_data_out, data_dims, len_out, &
                             error, mem_space_id = dspace_id, file_space_id = dspace_id)
               CALL check("h5dread_real_f", error, total_error)
-              do ih = 1, data_dims(2)
-              do jh = 1, len_out(ih)
-                 IF( .NOT.dreal_eq( REAL(vl_real_data(jh,ih),dp), REAL(vl_real_data_out(jh,ih), dp)) ) THEN
-                    total_error = total_error + 1
-                    WRITE(*,*) "h5dread_vl_f returned incorrect data"
-                 ENDIF
-              enddo
-               if (len(ih) .ne. len_out(ih)) then
-                  total_error = total_error + 1
-                  write(*,*) "h5dread_vl_f returned incorrect data"
-              endif
-              enddo
+              DO ih = 1, data_dims(2)
+              DO jh = 1, len_out(ih)
+                 CALL VERIFY("h5dread_vl_f returned incorrect data",vl_real_data(jh,ih),vl_real_data_out(jh,ih), total_error)
+              ENDDO
+              IF (LEN(ih) .NE. len_out(ih)) THEN
+                 total_error = total_error + 1
+                 WRITE(*,*) "h5dread_vl_f returned incorrect data"
+              ENDIF
+           ENDDO
 
 
           !
@@ -367,8 +363,6 @@ CONTAINS
         END SUBROUTINE vl_test_real
 
         SUBROUTINE vl_test_string(cleanup, total_error)
-        USE HDF5 ! This module contains all necessary modules
-        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN) :: cleanup

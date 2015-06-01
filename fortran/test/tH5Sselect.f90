@@ -38,12 +38,13 @@
 !*****
 MODULE TH5SSELECT
 
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
+  USE TH5_MISC_GEN
+
 CONTAINS
 
   SUBROUTINE test_select_hyperslab(cleanup, total_error)
-
-    USE HDF5 ! This module contains all necessary modules
-    USE TH5_MISC
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN) :: cleanup
@@ -699,8 +700,6 @@ CONTAINS
 
 
   SUBROUTINE test_basic_select(cleanup, total_error)
-    USE HDF5 ! This module contains all necessary modules
-    USE TH5_MISC
 
     IMPLICIT NONE
     LOGICAL, INTENT(IN)  :: cleanup
@@ -1036,8 +1035,6 @@ CONTAINS
 !***************************************************************
 
 SUBROUTINE test_select_point(cleanup, total_error)
-  USE HDF5 ! This module contains all necessary modules 
-  USE TH5_MISC
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -1140,9 +1137,9 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL check("h5sget_select_elem_pointlist_f", error, total_error)
 
   DO i= 1, POINT1_NPOINTS
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord1(1,i)), INT(coord1(1,i)), total_error)
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord1(2,i)), INT(coord1(2,i)), total_error)
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord1(3,i)), INT(coord1(3,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord1(1,i)), INT(coord1(1,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord1(2,i)), INT(coord1(2,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord1(3,i)), INT(coord1(3,i)), total_error)
   ENDDO
 
   CALL H5Sget_select_npoints_f(sid1, npoints, error)
@@ -1171,9 +1168,9 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL check("h5sget_select_elem_pointlist_f", error, total_error)
 
   DO i= 1, POINT1_NPOINTS
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord1(1,i)), INT(coord1(1,i)), total_error)
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord1(2,i)), INT(coord1(2,i)), total_error)
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord1(3,i)), INT(coord1(3,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord1(1,i)), INT(coord1(1,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord1(2,i)), INT(coord1(2,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord1(3,i)), INT(coord1(3,i)), total_error)
   ENDDO
 
   CALL H5Sget_select_npoints_f(sid1, npoints, error)
@@ -1202,8 +1199,8 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL check("h5sget_select_elem_pointlist_f", error, total_error)
 
   DO i= 1, POINT1_NPOINTS
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord2(1,i)), INT(coord2(1,i)), total_error)
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord2(2,i)), INT(coord2(2,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord2(1,i)), INT(coord2(1,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord2(2,i)), INT(coord2(2,i)), total_error)
   ENDDO
 
 !!$
@@ -1238,8 +1235,8 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL check("h5sget_select_elem_pointlist_f", error, total_error)
 
   DO i= 1, POINT1_NPOINTS
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord2(1,i)), INT(coord2(1,i)), total_error)
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord2(2,i)), INT(coord2(2,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord2(1,i)), INT(coord2(1,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord2(2,i)), INT(coord2(2,i)), total_error)
   ENDDO
 
   CALL H5Sget_select_npoints_f(sid2, npoints, error)
@@ -1284,8 +1281,8 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL h5sget_select_elem_pointlist_f(sid2, INT(0,hsize_t), INT(POINT1_NPOINTS,hsize_t),temp_coord3,error)
   CALL check("h5sget_select_elem_pointlist_f", error, total_error)
   DO i= 1, POINT1_NPOINTS
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord3(1,i)), INT(coord3(1,i)), total_error)
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord3(2,i)), INT(coord3(2,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord3(1,i)), INT(coord3(1,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord3(2,i)), INT(coord3(2,i)), total_error)
   ENDDO
 
   CALL H5Sget_select_npoints_f(sid2, npoints, error)
@@ -1311,8 +1308,8 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL h5sget_select_elem_pointlist_f(sid2, INT(POINT1_NPOINTS,hsize_t), INT(POINT1_NPOINTS,hsize_t),temp_coord3,error)
   CALL check("h5sget_select_elem_pointlist_f", error, total_error)
   DO i= 1, POINT1_NPOINTS
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord3(1,i)), INT(coord3(1,i)), total_error)
-     CALL VERIFY("h5sget_select_elem_pointlist_f", INT(temp_coord3(2,i)), INT(coord3(2,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord3(1,i)), INT(coord3(1,i)), total_error)
+     CALL verify("h5sget_select_elem_pointlist_f", INT(temp_coord3(2,i)), INT(coord3(2,i)), total_error)
   ENDDO
 
   CALL H5Sget_select_npoints_f(sid2, npoints, error)
@@ -1363,8 +1360,6 @@ END SUBROUTINE test_select_point
 !***************************************************************
 
 SUBROUTINE test_select_combine(total_error)
-  USE HDF5 ! This module contains all necessary modules 
-  USE TH5_MISC
   
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -1400,7 +1395,7 @@ SUBROUTINE test_select_combine(total_error)
 
   CALL H5Sget_select_type_f(all_id, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT(H5S_SEL_ALL_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT(H5S_SEL_ALL_F), total_error)
 
   ! Copy base dataspace and set selection to "none" 
   CALL h5scopy_f(base_id, none_id, error)  
@@ -1411,7 +1406,7 @@ SUBROUTINE test_select_combine(total_error)
 
   CALL H5Sget_select_type_f(none_id, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT(H5S_SEL_NONE_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT(H5S_SEL_NONE_F), total_error)
   
   ! Copy "all" selection & space 
   CALL H5Scopy_f(all_id, space1, error)  
@@ -1429,7 +1424,7 @@ SUBROUTINE test_select_combine(total_error)
   ! Verify that it's still "all" selection 
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT(H5S_SEL_ALL_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT(H5S_SEL_ALL_F), total_error)
 
   ! Close temporary dataspace 
   CALL h5sclose_f(space1, error)
@@ -1451,12 +1446,12 @@ SUBROUTINE test_select_combine(total_error)
   ! Verify that the new selection is the same at the original block 
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
 
   ! Verify that there is only one block 
   CALL h5sget_select_hyper_nblocks_f(space1, nblocks, error)
   CALL check("h5sget_select_hyper_nblocks_f", error, total_error)
-  CALL VERIFY("h5sget_select_hyper_nblocks_f", INT(nblocks), 1, total_error)
+  CALL verify("h5sget_select_hyper_nblocks_f", INT(nblocks), 1, total_error)
   
   ! Retrieve the block defined 
   CALL h5sget_select_hyper_blocklist_f(space1, INT(0, hsize_t), INT(nblocks,hsize_t), blocks, error)
@@ -1464,10 +1459,10 @@ SUBROUTINE test_select_combine(total_error)
 
   ! Verify that the correct block is defined 
 
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 1, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 4, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 1, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 4, total_error)
 
   ! Close temporary dataspace 
   CALL h5sclose_f(space1, error)
@@ -1490,12 +1485,12 @@ SUBROUTINE test_select_combine(total_error)
   !  Verify that the new selection is an inversion of the original block 
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
 
   !  Verify that there are two blocks 
   CALL h5sget_select_hyper_nblocks_f(space1, nblocks, error)
   CALL check("h5sget_select_hyper_nblocks_f", error, total_error)
-  CALL VERIFY("h5sget_select_hyper_nblocks_f", INT(nblocks), 2, total_error)
+  CALL verify("h5sget_select_hyper_nblocks_f", INT(nblocks), 2, total_error)
 
   !  Retrieve the block defined 
 
@@ -1507,19 +1502,19 @@ SUBROUTINE test_select_combine(total_error)
 
   ! No guarantee is implied as the order in which blocks are listed. 
   ! So this will ONLY work for square domains iblock(1:2) = (/5,5/)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 5, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 10, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(5,1,1)), 6, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(6,1,1)), 1, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(7,1,1)), 10, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(8,1,1)), 10, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 5, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 10, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(5,1,1)), 6, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(6,1,1)), 1, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(7,1,1)), 10, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(8,1,1)), 10, total_error)
 
   ! Otherwise make sure the "area" of the block is correct
   area = (ABS(INT(blocks(1,1,1)-blocks(3,1,1)))+1)*(ABS(INT(blocks(2,1,1)-blocks(4,1,1)))+1)
   area = area + (ABS(INT(blocks(5,1,1)-blocks(7,1,1)))+1)*(ABS(INT(blocks(6,1,1)-blocks(8,1,1)))+1)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", area, 80, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", area, 80, total_error)
 
   ! Close temporary dataspace 
   CALL h5sclose_f(space1, error)
@@ -1542,12 +1537,12 @@ SUBROUTINE test_select_combine(total_error)
   !  Verify that the new selection is an inversion of the original block 
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
 
   !  Verify that there are two blocks 
   CALL h5sget_select_hyper_nblocks_f(space1, nblocks, error)
   CALL check("h5sget_select_hyper_nblocks_f", error, total_error)
-  CALL VERIFY("h5sget_select_hyper_nblocks_f", INT(nblocks), 2, total_error)
+  CALL verify("h5sget_select_hyper_nblocks_f", INT(nblocks), 2, total_error)
 
   !  Retrieve the block defined 
   blocks = -1 !  Reset block list 
@@ -1559,19 +1554,19 @@ SUBROUTINE test_select_combine(total_error)
   ! No guarantee is implied as the order in which blocks are listed. 
   ! So this will ONLY work for square domains iblock(1:2) = (/5,5/)
 
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 5, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)),10, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(5,1,1)), 6, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(6,1,1)), 1, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(7,1,1)),10, total_error)
-!!$  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(8,1,1)),10, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 5, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)),10, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(5,1,1)), 6, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(6,1,1)), 1, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(7,1,1)),10, total_error)
+!!$  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(8,1,1)),10, total_error)
 
   ! Otherwise make sure the "area" of the block is correct
   area = (ABS(INT(blocks(1,1,1)-blocks(3,1,1)))+1)*(ABS(INT(blocks(2,1,1)-blocks(4,1,1)))+1)
   area = area + (ABS(INT(blocks(5,1,1)-blocks(7,1,1)))+1)*(ABS(INT(blocks(6,1,1)-blocks(8,1,1)))+1)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", area, 80, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", area, 80, total_error)
 
 
   !  Close temporary dataspace 
@@ -1594,7 +1589,7 @@ SUBROUTINE test_select_combine(total_error)
   ! Verify that the new selection is the "none" selection 
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_NONE_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_NONE_F), total_error)
 
   !  Close temporary dataspace 
   CALL h5sclose_f(space1, error)
@@ -1617,13 +1612,13 @@ SUBROUTINE test_select_combine(total_error)
   !  Verify that the new selection is the same as the original hyperslab 
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
   
 
   !  Verify that there is only one block 
   CALL h5sget_select_hyper_nblocks_f(space1, nblocks, error)
   CALL check("h5sget_select_hyper_nblocks_f", error, total_error)
-  CALL VERIFY("h5sget_select_hyper_nblocks_f", INT(nblocks), 1, total_error)
+  CALL verify("h5sget_select_hyper_nblocks_f", INT(nblocks), 1, total_error)
 
   !  Retrieve the block defined 
   blocks = -1 !  Reset block list 
@@ -1631,10 +1626,10 @@ SUBROUTINE test_select_combine(total_error)
   CALL check("h5sget_select_hyper_blocklist_f", error, total_error)
 
   !  Verify that the correct block is defined 
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 1, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 4, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 1, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 4, total_error)
 
   !  Close temporary dataspace 
   CALL h5sclose_f(space1, error)
@@ -1657,7 +1652,7 @@ SUBROUTINE test_select_combine(total_error)
   !  Verify that the new selection is the "none" selection 
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_NONE_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_NONE_F), total_error)
 
   !  Close temporary dataspace 
   CALL h5sclose_f(space1, error)
@@ -1680,23 +1675,23 @@ SUBROUTINE test_select_combine(total_error)
   !  Verify that the new selection is the same as the original hyperslab 
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
   
 
   !  Verify that there is only one block 
   CALL h5sget_select_hyper_nblocks_f(space1, nblocks, error)
   CALL check("h5sget_select_hyper_nblocks_f", error, total_error)
-  CALL VERIFY("h5sget_select_hyper_nblocks_f", INT(nblocks), 1, total_error)
+  CALL verify("h5sget_select_hyper_nblocks_f", INT(nblocks), 1, total_error)
 
   !  Retrieve the block defined 
   blocks = -1 !  Reset block list 
   CALL h5sget_select_hyper_blocklist_f(space1, INT(0, hsize_t), INT(nblocks,hsize_t), blocks, error)
   CALL check("h5sget_select_hyper_blocklist_f", error, total_error)
   !  Verify that the correct block is defined 
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 1, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 4, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 1, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 4, total_error)
   
   !  Close temporary dataspace 
   CALL h5sclose_f(space1, error)
@@ -1719,7 +1714,7 @@ SUBROUTINE test_select_combine(total_error)
   !  Verify that the new selection is the "none" selection 
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_NONE_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_NONE_F), total_error)
 
   !  Close temporary dataspace 
   CALL h5sclose_f(space1, error)
@@ -1741,12 +1736,12 @@ SUBROUTINE test_select_combine(total_error)
   !  Verify that the new selection is the same as the original hyperslab 
   CALL H5Sget_select_type_f(space1, sel_type, error)
   CALL check("H5Sget_select_type_f", error, total_error)
-  CALL VERIFY("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
+  CALL verify("H5Sget_select_type_f", INT(sel_type), INT( H5S_SEL_HYPERSLABS_F), total_error)
     
   !  Verify that there is ONLY one BLOCK 
   CALL h5sget_select_hyper_nblocks_f(space1, nblocks, error)
   CALL check("h5sget_select_hyper_nblocks_f", error, total_error)
-  CALL VERIFY("h5sget_select_hyper_nblocks_f", INT(nblocks), 1, total_error)
+  CALL verify("h5sget_select_hyper_nblocks_f", INT(nblocks), 1, total_error)
 
   !  Retrieve the block defined 
 
@@ -1757,10 +1752,10 @@ SUBROUTINE test_select_combine(total_error)
 
   !  Verify that the correct block is defined 
 
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 1, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
-  CALL VERIFY("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 4, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(1,1,1)), 1, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(2,1,1)), 1, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(3,1,1)), 5, total_error)
+  CALL verify("h5sget_select_hyper_blocklist_f", INT(blocks(4,1,1)), 4, total_error)
   
   !  Close temporary dataspace 
   CALL h5sclose_f(space1, error)
@@ -1785,8 +1780,6 @@ END SUBROUTINE test_select_combine
 !***************************************************************
 
 SUBROUTINE test_select_bounds(total_error)
-  USE HDF5 ! This module contains all necessary modules 
-  USE TH5_MISC
   
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -1817,10 +1810,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 1, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), SPACE11_DIM1, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), SPACE11_DIM2, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 1, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), SPACE11_DIM1, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), SPACE11_DIM2, total_error)
 
   ! Set offset for selection 
   offset(1:2) = 1
@@ -1847,7 +1840,7 @@ SUBROUTINE test_select_bounds(total_error)
 
   ! Get bounds for 'none' selection, should fail 
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
-  CALL VERIFY("h5sget_select_bounds_f", error, -1, total_error)
+  CALL verify("h5sget_select_bounds_f", error, -1, total_error)
 
   ! Set point selection 
   
@@ -1863,10 +1856,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), INT(SPACE11_DIM1-4), total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), INT(SPACE11_DIM2-4), total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), INT(SPACE11_DIM1-4), total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), INT(SPACE11_DIM2-4), total_error)
 
   !  Set bad offset for selection 
 
@@ -1876,7 +1869,7 @@ SUBROUTINE test_select_bounds(total_error)
 
   !  Get bounds for hyperslab selection with negative offset 
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
-  CALL VERIFY("h5sget_select_bounds_f", error, -1, total_error)
+  CALL verify("h5sget_select_bounds_f", error, -1, total_error)
  
   !  Set valid offset for selection 
   offset(1:2) = (/2,-2/)
@@ -1887,10 +1880,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 5, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), INT(SPACE11_DIM1-2), total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), INT(SPACE11_DIM2-6), total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 5, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), INT(SPACE11_DIM1-2), total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), INT(SPACE11_DIM2-6), total_error)
 
   !  Reset offset for selection 
   offset(1:2) = 0
@@ -1911,10 +1904,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), 37, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), 37, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), 37, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), 37, total_error)
 
   ! Set bad offset for selection 
   offset(1:2) = (/5,-5/)
@@ -1923,7 +1916,7 @@ SUBROUTINE test_select_bounds(total_error)
 
   !  Get bounds for hyperslab selection with negative offset 
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
-  CALL VERIFY("h5sget_select_bounds_f", error, -1, total_error)
+  CALL verify("h5sget_select_bounds_f", error, -1, total_error)
 
   !  Set valid offset for selection 
   offset(1:2) = (/5,-2/)
@@ -1934,10 +1927,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 8, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), 42, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), 35, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 8, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), 42, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), 35, total_error)
 
   ! Reset offset for selection 
   offset(1:2) = 0
@@ -1958,10 +1951,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), 50, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), 50, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), 50, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), 50, total_error)
 
   !  Set bad offset for selection 
   offset(1:2) = (/5,-5/)
@@ -1970,7 +1963,7 @@ SUBROUTINE test_select_bounds(total_error)
 
   !  Get bounds for hyperslab selection with negative offset 
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
-  CALL VERIFY("h5sget_select_bounds_f", error, -1, total_error)
+  CALL verify("h5sget_select_bounds_f", error, -1, total_error)
 
   ! Set valid offset for selection 
   offset(1:2) = (/5,-2/)
@@ -1981,10 +1974,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 8, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), 55, total_error)
-  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), 48, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 8, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), 55, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), 48, total_error)
 
   ! Reset offset for selection 
   offset(1:2) = 0

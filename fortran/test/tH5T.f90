@@ -29,6 +29,10 @@
 
 MODULE TH5T
 
+  USE HDF5
+  USE TH5_MISC
+  USE TH5_MISC_GEN
+
 CONTAINS
 
     SUBROUTINE compoundtest(cleanup, total_error)
@@ -47,8 +51,6 @@ CONTAINS
 ! h5tget_class_f, h5tget_member_name_f, h5tget_member_offset_f, h5tget_member_type_f,
 ! h5tequal_f, h5tinsert_array_f, h5tcommit_f, h5tencode_f, h5tdecode_f
 
-     USE HDF5 ! This module contains all necessary modules
-     USE TH5_MISC
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
@@ -526,12 +528,9 @@ CONTAINS
      !
      CALL h5dread_f(dset_id, dt3_id, double_member_out, data_dims, error)
      CALL check("h5dread_f", error, total_error)
-         do i = 1, dimsize
-            IF( .NOT.dreal_eq( REAL(double_member_out(i),dp), REAL( double_member(i), dp)) ) THEN
-                write(*,*) " Wrong double precision data is read back "
-                total_error = total_error + 1
-            endif
-         enddo
+     DO i = 1, dimsize
+        CALL VERIFY("h5dread_f:Wrong double precision data is read back", double_member_out(i), double_member(i), total_error)   
+     ENDDO
      !
      !
      CALL h5tcreate_f(H5T_COMPOUND_F, type_sizer, dt4_id, error)
@@ -544,12 +543,9 @@ CONTAINS
      !
      CALL h5dread_f(dset_id, dt4_id, real_member_out, data_dims, error)
      CALL check("h5dread_f", error, total_error)
-         DO i = 1, dimsize
-            IF( .NOT.dreal_eq( REAL(real_member_out(i),dp), REAL( real_member(i), dp)) ) THEN
-               WRITE(*,*) " Wrong real precision data is read back "
-               total_error = total_error + 1
-            ENDIF
-         ENDDO
+     DO i = 1, dimsize
+        CALL VERIFY("h5dread_f:Wrong double precision data is read back", real_member_out(i), real_member(i), total_error)   
+     ENDDO
      !
      ! *-----------------------------------------------------------------------
      ! * Test encoding and decoding compound datatypes
@@ -564,7 +560,7 @@ CONTAINS
      !  Try decoding bogus buffer 
 
      CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
-     CALL VERIFY("H5Tdecode_f", error, -1, total_error)
+     CALL verify("H5Tdecode_f", error, -1, total_error)
 
      CALL H5Tencode_f(dtype_id, cmpd_buf, cmpd_buf_size, error)
      CALL check("H5Tencode_f", error, total_error)
@@ -577,7 +573,7 @@ CONTAINS
 
      CALL H5Tequal_f(decoded_tid1, dtype_id, flag, error)
      CALL check("H5Tequal_f", error, total_error)
-     CALL VerifyLogical("H5Tequal_f", flag, .TRUE., total_error)
+     CALL verify("H5Tequal_f", flag, .TRUE., total_error)
      !
      ! Close all open objects.
      !
@@ -612,9 +608,6 @@ CONTAINS
 !   H5tset_sign_f, H5tget_ebias_f,H5tset_ebias_f, H5tget_norm_f,
 !   H5tset_norm_f, H5tget_inpad_f, H5tset_inpad_f, H5tget_cset_f,
 !   H5tset_cset_f, H5tget_strpad_f, H5tset_strpad_f
-
-     USE HDF5 ! This module contains all necessary modules
-     USE TH5_MISC
 
      IMPLICIT NONE
      INTEGER, INTENT(OUT) :: total_error
@@ -901,7 +894,7 @@ CONTAINS
     CALL check("H5Tget_order_f",error, total_error)
     CALL H5Tget_order_f(H5T_NATIVE_INTEGER, order2, error)
     CALL check("H5Tget_order_f",error, total_error)
-    CALL VERIFY("H5Tget_native_type_f",order1, order2, total_error)
+    CALL verify("H5Tget_native_type_f",order1, order2, total_error)
 
     ! this test depends on whether -i8 was specified
 
@@ -909,11 +902,11 @@ CONTAINS
 !!$    CALL check("H5Tget_size_f",error, total_error)
 !!$    CALL H5Tget_size_f(H5T_STD_I32BE, type_size2, error)
 !!$    CALL check("H5Tget_size_f",error, total_error)
-!!$    CALL VERIFY("H5Tget_native_type_f", INT(type_size1), INT(type_size2), total_error)
+!!$    CALL verify("H5Tget_native_type_f", INT(type_size1), INT(type_size2), total_error)
 
     CALL H5Tget_class_f(native_type, class, error)
     CALL check("H5Tget_class_f",error, total_error)
-    CALL VERIFY("H5Tget_native_type_f", INT(class), INT(H5T_ENUM_F), total_error)
+    CALL verify("H5Tget_native_type_f", INT(class), INT(H5T_ENUM_F), total_error)
 
     CALL h5dclose_f(dset_id,error)
     CALL check("h5dclose_f", error, total_error)
@@ -971,8 +964,6 @@ CONTAINS
 
 SUBROUTINE test_derived_flt(cleanup, total_error)
 
-  USE HDF5 ! This module contains all necessary modules
-  USE TH5_MISC
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -1059,24 +1050,24 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
   CALL check("H5Tget_fields_f", error, total_error)
 
   IF(spos.NE.44 .OR. epos.NE.34 .OR. esize.NE.10 .OR. mpos.NE.3 .OR. msize.NE.31)THEN
-     CALL VERIFY("H5Tget_fields_f", -1, 0, total_error)
+     CALL verify("H5Tget_fields_f", -1, 0, total_error)
   ENDIF
 
   CALL H5Tget_precision_f(tid1, precision1, error)
   CALL check("H5Tget_precision_f", error, total_error)
-  CALL VERIFY("H5Tget_precision_f", INT(precision1), 42, total_error)
+  CALL verify("H5Tget_precision_f", INT(precision1), 42, total_error)
 
   CALL H5Tget_offset_f(tid1, offset1, error)
   CALL check("H5Tget_offset_f", error, total_error)
-  CALL VERIFY("H5Tget_offset_f", INT(offset1), 3, total_error)
+  CALL verify("H5Tget_offset_f", INT(offset1), 3, total_error)
 
   CALL H5Tget_size_f(tid1, size1, error)
   CALL check("H5Tget_size_f", error, total_error)
-  CALL VERIFY("H5Tget_size_f", INT(size1), 7, total_error)
+  CALL verify("H5Tget_size_f", INT(size1), 7, total_error)
 
   CALL H5Tget_ebias_f(tid1, ebias1, error)
   CALL check("H5Tget_ebias_f", error, total_error)
-  CALL VERIFY("H5Tget_ebias_f", INT(ebias1), 511, total_error)
+  CALL verify("H5Tget_ebias_f", INT(ebias1), 511, total_error)
 
   !--------------------------------------------------------------------------
   ! *                   2nd floating-point type
@@ -1120,24 +1111,24 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
   CALL check("H5Tget_fields_f", error, total_error)
 
   IF(spos.NE.23 .OR. epos.NE.16 .OR. esize.NE.7 .OR. mpos.NE.0 .OR. msize.NE.16)THEN
-     CALL VERIFY("H5Tget_fields_f", -1, 0, total_error)
+     CALL verify("H5Tget_fields_f", -1, 0, total_error)
   ENDIF
 
   CALL H5Tget_precision_f(tid2, precision2, error)
   CALL check("H5Tget_precision_f", error, total_error)
-  CALL VERIFY("H5Tget_precision_f", INT(precision2), 24, total_error)
+  CALL verify("H5Tget_precision_f", INT(precision2), 24, total_error)
 
   CALL H5Tget_offset_f(tid2, offset2, error)
   CALL check("H5Tget_offset_f", error, total_error)
-  CALL VERIFY("H5Tget_offset_f", INT(offset2), 0, total_error)
+  CALL verify("H5Tget_offset_f", INT(offset2), 0, total_error)
 
   CALL H5Tget_size_f(tid2, size2, error)
   CALL check("H5Tget_size_f", error, total_error)
-  CALL VERIFY("H5Tget_size_f", INT(size2), 3, total_error)
+  CALL verify("H5Tget_size_f", INT(size2), 3, total_error)
 
   CALL H5Tget_ebias_f(tid2, ebias2, error)
   CALL check("H5Tget_ebias_f", error, total_error)
-  CALL VERIFY("H5Tget_ebias_f", INT(ebias2), 63, total_error)
+  CALL verify("H5Tget_ebias_f", INT(ebias2), 63, total_error)
 
   CALL h5tclose_f(tid1, error)
   CALL check("h5tclose_f", error, total_error)

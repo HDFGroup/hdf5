@@ -33,11 +33,13 @@
 !
 MODULE TH5R
 
+  USE HDF5
+  USE TH5_MISC
+  USE TH5_MISC_GEN
+
 CONTAINS
 
 SUBROUTINE refobjtest(cleanup, total_error)
-  USE HDF5 ! This module contains all necessary modules
-  USE TH5_MISC
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
@@ -163,22 +165,22 @@ SUBROUTINE refobjtest(cleanup, total_error)
   CALL check("H5Rget_name_f", error, total_error)
 
 
-  CALL VERIFY("H5Rget_name_f", INT(buf_size),7, total_error)
-  CALL VerifyString("H5Rget_name_f", buf, "/GROUP1", total_error)
+  CALL verify("H5Rget_name_f", INT(buf_size),7, total_error)
+  CALL verify("H5Rget_name_f", buf, "/GROUP1", total_error)
 
   ! with buffer bigger then needed
 
   CALL H5Rget_name_f(dsetr_id, ref(1), buf_big, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", INT(buf_size),7,total_error)
-  CALL VerifyString("H5Rget_name_f", TRIM(buf_big), "/GROUP1", total_error)
+  CALL verify("H5Rget_name_f", INT(buf_size),7,total_error)
+  CALL verify("H5Rget_name_f", TRIM(buf_big), "/GROUP1", total_error)
 
   ! getting path to dataset in /Group1
 
   CALL H5Rget_name_f(dsetr_id, ref(2), buf_big, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", INT(buf_size),14,total_error)
-  CALL VerifyString("H5Rget_name_f", TRIM(buf_big), "/GROUP1/GROUP2", total_error)
+  CALL verify("H5Rget_name_f", INT(buf_size),14,total_error)
+  CALL verify("H5Rget_name_f", TRIM(buf_big), "/GROUP1/GROUP2", total_error)
 
   !
   !Close the dataset
@@ -242,9 +244,6 @@ END SUBROUTINE refobjtest
 !   and h5rdereference_f functionalities
 !
 SUBROUTINE refregtest(cleanup, total_error)
-  USE HDF5 ! This module contains all necessary modules
-  USE TH5_MISC
-!  use iso_c_binding  ! NOTE: if this is uncommented, then need to move subroutine into another file.
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -406,23 +405,23 @@ SUBROUTINE refregtest(cleanup, total_error)
   ! Get name of the dataset the first region reference points to using H5Rget_name_f
   CALL H5Rget_name_f(dsetr_id, ref_out(1), buf, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", INT(buf_size),7,total_error)
-  CALL VerifyString("H5Rget_name_f", buf, "/MATRIX", total_error)
+  CALL verify("H5Rget_name_f", INT(buf_size),7,total_error)
+  CALL verify("H5Rget_name_f", buf, "/MATRIX", total_error)
 
   ! Get name of the dataset the first region reference points to using H5Rget_name_f
   ! buffer bigger then needed
   CALL H5Rget_name_f(dsetr_id, ref_out(1), buf_big, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", INT(buf_size),7,total_error)
-  CALL VerifyString("H5Rget_name_f", TRIM(buf_big), "/MATRIX", total_error)
+  CALL verify("H5Rget_name_f", INT(buf_size),7,total_error)
+  CALL verify("H5Rget_name_f", TRIM(buf_big), "/MATRIX", total_error)
 
 
   ! Get name of the dataset the first region reference points to using H5Rget_name_f
   ! buffer smaller then needed
   CALL H5Rget_name_f(dsetr_id, ref_out(1), buf_small, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", INT(buf_size),7,total_error)
-  CALL VerifyString("H5Rget_name_f", TRIM(buf_small), "/MAT", total_error)
+  CALL verify("H5Rget_name_f", INT(buf_size),7,total_error)
+  CALL verify("H5Rget_name_f", TRIM(buf_small), "/MAT", total_error)
   !
   ! Dereference the first reference.
   !
@@ -434,7 +433,7 @@ SUBROUTINE refregtest(cleanup, total_error)
   ! Get name of the dataset the second region reference points to using H5Rget_name_f
   CALL H5Rget_name_f(dsetr_id, ref_out(2), buf, error) ! no optional size
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VerifyString("H5Rget_name_f", TRIM(buf), "/MATRIX", total_error)
+  CALL verify("H5Rget_name_f", TRIM(buf), "/MATRIX", total_error)
   !
   ! Read selected data from the dataset.
   !

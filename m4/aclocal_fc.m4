@@ -63,6 +63,20 @@ dnl was required" problem when libtool is also used
 dnl [1] MPICH.org
 dnl
 
+dnl See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
+
+AC_DEFUN([PAC_PROG_FC_ISO_FORTRAN_ENV],[
+  HAVE_ISO_FORTRAN_ENV="no"
+  AC_MSG_CHECKING([if Fortran compiler supports intrinsic module ISO_FORTRAN_ENV])
+  AC_LINK_IFELSE([AC_LANG_SOURCE([ 
+   PROGRAM main
+     USE, INTRINSIC :: ISO_FORTRAN_ENV
+   END PROGRAM
+  ])],[AC_MSG_RESULT([yes])
+     	HAVE_ISO_FORTRAN_ENV="yes"],
+      [AC_MSG_RESULT([no])])
+])
+
 dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
 
 AC_DEFUN([PAC_PROG_FC_SIZEOF],[

@@ -322,7 +322,7 @@ WRITE(*,'(40(A,/))') &
 !
 ! Only interfaces with arrays of rank 7 and less are provided. Even-though, the F2008 
 ! standard extended the maximum rank to 15, it was decided that they should use the
-! new APIs to handle this use case. Handling rank 7 and less is for backward compatibility
+! new APIs to handle those use cases. Handling rank 7 and less is for backward compatibility
 ! with the Fortran 90/95 APIs codes which could never handle rank 15 array sizes.
 
   OPEN(11,FILE='H5_KINDff.F90')
@@ -769,6 +769,181 @@ WRITE(*,'(40(A,/))') &
   ENDDO
 
   WRITE(11,'(A)') 'END MODULE H5_KIND'
+
+  CLOSE(11)
+
+! (b) Generate Fortran Check routines for the tests KIND interfaces.
+  OPEN(11,FILE='../test/tf_gen.F90')
+  WRITE(11,'(40(A,/))') &
+'!****h* ROBODoc/TH5_MISC_gen.F90',&
+'!',&
+'! NAME',&
+'!  TH5_MISC_gen',&
+'! ',&
+'! PURPOSE',&
+'!  This module is generated at build by H5test_kind.F90 to handle checking ',&
+'!  in the tests all the detected KINDs.',&
+'!',&
+'! COPYRIGHT',&
+'! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
+'!   Copyright by The HDF Group.                                               *',&
+'!   All rights reserved.                                                      *',&
+'!                                                                             *',&
+'!   This file is part of HDF5.  The full HDF5 copyright notice, including     *',&
+'!   terms governing use, modification, and redistribution, is contained in    *',&
+'!   the files COPYING and Copyright.html.  COPYING can be found at the root   *',&
+'!   of the source code distribution tree; Copyright.html can be found at the  *',&
+'!   root level of an installed copy of the electronic HDF5 document set and   *',&
+'!   is linked from the top-level documents page.  It can also be found at     *',&
+'!   http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *',&
+'!   access to either file, you may request a copy from help@hdfgroup.org.     *',&
+'! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
+'!',&
+'! AUTHOR',&
+'!  H5test_kind.F90',&
+'!',&
+'!*****'
+
+  WRITE(11,'(a)') "MODULE TH5_MISC_gen"
+
+  WRITE(11,'(A)') '  USE, INTRINSIC :: ISO_C_BINDING'
+  WRITE(11,'(A)') '  USE H5GLOBAL'
+  
+! Interfaces for validating REALs, INTEGERs, CHARACTERs, LOGICALs
+
+  WRITE(11,'(A)') '  INTERFACE verify'
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(A)') "     MODULE PROCEDURE verify_real_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  DO i = 1, ii
+     j = ikind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(A)') "     MODULE PROCEDURE verify_integer_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  WRITE(11,'(A)') "     MODULE PROCEDURE verify_character"
+  WRITE(11,'(A)') "     MODULE PROCEDURE verify_logical"
+  WRITE(11,'(A)') "  END INTERFACE"
+
+  WRITE(11,'(A)') '  INTERFACE check_real_eq'
+  DO i = 1, ir
+     j = rkind_numbers(i)
+     WRITE(chr2,'(I2)') j
+     WRITE(11,'(A)') "     MODULE PROCEDURE real_eq_kind_"//TRIM(ADJUSTL(chr2))
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+  WRITE(11,'(A)') 'CONTAINS'
+
+! ***************************
+! VALIDATE INTEGERS
+! ***************************
+  DO i = 1, ii
+     k = ikind_numbers(i)
+     WRITE(chr2,'(I2)') k
+! DLL definitions for windows
+     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_TEST_DLL)'
+     WRITE(11,'(A)') '!DEC$attributes dllexport :: verify_integer_kind_'//TRIM(ADJUSTL(chr2))
+     WRITE(11,'(A)') '!DEC$endif'
+
+! Subroutine API
+     WRITE(11,'(A)') '  SUBROUTINE verify_integer_kind_'//TRIM(ADJUSTL(chr2))//'(string,value,correct_value,total_error)'
+     WRITE(11,'(A)') '    IMPLICIT NONE'
+     WRITE(11,'(A)') '    CHARACTER(LEN=*) :: string'
+     WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//') :: value, correct_value'
+     WRITE(11,'(A)') '    INTEGER :: total_error'
+     WRITE(11,'(A)') '    IF (value .NE. correct_value) THEN'
+     WRITE(11,'(A)') '       total_error=total_error+1'
+     WRITE(11,'(A)') '       WRITE(*,*) "ERROR: INCORRECT INTEGER VALIDATION ", string'
+     WRITE(11,'(A)') '    ENDIF'
+     WRITE(11,'(A)') '  END SUBROUTINE verify_integer_kind_'//TRIM(ADJUSTL(chr2))
+ ENDDO
+
+! ***************************
+! VALIDATE REALS
+! ***************************
+  DO i = 1, ir
+     k = rkind_numbers(i)
+     WRITE(chr2,'(I2)') k
+! DLL definitions for windows
+     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_TEST_DLL)'
+     WRITE(11,'(A)') '!DEC$attributes dllexport :: verify_real_kind_'//TRIM(ADJUSTL(chr2))
+     WRITE(11,'(A)') '!DEC$endif'
+    
+! Subroutine API 
+     WRITE(11,'(A)') '  SUBROUTINE verify_real_kind_'//TRIM(ADJUSTL(chr2))//'(string,value,correct_value,total_error)'
+     WRITE(11,'(A)') '    IMPLICIT NONE'
+     WRITE(11,'(A)') '    CHARACTER(LEN=*) :: string'
+     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//') :: value, correct_value'
+     WRITE(11,'(A)') '    INTEGER :: total_error'
+     WRITE(11,'(A)') '    IF (.NOT.real_eq_kind_'//TRIM(ADJUSTL(chr2))//'( value, correct_value) ) THEN'
+     WRITE(11,'(A)') '       total_error=total_error+1'
+     WRITE(11,'(A)') '       WRITE(*,*) "ERROR: INCORRECT REAL VALIDATION ", string'
+     WRITE(11,'(A)') '    ENDIF'
+     WRITE(11,'(A)') '  END SUBROUTINE verify_real_kind_'//TRIM(ADJUSTL(chr2))
+
+
+! ***********************************
+! TEST IF TWO REAL NUMBERS ARE EQUAL
+! ***********************************
+
+     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_TEST_DLL)'
+     WRITE(11,'(A)') '!DEC$attributes dllexport :: real_eq_kind_'//TRIM(ADJUSTL(chr2))
+     WRITE(11,'(A)') '!DEC$endif'
+     WRITE(11,'(A)') '  LOGICAL FUNCTION real_eq_kind_'//TRIM(ADJUSTL(chr2))//'(a,b)'
+     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'), INTENT (in):: a,b'
+     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'), PARAMETER :: eps = 1.e-8'
+     WRITE(11,'(A)') '    real_eq_kind_'//TRIM(ADJUSTL(chr2))//' = ABS(a-b) .LT. eps'
+     WRITE(11,'(A)') '  END FUNCTION real_eq_kind_'//TRIM(ADJUSTL(chr2))
+  ENDDO
+
+! ***************************
+! VALIDATE CHARACTER STRINGS
+! ***************************
+
+! DLL definitions for windows
+  WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_TEST_DLL)'
+  WRITE(11,'(A)') '!DEC$attributes dllexport :: verify_character'
+  WRITE(11,'(A)') '!DEC$endif'
+
+! Subroutine API 
+  WRITE(11,'(A)') '  SUBROUTINE verify_character(string,value,correct_value,total_error)'
+  WRITE(11,'(A)') '    IMPLICIT NONE'
+  WRITE(11,'(A)') '    CHARACTER*(*) :: string'
+  WRITE(11,'(A)') '    CHARACTER*(*) :: value, correct_value'
+  WRITE(11,'(A)') '    INTEGER :: total_error'
+  WRITE(11,'(A)') '    IF (TRIM(value) .NE. TRIM(correct_value)) THEN'
+  WRITE(11,'(A)') '       total_error = total_error + 1'
+  WRITE(11,'(A)') '       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
+  WRITE(11,'(A)') '    ENDIF'
+  WRITE(11,'(A)') '  END SUBROUTINE verify_character'
+
+! ***************************
+! VALIDATE LOGICAL
+! ***************************
+
+! DLL definitions for windows
+  WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_TEST_DLL)'
+  WRITE(11,'(A)') '!DEC$attributes dllexport :: verify_logical'
+  WRITE(11,'(A)') '!DEC$endif'
+! Subroutine API 
+  WRITE(11,'(A)') '  SUBROUTINE verify_logical(string,value,correct_value,total_error)'
+  WRITE(11,'(A)') '    CHARACTER(LEN=*) :: string'
+  WRITE(11,'(A)') '    LOGICAL :: value, correct_value'
+  WRITE(11,'(A)') '    INTEGER :: total_error'
+  WRITE(11,'(A)') '    IF (value .NEQV. correct_value) THEN'
+  WRITE(11,'(A)') '       total_error = total_error + 1'
+  WRITE(11,'(A)') '       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
+  WRITE(11,'(A)') '    ENDIF'
+  
+  WRITE(11,'(A)') '  END SUBROUTINE verify_logical'
+
+
+
+  WRITE(11,'(A)') "END MODULE TH5_MISC_gen"
+
+  CLOSE(11)
 
 END PROGRAM test_kind
 

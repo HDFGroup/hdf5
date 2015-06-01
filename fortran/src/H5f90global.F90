@@ -66,7 +66,7 @@ MODULE H5GLOBAL
      INTEGER, DIMENSION(1:REF_REG_BUF_LEN) :: ref
   END TYPE hdset_reg_ref_t_f
 
-  INTEGER, PARAMETER :: PREDEF_TYPES_LEN = 17 ! Do not forget to change this
+  INTEGER, PARAMETER :: PREDEF_TYPES_LEN = 19 ! Do not forget to change this
                                               ! value when new predefined
                                               ! datatypes are added
 
@@ -108,6 +108,9 @@ MODULE H5GLOBAL
        H5T_STD_U16BE,   &
        H5T_STD_U16LE,   &
        H5T_STD_U32BE
+       
+  INTEGER(HID_T) :: H5T_NATIVE_INTEGER_16 ! NEED IFDEF -MSB-
+  INTEGER(HID_T) :: H5T_NATIVE_FLOAT_128 ! NEED IFDEF -MSB-
 
 ! NOTE: Splitting the line since the Fortran 95 standard limits the number of 
 !       continuation lines to 39; the F03/F08 standard limits the number 
@@ -151,6 +154,8 @@ MODULE H5GLOBAL
   EQUIVALENCE (predef_types(15), H5T_NATIVE_B16)
   EQUIVALENCE (predef_types(16), H5T_NATIVE_B32)
   EQUIVALENCE (predef_types(17), H5T_NATIVE_B64)  
+  EQUIVALENCE (predef_types(18), H5T_NATIVE_INTEGER_16)   ! ADDED NEW TYPE -MSB- 
+  EQUIVALENCE (predef_types(19), H5T_NATIVE_FLOAT_128)   ! ADDED NEW TYPE -MSB-
 
   INTEGER(HID_T), DIMENSION(FLOATING_TYPES_LEN) :: floating_types
   EQUIVALENCE (floating_types(1), H5T_IEEE_F32BE )
