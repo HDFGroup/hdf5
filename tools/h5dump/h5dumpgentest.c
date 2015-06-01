@@ -128,13 +128,13 @@ write_dset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
 
 /* a filter operation callback function */
 static size_t
-myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-        const unsigned int UNUSED *cd_values, size_t nbytes,
-        size_t UNUSED *buf_size, void UNUSED **buf);
+myfilter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+        const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
+        size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf);
 
 /* a "set local" callback     */
 static herr_t
-set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t UNUSED sid);
+set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t H5_ATTR_UNUSED sid);
 
 #define MYFILTER_ID 405
 
@@ -151,8 +151,8 @@ const H5Z_class2_t H5Z_MYFILTER[1] = {{
 
 
 /* A UD link traversal function.  Shouldn't actually be called. */
-static hid_t UD_traverse(UNUSED const char * link_name, UNUSED hid_t cur_group,
-        UNUSED const void * udata, UNUSED size_t udata_size, UNUSED hid_t lapl_id)
+static hid_t UD_traverse(H5_ATTR_UNUSED const char * link_name, H5_ATTR_UNUSED hid_t cur_group,
+        H5_ATTR_UNUSED const void * udata, H5_ATTR_UNUSED size_t udata_size, H5_ATTR_UNUSED hid_t lapl_id)
 {
     return -1;
 }
@@ -5626,9 +5626,9 @@ static void gent_filters(void)
  *-------------------------------------------------------------------------
  */
 static size_t
-myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-        const unsigned int UNUSED *cd_values, size_t nbytes,
-        size_t UNUSED *buf_size, void UNUSED **buf)
+myfilter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+        const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
+        size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return nbytes;
 }
@@ -5643,7 +5643,7 @@ myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
  */
 
 static herr_t
-set_local_myfilter(hid_t dcpl_id, hid_t UNUSED tid, hid_t UNUSED sid)
+set_local_myfilter(hid_t dcpl_id, hid_t H5_ATTR_UNUSED tid, hid_t H5_ATTR_UNUSED sid)
 {
     unsigned flags;                        /* Filter flags */
     size_t   cd_nelmts = 0;                /* Number of filter parameters */

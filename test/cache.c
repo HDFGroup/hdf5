@@ -17341,14 +17341,14 @@ check_check_evictions_enabled_err(void)
 hbool_t rpt_fcn_called = FALSE;
 enum H5C_resize_status rpt_status;
 
-static void test_rpt_fcn(UNUSED H5C_t * cache_ptr,
-                  UNUSED int32_t version,
-                  UNUSED double hit_rate,
+static void test_rpt_fcn(H5_ATTR_UNUSED H5C_t * cache_ptr,
+                  H5_ATTR_UNUSED int32_t version,
+                  H5_ATTR_UNUSED double hit_rate,
                   enum H5C_resize_status status,
-                  UNUSED size_t old_max_cache_size,
-                  UNUSED size_t new_max_cache_size,
-                  UNUSED size_t old_min_clean_size,
-                  UNUSED size_t new_min_clean_size)
+                  H5_ATTR_UNUSED size_t old_max_cache_size,
+                  H5_ATTR_UNUSED size_t new_max_cache_size,
+                  H5_ATTR_UNUSED size_t old_min_clean_size,
+                  H5_ATTR_UNUSED size_t new_min_clean_size)
 {
     rpt_fcn_called = TRUE;
     rpt_status = status;

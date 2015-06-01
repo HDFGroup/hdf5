@@ -83,7 +83,7 @@ static herr_t H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compact_build_table_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
+H5G_compact_build_table_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_iter_bt_t *udata = (H5G_iter_bt_t *)_udata;     /* 'User data' passed in */
@@ -274,7 +274,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compact_remove_common_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
+H5G_compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_iter_rm_t *udata = (H5G_iter_rm_t *)_udata;     /* 'User data' passed in */
@@ -452,7 +452,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compact_lookup_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
+H5G_compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_iter_lkp_t *udata = (H5G_iter_lkp_t *)_udata;     /* 'User data' passed in */

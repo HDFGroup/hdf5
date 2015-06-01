@@ -120,7 +120,7 @@ void tts_cancel(void)
     assert(ret==0);
 }
 
-void *tts_cancel_thread(void UNUSED *arg)
+void *tts_cancel_thread(void H5_ATTR_UNUSED *arg)
 {
     int datavalue;
     int buffer;
@@ -182,8 +182,8 @@ void *tts_cancel_thread(void UNUSED *arg)
     return NULL;
 }
 
-herr_t tts_cancel_callback(void *elem, hid_t UNUSED type_id, unsigned UNUSED ndim,
-			   const hsize_t UNUSED *point, void *operator_data)
+herr_t tts_cancel_callback(void *elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_UNUSED ndim,
+			   const hsize_t H5_ATTR_UNUSED *point, void *operator_data)
 {
     int value = *(int *)elem;
     hid_t dataset = *(hid_t *)operator_data;

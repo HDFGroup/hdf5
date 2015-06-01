@@ -745,7 +745,7 @@ obj_stats(const char *path, const H5O_info_t *oi, const char *already_visited,
  *-------------------------------------------------------------------------
  */
 static herr_t
-lnk_stats(const char UNUSED *path, const H5L_info_t *li, void *_iter)
+lnk_stats(const char H5_ATTR_UNUSED *path, const H5L_info_t *li, void *_iter)
 {
     iter_t *iter = (iter_t *)_iter;
 

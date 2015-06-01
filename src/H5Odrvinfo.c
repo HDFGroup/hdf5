@@ -80,8 +80,8 @@ const H5O_msg_class_t H5O_MSG_DRVINFO[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_drvinfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
-    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
+H5O_drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_drvinfo_t	*mesg;          /* Native message */
     void                *ret_value;     /* Return value */
@@ -139,7 +139,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_drvinfo_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O_drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_drvinfo_t *mesg = (const H5O_drvinfo_t *)_mesg;
 
@@ -225,7 +225,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_drvinfo_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void *_mesg)
+H5O_drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_drvinfo_t *mesg = (const H5O_drvinfo_t *)_mesg;
     size_t                   ret_value;
@@ -289,7 +289,7 @@ H5O_drvinfo_reset(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_drvinfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *stream,
+H5O_drvinfo_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg, FILE *stream,
     int indent, int fwidth)
 {
     const H5O_drvinfo_t *mesg = (const H5O_drvinfo_t *)_mesg;

@@ -4814,10 +4814,10 @@ test_bitfield_funcs(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-convert_opaque(hid_t UNUSED st, hid_t UNUSED dt, H5T_cdata_t *cdata,
-	       size_t UNUSED nelmts, size_t UNUSED buf_stride,
-               size_t UNUSED bkg_stride, void UNUSED *_buf,
-	       void UNUSED *bkg, hid_t UNUSED dset_xfer_plid)
+convert_opaque(hid_t H5_ATTR_UNUSED st, hid_t H5_ATTR_UNUSED dt, H5T_cdata_t *cdata,
+	       size_t H5_ATTR_UNUSED nelmts, size_t H5_ATTR_UNUSED buf_stride,
+               size_t H5_ATTR_UNUSED bkg_stride, void H5_ATTR_UNUSED *_buf,
+	       void H5_ATTR_UNUSED *bkg, hid_t H5_ATTR_UNUSED dset_xfer_plid)
 {
     if (H5T_CONV_CONV==cdata->command) num_opaque_conversions_g++;
     return 0;
@@ -5872,8 +5872,8 @@ typedef struct {
 } except_info_t;
 
 static H5T_conv_ret_t
-conv_except(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst_id,
-    void UNUSED *src_buf, void UNUSED *dst_buf, void *_user_data)
+conv_except(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5_ATTR_UNUSED dst_id,
+    void H5_ATTR_UNUSED *src_buf, void H5_ATTR_UNUSED *dst_buf, void *_user_data)
 {
     except_info_t *user_data = (except_info_t *)_user_data;
 

@@ -133,7 +133,7 @@ H5FL_DEFINE_STATIC(H5FA__test_ctx_t);
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5FA__test_crt_context(void UNUSED *udata))
+H5FA__test_crt_context(void H5_ATTR_UNUSED *udata))
 
     /* Local variables */
     H5FA__test_ctx_t *ctx;              /* Context for callbacks */
@@ -226,7 +226,7 @@ END_FUNC(STATIC)  /* end H5FA__test_fill() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__test_encode(void *raw, const void *_elmt, size_t nelmts, void UNUSED *_ctx))
+H5FA__test_encode(void *raw, const void *_elmt, size_t nelmts, void H5_ATTR_UNUSED *_ctx))
 
     /* Local variables */
 #ifndef NDEBUG
@@ -271,7 +271,7 @@ END_FUNC(STATIC)  /* end H5FA__test_encode() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void UNUSED *_ctx))
+H5FA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_UNUSED *_ctx))
 
     /* Local variables */
 #ifndef NDEBUG
@@ -350,7 +350,7 @@ END_FUNC(STATIC)  /* end H5FA__test_debug() */
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5FA__test_crt_dbg_context(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED obj_addr))
+H5FA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED obj_addr))
 
     /* Local variables */
     H5FA__test_ctx_t *ctx;              /* Context for callbacks */

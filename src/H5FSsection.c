@@ -1895,7 +1895,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_iterate_sect_cb(void *_item, void UNUSED *key, void *_udata)
+H5FS_iterate_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata)
 {
     H5FS_section_info_t *sect_info = (H5FS_section_info_t *)_item;   /* Free space section to work on */
     H5FS_iter_ud_t *udata = (H5FS_iter_ud_t *)_udata; /* Callback info */
@@ -1933,7 +1933,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_iterate_node_cb(void *_item, void UNUSED *key, void *_udata)
+H5FS_iterate_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata)
 {
     H5FS_node_t *fspace_node = (H5FS_node_t *)_item;   /* Free space size node to work on */
     H5FS_iter_ud_t *udata = (H5FS_iter_ud_t *)_udata; /* Callback info */

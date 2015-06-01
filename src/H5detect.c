@@ -488,7 +488,7 @@ precision (detected_t *d)
  *-------------------------------------------------------------------------
  */
 static void
-sigsegv_handler(int UNUSED signo)
+sigsegv_handler(int H5_ATTR_UNUSED signo)
 {
 #if !defined(H5HAVE_SIGJMP) && defined(H5_HAVE_SIGPROCMASK)
     /* Use sigprocmask to unblock the signal if sigsetjmp/siglongjmp are not */
@@ -526,7 +526,7 @@ sigsegv_handler(int UNUSED signo)
  *-------------------------------------------------------------------------
  */
 static void
-sigbus_handler(int UNUSED signo)
+sigbus_handler(int H5_ATTR_UNUSED signo)
 {
 #if !defined(H5HAVE_SIGJMP) && defined(H5_HAVE_SIGPROCMASK)
     /* Use sigprocmask to unblock the signal if sigsetjmp/siglongjmp are not */
@@ -562,7 +562,7 @@ sigbus_handler(int UNUSED signo)
  *-------------------------------------------------------------------------
  */
 static void
-sigill_handler(int UNUSED signo)
+sigill_handler(int H5_ATTR_UNUSED signo)
 {
 #if !defined(H5HAVE_SIGJMP) && defined(H5_HAVE_SIGPROCMASK)
     /* Use sigprocmask to unblock the signal if sigsetjmp/siglongjmp are not */

@@ -295,9 +295,9 @@ H5B2__test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+H5B2__test_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     int indent, int fwidth, const void *record,
-    const void UNUSED *_udata)
+    const void H5_ATTR_UNUSED *_udata)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -324,7 +324,7 @@ H5B2__test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
  *-------------------------------------------------------------------------
  */
 static void *
-H5B2__test_crt_dbg_context(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr)
+H5B2__test_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr)
 {
     H5B2_test_ctx_t *ctx;       /* Callback context structure */
     void *ret_value;            /* Return value */
