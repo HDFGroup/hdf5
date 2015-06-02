@@ -934,7 +934,7 @@ H5FD_log_query(const H5FD_t *_file, unsigned long *flags /* out */)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, hsize_t size)
+H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hsize_t size)
 {
     H5FD_log_t	*file = (H5FD_log_t *)_file;
     haddr_t addr;
@@ -989,7 +989,7 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, hsize_t siz
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_log_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
+H5FD_log_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_log_t    *file = (const H5FD_log_t *)_file;
 
@@ -1061,7 +1061,7 @@ H5FD_log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_log_get_eof(const H5FD_t *_file, H5FD_mem_t UNUSED type)
+H5FD_log_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_log_t	*file = (const H5FD_log_t *)_file;
 
@@ -1084,7 +1084,7 @@ H5FD_log_get_eof(const H5FD_t *_file, H5FD_mem_t UNUSED type)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_log_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void **file_handle)
+H5FD_log_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handle)
 {
     H5FD_log_t          *file = (H5FD_log_t *)_file;
     herr_t              ret_value = SUCCEED;
@@ -1118,7 +1118,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr,
+H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
             size_t size, void *buf/*out*/)
 {
     H5FD_log_t          *file = (H5FD_log_t *)_file;
@@ -1315,7 +1315,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr,
+H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
             size_t size, const void *buf)
 {
     H5FD_log_t          *file = (H5FD_log_t *)_file;
@@ -1515,7 +1515,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_log_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
+H5FD_log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
     H5FD_log_t  *file = (H5FD_log_t *)_file;
     herr_t      ret_value = SUCCEED;                /* Return value */

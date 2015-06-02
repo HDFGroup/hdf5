@@ -669,7 +669,7 @@ test_h5o_plist(void)
     gcpl = H5Gget_create_plist(grp);
     CHECK(gcpl, FAIL, "H5Gget_create_plist");
     tcpl = H5Tget_create_plist(dtype);
-    CHECK(dcpl, FAIL, "H5Tget_create_plist");
+    CHECK(tcpl, FAIL, "H5Tget_create_plist");
     dcpl = H5Dget_create_plist(dset);
     CHECK(dcpl, FAIL, "H5Dget_create_plist");
 
@@ -719,7 +719,7 @@ test_h5o_plist(void)
     gcpl = H5Gget_create_plist(grp);
     CHECK(gcpl, FAIL, "H5Gget_create_plist");
     tcpl = H5Tget_create_plist(dtype);
-    CHECK(dcpl, FAIL, "H5Tget_create_plist");
+    CHECK(tcpl, FAIL, "H5Tget_create_plist");
     dcpl = H5Dget_create_plist(dset);
     CHECK(dcpl, FAIL, "H5Dget_create_plist");
 

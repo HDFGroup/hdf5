@@ -122,7 +122,7 @@ H5FL_EXTERN(H5F_super_t);
  *-------------------------------------------------------------------------
  */
 static H5F_super_t *
-H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
+H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t H5_ATTR_UNUSED addr, void *_udata)
 {
     H5F_super_t        *sblock = NULL;      /* File's superblock */
     haddr_t             base_addr = HADDR_UNDEF;        /* Base address of file */
@@ -635,7 +635,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
+H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t H5_ATTR_UNUSED addr,
     H5F_super_t *sblock)
 {
     herr_t          ret_value = SUCCEED;
@@ -872,7 +872,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_sblock_dest(H5F_t UNUSED *f, H5F_super_t* sblock)
+H5F_sblock_dest(H5F_t H5_ATTR_UNUSED *f, H5F_super_t* sblock)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 

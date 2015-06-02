@@ -192,7 +192,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_debug() */
  */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int indent,
+H5EA__iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int indent,
     int fwidth, const H5EA_class_t *cls, haddr_t hdr_addr, haddr_t obj_addr))
 
     /* Local variables */

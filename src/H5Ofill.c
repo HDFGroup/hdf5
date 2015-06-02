@@ -184,8 +184,8 @@ H5FL_BLK_EXTERN(type_conv);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
-    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
+H5O_fill_new_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_fill_t	*fill = NULL;
     void	*ret_value;
@@ -298,8 +298,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_old_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
-    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
+H5O_fill_old_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_fill_t *fill = NULL;		/* Decoded fill value message */
     void *ret_value;                    /* Return value */
@@ -359,7 +359,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_fill)
+H5O_fill_new_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 {
     const H5O_fill_t	*fill = (const H5O_fill_t *)_fill;
 
@@ -455,7 +455,7 @@ H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_fill)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_old_encode(H5F_t UNUSED *f, uint8_t *p, const void *_fill)
+H5O_fill_old_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p, const void *_fill)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
 
@@ -608,7 +608,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_fill_new_size(const H5F_t UNUSED *f, const void *_fill)
+H5O_fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
 {
     const H5O_fill_t	*fill = (const H5O_fill_t *)_fill;
     size_t		ret_value;
@@ -656,7 +656,7 @@ H5O_fill_new_size(const H5F_t UNUSED *f, const void *_fill)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_fill_old_size(const H5F_t UNUSED *f, const void *_fill)
+H5O_fill_old_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;
 
@@ -805,7 +805,7 @@ H5O_fill_free(void *fill)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_fill, FILE *stream,
+H5O_fill_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_fill, FILE *stream,
 	       int indent, int fwidth)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)_fill;

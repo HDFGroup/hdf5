@@ -61,7 +61,7 @@ const int H5Z_FILTER_BOGUS = 305;
 
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
-// UNUSED variables caused warning, but taking them out caused failure.
+// H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
 
 /*-------------------------------------------------------------------------
  * Function:	test_create
@@ -462,7 +462,7 @@ static size_t
 filter_bogus(unsigned int flags, size_t cd_nelmts,
       const unsigned int cd_values[], size_t nbytes,
       size_t *buf_size, void **buf)
-// UNUSED variables caused warning, but taking them out caused failure.
+// H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
 {
     return nbytes;
 }

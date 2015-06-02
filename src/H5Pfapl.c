@@ -445,7 +445,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_facc_create(hid_t fapl_id, void UNUSED *copy_data)
+H5P_facc_create(hid_t fapl_id, void H5_ATTR_UNUSED *copy_data)
 {
     hid_t          driver_id;
     H5P_genplist_t *plist;              /* Property list */
@@ -495,7 +495,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
+H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void H5_ATTR_UNUSED *copy_data)
 {
     hid_t          driver_id;
     H5P_genplist_t *src_plist;              /* Source property list */
@@ -546,7 +546,7 @@ done:
  */
 /* ARGSUSED */
 herr_t
-H5P_facc_close(hid_t fapl_id, void UNUSED *close_data)
+H5P_facc_close(hid_t fapl_id, void H5_ATTR_UNUSED *close_data)
 {
     hid_t      driver_id;
     H5P_genplist_t *plist;              /* Property list */
@@ -1117,7 +1117,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
+H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts,
 	     size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -2294,7 +2294,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_file_image_info_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_file_image_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     H5FD_file_image_info_t info;        /* Image info struct */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2348,7 +2348,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_file_image_info_copy(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_file_image_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2423,7 +2423,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_file_image_info_close(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_file_image_info_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2473,7 +2473,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P__facc_cache_config_cmp(const void *_config1, const void *_config2, size_t UNUSED size)
+H5P__facc_cache_config_cmp(const void *_config1, const void *_config2, size_t H5_ATTR_UNUSED size)
 {
     const H5AC_cache_config_t *config1 = (const H5AC_cache_config_t *)_config1; /* Create local aliases for values */
     const H5AC_cache_config_t *config2 = (const H5AC_cache_config_t *)_config2; /* Create local aliases for values */

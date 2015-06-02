@@ -224,7 +224,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5D__compact_is_space_alloc(const H5O_storage_t UNUSED *storage)
+H5D__compact_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -249,8 +249,8 @@ H5D__compact_is_space_alloc(const H5O_storage_t UNUSED *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__compact_io_init(H5D_io_info_t UNUSED *io_info, const H5D_type_info_t UNUSED *type_info,
-    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
+H5D__compact_io_init(H5D_io_info_t H5_ATTR_UNUSED *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
     H5D_dset_info_t *dinfo)
 {
     FUNC_ENTER_STATIC_NOERR

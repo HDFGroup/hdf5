@@ -154,7 +154,7 @@ void tts_error(void)
 }
 
 static
-void *tts_error_thread(void UNUSED *arg)
+void *tts_error_thread(void H5_ATTR_UNUSED *arg)
 {
     hid_t dataspace, datatype, dataset;
     hsize_t dimsf[1]; /* dataset dimensions */
@@ -199,7 +199,7 @@ void *tts_error_thread(void UNUSED *arg)
 }
 
 static
-herr_t error_callback(hid_t UNUSED estack_id, void *client_data)
+herr_t error_callback(hid_t H5_ATTR_UNUSED estack_id, void *client_data)
 {
     H5TS_mutex_lock_simple(&error_mutex);
     error_count++;
@@ -208,7 +208,7 @@ herr_t error_callback(hid_t UNUSED estack_id, void *client_data)
 }
 
 static
-herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void UNUSED *client_data)
+herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSED *client_data)
 {
     hid_t maj_num, min_num;
 

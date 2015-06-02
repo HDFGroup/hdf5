@@ -1019,7 +1019,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_copy_free_addrmap_cb(void *_item, void UNUSED *key, void UNUSED *op_data)
+H5O_copy_free_addrmap_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op_data)
 {
     H5O_addr_map_t *item = (H5O_addr_map_t *)_item;
 
@@ -1411,7 +1411,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_copy_free_comm_dt_cb(void *item, void *_key, void UNUSED *op_data)
+H5O_copy_free_comm_dt_cb(void *item, void *_key, void H5_ATTR_UNUSED *op_data)
 {
     haddr_t     *addr = (haddr_t *)item;
     H5O_copy_search_comm_dt_key_t *key = (H5O_copy_search_comm_dt_key_t *)_key;
@@ -1692,7 +1692,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_copy_search_comm_dt_cb(hid_t UNUSED group, const char *name,
+H5O_copy_search_comm_dt_cb(hid_t H5_ATTR_UNUSED group, const char *name,
     const H5L_info_t *linfo, void *_udata)
 {
     H5O_copy_search_comm_dt_ud_t *udata = (H5O_copy_search_comm_dt_ud_t *)_udata; /* Skip list of dtypes in dest file */

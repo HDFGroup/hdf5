@@ -157,7 +157,7 @@ H5FL_SEQ_DEFINE(H5G_entry_t);
  *-------------------------------------------------------------------------
  */
 static H5UC_t *
-H5G_node_get_shared(const H5F_t *f, const void UNUSED *_udata)
+H5G_node_get_shared(const H5F_t *f, const void H5_ATTR_UNUSED *_udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -323,8 +323,8 @@ H5G__node_free(H5G_node_t *sym)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
-		void UNUSED *_udata, void *_rt_key, haddr_t *addr_p/*out*/)
+H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t H5_ATTR_UNUSED op, void *_lt_key,
+		void H5_ATTR_UNUSED *_udata, void *_rt_key, haddr_t *addr_p/*out*/)
 {
     H5G_node_key_t	*lt_key = (H5G_node_key_t *)_lt_key;
     H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
@@ -518,7 +518,7 @@ H5G_node_cmp3(void *_lt_key, void *_udata, void *_rt_key)
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key,
+H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void H5_ATTR_UNUSED *_lt_key,
     void *_udata)
 {
     H5G_bt_lkp_t	*udata = (H5G_bt_lkp_t *)_udata;
@@ -614,7 +614,7 @@ done:
  */
 static H5B_ins_t
 H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    void UNUSED *_lt_key, hbool_t UNUSED *lt_key_changed,
+    void H5_ATTR_UNUSED *_lt_key, hbool_t H5_ATTR_UNUSED *lt_key_changed,
     void *_md_key, void *_udata,
     void *_rt_key, hbool_t *rt_key_changed,
     haddr_t *new_node_p)
@@ -785,7 +785,7 @@ done:
  */
 static H5B_ins_t
 H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
-		hbool_t UNUSED *lt_key_changed/*out*/,
+		hbool_t H5_ATTR_UNUSED *lt_key_changed/*out*/,
 		void *_udata/*in,out*/, void *_rt_key/*in,out*/,
 		hbool_t *rt_key_changed/*out*/)
 {
@@ -982,8 +982,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G__node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
-    const void UNUSED *_rt_key, void *_udata)
+H5G__node_iterate(H5F_t *f, hid_t dxpl_id, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
+    const void H5_ATTR_UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_it_it_t	*udata = (H5G_bt_it_it_t *)_udata;
     H5G_node_t		*sn = NULL;
@@ -1061,8 +1061,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G__node_sumup(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
-		  const void UNUSED *_rt_key, void *_udata)
+H5G__node_sumup(H5F_t *f, hid_t dxpl_id, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
+		  const void H5_ATTR_UNUSED *_rt_key, void *_udata)
 {
     hsize_t	        *num_objs = (hsize_t *)_udata;
     H5G_node_t		*sn = NULL;
@@ -1106,8 +1106,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G__node_by_idx(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
-		  const void UNUSED *_rt_key, void *_udata)
+H5G__node_by_idx(H5F_t *f, hid_t dxpl_id, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
+		  const void H5_ATTR_UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_it_idx_common_t	*udata = (H5G_bt_it_idx_common_t *)_udata;
     H5G_node_t		*sn = NULL;
@@ -1242,8 +1242,8 @@ H5G_node_close(const H5F_t *f)
  *-------------------------------------------------------------------------
  */
 int
-H5G__node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
-		  const void UNUSED *_rt_key, void *_udata)
+H5G__node_copy(H5F_t *f, hid_t dxpl_id, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
+		  const void H5_ATTR_UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_it_cpy_t     *udata = (H5G_bt_it_cpy_t *)_udata;
     const H5O_loc_t     *src_oloc = udata->src_oloc;
@@ -1399,8 +1399,8 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G__node_build_table(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
-    const void UNUSED *_rt_key, void *_udata)
+H5G__node_build_table(H5F_t *f, hid_t dxpl_id, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr,
+    const void H5_ATTR_UNUSED *_rt_key, void *_udata)
 {
     H5G_bt_it_bt_t	*udata = (H5G_bt_it_bt_t *)_udata;
     H5G_node_t		*sn = NULL;             /* Symbol table node */
@@ -1474,8 +1474,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__node_iterate_size(H5F_t *f, hid_t UNUSED dxpl_id, const void UNUSED *_lt_key, haddr_t UNUSED addr,
-    const void UNUSED *_rt_key, void *_udata)
+H5G__node_iterate_size(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const void H5_ATTR_UNUSED *_lt_key, haddr_t H5_ATTR_UNUSED addr,
+    const void H5_ATTR_UNUSED *_rt_key, void *_udata)
 {
     hsize_t     *stab_size = (hsize_t *)_udata;         /* User data */
 

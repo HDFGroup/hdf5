@@ -608,7 +608,7 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long *flags /* out */)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl_id, hsize_t size)
+H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*H5_ATTR_UNUSED*/ type, hid_t /*H5_ATTR_UNUSED*/ dxpl_id, hsize_t size)
 {
     H5FD_stdio_t    *file = (H5FD_stdio_t*)_file;
     haddr_t         addr;
@@ -653,7 +653,7 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
+H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*H5_ATTR_UNUSED*/ type)
 {
     const H5FD_stdio_t *file = (const H5FD_stdio_t *)_file;
 
@@ -684,7 +684,7 @@ H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, haddr_t addr)
+H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*H5_ATTR_UNUSED*/ type, haddr_t addr)
 {
     H5FD_stdio_t  *file = (H5FD_stdio_t*)_file;
 
@@ -719,7 +719,7 @@ H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_stdio_get_eof(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
+H5FD_stdio_get_eof(const H5FD_t *_file, H5FD_mem_t /*H5_ATTR_UNUSED*/ type)
 {
     const H5FD_stdio_t  *file = (const H5FD_stdio_t *)_file;
 

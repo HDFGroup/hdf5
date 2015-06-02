@@ -394,7 +394,7 @@ done:
  */
 static herr_t
 H5HL_prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    void *thing, unsigned UNUSED *flags_ptr)
+    void *thing, unsigned H5_ATTR_UNUSED *flags_ptr)
 {
     H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* Local heap prefix to flush */
     H5WB_t *wb = NULL;                  /* Wrapped buffer for heap data */
@@ -553,7 +553,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_prefix_clear(H5F_t UNUSED *f, void *thing, hbool_t destroy)
+H5HL_prefix_clear(H5F_t H5_ATTR_UNUSED *f, void *thing, hbool_t destroy)
 {
     H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* The local heap prefix to operate on */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -590,7 +590,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_prefix_size(const H5F_t UNUSED *f, const void *thing, size_t *size_ptr)
+H5HL_prefix_size(const H5F_t H5_ATTR_UNUSED *f, const void *thing, size_t *size_ptr)
 {
     const H5HL_prfx_t *prfx = (const H5HL_prfx_t *)thing;   /* Pointer to local heap prefix to query */
 
@@ -694,7 +694,7 @@ done:
  */
 static herr_t
 H5HL_datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    void *_thing, unsigned UNUSED * flags_ptr)
+    void *_thing, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -835,7 +835,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_datablock_size(const H5F_t UNUSED *f, const void *_thing, size_t *size_ptr)
+H5HL_datablock_size(const H5F_t H5_ATTR_UNUSED *f, const void *_thing, size_t *size_ptr)
 {
     const H5HL_dblk_t *dblk = (const H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
 

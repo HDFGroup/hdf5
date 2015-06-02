@@ -473,7 +473,7 @@ parse_args(int argc, char **argv)
 #else /* H5_HAVE_PARALLEL */
 /* dummy program since H5_HAVE_PARALLEL is not configured in */
 int
-main(int UNUSED argc, char UNUSED **argv)
+main(int H5_ATTR_UNUSED argc, char H5_ATTR_UNUSED **argv)
 {
     printf("No parallel performance because parallel is not configured in\n");
     return(0);

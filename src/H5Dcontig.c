@@ -499,7 +499,7 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
  */
 static herr_t
 H5D__contig_io_init(H5D_io_info_t *io_info,
-    const H5D_type_info_t UNUSED *type_info, hsize_t nelmts,
+    const H5D_type_info_t H5_ATTR_UNUSED *type_info, hsize_t nelmts,
     const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo)
 {
     H5D_t *dataset = dinfo->dset;     /* Local pointer to dataset info */

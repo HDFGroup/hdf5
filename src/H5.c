@@ -615,7 +615,7 @@ H5_debug_mask(const char *s)
  *
  *-------------------------------------------------------------------------
  */
-static int H5_mpi_delete_cb(MPI_Comm UNUSED comm, int UNUSED keyval, void UNUSED *attr_val, int UNUSED *flag)
+static int H5_mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void H5_ATTR_UNUSED *attr_val, int H5_ATTR_UNUSED *flag)
 {
     H5_term_library();
     return MPI_SUCCESS;

@@ -252,7 +252,7 @@ done:
  */
 herr_t
 H5D__mpio_select_read(const H5D_io_info_t *io_info, hsize_t mpi_buf_count, 
-    const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
+    const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space)
 {
     /* all dsets are in the same file, so just get it from the first dset */
     const H5F_t *file = io_info->dsets_info[0].dset->oloc.file;
@@ -289,7 +289,7 @@ done:
  */
 herr_t
 H5D__mpio_select_write(const H5D_io_info_t *io_info, hsize_t mpi_buf_count, 
-    const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
+    const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space)
 {
     /* all dsets are in the same file, so just get it from the first dset */
     const H5F_t *file = io_info->dsets_info[0].dset->oloc.file;
@@ -448,7 +448,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count, 
+H5D__all_piece_collective_io(H5_ATTR_UNUSED const hid_t file_id, const size_t count, 
     H5D_io_info_t *io_info, H5P_genplist_t *dx_plist)
 {
     MPI_Datatype chunk_final_mtype;         /* Final memory MPI datatype for all chunks with seletion */

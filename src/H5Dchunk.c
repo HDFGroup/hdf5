@@ -220,7 +220,7 @@ static herr_t H5D__create_piece_file_map_hyper(H5D_dset_info_t *di,
     const H5D_io_info_t *io_info);
 static herr_t H5D__create_piece_mem_map_hyper(const H5D_io_info_t *io_info,
     const H5D_dset_info_t *dinfo);
-static herr_t H5D__piece_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, 
+static herr_t H5D__piece_file_cb(void H5_ATTR_UNUSED *elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndims, 
     const hsize_t *coords, void *_opdata);
 static herr_t H5D__piece_mem_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *_opdata);
@@ -495,7 +495,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
+H5D__chunk_construct(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset)
 {
     const H5T_t *type = dset->shared->type;      /* Convenience pointer to dataset's datatype */
     uint64_t chunk_size;        /* Size of chunk in bytes */
@@ -1080,7 +1080,7 @@ H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__free_piece_info(void *item, void UNUSED *key, void UNUSED *opdata)
+H5D__free_piece_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *opdata)
 {
     H5D_piece_info_t *piece_info = (H5D_piece_info_t *)item;
 
@@ -1507,7 +1507,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__piece_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_opdata)
+H5D__piece_file_cb(void H5_ATTR_UNUSED *elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_opdata)
 {
     H5D_io_info_wrap_t *opdata = (H5D_io_info_wrap_t *)_opdata;
     H5D_io_info_t *io_info = (H5D_io_info_t *) opdata->io_info;  /* io info for mumti dset */
@@ -1642,7 +1642,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__piece_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_opdata)
+H5D__piece_mem_cb(void H5_ATTR_UNUSED *elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_opdata)
 {
     H5D_io_info_wrap_t *opdata = (H5D_io_info_wrap_t *)_opdata;
     H5D_io_info_t *io_info = (H5D_io_info_t *) opdata->io_info;  /* io info for mumti dset */
@@ -1798,7 +1798,7 @@ done:
  */
 static herr_t
 H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
     H5D_dset_info_t *dset_info)
 {
     H5SL_node_t *chunk_node;            /* Current node in chunk skip list */
@@ -1966,7 +1966,7 @@ done:
  */
 static herr_t
 H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
     H5D_dset_info_t *dset_info)
 {
     H5SL_node_t *chunk_node;            /* Current node in chunk skip list */
@@ -5355,7 +5355,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__nonexistent_readvv_cb(hsize_t UNUSED dst_off, hsize_t src_off, size_t len,
+H5D__nonexistent_readvv_cb(hsize_t H5_ATTR_UNUSED dst_off, hsize_t src_off, size_t len,
     void *_udata)
 {
     H5D_chunk_readvv_ud_t *udata = (H5D_chunk_readvv_ud_t *)_udata; /* User data for H5VM_opvv() operator */
