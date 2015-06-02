@@ -23,18 +23,18 @@
 #include <stdlib.h>
 #include <time.h>
 
+/*
+ * This file needs to access private information from the H5Z package.
+ */
+#define H5Z_PACKAGE
+
+
 #include "h5test.h"
 #include "H5srcdir.h"
+#include "H5Zpkg.h"
 #ifdef H5_HAVE_SZLIB_H
 #   include "szlib.h"
 #endif
-
-/*
- * This file needs to access private datatypes from the H5Z package.
- */
-#define H5Z_PACKAGE
-#include "H5Zpkg.h"
-
 
 const char *FILENAME[] = {
     "dataset",

@@ -66,7 +66,6 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-3.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-4.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompact.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_enum.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcontents.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcontiguos.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.ddl
@@ -216,7 +215,6 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdintsize.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_enum.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty.h5
@@ -1159,7 +1157,6 @@
   #test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
   ADD_H5_TEST (tnestedcmpddt 0 --enable-error-stack tnestedcmpddt.h5)
-  #ADD_H5_TEST (tcompound_enum 0 --enable-error-stack tcompound_enum.h5)
 
   # test for options
   ADD_H5ERR_MASK_TEST (tall-1 0 --enable-error-stack tall.h5)

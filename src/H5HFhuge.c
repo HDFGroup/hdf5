@@ -653,7 +653,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 
             /* Retrieve the object's address & length */
             obj_addr = found_rec.addr;
-            H5_ASSIGN_OVERFLOW(/* To: */ obj_size, /* From: */ found_rec.len, /* From: */ hsize_t, /* To: */ size_t);
+            H5_CHECKED_ASSIGN(obj_size, size_t, found_rec.len, hsize_t);
             filter_mask = found_rec.filter_mask;
         } /* end if */
         else {
@@ -669,7 +669,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 
             /* Retrieve the object's address & length */
             obj_addr = found_rec.addr;
-            H5_ASSIGN_OVERFLOW(/* To: */ obj_size, /* From: */ found_rec.len, /* From: */ hsize_t, /* To: */ size_t);
+            H5_CHECKED_ASSIGN(obj_size, size_t, found_rec.len, hsize_t);
         } /* end else */
     } /* end else */
 
@@ -797,7 +797,7 @@ H5HF_huge_write(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 
         /* Retrieve the object's address & length */
         obj_addr = found_rec.addr;
-        H5_ASSIGN_OVERFLOW(/* To: */ obj_size, /* From: */ found_rec.len, /* From: */ hsize_t, /* To: */ size_t);
+        H5_CHECKED_ASSIGN(obj_size, size_t, found_rec.len, hsize_t);
     } /* end else */
 
     /* Write the object's data to the file */

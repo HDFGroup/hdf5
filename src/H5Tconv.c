@@ -1952,7 +1952,7 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
             src2dst[i] = -1;
             for(j = 0; j < dst_nmembs; j++) {
                 if(!HDstrcmp(src->shared->u.compnd.memb[i].name, dst->shared->u.compnd.memb[j].name)) {
-                    H5_ASSIGN_OVERFLOW(src2dst[i],j,unsigned,int);
+                    H5_CHECKED_ASSIGN(src2dst[i], int, j, unsigned);
                     break;
                 } /* end if */
             } /* end for */
@@ -2187,16 +2187,16 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * Direction of conversion and striding through background.
              */
             if(buf_stride) {
-                H5_ASSIGN_OVERFLOW(src_delta, buf_stride, size_t, ssize_t);
+                H5_CHECKED_ASSIGN(src_delta, ssize_t, buf_stride, size_t);
                 if(!bkg_stride) {
-                    H5_ASSIGN_OVERFLOW(bkg_delta, dst->shared->size, size_t, ssize_t);
+                    H5_CHECKED_ASSIGN(bkg_delta, ssize_t, dst->shared->size, size_t);
                 } /* end if */
                 else
-                    H5_ASSIGN_OVERFLOW(bkg_delta, bkg_stride, size_t, ssize_t);
+                    H5_CHECKED_ASSIGN(bkg_delta, ssize_t, bkg_stride, size_t);
             } /* end if */
             else if(dst->shared->size <= src->shared->size) {
-                H5_ASSIGN_OVERFLOW(src_delta, src->shared->size, size_t, ssize_t);
-                H5_ASSIGN_OVERFLOW(bkg_delta, dst->shared->size, size_t, ssize_t);
+                H5_CHECKED_ASSIGN(src_delta, ssize_t, src->shared->size, size_t);
+                H5_CHECKED_ASSIGN(bkg_delta, ssize_t, dst->shared->size, size_t);
             } /* end else-if */
             else {
                 H5_CHECK_OVERFLOW(src->shared->size, size_t, ssize_t);
@@ -2278,7 +2278,7 @@ H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* If the bkg_delta was set to -(dst->shared->size), make it positive now */
             if(buf_stride == 0 && dst->shared->size > src->shared->size)
-                H5_ASSIGN_OVERFLOW(bkg_delta, dst->shared->size, size_t, ssize_t);
+                H5_CHECKED_ASSIGN(bkg_delta, ssize_t, dst->shared->size, size_t);
 
             /*
              * Copy the background buffer back into the in-place conversion
@@ -2833,8 +2833,8 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 src_delta = dst_delta = (ssize_t)buf_stride;
                 s = d = buf;
             } else if(dst->shared->size <= src->shared->size) {
-                H5_ASSIGN_OVERFLOW(src_delta, src->shared->size, size_t, ssize_t);
-                H5_ASSIGN_OVERFLOW(dst_delta, dst->shared->size, size_t, ssize_t);
+                H5_CHECKED_ASSIGN(src_delta, ssize_t, src->shared->size, size_t);
+                H5_CHECKED_ASSIGN(dst_delta, ssize_t, dst->shared->size, size_t);
                 s = d = buf;
             } else {
                 H5_CHECK_OVERFLOW(src->shared->size, size_t, ssize_t);

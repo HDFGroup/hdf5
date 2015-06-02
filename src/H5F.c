@@ -484,15 +484,15 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* Check/fix arguments */
     if(!filename || !*filename)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
     /* In this routine, we only accept the following flags:
-     *          H5F_ACC_EXCL, H5F_ACC_TRUNC and H5F_ACC_DEBUG
+     *          H5F_ACC_EXCL and H5F_ACC_TRUNC
      */
-    if(flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_DEBUG))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
+    if(flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
     /* The H5F_ACC_EXCL and H5F_ACC_TRUNC flags are mutually exclusive */
     if((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation")
 
     /* Check file creation property list */
     if(H5P_DEFAULT == fcpl_id)
@@ -1380,7 +1380,7 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
     HDmemset(finfo, 0, sizeof(*finfo));
 
     /* Get the size of the superblock and any superblock extensions */
-    if(H5F_super_size(f, H5AC_ind_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
+    if(H5F__super_size(f, H5AC_ind_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
 
     /* Get the size of any persistent free space */

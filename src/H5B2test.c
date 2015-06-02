@@ -61,15 +61,15 @@ typedef struct H5B2_test_ctx_t {
 /* Local Prototypes */
 /********************/
 
-static void *H5B2_test_crt_context(void *udata);
-static herr_t H5B2_test_dst_context(void *ctx);
-static herr_t H5B2_test_store(void *nrecord, const void *udata);
-static herr_t H5B2_test_compare(const void *rec1, const void *rec2);
-static herr_t H5B2_test_encode(uint8_t *raw, const void *nrecord, void *ctx);
-static herr_t H5B2_test_decode(const uint8_t *raw, void *nrecord, void *ctx);
-static herr_t H5B2_test_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
+static void *H5B2__test_crt_context(void *udata);
+static herr_t H5B2__test_dst_context(void *ctx);
+static herr_t H5B2__test_store(void *nrecord, const void *udata);
+static herr_t H5B2__test_compare(const void *rec1, const void *rec2);
+static herr_t H5B2__test_encode(uint8_t *raw, const void *nrecord, void *ctx);
+static herr_t H5B2__test_decode(const uint8_t *raw, void *nrecord, void *ctx);
+static herr_t H5B2__test_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
     int indent, int fwidth, const void *record, const void *_udata);
-static void *H5B2_test_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
+static void *H5B2__test_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 
 /*********************/
@@ -80,15 +80,15 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2_TEST_ID,               /* Type of B-tree */
     "H5B2_TEST_ID",             /* Name of B-tree class */
     sizeof(hsize_t),            /* Size of native record */
-    H5B2_test_crt_context,      /* Create client callback context */
-    H5B2_test_dst_context,      /* Destroy client callback context */
-    H5B2_test_store,            /* Record storage callback */
-    H5B2_test_compare,          /* Record comparison callback */
-    H5B2_test_encode,           /* Record encoding callback */
-    H5B2_test_decode,           /* Record decoding callback */
-    H5B2_test_debug,            /* Record debugging callback */
-    H5B2_test_crt_dbg_context,  /* Create debugging context */
-    H5B2_test_dst_context       /* Destroy debugging context */
+    H5B2__test_crt_context,      /* Create client callback context */
+    H5B2__test_dst_context,      /* Destroy client callback context */
+    H5B2__test_store,            /* Record storage callback */
+    H5B2__test_compare,          /* Record comparison callback */
+    H5B2__test_encode,           /* Record encoding callback */
+    H5B2__test_decode,           /* Record decoding callback */
+    H5B2__test_debug,            /* Record debugging callback */
+    H5B2__test_crt_dbg_context,  /* Create debugging context */
+    H5B2__test_dst_context       /* Destroy debugging context */
 }};
 
 
@@ -107,7 +107,7 @@ H5FL_DEFINE_STATIC(H5B2_test_ctx_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_test_crt_context
+ * Function:	H5B2__test_crt_context
  *
  * Purpose:	Create client callback context
  *
@@ -120,13 +120,13 @@ H5FL_DEFINE_STATIC(H5B2_test_ctx_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5B2_test_crt_context(void *_f)
+H5B2__test_crt_context(void *_f)
 {
     H5F_t *f = (H5F_t *)_f;     /* User data for building callback context */
     H5B2_test_ctx_t *ctx;       /* Callback context structure */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -143,11 +143,11 @@ H5B2_test_crt_context(void *_f)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_test_crt_context() */
+} /* H5B2__test_crt_context() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_test_dst_context
+ * Function:	H5B2__test_dst_context
  *
  * Purpose:	Destroy client callback context
  *
@@ -160,11 +160,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_dst_context(void *_ctx)
+H5B2__test_dst_context(void *_ctx)
 {
     H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx;       /* Callback context structure */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -173,11 +173,11 @@ H5B2_test_dst_context(void *_ctx)
     ctx = H5FL_FREE(H5B2_test_ctx_t, ctx);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_test_dst_context() */
+} /* H5B2__test_dst_context() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_test_store
+ * Function:	H5B2__test_store
  *
  * Purpose:	Store native information into record for B-tree
  *
@@ -190,18 +190,18 @@ H5B2_test_dst_context(void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_store(void *nrecord, const void *udata)
+H5B2__test_store(void *nrecord, const void *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     *(hsize_t *)nrecord = *(const hsize_t *)udata;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_test_store() */
+} /* H5B2__test_store() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_test_compare
+ * Function:	H5B2__test_compare
  *
  * Purpose:	Compare two native information records, according to some key
  *
@@ -215,16 +215,16 @@ H5B2_test_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_compare(const void *rec1, const void *rec2)
+H5B2__test_compare(const void *rec1, const void *rec2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI((herr_t)(*(const hssize_t *)rec1 - *(const hssize_t *)rec2))
-} /* H5B2_test_compare() */
+} /* H5B2__test_compare() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_test_encode
+ * Function:	H5B2__test_encode
  *
  * Purpose:	Encode native information into raw form for storing on disk
  *
@@ -237,11 +237,11 @@ H5B2_test_compare(const void *rec1, const void *rec2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_encode(uint8_t *raw, const void *nrecord, void *_ctx)
+H5B2__test_encode(uint8_t *raw, const void *nrecord, void *_ctx)
 {
     H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx;       /* Callback context structure */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -249,11 +249,11 @@ H5B2_test_encode(uint8_t *raw, const void *nrecord, void *_ctx)
     H5F_ENCODE_LENGTH_LEN(raw, *(const hsize_t *)nrecord, ctx->sizeof_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_test_encode() */
+} /* H5B2__test_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_test_decode
+ * Function:	H5B2__test_decode
  *
  * Purpose:	Decode raw disk form of record into native form
  *
@@ -266,11 +266,11 @@ H5B2_test_encode(uint8_t *raw, const void *nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
+H5B2__test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
 {
     H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx;       /* Callback context structure */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(ctx);
@@ -278,11 +278,11 @@ H5B2_test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
     H5F_DECODE_LENGTH_LEN(raw, *(hsize_t *)nrecord, ctx->sizeof_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_test_decode() */
+} /* H5B2__test_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_test_debug
+ * Function:	H5B2__test_debug
  *
  * Purpose:	Debug native form of record
  *
@@ -295,11 +295,11 @@ H5B2_test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+H5B2__test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
     int indent, int fwidth, const void *record,
     const void UNUSED *_udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert (record);
 
@@ -307,11 +307,11 @@ H5B2_test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
         *(const hsize_t *)record);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5B2_test_debug() */
+} /* H5B2__test_debug() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_test_crt_dbg_context
+ * Function:	H5B2__test_crt_dbg_context
  *
  * Purpose:	Create context for debugging callback
  *
@@ -324,12 +324,12 @@ H5B2_test_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
  *-------------------------------------------------------------------------
  */
 static void *
-H5B2_test_crt_dbg_context(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr)
+H5B2__test_crt_dbg_context(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr)
 {
     H5B2_test_ctx_t *ctx;       /* Callback context structure */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -346,7 +346,7 @@ H5B2_test_crt_dbg_context(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_test_crt_dbg_context() */
+} /* H5B2__test_crt_dbg_context() */
 
 
 /*-------------------------------------------------------------------------
@@ -397,7 +397,7 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;      /* Node pointer info for current node */
-    unsigned    depth;                  /* Current depth of the tree */
+    uint16_t    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
     herr_t	ret_value = SUCCEED;    /* Return value */
@@ -430,11 +430,11 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
         H5B2_node_ptr_t next_node_ptr;      /* Node pointer info for next node */
 
         /* Lock B-tree current node */
-        if(NULL == (internal = H5B2_protect_internal(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC_READ)))
+        if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC_READ)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate node pointer for child */
-        cmp = H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
+        cmp = H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
         if(cmp > 0)
             idx++;
 
@@ -470,11 +470,11 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
         H5B2_leaf_t *leaf;          /* Pointer to leaf node in B-tree */
 
         /* Lock B-tree leaf node */
-        if(NULL == (leaf = H5B2_protect_leaf(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, H5AC_READ)))
+        if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, H5AC_READ)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
         /* Locate record */
-        cmp = H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
+        cmp = H5B2__locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
 
         /* Unlock current node */
         if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
@@ -499,7 +499,7 @@ done:
  *
  * Purpose:	Determine the depth of a node holding a record in the B-tree
  *
- * Note:	Just a simple wrapper around the H5B2_get_node_info_test() routine
+ * Note:	Just a simple wrapper around the H5B2__get_node_info_test() routine
  *
  * Return:	Success:	non-negative depth of the node where the record
  *                              was found

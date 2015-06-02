@@ -602,12 +602,12 @@ H5D__pre_write(hid_t file_id, hid_t dxpl_id, size_t count,
          * zero. So transfer the offset array to an internal offset array */ 
         if((sndims = H5S_get_simple_extent_dims(dset_info[0].dset->shared->space, dims, NULL)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
-        H5_ASSIGN_OVERFLOW(ndims, sndims, int, unsigned);
+        H5_CHECKED_ASSIGN(ndims, unsigned, sndims, int);
 
         /* Sanity check chunk offset and set up internal offset array */
         for(u = 0; u < ndims; u++) {
             /* Make sure the offset doesn't exceed the dataset's dimensions */
-            if(direct_offset[u] > dims[u])
+            if(direct_offset[u] > dset_info[0].dset->shared->curr_dims[u])
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
 
             /* Make sure the offset fall right on a chunk's boundary */
@@ -781,7 +781,7 @@ H5D__read(hid_t file_id, hid_t dxpl_id, size_t count,
 
         if((snelmts = H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dst dataspace has invalid selection")
-        H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
+        H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
 
         /* Make certain that the number of elements in each selection is the same */
         if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(dset_info[i].file_space))
@@ -876,7 +876,7 @@ H5D__read(hid_t file_id, hid_t dxpl_id, size_t count,
         /* Set up I/O operation */
         io_info.op_type = H5D_IO_OP_READ;
         if(H5D__ioinfo_init(dset_info[i].dset, dxpl_cache, dxpl_id, &(dset_info[i]), 
-                                  &(store[i]), &io_info) < 0)
+                            &(store[i]), &io_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
 #ifdef H5_HAVE_PARALLEL
         io_info_init = TRUE;
@@ -921,8 +921,10 @@ H5D__read(hid_t file_id, hid_t dxpl_id, size_t count,
         /* Loop with serial & single-dset read IO path */
         for(i = 0; i < count; i++) {
             /* set metadata tagging with dset oheader addr */
-            if(H5AC_tag(dxpl_id, dset_info->dset->oloc.addr, &prev_tag) < 0)
+            if(H5AC_tag(dxpl_id, dset_info[i].dset->oloc.addr, &prev_tag) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+
+            io_info.dsets_info = &(dset_info[i]);
 
             if((*io_info.io_ops.multi_read)(&io_info, &(dset_info[i].type_info), nelmts, dset_info[i].file_space, 
                                             dset_info[i].mem_space, &dset_info[i]) < 0)
@@ -1052,7 +1054,7 @@ H5D__write(hid_t file_id, hid_t dxpl_id, size_t count,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
         /* set metadata tagging with dset oheader addr */
-        if(H5AC_tag(dxpl_id, dset_info->dset->oloc.addr, &prev_tag) < 0)
+        if(H5AC_tag(dxpl_id, dset_info[i].dset->oloc.addr, &prev_tag) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
 
         /* All filters in the DCPL must have encoding enabled. */
@@ -1110,7 +1112,7 @@ H5D__write(hid_t file_id, hid_t dxpl_id, size_t count,
 
         if((snelmts = H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space)) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
-        H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
+        H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
 
         /* Make certain that the number of elements in each selection is the same */
         if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(dset_info[i].file_space))
@@ -1236,6 +1238,9 @@ H5D__write(hid_t file_id, hid_t dxpl_id, size_t count,
             /* set metadata tagging with dset oheader addr */
             if(H5AC_tag(dxpl_id, dset_info->dset->oloc.addr, &prev_tag) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+
+            io_info.dsets_info = &(dset_info[i]);
+
             /* Invoke correct "high level" I/O routine */
             if((*io_info.io_ops.multi_write)(&io_info, &(dset_info[i].type_info), nelmts, dset_info[i].file_space, 
                                              dset_info[i].mem_space, &dset_info[i]) < 0)

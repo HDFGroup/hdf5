@@ -62,6 +62,7 @@ static H5D_shared_t *H5D__new(hid_t dcpl_id, hbool_t creating,
     hbool_t vl_type);
 static herr_t H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
     const H5T_t *type);
+static herr_t H5D__cache_dataspace_info(const H5D_t *dset);
 static herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
     hid_t dapl_id);
@@ -665,6 +666,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D__cache_dataspace_info
+ *
+ * Purpose:	Cache dataspace info for a dataset
+ *
+ * Return:	Success:    SUCCEED
+ *		Failure:    FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, November 19, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__cache_dataspace_info(const H5D_t *dset)
+{
+    int sndims;                         /* Signed number of dimensions of dataspace rank */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checking */
+    HDassert(dset);
+
+    /* Cache info for dataset's dataspace */
+    if((sndims = H5S_get_simple_extent_dims(dset->shared->space, dset->shared->curr_dims, dset->shared->max_dims)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't cache dataspace dimensions")
+    dset->shared->ndims = (unsigned)sndims;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__cache_dataspace_info() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__init_space
  *
  * Purpose:	Copy a dataspace for a dataset's use, performing all the
@@ -697,6 +732,10 @@ H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
     /* Copy dataspace for dataset */
     if(NULL == (dset->shared->space = H5S_copy(space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataspace")
+
+    /* Cache the dataset's dataspace info */
+    if(H5D__cache_dataspace_info(dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't cache dataspace info")
 
     /* Set the latest format, if requested */
     if(use_latest_format)
@@ -1250,6 +1289,10 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
 
     if(NULL == (dataset->shared->space = H5S_read(&(dataset->oloc), dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load dataspace info from dataset header")
+
+    /* Cache the dataset's dataspace info */
+    if(H5D__cache_dataspace_info(dataset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't cache dataspace info")
 
     /* Get a datatype ID for the dataset's datatype */
     if((dataset->shared->type_id = H5I_register(H5I_DATATYPE, dataset->shared->type, FALSE)) < 0)
@@ -2193,9 +2236,7 @@ done:
 herr_t
 H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 {
-    H5S_t   *space;                     /* Dataset's dataspace */
-    int     rank;                       /* Dataspace # of dimensions */
-    hsize_t curr_dims[H5O_LAYOUT_NDIMS];/* Current dimension sizes */
+    hsize_t curr_dims[H5S_MAX_RANK];    /* Current dimension sizes */
     htri_t  changed;                    /* Whether the dataspace changed size */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
@@ -2219,29 +2260,64 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
     if(H5D__check_filters(dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't apply filters")
 
-    /* Get the dataspace */
-    space = dset->shared->space;
-
-    /* Check if we are shrinking or expanding any of the dimensions */
-    if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
+    /* Keep the current dataspace dimensions for later */
+    HDcompile_assert(sizeof(curr_dims) == sizeof(dset->shared->curr_dims));
+    HDmemcpy(curr_dims, dset->shared->curr_dims, H5S_MAX_RANK * sizeof(curr_dims[0]));
 
     /* Modify the size of the dataspace */
-    if((changed = H5S_set_extent(space, size)) < 0)
+    if((changed = H5S_set_extent(dset->shared->space, size)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of dataspace")
 
     /* Don't bother updating things, unless they've changed */
     if(changed) {
-        hbool_t shrink = FALSE;             /* Flag to indicate a dimension has shrank */
-        hbool_t expand = FALSE;             /* Flag to indicate a dimension has grown */
-        unsigned u;                         /* Local index variable */
+        hbool_t shrink = FALSE;         /* Flag to indicate a dimension has shrank */
+        hbool_t expand = FALSE;         /* Flag to indicate a dimension has grown */
+        hbool_t update_chunks = FALSE;  /* Flag to indicate chunk cache update is needed */
+        unsigned u;                     /* Local index variable */
 
         /* Determine if we are shrinking and/or expanding any dimensions */
-        for(u = 0; u < (unsigned)rank; u++) {
+        for(u = 0; u < dset->shared->ndims; u++) {
+            /* Check for various status changes */
             if(size[u] < curr_dims[u])
                 shrink = TRUE;
             if(size[u] > curr_dims[u])
                 expand = TRUE;
+
+            /* Chunked storage specific checks */
+            if(H5D_CHUNKED == dset->shared->layout.type && dset->shared->ndims > 1) {
+                hsize_t scaled;             /* Scaled value */
+
+                /* Compute the scaled dimension size value */
+                scaled = size[u] / dset->shared->layout.u.chunk.dim[u];
+
+                /* Check if scaled dimension size changed */
+                if(scaled != dset->shared->cache.chunk.scaled_dims[u]) {
+                    hsize_t scaled_power2up;    /* Scaled value, rounded to next power of 2 */
+
+                    /* Update the scaled dimension size value for the current dimension */
+                    dset->shared->cache.chunk.scaled_dims[u] = scaled;
+
+                    /* Check if algorithm for computing hash values will change */
+                    if((scaled > dset->shared->cache.chunk.nslots &&
+                                dset->shared->cache.chunk.scaled_dims[u] <= dset->shared->cache.chunk.nslots)
+                            || (scaled <= dset->shared->cache.chunk.nslots &&
+                                dset->shared->cache.chunk.scaled_dims[u] > dset->shared->cache.chunk.nslots))
+                        update_chunks = TRUE;
+
+                    /* Check if the number of bits required to encode the scaled size value changed */
+                    if(dset->shared->cache.chunk.scaled_power2up[u] != (scaled_power2up = H5VM_power2up(scaled))) {
+                        /* Update the 'power2up' & 'encode_bits' values for the current dimension */
+                        dset->shared->cache.chunk.scaled_power2up[u] = scaled_power2up;
+                        dset->shared->cache.chunk.scaled_encode_bits[u] = H5VM_log2_gen(scaled_power2up);
+
+                        /* Indicate that the cached chunk indices need to be updated */
+                        update_chunks = TRUE;
+                    } /* end if */
+                } /* end if */
+            } /* end if */
+
+            /* Update the cached copy of the dataset's dimensions */
+            dset->shared->curr_dims[u] = size[u];
         } /* end for */
 
         /*-------------------------------------------------------------------------
@@ -2250,11 +2326,15 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          */
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dset->shared->layout.type) {
-            /* Update the cached chunk info */
+            /* Set the cached chunk info */
             if(H5D__chunk_set_info(dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks")
-            if(H5D__chunk_update_cache(dset, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
+
+            /* Check if updating the chunk cache indices is necessary */
+            if(update_chunks)
+                /* Update the chunk cache indices */
+                if(H5D__chunk_update_cache(dset, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
         } /* end if */
 
         /* Allocate space for the new parts of the dataset, if appropriate */

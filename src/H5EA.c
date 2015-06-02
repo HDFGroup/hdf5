@@ -148,7 +148,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array info")
 
     /* Lock the array header into memory */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, ctx_udata, H5AC_WRITE)))
+    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC_WRITE)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Point extensible array wrapper at header and bump it's ref count */
@@ -168,7 +168,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
 CATCH
 
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5EA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
     if(!ret_value)
         if(ea && H5EA_close(ea, dxpl_id) < 0)
@@ -209,7 +209,7 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
 #ifdef QAK
 HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, ctx_udata, H5AC_READ)))
+    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC_READ)))
         H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header, address = %llu", (unsigned long long)ea_addr)
 
     /* Check for pending array deletion */
@@ -237,7 +237,7 @@ HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 
 CATCH
 
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5EA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
     if(!ret_value)
         if(ea && H5EA_close(ea, dxpl_id) < 0)
@@ -1048,7 +1048,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
         /* Lock the array header into memory */
         /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-        if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(ea->f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, NULL, H5AC_WRITE)))
+        if(NULL == (hdr = H5EA__hdr_protect(ea->f, dxpl_id, ea_addr, NULL, H5AC_WRITE)))
             H5E_THROW(H5E_CANTLOAD, "unable to load extensible array header")
 
         /* Set the shared array header's file context for this operation */
@@ -1112,7 +1112,7 @@ H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
 #ifdef QAK
 HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, ctx_udata, H5AC_WRITE)))
+    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC_WRITE)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
 
     /* Check for files using shared array header */
@@ -1131,7 +1131,7 @@ HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 CATCH
 
     /* Unprotect the header, if an error occurred */
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5EA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
 END_FUNC(PRIV)  /* end H5EA_delete() */
