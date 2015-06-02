@@ -2102,7 +2102,7 @@ H5D__vlen_get_buf_size_alloc(size_t size, void *info)
  */
 /* ARGSUSED */
 herr_t
-H5D__vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, const hsize_t *point, void *op_data)
+H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim, const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)op_data;
     H5T_t *dt;                          /* Datatype for operation */
@@ -2458,7 +2458,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__mark(const H5D_t *dataset, hid_t UNUSED dxpl_id, unsigned flags)
+H5D__mark(const H5D_t *dataset, hid_t H5_ATTR_UNUSED dxpl_id, unsigned flags)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2492,7 +2492,7 @@ H5D__mark(const H5D_t *dataset, hid_t UNUSED dxpl_id, unsigned flags)
  *-------------------------------------------------------------------------
  */
 static int
-H5D__flush_cb(void *_dataset, hid_t UNUSED id, void *_udata)
+H5D__flush_cb(void *_dataset, hid_t H5_ATTR_UNUSED id, void *_udata)
 {
     H5D_t       *dataset = (H5D_t *)_dataset;   /* Dataset pointer */
     H5D_flush_ud_t *udata = (H5D_flush_ud_t *)_udata;   /* User data for callback */

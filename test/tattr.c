@@ -1392,7 +1392,7 @@ test_attr_mult_read(hid_t fapl)
 **
 ****************************************************************/
 static herr_t
-attr_op1(hid_t UNUSED loc_id, const char *name, const H5A_info_t UNUSED *ainfo,
+attr_op1(hid_t H5_ATTR_UNUSED loc_id, const char *name, const H5A_info_t H5_ATTR_UNUSED *ainfo,
     void *op_data)
 {
     int *count = (int *)op_data;
@@ -6508,8 +6508,8 @@ attr_iterate1_cb(hid_t loc_id, const char *attr_name, void *_op_data)
  *-------------------------------------------------------------------------
  */
 static int
-attr_iterate2_fail_cb(hid_t UNUSED group_id, const char UNUSED *attr_name,
-    const H5A_info_t UNUSED *info, void UNUSED *_op_data)
+attr_iterate2_fail_cb(hid_t H5_ATTR_UNUSED group_id, const char H5_ATTR_UNUSED *attr_name,
+    const H5A_info_t H5_ATTR_UNUSED *info, void H5_ATTR_UNUSED *_op_data)
 {
     return(H5_ITER_ERROR);
 } /* end attr_iterate2_fail_cb() */

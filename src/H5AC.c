@@ -2988,12 +2988,12 @@ done:
 #ifdef H5_HAVE_PARALLEL
 static herr_t
 H5AC_check_if_write_permitted(const H5F_t *f,
-                              hid_t UNUSED dxpl_id,
+                              hid_t H5_ATTR_UNUSED dxpl_id,
                               hbool_t * write_permitted_ptr)
 #else /* H5_HAVE_PARALLEL */
 static herr_t
-H5AC_check_if_write_permitted(const H5F_t UNUSED * f,
-                              hid_t UNUSED dxpl_id,
+H5AC_check_if_write_permitted(const H5F_t H5_ATTR_UNUSED * f,
+                              hid_t H5_ATTR_UNUSED dxpl_id,
                               hbool_t * write_permitted_ptr)
 #endif /* H5_HAVE_PARALLEL */
 {
@@ -3561,7 +3561,7 @@ H5AC_log_flushed_entry(H5C_t * cache_ptr,
                        haddr_t addr,
                        hbool_t was_dirty,
                        unsigned flags,
-                       int UNUSED type_id)
+                       int H5_ATTR_UNUSED type_id)
 {
     herr_t               ret_value = SUCCEED;    /* Return value */
     hbool_t		 cleared;

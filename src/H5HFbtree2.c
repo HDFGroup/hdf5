@@ -278,7 +278,7 @@ H5HF_huge_bt2_dst_context(void *_ctx)
  *-------------------------------------------------------------------------
  */
 static void *
-H5HF_huge_bt2_crt_dbg_context(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr)
+H5HF_huge_bt2_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr)
 {
     H5HF_huge_bt2_ctx_t *ctx;   /* Callback context structure */
     void *ret_value;            /* Return value */
@@ -505,9 +505,9 @@ H5HF_huge_bt2_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_huge_bt2_indir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+H5HF_huge_bt2_indir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     int indent, int fwidth, const void *_nrecord,
-    const void UNUSED *_udata)
+    const void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_huge_bt2_indir_rec_t *nrecord = (const H5HF_huge_bt2_indir_rec_t *)_nrecord;
 
@@ -727,9 +727,9 @@ H5HF_huge_bt2_filt_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_huge_bt2_filt_indir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+H5HF_huge_bt2_filt_indir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     int indent, int fwidth, const void *_nrecord,
-    const void UNUSED *_udata)
+    const void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_huge_bt2_filt_indir_rec_t *nrecord = (const H5HF_huge_bt2_filt_indir_rec_t *)_nrecord;
 
@@ -920,9 +920,9 @@ H5HF_huge_bt2_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_huge_bt2_dir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+H5HF_huge_bt2_dir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     int indent, int fwidth, const void *_nrecord,
-    const void UNUSED *_udata)
+    const void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_huge_bt2_dir_rec_t *nrecord = (const H5HF_huge_bt2_dir_rec_t *)_nrecord;
 
@@ -1149,8 +1149,8 @@ H5HF_huge_bt2_filt_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_huge_bt2_filt_dir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
-    int indent, int fwidth, const void *_nrecord, const void UNUSED *_udata)
+H5HF_huge_bt2_filt_dir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    int indent, int fwidth, const void *_nrecord, const void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_huge_bt2_filt_dir_rec_t *nrecord = (const H5HF_huge_bt2_filt_dir_rec_t *)_nrecord;
 

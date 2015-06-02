@@ -385,7 +385,7 @@ test_genprop_cls_crt_cb1(hid_t list_id, void *create_data)
 }
 
 static herr_t
-test_genprop_cls_cpy_cb1(hid_t new_list_id, hid_t UNUSED old_list_id, void *copy_data)
+test_genprop_cls_cpy_cb1(hid_t new_list_id, hid_t H5_ATTR_UNUSED old_list_id, void *copy_data)
 {
     struct {                /* Struct for iterations */
         int count;
@@ -993,7 +993,7 @@ prop_cb_info prop3_cb_info;     /* Callback statistics for property #3 */
 **
 ****************************************************************/
 static herr_t
-test_genprop_cls_cpy_cb2(hid_t new_list_id, hid_t UNUSED old_list_id, void *create_data)
+test_genprop_cls_cpy_cb2(hid_t new_list_id, hid_t H5_ATTR_UNUSED old_list_id, void *create_data)
 {
     struct {                /* Struct for iterations */
         int count;

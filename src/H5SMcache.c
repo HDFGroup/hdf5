@@ -73,7 +73,7 @@ static H5SM_list_t *H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *
 static herr_t H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_list_t *list);
 static herr_t H5SM_list_dest(H5F_t *f, H5SM_list_t* list);
 static herr_t H5SM_list_clear(H5F_t *f, H5SM_list_t *list, hbool_t destroy);
-static herr_t H5SM_list_size(const H5F_t *f, const H5SM_list_t UNUSED *list, size_t *size_ptr);
+static herr_t H5SM_list_size(const H5F_t *f, const H5SM_list_t H5_ATTR_UNUSED *list, size_t *size_ptr);
 
 
 /*********************/
@@ -127,7 +127,7 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
  *-------------------------------------------------------------------------
  */
 static H5SM_master_table_t *
-H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void UNUSED *udata)
+H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void H5_ATTR_UNUSED *udata)
 {
     H5SM_master_table_t *table = NULL;
     H5WB_t        *wb = NULL;           /* Wrapped buffer for table data */
@@ -369,7 +369,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_table_dest(H5F_t UNUSED *f, H5SM_master_table_t* table)
+H5SM_table_dest(H5F_t H5_ATTR_UNUSED *f, H5SM_master_table_t* table)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -437,7 +437,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_table_size(const H5F_t UNUSED *f, const H5SM_master_table_t *table, size_t *size_ptr)
+H5SM_table_size(const H5F_t H5_ATTR_UNUSED *f, const H5SM_master_table_t *table, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -740,7 +740,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_list_size(const H5F_t UNUSED *f, const H5SM_list_t *list, size_t *size_ptr)
+H5SM_list_size(const H5F_t H5_ATTR_UNUSED *f, const H5SM_list_t *list, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

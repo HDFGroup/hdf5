@@ -56,7 +56,7 @@
 
 /* Metadata cache callbacks */
 static H5B_t *H5B__load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5B__flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b, unsigned UNUSED * flags_ptr);
+static herr_t H5B__flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5B__dest(H5F_t *f, H5B_t *bt);
 static herr_t H5B__clear(H5F_t *f, H5B_t *b, hbool_t destroy);
 static herr_t H5B__compute_size(const H5F_t *f, const H5B_t *bt, size_t *size_ptr);
@@ -207,7 +207,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B__flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt, unsigned UNUSED * flags_ptr)
+H5B__flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     H5B_shared_t *shared;       /* Pointer to shared B-tree info */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -389,7 +389,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B__compute_size(const H5F_t UNUSED *f, const H5B_t *bt, size_t *size_ptr)
+H5B__compute_size(const H5F_t H5_ATTR_UNUSED *f, const H5B_t *bt, size_t *size_ptr)
 {
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
 

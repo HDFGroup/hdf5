@@ -164,7 +164,7 @@ const H5B2_class_t H5A_BT2_CORDER[1]={{ /* B-tree class information */
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_fh_name_cmp(const void *obj, size_t UNUSED obj_len, void *_udata)
+H5A__dense_fh_name_cmp(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_udata)
 {
     H5A_fh_ud_cmp_t *udata = (H5A_fh_ud_cmp_t *)_udata;         /* User data for 'op' callback */
     H5A_t *attr = NULL;                 /* Pointer to attribute created from heap object */
@@ -319,7 +319,7 @@ H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_btree2_name_encode(uint8_t *raw, const void *_nrecord, void UNUSED *ctx)
+H5A__dense_btree2_name_encode(uint8_t *raw, const void *_nrecord, void H5_ATTR_UNUSED *ctx)
 {
     const H5A_dense_bt2_name_rec_t *nrecord = (const H5A_dense_bt2_name_rec_t *)_nrecord;
 
@@ -350,7 +350,7 @@ H5A__dense_btree2_name_encode(uint8_t *raw, const void *_nrecord, void UNUSED *c
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_btree2_name_decode(const uint8_t *raw, void *_nrecord, void UNUSED *ctx)
+H5A__dense_btree2_name_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR_UNUSED *ctx)
 {
     H5A_dense_bt2_name_rec_t *nrecord = (H5A_dense_bt2_name_rec_t *)_nrecord;
 
@@ -381,8 +381,8 @@ H5A__dense_btree2_name_decode(const uint8_t *raw, void *_nrecord, void UNUSED *c
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_btree2_name_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
-    int indent, int fwidth, const void *_nrecord, const void UNUSED *_udata)
+H5A__dense_btree2_name_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    int indent, int fwidth, const void *_nrecord, const void H5_ATTR_UNUSED *_udata)
 {
     const H5A_dense_bt2_name_rec_t *nrecord = (const H5A_dense_bt2_name_rec_t *)_nrecord;
 
@@ -479,7 +479,7 @@ H5A__dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_btree2_corder_encode(uint8_t *raw, const void *_nrecord, void UNUSED *ctx)
+H5A__dense_btree2_corder_encode(uint8_t *raw, const void *_nrecord, void H5_ATTR_UNUSED *ctx)
 {
     const H5A_dense_bt2_corder_rec_t *nrecord = (const H5A_dense_bt2_corder_rec_t *)_nrecord;
 
@@ -509,7 +509,7 @@ H5A__dense_btree2_corder_encode(uint8_t *raw, const void *_nrecord, void UNUSED 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_btree2_corder_decode(const uint8_t *raw, void *_nrecord, void UNUSED *ctx)
+H5A__dense_btree2_corder_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR_UNUSED *ctx)
 {
     H5A_dense_bt2_corder_rec_t *nrecord = (H5A_dense_bt2_corder_rec_t *)_nrecord;
 
@@ -539,8 +539,8 @@ H5A__dense_btree2_corder_decode(const uint8_t *raw, void *_nrecord, void UNUSED 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_btree2_corder_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
-    int indent, int fwidth, const void *_nrecord, const void UNUSED *_udata)
+H5A__dense_btree2_corder_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    int indent, int fwidth, const void *_nrecord, const void H5_ATTR_UNUSED *_udata)
 {
     const H5A_dense_bt2_corder_rec_t *nrecord = (const H5A_dense_bt2_corder_rec_t *)_nrecord;
 

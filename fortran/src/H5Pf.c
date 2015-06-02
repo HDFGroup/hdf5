@@ -2733,7 +2733,7 @@ DONE:
  * SOURCE
 */
 int_f
-h5pregister_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void UNUSED *value)
+h5pregister_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void H5_ATTR_UNUSED *value)
 /******/
 {
      char* c_name = NULL;
@@ -2776,7 +2776,7 @@ DONE:
  * SOURCE
 */
 int_f
-h5pinsert_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void UNUSED *value)
+h5pinsert_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void H5_ATTR_UNUSED *value)
 /******/
 {
      char* c_name = NULL;
@@ -4853,9 +4853,9 @@ h5pset_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dens
 
 /****if* H5Pf/h5pset_fapl_direct_c
  * NAME
- *        h5pset_fapl_direct_c
+ *  h5pset_fapl_direct_c
  * PURPOSE
- *     Calls H5Pset_fapl_direct
+ *  Calls H5Pset_fapl_direct
  *
  * INPUTS
  *
@@ -4865,16 +4865,16 @@ h5pset_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dens
  *    cbuf_size  - Copy buffer size
  * Outputs
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              March 21, 2008
+ *  March 21, 2008
  * HISTORY
  *
  * SOURCE
 */
 int_f
-h5pset_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_t_f UNUSED *block_size, size_t_f UNUSED *cbuf_size)
+h5pset_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *alignment, size_t_f H5_ATTR_UNUSED *block_size, size_t_f H5_ATTR_UNUSED *cbuf_size)
 /******/
 {
   int ret_value = -1;
@@ -4917,7 +4917,7 @@ h5pset_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_t
  * SOURCE
 */
 int_f
-h5pget_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_t_f UNUSED *block_size, size_t_f UNUSED *cbuf_size)
+h5pget_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *alignment, size_t_f H5_ATTR_UNUSED *block_size, size_t_f H5_ATTR_UNUSED *cbuf_size)
 /******/
 {
   int ret_value = -1;

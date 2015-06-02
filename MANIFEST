@@ -308,6 +308,7 @@
 ./fortran/src/HDF5.F90
 ./fortran/src/H5config_f.inc.in
 ./fortran/src/H5config_f.inc.cmake
+./fortran/src/H5fort_type_defines.h.in
 ./fortran/src/Makefile.am
 ./fortran/src/Makefile.in
 ./fortran/src/README

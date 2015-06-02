@@ -96,8 +96,8 @@ typedef struct s1_t {
 #define ARRAY3_DIM2 3
 
 /* A UD link traversal function.  Shouldn't actually be called. */
-static hid_t UD_traverse(const char UNUSED * link_name, hid_t UNUSED cur_group,
-    const void UNUSED * udata, size_t UNUSED udata_size, hid_t UNUSED lapl_id)
+static hid_t UD_traverse(const char H5_ATTR_UNUSED * link_name, hid_t H5_ATTR_UNUSED cur_group,
+    const void H5_ATTR_UNUSED * udata, size_t H5_ATTR_UNUSED udata_size, hid_t H5_ATTR_UNUSED lapl_id)
 {
     return -1;
 }

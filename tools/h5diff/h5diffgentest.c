@@ -106,8 +106,8 @@ hsize_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define SPACE1_DIM2 0
 
 /* A UD link traversal function.  Shouldn't actually be called. */
-static hid_t UD_traverse(UNUSED const char * link_name, UNUSED hid_t cur_group,
-                         UNUSED const void * udata, UNUSED size_t udata_size, UNUSED hid_t lapl_id)
+static hid_t UD_traverse(H5_ATTR_UNUSED const char * link_name, H5_ATTR_UNUSED hid_t cur_group,
+                         H5_ATTR_UNUSED const void * udata, H5_ATTR_UNUSED size_t udata_size, H5_ATTR_UNUSED hid_t lapl_id)
 {
     return -1;
 }

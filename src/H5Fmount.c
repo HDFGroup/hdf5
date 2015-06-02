@@ -128,7 +128,7 @@ done:
  */
 static herr_t
 H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
-	  hid_t UNUSED plist_id, hid_t dxpl_id)
+	  hid_t H5_ATTR_UNUSED plist_id, hid_t dxpl_id)
 {
     H5G_t	*mount_point = NULL;	/*mount point group		*/
     H5F_t	*ancestor = NULL;	/*ancestor files		*/

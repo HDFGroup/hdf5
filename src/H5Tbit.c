@@ -82,7 +82,7 @@ H5T__bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src,
 	size_t mask = ((size_t)1 << nbits) - 1;
 
 	dst[d_idx] &= (uint8_t)~(mask << dst_offset);
-	dst[d_idx] |= (uint8_t)(((src[s_idx] >> src_offset) & (uint8_t)mask) << dst_offset);
+	dst[d_idx] = (uint8_t)(dst[d_idx] | (((src[s_idx] >> src_offset) & (uint8_t)mask) << dst_offset));
 
 	src_offset += nbits;
 	if(src_offset >= 8) {
@@ -141,7 +141,7 @@ H5T__bit_copy(uint8_t *dst, size_t dst_offset, const uint8_t *src,
 	size_t mask = ((size_t)1 << nbits) - 1;
 
 	dst[d_idx] &= (uint8_t)(~(mask << dst_offset));
-	dst[d_idx] |= (uint8_t)(((src[s_idx] >> src_offset) & (uint8_t)mask) << dst_offset);
+	dst[d_idx] = (uint8_t)(dst[d_idx] | (((src[s_idx] >> src_offset) & (uint8_t)mask) << dst_offset));
 
 	src_offset += nbits;
 	if(src_offset >= 8) {
@@ -376,9 +376,11 @@ H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value)
 	unsigned mask = ((unsigned)1 << nbits) - 1;
 
 	if(value)
-	    buf[idx++] |= (uint8_t)(mask << offset);
+	    buf[idx] = (uint8_t)(buf[idx] | (mask << offset));
 	else
-	    buf[idx++] &= (uint8_t)(~(mask << offset));
+	    buf[idx] &= (uint8_t)(~(mask << offset));
+
+	idx++;
 	size -= nbits;
     } /* end if */
 
@@ -551,7 +553,7 @@ H5T__bit_inc(uint8_t *buf, size_t start, size_t size)
 	acc++;
 	carry = acc & ((unsigned)1 << MIN(size, 8 - start));
 	buf[idx] &= (uint8_t)(~(mask << start));
-	buf[idx] |= (uint8_t)((acc & mask) << start);
+	buf[idx] = (uint8_t)(buf[idx] | ((acc & mask) << start));
 	size -= MIN(size, 8 - start);
 	start = 0;
 	idx++;
