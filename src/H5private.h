@@ -279,15 +279,10 @@
  * big deal if we don't.
  */
 #ifdef __cplusplus
-#   define UNUSED    /*void*/
-#   define NORETURN  /*void*/
+#   define __attribute__(X)  /*void*/
 #else /* __cplusplus */
-#ifdef H5_HAVE_ATTRIBUTE
-#   define UNUSED    __attribute__((unused))
-#   define NORETURN  __attribute__((noreturn))
-#else
-#   define UNUSED    /*void*/
-#   define NORETURN  /*void*/
+#ifndef H5_HAVE_ATTRIBUTE
+#   define __attribute__(X)  /*void*/
 #endif
 #endif /* __cplusplus */
 

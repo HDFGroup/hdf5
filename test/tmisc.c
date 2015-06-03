@@ -5137,8 +5137,8 @@ test_misc29(void)
 
 
 static int
-test_misc30_get_info_cb(hid_t loc_id, const char *name, const H5L_info_t UNUSED *info,
-    void UNUSED *op_data)
+test_misc30_get_info_cb(hid_t loc_id, const char *name, const H5L_info_t H5_ATTR_UNUSED *info,
+    void H5_ATTR_UNUSED *op_data)
 {
     H5O_info_t object_info;
 

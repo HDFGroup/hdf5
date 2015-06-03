@@ -85,8 +85,8 @@ typedef struct TEST_free_section_t {
 
 static herr_t TEST_sect_init_cls(H5FS_section_class_t *, void *);
 static herr_t TEST_sect_free(H5FS_section_info_t *_sect);
-static herr_t TEST_sect_can_merge(const H5FS_section_info_t *, const H5FS_section_info_t *, void UNUSED *);
-static herr_t TEST_sect_merging(H5FS_section_info_t *, H5FS_section_info_t *, void UNUSED *);
+static herr_t TEST_sect_can_merge(const H5FS_section_info_t *, const H5FS_section_info_t *, void H5_ATTR_UNUSED *);
+static herr_t TEST_sect_merging(H5FS_section_info_t *, H5FS_section_info_t *, void H5_ATTR_UNUSED *);
 static herr_t TEST_sect_can_shrink(const H5FS_section_info_t *, void *);
 static herr_t TEST_sect_shrinking(H5FS_section_info_t **, void *);
 
@@ -223,7 +223,7 @@ TEST_sect_init_cls(H5FS_section_class_t *cls, void *_udata)
  */
 static herr_t
 TEST_sect_can_merge(const H5FS_section_info_t *_sect1,
-    const H5FS_section_info_t *_sect2, void UNUSED *_udata)
+    const H5FS_section_info_t *_sect2, void H5_ATTR_UNUSED *_udata)
 {
     const TEST_free_section_t *sect1 = (const TEST_free_section_t *)_sect1;
     const TEST_free_section_t *sect2 = (const TEST_free_section_t *)_sect2;
@@ -246,7 +246,7 @@ TEST_sect_can_merge(const H5FS_section_info_t *_sect1,
  */
 static herr_t
 TEST_sect_merging(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
-    void UNUSED *_udata)
+    void H5_ATTR_UNUSED *_udata)
 {
     TEST_free_section_t *sect1 = (TEST_free_section_t *)_sect1;
     TEST_free_section_t *sect2 = (TEST_free_section_t *)_sect2;

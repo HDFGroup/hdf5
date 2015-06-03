@@ -1900,7 +1900,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5I__iterate_pub_cb(void UNUSED *obj, hid_t id, void *_udata)
+H5I__iterate_pub_cb(void H5_ATTR_UNUSED *obj, hid_t id, void *_udata)
 {
     H5I_iterate_pub_ud_t *udata = (H5I_iterate_pub_ud_t *)_udata; /* User data for callback */
     herr_t ret_value;   /* Callback return value */
@@ -1975,7 +1975,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5I__iterate_cb(void *_item, void UNUSED *_key, void *_udata)
+H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
     H5I_id_info_t *item = (H5I_id_info_t *)_item;       /* Pointer to the ID node */
     H5I_iterate_ud_t *udata = (H5I_iterate_ud_t *)_udata; /* User data for callback */
@@ -2287,7 +2287,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5I__get_id_cb(void *_item, void UNUSED *_key, void *_udata)
+H5I__get_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
     H5I_id_info_t *item = (H5I_id_info_t *)_item;       /* Pointer to the ID node */
     H5I_get_id_ud_t *udata = (H5I_get_id_ud_t *)_udata;     /* Pointer to user data */
@@ -2383,7 +2383,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5I__debug_cb(void *_item, void UNUSED *_key, void *_udata)
+H5I__debug_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
     H5I_id_info_t *item = (H5I_id_info_t *)_item;       /* Pointer to the ID node */
     H5I_type_t type = *(H5I_type_t *)_udata;            /* User data */

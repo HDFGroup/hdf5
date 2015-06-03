@@ -1811,7 +1811,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED *lnk,
+H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t H5_ATTR_UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_cr_t *udata = (H5L_trav_cr_t *)_udata;   /* User data passed in */
@@ -2296,8 +2296,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_get_val_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
-    H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
+H5L_get_val_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
+    H5G_loc_t H5_ATTR_UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_gv_t *udata = (H5L_trav_gv_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;               /* Return value */
@@ -2380,8 +2380,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_get_val_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
-    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+H5L_get_val_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_gvbi_t *udata = (H5L_trav_gvbi_t *)_udata;   /* User data passed in */
@@ -2462,7 +2462,7 @@ done:
  */
 static herr_t
 H5L_delete_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
-    H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
+    H5G_loc_t H5_ATTR_UNUSED *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_rm_t *udata = (H5L_trav_rm_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;
@@ -2550,8 +2550,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_delete_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
-    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+H5L_delete_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_gvbi_t *udata = (H5L_trav_gvbi_t *)_udata;   /* User data passed in */
@@ -2626,7 +2626,7 @@ done:
  */
 static herr_t
 H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
-    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_mv2_t *udata = (H5L_trav_mv2_t *)_udata;   /* User data passed in */
@@ -2939,8 +2939,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_exists_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
-    const H5O_link_t *lnk, H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/,
+H5L_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t *lnk, H5G_loc_t H5_ATTR_UNUSED *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     hbool_t *udata = (hbool_t *)_udata;   /* User data passed in */
@@ -3003,8 +3003,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_get_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
-    const H5O_link_t *lnk, H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/,
+H5L_get_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t *lnk, H5G_loc_t H5_ATTR_UNUSED *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_gi_t *udata = (H5L_trav_gi_t *)_udata;   /* User data passed in */
@@ -3076,8 +3076,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_get_info_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
-    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+H5L_get_info_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_gibi_t *udata = (H5L_trav_gibi_t *)_udata;   /* User data passed in */
@@ -3185,8 +3185,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_get_name_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
-    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+H5L_get_name_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5L_trav_gnbi_t *udata = (H5L_trav_gnbi_t *)_udata;   /* User data passed in */

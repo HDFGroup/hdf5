@@ -845,7 +845,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_copy_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
+H5A__dense_copy_fh_cb(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_udata)
 {
     H5A_fh_ud_cp_t *udata = (H5A_fh_ud_cp_t *)_udata;       /* User data for fractal heap 'op' callback */
     herr_t ret_value = SUCCEED;   /* Return value */

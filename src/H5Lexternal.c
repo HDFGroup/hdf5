@@ -30,9 +30,9 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
-static hid_t H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
-    const void *udata, size_t UNUSED udata_size, hid_t lapl_id);
-static ssize_t H5L_extern_query(const char UNUSED * link_name, const void *udata,
+static hid_t H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
+    const void *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id);
+static ssize_t H5L_extern_query(const char H5_ATTR_UNUSED * link_name, const void *udata,
     size_t udata_size, void * buf /*out*/, size_t buf_size);
 
 /* Default External Link link class */
@@ -189,8 +189,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
-    const void *_udata, size_t UNUSED udata_size, hid_t lapl_id)
+H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
+    const void *_udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     char       *my_prefix;              /* Library's copy of the prefix */
@@ -505,7 +505,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5L_extern_query(const char UNUSED * link_name, const void *_udata, size_t udata_size,
+H5L_extern_query(const char H5_ATTR_UNUSED * link_name, const void *_udata, size_t udata_size,
     void *buf /*out*/, size_t buf_size)
 {
     const uint8_t *udata = (const uint8_t *)_udata;      /* Pointer to external link buffer */

@@ -289,7 +289,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5F_get_all_count_cb(void UNUSED *obj_ptr, hid_t UNUSED obj_id, void *key)
+H5F_get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
 {
     H5F_trav_obj_cnt_t *udata = (H5F_trav_obj_cnt_t *)key;
     int                ret_value = H5_ITER_CONT;    /* Return value */
@@ -381,7 +381,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5F_get_all_ids_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
+H5F_get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_trav_obj_ids_t *udata = (H5F_trav_obj_ids_t *)key;
     int                ret_value = H5_ITER_CONT;    /* Return value */

@@ -1307,7 +1307,7 @@ H5P_free_prop(H5P_genprop_t *prop)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_free_prop_cb(void *item, void UNUSED *key, void *op_data)
+H5P_free_prop_cb(void *item, void H5_ATTR_UNUSED *key, void *op_data)
 {
     H5P_genprop_t *tprop=(H5P_genprop_t *)item; /* Temporary pointer to property */
     hbool_t make_cb = *(hbool_t *)op_data;      /* Whether to make property 'close' callback */
@@ -1347,7 +1347,7 @@ H5P_free_prop_cb(void *item, void UNUSED *key, void *op_data)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_free_del_name_cb(void *item, void UNUSED *key, void UNUSED *op_data)
+H5P_free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op_data)
 {
     char *del_name=(char *)item;       /* Temporary pointer to deleted name */
 
@@ -1477,7 +1477,7 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static int
-H5P_open_class_path_cb(void *_obj, hid_t UNUSED id, void *_key)
+H5P_open_class_path_cb(void *_obj, hid_t H5_ATTR_UNUSED id, void *_key)
 {
     H5P_genclass_t *obj = (H5P_genclass_t *)_obj; /* Pointer to the class for this ID */
     H5P_check_class_t *key = (H5P_check_class_t *)_key; /* Pointer to key information for comparison */
@@ -1984,8 +1984,8 @@ done:
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to decode.
-        size_t *size;       IN: UNUSED
-        void *value;        IN: UNUSED
+        size_t *size;       IN: H5_ATTR_UNUSED
+        void *value;        IN: H5_ATTR_UNUSED
         void *plist;        IN: The property list structure.
         uint8_t **buf;      IN: The buffer that holds the binary encoded property;
     The 'decode' routine decodes the binary buffer passed in and transforms it into
@@ -2162,8 +2162,8 @@ done:
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to decode.
-        size_t *size;       IN: UNUSED
-        void *value;        IN: UNUSED
+        size_t *size;       IN: H5_ATTR_UNUSED
+        void *value;        IN: H5_ATTR_UNUSED
         void *plist;        IN: The property list structure.
         uint8_t **buf;      IN: The buffer that holds the binary encoded property;
     The 'decode' routine decodes the binary buffer passed in and transforms it into
@@ -2403,8 +2403,8 @@ done:
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to decode.
-        size_t *size;       IN: UNUSED
-        void *value;        IN: UNUSED
+        size_t *size;       IN: H5_ATTR_UNUSED
+        void *value;        IN: H5_ATTR_UNUSED
         void *plist;        IN: The property list structure.
         uint8_t **buf;      IN: The buffer that holds the binary encoded property;
     The 'decode' routine decodes the binary buffer passed in and transforms it into

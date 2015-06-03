@@ -262,7 +262,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_space_revert_root_cb(H5FS_section_info_t *_sect, void UNUSED *_udata)
+H5HF_space_revert_root_cb(H5FS_section_info_t *_sect, void H5_ATTR_UNUSED *_udata)
 {
     H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;       /* Section to dump info */
     herr_t      ret_value = SUCCEED;    /* Return value */

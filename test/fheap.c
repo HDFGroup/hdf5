@@ -1827,7 +1827,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam)
+test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
@@ -1944,7 +1944,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam)
+test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
@@ -2090,7 +2090,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam)
+test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t	file2 = -1;             /* File ID */
@@ -2262,7 +2262,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam)
+test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
@@ -15884,9 +15884,9 @@ error:
 /* Custom filter used to verify that the filters are actually called and do not
  * just silently fail */
 static hbool_t test_write_filter_called;
-static size_t test_write_filter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-    const unsigned int UNUSED cd_values[], size_t nbytes, size_t UNUSED *buf_size,
-    void UNUSED **buf)
+static size_t test_write_filter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+    const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+    void H5_ATTR_UNUSED **buf)
 {
     test_write_filter_called = TRUE;
 
