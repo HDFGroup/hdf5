@@ -476,7 +476,6 @@ H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size)
 
     FUNC_ENTER_API(FAIL)
 
-    HDassert(0 && "Checking code coverage..."); //VDSINC
     /* Check argument */
     if(gap_size == HSIZE_UNDEF)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid printf gap size")

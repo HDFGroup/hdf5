@@ -1573,7 +1573,6 @@ H5D_close(H5D_t *dataset)
                     /* Close sub datasets */
                     for(j = 0; j < dataset->shared->layout.storage.u.virt.list[i].sub_dset_nused; j++)
                         if(dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset) {
-                            //HDassert(0 && "Checking code coverage..."); //VDSINC
                             HDassert(dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset != dataset);
                             if(H5D_close(dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset) < 0)
                                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")

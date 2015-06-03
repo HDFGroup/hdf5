@@ -1724,22 +1724,22 @@ done:
 
         /* Check if the entry has been partly allocated but not added to the
          * property list or not included in list_nused */
-        if((ret_value < 0) && ent) {
-            HDassert(ret_value < 0);
-
-            /* Free incomplete entry */
-            ent->source_dset.file_name = (char *)H5MM_xfree(ent->source_dset.file_name);
-            ent->source_dset.dset_name = (char *)H5MM_xfree(ent->source_dset.dset_name);
-            if(ent->source_dset.virtual_select && H5S_close(ent->source_dset.virtual_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection")
-            ent->source_dset.virtual_select = NULL;
-            if(ent->source_select && H5S_close(ent->source_select) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
-            ent->source_select = NULL;
-            H5D_virtual_free_parsed_name(ent->parsed_source_file_name);
-            ent->parsed_source_file_name = NULL;
-            H5D_virtual_free_parsed_name(ent->parsed_source_dset_name);
-            ent->parsed_source_dset_name = NULL;
+        if(ret_value < 0) {
+            /* Free incomplete entry if present */
+            if(ent) {
+                ent->source_dset.file_name = (char *)H5MM_xfree(ent->source_dset.file_name);
+                ent->source_dset.dset_name = (char *)H5MM_xfree(ent->source_dset.dset_name);
+                if(ent->source_dset.virtual_select && H5S_close(ent->source_dset.virtual_select) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection")
+                ent->source_dset.virtual_select = NULL;
+                if(ent->source_select && H5S_close(ent->source_select) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
+                ent->source_select = NULL;
+                H5D_virtual_free_parsed_name(ent->parsed_source_file_name);
+                ent->parsed_source_file_name = NULL;
+                H5D_virtual_free_parsed_name(ent->parsed_source_dset_name);
+                ent->parsed_source_dset_name = NULL;
+            } /* end if */
 
             /* Free list if necessary */
             if(free_list)

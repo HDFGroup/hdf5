@@ -6550,33 +6550,20 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         opt_block = int_block;
         for(u=0; u<space->extent.rank; u++) {
             /* contiguous hyperslabs have the block size equal to the stride */
-            if(stride[u]==block[u]) {
-                if(count[u] == H5S_UNLIMITED) {
-                    if(block[u] == 1) {
-                        int_block[u] = H5S_UNLIMITED;
-                        int_count[u] = 1;
-                        int_stride[u] = 1;
-                    } /* end if */
-                    else {
-                        int_block[u] = block[u];
-                        int_count[u] = H5S_UNLIMITED;
-                        int_stride[u] = stride[u];
-                    } /* end else */
-                } /* end if */
-                else {
-                    int_count[u]=1;
-                    int_stride[u]=1;
-                    if(block[u]==1)
-                        int_block[u]=count[u];
-                    else
-                        int_block[u]=block[u]*count[u];
-                } /* end else */
+            if((stride[u] == block[u]) && (count[u] != H5S_UNLIMITED)) {
+                int_count[u]=1;
+                int_stride[u]=1;
+                if(block[u]==1)
+                    int_block[u]=count[u];
+                else
+                    int_block[u]=block[u]*count[u];
             } /* end if */
             else {
                 if(count[u]==1)
                     int_stride[u]=1;
                 else {
-                    HDassert(stride[u] > block[u]);
+                    HDassert((stride[u] > block[u]) || ((stride[u] == block[u])
+                            && (count[u] == H5S_UNLIMITED)));
                     int_stride[u]=stride[u];
                 } /* end else */
                 int_count[u]=count[u];
@@ -6761,7 +6748,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
             /* Patch count and block to remove unlimited and include the
              * existing selection */
-            H5S__hyper_get_clip_diminfo(start[unlim_dim], opt_stride[unlim_dim], &tmp_count, &tmp_block, space->select.offset[unlim_dim], bounds_end[unlim_dim]);
+            H5S__hyper_get_clip_diminfo(start[unlim_dim], opt_stride[unlim_dim], &tmp_count, &tmp_block, space->select.offset[unlim_dim], bounds_end[unlim_dim] + (hsize_t)1);
             HDassert((tmp_count == 1) || (opt_count != _ones));
             HDassert((tmp_block == 1) || (opt_block != _ones));
             if(opt_count != _ones) {
@@ -7276,33 +7263,20 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
         opt_block = int_block;
         for(u=0; u<space->extent.rank; u++) {
             /* contiguous hyperslabs have the block size equal to the stride */
-            if(stride[u]==block[u]) {
-                if(count[u] == H5S_UNLIMITED) {
-                    if(block[u] == 1) {
-                        int_block[u] = H5S_UNLIMITED;
-                        int_count[u] = 1;
-                        int_stride[u] = 1;
-                    } /* end if */
-                    else {
-                        int_block[u] = block[u];
-                        int_count[u] = H5S_UNLIMITED;
-                        int_stride[u] = stride[u];
-                    } /* end else */
-                } /* end if */
-                else {
-                    int_count[u]=1;
-                    int_stride[u]=1;
-                    if(block[u]==1)
-                        int_block[u]=count[u];
-                    else
-                        int_block[u]=block[u]*count[u];
-                } /* end else */
+            if((stride[u] == block[u]) && (count[u] != H5S_UNLIMITED)) {
+                int_count[u]=1;
+                int_stride[u]=1;
+                if(block[u]==1)
+                    int_block[u]=count[u];
+                else
+                    int_block[u]=block[u]*count[u];
             } /* end if */
             else {
                 if(count[u]==1)
                     int_stride[u]=1;
                 else {
-                    HDassert(stride[u] > block[u]);
+                    HDassert((stride[u] > block[u]) || ((stride[u] == block[u])
+                            && (count[u] == H5S_UNLIMITED)));
                     int_stride[u]=stride[u];
                 } /* end else */
                 int_count[u]=count[u];
@@ -7479,7 +7453,7 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
 
             /* Patch count and block to remove unlimited and include the
              * existing selection */
-            H5S__hyper_get_clip_diminfo(start[unlim_dim], opt_stride[unlim_dim], &tmp_count, &tmp_block, space->select.offset[unlim_dim], bounds_end[unlim_dim]);
+            H5S__hyper_get_clip_diminfo(start[unlim_dim], opt_stride[unlim_dim], &tmp_count, &tmp_block, space->select.offset[unlim_dim], bounds_end[unlim_dim] + (hsize_t)1);
             HDassert((tmp_count == 1) || (opt_count != _ones));
             HDassert((tmp_block == 1) || (opt_block != _ones));
             if(opt_count != _ones) {
@@ -9368,7 +9342,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     /* Allocate space for the hyperslab selection information (note this sets
      * diminfo_valid to FALSE, diminfo arrays to 0, and span list to NULL) */
     if((proj_space->select.sel_info.hslab = H5FL_CALLOC(H5S_hyper_sel_t)) == NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate hyperslab info")
 
     /* Set selection type */
     proj_space->select.type = H5S_sel_hyper;
@@ -9542,7 +9516,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                              * current dimension */
                             low = curr_span_up_dim[i - 1] % proj_space->extent.size[i - 1];
                             if(H5S_hyper_append_span(&prev_span[i - 1], &curr_span_tree[i - 1], low, low, curr_span_tree[i], NULL) < 0)
-                                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
+                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSELECT, FAIL, "can't allocate hyperslab span")
 
                             /* Reset lower dimension's span tree and previous
                              * span since we just committed it and will start
@@ -9567,7 +9541,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
                     /* Append span in lowest dimension */
                     if(H5S_hyper_append_span(&prev_span[proj_rank - 1], &curr_span_tree[proj_rank - 1], low, high, NULL, NULL) < 0)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSELECT, FAIL, "can't allocate hyperslab span")
 
                     /* Update remaining offset and length */
                     proj_off += (hsize_t)span_len;
@@ -9590,7 +9564,7 @@ loop_end:
             /* Append remaining span tree to higher dimension */
             low = curr_span_up_dim[i - 1] % proj_space->extent.size[i - 1];
             if(H5S_hyper_append_span(&prev_span[i - 1], &curr_span_tree[i - 1], low, low, curr_span_tree[i], NULL) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab span")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSELECT, FAIL, "can't allocate hyperslab span")
 
             /* Reset span tree */
             if(H5S_hyper_free_span_info(curr_span_tree[i]) < 0)
@@ -9687,15 +9661,13 @@ H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count,
             *count = 0;
     } /* end if */
     /* Check for single block in unlimited dimension */
-    else if(*count == (hsize_t)1) {
-        HDassert(*block == H5S_UNLIMITED);
-
+    else if((*block == H5S_UNLIMITED) || (*block == stride)) {
         /* Calculate actual block size for this clip size */
         *block = (hsize_t)((hssize_t)clip_size - ((hssize_t)start + offset));
+        *count = (hsize_t)1;
     } /* end if */
     else {
         HDassert(*count == H5S_UNLIMITED);
-        HDassert(*block != H5S_UNLIMITED);
         HDassert((hssize_t)clip_size > offset);
 
         /* Calculate initial count (last block may be partial) */
@@ -9734,6 +9706,8 @@ herr_t
 H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
 {
     H5S_hyper_sel_t *hslab;     /* Convenience pointer to hyperslab info */
+    
+    H5S_hyper_dim_t *diminfo;   /* Convenience pointer to opt_diminfo in unlimited dimension */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -9743,6 +9717,8 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
     hslab = space->select.sel_info.hslab;
     HDassert(hslab);
     HDassert(hslab->unlim_dim >= 0);
+
+    diminfo = &hslab->opt_diminfo[hslab->unlim_dim];
 
     /* Check for no need to change size */
     if(((hssize_t)clip_size - space->select.offset[hslab->unlim_dim])
@@ -9757,14 +9733,14 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
     } /* end if */
 
     /* Initialize opt_diminfo with opt_unlim_diminfo */
-    hslab->opt_diminfo[hslab->unlim_dim] = hslab->opt_unlim_diminfo[hslab->unlim_dim];
+    *diminfo = hslab->opt_unlim_diminfo[hslab->unlim_dim];
 
     /* Get initial diminfo */
-    H5S__hyper_get_clip_diminfo(hslab->opt_diminfo[hslab->unlim_dim].start, hslab->opt_diminfo[hslab->unlim_dim].stride, &hslab->opt_diminfo[hslab->unlim_dim].count, &hslab->opt_diminfo[hslab->unlim_dim].block, space->select.offset[hslab->unlim_dim], clip_size);
+    H5S__hyper_get_clip_diminfo(diminfo->start, diminfo->stride, &diminfo->count, &diminfo->block, space->select.offset[hslab->unlim_dim], clip_size);
 
     /* Check for nothing returned */
-    if((hslab->opt_diminfo[hslab->unlim_dim].block == 0)
-            || (hslab->opt_diminfo[hslab->unlim_dim].count == 0)) {
+    if((diminfo->block == 0)
+            || (diminfo->count == 0)) {
         /* Set num_elem */
         space->select.num_elem = (hsize_t)0;
 
@@ -9774,25 +9750,20 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
     /* Check for single block in unlimited dimension */
     else if(hslab->opt_unlim_diminfo[hslab->unlim_dim].count == (hsize_t)1) {
         /* Calculate number of elements */
-        space->select.num_elem = hslab->opt_diminfo[hslab->unlim_dim].block
-                * hslab->num_elem_non_unlim;
+        space->select.num_elem = diminfo->block * hslab->num_elem_non_unlim;
 
         /* Mark that opt_diminfo is valid */
         hslab->diminfo_valid = TRUE;
     } /* end if */
     else {
         /* Calculate number of elements */
-        space->select.num_elem = hslab->opt_diminfo[hslab->unlim_dim].count
-                * hslab->opt_diminfo[hslab->unlim_dim].block
+        space->select.num_elem = diminfo->count * diminfo->block
                 * hslab->num_elem_non_unlim;
 
         /* Check if last block is partial.  If superset is set, just keep the
          * last block complete to speed computation. */
-        if(((hslab->opt_diminfo[hslab->unlim_dim].stride
-                * (hslab->opt_diminfo[hslab->unlim_dim].count - (hsize_t)1))
-                + hslab->opt_diminfo[hslab->unlim_dim].block)
-                 > ((hsize_t)((hssize_t)clip_size
-                - ((hssize_t)hslab->opt_diminfo[hslab->unlim_dim].start
+        if(((diminfo->stride * (diminfo->count - (hsize_t)1)) + diminfo->block)
+                 > ((hsize_t)((hssize_t)clip_size - ((hssize_t)diminfo->start
                 + space->select.offset[hslab->unlim_dim])))) {
             hsize_t start[H5S_MAX_RANK];
             hsize_t block[H5S_MAX_RANK];
@@ -9908,6 +9879,7 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
 {
     const H5S_hyper_sel_t *clip_hslab; /* Convenience pointer to hyperslab info */
     const H5S_hyper_sel_t *match_hslab; /* Convenience pointer to hyperslab info */
+    const H5S_hyper_dim_t *diminfo; /* Convenience pointer to opt_unlim_diminfo in unlimited dimension */
     hsize_t num_slices;
     hsize_t count;
     hsize_t rem_slices;
@@ -9926,59 +9898,45 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
     HDassert(match_hslab->unlim_dim >= 0);
     HDassert(clip_hslab->num_elem_non_unlim == match_hslab->num_elem_non_unlim);
 
+    diminfo = &clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim];
+
     /* Calculate number of slices */
     num_slices = match_space->select.num_elem / match_hslab->num_elem_non_unlim;
 
     if(num_slices == 0) {
         HDassert(incl_trail && "Checking code coverage..."); //VDSINC
         HDassert(!incl_trail && "Checking code coverage..."); //VDSINC
-        *clip_size = incl_trail
-                ? clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
-                : 0;
+        *clip_size = incl_trail ? diminfo->start : 0;
     } //VDSINC
-    else if(clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block == H5S_UNLIMITED) {
+    else if((diminfo->block == H5S_UNLIMITED)
+            || (diminfo->block == diminfo->stride))
         /* Unlimited block, just set the extent large enough for the block size
          * to match num_slices */
-        HDassert(clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].count == (hsize_t)1);
-
-        *clip_size =
-                clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
-                + num_slices;
-    } /* end if */
+        *clip_size = diminfo->start + num_slices;
     else {
         /* Unlimited count, need to match extent so a block (possibly) gets cut
          * off so the number of slices matches num_slices */
-        HDassert(clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].count == H5S_UNLIMITED);
+        HDassert(diminfo->count == H5S_UNLIMITED);
 
         /* Calculate number of complete blocks in clip_space */
-        count = num_slices / clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block;
+        count = num_slices / diminfo->block;
 
         /* Calculate slices remaining */
-        rem_slices = num_slices - (count
-                * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block);
+        rem_slices = num_slices - (count * diminfo->block);
 
         if(rem_slices > 0)
             /* Must end extent in middle of partial block (or beginning of empty
              * block if include_trailing_space and rem_slices == 0) */
-            *clip_size =
-                    clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
-                    + (count
-                    * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride)
+            *clip_size = diminfo->start + (count * diminfo->stride)
                     + rem_slices;
         else {
             if(incl_trail)
                 /* End extent just before first missing block */
-                *clip_size =
-                        clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
-                        + (count
-                        * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride);
+                *clip_size = diminfo->start + (count * diminfo->stride);
             else
                 /* End extent at end of last block */
-                *clip_size =
-                        clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].start
-                        + ((count - (hsize_t)1)
-                        * clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].stride)
-                        + clip_hslab->opt_unlim_diminfo[clip_hslab->unlim_dim].block;
+                *clip_size = diminfo->start + ((count - (hsize_t)1)
+                        * diminfo->stride) + diminfo->block;
         } /* end else */
     } /* end else */
 
@@ -10024,17 +9982,16 @@ H5S_hyper_get_unlim_block(const H5S_t *space, hsize_t block_index)
     HDassert(hslab->unlim_dim >= 0);
     HDassert(hslab->opt_unlim_diminfo[hslab->unlim_dim].count == H5S_UNLIMITED);
 
-    /* Set block to clip_size in unlimited dimension, H5S_MAX_SIZE in
-     * others so only unlimited dimension is clipped */
+    /* Set start to select block_indexth block in unlimited dimension and set
+     * count to 1 in that dimension to only select that block.  Copy all other
+     * diminfo parameters. */
     for(i = 0; i < space->extent.rank; i++) {
         if((int)i == hslab->unlim_dim){
-            //HDassert(0 && "Checking code coverage..."); //VDSINC
             start[i] = hslab->opt_unlim_diminfo[i].start + (block_index
                     * hslab->opt_unlim_diminfo[i].stride);
             count[i] = (hsize_t)1;
         } /* end if */
         else {
-            //HDassert(0 && "Checking code coverage..."); //VDSINC
             start[i] = hslab->opt_unlim_diminfo[i].start;
             count[i] = hslab->opt_unlim_diminfo[i].count;
         } /* end else */
@@ -10052,7 +10009,7 @@ H5S_hyper_get_unlim_block(const H5S_t *space, hsize_t block_index)
     (void)HDmemset(space_out->select.offset, 0, (size_t)space_out->extent.rank * sizeof(space_out->select.offset[0]));
     space_out->select.offset_changed = FALSE;
 
-    /* "And" selection with calculate block to perform clip operation */
+    /* Select block as defined by start/stride/count/block computed above */
     if(H5S_select_hyperslab(space_out, H5S_SELECT_SET, start, stride, count, block) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "can't select hyperslab")
 

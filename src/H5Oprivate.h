@@ -413,22 +413,25 @@ typedef struct H5O_storage_compact_t {
 } H5O_storage_compact_t;
 
 typedef struct H5O_storage_virtual_srcdset_t {
-    struct H5D_t *dset;                 /* Source dataset */
+    /* Stored */
     char *file_name;                    /* Source file name used for virtual dataset mapping */
     char *dset_name;                    /* Source dataset name used for virtual dataset mapping */
     struct H5S_t *virtual_select;       /* Selection in the virtual dataset that is mapped to source selection */
+
+    /* Not stored */
+    struct H5D_t *dset;                 /* Source dataset                     */
 } H5O_storage_virtual_srcdset_t;
 
 typedef struct H5O_storage_virtual_name_seg_t {
-    char *name_segment;
-    struct H5O_storage_virtual_name_seg_t *next;
+    char *name_segment;                 /* String for this name segment       */
+    struct H5O_storage_virtual_name_seg_t *next; /* Next name segment         */
 } H5O_storage_virtual_name_seg_t;
 
 typedef enum H5O_virtual_space_status_t {
-    H5O_VIRTUAL_STATUS_INVALID = 0,     /* Space extent is invalid */
+    H5O_VIRTUAL_STATUS_INVALID = 0,     /* Space extent is invalid            */
     H5O_VIRTUAL_STATUS_SEL_BOUNDS,      /* Space extent set to bounds of selection */
     H5O_VIRTUAL_STATUS_USER,            /* Space extent provided by application */
-    H5O_VIRTUAL_STATUS_CORRECT          /* Space extent matches dataset */
+    H5O_VIRTUAL_STATUS_CORRECT          /* Space extent matches dataset       */
 } H5O_virtual_space_status_t;
 
 typedef struct H5O_storage_virtual_ent_t {
@@ -438,14 +441,14 @@ typedef struct H5O_storage_virtual_ent_t {
 
     /* Not stored */
     H5O_storage_virtual_srcdset_t *sub_dset; /* Array of sub-source dataset info structs */
-    size_t sub_dset_nalloc;
-    size_t sub_dset_nused;
-    H5O_storage_virtual_name_seg_t *parsed_source_file_name;
-    size_t psfn_static_strlen;
-    size_t psfn_nsubs;
-    H5O_storage_virtual_name_seg_t *parsed_source_dset_name;
-    size_t psdn_static_strlen;
-    size_t psdn_nsubs;
+    size_t sub_dset_nalloc;             /* Number of slots allocated in sub_dset */
+    size_t sub_dset_nused;              /* Number of slots "used" in sub_dset - essentially the farthest sub dataset in the extent */
+    H5O_storage_virtual_name_seg_t *parsed_source_file_name; /* Parsed version of source_dset.file_name */
+    size_t psfn_static_strlen;          /* Length of parsed_source_file_name without block number substitutions */
+    size_t psfn_nsubs;                  /* Number of block number substitutions in parsed_source_file_name */
+    H5O_storage_virtual_name_seg_t *parsed_source_dset_name; /* Parsed version of source_dset.dset_name */
+    size_t psdn_static_strlen;          /* Length of parsed_source_dset_name without block number substitutions */
+    size_t psdn_nsubs;                  /* Number of block number substitutions in parsed_source_dset_name */
     int unlim_dim_source;               /* Unlimited dimension in source_select */
     int unlim_dim_virtual;              /* Unlimited dimension in virtual_select */
     hsize_t unlim_extent_source;        /* Extent of unlimited dimension in source dset last time virtual_select was patched to match selection */
