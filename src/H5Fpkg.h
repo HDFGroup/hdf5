@@ -89,34 +89,34 @@
         + 1 /* reserved */                                              \
         + 4 /* group leaf k, group internal k */                        \
         + 4) /* consistency flags */
-#define H5F_SUPERBLOCK_VARLEN_SIZE_V0(f)                                \
+#define H5F_SUPERBLOCK_VARLEN_SIZE_V0(sizeof_addr, sizeof_size)         \
         ( H5F_SUPERBLOCK_VARLEN_SIZE_COMMON /* Common variable-length info */ \
-        + H5F_SIZEOF_ADDR(f) /* base address */                         \
-        + H5F_SIZEOF_ADDR(f) /* <unused> */				\
-        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
-        + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
-        + H5G_SIZEOF_ENTRY(f)) /* root group ptr */
-#define H5F_SUPERBLOCK_VARLEN_SIZE_V1(f)                                \
+        + (sizeof_addr) /* base address */                              \
+        + (sizeof_addr) /* <unused> */                                  \
+        + (sizeof_addr) /* EOF address */                               \
+        + (sizeof_addr) /* driver block address */                      \
+        + H5G_SIZEOF_ENTRY(sizeof_addr, sizeof_size)) /* root group ptr */
+#define H5F_SUPERBLOCK_VARLEN_SIZE_V1(sizeof_addr, sizeof_size)         \
         ( H5F_SUPERBLOCK_VARLEN_SIZE_COMMON /* Common variable-length info */ \
         + 2 /* indexed B-tree internal k */                             \
         + 2 /* reserved */                                              \
-        + H5F_SIZEOF_ADDR(f) /* base address */                         \
-        + H5F_SIZEOF_ADDR(f) /* <unused> */				\
-        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
-        + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
-        + H5G_SIZEOF_ENTRY(f)) /* root group ptr */
-#define H5F_SUPERBLOCK_VARLEN_SIZE_V2(f)                                \
+        + (sizeof_addr) /* base address */                              \
+        + (sizeof_addr) /* <unused> */                                  \
+        + (sizeof_addr) /* EOF address */                               \
+        + (sizeof_addr) /* driver block address */                      \
+        + H5G_SIZEOF_ENTRY(sizeof_addr, sizeof_size)) /* root group ptr */
+#define H5F_SUPERBLOCK_VARLEN_SIZE_V2(sizeof_addr)                      \
         ( 2 /* size of address, size of lengths */                      \
         + 1 /* consistency flags */                                     \
-        + H5F_SIZEOF_ADDR(f) /* base address */                         \
-        + H5F_SIZEOF_ADDR(f) /* superblock extension address */         \
-        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
-        + H5F_SIZEOF_ADDR(f) /* root group object header address */     \
+        + (sizeof_addr) /* base address */                              \
+        + (sizeof_addr) /* superblock extension address */              \
+        + (sizeof_addr) /* EOF address */                               \
+        + (sizeof_addr) /* root group object header address */          \
         + H5F_SIZEOF_CHKSUM) /* superblock checksum (keep this last) */
 #define H5F_SUPERBLOCK_VARLEN_SIZE(v, f) (				\
-        (v == 0 ? H5F_SUPERBLOCK_VARLEN_SIZE_V0(f) : 0)			\
-        + (v == 1 ? H5F_SUPERBLOCK_VARLEN_SIZE_V1(f) : 0)               \
-        + (v == 2 ? H5F_SUPERBLOCK_VARLEN_SIZE_V2(f) : 0))
+        (v == 0 ? H5F_SUPERBLOCK_VARLEN_SIZE_V0(H5F_SIZEOF_ADDR(f), H5F_SIZEOF_SIZE(f)) : 0) \
+        + (v == 1 ? H5F_SUPERBLOCK_VARLEN_SIZE_V1(H5F_SIZEOF_ADDR(f), H5F_SIZEOF_SIZE(f)) : 0) \
+        + (v == 2 ? H5F_SUPERBLOCK_VARLEN_SIZE_V2(H5F_SIZEOF_ADDR(f)) : 0))
 
 /* Total size of superblock, depends on superblock version */
 #define H5F_SUPERBLOCK_SIZE(v, f) ( H5F_SUPERBLOCK_FIXED_SIZE           \
@@ -339,6 +339,10 @@ H5_DLL unsigned H5F_efc_max_nfiles(H5F_efc_t *efc);
 H5_DLL herr_t H5F_efc_release(H5F_efc_t *efc);
 H5_DLL herr_t H5F_efc_destroy(H5F_efc_t *efc);
 H5_DLL herr_t H5F_efc_try_close(H5F_t *f);
+
+/* Functions that get/retrieve values from VFD layer */
+H5_DLL herr_t H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr);
+H5_DLL herr_t H5F__set_base_addr(const H5F_t *f, haddr_t addr);
 
 /* Testing functions */
 #ifdef H5F_TESTING

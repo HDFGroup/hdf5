@@ -66,7 +66,7 @@
     )
 
 /* Size of the extensible array header on disk */
-#define H5EA_HEADER_SIZE(h)     (                                             \
+#define H5EA_HEADER_SIZE(sizeof_addr, sizeof_size) (                          \
     /* General metadata fields */                                             \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
@@ -79,15 +79,25 @@
     + 1 /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */ \
                                                                               \
     /* Extensible Array statistics fields */                                  \
-    + (h)->sizeof_size /* Number of super blocks created */		      \
-    + (h)->sizeof_size /* Size of super blocks created */		      \
-    + (h)->sizeof_size /* Number of data blocks created */		      \
-    + (h)->sizeof_size /* Size of data blocks created */		      \
-    + (h)->sizeof_size /* Max. index set */				      \
-    + (h)->sizeof_size /* Number of elements 'realized' */		      \
+    + (sizeof_size) /* Number of super blocks created */		      \
+    + (sizeof_size) /* Size of super blocks created */	        	      \
+    + (sizeof_size) /* Number of data blocks created */	        	      \
+    + (sizeof_size) /* Size of data blocks created */   		      \
+    + (sizeof_size) /* Max. index set */	       			      \
+    + (sizeof_size) /* Number of elements 'realized' */	        	      \
                                                                               \
     /* Extensible Array Header specific fields */                             \
-    + (h)->sizeof_addr /* File address of index block */		      \
+    + (sizeof_addr) /* File address of index block */   		      \
+    )
+
+/* Size of the extensible array header on disk (via file pointer) */
+#define H5EA_HEADER_SIZE_FILE(f)   (                                          \
+    H5EA_HEADER_SIZE(H5F_SIZEOF_ADDR(f), H5F_SIZEOF_SIZE(f))                  \
+    )
+
+/* Size of the extensible array header on disk (via extensible array header) */
+#define H5EA_HEADER_SIZE_HDR(h)   (                                           \
+    H5EA_HEADER_SIZE((h)->sizeof_addr, (h)->sizeof_size)                      \
     )
 
 /* Size of the extensible array index block on disk */
@@ -139,8 +149,8 @@
     )
 
 /* Size of the extensible array data block page on disk */
-#define H5EA_DBLK_PAGE_SIZE(p)     (					      \
-    + ((p)->hdr->dblk_page_nelmts * (size_t)(p)->hdr->cparam.raw_elmt_size) /* Elements in data block page */  \
+#define H5EA_DBLK_PAGE_SIZE(h)     (					      \
+    + ((h)->dblk_page_nelmts * (size_t)(h)->cparam.raw_elmt_size) /* Elements in data block page */  \
     + H5EA_SIZEOF_CHKSUM                        /* Checksum for each page */  \
     )
 
