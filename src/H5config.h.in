@@ -130,6 +130,9 @@
 /* Define if the compiler understands the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION
 
+/* Determine if INTEGER*16 is available */
+#undef HAVE_Fortran_INTEGER_SIZEOF_16
+
 /* Define to 1 if you have the `GetConsoleScreenBufferInfo' function. */
 #undef HAVE_GETCONSOLESCREENBUFFERINFO
 

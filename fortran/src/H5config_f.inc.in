@@ -1,5 +1,8 @@
 ! fortran/src/H5config_f.inc. Generated from fortran/src/H5config_f.inc.in by configure
 
+! The script to replace the defines in H5config_f.inc.in is
+! located in configure.ac in the Fortran section. 
+
 ! Define if we have parallel support
 #undef HAVE_PARALLEL
 
@@ -19,4 +22,11 @@
 #undef HAVE_ISO_FORTRAN_ENV
 
 ! Define the size of C's long double
-#define H5_SIZEOF_LONG_DOUBLE
+#undef SIZEOF_LONG_DOUBLE
+
+! Define if the C intrinsic __FLOAT128 exists
+#undef HAVE_FLOAT128
+
+! Define if INTEGER*16 is available 
+#undef HAVE_Fortran_INTEGER_SIZEOF_16
+

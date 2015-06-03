@@ -451,6 +451,16 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([PAC_FORTRAN_NATIVE_REAL_SIZEOF])
   AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_KIND])
   AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF])
+  AC_SUBST([HAVE_Fortran_INTEGER_SIZEOF_16])
+
+  ## Setting definition if there is a 16 byte fortran integer
+  if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
+    HAVE_Fortran_INTEGER_SIZEOF_16="1" 	
+    AC_DEFINE([HAVE_Fortran_INTEGER_SIZEOF_16], [1], [Determine if INTEGER*16 is available])
+  else
+    HAVE_Fortran_INTEGER_SIZEOF_16="0"
+    AC_DEFINE([HAVE_Fortran_INTEGER_SIZEOF_16], [0], [Determine if INTEGER*16 is available])
+  fi
 
   ##if test $PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF > ${ac_cv_sizeof_long_double}; then
   ##  AC_MSG_ERROR([Fortran default DOUBLE PRECISION ("X$PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF" Bytes) can not be represented in C ])
@@ -1109,7 +1119,7 @@ AC_CHECK_SIZEOF([off64_t], [8])
 ## Checkpoint the cache
 AC_CACHE_SAVE
 
-## Check for the __FLOAT128
+## Check for __FLOAT128 extension
 AC_MSG_CHECKING([for __float128])
 AC_TRY_COMPILE([],
   [__float128 x;],

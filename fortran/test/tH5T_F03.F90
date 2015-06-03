@@ -41,6 +41,7 @@
 !**
 !***************************************************************
 !
+#include <H5config_f.inc>
 
 MODULE TH5T_F03
 
@@ -969,8 +970,6 @@ END SUBROUTINE test_array_compound_atomic
 
   END SUBROUTINE test_array_bkg
 
-
-
   SUBROUTINE test_h5kind_to_type(total_error)
 
     IMPLICIT NONE
@@ -986,22 +985,24 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: int_kind_4 = SELECTED_INT_KIND(4) !should map to INTEGER*2 on most modern processors
     INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(9) !should map to INTEGER*4 on most modern processors
     INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
-!#ifdef    
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0 
     INTEGER, PARAMETER :: int_kind_32 = SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
     INTEGER(int_kind_32), DIMENSION(1:4), TARGET :: dset_data_i32, data_out_i32  
     INTEGER(HID_T) :: dset_id32     ! Dataset identifier 
     CHARACTER(LEN=6), PARAMETER :: dsetname16 = "dset16"     ! Dataset name 
-!#endif
-    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_C_FLOAT)   !should map to REAL*4 on most modern processors
-    INTEGER, PARAMETER :: real_kind_15 = SELECTED_REAL_KIND(Fortran_REAL_C_DOUBLE)  !should map to REAL*8 on most modern processors
+#endif
+    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(C_FLOAT)   !should map to REAL*4 on most modern processors
+    INTEGER, PARAMETER :: real_kind_15 = SELECTED_REAL_KIND(C_DOUBLE)  !should map to REAL*8 on most modern processors
     
-!#ifdef  
+#if H5_HAVE_FLOAT128!=0
     INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(31)
+#else
+    INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(C_LONG_DOUBLE)
+#endif
     REAL(real_kind_31), DIMENSION(1:4), TARGET :: dset_data_r31, data_out_r31   
     INTEGER(HID_T) :: dset_idr16      ! Dataset identifier 
     CHARACTER(LEN=7), PARAMETER :: dsetnamer16 = "dsetr16"     ! Dataset name
-    
-!#endif
+
     CHARACTER(LEN=12), PARAMETER :: filename = "dsetf_F03.h5" ! File name
     CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"     ! Dataset name
     CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"     ! Dataset name
@@ -1043,19 +1044,17 @@ END SUBROUTINE test_array_compound_atomic
     ! Initialize the dset_data array.
     !
     DO i = 1, 4
-       dset_data_i1(i)  = 2**(4)-i
-       dset_data_i4(i)  = 2**(10)-i
-       dset_data_i8(i)  = 2**(28)-i
-       dset_data_i16(i) = 2**(28)-i
-!#ifdef
-       dset_data_i32(i) = 2**(28)-i
-!#endif
-       dset_data_r(i) = (i)*100.
-       dset_data_r7(i) = (i)*100.
-       dset_data_r15(i) = (i)*1000.
-!#ifdef
-       dset_data_r31(i) = 3.141592653589793238462643383279_real_kind_31
-!#endif
+       dset_data_i1(i)  = HUGE(0_int_kind_1)-i
+       dset_data_i4(i)  = HUGE(0_int_kind_4)-i
+       dset_data_i8(i)  = HUGE(0_int_kind_8)-i
+       dset_data_i16(i) = HUGE(0_int_kind_16)-i
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+       dset_data_i32(i) = HUGE(0_int_kind_32)-i
+#endif
+       dset_data_r(i) = 4.0*ATAN(1.0)-REAL(i-1)
+       dset_data_r7(i) = 4.0_real_kind_7*ATAN(1.0_real_kind_7)-REAL(i-1,real_kind_7)
+       dset_data_r15(i) = 4.0_real_kind_15*ATAN(1.0_real_kind_15)-REAL(i-1,real_kind_15)
+       dset_data_r31(i) = 4.0_real_kind_31*ATAN(1.0_real_kind_31)-REAL(i-1,real_kind_31)
        
     END DO
 
@@ -1077,17 +1076,17 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("H5Dcreate_f",error, total_error)
     CALL H5Dcreate_f(file_id, dsetname8, h5kind_to_type(int_kind_16,H5_INTEGER_KIND), dspace_id, dset_id16, error)
     CALL check("H5Dcreate_f",error, total_error)
-!#ifdef
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     CALL H5Dcreate_f(file_id, dsetname16, h5kind_to_type(int_kind_32,H5_INTEGER_KIND), dspace_id, dset_id32, error)
     CALL check("H5Dcreate_f",error, total_error)
-!#endif
+#endif
     CALL H5Dcreate_f(file_id, dsetnamer, H5T_NATIVE_REAL, dspace_id, dset_idr, error)
     CALL check("H5Dcreate_f",error, total_error)
     CALL H5Dcreate_f(file_id, dsetnamer4, h5kind_to_type(real_kind_7,H5_REAL_KIND),  dspace_id, dset_idr4, error)
     CALL check("H5Dcreate_f",error, total_error)
     CALL H5Dcreate_f(file_id, dsetnamer8, h5kind_to_type(real_kind_15,H5_REAL_KIND), dspace_id, dset_idr8, error)
     CALL check("H5Dcreate_f",error, total_error)
-!#ifdef
+!#ifdef H5_HAVE_FLOAT128
     CALL H5Dcreate_f(file_id, dsetnamer16, h5kind_to_type(real_kind_31,H5_REAL_KIND), dspace_id, dset_idr16, error)
     CALL check("H5Dcreate_f",error, total_error)
 !#endif
@@ -1106,11 +1105,11 @@ END SUBROUTINE test_array_compound_atomic
     f_ptr = C_LOC(dset_data_i16(1))
     CALL h5dwrite_f(dset_id16, h5kind_to_type(int_kind_16,H5_INTEGER_KIND), f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)
-!#ifdef
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     f_ptr = C_LOC(dset_data_i32(1))
     CALL h5dwrite_f(dset_id32, h5kind_to_type(int_kind_32,H5_INTEGER_KIND), f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)
-!#endif
+#endif
     f_ptr = C_LOC(dset_data_r(1))
     CALL h5dwrite_f(dset_idr, H5T_NATIVE_REAL, f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)
@@ -1120,7 +1119,7 @@ END SUBROUTINE test_array_compound_atomic
     f_ptr = C_LOC(dset_data_r15(1))
     CALL h5dwrite_f(dset_idr8, h5kind_to_type(real_kind_15,H5_REAL_KIND), f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)
-!#ifdef
+!#ifdef H5_HAVE_FLOAT128
     f_ptr = C_LOC(dset_data_r31(1))
     CALL h5dwrite_f(dset_idr16, h5kind_to_type(real_kind_31,H5_REAL_KIND), f_ptr, error)
     CALL check("H5Dwrite_f",error, total_error)
@@ -1152,11 +1151,11 @@ END SUBROUTINE test_array_compound_atomic
     f_ptr = C_LOC(data_out_i16)
     CALL h5dread_f(dset_id16, h5kind_to_type(int_kind_16,H5_INTEGER_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-!#ifdef
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     f_ptr = C_LOC(data_out_i32)
     CALL h5dread_f(dset_id32, h5kind_to_type(int_kind_32,H5_INTEGER_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-!#endif
+#endif
     f_ptr = C_LOC(data_out_r)
     CALL h5dread_f(dset_idr, H5T_NATIVE_REAL, f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
@@ -1166,26 +1165,23 @@ END SUBROUTINE test_array_compound_atomic
     f_ptr = C_LOC(data_out_r15)
     CALL h5dread_f(dset_idr8, h5kind_to_type(real_kind_15,H5_REAL_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-!#ifdef
     f_ptr = C_LOC(data_out_r31)
     CALL h5dread_f(dset_idr16, h5kind_to_type(real_kind_31,H5_REAL_KIND), f_ptr,  error)
     CALL check("h5dread_f",error, total_error)
-!#endif
     DO i = 1, 4
        
-       CALL verify("h5kind_to_type1",dset_data_i1(i),data_out_i1(i),total_error)
-       CALL verify("h5kind_to_type2",dset_data_i4(i),data_out_i4(i),total_error)
-!!$       CALL verify_Fortran_INTEGER_4("h5kind_to_type3",INT(dset_data_i8(i),int_kind_8),INT(data_out_i8(i),int_kind_8),total_error)
-!!$       CALL verify_Fortran_INTEGER_4("h5kind_to_type4",INT(dset_data_i16(i),int_kind_8),INT(data_out_i16(i),int_kind_8),total_error)
+       CALL verify("h5kind_to_type",dset_data_i1(i),data_out_i1(i),total_error)
+       CALL verify("h5kind_to_type",dset_data_i4(i),data_out_i4(i),total_error)
+       CALL verify("h5kind_to_type",dset_data_i8(i),data_out_i8(i),total_error)
+       CALL verify("h5kind_to_type",dset_data_i16(i),data_out_i16(i),total_error)
        
-!#ifdef
-!       PRINT*,dset_data_i16(i),data_out_i16(i)
-!!$       CALL verify_Fortran_INTEGER_4("h5kind_to_type4",INT(dset_data_i16(i),int_kind_8),INT(data_out_i16(i),int_kind_8),total_error)
-!#endif
-       CALL verify("h5kind_to_type5",dset_data_r(i),data_out_r(i),total_error)
-       CALL verify("h5kind_to_type6",dset_data_r7(i),data_out_r7(i),total_error)
-       CALL verify("h5kind_to_type7",dset_data_r15(i),data_out_r15(i),total_error)
-
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+       CALL verify("h5kind_to_type",dset_data_i32(i),data_out_i32(i),total_error)
+#endif
+       CALL verify("h5kind_to_type",dset_data_r(i),data_out_r(i),total_error)
+       CALL verify("h5kind_to_type",dset_data_r7(i),data_out_r7(i),total_error)
+       CALL verify("h5kind_to_type",dset_data_r15(i),data_out_r15(i),total_error)
+       CALL verify("h5kind_to_type",dset_data_r31(i),data_out_r31(i),total_error)
     END DO
 
   !

@@ -719,6 +719,7 @@ am__fastdepCXX_TRUE
 CXXDEPMODE
 ac_ct_CXX
 CXXFLAGS
+HAVE_Fortran_INTEGER_SIZEOF_16
 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF
 PAC_FORTRAN_NATIVE_DOUBLE_KIND
 PAC_FORTRAN_NATIVE_REAL_SIZEOF
@@ -6970,7 +6971,7 @@ rm -f core conftest.err conftest.$ac_objext \
 
   ## See if C_LONG_DOUBLE is available, and if it is different from C_DOUBLE
 
-  HAVE_C_LONG_DOUBLE_FORTRAN="no"
+  FORTRAN_HAVE_C_LONG_DOUBLE="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran C_LONG_DOUBLE is valid" >&5
 $as_echo_n "checking if Fortran C_LONG_DOUBLE is valid... " >&6; }
 
@@ -7003,7 +7004,7 @@ _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-            HAVE_C_LONG_DOUBLE_FORTRAN="yes"
+            FORTRAN_HAVE_C_LONG_DOUBLE="yes"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -7409,6 +7410,20 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
+
+
+  ## Setting definition if there is a 16 byte fortran integer
+  if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
+    HAVE_Fortran_INTEGER_SIZEOF_16="1"
+
+$as_echo "#define HAVE_Fortran_INTEGER_SIZEOF_16 1" >>confdefs.h
+
+  else
+    HAVE_Fortran_INTEGER_SIZEOF_16="0"
+
+$as_echo "#define HAVE_Fortran_INTEGER_SIZEOF_16 0" >>confdefs.h
+
+  fi
 
   ##if test $PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF > ${ac_cv_sizeof_long_double}; then
   ##  AC_MSG_ERROR([Fortran default DOUBLE PRECISION ("X$PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF" Bytes) can not be represented in C ])
@@ -24733,7 +24748,7 @@ $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
 fi
 rm -f confcache
 
-## Check for the __FLOAT128
+## Check for __FLOAT128 extension
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __float128" >&5
 $as_echo_n "checking for __float128... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext

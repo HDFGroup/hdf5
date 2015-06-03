@@ -240,7 +240,7 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     if ((types[15] = (hid_t_f)H5Tcopy(H5T_NATIVE_B32)) < 0) return ret_value;
     if ((types[16] = (hid_t_f)H5Tcopy(H5T_NATIVE_B64)) < 0) return ret_value;
 
-/* #ifdef -MSB-  */
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
      /*
      * FIND H5T_NATIVE_INTEGER_16
      */
@@ -260,6 +260,10 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
       if ((types[17] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
       if ( H5Tset_precision (types[17], 128) < 0) return ret_value;
     } /*end else */
+#else
+    if ((types[17] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
+    if ( H5Tset_precision (types[17], 128) < 0) return ret_value;
+#endif
 
 
 /* #ifdef -MSB-  */
@@ -356,16 +360,16 @@ h5close_types_c( hid_t_f * types, int_f *lentypes,
     int i;
 
     for (i = 0; i < *lentypes; i++) {
-        c_type_id = types[i];
-        if ( H5Tclose(c_type_id) < 0) return ret_value;
+      c_type_id = types[i];
+      if ( H5Tclose(c_type_id) < 0) return ret_value;
     }
     for (i = 0; i < *floatinglen; i++) {
-        c_type_id = floatingtypes[i];
-        if ( H5Tclose(c_type_id) < 0) return ret_value;
+      c_type_id = floatingtypes[i];
+      if ( H5Tclose(c_type_id) < 0) return ret_value;
     }
     for (i = 0; i < *integerlen; i++) {
-        c_type_id = integertypes[i];
-        if ( H5Tclose(c_type_id) < 0) return ret_value;
+      c_type_id = integertypes[i];
+      if ( H5Tclose(c_type_id) < 0) return ret_value;
     }
     ret_value = 0;
     return ret_value;

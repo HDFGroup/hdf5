@@ -129,7 +129,7 @@ dnl Check to see C_LONG_DOUBLE is available, and if it
 dnl is different from C_DOUBLE
 
 AC_DEFUN([PAC_PROG_FC_HAVE_C_LONG_DOUBLE],[
-  HAVE_C_LONG_DOUBLE_FORTRAN="no"	
+  FORTRAN_HAVE_C_LONG_DOUBLE="no"	
   AC_MSG_CHECKING([if Fortran C_LONG_DOUBLE is valid])
   
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([
@@ -156,7 +156,7 @@ AC_DEFUN([PAC_PROG_FC_HAVE_C_LONG_DOUBLE],[
        CALL h5t(d)
      END PROGRAM main
     ])], [AC_MSG_RESULT([yes]) 
-            HAVE_C_LONG_DOUBLE_FORTRAN="yes"], 
+            FORTRAN_HAVE_C_LONG_DOUBLE="yes"], 
          [AC_MSG_RESULT([no])])
 ])
 
@@ -482,7 +482,6 @@ rm -f pac_fconftest.out
         ],[
             pack_int_sizeof="$2"
         ])
-dnl PAC_FC_ALL_INTEGER_KINDS_SIZEOF="{ $pack_int_sizeof }"
 AC_MSG_RESULT([$pack_int_sizeof])
 AC_LANG_POP([Fortran])
 ])

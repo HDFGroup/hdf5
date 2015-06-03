@@ -123,7 +123,7 @@ add_executable (fortranlib_test_F03
     tH5L_F03.f90
     tH5O_F03.f90
     tH5P_F03.f90
-    tH5T_F03.f90
+    tH5T_F03.F90
     tHDF5_F03.f90
   )
 TARGET_NAMING (fortranlib_test_F03 ${LIB_TYPE})
