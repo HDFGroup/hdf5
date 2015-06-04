@@ -206,28 +206,28 @@ int main(void)
 
   /* (b) Define c_float_x */
 
-  /* make sure we find long double first before checking for __float128
-   * ideally we need to match precision instead of matching sizeof */
-
-  int found_longdb = 0;
+  int found_long_double = 0;
   for(i=0;i< H5_FORTRAN_NUM_REAL_KINDS;i++) {
-#ifdef H5_HAVE_FLOAT128
-    if(sizeof(__float128) == RealKinds_SizeOf[i] && found_longdb == 1) {
-      writeTypedef("float", "__float128", RealKinds[i]);
-      strcpy(Real_C_TYPES[i], "C_FLOAT128");
-    } else
-#endif
-    if(sizeof(long double) == RealKinds_SizeOf[i]) {
-      found_longdb = 1;
-      writeTypedef("float", "long double", RealKinds[i]);
-      strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE");
+
+    if (sizeof(float) == RealKinds_SizeOf[i]) {
+      writeTypedef("float", "float", RealKinds[i]);
+      strcpy(Real_C_TYPES[i], "C_FLOAT");
     } else if(sizeof(double) == RealKinds_SizeOf[i]) {
       writeTypedef("float", "double", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_DOUBLE");
-    } else if(sizeof(float) == RealKinds_SizeOf[i]) {
-      writeTypedef("float", "float", RealKinds[i]);
-      strcpy(Real_C_TYPES[i], "C_FLOAT");
-    } else {
+    } else if(sizeof(long double) == RealKinds_SizeOf[i] && found_long_double == 0) {
+      writeTypedef("float", "long double", RealKinds[i]);
+      strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE");
+      found_long_double = 1;
+    }
+#ifdef H5_HAVE_FLOAT128
+    /* Don't select a higher precision than Fortran can support */
+    else if(sizeof(__float128) == RealKinds_SizeOf[i] && found_long_double == 1 && H5_PAC_FC_MAX_REAL_PRECISION > 28) {
+      writeTypedef("float", "__float128", RealKinds[i]);
+      strcpy(Real_C_TYPES[i], "C_FLOAT128");
+    } 
+#endif
+    else {
       printf("                      **** HDF5 WARNING ****/n");
       printf("Fortran REAL is %d bytes, but no corresponding C floating type exists\n",RealKinds_SizeOf[i]);
       printf("Fortran Interfaces for Fortran REALs of %d bytes will not exist\n",RealKinds_SizeOf[i]);

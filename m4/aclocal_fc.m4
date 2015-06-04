@@ -310,48 +310,69 @@ AC_RUN_IFELSE([
     AC_LANG_SOURCE([
         PROGRAM main
         IMPLICIT NONE
-        INTEGER :: ik, k, lastkind
+        INTEGER :: ik, k, lastkind, max_decimal_prec
         lastkind=SELECTED_INT_KIND(1)
-        OPEN(8, FILE="pac_fconftest.out", form="formatted")
-        WRITE(8,'("ik:")',ADVANCE='NO') ! Find integer KINDs
-        DO ik=2,30
+        OPEN(8, FILE='pac_fconftest.out', form='formatted')
+        WRITE(8,'(A)',ADVANCE='NO') 'A' ! Find integer KINDs
+        DO ik=2,36
              k = SELECTED_INT_KIND(ik)
              IF (k .NE. lastkind) THEN
-                  WRITE(8,'(I0,A)',ADVANCE='NO') lastkind," "
+                  WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '	
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
-        dnl IF (k.NE.lastkind) WRITE(8,'(I0,A)',ADVANCE='NO') k, " "
-	IF (lastkind.NE.-1) WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
-        WRITE(8,'(/)')
-        WRITE(8,'("rk:")',ADVANCE='NO') ! Find real KINDs
+	IF (lastkind.NE.-1) THEN
+           WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'B '
+	ELSE
+           WRITE(8,'(A)',ADVANCE='NO') 'B '
+        ENDIF
+        WRITE(8,'(A)',ADVANCE='NO') 'C' ! Find real KINDs
         lastkind=SELECTED_REAL_KIND(1)
-        DO ik=2,30
+	max_decimal_prec = 1
+        DO ik=2,36
              k = SELECTED_REAL_KIND(ik)
              IF (k .NE. lastkind) THEN
-                  WRITE(8,'(I0,A)',ADVANCE='NO') lastkind," "
+                  WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
+	          max_decimal_prec = ik
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
-        IF (lastkind.NE.-1) WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
-        dnl IF (k.NE.lastkind) WRITE(8,'(I0,A)',ADVANCE='NO') k, " "
-
+        IF (lastkind.NE.-1)THEN
+            WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'D'
+	ELSE
+           WRITE(8,'(A)',ADVANCE='NO') 'D'
+        ENDIF
+	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' E',max_decimal_prec,'F'
+        
         END
     ])
 ],[
     if test -s pac_fconftest.out ; then
-		
-     dnl   pac_flag="`sed -e 's/  */ /g' pac_fconftest.out | tr '\012' ','`"
-        pac_validIntKinds="`sed -n -e 's/^.*ik://p' pac_fconftest.out`"
-        pac_validRealKinds="`sed -n -e 's/^.*rk://p' pac_fconftest.out`"
+	
+     dnl The output from the above program will be something like 
+     dnl A1 4 8 16B C4 8 10D E30F where:
+     dnl      - valid integer kinds are the numbers between A and B
+     dnl      - valid real kinds are the numbers between A and B
+     dnl      - max decimal precision for reals is the number between E and F
+
+      dnl pac_validIntKinds="`sed -n -e 's/^.*ik://p' pac_fconftest.out`"
+      dnl pac_validRealKinds="`sed -n -e 's/^.*rk://p' pac_fconftest.out`"
+        tmp="`cat pac_fconftest.out`"
+        pac_validIntKinds="`echo $tmp | sed -e 's/.*A\(.*\)B.*/\1/'`"
+        pac_validRealKinds="`echo $tmp | sed -e 's/.*C\(.*\)D.*/\1/'`"
+        PAC_FC_MAX_REAL_PRECISION="`echo $tmp | sed -e 's/.*E\(.*\)F.*/\1/'`"
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
         AC_MSG_CHECKING([for Fortran INTEGER KINDs])
         AC_MSG_RESULT([$PAC_FC_ALL_INTEGER_KINDS])
 	AC_MSG_CHECKING([for Fortran REAL KINDs])
 	AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])
+	AC_MSG_CHECKING([for Fortran REALs maximum decimal precision])
+	AC_MSG_RESULT([$PAC_FC_MAX_REAL_PRECISION])
     else
         AC_MSG_RESULT([Error])
         AC_MSG_WARN([No output from test program!])
@@ -369,7 +390,6 @@ AC_RUN_IFELSE([
 ])
 AC_LANG_POP([Fortran])
 ])
-
 AC_DEFUN([PAC_FC_SIZEOF_INT_KINDS],[
 AC_REQUIRE([PAC_FC_AVAIL_KINDS])
 AC_MSG_CHECKING([sizeof of available INTEGER KINDs])
@@ -379,12 +399,14 @@ rm -f pac_fconftest.out
 for kind in $pac_validIntKinds; do
   AC_LANG_CONFTEST([
       AC_LANG_SOURCE([
-                program main
-                integer (kind=$kind) a
-                open(8, file="pac_fconftest.out", form="formatted")
-                write(8,'(I0)') sizeof(a)
-                close(8)
-                end
+                PROGRAM main
+                USE ISO_C_BINDING
+                IMPLICIT NONE
+                INTEGER (KIND=$kind) a
+                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                WRITE(8,'(I0)') $FC_SIZEOF_A
+                CLOSE(8)
+                END
             ])
         ])
         AC_RUN_IFELSE([],[
@@ -415,12 +437,14 @@ rm -f pac_fconftest.out
 for kind in $pac_validRealKinds; do
   AC_LANG_CONFTEST([
       AC_LANG_SOURCE([
-                program main
-                REAL (kind=$kind) :: a
-                open(8, file="pac_fconftest.out", form="formatted")
-                write(8,'(I0)') sizeof(a)
-                close(8)
-                end
+                PROGRAM main
+                USE ISO_C_BINDING
+                IMPLICIT NONE
+                REAL (KIND=$kind) :: a
+                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                WRITE(8,'(I0)') $FC_SIZEOF_A
+                CLOSE(8)
+                END
             ])
         ])
         AC_RUN_IFELSE([],[
@@ -450,19 +474,21 @@ pack_int_sizeof=""
 rm -f pac_fconftest.out
   AC_LANG_CONFTEST([
       AC_LANG_SOURCE([
-                program main
-                integer a
-                real b
-                double precision c
-                open(8, file="pac_fconftest.out", form="formatted")
-                write(8,*) sizeof(a)
-	        write(8,*) kind(a)
-	        write(8,*) sizeof(b)
-	        write(8,*) kind(b)
-                write(8,*) sizeof(c)
-                write(8,*) kind(c)
-                close(8)
-                end
+                PROGRAM main
+                USE ISO_C_BINDING
+                IMPLICIT NONE
+                INTEGER a
+                REAL b
+                DOUBLE PRECISION c
+                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                WRITE(8,*) $FC_SIZEOF_A
+	        WRITE(8,*) kind(a)
+	        WRITE(8,*) $FC_SIZEOF_B
+	        WRITE(8,*) kind(b)
+                WRITE(8,*) $FC_SIZEOF_C
+                WRITE(8,*) kind(c)
+                CLOSE(8)
+                END
             ])
         ])
         AC_RUN_IFELSE([],[

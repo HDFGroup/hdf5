@@ -27,7 +27,13 @@ if (H5_HAVE_PARALLEL)
   set (CMAKE_H5_HAVE_PARALLEL 1)
 endif (H5_HAVE_PARALLEL)
 
+set (CMAKE_H5_HAVE_FLOAT128 0)
+if (HAVE_FLOAT128)
+  set (CMAKE_H5_HAVE_FLOAT128 1)
+endif(HAVE_FLOAT128)
+
 configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5config_f.inc.cmake ${CMAKE_BINARY_DIR}/H5config_f.inc @ONLY)
+configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5fort_type_defines.h.in ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h @ONLY)
 
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities

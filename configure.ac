@@ -429,6 +429,24 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
   PAC_PROG_FC_STORAGE_SIZE
 
+
+  ## Set the sizeof function for use later in the fortran tests
+  if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes";then
+    FC_SIZEOF_A="STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
+    FC_SIZEOF_B="STORAGE_SIZE(b, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
+    FC_SIZEOF_C="STORAGE_SIZE(c, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
+  else 
+    if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes";then
+      FC_SIZEOF_A="SIZEOF(a)"
+      FC_SIZEOF_B="SIZEOF(a)"
+      FC_SIZEOF_C="SIZEOF(a)"
+    else	
+      ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
+      AC_MSG_ERROR([Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE])
+    fi
+  fi
+
+
   ## See if C_LONG_DOUBLE is available, and if it is different from C_DOUBLE
   PAC_PROG_FC_HAVE_C_LONG_DOUBLE
 
@@ -442,6 +460,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   PAC_FC_SIZEOF_REAL_KINDS
 
   AC_SUBST([PAC_FC_ALL_REAL_KINDS])
+  AC_SUBST([PAC_FC_MAX_REAL_PRECISION])
   AC_SUBST([PAC_FC_ALL_INTEGER_KINDS])
   AC_SUBST([PAC_FC_ALL_REAL_KINDS_SIZEOF])
   AC_SUBST([PAC_FC_ALL_INTEGER_KINDS_SIZEOF])  
@@ -467,11 +486,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ##fi
 
   ##PAC_FC_AVAIL_INTEGER_MODELS
-	
-  ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
-  if test "X$HAVE_SIZEOF_FORTRAN" = "Xno" && test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xno"; then
-    AC_MSG_ERROR([Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE])
-  fi
+
   
   if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_STORAGE_SIZE], [1], [Define if we have Fortran intrinsic STORAGE_SIZE])

@@ -729,6 +729,7 @@ PAC_FORTRAN_NATIVE_INTEGER_KIND
 PAC_FC_ALL_INTEGER_KINDS_SIZEOF
 PAC_FC_ALL_REAL_KINDS_SIZEOF
 PAC_FC_ALL_INTEGER_KINDS
+PAC_FC_MAX_REAL_PRECISION
 PAC_FC_ALL_REAL_KINDS
 FCLIBS
 F9XMODEXT
@@ -6969,6 +6970,24 @@ rm -f core conftest.err conftest.$ac_objext \
 
 
 
+
+  ## Set the sizeof function for use later in the fortran tests
+  if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes";then
+    FC_SIZEOF_A="STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
+    FC_SIZEOF_B="STORAGE_SIZE(b, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
+    FC_SIZEOF_C="STORAGE_SIZE(c, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
+  else
+    if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes";then
+      FC_SIZEOF_A="SIZEOF(a)"
+      FC_SIZEOF_B="SIZEOF(a)"
+      FC_SIZEOF_C="SIZEOF(a)"
+    else
+      ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
+      as_fn_error $? "Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE" "$LINENO" 5
+    fi
+  fi
+
+
   ## See if C_LONG_DOUBLE is available, and if it is different from C_DOUBLE
 
   FORTRAN_HAVE_C_LONG_DOUBLE="no"
@@ -7052,31 +7071,43 @@ else
 
         PROGRAM main
         IMPLICIT NONE
-        INTEGER :: ik, k, lastkind
+        INTEGER :: ik, k, lastkind, max_decimal_prec
         lastkind=SELECTED_INT_KIND(1)
-        OPEN(8, FILE="pac_fconftest.out", form="formatted")
-        WRITE(8,'("ik:")',ADVANCE='NO') ! Find integer KINDs
-        DO ik=2,30
+        OPEN(8, FILE='pac_fconftest.out', form='formatted')
+        WRITE(8,'(A)',ADVANCE='NO') 'A' ! Find integer KINDs
+        DO ik=2,36
              k = SELECTED_INT_KIND(ik)
              IF (k .NE. lastkind) THEN
-                  WRITE(8,'(I0,A)',ADVANCE='NO') lastkind," "
+                  WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
-        	IF (lastkind.NE.-1) WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
-        WRITE(8,'(/)')
-        WRITE(8,'("rk:")',ADVANCE='NO') ! Find real KINDs
+	IF (lastkind.NE.-1) THEN
+           WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'B '
+	ELSE
+           WRITE(8,'(A)',ADVANCE='NO') 'B '
+        ENDIF
+        WRITE(8,'(A)',ADVANCE='NO') 'C' ! Find real KINDs
         lastkind=SELECTED_REAL_KIND(1)
-        DO ik=2,30
+	max_decimal_prec = 1
+        DO ik=2,36
              k = SELECTED_REAL_KIND(ik)
              IF (k .NE. lastkind) THEN
-                  WRITE(8,'(I0,A)',ADVANCE='NO') lastkind," "
+                  WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
+	          max_decimal_prec = ik
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
-        IF (lastkind.NE.-1) WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
+        IF (lastkind.NE.-1)THEN
+            WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'D'
+	ELSE
+           WRITE(8,'(A)',ADVANCE='NO') 'D'
+        ENDIF
+	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' E',max_decimal_prec,'F'
 
         END
 
@@ -7086,8 +7117,11 @@ if ac_fn_fc_try_run "$LINENO"; then :
 
     if test -s pac_fconftest.out ; then
 
-             pac_validIntKinds="`sed -n -e 's/^.*ik://p' pac_fconftest.out`"
-        pac_validRealKinds="`sed -n -e 's/^.*rk://p' pac_fconftest.out`"
+
+                    tmp="`cat pac_fconftest.out`"
+        pac_validIntKinds="`echo $tmp | sed -e 's/.*A\(.*\)B.*/\1/'`"
+        pac_validRealKinds="`echo $tmp | sed -e 's/.*C\(.*\)D.*/\1/'`"
+        PAC_FC_MAX_REAL_PRECISION="`echo $tmp | sed -e 's/.*E\(.*\)F.*/\1/'`"
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran INTEGER KINDs" >&5
@@ -7098,6 +7132,10 @@ $as_echo "$PAC_FC_ALL_INTEGER_KINDS" >&6; }
 $as_echo_n "checking for Fortran REAL KINDs... " >&6; }
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_ALL_REAL_KINDS" >&5
 $as_echo "$PAC_FC_ALL_REAL_KINDS" >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran REALs maximum decimal precision" >&5
+$as_echo_n "checking for Fortran REALs maximum decimal precision... " >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_MAX_REAL_PRECISION" >&5
+$as_echo "$PAC_FC_MAX_REAL_PRECISION" >&6; }
     else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: Error" >&5
 $as_echo "Error" >&6; }
@@ -7137,19 +7175,21 @@ rm -f pac_fconftest.out
   cat > conftest.$ac_ext <<_ACEOF
 
 
-                program main
-                integer a
-                real b
-                double precision c
-                open(8, file="pac_fconftest.out", form="formatted")
-                write(8,*) sizeof(a)
-	        write(8,*) kind(a)
-	        write(8,*) sizeof(b)
-	        write(8,*) kind(b)
-                write(8,*) sizeof(c)
-                write(8,*) kind(c)
-                close(8)
-                end
+                PROGRAM main
+                USE ISO_C_BINDING
+                IMPLICIT NONE
+                INTEGER a
+                REAL b
+                DOUBLE PRECISION c
+                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                WRITE(8,*) $FC_SIZEOF_A
+	        WRITE(8,*) kind(a)
+	        WRITE(8,*) $FC_SIZEOF_B
+	        WRITE(8,*) kind(b)
+                WRITE(8,*) $FC_SIZEOF_C
+                WRITE(8,*) kind(c)
+                CLOSE(8)
+                END
 
 
 _ACEOF
@@ -7208,31 +7248,43 @@ else
 
         PROGRAM main
         IMPLICIT NONE
-        INTEGER :: ik, k, lastkind
+        INTEGER :: ik, k, lastkind, max_decimal_prec
         lastkind=SELECTED_INT_KIND(1)
-        OPEN(8, FILE="pac_fconftest.out", form="formatted")
-        WRITE(8,'("ik:")',ADVANCE='NO') ! Find integer KINDs
-        DO ik=2,30
+        OPEN(8, FILE='pac_fconftest.out', form='formatted')
+        WRITE(8,'(A)',ADVANCE='NO') 'A' ! Find integer KINDs
+        DO ik=2,36
              k = SELECTED_INT_KIND(ik)
              IF (k .NE. lastkind) THEN
-                  WRITE(8,'(I0,A)',ADVANCE='NO') lastkind," "
+                  WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
-        	IF (lastkind.NE.-1) WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
-        WRITE(8,'(/)')
-        WRITE(8,'("rk:")',ADVANCE='NO') ! Find real KINDs
+	IF (lastkind.NE.-1) THEN
+           WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'B '
+	ELSE
+           WRITE(8,'(A)',ADVANCE='NO') 'B '
+        ENDIF
+        WRITE(8,'(A)',ADVANCE='NO') 'C' ! Find real KINDs
         lastkind=SELECTED_REAL_KIND(1)
-        DO ik=2,30
+	max_decimal_prec = 1
+        DO ik=2,36
              k = SELECTED_REAL_KIND(ik)
              IF (k .NE. lastkind) THEN
-                  WRITE(8,'(I0,A)',ADVANCE='NO') lastkind," "
+                  WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
+	          max_decimal_prec = ik
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
-        IF (lastkind.NE.-1) WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, " "
+        IF (lastkind.NE.-1)THEN
+            WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'D'
+	ELSE
+           WRITE(8,'(A)',ADVANCE='NO') 'D'
+        ENDIF
+	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' E',max_decimal_prec,'F'
 
         END
 
@@ -7242,8 +7294,11 @@ if ac_fn_fc_try_run "$LINENO"; then :
 
     if test -s pac_fconftest.out ; then
 
-             pac_validIntKinds="`sed -n -e 's/^.*ik://p' pac_fconftest.out`"
-        pac_validRealKinds="`sed -n -e 's/^.*rk://p' pac_fconftest.out`"
+
+                    tmp="`cat pac_fconftest.out`"
+        pac_validIntKinds="`echo $tmp | sed -e 's/.*A\(.*\)B.*/\1/'`"
+        pac_validRealKinds="`echo $tmp | sed -e 's/.*C\(.*\)D.*/\1/'`"
+        PAC_FC_MAX_REAL_PRECISION="`echo $tmp | sed -e 's/.*E\(.*\)F.*/\1/'`"
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran INTEGER KINDs" >&5
@@ -7254,6 +7309,10 @@ $as_echo "$PAC_FC_ALL_INTEGER_KINDS" >&6; }
 $as_echo_n "checking for Fortran REAL KINDs... " >&6; }
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_ALL_REAL_KINDS" >&5
 $as_echo "$PAC_FC_ALL_REAL_KINDS" >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran REALs maximum decimal precision" >&5
+$as_echo_n "checking for Fortran REALs maximum decimal precision... " >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_MAX_REAL_PRECISION" >&5
+$as_echo "$PAC_FC_MAX_REAL_PRECISION" >&6; }
     else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: Error" >&5
 $as_echo "Error" >&6; }
@@ -7294,12 +7353,14 @@ for kind in $pac_validIntKinds; do
   cat > conftest.$ac_ext <<_ACEOF
 
 
-                program main
-                integer (kind=$kind) a
-                open(8, file="pac_fconftest.out", form="formatted")
-                write(8,'(I0)') sizeof(a)
-                close(8)
-                end
+                PROGRAM main
+                USE ISO_C_BINDING
+                IMPLICIT NONE
+                INTEGER (KIND=$kind) a
+                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                WRITE(8,'(I0)') $FC_SIZEOF_A
+                CLOSE(8)
+                END
 
 
 _ACEOF
@@ -7354,12 +7415,14 @@ for kind in $pac_validRealKinds; do
   cat > conftest.$ac_ext <<_ACEOF
 
 
-                program main
-                REAL (kind=$kind) :: a
-                open(8, file="pac_fconftest.out", form="formatted")
-                write(8,'(I0)') sizeof(a)
-                close(8)
-                end
+                PROGRAM main
+                USE ISO_C_BINDING
+                IMPLICIT NONE
+                REAL (KIND=$kind) :: a
+                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                WRITE(8,'(I0)') $FC_SIZEOF_A
+                CLOSE(8)
+                END
 
 
 _ACEOF
@@ -7412,6 +7475,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
+
   ## Setting definition if there is a 16 byte fortran integer
   if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
     HAVE_Fortran_INTEGER_SIZEOF_16="1"
@@ -7431,10 +7495,6 @@ $as_echo "#define HAVE_Fortran_INTEGER_SIZEOF_16 0" >>confdefs.h
 
   ##PAC_FC_AVAIL_INTEGER_MODELS
 
-  ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
-  if test "X$HAVE_SIZEOF_FORTRAN" = "Xno" && test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xno"; then
-    as_fn_error $? "Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE" "$LINENO" 5
-  fi
 
   if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"; then
 

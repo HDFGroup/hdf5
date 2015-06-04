@@ -24,8 +24,8 @@
 ! Define the size of C's long double
 #undef SIZEOF_LONG_DOUBLE
 
-! Define if the C intrinsic __FLOAT128 exists
-#undef HAVE_FLOAT128
+! Define the maximum decimal precision for reals
+#undef PAC_FC_MAX_REAL_PRECISION
 
 ! Define if INTEGER*16 is available 
 #undef HAVE_Fortran_INTEGER_SIZEOF_16

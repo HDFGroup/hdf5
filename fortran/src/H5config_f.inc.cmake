@@ -28,7 +28,7 @@
 #undef H5_FORTRAN_HAVE_C_SIZEOF
 #endif
 
-! Define if the intrinsic function FORTRAN_HAVE_C_LONG_DOUBLE exists
+! Define if the intrinsic C_LONG_DOUBLE exists
 #define H5_FORTRAN_HAVE_C_LONG_DOUBLE @FORTRAN_HAVE_C_LONG_DOUBLE@
 
 #if H5_FORTRAN_HAVE_C_LONG_DOUBLE==0
