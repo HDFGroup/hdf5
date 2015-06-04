@@ -680,6 +680,36 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         } /* end else */
                         break;
 
+                    case 'v':
+                        if(ptr) {
+                            if(vp)
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5D_vds_view_t view = (H5D_vds_view_t)va_arg(ap, int);
+
+                            switch(view) {
+                                case H5D_VDS_ERROR:
+                                    fprintf(out, "H5D_VDS_ERROR");
+                                    break;
+
+                                case H5D_VDS_FIRST_MISSING:
+                                    fprintf(out, "H5D_VDS_FIRST_MISSING");
+                                    break;
+
+                                case H5D_VDS_LAST_AVAILABLE:
+                                    fprintf(out, "H5D_VDS_LAST_AVAILABLE");
+                                    break;
+
+                                default:
+                                    fprintf(out, "%ld", (long)view);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+
                     default:
                         fprintf (out, "BADTYPE(D%c)", type[1]);
                         goto error;

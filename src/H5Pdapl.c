@@ -332,6 +332,7 @@ H5Pset_virtual_view(hid_t plist_id, H5D_vds_view_t view)
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iDv", plist_id, view);
 
     /* Check argument */
     if((view != H5D_VDS_FIRST_MISSING) && (view != H5D_VDS_LAST_AVAILABLE))
@@ -371,6 +372,7 @@ H5Pget_virtual_view(hid_t plist_id)
     H5D_vds_view_t ret_value;   /* Return value */
 
     FUNC_ENTER_API(H5D_VDS_ERROR)
+    H5TRACE1("Dv", "i", plist_id);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
@@ -475,6 +477,7 @@ H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ih", plist_id, gap_size);
 
     /* Check argument */
     if(gap_size == HSIZE_UNDEF)
@@ -512,6 +515,7 @@ H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(H5D_VDS_ERROR)
+    H5TRACE2("e", "i*h", plist_id, gap_size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
