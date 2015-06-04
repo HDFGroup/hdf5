@@ -23,8 +23,8 @@ include $(top_srcdir)/config/commence.am
 # Include src directory
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
-#test script and program
-TEST_PROG=h5repart_gentest talign
+#test scripts and programs
+TEST_PROG=h5repart_gentest talign vds_gentest
 TEST_SCRIPT=testh5repart.sh testh5mkgrp.sh
 
 check_PROGRAMS=$(TEST_PROG) repart_test

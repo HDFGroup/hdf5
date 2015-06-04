@@ -116,7 +116,8 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = h5cc testh5mkgrp.sh testh5repart.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 = h5repart_gentest$(EXEEXT) talign$(EXEEXT)
+am__EXEEXT_1 = h5repart_gentest$(EXEEXT) talign$(EXEEXT) \
+	vds_gentest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 h5debug_SOURCES = h5debug.c
 h5debug_OBJECTS = h5debug.$(OBJEXT)
@@ -155,6 +156,10 @@ talign_SOURCES = talign.c
 talign_OBJECTS = talign.$(OBJEXT)
 talign_LDADD = $(LDADD)
 talign_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+vds_gentest_SOURCES = vds_gentest.c
+vds_gentest_OBJECTS = vds_gentest.$(OBJEXT)
+vds_gentest_LDADD = $(LDADD)
+vds_gentest_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -218,9 +223,9 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = h5debug.c h5mkgrp.c h5repart.c h5repart_gentest.c \
-	repart_test.c talign.c
+	repart_test.c talign.c vds_gentest.c
 DIST_SOURCES = h5debug.c h5mkgrp.c h5repart.c h5repart_gentest.c \
-	repart_test.c talign.c
+	repart_test.c talign.c vds_gentest.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -695,8 +700,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 \
 	../testfiles/fst_family*.h5 ../testfiles/scd_family*.h5
 
-#test script and program
-TEST_PROG = h5repart_gentest talign
+#test scripts and programs
+TEST_PROG = h5repart_gentest talign vds_gentest
 TEST_SCRIPT = testh5repart.sh testh5mkgrp.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
@@ -863,6 +868,10 @@ repart_test$(EXEEXT): $(repart_test_OBJECTS) $(repart_test_DEPENDENCIES) $(EXTRA
 talign$(EXEEXT): $(talign_OBJECTS) $(talign_DEPENDENCIES) $(EXTRA_talign_DEPENDENCIES) 
 	@rm -f talign$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(talign_OBJECTS) $(talign_LDADD) $(LIBS)
+
+vds_gentest$(EXEEXT): $(vds_gentest_OBJECTS) $(vds_gentest_DEPENDENCIES) $(EXTRA_vds_gentest_DEPENDENCIES) 
+	@rm -f vds_gentest$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(vds_gentest_OBJECTS) $(vds_gentest_LDADD) $(LIBS)
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
@@ -911,6 +920,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart_gentest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/repart_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/talign.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vds_gentest.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1131,6 +1141,13 @@ h5repart_gentest.log: h5repart_gentest$(EXEEXT)
 talign.log: talign$(EXEEXT)
 	@p='talign$(EXEEXT)'; \
 	b='talign'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+vds_gentest.log: vds_gentest$(EXEEXT)
+	@p='vds_gentest$(EXEEXT)'; \
+	b='vds_gentest'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
