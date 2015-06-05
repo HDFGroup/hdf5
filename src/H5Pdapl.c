@@ -365,22 +365,25 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5D_vds_view_t
-H5Pget_virtual_view(hid_t plist_id)
+herr_t
+H5Pget_virtual_view(hid_t plist_id, H5D_vds_view_t *view)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    H5D_vds_view_t ret_value;   /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5D_VDS_ERROR)
-    H5TRACE1("Dv", "i", plist_id);
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Dv", plist_id, view);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_VDS_ERROR, "can't find object for ID")
 
     /* Get value from property list */
-    if(H5P_get(plist, H5D_ACS_VDS_VIEW_NAME, &ret_value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_VDS_ERROR, "unable to get value")
+    if(view) {
+        HDassert(0 && "Checking code coverage..."); //VDSINC
+        if(H5P_get(plist, H5D_ACS_VDS_VIEW_NAME, view) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_VDS_ERROR, "unable to get value")
+    } //VDSINC
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -514,7 +517,7 @@ H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size)
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5D_VDS_ERROR)
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", plist_id, gap_size);
 
     /* Get the plist structure */
