@@ -420,6 +420,9 @@ typedef struct H5O_storage_virtual_srcdset_t {
 
     /* Not stored */
     struct H5D_t *dset;                 /* Source dataset                     */
+
+    /* Temporary - only used during I/O operation, NULL at all other times */
+    struct H5S_t *projected_mem_space;  /* Selection within mem_space for this mapping */
 } H5O_storage_virtual_srcdset_t;
 
 typedef struct H5O_storage_virtual_name_seg_t {

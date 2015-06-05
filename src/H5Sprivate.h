@@ -241,6 +241,7 @@ H5_DLL herr_t H5S_select_project_simple(const H5S_t *space, H5S_t *new_space, hs
 H5_DLL herr_t H5S_select_project_intersection(const H5S_t *src_space,
     const H5S_t *dst_space, const H5S_t *src_intersect_space,
     H5S_t **new_space_ptr);
+H5_DLL herr_t H5S_select_subtract(H5S_t *space, H5S_t *subtract_space);
 
 /* Operations on all selections */
 H5_DLL herr_t H5S_select_all(H5S_t *space, hbool_t rel_prev);

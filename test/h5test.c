@@ -122,9 +122,9 @@ h5_errors(hid_t estack, void UNUSED *client_data)
 
 
 /*-------------------------------------------------------------------------
- * Function:  h5_close_files
+ * Function:  h5_cleanup_files
  *
- * Purpose:  Cleanup temporary test files (always closes).
+ * Purpose:  Cleanup temporary test files (always).
  *    base_name contains the list of test file names.
  *
  * Return:  void
@@ -137,7 +137,7 @@ h5_errors(hid_t estack, void UNUSED *client_data)
  *-------------------------------------------------------------------------
  */
 void
-h5_close_files(const char *base_name[], hid_t fapl)
+h5_cleanup_files(const char *base_name[], hid_t fapl)
 {
     int i;
 
@@ -185,7 +185,7 @@ h5_close_files(const char *base_name[], hid_t fapl)
     } /* end for */
 
     return;
-} /* end h5_close_files() */
+} /* end h5_cleanup_files() */
 
 
 /*-------------------------------------------------------------------------
@@ -208,8 +208,8 @@ h5_cleanup(const char *base_name[], hid_t fapl)
     int    retval = 0;
 
     if(GetTestCleanup()) {
-        /* Close files in base_name */
-        h5_close_files(base_name, fapl);
+        /* Clean up files in base_name */
+        h5_cleanup_files(base_name, fapl);
 
         retval = 1;
     } /* end if */

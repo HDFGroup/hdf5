@@ -2259,3 +2259,92 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5S_select_project_intersection() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_subtract
+
+ PURPOSE
+    VDSINC
+
+ USAGE
+    VDSINC
+
+ RETURNS
+    Non-negative on success/Negative on failure.
+
+ DESCRIPTION
+    VDSINC
+    
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_subtract(H5S_t *space, H5S_t *subtract_space)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(space);
+    HDassert(subtract_space);
+
+    /* If either space is using the none selection, then we do not need to do
+     * anything */
+    if((space->select.type->type != H5S_SEL_NONE)
+            && (subtract_space->select.type->type != H5S_SEL_NONE)) {
+        /* If subtract_space is using the all selection, set space to none */
+        if(subtract_space->select.type->type == H5S_SEL_ALL) {
+            HDassert(0 && "Checking code coverage...");//VDSINC
+            /* Change to "none" selection */
+            if(H5S_select_none(space) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+        } /* end if */
+        else {
+            /* Check for point selection in subtract_space, convert to
+             * hyperslab */
+            if(subtract_space->select.type->type == H5S_SEL_POINTS)
+                HDassert(0 && "Not yet implemented...");//VDSINC
+
+            /* Check for point or all selection in space, convert to hyperslab
+             */
+            if(space->select.type->type == H5S_SEL_ALL) {
+                /* Convert current "all" selection to "real" hyperslab selection */
+                /* Then allow operation to proceed */
+                hsize_t tmp_start[H5O_LAYOUT_NDIMS];    /* Temporary start information */
+                hsize_t tmp_stride[H5O_LAYOUT_NDIMS];   /* Temporary stride information */
+                hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary count information */
+                hsize_t tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block information */
+                unsigned i;                             /* Local index variable */
+
+                /* Fill in temporary information for the dimensions */
+                for(i = 0; i < space->extent.rank; i++) {
+                    tmp_start[i] = 0;
+                    tmp_stride[i] = 1;
+                    tmp_count[i] = 1;
+                    tmp_block[i] = space->extent.size[i];
+                } /* end for */
+
+                /* Convert to hyperslab selection */
+                if(H5S_select_hyperslab(space, H5S_SELECT_SET, tmp_start, tmp_stride, tmp_count, tmp_block) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't convert selection")
+            } /* end if */
+            else if(space->select.type->type == H5S_SEL_POINTS)
+                HDassert(0 && "Not yet implemented...");//VDSINC
+
+            HDassert(space->select.type->type == H5S_SEL_HYPERSLABS);
+            HDassert(subtract_space->select.type->type == H5S_SEL_HYPERSLABS);
+
+            /* Both spaces are now hyperslabs, perform the operation */
+            if(H5S__hyper_subtract(space, subtract_space) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't subtract hyperslab")
+        } /* end else */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5S_select_subtract() */
+

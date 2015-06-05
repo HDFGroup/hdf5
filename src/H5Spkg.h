@@ -276,6 +276,7 @@ H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
 H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
     const H5S_t *dst_space, const H5S_t *src_intersect_space,
     H5S_t *proj_space);
+H5_DLL herr_t H5S__hyper_subtract (H5S_t *space, H5S_t *subtract_space);
 
 /* Testing functions */
 #ifdef H5S_TESTING
