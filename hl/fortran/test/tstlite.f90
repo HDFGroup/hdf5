@@ -142,15 +142,11 @@ END DO
 ! write dataset.
 !
 f_ptr = C_LOC(buf3(1))
-!PRINT*,h5kind_to_type(INT(KIND(buf3(1))), INT(H5_REAL_KIND)),  H5T_NATIVE_REAL_8,H5T_NATIVE_REAL,H5T_NATIVE_REAL_16
-PRINT*, KIND(buf3(1)), Fortran_REAL_16
 mytype = h5kind_to_type(KIND(buf3(1)), H5_REAL_KIND)
-PRINT*,sizeof(buf3(1))
 CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, &
      mytype, f_ptr, errcode)
 !CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_DOUBLE, buf3, errcode)
 ! h5kind_to_type(KIND(buf3(1)), H5_REAL_KIND)
-stop
 !
 ! read dataset.
 !

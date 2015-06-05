@@ -422,6 +422,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Define Fortran Maximum Real Decimal Precision */
+#undef PAC_FC_MAX_REAL_PRECISION
+
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #undef PRINTF_LL_WIDTH
 

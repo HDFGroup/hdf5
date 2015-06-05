@@ -719,6 +719,7 @@ am__fastdepCXX_TRUE
 CXXDEPMODE
 ac_ct_CXX
 CXXFLAGS
+FORTRAN_HAVE_C_LONG_DOUBLE
 HAVE_Fortran_INTEGER_SIZEOF_16
 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF
 PAC_FORTRAN_NATIVE_DOUBLE_KIND
@@ -7118,10 +7119,15 @@ if ac_fn_fc_try_run "$LINENO"; then :
     if test -s pac_fconftest.out ; then
 
 
-                    tmp="`cat pac_fconftest.out`"
+        tmp="`cat pac_fconftest.out`"
         pac_validIntKinds="`echo $tmp | sed -e 's/.*A\(.*\)B.*/\1/'`"
         pac_validRealKinds="`echo $tmp | sed -e 's/.*C\(.*\)D.*/\1/'`"
         PAC_FC_MAX_REAL_PRECISION="`echo $tmp | sed -e 's/.*E\(.*\)F.*/\1/'`"
+
+cat >>confdefs.h <<_ACEOF
+#define PAC_FC_MAX_REAL_PRECISION $PAC_FC_MAX_REAL_PRECISION
+_ACEOF
+
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran INTEGER KINDs" >&5
@@ -7142,6 +7148,7 @@ $as_echo "Error" >&6; }
         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No output from test program!" >&5
 $as_echo "$as_me: WARNING: No output from test program!" >&2;}
     fi
+    rm -f pac_fconftest.out
 
 else
 
@@ -7181,7 +7188,7 @@ rm -f pac_fconftest.out
                 INTEGER a
                 REAL b
                 DOUBLE PRECISION c
-                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
                 WRITE(8,*) $FC_SIZEOF_A
 	        WRITE(8,*) kind(a)
 	        WRITE(8,*) $FC_SIZEOF_B
@@ -7295,10 +7302,15 @@ if ac_fn_fc_try_run "$LINENO"; then :
     if test -s pac_fconftest.out ; then
 
 
-                    tmp="`cat pac_fconftest.out`"
+        tmp="`cat pac_fconftest.out`"
         pac_validIntKinds="`echo $tmp | sed -e 's/.*A\(.*\)B.*/\1/'`"
         pac_validRealKinds="`echo $tmp | sed -e 's/.*C\(.*\)D.*/\1/'`"
         PAC_FC_MAX_REAL_PRECISION="`echo $tmp | sed -e 's/.*E\(.*\)F.*/\1/'`"
+
+cat >>confdefs.h <<_ACEOF
+#define PAC_FC_MAX_REAL_PRECISION $PAC_FC_MAX_REAL_PRECISION
+_ACEOF
+
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran INTEGER KINDs" >&5
@@ -7319,6 +7331,7 @@ $as_echo "Error" >&6; }
         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No output from test program!" >&5
 $as_echo "$as_me: WARNING: No output from test program!" >&2;}
     fi
+    rm -f pac_fconftest.out
 
 else
 
@@ -7357,7 +7370,7 @@ for kind in $pac_validIntKinds; do
                 USE ISO_C_BINDING
                 IMPLICIT NONE
                 INTEGER (KIND=$kind) a
-                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
                 WRITE(8,'(I0)') $FC_SIZEOF_A
                 CLOSE(8)
                 END
@@ -7419,7 +7432,7 @@ for kind in $pac_validRealKinds; do
                 USE ISO_C_BINDING
                 IMPLICIT NONE
                 REAL (KIND=$kind) :: a
-                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
                 WRITE(8,'(I0)') $FC_SIZEOF_A
                 CLOSE(8)
                 END
@@ -7476,6 +7489,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
+
   ## Setting definition if there is a 16 byte fortran integer
   if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
     HAVE_Fortran_INTEGER_SIZEOF_16="1"
@@ -7513,8 +7527,9 @@ $as_echo "#define FORTRAN_HAVE_C_SIZEOF 1" >>confdefs.h
 $as_echo "#define FORTRAN_HAVE_SIZEOF 1" >>confdefs.h
 
   fi
-
+  FORTRAN_HAVE_C_LONG_DOUBLE="0"
   if test "X$HAVE_C_LONG_DOUBLE_FORTRAN" = "Xyes"; then
+    FORTRAN_HAVE_C_LONG_DOUBLE="1"
 
 $as_echo "#define FORTRAN_HAVE_C_LONG_DOUBLE 1" >>confdefs.h
 

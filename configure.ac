@@ -471,6 +471,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_KIND])
   AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF])
   AC_SUBST([HAVE_Fortran_INTEGER_SIZEOF_16])
+  AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
 
   ## Setting definition if there is a 16 byte fortran integer
   if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
@@ -499,8 +500,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   if  test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
   fi
-
+  FORTRAN_HAVE_C_LONG_DOUBLE="0" 
   if test "X$HAVE_C_LONG_DOUBLE_FORTRAN" = "Xyes"; then
+    FORTRAN_HAVE_C_LONG_DOUBLE="1" 
     AC_DEFINE([FORTRAN_HAVE_C_LONG_DOUBLE], [1], [Define if we have Fortran C_LONG_DOUBLE])
   fi
   AC_DEFINE([FORTRAN_SIZEOF_LONG_DOUBLE], [SIZEOF_LONG_DOUBLE], [Determine the size of C long double])

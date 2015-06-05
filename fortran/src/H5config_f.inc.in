@@ -27,6 +27,9 @@
 ! Define the maximum decimal precision for reals
 #undef PAC_FC_MAX_REAL_PRECISION
 
+! If C has quad precision
+#undef HAVE_FLOAT128
+
 ! Define if INTEGER*16 is available 
 #undef HAVE_Fortran_INTEGER_SIZEOF_16
 

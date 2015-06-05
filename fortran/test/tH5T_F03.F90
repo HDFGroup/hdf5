@@ -991,13 +991,13 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER(HID_T) :: dset_id32     ! Dataset identifier 
     CHARACTER(LEN=6), PARAMETER :: dsetname16 = "dset16"     ! Dataset name 
 #endif
-    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(C_FLOAT)   !should map to REAL*4 on most modern processors
-    INTEGER, PARAMETER :: real_kind_15 = SELECTED_REAL_KIND(C_DOUBLE)  !should map to REAL*8 on most modern processors
+    INTEGER, PARAMETER :: real_kind_7  = C_FLOAT   !should map to REAL*4 on most modern processors
+    INTEGER, PARAMETER :: real_kind_15 = C_DOUBLE  !should map to REAL*8 on most modern processors
     
 #if H5_HAVE_FLOAT128!=0
     INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(31)
 #else
-    INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(C_LONG_DOUBLE)
+    INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(17)
 #endif
     REAL(real_kind_31), DIMENSION(1:4), TARGET :: dset_data_r31, data_out_r31   
     INTEGER(HID_T) :: dset_idr16      ! Dataset identifier 
@@ -1183,7 +1183,7 @@ END SUBROUTINE test_array_compound_atomic
        CALL verify("h5kind_to_type",dset_data_r15(i),data_out_r15(i),total_error)
        CALL verify("h5kind_to_type",dset_data_r31(i),data_out_r31(i),total_error)
     END DO
-
+    
   !
   ! Close the dataset.
   !
@@ -1302,8 +1302,8 @@ SUBROUTINE t_array(total_error)
   CALL check("h5dget_type_f",error, error)
   CALL H5Tget_array_dims_f(filetype, adims, error)
   CALL check("h5dget_type_f",error, total_error)
-  CALL VERIFY("H5Tget_array_dims_f", INT(adims(1)), adim0, total_error)
-  CALL VERIFY("H5Tget_array_dims_f", INT(adims(2)), adim1, total_error)
+  CALL VERIFY("H5Tget_array_dims_f", adims(1), INT(adim0,hsize_t), total_error)
+  CALL VERIFY("H5Tget_array_dims_f", adims(2), INT(adim1,hsize_t), total_error)
   !
   ! Get dataspace and allocate memory for read buffer.  This is a
   ! three dimensional attribute when the array datatype is included.
@@ -1312,7 +1312,7 @@ SUBROUTINE t_array(total_error)
   CALL check("H5Dget_space_f",error, error)
   CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
-  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), dim0, total_error)
+  CALL VERIFY("H5Sget_simple_extent_dims_f", dims(1), INT(dim0,hsize_t), total_error)
 
   ALLOCATE(rdata(1:dims(1),1:adims(1),1:adims(2)))
   !
@@ -1477,8 +1477,8 @@ SUBROUTINE t_enum(total_error)
   CALL check("H5Dget_space_f",error, total_error)
   CALL h5sget_simple_extent_dims_f(space, dims, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
-  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), dim0, total_error)
-  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(2)), dim1, total_error)
+  CALL VERIFY("H5Sget_simple_extent_dims_f", dims(1), INT(dim0,hsize_t), total_error)
+  CALL VERIFY("H5Sget_simple_extent_dims_f", dims(2), INT(dim1,hsize_t), total_error)
 
   ALLOCATE(rdata(1:dims(1),1:dims(2)))
 
@@ -1597,8 +1597,8 @@ SUBROUTINE t_bit(total_error)
   CALL check("H5Dget_space_f",error, total_error)
   CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
-  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), dim0, total_error)
-  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(2)), dim1, total_error)
+  CALL VERIFY("H5Sget_simple_extent_dims_f", dims(1), INT(dim0,hsize_t), total_error)
+  CALL VERIFY("H5Sget_simple_extent_dims_f", dims(2), INT(dim1,hsize_t), total_error)
   ALLOCATE(rdata(1:dims(1),1:dims(2)))
   !
   ! Read the data.
@@ -1758,7 +1758,7 @@ SUBROUTINE t_opaque(total_error)
   CALL check("H5Dget_space_f",error, total_error)
   CALL h5sget_simple_extent_dims_f(space, dims, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
-  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), dim0, total_error)
+  CALL VERIFY("H5Sget_simple_extent_dims_f", dims(1), INT(dim0,hsize_t), total_error)
   ALLOCATE(rdata(1:dims(1)))
   !
   ! Read the data.
@@ -1879,7 +1879,7 @@ SUBROUTINE t_objref(total_error)
   CALL check("H5Dget_space_f",error, total_error)
   CALL h5sget_simple_extent_dims_f(space, dims, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
-  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), dim0, total_error)
+  CALL VERIFY("H5Sget_simple_extent_dims_f", dims(1), INT(dim0,hsize_t), total_error)
 
   ALLOCATE(rdata(1:maxdims(1)))
   !
@@ -2058,7 +2058,7 @@ SUBROUTINE t_regref(total_error)
   CALL check("H5Dget_space_f",error, total_error)
   CALL h5sget_simple_extent_dims_f(space, dims, maxdims, error)
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
-  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), dim0, total_error)
+  CALL VERIFY("H5Sget_simple_extent_dims_f", dims(1), INT(dim0,hsize_t), total_error)
   ALLOCATE(rdata(1:dims(1)))
   CALL h5sclose_f(space, error)
   CALL check("h5sclose_f",error, total_error)
@@ -2733,7 +2733,7 @@ SUBROUTINE t_string(total_error)
   CALL check("H5Dget_space_f",error, total_error)
   CALL H5Sget_simple_extent_dims_f(space, dims, maxdims, error) 
   CALL check("H5Sget_simple_extent_dims_f",error, total_error)
-  CALL VERIFY("H5Sget_simple_extent_dims_f", INT(dims(1)), dim0, total_error)
+  CALL VERIFY("H5Sget_simple_extent_dims_f", dims(1), INT(dim0,hsize_t), total_error)
 
   ALLOCATE(rdata(1:dims(1)))
   !

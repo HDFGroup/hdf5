@@ -359,12 +359,11 @@ AC_RUN_IFELSE([
      dnl      - valid real kinds are the numbers between A and B
      dnl      - max decimal precision for reals is the number between E and F
 
-      dnl pac_validIntKinds="`sed -n -e 's/^.*ik://p' pac_fconftest.out`"
-      dnl pac_validRealKinds="`sed -n -e 's/^.*rk://p' pac_fconftest.out`"
         tmp="`cat pac_fconftest.out`"
         pac_validIntKinds="`echo $tmp | sed -e 's/.*A\(.*\)B.*/\1/'`"
         pac_validRealKinds="`echo $tmp | sed -e 's/.*C\(.*\)D.*/\1/'`"
         PAC_FC_MAX_REAL_PRECISION="`echo $tmp | sed -e 's/.*E\(.*\)F.*/\1/'`"
+        AC_DEFINE_UNQUOTED([PAC_FC_MAX_REAL_PRECISION], $PAC_FC_MAX_REAL_PRECISION, [Define Fortran Maximum Real Decimal Precision])
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
         AC_MSG_CHECKING([for Fortran INTEGER KINDs])
@@ -377,7 +376,7 @@ AC_RUN_IFELSE([
         AC_MSG_RESULT([Error])
         AC_MSG_WARN([No output from test program!])
     fi
-    dnl rm -f pac_fconftest.out
+    rm -f pac_fconftest.out
 ],[
     AC_MSG_RESULT([Error])
     AC_MSG_WARN([Failed to run program to determine available KINDs])
@@ -403,7 +402,7 @@ for kind in $pac_validIntKinds; do
                 USE ISO_C_BINDING
                 IMPLICIT NONE
                 INTEGER (KIND=$kind) a
-                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
                 WRITE(8,'(I0)') $FC_SIZEOF_A
                 CLOSE(8)
                 END
@@ -441,7 +440,7 @@ for kind in $pac_validRealKinds; do
                 USE ISO_C_BINDING
                 IMPLICIT NONE
                 REAL (KIND=$kind) :: a
-                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
                 WRITE(8,'(I0)') $FC_SIZEOF_A
                 CLOSE(8)
                 END
@@ -480,7 +479,7 @@ rm -f pac_fconftest.out
                 INTEGER a
                 REAL b
                 DOUBLE PRECISION c
-                OPEN(8, FILE="pac_fconftest.out", FORM="formatted")
+                OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
                 WRITE(8,*) $FC_SIZEOF_A
 	        WRITE(8,*) kind(a)
 	        WRITE(8,*) $FC_SIZEOF_B

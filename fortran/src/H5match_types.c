@@ -215,6 +215,7 @@ int main(void)
     } else if(sizeof(double) == RealKinds_SizeOf[i]) {
       writeTypedef("float", "double", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_DOUBLE");
+/* may not have long double in fortran need check */ 
     } else if(sizeof(long double) == RealKinds_SizeOf[i] && found_long_double == 0) {
       writeTypedef("float", "long double", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE");
@@ -227,12 +228,27 @@ int main(void)
       strcpy(Real_C_TYPES[i], "C_FLOAT128");
     } 
 #endif
-    else {
-      printf("                      **** HDF5 WARNING ****/n");
-      printf("Fortran REAL is %d bytes, but no corresponding C floating type exists\n",RealKinds_SizeOf[i]);
-      printf("Fortran Interfaces for Fortran REALs of %d bytes will not exist\n",RealKinds_SizeOf[i]);
-    }
-  }
+/*     else { */
+  /*     /\* Did not find the real type, use the next smallest *\/ */
+/*       sprintf(chrA, "%d", RealKinds[i]); */
+/*       if(sizeof(float) > RealKinds_SizeOf[H5_FORTRAN_NUM_REAL_KINDS-2]) { */
+/* 	writeTypedef("float", "float", RealKinds[i]); */
+/* 	strcpy(Real_C_TYPES[i], chrA); */
+/*       } else if(sizeof(double) > RealKinds_SizeOf[H5_FORTRAN_NUM_REAL_KINDS-2]) { */
+/* 	writeTypedef("float", "double", RealKinds[i]); */
+/* 	strcpy(Real_C_TYPES[i], chrA); */
+/*       } else if(sizeof(long double) > RealKinds_SizeOf[H5_FORTRAN_NUM_REAL_KINDS-2]) { */
+/* 	writeTypedef("float", "long double", RealKinds[i]); */
+/* 	strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE"); } */
+      else {
+	printf("                      **** HDF5 WARNING ****\n");
+	printf("Fortran REAL is %d bytes, but no corresponding C floating type exists\n",RealKinds_SizeOf[i]);
+	printf("Fortran Interface will create a custom datatype to store Fortran Real\n",RealKinds_SizeOf[i]);
+
+        writeTypedef("float", "long double", RealKinds[i]);
+	strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE"); }
+      }
+/*   } */
 
   /* Now begin defining fortran types. */
   fprintf(c_header, "\n");

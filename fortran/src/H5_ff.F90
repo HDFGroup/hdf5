@@ -391,9 +391,11 @@ CONTAINS
           h5_type = H5T_NATIVE_REAL_C_DOUBLE
        ELSE IF(kind.EQ.Fortran_REAL_C_LONG_DOUBLE)THEN
           h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
-#if H5_PAC_FC_MAX_REAL_PRECISION > 28
+#if H5_PAC_FC_MAX_REAL_PRECISION > 28 
+#ifdef H5_HAVE_FLOAT128
        ELSE IF(kind.EQ.Fortran_REAL_C_FLOAT128)THEN
           h5_type = H5T_NATIVE_FLOAT_128
+#endif
 #endif
        ENDIF
     ENDIF

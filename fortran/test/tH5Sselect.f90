@@ -1810,10 +1810,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 1, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), SPACE11_DIM1, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), SPACE11_DIM2, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(1), 1_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(2), 1_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(1), INT(SPACE11_DIM1, hsize_t), total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(2), INT(SPACE11_DIM2, hsize_t), total_error)
 
   ! Set offset for selection 
   offset(1:2) = 1
@@ -1824,10 +1824,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 1, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), SPACE11_DIM1, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), SPACE11_DIM2, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(1), 1_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(2), 1_hsize_t, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", high_bounds(1), INT(SPACE11_DIM1, hsize_t), total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(2), INT(SPACE11_DIM2, hsize_t), total_error)
 
   ! Reset offset for selection 
   offset(1:2) = 0
@@ -1856,10 +1856,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), INT(SPACE11_DIM1-4), total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), INT(SPACE11_DIM2-4), total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(1), 3_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(2), 3_hsize_t, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", high_bounds(1), INT(SPACE11_DIM1-4,hsize_t), total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(2), INT(SPACE11_DIM2-4,hsize_t), total_error)
 
   !  Set bad offset for selection 
 
@@ -1880,10 +1880,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 5, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), INT(SPACE11_DIM1-2), total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), INT(SPACE11_DIM2-6), total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(1), 5_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(2), 1_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(1), INT(SPACE11_DIM1-2,hsize_t), total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(2), INT(SPACE11_DIM2-6,hsize_t), total_error)
 
   !  Reset offset for selection 
   offset(1:2) = 0
@@ -1904,10 +1904,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), 37, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), 37, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(1), 3_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(2), 3_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(1), 37_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(2), 37_hsize_t, total_error)
 
   ! Set bad offset for selection 
   offset(1:2) = (/5,-5/)
@@ -1927,10 +1927,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 8, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), 42, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), 35, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(1), 8_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(2), 1_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(1), 42_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(2), 35_hsize_t, total_error)
 
   ! Reset offset for selection 
   offset(1:2) = 0
@@ -1951,10 +1951,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), 50, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), 50, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(1), 3_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(2), 3_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(1), 50_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(2), 50_hsize_t, total_error)
 
   !  Set bad offset for selection 
   offset(1:2) = (/5,-5/)
@@ -1974,10 +1974,10 @@ SUBROUTINE test_select_bounds(total_error)
   CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
   CALL check("h5sget_select_bounds_f", error, total_error)
 
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 8, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), 55, total_error)
-  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), 48, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(1), 8_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", low_bounds(2), 1_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(1), 55_hsize_t, total_error)
+  CALL verify("h5sget_select_bounds_f", high_bounds(2), 48_hsize_t, total_error)
 
   ! Reset offset for selection 
   offset(1:2) = 0
