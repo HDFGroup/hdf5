@@ -438,7 +438,7 @@ H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     /* Get the number of chunks to perform I/O on */
     num_chunkf = 0;
     ori_num_chunkf = H5SL_count(fm->sel_chunks);
-    H5_ASSIGN_OVERFLOW(num_chunkf, ori_num_chunkf, size_t, int);
+    H5_CHECKED_ASSIGN(num_chunkf, int, ori_num_chunkf, size_t);
 
     /* Determine the summation of number of chunks for all processes */
     if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, sum_chunkf, 1, MPI_INT, MPI_SUM, io_info->comm)))
@@ -826,7 +826,7 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
     } /* end if */
 
     /* Retrieve total # of chunks in dataset */
-    H5_ASSIGN_OVERFLOW(total_chunks, fm->layout->u.chunk.nchunks, hsize_t, size_t);
+    H5_CHECKED_ASSIGN(total_chunks, size_t, fm->layout->u.chunk.nchunks, hsize_t);
 
     /* Handle special case when dataspace dimensions only allow one chunk in
      *  the dataset.  [This sometimes is used by developers who want the
@@ -860,8 +860,7 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
             mspace = chunk_info->mspace;
 
             /* Look up address of chunk */
-            if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->coords,
-                    chunk_info->scaled, &udata) < 0)
+            if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->scaled, &udata) < 0)
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk address")
             ctg_store.contig.dset_addr = udata.chunk_block.offset;
         } /* end else */
@@ -1149,7 +1148,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *ty
 #endif
 
     /* Retrieve total # of chunks in dataset */
-    H5_ASSIGN_OVERFLOW(total_chunk, fm->layout->u.chunk.nchunks, hsize_t, size_t);
+    H5_CHECKED_ASSIGN(total_chunk, size_t, fm->layout->u.chunk.nchunks, hsize_t);
     HDassert(total_chunk != 0);
 
     /* Allocate memories */
@@ -1201,7 +1200,7 @@ if(H5DEBUG(D))
             HDassert(chunk_info->index == u);
 
             /* Pass in chunk's coordinates in a union. */
-            store.chunk.offset  = chunk_info->coords;
+            store.chunk.scaled  = chunk_info->scaled;
         } /* end if */
 
         /* Collective IO for this chunk,
@@ -1588,8 +1587,7 @@ if(H5DEBUG(D))
             H5D_chunk_ud_t udata;   /* User data for querying chunk info */
 
             /* Get address of chunk */
-            if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id,
-                    chunk_info->coords, chunk_info->scaled, &udata) < 0)
+            if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->scaled, &udata) < 0)
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
             chunk_addr = udata.chunk_block.offset;
         } /* end if */
@@ -1699,7 +1697,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
 
     /* Setup parameters */
-    H5_ASSIGN_OVERFLOW(total_chunks, fm->layout->u.chunk.nchunks, hsize_t, int);
+    H5_CHECKED_ASSIGN(total_chunks, int, fm->layout->u.chunk.nchunks, hsize_t);
     percent_nproc_per_chunk = H5P_peek_unsigned(dx_plist, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME);
     /* if ratio is 0, perform collective io */
     if(0 == percent_nproc_per_chunk) {

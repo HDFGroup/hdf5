@@ -433,7 +433,7 @@ H5Inmembers(H5I_type_t type, hsize_t *num_members)
         if((members = H5I_nmembers(type)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTCOUNT, FAIL, "can't compute number of members")
 
-        H5_ASSIGN_OVERFLOW(*num_members, members, int64_t, hsize_t);
+        H5_CHECKED_ASSIGN(*num_members, hsize_t, members, int64_t);
     } /* end if */
 
 done:
@@ -460,7 +460,7 @@ int64_t
 H5I_nmembers(H5I_type_t type)
 {
     H5I_id_type_t	*type_ptr = NULL;
-    int		ret_value;
+    int64_t		    ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -470,7 +470,7 @@ H5I_nmembers(H5I_type_t type)
 	HGOTO_DONE(0);
 
     /* Set return value */
-    H5_ASSIGN_OVERFLOW(ret_value, type_ptr->id_count, uint64_t, int64_t);
+    H5_CHECKED_ASSIGN(ret_value, int64_t, type_ptr->id_count, uint64_t);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

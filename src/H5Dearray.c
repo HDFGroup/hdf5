@@ -73,6 +73,15 @@ typedef struct H5D_earray_ud_t {
     hid_t dxpl_id;              /* DXPL ID for operation */
 } H5D_earray_ud_t;
 
+/* Extensible Array callback info for iteration over chunks */
+typedef struct H5D_earray_it_ud_t {
+    H5D_chunk_common_ud_t common;       /* Common info for Fixed Array user data (must be first) */
+    H5D_chunk_rec_t     chunk_rec;      /* Generic chunk record for callback */
+    hbool_t             filtered;       /* Whether the chunks are filtered */
+    H5D_chunk_cb_func_t cb;             /* Chunk callback routine */
+    void                *udata;         /* User data for chunk callback routine */
+} H5D_earray_it_ud_t;
+
 /* Native extensible array element for chunks w/filters */
 typedef struct H5D_earray_filt_elmt_t {
     haddr_t addr;               /* Address of chunk */
@@ -240,7 +249,7 @@ H5D_earray_crt_context(void *_udata)
     /* Compute the size required for encoding the size of a chunk, allowing
      *      for an extra byte, in case the filter makes the chunk larger.
      */
-    ctx->chunk_size_len = 1 + ((H5VM_log2_gen(udata->chunk_size) + 8) / 8);
+    ctx->chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)udata->chunk_size) + 8) / 8);
     if(ctx->chunk_size_len > 8)
         ctx->chunk_size_len = 8;
 
@@ -903,7 +912,7 @@ H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t *space,
     /* Get the dim info for dataset */
     if((sndims = H5S_get_simple_extent_dims(space, NULL, max_dims)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace dimensions")
-    H5_ASSIGN_OVERFLOW(ndims, sndims, int, unsigned);
+    H5_CHECKED_ASSIGN(ndims, unsigned, sndims, int);
 
     /* Find the rank of the unlimited dimension */
     unlim_dim = (-1);
@@ -977,7 +986,7 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
         /* Compute the size required for encoding the size of a chunk, allowing
          *      for an extra byte, in case the filter makes the chunk larger.
          */
-        chunk_size_len = 1 + ((H5VM_log2_gen(idx_info->layout->size) + 8) / 8);
+        chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
         if(chunk_size_len > 8)
             chunk_size_len = 8;
 
@@ -1159,9 +1168,12 @@ H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     if(idx_info->layout->u.earray.unlim_dim > 0) {
         hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
         unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
+	unsigned u;
 
-        /* Set up the swizzled chunk coordinates */
-        HDmemcpy(swizzled_coords, udata->common.offset, ndims * sizeof(udata->common.offset[0]));
+	/* Compute coordinate offset from scaled offset */
+	for(u = 0; u < ndims; u++)
+	    swizzled_coords[u] = udata->common.scaled[u] * idx_info->layout->dim[u];
+
         H5VM_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */
@@ -1250,6 +1262,64 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_earray_idx_resize() */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5D_earray_idx_iterate_cb
+ *
+ * Purpose:	Callback routine for extensible array element iteration.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D_earray_idx_iterate_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
+{
+    H5D_earray_it_ud_t   *udata = (H5D_earray_it_ud_t *)_udata; /* User data */
+    unsigned ndims;                 /* Rank of chunk */
+    int curr_dim;                   /* Current dimension */
+    int ret_value = H5_ITER_CONT;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Compose generic chunk record for callback */
+    if(udata->filtered) {
+        const H5D_earray_filt_elmt_t *filt_elmt = (const H5D_earray_filt_elmt_t *)_elmt;
+
+        udata->chunk_rec.chunk_addr = filt_elmt->addr;
+        udata->chunk_rec.nbytes = filt_elmt->nbytes;
+        udata->chunk_rec.filter_mask = filt_elmt->filter_mask;
+    } /* end if */
+    else
+        udata->chunk_rec.chunk_addr = *(const haddr_t *)_elmt;
+
+    /* Make "generic chunk" callback */
+    if(H5F_addr_defined(udata->chunk_rec.chunk_addr)) {
+	if((ret_value = (udata->cb)(&udata->chunk_rec, udata->udata)) < 0)
+	    HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
+    }
+
+    /* Update coordinates of chunk in dataset */
+    ndims = udata->common.layout->ndims - 1;
+    HDassert(ndims > 0);
+    curr_dim = (int)(ndims - 1);
+    while(curr_dim >= 0) {
+        /* Increment coordinate in current dimension */
+        udata->chunk_rec.scaled[curr_dim]++;
+        /* Check if we went off the end of the current dimension */
+        if(udata->chunk_rec.scaled[curr_dim] >= udata->common.layout->chunks[curr_dim]) {
+            /* Reset coordinate & move to next faster dimension */
+            udata->chunk_rec.scaled[curr_dim] = 0;
+            curr_dim--;
+        } /* end if */
+        else
+            break;
+    } /* end while */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D_earray_idx_iterate_cb() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_earray_idx_iterate
@@ -1301,65 +1371,28 @@ H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     if(H5EA_get_stats(ea, &ea_stat) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics")
 
-    /* Check if there are any array elements */
     if(ea_stat.stored.max_idx_set > 0) {
-        H5D_chunk_rec_t chunk_rec;  /* Generic chunk record for callback */
-        hsize_t u;              /* Local index variable */
 
-        /* Check for filters on chunks */
-        if(idx_info->pline->nused > 0) {
-            /* Prepare common fields of chunk record for callback */
-            HDmemset(&chunk_rec, 0, sizeof(chunk_rec));
+        H5D_earray_it_ud_t udata;   /* User data for iteration callback */
 
-            /* Loop over array elements */
-            /* (Note: this may be too simple for datasets with >1 dimension) */
-            for(u = 0; u < ea_stat.stored.max_idx_set; u++, chunk_rec.offset[0] += idx_info->layout->dim[0]) {
-                H5D_earray_filt_elmt_t elmt;            /* Extensible array element */
-
-                /* Get the info about the chunk for the index */
-                if(H5EA_get(ea, idx_info->dxpl_id, u, &elmt) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
-
-                /* Check if chunk exists */
-                if(H5F_addr_defined(elmt.addr)) {
-                    /* Set chunk info for callback record */
-                    chunk_rec.chunk_addr = elmt.addr;
-                    chunk_rec.nbytes = elmt.nbytes;
-                    chunk_rec.filter_mask = elmt.filter_mask;
-
-                    /* Make chunk callback */
-                    if((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)
-                        HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
-                } /* end if */
-            } /* end for */
+	/* Initialize userdata */
+	HDmemset(&udata, 0, sizeof udata);
+	udata.common.layout = idx_info->layout;
+	udata.common.storage = idx_info->storage;
+	udata.common.rdcc = NULL;
+        HDmemset(&udata.chunk_rec, 0, sizeof(udata.chunk_rec));
+        udata.filtered = (idx_info->pline->nused > 0);
+        if(!udata.filtered) {
+            udata.chunk_rec.nbytes = idx_info->layout->size;
+            udata.chunk_rec.filter_mask = 0;
         } /* end if */
-        else {
-            /* Prepare common fields of chunk record for callback */
-            HDmemset(&chunk_rec, 0, sizeof(chunk_rec));
-            chunk_rec.nbytes = idx_info->layout->size;
-            chunk_rec.filter_mask = 0;
-
-            /* Loop over array elements */
-            /* (Note: this may be too simple for datasets with >1 dimension) */
-            for(u = 0; u < ea_stat.stored.max_idx_set; u++, chunk_rec.offset[0] += idx_info->layout->dim[0]) {
-                haddr_t addr;       /* Chunk address */
-
-                /* Get the address of the chunk for the index */
-                if(H5EA_get(ea, idx_info->dxpl_id, u, &addr) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
-
-                /* Check if chunk exists */
-                if(H5F_addr_defined(addr)) {
-                    /* Set chunk address for callback record */
-                    chunk_rec.chunk_addr = addr;
-
-                    /* Make chunk callback */
-                    if((ret_value = (*chunk_cb)(&chunk_rec, chunk_udata)) < 0)
-                        HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
-                } /* end if */
-            } /* end for */
-        } /* end else */
-    } /* end if */
+	udata.cb = chunk_cb;
+	udata.udata = chunk_udata;
+	
+        /* Iterate over the extensible array elements */
+	if((ret_value = H5EA_iterate(ea, idx_info->dxpl_id, H5D_earray_idx_iterate_cb, &udata)) < 0)
+	    HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over fixed array chunk index");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1409,9 +1442,12 @@ H5D_earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     if(idx_info->layout->u.earray.unlim_dim > 0) {
         hsize_t swizzled_coords[H5O_LAYOUT_NDIMS];	/* swizzled chunk coordinates */
         unsigned ndims = (idx_info->layout->ndims - 1); /* Number of dimensions */
+	unsigned u;
 
-        /* Set up the swizzled chunk coordinates */
-        HDmemcpy(swizzled_coords, udata->offset, ndims * sizeof(udata->offset[0]));
+	/* Compute coordinate offset from scaled offset */
+	for(u = 0; u < ndims; u++)
+	    swizzled_coords[u] = udata->scaled[u] * idx_info->layout->dim[u];
+
         H5VM_swizzle_coords(hsize_t, swizzled_coords, idx_info->layout->u.earray.unlim_dim);
 
         /* Calculate the index of this chunk */

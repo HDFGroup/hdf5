@@ -2373,20 +2373,43 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 
         /* Determine if we are shrinking and/or expanding any dimensions */
         for(u = 0; u < dset->shared->ndims; u++) {
-            hsize_t size_power2up;      /* Size value, rounded to next power of 2 */
-
             /* Check for various status changes */
             if(size[u] < curr_dims[u])
                 shrink = TRUE;
             if(size[u] > curr_dims[u])
                 expand = TRUE;
-	    if(dset->shared->curr_power2up[u] != (size_power2up = H5VM_power2up(size[u]))) {
-                /* Update the 'power2up' value for the current dimension */
-                dset->shared->curr_power2up[u] = size_power2up;
 
-                /* Only need to update the chunk indices if >1 dimension */
-                if(u > 0)
-                    update_chunks = TRUE;
+            /* Chunked storage specific checks */
+            if(H5D_CHUNKED == dset->shared->layout.type && dset->shared->ndims > 1) {
+                hsize_t scaled;             /* Scaled value */
+
+                /* Compute the scaled dimension size value */
+                scaled = size[u] / dset->shared->layout.u.chunk.dim[u];
+
+                /* Check if scaled dimension size changed */
+                if(scaled != dset->shared->cache.chunk.scaled_dims[u]) {
+                    hsize_t scaled_power2up;    /* Scaled value, rounded to next power of 2 */
+
+                    /* Update the scaled dimension size value for the current dimension */
+                    dset->shared->cache.chunk.scaled_dims[u] = scaled;
+
+                    /* Check if algorithm for computing hash values will change */
+                    if((scaled > dset->shared->cache.chunk.nslots &&
+                                dset->shared->cache.chunk.scaled_dims[u] <= dset->shared->cache.chunk.nslots)
+                            || (scaled <= dset->shared->cache.chunk.nslots &&
+                                dset->shared->cache.chunk.scaled_dims[u] > dset->shared->cache.chunk.nslots))
+                        update_chunks = TRUE;
+
+                    /* Check if the number of bits required to encode the scaled size value changed */
+                    if(dset->shared->cache.chunk.scaled_power2up[u] != (scaled_power2up = H5VM_power2up(scaled))) {
+                        /* Update the 'power2up' & 'encode_bits' values for the current dimension */
+                        dset->shared->cache.chunk.scaled_power2up[u] = scaled_power2up;
+                        dset->shared->cache.chunk.scaled_encode_bits[u] = H5VM_log2_gen(scaled_power2up);
+
+                        /* Indicate that the cached chunk indices need to be updated */
+                        update_chunks = TRUE;
+                    } /* end if */
+                } /* end if */
             } /* end if */
 
             /* Update the cached copy of the dataset's dimensions */

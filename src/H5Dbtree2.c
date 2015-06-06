@@ -49,7 +49,7 @@
 /* Typedef for non-filtered object's records in v2 B-tree */
 typedef struct H5D_bt2_rec_t {
     haddr_t addr;       		/* Address of the chunk in the file */
-    hsize_t offset[H5O_LAYOUT_NDIMS];   /* logical offset to start*/
+    hsize_t scaled[H5O_LAYOUT_NDIMS];   /* logical offset to start*/
 } H5D_bt2_rec_t;
 
 /* Typedef for filtered object's records in v2 B-tree */
@@ -57,7 +57,7 @@ typedef struct H5D_bt2_filt_rec_t {
     haddr_t addr;       	/* Address of the filtered object in the file */
     uint32_t nbytes;        	/* Length of the filtered object in the file */
     uint32_t filter_mask;   	/* I/O pipeline filter mask for filtered object in the file */
-    hsize_t offset[H5O_LAYOUT_NDIMS];       /* logical offset to start*/
+    hsize_t scaled[H5O_LAYOUT_NDIMS];       /* logical offset to start*/
 } H5D_bt2_filt_rec_t;
 
 /* User data for creating callback context */
@@ -65,13 +65,15 @@ typedef struct H5D_bt2_ctx_ud_t {
     const H5F_t *f;             /* Pointer to file info */
     uint32_t chunk_size;        /* Size of chunk (bytes; for filtered object) */
     unsigned ndims;		/* Number of dimensions */
+    uint32_t *dim;		/* Size of chunk in elements */
 } H5D_bt2_ctx_ud_t;
 
 /* The callback context */
 typedef struct H5D_bt2_ctx_t {
     size_t sizeof_addr;       	/* Size of file addresses in the file (bytes) */
     size_t chunk_size_len;      /* Size of chunk sizes in the file (bytes) */
-    unsigned ndims;		/* Number of dimensions */
+    unsigned ndims;		/* Number of dimensions in chunk */
+    uint32_t *dim;		/* Size of chunk in elements */
 } H5D_bt2_ctx_t;
 
 /* User data for the chunk's removal callback routine */
@@ -242,6 +244,9 @@ const H5B2_class_t H5D_BT2_FILT[1] = {{	/* B-tree class information */
 H5FL_DEFINE_STATIC(H5D_bt2_ctx_t);
 /* Declare a free list to manage the H5D_bt2_ctx_ud_t struct */
 H5FL_DEFINE_STATIC(H5D_bt2_ctx_ud_t);
+/* Declare a free list to manage the page elements */
+H5FL_BLK_DEFINE(chunk_dim);
+
 
 
 
@@ -262,6 +267,7 @@ H5D_bt2_crt_context(void *_udata)
 {
     H5D_bt2_ctx_ud_t *udata = (H5D_bt2_ctx_ud_t *)_udata; /* User data for building callback context */
     H5D_bt2_ctx_t *ctx;   	/* Callback context structure */
+    uint32_t *my_dim = NULL;    /* Pointer to copy of chunk dimension size */
     void *ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -278,6 +284,12 @@ H5D_bt2_crt_context(void *_udata)
     /* Determine the size of addresses and # of dimensions for the dataset */
     ctx->sizeof_addr = H5F_SIZEOF_ADDR(udata->f);
     ctx->ndims = udata->ndims;
+
+    /* Set up the "local" information for this dataset's chunk dimension sizes */
+    if(NULL == (my_dim = (uint32_t *)H5FL_BLK_MALLOC(chunk_dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t))))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate chunk dims")
+    HDmemcpy(my_dim, udata->dim, H5O_LAYOUT_NDIMS * sizeof(uint32_t));
+    ctx->dim = my_dim;
 
     /* 
      * Compute the size required for encoding the size of a chunk,
@@ -317,6 +329,10 @@ H5D_bt2_dst_context(void *_ctx)
     /* Sanity check */
     HDassert(ctx);
 
+    if(ctx->dim) {
+	/* Free array for chunk dimension sizes */
+	(void)H5FL_BLK_FREE(chunk_dim, ctx->dim); 
+    }
     /* Release callback context */
     ctx = H5FL_FREE(H5D_bt2_ctx_t, ctx);
 
@@ -379,7 +395,7 @@ H5D_bt2_compare(const void *_udata, const void *_rec2)
     HDassert(rec2);
 
     /* Compare the offsets but ignore the other fields */
-    ret_value = H5VM_vector_cmp_u(udata->ndims, rec1->offset, rec2->offset);
+    ret_value = H5VM_vector_cmp_u(udata->ndims, rec1->scaled, rec2->scaled);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_bt2_compare() */
@@ -403,7 +419,8 @@ H5D_bt2_encode(uint8_t *raw, const void *_record, void *_ctx)
 {
     H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;	/* Callback context structure */
     const H5D_bt2_rec_t *record = (const H5D_bt2_rec_t *)_record; /* The native record */
-    unsigned	i;	/* Local index varible */
+    hsize_t  tmp_offset; 	/* Temporary coordinate offset, from file */
+    unsigned i;			/* Local index varible */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -412,8 +429,11 @@ H5D_bt2_encode(uint8_t *raw, const void *_record, void *_ctx)
 
     /* Encode the record's fields */
     H5F_addr_encode_len(ctx->sizeof_addr, &raw, record->addr);
-    for(i = 0; i < ctx->ndims; i++)
-	UINT64ENCODE(raw, record->offset[i]);
+    for(i = 0; i < ctx->ndims; i++) {
+	/* Compute coordinate offset from scaled offset */
+        tmp_offset = record->scaled[i] * ctx->dim[i];
+        UINT64ENCODE(raw, tmp_offset);
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D_bt2_encode() */
@@ -437,7 +457,8 @@ H5D_bt2_decode(const uint8_t *raw, void *_record, void *_ctx)
 {
     H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;       	/* Callback context structure */
     H5D_bt2_rec_t *record = (H5D_bt2_rec_t *)_record;	/* The native record */
-    unsigned	i;	/* Local index variable */
+    hsize_t  tmp_offset; 	/* Temporary coordinate offset, from file */
+    unsigned	i;		/* Local index variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -446,8 +467,15 @@ H5D_bt2_decode(const uint8_t *raw, void *_record, void *_ctx)
 
     /* Decode the record's fields */
     H5F_addr_decode_len(ctx->sizeof_addr, &raw, &record->addr);
-    for(i = 0; i < ctx->ndims; i++)
-	UINT64DECODE(raw, record->offset[i]);
+    for(i = 0; i < ctx->ndims; i++) {
+
+	/* Retrieve coordinate offset */
+        UINT64DECODE(raw, tmp_offset);
+        HDassert(0 == (tmp_offset % ctx->dim[i]));
+
+        /* Convert to a scaled offset */
+        record->scaled[i] = tmp_offset / ctx->dim[i];
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D_bt2_decode() */
@@ -480,7 +508,7 @@ H5D_bt2_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Chunk address:", (unsigned)record->addr);
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
     for(u = 0; u < u_ctx->ndims; u++)
-        HDfprintf(stream, "%s%Hd", u?", ":"", record->offset[u]);
+        HDfprintf(stream, "%s%Hd", u?", ":"", record->scaled[u] * u_ctx->dim[u]);
     HDfputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -542,7 +570,7 @@ H5D_bt2_filt_compare(const void *_udata, const void *_rec2)
     HDassert(rec2);
 
     /* Compare the offsets but ignore the other fields */
-    ret_value = H5VM_vector_cmp_u(udata->ndims, rec1->offset, rec2->offset);
+    ret_value = H5VM_vector_cmp_u(udata->ndims, rec1->scaled, rec2->scaled);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_bt2_filt_compare() */
@@ -578,7 +606,7 @@ H5D_bt2_filt_encode(uint8_t *raw, const void *_record, void *_ctx)
     UINT64ENCODE_VAR(raw, record->nbytes, ctx->chunk_size_len);
     UINT32ENCODE(raw, record->filter_mask);
     for(i = 0; i < ctx->ndims; i++)
-	UINT64ENCODE(raw, record->offset[i]);
+	UINT64ENCODE(raw, record->scaled[i]);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D_bt2_filt_encode() */
@@ -614,7 +642,7 @@ H5D_bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
     UINT64DECODE_VAR(raw, record->nbytes, ctx->chunk_size_len);
     UINT32DECODE(raw, record->filter_mask);
     for(i = 0; i < ctx->ndims; i++)
-	UINT64DECODE(raw, record->offset[i]);
+	UINT64DECODE(raw, record->scaled[i]);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D_bt2_filt_decode() */
@@ -650,7 +678,7 @@ H5D_bt2_filt_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
 
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
     for(u = 0; u < u_ctx->ndims; u++)
-        HDfprintf(stream, "%s%Hd", u?", ":"", record->offset[u]);
+        HDfprintf(stream, "%s%Hd", u?", ":"", record->scaled[u] * u_ctx->dim[u]);
     HDfputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -829,6 +857,7 @@ H5D_bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     u_ctx.f = idx_info->f;
     u_ctx.ndims = idx_info->layout->ndims - 1;
     u_ctx.chunk_size = idx_info->layout->size;
+    u_ctx.dim = idx_info->layout->dim;
 
     /* Check for SWMR writes to the file */
     if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
@@ -912,6 +941,7 @@ H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     u_ctx.f = idx_info->f;
     u_ctx.ndims = idx_info->layout->ndims - 1;
     u_ctx.chunk_size = idx_info->layout->size;
+    u_ctx.dim = idx_info->layout->dim;
 
     /* Check for SWMR writes to the file */
     if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
@@ -1057,13 +1087,13 @@ H5D_bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
         filt_rec.nbytes = udata->chunk_block.length;
         filt_rec.filter_mask = udata->filter_mask;
 	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-	    filt_rec.offset[u] = udata->common.offset[u];
+	    filt_rec.scaled[u] = udata->common.scaled[u];
     } else { /* non-filtered chunk */
 	bt2_udata.rec = &rec;
 
 	rec.addr = udata->chunk_block.offset;
 	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-	    rec.offset[u] = udata->common.offset[u];
+	    rec.scaled[u] = udata->common.scaled[u];
     }
 
     if(udata->need_modify) {
@@ -1185,7 +1215,7 @@ H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 
 	/* Set the chunk offset to be searched for */
 	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-	    search_rec.offset[u] = udata->common.offset[u];
+	    search_rec.scaled[u] = udata->common.scaled[u];
 
 	found_rec.addr = HADDR_UNDEF;
 	found_rec.nbytes = 0;
@@ -1212,7 +1242,7 @@ H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 
 	/* Set the chunk offset to be searched for */
 	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-	    search_rec.offset[u] = udata->common.offset[u];
+	    search_rec.scaled[u] = udata->common.scaled[u];
 
 	search_rec.addr = HADDR_UNDEF;
 	found_rec.addr = HADDR_UNDEF;
@@ -1275,7 +1305,7 @@ H5D_bt2_idx_iterate_cb(const void *_record, void *_udata)
         udata->chunk_rec.nbytes = filt_rec->nbytes;
         udata->chunk_rec.filter_mask = filt_rec->filter_mask;
 	for(u = 0; u < (udata->common.layout->ndims - 1); u++)
-	    udata->chunk_rec.offset[u] = filt_rec->offset[u];
+	    udata->chunk_rec.scaled[u] = filt_rec->scaled[u];
     } /* end if */
     else { /* non-filtered record */
         const H5D_bt2_rec_t *rec = (const H5D_bt2_rec_t *)_record;
@@ -1284,7 +1314,7 @@ H5D_bt2_idx_iterate_cb(const void *_record, void *_udata)
         udata->chunk_rec.nbytes = udata->common.layout->size;
         udata->chunk_rec.filter_mask = 0;
 	for(u = 0; u < (udata->common.layout->ndims - 1); u++)
-	    udata->chunk_rec.offset[u] = rec->offset[u];
+	    udata->chunk_rec.scaled[u] = rec->scaled[u];
     } /* end else */
 
     /* Make "generic chunk" callback */
@@ -1475,7 +1505,7 @@ H5D_bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *ud
 
 	/* Initialize the record to search for */
 	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-	    search_rec.offset[u] = udata->offset[u];
+	    search_rec.scaled[u] = udata->scaled[u];
 
 	bt2_udata.rec = &search_rec;
 	bt2_udata.ndims = idx_info->layout->ndims - 1;
@@ -1492,7 +1522,7 @@ H5D_bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *ud
 
 	/* Initialize the record to search for */
 	for(u = 0; u < (idx_info->layout->ndims - 1); u++)
-	    search_rec.offset[u] = udata->offset[u];
+	    search_rec.scaled[u] = udata->scaled[u];
 
 	bt2_udata.rec = &search_rec;
 	bt2_udata.ndims = idx_info->layout->ndims - 1;
@@ -1553,6 +1583,7 @@ H5D_bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
 	u_ctx.f = idx_info->f;
 	u_ctx.ndims = idx_info->layout->ndims - 1;
 	u_ctx.chunk_size = idx_info->layout->size;
+	u_ctx.dim = idx_info->layout->dim;
 
 	/* Initialize user data for removal callback */
 	remove_udata.f = idx_info->f;

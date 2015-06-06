@@ -103,6 +103,8 @@ const H5EA_class_t *const H5EA_client_class_g[] = {
 /* Declare a free list to manage the H5EA_t struct */
 H5FL_DEFINE_STATIC(H5EA_t);
 
+/* Declare a PQ free list to manage the element */
+H5FL_BLK_DEFINE(ea_native_elmt);
 
 
 /*-------------------------------------------------------------------------
@@ -1029,3 +1031,56 @@ CATCH
 
 END_FUNC(PRIV)  /* end H5EA_delete() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5EA_iterate
+ *
+ * Purpose:     Iterate over the elements of an extensible array
+ *              (copied and modified from FA_iterate() in H5FA.c)
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Vailin Choi; Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA_iterate(H5EA_t *ea, hid_t dxpl_id, H5EA_operator_t op, void *udata))
+
+    /* Local variables */
+    uint8_t     *elmt = NULL;
+    hsize_t     u;
+
+    /*
+     * Check arguments.
+     */
+    HDassert(ea);
+    HDassert(op);
+    HDassert(udata);
+
+    /* Allocate space for a native array element */
+    if(NULL == (elmt = H5FL_BLK_MALLOC(ea_native_elmt, ea->hdr->cparam.cls->nat_elmt_size)))
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array element")
+
+    /* Iterate over all elements in array */
+    for(u = 0; u < ea->hdr->stats.stored.max_idx_set; u++) {
+        int cb_ret;     /* Return value from callback */
+
+        /* Get array element */
+        if(H5EA_get(ea, dxpl_id, u, elmt) < 0)
+            H5E_THROW(H5E_CANTGET, "unable to delete fixed array")
+
+        /* Make callback */
+        if((cb_ret = (*op)(u, elmt, udata)) < 0) {
+            H5E_PRINTF(H5E_BADITER, "iterator function failed");
+            H5_LEAVE(cb_ret)
+        } /* end if */
+    } /* end for */
+
+CATCH
+
+    if(elmt)
+        elmt = H5FL_BLK_FREE(ea_native_elmt, elmt);
+
+END_FUNC(PRIV)  /* end H5EA_iterate() */

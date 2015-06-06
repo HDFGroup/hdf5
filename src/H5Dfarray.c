@@ -78,7 +78,6 @@ typedef struct H5D_farray_del_ud_t {
 typedef struct H5D_farray_it_ud_t {
     H5D_chunk_common_ud_t common;       /* Common info for Fixed Array user data (must be first) */
     H5D_chunk_rec_t     chunk_rec;      /* Generic chunk record for callback */
-    hsize_t	        chunk_offset[H5O_LAYOUT_NDIMS];	/* Chunk offset for max dim */
     hbool_t             filtered;       /* Whether the chunks are filtered */
     H5D_chunk_cb_func_t cb;             /* Chunk callback routine */
     void                *udata;         /* User data for chunk callback routine */
@@ -256,7 +255,7 @@ H5D_farray_crt_context(void *_udata)
     /* Compute the size required for encoding the size of a chunk, allowing
      *      for an extra byte, in case the filter makes the chunk larger.
      */
-    ctx->chunk_size_len = 1 + ((H5VM_log2_gen(udata->chunk_size) + 8) / 8);
+    ctx->chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)udata->chunk_size) + 8) / 8);
     if(ctx->chunk_size_len > 8)
         ctx->chunk_size_len = 8;
 
@@ -954,7 +953,7 @@ H5D_farray_idx_create(const H5D_chk_idx_info_t *idx_info)
         /* Compute the size required for encoding the size of a chunk, allowing
          *      for an extra byte, in case the filter makes the chunk larger.
          */
-        chunk_size_len = 1 + ((H5VM_log2_gen(idx_info->layout->size) + 8) / 8);
+        chunk_size_len = 1 + ((H5VM_log2_gen((uint64_t)idx_info->layout->size) + 8) / 8);
         if(chunk_size_len > 8)
             chunk_size_len = 8;
 
@@ -1218,14 +1217,12 @@ H5D_farray_idx_iterate_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
     curr_dim = (int)(ndims - 1);
     while(curr_dim >= 0) {
         /* Increment coordinate in current dimension */
-        udata->chunk_offset[curr_dim]++;
-        udata->chunk_rec.offset[curr_dim] += udata->common.layout->dim[curr_dim];
+        udata->chunk_rec.scaled[curr_dim]++;
 
         /* Check if we went off the end of the current dimension */
-        if(udata->chunk_offset[curr_dim] >= udata->common.layout->max_chunks[curr_dim]) {
+        if(udata->chunk_rec.scaled[curr_dim] >= udata->common.layout->chunks[curr_dim]) {
             /* Reset coordinate & move to next faster dimension */
-            udata->chunk_offset[curr_dim] = 0;
-            udata->chunk_rec.offset[curr_dim] = 0;
+            udata->chunk_rec.scaled[curr_dim] = 0;
             curr_dim--;
         } /* end if */
         else
@@ -1292,7 +1289,6 @@ H5D_farray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 	udata.common.storage = idx_info->storage;
 	udata.common.rdcc = NULL;
         HDmemset(&udata.chunk_rec, 0, sizeof(udata.chunk_rec));
-        HDmemset(&udata.chunk_offset, 0, sizeof(udata.chunk_offset));
         udata.filtered = (idx_info->pline->nused > 0);
         if(!udata.filtered) {
             udata.chunk_rec.nbytes = idx_info->layout->size;

@@ -115,6 +115,9 @@ typedef struct H5EA_stat_t {
 /* Extensible array info (forward decl - defined in H5EApkg.h) */
 typedef struct H5EA_t H5EA_t;
 
+/* Define the operator callback function pointer for H5EA_iterate() */
+typedef int (*H5EA_operator_t)(hsize_t idx, const void *_elmt, void *_udata);
+
 
 /*****************************/
 /* Library-private Variables */
@@ -141,6 +144,7 @@ H5_DLL herr_t H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void 
 H5_DLL herr_t H5EA_get(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt);
 H5_DLL herr_t H5EA_depend(H5AC_info_t *parent_entry, H5EA_t *ea);
 H5_DLL herr_t H5EA_undepend(H5AC_info_t *parent_entry, H5EA_t *ea);
+H5_DLL herr_t H5EA_iterate(H5EA_t *ea, hid_t dxpl_id, H5EA_operator_t op, void *udata);
 H5_DLL herr_t H5EA_close(H5EA_t *ea, hid_t dxpl_id);
 H5_DLL herr_t H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);
 

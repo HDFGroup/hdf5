@@ -89,8 +89,6 @@ H5_DLL hsize_t H5VM_hyper_stride(unsigned n, const hsize_t *size,
 				 const hsize_t *total_size,
 				 const hsize_t *offset,
 				 hsize_t *stride);
-H5_DLL htri_t H5VM_hyper_disjointp(unsigned n, const hsize_t *offset1,
-    const uint32_t *size1, const hsize_t *offset2, const uint32_t *size2);
 H5_DLL htri_t H5VM_hyper_eq(unsigned n, const hsize_t *offset1,
 			    const hsize_t *size1, const hsize_t *offset2,
 			    const hsize_t *size2);

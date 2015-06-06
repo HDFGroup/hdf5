@@ -434,7 +434,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     superblock_size = (hsize_t)H5F_SUPERBLOCK_SIZE(super_vers, f);
 
     /* Compute the size of the driver information block */
-    H5_ASSIGN_OVERFLOW(driver_size, H5FD_sb_size(f->shared->lf), hsize_t, size_t);
+    H5_CHECKED_ASSIGN(driver_size, size_t, H5FD_sb_size(f->shared->lf), hsize_t);
     if(driver_size > 0) {
         driver_size += H5F_DRVINFOBLOCK_HDR_SIZE;
 

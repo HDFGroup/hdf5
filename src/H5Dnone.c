@@ -234,7 +234,6 @@ H5D_none_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata)
 {
     H5D_chunk_rec_t chunk_rec;			/* generic chunk record  */
-    hsize_t chunk_offset[H5O_LAYOUT_NDIMS]; 	/* Offset for the chunk */
     unsigned ndims; 	/* Rank of chunk */
     unsigned u;		/* Local index variable */
     int curr_dim;       /* Current rank */
@@ -258,15 +257,13 @@ H5D_none_iterate(const H5D_chk_idx_info_t *idx_info,
     chunk_rec.nbytes = idx_info->layout->size;
     chunk_rec.filter_mask = 0;
 
-    HDmemset(&chunk_offset, 0, sizeof(chunk_offset));
-
     ndims = idx_info->layout->ndims - 1;
     HDassert(ndims > 0);
 
     /* Iterate over all the chunks in the dataset's dataspace */
     for(u = 0; u < idx_info->layout->nchunks; u++) {
 	/* Calculate the index of this chunk */
-	idx = H5VM_chunk_index(ndims, chunk_rec.offset, idx_info->layout->dim, idx_info->layout->max_down_chunks);
+	idx = H5VM_array_offset_pre(ndims, idx_info->layout->max_down_chunks, chunk_rec.scaled);
 
 	/* Calculate the address of the chunk */
 	chunk_rec.chunk_addr = idx_info->storage->idx_addr + idx * idx_info->layout->size;
@@ -279,14 +276,12 @@ H5D_none_iterate(const H5D_chk_idx_info_t *idx_info,
 	curr_dim = (int)(ndims - 1);
 	while(curr_dim >= 0) {
 	    /* Increment coordinate in current dimension */
-	    chunk_offset[curr_dim]++;
-	    chunk_rec.offset[curr_dim] += idx_info->layout->dim[curr_dim];
+	    chunk_rec.scaled[curr_dim]++;
 
 	    /* Check if we went off the end of the current dimension */
-	    if(chunk_offset[curr_dim] >= idx_info->layout->chunks[curr_dim]) {
+	    if(chunk_rec.scaled[curr_dim] >= idx_info->layout->chunks[curr_dim]) {
 		/* Reset coordinate & move to next faster dimension */
-		chunk_offset[curr_dim] = 0;
-		chunk_rec.offset[curr_dim] = 0;
+		chunk_rec.scaled[curr_dim] = 0;
 		curr_dim--;
 	    } /* end if */
 	    else

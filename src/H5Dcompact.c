@@ -197,7 +197,7 @@ H5D__compact_construct(H5F_t *f, H5D_t *dset)
     tmp_size = H5T_get_size(dset->shared->type);
     HDassert(tmp_size > 0);
     tmp_size = tmp_size * (hsize_t)stmp_size;
-    H5_ASSIGN_OVERFLOW(dset->shared->layout.storage.u.compact.size, tmp_size, hssize_t, size_t);
+    H5_CHECKED_ASSIGN(dset->shared->layout.storage.u.compact.size, size_t, tmp_size, hssize_t);
 
     /* Verify data size is smaller than maximum header message size
      * (64KB) minus other layout message fields.

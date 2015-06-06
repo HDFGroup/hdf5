@@ -244,7 +244,6 @@
 #define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \
 				 HADDR_UNDEF==(X)+(haddr_t)(Z) ||	      \
 				 (X)+(haddr_t)(Z)<(X))
-#define H5F_addr_hash(X,M)	((unsigned)((X)%(M)))
 #define H5F_addr_defined(X)	((X)!=HADDR_UNDEF)
 /* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
  * certain that X is not HADDR_UNDEF and then checking that X equals Y
