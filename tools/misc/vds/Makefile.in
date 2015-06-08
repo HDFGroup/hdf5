@@ -30,8 +30,6 @@
 #
 # HDF5 Library Makefile(.in)
 #
-
-
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -99,13 +97,10 @@ host_triplet = @host@
 DIST_COMMON = $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/bin/mkinstalldirs \
-	$(srcdir)/h5cc.in $(srcdir)/testh5mkgrp.sh.in \
-	$(srcdir)/testh5repart.sh.in $(top_srcdir)/bin/depcomp \
-	$(top_srcdir)/bin/test-driver
-check_PROGRAMS = $(am__EXEEXT_1) repart_test$(EXEEXT)
-bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
-TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
-subdir = tools/misc
+	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/test-driver
+check_PROGRAMS = $(am__EXEEXT_1)
+TESTS = $(am__EXEEXT_1)
+subdir = tools/misc/vds
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 	$(top_srcdir)/m4/aclocal_fc.m4 $(top_srcdir)/configure.ac
@@ -113,76 +108,35 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = h5cc testh5mkgrp.sh testh5repart.sh
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 = h5repart_gentest$(EXEEXT) talign$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS)
-h5debug_SOURCES = h5debug.c
-h5debug_OBJECTS = h5debug.$(OBJEXT)
-h5debug_LDADD = $(LDADD)
-h5debug_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+am__EXEEXT_1 = UC_1_one_dim_gen$(EXEEXT) UC_2_two_dims_gen$(EXEEXT) \
+	UC_3_gaps_gen$(EXEEXT) UC_4_printf_gen$(EXEEXT) \
+	UC_5_stride_gen$(EXEEXT)
+UC_1_one_dim_gen_SOURCES = UC_1_one_dim_gen.c
+UC_1_one_dim_gen_OBJECTS = UC_1_one_dim_gen.$(OBJEXT)
+UC_1_one_dim_gen_LDADD = $(LDADD)
+UC_1_one_dim_gen_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-h5debug_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(h5debug_LDFLAGS) $(LDFLAGS) -o $@
-h5mkgrp_SOURCES = h5mkgrp.c
-h5mkgrp_OBJECTS = h5mkgrp.$(OBJEXT)
-h5mkgrp_LDADD = $(LDADD)
-h5mkgrp_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-h5mkgrp_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(h5mkgrp_LDFLAGS) $(LDFLAGS) -o $@
-h5repart_SOURCES = h5repart.c
-h5repart_OBJECTS = h5repart.$(OBJEXT)
-h5repart_LDADD = $(LDADD)
-h5repart_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-h5repart_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(h5repart_LDFLAGS) $(LDFLAGS) -o $@
-h5repart_gentest_SOURCES = h5repart_gentest.c
-h5repart_gentest_OBJECTS = h5repart_gentest.$(OBJEXT)
-h5repart_gentest_LDADD = $(LDADD)
-h5repart_gentest_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-repart_test_SOURCES = repart_test.c
-repart_test_OBJECTS = repart_test.$(OBJEXT)
-repart_test_LDADD = $(LDADD)
-repart_test_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-talign_SOURCES = talign.c
-talign_OBJECTS = talign.$(OBJEXT)
-talign_LDADD = $(LDADD)
-talign_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
-SCRIPTS = $(bin_SCRIPTS)
+UC_2_two_dims_gen_SOURCES = UC_2_two_dims_gen.c
+UC_2_two_dims_gen_OBJECTS = UC_2_two_dims_gen.$(OBJEXT)
+UC_2_two_dims_gen_LDADD = $(LDADD)
+UC_2_two_dims_gen_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+UC_3_gaps_gen_SOURCES = UC_3_gaps_gen.c
+UC_3_gaps_gen_OBJECTS = UC_3_gaps_gen.$(OBJEXT)
+UC_3_gaps_gen_LDADD = $(LDADD)
+UC_3_gaps_gen_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+UC_4_printf_gen_SOURCES = UC_4_printf_gen.c
+UC_4_printf_gen_OBJECTS = UC_4_printf_gen.$(OBJEXT)
+UC_4_printf_gen_LDADD = $(LDADD)
+UC_4_printf_gen_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
+UC_5_stride_gen_SOURCES = UC_5_stride_gen.c
+UC_5_stride_gen_OBJECTS = UC_5_stride_gen.$(OBJEXT)
+UC_5_stride_gen_LDADD = $(LDADD)
+UC_5_stride_gen_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -217,31 +171,15 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = h5debug.c h5mkgrp.c h5repart.c h5repart_gentest.c \
-	repart_test.c talign.c
-DIST_SOURCES = h5debug.c h5mkgrp.c h5repart.c h5repart_gentest.c \
-	repart_test.c talign.c
-RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
-	ctags-recursive dvi-recursive html-recursive info-recursive \
-	install-data-recursive install-dvi-recursive \
-	install-exec-recursive install-html-recursive \
-	install-info-recursive install-pdf-recursive \
-	install-ps-recursive install-recursive installcheck-recursive \
-	installdirs-recursive pdf-recursive ps-recursive \
-	tags-recursive uninstall-recursive
+SOURCES = UC_1_one_dim_gen.c UC_2_two_dims_gen.c UC_3_gaps_gen.c \
+	UC_4_printf_gen.c UC_5_stride_gen.c
+DIST_SOURCES = UC_1_one_dim_gen.c UC_2_two_dims_gen.c UC_3_gaps_gen.c \
+	UC_4_printf_gen.c UC_5_stride_gen.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
-  distclean-recursive maintainer-clean-recursive
-am__recursive_targets = \
-  $(RECURSIVE_TARGETS) \
-  $(RECURSIVE_CLEAN_TARGETS) \
-  $(am__extra_recursive_targets)
-AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
-	check recheck distdir
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -283,6 +221,33 @@ am__tty_colors = { \
     std='[m'; \
   fi; \
 }
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
 am__recheck_rx = ^[ 	]*:recheck:[ 	]*
 am__global_test_result_rx = ^[ 	]*:global-test-result:[ 	]*
 am__copy_in_global_log_rx = ^[ 	]*:copy-in-global-log:[ 	]*
@@ -417,6 +382,7 @@ am__set_TESTS_bases = \
   bases=`for i in $$bases; do echo $$i; done | sed 's/\.log$$//'`; \
   bases=`echo $$bases`
 RECHECK_LOGS = $(TEST_LOGS)
+AM_RECURSIVE_TARGETS = check recheck
 TEST_SUITE_LOG = test-suite.log
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
 LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
@@ -435,33 +401,7 @@ am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
 TEST_LOGS = $(am__test_logs2:.sh.log=.log)
 SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
 SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
-DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-am__relativize = \
-  dir0=`pwd`; \
-  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
-  sed_rest='s,^[^/]*/*,,'; \
-  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
-  sed_butlast='s,/*[^/]*$$,,'; \
-  while test -n "$$dir1"; do \
-    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
-    if test "$$first" != "."; then \
-      if test "$$first" = ".."; then \
-        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
-        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
-      else \
-        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
-        if test "$$first2" = "$$first"; then \
-          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
-        else \
-          dir2="../$$dir2"; \
-        fi; \
-        dir0="$$dir0"/"$$first"; \
-      fi; \
-    fi; \
-    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
-  done; \
-  reldir="$$dir2"
 ACLOCAL = @ACLOCAL@
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
 AMTAR = @AMTAR@
@@ -730,38 +670,16 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 
-# Temporary files.  *.h5 are generated by h5repart_gentest.  They should
-# copied to the testfiles/ directory if update is required. fst_family*.h5
-# and scd_family*.h5 were created by setting the HDF5_NOCLEANUP variable.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 \
-	../testfiles/fst_family*.h5 ../testfiles/scd_family*.h5
-SUBDIRS = vds
+# Temporary files.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5
 
 #test scripts and programs
-TEST_PROG = h5repart_gentest talign
-TEST_SCRIPT = testh5repart.sh testh5mkgrp.sh
-check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = h5repart$(EXEEXT) h5mkgrp$(EXEEXT)
-bin_SCRIPTS = h5redeploy
+TEST_PROG = UC_1_one_dim_gen UC_2_two_dims_gen UC_3_gaps_gen UC_4_printf_gen \
+    UC_5_stride_gen
 
-# Add h5debug, h5repart, and h5mkgrp specific linker flags here
-h5debug_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
-h5repart_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
-h5mkgrp_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
-
-# Tell automake to clean h5redeploy script
-CLEANFILES = h5redeploy
-
-# These were generated by configure.  Remove them only when distclean.
-DISTCLEANFILES = h5cc testh5repart.sh
 
 # All programs rely on hdf5 library and h5tools library
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
-@BUILD_PARALLEL_CONDITIONAL_FALSE@H5CC_NAME = h5cc
-
-# h5cc needs custom install and uninstall rules, since it may be
-# named h5pcc if hdf5 is being built in parallel mode.
-@BUILD_PARALLEL_CONDITIONAL_TRUE@H5CC_NAME = h5pcc
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -782,7 +700,7 @@ TEST_PROG_CHKEXE = $(TEST_PROG:=.chkexe_)
 TEST_PROG_PARA_CHKEXE = $(TEST_PROG_PARA:=.chkexe_)
 TEST_SCRIPT_CHKSH = $(TEST_SCRIPT:=.chkexe_)
 TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chkexe_)
-all: all-recursive
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .log .o .obj .sh .sh$(EXEEXT) .trs
@@ -795,9 +713,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/misc/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign tools/misc/vds/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign tools/misc/Makefile
+	  $(AUTOMAKE) --foreign tools/misc/vds/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -817,61 +735,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-h5cc: $(top_builddir)/config.status $(srcdir)/h5cc.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-testh5mkgrp.sh: $(top_builddir)/config.status $(srcdir)/testh5mkgrp.sh.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-testh5repart.sh: $(top_builddir)/config.status $(srcdir)/testh5repart.sh.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
-	fi; \
-	for p in $$list; do echo "$$p $$p"; done | \
-	sed 's/$(EXEEXT)$$//' | \
-	while read p p1; do if test -f $$p \
-	 || test -f $$p1 \
-	  ; then echo "$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n;h' \
-	    -e 's|.*|.|' \
-	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
-	sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
-	    else { print "f", $$3 "/" $$4, $$1; } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	    test -z "$$files" || { \
-	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
-	    } \
-	; done
-
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
-	      -e 's/$$/$(EXEEXT)/' \
-	`; \
-	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(bindir)" && rm -f $$files
-
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
-	echo " rm -f" $$list; \
-	rm -f $$list || exit $$?; \
-	test -n "$(EXEEXT)" || exit 0; \
-	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
-	echo " rm -f" $$list; \
-	rm -f $$list
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -882,64 +745,25 @@ clean-checkPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-h5debug$(EXEEXT): $(h5debug_OBJECTS) $(h5debug_DEPENDENCIES) $(EXTRA_h5debug_DEPENDENCIES) 
-	@rm -f h5debug$(EXEEXT)
-	$(AM_V_CCLD)$(h5debug_LINK) $(h5debug_OBJECTS) $(h5debug_LDADD) $(LIBS)
+UC_1_one_dim_gen$(EXEEXT): $(UC_1_one_dim_gen_OBJECTS) $(UC_1_one_dim_gen_DEPENDENCIES) $(EXTRA_UC_1_one_dim_gen_DEPENDENCIES) 
+	@rm -f UC_1_one_dim_gen$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(UC_1_one_dim_gen_OBJECTS) $(UC_1_one_dim_gen_LDADD) $(LIBS)
 
-h5mkgrp$(EXEEXT): $(h5mkgrp_OBJECTS) $(h5mkgrp_DEPENDENCIES) $(EXTRA_h5mkgrp_DEPENDENCIES) 
-	@rm -f h5mkgrp$(EXEEXT)
-	$(AM_V_CCLD)$(h5mkgrp_LINK) $(h5mkgrp_OBJECTS) $(h5mkgrp_LDADD) $(LIBS)
+UC_2_two_dims_gen$(EXEEXT): $(UC_2_two_dims_gen_OBJECTS) $(UC_2_two_dims_gen_DEPENDENCIES) $(EXTRA_UC_2_two_dims_gen_DEPENDENCIES) 
+	@rm -f UC_2_two_dims_gen$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(UC_2_two_dims_gen_OBJECTS) $(UC_2_two_dims_gen_LDADD) $(LIBS)
 
-h5repart$(EXEEXT): $(h5repart_OBJECTS) $(h5repart_DEPENDENCIES) $(EXTRA_h5repart_DEPENDENCIES) 
-	@rm -f h5repart$(EXEEXT)
-	$(AM_V_CCLD)$(h5repart_LINK) $(h5repart_OBJECTS) $(h5repart_LDADD) $(LIBS)
+UC_3_gaps_gen$(EXEEXT): $(UC_3_gaps_gen_OBJECTS) $(UC_3_gaps_gen_DEPENDENCIES) $(EXTRA_UC_3_gaps_gen_DEPENDENCIES) 
+	@rm -f UC_3_gaps_gen$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(UC_3_gaps_gen_OBJECTS) $(UC_3_gaps_gen_LDADD) $(LIBS)
 
-h5repart_gentest$(EXEEXT): $(h5repart_gentest_OBJECTS) $(h5repart_gentest_DEPENDENCIES) $(EXTRA_h5repart_gentest_DEPENDENCIES) 
-	@rm -f h5repart_gentest$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(h5repart_gentest_OBJECTS) $(h5repart_gentest_LDADD) $(LIBS)
+UC_4_printf_gen$(EXEEXT): $(UC_4_printf_gen_OBJECTS) $(UC_4_printf_gen_DEPENDENCIES) $(EXTRA_UC_4_printf_gen_DEPENDENCIES) 
+	@rm -f UC_4_printf_gen$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(UC_4_printf_gen_OBJECTS) $(UC_4_printf_gen_LDADD) $(LIBS)
 
-repart_test$(EXEEXT): $(repart_test_OBJECTS) $(repart_test_DEPENDENCIES) $(EXTRA_repart_test_DEPENDENCIES) 
-	@rm -f repart_test$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(repart_test_OBJECTS) $(repart_test_LDADD) $(LIBS)
-
-talign$(EXEEXT): $(talign_OBJECTS) $(talign_DEPENDENCIES) $(EXTRA_talign_DEPENDENCIES) 
-	@rm -f talign$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(talign_OBJECTS) $(talign_LDADD) $(LIBS)
-install-binSCRIPTS: $(bin_SCRIPTS)
-	@$(NORMAL_INSTALL)
-	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  if test -f "$$d$$p"; then echo "$$d$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n' \
-	    -e 'h;s|.*|.|' \
-	    -e 'p;x;s,.*/,,;$(transform)' | sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1; } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) { files[d] = files[d] " " $$1; \
-	      if (++n[d] == $(am__install_max)) { \
-		print "f", d, files[d]; n[d] = 0; files[d] = "" } } \
-	    else { print "f", d "/" $$4, $$1 } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	     if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	     test -z "$$files" || { \
-	       echo " $(INSTALL_SCRIPT) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	       $(INSTALL_SCRIPT) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
-	     } \
-	; done
-
-uninstall-binSCRIPTS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || exit 0; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	       sed -e 's,.*/,,;$(transform)'`; \
-	dir='$(DESTDIR)$(bindir)'; $(am__uninstall_files_from_dir)
+UC_5_stride_gen$(EXEEXT): $(UC_5_stride_gen_OBJECTS) $(UC_5_stride_gen_DEPENDENCIES) $(EXTRA_UC_5_stride_gen_DEPENDENCIES) 
+	@rm -f UC_5_stride_gen$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(UC_5_stride_gen_OBJECTS) $(UC_5_stride_gen_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -947,12 +771,11 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5debug.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5mkgrp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repart_gentest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/repart_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/talign.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UC_1_one_dim_gen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UC_2_two_dims_gen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UC_3_gaps_gen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UC_4_printf_gen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UC_5_stride_gen.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -981,61 +804,14 @@ mostlyclean-libtool:
 clean-libtool:
 	-rm -rf .libs _libs
 
-# This directory's subdirectories are mostly independent; you can cd
-# into them and run 'make' without going through this Makefile.
-# To change the values of 'make' variables: instead of editing Makefiles,
-# (1) if the variable is set in 'config.status', edit 'config.status'
-#     (which will cause the Makefiles to be regenerated when you run 'make');
-# (2) otherwise, pass the desired values on the 'make' command line.
-$(am__recursive_targets):
-	@fail=; \
-	if $(am__make_keepgoing); then \
-	  failcom='fail=yes'; \
-	else \
-	  failcom='exit 1'; \
-	fi; \
-	dot_seen=no; \
-	target=`echo $@ | sed s/-recursive//`; \
-	case "$@" in \
-	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
-	  *) list='$(SUBDIRS)' ;; \
-	esac; \
-	for subdir in $$list; do \
-	  echo "Making $$target in $$subdir"; \
-	  if test "$$subdir" = "."; then \
-	    dot_seen=yes; \
-	    local_target="$$target-am"; \
-	  else \
-	    local_target="$$target"; \
-	  fi; \
-	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
-	  || eval $$failcom; \
-	done; \
-	if test "$$dot_seen" = "no"; then \
-	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
-	fi; test -z "$$fail"
-
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
-tags: tags-recursive
+tags: tags-am
 TAGS: tags
 
 tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	set x; \
 	here=`pwd`; \
-	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
-	  include_option=--etags-include; \
-	  empty_fix=.; \
-	else \
-	  include_option=--include; \
-	  empty_fix=; \
-	fi; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    test ! -f $$subdir/TAGS || \
-	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
-	  fi; \
-	done; \
 	$(am__define_uniq_tagged_files); \
 	shift; \
 	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
@@ -1048,7 +824,7 @@ tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	      $$unique; \
 	  fi; \
 	fi
-ctags: ctags-recursive
+ctags: ctags-am
 
 CTAGS: ctags
 ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
@@ -1061,7 +837,7 @@ GTAGS:
 	here=`$(am__cd) $(top_builddir) && pwd` \
 	  && $(am__cd) $(top_srcdir) \
 	  && gtags -i $(GTAGS_ARGS) "$$here"
-cscopelist: cscopelist-recursive
+cscopelist: cscopelist-am
 
 cscopelist-am: $(am__tagged_files)
 	list='$(am__tagged_files)'; \
@@ -1199,7 +975,7 @@ $(TEST_SUITE_LOG): $(TEST_LOGS)
 	  echo "$$col$$br$$std";					\
 	fi;								\
 	$$success || exit 1
-recheck: all $(check_PROGRAMS) $(check_SCRIPTS)
+recheck: all $(check_PROGRAMS)
 	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 	@set +e; $(am__set_TESTS_bases); \
 	bases=`for i in $$bases; do echo $$i; done \
@@ -1210,16 +986,37 @@ recheck: all $(check_PROGRAMS) $(check_SCRIPTS)
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
-h5repart_gentest.log: h5repart_gentest$(EXEEXT)
-	@p='h5repart_gentest$(EXEEXT)'; \
-	b='h5repart_gentest'; \
+UC_1_one_dim_gen.log: UC_1_one_dim_gen$(EXEEXT)
+	@p='UC_1_one_dim_gen$(EXEEXT)'; \
+	b='UC_1_one_dim_gen'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-talign.log: talign$(EXEEXT)
-	@p='talign$(EXEEXT)'; \
-	b='talign'; \
+UC_2_two_dims_gen.log: UC_2_two_dims_gen$(EXEEXT)
+	@p='UC_2_two_dims_gen$(EXEEXT)'; \
+	b='UC_2_two_dims_gen'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+UC_3_gaps_gen.log: UC_3_gaps_gen$(EXEEXT)
+	@p='UC_3_gaps_gen$(EXEEXT)'; \
+	b='UC_3_gaps_gen'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+UC_4_printf_gen.log: UC_4_printf_gen$(EXEEXT)
+	@p='UC_4_printf_gen$(EXEEXT)'; \
+	b='UC_4_printf_gen'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+UC_5_stride_gen.log: UC_5_stride_gen$(EXEEXT)
+	@p='UC_5_stride_gen$(EXEEXT)'; \
+	b='UC_5_stride_gen'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -1269,50 +1066,21 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    $(am__make_dryrun) \
-	      || test -d "$(distdir)/$$subdir" \
-	      || $(MKDIR_P) "$(distdir)/$$subdir" \
-	      || exit 1; \
-	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
-	    $(am__relativize); \
-	    new_distdir=$$reldir; \
-	    dir1=$$subdir; dir2="$(top_distdir)"; \
-	    $(am__relativize); \
-	    new_top_distdir=$$reldir; \
-	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
-	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
-	    ($(am__cd) $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$new_top_distdir" \
-	        distdir="$$new_distdir" \
-		am__remove_distdir=: \
-		am__skip_length_check=: \
-		am__skip_mode_fix=: \
-	        distdir) \
-	      || exit 1; \
-	  fi; \
-	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
-check: check-recursive
-all-am: Makefile $(PROGRAMS) $(SCRIPTS) all-local
-installdirs: installdirs-recursive
-installdirs-am:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
-install: install-recursive
-install-exec: install-exec-recursive
-install-data: install-data-recursive
-uninstall: uninstall-recursive
+check: check-am
+all-am: Makefile all-local
+installdirs:
+install: install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-recursive
+installcheck: installcheck-am
 install-strip:
 	if test -z '$(STRIP)'; then \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
@@ -1329,107 +1097,100 @@ mostlyclean-generic:
 	-test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-recursive
+clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
+	mostlyclean-am
 
-distclean: distclean-recursive
+distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
 
-dvi: dvi-recursive
+dvi: dvi-am
 
 dvi-am:
 
-html: html-recursive
+html: html-am
 
 html-am:
 
-info: info-recursive
+info: info-am
 
 info-am:
 
 install-data-am:
 
-install-dvi: install-dvi-recursive
+install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS install-binSCRIPTS \
-	install-exec-local
+install-exec-am:
 
-install-html: install-html-recursive
+install-html: install-html-am
 
 install-html-am:
 
-install-info: install-info-recursive
+install-info: install-info-am
 
 install-info-am:
 
 install-man:
 
-install-pdf: install-pdf-recursive
+install-pdf: install-pdf-am
 
 install-pdf-am:
 
-install-ps: install-ps-recursive
+install-ps: install-ps-am
 
 install-ps-am:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-recursive
+maintainer-clean: maintainer-clean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-recursive
+mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool mostlyclean-local
 
-pdf: pdf-recursive
+pdf: pdf-am
 
 pdf-am:
 
-ps: ps-recursive
+ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-local
+uninstall-am:
 
-.MAKE: $(am__recursive_targets) check-am install-am install-strip
+.MAKE: check-am install-am install-strip
 
-.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am all-local \
-	check check-TESTS check-am clean clean-binPROGRAMS \
-	clean-checkPROGRAMS clean-generic clean-libtool cscopelist-am \
-	ctags ctags-am distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-binSCRIPTS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-exec-local \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs installdirs-am maintainer-clean \
+.PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
+	check-am clean clean-checkPROGRAMS clean-generic clean-libtool \
+	cscopelist-am ctags ctags-am distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
-	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-binSCRIPTS uninstall-local
+	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am
 
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
@@ -1442,15 +1203,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
 
 help:
 	@$(top_srcdir)/bin/makehelp
-
-install-exec-local:
-	@$(INSTALL) h5cc $(DESTDIR)$(bindir)/$(H5CC_NAME)
-uninstall-local:
-	@$(RM) $(DESTDIR)$(bindir)/$(H5CC_NAME)
-
-# How to build h5redeploy script
-h5redeploy: h5redeploy.in
-	@cp $(srcdir)/$@.in $@
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
