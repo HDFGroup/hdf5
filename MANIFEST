@@ -1144,6 +1144,7 @@
 ./testpar/t_pshutdown.c
 ./testpar/t_prestart.c
 ./testpar/t_span_tree.c
+./testpar/t_init_term.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
