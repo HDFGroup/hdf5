@@ -256,7 +256,7 @@ nh5awritec_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
  * SOURCE
 */
 int_f
-nh5awrite_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -266,7 +266,7 @@ nh5awrite_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void U
 }
 
 int_f
-nh5awrite_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -276,7 +276,7 @@ nh5awrite_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void U
 }
 
 int_f
-nh5awrite_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -286,7 +286,7 @@ nh5awrite_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void U
 }
 
 int_f
-nh5awrite_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -296,7 +296,7 @@ nh5awrite_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void U
 }
 
 int_f
-nh5awrite_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -306,7 +306,7 @@ nh5awrite_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void U
 }
 
 int_f
-nh5awrite_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -316,7 +316,7 @@ nh5awrite_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void U
 }
 
 int_f
-nh5awrite_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -326,7 +326,7 @@ nh5awrite_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void U
 }
 
 int_f
-nh5awrite_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -336,7 +336,7 @@ nh5awrite_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void U
 }
 
 int_f
-nh5awrite_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -346,7 +346,7 @@ nh5awrite_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUS
 }
 
 int_f
-nh5awrite_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -356,7 +356,7 @@ nh5awrite_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUS
 }
 
 int_f
-nh5awrite_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -366,7 +366,7 @@ nh5awrite_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUS
 }
 
 int_f
-nh5awrite_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -376,7 +376,7 @@ nh5awrite_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUS
 }
 
 int_f
-nh5awrite_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -386,7 +386,7 @@ nh5awrite_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUS
 }
 
 int_f
-nh5awrite_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -396,7 +396,7 @@ nh5awrite_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUS
 }
 
 int_f
-nh5awrite_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -406,7 +406,7 @@ nh5awrite_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUS
 }
 
 int_f
-nh5awrite_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -416,7 +416,7 @@ nh5awrite_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUS
 }
 
 int_f
-nh5awrite_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -426,7 +426,7 @@ nh5awrite_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5awrite_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -436,7 +436,7 @@ nh5awrite_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5awrite_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -446,7 +446,7 @@ nh5awrite_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5awrite_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -456,7 +456,7 @@ nh5awrite_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5awrite_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -466,7 +466,7 @@ nh5awrite_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5awrite_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -476,7 +476,7 @@ nh5awrite_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5awrite_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -486,7 +486,7 @@ nh5awrite_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5awrite_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
      /*
@@ -496,7 +496,7 @@ nh5awrite_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED *dims)
+nh5awrite_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED *dims)
 /******/
 {
     int_f ret_value=0;          /* Return value */
@@ -655,7 +655,7 @@ nh5areadc_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, _fcd buf, void *dims)
  * SOURCE
 */
 int_f
-nh5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
     int_f ret_value=0;          /* Return value */
@@ -671,7 +671,7 @@ done:
 }
 
 int_f
-nh5aread_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -681,7 +681,7 @@ nh5aread_integer_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5aread_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -691,7 +691,7 @@ nh5aread_integer_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5aread_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -701,7 +701,7 @@ nh5aread_integer_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5aread_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -711,7 +711,7 @@ nh5aread_integer_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5aread_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -721,7 +721,7 @@ nh5aread_integer_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5aread_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -731,7 +731,7 @@ nh5aread_integer_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5aread_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -741,7 +741,7 @@ nh5aread_integer_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5aread_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -751,7 +751,7 @@ nh5aread_integer_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UN
 }
 
 int_f
-nh5aread_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -761,7 +761,7 @@ nh5aread_real_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSE
 }
 
 int_f
-nh5aread_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -771,7 +771,7 @@ nh5aread_real_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSE
 }
 
 int_f
-nh5aread_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -781,7 +781,7 @@ nh5aread_real_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSE
 }
 
 int_f
-nh5aread_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -791,7 +791,7 @@ nh5aread_real_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSE
 }
 
 int_f
-nh5aread_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -801,7 +801,7 @@ nh5aread_real_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSE
 }
 
 int_f
-nh5aread_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -811,7 +811,7 @@ nh5aread_real_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSE
 }
 
 int_f
-nh5aread_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -821,7 +821,7 @@ nh5aread_real_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSE
 }
 
 int_f
-nh5aread_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -831,7 +831,7 @@ nh5aread_real_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSE
 }
 
 int_f
-nh5aread_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -841,7 +841,7 @@ nh5aread_double_s_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNU
 }
 
 int_f
-nh5aread_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -851,7 +851,7 @@ nh5aread_double_1_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNU
 }
 
 int_f
-nh5aread_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -861,7 +861,7 @@ nh5aread_double_2_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNU
 }
 
 int_f
-nh5aread_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -871,7 +871,7 @@ nh5aread_double_3_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNU
 }
 
 int_f
-nh5aread_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -881,7 +881,7 @@ nh5aread_double_4_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNU
 }
 
 int_f
-nh5aread_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -891,7 +891,7 @@ nh5aread_double_5_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNU
 }
 
 int_f
-nh5aread_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*
@@ -901,7 +901,7 @@ nh5aread_double_6_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNU
 }
 
 int_f
-nh5aread_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void UNUSED * dims)
+nh5aread_double_7_c (hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf, void H5_ATTR_UNUSED * dims)
 /******/
 {
      /*

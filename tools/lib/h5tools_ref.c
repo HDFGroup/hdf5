@@ -61,7 +61,7 @@ static int ref_path_table_put(const char *, haddr_t objno);
  *-------------------------------------------------------------------------
  */
 static herr_t
-free_ref_path_info(void *item, void UNUSED *key, void UNUSED *operator_data/*in,out*/)
+free_ref_path_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *operator_data/*in,out*/)
 {
     ref_path_node_t *node = (ref_path_node_t *)item;
 
@@ -85,7 +85,7 @@ free_ref_path_info(void *item, void UNUSED *key, void UNUSED *operator_data/*in,
  */
 static herr_t
 init_ref_path_cb(const char *obj_name, const H5O_info_t *oinfo,
-    const char *already_seen, void UNUSED *_udata)
+    const char *already_seen, void H5_ATTR_UNUSED *_udata)
 {
     /* Check if the object is already in the path table */
     if(NULL == already_seen) {

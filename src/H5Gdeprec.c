@@ -917,7 +917,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_get_objinfo_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
+H5G_get_objinfo_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_trav_goi_t *udata = (H5G_trav_goi_t *)_udata;   /* User data passed in */

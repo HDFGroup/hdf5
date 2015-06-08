@@ -226,7 +226,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P__dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
+H5P__dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void H5_ATTR_UNUSED *copy_data)
 {
     H5O_fill_t     src_fill, dst_fill;          /* Source & destination fill values */
     H5O_efl_t      src_efl, dst_efl;            /* Source & destination external file lists */
@@ -340,7 +340,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P__dcrt_close(hid_t dcpl_id, void UNUSED *close_data)
+H5P__dcrt_close(hid_t dcpl_id, void H5_ATTR_UNUSED *close_data)
 {
     H5O_fill_t      fill;               /* Fill value */
     H5O_efl_t       efl;                /* External file list */
@@ -388,7 +388,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t UNUSED size)
+H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_UNUSED size)
 {
     const H5O_layout_t *layout1 = (const H5O_layout_t *)_layout1,     /* Create local aliases for values */
         *layout2 = (const H5O_layout_t *)_layout2;
@@ -458,7 +458,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5P_fill_value_cmp(const void *_fill1, const void *_fill2, size_t UNUSED size)
+H5P_fill_value_cmp(const void *_fill1, const void *_fill2, size_t H5_ATTR_UNUSED size)
 {
     const H5O_fill_t *fill1 = (const H5O_fill_t *)_fill1,     /* Create local aliases for values */
         *fill2 = (const H5O_fill_t *)_fill2;
@@ -520,7 +520,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P__dcrt_ext_file_list_cmp(const void *_efl1, const void *_efl2, size_t UNUSED size)
+H5P__dcrt_ext_file_list_cmp(const void *_efl1, const void *_efl2, size_t H5_ATTR_UNUSED size)
 {
     const H5O_efl_t *efl1 = (const H5O_efl_t *)_efl1,     /* Create local aliases for values */
         *efl2 = (const H5O_efl_t *)_efl2;

@@ -141,7 +141,7 @@ static char            *xml_escape_the_name(const char *);
  *-------------------------------------------------------------------------
  */
 static herr_t
-xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED *op_data)
+xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR_UNUSED *op_data)
 {
     hid_t       obj;
     herr_t      ret = SUCCEED;
@@ -1854,7 +1854,7 @@ xml_dump_dataspace(hid_t space)
  *-------------------------------------------------------------------------
  */
 void
-xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNUSED pindex)
+xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset, int H5_ATTR_UNUSED pindex)
 {
     hid_t               space = -1;
     hid_t               type = -1;
@@ -2051,8 +2051,8 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
  *-------------------------------------------------------------------------
  */
 herr_t
-xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t UNUSED *info,
-    void UNUSED * op_data)
+xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *info,
+    void H5_ATTR_UNUSED * op_data)
 {
     hid_t             attr_id = -1;
     hid_t             type = -1;
@@ -3753,7 +3753,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
  *-------------------------------------------------------------------------
  */
 void
-xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
+xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * sset)
 {
     hid_t               type;
     hid_t               space;

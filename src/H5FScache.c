@@ -75,17 +75,17 @@ typedef struct {
 /********************/
 
 /* Section info routines */
-static herr_t H5FS_sinfo_serialize_sect_cb(void *_item, void UNUSED *key, void *_udata);
-static herr_t H5FS_sinfo_serialize_node_cb(void *_item, void UNUSED *key, void *_udata);
+static herr_t H5FS_sinfo_serialize_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata);
+static herr_t H5FS_sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata);
 
 /* Metadata cache callbacks */
 static H5FS_t *H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace, unsigned UNUSED * flags_ptr);
+static herr_t H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5FS_cache_hdr_dest(H5F_t *f, H5FS_t *fspace);
 static herr_t H5FS_cache_hdr_clear(H5F_t *f, H5FS_t *fspace, hbool_t destroy);
 static herr_t H5FS_cache_hdr_size(const H5F_t *f, const H5FS_t *fspace, size_t *size_ptr);
 static H5FS_sinfo_t *H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo, unsigned UNUSED * flags_ptr);
+static herr_t H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo);
 static herr_t H5FS_cache_sinfo_clear(H5F_t *f, H5FS_sinfo_t *sinfo, hbool_t destroy);
 static herr_t H5FS_cache_sinfo_size(const H5F_t *f, const H5FS_sinfo_t *sinfo, size_t *size_ptr);
@@ -279,7 +279,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace, unsigned UNUSED * flags_ptr)
+H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_t *fspace, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     H5WB_t      *wb = NULL;             /* Wrapped buffer for header data */
     uint8_t     hdr_buf[H5FS_HDR_BUF_SIZE]; /* Buffer for header */
@@ -531,7 +531,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_hdr_size(const H5F_t UNUSED *f, const H5FS_t *fspace, size_t *size_ptr)
+H5FS_cache_hdr_size(const H5F_t H5_ATTR_UNUSED *f, const H5FS_t *fspace, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -562,7 +562,7 @@ H5FS_cache_hdr_size(const H5F_t UNUSED *f, const H5FS_t *fspace, size_t *size_pt
  *-------------------------------------------------------------------------
  */
 static H5FS_sinfo_t *
-H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
+H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t H5_ATTR_UNUSED addr, void *_udata)
 {
     H5FS_sinfo_t	*sinfo = NULL;  /* Free space section info */
     H5FS_sinfo_cache_ud_t *udata = (H5FS_sinfo_cache_ud_t *)_udata; /* user data for callback */
@@ -724,7 +724,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_sinfo_serialize_sect_cb(void *_item, void UNUSED *key, void *_udata)
+H5FS_sinfo_serialize_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata)
 {
     H5FS_section_class_t *sect_cls;     /* Class of section */
     H5FS_section_info_t *sect= (H5FS_section_info_t *)_item;   /* Free space section to work on */
@@ -780,7 +780,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_sinfo_serialize_node_cb(void *_item, void UNUSED *key, void *_udata)
+H5FS_sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata)
 {
     H5FS_node_t *fspace_node = (H5FS_node_t *)_item;   /* Free space size node to work on */
     H5FS_iter_ud_t *udata = (H5FS_iter_ud_t *)_udata; /* Callback info */
@@ -826,7 +826,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo, unsigned UNUSED * flags_ptr)
+H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1009,7 +1009,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_sinfo_size(const H5F_t UNUSED *f, const H5FS_sinfo_t *sinfo, size_t *size_ptr)
+H5FS_cache_sinfo_size(const H5F_t H5_ATTR_UNUSED *f, const H5FS_sinfo_t *sinfo, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

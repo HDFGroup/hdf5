@@ -1060,7 +1060,7 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
+H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_core_t   *file = (const H5FD_core_t*)_file;
 
@@ -1085,7 +1085,7 @@ H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
+H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;
     herr_t      ret_value = SUCCEED;            /* Return value */
@@ -1207,7 +1207,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
+H5FD_core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
         size_t size, void *buf/*out*/)
 {
     H5FD_core_t  *file = (H5FD_core_t*)_file;
@@ -1267,7 +1267,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
+H5FD_core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
         size_t size, const void *buf)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;
@@ -1348,7 +1348,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
+H5FD_core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, unsigned H5_ATTR_UNUSED closing)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;
     herr_t      ret_value = SUCCEED;            /* Return value */
@@ -1445,7 +1445,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t closing)
+H5FD_core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;
     size_t new_eof;                             /* New size of memory buffer */

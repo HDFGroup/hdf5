@@ -102,7 +102,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T__print_stats(H5T_path_t UNUSED * path, int UNUSED * nprint/*in,out*/)
+H5T__print_stats(H5T_path_t H5_ATTR_UNUSED * path, int H5_ATTR_UNUSED * nprint/*in,out*/)
 {
 #ifdef H5T_DEBUG
     hsize_t	nbytes;

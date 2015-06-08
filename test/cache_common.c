@@ -330,7 +330,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
 static herr_t clear(H5F_t * f, void * thing, hbool_t dest);
 static herr_t destroy(H5F_t * f, void * thing);
 static herr_t flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                    haddr_t addr, void *thing, unsigned UNUSED * flags_ptr);
+                    haddr_t addr, void *thing, unsigned H5_ATTR_UNUSED * flags_ptr);
 static void * load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t size(H5F_t * f, void * thing, size_t * size_ptr);
 static void execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr,
@@ -486,9 +486,9 @@ type_and_index_to_addr(int32_t type,
  */
 
 herr_t
-check_write_permitted(const H5F_t UNUSED * f,
-                      hid_t UNUSED dxpl_id,
-                      hbool_t * write_permitted_ptr)
+check_write_permitted(const H5F_t H5_ATTR_UNUSED *f,
+                      hid_t H5_ATTR_UNUSED dxpl_id,
+                      hbool_t *write_permitted_ptr)
 {
 
     HDassert( write_permitted_ptr );
@@ -639,7 +639,7 @@ variable_clear(H5F_t * f, void *  thing, hbool_t dest)
  */
 
 herr_t
-destroy(H5F_t UNUSED * f,
+destroy(H5F_t H5_ATTR_UNUSED * f,
         void *         thing)
 {
     int i;
@@ -796,11 +796,11 @@ variable_dest(H5F_t * f, void *  thing)
 
 herr_t
 flush(H5F_t *f,
-      hid_t UNUSED dxpl_id,
+      hid_t H5_ATTR_UNUSED dxpl_id,
       hbool_t dest,
       haddr_t
 #ifdef NDEBUG
-          UNUSED
+          H5_ATTR_UNUSED
 #endif /* NDEBUG */
           addr,
       void *thing,
@@ -966,10 +966,10 @@ variable_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
  */
 
 void *
-load(H5F_t UNUSED *f,
-     hid_t UNUSED dxpl_id,
+load(H5F_t H5_ATTR_UNUSED *f,
+     hid_t H5_ATTR_UNUSED dxpl_id,
      haddr_t addr,
-     void UNUSED *udata)
+     void H5_ATTR_UNUSED *udata)
 {
     int32_t type;
     int32_t idx;
@@ -1090,7 +1090,7 @@ variable_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
  */
 
 herr_t
-size(H5F_t UNUSED *  f,
+size(H5F_t H5_ATTR_UNUSED *  f,
      void *   thing,
      size_t * size_ptr)
 {

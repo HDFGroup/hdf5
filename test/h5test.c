@@ -113,7 +113,7 @@ static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suf
  *-------------------------------------------------------------------------
  */
 static herr_t
-h5_errors(hid_t estack, void UNUSED *client_data)
+h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
 {
     H5_FAILED();
     H5Eprint2(estack, stdout);
@@ -1222,8 +1222,8 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-h5_verify_cached_stabs_cb(hid_t oid, const char UNUSED *name,
-    const H5O_info_t *oinfo, void UNUSED *udata)
+h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name,
+    const H5O_info_t *oinfo, void H5_ATTR_UNUSED *udata)
 {
     if(oinfo->type == H5O_TYPE_GROUP)
         return(H5G__verify_cached_stabs_test(oid));

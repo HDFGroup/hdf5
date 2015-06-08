@@ -239,7 +239,7 @@ out:
 
 
 	/* A dummy search function for the next test */
-static int test_search_func(void UNUSED * ptr1, void UNUSED * ptr2) { return 0; }
+static int test_search_func(void H5_ATTR_UNUSED * ptr1, void H5_ATTR_UNUSED * ptr2) { return 0; }
 
 	/* Ensure that public functions cannot access "predefined" ID types */
 static int id_predefined_test(void )

@@ -1301,7 +1301,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_extend_release_integer(void UNUSED *_elmt)
+test_extend_release_integer(void H5_ATTR_UNUSED *_elmt)
 {
     return 0;
 } /* end test_extend_release_integer() */

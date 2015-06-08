@@ -182,7 +182,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P__ocrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
+H5P__ocrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void H5_ATTR_UNUSED *copy_data)
 {
     H5O_pline_t    src_pline, dst_pline;        /* Source & destination pipelines */
     H5P_genplist_t *src_plist;                  /* Pointer to source property list */
@@ -231,7 +231,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P__ocrt_close(hid_t dcpl_id, void UNUSED *close_data)
+H5P__ocrt_close(hid_t dcpl_id, void H5_ATTR_UNUSED *close_data)
 {
     H5O_pline_t     pline;              /* I/O pipeline */
     H5P_genplist_t *plist;              /* Property list */
@@ -1462,7 +1462,7 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
  *-------------------------------------------------------------------------
  */
 static int
-H5P__ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t UNUSED size)
+H5P__ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t H5_ATTR_UNUSED size)
 {
     const H5O_pline_t *pline1 = (const H5O_pline_t *)_pline1,     /* Create local aliases for values */
         *pline2 = (const H5O_pline_t *)_pline2;

@@ -206,7 +206,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_lacc_elink_fapl_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_lacc_elink_fapl_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     hid_t          l_fapl_id;
     herr_t         ret_value = SUCCEED;
@@ -240,7 +240,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_lacc_elink_fapl_copy(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_lacc_elink_fapl_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     hid_t          l_fapl_id;
     herr_t         ret_value = SUCCEED;
@@ -281,7 +281,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P_lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t UNUSED size)
+H5P_lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
 {
     const hid_t *fapl1 = (const hid_t *)value1;
     const hid_t *fapl2 = (const hid_t *)value2;
@@ -328,7 +328,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_lacc_elink_fapl_close(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_lacc_elink_fapl_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     hid_t		l_fapl_id;
     herr_t     		ret_value = SUCCEED;
@@ -360,7 +360,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_lacc_elink_pref_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_lacc_elink_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -386,7 +386,7 @@ H5P_lacc_elink_pref_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UN
  */
 /* ARGSUSED */
 static herr_t
-H5P_lacc_elink_pref_copy(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_lacc_elink_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -413,7 +413,7 @@ H5P_lacc_elink_pref_copy(const char UNUSED *name, size_t UNUSED size, void *valu
  *-------------------------------------------------------------------------
  */
 static int
-H5P_lacc_elink_pref_cmp(const void *value1, const void *value2, size_t UNUSED size)
+H5P_lacc_elink_pref_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
 {
     const char *pref1 = *(const char * const *)value1;
     const char *pref2 = *(const char * const *)value2;
@@ -447,7 +447,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_lacc_elink_pref_close(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_lacc_elink_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

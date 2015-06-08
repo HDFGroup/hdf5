@@ -174,7 +174,7 @@ static htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr,
  */
 static herr_t
 H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
+    unsigned H5_ATTR_UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_cvt_t *udata = (H5O_iter_cvt_t *)_udata;   /* Operator user data */
     H5A_t *attr = (H5A_t *)mesg->native;        /* Pointer to attribute to insert */
@@ -424,7 +424,7 @@ done:
  */
 static herr_t
 H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
-    unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
+    unsigned H5_ATTR_UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_opn_t *udata = (H5O_iter_opn_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -863,7 +863,7 @@ done:
  */
 static herr_t
 H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
+    unsigned H5_ATTR_UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_wrt_t *udata = (H5O_iter_wrt_t *)_udata;   /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
@@ -1025,8 +1025,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
+H5O_attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned H5_ATTR_UNUSED sequence, unsigned H5_ATTR_UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -1076,7 +1076,7 @@ H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
  */
 static herr_t
 H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
+    unsigned H5_ATTR_UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
@@ -1542,7 +1542,7 @@ done:
  */
 static herr_t
 H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
+    unsigned H5_ATTR_UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
@@ -1824,8 +1824,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_exists_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
+H5O_attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned H5_ATTR_UNUSED sequence, unsigned H5_ATTR_UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
