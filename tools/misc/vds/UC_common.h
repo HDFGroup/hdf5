@@ -13,11 +13,29 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
+#ifndef USE_CASE_COMMON_H
+#define USE_CASE_COMMON_H
 
-int
-main(int argc, char *argv[])
-{
-    return EXIT_SUCCESS;
-} /* end main */
+/******************************************
+ * Symbols used across multiple use cases *
+ ******************************************/
+
+/* All datasets are 3D */
+#define RANK                3
+
+/* Lengths of string identifiers (file, dataset names, etc.) */
+#define NAME_LEN            32
+
+/* Compression level */
+#define COMPRESSION_LEVEL   7
+
+/* Booleans */
+#define TRUE 1
+#define FALSE 0
+
+/* Testing macros */
+#define AT()        printf ("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
+#define UC_ERROR    {puts("*ERROR*"); fflush(stdout); AT(); goto error;}
+
+#endif /* USE_CASE_COMMON_H */
 
