@@ -438,8 +438,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   else 
     if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes";then
       FC_SIZEOF_A="SIZEOF(a)"
-      FC_SIZEOF_B="SIZEOF(a)"
-      FC_SIZEOF_C="SIZEOF(a)"
+      FC_SIZEOF_B="SIZEOF(b)"
+      FC_SIZEOF_C="SIZEOF(c)"
     else	
       ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
       AC_MSG_ERROR([Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE])
@@ -472,6 +472,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF])
   AC_SUBST([HAVE_Fortran_INTEGER_SIZEOF_16])
   AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
+  AC_SUBST([PAC_C_MAX_REAL_PRECISION])
 
   ## Setting definition if there is a 16 byte fortran integer
   if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
@@ -487,7 +488,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ##fi
 
   ##PAC_FC_AVAIL_INTEGER_MODELS
-
+	
   
   if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_STORAGE_SIZE], [1], [Define if we have Fortran intrinsic STORAGE_SIZE])
@@ -506,12 +507,12 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_C_LONG_DOUBLE], [1], [Define if we have Fortran C_LONG_DOUBLE])
   fi
   AC_DEFINE([FORTRAN_SIZEOF_LONG_DOUBLE], [SIZEOF_LONG_DOUBLE], [Determine the size of C long double])
+## Change back to the C language
+  AC_LANG_POP(Fortran)
+  PAC_LDBL_DIG
 else
   FC="no"
 fi
-
-## Change back to the C language
-AC_LANG_POP(Fortran)
 
 ## ----------------------------------------------------------------------
 ## Check if they would like the C++ interface compiled

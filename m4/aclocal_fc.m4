@@ -510,3 +510,37 @@ rm -f pac_fconftest.out
 AC_MSG_RESULT([$pack_int_sizeof])
 AC_LANG_POP([Fortran])
 ])
+
+AC_DEFUN([PAC_LDBL_DIG],[
+AC_MSG_CHECKING([maximum decimal precision for C])
+rm -f pac_Cconftest.out
+  AC_LANG_CONFTEST([
+      AC_LANG_PROGRAM([
+                #include <float.h>
+                #include <stdio.h>
+                #if __STDC_VERSION__ >= 199901L
+                #define C_LDBL_DIG DECIMAL_DIG 
+                #else
+                #define C_LDBL_DIG LDBL_DIG
+                #endif
+                ],[[
+                  FILE * pFile;
+                  pFile = fopen("pac_Cconftest.out","w");
+                  fprintf(pFile, "%d\n", C_LDBL_DIG);
+                ]])
+        ])
+        AC_RUN_IFELSE([],[
+            if test -s pac_Cconftest.out ; then
+                LDBL_DIG="`cat pac_Cconftest.out`"
+                AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $LDBL_DIG, [Determine the decimal precision of C long double])
+            else
+                AC_MSG_WARN([No output from test program!])
+            fi
+            rm -f pac_Cconftest.out
+        ],[
+            AC_MSG_WARN([C program fails to build or run!])
+        ],[])
+AC_MSG_RESULT([$LDBL_DIG])
+])
+
+

@@ -994,10 +994,25 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: real_kind_7  = C_FLOAT   !should map to REAL*4 on most modern processors
     INTEGER, PARAMETER :: real_kind_15 = C_DOUBLE  !should map to REAL*8 on most modern processors
     
+! Check if C has quad precision extension
 #if H5_HAVE_FLOAT128!=0
+! Check if Fortran supports quad precision
+# if H5_PAC_FC_MAX_REAL_PRECISION > 26
     INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(31)
+# else
+    INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(15,307)
+# endif
 #else
-    INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(17)
+! Check if the default of long double is quad precision
+# if H5_PAC_C_MAX_REAL_PRECISION  > 26
+#   if H5_PAC_FC_MAX_REAL_PRECISION > 26
+    INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(31)
+#   else
+    INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(15,307)
+#   endif
+# else
+    INTEGER, PARAMETER :: real_kind_31 = SELECTED_REAL_KIND(15,307)
+# endif
 #endif
     REAL(real_kind_31), DIMENSION(1:4), TARGET :: dset_data_r31, data_out_r31   
     INTEGER(HID_T) :: dset_idr16      ! Dataset identifier 

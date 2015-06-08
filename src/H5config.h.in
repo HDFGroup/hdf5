@@ -422,6 +422,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Determine the decimal precision of C long double */
+#undef PAC_C_MAX_REAL_PRECISION
+
 /* Define Fortran Maximum Real Decimal Precision */
 #undef PAC_FC_MAX_REAL_PRECISION
 

@@ -397,6 +397,8 @@ CONTAINS
           h5_type = H5T_NATIVE_FLOAT_128
 #endif
 #endif
+       ELSE
+          h5_type = -1
        ENDIF
     ENDIF
 

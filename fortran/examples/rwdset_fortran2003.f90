@@ -28,13 +28,13 @@ PROGRAM RWDSET_FORTRAN2003
         
   IMPLICIT NONE
 
-  INTEGER, PARAMETER :: int_kind_1 = SELECTED_INT_KIND(Fortran_INTEGER_1)  !should map to INTEGER*1 on most modern processors
-  INTEGER, PARAMETER :: int_kind_4 = SELECTED_INT_KIND(Fortran_INTEGER_2)  !should map to INTEGER*2 on most modern processors
-  INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  !should map to INTEGER*4 on most modern processors
-  INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(Fortran_INTEGER_8) !should map to INTEGER*8 on most modern processors
+  INTEGER, PARAMETER :: int_kind_1 = SELECTED_INT_KIND(2)  !should map to INTEGER*1 on most modern processors
+  INTEGER, PARAMETER :: int_kind_4 = SELECTED_INT_KIND(4)  !should map to INTEGER*2 on most modern processors
+  INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(9)  !should map to INTEGER*4 on most modern processors
+  INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
 
-  INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4) !should map to REAL*4 on most modern processors
-  INTEGER, PARAMETER :: real_kind_15 = SELECTED_REAL_KIND(Fortran_REAL_8) !should map to REAL*8 on most modern processors
+  INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(6,37) !should map to REAL*4 on most modern processors
+  INTEGER, PARAMETER :: real_kind_15 = SELECTED_REAL_KIND(15,307) !should map to REAL*8 on most modern processors
 
   CHARACTER(LEN=8), PARAMETER :: filename = "dsetf.h5" ! File name
   CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"     ! Dataset name

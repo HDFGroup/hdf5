@@ -213,8 +213,10 @@ CONTAINS
      CALL check("h5tget_size_f", error, total_error)
      CALL h5tget_size_f(H5T_NATIVE_INTEGER, type_sizei, error)
      CALL check("h5tget_size_f", error, total_error)
+     PRINT*,H5T_NATIVE_DOUBLE
      CALL h5tget_size_f(H5T_NATIVE_DOUBLE, type_sized, error)
      CALL check("h5tget_size_f", error, total_error)
+     stop
      CALL h5tget_size_f(H5T_NATIVE_REAL, type_sizer, error)
      CALL check("h5tget_size_f", error, total_error)
      !write(*,*) "get sizes", type_sizec, type_sizei, type_sizer, type_sized

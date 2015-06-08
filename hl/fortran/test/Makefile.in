@@ -151,13 +151,16 @@ am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src -I$(top_builddir)/fortran/src
-FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
-LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
-AM_V_FC = $(am__v_FC_@AM_V@)
-am__v_FC_ = $(am__v_FC_@AM_DEFAULT_V@)
-am__v_FC_0 = @echo "  FC      " $@;
-am__v_FC_1 = 
+PPFCCOMPILE = $(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_FCFLAGS) $(FCFLAGS)
+LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(FC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_FCFLAGS) $(FCFLAGS)
+AM_V_PPFC = $(am__v_PPFC_@AM_V@)
+am__v_PPFC_ = $(am__v_PPFC_@AM_DEFAULT_V@)
+am__v_PPFC_0 = @echo "  PPFC    " $@;
+am__v_PPFC_1 = 
 FCLD = $(FC)
 FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
@@ -525,6 +528,7 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
+PAC_C_MAX_REAL_PRECISION = @PAC_C_MAX_REAL_PRECISION@
 PAC_FC_ALL_INTEGER_KINDS = @PAC_FC_ALL_INTEGER_KINDS@
 PAC_FC_ALL_INTEGER_KINDS_SIZEOF = @PAC_FC_ALL_INTEGER_KINDS_SIZEOF@
 PAC_FC_ALL_REAL_KINDS = @PAC_FC_ALL_REAL_KINDS@
@@ -685,10 +689,10 @@ TEST_PROG = tstds tstlite tstimage tsttable
 LDADD = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL)  $(LIBHDF5)
 
 # Source files for the programs
-tstds_SOURCES = tstds.f90
-tstlite_SOURCES = tstlite.f90
-tstimage_SOURCES = tstimage.f90
-tsttable_SOURCES = tsttable.f90
+tstds_SOURCES = tstds.F90
+tstlite_SOURCES = tstlite.F90
+tstimage_SOURCES = tstimage.F90
+tsttable_SOURCES = tsttable.F90
 
 # Mark this directory as part of the Fortran API (this affects output
 # from tests in conclude.am)
@@ -716,7 +720,7 @@ TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chkexe_)
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .f90 .lo .log .o .obj .sh .sh$(EXEEXT) .trs
+.SUFFIXES: .F90 .lo .log .o .obj .sh .sh$(EXEEXT) .trs
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -780,14 +784,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-.f90.o:
-	$(AM_V_FC)$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
+.F90.o:
+	$(AM_V_PPFC)$(PPFCCOMPILE) -c -o $@ $<
 
-.f90.obj:
-	$(AM_V_FC)$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) `$(CYGPATH_W) '$<'`
+.F90.obj:
+	$(AM_V_PPFC)$(PPFCCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-.f90.lo:
-	$(AM_V_FC)$(LTFCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
+.F90.lo:
+	$(AM_V_PPFC)$(LTPPFCCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo

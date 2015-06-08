@@ -33,3 +33,6 @@
 ! Define if INTEGER*16 is available 
 #undef HAVE_Fortran_INTEGER_SIZEOF_16
 
+! Maximum decimal precision for C
+#undef PAC_C_MAX_REAL_PRECISION
+

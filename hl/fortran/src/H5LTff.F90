@@ -3568,7 +3568,7 @@ CONTAINS
 #ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
     SizeOf_buf_type = STORAGE_SIZE(buf(1)(1:1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
-    SizeOf_buf_type = SIZEOF((buf(1)(1:1))
+    SizeOf_buf_type = SIZEOF(buf(1:1)(1:1))
 #endif
 
     namelen = LEN(dset_name)

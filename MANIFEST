@@ -2339,10 +2339,10 @@
 ./hl/fortran/src/Makefile.in
 ./hl/fortran/test/Makefile.am
 ./hl/fortran/test/Makefile.in
-./hl/fortran/test/tstds.f90
-./hl/fortran/test/tstimage.f90
-./hl/fortran/test/tstlite.f90
-./hl/fortran/test/tsttable.f90
+./hl/fortran/test/tstds.F90
+./hl/fortran/test/tstimage.F90
+./hl/fortran/test/tstlite.F90
+./hl/fortran/test/tsttable.F90
 
 # hl c++
 ./hl/c++/COPYING

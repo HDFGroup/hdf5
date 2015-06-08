@@ -719,6 +719,7 @@ am__fastdepCXX_TRUE
 CXXDEPMODE
 ac_ct_CXX
 CXXFLAGS
+PAC_C_MAX_REAL_PRECISION
 FORTRAN_HAVE_C_LONG_DOUBLE
 HAVE_Fortran_INTEGER_SIZEOF_16
 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF
@@ -6980,8 +6981,8 @@ rm -f core conftest.err conftest.$ac_objext \
   else
     if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes";then
       FC_SIZEOF_A="SIZEOF(a)"
-      FC_SIZEOF_B="SIZEOF(a)"
-      FC_SIZEOF_C="SIZEOF(a)"
+      FC_SIZEOF_B="SIZEOF(b)"
+      FC_SIZEOF_C="SIZEOF(c)"
     else
       ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
       as_fn_error $? "Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE" "$LINENO" 5
@@ -7490,6 +7491,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
+
   ## Setting definition if there is a 16 byte fortran integer
   if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
     HAVE_Fortran_INTEGER_SIZEOF_16="1"
@@ -7537,17 +7539,87 @@ $as_echo "#define FORTRAN_HAVE_C_LONG_DOUBLE 1" >>confdefs.h
 
 $as_echo "#define FORTRAN_SIZEOF_LONG_DOUBLE SIZEOF_LONG_DOUBLE" >>confdefs.h
 
-else
-  FC="no"
-fi
-
 ## Change back to the C language
-ac_ext=c
+  ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking maximum decimal precision for C" >&5
+$as_echo_n "checking maximum decimal precision for C... " >&6; }
+rm -f pac_Cconftest.out
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+                #include <float.h>
+                #include <stdio.h>
+                #if __STDC_VERSION__ >= 199901L
+                #define C_LDBL_DIG DECIMAL_DIG
+                #else
+                #define C_LDBL_DIG LDBL_DIG
+                #endif
+
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+
+                  FILE * pFile;
+                  pFile = fopen("pac_Cconftest.out","w");
+                  fprintf(pFile, "%d\n", C_LDBL_DIG);
+
+  ;
+  return 0;
+}
+
+_ACEOF
+        if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  if ac_fn_c_try_run "$LINENO"; then :
+
+            if test -s pac_Cconftest.out ; then
+                LDBL_DIG="`cat pac_Cconftest.out`"
+
+cat >>confdefs.h <<_ACEOF
+#define PAC_C_MAX_REAL_PRECISION $LDBL_DIG
+_ACEOF
+
+            else
+                { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No output from test program!" >&5
+$as_echo "$as_me: WARNING: No output from test program!" >&2;}
+            fi
+            rm -f pac_Cconftest.out
+
+else
+
+            { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: C program fails to build or run!" >&5
+$as_echo "$as_me: WARNING: C program fails to build or run!" >&2;}
+
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $LDBL_DIG" >&5
+$as_echo "$LDBL_DIG" >&6; }
+
+else
+  FC="no"
+fi
 
 ## ----------------------------------------------------------------------
 ## Check if they would like the C++ interface compiled

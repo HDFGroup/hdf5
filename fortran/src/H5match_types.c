@@ -163,6 +163,7 @@ int main(void)
   
   int H5_FORTRAN_NUM_INTEGER_KINDS;
   int H5_FORTRAN_NUM_REAL_KINDS;
+  int found_long_double = 0;
 
   /* Open target files */
   c_header = fopen(CFILE, "w");
@@ -206,7 +207,6 @@ int main(void)
 
   /* (b) Define c_float_x */
 
-  int found_long_double = 0;
   for(i=0;i< H5_FORTRAN_NUM_REAL_KINDS;i++) {
 
     if (sizeof(float) == RealKinds_SizeOf[i]) {
@@ -551,12 +551,12 @@ int main(void)
     
     fprintf(fort_header, "        INTEGER, PARAMETER :: H5R_DSET_REG_REF_BUF_SIZE_F = %u\n", H5_SIZEOF_HADDR_T + 4 );
 
-
   /* Close files */
   endCfile();
   endFfile();
   fclose(c_header);
   fclose(fort_header);
+
   return 0;
 }
 

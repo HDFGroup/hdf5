@@ -16,6 +16,7 @@
 !
 ! This file contains the FORTRAN90 tests for H5LT
 !
+#include <H5config_f.inc>
 
 PROGRAM lite_test
 
@@ -1220,9 +1221,9 @@ SUBROUTINE test_datasets()
   !
   ! read dataset.
   !
-  f_ptr = C_LOC(buf4(1))
-  CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, f_ptr, errcode)
-  !CALL h5ltread_dataset_double_f(file_id, dsetname4, bufr4, dims, errcode)
+  !!!f_ptr = C_LOC(buf4(1)) MSB
+  !!!CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, f_ptr, errcode) MSB
+  CALL h5ltread_dataset_double_f(file_id, dsetname4, bufr4, dims, errcode)
 
   !
   ! compare read and write buffers.
@@ -1499,22 +1500,22 @@ SUBROUTINE test_attributes()
   !
   ! write attribute.
   !
-!#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
   SizeOf_buf_type = STORAGE_SIZE(buf3(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
-!#else
-!  SizeOf_buf_type = SIZEOF(bufr4(1))
-!#endif
+#else
+  SizeOf_buf_type = SIZEOF(buf3(1))
+#endif
   f_ptr = C_LOC(buf3(1))
   CALL h5ltset_attribute_f(file_id,dsetname1,attrname3,f_ptr,"REAL", SizeOf_buf_type, size,errcode)
   !CALL h5ltset_attribute_float_f(file_id,dsetname1,attrname3,buf3,size,errcode)
   !
   ! read attribute.
   !
-!#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
   SizeOf_buf_type = STORAGE_SIZE(bufr3(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
-!#else
-!  SizeOf_buf_type = SIZEOF(bufr4(1))
-!#endif
+#else
+  SizeOf_buf_type = SIZEOF(bufr3(1))
+#endif
 
   f_ptr = C_LOC(bufr3(1))
   CALL h5ltget_attribute_f(file_id,dsetname1,attrname3,f_ptr,"REAL",SizeOf_buf_type,errcode)
@@ -1538,9 +1539,12 @@ SUBROUTINE test_attributes()
   !-------------------------------------------------------------------------
 
   CALL test_begin(' Set/Get attributes double      ')
-  
-  SizeOf_buf_type = STORAGE_SIZE(buf4(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+  SizeOf_buf_type = STORAGE_SIZE(buf4(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+#else
+  SizeOf_buf_type = SIZEOF(buf4(1))
+#endif
   !
   ! write attribute.
   !
@@ -1553,11 +1557,11 @@ SUBROUTINE test_attributes()
   ! read attribute.
   !
 
-!#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
   SizeOf_buf_type = STORAGE_SIZE(bufr4(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
-!#else
-!  SizeOf_buf_type = SIZEOF(bufr4(1))
-!#endif
+#else
+  SizeOf_buf_type = SIZEOF(bufr4(1))
+#endif
 
   f_ptr = C_LOC(bufr4(1))
   CALL h5ltget_attribute_f(file_id,dsetname1,attrname4,f_ptr,"REAL",SizeOf_buf_type,errcode)
