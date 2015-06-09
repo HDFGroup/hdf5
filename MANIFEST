@@ -1102,6 +1102,7 @@
 ./test/test_filters_be.h5
 ./test/gen_filters.c
 ./test/chunk_info.c
+./test/vds.c
 
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
@@ -1176,7 +1177,6 @@
 ./tools/h5dump/testh5dumppbits.sh.in
 ./tools/h5dump/testh5dumpxml.sh.in
 ./tools/h5dump/binread.c
-
 
 ./tools/h5import/Makefile.am
 ./tools/h5import/Makefile.in
@@ -1321,6 +1321,20 @@
 ./tools/misc/testfiles/h5mkgrp_help.txt
 ./tools/misc/testfiles/h5mkgrp_version.txt.in
 ./tools/misc/h5perf_gentest.c
+./tools/misc/vds/Makefile.am
+./tools/misc/vds/Makefile.in
+./tools/misc/vds/UC_1.h
+./tools/misc/vds/UC_1_one_dim_gen.c
+./tools/misc/vds/UC_2.h
+./tools/misc/vds/UC_2_two_dims_gen.c
+./tools/misc/vds/UC_3.h
+./tools/misc/vds/UC_3_gaps_gen.c
+./tools/misc/vds/UC_4.h
+./tools/misc/vds/UC_4_printf_gen.c
+./tools/misc/vds/UC_5.h
+./tools/misc/vds/UC_5_stride_gen.c
+./tools/misc/vds/UC_common.h
+
 
 # h5stat sources
 ./tools/h5stat/Makefile.am
