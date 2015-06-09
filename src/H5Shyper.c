@@ -9339,6 +9339,10 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     if(H5S_SELECT_RELEASE(proj_space) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection")
 
+    /* If any selections are empty, skip to the end so "none" is selected */
+    if((ss_nelem == 0) || (ds_nelem == 0) || (sis_nelem == 0))
+        goto loop_end;
+
     /* Allocate space for the hyperslab selection information (note this sets
      * diminfo_valid to FALSE, diminfo arrays to 0, and span list to NULL) */
     if((proj_space->select.sel_info.hslab = H5FL_CALLOC(H5S_hyper_sel_t)) == NULL)
@@ -9359,6 +9363,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     if(H5S_SELECT_GET_SEQ_LIST(src_space, 0u, &ss_iter, H5S_PROJECT_INTERSECT_NSEQS, ss_nelem, &ss_nseq, &nelem, ss_off, ss_len) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
     ss_nelem -= nelem;
+    HDassert(ss_nseq > 0);
 
     /* Initialize destination space iterator */
     if(H5S_select_iter_init(&ds_iter, dst_space, (size_t)1) < 0)
@@ -9369,6 +9374,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     if(H5S_SELECT_GET_SEQ_LIST(dst_space, 0u, &ds_iter, H5S_PROJECT_INTERSECT_NSEQS, ds_nelem, &ds_nseq, &nelem, ds_off, ds_len) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
     ds_nelem -= nelem;
+    HDassert(ds_nseq > 0);
 
     /* Initialize source intersect space iterator */
     if(H5S_select_iter_init(&sis_iter, src_intersect_space, (size_t)1) < 0)
@@ -9379,10 +9385,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     if(H5S_SELECT_GET_SEQ_LIST(src_intersect_space, 0u, &sis_iter, H5S_PROJECT_INTERSECT_NSEQS, sis_nelem, &sis_nseq, &nelem, sis_off, sis_len) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
     sis_nelem -= nelem;
-
-    /* If any sequences are empty, skip the main loop */
-    if((ss_nseq == 0) || (ds_nseq == 0) || (sis_nseq == 0))
-        goto loop_end;
+    HDassert(sis_nseq > 0);
 
     /* Loop until we run out of sequences in either the source or source
      * intersect space */
@@ -10014,7 +10017,7 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
     num_slices = match_space->select.num_elem / match_hslab->num_elem_non_unlim;
 
     if(num_slices == 0) {
-        HDassert(incl_trail && "Checking code coverage..."); //VDSINC
+        //HDassert(incl_trail && "Checking code coverage..."); //VDSINC
         HDassert(!incl_trail && "Checking code coverage..."); //VDSINC
         *clip_size = incl_trail ? diminfo->start : 0;
     } //VDSINC
