@@ -335,7 +335,14 @@ add_test (
 )
 
 foreach (test ${H5_TESTS})
-  add_test (NAME H5TEST-${test} COMMAND $<TARGET_FILE:${test}>)
+  if (${test} STREQUAL "big" AND CYGWIN)
+    add_test (
+        NAME H5TEST-${test}
+        COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${test}"
+    )
+  else (${test} STREQUAL "big" AND CYGWIN)
+    add_test (NAME H5TEST-${test} COMMAND $<TARGET_FILE:${test}>)
+  endif (${test} STREQUAL "big" AND CYGWIN)
   set_tests_properties (H5TEST-${test} PROPERTIES
       DEPENDS H5TEST-clear-objects
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
@@ -346,9 +353,7 @@ endforeach (test ${H5_TESTS})
 set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
 set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-testmeta PROPERTIES TIMEOUT 1800)
-if (NOT CYGWIN)
-  set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
-endif (NOT CYGWIN)
+set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
 
 ##############################################################################
 ##############################################################################
