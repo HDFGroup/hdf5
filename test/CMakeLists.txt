@@ -85,7 +85,7 @@ if (BUILD_SHARED_LIBS)
         TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different 
+        ARGS       -E copy_if_different
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/testdir1/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
     )
@@ -116,7 +116,7 @@ if (BUILD_SHARED_LIBS)
         TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different 
+        ARGS       -E copy_if_different
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/testdir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
     )
@@ -190,7 +190,7 @@ set (H5_TESTS
     objcopy
     links
     unlink
-    big
+#    big
     mtime
     fillval
     mount
@@ -223,6 +223,9 @@ set (H5_TESTS
     enc_dec_plist_with_endianess
     unregister
 )
+if (NOT CYGWIN)
+  set (H5_TESTS ${H5_TESTS} big)
+endif (NOT CYGWIN)
 
 foreach (test ${H5_TESTS})
   ADD_H5_EXE(${test})
@@ -293,7 +296,7 @@ set_target_properties (links_env PROPERTIES FOLDER test)
 
 #-- Adding test for libinfo
 set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
-file (WRITE ${GREP_RUNNER} 
+file (WRITE ${GREP_RUNNER}
   "file (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
 if (\${TEST_RESULT} STREQUAL \"0\")
   message (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")
