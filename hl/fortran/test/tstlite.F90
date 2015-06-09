@@ -1214,16 +1214,17 @@ SUBROUTINE test_datasets()
   !
   ! write dataset.
   !
-  f_ptr = C_LOC(buf4(1))
-  CALL h5ltmake_dataset_f(file_id, dsetname4, rank, dims, H5T_NATIVE_DOUBLE, f_ptr, errcode)
-  !CALL h5ltmake_dataset_double_f(file_id, dsetname4, rank, dims, buf4, errcode)
+  !f_ptr = C_LOC(buf4(1))
+  !CALL h5ltmake_dataset_f(file_id, dsetname4, rank, dims, H5T_NATIVE_DOUBLE, f_ptr, errcode)
+  CALL h5ltmake_dataset_double_f(file_id, dsetname4, rank, dims, buf4, errcode)
 
   !
   ! read dataset.
   !
-  !!!f_ptr = C_LOC(buf4(1)) MSB
-  !!!CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, f_ptr, errcode) MSB
+  !f_ptr = C_LOC(buf4(1))
+  !CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, f_ptr, errcode)
   CALL h5ltread_dataset_double_f(file_id, dsetname4, bufr4, dims, errcode)
+
 
   !
   ! compare read and write buffers.

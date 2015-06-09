@@ -446,10 +446,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     fi
   fi
 
-
-  ## See if C_LONG_DOUBLE is available, and if it is different from C_DOUBLE
-  PAC_PROG_FC_HAVE_C_LONG_DOUBLE
-
   ## See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
   PAC_PROG_FC_ISO_FORTRAN_ENV
 
@@ -471,8 +467,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_KIND])
   AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF])
   AC_SUBST([HAVE_Fortran_INTEGER_SIZEOF_16])
-  AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
   AC_SUBST([PAC_C_MAX_REAL_PRECISION])
+  AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
+  AC_SUBST([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE])
 
   ## Setting definition if there is a 16 byte fortran integer
   if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
@@ -501,12 +498,30 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   if  test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
   fi
+
+  ## See if C_LONG_DOUBLE is available
+  PAC_PROG_FC_HAVE_C_LONG_DOUBLE
+
   FORTRAN_HAVE_C_LONG_DOUBLE="0" 
   if test "X$HAVE_C_LONG_DOUBLE_FORTRAN" = "Xyes"; then
     FORTRAN_HAVE_C_LONG_DOUBLE="1" 
     AC_DEFINE([FORTRAN_HAVE_C_LONG_DOUBLE], [1], [Define if we have Fortran C_LONG_DOUBLE])
   fi
+
+  ## Is C_LONG_DOUBLE different from C_DOUBLE
+  FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
+  if test "X$FORTRAN_HAVE_C_LONG_DOUBLE"; then
+    PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
+    if test "X$FORTRAN_C_LONG_DOUBLE_IS_UNIQUE" = "Xyes"; then
+      FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="1" 
+      AC_DEFINE([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE], [1], [Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE])
+    else
+      FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
+    fi
+  fi
+ 
   AC_DEFINE([FORTRAN_SIZEOF_LONG_DOUBLE], [SIZEOF_LONG_DOUBLE], [Determine the size of C long double])
+
 ## Change back to the C language
   AC_LANG_POP(Fortran)
   PAC_LDBL_DIG

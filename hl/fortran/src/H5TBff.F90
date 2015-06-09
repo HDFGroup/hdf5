@@ -42,7 +42,7 @@ MODULE h5tb
      MODULE PROCEDURE h5tbwrite_field_name_f_int
      MODULE PROCEDURE h5tbwrite_field_name_f_c_float
      MODULE PROCEDURE h5tbwrite_field_name_f_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
      MODULE PROCEDURE h5tbwrite_field_name_f_c_long_double
 #endif
      MODULE PROCEDURE h5tbwrite_field_name_f_string
@@ -52,7 +52,7 @@ MODULE h5tb
      MODULE PROCEDURE h5tbread_field_name_f_int
      MODULE PROCEDURE h5tbread_field_name_f_c_float
      MODULE PROCEDURE h5tbread_field_name_f_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
      MODULE PROCEDURE h5tbread_field_name_f_c_long_double
 #endif
      MODULE PROCEDURE h5tbread_field_name_f_string
@@ -62,7 +62,7 @@ MODULE h5tb
      MODULE PROCEDURE h5tbwrite_field_index_f_int
      MODULE PROCEDURE h5tbwrite_field_index_f_c_float
      MODULE PROCEDURE h5tbwrite_field_index_f_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
      MODULE PROCEDURE h5tbwrite_field_index_f_c_long_double
 #endif
      MODULE PROCEDURE h5tbwrite_field_index_f_string
@@ -72,7 +72,7 @@ MODULE h5tb
      MODULE PROCEDURE h5tbread_field_index_f_int
      MODULE PROCEDURE h5tbread_field_index_f_c_float
      MODULE PROCEDURE h5tbread_field_index_f_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
      MODULE PROCEDURE h5tbread_field_index_f_c_long_double
 #endif
      MODULE PROCEDURE h5tbread_field_index_f_string
@@ -82,7 +82,7 @@ MODULE h5tb
      MODULE PROCEDURE h5tbinsert_field_f_int
      MODULE PROCEDURE h5tbinsert_field_f_c_float
      MODULE PROCEDURE h5tbinsert_field_f_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
      MODULE PROCEDURE h5tbinsert_field_f_c_long_double
 #endif
      MODULE PROCEDURE h5tbinsert_field_f_string
@@ -413,7 +413,7 @@ CONTAINS
     
   END SUBROUTINE h5tbwrite_field_name_f_c_double
 
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
   SUBROUTINE h5tbwrite_field_name_f_c_long_double(loc_id,&
        dset_name,&
        field_name,&
@@ -594,7 +594,7 @@ CONTAINS
 
   END SUBROUTINE h5tbread_field_name_f_c_double
 
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
   SUBROUTINE h5tbread_field_name_f_c_long_double(loc_id,&
        dset_name,&
        field_name,&
@@ -766,7 +766,7 @@ CONTAINS
     
   END SUBROUTINE h5tbwrite_field_index_f_c_double
 
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
   SUBROUTINE h5tbwrite_field_index_f_c_long_double(loc_id,&
        dset_name,&
        field_index,&
@@ -931,7 +931,7 @@ CONTAINS
 
   END SUBROUTINE h5tbread_field_index_f_c_double
 
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
   SUBROUTINE h5tbread_field_index_f_c_long_double(loc_id,&
        dset_name,&
        field_index,&
@@ -1093,7 +1093,7 @@ CONTAINS
     
   END SUBROUTINE h5tbinsert_field_f_c_double
 
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
   SUBROUTINE h5tbinsert_field_f_c_long_double(loc_id,&
        dset_name,&
        field_name,&

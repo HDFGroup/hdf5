@@ -125,12 +125,27 @@ AC_DEFUN([PAC_PROG_FC_STORAGE_SIZE],[
 
 ])
 
-dnl Check to see C_LONG_DOUBLE is available, and if it 
-dnl is different from C_DOUBLE
+dnl Check to see C_LONG_DOUBLE is available
 
 AC_DEFUN([PAC_PROG_FC_HAVE_C_LONG_DOUBLE],[
-  FORTRAN_HAVE_C_LONG_DOUBLE="no"	
-  AC_MSG_CHECKING([if Fortran C_LONG_DOUBLE is valid])
+  HAVE_C_LONG_DOUBLE_FORTRAN="no"
+  AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_LONG_DOUBLE])
+  AC_LINK_IFELSE([AC_LANG_SOURCE([
+   PROGRAM main
+     USE ISO_C_BINDING
+     REAL(KIND=C_LONG_DOUBLE) :: d
+   END PROGRAM
+  ])], [AC_MSG_RESULT([yes])
+     	HAVE_C_LONG_DOUBLE_FORTRAN="yes"],
+     [AC_MSG_RESULT([no])])
+])
+
+dnl Check if C_LONG_DOUBLE is different from C_DOUBLE
+
+if  test "X$FORTRAN_HAVE_C_LONG_DOUBLE" = "Xyes"; then
+AC_DEFUN([PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE],[
+  FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="no"	
+  AC_MSG_CHECKING([if Fortran C_LONG_DOUBLE is different from C_DOUBLE])
   
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([
      MODULE type_mod
@@ -156,9 +171,10 @@ AC_DEFUN([PAC_PROG_FC_HAVE_C_LONG_DOUBLE],[
        CALL h5t(d)
      END PROGRAM main
     ])], [AC_MSG_RESULT([yes]) 
-            FORTRAN_HAVE_C_LONG_DOUBLE="yes"], 
+            FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="yes"], 
          [AC_MSG_RESULT([no])])
 ])
+fi
 
 dnl Checking if the compiler supports the required Fortran 2003 features and
 dnl disable Fortran 2003 if it does not.
