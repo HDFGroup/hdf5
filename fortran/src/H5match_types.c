@@ -226,7 +226,12 @@ int main(void)
     else if(sizeof(__float128) == RealKinds_SizeOf[i] && found_long_double == 1 && H5_PAC_FC_MAX_REAL_PRECISION > 28) {
       writeTypedef("float", "__float128", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_FLOAT128");
-    } 
+    }
+#else
+    else if(sizeof(long double) == RealKinds_SizeOf[i] && found_long_double == 1 && H5_PAC_FC_MAX_REAL_PRECISION > 28) {
+      writeTypedef("float", "long double", RealKinds[i]);
+      strcpy(Real_C_TYPES[i], "C_FLOAT128");
+    }
 #endif
 /*     else { */
   /*     /\* Did not find the real type, use the next smallest *\/ */
