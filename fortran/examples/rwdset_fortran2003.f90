@@ -148,12 +148,12 @@ PROGRAM RWDSET_FORTRAN2003
   CALL h5dread_f(dset_idr8, h5kind_to_type(real_kind_15,H5_REAL_KIND), f_ptr,  error)
 
 ! memory type
-  WRITE(*,'(A,4i8)' )'SELECTED_INT_KIND(Fortran_INTEGER_1):  ',data_out_i8a
-  WRITE(*,'(A,4i8)' )'SELECTED_INT_KIND(Fortran_INTEGER_4):  ',data_out_i4
-  WRITE(*,'(A,4i8)' )'SELECTED_INT_KIND(Fortran_INTEGER_8):  ',data_out_i8
-  WRITE(*,'(A,4i8)' )'SELECTED_INT_KIND(Fortran_INTEGER_16): ',data_out_i16
-  WRITE(*,'(A,4(1x,f9.4))' )'SELECTED_REAL_KIND(Fortran_REAL_7):  ',data_out_r7
-  WRITE(*,'(A,4(1x,f16.10))' )'SELECTED_REAL_KIND(Fortran_REAL_15):  ',data_out_r15
+  WRITE(*,'(A,4i8)' )'SELECTED_INT_KIND(2):  ',data_out_i8a
+  WRITE(*,'(A,4i8)' )'SELECTED_INT_KIND(4):  ',data_out_i4
+  WRITE(*,'(A,4i8)' )'SELECTED_INT_KIND(9):  ',data_out_i8
+  WRITE(*,'(A,4i8)' )'SELECTED_INT_KIND(18): ',data_out_i16
+  WRITE(*,'(A,4(1x,f9.4))' )'SELECTED_REAL_KIND(6,37):  ',data_out_r7
+  WRITE(*,'(A,4(1x,f16.10))' )'SELECTED_REAL_KIND(15,307):  ',data_out_r15
   !
   ! Close the dataset.
   !
