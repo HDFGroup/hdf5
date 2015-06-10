@@ -33393,5 +33393,14 @@ cat >> src/H5config.h <<EOF
 #endif
 EOF
 
+## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
+## linker flags:  -l with no library name; -l <libname>, specifically gfortran or m.
+## This sed script corrects "-l <libname>" first and then "-l " with no library name.
+## If the order is not preserved, all instances of "-l " will be removed.
+## The -i option for sed doesn't work on some systems, so a temporary file is used
+## and used to overwrite the original libtool file.
+sed -e '/^postdeps/ s/-l \(a-zA-Z\)/-l\1/g' -e '/^postdeps/ s/-l //g' libtool > libtool_rev
+mv -f libtool_rev libtool
+
 ## show the configure settings
 cat src/libhdf5.settings
