@@ -32701,7 +32701,7 @@ $as_echo X"$file" |
   done
 }
  ;;
-    "fortran/src/H5config_f.inc":H) sed -i '1d;s%^/\* \(.*\) \*/%\1%;s/#define /#define H5_/;s/#undef /#undef H5_/' fortran/src/H5config_f.inc ;;
+    "fortran/src/H5config_f.inc":H) cat fortran/src/H5config_f.inc | sed '1d;s%^/\* \(.*\) \*/%\1%;s/#define /#define H5_/;s/#undef /#undef H5_/' >fortran/src/H5config_f.inc.tmp; mv -- fortran/src/H5config_f.inc.tmp fortran/src/H5config_f.inc ;;
     "libtool":C)
 
     # See if we are running on zsh, and set the options which allow our
