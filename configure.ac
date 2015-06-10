@@ -470,6 +470,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([PAC_C_MAX_REAL_PRECISION])
   AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
   AC_SUBST([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE])
+  AC_SUBST([FORTRAN_SIZEOF_LONG_DOUBLE])
 
   ## Setting definition if there is a 16 byte fortran integer
   if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
@@ -519,8 +520,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
       FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
     fi
   fi
- 
-  AC_DEFINE([FORTRAN_SIZEOF_LONG_DOUBLE], [SIZEOF_LONG_DOUBLE], [Determine the size of C long double])
+  
+  FORTRAN_SIZEOF_LONG_DOUBLE=${ac_cv_sizeof_long_double}
+  AC_DEFINE_UNQUOTED([FORTRAN_SIZEOF_LONG_DOUBLE], ["${ac_cv_sizeof_long_double}"], [Determine the size of C long double])
 
 ## Change back to the C language
   AC_LANG_POP(Fortran)

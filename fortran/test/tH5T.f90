@@ -157,7 +157,6 @@ CONTAINS
      
      CALL h5tclose_f(fixed_str2,error)
      CALL check("h5tclose_f", error, total_error)
-
      data_dims(1) = dimsize
      !
      ! Initialize data buffer.

@@ -719,6 +719,7 @@ am__fastdepCXX_TRUE
 CXXDEPMODE
 ac_ct_CXX
 CXXFLAGS
+FORTRAN_SIZEOF_LONG_DOUBLE
 FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
 FORTRAN_HAVE_C_LONG_DOUBLE
 PAC_C_MAX_REAL_PRECISION
@@ -7450,6 +7451,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
+
   ## Setting definition if there is a 16 byte fortran integer
   if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
     HAVE_Fortran_INTEGER_SIZEOF_16="1"
@@ -7575,8 +7577,11 @@ $as_echo "#define FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 1" >>confdefs.h
     fi
   fi
 
+  FORTRAN_SIZEOF_LONG_DOUBLE=${ac_cv_sizeof_long_double}
 
-$as_echo "#define FORTRAN_SIZEOF_LONG_DOUBLE SIZEOF_LONG_DOUBLE" >>confdefs.h
+cat >>confdefs.h <<_ACEOF
+#define FORTRAN_SIZEOF_LONG_DOUBLE "${ac_cv_sizeof_long_double}"
+_ACEOF
 
 
 ## Change back to the C language
@@ -32701,7 +32706,7 @@ $as_echo X"$file" |
   done
 }
  ;;
-    "fortran/src/H5config_f.inc":H) cat fortran/src/H5config_f.inc | sed '1d;s%^/\* \(.*\) \*/%\1%;s/#define /#define H5_/;s/#undef /#undef H5_/' >fortran/src/H5config_f.inc.tmp; mv -- fortran/src/H5config_f.inc.tmp fortran/src/H5config_f.inc ;;
+    "fortran/src/H5config_f.inc":H) cat fortran/src/H5config_f.inc | sed '1d;s%^/\* \(.*\) \*/%\1%;s/#define /#define H5_/;s/#undef /#undef H5_/' >fortran/src/H5config_f.inc.tmp; mv -f fortran/src/H5config_f.inc.tmp fortran/src/H5config_f.inc ;;
     "libtool":C)
 
     # See if we are running on zsh, and set the options which allow our

@@ -22,7 +22,7 @@
 */
 
 #include "H5f90.h"
-
+#include "H5fort_type_defines.h"
 /****if* H5_f/h5init_types_c
  * NAME
  *  h5init_types_c
@@ -90,6 +90,12 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
 #if H5_SIZEOF_LONG_DOUBLE!=0
     else if(sizeof(double_f)==sizeof(long double)) {
        if ((types[2] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
+    }/*end else */
+#endif
+#ifdef H5_HAVE_FLOAT128
+    else if(sizeof(double_f)==sizeof(__float128)) {
+      if ((types[2] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
+      if ( H5Tset_precision (types[2], 128) < 0) return ret_value;
     }/*end else */
 #endif
 

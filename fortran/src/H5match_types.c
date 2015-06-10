@@ -488,6 +488,16 @@ int main(void)
     writeToFilesChr("float","Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_KIND, "C_DOUBLE");
   else if(H5_FORTRAN_NATIVE_DOUBLE_SIZEOF == sizeof(float))
     writeToFilesChr("float","Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_KIND, "C_FLOAT");
+#ifdef H5_HAVE_FLOAT128
+    /* Don't select a higher precision than Fortran can support */
+  else if(sizeof(__float128) == H5_FORTRAN_NATIVE_DOUBLE_SIZEOF && H5_PAC_FC_MAX_REAL_PRECISION > 28) {
+      writeToFilesChr("float","Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_KIND, "C_FLOAT128");
+    }
+#else
+  else if(sizeof(long double) == H5_FORTRAN_NATIVE_DOUBLE_SIZEOF && H5_PAC_FC_MAX_REAL_PRECISION > 28) {
+      writeToFilesChr("float","Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_KIND, "C_FLOAT128");
+    }
+#endif
   else {
 /*     /\* No exact match, choose the next highest *\/ */
 /*     if(H5_FORTRAN_NATIVE_DOUBLE_SIZEOF > sizeof(long double)) */
