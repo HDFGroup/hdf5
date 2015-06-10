@@ -2698,8 +2698,8 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
         H5_ENCODE_DOUBLE(*pp, config->empty_reserve);
 
-        /* int */
-        INT32ENCODE(*pp, (int32_t)config->dirty_bytes_threshold);
+        /* unsigned */
+        UINT32ENCODE(*pp, (uint32_t)config->dirty_bytes_threshold);
 
         /* int */
         INT32ENCODE(*pp, (int32_t)config->metadata_write_strategy);
@@ -2850,8 +2850,8 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
 
     H5_DECODE_DOUBLE(*pp, config->empty_reserve);
 
-    /* int */
-    INT32DECODE(*pp, config->dirty_bytes_threshold);
+    /* unsigned */
+    UINT32DECODE(*pp, config->dirty_bytes_threshold);
 
     /* int */
     INT32DECODE(*pp, config->metadata_write_strategy);

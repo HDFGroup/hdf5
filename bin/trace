@@ -179,7 +179,7 @@ sub argstring ($$$) {
   # Normalize the data type by removing redundant white space,
   # certain type qualifiers, and indirection.
   $atype =~ s/^\bconst\b//;
-  $atype =~ s/\bUNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_UNUSED\b//g;
   $atype =~ s/\s+/ /g;
   $ptr = length $1 if  $atype =~ s/(\*+)//;
   $atype =~ s/^\s+//;

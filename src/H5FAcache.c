@@ -189,7 +189,7 @@ H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata))
 	H5E_THROW(H5E_CANTINIT, "can't wrap buffer")
 
     /* Compute the 'base' size of the fixed array header on disk */
-    size = H5FA_HEADER_SIZE(hdr);
+    size = H5FA_HEADER_SIZE_HDR(hdr);
 
     /* Get a pointer to a buffer that's large enough for serialized header */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
@@ -883,7 +883,7 @@ H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 	H5E_THROW(H5E_CANTINIT, "can't wrap buffer")
 
     /* Compute the size of the fixed array data block page on disk */
-    size = H5FA_DBLK_PAGE_SIZE(dblk_page, udata->nelmts);
+    size = H5FA_DBLK_PAGE_SIZE(udata->hdr, udata->nelmts);
 
     /* Get a pointer to a buffer that's large enough for serialized info */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))

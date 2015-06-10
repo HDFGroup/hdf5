@@ -70,7 +70,7 @@
     )
 
 /* Size of the Fixed Array header on disk */
-#define H5FA_HEADER_SIZE(h)     (                                             \
+#define H5FA_HEADER_SIZE(sizeof_addr, sizeof_size) (                          \
     /* General metadata fields */                                             \
     H5FA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
@@ -79,10 +79,20 @@
     + 1 /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */ \
                                                                               \
     /* Fixed Array statistics fields */                                       \
-    + (h)->sizeof_size /* # of elements in the fixed array */    	      \
+    + (sizeof_size) /* # of elements in the fixed array */    		      \
                                                                               \
     /* Fixed Array Header specific fields */                                  \
-    + (h)->sizeof_addr /* File address of Fixed Array data block */  	      \
+    + (sizeof_addr) /* File address of Fixed Array data block */  	      \
+    )
+
+/* Size of the fixed array header on disk (via file pointer) */
+#define H5FA_HEADER_SIZE_FILE(f)   (                                          \
+    H5FA_HEADER_SIZE(H5F_SIZEOF_ADDR(f), H5F_SIZEOF_SIZE(f))                  \
+    )
+
+/* Size of the fixed array header on disk (via fixed array header) */
+#define H5FA_HEADER_SIZE_HDR(h)   (                                           \
+    H5FA_HEADER_SIZE((h)->sizeof_addr, (h)->sizeof_size)                      \
     )
 
 /* Size of the Fixed Array data block prefix on disk */
@@ -108,9 +118,9 @@
     )
 
 /* Size of the Fixed Array data block page on disk */
-#define H5FA_DBLK_PAGE_SIZE(d, nelmts)     (                                          	   \
+#define H5FA_DBLK_PAGE_SIZE(h, nelmts)     (                                  \
     /* Fixed Array Data Block Page */					      \
-    + (nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size) /* Elements in data block page */  \
+    + (nelmts * (size_t)(h)->cparam.raw_elmt_size) /* Elements in data block page */  \
     + H5FA_SIZEOF_CHKSUM                        	/* Checksum for each page */  	   \
     )
 

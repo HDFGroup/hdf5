@@ -19,7 +19,6 @@
  *		This file contains common code for tests of the cache
  *		implemented in H5C.c
  */
-#include "H5private.h"          /* Put this first, so H5open() isn't invoked in public macros */
 #include "h5test.h"
 #include "H5Cprivate.h"
 #include "H5Iprivate.h"
@@ -799,7 +798,6 @@ notify_dest(H5F_t * f, void *  thing)
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 flush(H5F_t *f,
       hid_t H5_ATTR_UNUSED dxpl_id,
@@ -871,7 +869,6 @@ flush(H5F_t *f,
     }
 
     return(SUCCEED);
-
 } /* flush() */
 
 herr_t
@@ -961,7 +958,6 @@ notify_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
     HDassert ( ((test_entry_t *)thing)->type == NOTIFY_ENTRY_TYPE );
     return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -1108,7 +1104,6 @@ notify_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 size(H5F_t H5_ATTR_UNUSED *  f,
      void *   thing,
@@ -1134,7 +1129,6 @@ size(H5F_t H5_ATTR_UNUSED *  f,
     *size_ptr = entry_ptr->size;
 
     return(SUCCEED);
-
 } /* size() */
 
 herr_t

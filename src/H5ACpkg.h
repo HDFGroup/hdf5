@@ -64,10 +64,10 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5AC__MIN_DIRTY_BYTES_THRESHOLD		(int32_t) \
+#define H5AC__MIN_DIRTY_BYTES_THRESHOLD		(size_t) \
 						(H5C__MIN_MAX_CACHE_SIZE / 2)
 #define H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD	(256 * 1024)
-#define H5AC__MAX_DIRTY_BYTES_THRESHOLD   	(int32_t) \
+#define H5AC__MAX_DIRTY_BYTES_THRESHOLD   	(size_t) \
 						(H5C__MAX_MAX_CACHE_SIZE / 4)
 
 
@@ -142,6 +142,29 @@
  *
  *                                              JRM - 6/27/05
  *
+ * Update: When the above was written, I planned to allow the process
+ *	0 metadata cache to write dirty metadata between sync points.
+ *	However, testing indicated that this allowed occasional 
+ *	messages from the future to reach the caches on other processes.
+ *
+ *	To resolve this, the code was altered to require that all metadata
+ *	writes take place during sync points -- which solved the problem.
+ *	Initially all writes were performed by the process 0 cache.  This 
+ *	approach was later replaced with a distributed write approach
+ *	in which each process writes a subset of the metadata to be 
+ *	written.  
+ *
+ *	After thinking on the matter for a while, I arrived at the 
+ *	conclusion that the process 0 cache could be allowed to write 
+ *	dirty metadata between sync points if it restricted itself to 
+ *	entries that had been dirty at the time of the previous sync point.  
+ *	
+ *	To date, there has been no attempt to implement this optimization.
+ *	However, should it be attempted, much of the supporting code 
+ *	should still be around.
+ *
+ *						JRM -- 1/6/15
+ *
  * magic:       Unsigned 32 bit integer always set to
  *		H5AC__H5AC_AUX_T_MAGIC.  This field is used to validate
  *		pointers to instances of H5AC_aux_t.
@@ -179,6 +202,10 @@
  *		this code, all writes were done from process 0.  This
  *		field exists to facilitate experiments with other 
  *		strategies.
+ *
+ *		At present, this field must be set to either
+ *		H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY or 
+ *		H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED.
  *
  * dirty_bytes_propagations: This field only exists when the
  *		H5AC_DEBUG_DIRTY_BYTES_CREATION #define is TRUE.
@@ -344,24 +371,24 @@ typedef struct H5AC_aux_t
 
     hbool_t	write_permitted;
 
-    int32_t	dirty_bytes_threshold;
+    size_t	dirty_bytes_threshold;
 
-    int32_t	dirty_bytes;
+    size_t	dirty_bytes;
 
     int32_t	metadata_write_strategy;
 
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
 
-    int32_t	dirty_bytes_propagations;
+    unsigned	dirty_bytes_propagations;
 
-    int32_t     unprotect_dirty_bytes;
-    int32_t     unprotect_dirty_bytes_updates;
+    size_t      unprotect_dirty_bytes;
+    unsigned    unprotect_dirty_bytes_updates;
 
-    int32_t     insert_dirty_bytes;
-    int32_t     insert_dirty_bytes_updates;
+    size_t      insert_dirty_bytes;
+    unsigned    insert_dirty_bytes_updates;
 
-    int32_t     move_dirty_bytes;
-    int32_t     move_dirty_bytes_updates;
+    size_t      move_dirty_bytes;
+    unsigned    move_dirty_bytes_updates;
 
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 

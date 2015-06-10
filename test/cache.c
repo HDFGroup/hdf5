@@ -271,7 +271,7 @@ smoke_check_1(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    row_major_scan_forward(/* file_ptr              */ file_ptr,
+    row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -289,7 +289,7 @@ smoke_check_1(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    row_major_scan_backward(/* file_ptr              */ file_ptr,
+    row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -307,7 +307,7 @@ smoke_check_1(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    row_major_scan_forward(/* file_ptr              */ file_ptr,
+    row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -336,7 +336,7 @@ smoke_check_1(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    col_major_scan_forward(/* file_ptr              */ file_ptr,
+    col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -360,7 +360,7 @@ smoke_check_1(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    col_major_scan_backward(/* file_ptr              */ file_ptr,
+    col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -456,7 +456,7 @@ smoke_check_2(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    row_major_scan_forward(/* file_ptr              */ file_ptr,
+    row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -474,7 +474,7 @@ smoke_check_2(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    row_major_scan_backward(/* file_ptr              */ file_ptr,
+    row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -492,7 +492,7 @@ smoke_check_2(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    row_major_scan_forward(/* file_ptr              */ file_ptr,
+    row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -521,7 +521,7 @@ smoke_check_2(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    col_major_scan_forward(/* file_ptr              */ file_ptr,
+    col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -545,7 +545,7 @@ smoke_check_2(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    col_major_scan_backward(/* file_ptr              */ file_ptr,
+    col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -640,7 +640,7 @@ smoke_check_3(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    row_major_scan_forward(/* file_ptr              */ file_ptr,
+    row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -825,7 +825,7 @@ smoke_check_4(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    row_major_scan_forward(/* file_ptr              */ file_ptr,
+    row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -843,7 +843,7 @@ smoke_check_4(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    row_major_scan_backward(/* file_ptr              */ file_ptr,
+    row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -861,7 +861,7 @@ smoke_check_4(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    row_major_scan_forward(/* file_ptr              */ file_ptr,
+    row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -890,7 +890,7 @@ smoke_check_4(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    col_major_scan_forward(/* file_ptr              */ file_ptr,
+    col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -914,7 +914,7 @@ smoke_check_4(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    col_major_scan_backward(/* file_ptr              */ file_ptr,
+    col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -13206,8 +13206,8 @@ check_expunge_entry(void)
          */
 
         result = H5C_get_entry_status(file_ptr, entry_ptr->addr, &entry_size,
-                                      &in_cache, &is_dirty, &is_protected,
-				      &is_pinned, NULL, NULL);
+                                       &in_cache, &is_dirty, &is_protected,
+				       &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 

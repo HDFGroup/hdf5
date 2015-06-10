@@ -238,7 +238,7 @@ HDfprintf(stderr, "%s: Dumping file free space sections\n", FUNC);
     HDassert(stream);
 
     /* Retrieve the 'eoa' for the file */
-    if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
+    if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: for type = H5FD_MEM_DEFAULT, eoa = %a\n", FUNC, eoa);
@@ -265,7 +265,7 @@ HDfprintf(stderr, "%s: sda_addr = %a, sda_size = %Hu, end of sda = %a\n", FUNC, 
         if(H5FD_MEM_DEFAULT == f->shared->fs_type_map[type] ||
                 type == f->shared->fs_type_map[type]) {
             /* Retrieve the 'eoa' for this file memory type */
-            if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, type)))
+            if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, type)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
             HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3),
                       "eoa:",

@@ -256,7 +256,7 @@ H5B2__hdr_alloc(H5F_t *f)
     hdr->f = f;
     hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
     hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
-    hdr->hdr_size = H5B2_HEADER_SIZE(hdr);
+    hdr->hdr_size = H5B2_HEADER_SIZE_HDR(hdr);
     hdr->root.addr = HADDR_UNDEF;
 
     /* Set return value */

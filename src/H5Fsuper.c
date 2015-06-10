@@ -279,7 +279,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id)
     /* Check for userblock present */
     if(H5F_addr_gt(super_addr, 0)) {
         /* Set the base address for the file in the VFD now */
-        if(H5FD_set_base_addr(f->shared->lf, super_addr) < 0)
+        if(H5F__set_base_addr(f, super_addr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "failed to set base address for file driver")
     } /* end if */
 
@@ -418,13 +418,13 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
     sblock->status_flags = 0;
 
     /* Reserve space for the userblock */
-    if(H5FD_set_eoa(f->shared->lf, H5FD_MEM_SUPER, userblock_size) < 0)
+    if(H5F__set_eoa(f, H5FD_MEM_SUPER, userblock_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to set EOA value for userblock")
 
     /* Set the base address for the file in the VFD now, after allocating
      *  space for userblock.
      */
-    if(H5FD_set_base_addr(f->shared->lf, sblock->base_addr) < 0)
+    if(H5F__set_base_addr(f, sblock->base_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to set base address for file driver")
 
     /* Save a local copy of the superblock version number */
@@ -455,7 +455,7 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
         superblock_size += driver_size;
 
     /* Reserve space in the file for the superblock, instead of allocating it */
-    if(H5FD_set_eoa(f->shared->lf, H5FD_MEM_SUPER, superblock_size) < 0)
+    if(H5F__set_eoa(f, H5FD_MEM_SUPER, superblock_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to set EOA value for superblock")
 
     /* Insert superblock into cache, pinned */

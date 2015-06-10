@@ -605,7 +605,7 @@ H5FS__new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space free list")
 
     /* Set immutable free list parameters */
-    fspace->nclasses = nclasses;
+    H5_CHECKED_ASSIGN(fspace->nclasses, unsigned, nclasses, size_t);
     if(nclasses > 0) {
         if(NULL == (fspace->sect_cls = H5FL_SEQ_MALLOC(H5FS_section_class_t, nclasses)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space section class array")
