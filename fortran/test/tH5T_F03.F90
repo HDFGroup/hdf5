@@ -976,11 +976,6 @@ END SUBROUTINE test_array_compound_atomic
     
     INTEGER, INTENT(INOUT) :: total_error
     
-!    INTEGER, PARAMETER :: int_kind_1 = SELECTED_INT_KIND(Fortran_INTEGER_1)  !should map to INTEGER*1 on most modern processors
-!    INTEGER, PARAMETER :: int_kind_4 = SELECTED_INT_KIND(Fortran_INTEGER_2)  !should map to INTEGER*2 on most modern processors
-!    INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  !should map to INTEGER*4 on most modern processors
-!    INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(Fortran_INTEGER_8) !should map to INTEGER*8 on most modern processors
-
     INTEGER, PARAMETER :: int_kind_1 = SELECTED_INT_KIND(2) !should map to INTEGER*1 on most modern processors
     INTEGER, PARAMETER :: int_kind_4 = SELECTED_INT_KIND(4) !should map to INTEGER*2 on most modern processors
     INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(9) !should map to INTEGER*4 on most modern processors
@@ -2951,7 +2946,7 @@ END SUBROUTINE setup_buffer
 SUBROUTINE test_nbit(total_error )
 
   IMPLICIT NONE
-  INTEGER, PARAMETER :: wp = SELECTED_REAL_KIND(Fortran_REAL_C_FLOAT) !should map to REAL*4 on most modern processors
+  INTEGER, PARAMETER :: wp = C_FLOAT !should map to REAL*4 on most modern processors
   INTEGER, INTENT(INOUT) :: total_error
   INTEGER(hid_t) :: file
   
@@ -3097,10 +3092,10 @@ SUBROUTINE t_enum_conv(total_error)
 
   INTEGER, INTENT(INOUT) :: total_error
 
-  INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4) !should map to INTEGER*4 on most modern processors
-  INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(Fortran_INTEGER_8)!should map to INTEGER*8 on most modern processors
+  INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(9)   !should map to INTEGER*4 on most modern processors
+  INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
   
-  INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_C_FLOAT)  !should map to REAL*4 on most modern processors
+  INTEGER, PARAMETER :: real_kind_7 = C_FLOAT  !should map to REAL*4 on most modern processors
 
   INTEGER(hid_t) :: cwg=-1, dtype=-1, space=-1, dset=-1 ! Handles
   INTEGER(hid_t) :: file ! Handles
@@ -3245,8 +3240,8 @@ SUBROUTINE t_enum_conv(total_error)
      ENDIF
   ENDDO
 
-  ! Test converting the data to (SELECTED_INT_KIND(Fortran_INTEGER_4)) number. 
-  ! Read enum data back as (SELECTED_INT_KIND(Fortran_INTEGER_4)) number
+  ! Test converting the data to (SELECTED_INT_KIND(9)) number. 
+  ! Read enum data back as (SELECTED_INT_KIND(9)) number
 
   m_baset = h5kind_to_type(int_kind_8, H5_INTEGER_KIND) ! Memory base type
   f_ptr = C_LOC(data_i8(1))
@@ -3262,8 +3257,8 @@ SUBROUTINE t_enum_conv(total_error)
      ENDIF
   ENDDO
 
-  ! Test converting the data to (SELECTED_INT_KIND(Fortran_INTEGER_8)) number. 
-  ! Read enum data back as (SELECTED_INT_KIND(Fortran_INTEGER_8)) number
+  ! Test converting the data to (SELECTED_INT_KIND(18)) number. 
+  ! Read enum data back as (SELECTED_INT_KIND(18)) number
 
   m_baset = h5kind_to_type(int_kind_16, H5_INTEGER_KIND) ! Memory base type
   f_ptr = C_LOC(data_i16(1))
@@ -3279,8 +3274,8 @@ SUBROUTINE t_enum_conv(total_error)
      ENDIF
   ENDDO
 
-  ! Test converting the data to  SELECTED_REAL_KIND(Fortran_REAL_4) number. 
-  ! Read enum data back as  SELECTED_REAL_KIND(Fortran_REAL_4) number
+  ! Test converting the data to C_FLOAT number. 
+  ! Read enum data back as C_FLOAT number
 
   m_baset = h5kind_to_type(KIND(data_r7(1)), H5_REAL_KIND) ! Memory base type
   f_ptr = C_LOC(data_r7(1))
@@ -3357,10 +3352,10 @@ SUBROUTINE t_enum_conv(total_error)
   CALL check("h5dclose_f", error, total_error)
 
   !*********************************************************
-  !* Dataset of real SELECTED_REAL_KIND(Fortran_REAL_4) type
+  !* Dataset of real C_FLOAT type
   !*********************************************************
 
-  ! Create a dataset of SELECTED_REAL_KIND(Fortran_REAL_4) and write enum data to it
+  ! Create a dataset of C_FLOAT and write enum data to it
   m_baset = h5kind_to_type(KIND(data_r7(1)), H5_REAL_KIND) ! Memory base type
   CALL h5dcreate_f(cwg, "color_table4", m_baset, space, dset,  error)
   CALL check("h5dcreate_f", error, total_error)
@@ -3385,10 +3380,10 @@ SUBROUTINE t_enum_conv(total_error)
   CALL check("h5dclose_f", error, total_error)
 
   ! *****************************************************************
-  ! * Dataset of integer SELECTED_INT_KIND(Fortran_INTEGER_8) type
+  ! * Dataset of integer SELECTED_INT_KIND(18) type
   ! *****************************************************************
 
-  ! Create a integer dataset of (SELECTED_INT_KIND(Fortran_INTEGER_8)) and write enum data to it
+  ! Create a integer dataset of (SELECTED_INT_KIND(18)) and write enum data to it
   m_baset = h5kind_to_type(KIND(data_i16(1)), H5_INTEGER_KIND) ! Memory base type
   CALL h5dcreate_f(cwg, "color_table5", m_baset, space, dset, error)
   CALL check("h5dcreate_f", error, total_error)
