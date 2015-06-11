@@ -605,7 +605,7 @@ H5FS__new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space free list")
 
     /* Set immutable free list parameters */
-    fspace->nclasses = nclasses;
+    H5_CHECKED_ASSIGN(fspace->nclasses, unsigned, nclasses, size_t);
     if(nclasses > 0) {
         if(NULL == (fspace->sect_cls = H5FL_SEQ_MALLOC(H5FS_section_class_t, nclasses)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for free space section class array")
@@ -1064,7 +1064,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_sinfo_free_sect_cb(void *_sect, void UNUSED *key, void *op_data)
+H5FS_sinfo_free_sect_cb(void *_sect, void H5_ATTR_UNUSED *key, void *op_data)
 {
     H5FS_section_info_t *sect = (H5FS_section_info_t *)_sect;   /* Section to free */
     const H5FS_sinfo_t *sinfo = (const H5FS_sinfo_t *)op_data;     /* Free space manager for section */
@@ -1096,7 +1096,7 @@ H5FS_sinfo_free_sect_cb(void *_sect, void UNUSED *key, void *op_data)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_sinfo_free_node_cb(void *item, void UNUSED *key, void *op_data)
+H5FS_sinfo_free_node_cb(void *item, void H5_ATTR_UNUSED *key, void *op_data)
 {
     H5FS_node_t *fspace_node = (H5FS_node_t *)item;       /* Temporary pointer to free space list node */
 

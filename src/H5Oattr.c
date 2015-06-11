@@ -122,7 +122,7 @@ H5FL_EXTERN(H5S_extent_t);
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_attr_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned UNUSED mesg_flags,
+H5O_attr_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
     unsigned *ioflags, const uint8_t *p)
 {
     H5A_t		*attr = NULL;
@@ -413,7 +413,7 @@ done:
     portion of the message).  It doesn't take into account alignment.
 --------------------------------------------------------------------------*/
 static size_t
-H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
+H5O_attr_size(const H5F_t H5_ATTR_UNUSED *f, const void *_mesg)
 {
     const H5A_t         *attr = (const H5A_t *)_mesg;
     size_t		name_len;
@@ -478,7 +478,7 @@ H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_attr_reset(void UNUSED *_mesg)
+H5O_attr_reset(void H5_ATTR_UNUSED *_mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -614,8 +614,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
-    hbool_t *deleted, const H5O_copy_t *cpy_info, void UNUSED *udata)
+H5O_attr_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
+    hbool_t *deleted, const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -648,9 +648,9 @@ H5O_attr_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
+H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t H5_ATTR_UNUSED *mesg_type,
     void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
-    H5O_copy_t *cpy_info, void UNUSED *udata, hid_t dxpl_id)
+    H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata, hid_t dxpl_id)
 {
     void        *ret_value;             /* Return value */
 

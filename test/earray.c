@@ -624,7 +624,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static earray_test_t *
-earray_cache_test_load(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, const void UNUSED *udata1, void UNUSED *udata2)
+earray_cache_test_load(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr, const void H5_ATTR_UNUSED *udata1, void H5_ATTR_UNUSED *udata2)
 {
     /* Check arguments */
     HDassert(f);
@@ -651,7 +651,7 @@ earray_cache_test_load(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED add
  *-------------------------------------------------------------------------
  */
 static herr_t
-earray_cache_test_flush(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, hbool_t destroy, haddr_t UNUSED addr, earray_test_t *test, unsigned UNUSED * flags_ptr)
+earray_cache_test_flush(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t destroy, haddr_t H5_ATTR_UNUSED addr, earray_test_t *test, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     /* check arguments */
     HDassert(f);
@@ -722,7 +722,7 @@ error:
  *-------------------------------------------------------------------------
  */
 herr_t
-earray_cache_test_dest(H5F_t UNUSED *f, earray_test_t *test)
+earray_cache_test_dest(H5F_t H5_ATTR_UNUSED *f, earray_test_t *test)
 {
     /*
      * Check arguments.
@@ -787,7 +787,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-earray_cache_test_size(const H5F_t UNUSED *f, const earray_test_t UNUSED *test, size_t *size_ptr)
+earray_cache_test_size(const H5F_t H5_ATTR_UNUSED *f, const earray_test_t H5_ATTR_UNUSED *test, size_t *size_ptr)
 {
     /* check arguments */
     HDassert(f);
@@ -816,7 +816,7 @@ earray_cache_test_size(const H5F_t UNUSED *f, const earray_test_t UNUSED *test, 
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tparam)
+test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
@@ -1394,7 +1394,7 @@ test_flush_depend_cb(const void *_elmt, size_t nelmts, void *udata)
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tparam)
+test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
@@ -1629,8 +1629,8 @@ typedef struct eiter_fw_t {
  *-------------------------------------------------------------------------
  */
 static void *
-eiter_fw_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam,
-    hsize_t UNUSED cnt)
+eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_param_t H5_ATTR_UNUSED *tparam,
+    hsize_t H5_ATTR_UNUSED cnt)
 {
     eiter_fw_t *eiter;          /* Forward element iteration object */
 
@@ -2074,7 +2074,7 @@ typedef struct eiter_rnd_t {
  *-------------------------------------------------------------------------
  */
 static void *
-eiter_rnd_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam,
+eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_param_t H5_ATTR_UNUSED *tparam,
     hsize_t cnt)
 {
     eiter_rnd_t *eiter;         /* Random element iteration object */
@@ -2227,7 +2227,7 @@ static const earray_iter_t ea_iter_rnd = {
  *-------------------------------------------------------------------------
  */
 static void *
-eiter_rnd2_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam,
+eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_param_t H5_ATTR_UNUSED *tparam,
     hsize_t cnt)
 {
     eiter_rnd_t *eiter;        /* Random element iteration object */
@@ -2311,7 +2311,7 @@ typedef struct eiter_cyc_t {
  *-------------------------------------------------------------------------
  */
 static void *
-eiter_cyc_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam,
+eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_param_t H5_ATTR_UNUSED *tparam,
     hsize_t cnt)
 {
     eiter_cyc_t *eiter;         /* Cyclic element iteration object */

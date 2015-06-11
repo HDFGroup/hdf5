@@ -213,7 +213,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_t *sym, unsigned UNUSED * flags_ptr)
+H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_t *sym, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     H5WB_t     *wb = NULL;     /* Wrapped buffer for node data */
     uint8_t     node_buf[H5G_NODE_BUF_SIZE]; /* Buffer for node */
@@ -394,7 +394,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_size(const H5F_t UNUSED *f, const H5G_node_t *sym, size_t *size_ptr)
+H5G_node_size(const H5F_t H5_ATTR_UNUSED *f, const H5G_node_t *sym, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

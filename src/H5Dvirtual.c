@@ -1218,8 +1218,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__virtual_init(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5D_t *dset,
-    hid_t dapl_id)
+H5D__virtual_init(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+        const H5D_t *dset, hid_t dapl_id)
 {
     H5O_storage_virtual_t *storage;     /* Convenience pointer */
     H5P_genplist_t *dapl;               /* Data access property list object pointer */
@@ -1279,7 +1279,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5D__virtual_is_space_alloc(const H5O_storage_t UNUSED *storage)
+H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 {
     hbool_t ret_value;                  /* Return value */
 
@@ -1632,7 +1632,7 @@ done:
 static herr_t
 H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-    H5D_chunk_map_t UNUSED *fm)
+    H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5O_storage_virtual_t *storage;         /* Convenient pointer into layout struct */
     hsize_t     tot_nelmts;                 /* Total number of elements mapped to mem_space */
@@ -1811,7 +1811,7 @@ done:
 static herr_t
 H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-    H5D_chunk_map_t UNUSED *fm)
+    H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5O_storage_virtual_t *storage;         /* Convenient pointer into layout struct */
     hsize_t     tot_nelmts;                 /* Total number of elements mapped to mem_space */
@@ -1884,7 +1884,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_flush(H5D_t UNUSED *dset, hid_t UNUSED dxpl_id)
+H5D__virtual_flush(H5D_t H5_ATTR_UNUSED *dset, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -1908,9 +1908,12 @@ H5D__virtual_flush(H5D_t UNUSED *dset, hid_t UNUSED dxpl_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__virtual_copy(H5F_t UNUSED *f_src, const H5O_storage_virtual_t UNUSED *storage_src,
-    H5F_t UNUSED *f_dst, H5O_storage_virtual_t UNUSED *storage_dst, H5T_t UNUSED *dt_src,
-    H5O_copy_t UNUSED *cpy_info, hid_t UNUSED dxpl_id)
+H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_src,
+        const H5O_storage_virtual_t H5_ATTR_UNUSED *storage_src,
+        H5F_t H5_ATTR_UNUSED *f_dst,
+        H5O_storage_virtual_t H5_ATTR_UNUSED *storage_dst,
+        H5T_t H5_ATTR_UNUSED *dt_src, H5O_copy_t H5_ATTR_UNUSED *cpy_info,
+        hid_t H5_ATTR_UNUSED dxpl_id)
 {
     FUNC_ENTER_PACKAGE_NOERR
 

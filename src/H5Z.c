@@ -506,7 +506,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__check_unregister_group_cb(void *obj_ptr, hid_t UNUSED obj_id, void *key)
+H5Z__check_unregister_group_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
 {
     hid_t           ocpl_id = -1;
     H5Z_object_t    *object = (H5Z_object_t *)key;
@@ -559,7 +559,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t UNUSED obj_id, void *key)
+H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void *key)
 {
     hid_t           ocpl_id = -1;
     H5Z_object_t    *object = (H5Z_object_t *)key;
@@ -610,7 +610,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5Z__flush_file_cb(void *obj_ptr, hid_t UNUSED obj_id, void UNUSED *key)
+H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_UNUSED *key)
 {
     int             ret_value = FALSE;    /* Return value */
 

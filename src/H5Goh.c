@@ -210,7 +210,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5O_group_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
+H5O_group_open(const H5G_loc_t *obj_loc, hid_t H5_ATTR_UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
     H5G_t       *grp = NULL;            /* Group opened */
     hid_t	ret_value;              /* Return value */

@@ -80,18 +80,18 @@ static herr_t H5HF__dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *d
 
 /* Metadata cache (H5AC) callbacks */
 static H5HF_hdr_t *H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_hdr_t *hdr, unsigned UNUSED * flags_ptr);
+static herr_t H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_hdr_t *hdr, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5HF_cache_hdr_dest(H5F_t *f, H5HF_hdr_t *hdr);
 static herr_t H5HF_cache_hdr_clear(H5F_t *f, H5HF_hdr_t *hdr, hbool_t destroy);
 static herr_t H5HF_cache_hdr_size(const H5F_t *f, const H5HF_hdr_t *hdr, size_t *size_ptr);
 static H5HF_indirect_t *H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5HF_cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_indirect_t *iblock, unsigned UNUSED * flags_ptr);
+static herr_t H5HF_cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_indirect_t *iblock, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5HF_cache_iblock_dest(H5F_t *f, H5HF_indirect_t *iblock);
 static herr_t H5HF_cache_iblock_clear(H5F_t *f, H5HF_indirect_t *iblock, hbool_t destroy);
 static herr_t H5HF_cache_iblock_notify(H5C_notify_action_t action, H5HF_indirect_t *iblock);
 static herr_t H5HF_cache_iblock_size(const H5F_t *f, const H5HF_indirect_t *iblock, size_t *size_ptr);
 static H5HF_direct_t *H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_direct_t *dblock, unsigned UNUSED * flags_ptr);
+static herr_t H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_direct_t *dblock, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5HF_cache_dblock_dest(H5F_t *f, H5HF_direct_t *dblock);
 static herr_t H5HF_cache_dblock_clear(H5F_t *f, H5HF_direct_t *dblock, hbool_t destroy);
 static herr_t H5HF_cache_dblock_notify(H5C_notify_action_t action, H5HF_direct_t *dblock);
@@ -262,6 +262,10 @@ H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF__dtable_encode() */
 
+/**************************************************/
+/* metadata cache callback definitions for header */
+/**************************************************/
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF_cache_hdr_load
@@ -379,8 +383,8 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
         /* Compute the size of the extra filter information */
         filter_info_size = (size_t)(hdr->sizeof_size     /* Size of size for filtered root direct block */
-            + (unsigned)4                       /* Size of filter mask for filtered root direct block */
-            + hdr->filter_len);                 /* Size of encoded I/O filter info */
+            + (unsigned)4		/* Size of filter mask for filtered root direct block */
+            + hdr->filter_len);         /* Size of encoded I/O filter info */
 
         /* Compute the heap header's size */
         hdr->heap_size = size + filter_info_size;
@@ -466,7 +470,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_hdr_t *hdr, unsigned UNUSED * flags_ptr)
+H5HF_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_hdr_t *hdr, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     H5WB_t *wb = NULL;                  /* Wrapped buffer for header data */
     uint8_t hdr_buf[H5HF_HDR_BUF_SIZE]; /* Buffer for header */
@@ -709,7 +713,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_cache_hdr_size(const H5F_t UNUSED *f, const H5HF_hdr_t *hdr, size_t *size_ptr)
+H5HF_cache_hdr_size(const H5F_t H5_ATTR_UNUSED *f, const H5HF_hdr_t *hdr, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -723,6 +727,10 @@ H5HF_cache_hdr_size(const H5F_t UNUSED *f, const H5HF_hdr_t *hdr, size_t *size_p
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_cache_hdr_size() */
+
+/***********************************************************/
+/* metadata cache callback definitions for indirect blocks */
+/***********************************************************/
 
 
 /*-------------------------------------------------------------------------
@@ -948,7 +956,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_indirect_t *iblock, unsigned UNUSED * flags_ptr)
+H5HF_cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_indirect_t *iblock, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     H5WB_t      *wb = NULL;             /* Wrapped buffer for indirect block data */
     uint8_t     iblock_buf[H5HF_IBLOCK_BUF_SIZE]; /* Buffer for indirect block */
@@ -1352,7 +1360,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_cache_iblock_size(const H5F_t UNUSED *f, const H5HF_indirect_t *iblock, size_t *size_ptr)
+H5HF_cache_iblock_size(const H5F_t H5_ATTR_UNUSED *f, const H5HF_indirect_t *iblock, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1365,6 +1373,10 @@ H5HF_cache_iblock_size(const H5F_t UNUSED *f, const H5HF_indirect_t *iblock, siz
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_cache_iblock_size() */
+
+/*********************************************************/
+/* metadata cache callback definitions for direct blocks */
+/*********************************************************/
 
 
 /*-------------------------------------------------------------------------
@@ -1560,7 +1572,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_direct_t *dblock, unsigned UNUSED * flags_ptr)
+H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_direct_t *dblock, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1993,7 +2005,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_cache_dblock_size(const H5F_t UNUSED *f, const H5HF_direct_t *dblock, size_t *size_ptr)
+H5HF_cache_dblock_size(const H5F_t H5_ATTR_UNUSED *f, const H5HF_direct_t *dblock, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

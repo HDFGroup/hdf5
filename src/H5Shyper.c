@@ -1960,8 +1960,9 @@ done:
     Determine the number of bytes needed to store the serialized hyperslab
         selection information.
  USAGE
-    hssize_t H5S_hyper_serial_size(space)
-        H5S_t *space;             IN: Dataspace pointer to query
+    hssize_t H5S_hyper_serial_size(f, space)
+        H5F_t *f                IN: File pointer
+        H5S_t *space;           IN: Dataspace pointer to query
  RETURNS
     The number of bytes required on success, negative on an error.
  DESCRIPTION
@@ -2046,7 +2047,8 @@ H5S_hyper_serial_size(const H5F_t *f, const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_serialize_helper (const H5S_hyper_span_info_t *spans, hsize_t *start, hsize_t *end, hsize_t rank, uint8_t **p)
+H5S_hyper_serialize_helper (const H5S_hyper_span_info_t *spans,
+        hsize_t *start, hsize_t *end, hsize_t rank, uint8_t **p)
 {
     H5S_hyper_span_t *curr;     /* Pointer to current hyperslab span */
     hsize_t u;                  /* Index variable */
@@ -2108,6 +2110,7 @@ done:
     Serialize the current selection into a user-provided buffer.
  USAGE
     herr_t H5S_hyper_serialize(space, p)
+        H5F_t *f                IN: File pointer
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
@@ -2299,8 +2302,11 @@ H5S_hyper_serialize(const H5F_t *f, const H5S_t *space, uint8_t **p)
     Deserialize the current selection from a user-provided buffer.
  USAGE
     herr_t H5S_hyper_deserialize(space, p)
+        H5F_t *f                IN: File pointer
         H5S_t *space;           IN/OUT: Dataspace pointer to place
                                 selection into
+        uint32_t version        IN: Selection version
+        uint8_t flags           IN: Selection flags
         uint8 **p;              OUT: Pointer to buffer holding serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
@@ -2315,8 +2321,8 @@ H5S_hyper_serialize(const H5F_t *f, const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_deserialize(const H5F_t *f, H5S_t *space, uint32_t UNUSED version,
-    uint8_t flags, const uint8_t **p)
+H5S_hyper_deserialize(const H5F_t *f, H5S_t *space,
+        uint32_t H5_ATTR_UNUSED version, uint8_t flags, const uint8_t **p)
 {
     unsigned rank;           	/* rank of points */
     size_t num_elem=0;      	/* number of elements in selection */
@@ -9087,7 +9093,7 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t *iter,
+H5S_hyper_get_seq_list(const H5S_t *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t *iter,
     size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {

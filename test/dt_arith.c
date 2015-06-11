@@ -415,7 +415,7 @@ static int my_isinf(int endian, unsigned char *val, size_t size,
  *-------------------------------------------------------------------------
  */
 static void
-fpe_handler(int UNUSED signo)
+fpe_handler(int H5_ATTR_UNUSED signo)
 {
     SKIPPED();
     HDputs("    Test skipped due to SIGFPE.");
@@ -488,7 +488,7 @@ reset_hdf5(void)
  *-------------------------------------------------------------------------
  */
 static H5T_conv_ret_t
-except_func(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst_id, void UNUSED *src_buf,
+except_func(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5_ATTR_UNUSED dst_id, void H5_ATTR_UNUSED *src_buf,
 		 void *dst_buf, void *user_data)
 {
     H5T_conv_ret_t      ret = H5T_CONV_HANDLED;
@@ -677,7 +677,7 @@ test_hard_query(void)
  *-------------------------------------------------------------------------
  */
 static H5T_conv_ret_t
-expt_handle(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst_id, void UNUSED *src_buf,
+expt_handle(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5_ATTR_UNUSED dst_id, void H5_ATTR_UNUSED *src_buf,
 		 void *dst_buf, void *user_data)
 {
     signed char         fill_value1 = 7;

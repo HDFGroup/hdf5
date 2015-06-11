@@ -404,7 +404,7 @@ trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
  */
 int
 trav_info_visit_obj(const char *path, const H5O_info_t *oinfo,
-    const char UNUSED *already_visited, void *udata)
+    const char H5_ATTR_UNUSED *already_visited, void *udata)
 {
     size_t idx;
     trav_info_t *info_p;
@@ -628,7 +628,7 @@ trav_table_visit_obj(const char *path, const H5O_info_t *oinfo,
  *-------------------------------------------------------------------------
  */
 static int
-trav_table_visit_lnk(const char *path, const H5L_info_t UNUSED *linfo, void *udata)
+trav_table_visit_lnk(const char *path, const H5L_info_t H5_ATTR_UNUSED *linfo, void *udata)
 {
     /* Add the link to the 'table' struct */
     trav_table_add((trav_table_t *)udata, path, NULL);
@@ -901,9 +901,9 @@ void trav_table_free( trav_table_t *table )
 static herr_t
 trav_attr(hid_t
 #ifndef H5TRAV_PRINT_SPACE
-UNUSED
+H5_ATTR_UNUSED
 #endif /* H5TRAV_PRINT_SPACE */
-obj, const char *attr_name, const H5A_info_t UNUSED *ainfo, void *_op_data)
+obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ainfo, void *_op_data)
 {
     trav_path_op_data_t *op_data = (trav_path_op_data_t *)_op_data;
     const char          *buf = op_data->path;

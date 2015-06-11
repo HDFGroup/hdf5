@@ -359,7 +359,7 @@ H5S_point_iter_next_block(H5S_sel_iter_t *iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_iter_release (H5S_sel_iter_t UNUSED * iter)
+H5S_point_iter_release (H5S_sel_iter_t H5_ATTR_UNUSED * iter)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -606,7 +606,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_copy(H5S_t *dst, const H5S_t *src, hbool_t UNUSED share_selection)
+H5S_point_copy(H5S_t *dst, const H5S_t *src, hbool_t H5_ATTR_UNUSED share_selection)
 {
     H5S_pnt_node_t *curr, *new_node, *new_tail;    /* Point information nodes */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -763,7 +763,8 @@ done:
     information.
  USAGE
     hssize_t H5S_point_serial_size(space)
-        H5S_t *space;             IN: Dataspace pointer to query
+        H5F_t *f                IN: File pointer
+        H5S_t *space;           IN: Dataspace pointer to query
  RETURNS
     The number of bytes required on success, negative on an error.
  DESCRIPTION
@@ -775,7 +776,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S_point_serial_size(const H5F_t UNUSED *f, const H5S_t *space)
+H5S_point_serial_size(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
     hssize_t ret_value;         /* return value */
@@ -809,6 +810,7 @@ H5S_point_serial_size(const H5F_t UNUSED *f, const H5S_t *space)
     Serialize the current selection into a user-provided buffer.
  USAGE
     herr_t H5S_point_serialize(space, p)
+        H5F_t *f                IN: File pointer
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
@@ -824,7 +826,8 @@ H5S_point_serial_size(const H5F_t UNUSED *f, const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_serialize(const H5F_t UNUSED *f, const H5S_t *space, uint8_t **p)
+H5S_point_serialize(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space,
+        uint8_t **p)
 {
     H5S_pnt_node_t *curr;   /* Point information nodes */
     uint8_t *lenp;          /* pointer to length location for later storage */
@@ -877,8 +880,11 @@ H5S_point_serialize(const H5F_t UNUSED *f, const H5S_t *space, uint8_t **p)
     Deserialize the current selection from a user-provided buffer.
  USAGE
     herr_t H5S_point_deserialize(space, p)
+        H5F_t *f                IN: File pointer
         H5S_t *space;           IN/OUT: Dataspace pointer to place
                                 selection into
+        uint32_t version        IN: Selection version
+        uint8_t flags           IN: Selection flags
         uint8 **p;              OUT: Pointer to buffer holding serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
@@ -893,8 +899,9 @@ H5S_point_serialize(const H5F_t UNUSED *f, const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_deserialize(const H5F_t UNUSED *f, H5S_t *space,
-    uint32_t UNUSED version, uint8_t UNUSED flags, const uint8_t **p)
+H5S_point_deserialize(const H5F_t H5_ATTR_UNUSED *f, H5S_t *space,
+    uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED flags,
+    const uint8_t **p)
 {
     H5S_seloper_t op=H5S_SELECT_SET;    /* Selection operation */
     unsigned rank;          /* Rank of points */
@@ -1206,7 +1213,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static int
-H5S_point_unlim_dim(const H5S_t UNUSED *space)
+H5S_point_unlim_dim(const H5S_t H5_ATTR_UNUSED *space)
 {
     FUNC_ENTER_NOAPI_NOERR
 

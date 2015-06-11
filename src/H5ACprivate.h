@@ -255,7 +255,7 @@ H5_DLLVAR hid_t H5AC_ind_dxpl_id;
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
   /* double      empty_reserve          = */ 0.1f,                            \
-  /* int	 dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* size_t	 dirty_bytes_threshold  = */ (256 * 1024),                    \
   /* int	metadata_write_strategy = */                                  \
 				       H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
 }
@@ -291,7 +291,7 @@ H5_DLLVAR hid_t H5AC_ind_dxpl_id;
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
   /* double      empty_reserve          = */ 0.1f,                            \
-  /* int	 dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* size_t	 dirty_bytes_threshold  = */ (256 * 1024),                    \
   /* int	metadata_write_strategy = */                                  \
 				       H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
 }

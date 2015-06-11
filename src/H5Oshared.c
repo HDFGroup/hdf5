@@ -589,8 +589,8 @@ done:
 herr_t
 H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst,
     const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
-    hbool_t UNUSED *recompute_size, unsigned *mesg_flags, H5O_copy_t *cpy_info,
-    void UNUSED *udata, hid_t dxpl_id)
+    hbool_t H5_ATTR_UNUSED *recompute_size, unsigned *mesg_flags, H5O_copy_t *cpy_info,
+    void H5_ATTR_UNUSED *udata, hid_t dxpl_id)
 {
     const H5O_shared_t  *shared_src = (const H5O_shared_t *)_native_src; /* Alias to shared info in native source */
     H5O_shared_t        *shared_dst = (H5O_shared_t *)_native_dst; /* Alias to shared info in native destination message */

@@ -3121,7 +3121,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_free_visit_visited(void *item, void UNUSED *key, void UNUSED *operator_data/*in,out*/)
+H5O_free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *operator_data/*in,out*/)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -3145,7 +3145,7 @@ H5O_free_visit_visited(void *item, void UNUSED *key, void UNUSED *operator_data/
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_visit_cb(hid_t UNUSED group, const char *name, const H5L_info_t *linfo,
+H5O_visit_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t *linfo,
     void *_udata)
 {
     H5O_iter_visit_ud_t *udata = (H5O_iter_visit_ud_t *)_udata;     /* User data for callback */

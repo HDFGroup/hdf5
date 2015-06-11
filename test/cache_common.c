@@ -19,7 +19,6 @@
  *		This file contains common code for tests of the cache
  *		implemented in H5C.c
  */
-#include "H5private.h"          /* Put this first, so H5open() isn't invoked in public macros */
 #include "h5test.h"
 #include "H5Cprivate.h"
 #include "H5Iprivate.h"
@@ -365,7 +364,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
 static herr_t clear(H5F_t * f, void * thing, hbool_t dest);
 static herr_t destroy(H5F_t * f, void * thing);
 static herr_t flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
-                    haddr_t addr, void *thing, unsigned UNUSED * flags_ptr);
+                    haddr_t addr, void *thing, unsigned H5_ATTR_UNUSED * flags_ptr);
 static void * load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t size(H5F_t * f, void * thing, size_t * size_ptr);
 static herr_t notify(H5C_notify_action_t action, void *thing);
@@ -478,8 +477,8 @@ addr_to_type_and_index(haddr_t addr,
  */
 
 herr_t
-check_write_permitted(const H5F_t UNUSED *f,
-                      hid_t UNUSED dxpl_id,
+check_write_permitted(const H5F_t H5_ATTR_UNUSED *f,
+                      hid_t H5_ATTR_UNUSED dxpl_id,
                       hbool_t *write_permitted_ptr)
 {
 
@@ -638,7 +637,7 @@ notify_clear(H5F_t * f, void *  thing, hbool_t dest)
  */
 
 herr_t
-destroy(H5F_t UNUSED * f,
+destroy(H5F_t H5_ATTR_UNUSED * f,
         void *         thing)
 {
     int i;
@@ -799,14 +798,13 @@ notify_dest(H5F_t * f, void *  thing)
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 flush(H5F_t *f,
-      hid_t UNUSED dxpl_id,
+      hid_t H5_ATTR_UNUSED dxpl_id,
       hbool_t dest,
       haddr_t
 #ifdef NDEBUG
-          UNUSED
+          H5_ATTR_UNUSED
 #endif /* NDEBUG */
           addr,
       void *thing,
@@ -871,7 +869,6 @@ flush(H5F_t *f,
     }
 
     return(SUCCEED);
-
 } /* flush() */
 
 herr_t
@@ -962,7 +959,6 @@ notify_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
     return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
 }
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	load & friends
@@ -980,10 +976,10 @@ notify_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
  */
 
 void *
-load(H5F_t UNUSED *f,
-     hid_t UNUSED dxpl_id,
+load(H5F_t H5_ATTR_UNUSED *f,
+     hid_t H5_ATTR_UNUSED dxpl_id,
      haddr_t addr,
-     void UNUSED *udata)
+     void H5_ATTR_UNUSED *udata)
 {
     int32_t type;
     int32_t idx;
@@ -1108,9 +1104,8 @@ notify_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-size(H5F_t UNUSED *  f,
+size(H5F_t H5_ATTR_UNUSED *  f,
      void *   thing,
      size_t * size_ptr)
 {
@@ -1134,7 +1129,6 @@ size(H5F_t UNUSED *  f,
     *size_ptr = entry_ptr->size;
 
     return(SUCCEED);
-
 } /* size() */
 
 herr_t

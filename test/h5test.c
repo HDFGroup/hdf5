@@ -113,7 +113,7 @@ static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suf
  *-------------------------------------------------------------------------
  */
 static herr_t
-h5_errors(hid_t estack, void UNUSED *client_data)
+h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
 {
     H5_FAILED();
     H5Eprint2(estack, stdout);
@@ -725,21 +725,24 @@ h5_show_hostname(void)
 {
     char  hostname[80];
 #ifdef H5_HAVE_WIN32_API
-     WSADATA wsaData;
-     int err;
+    WSADATA wsaData;
+    int err;
 #endif
 
     /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
     {
-  int mpi_rank, mpi_initialized;
+        int mpi_rank, mpi_initialized, mpi_finalized;
 
-  MPI_Initialized(&mpi_initialized);
-  if (mpi_initialized){
-      MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-      printf("MPI-process %d.", mpi_rank);
-  }else
-      printf("thread 0.");
+        MPI_Initialized(&mpi_initialized);
+        MPI_Finalized(&mpi_finalized);
+
+        if(mpi_initialized && !mpi_finalized) {
+            MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+            printf("MPI-process %d.", mpi_rank);
+        }
+        else
+            printf("thread 0.");
     }
 #elif defined(H5_HAVE_THREADSAFE)
     printf("thread %lu.", HDpthread_self_ulong());
@@ -748,31 +751,31 @@ h5_show_hostname(void)
 #endif
 #ifdef H5_HAVE_WIN32_API
 
-   err = WSAStartup( MAKEWORD(2,2), &wsaData );
-   if ( err != 0 ) {
-    /* could not find a usable WinSock DLL */
-    return;
-   }
+    err = WSAStartup( MAKEWORD(2,2), &wsaData );
+    if ( err != 0 ) {
+        /* could not find a usable WinSock DLL */
+        return;
+    }
 
-/* Confirm that the WinSock DLL supports 2.2.*/
-/* Note that if the DLL supports versions greater    */
-/* than 2.2 in addition to 2.2, it will still return */
-/* 2.2 in wVersion since that is the version we      */
-/* requested.                                        */
+    /* Confirm that the WinSock DLL supports 2.2.*/
+    /* Note that if the DLL supports versions greater    */
+    /* than 2.2 in addition to 2.2, it will still return */
+    /* 2.2 in wVersion since that is the version we      */
+    /* requested.                                        */
 
-   if ( LOBYTE( wsaData.wVersion ) != 2 ||
-        HIBYTE( wsaData.wVersion ) != 2 ) {
-    /* could not find a usable WinSock DLL */
-     WSACleanup( );
-     return;
-   }
+    if ( LOBYTE( wsaData.wVersion ) != 2 ||
+         HIBYTE( wsaData.wVersion ) != 2 ) {
+        /* could not find a usable WinSock DLL */
+        WSACleanup( );
+        return;
+    }
 
 #endif
 #ifdef H5_HAVE_GETHOSTNAME
     if (gethostname(hostname, (size_t)80) < 0)
-  printf(" gethostname failed\n");
+        printf(" gethostname failed\n");
     else
-  printf(" hostname=%s\n", hostname);
+        printf(" hostname=%s\n", hostname);
 #else
     printf(" gethostname not supported\n");
 #endif
@@ -1124,61 +1127,62 @@ int h5_szip_can_encode(void )
 char *
 getenv_all(MPI_Comm comm, int root, const char* name)
 {
-    int mpi_size, mpi_rank, mpi_initialized;
+    int mpi_size, mpi_rank, mpi_initialized, mpi_finalized;
     int len;
     static char* env = NULL;
 
     assert(name);
 
     MPI_Initialized(&mpi_initialized);
-    if(!mpi_initialized) {
-  /* use original getenv */
-  if(env)
-      HDfree(env);
-  env = HDgetenv(name);
-    } /* end if */
-    else {
-  MPI_Comm_rank(comm, &mpi_rank);
-  MPI_Comm_size(comm, &mpi_size);
-  assert(root < mpi_size);
+    MPI_Finalized(&mpi_finalized);
 
-  /* The root task does the getenv call
-   * and sends the result to the other tasks */
-  if(mpi_rank == root) {
-      env = HDgetenv(name);
-      if(env) {
-    len = (int)HDstrlen(env);
-    MPI_Bcast(&len, 1, MPI_INT, root, comm);
-    MPI_Bcast(env, len, MPI_CHAR, root, comm);
-      }
-      else {
-    /* len -1 indicates that the variable was not in the environment */
-    len = -1;
-    MPI_Bcast(&len, 1, MPI_INT, root, comm);
-      }
-  }
-  else {
-      MPI_Bcast(&len, 1, MPI_INT, root, comm);
-      if(len >= 0) {
-    if(env == NULL)
-        env = (char*) HDmalloc((size_t)len+1);
-    else if(HDstrlen(env) < (size_t)len)
-        env = (char*) HDrealloc(env, (size_t)len+1);
+    if(mpi_initialized && !mpi_finalized) {
+        MPI_Comm_rank(comm, &mpi_rank);
+        MPI_Comm_size(comm, &mpi_size);
+        assert(root < mpi_size);
 
-    MPI_Bcast(env, len, MPI_CHAR, root, comm);
-    env[len] = '\0';
-      }
-      else {
-    if(env)
-        HDfree(env);
-    env = NULL;
-      }
-  }
-    }
+        /* The root task does the getenv call
+         * and sends the result to the other tasks */
+        if(mpi_rank == root) {
+            env = HDgetenv(name);
+            if(env) {
+                len = (int)HDstrlen(env);
+                MPI_Bcast(&len, 1, MPI_INT, root, comm);
+                MPI_Bcast(env, len, MPI_CHAR, root, comm);
+            }
+            else {
+                /* len -1 indicates that the variable was not in the environment */
+                len = -1;
+                MPI_Bcast(&len, 1, MPI_INT, root, comm);
+            }
+        }
+        else {
+            MPI_Bcast(&len, 1, MPI_INT, root, comm);
+            if(len >= 0) {
+                if(env == NULL)
+                    env = (char*) HDmalloc((size_t)len+1);
+                else if(HDstrlen(env) < (size_t)len)
+                    env = (char*) HDrealloc(env, (size_t)len+1);
 
+                MPI_Bcast(env, len, MPI_CHAR, root, comm);
+                env[len] = '\0';
+            }
+            else {
+                if(env)
+                    HDfree(env);
+                env = NULL;
+            }
+        }
 #ifndef NDEBUG
-    MPI_Barrier(comm);
+        MPI_Barrier(comm);
 #endif
+    }
+    else {
+        /* use original getenv */
+        if(env)
+            HDfree(env);
+        env = HDgetenv(name);
+    } /* end if */
 
     return env;
 }
@@ -1247,8 +1251,8 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-h5_verify_cached_stabs_cb(hid_t oid, const char UNUSED *name,
-    const H5O_info_t *oinfo, void UNUSED *udata)
+h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name,
+    const H5O_info_t *oinfo, void H5_ATTR_UNUSED *udata)
 {
     if(oinfo->type == H5O_TYPE_GROUP)
         return(H5G__verify_cached_stabs_test(oid));

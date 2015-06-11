@@ -496,8 +496,8 @@ error:
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_bogus1(unsigned int flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
+filter_bogus1(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+      const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
     int *int_ptr=(int *)*buf;          /* Pointer to the data values */
@@ -533,8 +533,8 @@ filter_bogus1(unsigned int flags, size_t UNUSED cd_nelmts,
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_bogus2(unsigned int flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
+filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+      const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
     int *int_ptr=(int *)*buf;          /* Pointer to the data values */

@@ -114,8 +114,8 @@ H5FL_DEFINE_STATIC(H5O_linfo_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
-    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
+H5O_linfo_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_linfo_t	*linfo = NULL;  /* Link info */
     unsigned char index_flags;  /* Flags for encoding link index info */
@@ -189,7 +189,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_linfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O_linfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
     unsigned char       index_flags;          /* Flags for encoding link index info */
@@ -286,7 +286,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_linfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
+H5O_linfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
     size_t ret_value;   /* Return value */
@@ -343,7 +343,7 @@ H5O_linfo_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
+H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 {
     H5O_linfo_t *linfo = (H5O_linfo_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -379,8 +379,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
-    hbool_t UNUSED *recompute_size, unsigned UNUSED *mesg_flags,
+H5O_linfo_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t *file_dst,
+    hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
     H5O_copy_t *cpy_info, void *_udata, hid_t dxpl_id)
 {
     H5O_linfo_t          *linfo_src = (H5O_linfo_t *) native_src;
@@ -502,7 +502,7 @@ done:
  */
 static herr_t
 H5O_linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
-    H5O_loc_t *dst_oloc, void *mesg_dst, unsigned UNUSED *mesg_flags,
+    H5O_loc_t *dst_oloc, void *mesg_dst, unsigned H5_ATTR_UNUSED *mesg_flags,
     hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     const H5O_linfo_t   *linfo_src = (const H5O_linfo_t *)mesg_src;
@@ -558,7 +558,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_linfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * stream,
+H5O_linfo_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg, FILE * stream,
 	       int indent, int fwidth)
 {
     const H5O_linfo_t       *linfo = (const H5O_linfo_t *) _mesg;

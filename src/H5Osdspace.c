@@ -111,8 +111,8 @@ H5FL_ARR_EXTERN(hsize_t);
     within this function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
-    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
+H5O_sdspace_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5S_extent_t	*sdim = NULL;/* New extent dimensionality structure */
     void		*ret_value;
@@ -442,8 +442,8 @@ H5O_sdspace_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_sdspace_pre_copy_file(H5F_t UNUSED *file_src, const void *mesg_src,
-    hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info, void *_udata)
+H5O_sdspace_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
+    hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t H5_ATTR_UNUSED *cpy_info, void *_udata)
 {
     const H5S_extent_t *src_space_extent = (const H5S_extent_t *)mesg_src;  /* Source dataspace extent */
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
@@ -495,7 +495,7 @@ done:
     parameter.
 --------------------------------------------------------------------------*/
 static herr_t
-H5O_sdspace_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg,
+H5O_sdspace_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *mesg,
 		  FILE * stream, int indent, int fwidth)
 {
     const H5S_extent_t	   *sdim = (const H5S_extent_t *)mesg;
