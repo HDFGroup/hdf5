@@ -318,6 +318,12 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                         mesg->storage.u.virt.list[i].clip_size_source = HSIZE_UNDEF;
                         mesg->storage.u.virt.list[i].clip_size_virtual = HSIZE_UNDEF;
 
+                        /* Clipped selections */
+                        if(mesg->storage.u.virt.list[i].unlim_dim_virtual < 0) {
+                            mesg->storage.u.virt.list[i].source_dset.clipped_source_select = mesg->storage.u.virt.list[i].source_select;
+                            mesg->storage.u.virt.list[i].source_dset.clipped_virtual_select = mesg->storage.u.virt.list[i].source_dset.virtual_select;
+                        } /* end if */
+
                         /* Update min_dims */
                         if(H5D_virtual_update_min_dims(mesg, i) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to update virtual dataset minimum dimensions")

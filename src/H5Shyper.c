@@ -9317,7 +9317,15 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     HDassert(proj_space);
         
     /* Assert that src_space and src_intersect_space have same extent and there
-     * are no point selections? */
+     * are no point selections */
+    HDassert(H5S_GET_EXTENT_NDIMS(src_space)
+            == H5S_GET_EXTENT_NDIMS(src_intersect_space));
+    HDassert(!HDmemcmp(src_space->extent.size, src_intersect_space->extent.size,
+            (size_t)H5S_GET_EXTENT_NDIMS(src_space)
+            * sizeof(src_space->extent.size[0])));
+    HDassert(H5S_GET_SELECT_TYPE(src_space) != H5S_SEL_POINTS);
+    HDassert(H5S_GET_SELECT_TYPE(dst_space) != H5S_SEL_POINTS);
+    HDassert(H5S_GET_SELECT_TYPE(src_intersect_space) != H5S_SEL_POINTS);
 
     /* Initialize prev_space, curr_span_tree, and curr_span_up_dim */
     for(i = 0; i < H5S_MAX_RANK; i++) {
@@ -9757,16 +9765,13 @@ done:
     Non-negative on success/Negative on failure.
  DESCRIPTION
     This function recalculates the internal description of the hyperslab
-    to make the unlimited dimension extend to the specified extent.  if
-    superset is TRUE, then the hyperslab can be clipped to a size equal to
-    or greater than clip_size.
+    to make the unlimited dimension extend to the specified extent.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
-    Note this function takes the offset into account.
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
+void
 H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count,
     hsize_t *block, hssize_t offset, hsize_t clip_size)
 {
@@ -9796,7 +9801,7 @@ H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count,
     } /* end else */
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5S__hyper_get_clip_diminfo() */
+} /* end H5S_hyper_get_clip_diminfo() */
 
 
 /*--------------------------------------------------------------------------
@@ -9811,10 +9816,7 @@ H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count,
     Non-negative on success/Negative on failure.
  DESCRIPTION
     This function recalculates the internal description of the hyperslab
-    to make the unlimited dimension extend to the specified extent.  if
-    superset is TRUE, then the hyperslab can be clipped to a size equal to
-    or greater than clip_size.  If include_offset is TRUE, then the offset
-    is taken into account.
+    to make the unlimited dimension extend to the specified extent.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
     Note this function takes the offset into account.
@@ -9882,7 +9884,7 @@ H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size)
         /* Check if last block is partial.  If superset is set, just keep the
          * last block complete to speed computation. */
         if(((diminfo->stride * (diminfo->count - (hsize_t)1)) + diminfo->block)
-                 > ((hsize_t)((hssize_t)clip_size - ((hssize_t)diminfo->start
+                > ((hsize_t)((hssize_t)clip_size - ((hssize_t)diminfo->start
                 + space->select.offset[hslab->unlim_dim])))) {
             hsize_t start[H5S_MAX_RANK];
             hsize_t block[H5S_MAX_RANK];
@@ -10143,6 +10145,64 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_unlim_block */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_get_first_inc_block
+ PURPOSE
+    VDSINC
+ USAGE
+    VDSINC
+ RETURNS
+    Index of first incomplete block in clip_size (never fails).
+ DESCRIPTION
+    VDSINC
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Note this assumes the offset has been normalized.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hsize_t
+H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size,
+    hbool_t *partial)
+{
+    H5S_hyper_sel_t *hslab;     /* Convenience pointer to hyperslab info */
+    H5S_hyper_dim_t *diminfo;   /* Convenience pointer to opt_diminfo in unlimited dimension */
+    hsize_t ret_value;
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Check parameters */
+    HDassert(space);
+    hslab = space->select.sel_info.hslab;
+    HDassert(hslab);
+    HDassert(hslab->unlim_dim >= 0);
+    HDassert(hslab->opt_unlim_diminfo[hslab->unlim_dim].count == H5S_UNLIMITED);
+    HDassert(partial);
+
+    diminfo = &hslab->opt_unlim_diminfo[hslab->unlim_dim];
+
+    /* Check for selection outside of clip_size */
+    if(diminfo->start >= clip_size) {
+        ret_value = 0;
+        partial = FALSE;
+    } /* end if */
+    else {
+        /* Calculate index of first incomplete block */
+        ret_value = (clip_size - diminfo->start + diminfo->stride
+                - diminfo->block) / diminfo->stride;
+
+        /* Check for partial block */
+        if((diminfo->stride * ret_value) < (clip_size - diminfo->start))
+            *partial = TRUE;
+        else
+            *partial = FALSE;
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_hyper_get_first_inc_block */
 
 
 /*--------------------------------------------------------------------------

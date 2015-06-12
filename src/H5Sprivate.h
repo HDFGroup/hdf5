@@ -273,6 +273,8 @@ H5_DLL herr_t H5S_hyper_get_clip_extent(const H5S_t *clip_space,
     const H5S_t *match_space, hsize_t *clip_size, hbool_t incl_trail);
 H5_DLL H5S_t *H5S_hyper_get_unlim_block(const H5S_t *space,
     hsize_t block_index);
+H5_DLL hsize_t H5S_hyper_get_first_inc_block(const H5S_t *space,
+    hsize_t clip_size, hbool_t *partial);
 
 /* Operations on selection iterators */
 H5_DLL herr_t H5S_select_iter_init(H5S_sel_iter_t *iter, const H5S_t *space, size_t elmt_size);

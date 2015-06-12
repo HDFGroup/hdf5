@@ -171,15 +171,11 @@ typedef struct {
     hbool_t *dirty;         /* Pointer to dirty flag to mark */
 } H5D_compact_storage_t;
 
-typedef struct {
-} H5D_virtual_storage_t;    /* Either fill out or remove VDSINC */
-
 typedef union H5D_storage_t {
     H5D_contig_storage_t contig; /* Contiguous information for dataset */
     H5D_chunk_storage_t chunk;  /* Chunk information for dataset */
     H5D_compact_storage_t compact; /* Compact information for dataset */
     H5O_efl_t   efl;            /* External file list information for dataset */
-    H5D_virtual_storage_t virt; /* Virtual dataset information */
 } H5D_storage_t;
 
 /* Typedef for raw data I/O operation info */

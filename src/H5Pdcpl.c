@@ -57,7 +57,7 @@
 #define H5D_DEF_STORAGE_CONTIG_INIT   {HADDR_UNDEF, (hsize_t)0}
 #define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, HADDR_UNDEF,  NULL, {{HADDR_UNDEF, NULL}}}
 #define H5D_DEF_LAYOUT_CHUNK_INIT    {(unsigned)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
-#define H5D_DEF_STORAGE_VIRTUAL_INIT  {{HADDR_UNDEF, 0}, 0, NULL, 0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, H5D_VDS_ERROR, HSIZE_UNDEF}
+#define H5D_DEF_STORAGE_VIRTUAL_INIT  {{HADDR_UNDEF, 0}, 0, NULL, 0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, H5D_VDS_ERROR, HSIZE_UNDEF, FALSE}
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 #define H5D_DEF_STORAGE_COMPACT  {H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }}
 #define H5D_DEF_STORAGE_CONTIG   {H5D_CONTIGUOUS, { .contig = H5D_DEF_STORAGE_CONTIG_INIT }}
@@ -1689,6 +1689,11 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't parse source dataset name")
     ent->unlim_dim_source = H5S_get_select_unlim_dim(src_space);
     ent->unlim_dim_virtual = H5S_get_select_unlim_dim(vspace);
+    if(ent->unlim_dim_virtual < 0) {
+        ent->source_dset.clipped_source_select = ent->source_select;
+        ent->source_dset.clipped_virtual_select = ent->source_dset.virtual_select;
+    } /* end if */
+        
     ent->unlim_extent_source = HSIZE_UNDEF;
     ent->unlim_extent_virtual = HSIZE_UNDEF;
     ent->clip_size_source = HSIZE_UNDEF;

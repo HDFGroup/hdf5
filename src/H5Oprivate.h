@@ -420,6 +420,8 @@ typedef struct H5O_storage_virtual_srcdset_t {
     struct H5S_t *virtual_select;       /* Selection in the virtual dataset that is mapped to source selection */
 
     /* Not stored */
+    struct H5S_t *clipped_source_select; /* Clipped version of source_select  */
+    struct H5S_t *clipped_virtual_select; /* Clipped version of virtual_select */
     struct H5D_t *dset;                 /* Source dataset                     */
 
     /* Temporary - only used during I/O operation, NULL at all other times */
@@ -476,6 +478,7 @@ typedef struct H5O_storage_virtual_t {
     hsize_t     min_dims[H5S_MAX_RANK]; /* Minimum extent of VDS (maximum of all non-unlimited selection bounds) */
     H5D_vds_view_t view;                /* Method for calculating the extent of the virtual dataset with unlimited selections */
     hsize_t     printf_gap;             /* Maximum number of sequential missing source datasets before terminating the search for more */
+    hbool_t     init;                   /* Whether all information has been completely initialized */
 } H5O_storage_virtual_t;
 
 typedef struct H5O_storage_t {
