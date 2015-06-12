@@ -1493,6 +1493,10 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
     const H5S_t *mem_space, hsize_t *tot_nelmts)
 {
     hssize_t    select_nelmts;              /* Number of elements in selection */
+    hsize_t     bounds_start[H5S_MAX_RANK]; /* Selection bounds start */
+    hsize_t     bounds_end[H5S_MAX_RANK];   /* Selection bounds end */
+    int         rank;
+    hbool_t     bounds_init = FALSE;        /* Whether bounds_start, bounds_end, and rank are valid */
     size_t      i, j;                       /* Local index variables */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
@@ -1519,12 +1523,44 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
         /* Check for "printf" source dataset resolution */
         if(storage->list[i].parsed_source_file_name
                 || storage->list[i].parsed_source_dset_name) {
+            hbool_t partial_block;
+
+            HDassert(storage->list[i].unlim_dim_virtual >= 0);
+
+            /* Get selection bounds if necessary */
+            if(!bounds_init) {
+                /* Get rank of VDS */
+                if((rank = H5S_GET_EXTENT_NDIMS(io_info->dset->shared->space)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get number of dimensions")
+
+                /* Get selection bounds */
+                if(H5S_SELECT_BOUNDS(file_space, bounds_start, bounds_end) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get selection bounds")
+
+                /* Adjust bounds_end to represent the extent just enclosing them
+                 * (add 1) */
+                for(j = 0; j < (size_t)rank; j++)
+                    bounds_end[j]++;
+
+                /* Bounds are now initialized */
+                bounds_init = TRUE;
+            } /* end if */
+
+            /* Get index of first block in virtual selection */
+            storage->list[i].sub_dset_io_start = (size_t)H5S_hyper_get_first_inc_block(storage->list[i].source_dset.virtual_select, bounds_start[storage->list[i].unlim_dim_virtual], NULL);
+
+            /* Get index of first block outside of virtual selection */
+            storage->list[i].sub_dset_io_end = (size_t)H5S_hyper_get_first_inc_block(storage->list[i].source_dset.virtual_select, bounds_end[storage->list[i].unlim_dim_virtual], &partial_block);
+            if(partial_block)
+                storage->list[i].sub_dset_io_end++;
+            if(storage->list[i].sub_dset_io_end > storage->list[i].sub_dset_nused)
+                storage->list[i].sub_dset_io_end = storage->list[i].sub_dset_nused;
+
             /* Iterate over sub-source dsets */
-            for(j = 0; j < storage->list[i].sub_dset_nused; j++) {
-                /* Check for no clipped selection.  This should be an assertion
-                 * once we have I/O scoping for printf working VDSINC */
-                if(!storage->list[i].sub_dset[j].clipped_virtual_select)
-                    break;
+            for(j = storage->list[i].sub_dset_io_start;
+                    j < storage->list[i].sub_dset_io_end; j++) {
+                /* There should always be a clipped virtual selection here */
+                HDassert(storage->list[i].sub_dset[j].clipped_virtual_select);
 
                 /* Project intersection of file space and mapping virtual space
                  * onto memory space */
@@ -1634,7 +1670,8 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
         if(storage->list[i].parsed_source_file_name
                 || storage->list[i].parsed_source_dset_name) {
             /* Iterate over sub-source dsets */
-            for(j = 0; j < storage->list[i].sub_dset_nused; j++)
+            for(j = storage->list[i].sub_dset_io_start;
+                    j < storage->list[i].sub_dset_io_end; j++)
                 /* Close projected memory space */
                 if(storage->list[i].sub_dset[j].projected_mem_space) {
                     if(H5S_close(storage->list[i].sub_dset[j].projected_mem_space) < 0)
@@ -1761,7 +1798,8 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         if(storage->list[i].parsed_source_file_name
                 || storage->list[i].parsed_source_dset_name) {
             /* Iterate over sub-source dsets */
-            for(j = 0; j < storage->list[i].sub_dset_nused; j++)
+            for(j = storage->list[i].sub_dset_io_start;
+                    j < storage->list[i].sub_dset_io_end; j++)
                 if(H5D__virtual_read_one(io_info, type_info, file_space, &storage->list[i].sub_dset[j]) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset")
         } /* end if */
@@ -1785,7 +1823,8 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             if(storage->list[i].parsed_source_file_name
                     || storage->list[i].parsed_source_dset_name) {
                 /* Iterate over sub-source dsets */
-                for(j = 0; j < storage->list[i].sub_dset_nused; j++)
+                for(j = storage->list[i].sub_dset_io_start;
+                        j < storage->list[i].sub_dset_io_end; j++)
                     if(storage->list[i].sub_dset[j].projected_mem_space)
                         if(H5S_select_subtract(fill_space, storage->list[i].sub_dset[j].projected_mem_space) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to clip fill selection")
@@ -1942,7 +1981,8 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         if(storage->list[i].parsed_source_file_name
                 || storage->list[i].parsed_source_dset_name) {
             /* Iterate over sub-source dsets */
-            for(j = 0; j < storage->list[i].sub_dset_nused; j++) {
+            for(j = storage->list[i].sub_dset_io_start;
+                    j < storage->list[i].sub_dset_io_end; j++) {
                 HDassert(0 && "Checking code coverage..."); //VDSINC
                 if(H5D__virtual_write_one(io_info, type_info, file_space, &storage->list[i].sub_dset[j]) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to write to source dataset")

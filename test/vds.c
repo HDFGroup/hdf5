@@ -5515,10 +5515,6 @@ test_printf(unsigned config, hid_t fapl)
     if(mdims[1] != 20)
         TEST_ERROR
 
-    /* Close filespace */
-    if(H5Sclose(filespace) < 0)
-        TEST_ERROR
-
     /* Read data through virtual dataset */
     /* Reset rbuf */
     HDmemset(rbuf[0], 0, sizeof(rbuf));
@@ -5542,6 +5538,43 @@ test_printf(unsigned config, hid_t fapl)
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
         } /* end for */
+
+    /* Now try with different selections */
+    count[0] = 10;
+    for(start[1] = (hsize_t)0; start[1] < (hsize_t)5; start[1]++)
+        for(count[1] = (hsize_t)1; count[1] < (hsize_t)11; count[1]++) {
+            /* Reset rbuf */
+            HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+            /* Select hyperslab in memory space */
+            if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+                TEST_ERROR
+
+            /* Select hyperslab in file space */
+            if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+                TEST_ERROR
+
+            /* Read data */
+            if(H5Dread(vdset, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT, rbuf[0]) < 0)
+                TEST_ERROR
+
+            /* Verify read data */
+            for(i = 0; i < (int)mdims[0]; i++)
+                for(j = 0; j < (int)mdims[1]; j++) {
+                    if((j < (int)start[1]) || (j >= (int)(start[1] + count[1]))) {
+                        if(rbuf[i][j] != 0)
+                            TEST_ERROR
+                    } /* end if */
+                    else
+                        if(rbuf[i][j] != erbuf[i][j])
+                            TEST_ERROR
+                } /* end for */
+        } /* end for */
+    start[1] = 0;
+
+    /* Close filespace */
+    if(H5Sclose(filespace) < 0)
+        TEST_ERROR
 
     /* Close */
     if(!(config & TEST_IO_CLOSE_SRC)) {

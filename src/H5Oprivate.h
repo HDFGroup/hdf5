@@ -449,6 +449,8 @@ typedef struct H5O_storage_virtual_ent_t {
     H5O_storage_virtual_srcdset_t *sub_dset; /* Array of sub-source dataset info structs */
     size_t sub_dset_nalloc;             /* Number of slots allocated in sub_dset */
     size_t sub_dset_nused;              /* Number of slots "used" in sub_dset - essentially the farthest sub dataset in the extent */
+    size_t sub_dset_io_start;           /* First element in sub_dset involved in current I/O op.  Field has no meaning and may be uninitialized at all other times */
+    size_t sub_dset_io_end;             /* First element in sub_dset outside of current I/O op.  Field has no meaning and may be uninitialized at all other times */
     H5O_storage_virtual_name_seg_t *parsed_source_file_name; /* Parsed version of source_dset.file_name */
     size_t psfn_static_strlen;          /* Length of parsed_source_file_name without block number substitutions */
     size_t psfn_nsubs;                  /* Number of block number substitutions in parsed_source_file_name */

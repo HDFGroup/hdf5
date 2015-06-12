@@ -10180,25 +10180,27 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size,
     HDassert(hslab);
     HDassert(hslab->unlim_dim >= 0);
     HDassert(hslab->opt_unlim_diminfo[hslab->unlim_dim].count == H5S_UNLIMITED);
-    HDassert(partial);
 
     diminfo = &hslab->opt_unlim_diminfo[hslab->unlim_dim];
 
     /* Check for selection outside of clip_size */
     if(diminfo->start >= clip_size) {
         ret_value = 0;
-        partial = FALSE;
+        if(partial)
+            partial = FALSE;
     } /* end if */
     else {
         /* Calculate index of first incomplete block */
         ret_value = (clip_size - diminfo->start + diminfo->stride
                 - diminfo->block) / diminfo->stride;
 
-        /* Check for partial block */
-        if((diminfo->stride * ret_value) < (clip_size - diminfo->start))
-            *partial = TRUE;
-        else
-            *partial = FALSE;
+        if(partial) {
+            /* Check for partial block */
+            if((diminfo->stride * ret_value) < (clip_size - diminfo->start))
+                *partial = TRUE;
+            else
+                *partial = FALSE;
+        } /* end if */
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
