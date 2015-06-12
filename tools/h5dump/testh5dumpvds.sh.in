@@ -13,7 +13,7 @@
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
-# Tests for the h5dump tool with packed bits type files
+# Tests for the h5dump tool with vds type files
 
 srcdir=@srcdir@
 
@@ -61,7 +61,7 @@ SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
 
 TEST_P_DIR=./testfiles
-TESTDIR=./testfiles/pbits
+TESTDIR=./testfiles/vds
 test -d $TEST_P_DIR || mkdir -p $TEST_P_DIR
 test -d $TESTDIR || mkdir -p $TESTDIR
 
@@ -75,81 +75,47 @@ test -d $TESTDIR || mkdir -p $TESTDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
-$SRC_H5DUMP_TESTFILES/packedbits.h5
-$SRC_H5DUMP_TESTFILES/tarray1.h5
-$SRC_H5DUMP_TESTFILES/tcompound.h5
+$SRC_H5DUMP_TESTFILES/vds/1_a.h5
+$SRC_H5DUMP_TESTFILES/vds/1_b.h5
+$SRC_H5DUMP_TESTFILES/vds/1_c.h5
+$SRC_H5DUMP_TESTFILES/vds/1_d.h5
+$SRC_H5DUMP_TESTFILES/vds/1_e.h5
+$SRC_H5DUMP_TESTFILES/vds/1_f.h5
+$SRC_H5DUMP_TESTFILES/vds/1_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/2_a.h5
+$SRC_H5DUMP_TESTFILES/vds/2_b.h5
+$SRC_H5DUMP_TESTFILES/vds/2_c.h5
+$SRC_H5DUMP_TESTFILES/vds/2_d.h5
+$SRC_H5DUMP_TESTFILES/vds/2_e.h5
+$SRC_H5DUMP_TESTFILES/vds/2_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/3_1_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/3_2_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/4_0.h5
+$SRC_H5DUMP_TESTFILES/vds/4_1.h5
+$SRC_H5DUMP_TESTFILES/vds/4_2.h5
+$SRC_H5DUMP_TESTFILES/vds/4_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/5_a.h5
+$SRC_H5DUMP_TESTFILES/vds/5_b.h5
+$SRC_H5DUMP_TESTFILES/vds/5_c.h5
+$SRC_H5DUMP_TESTFILES/vds/5_vds.h5
 "
 
 LIST_OTHER_TEST_FILES="
-$SRC_H5DUMP_TESTFILES/pbits/tnofilename-with-packed-bits.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsArray.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsCompound.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsIncomplete.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsLengthExceeded.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsCharLengthExceeded.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsIntLengthExceeded.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsLongLengthExceeded.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsLengthPositive.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsMax.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsMaxExceeded.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsOffsetExceeded.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsCharOffsetExceeded.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsIntOffsetExceeded.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsLongOffsetExceeded.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsOffsetNegative.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsOverlapped.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSigned.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsigned.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedInt.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedInt.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLong.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLong.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLong.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLong.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedWhole.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedWhole.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedIntWhole.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedIntWhole.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongWhole.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongWhole.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLongWhole.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLongWhole.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLongWhole1.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLongWhole1.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLongWhole63.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLongWhole63.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSigned4.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsigned4.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedInt8.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedInt8.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLong16.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLong16.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLong32.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLong32.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSigned2.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsigned2.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedInt4.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedInt4.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLong8.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLong8.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLong16.ddl
-$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLong16.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds-1.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds-2.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds-3_1.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds-3_2.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds-4.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds-5.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds_layout-1.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds_layout-2.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds_layout-3_1.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds_layout-3_2.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds_layout-4.ddl
+$SRC_H5DUMP_TESTFILES/vds/tvds_layout-5.ddl
 "
 
 LIST_ERROR_TEST_FILES="
-${SRC_H5DUMP_ERRORFILES}/tnofilename-with-packed-bits.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsCharLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsCharOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsIncomplete.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsIntLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsIntOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsLengthPositive.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsLongLengthExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsLongOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsMaxExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsOffsetExceeded.err
-${SRC_H5DUMP_ERRORFILES}/tpbitsOffsetNegative.err
 "
 
 #
@@ -504,86 +470,23 @@ IMPORTTEST()
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
 
-####### test for dataset packed bits ######
+####### test for dataset vds ######
 
-# test failure handling
-# Missing file name
-TOOLTEST tnofilename-with-packed-bits.ddl --enable-error-stack
-# Limits:
-# Maximum number of packed bits is 8 (for now).
-# Maximum integer size is 64 (for now).
-# Maximun Offset is 63 (Maximum size - 1).
-# Maximum Offset+Length is 64 (Maximum size).
-# Tests:
-# Normal operation on both signed and unsigned int datasets.
-# Sanity check
-# Their rawdata output should be the same.
-TOOLTEST tpbitsSignedWhole.ddl --enable-error-stack -d /DS08BITS -M 0,8 packedbits.h5
-TOOLTEST tpbitsUnsignedWhole.ddl --enable-error-stack -d /DU08BITS -M 0,8 packedbits.h5
-TOOLTEST tpbitsSignedIntWhole.ddl --enable-error-stack -d /DS16BITS -M 0,16 packedbits.h5
-TOOLTEST tpbitsUnsignedIntWhole.ddl --enable-error-stack -d /DU16BITS -M 0,16 packedbits.h5
-TOOLTEST tpbitsSignedLongWhole.ddl --enable-error-stack -d /DS32BITS -M 0,32 packedbits.h5
-TOOLTEST tpbitsUnsignedLongWhole.ddl --enable-error-stack -d /DU32BITS -M 0,32 packedbits.h5
-TOOLTEST tpbitsSignedLongLongWhole.ddl --enable-error-stack -d /DS64BITS -M 0,64 packedbits.h5
-TOOLTEST tpbitsUnsignedLongLongWhole.ddl --enable-error-stack -d /DU64BITS -M 0,64 packedbits.h5
-TOOLTEST tpbitsSignedLongLongWhole63.ddl --enable-error-stack -d /DS64BITS -M 0,63 packedbits.h5
-TOOLTEST tpbitsUnsignedLongLongWhole63.ddl --enable-error-stack -d /DU64BITS -M 0,63 packedbits.h5
-TOOLTEST tpbitsSignedLongLongWhole1.ddl --enable-error-stack -d /DS64BITS -M 1,63 packedbits.h5
-TOOLTEST tpbitsUnsignedLongLongWhole1.ddl --enable-error-stack -d /DU64BITS -M 1,63 packedbits.h5
-# Half sections
-TOOLTEST tpbitsSigned4.ddl --enable-error-stack -d /DS08BITS -M 0,4,4,4 packedbits.h5
-TOOLTEST tpbitsUnsigned4.ddl --enable-error-stack -d /DU08BITS -M 0,4,4,4 packedbits.h5
-TOOLTEST tpbitsSignedInt8.ddl --enable-error-stack -d /DS16BITS -M 0,8,8,8 packedbits.h5
-TOOLTEST tpbitsUnsignedInt8.ddl --enable-error-stack -d /DU16BITS -M 0,8,8,8 packedbits.h5
-TOOLTEST tpbitsSignedLong16.ddl --enable-error-stack -d /DS32BITS -M 0,16,16,16 packedbits.h5
-TOOLTEST tpbitsUnsignedLong16.ddl --enable-error-stack -d /DU32BITS -M 0,16,16,16 packedbits.h5
-TOOLTEST tpbitsSignedLongLong32.ddl --enable-error-stack -d /DS64BITS -M 0,32,32,32 packedbits.h5
-TOOLTEST tpbitsUnsignedLongLong32.ddl --enable-error-stack -d /DU64BITS -M 0,32,32,32 packedbits.h5
-# Quarter sections
-TOOLTEST tpbitsSigned2.ddl --enable-error-stack -d /DS08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5
-TOOLTEST tpbitsUnsigned2.ddl --enable-error-stack -d /DU08BITS -M 0,2,2,2,4,2,6,2 packedbits.h5
-TOOLTEST tpbitsSignedInt4.ddl --enable-error-stack -d /DS16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5
-TOOLTEST tpbitsUnsignedInt4.ddl --enable-error-stack -d /DU16BITS -M 0,4,4,4,8,4,12,4 packedbits.h5
-TOOLTEST tpbitsSignedLong8.ddl --enable-error-stack -d /DS32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5
-TOOLTEST tpbitsUnsignedLong8.ddl --enable-error-stack -d /DU32BITS -M 0,8,8,8,16,8,24,8 packedbits.h5
-TOOLTEST tpbitsSignedLongLong16.ddl --enable-error-stack -d /DS64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5
-TOOLTEST tpbitsUnsignedLongLong16.ddl --enable-error-stack -d /DU64BITS -M 0,16,16,16,32,16,48,16 packedbits.h5
-# Begin and End
-TOOLTEST tpbitsSigned.ddl --enable-error-stack -d /DS08BITS -M 0,2,2,6 packedbits.h5
-TOOLTEST tpbitsUnsigned.ddl --enable-error-stack -d /DU08BITS -M 0,2,2,6 packedbits.h5
-TOOLTEST tpbitsSignedInt.ddl --enable-error-stack -d /DS16BITS -M 0,2,10,6 packedbits.h5
-TOOLTEST tpbitsUnsignedInt.ddl --enable-error-stack -d /DU16BITS -M 0,2,10,6 packedbits.h5
-TOOLTEST tpbitsSignedLong.ddl --enable-error-stack -d /DS32BITS -M 0,2,26,6 packedbits.h5
-TOOLTEST tpbitsUnsignedLong.ddl --enable-error-stack -d /DU32BITS -M 0,2,26,6 packedbits.h5
-TOOLTEST tpbitsSignedLongLong.ddl --enable-error-stack -d /DS64BITS -M 0,2,58,6 packedbits.h5
-TOOLTEST tpbitsUnsignedLongLong.ddl --enable-error-stack -d /DU64BITS -M 0,2,58,6 packedbits.h5
-# Overlapped packed bits.
-TOOLTEST tpbitsOverlapped.ddl --enable-error-stack -d /DS08BITS -M 0,1,1,1,2,1,0,3 packedbits.h5
-# Maximum number of packed bits.
-TOOLTEST tpbitsMax.ddl --enable-error-stack -d /DS08BITS -M 0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
-# Compound type.
-TOOLTEST tpbitsCompound.ddl --enable-error-stack -d /dset1 -M 0,1,1,1 tcompound.h5
-# Array type.
-TOOLTEST tpbitsArray.ddl --enable-error-stack -d /Dataset1 -M 0,1,1,1 tarray1.h5
-# Test Error handling.
-# Too many packed bits requested. Max is 8 for now.
-TOOLTEST tpbitsMaxExceeded.ddl --enable-error-stack -d /DS08BITS -M 0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1 packedbits.h5
-# Offset too large. Max is 7 (8-1) for now.
-TOOLTEST tpbitsOffsetExceeded.ddl --enable-error-stack -d /DS08BITS -M 64,1 packedbits.h5
-TOOLTEST tpbitsCharOffsetExceeded.ddl --enable-error-stack -d /DS08BITS -M 8,1 packedbits.h5
-TOOLTEST tpbitsIntOffsetExceeded.ddl --enable-error-stack -d /DS16BITS -M 16,1 packedbits.h5
-TOOLTEST tpbitsLongOffsetExceeded.ddl --enable-error-stack -d /DS32BITS -M 32,1 packedbits.h5
-# Bad offset, must not be negative.
-TOOLTEST tpbitsOffsetNegative.ddl --enable-error-stack -d /DS08BITS -M -1,1 packedbits.h5
-# Bad length, must not be positive.
-TOOLTEST tpbitsLengthPositive.ddl --enable-error-stack -d /DS08BITS -M 4,0 packedbits.h5
-# Offset+Length is too large. Max is 8 for now.
-TOOLTEST tpbitsLengthExceeded.ddl --enable-error-stack -d /DS08BITS -M 37,28 packedbits.h5
-TOOLTEST tpbitsCharLengthExceeded.ddl --enable-error-stack -d /DS08BITS -M 2,7 packedbits.h5
-TOOLTEST tpbitsIntLengthExceeded.ddl --enable-error-stack -d /DS16BITS -M 10,7 packedbits.h5
-TOOLTEST tpbitsLongLengthExceeded.ddl --enable-error-stack -d /DS32BITS -M 26,7 packedbits.h5
-# Incomplete pair of packed bits request.
-TOOLTEST tpbitsIncomplete.ddl --enable-error-stack -d /DS08BITS -M 0,2,2,1,0,2,2, packedbits.h5
+  # Data read
+TOOLTEST tvds-1.ddl --enable-error-stack 1_vds.h5
+TOOLTEST tvds-2.ddl --enable-error-stack 2_vds.h5
+TOOLTEST tvds-3_1.ddl --enable-error-stack 3_1_vds.h5
+TOOLTEST tvds-3_2.ddl --enable-error-stack 3_2_vds.h5
+TOOLTEST tvds-4.ddl --enable-error-stack 4_vds.h5
+TOOLTEST tvds-5.ddl --enable-error-stack 5_vds.h5
+
+  # Layout read
+TOOLTEST tvds_layout-1.ddl -p --enable-error-stack 1_vds.h5
+TOOLTEST tvds_layout-2.ddl -p --enable-error-stack 2_vds.h5
+TOOLTEST tvds_layout-3_1.ddl -p --enable-error-stack 3_1_vds.h5
+TOOLTEST tvds_layout-3_2.ddl -p --enable-error-stack 3_2_vds.h5
+TOOLTEST tvds_layout-4.ddl -p --enable-error-stack 4_vds.h5
+TOOLTEST tvds_layout-5.ddl -p --enable-error-stack 5_vds.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

@@ -8279,7 +8279,7 @@ main(void)
     if(nerrors)
         goto error;
     printf("All virtual dataset tests passed.\n");
-    h5_cleanup(FILENAME, fapl);
+//    h5_cleanup(FILENAME, fapl);
 
     return 0;
 
