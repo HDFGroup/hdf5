@@ -475,18 +475,14 @@ addr_to_type_and_index(haddr_t addr,
  *
  *-------------------------------------------------------------------------
  */
-
-herr_t
-check_write_permitted(const H5F_t H5_ATTR_UNUSED *f,
-                      hid_t H5_ATTR_UNUSED dxpl_id,
-                      hbool_t *write_permitted_ptr)
+static herr_t
+check_write_permitted(const H5F_t H5_ATTR_UNUSED *f, hbool_t *write_permitted_ptr)
 {
+    HDassert(write_permitted_ptr);
 
-    HDassert( write_permitted_ptr );
     *write_permitted_ptr = write_permitted;
 
     return(SUCCEED);
-
 } /* check_write_permitted() */
 
 

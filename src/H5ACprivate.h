@@ -363,8 +363,6 @@ H5_DLL herr_t H5AC_set_sync_point_done_callback(H5C_t *cache_ptr,
     void (*sync_point_done)(int num_writes, haddr_t *written_entries_tbl));
 H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
                                            void (* write_done)(void));
-H5_DLL herr_t H5AC_stats(const H5F_t *f);
-H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
 H5_DLL herr_t H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
     H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr,
@@ -374,27 +372,24 @@ H5_DLL herr_t H5AC_reset_cache_hit_rate_stats(H5AC_t *cache_ptr);
 H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
     H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t *config_ptr);
-
 H5_DLL herr_t H5AC_close_trace_file(H5AC_t *cache_ptr);
 H5_DLL herr_t H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name);
-H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t * prev_tag);
-H5_DLL herr_t H5AC_retag_copied_metadata(H5F_t * f, haddr_t metadata_tag);
-H5_DLL herr_t H5AC_ignore_tags(H5F_t * f);
+H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag);
+H5_DLL herr_t H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag);
+H5_DLL herr_t H5AC_ignore_tags(const H5F_t *f);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
 #endif /* H5_HAVE_PARALLEL */
 
 #ifndef NDEBUG  /* debugging functions */
-
+H5_DLL herr_t H5AC_stats(const H5F_t *f);
+H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
 H5_DLL herr_t H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr,
-                                           void ** entry_ptr_ptr);
-
+    void ** entry_ptr_ptr);
 H5_DLL herr_t H5AC_verify_entry_type(const H5F_t * f, haddr_t addr,
-                                     const H5AC_class_t * expected_type,
-                                     hbool_t * in_cache_ptr,
-                                     hbool_t * type_ok_ptr);
-
+    const H5AC_class_t * expected_type, hbool_t * in_cache_ptr,
+    hbool_t * type_ok_ptr);
 #endif /* NDEBUG */ /* end debugging functions */
 
 #endif /* !_H5ACprivate_H */

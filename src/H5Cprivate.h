@@ -170,14 +170,12 @@ typedef struct H5C_class_t {
 /* Type defintions of call back functions used by the cache as a whole */
 
 typedef herr_t (*H5C_write_permitted_func_t)(const H5F_t *f,
-                                             hid_t dxpl_id,
                                              hbool_t * write_permitted_ptr);
 
 typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
                                        haddr_t addr,
                                        hbool_t was_dirty,
-                                       unsigned flags,
-                                       int type_id);
+                                       unsigned flags);
 
 /* Upper and lower limits on cache size.  These limits are picked
  * out of a hat -- you should be able to change them as necessary.
@@ -1142,10 +1140,8 @@ H5_DLL herr_t H5C_get_entry_status(const H5F_t *f,
 H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t * cache_ptr,
                                         hbool_t * evictions_enabled_ptr);
 
-H5_DLL herr_t H5C_get_trace_file_ptr(const H5C_t *cache_ptr,
-    FILE **trace_file_ptr_ptr);
-H5_DLL herr_t H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr,
-    FILE **trace_file_ptr_ptr);
+H5_DLL FILE *H5C_get_trace_file_ptr(const H5C_t *cache_ptr);
+H5_DLL FILE *H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr);
 
 H5_DLL herr_t H5C_insert_entry(H5F_t *             f,
                                hid_t               primary_dxpl_id,

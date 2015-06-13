@@ -532,13 +532,6 @@ extern const haddr_t base_addrs[NUMBER_OF_ENTRY_TYPES];
 extern const haddr_t alt_base_addrs[NUMBER_OF_ENTRY_TYPES];
 extern const char * entry_type_names[NUMBER_OF_ENTRY_TYPES];
 
-
-/* call back function declarations: */
-
-herr_t check_write_permitted(const H5F_t * f,
-                             hid_t dxpl_id,
-                             hbool_t * write_permitted_ptr);
-
 /* callback table extern */
 
 extern const H5C_class_t types[NUMBER_OF_ENTRY_TYPES];
