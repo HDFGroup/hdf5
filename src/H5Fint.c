@@ -1175,7 +1175,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
     /* Truncate the file to the current allocated size */
-    if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)TRUE) < 0)
+    if(H5FD_truncate(f->shared->lf, dxpl_id, closing) < 0)
         HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
 
     /* Flush the entire metadata cache again since the EOA could have changed in the truncate call. */
