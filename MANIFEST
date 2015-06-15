@@ -1719,7 +1719,6 @@
 ./tools/testfiles/pbits/tpbitsUnsignedLongLongWhole1.ddl
 ./tools/testfiles/pbits/tpbitsUnsignedLongLongWhole63.ddl
 ./tools/testfiles/pbits/tpbitsMax.ddl
-./tools/testfiles/pbits/packedbits.h5
 ./tools/testfiles/pbits/tpbitsArray.ddl
 ./tools/testfiles/pbits/tpbitsCompound.ddl
 ./tools/testfiles/pbits/tpbitsIncomplete.ddl
@@ -1732,6 +1731,7 @@
 ./tools/testfiles/pbits/tpbitsIntOffsetExceeded.ddl
 ./tools/testfiles/pbits/tpbitsLongOffsetExceeded.ddl
 ./tools/testfiles/pbits/tpbitsOverlapped.ddl
+./tools/testfiles/packedbits.h5
 
 # h5dump h5import validation
 ./tools/testfiles/out3.h5import
