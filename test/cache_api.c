@@ -70,7 +70,6 @@ static unsigned check_file_mdc_api_errs(void);
 static unsigned
 check_fapl_mdc_api_calls(void)
 {
-    const char * fcn_name = "check_fapl_mdc_api_calls()";
     char filename[512];
     herr_t result;
     hid_t fapl_id = -1;
@@ -487,7 +486,7 @@ check_fapl_mdc_api_calls(void)
 
     if ( ! pass )
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+                  FUNC, failure_mssg);
 
     return !pass;
 
@@ -521,7 +520,6 @@ check_fapl_mdc_api_calls(void)
 static unsigned
 check_file_mdc_api_calls(void)
 {
-    const char * fcn_name = "check_file_mdc_api_calls()";
     char filename[512];
     hid_t file_id = -1;
     size_t max_size;
@@ -775,7 +773,7 @@ check_file_mdc_api_calls(void)
             pass = FALSE;
             failure_mssg = "H5Fget_mdc_hit_rate() failed 1.\n";
 
-        } else if ( hit_rate != 0.0f ) {
+        } else if ( !H5_DBL_ABS_EQUAL(hit_rate, (double)0.0f) ) {
 
             pass = FALSE;
             failure_mssg =
@@ -839,7 +837,7 @@ check_file_mdc_api_calls(void)
 
     if ( ! pass )
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+                  FUNC, failure_mssg);
 
     return !pass;
 
@@ -872,7 +870,6 @@ check_file_mdc_api_calls(void)
 static unsigned
 mdc_api_call_smoke_check(int express_test)
 {
-    const char * fcn_name = "mdc_api_call_smoke_check()";
     char filename[512];
     hbool_t valid_chunk;
     hbool_t dump_hit_rate = FALSE;
@@ -884,7 +881,7 @@ mdc_api_call_smoke_check(int express_test)
     hid_t filespace_ids[NUM_DSETS];
     hid_t memspace_id = -1;
     hid_t dataset_ids[NUM_DSETS];
-    hid_t properties;
+    hid_t properties = -1;
     char dset_name[64];
     int i, j, k, l, m, n;
     herr_t status;
@@ -1187,8 +1184,8 @@ mdc_api_call_smoke_check(int express_test)
                 }
 
                 /* select on disk hyperslab */
-                offset[0] = i; /*offset of hyperslab in file*/
-                offset[1] = j;
+                offset[0] = (hsize_t)i; /*offset of hyperslab in file*/
+                offset[1] = (hsize_t)j;
                 a_size[0] = CHUNK_SIZE;   /*size of hyperslab*/
                 a_size[1] = CHUNK_SIZE;
                 status = H5Sselect_hyperslab(filespace_ids[m], H5S_SELECT_SET,
@@ -1258,8 +1255,8 @@ mdc_api_call_smoke_check(int express_test)
         j = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
 
         /* select on disk hyperslab */
-        offset[0] = i; /*offset of hyperslab in file*/
-        offset[1] = j;
+        offset[0] = (hsize_t)i; /*offset of hyperslab in file*/
+        offset[1] = (hsize_t)j;
         a_size[0] = CHUNK_SIZE;   /*size of hyperslab*/
         a_size[1] = CHUNK_SIZE;
         status = H5Sselect_hyperslab(filespace_ids[m], H5S_SELECT_SET,
@@ -1383,8 +1380,8 @@ mdc_api_call_smoke_check(int express_test)
         j = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
 
         /* select on disk hyperslab */
-        offset[0] = i; /*offset of hyperslab in file*/
-        offset[1] = j;
+        offset[0] = (hsize_t)i; /*offset of hyperslab in file*/
+        offset[1] = (hsize_t)j;
         a_size[0] = CHUNK_SIZE;   /*size of hyperslab*/
         a_size[1] = CHUNK_SIZE;
         status = H5Sselect_hyperslab(filespace_ids[m], H5S_SELECT_SET,
@@ -1516,7 +1513,7 @@ mdc_api_call_smoke_check(int express_test)
 
     if ( ! pass )
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+                  FUNC, failure_mssg);
 
     return !pass;
 
@@ -2885,7 +2882,6 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
 static unsigned
 check_fapl_mdc_api_errs(void)
 {
-    const char * fcn_name = "check_fapl_mdc_api_errs()";
     static char msg[128];
     int i;
     herr_t result;
@@ -3032,7 +3028,7 @@ check_fapl_mdc_api_errs(void)
 
     if ( ! pass )
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+                  FUNC, failure_mssg);
 
     return !pass;
 
@@ -3058,7 +3054,6 @@ check_fapl_mdc_api_errs(void)
 static unsigned
 check_file_mdc_api_errs(void)
 {
-    const char * fcn_name = "check_file_mdc_api_errs()";
     char filename[512];
     static char msg[128];
     hbool_t show_progress = FALSE;
@@ -3086,7 +3081,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: calling h5_fixname().\n", fcn_name);
+	    HDfprintf(stdout, "%s: calling h5_fixname().\n", FUNC);
 	}
 
         if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
@@ -3101,7 +3096,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: calling H5Fcreate().\n", fcn_name);
+	    HDfprintf(stdout, "%s: calling H5Fcreate().\n", FUNC);
 	}
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -3123,7 +3118,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 1.\n", fcn_name);
+	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 1.\n", FUNC);
 	}
 
         H5E_BEGIN_TRY {
@@ -3141,7 +3136,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 2.\n", fcn_name);
+	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 2.\n", FUNC);
 	}
 
         H5E_BEGIN_TRY {
@@ -3160,7 +3155,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 3.\n", fcn_name);
+	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 3.\n", FUNC);
 	}
 
         H5E_BEGIN_TRY {
@@ -3182,7 +3177,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 1.\n", fcn_name);
+	    HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 1.\n", FUNC);
 	}
 
         H5E_BEGIN_TRY {
@@ -3200,7 +3195,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 2.\n", fcn_name);
+	    HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 2.\n", FUNC);
 	}
 
         H5E_BEGIN_TRY {
@@ -3221,7 +3216,7 @@ check_file_mdc_api_errs(void)
 
 	    HDfprintf(stdout,
 		    "%s: testing H5Fset_mdc_config() with invalid config %d.\n",
-		    fcn_name, i);
+		    FUNC, i);
 	}
 
         H5E_BEGIN_TRY {
@@ -3250,7 +3245,7 @@ check_file_mdc_api_errs(void)
 	if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 1.\n",
-		      fcn_name);
+		      FUNC);
 	}
 
         H5E_BEGIN_TRY {
@@ -3269,7 +3264,7 @@ check_file_mdc_api_errs(void)
 	if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 2.\n",
-		      fcn_name);
+		      FUNC);
 	}
 
         H5E_BEGIN_TRY {
@@ -3290,7 +3285,7 @@ check_file_mdc_api_errs(void)
 	if ( show_progress ) {
 
 	    HDfprintf(stdout, "%s: testing H5Freset_mdc_hit_rate_stats().\n",
-		      fcn_name);
+		      FUNC);
 	}
 
         H5E_BEGIN_TRY {
@@ -3311,7 +3306,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 1.\n", fcn_name);
+	    HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 1.\n", FUNC);
 	}
 
         H5E_BEGIN_TRY {
@@ -3330,7 +3325,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 2.\n", fcn_name);
+	    HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 2.\n", FUNC);
 	}
 
         if ( ( H5Fget_mdc_size(file_id, &max_size, NULL, NULL, NULL) < 0 ) ||
@@ -3352,7 +3347,7 @@ check_file_mdc_api_errs(void)
 
 	if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: cleaning up from tests.\n", fcn_name);
+	    HDfprintf(stdout, "%s: cleaning up from tests.\n", FUNC);
 	}
 
         if ( H5Fclose(file_id) < 0  ) {
@@ -3371,7 +3366,7 @@ check_file_mdc_api_errs(void)
 
     if ( ! pass )
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  fcn_name, failure_mssg);
+                  FUNC, failure_mssg);
 
     return !pass;
 

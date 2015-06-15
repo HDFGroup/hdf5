@@ -1718,10 +1718,10 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
     H5C_cache_entry_t *	entry_ptr = NULL;
     H5C_cache_entry_t *	next_entry_ptr = NULL;
 #if H5C_DO_SANITY_CHECKS
-    int64_t		flushed_entries_count;
-    size_t		flushed_entries_size;
-    int64_t		initial_slist_len;
-    size_t              initial_slist_size;
+    int64_t		flushed_entries_count = 0;
+    int64_t		flushed_entries_size = 0;
+    int64_t		initial_slist_len = 0;
+    size_t              initial_slist_size = 0;
 #endif /* H5C_DO_SANITY_CHECKS */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1943,7 +1943,7 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
                             if(entry_ptr->flush_dep_height == curr_flush_dep_height ) {
 #if H5C_DO_SANITY_CHECKS
                                 flushed_entries_count++;
-                                flushed_entries_size += entry_ptr->size;
+                                flushed_entries_size += (int64_t)entry_ptr->size;
 #endif /* H5C_DO_SANITY_CHECKS */
                                 status = H5C_flush_single_entry(f,
                                                                 primary_dxpl_id,
@@ -1976,7 +1976,7 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
                             if(entry_ptr->flush_dep_height == curr_flush_dep_height ) {
 #if H5C_DO_SANITY_CHECKS
                                 flushed_entries_count++;
-                                flushed_entries_size += entry_ptr->size;
+                                flushed_entries_size += (int64_t)entry_ptr->size;
 #endif /* H5C_DO_SANITY_CHECKS */
                                 status = H5C_flush_single_entry(f,
                                                                 primary_dxpl_id,
@@ -2027,8 +2027,8 @@ end_of_inner_loop:
 
 	    HDassert( (initial_slist_len + cache_ptr->slist_len_increase -
                        flushed_entries_count) == cache_ptr->slist_len );
-	    HDassert( (initial_slist_size + 
-                       (size_t)(cache_ptr->slist_size_increase) -
+	    HDassert( (size_t)((int64_t)initial_slist_size + 
+                       cache_ptr->slist_size_increase -
 		       flushed_entries_size) == cache_ptr->slist_size );
 #endif /* H5C_DO_SANITY_CHECKS */
 
@@ -4647,8 +4647,6 @@ H5C_stats(H5C_t * cache_ptr,
 #endif /* H5C_COLLECT_CACHE_STATS */
           display_detailed_stats)
 {
-    herr_t	ret_value = SUCCEED;   /* Return value */
-
 #if H5C_COLLECT_CACHE_STATS
     int		i;
     int64_t     total_hits = 0;
@@ -4680,11 +4678,12 @@ H5C_stats(H5C_t * cache_ptr,
     size_t      aggregate_max_size = 0;
     int32_t	aggregate_max_pins = 0;
     double      hit_rate;
-    double	average_successful_search_depth = 0.0;
-    double	average_failed_search_depth = 0.0;
-    double      average_entries_skipped_per_calls_to_msic = 0.0;
-    double      average_entries_scanned_per_calls_to_msic = 0.0;
+    double	average_successful_search_depth = 0.0f;
+    double	average_failed_search_depth = 0.0f;
+    double      average_entries_skipped_per_calls_to_msic = 0.0f;
+    double      average_entries_scanned_per_calls_to_msic = 0.0f;
 #endif /* H5C_COLLECT_CACHE_STATS */
+    herr_t	ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -4748,10 +4747,10 @@ H5C_stats(H5C_t * cache_ptr,
 
     if ( ( total_hits > 0 ) || ( total_misses > 0 ) ) {
 
-        hit_rate = 100.0 * ((double)(total_hits)) /
+        hit_rate = (double)100.0f * ((double)(total_hits)) /
                    ((double)(total_hits + total_misses));
     } else {
-        hit_rate = 0.0;
+        hit_rate = 0.0f;
     }
 
     if ( cache_ptr->successful_ht_searches > 0 ) {
@@ -4918,7 +4917,7 @@ H5C_stats(H5C_t * cache_ptr,
 
     HDfprintf(stdout, "%s  MSIC: Average/max entries skipped  = %lf / %ld\n",
               cache_ptr->prefix,
-              (float)average_entries_skipped_per_calls_to_msic,
+              (double)average_entries_skipped_per_calls_to_msic,
               (long)(cache_ptr->max_entries_skipped_in_msic));
 
     if (cache_ptr->calls_to_msic > 0) {
@@ -4929,7 +4928,7 @@ H5C_stats(H5C_t * cache_ptr,
 
     HDfprintf(stdout, "%s  MSIC: Average/max entries scanned  = %lf / %ld\n",
               cache_ptr->prefix,
-              (float)average_entries_scanned_per_calls_to_msic,
+              (double)average_entries_scanned_per_calls_to_msic,
               (long)(cache_ptr->max_entries_scanned_in_msic));
 
     HDfprintf(stdout, "%s  MSIC: Scanned to make space(evict) = %lld\n",
@@ -4973,10 +4972,10 @@ H5C_stats(H5C_t * cache_ptr,
 
             if ( ( cache_ptr->hits[i] > 0 ) || ( cache_ptr->misses[i] > 0 ) ) {
 
-                hit_rate = 100.0 * ((double)(cache_ptr->hits[i])) /
+                hit_rate = (double)100.0f * ((double)(cache_ptr->hits[i])) /
                           ((double)(cache_ptr->hits[i] + cache_ptr->misses[i]));
             } else {
-                hit_rate = 0.0;
+                hit_rate = 0.0f;
             }
 
             HDfprintf(stdout,
@@ -8229,7 +8228,6 @@ H5C_flush_single_entry(H5F_t *	   	   f,
     hbool_t		was_dirty;
     hbool_t		destroy_entry;
     herr_t		status;
-    int			type_id;
     unsigned		flush_flags = H5C_CALLBACK__NO_FLAGS_SET;
     H5C_cache_entry_t * entry_ptr = NULL;
     herr_t		ret_value = SUCCEED;      /* Return value */
@@ -8330,7 +8328,6 @@ H5C_flush_single_entry(H5F_t *	   	   f,
 #endif /* H5_HAVE_PARALLEL */
 
         was_dirty = entry_ptr->is_dirty;
-        type_id = entry_ptr->type->id;
 
         entry_ptr->flush_marker = FALSE;
 

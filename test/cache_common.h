@@ -425,26 +425,26 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
       ( (a).set_initial_size      == (b).set_initial_size ) ) &&      \
     ( ( ! cmp_init_size ) ||                                          \
       ( (a).initial_size          == (b).initial_size ) ) &&          \
-    ( DBL_REL_EQUAL((a).min_clean_fraction, (b).min_clean_fraction, 0.00001 ) ) && \
+    ( H5_DBL_ABS_EQUAL((a).min_clean_fraction, (b).min_clean_fraction) ) && \
     ( (a).max_size                == (b).max_size ) &&                \
     ( (a).min_size                == (b).min_size ) &&                \
     ( (a).epoch_length            == (b).epoch_length ) &&            \
     ( (a).incr_mode               == (b).incr_mode ) &&               \
-    ( DBL_REL_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold, 0.00001 ) ) && \
-    ( DBL_REL_EQUAL((a).increment, (b).increment, 0.00001 ) ) &&      \
+    ( H5_DBL_ABS_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold) ) && \
+    ( H5_DBL_ABS_EQUAL((a).increment, (b).increment) ) &&      \
     ( (a).apply_max_increment     == (b).apply_max_increment ) &&     \
     ( (a).max_increment           == (b).max_increment ) &&           \
     ( (a).flash_incr_mode         == (b).flash_incr_mode ) &&         \
-    ( DBL_REL_EQUAL((a).flash_multiple, (b).flash_multiple, 0.00001 ) ) && \
-    ( DBL_REL_EQUAL((a).flash_threshold, (b).flash_threshold, 0.00001 ) ) && \
+    ( H5_DBL_ABS_EQUAL((a).flash_multiple, (b).flash_multiple) ) && \
+    ( H5_DBL_ABS_EQUAL((a).flash_threshold, (b).flash_threshold) ) && \
     ( (a).decr_mode               == (b).decr_mode ) &&               \
-    ( DBL_REL_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold, 0.00001 ) ) && \
-    ( DBL_REL_EQUAL((a).decrement, (b).decrement, 0.00001 ) ) &&      \
+    ( H5_DBL_ABS_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold) ) && \
+    ( H5_DBL_ABS_EQUAL((a).decrement, (b).decrement) ) &&      \
     ( (a).apply_max_decrement     == (b).apply_max_decrement ) &&     \
     ( (a).max_decrement           == (b).max_decrement ) &&           \
     ( (a).epochs_before_eviction  == (b).epochs_before_eviction ) &&  \
     ( (a).apply_empty_reserve     == (b).apply_empty_reserve ) &&     \
-    ( DBL_REL_EQUAL((a).empty_reserve, (b).empty_reserve, 0.00001 ) ) && \
+    ( H5_DBL_ABS_EQUAL((a).empty_reserve, (b).empty_reserve) ) && \
     ( (a).dirty_bytes_threshold   == (b).dirty_bytes_threshold ) &&   \
     ( (a).metadata_write_strategy == (b).metadata_write_strategy ) )
 
@@ -481,9 +481,6 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
     (i).apply_empty_reserve    = (e).apply_empty_reserve;           \
     (i).empty_reserve          = (e).empty_reserve;                 \
 }
-
-/* Epsilon for floating-point comparisons */
-#define FP_EPSILON 0.000001f
 
 
 /* misc type definitions */
