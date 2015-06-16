@@ -113,8 +113,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = t_mpi$(EXEEXT) testphdf5$(EXEEXT) t_cache$(EXEEXT) \
 	t_pflush1$(EXEEXT) t_pflush2$(EXEEXT) t_pshutdown$(EXEEXT) \
-	t_prestart$(EXEEXT) t_pmulti_dset$(EXEEXT) \
-	t_shapesame$(EXEEXT)
+	t_prestart$(EXEEXT) t_init_term$(EXEEXT) \
+	t_pmulti_dset$(EXEEXT) t_shapesame$(EXEEXT)
 t_cache_SOURCES = t_cache.c
 t_cache_OBJECTS = t_cache.$(OBJEXT)
 t_cache_LDADD = $(LDADD)
@@ -197,9 +197,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c t_pmulti_dset.c \
-	t_prestart.c t_pshutdown.c t_shapesame.c $(testphdf5_SOURCES)
-DIST_SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
+SOURCES = t_cache.c t_init_term.c t_mpi.c t_pflush1.c t_pflush2.c \
+	t_pmulti_dset.c t_prestart.c t_pshutdown.c t_shapesame.c \
+	$(testphdf5_SOURCES)
+DIST_SOURCES = t_cache.c t_init_term.c t_mpi.c t_pflush1.c t_pflush2.c \
 	t_pmulti_dset.c t_prestart.c t_pshutdown.c t_shapesame.c \
 	$(testphdf5_SOURCES)
 am__can_run_installinfo = \
@@ -700,12 +701,13 @@ TRACE = perl $(top_srcdir)/bin/trace
 # after_mpi_fin.h5 is from t_init_term
 # go is used for debugging. See testphdf5.c.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 MPItest.h5 \
-	Para*.h5 CacheTestDummy.h5 shutdown.h5 pmulti_dset.h5 go
+	Para*.h5 CacheTestDummy.h5 shutdown.h5 pmulti_dset.h5 \
+	after_mpi_fin.h5 go
 
 # Test programs.  These are our main targets.
 #
 TEST_PROG_PARA = t_mpi testphdf5 t_cache t_pflush1 t_pflush2 t_pshutdown t_prestart \
-	t_pmulti_dset t_shapesame
+        t_init_term t_pmulti_dset t_shapesame
 
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c \
