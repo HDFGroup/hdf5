@@ -283,16 +283,16 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                     for(i = 0; i < mesg->storage.u.virt.list_nused; i++) {
                         /* Source file name */
                         tmp_size = HDstrlen((const char *)heap_block_p) + 1;
-                        if(NULL == (mesg->storage.u.virt.list[i].source_dset.file_name = (char *)H5MM_malloc(tmp_size)))
+                        if(NULL == (mesg->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, NULL, "unable to allocate memory for source file name")
-                        (void)HDmemcpy(mesg->storage.u.virt.list[i].source_dset.file_name, heap_block_p, tmp_size);
+                        (void)HDmemcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p, tmp_size);
                         heap_block_p += tmp_size;
 
                         /* Source dataset name */
                         tmp_size = HDstrlen((const char *)heap_block_p) + 1;
-                        if(NULL == (mesg->storage.u.virt.list[i].source_dset.dset_name = (char *)H5MM_malloc(tmp_size)))
+                        if(NULL == (mesg->storage.u.virt.list[i].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, NULL, "unable to allocate memory for source dataset name")
-                        (void)HDmemcpy(mesg->storage.u.virt.list[i].source_dset.dset_name, heap_block_p, tmp_size);
+                        (void)HDmemcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p, tmp_size);
                         heap_block_p += tmp_size;
 
                         /* Source selection */
@@ -305,10 +305,23 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
 
                         /* Parse source file and dataset names for "printf"
                          * style format specifiers */
-                        if(H5D_virtual_parse_source_name(mesg->storage.u.virt.list[i].source_dset.file_name, &mesg->storage.u.virt.list[i].parsed_source_file_name, &mesg->storage.u.virt.list[i].psfn_static_strlen, &mesg->storage.u.virt.list[i].psfn_nsubs) < 0)
+                        if(H5D_virtual_parse_source_name(mesg->storage.u.virt.list[i].source_file_name, &mesg->storage.u.virt.list[i].parsed_source_file_name, &mesg->storage.u.virt.list[i].psfn_static_strlen, &mesg->storage.u.virt.list[i].psfn_nsubs) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't parse source file name")
-                        if(H5D_virtual_parse_source_name(mesg->storage.u.virt.list[i].source_dset.dset_name, &mesg->storage.u.virt.list[i].parsed_source_dset_name, &mesg->storage.u.virt.list[i].psdn_static_strlen, &mesg->storage.u.virt.list[i].psdn_nsubs) < 0)
+                        if(H5D_virtual_parse_source_name(mesg->storage.u.virt.list[i].source_dset_name, &mesg->storage.u.virt.list[i].parsed_source_dset_name, &mesg->storage.u.virt.list[i].psdn_static_strlen, &mesg->storage.u.virt.list[i].psdn_nsubs) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't parse source dataset name")
+
+                        /* Set source names in source_dset struct */
+                        if((mesg->storage.u.virt.list[i].psfn_nsubs == 0)
+                                && (mesg->storage.u.virt.list[i].psdn_nsubs == 0)) {
+                            if(mesg->storage.u.virt.list[i].parsed_source_file_name)
+                                mesg->storage.u.virt.list[i].source_dset.file_name = mesg->storage.u.virt.list[i].parsed_source_file_name->name_segment;
+                            else
+                                mesg->storage.u.virt.list[i].source_dset.file_name = mesg->storage.u.virt.list[i].source_file_name;
+                            if(mesg->storage.u.virt.list[i].parsed_source_dset_name)
+                                mesg->storage.u.virt.list[i].source_dset.dset_name = mesg->storage.u.virt.list[i].parsed_source_dset_name->name_segment;
+                            else
+                                mesg->storage.u.virt.list[i].source_dset.dset_name = mesg->storage.u.virt.list[i].source_dset_name;
+                        } /* end if */
 
                         /* unlim_dim fields */
                         mesg->storage.u.virt.list[i].unlim_dim_source = H5S_get_select_unlim_dim(mesg->storage.u.virt.list[i].source_select);
@@ -486,17 +499,17 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
 
                 /* Calculate size of each entry */
                 for(i = 0; i < mesg->storage.u.virt.list_nused; i++) {
-                    HDassert(mesg->storage.u.virt.list[i].source_dset.file_name);
-                    HDassert(mesg->storage.u.virt.list[i].source_dset.dset_name);
+                    HDassert(mesg->storage.u.virt.list[i].source_file_name);
+                    HDassert(mesg->storage.u.virt.list[i].source_dset_name);
                     HDassert(mesg->storage.u.virt.list[i].source_select);
                     HDassert(mesg->storage.u.virt.list[i].source_dset.virtual_select);
 
                     /* Source file name */
-                    str_size[2 * i] = HDstrlen(mesg->storage.u.virt.list[i].source_dset.file_name) + (size_t)1;
+                    str_size[2 * i] = HDstrlen(mesg->storage.u.virt.list[i].source_file_name) + (size_t)1;
                     block_size += str_size[2 * i];
 
                     /* Source dset name */
-                    str_size[(2 * i) + 1] = HDstrlen(mesg->storage.u.virt.list[i].source_dset.dset_name) + (size_t)1;
+                    str_size[(2 * i) + 1] = HDstrlen(mesg->storage.u.virt.list[i].source_dset_name) + (size_t)1;
                     block_size += str_size[(2 * i) + 1];
 
                     /* Source selection */
@@ -529,11 +542,11 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
                 /* Encode each entry */
                 for(i = 0; i < mesg->storage.u.virt.list_nused; i++) {
                     /* Source file name */
-                    (void)HDstrcpy((char *)heap_block_p, mesg->storage.u.virt.list[i].source_dset.file_name);
+                    (void)HDstrcpy((char *)heap_block_p, mesg->storage.u.virt.list[i].source_file_name);
                     heap_block_p += str_size[2 * i];
 
                     /* Source dataset name */
-                    (void)HDstrcpy((char *)heap_block_p, mesg->storage.u.virt.list[i].source_dset.dset_name);
+                    (void)HDstrcpy((char *)heap_block_p, mesg->storage.u.virt.list[i].source_dset_name);
                     heap_block_p += str_size[(2 * i) + 1];
 
                     /* Source selection */

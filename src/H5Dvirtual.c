@@ -228,22 +228,31 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
         /* Copy the list entries, though set source_dset.dset and sub_dset to
          * NULL */
         for(i = 0; i < layout->storage.u.virt.list_nused; i++) {
-            if(NULL == (layout->storage.u.virt.list[i].source_dset.file_name
-                    = HDstrdup(orig_list[i].source_dset.file_name)))
-                HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source file name")
-            if(NULL == (layout->storage.u.virt.list[i].source_dset.dset_name
-                    = HDstrdup(orig_list[i].source_dset.dset_name)))
-                HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source dataset name")
+            /* Copy virtual selection */
             if(NULL == (layout->storage.u.virt.list[i].source_dset.virtual_select
                     = H5S_copy(orig_list[i].source_dset.virtual_select, FALSE, TRUE)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
+
+            /* Copy original source names */
+            if(NULL == (layout->storage.u.virt.list[i].source_file_name
+                    = HDstrdup(orig_list[i].source_file_name)))
+                HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source file name")
+            if(NULL == (layout->storage.u.virt.list[i].source_dset_name
+                    = HDstrdup(orig_list[i].source_dset_name)))
+                HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source dataset name")
+
+            /* Copy source selection */
             if(NULL == (layout->storage.u.virt.list[i].source_select
                     = H5S_copy(orig_list[i].source_select, FALSE, TRUE)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy source selection")
+
+            /* Initialize clipped selections */
             if(orig_list[i].unlim_dim_virtual < 0) {
                 layout->storage.u.virt.list[i].source_dset.clipped_source_select = layout->storage.u.virt.list[i].source_select;
                 layout->storage.u.virt.list[i].source_dset.clipped_virtual_select = layout->storage.u.virt.list[i].source_dset.virtual_select;
             } /* end if */
+
+            /* Copy parsed names */
             if(H5D__virtual_copy_parsed_name(&layout->storage.u.virt.list[i].parsed_source_file_name, orig_list[i].parsed_source_file_name) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy parsed source file name")
             layout->storage.u.virt.list[i].psfn_static_strlen = orig_list[i].psfn_static_strlen;
@@ -252,6 +261,43 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy parsed source dataset name")
             layout->storage.u.virt.list[i].psdn_static_strlen = orig_list[i].psdn_static_strlen;
             layout->storage.u.virt.list[i].psdn_nsubs = orig_list[i].psdn_nsubs;
+
+            /* Copy source names in source dset or add reference as appropriate
+             */
+            if(orig_list[i].source_dset.file_name) {
+                if(orig_list[i].source_dset.file_name
+                        == orig_list[i].source_file_name)
+                    layout->storage.u.virt.list[i].source_dset.file_name = layout->storage.u.virt.list[i].source_file_name;
+                else if(orig_list[i].parsed_source_file_name
+                        && (orig_list[i].source_dset.file_name
+                        != orig_list[i].parsed_source_file_name->name_segment)) {
+                    HDassert(layout->storage.u.virt.list[i].parsed_source_file_name);
+                    HDassert(layout->storage.u.virt.list[i].parsed_source_file_name->name_segment);
+                    layout->storage.u.virt.list[i].source_dset.file_name = layout->storage.u.virt.list[i].parsed_source_file_name->name_segment;
+                } /* end if */
+                else
+                    if(NULL == (layout->storage.u.virt.list[i].source_dset.file_name
+                            = HDstrdup(orig_list[i].source_dset.file_name)))
+                        HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source file name")
+            } /* end if */
+            if(orig_list[i].source_dset.dset_name) {
+                if(orig_list[i].source_dset.dset_name
+                        == orig_list[i].source_dset_name)
+                    layout->storage.u.virt.list[i].source_dset.dset_name = layout->storage.u.virt.list[i].source_dset_name;
+                else if(orig_list[i].parsed_source_dset_name
+                        && (orig_list[i].source_dset.dset_name
+                        != orig_list[i].parsed_source_dset_name->name_segment)) {
+                    HDassert(layout->storage.u.virt.list[i].parsed_source_dset_name);
+                    HDassert(layout->storage.u.virt.list[i].parsed_source_dset_name->name_segment);
+                    layout->storage.u.virt.list[i].source_dset.dset_name = layout->storage.u.virt.list[i].parsed_source_dset_name->name_segment;
+                } /* end if */
+                else
+                    if(NULL == (layout->storage.u.virt.list[i].source_dset.dset_name
+                            = HDstrdup(orig_list[i].source_dset.dset_name)))
+                        HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source dataset name")
+            } /* end if */
+
+            /* Copy other fields in entry */
             layout->storage.u.virt.list[i].unlim_dim_source = orig_list[i].unlim_dim_source;
             layout->storage.u.virt.list[i].unlim_dim_virtual = orig_list[i].unlim_dim_virtual;
             layout->storage.u.virt.list[i].unlim_extent_source = orig_list[i].unlim_extent_source;
@@ -263,7 +309,7 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
         } /* end for */
     } /* end if */
     else {
-        HDassert(0 && "checking code coverage...");//VDSINC
+        HDassert(0 && "checking code coverage..."); //VDSINC
         /* Zero out other fields related to list, just to be sure */
         layout->storage.u.virt.list = NULL;
         layout->storage.u.virt.list_nalloc = 0;
@@ -317,6 +363,10 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
         /* Free source_dset */
         if(H5D__virtual_reset_source_dset(&layout->storage.u.virt.list[i], &layout->storage.u.virt.list[i].source_dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset source dataset")
+
+        /* Free original source names */
+        (void)H5MM_xfree(layout->storage.u.virt.list[i].source_file_name);
+        (void)H5MM_xfree(layout->storage.u.virt.list[i].source_dset_name);
 
         /* Free sub_dset */
         for(j = 0; j < layout->storage.u.virt.list[i].sub_dset_nalloc; j++)
@@ -495,14 +545,28 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *virtual_ent,
     } /* end if */
 
     /* Free file name */
-    if((source_dset == &virtual_ent->source_dset)
-            || virtual_ent->parsed_source_file_name)
+    if(virtual_ent->parsed_source_file_name
+            && (source_dset->file_name
+            != virtual_ent->parsed_source_file_name->name_segment))
         source_dset->file_name = (char *)H5MM_xfree(source_dset->file_name);
+    else
+        HDassert((source_dset->file_name == virtual_ent->source_file_name)
+                || (virtual_ent->parsed_source_file_name
+                && (source_dset->file_name
+                == virtual_ent->parsed_source_file_name->name_segment))
+                || !source_dset->file_name);
 
     /* Free dataset name */
-    if((source_dset == &virtual_ent->source_dset)
-            || virtual_ent->parsed_source_dset_name)
+    if(virtual_ent->parsed_source_dset_name
+            && (source_dset->dset_name
+            != virtual_ent->parsed_source_dset_name->name_segment))
         source_dset->dset_name = (char *)H5MM_xfree(source_dset->dset_name);
+    else
+        HDassert((source_dset->dset_name == virtual_ent->source_dset_name)
+                || (virtual_ent->parsed_source_dset_name
+                && (source_dset->dset_name
+                == virtual_ent->parsed_source_dset_name->name_segment))
+                || !source_dset->dset_name);
 
     /* Free clipped virtual selection */
     if(source_dset->clipped_virtual_select) {
@@ -695,8 +759,9 @@ H5D_virtual_parse_source_name(const char *source_name,
         p = pct + 2;
     } /* end while */
 
-    /* Copy last segment of name, if any, unless there were no substitutions */
-    if(tmp_nsubs > 0) {
+    /* Copy last segment of name, if any, unless the parsed name was not
+     * allocated */
+    if(tmp_parsed_name) {
         HDassert(p >= source_name);
         if(*p == '\0')
             HDassert((size_t)(p - source_name) == tmp_strlen);
@@ -849,8 +914,10 @@ H5D__virtual_build_source_name(char *source_name,
 
     /* Check for static name */
     if(nsubs == 0) {
-        HDassert(!parsed_name);
-        *built_name = source_name;
+        if(parsed_name)
+            *built_name = parsed_name->name_segment;
+        else
+            *built_name = source_name;
     } /* end if */
     else {
         const H5O_storage_virtual_name_seg_t *name_seg = parsed_name;
@@ -1105,12 +1172,12 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                     else {
                         /* Resolve file name */
                         if(!storage->list[i].sub_dset[j].file_name)
-                            if(H5D__virtual_build_source_name(storage->list[i].source_dset.file_name, storage->list[i].parsed_source_file_name, storage->list[i].psfn_static_strlen, storage->list[i].psfn_nsubs, j, &storage->list[i].sub_dset[j].file_name) < 0)
+                            if(H5D__virtual_build_source_name(storage->list[i].source_file_name, storage->list[i].parsed_source_file_name, storage->list[i].psfn_static_strlen, storage->list[i].psfn_nsubs, j, &storage->list[i].sub_dset[j].file_name) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to build source file name")
 
                         /* Resolve dset name */
                         if(!storage->list[i].sub_dset[j].dset_name)
-                            if(H5D__virtual_build_source_name(storage->list[i].source_dset.dset_name, storage->list[i].parsed_source_dset_name, storage->list[i].psdn_static_strlen, storage->list[i].psdn_nsubs, j, &storage->list[i].sub_dset[j].dset_name) < 0)
+                            if(H5D__virtual_build_source_name(storage->list[i].source_dset_name, storage->list[i].parsed_source_dset_name, storage->list[i].psdn_static_strlen, storage->list[i].psdn_nsubs, j, &storage->list[i].sub_dset[j].dset_name) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to build source dataset name")
 
                         /* Resolve virtual selection for block */
@@ -1399,7 +1466,7 @@ done:
  */
 herr_t
 H5D__virtual_init(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-        const H5D_t *dset, hid_t dapl_id)
+    const H5D_t *dset, hid_t dapl_id)
 {
     H5O_storage_virtual_t *storage;     /* Convenience pointer */
     H5P_genplist_t *dapl;               /* Data access property list object pointer */
@@ -1521,8 +1588,7 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
         HDassert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
 
         /* Check for "printf" source dataset resolution */
-        if(storage->list[i].parsed_source_file_name
-                || storage->list[i].parsed_source_dset_name) {
+        if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
             hbool_t partial_block;
 
             HDassert(storage->list[i].unlim_dim_virtual >= 0);
@@ -1667,8 +1733,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
     /* Iterate over mappings */
     for(i = 0; i < storage->list_nused; i++)
         /* Check for "printf" source dataset resolution */
-        if(storage->list[i].parsed_source_file_name
-                || storage->list[i].parsed_source_dset_name) {
+        if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
             /* Iterate over sub-source dsets */
             for(j = storage->list[i].sub_dset_io_start;
                     j < storage->list[i].sub_dset_io_end; j++)
@@ -1795,8 +1860,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         HDassert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
 
         /* Check for "printf" source dataset resolution */
-        if(storage->list[i].parsed_source_file_name
-                || storage->list[i].parsed_source_dset_name) {
+        if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
             /* Iterate over sub-source dsets */
             for(j = storage->list[i].sub_dset_io_start;
                     j < storage->list[i].sub_dset_io_end; j++)
@@ -1820,8 +1884,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         /* Iterate over mappings */
         for(i = 0; i < storage->list_nused; i++)
             /* Check for "printf" source dataset resolution */
-            if(storage->list[i].parsed_source_file_name
-                    || storage->list[i].parsed_source_dset_name) {
+            if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
                 /* Iterate over sub-source dsets */
                 for(j = storage->list[i].sub_dset_io_start;
                         j < storage->list[i].sub_dset_io_end; j++)
@@ -1978,8 +2041,7 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         HDassert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
 
         /* Check for "printf" source dataset resolution */
-        if(storage->list[i].parsed_source_file_name
-                || storage->list[i].parsed_source_dset_name) {
+        if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
             /* Iterate over sub-source dsets */
             for(j = storage->list[i].sub_dset_io_start;
                     j < storage->list[i].sub_dset_io_end; j++) {

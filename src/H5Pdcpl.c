@@ -1674,19 +1674,29 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
 
     /* Add virtual dataset mapping entry */
     ent = &layout.storage.u.virt.list[layout.storage.u.virt.list_nused];
-    if(NULL == (ent->source_dset.file_name = HDstrdup(src_file_name)))
-        HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name")
-    adding_entry = TRUE;
-    if(NULL == (ent->source_dset.dset_name = HDstrdup(src_dset_name)))
-        HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name")
     if(NULL == (ent->source_dset.virtual_select = H5S_copy(vspace, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
+    adding_entry = TRUE;
+    if(NULL == (ent->source_file_name = HDstrdup(src_file_name)))
+        HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name")
+    if(NULL == (ent->source_dset_name = HDstrdup(src_dset_name)))
+        HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name")
     if(NULL == (ent->source_select = H5S_copy(src_space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")
-    if(H5D_virtual_parse_source_name(ent->source_dset.file_name, &ent->parsed_source_file_name, &ent->psfn_static_strlen, &ent->psfn_nsubs) < 0)
+    if(H5D_virtual_parse_source_name(ent->source_file_name, &ent->parsed_source_file_name, &ent->psfn_static_strlen, &ent->psfn_nsubs) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't parse source file name")
-    if(H5D_virtual_parse_source_name(ent->source_dset.dset_name, &ent->parsed_source_dset_name, &ent->psdn_static_strlen, &ent->psdn_nsubs) < 0)
+    if(H5D_virtual_parse_source_name(ent->source_dset_name, &ent->parsed_source_dset_name, &ent->psdn_static_strlen, &ent->psdn_nsubs) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't parse source dataset name")
+    if((ent->psfn_nsubs == 0) && (ent->psdn_nsubs == 0)) {
+        if(ent->parsed_source_file_name)
+            ent->source_dset.file_name = ent->parsed_source_file_name->name_segment;
+        else 
+            ent->source_dset.file_name = ent->source_file_name;
+        if(ent->parsed_source_dset_name)
+            ent->source_dset.dset_name = ent->parsed_source_dset_name->name_segment;
+        else
+            ent->source_dset.dset_name = ent->source_dset_name;
+    } /* end if */
     ent->unlim_dim_source = H5S_get_select_unlim_dim(src_space);
     ent->unlim_dim_virtual = H5S_get_select_unlim_dim(vspace);
     if(ent->unlim_dim_virtual < 0) {
@@ -1735,8 +1745,8 @@ done:
         if(ret_value < 0) {
             /* Free incomplete entry if present */
             if(ent) {
-                ent->source_dset.file_name = (char *)H5MM_xfree(ent->source_dset.file_name);
-                ent->source_dset.dset_name = (char *)H5MM_xfree(ent->source_dset.dset_name);
+                ent->source_file_name = (char *)H5MM_xfree(ent->source_file_name);
+                ent->source_dset_name = (char *)H5MM_xfree(ent->source_dset_name);
                 if(ent->source_dset.virtual_select && H5S_close(ent->source_dset.virtual_select) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release virtual selection")
                 ent->source_dset.virtual_select = NULL;
@@ -1960,10 +1970,10 @@ H5Pget_virtual_filename(hid_t dcpl_id, size_t index, char *name/*out*/,
     if(index >= layout.storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    HDassert(layout.storage.u.virt.list[index].source_dset.file_name);
+    HDassert(layout.storage.u.virt.list[index].source_file_name);
     if(name && (size > 0))
-        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_dset.file_name, size);
-    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_dset.file_name);
+        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_file_name, size);
+    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_file_name);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2007,10 +2017,10 @@ H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index, char *name/*out*/,
     if(index >= layout.storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
-    HDassert(layout.storage.u.virt.list[index].source_dset.dset_name);
+    HDassert(layout.storage.u.virt.list[index].source_dset_name);
     if(name && (size > 0))
-        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_dset.dset_name, size);
-    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_dset.dset_name);
+        (void)HDstrncpy(name, layout.storage.u.virt.list[index].source_dset_name, size);
+    ret_value = (ssize_t)HDstrlen(layout.storage.u.virt.list[index].source_dset_name);
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -415,11 +415,11 @@ typedef struct H5O_storage_compact_t {
 
 typedef struct H5O_storage_virtual_srcdset_t {
     /* Stored */
-    char *file_name;                    /* Source file name used for virtual dataset mapping */
-    char *dset_name;                    /* Source dataset name used for virtual dataset mapping */
     struct H5S_t *virtual_select;       /* Selection in the virtual dataset that is mapped to source selection */
 
     /* Not stored */
+    char *file_name;                    /* Source file name used for virtual dataset mapping */
+    char *dset_name;                    /* Source dataset name used for virtual dataset mapping */
     struct H5S_t *clipped_source_select; /* Clipped version of source_select  */
     struct H5S_t *clipped_virtual_select; /* Clipped version of virtual_select */
     struct H5D_t *dset;                 /* Source dataset                     */
@@ -443,6 +443,8 @@ typedef enum H5O_virtual_space_status_t {
 typedef struct H5O_storage_virtual_ent_t {
     /* Stored */
     H5O_storage_virtual_srcdset_t source_dset; /* Information about the source dataset */
+    char *source_file_name;             /* Original (unparsed) source file name */
+    char *source_dset_name;             /* Original (unparsed) source dataset name */
     struct H5S_t *source_select;        /* Selection in the source dataset for mapping */
 
     /* Not stored */
