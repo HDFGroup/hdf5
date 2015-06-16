@@ -8716,7 +8716,7 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter,
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t *iter,
+H5S_hyper_get_seq_list(const H5S_t *space, unsigned H5_ATTR_UNUSED flags, H5S_sel_iter_t *iter,
     size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {

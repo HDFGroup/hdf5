@@ -21,7 +21,7 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	*/
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5A_init_interface
+#define H5_INTERFACE_INIT_FUNC	H5A__init_interface
 
 
 /***********/
@@ -125,9 +125,9 @@ done:
 
 /*--------------------------------------------------------------------------
 NAME
-   H5A_init_interface -- Initialize interface-specific information
+   H5A__init_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5A_init_interface()
+    herr_t H5A__init_interface()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -136,11 +136,11 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5A_init_interface(void)
+H5A__init_interface(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Create attribute ID type.
@@ -150,7 +150,7 @@ H5A_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_init_interface() */
+} /* end H5A__init_interface() */
 
 
 /*--------------------------------------------------------------------------
@@ -229,7 +229,7 @@ H5A_term_interface(void)
 /* ARGSUSED */
 hid_t
 H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
-    hid_t acpl_id, hid_t UNUSED aapl_id)
+    hid_t acpl_id, hid_t H5_ATTR_UNUSED aapl_id)
 {
     H5A_t	        *attr = NULL;           /* Attribute created */
     H5G_loc_t           loc;                    /* Object location */
@@ -304,7 +304,7 @@ done:
 /* ARGSUSED */
 hid_t
 H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
-    hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t UNUSED aapl_id,
+    hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t H5_ATTR_UNUSED aapl_id,
     hid_t lapl_id)
 {
     H5A_t	        *attr = NULL;           /* Attribute created */
@@ -385,7 +385,7 @@ done:
     H5Aclose or resource leaks will develop.
 --------------------------------------------------------------------------*/
 hid_t
-H5Aopen(hid_t loc_id, const char *attr_name, hid_t UNUSED aapl_id)
+H5Aopen(hid_t loc_id, const char *attr_name, hid_t H5_ATTR_UNUSED aapl_id)
 {
     H5G_loc_t    	loc;            /* Object location */
     H5A_t               *attr = NULL;   /* Attribute opened */
@@ -407,7 +407,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t UNUSED aapl_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from object header for attribute: '%s'", attr_name)
 
     /* Finish initializing attribute */
-    if(H5A_open_common(&loc, attr) < 0)
+    if(H5A__open_common(&loc, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to initialize attribute")
 
     /* Register the attribute and get an ID for it */
@@ -447,7 +447,7 @@ done:
 --------------------------------------------------------------------------*/
 hid_t
 H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
-    hid_t UNUSED aapl_id, hid_t lapl_id)
+    hid_t H5_ATTR_UNUSED aapl_id, hid_t lapl_id)
 {
     H5G_loc_t    	loc;            /* Object location */
     H5A_t               *attr = NULL;   /* Attribute opened */
@@ -515,7 +515,7 @@ done:
 --------------------------------------------------------------------------*/
 hid_t
 H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t n, hid_t UNUSED aapl_id, hid_t lapl_id)
+    H5_iter_order_t order, hsize_t n, hid_t H5_ATTR_UNUSED aapl_id, hid_t lapl_id)
 {
     H5A_t       *attr = NULL;   /* Attribute opened */
     H5G_loc_t	loc;	        /* Object location */
@@ -595,7 +595,7 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
     /* Go write the actual data to the attribute */
-    if((ret_value = H5A_write(attr, mem_type, buf, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5A__write(attr, mem_type, buf, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
 done:
@@ -638,7 +638,7 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
     /* Go write the actual data to the attribute */
-    if((ret_value = H5A_read(attr, mem_type, buf, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5A__read(attr, mem_type, buf, H5AC_ind_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
 
 done:
@@ -799,7 +799,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
 
     /* Call private function in turn */
-    if(0 > (ret_value = H5A_get_name(my_attr, buf_size, buf)))
+    if(0 > (ret_value = H5A__get_name(my_attr, buf_size, buf)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
 
 done:
@@ -942,7 +942,7 @@ H5Aget_info(hid_t attr_id, H5A_info_t *ainfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Get the attribute information */
-    if(H5A_get_info(attr, ainfo) < 0)
+    if(H5A__get_info(attr, ainfo) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -996,7 +996,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
     /* Get the attribute information */
-    if(H5A_get_info(attr, ainfo) < 0)
+    if(H5A__get_info(attr, ainfo) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -1058,7 +1058,7 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
     /* Get the attribute information */
-    if(H5A_get_info(attr, ainfo) < 0)
+    if(H5A__get_info(attr, ainfo) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:

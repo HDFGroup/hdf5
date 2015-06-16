@@ -1224,7 +1224,7 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+can_apply_bogus(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     if(H5Tequal(type_id,H5T_NATIVE_DOUBLE))
         return 0;
@@ -1250,9 +1250,9 @@ can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
-      size_t UNUSED *buf_size, void UNUSED **buf)
+filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+      const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
+      size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return nbytes;
 }
@@ -1274,7 +1274,7 @@ filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
  *-------------------------------------------------------------------------
  */
 static herr_t
-set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     unsigned add_on=0;      /* Value to add to data going through */
     unsigned flags;         /* Filter flags */
@@ -1381,9 +1381,9 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_bogus3(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t UNUSED nbytes,
-      size_t UNUSED *buf_size, void UNUSED **buf)
+filter_bogus3(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+      const unsigned int H5_ATTR_UNUSED *cd_values, size_t H5_ATTR_UNUSED nbytes,
+      size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return 0;
 }
@@ -1477,8 +1477,8 @@ error:
  *-------------------------------------------------------------------------
  */
 static H5Z_cb_return_t
-filter_cb_cont(H5Z_filter_t filter, void UNUSED *buf, size_t UNUSED buf_size,
-           void UNUSED *op_data)
+filter_cb_cont(H5Z_filter_t filter, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNUSED buf_size,
+           void H5_ATTR_UNUSED *op_data)
 {
     if(H5Z_FILTER_FLETCHER32==filter)
        return H5Z_CB_CONT;
@@ -1500,8 +1500,8 @@ filter_cb_cont(H5Z_filter_t filter, void UNUSED *buf, size_t UNUSED buf_size,
  *-------------------------------------------------------------------------
  */
 static H5Z_cb_return_t
-filter_cb_fail(H5Z_filter_t filter, void UNUSED *buf, size_t UNUSED buf_size,
-           void UNUSED *op_data)
+filter_cb_fail(H5Z_filter_t filter, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNUSED buf_size,
+           void H5_ATTR_UNUSED *op_data)
 {
     if(H5Z_FILTER_FLETCHER32==filter)
        return H5Z_CB_FAIL;
@@ -2069,7 +2069,7 @@ error:
 static herr_t
 test_filters(hid_t file, hid_t
 #ifndef H5_HAVE_FILTER_SZIP
-UNUSED
+H5_ATTR_UNUSED
 #endif /* H5_HAVE_FILTER_SZIP */
     fapl)
 {
@@ -5400,7 +5400,7 @@ error:
 static herr_t
 test_can_apply_szip(hid_t
 #ifndef H5_HAVE_FILTER_SZIP
-UNUSED
+H5_ATTR_UNUSED
 #endif /* H5_HAVE_FILTER_SZIP */
 file)
 {
@@ -5819,7 +5819,7 @@ test_set_local(hid_t fapl)
 	for(j=0; j<dims[1]; j++) {
 	    /* If the difference between two values is greater than 0.001%, they're
              * considered not equal. */
-            if(!DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001F)) {
+            if(!H5_DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001F)) {
 		H5_FAILED();
 		printf("    Line %d: Read different values than written.\n",__LINE__);
 		printf("    At index %lu,%lu\n", (unsigned long)(i), (unsigned long)(j));
@@ -6760,13 +6760,13 @@ error:
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 /* Empty can_apply and set_local callbacks */
 static htri_t
-can_apply_deprec(hid_t UNUSED dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
+can_apply_deprec(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     return 1;
 }
 
 static herr_t
-set_local_deprec(hid_t UNUSED dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
+set_local_deprec(hid_t H5_ATTR_UNUSED dcpl_id, hid_t H5_ATTR_UNUSED type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     return(SUCCEED);
 }
@@ -7127,7 +7127,7 @@ test_chunk_cache(hid_t fapl)
      */
     if (H5Pget_cache(fapl_def, NULL, &nslots_1, &nbytes_1, &w0_1) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl1, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_1 != nslots_4) || (nbytes_1 != nbytes_4) || !DBL_ABS_EQUAL(w0_1, w0_4))
+    if ((nslots_1 != nslots_4) || (nbytes_1 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_1, w0_4))
         FAIL_PUTS_ERROR("    Cache values from default dapl do not match those from fapl.")
 
     /* Set a lapl property on dapl1 (to verify inheritance) */
@@ -7168,7 +7168,7 @@ test_chunk_cache(hid_t fapl)
     /* Retrieve dapl from dataset, verfiy cache values are the same as on fapl_local */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_2, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
 
@@ -7190,7 +7190,7 @@ test_chunk_cache(hid_t fapl)
      */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_3 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+    if ((nslots_3 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_3, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from dapl1.")
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
 
@@ -7201,7 +7201,7 @@ test_chunk_cache(hid_t fapl)
     /* Retrieve dapl from dataset, verfiy cache values are the same on fapl_local */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_2, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
 
@@ -7211,7 +7211,7 @@ test_chunk_cache(hid_t fapl)
         FAIL_STACK_ERROR
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_2, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
     /* Don't close dapl2, we will use it in the next section */
 
@@ -7231,7 +7231,7 @@ test_chunk_cache(hid_t fapl)
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR /* Close dapl2, to avoid id leak */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_2, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from dapl2.")
 
     /* Test H5D_CHUNK_CACHE_NSLOTS_DEFAULT and H5D_CHUNK_CACHE_W0_DEFAULT */
@@ -7244,7 +7244,7 @@ test_chunk_cache(hid_t fapl)
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR /* Close dapl2, to avoid id leak */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_3 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+    if ((nslots_3 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_3, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those expected.")
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
 
@@ -7254,14 +7254,14 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Oopen(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_3 != nslots_4) || (nbytes_3 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+    if ((nslots_3 != nslots_4) || (nbytes_3 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_3, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
 
     /* Verify functionality of H5Pcopy with a dapl */
     if ((dapl2 = H5Pcopy(dapl1)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_3 != nslots_4) || (nbytes_1 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+    if ((nslots_3 != nslots_4) || (nbytes_1 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_3, w0_4))
         FAIL_PUTS_ERROR("    Cache values from dapl2 do not match those from dapl1.")
 
     /* Close */
@@ -7489,9 +7489,9 @@ static size_t filter_expand_factor_g = 0;
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_expand(unsigned int flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
-      size_t *buf_size, void UNUSED **buf)
+filter_expand(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+      const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
+      size_t *buf_size, void H5_ATTR_UNUSED **buf)
 {
     size_t         ret_value = 0;
 
@@ -8890,8 +8890,8 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-gather_error_cb_fail(const void UNUSED *dst_buf,
-    size_t UNUSED dst_buf_bytes_used, void UNUSED *op_data)
+gather_error_cb_fail(const void H5_ATTR_UNUSED *dst_buf,
+    size_t H5_ATTR_UNUSED dst_buf_bytes_used, void H5_ATTR_UNUSED *op_data)
 {
     return FAIL;
 }

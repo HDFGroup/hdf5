@@ -169,7 +169,7 @@ HDfprintf(stderr, "%s: Called, addr = %a\n", FUNC, addr);
 
     /* Set info about data block page on disk */
     dblk_page->addr = addr;
-    dblk_page->size = H5EA_DBLK_PAGE_SIZE(dblk_page);
+    dblk_page->size = H5EA_DBLK_PAGE_SIZE(hdr);
 #ifdef QAK
 HDfprintf(stderr, "%s: dblk_page->size = %Zu\n", FUNC, dblk_page->size);
 #endif /* QAK */

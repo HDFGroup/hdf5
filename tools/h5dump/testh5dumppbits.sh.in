@@ -28,10 +28,10 @@ EXIT_FAILURE=1
 DUMPER=h5dump                     # The tool name
 DUMPER_BIN=`pwd`/$DUMPER          # The path of the tool binary
 
-H5DIFF=../h5diff/h5diff           # The h5diff tool name 
+H5DIFF=../h5diff/h5diff           # The h5diff tool name
 H5DIFF_BIN=`pwd`/$H5DIFF          # The path of the h5diff  tool binary
 
-H5IMPORT=../h5import/h5import     # The h5import tool name 
+H5IMPORT=../h5import/h5import     # The h5import tool name
 H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 
 RM='rm -rf'
@@ -81,59 +81,59 @@ $SRC_H5DUMP_TESTFILES/tcompound.h5
 "
 
 LIST_OTHER_TEST_FILES="
-$SRC_H5DUMP_TESTFILES/tnofilename-with-packed-bits.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsArray.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsCompound.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsIncomplete.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsLengthExceeded.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsCharLengthExceeded.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsIntLengthExceeded.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsLongLengthExceeded.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsLengthPositive.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsMax.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsMaxExceeded.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsOffsetExceeded.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsCharOffsetExceeded.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsIntOffsetExceeded.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsLongOffsetExceeded.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsOffsetNegative.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsOverlapped.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSigned.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsigned.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedInt.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedInt.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedLong.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLong.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLong.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLong.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedWhole.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedWhole.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedIntWhole.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedIntWhole.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedLongWhole.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongWhole.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLongWhole.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLongWhole.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLongWhole1.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLongWhole1.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLongWhole63.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLongWhole63.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSigned4.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsigned4.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedInt8.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedInt8.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedLong16.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLong16.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLong32.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLong32.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSigned2.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsigned2.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedInt4.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedInt4.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedLong8.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLong8.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsSignedLongLong16.ddl
-$SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLong16.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tnofilename-with-packed-bits.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsArray.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsCompound.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsIncomplete.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsLengthExceeded.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsCharLengthExceeded.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsIntLengthExceeded.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsLongLengthExceeded.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsLengthPositive.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsMax.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsMaxExceeded.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsOffsetExceeded.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsCharOffsetExceeded.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsIntOffsetExceeded.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsLongOffsetExceeded.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsOffsetNegative.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsOverlapped.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSigned.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsigned.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedInt.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedInt.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLong.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLong.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLong.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLong.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedWhole.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedWhole.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedIntWhole.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedIntWhole.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongWhole.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongWhole.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLongWhole.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLongWhole.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLongWhole1.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLongWhole1.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLongWhole63.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLongWhole63.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSigned4.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsigned4.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedInt8.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedInt8.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLong16.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLong16.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLong32.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLong32.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSigned2.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsigned2.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedInt4.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedInt4.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLong8.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLong8.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsSignedLongLong16.ddl
+$SRC_H5DUMP_TESTFILES/pbits/tpbitsUnsignedLongLong16.ddl
 "
 
 LIST_ERROR_TEST_FILES="
@@ -173,10 +173,10 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+              $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
-                
+
                     # Comment out this to CREATE expected file
                     exit $EXIT_FAILURE
                 fi
@@ -303,7 +303,7 @@ TOOLTEST2() {
      nerrors="`expr $nerrors + 1`"
      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
-    
+
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
      rm -f $actual $actualdata $actual_err
@@ -434,7 +434,7 @@ SKIP() {
    TESTING $DUMPER $@
     echo  " -SKIP-"
 }
-  
+
 # Print a line-line message left justified in a field of 70 characters
 #
 PRINT_H5DIFF() {
@@ -445,7 +445,7 @@ PRINT_H5DIFF() {
 
 # Call the h5diff tool
 #
-DIFFTEST() 
+DIFFTEST()
 {
     PRINT_H5DIFF  $@
     (
@@ -459,7 +459,7 @@ DIFFTEST()
     else
          echo " PASSED"
     fi
-        
+
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -472,7 +472,7 @@ PRINT_H5IMPORT() {
 
 # Call the h5import tool
 #
-IMPORTTEST() 
+IMPORTTEST()
 {
     # remove the output hdf5 file if it exists
     hdf5_file="$TESTDIR/$5"
@@ -483,7 +483,7 @@ IMPORTTEST()
     PRINT_H5IMPORT  $@
     (
   cd $TESTDIR
-  $RUNSERIAL $H5IMPORT_BIN "$@" 
+  $RUNSERIAL $H5IMPORT_BIN "$@"
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -492,7 +492,7 @@ IMPORTTEST()
     else
          echo " PASSED"
     fi
-        
+
 }
 
 

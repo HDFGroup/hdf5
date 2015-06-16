@@ -220,7 +220,7 @@ H5FL_DEFINE_STATIC(H5O_layout_chunk_t);
  */
 /* ARGSUSED */
 static H5UC_t *
-H5D__btree_get_shared(const H5F_t UNUSED *f, const void *_udata)
+H5D__btree_get_shared(const H5F_t H5_ATTR_UNUSED *f, const void *_udata)
 {
     const H5D_chunk_common_ud_t *udata = (const H5D_chunk_common_ud_t *) _udata;
 
@@ -255,7 +255,7 @@ H5D__btree_get_shared(const H5F_t UNUSED *f, const void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__btree_new_node(H5F_t *f, hid_t UNUSED dxpl_id, H5B_ins_t op,
+H5D__btree_new_node(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5B_ins_t op,
 		    void *_lt_key, void *_udata, void *_rt_key,
 		    haddr_t *addr_p/*out*/)
 {
@@ -441,7 +441,7 @@ H5D__btree_cmp3(void *_lt_key, void *_udata, void *_rt_key)
  */
 /* ARGSUSED */
 static htri_t
-H5D__btree_found(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr, const void *_lt_key,
+H5D__btree_found(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, const void *_lt_key,
 		 void *_udata)
 {
     H5D_chunk_ud_t	   *udata = (H5D_chunk_ud_t *) _udata;
@@ -541,10 +541,10 @@ done:
  */
 /* ARGSUSED */
 static H5B_ins_t
-H5D__btree_insert(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t addr, void *_lt_key,
+H5D__btree_insert(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, void *_lt_key,
 		  hbool_t *lt_key_changed,
 		  void *_md_key, void *_udata, void *_rt_key,
-		  hbool_t UNUSED *rt_key_changed,
+		  hbool_t H5_ATTR_UNUSED *rt_key_changed,
 		  haddr_t *new_node_p/*out*/)
 {
     H5D_btree_key_t	*lt_key = (H5D_btree_key_t *) _lt_key;
@@ -637,8 +637,8 @@ done:
 static H5B_ins_t
 H5D__btree_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out */ ,
 	hbool_t *lt_key_changed /*out */ ,
-	void UNUSED * _udata /*in,out */ ,
-	void UNUSED * _rt_key /*in,out */ ,
+	void H5_ATTR_UNUSED * _udata /*in,out */ ,
+	void H5_ATTR_UNUSED * _rt_key /*in,out */ ,
 	hbool_t *rt_key_changed /*out */ )
 {
     H5D_btree_key_t    *lt_key = (H5D_btree_key_t *)_lt_key;
@@ -881,7 +881,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__btree_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t UNUSED *space,
+H5D__btree_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNUSED *space,
     haddr_t dset_ohdr_addr)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
@@ -1078,8 +1078,8 @@ done:
  */
 /* ARGSUSED */
 static int
-H5D__btree_idx_iterate_cb(H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
-    const void *_lt_key, haddr_t addr, const void UNUSED *_rt_key,
+H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    const void *_lt_key, haddr_t addr, const void H5_ATTR_UNUSED *_rt_key,
     void *_udata)
 {
     H5D_btree_it_ud_t	*udata = (H5D_btree_it_ud_t *)_udata; /* User data */
@@ -1317,7 +1317,7 @@ done:
 static herr_t
 H5D__btree_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
     H5O_storage_chunk_t *storage_dst,
-    hid_t UNUSED dxpl_id)
+    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 

@@ -13,6 +13,17 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:		H5Fsuper_cache.c
+ *			Aug 15 2009
+ *			Quincey Koziol <koziol@hdfgroup.org>
+ *
+ * Purpose:		Implement file superblock & driver info metadata cache methods.
+ *
+ *-------------------------------------------------------------------------
+ */
+
 /****************/
 /* Module Setup */
 /****************/
@@ -111,7 +122,7 @@ H5FL_EXTERN(H5F_super_t);
  *-------------------------------------------------------------------------
  */
 static H5F_super_t *
-H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
+H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t H5_ATTR_UNUSED addr, void *_udata)
 {
     H5F_super_t        *sblock = NULL;      /* File's superblock */
     haddr_t             base_addr = HADDR_UNDEF;        /* Base address of file */
@@ -133,7 +144,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_eq(addr, 0));
     HDassert(dirtied);
@@ -371,14 +382,6 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
             drv_name[8] = '\0';
             p += 8; /* advance past name/version */
 
-            /* Check if driver matches driver information saved. Unfortunately, we can't push this
-             * function to each specific driver because we're checking if the driver is correct.
-             */
-            if(!HDstrncmp(drv_name, "NCSAfami", (size_t)8) && HDstrcmp(lf->cls->name, "family"))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "family driver should be used")
-            if(!HDstrncmp(drv_name, "NCSAmult", (size_t)8) && HDstrcmp(lf->cls->name, "multi"))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "multi driver should be used")
-
             /* Read in variable-sized portion of driver info block */
             if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE + drv_variable_size) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "set end of space allocation request failed")
@@ -386,7 +389,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read file driver information")
 
             /* Decode driver information */
-            if(H5FD_sb_decode(lf, drv_name, p) < 0)
+            if(H5FD_sb_load(lf, drv_name, p) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to decode driver information")
         } /* end if */
     } /* end if */
@@ -601,16 +604,8 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
                 if(NULL == H5O_msg_read(&ext_loc, H5O_DRVINFO_ID, &drvinfo, dxpl_id))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "driver info message not present")
 
-                /* Check if driver matches driver information saved. Unfortunately, we can't push this
-                 * function to each specific driver because we're checking if the driver is correct.
-                 */
-                if(!HDstrncmp(drvinfo.name, "NCSAfami", (size_t)8) && HDstrcmp(lf->cls->name, "family"))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "family driver should be used")
-                if(!HDstrncmp(drvinfo.name, "NCSAmult", (size_t)8) && HDstrcmp(lf->cls->name, "multi"))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "multi driver should be used")
-
                 /* Decode driver information */
-                if(H5FD_sb_decode(lf, drvinfo.name, drvinfo.buf) < 0)
+                if(H5FD_sb_load(lf, drvinfo.name, drvinfo.buf) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to decode driver information")
 
                 /* Reset driver info message */
@@ -684,7 +679,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 done:
     /* Release the [possibly partially initialized] superblock on errors */
     if(!ret_value && sblock)
-        if(H5F_super_free(sblock) < 0)
+        if(H5F__super_free(sblock) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTFREE, NULL, "unable to destroy superblock data")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -706,7 +701,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
+H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t H5_ATTR_UNUSED addr,
     H5F_super_t *sblock)
 {
     H5FD_t          *lf;                 /* file driver part of `shared' */
@@ -1058,7 +1053,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_sblock_dest(H5F_t UNUSED *f, H5F_super_t* sblock)
+H5F_sblock_dest(H5F_t H5_ATTR_UNUSED *f, H5F_super_t* sblock)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1068,7 +1063,7 @@ H5F_sblock_dest(H5F_t UNUSED *f, H5F_super_t* sblock)
     HDassert(sblock);
 
     /* Free superblock */
-    if(H5F_super_free(sblock) < 0)
+    if(H5F__super_free(sblock) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to destroy superblock")
 
 done:

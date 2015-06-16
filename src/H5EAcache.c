@@ -43,7 +43,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
@@ -227,7 +227,7 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata))
 	H5E_THROW(H5E_CANTINIT, "can't wrap buffer")
 
     /* Compute the 'base' size of the extensible array header on disk */
-    size = H5EA_HEADER_SIZE(hdr);
+    size = H5EA_HEADER_SIZE_HDR(hdr);
 
     /* Get a pointer to a buffer that's large enough for serialized header */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
@@ -350,7 +350,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5EA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5EA_hdr_t *hdr, unsigned UNUSED * flags_ptr))
+    H5EA_hdr_t *hdr, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     H5WB_t *wb = NULL;                  /* Wrapped buffer for header data */
     uint8_t hdr_buf[H5EA_HDR_BUF_SIZE]; /* Buffer for header */
@@ -486,7 +486,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_clear() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_hdr_size(const H5F_t UNUSED *f, const H5EA_hdr_t *hdr,
+H5EA__cache_hdr_size(const H5F_t H5_ATTR_UNUSED *f, const H5EA_hdr_t *hdr,
     size_t *size_ptr))
 
     /* Sanity check */
@@ -577,6 +577,7 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     haddr_t             arr_addr;       /* Address of array header in the file */
+    size_t              u;              /* Local index variable */
 
     /* Sanity check */
     HDassert(f);
@@ -638,8 +639,6 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Decode data block addresses in index block */
     if(iblock->ndblk_addrs > 0) {
-        size_t u;               /* Local index variable */
-
         /* Decode addresses of data blocks in index block */
         for(u = 0; u < iblock->ndblk_addrs; u++)
             H5F_addr_decode(f, &p, &iblock->dblk_addrs[u]);
@@ -647,8 +646,6 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Decode super block addresses in index block */
     if(iblock->nsblk_addrs > 0) {
-        size_t u;               /* Local index variable */
-
         /* Decode addresses of super blocks in index block */
         for(u = 0; u < iblock->nsblk_addrs; u++)
             H5F_addr_decode(f, &p, &iblock->sblk_addrs[u]);
@@ -705,7 +702,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5EA__cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5EA_iblock_t *iblock, unsigned UNUSED * flags_ptr))
+    H5EA_iblock_t *iblock, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     /* Local variables */
     H5WB_t *wb = NULL;                  /* Wrapped buffer for serializing data */
@@ -872,11 +869,7 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, H5EA_iblock_t *iblock))
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -902,7 +895,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_notify() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_iblock_size(const H5F_t UNUSED *f, const H5EA_iblock_t *iblock,
+H5EA__cache_iblock_size(const H5F_t H5_ATTR_UNUSED *f, const H5EA_iblock_t *iblock,
     size_t *size_ptr))
 
     /* Sanity check */
@@ -1111,7 +1104,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5EA__cache_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5EA_sblock_t *sblock, unsigned UNUSED * flags_ptr))
+    H5EA_sblock_t *sblock, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     /* Local variables */
     H5WB_t *wb = NULL;                  /* Wrapped buffer for serializing data */
@@ -1252,7 +1245,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_clear() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_sblock_size(const H5F_t UNUSED *f, const H5EA_sblock_t *sblock,
+H5EA__cache_sblock_size(const H5F_t H5_ATTR_UNUSED *f, const H5EA_sblock_t *sblock,
     size_t *size_ptr))
 
     /* Sanity check */
@@ -1300,11 +1293,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, H5EA_sblock_t *sblock))
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -1505,7 +1494,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5EA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5EA_dblock_t *dblock, unsigned UNUSED * flags_ptr))
+    H5EA_dblock_t *dblock, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     /* Local variables */
     H5WB_t *wb = NULL;                  /* Wrapped buffer for serializing data */
@@ -1662,11 +1651,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, H5EA_dblock_t *dblock))
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -1692,7 +1677,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_notify() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_dblock_size(const H5F_t UNUSED *f, const H5EA_dblock_t *dblock,
+H5EA__cache_dblock_size(const H5F_t H5_ATTR_UNUSED *f, const H5EA_dblock_t *dblock,
     size_t *size_ptr))
 
     /* Sanity check */
@@ -1791,9 +1776,6 @@ H5EA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(udata && udata->hdr && udata->parent);
-#ifdef QAK
-HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
-#endif /* QAK */
 
     /* Allocate the extensible array data block page */
     if(NULL == (dblk_page = H5EA__dblk_page_alloc(udata->hdr, udata->parent)))
@@ -1807,7 +1789,7 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 	H5E_THROW(H5E_CANTINIT, "can't wrap buffer")
 
     /* Compute the size of the extensible array data block page on disk */
-    size = H5EA_DBLK_PAGE_SIZE(dblk_page);
+    size = H5EA_DBLK_PAGE_SIZE(udata->hdr);
 
     /* Get a pointer to a buffer that's large enough for serialized info */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
@@ -1879,7 +1861,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5EA__cache_dblk_page_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5EA_dblk_page_t *dblk_page, unsigned UNUSED * flags_ptr))
+    H5EA_dblk_page_t *dblk_page, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     /* Local variables */
     H5WB_t *wb = NULL;                  /* Wrapped buffer for serializing data */
@@ -2014,11 +1996,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, H5EA_dblk_page_t *dblk
             break;
 
         default:
-#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -2044,7 +2022,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_notify() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_dblk_page_size(const H5F_t UNUSED *f, const H5EA_dblk_page_t *dblk_page,
+H5EA__cache_dblk_page_size(const H5F_t H5_ATTR_UNUSED *f, const H5EA_dblk_page_t *dblk_page,
     size_t *size_ptr))
 
     /* Sanity check */
@@ -2077,7 +2055,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_size() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__cache_dblk_page_dest(H5F_t UNUSED *f, H5EA_dblk_page_t *dblk_page))
+H5EA__cache_dblk_page_dest(H5F_t H5_ATTR_UNUSED *f, H5EA_dblk_page_t *dblk_page))
 
     /* Sanity check */
     HDassert(f);

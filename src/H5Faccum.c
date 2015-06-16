@@ -845,7 +845,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_free(const H5F_io_info_t *fio_info, H5FD_mem_t UNUSED type, haddr_t addr,
+H5F__accum_free(const H5F_io_info_t *fio_info, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr,
     hsize_t size)
 {
     H5F_meta_accum_t *accum;            /* Alias for file's metadata accumulator */

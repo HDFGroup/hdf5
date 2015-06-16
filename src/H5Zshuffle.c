@@ -63,7 +63,7 @@ const H5Z_class2_t H5Z_SHUFFLE[1] = {{
  */
 /* ARGSUSED */
 static herr_t
-H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     H5P_genplist_t *dcpl_plist;     /* Property list pointer */
     const H5T_t	*type;                  /* Datatype */

@@ -1077,7 +1077,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 
         /* Initialize information about the superblock and allocate space for it */
         /* (Writes superblock extension messages, if there are any) */
-        if(H5F_super_init(file, dxpl_id) < 0)
+        if(H5F__super_init(file, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
 
         /* Create and open the root group */
@@ -1088,7 +1088,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
     } else if (1 == shared->nrefs) {
 	/* Read the superblock if it hasn't been read before. */
-        if(H5F_super_read(file, dxpl_id) < 0)
+        if(H5F__super_read(file, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
 	/* Open the root group */
@@ -2128,3 +2128,64 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__should_truncate() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F__set_base_addr
+ *
+ * Purpose:	Quick and dirty routine to set the file's 'base_addr' value
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		July 19, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__set_base_addr(const H5F_t *f, haddr_t addr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Dispatch to driver */
+    if(H5FD_set_base_addr(f->shared->lf, addr) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_base_addr request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__set_base_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F__set_eoa
+ *
+ * Purpose:	Quick and dirty routine to set the file's 'eoa' value
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		July 19, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Dispatch to driver */
+    if(H5FD_set_eoa(f->shared->lf, type, addr) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_eoa request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__set_eoa() */

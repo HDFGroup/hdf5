@@ -845,7 +845,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_copy_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
+H5A__dense_copy_fh_cb(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_udata)
 {
     H5A_fh_ud_cp_t *udata = (H5A_fh_ud_cp_t *)_udata;       /* User data for fractal heap 'op' callback */
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -1082,7 +1082,7 @@ H5A__dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
                 H5A_info_t ainfo;               /* Info for attribute */
 
                 /* Get the attribute information */
-                if(H5A_get_info(fh_udata.attr, &ainfo) < 0)
+                if(H5A__get_info(fh_udata.attr, &ainfo) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5_ITER_ERROR, "unable to get attribute info")
 
                 /* Make the application callback */

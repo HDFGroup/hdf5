@@ -193,7 +193,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5D__efl_is_space_alloc(const H5O_storage_t UNUSED *storage)
+H5D__efl_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -218,9 +218,9 @@ H5D__efl_is_space_alloc(const H5O_storage_t UNUSED *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
-    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
-    H5D_chunk_map_t UNUSED *cm)
+H5D__efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
+    H5D_chunk_map_t H5_ATTR_UNUSED *cm)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -288,7 +288,7 @@ H5D__efl_read(const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
 	    HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "external file address overflowed")
 	if((fd = HDopen(efl->slot[u].name, O_RDONLY, 0)) < 0)
 	    HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file")
-	if(HDlseek(fd, (off_t)(efl->slot[u].offset + skip), SEEK_SET) < 0)
+	if(HDlseek(fd, (HDoff_t)(efl->slot[u].offset + skip), SEEK_SET) < 0)
 	    HGOTO_ERROR(H5E_EFL, H5E_SEEKERROR, FAIL, "unable to seek in external raw data file")
 #ifndef NDEBUG
 	tempto_read = MIN(efl->slot[u].size-skip, (hsize_t)size);
@@ -378,7 +378,7 @@ H5D__efl_write(const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *b
 	    else
 		HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file")
 	} /* end if */
-	if(HDlseek(fd, (off_t)(efl->slot[u].offset + skip), SEEK_SET) < 0)
+	if(HDlseek(fd, (HDoff_t)(efl->slot[u].offset + skip), SEEK_SET) < 0)
 	    HGOTO_ERROR(H5E_EFL, H5E_SEEKERROR, FAIL, "unable to seek in external raw data file")
 #ifndef NDEBUG
 	tempto_write = MIN(efl->slot[u].size - skip, (hsize_t)size);

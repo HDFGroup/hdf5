@@ -36,10 +36,10 @@ herr_t    dump_attr_cb(hid_t loc_id, const char *attr_name, const H5A_info_t *in
 
 void handle_paths(hid_t fid, const char *path_name, void *data, int pe, const char *display_name);
 void handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *display_name);
-void handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe, const char UNUSED *display_name);
-void handle_groups(hid_t fid, const char *group, void UNUSED *data, int pe, const char *display_name);
-void handle_links(hid_t fid, const char *links, void UNUSED * data, int UNUSED pe, const char UNUSED *display_name);
-void handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe, const char *display_name);
+void handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name);
+void handle_groups(hid_t fid, const char *group, void H5_ATTR_UNUSED *data, int pe, const char *display_name);
+void handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name);
+void handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED * data, int pe, const char *display_name);
 
 #ifdef __cplusplus
 }

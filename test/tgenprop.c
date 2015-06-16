@@ -385,7 +385,7 @@ test_genprop_cls_crt_cb1(hid_t list_id, void *create_data)
 }
 
 static herr_t
-test_genprop_cls_cpy_cb1(hid_t new_list_id, hid_t UNUSED old_list_id, void *copy_data)
+test_genprop_cls_cpy_cb1(hid_t new_list_id, hid_t H5_ATTR_UNUSED old_list_id, void *copy_data)
 {
     struct {                /* Struct for iterations */
         int count;
@@ -681,7 +681,7 @@ test_genprop_basic_list(void)
     ret = H5Pget(lid1, PROP2_NAME,&prop2_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
-    if(!FLT_ABS_EQUAL(prop2_value,*PROP2_DEF_VALUE))
+    if(!H5_FLT_ABS_EQUAL(prop2_value,*PROP2_DEF_VALUE))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
 	    "H5Pget", (double)*PROP2_DEF_VALUE, (double)prop2_value, (int)__LINE__, __FILE__);
 
@@ -773,7 +773,7 @@ test_genprop_basic_list_prop(void)
     ret = H5Pget(lid1, PROP2_NAME,&prop2_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
-    if(!FLT_ABS_EQUAL(prop2_value,*PROP2_DEF_VALUE))
+    if(!H5_FLT_ABS_EQUAL(prop2_value,*PROP2_DEF_VALUE))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
 	    "H5Pget", (double)*PROP2_DEF_VALUE, (double)prop2_value, (int)__LINE__, __FILE__);
 
@@ -786,7 +786,7 @@ test_genprop_basic_list_prop(void)
     ret = H5Pget(lid1, PROP4_NAME,&prop4_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
-    if(!FLT_ABS_EQUAL(prop4_value,*PROP4_DEF_VALUE))
+    if(!H5_FLT_ABS_EQUAL(prop4_value,*PROP4_DEF_VALUE))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
 	    "H5Pget", *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
 
@@ -823,7 +823,7 @@ test_genprop_basic_list_prop(void)
     ret = H5Pget(lid1, PROP4_NAME,&prop4_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
-    if(!FLT_ABS_EQUAL(prop4_value,*PROP4_DEF_VALUE))
+    if(!H5_FLT_ABS_EQUAL(prop4_value,*PROP4_DEF_VALUE))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
 	    "H5Pget", *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
 
@@ -993,7 +993,7 @@ prop_cb_info prop3_cb_info;     /* Callback statistics for property #3 */
 **
 ****************************************************************/
 static herr_t
-test_genprop_cls_cpy_cb2(hid_t new_list_id, hid_t UNUSED old_list_id, void *create_data)
+test_genprop_cls_cpy_cb2(hid_t new_list_id, hid_t H5_ATTR_UNUSED old_list_id, void *create_data)
 {
     struct {                /* Struct for iterations */
         int count;
@@ -1237,7 +1237,7 @@ test_genprop_list_callback(void)
     ret = H5Pget(lid1, PROP2_NAME,&prop2_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
-    if(!FLT_ABS_EQUAL(prop2_value,*PROP2_DEF_VALUE))
+    if(!H5_FLT_ABS_EQUAL(prop2_value,*PROP2_DEF_VALUE))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
 	    "H5Pget", (double)*PROP2_DEF_VALUE, (double)prop2_value, (int)__LINE__, __FILE__);
 
@@ -1252,7 +1252,7 @@ test_genprop_list_callback(void)
     ret = H5Pget(lid1, PROP4_NAME,&prop4_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
-    if(!FLT_ABS_EQUAL(prop4_value,*PROP4_DEF_VALUE))
+    if(!H5_FLT_ABS_EQUAL(prop4_value,*PROP4_DEF_VALUE))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
 	    "H5Pget", *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
 

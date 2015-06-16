@@ -319,8 +319,8 @@ H5FL_BLK_DEFINE_STATIC(chunk);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsize_t *offset, 
-     uint32_t data_size, const void *buf)
+H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, 
+    hsize_t *offset, uint32_t data_size, const void *buf)
 {
     const H5O_layout_t *layout = &(dset->shared->layout);       /* Dataset layout */
     H5D_chunk_ud_t udata;               /* User data for querying chunk info */
@@ -503,7 +503,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_construct(H5F_t UNUSED *f, H5D_t *dset)
+H5D__chunk_construct(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset)
 {
     const H5T_t *type = dset->shared->type;      /* Convenience pointer to dataset's datatype */
     uint64_t chunk_size;        /* Size of chunk in bytes */
@@ -722,7 +722,6 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
     H5SL_node_t *curr_node;     /* Current node in skip list */
-    H5S_sel_type fsel_type;     /* Selection type on disk */
     char bogus;                 /* "bogus" buffer to pass to selection iterator */
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED;	/* Return value		*/
@@ -836,13 +835,13 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         fm->use_single = FALSE;
 
         /* Get type of selection on disk & in memory */
-        if((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
+        if((fm->fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
             HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
         if((fm->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
             HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
 
         /* If the selection is NONE or POINTS, set the flag to FALSE */
-        if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
+        if(fm->fsel_type == H5S_SEL_POINTS || fm->fsel_type == H5S_SEL_NONE)
             sel_hyper_flag = FALSE;
         else
             sel_hyper_flag = TRUE;
@@ -1102,7 +1101,7 @@ H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5D__free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
+H5D__free_chunk_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *opdata)
 {
     H5D_chunk_info_t *chunk_info = (H5D_chunk_info_t *)item;
 
@@ -1142,7 +1141,7 @@ H5D__free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
 static herr_t
 H5D__create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t
 #ifndef H5_HAVE_PARALLEL
-    UNUSED
+    H5_ATTR_UNUSED
 #endif /* H5_HAVE_PARALLEL */
     *io_info)
 {
@@ -1224,7 +1223,7 @@ done:
 static herr_t
 H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
 #ifndef H5_HAVE_PARALLEL
-    UNUSED
+    H5_ATTR_UNUSED
 #endif /* H5_HAVE_PARALLEL */
     *io_info)
 {
@@ -1521,7 +1520,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_udata)
+H5D__chunk_file_cb(void H5_ATTR_UNUSED *elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_udata)
 {
     H5D_chunk_file_iter_ud_t *udata = (H5D_chunk_file_iter_ud_t *)_udata;       /* User data for operation */
     H5D_chunk_map_t      *fm = udata->fm;       /* File<->memory chunk mapping info */
@@ -1638,7 +1637,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5D__chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_fm)
+H5D__chunk_mem_cb(void H5_ATTR_UNUSED *elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_fm)
 {
     H5D_chunk_map_t      *fm = (H5D_chunk_map_t *)_fm;  /* File<->memory chunk mapping info */
     H5D_chunk_info_t *chunk_info;               /* Chunk information for current chunk */
@@ -1790,7 +1789,7 @@ done:
  */
 static herr_t
 H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
     H5D_chunk_map_t *fm)
 {
     H5SL_node_t *chunk_node;            /* Current node in chunk skip list */
@@ -1942,7 +1941,7 @@ done:
  */
 static herr_t
 H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
     H5D_chunk_map_t *fm)
 {
     H5SL_node_t *chunk_node;            /* Current node in chunk skip list */
@@ -2014,7 +2013,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
             /* Determine if we will access all the data in the chunk */
             if(dst_accessed_bytes != ctg_store.contig.dset_size ||
-                    (chunk_info->chunk_points * type_info->src_type_size) != ctg_store.contig.dset_size)
+                    (chunk_info->chunk_points * type_info->src_type_size) != ctg_store.contig.dset_size ||
+		    fm->fsel_type == H5S_SEL_POINTS)
                 entire_chunk = FALSE;
 
             /* Set chunk's [scaled] coordinates */
@@ -5310,7 +5310,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__nonexistent_readvv_cb(hsize_t UNUSED dst_off, hsize_t src_off, size_t len,
+H5D__nonexistent_readvv_cb(hsize_t H5_ATTR_UNUSED dst_off, hsize_t src_off, size_t len,
     void *_udata)
 {
     H5D_chunk_readvv_ud_t *udata = (H5D_chunk_readvv_ud_t *)_udata; /* User data for H5VM_opvv() operator */

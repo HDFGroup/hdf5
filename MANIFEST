@@ -13,7 +13,7 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
 #------------------------------------------------------------------------------
-# This is the list of files that are part of HDF5 source distribution. 
+# This is the list of files that are part of HDF5 source distribution.
 # All files have a `./' prefix and appear in lexicographic order.
 # Lines that end with _DO_NOT_DISTRIBUTE_ will not be included in a
 # release.  Blank lines and comments are ignored.  Comments must start
@@ -575,7 +575,7 @@
 ./src/H5Bdbg.c
 ./src/H5Bpkg.h
 ./src/H5Bprivate.h
-./src/H5Bpublic.h      
+./src/H5Bpublic.h
 ./src/H5B2.c
 ./src/H5B2cache.c
 ./src/H5B2dbg.c
@@ -583,7 +583,7 @@
 ./src/H5B2int.c
 ./src/H5B2pkg.h
 ./src/H5B2private.h
-./src/H5B2public.h    
+./src/H5B2public.h
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
@@ -737,7 +737,7 @@
 ./src/H5HFman.c
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
-./src/H5HFpublic.h  
+./src/H5HFpublic.h
 ./src/H5HFsection.c
 ./src/H5HFspace.c
 ./src/H5HFstat.c
@@ -1164,6 +1164,7 @@
 ./testpar/t_pshutdown.c
 ./testpar/t_prestart.c
 ./testpar/t_span_tree.c
+./testpar/t_init_term.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
@@ -1452,8 +1453,8 @@
 ./tools/testfiles/tattrintsize.ddl
 ./tools/testfiles/tattrintsize.h5
 ./tools/testfiles/tattrreg.h5
-./tools/testfiles/tattrreg.ddl 
-./tools/testfiles/tattrregR.ddl 
+./tools/testfiles/tattrreg.ddl
+./tools/testfiles/tattrregR.ddl
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/tbinary.h5
@@ -1492,8 +1493,8 @@
 ./tools/testfiles/tcompound2.h5
 ./tools/testfiles/tcompound_complex.h5
 ./tools/testfiles/tdatareg.h5
-./tools/testfiles/tdatareg.ddl 
-./tools/testfiles/tdataregR.ddl 
+./tools/testfiles/tdatareg.ddl
+./tools/testfiles/tdataregR.ddl
 ./tools/testfiles/tdeflate.ddl
 ./tools/testfiles/tdset-1.ddl
 ./tools/testfiles/tdset-2.ddl
@@ -1700,60 +1701,60 @@
 ./tools/h5dump/errfiles/tslink-D.err
 
 # h5dump packed bits validation
-./tools/testfiles/tnofilename-with-packed-bits.ddl
-./tools/testfiles/tpbitsLengthPositive.ddl
-./tools/testfiles/tpbitsMaxExceeded.ddl
-./tools/testfiles/tpbitsSigned.ddl
-./tools/testfiles/tpbitsSigned2.ddl
-./tools/testfiles/tpbitsSigned4.ddl
-./tools/testfiles/tpbitsSignedWhole.ddl
-./tools/testfiles/tpbitsSignedInt.ddl
-./tools/testfiles/tpbitsSignedInt4.ddl
-./tools/testfiles/tpbitsSignedInt8.ddl
-./tools/testfiles/tpbitsSignedIntWhole.ddl
-./tools/testfiles/tpbitsSignedLong.ddl
-./tools/testfiles/tpbitsSignedLong8.ddl
-./tools/testfiles/tpbitsSignedLong16.ddl
-./tools/testfiles/tpbitsSignedLongWhole.ddl
-./tools/testfiles/tpbitsSignedLongLong.ddl
-./tools/testfiles/tpbitsSignedLongLong16.ddl
-./tools/testfiles/tpbitsSignedLongLong32.ddl
-./tools/testfiles/tpbitsSignedLongLongWhole.ddl
-./tools/testfiles/tpbitsSignedLongLongWhole1.ddl
-./tools/testfiles/tpbitsSignedLongLongWhole63.ddl
-./tools/testfiles/tpbitsOffsetNegative.ddl
-./tools/testfiles/tpbitsUnsigned.ddl
-./tools/testfiles/tpbitsUnsigned2.ddl
-./tools/testfiles/tpbitsUnsigned4.ddl
-./tools/testfiles/tpbitsUnsignedWhole.ddl
-./tools/testfiles/tpbitsUnsignedInt.ddl
-./tools/testfiles/tpbitsUnsignedInt4.ddl
-./tools/testfiles/tpbitsUnsignedInt8.ddl
-./tools/testfiles/tpbitsUnsignedIntWhole.ddl
-./tools/testfiles/tpbitsUnsignedLong.ddl
-./tools/testfiles/tpbitsUnsignedLong8.ddl
-./tools/testfiles/tpbitsUnsignedLong16.ddl
-./tools/testfiles/tpbitsUnsignedLongWhole.ddl
-./tools/testfiles/tpbitsUnsignedLongLong.ddl
-./tools/testfiles/tpbitsUnsignedLongLong16.ddl
-./tools/testfiles/tpbitsUnsignedLongLong32.ddl
-./tools/testfiles/tpbitsUnsignedLongLongWhole.ddl
-./tools/testfiles/tpbitsUnsignedLongLongWhole1.ddl
-./tools/testfiles/tpbitsUnsignedLongLongWhole63.ddl
-./tools/testfiles/tpbitsMax.ddl
+./tools/testfiles/pbits/tnofilename-with-packed-bits.ddl
+./tools/testfiles/pbits/tpbitsLengthPositive.ddl
+./tools/testfiles/pbits/tpbitsMaxExceeded.ddl
+./tools/testfiles/pbits/tpbitsSigned.ddl
+./tools/testfiles/pbits/tpbitsSigned2.ddl
+./tools/testfiles/pbits/tpbitsSigned4.ddl
+./tools/testfiles/pbits/tpbitsSignedWhole.ddl
+./tools/testfiles/pbits/tpbitsSignedInt.ddl
+./tools/testfiles/pbits/tpbitsSignedInt4.ddl
+./tools/testfiles/pbits/tpbitsSignedInt8.ddl
+./tools/testfiles/pbits/tpbitsSignedIntWhole.ddl
+./tools/testfiles/pbits/tpbitsSignedLong.ddl
+./tools/testfiles/pbits/tpbitsSignedLong8.ddl
+./tools/testfiles/pbits/tpbitsSignedLong16.ddl
+./tools/testfiles/pbits/tpbitsSignedLongWhole.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLong.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLong16.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLong32.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLongWhole.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLongWhole1.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLongWhole63.ddl
+./tools/testfiles/pbits/tpbitsOffsetNegative.ddl
+./tools/testfiles/pbits/tpbitsUnsigned.ddl
+./tools/testfiles/pbits/tpbitsUnsigned2.ddl
+./tools/testfiles/pbits/tpbitsUnsigned4.ddl
+./tools/testfiles/pbits/tpbitsUnsignedWhole.ddl
+./tools/testfiles/pbits/tpbitsUnsignedInt.ddl
+./tools/testfiles/pbits/tpbitsUnsignedInt4.ddl
+./tools/testfiles/pbits/tpbitsUnsignedInt8.ddl
+./tools/testfiles/pbits/tpbitsUnsignedIntWhole.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLong.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLong8.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLong16.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongWhole.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLong.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLong16.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLong32.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLongWhole.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLongWhole1.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLongWhole63.ddl
+./tools/testfiles/pbits/tpbitsMax.ddl
+./tools/testfiles/pbits/tpbitsArray.ddl
+./tools/testfiles/pbits/tpbitsCompound.ddl
+./tools/testfiles/pbits/tpbitsIncomplete.ddl
+./tools/testfiles/pbits/tpbitsLengthExceeded.ddl
+./tools/testfiles/pbits/tpbitsCharLengthExceeded.ddl
+./tools/testfiles/pbits/tpbitsIntLengthExceeded.ddl
+./tools/testfiles/pbits/tpbitsLongLengthExceeded.ddl
+./tools/testfiles/pbits/tpbitsOffsetExceeded.ddl
+./tools/testfiles/pbits/tpbitsCharOffsetExceeded.ddl
+./tools/testfiles/pbits/tpbitsIntOffsetExceeded.ddl
+./tools/testfiles/pbits/tpbitsLongOffsetExceeded.ddl
+./tools/testfiles/pbits/tpbitsOverlapped.ddl
 ./tools/testfiles/packedbits.h5
-./tools/testfiles/tpbitsArray.ddl
-./tools/testfiles/tpbitsCompound.ddl
-./tools/testfiles/tpbitsIncomplete.ddl
-./tools/testfiles/tpbitsLengthExceeded.ddl
-./tools/testfiles/tpbitsCharLengthExceeded.ddl
-./tools/testfiles/tpbitsIntLengthExceeded.ddl
-./tools/testfiles/tpbitsLongLengthExceeded.ddl
-./tools/testfiles/tpbitsOffsetExceeded.ddl
-./tools/testfiles/tpbitsCharOffsetExceeded.ddl
-./tools/testfiles/tpbitsIntOffsetExceeded.ddl
-./tools/testfiles/tpbitsLongOffsetExceeded.ddl
-./tools/testfiles/tpbitsOverlapped.ddl
 
 # h5dump h5import validation
 ./tools/testfiles/out3.h5import
@@ -2439,6 +2440,7 @@
 ./config/cmake/H5pubconf.h.in
 ./config/cmake/hdf5-config.cmake.in
 ./config/cmake/hdf5-config-version.cmake.in
+./config/cmake/HDFCompilerFlags.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake

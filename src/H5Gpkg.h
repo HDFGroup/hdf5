@@ -55,7 +55,7 @@
     + 2         /* Number of symbols */                                       \
                                                                               \
     /* Entries */                                                             \
-    + ((2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY(f))                         \
+    + ((2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY_FILE(f))                    \
     )
 
 

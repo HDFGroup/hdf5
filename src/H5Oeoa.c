@@ -82,8 +82,8 @@ H5FL_DEFINE(H5O_eoa_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__eoa_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
-    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
+H5O__eoa_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_eoa_t *mesg;    /* Native message */
     H5FD_mem_t mt;      /* Memory type iterator */
@@ -132,7 +132,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__eoa_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__eoa_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_eoa_t *mesg = (const H5O_eoa_t *) _mesg;    
     H5FD_mem_t mt;      /* Memory type iterator */
@@ -215,7 +215,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O__eoa_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED * mesg)
+H5O__eoa_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED * mesg)
 {
     size_t  ret_value;
 
@@ -249,7 +249,7 @@ H5O__eoa_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__eoa_reset(void UNUSED *_mesg)
+H5O__eoa_reset(void H5_ATTR_UNUSED *_mesg)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -297,7 +297,7 @@ H5O__eoa_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__eoa_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
+H5O__eoa_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg,
     FILE *stream, int indent, int fwidth)
 {
     const H5O_eoa_t *mesg = (const H5O_eoa_t *) _mesg;

@@ -389,7 +389,7 @@ H5T_vlen_seq_mem_getptr(void *_vl)
  */
 /* ARGSUSED */
 static htri_t
-H5T_vlen_seq_mem_isnull(const H5F_t UNUSED *f, void *_vl)
+H5T_vlen_seq_mem_isnull(const H5F_t H5_ATTR_UNUSED *f, void *_vl)
 {
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     const hvl_t *vl=(const hvl_t *)_vl;   /* Pointer to the user's hvl_t information */
@@ -427,7 +427,7 @@ H5T_vlen_seq_mem_isnull(const H5F_t UNUSED *f, void *_vl)
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_seq_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *buf, size_t len)
+H5T_vlen_seq_mem_read(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, void *_vl, void *buf, size_t len)
 {
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     const hvl_t *vl=(const hvl_t *)_vl;   /* Pointer to the user's hvl_t information */
@@ -469,7 +469,7 @@ H5T_vlen_seq_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *bu
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_seq_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void UNUSED *_bg, size_t seq_len, size_t base_size)
+H5T_vlen_seq_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void H5_ATTR_UNUSED *_bg, size_t seq_len, size_t base_size)
 {
     hvl_t vl;                       /* Temporary hvl_t to use during operation */
     size_t len;
@@ -526,7 +526,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_seq_mem_setnull(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void UNUSED *_bg)
+H5T_vlen_seq_mem_setnull(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, void *_vl, void H5_ATTR_UNUSED *_bg)
 {
     hvl_t vl;                       /* Temporary hvl_t to use during operation */
 
@@ -630,7 +630,7 @@ H5T_vlen_str_mem_getptr(void *_vl)
  */
 /* ARGSUSED */
 static htri_t
-H5T_vlen_str_mem_isnull(const H5F_t UNUSED *f, void *_vl)
+H5T_vlen_str_mem_isnull(const H5F_t H5_ATTR_UNUSED *f, void *_vl)
 {
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     char *s=*(char **)_vl;   /* Pointer to the user's string information */
@@ -662,7 +662,7 @@ H5T_vlen_str_mem_isnull(const H5F_t UNUSED *f, void *_vl)
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_str_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *buf, size_t len)
+H5T_vlen_str_mem_read(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, void *_vl, void *buf, size_t len)
 {
 #ifdef H5_NO_ALIGNMENT_RESTRICTIONS
     char *s=*(char **)_vl;   /* Pointer to the user's string information */
@@ -703,7 +703,7 @@ H5T_vlen_str_mem_read(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void *bu
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_str_mem_write(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void UNUSED *_bg, size_t seq_len, size_t base_size)
+H5T_vlen_str_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf, void H5_ATTR_UNUSED *_bg, size_t seq_len, size_t base_size)
 {
     char *t;                        /* Pointer to temporary buffer allocated */
     size_t len;                     /* Maximum length of the string to copy */
@@ -750,7 +750,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_str_mem_setnull(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_vl, void UNUSED *_bg)
+H5T_vlen_str_mem_setnull(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, void *_vl, void H5_ATTR_UNUSED *_bg)
 {
     char *t=NULL;                   /* Pointer to temporary buffer allocated */
 
@@ -806,7 +806,7 @@ H5T_vlen_disk_getlen(const void *_vl)
  */
 /* ARGSUSED */
 static void *
-H5T_vlen_disk_getptr(void UNUSED *vl)
+H5T_vlen_disk_getptr(void H5_ATTR_UNUSED *vl)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -864,7 +864,7 @@ H5T_vlen_disk_isnull(const H5F_t *f, void *_vl)
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t UNUSED len)
+H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t H5_ATTR_UNUSED len)
 {
     uint8_t *vl=(uint8_t *)_vl;   /* Pointer to the user's hvl_t information */
     H5HG_t hobjid;
@@ -910,7 +910,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED *vl_alloc_info,
+H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_alloc_info,
     void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size)
 {
     uint8_t *vl = (uint8_t *)_vl; /*Pointer to the user's hvl_t information*/
@@ -1154,7 +1154,7 @@ done:
 --------------------------------------------------------------------------*/
 /* ARGSUSED */
 herr_t
-H5T_vlen_reclaim(void *elem, hid_t type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *op_data)
+H5T_vlen_reclaim(void *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim, const hsize_t H5_ATTR_UNUSED *point, void *op_data)
 {
     H5T_vlen_alloc_info_t *vl_alloc_info = (H5T_vlen_alloc_info_t *)op_data; /* VL allocation info from iterator */
     H5T_t	*dt;

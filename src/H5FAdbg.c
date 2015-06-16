@@ -117,7 +117,7 @@ H5FA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     } /* end if */
 
     /* Load the fixed array header */
-    if(NULL == (hdr = (H5FA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FARRAY_HDR, addr, dbg_ctx, H5AC_READ)))
+    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, addr, dbg_ctx, H5AC_READ)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load fixed array header")
 
     /* Print opening message */
@@ -150,7 +150,7 @@ H5FA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 CATCH
     if(dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
 	H5E_THROW(H5E_CANTRELEASE, "unable to release fixed array debugging context")
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FARRAY_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5FA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array header")
 
 END_FUNC(PKG)   /* end H5FA__hdr_debug() */
@@ -198,11 +198,11 @@ H5FA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     } /* end if */
 
     /* Load the fixed array header */
-    if(NULL == (hdr = (H5FA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FARRAY_HDR, hdr_addr, dbg_ctx, H5AC_READ)))
+    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, hdr_addr, dbg_ctx, H5AC_READ)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load fixed array header")
 
     /* Protect data block */
-    if(NULL == (dblock = H5FA__dblock_protect(hdr, dxpl_id, addr, hdr->cparam.nelmts, H5AC_READ)))
+    if(NULL == (dblock = H5FA__dblock_protect(hdr, dxpl_id, addr, H5AC_READ)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block, address = %llu", (unsigned long long)addr)
 
     /* Print opening message */
@@ -280,7 +280,7 @@ CATCH
 	H5E_THROW(H5E_CANTRELEASE, "unable to release fixed array debugging context")
     if(dblock && H5FA__dblock_unprotect(dblock, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array data block")
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FARRAY_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5FA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array header")
 
 END_FUNC(PKG)   /* end H5FA__dblock_debug() */

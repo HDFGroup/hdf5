@@ -118,24 +118,6 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define ALARM_ON  TestAlarmOn()
 #define ALARM_OFF  HDalarm(0)
 
-/*
- * The methods to compare the equality of floating-point values:
- *    1. XXX_ABS_EQUAL - check if the difference is smaller than the
- *       Epsilon value.  The Epsilon values, FLT_EPSILON, DBL_EPSILON,
- *       and LDBL_EPSILON, are defined by compiler in float.h.
- *    2. XXX_REL_EQUAL - check if the relative difference is smaller than a
- *       predefined value M.  See if two values are relatively equal.
- *       It's the test's responsibility not to pass in the value 0, which
- *       may cause the equation to fail.
- */
-#define FLT_ABS_EQUAL(X,Y)  ((float)fabs(X-Y)<FLT_EPSILON)
-#define DBL_ABS_EQUAL(X,Y)  (fabs(X-Y)<DBL_EPSILON)
-#define LDBL_ABS_EQUAL(X,Y)  (fabsl(X-Y)<LDBL_EPSILON)
-
-#define FLT_REL_EQUAL(X,Y,M)    (fabsf((Y-X)/X<M)
-#define DBL_REL_EQUAL(X,Y,M)    (fabs((Y-X)/X)<M)
-#define LDBL_REL_EQUAL(X,Y,M)    (fabsl((Y-X)/X)<M)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
