@@ -23,6 +23,8 @@ if (BUILD_TESTING)
 
   include (CMakeTests.cmake)
 
+  include (CMakeTestsVDS.cmake)
+
 endif (BUILD_TESTING)
 
 ##############################################################################

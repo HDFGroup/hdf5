@@ -1272,6 +1272,7 @@
 ./tools/h5ls/Makefile.in
 ./tools/h5ls/h5ls.c
 ./tools/h5ls/testh5ls.sh.in
+./tools/h5ls/testh5lsvds.sh.in
 
 # h5copy sources
 ./tools/h5copy/testh5copy.sh.in
@@ -1870,7 +1871,13 @@
 ./tools/testfiles/thlinks-nodangle-1.ls
 ./tools/testfiles/tudlink-1.ls
 
-
+# h5ls vds validation
+./tools/testfiles/vds/tvds-1.ls
+./tools/testfiles/vds/tvds-2.ls
+./tools/testfiles/vds/tvds-3_1.ls
+./tools/testfiles/vds/tvds-3_2.ls
+./tools/testfiles/vds/tvds-4.ls
+./tools/testfiles/vds/tvds-5.ls
 
 #additional test input and output for h5dump XML
 ./tools/testfiles/tall.h5.xml
