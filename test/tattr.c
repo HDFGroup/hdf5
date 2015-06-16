@@ -522,7 +522,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(!DBL_ABS_EQUAL(rdata,0.0F))
+    if(!H5_DBL_ABS_EQUAL(rdata,0.0F))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,(double)0.0F);
 
     ret=H5Fflush(fil, H5F_SCOPE_GLOBAL);
@@ -531,7 +531,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(!DBL_ABS_EQUAL(rdata,0.0F))
+    if(!H5_DBL_ABS_EQUAL(rdata,0.0F))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,(double)0.0F);
 
     ret=H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
@@ -540,7 +540,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(!DBL_ABS_EQUAL(rdata,wdata))
+    if(!H5_DBL_ABS_EQUAL(rdata,wdata))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,wdata);
 
     ret=H5Sclose(spc);
@@ -1014,7 +1014,7 @@ test_attr_scalar_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify the floating-poing value in this way to avoid compiler warning. */
-    if(!FLT_ABS_EQUAL(rdata, attr_data5))
+    if(!H5_FLT_ABS_EQUAL(rdata, attr_data5))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
 	    "H5Aread", (double)attr_data5, (double)rdata, (int)__LINE__, __FILE__);
 
@@ -1355,7 +1355,7 @@ test_attr_mult_read(hid_t fapl)
     for(i = 0; i < ATTR3_DIM1; i++)
         for(j = 0; j < ATTR3_DIM2; j++)
             for(k = 0; k < ATTR3_DIM3; k++)
-                if(!DBL_ABS_EQUAL(attr_data3[i][j][k], read_data3[i][j][k]))
+                if(!H5_DBL_ABS_EQUAL(attr_data3[i][j][k], read_data3[i][j][k]))
                     TestErrPrintf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n", __LINE__, i, j, k, attr_data3[i][j][k], i, j, k, read_data3[i][j][k]);
 
     /* Verify Name */

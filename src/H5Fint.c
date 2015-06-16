@@ -881,14 +881,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
 
-        /* Only truncate the file on an orderly close, with write-access */
-        if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {
-            /* Truncate the file to the current allocated size */
-            if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)TRUE) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
-        } /* end if */
-
         /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)
             /* Push error, but keep going*/
@@ -1202,6 +1194,15 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
         HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
 
     /* Flush the entire metadata cache */
+    if(H5AC_flush(f, dxpl_id) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
+
+    /* Truncate the file to the current allocated size */
+    if(H5FD_truncate(f->shared->lf, dxpl_id, closing) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
+
+    /* Flush the entire metadata cache again since the EOA could have changed in the truncate call. */
     if(H5AC_flush(f, dxpl_id) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
@@ -2116,3 +2117,66 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_file_image() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F__set_base_addr
+ *
+ * Purpose:	Quick and dirty routine to set the file's 'base_addr' value
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		July 19, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__set_base_addr(const H5F_t *f, haddr_t addr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Dispatch to driver */
+    if(H5FD_set_base_addr(f->shared->lf, addr) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_base_addr request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__set_base_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F__set_eoa
+ *
+ * Purpose:	Quick and dirty routine to set the file's 'eoa' value
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		July 19, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Dispatch to driver */
+    if(H5FD_set_eoa(f->shared->lf, type, addr) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set_eoa request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__set_eoa() */
+

@@ -5819,7 +5819,7 @@ test_set_local(hid_t fapl)
 	for(j=0; j<dims[1]; j++) {
 	    /* If the difference between two values is greater than 0.001%, they're
              * considered not equal. */
-            if(!DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001F)) {
+            if(!H5_DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001F)) {
 		H5_FAILED();
 		printf("    Line %d: Read different values than written.\n",__LINE__);
 		printf("    At index %lu,%lu\n", (unsigned long)(i), (unsigned long)(j));
@@ -7127,7 +7127,7 @@ test_chunk_cache(hid_t fapl)
      */
     if (H5Pget_cache(fapl_def, NULL, &nslots_1, &nbytes_1, &w0_1) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl1, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_1 != nslots_4) || (nbytes_1 != nbytes_4) || !DBL_ABS_EQUAL(w0_1, w0_4))
+    if ((nslots_1 != nslots_4) || (nbytes_1 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_1, w0_4))
         FAIL_PUTS_ERROR("    Cache values from default dapl do not match those from fapl.")
 
     /* Set a lapl property on dapl1 (to verify inheritance) */
@@ -7168,7 +7168,7 @@ test_chunk_cache(hid_t fapl)
     /* Retrieve dapl from dataset, verfiy cache values are the same as on fapl_local */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_2, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
 
@@ -7190,7 +7190,7 @@ test_chunk_cache(hid_t fapl)
      */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_3 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+    if ((nslots_3 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_3, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from dapl1.")
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
 
@@ -7201,7 +7201,7 @@ test_chunk_cache(hid_t fapl)
     /* Retrieve dapl from dataset, verfiy cache values are the same on fapl_local */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_2, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
 
@@ -7211,7 +7211,7 @@ test_chunk_cache(hid_t fapl)
         FAIL_STACK_ERROR
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_2, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
     /* Don't close dapl2, we will use it in the next section */
 
@@ -7231,7 +7231,7 @@ test_chunk_cache(hid_t fapl)
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR /* Close dapl2, to avoid id leak */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_2, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from dapl2.")
 
     /* Test H5D_CHUNK_CACHE_NSLOTS_DEFAULT and H5D_CHUNK_CACHE_W0_DEFAULT */
@@ -7244,7 +7244,7 @@ test_chunk_cache(hid_t fapl)
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR /* Close dapl2, to avoid id leak */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_3 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+    if ((nslots_3 != nslots_4) || (nbytes_2 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_3, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those expected.")
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
 
@@ -7254,14 +7254,14 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Oopen(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_3 != nslots_4) || (nbytes_3 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+    if ((nslots_3 != nslots_4) || (nbytes_3 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_3, w0_4))
         FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
     if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
 
     /* Verify functionality of H5Pcopy with a dapl */
     if ((dapl2 = H5Pcopy(dapl1)) < 0) FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
-    if ((nslots_3 != nslots_4) || (nbytes_1 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+    if ((nslots_3 != nslots_4) || (nbytes_1 != nbytes_4) || !H5_DBL_ABS_EQUAL(w0_3, w0_4))
         FAIL_PUTS_ERROR("    Cache values from dapl2 do not match those from dapl1.")
 
     /* Close */

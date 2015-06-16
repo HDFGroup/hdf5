@@ -565,7 +565,7 @@ HDfprintf(stderr, "%s: size = %Hu\n", FUNC, size);
     HDassert(size > 0);
 
     /* Retrieve the 'eoa' for the file */
-    if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
+    if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "driver get_eoa request failed")
 
     /* Compute value to return */
@@ -598,7 +598,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
+H5MF_xfree(const H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     hsize_t size)
 {
     H5F_io_info_t fio_info;             /* I/O info for operation */
@@ -862,7 +862,7 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
     HDassert(f->shared->lf);
 
     /* Retrieve the 'eoa' for the file */
-    if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
+    if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 
     /* Retrieve metadata aggregator info, if available */

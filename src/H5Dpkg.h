@@ -337,6 +337,7 @@ typedef struct H5D_chunk_map_t {
     H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
     unsigned m_ndims;           /* Number of dimensions for memory dataspace */
     H5S_sel_type msel_type;     /* Selection type in memory */
+    H5S_sel_type fsel_type;     /* Selection type in file */
 
     H5SL_t *sel_chunks;         /* Skip list containing information for each chunk selected */
 
