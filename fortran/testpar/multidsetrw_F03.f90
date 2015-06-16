@@ -28,13 +28,14 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
 
   LOGICAL, INTENT(in) :: do_collective              ! use collective IO
   LOGICAL, INTENT(in) :: do_chunk                   ! use chunking
-  INTEGER(SIZE_T), INTENT(in) :: mpi_size                   ! number of processes in the group of communicator
+  INTEGER, INTENT(in) :: mpi_size                   ! number of processes in the group of communicator
   INTEGER, INTENT(in) :: mpi_rank                   ! rank of the calling process in the communicator
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
   CHARACTER(LEN=80):: dsetname ! Dataset name
   TYPE(H5D_rw_multi_t), ALLOCATABLE, DIMENSION(:) :: info_md
   INTEGER(hsize_t), DIMENSION(1:2) :: cdims           ! chunk dimensions
 
+  INTEGER(SIZE_T):: ndsets
   INTEGER(HID_T) :: file_id       ! File identifier
   INTEGER(HID_T) :: filespace     ! Dataspace identifier in file 
   INTEGER(HID_T) :: memspace      ! Dataspace identifier in memory
@@ -52,6 +53,7 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   INTEGER :: error          ! Error flags
 
   dimsf = (/5_hsize_t,INT(mpi_size, hsize_t)*8_hsize_t/)
+  ndsets = 5;
 
   ! 
   ! Setup file access property list with parallel I/O access.
@@ -104,10 +106,10 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   !
   ! Initialize data buffer
   !
-  ALLOCATE ( DATA(COUNT(1),COUNT(2), mpi_size))
-  ALLOCATE ( rdata(COUNT(1),COUNT(2), mpi_size))
+  ALLOCATE ( DATA(COUNT(1),COUNT(2), ndsets))
+  ALLOCATE ( rdata(COUNT(1),COUNT(2), ndsets))
 
-  ALLOCATE(info_md(1:mpi_size))
+  ALLOCATE(info_md(1:ndsets))
 
   !
   ! Create property list for collective dataset write
@@ -125,11 +127,11 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   !
   ! Create the dataset with default properties.
   !
-  info_md(1:mpi_size)%mem_type_id = H5T_NATIVE_INTEGER
-  info_md(1:mpi_size)%mem_space_id = memspace
-  info_md(1:mpi_size)%dset_space_id = filespace
+  info_md(1:ndsets)%mem_type_id = H5T_NATIVE_INTEGER
+  info_md(1:ndsets)%mem_space_id = memspace
+  info_md(1:ndsets)%dset_space_id = filespace
 
-  DO i = 1, mpi_size
+  DO i = 1, ndsets
      ! Create the data
      DO k = 1, COUNT(1)
         DO j = 1, COUNT(2)
@@ -149,25 +151,25 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   !
   ! Write the dataset collectively. 
   !
-  CALL h5dwrite_multi_f(plist_id, mpi_size, info_md, error)
+  CALL h5dwrite_multi_f(plist_id, ndsets, info_md, error)
   CALL check("h5dwrite_multi_f", error, nerrors)
 
-  DO i = 1, mpi_size
+  DO i = 1, ndsets
      ! Point to the read buffer
      info_md(i)%buf = C_LOC(rdata(1,1,i))
   ENDDO
 
-  CALL H5Dread_multi_f(plist_id, mpi_size, info_md, error)
+  CALL H5Dread_multi_f(plist_id, ndsets, info_md, error)
   CALL check("h5dread_multi_f", error, nerrors)
 
-  DO i = 1, mpi_size
+  DO i = 1, ndsets
      ! Close all the datasets
      CALL h5dclose_f(info_md(i)%dset_id, error)
      CALL check("h5dclose_f", error, nerrors)
   ENDDO
 
   ! check the data read and write buffers
-  DO i = 1, mpi_size
+  DO i = 1, ndsets
      ! Create the data
      DO k = 1, COUNT(1)
         DO j = 1, COUNT(2)

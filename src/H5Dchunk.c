@@ -712,7 +712,6 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
     H5SL_node_t *curr_node;     /* Current node in skip list */
-    H5S_sel_type fsel_type;     /* Selection type on disk */
     char bogus;                 /* "bogus" buffer to pass to selection iterator */
     unsigned u;                 /* Local index variable */
     H5D_io_info_wrap_t io_info_wrap;
@@ -815,13 +814,13 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         dinfo->use_single = FALSE;
 
         /* Get type of selection on disk & in memory */
-        if((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
+        if((dinfo->fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
             HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
         if((dinfo->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
             HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
 
         /* If the selection is NONE or POINTS, set the flag to FALSE */
-        if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
+        if(dinfo->fsel_type == H5S_SEL_POINTS || dinfo->fsel_type == H5S_SEL_NONE)
             sel_hyper_flag = FALSE;
         else
             sel_hyper_flag = TRUE;
@@ -2045,7 +2044,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
             /* Determine if we will access all the data in the chunk */
             if(dst_accessed_bytes != ctg_store.contig.dset_size ||
-                    (chunk_info->piece_points * type_info->src_type_size) != ctg_store.contig.dset_size)
+               (chunk_info->piece_points * type_info->src_type_size) != ctg_store.contig.dset_size ||
+               dset_info->fsel_type == H5S_SEL_POINTS)
                 entire_chunk = FALSE;
 
             /* Set chunk's [scaled] coordinates */

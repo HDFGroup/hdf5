@@ -148,7 +148,7 @@ H5FA__hdr_init(H5FA_hdr_t *hdr, void *ctx_udata))
     HDassert(hdr);
 
     /* Set size of header on disk (locally and in statistics) */
-    hdr->stats.hdr_size = hdr->size = H5FA_HEADER_SIZE(hdr);
+    hdr->stats.hdr_size = hdr->size = H5FA_HEADER_SIZE_HDR(hdr);
 
     /* Set number of elements for Fixed Array in statistics */
     hdr->stats.nelmts = hdr->cparam.nelmts;

@@ -126,7 +126,7 @@ static int check_data(const char *dsetname, hid_t fid, hbool_t floating_number)
 	/* Check results */
 	for (j=0; j<(NX+1); j++) {
 	    for (i=0; i<NY; i++) {
-		if (!DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001F)) {
+		if (!H5_DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001F)) {
 		    if (!nerrors++) {
 			H5_FAILED();
 			printf("element [%d][%d] is %g but should have been %g\n",

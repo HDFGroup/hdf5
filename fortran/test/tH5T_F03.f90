@@ -3608,7 +3608,7 @@ SUBROUTINE multiple_dset_rw(cleanup, total_error)
 
 
   ! write all the datasets
-  CALL h5dwrite_multi_f(file_id, H5P_DEFAULT_F, ndset, info_md, error)
+  CALL h5dwrite_multi_f(H5P_DEFAULT_F, ndset, info_md, error)
   CALL check("h5dwrite_multi_f", error, total_error)
 
   ! point to read buffers
@@ -3620,7 +3620,7 @@ SUBROUTINE multiple_dset_rw(cleanup, total_error)
   info_md(5)%buf = C_LOC(rbuf_intmd(1,1,1))
 
   ! read all the datasets
-  CALL h5dread_multi_f(file_id, H5P_DEFAULT_F, ndset, info_md, error)
+  CALL h5dread_multi_f(H5P_DEFAULT_F, ndset, info_md, error)
   CALL check("h5dread_multi_f", error, total_error)
 
   ! check the written and read in values

@@ -220,6 +220,7 @@ typedef struct H5D_dset_info_t {
     hsize_t nelmts;             /* Number of elements selected in file & memory dataspaces */
 
     const H5S_t *file_space;    /* Pointer to the file dataspace */
+    H5S_sel_type fsel_type;     /* Selection type in file */
     unsigned f_ndims;           /* Number of dimensions for file dataspace */
     hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
 
