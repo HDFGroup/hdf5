@@ -710,7 +710,6 @@ PARALLEL
 TIME
 TR
 AR
-PERL
 HL_FOR
 HL
 CXXCPP
@@ -719,6 +718,11 @@ am__fastdepCXX_TRUE
 CXXDEPMODE
 ac_ct_CXX
 CXXFLAGS
+H5CONFIG_F_IKIND
+H5CONFIG_F_NUM_IKIND
+H5CONFIG_F_RKIND_SIZEOF
+H5CONFIG_F_RKIND
+H5CONFIG_F_NUM_RKIND
 FORTRAN_SIZEOF_LONG_DOUBLE
 FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
 FORTRAN_HAVE_C_LONG_DOUBLE
@@ -837,6 +841,7 @@ am__isrc
 INSTALL_DATA
 INSTALL_SCRIPT
 INSTALL_PROGRAM
+PERL
 target_alias
 host_alias
 build_alias
@@ -3009,6 +3014,60 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+
+
+
+
+## PLACE CHECKS FOR REQUIRED PACKAGES NEEDED TO INSTALL HDF5 AT THE BEGINNING
+## --------------------------------------------------------------------------
+## Check if they have Perl installed on their system. We only need Perl
+## if they're using a GNU compiler.
+##
+ PERL=""
+##if test "X$GCC" = "Xyes"; then
+  for ac_prog in perl
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_PERL+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$PERL"; then
+  ac_cv_prog_PERL="$PERL" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_PERL="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+PERL=$ac_cv_prog_PERL
+if test -n "$PERL"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PERL" >&5
+$as_echo "$PERL" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$PERL" && break
+done
+
+##fi
 
 
 ac_config_headers="$ac_config_headers src/H5config.h"
@@ -5542,6 +5601,46 @@ _ACEOF
 
 
 
+## Check for __FLOAT128 extension
+# The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking size of __float128" >&5
+$as_echo_n "checking size of __float128... " >&6; }
+if ${ac_cv_sizeof___float128+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (__float128))" "ac_cv_sizeof___float128"        "$ac_includes_default"; then :
+
+else
+  if test "$ac_cv_type___float128" = yes; then
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (__float128)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof___float128=0
+   fi
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof___float128" >&5
+$as_echo "$ac_cv_sizeof___float128" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF___FLOAT128 $ac_cv_sizeof___float128
+_ACEOF
+
+
+if test "$ac_cv_sizeof___float128" != 0; then
+
+$as_echo "#define HAVE_FLOAT128 1" >>confdefs.h
+
+fi
+
 ## ----------------------------------------------------------------------
 ## Check if they would like the Fortran interface compiled
 ##
@@ -6974,7 +7073,6 @@ rm -f core conftest.err conftest.$ac_objext \
 
 
 
-
   ## Set the sizeof function for use later in the fortran tests
   if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes";then
     FC_SIZEOF_A="STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
@@ -7032,12 +7130,15 @@ else
         PROGRAM main
         IMPLICIT NONE
         INTEGER :: ik, k, lastkind, max_decimal_prec
+	INTEGER :: num_rkinds, num_ikinds
+        num_ikinds = 0
         lastkind=SELECTED_INT_KIND(1)
         OPEN(8, FILE='pac_fconftest.out', form='formatted')
         WRITE(8,'(A)',ADVANCE='NO') 'A' ! Find integer KINDs
         DO ik=2,36
              k = SELECTED_INT_KIND(ik)
              IF (k .NE. lastkind) THEN
+	          num_ikinds = num_ikinds + 1
                   WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
              	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
@@ -7045,16 +7146,19 @@ else
              IF (k .LE. 0) EXIT
         ENDDO
 	IF (lastkind.NE.-1) THEN
+	   num_ikinds = num_ikinds + 1
            WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'B '
 	ELSE
            WRITE(8,'(A)',ADVANCE='NO') 'B '
         ENDIF
         WRITE(8,'(A)',ADVANCE='NO') 'C' ! Find real KINDs
+        num_rkinds = 0
         lastkind=SELECTED_REAL_KIND(1)
 	max_decimal_prec = 1
         DO ik=2,36
              k = SELECTED_REAL_KIND(ik)
              IF (k .NE. lastkind) THEN
+                  num_rkinds = num_rkinds + 1
                   WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
              	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
@@ -7063,11 +7167,15 @@ else
              IF (k .LE. 0) EXIT
         ENDDO
         IF (lastkind.NE.-1)THEN
+	    num_rkinds = num_rkinds + 1
             WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'D'
 	ELSE
            WRITE(8,'(A)',ADVANCE='NO') 'D'
         ENDIF
 	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' E',max_decimal_prec,'F'
+
+	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' a',num_ikinds,'b'
+	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' c',num_rkinds,'d'
 
         END
 
@@ -7087,8 +7195,24 @@ cat >>confdefs.h <<_ACEOF
 #define PAC_FC_MAX_REAL_PRECISION $PAC_FC_MAX_REAL_PRECISION
 _ACEOF
 
+
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
+
+			H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $tmp | sed -e 's/.*a\(.*\)b.*/\1/'`"
+	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds | sed -e 's/ /,/g'`/)"
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_NUM_IKIND $H5CONFIG_F_NUM_IKIND
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_IKIND $H5CONFIG_F_IKIND
+_ACEOF
+
+
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran INTEGER KINDs" >&5
 $as_echo_n "checking for Fortran INTEGER KINDs... " >&6; }
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_ALL_INTEGER_KINDS" >&5
@@ -7215,12 +7339,15 @@ else
         PROGRAM main
         IMPLICIT NONE
         INTEGER :: ik, k, lastkind, max_decimal_prec
+	INTEGER :: num_rkinds, num_ikinds
+        num_ikinds = 0
         lastkind=SELECTED_INT_KIND(1)
         OPEN(8, FILE='pac_fconftest.out', form='formatted')
         WRITE(8,'(A)',ADVANCE='NO') 'A' ! Find integer KINDs
         DO ik=2,36
              k = SELECTED_INT_KIND(ik)
              IF (k .NE. lastkind) THEN
+	          num_ikinds = num_ikinds + 1
                   WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
              	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
@@ -7228,16 +7355,19 @@ else
              IF (k .LE. 0) EXIT
         ENDDO
 	IF (lastkind.NE.-1) THEN
+	   num_ikinds = num_ikinds + 1
            WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'B '
 	ELSE
            WRITE(8,'(A)',ADVANCE='NO') 'B '
         ENDIF
         WRITE(8,'(A)',ADVANCE='NO') 'C' ! Find real KINDs
+        num_rkinds = 0
         lastkind=SELECTED_REAL_KIND(1)
 	max_decimal_prec = 1
         DO ik=2,36
              k = SELECTED_REAL_KIND(ik)
              IF (k .NE. lastkind) THEN
+                  num_rkinds = num_rkinds + 1
                   WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
              	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
@@ -7246,11 +7376,15 @@ else
              IF (k .LE. 0) EXIT
         ENDDO
         IF (lastkind.NE.-1)THEN
+	    num_rkinds = num_rkinds + 1
             WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'D'
 	ELSE
            WRITE(8,'(A)',ADVANCE='NO') 'D'
         ENDIF
 	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' E',max_decimal_prec,'F'
+
+	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' a',num_ikinds,'b'
+	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' c',num_rkinds,'d'
 
         END
 
@@ -7270,8 +7404,24 @@ cat >>confdefs.h <<_ACEOF
 #define PAC_FC_MAX_REAL_PRECISION $PAC_FC_MAX_REAL_PRECISION
 _ACEOF
 
+
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
+
+			H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $tmp | sed -e 's/.*a\(.*\)b.*/\1/'`"
+	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds | sed -e 's/ /,/g'`/)"
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_NUM_IKIND $H5CONFIG_F_NUM_IKIND
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_IKIND $H5CONFIG_F_IKIND
+_ACEOF
+
+
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran INTEGER KINDs" >&5
 $as_echo_n "checking for Fortran INTEGER KINDs... " >&6; }
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_ALL_INTEGER_KINDS" >&5
@@ -7363,7 +7513,7 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
 done
-PAC_FC_ALL_INTEGER_KINDS_SIZEOF="{ $pack_int_sizeof }"
+PAC_FC_ALL_INTEGER_KINDS_SIZEOF="{`echo $pack_int_sizeof | sed -e 's/,$//' | sed -e 's/ //g'`}"
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_ALL_INTEGER_KINDS_SIZEOF" >&5
 $as_echo "$PAC_FC_ALL_INTEGER_KINDS_SIZEOF" >&6; }
 ac_ext=${ac_fc_srcext-f}
@@ -7425,13 +7575,18 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
 done
-PAC_FC_ALL_REAL_KINDS_SIZEOF="{ $pack_real_sizeof }"
+PAC_FC_ALL_REAL_KINDS_SIZEOF="{`echo $pack_real_sizeof | sed -e 's/,$//' | sed -e 's/ //g'`}"
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_ALL_REAL_KINDS_SIZEOF" >&5
 $as_echo "$PAC_FC_ALL_REAL_KINDS_SIZEOF" >&6; }
 ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
+
+
+
+
+
 
 
 
@@ -7584,6 +7739,50 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+
+
+  max_real_fortran_sizeof="`echo \"$PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -ne '/,(\d+)\}/; print $1'`"
+  max_real_fortran_kind="`echo \"$PAC_FC_ALL_REAL_KINDS\" | perl -ne '/,(\d+)\}/; print $1'`"
+
+  if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:
+        Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
+                  !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
+     " >&5
+$as_echo "$as_me: WARNING:
+        Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
+                  !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
+     " >&2;}
+     PAC_FC_ALL_REAL_KINDS="`echo \"$PAC_FC_ALL_REAL_KINDS\" | $PERL  -pe 's/,\d+}/}/g;'`"
+     PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo \"$PAC_FC_ALL_REAL_KINDS_SIZEOF\" | $PERL  -pe 's/,\d+}/}/g;'`"
+  fi
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran interoperable KINDS with C" >&5
+$as_echo_n "checking for Fortran interoperable KINDS with C... " >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_ALL_REAL_KINDS" >&5
+$as_echo "$PAC_FC_ALL_REAL_KINDS" >&6; }
+
+    H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"$PAC_FC_ALL_REAL_KINDS\" | perl -e '$count = (<STDIN> =~ tr/,//);print $count+1'`"
+  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/{//g' | sed -e 's/}//g'`/)"
+  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/{//g' | sed -e 's/}//g'`/)"
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_NUM_RKIND $H5CONFIG_F_NUM_RKIND
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_RKIND $H5CONFIG_F_RKIND
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_RKIND_SIZEOF $H5CONFIG_F_RKIND_SIZEOF
+_ACEOF
+
+
+
+
 ## Change back to the C language
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -7601,10 +7800,16 @@ rm -f pac_Cconftest.out
 
                 #include <float.h>
                 #include <stdio.h>
-                #if __STDC_VERSION__ >= 199901L
-                #define C_LDBL_DIG DECIMAL_DIG
+                #define CHECK_FLOAT128 $ac_cv_sizeof___float128
+                #if CHECK_FLOAT128!=0
+                #include <quadmath.h>
+                #define C_LDBL_DIG FLT128_DIG
                 #else
+                # if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+                #define C_LDBL_DIG DECIMAL_DIG
+                # else
                 #define C_LDBL_DIG LDBL_DIG
+                # endif
                 #endif
 
 #ifdef FC_DUMMY_MAIN
@@ -8423,56 +8628,6 @@ else
  echo "no"
 fi
 
-
-## ----------------------------------------------------------------------
-## Check if they have Perl installed on their system. We only need Perl
-## if they're using a GNU compiler.
-##
- PERL=""
-if test "X$GCC" = "Xyes"; then
-  for ac_prog in perl
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_PERL+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$PERL"; then
-  ac_cv_prog_PERL="$PERL" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_PERL="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-PERL=$ac_cv_prog_PERL
-if test -n "$PERL"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PERL" >&5
-$as_echo "$PERL" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$PERL" && break
-done
-
-fi
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
@@ -24939,41 +25094,6 @@ $as_echo "$as_me: not updating unwritable cache $cache_file" >&6;}
   fi
 fi
 rm -f confcache
-
-## Check for __FLOAT128 extension
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for __float128" >&5
-$as_echo_n "checking for __float128... " >&6; }
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-__float128 x;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-
-$as_echo "#define HAVE_FLOAT128 1" >>confdefs.h
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 ## ----------------------------------------------------------------------
 ## Check if the dev_t type is a scalar type (must come after the check for

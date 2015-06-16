@@ -48,6 +48,21 @@
 /* Determine the size of C long double */
 #undef FORTRAN_SIZEOF_LONG_DOUBLE
 
+/* Define valid Fortran INTEGER KINDs */
+#undef H5CONFIG_F_IKIND
+
+/* Define number of valid Fortran INTEGER KINDs */
+#undef H5CONFIG_F_NUM_IKIND
+
+/* Define number of valid Fortran REAL KINDs */
+#undef H5CONFIG_F_NUM_RKIND
+
+/* Define valid Fortran REAL KINDs */
+#undef H5CONFIG_F_RKIND
+
+/* Define valid Fortran REAL KINDs Sizeof */
+#undef H5CONFIG_F_RKIND_SIZEOF
+
 /* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 
@@ -547,6 +562,9 @@
 
 /* The size of `unsigned', as computed by sizeof. */
 #undef SIZEOF_UNSIGNED
+
+/* The size of `__float128', as computed by sizeof. */
+#undef SIZEOF___FLOAT128
 
 /* The size of `__int64', as computed by sizeof. */
 #undef SIZEOF___INT64

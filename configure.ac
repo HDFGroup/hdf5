@@ -27,6 +27,19 @@ AC_PREREQ([2.69])
 ## release!!!
 ##
 AC_INIT([HDF5], [1.9.222], [help@hdfgroup.org])
+
+
+
+## PLACE CHECKS FOR REQUIRED PACKAGES NEEDED TO INSTALL HDF5 AT THE BEGINNING
+## --------------------------------------------------------------------------
+## Check if they have Perl installed on their system. We only need Perl
+## if they're using a GNU compiler.
+##
+AC_SUBST([PERL]) PERL=""
+##if test "X$GCC" = "Xyes"; then
+  AC_CHECK_PROGS([PERL], [perl],, [$PATH])
+##fi
+
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -346,6 +359,12 @@ esac
 
 AC_CHECK_SIZEOF([long double], [8])
 
+## Check for __FLOAT128 extension
+AC_CHECK_SIZEOF([__float128])
+if test "$ac_cv_sizeof___float128" != 0; then
+  AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
+fi
+
 ## ----------------------------------------------------------------------
 ## Check if they would like the Fortran interface compiled
 ##
@@ -429,7 +448,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
   PAC_PROG_FC_STORAGE_SIZE
 
-
   ## Set the sizeof function for use later in the fortran tests
   if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes";then
     FC_SIZEOF_A="STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
@@ -471,6 +489,11 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
   AC_SUBST([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE])
   AC_SUBST([FORTRAN_SIZEOF_LONG_DOUBLE])
+  AC_SUBST([H5CONFIG_F_NUM_RKIND])
+  AC_SUBST([H5CONFIG_F_RKIND])	
+  AC_SUBST([H5CONFIG_F_RKIND_SIZEOF])	
+  AC_SUBST([H5CONFIG_F_NUM_IKIND])
+  AC_SUBST([H5CONFIG_F_IKIND])	
 
   ## Setting definition if there is a 16 byte fortran integer
   if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
@@ -523,6 +546,54 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   
   FORTRAN_SIZEOF_LONG_DOUBLE=${ac_cv_sizeof_long_double}
   AC_DEFINE_UNQUOTED([FORTRAN_SIZEOF_LONG_DOUBLE], ["${ac_cv_sizeof_long_double}"], [Determine the size of C long double])
+
+
+  dnl get the largest sizeof for REAL kinds
+  dnl max_real_fortran_sizeof="`echo $pack_real_sizeof | sed -e 's/, *$//g' | sed -e [0-9]*$`"
+  dnl max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/, }//g' | sed -e [0-9]*$`"
+  dnl max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/\(, \}\)//g' | sed -e 's/.* //g'`"
+
+  max_real_fortran_sizeof="`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -ne '/,(\d+)\}/; print $1'`"
+  max_real_fortran_kind="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -ne '/,(\d+)\}/; print $1'`"
+
+  if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof"; then
+     AC_MSG_WARN([
+        Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
+                  !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
+     ])
+     PAC_FC_ALL_REAL_KINDS="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | $PERL  -pe 's/,\d+}/}/g;'`"
+     PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | $PERL  -pe 's/,\d+}/}/g;'`"
+  fi
+  AC_MSG_CHECKING([for Fortran interoperable KINDS with C])
+  AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])	
+
+  dnl count the number of real kinds
+  H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -e '$count = (<STDIN> =~ tr/,//);print $count+1'`"
+  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/{//g' | sed -e 's/}//g'`/)"
+  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/{//g' | sed -e 's/}//g'`/)"
+
+  AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
+  AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
+  AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND_SIZEOF], $H5CONFIG_F_RKIND_SIZEOF, [Define valid Fortran REAL KINDs Sizeof])
+
+   dnl remove the invalid kind from the list
+     dnl AC_MSG_WARN([...$PAC_FC_ALL_REAL_KINDS_SIZEOF...$PAC_FC_ALL_REAL_KINDS...])
+     dnl PAC_FC_ALL_REAL_KINDS="{4,8,16}"
+     dnl tmp3="`echo $PAC_FC_ALL_REAL_KINDS | perl -pe 's/,[0-9]*\}$/\}/g'`"
+     dnl tmp1="`echo "${PAC_FC_ALL_REAL_KINDS}" | sed -e 's/,[0-9]*\}*\$/}/g'`"
+     dnl tmp1="`echo $pac_validRealKinds | sed s/'w*$'//`"	
+     dnl tmp2="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/[0-9]*, \}*$/}/g'`"
+     dnl tmp3="$PAC_FC_ALL_REAL_KINDS_SIZEOF"
+     dnl  echo "$tmp3"
+     dnl tmp2=`echo $tmp3 | sed -e 's/[0-9]//'`
+     dnl AC_MSG_WARN([here $tmp2....])
+
+     dnl PAC_FC_ALL_REAL_KINDS="{4,8,16}"
+     dnl  echo "$PAC_FC_ALL_REAL_KINDS" 
+     dnl tmp1="`echo "${PAC_FC_ALL_REAL_KINDS}" | sed -e 's/,[0-9]*\}*\$/}/g'`"
+     dnl tmp1="`echo $pac_validRealKinds | sed s/'w*$'//`"	
+     dnl tmp2="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/[0-9]*, \}*$/}/g'`"
+     dnl tmp3="$PAC_FC_ALL_REAL_KINDS_SIZEOF"
 
 ## Change back to the C language
   AC_LANG_POP(Fortran)
@@ -598,15 +669,6 @@ else
  echo "no"
 fi
 
-
-## ----------------------------------------------------------------------
-## Check if they have Perl installed on their system. We only need Perl
-## if they're using a GNU compiler.
-##
-AC_SUBST([PERL]) PERL=""
-if test "X$GCC" = "Xyes"; then
-  AC_CHECK_PROGS([PERL], [perl],, [$PATH])
-fi
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
@@ -1153,15 +1215,6 @@ AC_CHECK_SIZEOF([off64_t], [8])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
-
-## Check for __FLOAT128 extension
-AC_MSG_CHECKING([for __float128])
-AC_TRY_COMPILE([],
-  [__float128 x;],
-  [AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
-  AC_MSG_RESULT([yes])],
-  AC_MSG_RESULT([no])
-)
 
 ## ----------------------------------------------------------------------
 ## Check if the dev_t type is a scalar type (must come after the check for

@@ -51,7 +51,15 @@
 PROGRAM test_kind
   USE, INTRINSIC :: ISO_C_BINDING
   IMPLICIT NONE
-  INTEGER :: i, j, k, ii, ir, last, ikind_numbers(10), rkind_numbers(10)
+
+! These values are valid REAL KINDs (with corresponding C float) found during configure
+  H5_H5CONFIG_F_NUM_RKIND
+  H5_H5CONFIG_F_RKIND
+! These values are valid INTEGER KINDs (with corresponding C float) found during configure
+  H5_H5CONFIG_F_NUM_IKIND
+  H5_H5CONFIG_F_IKIND
+
+  INTEGER :: i, j, k
   INTEGER :: ji, jr, jd
 #ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
   REAL(KIND=C_LONG_DOUBLE) :: c_longdble
@@ -84,38 +92,6 @@ PROGRAM test_kind
        '    f_ptr = C_LOC(buf(1,1,1,1,1,1))  ', &
        '    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))' &
             /)
-
-  last = -1
-  ii = 0
-
-  ikind_numbers = 0
-  rkind_numbers = 0
-
-  DO i = 1,100
-     j = SELECTED_INT_KIND(i)
-     IF(j .NE. last) THEN
-        IF(last .NE. -1) THEN
-           ii = ii + 1
-           ikind_numbers(ii) = last
-        ENDIF
-        last = j
-        IF(j .EQ. -1) EXIT
-     ENDIF
-  ENDDO
-
-  last = -1
-  ir = 0
-  DO i = 1,100
-     j = SELECTED_REAL_KIND(i)
-     IF(j .NE. last) THEN
-        IF(last .NE. -1) THEN
-           ir = ir + 1
-           rkind_numbers(ir) = last
-        ENDIF
-        last = j
-        IF(j .EQ. -1) EXIT
-     ENDIF
-  ENDDO
 
   GOTO 10
 
@@ -214,8 +190,8 @@ WRITE(*,'(40(A,/))') &
        "//TRIM(ADJUSTL(ichr2))//"//'"_KIND "'//"//ADJUSTL(jchr2)"
   WRITE(*,*)"   RETURN"
   WRITE(*,*)"END SUBROUTINE"
-  DO i = 1, ii
-     j = ikind_numbers(i)
+  DO i = 1, num_ikinds
+     j = ikind(i)
      WRITE(*, "("" SUBROUTINE i"", i2.2,""()"")") j
      WRITE(*,*)"   IMPLICIT NONE"
      WRITE(*,'(A,I0,A)')"   INTEGER(KIND=",j,") :: a"
@@ -233,8 +209,8 @@ WRITE(*,'(40(A,/))') &
      WRITE(*,*)"   RETURN"
      WRITE(*,*)"END SUBROUTINE"
   ENDDO
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(*, "("" SUBROUTINE r"", i2.2,""()"")") j
      WRITE(*,*)"   IMPLICIT NONE"
      WRITE(*,'(A,I0,A)')"    REAL(KIND= ",j,") :: a"
@@ -267,12 +243,12 @@ WRITE(*,'(40(A,/))') &
   WRITE(*, "("" CALL r"", i2.2,""()"")") jr
   jd = 0
   WRITE(*, "("" CALL d"", i2.2,""()"")") jd
-  DO i = 1, ii
-     j = ikind_numbers(i)
+  DO i = 1, num_ikinds
+     j = ikind(i)
      WRITE(*, "("" CALL i"", i2.2,""()"")") j
   ENDDO
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(*, "("" CALL r"", i2.2,""()"")") j
   ENDDO
 #ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
@@ -373,8 +349,8 @@ WRITE(*,'(40(A,/))') &
 ! H5Awrite_f
 !
   WRITE(11,'(A)') "  INTERFACE h5awrite_f"
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
         WRITE(11,'(A)') "     MODULE PROCEDURE h5awrite_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
@@ -384,8 +360,8 @@ WRITE(*,'(40(A,/))') &
 
 ! H5Aread_f
   WRITE(11,'(A)') "  INTERFACE h5aread_f"
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
         WRITE(11,'(A)') "     MODULE PROCEDURE h5aread_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
@@ -398,8 +374,8 @@ WRITE(*,'(40(A,/))') &
 !
 ! H5Dwrite_f
   WRITE(11,'(A)') "  INTERFACE h5dwrite_f"
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
         WRITE(11,'(A)') "     MODULE PROCEDURE h5dwrite_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
@@ -409,8 +385,8 @@ WRITE(*,'(40(A,/))') &
 
 ! H5Dread_f
   WRITE(11,'(A)') "  INTERFACE h5dread_f"
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
         WRITE(11,'(A)') "     MODULE PROCEDURE h5dread_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
@@ -424,8 +400,8 @@ WRITE(*,'(40(A,/))') &
 !
 ! H5Pset_fill_value_f
   WRITE(11,'(A)') "  INTERFACE h5pset_fill_value_f"
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      WRITE(11,'(A)') "     MODULE PROCEDURE h5pset_fill_value_kind_"//TRIM(ADJUSTL(chr2))
   END DO
@@ -433,8 +409,8 @@ WRITE(*,'(40(A,/))') &
 
 ! H5Pget_fill_value_f
   WRITE(11,'(A)') "  INTERFACE h5pget_fill_value_f"
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      WRITE(11,'(A)') "     MODULE PROCEDURE h5pget_fill_value_kind_"//TRIM(ADJUSTL(chr2))
   END DO
@@ -442,8 +418,8 @@ WRITE(*,'(40(A,/))') &
 
 ! H5Pset_f
   WRITE(11,'(A)') "  INTERFACE h5pset_f"
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      WRITE(11,'(A)') "     MODULE PROCEDURE h5pset_kind_"//TRIM(ADJUSTL(chr2))
   END DO
@@ -451,8 +427,8 @@ WRITE(*,'(40(A,/))') &
 
 ! H5Pget_f
   WRITE(11,'(A)') "  INTERFACE h5pget_f"
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      WRITE(11,'(A)') "     MODULE PROCEDURE h5pget_kind_"//TRIM(ADJUSTL(chr2))
   END DO
@@ -460,8 +436,8 @@ WRITE(*,'(40(A,/))') &
 
 ! H5Pregister_f
   WRITE(11,'(A)') "  INTERFACE h5pregister_f"
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      WRITE(11,'(A)') "     MODULE PROCEDURE h5pregister_kind_"//TRIM(ADJUSTL(chr2))
   END DO
@@ -469,8 +445,8 @@ WRITE(*,'(40(A,/))') &
 
 ! H5Pinsert_f
   WRITE(11,'(A)') "  INTERFACE h5pinsert_f"
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      WRITE(11,'(A)') "     MODULE PROCEDURE h5pinsert_kind_"//TRIM(ADJUSTL(chr2))
   END DO
@@ -483,8 +459,8 @@ WRITE(*,'(40(A,/))') &
 !**********************
 !
 ! H5Awrite_f
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
      DO j = 1, 8
 
@@ -511,8 +487,8 @@ WRITE(*,'(40(A,/))') &
   ENDDO
 !
 ! H5Aread_f
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
      DO j = 1, 8
 ! DLL definitions for windows
@@ -541,8 +517,8 @@ WRITE(*,'(40(A,/))') &
 !**********************
 !
 ! h5dread_f
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
      DO j = 1, 8
 ! DLL definitions for windows
@@ -582,8 +558,8 @@ WRITE(*,'(40(A,/))') &
   ENDDO
 !
 ! h5dwrite_f
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
      DO j = 1, 8
 ! DLL definitions for windows
@@ -626,8 +602,8 @@ WRITE(*,'(40(A,/))') &
 !**********************
 !
 ! H5Pset_fill_value_f
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
 ! DLL definitions for windows
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
@@ -648,8 +624,8 @@ WRITE(*,'(40(A,/))') &
   ENDDO
 
 ! H5Pget_fill_value_f
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
 ! DLL definitions for windows
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
@@ -670,8 +646,8 @@ WRITE(*,'(40(A,/))') &
   ENDDO
 
 ! H5Pset_f
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
 ! DLL definitions for windows
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
@@ -695,8 +671,8 @@ WRITE(*,'(40(A,/))') &
   ENDDO
 
 ! H5Pget_f
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
 ! DLL definitions for windows
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
@@ -719,8 +695,8 @@ WRITE(*,'(40(A,/))') &
   ENDDO
 
 ! H5Pregister_f
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
 ! DLL definitions for windows
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
@@ -744,8 +720,8 @@ WRITE(*,'(40(A,/))') &
   ENDDO
 
 ! H5Pinsert_f
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
 ! DLL definitions for windows
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
@@ -812,13 +788,13 @@ WRITE(*,'(40(A,/))') &
 ! Interfaces for validating REALs, INTEGERs, CHARACTERs, LOGICALs
 
   WRITE(11,'(A)') '  INTERFACE verify'
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      WRITE(11,'(A)') "     MODULE PROCEDURE verify_real_kind_"//TRIM(ADJUSTL(chr2))
   END DO
-  DO i = 1, ii
-     j = ikind_numbers(i)
+  DO i = 1, num_ikinds
+     j = ikind(i)
      WRITE(chr2,'(I2)') j
      WRITE(11,'(A)') "     MODULE PROCEDURE verify_integer_kind_"//TRIM(ADJUSTL(chr2))
   END DO
@@ -827,8 +803,8 @@ WRITE(*,'(40(A,/))') &
   WRITE(11,'(A)') "  END INTERFACE"
 
   WRITE(11,'(A)') '  INTERFACE check_real_eq'
-  DO i = 1, ir
-     j = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     j = rkind(i)
      WRITE(chr2,'(I2)') j
      WRITE(11,'(A)') "     MODULE PROCEDURE real_eq_kind_"//TRIM(ADJUSTL(chr2))
   END DO
@@ -839,8 +815,8 @@ WRITE(*,'(40(A,/))') &
 ! ***************************
 ! VALIDATE INTEGERS
 ! ***************************
-  DO i = 1, ii
-     k = ikind_numbers(i)
+  DO i = 1, num_ikinds
+     k = ikind(i)
      WRITE(chr2,'(I2)') k
 ! DLL definitions for windows
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_TEST_DLL)'
@@ -863,8 +839,8 @@ WRITE(*,'(40(A,/))') &
 ! ***************************
 ! VALIDATE REALS
 ! ***************************
-  DO i = 1, ir
-     k = rkind_numbers(i)
+  DO i = 1, num_rkinds
+     k = rkind(i)
      WRITE(chr2,'(I2)') k
 ! DLL definitions for windows
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_TEST_DLL)'

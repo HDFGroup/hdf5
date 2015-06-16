@@ -153,7 +153,6 @@ int main(void)
   int FoundRealSizeKind[10];
   int i, j,flag;
   char chrA[32],chrB[32];
-  int H5_C_HAS_REAL_NATIVE_16;
 
   int IntKinds[] = H5_FORTRAN_INTEGER_KINDS;
   int IntKinds_SizeOf[] = H5_FORTRAN_INTEGER_KINDS_SIZEOF;
@@ -168,9 +167,6 @@ int main(void)
   /* Open target files */
   c_header = fopen(CFILE, "w");
   fort_header = fopen(FFILE, "w");
-
-  /* Default is C has 16 byte float */
-  H5_C_HAS_REAL_NATIVE_16 = 1;
 
   /* Write copyright, boilerplate to both files */
   initCfile();
@@ -208,30 +204,45 @@ int main(void)
   /* (b) Define c_float_x */
 
   for(i=0;i< H5_FORTRAN_NUM_REAL_KINDS;i++) {
-
     if (sizeof(float) == RealKinds_SizeOf[i]) {
       writeTypedef("float", "float", RealKinds[i]);
-      strcpy(Real_C_TYPES[i], "C_FLOAT"); }
+      strcpy(Real_C_TYPES[i], "C_FLOAT");
+    }
     else if(sizeof(double) == RealKinds_SizeOf[i]) {
       writeTypedef("float", "double", RealKinds[i]);
-      strcpy(Real_C_TYPES[i], "C_DOUBLE"); }
+      strcpy(Real_C_TYPES[i], "C_DOUBLE"); 
+    }
 #if H5_FORTRAN_HAVE_C_LONG_DOUBLE!=0
     else if(sizeof(long double) == RealKinds_SizeOf[i] && found_long_double == 0) {
       writeTypedef("float", "long double", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE");
-      found_long_double = 1; }
-#endif
-#ifdef H5_HAVE_FLOAT128
+      found_long_double = 1; 
+    }
+#  ifdef H5_HAVE_FLOAT128
     /* Don't select a higher precision than Fortran can support */
     else if(sizeof(__float128) == RealKinds_SizeOf[i] && found_long_double == 1 && H5_PAC_FC_MAX_REAL_PRECISION > 28) {
       writeTypedef("float", "__float128", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_FLOAT128");
     }
-#else
+#  else
     else if(sizeof(long double) == RealKinds_SizeOf[i] && found_long_double == 1 && H5_PAC_FC_MAX_REAL_PRECISION > 28) {
       writeTypedef("float", "long double", RealKinds[i]);
       strcpy(Real_C_TYPES[i], "C_FLOAT128");
     }
+#  endif
+#else /* There is no C_LONG_DOUBLE intrinsic */
+#  ifdef H5_HAVE_FLOAT128
+    /* Don't select a higher precision than Fortran can support */
+    else if(sizeof(__float128) == RealKinds_SizeOf[i] ) {
+      writeTypedef("float", "__float128", RealKinds[i]);
+      strcpy(Real_C_TYPES[i], "C_FLOAT128");
+    }
+#  else
+    else if(sizeof(long double) == RealKinds_SizeOf[i] ) {
+      writeTypedef("float", "long double", RealKinds[i]);
+      strcpy(Real_C_TYPES[i], "C_FLOAT128");
+    }
+#  endif
 #endif
 /*     else { */
   /*     /\* Did not find the real type, use the next smallest *\/ */
@@ -246,10 +257,12 @@ int main(void)
 /* 	writeTypedef("float", "long double", RealKinds[i]); */
 /* 	strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE"); } */
     else {
-      printf("                      **** HDF5 WARNING ****\n");
-      printf("Fortran REAL is %d bytes, but no corresponding C floating type exists\n",RealKinds_SizeOf[i]);
-      printf("Fortran Interface will create a custom datatype to store Fortran Real\n",RealKinds_SizeOf[i]);
+      printf("\n                      **** HDF5 WARNING ****\n");
+      printf("Fortran REAL(KIND=%d) is %d Bytes, but no corresponding C float type exists of that size\n",RealKinds[i],RealKinds_SizeOf[i]);
+      printf("     !!! Fortran interfaces will not be generated for REAL(KIND=%d) !!!\n\n",RealKinds[i]);
 
+      RealKinds_SizeOf[i] = -1;
+      RealKinds[i] = -1;
 /*       writeTypedef("float", "long double", RealKinds[i]); */
 /*       strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE"); } */
     }
@@ -392,12 +405,14 @@ int main(void)
   FoundRealSize[4] = -1;
   
   for(i=0;i<H5_FORTRAN_NUM_REAL_KINDS;i++) {
-    FoundRealSize[i] = (int)RealKinds[i];
-    FoundRealSizeKind[i] = (int)RealKinds_SizeOf[i];	
-    sprintf(chrA, "Fortran_REAL_%s", Real_C_TYPES[i]);
+    if (RealKinds[i] > 0) {
+      FoundRealSize[i] = (int)RealKinds[i];
+      FoundRealSizeKind[i] = (int)RealKinds_SizeOf[i];	
+      sprintf(chrA, "Fortran_REAL_%s", Real_C_TYPES[i]);
  /*    sprintf(chrB, "real_%d_f", FoundRealSize[i]); */
-    sprintf(chrB, "real_%s_f", Real_C_TYPES[i]);
-    writeToFiles("float",chrA, chrB, RealKinds[i], RealKinds_SizeOf[i]);
+      sprintf(chrB, "real_%s_f", Real_C_TYPES[i]);
+      writeToFiles("float",chrA, chrB, RealKinds[i], RealKinds_SizeOf[i]);
+    }
   }
 
 /*   for(i=0;i<H5_FORTRAN_NUM_REAL_KINDS;i++) { */
