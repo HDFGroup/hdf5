@@ -2486,7 +2486,7 @@ test_misc14(void)
     /* Check data from first dataset */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata, data1))
+    if(!H5_DBL_ABS_EQUAL(rdata, data1))
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Unlink second dataset */
@@ -2500,7 +2500,7 @@ test_misc14(void)
     /* Verify the data from dataset #1 */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data1))
+    if(!H5_DBL_ABS_EQUAL(rdata,data1))
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Close first dataset */
@@ -2534,7 +2534,7 @@ test_misc14(void)
     /* Check data from second dataset */
     ret = H5Dread(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data2))
+    if(!H5_DBL_ABS_EQUAL(rdata,data2))
         TestErrPrintf("Error on line %d: data2!=rdata\n",__LINE__);
 
     /* Unlink first dataset */
@@ -2548,7 +2548,7 @@ test_misc14(void)
     /* Verify the data from dataset #2 */
     ret = H5Dread(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data2))
+    if(!H5_DBL_ABS_EQUAL(rdata,data2))
         TestErrPrintf("Error on line %d: data2!=rdata\n",__LINE__);
 
     /* Close second dataset */
@@ -2589,13 +2589,13 @@ test_misc14(void)
     /* Check data from first dataset */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data1))
+    if(!H5_DBL_ABS_EQUAL(rdata,data1))
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Check data from third dataset */
     ret = H5Dread(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data3))
+    if(!H5_DBL_ABS_EQUAL(rdata,data3))
         TestErrPrintf("Error on line %d: data3!=rdata\n",__LINE__);
 
     /* Unlink second dataset */
@@ -2609,13 +2609,13 @@ test_misc14(void)
     /* Verify the data from dataset #1 */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data1))
+    if(!H5_DBL_ABS_EQUAL(rdata,data1))
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Verify the data from dataset #3 */
     ret = H5Dread(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data3))
+    if(!H5_DBL_ABS_EQUAL(rdata,data3))
         TestErrPrintf("Error on line %d: data3!=rdata\n",__LINE__);
 
     /* Close first dataset */

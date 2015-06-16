@@ -27,6 +27,10 @@
  *-------------------------------------------------------------------------
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
 #define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
@@ -34,10 +38,9 @@
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5AC_init_interface
 
-#ifdef H5_HAVE_PARALLEL
-#include <mpi.h>
-#endif /* H5_HAVE_PARALLEL */
-
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACpkg.h"		/* Metadata cache			*/
 #include "H5Cpkg.h"             /* Cache                                */
@@ -51,13 +54,16 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 
 
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
 #ifdef H5_HAVE_PARALLEL
-
-/* Declare a free list to manage the H5AC_aux_t struct */
-H5FL_DEFINE_STATIC(H5AC_aux_t);
-
-#endif /* H5_HAVE_PARALLEL */
-
 /****************************************************************************
  *
  * structure H5AC_slist_entry_t
@@ -69,143 +75,135 @@ H5FL_DEFINE_STATIC(H5AC_aux_t);
  * allocated structure to store these offsets in.  This structure serves
  * that purpose.  Its fields are as follows:
  *
- * magic:       Unsigned 32 bit integer always set to
- *		H5AC__H5AC_SLIST_ENTRY_T_MAGIC.  This field is used to
- *		validate pointers to instances of H5AC_slist_entry_t.
- *
  * addr:	file offset of a metadata entry.  Entries are added to this
  *		list (if they aren't there already) when they are marked
  *		dirty in an unprotect, inserted, or moved.  They are
  *		removed when they appear in a clean entries broadcast.
  *
  ****************************************************************************/
-
-#ifdef H5_HAVE_PARALLEL
-
-#define H5AC__H5AC_SLIST_ENTRY_T_MAGIC        0x00D0A02
-
 typedef struct H5AC_slist_entry_t
 {
-    uint32_t    magic;
-
     haddr_t     addr;
 } H5AC_slist_entry_t;
 
-/* Declare a free list to manage the H5AC_slist_entry_t struct */
-H5FL_DEFINE_STATIC(H5AC_slist_entry_t);
-
+/* User data for address list building callbacks */
+typedef struct H5AC_addr_list_ud_t
+{
+    H5AC_aux_t    * aux_ptr;        /* 'Auxiliary' parallel cache info */
+    haddr_t       * addr_buf_ptr;   /* Array to store addresses */
+    int             i;              /* Counter for position in array */
+} H5AC_addr_list_ud_t;
 #endif /* H5_HAVE_PARALLEL */
 
 
-/*
- * Private file-scope variables.
- */
+/********************/
+/* Local Prototypes */
+/********************/
+
+static herr_t H5AC__check_if_write_permitted(const H5F_t *f,
+    hbool_t *write_permitted_ptr);
+static herr_t H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr,
+    H5C_auto_size_ctl_t *int_conf_ptr);
+
+#ifdef H5_HAVE_PARALLEL
+static herr_t H5AC__broadcast_candidate_list(H5AC_t *cache_ptr,
+    int *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
+static herr_t H5AC__broadcast_clean_list(H5AC_t *cache_ptr);
+static herr_t H5AC__construct_candidate_list(H5AC_t *cache_ptr,
+    H5AC_aux_t *aux_ptr, int sync_point_op);
+static herr_t H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr,
+    int *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
+static herr_t H5AC__flush_entries(H5F_t *f, hid_t dxpl_id);
+static herr_t H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr);
+static herr_t H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr);
+static herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr,
+    hbool_t was_dirty, unsigned flags);
+static herr_t H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr);
+static herr_t H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr,
+    haddr_t new_addr);
+static herr_t H5AC__propagate_and_apply_candidate_list(H5F_t  *f, hid_t dxpl_id);
+static herr_t H5AC__propagate_flushed_and_still_clean_entries_list(H5F_t  *f,
+    hid_t dxpl_id);
+static herr_t H5AC__receive_haddr_list(MPI_Comm mpi_comm, int *num_entries_ptr,
+    haddr_t **haddr_buf_ptr_ptr);
+static herr_t H5AC__receive_candidate_list(const H5AC_t *cache_ptr,
+    int *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
+static herr_t H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t primary_dxpl_id,
+    hid_t secondary_dxpl_id);
+static herr_t H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, int num_candidates,
+    haddr_t *candidates_list_ptr);
+static herr_t H5AC__rsp__dist_md_write__flush(H5F_t *f, hid_t dxpl_id);
+static herr_t H5AC__rsp__dist_md_write__flush_to_min_clean(H5F_t *f, hid_t dxpl_id);
+static herr_t H5AC__rsp__p0_only__flush(H5F_t *f, hid_t dxpl_id);
+static herr_t H5AC__rsp__p0_only__flush_to_min_clean(H5F_t *f, hid_t dxpl_id);
+static herr_t H5AC__run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op);
+#endif /* H5_HAVE_PARALLEL */
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
 
 /* Default dataset transfer property list for metadata I/O calls */
 /* (Collective set, "block before metadata write" set and "library internal" set) */
 /* (Global variable definition, declaration is in H5ACprivate.h also) */
-hid_t H5AC_dxpl_id=(-1);
+hid_t H5AC_dxpl_id = (-1);
 
 /* Dataset transfer property list for independent metadata I/O calls */
 /* (just "library internal" set - i.e. independent transfer mode) */
 /* (Global variable definition, declaration is in H5ACprivate.h also) */
 H5P_genplist_t *H5AC_ind_dxpl_g = NULL;
-hid_t H5AC_ind_dxpl_id=(-1);
+hid_t H5AC_ind_dxpl_id = (-1);
 
 
-/*
- * Private file-scope function declarations:
- */
-
-static herr_t H5AC_check_if_write_permitted(const H5F_t *f,
-                                            hid_t dxpl_id,
-                                            hbool_t * write_permitted_ptr);
-
-static herr_t H5AC_ext_config_2_int_config(H5AC_cache_config_t * ext_conf_ptr,
-                                           H5C_auto_size_ctl_t * int_conf_ptr);
+/*******************/
+/* Local Variables */
+/*******************/
 
 #ifdef H5_HAVE_PARALLEL
-static herr_t H5AC_broadcast_candidate_list(H5AC_t * cache_ptr,
-                                            int * num_entries_ptr,
-                                            haddr_t ** haddr_buf_ptr_ptr);
+/* Declare a free list to manage the H5AC_aux_t struct */
+H5FL_DEFINE_STATIC(H5AC_aux_t);
 
-static herr_t H5AC_broadcast_clean_list(H5AC_t * cache_ptr);
-
-static herr_t H5AC_construct_candidate_list(H5AC_t * cache_ptr,
-                                            H5AC_aux_t * aux_ptr,
-                                            int sync_point_op);
-
-static herr_t H5AC_copy_candidate_list_to_buffer(H5AC_t * cache_ptr,
-                                        int * num_entries_ptr,
-                                        haddr_t ** haddr_buf_ptr_ptr,
-					size_t * MPI_Offset_buf_size_ptr,
-                                        MPI_Offset ** MPI_Offset_buf_ptr_ptr);
-
-static herr_t H5AC_flush_entries(H5F_t *f);
-
-static herr_t H5AC_log_deleted_entry(H5AC_t * cache_ptr,
-                                     H5AC_info_t * entry_ptr,
-                                     haddr_t addr,
-                                     unsigned int flags);
-
-static herr_t H5AC_log_dirtied_entry(const H5AC_info_t * entry_ptr,
-                                     haddr_t addr);
-
-static herr_t H5AC_log_flushed_entry(H5C_t * cache_ptr,
-                                     haddr_t addr,
-                                     hbool_t was_dirty,
-                                     unsigned flags,
-                                     int type_id);
-
-static herr_t H5AC_log_moved_entry(const H5F_t * f,
-                                     haddr_t old_addr,
-                                     haddr_t new_addr);
-
-static herr_t H5AC_log_inserted_entry(H5AC_t * cache_ptr,
-                                      H5AC_info_t * entry_ptr);
-
-static herr_t H5AC_propagate_and_apply_candidate_list(H5F_t  * f,
-                                                      hid_t    dxpl_id,
-                                                      H5AC_t * cache_ptr);
-
-static herr_t H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
-                                                           hid_t dxpl_id,
-                                                           H5AC_t * cache_ptr);
-
-static herr_t H5AC_receive_candidate_list(H5AC_t * cache_ptr,
-                                          int * num_entries_ptr,
-                                          haddr_t ** haddr_buf_ptr_ptr);
-
-static herr_t H5AC_receive_and_apply_clean_list(H5F_t  * f,
-                                                hid_t    primary_dxpl_id,
-                                                hid_t    secondary_dxpl_id,
-                                                H5AC_t * cache_ptr);
-
-static herr_t H5AC_tidy_cache_0_lists(H5AC_t * cache_ptr,
-                                      int num_candidates,
-                                      haddr_t * candidates_list_ptr);
-
-herr_t H5AC_rsp__dist_md_write__flush(H5F_t *f, 
-                                      hid_t dxpl_id, 
-                                      H5AC_t * cache_ptr);
-
-herr_t H5AC_rsp__dist_md_write__flush_to_min_clean(H5F_t *f, 
-                                                   hid_t dxpl_id, 
-                                                   H5AC_t * cache_ptr);
-
-herr_t H5AC_rsp__p0_only__flush(H5F_t *f, 
-                                hid_t dxpl_id, 
-                                H5AC_t * cache_ptr);
-
-herr_t H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f, 
-                                             hid_t dxpl_id, 
-                                             H5AC_t * cache_ptr);
-
-static herr_t H5AC_run_sync_point(H5F_t *f, 
-                                  hid_t dxpl_id, 
-		                  int sync_point_op);
-
+/* Declare a free list to manage the H5AC_slist_entry_t struct */
+H5FL_DEFINE_STATIC(H5AC_slist_entry_t);
 #endif /* H5_HAVE_PARALLEL */
+
+static const char *H5AC_entry_type_names[H5AC_NTYPES] =
+{
+    "B-tree nodes",
+    "symbol table nodes",
+    "local heap prefixes",
+    "local heap data blocks",
+    "global heaps",
+    "object headers",
+    "object header chunks",
+    "v2 B-tree headers",
+    "v2 B-tree internal nodes",
+    "v2 B-tree leaf nodes",
+    "fractal heap headers",
+    "fractal heap direct blocks",
+    "fractal heap indirect blocks",
+    "free space headers",
+    "free space sections",
+    "shared OH message master table",
+    "shared OH message index",
+    "extensible array headers",
+    "extensible array index blocks",
+    "extensible array super blocks",
+    "extensible array data blocks",
+    "extensible array data block pages",
+    "fixed array headers",
+    "fixed array data block",
+    "fixed array data block pages",
+    "superblock",
+    "test entry"	/* for testing only -- not used for actual files */
+};
+
 
 
 /*-------------------------------------------------------------------------
@@ -232,7 +230,7 @@ H5AC_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5AC_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -273,8 +271,8 @@ H5AC_init_interface(void)
     /* Insert 'collective metadata write' property */
     coll_meta_write = 1;
     if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
-                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Get an ID for the independent H5AC dxpl */
     if((H5AC_ind_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
@@ -287,8 +285,8 @@ H5AC_init_interface(void)
     /* Insert 'collective metadata write' property */
     coll_meta_write = 0;
     if(H5P_insert(H5AC_ind_dxpl_g, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
-                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 #else /* H5_HAVE_PARALLEL */
     /* Sanity check */
     HDassert(H5P_LST_DATASET_XFER_ID_g!=(-1));
@@ -297,7 +295,7 @@ H5AC_init_interface(void)
     H5AC_ind_dxpl_id = H5P_DATASET_XFER_DEFAULT;
 
     /* Get the property list objects for the IDs */
-    if (NULL == (H5AC_ind_dxpl_g = (H5P_genplist_t *)H5I_object(H5AC_ind_dxpl_id)))
+    if(NULL == (H5AC_ind_dxpl_g = (H5P_genplist_t *)H5I_object(H5AC_ind_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list object")
 #endif /* H5_HAVE_PARALLEL */
 
@@ -328,15 +326,14 @@ H5AC_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_interface_initialize_g) {
+    if(H5_interface_initialize_g) {
 #ifdef H5_HAVE_PARALLEL
         if(H5AC_dxpl_id > 0 || H5AC_ind_dxpl_id > 0) {
             /* Indicate more work to do */
             n = 1; /* H5I */
 
             /* Close H5AC dxpl */
-            if(H5I_dec_ref(H5AC_dxpl_id) < 0 ||
-                    H5I_dec_ref(H5AC_ind_dxpl_id) < 0)
+            if(H5I_dec_ref(H5AC_dxpl_id) < 0 || H5I_dec_ref(H5AC_ind_dxpl_id) < 0)
                 H5E_clear_stack(NULL); /*ignore error*/
             else {
                 /* Reset static IDs */
@@ -347,49 +344,21 @@ H5AC_term_interface(void)
                 H5_interface_initialize_g = 0;
             } /* end else */
         } /* end if */
-        else
-#else /* H5_HAVE_PARALLEL */
-            /* Reset static IDs */
-            H5AC_dxpl_id=(-1);
-            H5AC_ind_dxpl_id=(-1);
+        else {
 #endif /* H5_HAVE_PARALLEL */
-            /* Reset interface initialization flag */
-            H5_interface_initialize_g = 0;
+            /* Reset static IDs */
+            H5AC_dxpl_id = (-1);
+            H5AC_ind_dxpl_id = (-1);
+#ifdef H5_HAVE_PARALLEL
+        } /* end else */
+#endif /* H5_HAVE_PARALLEL */
+
+        /* Reset interface initialization flag */
+        H5_interface_initialize_g = 0;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5AC_term_interface() */
-
-static const char * H5AC_entry_type_names[H5AC_NTYPES] =
-{
-    "B-tree nodes",
-    "symbol table nodes",
-    "local heap prefixes",
-    "local heap data blocks",
-    "global heaps",
-    "object headers",
-    "object header chunks",
-    "v2 B-tree headers",
-    "v2 B-tree internal nodes",
-    "v2 B-tree leaf nodes",
-    "fractal heap headers",
-    "fractal heap direct blocks",
-    "fractal heap indirect blocks",
-    "free space headers",
-    "free space sections",
-    "shared OH message master table",
-    "shared OH message index",
-    "extensible array headers",
-    "extensible array index blocks",
-    "extensible array super blocks",
-    "extensible array data blocks",
-    "extensible array data block pages",
-    "fixed array headers",
-    "fixed array data block",
-    "fixed array data block pages",
-    "superblock",
-    "test entry"	/* for testing only -- not used for actual files */
-};
 
 
 /*-------------------------------------------------------------------------
@@ -411,8 +380,7 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_create(const H5F_t *f,
-            H5AC_cache_config_t *config_ptr)
+H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr)
 {
 #ifdef H5_HAVE_PARALLEL
     char 	 prefix[H5C__PREFIX_LEN] = "";
@@ -422,6 +390,7 @@ H5AC_create(const H5F_t *f,
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Check arguments */
     HDassert(f);
     HDassert(NULL == f->shared->cache);
     HDassert(config_ptr != NULL) ;
@@ -429,7 +398,7 @@ H5AC_create(const H5F_t *f,
     HDcompile_assert(H5C__MAX_NUM_TYPE_IDS == H5AC_NTYPES);
 
     if(H5AC_validate_config(config_ptr) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad cache configuration")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache configuration")
 
 #ifdef H5_HAVE_PARALLEL
     if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
@@ -467,11 +436,8 @@ H5AC_create(const H5F_t *f,
         aux_ptr->move_dirty_bytes_updates = 0;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
         aux_ptr->d_slist_ptr = NULL;
-        aux_ptr->d_slist_len = 0;
         aux_ptr->c_slist_ptr = NULL;
-        aux_ptr->c_slist_len = 0;
         aux_ptr->candidate_slist_ptr = NULL;
-        aux_ptr->candidate_slist_len = 0;
         aux_ptr->write_done = NULL;
         aux_ptr->sync_point_done = NULL;
 
@@ -492,66 +458,50 @@ H5AC_create(const H5F_t *f,
         if(NULL == (aux_ptr->candidate_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create candidate entry list.")
 
-        if(aux_ptr != NULL) {
-            if(aux_ptr->mpi_rank == 0) {
+        if(aux_ptr != NULL)
+            if(aux_ptr->mpi_rank == 0)
                 f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE,
-                                        H5AC__DEFAULT_MIN_CLEAN_SIZE,
-                                        (H5AC_NTYPES - 1),
-                                        (const char **)H5AC_entry_type_names,
-                                        H5AC_check_if_write_permitted,
-                                        TRUE,
-                                        H5AC_log_flushed_entry,
-                                        (void *)aux_ptr);
-            } else {
+                        H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
+                        (const char **)H5AC_entry_type_names,
+                        H5AC__check_if_write_permitted, TRUE, H5AC__log_flushed_entry,
+                        (void *)aux_ptr);
+            else
                 f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE,
-                                        H5AC__DEFAULT_MIN_CLEAN_SIZE,
-                                        (H5AC_NTYPES - 1),
-                                        (const char **)H5AC_entry_type_names,
-                                        H5AC_check_if_write_permitted,
-                                        TRUE,
-                                        NULL,
-                                        (void *)aux_ptr);
-            }
-        } else {
+                        H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
+                        (const char **)H5AC_entry_type_names,
+                        H5AC__check_if_write_permitted, TRUE, NULL,
+                        (void *)aux_ptr);
+        else
             f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE,
-                                        H5AC__DEFAULT_MIN_CLEAN_SIZE,
-                                        (H5AC_NTYPES - 1),
-                                        (const char **)H5AC_entry_type_names,
-                                        H5AC_check_if_write_permitted,
-                                        TRUE,
-                                        NULL,
-                                        NULL);
-        }
-    } else {
+                    H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
+                    (const char **)H5AC_entry_type_names,
+                    H5AC__check_if_write_permitted, TRUE, NULL, NULL);
+    } /* end if */
+    else {
 #endif /* H5_HAVE_PARALLEL */
         /* The default max cache size and min clean size will frequently be
          * overwritten shortly by the subsequent set resize config call.
          *                                             -- JRM
          */
         f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE,
-                                        H5AC__DEFAULT_MIN_CLEAN_SIZE,
-                                        (H5AC_NTYPES - 1),
-                                        (const char **)H5AC_entry_type_names,
-                                        H5AC_check_if_write_permitted,
-                                        TRUE,
-                                        NULL,
-                                        NULL);
+                H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
+                (const char **)H5AC_entry_type_names,
+                H5AC__check_if_write_permitted, TRUE, NULL, NULL);
 #ifdef H5_HAVE_PARALLEL
-    }
+    } /* end else */
 #endif /* H5_HAVE_PARALLEL */
 
     if(NULL == f->shared->cache)
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+	HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
 #ifdef H5_HAVE_PARALLEL
-    if(aux_ptr != NULL) {
+    if(aux_ptr != NULL)
         if(H5C_set_prefix(f->shared->cache, prefix) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "H5C_set_prefix() failed")
-    } /* end if */
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "H5C_set_prefix() failed")
 #endif /* H5_HAVE_PARALLEL */
 
     if(H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "auto resize configuration failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "auto resize configuration failed")
 
 done:
 #ifdef H5_HAVE_PARALLEL
@@ -560,13 +510,10 @@ done:
         if(aux_ptr != NULL) {
             if(aux_ptr->d_slist_ptr != NULL)
                 H5SL_close(aux_ptr->d_slist_ptr);
-
             if(aux_ptr->c_slist_ptr != NULL)
                 H5SL_close(aux_ptr->c_slist_ptr);
-
             if(aux_ptr->candidate_slist_ptr != NULL)
                 H5SL_close(aux_ptr->candidate_slist_ptr);
-
             aux_ptr->magic = 0;
             aux_ptr = H5FL_FREE(H5AC_aux_t, aux_ptr);
         } /* end if */
@@ -623,7 +570,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
-    if(H5AC_flush_entries(f) < 0)
+    if(H5AC__flush_entries(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
 #endif /* H5_HAVE_PARALLEL */
 
@@ -665,13 +612,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_expunge_entry(H5F_t *f,
-		   hid_t dxpl_id,
-		   const H5AC_class_t *type,
-		   haddr_t addr,
-                   unsigned flags)
+H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
+    haddr_t addr, unsigned flags)
 {
-    herr_t  result;
 #if H5AC__TRACE_FILE_ENABLED
     char                trace[128] = "";
     FILE *              trace_file_ptr = NULL;
@@ -680,6 +623,7 @@ H5AC_expunge_entry(H5F_t *f,
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
@@ -696,41 +640,21 @@ H5AC_expunge_entry(H5F_t *f,
      * necessary in the trace file.  Write the return value to catch occult
      * errors.
      */
-    if ( ( cache_ptr != NULL ) &&
-         ( H5C_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
-         ( trace_file_ptr != NULL ) ) {
-
-        sprintf(trace, "H5AC_expunge_entry 0x%lx %d",
-	        (unsigned long)addr,
-		(int)(type->id));
-    }
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
+        sprintf(trace, "%s 0x%lx %d", FUNC, (unsigned long)addr, (int)(type->id));
 }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    result = H5C_expunge_entry(f,
-		               dxpl_id,
-                               H5AC_dxpl_id,
-                               type,
-                               addr,
-                               flags);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
-                    "H5C_expunge_entry() failed.")
-    }
+    if(H5C_expunge_entry(f, dxpl_id, H5AC_dxpl_id, type, addr, flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "H5C_expunge_entry() failed.")
 
 done:
-
 #if H5AC__TRACE_FILE_ENABLED
-    if ( trace_file_ptr != NULL ) {
-
+    if(trace_file_ptr != NULL)
 	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
-    }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_expunge_entry() */
 
 
@@ -765,6 +689,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
@@ -773,21 +698,18 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
     /* For the flush, only the flags are really necessary in the trace file.
      * Write the result to catch occult errors.
      */
-    if((f != NULL) &&
-            (f->shared != NULL) &&
-            (f->shared->cache != NULL) &&
-            (H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
-            (trace_file_ptr != NULL))
-	sprintf(trace, "H5AC_flush");
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
+	sprintf(trace, "%s", FUNC);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
     /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
-    if(H5AC_flush_entries(f) < 0)
+    if(H5AC__flush_entries(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
 #endif /* H5_HAVE_PARALLEL */
 
     /* Flush the cache */
+    /* (Again, in parallel - writes out the superblock) */
     if(H5C_flush_cache(f, dxpl_id, H5AC_dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache.")
 
@@ -808,12 +730,12 @@ done:
  * 		cache contains an entry at that location.  If it does,
  * 		also determine whether the entry is dirty, protected,
  * 		pinned, etc. and return that information to the caller
- * 		in *status_ptr.
+ * 		in *status.
  *
  * 		If the specified entry doesn't exist, set *status_ptr
  * 		to zero.
  *
- * 		On error, the value of *status_ptr is undefined.
+ * 		On error, the value of *status is undefined.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -823,44 +745,40 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_entry_status(const H5F_t *f,
-                      haddr_t    addr,
-		      unsigned * status_ptr)
+H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
 {
-    hbool_t	in_cache;
-    hbool_t	is_dirty;
-    hbool_t	is_protected;
-    hbool_t	is_pinned;
-    hbool_t	is_flush_dep_child;
-    hbool_t	is_flush_dep_parent;
-    size_t	entry_size;
-    unsigned	status = 0;
+    hbool_t	in_cache;               /* Entry @ addr is in the cache */
+    hbool_t	is_dirty;               /* Entry @ addr is in the cache and dirty */
+    hbool_t	is_protected;           /* Entry @ addr is in the cache and protected */
+    hbool_t	is_pinned;              /* Entry @ addr is in the cache and pinned */
+    hbool_t	is_flush_dep_child;     /* Entry @ addr is in the cache and is a flush dependency child */
+    hbool_t	is_flush_dep_parent;    /* Entry @ addr is in the cache and is a flush dependency parent */
     herr_t      ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if((f == NULL) || (!H5F_addr_defined(addr)) || (status_ptr == NULL))
+    if((f == NULL) || (!H5F_addr_defined(addr)) || (status == NULL))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry.")
 
-    if(H5C_get_entry_status(f, addr, &entry_size, &in_cache, &is_dirty,
+    if(H5C_get_entry_status(f, addr, NULL, &in_cache, &is_dirty,
             &is_protected, &is_pinned, &is_flush_dep_parent, &is_flush_dep_child) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_status() failed.")
 
     if(in_cache) {
-	status |= H5AC_ES__IN_CACHE;
+	*status |= H5AC_ES__IN_CACHE;
 	if(is_dirty)
-	    status |= H5AC_ES__IS_DIRTY;
+	    *status |= H5AC_ES__IS_DIRTY;
 	if(is_protected)
-	    status |= H5AC_ES__IS_PROTECTED;
+	    *status |= H5AC_ES__IS_PROTECTED;
 	if(is_pinned)
-	    status |= H5AC_ES__IS_PINNED;
+	    *status |= H5AC_ES__IS_PINNED;
 	if(is_flush_dep_parent)
-	    status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
+	    *status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
 	if(is_flush_dep_child)
-	    status |= H5AC_ES__IS_FLUSH_DEP_CHILD;
+	    *status |= H5AC_ES__IS_FLUSH_DEP_CHILD;
     } /* end if */
-
-    *status_ptr = status;
+    else
+        *status = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -895,6 +813,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
@@ -916,17 +835,9 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
      * Note that some data is not available right now -- put what we can
      * in the trace buffer now, and fill in the rest at the end.
      */
-    if ( ( f != NULL ) &&
-         ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
-         ( trace_file_ptr != NULL ) ) {
-
-        sprintf(trace, "H5AC_insert_entry 0x%lx %d 0x%x",
-	        (unsigned long)addr,
-		type->id,
-		flags);
-    }
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
+        sprintf(trace, "%s 0x%lx %d 0x%x", FUNC, (unsigned long)addr, type->id,
+            flags);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     /* Insert entry into metadata cache */
@@ -934,10 +845,9 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
         HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5C_insert_entry() failed")
 
 #if H5AC__TRACE_FILE_ENABLED
-    if(trace_file_ptr != NULL) {
+    if(trace_file_ptr != NULL)
         /* make note of the entry size */
         trace_entry_size = ((H5C_cache_entry_t *)thing)->size;
-    }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
@@ -946,12 +856,12 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 
     if(NULL != (aux_ptr = (H5AC_aux_t *)f->shared->cache->aux_ptr)) {
         /* Log the new entry */
-        if(H5AC_log_inserted_entry(f->shared->cache, (H5AC_info_t *)thing) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5AC_log_inserted_entry() failed")
+        if(H5AC__log_inserted_entry((H5AC_info_t *)thing) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5AC__log_inserted_entry() failed")
 
         /* Check if we should try to flush */
         if(aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold)
-            if(H5AC_run_sync_point(f, H5AC_dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
+            if(H5AC__run_sync_point(f, H5AC_dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't run sync point.")
     } /* end if */
 }
@@ -959,11 +869,8 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 
 done:
 #if H5AC__TRACE_FILE_ENABLED
-    if(trace_file_ptr != NULL) {
-	HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
-                  (int)trace_entry_size,
-		  (int)ret_value);
-    }
+    if(trace_file_ptr != NULL)
+	HDfprintf(trace_file_ptr, "%s %d %d\n", trace, (int)trace_entry_size, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1002,8 +909,7 @@ H5AC_mark_entry_dirty(void *thing)
      * is really necessary in the trace file.  Write the result to catch
      * occult errors.
      */
-    if((H5C_get_trace_file_ptr_from_entry((const H5C_cache_entry_t *) thing, &trace_file_ptr) >= 0) &&
-            (NULL != trace_file_ptr))
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(thing)))
         sprintf(trace, "%s 0x%lx", FUNC,
 	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
@@ -1017,10 +923,9 @@ H5AC_mark_entry_dirty(void *thing)
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     if((!entry_ptr->is_dirty) && (!entry_ptr->is_protected) &&
-             (entry_ptr->is_pinned) && (NULL != cache_ptr->aux_ptr)) {
-        if(H5AC_log_dirtied_entry(entry_ptr, entry_ptr->addr) < 0)
+             (entry_ptr->is_pinned) && (NULL != cache_ptr->aux_ptr))
+        if(H5AC__log_dirtied_entry(entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
-    } /* end if */
 }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1059,12 +964,13 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
     FILE *        	trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
 #ifdef H5_HAVE_PARALLEL
-    H5AC_aux_t        * aux_ptr;
+    H5AC_aux_t        *aux_ptr;
 #endif /* H5_HAVE_PARALLEL */
-    herr_t ret_value=SUCCEED;      /* Return value */
+    herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared->cache);
     HDassert(type);
@@ -1077,25 +983,16 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
      * necessary in the trace file.  Include the type id so we don't have to
      * look it up.  Also write the result to catch occult errors.
      */
-    if ( ( f != NULL ) &&
-         ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
-         ( trace_file_ptr != NULL ) ) {
-
-        sprintf(trace, "H5AC_move_entry 0x%lx 0x%lx %d",
-	        (unsigned long)old_addr,
-		(unsigned long)new_addr,
-		(int)(type->id));
-    }
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
+        sprintf(trace, "%s 0x%lx 0x%lx %d", FUNC, (unsigned long)old_addr,
+		(unsigned long)new_addr, (int)(type->id));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
     /* Log moving the entry */
-    if(NULL != (aux_ptr = (H5AC_aux_t *)f->shared->cache->aux_ptr)) {
-        if(H5AC_log_moved_entry(f, old_addr, new_addr) < 0)
+    if(NULL != (aux_ptr = (H5AC_aux_t *)f->shared->cache->aux_ptr))
+        if(H5AC__log_moved_entry(f, old_addr, new_addr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log moved entry")
-    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     if(H5C_move_entry(f->shared->cache, type, old_addr, new_addr) < 0)
@@ -1103,10 +1000,9 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
 
 #ifdef H5_HAVE_PARALLEL
     /* Check if we should try to flush */
-    if(NULL != aux_ptr && aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold) {
-        if(H5AC_run_sync_point(f, H5AC_dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
+    if(NULL != aux_ptr && aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold)
+        if(H5AC__run_sync_point(f, H5AC_dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't run sync point.")
-    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -1150,8 +1046,7 @@ H5AC_pin_protected_entry(void *thing)
     /* For the pin protected entry call, only the addr is really necessary
      * in the trace file.  Also write the result to catch occult errors.
      */
-    if((H5C_get_trace_file_ptr_from_entry((const H5C_cache_entry_t *)thing, &trace_file_ptr) >= 0) &&
-            (NULL != trace_file_ptr))
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(thing)))
         sprintf(trace, "%s 0x%lx", FUNC,
 	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
@@ -1198,10 +1093,8 @@ H5AC_create_flush_dependency(void * parent_thing, void * child_thing)
     HDassert(child_thing);
 
 #if H5AC__TRACE_FILE_ENABLED
-    if((H5C_get_trace_file_ptr_from_entry((H5C_cache_entry_t *)parent_thing, &trace_file_ptr) >= 0) &&
-            (NULL != trace_file_ptr))
-        sprintf(trace, "%s %lx %lx",
-                FUNC,
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(parent_thing)))
+        sprintf(trace, "%s %lx %lx", FUNC,
 	        (unsigned long)(((H5C_cache_entry_t *)parent_thing)->addr),
 	        (unsigned long)(((H5C_cache_entry_t *)child_thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
@@ -1244,15 +1137,11 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5AC_protect(H5F_t *f,
-             hid_t dxpl_id,
-             const H5AC_class_t *type,
-             haddr_t addr,
-	     void *udata,
-             H5AC_protect_t rw)
+H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
+    void *udata, H5AC_protect_t rw)
 {
     unsigned		protect_flags = H5C__NO_FLAGS_SET;
-    void *		thing = (void *)NULL;
+    void *		thing;          /* Pointer to native data structure for entry */
 #if H5AC__TRACE_FILE_ENABLED
     char                trace[128] = "";
     size_t		trace_entry_size = 0;
@@ -1262,7 +1151,7 @@ H5AC_protect(H5F_t *f,
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* check args */
+    /* Sanity check */
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
@@ -1281,11 +1170,7 @@ H5AC_protect(H5F_t *f,
      * sanity check.  Also indicate whether the call was successful to
      * catch occult errors.
      */
-    if ( ( f != NULL ) &&
-         ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
-         ( trace_file_ptr != NULL ) ) {
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr))) {
 
 	const char * rw_string;
 
@@ -1302,53 +1187,34 @@ H5AC_protect(H5F_t *f,
 	    rw_string = "???";
 	}
 
-        sprintf(trace, "H5AC_protect 0x%lx %d %s",
-	        (unsigned long)addr,
-		(int)(type->id),
-		rw_string);
+        sprintf(trace, "%s 0x%lx %d %s", FUNC, (unsigned long)addr,
+		(int)(type->id), rw_string);
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     if ( rw == H5AC_READ )
 	protect_flags |= H5C__READ_ONLY_FLAG;
 
-    thing = H5C_protect(f,
-		        dxpl_id,
-                        H5AC_dxpl_id,
-			type,
-			addr,
-			udata,
-			protect_flags);
-
-    if ( thing == NULL ) {
+    if(NULL == (thing = H5C_protect(f, dxpl_id, H5AC_dxpl_id, type, addr, udata, protect_flags)))
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "H5C_protect() failed.")
-    }
 
 #if H5AC__TRACE_FILE_ENABLED
-    if ( trace_file_ptr != NULL ) {
-
-        /* make note of the entry size */
+    if(trace_file_ptr != NULL)
+        /* Make note of the entry size */
         trace_entry_size = ((H5C_cache_entry_t *)thing)->size;
-    }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     /* Set return value */
     ret_value = thing;
 
 done:
-
 #if H5AC__TRACE_FILE_ENABLED
-    if ( trace_file_ptr != NULL ) {
-
-	HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
-                  (int)trace_entry_size,
-                  (int)(ret_value != NULL));
-    }
+    if(trace_file_ptr != NULL)
+	HDfprintf(trace_file_ptr, "%s %d %d\n", trace, (int)trace_entry_size, (int)(ret_value != NULL));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_protect() */
 
 
@@ -1383,8 +1249,7 @@ H5AC_resize_entry(void *thing, size_t new_size)
      * really necessary in the trace file. Write the result to catch
      * occult errors.
      */
-    if((H5C_get_trace_file_ptr_from_entry((H5C_cache_entry_t *)thing, &trace_file_ptr) >= 0) &&
-            (NULL != trace_file_ptr))
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(thing)))
         sprintf(trace, "%s 0x%lx %d", FUNC,
 	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr),
 		(int)new_size);
@@ -1401,10 +1266,9 @@ H5AC_resize_entry(void *thing, size_t new_size)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    if((!entry_ptr->is_dirty) && (NULL != cache_ptr->aux_ptr)) {
-        if(H5AC_log_dirtied_entry(entry_ptr, entry_ptr->addr) < 0)
+    if((!entry_ptr->is_dirty) && (NULL != cache_ptr->aux_ptr))
+        if(H5AC__log_dirtied_entry(entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
-    } /* end if */
 }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1449,8 +1313,7 @@ H5AC_unpin_entry(void *thing)
     /* For the unpin entry call, only the addr is really necessary
      * in the trace file.  Also write the result to catch occult errors.
      */
-    if((H5C_get_trace_file_ptr_from_entry((H5C_cache_entry_t *)thing, &trace_file_ptr) >= 0) &&
-            (NULL != trace_file_ptr))
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(thing)))
         sprintf(trace, "%s 0x%lx", FUNC,
 	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
@@ -1496,10 +1359,8 @@ H5AC_destroy_flush_dependency(void * parent_thing, void * child_thing)
     HDassert(child_thing);
 
 #if H5AC__TRACE_FILE_ENABLED
-    if((H5C_get_trace_file_ptr_from_entry((H5C_cache_entry_t *)parent_thing, &trace_file_ptr) >= 0) &&
-            (NULL != trace_file_ptr))
-        sprintf(trace, "%s %llx %llx",
-                FUNC,
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(parent_thing)))
+        sprintf(trace, "%s %llx %llx", FUNC,
 	        (unsigned long long)(((H5C_cache_entry_t *)parent_thing)->addr),
 	        (unsigned long long)(((H5C_cache_entry_t *)child_thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
@@ -1572,6 +1433,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
@@ -1588,21 +1450,13 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
      * new size are really necessary in the trace file.  Write the return
      * value to catch occult errors.
      */
-    if ( ( f != NULL ) &&
-         ( f->shared != NULL ) &&
-         ( f->shared->cache != NULL ) &&
-         ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0) &&
-         ( trace_file_ptr != NULL ) ) {
-
-        sprintf(trace, "H5AC_unprotect 0x%lx %d",
-	        (unsigned long)addr,
-		(int)(type->id));
-    }
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
+        sprintf(trace, "%s 0x%lx %d", FUNC, (unsigned long)addr, (int)(type->id));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    dirtied = (hbool_t)( ( (flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG ) ||
-		( ((H5AC_info_t *)thing)->dirtied ) );
-    deleted = (hbool_t)( (flags & H5C__DELETED_FLAG) == H5C__DELETED_FLAG );
+    dirtied = (hbool_t)(((flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG) ||
+		(((H5AC_info_t *)thing)->dirtied));
+    deleted = (hbool_t)((flags & H5C__DELETED_FLAG) == H5C__DELETED_FLAG);
 
     /* Check if the size changed out from underneath us, if we're not deleting
      *  the entry.
@@ -1611,24 +1465,21 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
         size_t		curr_size = 0;
 
         if((type->size)(f, thing, &curr_size) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, "Can't get size of thing")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTGETSIZE, FAIL, "Can't get size of thing")
 
         if(((H5AC_info_t *)thing)->size != curr_size)
             HGOTO_ERROR(H5E_CACHE, H5E_BADSIZE, FAIL, "size of entry changed")
     } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
-    if((dirtied) && (((H5AC_info_t *)thing)->is_dirty == FALSE) &&
-            (NULL != (aux_ptr = (H5AC_aux_t *)f->shared->cache->aux_ptr))) {
-        if(H5AC_log_dirtied_entry((H5AC_info_t *)thing, addr) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry")
-    } /* end if */
+    if(NULL != (aux_ptr = (H5AC_aux_t *)f->shared->cache->aux_ptr)) {
+        if(dirtied && ((H5AC_info_t *)thing)->is_dirty == FALSE)
+            if(H5AC__log_dirtied_entry((H5AC_info_t *)thing) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry")
 
-    if((deleted) &&
-            (NULL != (aux_ptr = (H5AC_aux_t *)(f->shared->cache->aux_ptr))) &&
-            (aux_ptr->mpi_rank == 0)) {
-        if(H5AC_log_deleted_entry(f->shared->cache, (H5AC_info_t *)thing, addr, flags) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5AC_log_deleted_entry() failed.")
+        if(deleted && aux_ptr->mpi_rank == 0)
+            if(H5AC__log_deleted_entry((H5AC_info_t *)thing) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5AC__log_deleted_entry() failed.")
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1637,17 +1488,15 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 
 #ifdef H5_HAVE_PARALLEL
     /* Check if we should try to flush */
-    if((aux_ptr != NULL) && (aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold)) {
-        if(H5AC_run_sync_point(f, H5AC_dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
+    if((aux_ptr != NULL) && (aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold))
+        if(H5AC__run_sync_point(f, H5AC_dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't run sync point.")
-    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr != NULL)
-	HDfprintf(trace_file_ptr, "%s 0x%x %d\n",
-		  trace, (unsigned)flags, (int)ret_value);
+	HDfprintf(trace_file_ptr, "%s 0x%x %d\n", trace, (unsigned)flags, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1678,12 +1527,11 @@ H5AC_set_sync_point_done_callback(H5C_t * cache_ptr,
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    /* Sanity checks */
     HDassert(cache_ptr && (cache_ptr->magic == H5C__H5C_T_MAGIC));
-
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     aux_ptr->sync_point_done = sync_point_done;
 
@@ -1708,17 +1556,15 @@ H5AC_set_sync_point_done_callback(H5C_t * cache_ptr,
  */
 #ifdef H5_HAVE_PARALLEL
 herr_t
-H5AC_set_write_done_callback(H5C_t * cache_ptr,
-                             void (* write_done)(void))
+H5AC_set_write_done_callback(H5C_t * cache_ptr, void (* write_done)(void))
 {
     H5AC_aux_t * aux_ptr;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    /* Sanity checks */
     HDassert(cache_ptr && (cache_ptr->magic == H5C__H5C_T_MAGIC));
-
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
     HDassert( aux_ptr != NULL );
     HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
 
@@ -1728,6 +1574,7 @@ H5AC_set_write_done_callback(H5C_t * cache_ptr,
 } /* H5AC_set_write_done_callback() */
 #endif /* H5_HAVE_PARALLEL */
 
+#ifndef NDEBUG  /* debugging functions */
 
 /*-------------------------------------------------------------------------
  * Function:    H5AC_stats
@@ -1744,10 +1591,9 @@ H5AC_set_write_done_callback(H5C_t * cache_ptr,
 herr_t
 H5AC_stats(const H5F_t *f)
 {
-    herr_t		ret_value = SUCCEED;   /* Return value */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_ENTER_NOAPI(FAIL)
-
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
@@ -1755,8 +1601,7 @@ H5AC_stats(const H5F_t *f)
     /* at present, this can't fail */
     (void)H5C_stats(f->shared->cache, H5F_OPEN_NAME(f), FALSE);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5AC_stats() */
 
 
@@ -1780,18 +1625,18 @@ H5AC_dump_cache(const H5F_t *f)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
 
-    if ( H5C_dump_cache(f->shared->cache, H5F_OPEN_NAME(f)) < 0 ) {
-
+    if(H5C_dump_cache(f->shared->cache, H5F_OPEN_NAME(f)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_dump_cache() failed.")
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_dump_cache() */
+#endif /* NDEBUG */
 
 
 /*-------------------------------------------------------------------------
@@ -1807,59 +1652,36 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
-                                  H5AC_cache_config_t *config_ptr)
+H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr,
+    H5AC_cache_config_t *config_ptr)
 {
-    herr_t result;
-    herr_t ret_value = SUCCEED;      /* Return value */
-    hbool_t evictions_enabled;
     H5C_auto_size_ctl_t internal_config;
+    hbool_t evictions_enabled;
+    herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ( ( cache_ptr == NULL )
-         ||
+    /* Check args */
+    if((cache_ptr == NULL) ||
 #ifdef H5_HAVE_PARALLEL
-         ( ( cache_ptr->aux_ptr != NULL )
-           &&
-           ( ((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic
-             !=
-             H5AC__H5AC_AUX_T_MAGIC
-           )
-         )
-         ||
+             ((cache_ptr->aux_ptr != NULL) &&
+               (((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic != H5AC__H5AC_AUX_T_MAGIC))
+             ||
 #endif /* H5_HAVE_PARALLEL */
-         ( config_ptr == NULL )
-         ||
-         ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION )
-       )
-    {
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "Bad cache_ptr or config_ptr on entry.")
+             (config_ptr == NULL) || (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr or config_ptr on entry.")
 
-    }
-
-    result = H5C_get_cache_auto_resize_config((const H5C_t *)cache_ptr,
-					      &internal_config);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C_get_cache_auto_resize_config() failed.")
-    }
-
+    /* Retrieve the configuration */
+    if(H5C_get_cache_auto_resize_config((const H5C_t *)cache_ptr, &internal_config) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_cache_auto_resize_config() failed.")
     if(H5C_get_evictions_enabled((const H5C_t *)cache_ptr, &evictions_enabled) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_resize_enabled() failed.")
 
-    if ( internal_config.rpt_fcn == NULL ) {
-
+    /* Set the information to return */
+    if(internal_config.rpt_fcn == NULL)
         config_ptr->rpt_fcn_enabled = FALSE;
-
-    } else {
-
+    else
 	config_ptr->rpt_fcn_enabled = TRUE;
-    }
-
     config_ptr->open_trace_file        = FALSE;
     config_ptr->close_trace_file       = FALSE;
     config_ptr->trace_file_name[0]     = '\0';
@@ -1883,35 +1705,24 @@ H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
     config_ptr->decrement              = internal_config.decrement;
     config_ptr->apply_max_decrement    = internal_config.apply_max_decrement;
     config_ptr->max_decrement          = internal_config.max_decrement;
-    config_ptr->epochs_before_eviction =
-                                  (int)(internal_config.epochs_before_eviction);
+    config_ptr->epochs_before_eviction = (int)(internal_config.epochs_before_eviction);
     config_ptr->apply_empty_reserve    = internal_config.apply_empty_reserve;
     config_ptr->empty_reserve          = internal_config.empty_reserve;
-
 #ifdef H5_HAVE_PARALLEL
-    if ( cache_ptr->aux_ptr != NULL ) {
-
-        config_ptr->dirty_bytes_threshold =
-	    ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold;
-	config_ptr->metadata_write_strategy = 
-	    ((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy;
-
-    } else {
+    if(cache_ptr->aux_ptr != NULL) {
+        config_ptr->dirty_bytes_threshold = ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold;
+	config_ptr->metadata_write_strategy = ((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy;
+    } /* end if */
+    else {
 #endif /* H5_HAVE_PARALLEL */
-
-        config_ptr->dirty_bytes_threshold = 
-		H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD;
-	config_ptr->metadata_write_strategy = 
-		H5AC__DEFAULT_METADATA_WRITE_STRATEGY;
-
+        config_ptr->dirty_bytes_threshold = H5AC__DEFAULT_DIRTY_BYTES_THRESHOLD;
+	config_ptr->metadata_write_strategy = H5AC__DEFAULT_METADATA_WRITE_STRATEGY;
 #ifdef H5_HAVE_PARALLEL
-    }
+    } /* end else */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_get_cache_auto_resize_config() */
 
 
@@ -1928,33 +1739,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_size(H5AC_t * cache_ptr,
-                    size_t * max_size_ptr,
-                    size_t * min_clean_size_ptr,
-                    size_t * cur_size_ptr,
-                    int32_t * cur_num_entries_ptr)
+H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+    size_t *cur_size_ptr, int32_t *cur_num_entries_ptr)
 {
-    herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    result = H5C_get_cache_size((H5C_t *)cache_ptr,
-				max_size_ptr,
-				min_clean_size_ptr,
-				cur_size_ptr,
-				cur_num_entries_ptr);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C_get_cache_size() failed.")
-    }
+    if(H5C_get_cache_size((H5C_t *)cache_ptr, max_size_ptr, min_clean_size_ptr,
+            cur_size_ptr, cur_num_entries_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_cache_size() failed.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_get_cache_size() */
 
 
@@ -1971,7 +1768,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_hit_rate(H5AC_t * cache_ptr, double * hit_rate_ptr)
+H5AC_get_cache_hit_rate(H5AC_t *cache_ptr, double *hit_rate_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -2000,23 +1797,15 @@ done:
 herr_t
 H5AC_reset_cache_hit_rate_stats(H5AC_t * cache_ptr)
 {
-    herr_t result;
     herr_t      ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    result = H5C_reset_cache_hit_rate_stats((H5C_t *)cache_ptr);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C_reset_cache_hit_rate_stats() failed.")
-    }
+    if(H5C_reset_cache_hit_rate_stats((H5C_t *)cache_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_reset_cache_hit_rate_stats() failed.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_reset_cache_hit_rate_stats() */
 
 
@@ -2033,124 +1822,84 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
-                                  H5AC_cache_config_t *config_ptr)
+H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config_ptr)
 {
-    herr_t              result;
-    herr_t              ret_value = SUCCEED;      /* Return value */
     H5C_auto_size_ctl_t internal_config;
 #if H5AC__TRACE_FILE_ENABLED
     H5AC_cache_config_t trace_config = H5AC__DEFAULT_CACHE_CONFIG;
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert( cache_ptr );
+    /* Sanity checks */
+    HDassert(cache_ptr);
 
 #if H5AC__TRACE_FILE_ENABLED
     /* Make note of the new configuration.  Don't look up the trace file
      * pointer, as that may change before we use it.
      */
-    if ( config_ptr != NULL ) {
-
+    if(config_ptr != NULL)
         trace_config = *config_ptr;
-
-    }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    if ( ( cache_ptr == NULL )
+    if((cache_ptr == NULL)
 #ifdef H5_HAVE_PARALLEL
-         ||
-         ( ( cache_ptr->aux_ptr != NULL )
-           &&
-           (
-             ((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic
-             !=
-             H5AC__H5AC_AUX_T_MAGIC
-           )
-         )
+            || ((cache_ptr->aux_ptr != NULL) &&
+                (((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic != H5AC__H5AC_AUX_T_MAGIC))
 #endif /* H5_HAVE_PARALLEL */
-       ) {
-
+            )
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry.")
-    }
 
-    result = H5AC_validate_config(config_ptr);
+    /* Validate external configuration */
+    if(H5AC_validate_config(config_ptr) != SUCCEED)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache configuration");
 
-    if ( result != SUCCEED ) {
+    if(config_ptr->open_trace_file) {
+	FILE * file_ptr;
 
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad cache configuration");
-    }
+	if(NULL == (file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
+	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_trace_file_ptr() failed.")
 
-    if ( config_ptr->open_trace_file ) {
+	if((!(config_ptr->close_trace_file)) && (file_ptr != NULL))
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Trace file already open.")
+    } /* end if */
 
-	FILE * file_ptr = NULL;
+    /* Close & reopen trace file, if requested */
+    if(config_ptr->close_trace_file)
+	if(H5AC_close_trace_file(cache_ptr) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_close_trace_file() failed.")
+    if(config_ptr->open_trace_file)
+        if(H5AC_open_trace_file(cache_ptr, config_ptr->trace_file_name) < 0)
+	    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "H5AC_open_trace_file() failed.")
 
-	if ( H5C_get_trace_file_ptr(cache_ptr, &file_ptr) < 0 ) {
+    /* Convert external configuration to internal representation */
+    if(H5AC__ext_config_2_int_config(config_ptr, &internal_config) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC__ext_config_2_int_config() failed.")
 
-	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			"H5C_get_trace_file_ptr() failed.")
-	}
-
-	if ( ( ! ( config_ptr->close_trace_file ) ) &&
-	     ( file_ptr != NULL ) ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                        "Trace file already open.")
-        }
-    }
-
-    if ( config_ptr->close_trace_file ) {
-
-	if ( H5AC_close_trace_file(cache_ptr) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5AC_close_trace_file() failed.")
-	}
-    }
-
-    if ( config_ptr->open_trace_file ) {
-
-        if ( H5AC_open_trace_file(cache_ptr, config_ptr->trace_file_name) < 0 )
-	{
-
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                        "H5AC_open_trace_file() failed.")
-	}
-    }
-
-    if(H5AC_ext_config_2_int_config(config_ptr, &internal_config) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_ext_config_2_int_config() failed.")
-
+    /* Set configuration */
     if(H5C_set_cache_auto_resize_config(cache_ptr, &internal_config) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_set_cache_auto_resize_config() failed.")
-
     if(H5C_set_evictions_enabled(cache_ptr, config_ptr->evictions_enabled) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_set_evictions_enabled() failed.")
 
 #ifdef H5_HAVE_PARALLEL
-    if ( cache_ptr->aux_ptr != NULL ) {
-
-        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold =
-            config_ptr->dirty_bytes_threshold;
-
-        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy =
-            config_ptr->metadata_write_strategy;
-    }
+    /* Set parallel configuration values */
+    /* (Which are only held in the H5AC layer -QAK) */
+    if(cache_ptr->aux_ptr != NULL) {
+        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold = config_ptr->dirty_bytes_threshold;
+        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy = config_ptr->metadata_write_strategy;
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
 done:
-
 #if H5AC__TRACE_FILE_ENABLED
     /* For the set cache auto resize config call, only the contents
      * of the config is necessary in the trace file. Write the return
      * value to catch occult errors.
      */
-    if ( ( cache_ptr != NULL ) &&
-         ( H5C_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
-         ( trace_file_ptr != NULL ) ) {
-
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
 	HDfprintf(trace_file_ptr,
                   "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %f %f %d %d %d %f %f %d %d %d %d %f %zu %d %d\n",
 		  "H5AC_set_cache_auto_resize_config",
@@ -2185,11 +1934,9 @@ done:
 		  trace_config.dirty_bytes_threshold,
 		  trace_config.metadata_write_strategy,
 		  (int)ret_value);
-    }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_set_cache_auto_resize_config() */
 
 
@@ -2216,27 +1963,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_validate_config(H5AC_cache_config_t * config_ptr)
+H5AC_validate_config(H5AC_cache_config_t *config_ptr)
 {
     H5C_auto_size_ctl_t internal_config;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Check args */
     if(config_ptr == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
-
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
     if(config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
-
-    if((config_ptr->rpt_fcn_enabled != TRUE) && (config_ptr->rpt_fcn_enabled != FALSE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->rpt_fcn_enabled must be either TRUE or FALSE.")
-
-    if((config_ptr->open_trace_file != TRUE) && (config_ptr->open_trace_file != FALSE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->open_trace_file must be either TRUE or FALSE.")
-
-    if((config_ptr->close_trace_file != TRUE) && (config_ptr->close_trace_file != FALSE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->close_trace_file must be either TRUE or FALSE.")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Unknown config version.")
 
     /* don't bother to test trace_file_name unless open_trace_file is TRUE */
     if(config_ptr->open_trace_file) {
@@ -2247,45 +1985,32 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
 	 * sanity checks on the length of the file name.
 	 */
 	name_len = HDstrlen(config_ptr->trace_file_name);
+	if(name_len == 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name is empty.")
+        else if(name_len > H5AC__MAX_TRACE_FILE_NAME_LEN)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name too long.")
+    } /* end if */
 
-	if(name_len == 0) {
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name is empty.")
-        } else if(name_len > H5AC__MAX_TRACE_FILE_NAME_LEN) {
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->trace_file_name too long.")
-	}
-    }
+    if((config_ptr->evictions_enabled == FALSE) &&
+            ((config_ptr->incr_mode != H5C_incr__off) ||
+                (config_ptr->flash_incr_mode != H5C_flash_incr__off) ||
+                (config_ptr->decr_mode != H5C_decr__off)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Can't disable evictions while auto-resize is enabled.")
 
-    if ( ( config_ptr->evictions_enabled != TRUE ) &&
-         ( config_ptr->evictions_enabled != FALSE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-            "config_ptr->evictions_enabled must be either TRUE or FALSE.")
-    }
-
-    if ( ( config_ptr->evictions_enabled == FALSE ) &&
-	 ( ( config_ptr->incr_mode != H5C_incr__off ) ||
-	   ( config_ptr->flash_incr_mode != H5C_flash_incr__off ) ||
-	   ( config_ptr->decr_mode != H5C_decr__off ) ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "Can't disable evictions while auto-resize is enabled.")
-    }
-
-    if(config_ptr->dirty_bytes_threshold < H5AC__MIN_DIRTY_BYTES_THRESHOLD) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirty_bytes_threshold too small.")
-    } else if(config_ptr->dirty_bytes_threshold > H5AC__MAX_DIRTY_BYTES_THRESHOLD) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirty_bytes_threshold too big.")
-    }
+    if(config_ptr->dirty_bytes_threshold < H5AC__MIN_DIRTY_BYTES_THRESHOLD)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "dirty_bytes_threshold too small.")
+    else if(config_ptr->dirty_bytes_threshold > H5AC__MAX_DIRTY_BYTES_THRESHOLD)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "dirty_bytes_threshold too big.")
 
     if((config_ptr->metadata_write_strategy != H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY) &&
          (config_ptr->metadata_write_strategy != H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->metadata_write_strategy out of range.")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "config_ptr->metadata_write_strategy out of range.")
 
-    if(H5AC_ext_config_2_int_config(config_ptr, &internal_config) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_ext_config_2_int_config() failed.")
+    if(H5AC__ext_config_2_int_config(config_ptr, &internal_config) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC__ext_config_2_int_config() failed.")
 
     if(H5C_validate_resize_config(&internal_config, H5C_RESIZE_CFG__VALIDATE_ALL) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error(s) in new config.")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "error(s) in new config.")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2309,44 +2034,29 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_close_trace_file(H5AC_t * cache_ptr)
-
+H5AC_close_trace_file(H5AC_t *cache_ptr)
 {
-    herr_t   ret_value = SUCCEED;    /* Return value */
     FILE *   trace_file_ptr = NULL;
+    herr_t   ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ( cache_ptr == NULL ) {
+    if(cache_ptr == NULL)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "NULL cache_ptr on entry.")
 
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL cache_ptr on entry.")
-    }
+    if(NULL == (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_trace_file_ptr() failed.")
 
-    if ( H5C_get_trace_file_ptr(cache_ptr, &trace_file_ptr) < 0 ) {
+    if(trace_file_ptr != NULL) {
+        if(H5C_set_trace_file_ptr(cache_ptr, NULL) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_set_trace_file_ptr() failed.")
 
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		    "H5C_get_trace_file_ptr() failed.")
-    }
-
-    if ( trace_file_ptr != NULL ) {
-
-        if ( H5C_set_trace_file_ptr(cache_ptr, NULL) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C_set_trace_file_ptr() failed.")
-         }
-
-        if ( HDfclose(trace_file_ptr) != 0 ) {
-
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, \
-                        "can't close metadata cache trace file")
-        }
-    }
+        if(HDfclose(trace_file_ptr) != 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close metadata cache trace file")
+    } /* end if */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_close_trace_file() */
 
 
@@ -2367,99 +2077,57 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_open_trace_file(H5AC_t * cache_ptr,
-		     const char * trace_file_name)
+H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name)
 {
-    herr_t   ret_value = SUCCEED;    /* Return value */
     char     file_name[H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 2];
     FILE *   file_ptr = NULL;
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
+    herr_t   ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(cache_ptr);
 
-    if ( cache_ptr == NULL ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "cache_ptr NULL on entry.")
-    }
-
-    if ( trace_file_name == NULL ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-		    "NULL trace_file_name on entry.")
-    }
-
-    if ( HDstrlen(trace_file_name) > H5AC__MAX_TRACE_FILE_NAME_LEN ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "trace file name too long.")
-    }
-
-    if ( H5C_get_trace_file_ptr(cache_ptr, &file_ptr) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		    "H5C_get_trace_file_ptr() failed.")
-    }
-
-    if ( file_ptr != NULL ) {
-
-        HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "trace file already open.")
-    }
+    /* Check args */
+    if(cache_ptr == NULL)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "cache_ptr NULL on entry.")
+    if(trace_file_name == NULL)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "NULL trace_file_name on entry.")
+    if(HDstrlen(trace_file_name) > H5AC__MAX_TRACE_FILE_NAME_LEN)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "trace file name too long.")
+    if(NULL != (file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
+        HGOTO_ERROR(H5E_CACHE, H5E_FILEOPEN, FAIL, "trace file already open.")
 
 #ifdef H5_HAVE_PARALLEL
-
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    if ( cache_ptr->aux_ptr == NULL ) {
-
+    if(cache_ptr->aux_ptr == NULL)
         sprintf(file_name, "%s", trace_file_name);
-
-    } else {
-
-	if ( aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC ) {
-
+    else {
+	if(aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad aux_ptr->magic.")
-	}
 
         sprintf(file_name, "%s.%d", trace_file_name, aux_ptr->mpi_rank);
+    } /* end else */
 
-    }
-
-    if ( HDstrlen(file_name) >
-         H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 1 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		    "cooked trace file name too long.")
-    }
-
+    if(HDstrlen(file_name) > H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 1)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "cooked trace file name too long.")
 #else /* H5_HAVE_PARALLEL */
-
-    HDsnprintf(file_name, 
-               (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 1), 
+    HDsnprintf(file_name, (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 1), 
                "%s", trace_file_name);
-
 #endif /* H5_HAVE_PARALLEL */
 
-    if ( (file_ptr = HDfopen(file_name, "w")) == NULL ) {
-
-	/* trace file open failed */
+    if((file_ptr = HDfopen(file_name, "w")) == NULL)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "trace file open failed.")
-    }
 
     HDfprintf(file_ptr, "### HDF5 metadata cache trace file version 1 ###\n");
 
-    if ( H5C_set_trace_file_ptr(cache_ptr, file_ptr) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		    "H5C_set_trace_file_ptr() failed.")
-    }
+    if(H5C_set_trace_file_ptr(cache_ptr, file_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_set_trace_file_ptr() failed.")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_open_trace_file() */
 
 
@@ -2483,8 +2151,7 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 herr_t
-H5AC_add_candidate(H5AC_t * cache_ptr,
-                   haddr_t addr)
+H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr)
 {
     H5AC_aux_t         * aux_ptr;
     H5AC_slist_entry_t * slist_entry_ptr = NULL;
@@ -2492,36 +2159,31 @@ H5AC_add_candidate(H5AC_t * cache_ptr,
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
+    HDassert(aux_ptr->candidate_slist_ptr != NULL);
 
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy ==
-              H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
-    HDassert( aux_ptr->candidate_slist_ptr != NULL );
-
-    /* If the supplied address appears in the candidate list, scream and die. */
-    if(NULL != H5SL_search(aux_ptr->candidate_slist_ptr, (void *)(&addr)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry already in candidate slist.")
-
-    /* otherwise, construct an entry for the supplied address, and insert
+    /* Construct an entry for the supplied address, and insert
      * it into the candidate slist.
      */
-    if(NULL == (slist_entry_ptr = H5FL_CALLOC(H5AC_slist_entry_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "Can't allocate candidate slist entry .")
-
-    slist_entry_ptr->magic = H5AC__H5AC_SLIST_ENTRY_T_MAGIC;
+    if(NULL == (slist_entry_ptr = H5FL_MALLOC(H5AC_slist_entry_t)))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate candidate slist entry")
     slist_entry_ptr->addr  = addr;
 
     if(H5SL_insert(aux_ptr->candidate_slist_ptr, slist_entry_ptr, &(slist_entry_ptr->addr)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert entry into dirty entry slist.")
-
-    aux_ptr->candidate_slist_len += 1;
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert entry into dirty entry slist")
 
 done:
+    /* Clean up on error */
+    if(ret_value < 0)
+        if(slist_entry_ptr)
+            slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_add_candidate() */
 #endif /* H5_HAVE_PARALLEL */
@@ -2568,33 +2230,22 @@ done:
  *
  * Programmer:  John Mainzer, 5/30/14
  *
- * Changes:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
 herr_t
-H5AC_get_entry_ptr_from_addr(const H5F_t *f,
-                             haddr_t   addr,
-                             void ** entry_ptr_ptr)
+H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr, void **entry_ptr_ptr)
 {
     herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ( H5C_get_entry_ptr_from_addr(f, addr, entry_ptr_ptr) < 0 )
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C_get_entry_ptr_from_addr() failed.")
+    if(H5C_get_entry_ptr_from_addr(f, addr, entry_ptr_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_ptr_from_addr() failed")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_get_entry_ptr_from_addr() */
-
 #endif /* NDEBUG */
 
 
@@ -2624,36 +2275,23 @@ done:
  *
  * Programmer:  John Mainzer, 5/30/14
  *
- * Changes:
- *
- *              None.
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
 herr_t
-H5AC_verify_entry_type(const H5F_t *f,
-                       haddr_t   addr,
-                       const H5AC_class_t * expected_type,
-                       hbool_t * in_cache_ptr,
-                       hbool_t * type_ok_ptr)
+H5AC_verify_entry_type(const H5F_t *f, haddr_t addr, const H5AC_class_t *expected_type,
+    hbool_t *in_cache_ptr, hbool_t *type_ok_ptr)
 {
     herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if ( H5C_verify_entry_type(f, addr, (const H5C_class_t *)expected_type,
-                               in_cache_ptr, type_ok_ptr) < 0 )
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C_verify_entry_type() failed.")
+    if(H5C_verify_entry_type(f, addr, expected_type, in_cache_ptr, type_ok_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_verify_entry_type() failed")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_verify_entry_type() */
-
 #endif /* NDEBUG */
 
 
@@ -2664,7 +2302,7 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_broadcast_candidate_list()
+ * Function:    H5AC__broadcast_candidate_list()
  *
  * Purpose:     Broadcast the contents of the process 0 candidate entry
  *		slist.  In passing, also remove all entries from said
@@ -2688,98 +2326,125 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_broadcast_candidate_list(H5AC_t * cache_ptr,
-                              int * num_entries_ptr,
-                              haddr_t ** haddr_buf_ptr_ptr)
+H5AC__broadcast_candidate_list(H5AC_t *cache_ptr, int *num_entries_ptr,
+    haddr_t **haddr_buf_ptr_ptr)
 {
-    hbool_t		 success = FALSE;
     H5AC_aux_t         * aux_ptr = NULL;
     haddr_t            * haddr_buf_ptr = NULL;
-    MPI_Offset         * MPI_Offset_buf_ptr = NULL;
-    size_t		 buf_size = 0;
     int                  mpi_result;
-    int			 chk_num_entries = 0;
-    int			 num_entries = 0;
+    int			 num_entries;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->mpi_rank == 0 );
-    HDassert( aux_ptr->metadata_write_strategy ==
-              H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
-    HDassert( aux_ptr->candidate_slist_ptr != NULL );
-    HDassert( H5SL_count(aux_ptr->candidate_slist_ptr) ==
-		    (size_t)(aux_ptr->candidate_slist_len) );
-    HDassert( num_entries_ptr != NULL );
-    HDassert( *num_entries_ptr == 0 );
-    HDassert( haddr_buf_ptr_ptr != NULL );
-    HDassert( *haddr_buf_ptr_ptr == NULL );
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->mpi_rank == 0);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
+    HDassert(aux_ptr->candidate_slist_ptr != NULL);
+    HDassert(num_entries_ptr != NULL);
+    HDassert(*num_entries_ptr == 0);
+    HDassert(haddr_buf_ptr_ptr != NULL);
+    HDassert(*haddr_buf_ptr_ptr == NULL);
 
     /* First broadcast the number of entries in the list so that the
      * receivers can set up buffers to receive them.  If there aren't
      * any, we are done.
      */
-    num_entries = aux_ptr->candidate_slist_len;
+    num_entries = (int)H5SL_count(aux_ptr->candidate_slist_ptr);
     if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_INT, 0, aux_ptr->mpi_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed 1", mpi_result)
+        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
 
     if(num_entries > 0) {
+        size_t		 buf_size = 0;
+        int		 chk_num_entries = 0;
+
         /* convert the candidate list into the format we
          * are used to receiving from process 0, and also load it 
          * into a buffer for transmission.
          */
-        if(H5AC_copy_candidate_list_to_buffer(cache_ptr, &chk_num_entries,
-                &haddr_buf_ptr, &buf_size, &MPI_Offset_buf_ptr) < 0)
+        if(H5AC__copy_candidate_list_to_buffer(cache_ptr, &chk_num_entries, &haddr_buf_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate buffer.")
+        HDassert(chk_num_entries == num_entries);
+        HDassert(haddr_buf_ptr != NULL);
 
-        HDassert( chk_num_entries == num_entries );
-        HDassert( haddr_buf_ptr != NULL );
-        HDassert( MPI_Offset_buf_ptr != NULL );
-        HDassert( aux_ptr->candidate_slist_len == 0 );
-
-        /* Now broadcast the list of candidate entries -- if there is one.
-         *
-         * The peculiar structure of the following call to MPI_Bcast is
-         * due to MPI's (?) failure to believe in the MPI_Offset type.
-         * Thus the element type is MPI_BYTE, with size equal to the
-         * buf_size computed above.
-         */
-        if(MPI_SUCCESS != (mpi_result = MPI_Bcast((void *)MPI_Offset_buf_ptr, (int)buf_size, MPI_BYTE, 0, aux_ptr->mpi_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed 2", mpi_result)
+        /* Now broadcast the list of candidate entries */
+        buf_size = sizeof(haddr_t) * (size_t)num_entries;
+        if(MPI_SUCCESS != (mpi_result = MPI_Bcast((void *)haddr_buf_ptr, (int)buf_size, MPI_BYTE, 0, aux_ptr->mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
     } /* end if */
 
-    success = TRUE;
+    /* Pass the number of entries and the buffer pointer 
+     * back to the caller.  Do this so that we can use the same code
+     * to apply the candidate list to all the processes.
+     */
+    *num_entries_ptr = num_entries;
+    *haddr_buf_ptr_ptr = haddr_buf_ptr;
 
 done:
-    if(MPI_Offset_buf_ptr != NULL)
-        MPI_Offset_buf_ptr = (MPI_Offset *)H5MM_xfree((void *)MPI_Offset_buf_ptr);
-
-    if(success) {
-        /* Pass the number of entries and the buffer pointer 
-         * back to the caller.  Do this so that we can use the same code
-         * to apply the candidate list to all the processes.
-         */
-        *num_entries_ptr = num_entries;
-        *haddr_buf_ptr_ptr = haddr_buf_ptr;
-    } else if(haddr_buf_ptr != NULL) {
-        haddr_buf_ptr = (haddr_t *)H5MM_xfree((void *)haddr_buf_ptr);
-    }
+    if(ret_value < 0)
+        if(haddr_buf_ptr)
+            haddr_buf_ptr = (haddr_t *)H5MM_xfree((void *)haddr_buf_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_broadcast_candidate_list() */
+} /* H5AC__broadcast_candidate_list() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_broadcast_clean_list()
+ * Function:    H5AC__broadcast_clean_list_cb()
+ *
+ * Purpose:     Skip list callback for building array of addresses for
+ *              broadcasting the clean list.
+ *
+ * Return:      Non-negative on success/Negative on failure.
+ *
+ * Programmer:  Quincey Koziol, 6/12/15
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_PARALLEL
+static herr_t
+H5AC__broadcast_clean_list_cb(void *_item, void H5_ATTR_UNUSED *_key,
+    void *_udata)
+{
+    H5AC_slist_entry_t    * slist_entry_ptr = (H5AC_slist_entry_t *)_item;  /* Address of item */
+    H5AC_addr_list_ud_t   * udata = (H5AC_addr_list_ud_t *)_udata;      /* Context for callback */
+    haddr_t		    addr;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(slist_entry_ptr);
+    HDassert(udata);
+
+    /* Store the entry's address in the buffer */
+    addr = slist_entry_ptr->addr;
+    udata->addr_buf_ptr[udata->i] = addr;
+    udata->i++;
+
+    /* now release the entry */
+    slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
+
+    /* and also remove the matching entry from the dirtied list
+     * if it exists.
+     */
+    if(NULL != (slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(udata->aux_ptr->d_slist_ptr, (void *)(&addr))))
+        slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5AC__broadcast_clean_list_cb() */
+#endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC__broadcast_clean_list()
  *
  * Purpose:     Broadcast the contents of the process 0 cleaned entry
  *		slist.  In passing, also remove all entries from said
@@ -2799,174 +2464,76 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_broadcast_clean_list(H5AC_t * cache_ptr)
+H5AC__broadcast_clean_list(H5AC_t * cache_ptr)
 {
-    herr_t               ret_value = SUCCEED;    /* Return value */
-    haddr_t		 addr;
     haddr_t	       * addr_buf_ptr = NULL;
-    H5AC_aux_t         * aux_ptr = NULL;
-    H5SL_node_t        * slist_node_ptr = NULL;
-    H5AC_slist_entry_t * slist_entry_ptr = NULL;
-    MPI_Offset         * buf_ptr = NULL;
-    size_t		 buf_size;
-    int                  i = 0;
+    H5AC_aux_t         * aux_ptr;
     int                  mpi_result;
     int			 num_entries = 0;
+    herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->mpi_rank == 0 );
-    HDassert( aux_ptr->c_slist_ptr != NULL );
-    HDassert( H5SL_count(aux_ptr->c_slist_ptr) ==
-		    (size_t)(aux_ptr->c_slist_len) );
-
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->mpi_rank == 0);
+    HDassert(aux_ptr->c_slist_ptr != NULL);
 
     /* First broadcast the number of entries in the list so that the
      * receives can set up a buffer to receive them.  If there aren't
      * any, we are done.
      */
-    num_entries = aux_ptr->c_slist_len;
+    num_entries = (int)H5SL_count(aux_ptr->c_slist_ptr);
+    if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_INT, 0, aux_ptr->mpi_comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
 
-    mpi_result = MPI_Bcast(&num_entries, 1, MPI_INT, 0, aux_ptr->mpi_comm);
+    if(num_entries > 0) {
+        H5AC_addr_list_ud_t udata;
+        size_t		 buf_size;
 
-    if ( mpi_result != MPI_SUCCESS ) {
-
-        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed 1", mpi_result)
-
-    }
-
-    if ( num_entries > 0 )
-    {
         /* allocate a buffer to store the list of entry base addresses in */
+        buf_size = sizeof(haddr_t) * (size_t)num_entries;
+        if(NULL == (addr_buf_ptr = (haddr_t *)H5MM_malloc(buf_size)))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for addr buffer")
 
-        buf_size = sizeof(MPI_Offset) * (size_t)num_entries;
+        /* Set up user data for callback */
+        udata.aux_ptr = aux_ptr;
+        udata.addr_buf_ptr = addr_buf_ptr;
+        udata.i = 0;
 
-        buf_ptr = (MPI_Offset *)H5MM_malloc(buf_size);
+        /* Free all the clean list entries, building the address list in the callback */
+        /* (Callback also removes the matching entries from the dirtied list) */
+        if(H5SL_free(aux_ptr->c_slist_ptr, H5AC__broadcast_clean_list_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "Can't build address list for clean entries")
 
-        if ( buf_ptr == NULL ) {
+        /* Now broadcast the list of cleaned entries */
+        if(MPI_SUCCESS != (mpi_result = MPI_Bcast((void *)addr_buf_ptr, (int)buf_size, MPI_BYTE, 0, aux_ptr->mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
+    } /* end if */
 
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                        "memory allocation failed for clean entry buffer")
-        }
-
-        /* if the sync_point_done callback is defined, allocate the
-         * addr buffer as well.
-         */
-        if ( aux_ptr->sync_point_done != NULL ) {
-
-            addr_buf_ptr = (haddr_t *)H5MM_malloc((size_t)num_entries * sizeof(haddr_t));
-
-            if ( addr_buf_ptr == NULL ) {
-
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                            "memory allocation failed for addr buffer")
-            }
-        }
-
-
-        /* now load the entry base addresses into the buffer, emptying the
-         * cleaned entry list in passing
-         */
-
-        while ( NULL != (slist_node_ptr = H5SL_first(aux_ptr->c_slist_ptr) ) )
-        {
-            slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_item(slist_node_ptr);
-
-            HDassert(slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC);
-
-            HDassert( i < num_entries );
-
-            addr = slist_entry_ptr->addr;
-
-            if ( addr_buf_ptr != NULL ) {
-
-                addr_buf_ptr[i] = addr;
-            }
-
-            if ( H5FD_mpi_haddr_to_MPIOff(addr, &(buf_ptr[i])) < 0 ) {
-
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, \
-                            "can't convert from haddr to MPI off")
-            }
-
-            i++;
-
-            /* now remove the entry from the cleaned entry list */
-            if ( H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&addr))
-                 != slist_entry_ptr ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, \
-                            "Can't delete entry from cleaned entry slist.")
-            }
-
-            slist_entry_ptr->magic = 0;
-            slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
-
-            aux_ptr->c_slist_len -= 1;
-
-            HDassert( aux_ptr->c_slist_len >= 0 );
-
-            /* and also remove the matching entry from the dirtied list
-             * if it exists.
-             */
-            if((slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_search(aux_ptr->d_slist_ptr, (void *)(&addr))) != NULL) {
-                HDassert( slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC );
-                HDassert( slist_entry_ptr->addr == addr );
-
-                if(H5SL_remove(aux_ptr->d_slist_ptr, (void *)(&addr)) != slist_entry_ptr)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, "Can't delete entry from dirty entry slist.")
-
-                slist_entry_ptr->magic = 0;
-                slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
-
-                aux_ptr->d_slist_len -= 1;
-
-                HDassert( aux_ptr->d_slist_len >= 0 );
-            } /* end if */
-        } /* while */
-
-
-        /* Now broadcast the list of cleaned entries -- if there is one.
-         *
-         * The peculiar structure of the following call to MPI_Bcast is
-         * due to MPI's (?) failure to believe in the MPI_Offset type.
-         * Thus the element type is MPI_BYTE, with size equal to the
-         * buf_size computed above.
-         */
-
-        mpi_result = MPI_Bcast((void *)buf_ptr, (int)buf_size, MPI_BYTE, 0,
-                               aux_ptr->mpi_comm);
-
-        if ( mpi_result != MPI_SUCCESS ) {
-
-            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed 2", mpi_result)
-        }
-    }
-
-    if(aux_ptr->sync_point_done != NULL)
+    /* if it is defined, call the sync point done callback.  Note
+     * that this callback is defined purely for testing purposes,
+     * and should be undefined under normal operating circumstances.
+     */
+    if(aux_ptr->sync_point_done)
         (aux_ptr->sync_point_done)(num_entries, addr_buf_ptr);
 
 done:
-    if(buf_ptr != NULL)
-        buf_ptr = (MPI_Offset *)H5MM_xfree((void *)buf_ptr);
-    if(addr_buf_ptr != NULL)
+    if(addr_buf_ptr)
         addr_buf_ptr = (haddr_t *)H5MM_xfree((void *)addr_buf_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_broadcast_clean_list() */
+} /* H5AC__broadcast_clean_list() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_check_if_write_permitted
+ * Function:    H5AC__check_if_write_permitted
  *
  * Purpose:     Determine if a write is permitted under the current
  *		circumstances, and set *write_permitted_ptr accordingly.
@@ -2983,62 +2550,44 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_check_if_write_permitted(const H5F_t *f,
-                              hid_t H5_ATTR_UNUSED dxpl_id,
-                              hbool_t * write_permitted_ptr)
-#else /* H5_HAVE_PARALLEL */
-static herr_t
-H5AC_check_if_write_permitted(const H5F_t H5_ATTR_UNUSED * f,
-                              hid_t H5_ATTR_UNUSED dxpl_id,
-                              hbool_t * write_permitted_ptr)
+H5AC__check_if_write_permitted(const H5F_t
+#ifndef H5_HAVE_PARALLEL
+H5_ATTR_UNUSED
 #endif /* H5_HAVE_PARALLEL */
+    *f, hbool_t *write_permitted_ptr)
 {
-    hbool_t		write_permitted = TRUE;
-    herr_t		ret_value = SUCCEED;      /* Return value */
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t *	aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
+    hbool_t		write_permitted = TRUE;
 
-
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC_NOERR
 
 #ifdef H5_HAVE_PARALLEL
-    HDassert( f != NULL );
-    HDassert( f->shared != NULL );
-    HDassert( f->shared->cache != NULL );
-
+    /* Sanity checks */
+    HDassert(f != NULL);
+    HDassert(f->shared != NULL);
+    HDassert(f->shared->cache != NULL);
     aux_ptr = (H5AC_aux_t *)(f->shared->cache->aux_ptr);
+    if(aux_ptr != NULL) {
+        HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
-    if ( aux_ptr != NULL ) {
-
-        HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-
-        if ( ( aux_ptr->mpi_rank == 0 ) ||
-             ( aux_ptr->metadata_write_strategy ==
-               H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED ) ) {
-
+        if((aux_ptr->mpi_rank == 0) || (aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED))
 	    write_permitted = aux_ptr->write_permitted;
-
-        } else {
-
+        else
 	    write_permitted = FALSE;
-	}
-    }
+    } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
     *write_permitted_ptr = write_permitted;
 
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5AC_check_if_write_permitted() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5AC__check_if_write_permitted() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_construct_candidate_list()
+ * Function:    H5AC__construct_candidate_list()
  *
  * Purpose:     In the parallel case when the metadata_write_strategy is 
  *		H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED, process 0 uses
@@ -3058,29 +2607,26 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_construct_candidate_list(H5AC_t * cache_ptr,
-                              H5AC_aux_t * aux_ptr,
-                              int sync_point_op)
+H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t *aux_ptr,
+    int sync_point_op)
 {
     herr_t ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy ==
-              H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
-    HDassert( ( sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_CACHE ) ||
-              ( aux_ptr->mpi_rank == 0 ) );
-    HDassert( aux_ptr->d_slist_ptr != NULL );
-    HDassert( aux_ptr->c_slist_ptr != NULL );
-    HDassert( aux_ptr->c_slist_len == 0 );
-    HDassert( aux_ptr->candidate_slist_ptr != NULL );
-    HDassert( aux_ptr->candidate_slist_len == 0 );
-    HDassert( ( sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN ) ||
-              ( sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_CACHE ) );
+    /* Sanity checks */
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
+    HDassert((sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_CACHE) || (aux_ptr->mpi_rank == 0));
+    HDassert(aux_ptr->d_slist_ptr != NULL);
+    HDassert(aux_ptr->c_slist_ptr != NULL);
+    HDassert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
+    HDassert(aux_ptr->candidate_slist_ptr != NULL);
+    HDassert(H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
+    HDassert((sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) || (sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_CACHE));
 
     switch(sync_point_op) {
 	case H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN:
@@ -3100,13 +2646,52 @@ H5AC_construct_candidate_list(H5AC_t * cache_ptr,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_construct_candidate_list() */
+} /* H5AC__construct_candidate_list() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_copy_candidate_list_to_buffer
+ * Function:    H5AC__copy_candidate_list_to_buffer_cb
+ *
+ * Purpose:     Skip list callback for building array of addresses for
+ *              broadcasting the candidate list.
+ *
+ * Return:	Return SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  Quincey Koziol, 6/12/15
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_PARALLEL
+static herr_t
+H5AC__copy_candidate_list_to_buffer_cb(void *_item, void H5_ATTR_UNUSED *_key,
+    void *_udata)
+{
+    H5AC_slist_entry_t    * slist_entry_ptr = (H5AC_slist_entry_t *)_item;  /* Address of item */
+    H5AC_addr_list_ud_t   * udata = (H5AC_addr_list_ud_t *)_udata;      /* Context for callback */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(slist_entry_ptr);
+    HDassert(udata);
+
+    /* Store the entry's address in the buffer */
+    udata->addr_buf_ptr[udata->i] = slist_entry_ptr->addr;
+    udata->i++;
+
+    /* now release the entry */
+    slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5AC__copy_candidate_list_to_buffer_cb() */
+#endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC__copy_candidate_list_to_buffer
  *
  * Purpose:     Allocate buffer(s) and copy the contents of the candidate
  *		entry slist into it (them).  In passing, remove all 
@@ -3137,123 +2722,68 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_copy_candidate_list_to_buffer(H5AC_t * cache_ptr,
-                                   int * num_entries_ptr,
-                                   haddr_t ** haddr_buf_ptr_ptr,
-                                   size_t * MPI_Offset_buf_size_ptr,
-                                   MPI_Offset ** MPI_Offset_buf_ptr_ptr)
+H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr, int *num_entries_ptr,
+    haddr_t **haddr_buf_ptr_ptr)
 {
-    herr_t               ret_value = SUCCEED;    /* Return value */
-    hbool_t		 success = FALSE;
-    haddr_t		 addr;
     H5AC_aux_t         * aux_ptr = NULL;
-    H5SL_node_t        * slist_node_ptr = NULL;
-    H5AC_slist_entry_t * slist_entry_ptr = NULL;
-    MPI_Offset         * MPI_Offset_buf_ptr = NULL;
+    H5AC_addr_list_ud_t  udata;
     haddr_t            * haddr_buf_ptr = NULL;
     size_t		 buf_size;
-    int                  i = 0;
     int			 num_entries = 0;
+    herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
+    HDassert(aux_ptr->candidate_slist_ptr != NULL);
+    HDassert(H5SL_count(aux_ptr->candidate_slist_ptr) > 0);
+    HDassert(num_entries_ptr != NULL);
+    HDassert(*num_entries_ptr == 0);
+    HDassert(haddr_buf_ptr_ptr != NULL);
+    HDassert(*haddr_buf_ptr_ptr == NULL);
 
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy ==
-              H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
-    HDassert( aux_ptr->candidate_slist_ptr != NULL );
-    HDassert( H5SL_count(aux_ptr->candidate_slist_ptr) ==
-		    (size_t)(aux_ptr->candidate_slist_len) );
-    HDassert( aux_ptr->candidate_slist_len > 0 );
-    HDassert( num_entries_ptr != NULL );
-    HDassert( *num_entries_ptr == 0 );
-    HDassert( haddr_buf_ptr_ptr != NULL );
-    HDassert( *haddr_buf_ptr_ptr == NULL );
-
-    num_entries = aux_ptr->candidate_slist_len;
+    num_entries = (int)H5SL_count(aux_ptr->candidate_slist_ptr);
 
     /* allocate a buffer(s) to store the list of candidate entry 
      * base addresses in 
      */
-    if(MPI_Offset_buf_ptr_ptr != NULL) {
-        HDassert( MPI_Offset_buf_size_ptr != NULL );
+    buf_size = sizeof(haddr_t) * (size_t)num_entries;
+    if(NULL == (haddr_buf_ptr = (haddr_t *)H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for haddr buffer")
 
-        /* allocate a buffer of MPI_Offset */
-        buf_size = sizeof(MPI_Offset) * (size_t)num_entries;
-        if(NULL == (MPI_Offset_buf_ptr = (MPI_Offset *)H5MM_malloc(buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for MPI_Offset buffer")
-    } /* end if */
+    /* Set up user data for callback */
+    udata.aux_ptr = aux_ptr;
+    udata.addr_buf_ptr = haddr_buf_ptr;
+    udata.i = 0;
 
-    /* allocate a buffer of haddr_t */
-    if(NULL == (haddr_buf_ptr = (haddr_t *)H5MM_malloc(sizeof(haddr_t) * (size_t)num_entries)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for haddr buffer")
+    /* Free all the candidate list entries, building the address list in the callback */
+    if(H5SL_free(aux_ptr->candidate_slist_ptr, H5AC__copy_candidate_list_to_buffer_cb, &udata) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "Can't build address list for candidate entries")
 
-    /* now load the entry base addresses into the buffer, emptying the
-     * candidate entry list in passing
+    /* Pass the number of entries and the buffer pointer 
+     * back to the caller.
      */
-    while(NULL != (slist_node_ptr = H5SL_first(aux_ptr->candidate_slist_ptr))) {
-        slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_item(slist_node_ptr);
-
-        HDassert(slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC);
-        HDassert( i < num_entries );
-
-        addr = slist_entry_ptr->addr;
-        haddr_buf_ptr[i] = addr;
-        if(MPI_Offset_buf_ptr != NULL) {
-            if(H5FD_mpi_haddr_to_MPIOff(addr, &(MPI_Offset_buf_ptr[i])) < 0)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
-        } /* end if */
-
-        i++;
-
-        /* now remove the entry from the cleaned entry list */
-        if(H5SL_remove(aux_ptr->candidate_slist_ptr, (void *)(&addr)) != slist_entry_ptr)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, "Can't delete entry from candidate entry slist.")
-
-        slist_entry_ptr->magic = 0;
-        slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
-
-        aux_ptr->candidate_slist_len -= 1;
-
-        HDassert( aux_ptr->candidate_slist_len >= 0 );
-    } /* while */
-    HDassert( aux_ptr->candidate_slist_len == 0 );
-
-    success = TRUE;
+    *num_entries_ptr = num_entries;
+    *haddr_buf_ptr_ptr = haddr_buf_ptr;
 
 done:
-    if(success) {
-        /* Pass the number of entries and the buffer pointer 
-         * back to the caller.
-         */
-        *num_entries_ptr = num_entries;
-        *haddr_buf_ptr_ptr = haddr_buf_ptr;
-
-        if(MPI_Offset_buf_ptr_ptr != NULL) {
-            HDassert( MPI_Offset_buf_ptr != NULL);
-	    *MPI_Offset_buf_size_ptr = buf_size;
-	    *MPI_Offset_buf_ptr_ptr = MPI_Offset_buf_ptr;
-        } /* end if */
-    } /* end if */
-    else {
-        if(MPI_Offset_buf_ptr != NULL)
-            MPI_Offset_buf_ptr = (MPI_Offset *)H5MM_xfree((void *)MPI_Offset_buf_ptr);
-        if(haddr_buf_ptr != NULL)
+    if(ret_value < 0)
+        if(haddr_buf_ptr)
             haddr_buf_ptr = (haddr_t *)H5MM_xfree((void *)haddr_buf_ptr);
-    } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_copy_candidate_list_to_buffer() */
+} /* H5AC__copy_candidate_list_to_buffer() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_ext_config_2_int_config()
+ * Function:    H5AC__ext_config_2_int_config()
  *
  * Purpose:     Utility function to translate an instance of
  *		H5AC_cache_config_t to an instance of H5C_auto_size_ctl_t.
@@ -3271,30 +2801,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC_ext_config_2_int_config(H5AC_cache_config_t * ext_conf_ptr,
-                             H5C_auto_size_ctl_t * int_conf_ptr)
+H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr,
+    H5C_auto_size_ctl_t *int_conf_ptr)
 {
     herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    if ( ( ext_conf_ptr == NULL ) ||
-         ( ext_conf_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) ||
-         ( int_conf_ptr == NULL ) ) {
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "Bad ext_conf_ptr or inf_conf_ptr on entry.")
-    }
+    if((ext_conf_ptr == NULL) || (ext_conf_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION) ||
+            (int_conf_ptr == NULL))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad ext_conf_ptr or inf_conf_ptr on entry.")
 
     int_conf_ptr->version                = H5C__CURR_AUTO_SIZE_CTL_VER;
-
-    if ( ext_conf_ptr->rpt_fcn_enabled ) {
-
+    if(ext_conf_ptr->rpt_fcn_enabled)
         int_conf_ptr->rpt_fcn            = H5C_def_auto_resize_rpt_fcn;
-
-    } else {
-
+    else
         int_conf_ptr->rpt_fcn            = NULL;
-    }
 
     int_conf_ptr->set_initial_size       = ext_conf_ptr->set_initial_size;
     int_conf_ptr->initial_size           = ext_conf_ptr->initial_size;
@@ -3323,18 +2845,17 @@ H5AC_ext_config_2_int_config(H5AC_cache_config_t * ext_conf_ptr,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_ext_config_2_int_config() */
+} /* H5AC__ext_config_2_int_config() */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_log_deleted_entry()
+ * Function:    H5AC__log_deleted_entry()
  *
- * Purpose:     Log an entry for which H5C__DELETED_FLAG has been set.
+ * Purpose:     Log an entry which has been deleted.
  *
- *		If mpi_rank is 0, we must make sure that the entry doesn't
- *		appear in the cleaned or dirty entry lists.  Otherwise,
- *		we have nothing to do.
+ *		Only called for mpi_rank 0. We must make sure that the entry
+ *              doesn't appear in the cleaned or dirty entry lists.
  *
  *		Return SUCCEED on success, and FAIL on failure.
  *
@@ -3346,80 +2867,48 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_log_deleted_entry(H5AC_t * cache_ptr,
-                       H5AC_info_t * entry_ptr,
-                       haddr_t addr,
-                       unsigned int flags)
+H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr)
 {
+    H5AC_t             * cache_ptr;
     H5AC_aux_t         * aux_ptr;
     H5AC_slist_entry_t * slist_entry_ptr = NULL;
-    herr_t               ret_value = SUCCEED;    /* Return value */
+    haddr_t              addr;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC_NOERR
 
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(entry_ptr);
+    addr = entry_ptr->addr;
+    cache_ptr = entry_ptr->cache_ptr;
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->mpi_rank == 0);
+    HDassert(aux_ptr->d_slist_ptr != NULL);
+    HDassert(aux_ptr->c_slist_ptr != NULL);
 
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
+    /* if the entry appears in the dirtied entry slist, remove it. */
+    if(NULL != (slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->d_slist_ptr, (void *)(&addr))))
+        slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
 
-    HDassert( entry_ptr != NULL );
-    HDassert( entry_ptr->addr == addr );
+    /* if the entry appears in the cleaned entry slist, remove it. */
+    if(NULL != (slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&addr))))
+        slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
 
-    HDassert( (flags & H5C__DELETED_FLAG) != 0 );
-
-    if(aux_ptr->mpi_rank == 0) {
-        HDassert( aux_ptr->d_slist_ptr != NULL );
-        HDassert( aux_ptr->c_slist_ptr != NULL );
-
-        /* if the entry appears in the dirtied entry slist, remove it. */
-        if((slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_search(aux_ptr->d_slist_ptr, (void *)(&addr))) != NULL) {
-            HDassert(slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC);
-            HDassert(slist_entry_ptr->addr == addr);
-
-            if(H5SL_remove(aux_ptr->d_slist_ptr, (void *)(&addr)) != slist_entry_ptr)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, "Can't delete entry from dirty entry slist.")
-
-            slist_entry_ptr->magic = 0;
-            slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
-
-            aux_ptr->d_slist_len -= 1;
-
-            HDassert( aux_ptr->d_slist_len >= 0 );
-        } /* end if */
-
-        /* if the entry appears in the cleaned entry slist, remove it. */
-        if((slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_search(aux_ptr->c_slist_ptr, (void *)(&addr))) != NULL) {
-            HDassert(slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC);
-            HDassert(slist_entry_ptr->addr == addr);
-
-            if(H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&addr)) != slist_entry_ptr)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, "Can't delete entry from cleaned entry slist.")
-
-            slist_entry_ptr->magic = 0;
-            slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
-
-            aux_ptr->c_slist_len -= 1;
-
-            HDassert( aux_ptr->c_slist_len >= 0 );
-        } /* end if */
-    } /* if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_log_deleted_entry() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5AC__log_deleted_entry() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_log_dirtied_entry()
+ * Function:    H5AC__log_dirtied_entry()
  *
  * Purpose:     Update the dirty_bytes count for a newly dirtied entry.
  *
- *		If mpi_rank isnt 0, this simply means adding the size
+ *		If mpi_rank isn't 0, this simply means adding the size
  *		of the entries to the dirty_bytes count.
  *
  *		If mpi_rank is 0, we must first check to see if the entry
@@ -3438,103 +2927,73 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_log_dirtied_entry(const H5AC_info_t * entry_ptr,
-                       haddr_t addr)
+H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
 {
     H5AC_t             * cache_ptr;
     H5AC_aux_t         * aux_ptr;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( entry_ptr );
-    HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->is_dirty == FALSE );
-
+    /* Sanity checks */
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->is_dirty == FALSE);
     cache_ptr = entry_ptr->cache_ptr;
-
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
+    if(aux_ptr->mpi_rank == 0) {
+        H5AC_slist_entry_t *slist_entry_ptr;
+        haddr_t addr = entry_ptr->addr;
 
-    if ( aux_ptr->mpi_rank == 0 ) {
-        H5AC_slist_entry_t * slist_entry_ptr;
+        /* Sanity checks */
+        HDassert(aux_ptr->d_slist_ptr != NULL);
+        HDassert(aux_ptr->c_slist_ptr != NULL);
 
-        HDassert( aux_ptr->d_slist_ptr != NULL );
-        HDassert( aux_ptr->c_slist_ptr != NULL );
-
-        if ( H5SL_search(aux_ptr->d_slist_ptr, (void *)(&addr)) == NULL ) {
-
+        if(NULL == H5SL_search(aux_ptr->d_slist_ptr, (void *)(&addr))) {
             /* insert the address of the entry in the dirty entry list, and
              * add its size to the dirty_bytes count.
              */
-            if ( NULL == (slist_entry_ptr = H5FL_CALLOC(H5AC_slist_entry_t)) ) {
-
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                            "Can't allocate dirty slist entry .")
-            }
-
-            slist_entry_ptr->magic = H5AC__H5AC_SLIST_ENTRY_T_MAGIC;
+            if(NULL == (slist_entry_ptr = H5FL_MALLOC(H5AC_slist_entry_t)))
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate dirty slist entry .")
             slist_entry_ptr->addr  = addr;
 
-            if ( H5SL_insert(aux_ptr->d_slist_ptr, slist_entry_ptr,
-                             &(slist_entry_ptr->addr)) < 0 ) {
+            if(H5SL_insert(aux_ptr->d_slist_ptr, slist_entry_ptr, &(slist_entry_ptr->addr)) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert entry into dirty entry slist.")
 
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, \
-                            "can't insert entry into dirty entry slist.")
-            }
-
-            aux_ptr->d_slist_len += 1;
             aux_ptr->dirty_bytes += entry_ptr->size;
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
 	    aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
 	    aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-        }
-
-        if(H5SL_search(aux_ptr->c_slist_ptr, (void *)(&addr)) != NULL) {
-            /* the entry is dirty.  If it exists on the cleaned entries list,
-             * remove it.
-             */
-            if((slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_search(aux_ptr->c_slist_ptr, (void *)(&addr))) != NULL) {
-                HDassert(slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC);
-                HDassert(slist_entry_ptr->addr == addr);
-
-                if(H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&addr)) != slist_entry_ptr)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, "Can't delete entry from clean entry slist.")
-
-                slist_entry_ptr->magic = 0;
-                slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
-
-                aux_ptr->c_slist_len -= 1;
-
-                HDassert( aux_ptr->c_slist_len >= 0 );
-            } /* end if */
         } /* end if */
-    } else {
 
+        /* the entry is dirty.  If it exists on the cleaned entries list,
+         * remove it.
+         */
+        if(NULL != (slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&addr))))
+            slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
+    } /* end if */
+    else {
         aux_ptr->dirty_bytes += entry_ptr->size;
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
         aux_ptr->unprotect_dirty_bytes += entry_size;
         aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-    }
+    } /* end else */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5AC_log_dirtied_entry() */
+} /* H5AC__log_dirtied_entry() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_log_flushed_entry()
+ * Function:    H5AC__log_flushed_entry()
  *
  * Purpose:     Update the clean entry slist for the flush of an entry --
  *		specifically, if the entry has been cleared, remove it
@@ -3555,117 +3014,58 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_log_flushed_entry(H5C_t * cache_ptr,
-                       haddr_t addr,
-                       hbool_t was_dirty,
-                       unsigned flags,
-                       int H5_ATTR_UNUSED type_id)
+H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, hbool_t was_dirty,
+    unsigned flags)
 {
-    herr_t               ret_value = SUCCEED;    /* Return value */
     hbool_t		 cleared;
     H5AC_aux_t         * aux_ptr;
     H5AC_slist_entry_t * slist_entry_ptr = NULL;
+    herr_t               ret_value = SUCCEED;    /* Return value */
 
+    FUNC_ENTER_STATIC
 
-    FUNC_ENTER_NOAPI(FAIL)
-
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity check */
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->mpi_rank == 0);
+    HDassert(aux_ptr->c_slist_ptr != NULL);
 
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->mpi_rank == 0 );
-    HDassert( aux_ptr->c_slist_ptr != NULL );
+    /* Set local flags */
+    cleared = ((flags & H5C__FLUSH_CLEAR_ONLY_FLAG) != 0);
 
-    cleared = ( (flags & H5C__FLUSH_CLEAR_ONLY_FLAG) != 0 );
-
-    if ( cleared ) {
-
+    if(cleared) {
         /* If the entry has been cleared, must remove it from both the
          * cleaned list and the dirtied list.
          */
-
-        if ( (slist_entry_ptr = (H5AC_slist_entry_t *)
-				H5SL_search(aux_ptr->c_slist_ptr,
-                                            (void *)(&addr))) != NULL ) {
-
-            HDassert( slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC);
-            HDassert( slist_entry_ptr->addr == addr );
-
-            if ( H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&addr))
-                 != slist_entry_ptr ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, \
-                            "Can't delete entry from clean entry slist.")
-            }
-
-            slist_entry_ptr->magic = 0;
+        if(NULL != (slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&addr))))
             slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
-
-            aux_ptr->c_slist_len -= 1;
-
-            HDassert( aux_ptr->c_slist_len >= 0 );
-        }
-
-        if ( (slist_entry_ptr = (H5AC_slist_entry_t *)
-                 H5SL_search(aux_ptr->d_slist_ptr, (void *)(&addr))) != NULL ) {
-
-            HDassert( slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC);
-            HDassert( slist_entry_ptr->addr == addr );
-
-            if ( H5SL_remove(aux_ptr->d_slist_ptr, (void *)(&addr))
-                 != slist_entry_ptr ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, \
-                            "Can't delete entry from dirty entry slist.")
-            }
-
-            slist_entry_ptr->magic = 0;
+        if(NULL != (slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->d_slist_ptr, (void *)(&addr))))
             slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
-
-            aux_ptr->d_slist_len -= 1;
-
-            HDassert( aux_ptr->d_slist_len >= 0 );
-        }
-    } else if ( was_dirty ) {
-
-        if ( H5SL_search(aux_ptr->c_slist_ptr, (void *)(&addr)) == NULL ) {
-
+    } /* end if */
+    else if(was_dirty) {
+        if(NULL == H5SL_search(aux_ptr->c_slist_ptr, (void *)(&addr))) {
             /* insert the address of the entry in the clean entry list. */
+            if(NULL == (slist_entry_ptr = H5FL_MALLOC(H5AC_slist_entry_t)))
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate clean slist entry .")
+            slist_entry_ptr->addr = addr;
 
-            if ( NULL == (slist_entry_ptr = H5FL_CALLOC(H5AC_slist_entry_t)) ) {
-
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                            "Can't allocate clean slist entry .")
-            }
-
-            slist_entry_ptr->magic = H5AC__H5AC_SLIST_ENTRY_T_MAGIC;
-            slist_entry_ptr->addr  = addr;
-
-            if ( H5SL_insert(aux_ptr->c_slist_ptr, slist_entry_ptr,
-                             &(slist_entry_ptr->addr)) < 0 ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, \
-                            "can't insert entry into clean entry slist.")
-            }
-
-            aux_ptr->c_slist_len += 1;
-        }
-    }
+            if(H5SL_insert(aux_ptr->c_slist_ptr, slist_entry_ptr, &(slist_entry_ptr->addr)) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert entry into clean entry slist.")
+        } /* end if */
+    } /* end else-if */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5AC_log_flushed_entry() */
+} /* H5AC__log_flushed_entry() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_log_inserted_entry()
+ * Function:    H5AC__log_inserted_entry()
  *
  * Purpose:     Update the dirty_bytes count for a newly inserted entry.
  *
@@ -3685,48 +3085,44 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_log_inserted_entry(H5AC_t * cache_ptr,
-                        H5AC_info_t * entry_ptr)
+H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr)
 {
+    H5AC_t             * cache_ptr;
     H5AC_aux_t         * aux_ptr;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
+    /* Sanity checks */
+    HDassert(entry_ptr);
+    cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr != NULL);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
-    HDassert( entry_ptr != NULL );
-
     if(aux_ptr->mpi_rank == 0) {
-        H5AC_slist_entry_t * slist_entry_ptr;
+        H5AC_slist_entry_t *slist_entry_ptr;
 
         HDassert(aux_ptr->d_slist_ptr != NULL);
         HDassert(aux_ptr->c_slist_ptr != NULL);
 
-        if(NULL != H5SL_search(aux_ptr->d_slist_ptr, (void *)(&entry_ptr->addr)))
+        /* Entry to insert should not be in dirty list currently */
+        if(NULL != H5SL_search(aux_ptr->d_slist_ptr, (const void *)(&entry_ptr->addr)))
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Inserted entry already in dirty slist.")
 
         /* insert the address of the entry in the dirty entry list, and
          * add its size to the dirty_bytes count.
          */
-        if(NULL == (slist_entry_ptr = H5FL_CALLOC(H5AC_slist_entry_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "Can't allocate dirty slist entry .")
-
-        slist_entry_ptr->magic = H5AC__H5AC_SLIST_ENTRY_T_MAGIC;
+        if(NULL == (slist_entry_ptr = H5FL_MALLOC(H5AC_slist_entry_t)))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate dirty slist entry .")
         slist_entry_ptr->addr  = entry_ptr->addr;
-
-        if(H5SL_insert(aux_ptr->d_slist_ptr, slist_entry_ptr, &(slist_entry_ptr->addr)) < 0 )
+        if(H5SL_insert(aux_ptr->d_slist_ptr, slist_entry_ptr, &(slist_entry_ptr->addr)) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert entry into dirty entry slist.")
 
-        aux_ptr->d_slist_len += 1;
-
-        if(NULL != H5SL_search(aux_ptr->c_slist_ptr, (void *)(&entry_ptr->addr)))
+        /* Entry to insert should not be in clean list either */
+        if(NULL != H5SL_search(aux_ptr->c_slist_ptr, (const void *)(&entry_ptr->addr)))
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Inserted entry in clean slist.")
     } /* end if */
 
@@ -3739,13 +3135,13 @@ H5AC_log_inserted_entry(H5AC_t * cache_ptr,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_log_inserted_entry() */
+} /* H5AC__log_inserted_entry() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_log_moved_entry()
+ * Function:    H5AC__log_moved_entry()
  *
  * Purpose:     Update the dirty_bytes count for a moved entry.
  *
@@ -3756,8 +3152,8 @@ done:
  *		moving in a collective operation and immediately after
  *		unprotecting the target entry.
  *
- *		This function uses this invarient, and will cause arcane
- *		failures if it is not met.  If maintaining this invarient
+ *		This function uses this invariant, and will cause arcane
+ *		failures if it is not met.  If maintaining this invariant
  *		becomes impossible, we will have to rework this function
  *		extensively, and likely include a bit of IPC for
  *		synchronization.  A better option might be to subsume
@@ -3791,100 +3187,52 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_log_moved_entry(const H5F_t *f,
-                       haddr_t old_addr,
-                       haddr_t new_addr)
+H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
 {
-    H5AC_t *             cache_ptr;
+    H5AC_t             * cache_ptr;
+    H5AC_aux_t         * aux_ptr;
     hbool_t		 entry_in_cache;
     hbool_t		 entry_dirty;
     size_t               entry_size;
-    H5AC_aux_t         * aux_ptr = NULL;
-    H5AC_slist_entry_t * slist_entry_ptr = NULL;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( f );
-    HDassert( f->shared );
-
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
     cache_ptr = (H5AC_t *)f->shared->cache;
-
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     /* get entry status, size, etc here */
-    if ( H5C_get_entry_status(f, old_addr, &entry_size, &entry_in_cache,
-                              &entry_dirty, NULL, NULL, NULL, NULL) < 0 ) {
-
+    if(H5C_get_entry_status(f, old_addr, &entry_size, &entry_in_cache,
+            &entry_dirty, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get entry status.")
-
-    } else if ( ! entry_in_cache ) {
-
-        HDassert( entry_in_cache );
+    if(!entry_in_cache)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry not in cache.")
-    }
 
-    if ( aux_ptr->mpi_rank == 0 ) {
+    if(aux_ptr->mpi_rank == 0) {
+        H5AC_slist_entry_t * slist_entry_ptr;
 
-        HDassert( aux_ptr->d_slist_ptr != NULL );
-        HDassert( aux_ptr->c_slist_ptr != NULL );
+        HDassert(aux_ptr->d_slist_ptr != NULL);
+        HDassert(aux_ptr->c_slist_ptr != NULL);
 
         /* if the entry appears in the cleaned entry slist, under its old
          * address, remove it.
          */
-        if ( (slist_entry_ptr = (H5AC_slist_entry_t *)
-	      H5SL_search(aux_ptr->c_slist_ptr, (void *)(&old_addr))) != NULL ) {
-
-            HDassert( slist_entry_ptr->magic ==
-                          H5AC__H5AC_SLIST_ENTRY_T_MAGIC );
-            HDassert( slist_entry_ptr->addr == old_addr );
-
-            if ( H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&old_addr))
-                               != slist_entry_ptr ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, \
-                            "Can't delete entry from cleaned entry slist.")
-            }
-
-            slist_entry_ptr->magic = 0;
+        if(NULL != (slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&old_addr))))
             slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
-
-            aux_ptr->c_slist_len -= 1;
-
-            HDassert( aux_ptr->c_slist_len >= 0 );
-        }
 
         /* if the entry appears in the dirtied entry slist under its old
          * address, remove it, but don't free it. Set addr to new_addr.
          */
-        if ( (slist_entry_ptr = (H5AC_slist_entry_t *)
-	      H5SL_search(aux_ptr->d_slist_ptr, (void *)(&old_addr))) != NULL ) {
-
-            HDassert( slist_entry_ptr->magic ==
-                      H5AC__H5AC_SLIST_ENTRY_T_MAGIC );
-            HDassert( slist_entry_ptr->addr == old_addr );
-
-            if ( H5SL_remove(aux_ptr->d_slist_ptr, (void *)(&old_addr))
-                != slist_entry_ptr ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, \
-                            "Can't delete entry from dirty entry slist.")
-            }
-
+        if(NULL != (slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->d_slist_ptr, (void *)(&old_addr))))
             slist_entry_ptr->addr = new_addr;
-
-            aux_ptr->d_slist_len -= 1;
-
-            HDassert( aux_ptr->d_slist_len >= 0 );
-
-        } else {
-
+        else {
              /* otherwise, allocate a new entry that is ready
               * for insertion, and increment dirty_bytes.
               *
@@ -3892,17 +3240,10 @@ H5AC_log_moved_entry(const H5F_t *f,
               * list under its old address implies that it must have
               * been clean to start with.
               */
-
-            HDassert( !entry_dirty );
-
-            if ( NULL == (slist_entry_ptr = H5FL_CALLOC(H5AC_slist_entry_t)) ) {
-
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                            "Can't allocate dirty slist entry .")
-            }
-
-            slist_entry_ptr->magic = H5AC__H5AC_SLIST_ENTRY_T_MAGIC;
-            slist_entry_ptr->addr  = new_addr;
+            HDassert(!entry_dirty);
+            if(NULL == (slist_entry_ptr = H5FL_MALLOC(H5AC_slist_entry_t)))
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "Can't allocate dirty slist entry .")
+            slist_entry_ptr->addr = new_addr;
 
             aux_ptr->dirty_bytes += entry_size;
 
@@ -3910,43 +3251,29 @@ H5AC_log_moved_entry(const H5F_t *f,
             aux_ptr->move_dirty_bytes += entry_size;
             aux_ptr->move_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-        }
-
-        /* verify that there is no entry at new_addr in the dirty slist */
-        if ( H5SL_search(aux_ptr->d_slist_ptr, (void *)(&new_addr)) != NULL ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "dirty slist already contains entry at new_addr.")
-        }
+        } /* end else */
 
         /* insert / reinsert the entry in the dirty slist */
-        if ( H5SL_insert(aux_ptr->d_slist_ptr, slist_entry_ptr,
-                         &(slist_entry_ptr->addr)) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, \
-                        "can't insert entry into dirty entry slist.")
-        }
-
-        aux_ptr->d_slist_len += 1;
-
-    } else if ( ! entry_dirty ) {
-
+        if(H5SL_insert(aux_ptr->d_slist_ptr, slist_entry_ptr, &(slist_entry_ptr->addr)) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert entry into dirty entry slist.")
+    } /* end if */
+    else if(!entry_dirty) {
         aux_ptr->dirty_bytes += entry_size;
 
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
         aux_ptr->move_dirty_bytes += entry_size;
         aux_ptr->move_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
-    }
+    } /* end else-if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_log_moved_entry() */
+} /* H5AC__log_moved_entry() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_propagate_and_apply_candidate_list
+ * Function:    H5AC__propagate_and_apply_candidate_list
  *
  * Purpose:     Prior to the addition of support for multiple metadata 
  *		write strategies, in PHDF5, only the metadata cache with 
@@ -4042,42 +3369,41 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_propagate_and_apply_candidate_list(H5F_t  * f,
-                                        hid_t    dxpl_id,
-                                        H5AC_t * cache_ptr)
+H5AC__propagate_and_apply_candidate_list(H5F_t  *f, hid_t dxpl_id)
 {
-    int		         mpi_code;
-    int	                 num_candidates = 0;
-    haddr_t            * candidates_list_ptr = NULL;
+    H5AC_t             * cache_ptr;
     H5AC_aux_t         * aux_ptr;
+    haddr_t            * candidates_list_ptr = NULL;
+    int		         mpi_result;
+    int	                 num_candidates = 0;
     herr_t               ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(f != NULL);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
-              H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
 
     /* to prevent "messages from the future" we must synchronize all
      * processes before we write any entries.
      */
-    if(MPI_SUCCESS != (mpi_code = MPI_Barrier(aux_ptr->mpi_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed 1", mpi_code)
+    if(MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
 
     if(aux_ptr->mpi_rank == 0) {
-        if(H5AC_broadcast_candidate_list(cache_ptr, &num_candidates, &candidates_list_ptr) < 0)
+        if(H5AC__broadcast_candidate_list(cache_ptr, &num_candidates, &candidates_list_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't broadcast candidate slist.")
 
-        HDassert( aux_ptr->candidate_slist_len == 0 );
+        HDassert(H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
     } /* end if */
     else {
-        if(H5AC_receive_candidate_list(cache_ptr, &num_candidates, &candidates_list_ptr) < 0)
+        if(H5AC__receive_candidate_list(cache_ptr, &num_candidates, &candidates_list_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't receive candidate broadcast.")
     } /* end else */
 
@@ -4089,55 +3415,59 @@ H5AC_propagate_and_apply_candidate_list(H5F_t  * f,
          * distributing the writes across the processes.
          */
 
+        /* Enable writes during this operation */
         aux_ptr->write_permitted = TRUE;
 
-        result = H5C_apply_candidate_list(f,
-                                          dxpl_id,
-                                          dxpl_id,
-                                          cache_ptr,
-                                          num_candidates,
-                                          candidates_list_ptr,
-                                          aux_ptr->mpi_rank,
-                                          aux_ptr->mpi_size);
+        /* Apply the candidate list */
+        result = H5C_apply_candidate_list(f, dxpl_id, dxpl_id, cache_ptr, num_candidates,
+            candidates_list_ptr, aux_ptr->mpi_rank, aux_ptr->mpi_size);
 
+        /* Disable writes again */
         aux_ptr->write_permitted = FALSE;
 
+        /* Check for error on the write operation */
         if(result < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't apply candidate list.")
 
-	if(aux_ptr->write_done != NULL)
+        /* this code exists primarily for the test bed -- it allows us to
+         * enforce posix semantics on the server that pretends to be a 
+         * file system in our parallel tests.
+         */
+	if(aux_ptr->write_done)
 	    (aux_ptr->write_done)();
 
         /* to prevent "messages from the past" we must synchronize all
          * processes again before we go on.
          */
-        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(aux_ptr->mpi_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed 2", mpi_code)
+        if(MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
 
-        if(aux_ptr->mpi_rank == 0) {
-            if(H5AC_tidy_cache_0_lists(cache_ptr, num_candidates, candidates_list_ptr) < 0)
+	/* if this is process zero, tidy up the dirtied,
+         * and flushed and still clean lists.
+         */
+        if(aux_ptr->mpi_rank == 0)
+            if(H5AC__tidy_cache_0_lists(cache_ptr, num_candidates, candidates_list_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't tidy up process 0 lists.")
-        } /* end if */
     } /* end if */
 
     /* if it is defined, call the sync point done callback.  Note
      * that this callback is defined purely for testing purposes,
      * and should be undefined under normal operating circumstances.
      */
-    if(aux_ptr->sync_point_done != NULL)
+    if(aux_ptr->sync_point_done)
         (aux_ptr->sync_point_done)(num_candidates, candidates_list_ptr);
 
 done:
-    if(candidates_list_ptr != NULL)
+    if(candidates_list_ptr)
         candidates_list_ptr = (haddr_t *)H5MM_xfree((void *)candidates_list_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_propagate_and_apply_candidate_list() */
+} /* H5AC__propagate_and_apply_candidate_list() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_propagate_flushed_and_still_clean_entries_list
+ * Function:    H5AC__propagate_flushed_and_still_clean_entries_list
  *
  * Purpose:     In PHDF5, if the process 0 only metadata write strategy
  *		is selected, only the metadata cache with mpi rank 0 is 
@@ -4209,44 +3539,117 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
-                                                    hid_t    dxpl_id,
-                                                    H5AC_t * cache_ptr)
+H5AC__propagate_flushed_and_still_clean_entries_list(H5F_t  *f, hid_t dxpl_id)
 {
+    H5AC_t     * cache_ptr;
     H5AC_aux_t * aux_ptr;
     herr_t	 ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
+    /* Sanity checks */
+    HDassert(f != NULL);
+    cache_ptr = f->shared->cache;
     HDassert(cache_ptr != NULL);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
-    HDassert(aux_ptr->metadata_write_strategy == 
-              H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
 
     if(aux_ptr->mpi_rank == 0) {
-        if(H5AC_broadcast_clean_list(cache_ptr) < 0)
+        if(H5AC__broadcast_clean_list(cache_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't broadcast clean slist.")
-        HDassert( aux_ptr->c_slist_len == 0 );
+        HDassert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
     } /* end if */
     else {
-        if(H5AC_receive_and_apply_clean_list(f, dxpl_id, H5AC_dxpl_id, cache_ptr) < 0)
+        if(H5AC__receive_and_apply_clean_list(f, dxpl_id, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't receive and/or process clean slist broadcast.")
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_propagate_flushed_and_still_clean_entries_list() */
+} /* H5AC__propagate_flushed_and_still_clean_entries_list() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_receive_and_apply_clean_list()
+ * Function:    H5AC_receive_haddr_list()
+ *
+ * Purpose:     Receive the list of entry addresses from process 0,
+ *		and return it in a buffer pointed to by *haddr_buf_ptr_ptr.
+ *		Note that the caller must free this buffer if it is 
+ *		returned.
+ *
+ *		This function must only be called by the process with
+ *		MPI_rank greater than 0.
+ *
+ *		Return SUCCEED on success, and FAIL on failure.
+ *
+ * Return:      Non-negative on success/Negative on failure.
+ *
+ * Programmer:  Quincey Koziol, 6/11/2015
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_PARALLEL
+static herr_t
+H5AC__receive_haddr_list(MPI_Comm mpi_comm, int *num_entries_ptr,
+    haddr_t **haddr_buf_ptr_ptr)
+{
+    haddr_t	       * haddr_buf_ptr = NULL;
+    int                  mpi_result;
+    int			 num_entries;
+    herr_t               ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(num_entries_ptr != NULL);
+    HDassert(*num_entries_ptr == 0);
+    HDassert(haddr_buf_ptr_ptr != NULL);
+    HDassert(*haddr_buf_ptr_ptr == NULL);
+
+    /* First receive the number of entries in the list so that we
+     * can set up a buffer to receive them.  If there aren't
+     * any, we are done.
+     */
+    if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_INT, 0, mpi_comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
+
+    if(num_entries > 0) {
+        size_t buf_size;
+
+        /* allocate buffers to store the list of entry base addresses in */
+        buf_size = sizeof(haddr_t) * (size_t)num_entries;
+        if(NULL == (haddr_buf_ptr = (haddr_t *)H5MM_malloc(buf_size)))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for haddr buffer")
+
+        /* Now receive the list of candidate entries */
+        if(MPI_SUCCESS != (mpi_result = MPI_Bcast((void *)haddr_buf_ptr, (int)buf_size, MPI_BYTE, 0, mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
+    } /* end if */
+
+    /* finally, pass the number of entries and the buffer pointer 
+     * back to the caller.
+     */
+    *num_entries_ptr = num_entries;
+    *haddr_buf_ptr_ptr = haddr_buf_ptr;
+
+done:
+    if(ret_value < 0)
+        if(haddr_buf_ptr)
+            haddr_buf_ptr = (haddr_t *)H5MM_xfree((void *)haddr_buf_ptr);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_receive_haddr_list() */
+#endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC__receive_and_apply_clean_list()
  *
  * Purpose:     Receive the list of cleaned entries from process 0,
  *		and mark the specified entries as clean.
@@ -4264,98 +3667,54 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_receive_and_apply_clean_list(H5F_t  * f,
-                                  hid_t    primary_dxpl_id,
-                                  hid_t    secondary_dxpl_id,
-                                  H5AC_t * cache_ptr)
+H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id)
 {
+    H5AC_t             * cache_ptr;
     H5AC_aux_t         * aux_ptr;
     haddr_t	       * haddr_buf_ptr = NULL;
-    MPI_Offset         * MPI_Offset_buf_ptr = NULL;
-    int                  mpi_result;
     int			 num_entries = 0;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( f != NULL );
-    HDassert( f->shared->cache == cache_ptr );
-
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity check */
+    HDassert(f != NULL);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->mpi_rank != 0);
 
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->mpi_rank != 0 );
+    /* Retrieve the clean list from process 0 */
+    if(H5AC__receive_haddr_list(aux_ptr->mpi_comm, &num_entries, &haddr_buf_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't receive clean list")
 
-    /* First receive the number of entries in the list so that we
-     * can set up a buffer to receive them.  If there aren't
-     * any, we are done.
-     */
-    if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_INT, 0, aux_ptr->mpi_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed 1", mpi_result)
-
-    if(num_entries > 0) {
-        size_t buf_size;
-        int i;
-
-        /* allocate buffers to store the list of entry base addresses in */
-        buf_size = sizeof(MPI_Offset) * (size_t)num_entries;
-        if(NULL == (MPI_Offset_buf_ptr = (MPI_Offset *)H5MM_malloc(buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for receive buffer")
-        if(NULL == (haddr_buf_ptr = (haddr_t *)H5MM_malloc(sizeof(haddr_t) * (size_t)num_entries)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for haddr buffer")
-
-        /* Now receive the list of cleaned entries
-         *
-         * The peculiar structure of the following call to MPI_Bcast is
-         * due to MPI's (?) failure to believe in the MPI_Offset type.
-         * Thus the element type is MPI_BYTE, with size equal to the
-         * buf_size computed above.
-         */
-        if(MPI_SUCCESS != (mpi_result = MPI_Bcast((void *)MPI_Offset_buf_ptr, (int)buf_size, MPI_BYTE, 0, aux_ptr->mpi_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed 2", mpi_result)
-
-        /* translate the MPI_Offsets to haddr_t */
-        i = 0;
-        while(i < num_entries) {
-            haddr_buf_ptr[i] = H5FD_mpi_MPIOff_to_haddr(MPI_Offset_buf_ptr[i]);
-
-            if(haddr_buf_ptr[i] == HADDR_UNDEF)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert MPI off to haddr")
-
-            i++;
-        } /* end while */
-
+    if(num_entries > 0)
         /* mark the indicated entries as clean */
-        if(H5C_mark_entries_as_clean(f, primary_dxpl_id, secondary_dxpl_id,
-                (int32_t)num_entries, &(haddr_buf_ptr[0])) < 0)
+        if(H5C_mark_entries_as_clean(f, primary_dxpl_id, secondary_dxpl_id, (int32_t)num_entries, haddr_buf_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't mark entries clean.")
-    } /* end if */
 
     /* if it is defined, call the sync point done callback.  Note
      * that this callback is defined purely for testing purposes,
      * and should be undefined under normal operating circumstances.
      */
-    if(aux_ptr->sync_point_done != NULL)
+    if(aux_ptr->sync_point_done)
         (aux_ptr->sync_point_done)(num_entries, haddr_buf_ptr);
 
 done:
-    if(MPI_Offset_buf_ptr != NULL)
-        MPI_Offset_buf_ptr = (MPI_Offset *)H5MM_xfree((void *)MPI_Offset_buf_ptr);
-    if(haddr_buf_ptr != NULL)
+    if(haddr_buf_ptr)
         haddr_buf_ptr = (haddr_t *)H5MM_xfree((void *)haddr_buf_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_receive_and_apply_clean_list() */
+} /* H5AC__receive_and_apply_clean_list() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5AC_receive_candidate_list()
+ * Function:    H5AC__receive_candidate_list()
  *
  * Purpose:     Receive the list of candidate entries from process 0,
  *		and return it in a buffer pointed to by *haddr_buf_ptr_ptr.
@@ -4375,105 +3734,39 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_receive_candidate_list(H5AC_t * cache_ptr,
-                            int * num_entries_ptr,
-                            haddr_t ** haddr_buf_ptr_ptr)
+H5AC__receive_candidate_list(const H5AC_t *cache_ptr, int *num_entries_ptr,
+    haddr_t **haddr_buf_ptr_ptr)
 {
-    hbool_t		 success = FALSE;
     H5AC_aux_t         * aux_ptr;
-    haddr_t	       * haddr_buf_ptr = NULL;
-    MPI_Offset         * MPI_Offset_buf_ptr = NULL;
-    int                  mpi_result;
-    int			 num_entries;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->mpi_rank != 0);
+    HDassert(aux_ptr-> metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
+    HDassert(num_entries_ptr != NULL);
+    HDassert(*num_entries_ptr == 0);
+    HDassert(haddr_buf_ptr_ptr != NULL);
+    HDassert(*haddr_buf_ptr_ptr == NULL);
 
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->mpi_rank != 0 );
-    HDassert( aux_ptr-> metadata_write_strategy == 
-              H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
-
-    HDassert( num_entries_ptr != NULL );
-    HDassert( *num_entries_ptr == 0 );
-
-    HDassert( haddr_buf_ptr_ptr != NULL );
-    HDassert( *haddr_buf_ptr_ptr == NULL );
-
-
-    /* First receive the number of entries in the list so that we
-     * can set up a buffer to receive them.  If there aren't
-     * any, we are done.
-     */
-    if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_INT, 0, aux_ptr->mpi_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed 1", mpi_result)
-
-    if(num_entries > 0) {
-        size_t buf_size;
-        int i;
-
-        /* allocate buffers to store the list of entry base addresses in */
-        buf_size = sizeof(MPI_Offset) * (size_t)num_entries;
-
-        if(NULL == (MPI_Offset_buf_ptr = (MPI_Offset *)H5MM_malloc(buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for receive buffer")
-        if(NULL == (haddr_buf_ptr = (haddr_t *)H5MM_malloc(sizeof(haddr_t) * (size_t)num_entries)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for haddr buffer")
-
-        /* Now receive the list of candidate entries
-         *
-         * The peculiar structure of the following call to MPI_Bcast is
-         * due to MPI's (?) failure to believe in the MPI_Offset type.
-         * Thus the element type is MPI_BYTE, with size equal to the
-         * buf_size computed above.
-         */
-        if(MPI_SUCCESS != (mpi_result = MPI_Bcast((void *)MPI_Offset_buf_ptr, (int)buf_size, MPI_BYTE, 0, aux_ptr->mpi_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed 2", mpi_result)
-
-        /* translate the MPI_Offsets to haddr_t */
-        i = 0;
-        while(i < num_entries) {
-            haddr_buf_ptr[i] = H5FD_mpi_MPIOff_to_haddr(MPI_Offset_buf_ptr[i]);
-
-            if(haddr_buf_ptr[i] == HADDR_UNDEF)
-                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert MPI off to haddr")
-
-            i++;
-        } /* end while */
-    } /* end if */
-
-    success = TRUE;
+    /* Retrieve the candidate list from process 0 */
+    if(H5AC__receive_haddr_list(aux_ptr->mpi_comm, num_entries_ptr, haddr_buf_ptr_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't receive clean list")
 
 done:
-    if(MPI_Offset_buf_ptr != NULL)
-        MPI_Offset_buf_ptr = (MPI_Offset *)H5MM_xfree((void *)MPI_Offset_buf_ptr);
-
-    if(success) {
-        /* finally, pass the number of entries and the buffer pointer 
-         * back to the caller.  Do this so that we can use the same code
-         * to apply the candidate list to all the processes.
-         */
-        *num_entries_ptr = num_entries;
-        *haddr_buf_ptr_ptr = haddr_buf_ptr;
-    } /* end if */
-    else {
-        if(haddr_buf_ptr != NULL)
-            haddr_buf_ptr = (haddr_t *)H5MM_xfree((void *)haddr_buf_ptr);
-    } /* end else */
-
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_receive_candidate_list() */
+} /* H5AC__receive_candidate_list() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_rsp__dist_md_write__flush
+ * Function:    H5AC__rsp__dist_md_write__flush
  *
  * Purpose:     Routine for handling the details of running a sync point
  *		that is triggered by a flush -- which in turn must have been
@@ -4522,31 +3815,27 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
-herr_t
-H5AC_rsp__dist_md_write__flush(H5F_t *f, 
-                               hid_t dxpl_id, 
-                               H5AC_t * cache_ptr)
+static herr_t
+H5AC__rsp__dist_md_write__flush(H5F_t *f, hid_t dxpl_id)
 {
-    int		 mpi_code;
-    int          num_entries = 0;
-    haddr_t    * haddr_buf_ptr = NULL;
+    H5AC_t     * cache_ptr;
     H5AC_aux_t * aux_ptr;
+    haddr_t    * haddr_buf_ptr = NULL;
+    int		 mpi_result;
+    int          num_entries = 0;
     herr_t	 ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( f != NULL );
-    HDassert( f->shared->cache == cache_ptr );
-
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(f != NULL);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
-              H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
 
     /* first construct the candidate list -- initially, this will be in the 
      * form of a skip list.  We will convert it later.
@@ -4554,33 +3843,30 @@ H5AC_rsp__dist_md_write__flush(H5F_t *f,
     if(H5C_construct_candidate_list__clean_cache(cache_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate list.")
 
-    if(aux_ptr->candidate_slist_len > 0) {
+    if(H5SL_count(aux_ptr->candidate_slist_ptr) > 0) {
         herr_t	 result;
 
         /* convert the candidate list into the format we
          * are used to receiving from process 0.
          */
-        if(H5AC_copy_candidate_list_to_buffer(cache_ptr, &num_entries, &haddr_buf_ptr, NULL, NULL) < 0)
+        if(H5AC__copy_candidate_list_to_buffer(cache_ptr, &num_entries, &haddr_buf_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate buffer.")
 
         /* initial sync point barrier */
-        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(aux_ptr->mpi_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed 1", mpi_code)
+        if(MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
 
-        /* apply the candidate list */
+        /* Enable writes during this operation */
         aux_ptr->write_permitted = TRUE;
 
-        result = H5C_apply_candidate_list(f,
-                                          dxpl_id,
-                                          dxpl_id,
-                                          cache_ptr,
-                                          num_entries,
-                                          haddr_buf_ptr,
-                                          aux_ptr->mpi_rank,
-                                          aux_ptr->mpi_size);
+        /* Apply the candidate list */
+        result = H5C_apply_candidate_list(f, dxpl_id, dxpl_id, cache_ptr, num_entries,
+            haddr_buf_ptr, aux_ptr->mpi_rank, aux_ptr->mpi_size);
 
+        /* Disable writes again */
         aux_ptr->write_permitted = FALSE;
 
+        /* Check for error on the write operation */
         if(result < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't apply candidate list.")
 
@@ -4588,40 +3874,39 @@ H5AC_rsp__dist_md_write__flush(H5F_t *f,
          * enforce posix semantics on the server that pretends to be a 
          * file system in our parallel tests.
          */
-        if(aux_ptr->write_done != NULL)
+        if(aux_ptr->write_done)
             (aux_ptr->write_done)();
 
         /* final sync point barrier */
-        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(aux_ptr->mpi_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed 1", mpi_code)
+        if(MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
 
 	/* if this is process zero, tidy up the dirtied,
          * and flushed and still clean lists.
          */
-        if(aux_ptr->mpi_rank == 0) {
-            if(H5AC_tidy_cache_0_lists(cache_ptr, num_entries, haddr_buf_ptr) < 0)
+        if(aux_ptr->mpi_rank == 0)
+            if(H5AC__tidy_cache_0_lists(cache_ptr, num_entries, haddr_buf_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't tidy up process 0 lists.")
-        } /* end if */
     } /* end if */
 
     /* if it is defined, call the sync point done callback.  Note
      * that this callback is defined purely for testing purposes,
      * and should be undefined under normal operating circumstances.
      */
-    if(aux_ptr->sync_point_done != NULL)
+    if(aux_ptr->sync_point_done)
         (aux_ptr->sync_point_done)(num_entries, haddr_buf_ptr);
 
 done:
-    if(haddr_buf_ptr != NULL)
+    if(haddr_buf_ptr)
         haddr_buf_ptr = (haddr_t *)H5MM_xfree((void *)haddr_buf_ptr);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_rsp__dist_md_write__flush() */
+} /* H5AC__rsp__dist_md_write__flush() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_rsp__dist_md_write__flush_to_min_clean
+ * Function:    H5AC__rsp__dist_md_write__flush_to_min_clean
  *
  * Purpose:     Routine for handling the details of running a sync point
  *		triggered by the accumulation of dirty metadata (as 
@@ -4675,29 +3960,25 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
-herr_t
-H5AC_rsp__dist_md_write__flush_to_min_clean(H5F_t *f, 
-                                            hid_t dxpl_id, 
-                                            H5AC_t * cache_ptr)
+static herr_t
+H5AC__rsp__dist_md_write__flush_to_min_clean(H5F_t *f, hid_t dxpl_id)
 {
-    hbool_t 	 evictions_enabled;
+    H5AC_t     * cache_ptr;
     H5AC_aux_t * aux_ptr;
+    hbool_t 	 evictions_enabled;
     herr_t	 ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( f != NULL );
-    HDassert( f->shared->cache == cache_ptr );
-
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(f != NULL);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
-              H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
 
     /* Query if evictions are allowed */
     if(H5C_get_evictions_enabled((const H5C_t *)cache_ptr, &evictions_enabled) < 0)
@@ -4705,24 +3986,23 @@ H5AC_rsp__dist_md_write__flush_to_min_clean(H5F_t *f,
 
     if(evictions_enabled) {
         /* construct candidate list -- process 0 only */
-        if(aux_ptr->mpi_rank == 0) {
-            if(H5AC_construct_candidate_list(cache_ptr, aux_ptr, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
+        if(aux_ptr->mpi_rank == 0)
+            if(H5AC__construct_candidate_list(cache_ptr, aux_ptr, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't construct candidate list.")
-        } /* mpi rank == 0 */
 
         /* propagate and apply candidate list -- all processes */
-        if(H5AC_propagate_and_apply_candidate_list(f, dxpl_id, cache_ptr) < 0)
+        if(H5AC__propagate_and_apply_candidate_list(f, dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate and apply candidate list.")
     } /* evictions enabled */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_rsp__dist_md_write__flush_to_min_clean() */
+} /* H5AC__rsp__dist_md_write__flush_to_min_clean() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_rsp__p0_only__flush
+ * Function:    H5AC__rsp__p0_only__flush
  *
  * Purpose:     Routine for handling the details of running a sync point
  *		that is triggered a flush -- which in turn must have been
@@ -4758,67 +4038,70 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
-herr_t
-H5AC_rsp__p0_only__flush(H5F_t *f, 
-                         hid_t dxpl_id, 
-                         H5AC_t * cache_ptr)
+static herr_t
+H5AC__rsp__p0_only__flush(H5F_t *f, hid_t dxpl_id)
 {
-    int		 mpi_code;
+    H5AC_t     * cache_ptr;
     H5AC_aux_t * aux_ptr;
+    int		 mpi_result;
     herr_t	 ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( f != NULL );
-    HDassert( f->shared->cache == cache_ptr );
-
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(f != NULL);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
-              H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY );
-
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
 
     /* to prevent "messages from the future" we must 
      * synchronize all processes before we start the flush.  
      * Hence the following barrier.
      */
-    if(MPI_SUCCESS != (mpi_code = MPI_Barrier(aux_ptr->mpi_comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed 1", mpi_code)
+    if(MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
 
     /* Flush data to disk, from rank 0 process */
     if(aux_ptr->mpi_rank == 0) {
         herr_t        result;
 
+        /* Enable writes during this operation */
         aux_ptr->write_permitted = TRUE;
 
+        /* Flush the cache */
         result = H5C_flush_cache(f, dxpl_id, dxpl_id, H5AC__NO_FLAGS_SET);
 
+        /* Disable writes again */
         aux_ptr->write_permitted = FALSE;
 
+        /* Check for error on the write operation */
         if(result < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
 
-        if(aux_ptr->write_done != NULL)
+        /* this code exists primarily for the test bed -- it allows us to
+         * enforce posix semantics on the server that pretends to be a 
+         * file system in our parallel tests.
+         */
+        if(aux_ptr->write_done)
             (aux_ptr->write_done)();
     } /* end if */
 
     /* Propagate cleaned entries to other ranks. */
-    if(H5AC_propagate_flushed_and_still_clean_entries_list(f, H5AC_dxpl_id, cache_ptr) < 0)
+    if(H5AC__propagate_flushed_and_still_clean_entries_list(f, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate clean entries list.")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_rsp__p0_only__flush() */
+} /* H5AC__rsp__p0_only__flush() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_rsp__p0_only__flush_to_min_clean
+ * Function:    H5AC__rsp__p0_only__flush_to_min_clean
  *
  * Purpose:     Routine for handling the details of running a sync point
  *		triggered by the accumulation of dirty metadata (as 
@@ -4860,29 +4143,25 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
-herr_t
-H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f, 
-                                      hid_t dxpl_id, 
-                                      H5AC_t * cache_ptr)
+static herr_t
+H5AC__rsp__p0_only__flush_to_min_clean(H5F_t *f, hid_t dxpl_id)
 {
-    hbool_t 	 evictions_enabled;
+    H5AC_t     * cache_ptr;
     H5AC_aux_t * aux_ptr;
+    hbool_t 	 evictions_enabled;
     herr_t	 ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( f != NULL );
-    HDassert( f->shared->cache == cache_ptr );
-
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(f != NULL);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
-              H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY );
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
 
     /* Query if evictions are allowed */
     if(H5C_get_evictions_enabled((const H5C_t *)cache_ptr, &evictions_enabled) < 0)
@@ -4896,14 +4175,14 @@ H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f,
      * Otherwise, do nothing.
      */
     if(evictions_enabled) {
-        int          mpi_code;
+        int          mpi_result;
 
         /* to prevent "messages from the future" we must synchronize all
          * processes before we start the flush.  This synchronization may
          * already be done -- hence the do_barrier parameter.
          */
-        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(aux_ptr->mpi_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+        if(MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
 
         if(0 == aux_ptr->mpi_rank) {
             herr_t	 result;
@@ -4913,12 +4192,17 @@ H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f,
              * Note that it is quite possible that no entries will be 
              * flushed.
              */
+
+            /* Enable writes during this operation */
             aux_ptr->write_permitted = TRUE;
 
+            /* Flush the cache */
             result = H5C_flush_to_min_clean(f, dxpl_id, H5AC_dxpl_id);
 
+            /* Disable writes again */
             aux_ptr->write_permitted = FALSE;
 
+            /* Check for error on the write operation */
             if(result < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_flush_to_min_clean() failed.")
 
@@ -4926,22 +4210,22 @@ H5AC_rsp__p0_only__flush_to_min_clean(H5F_t *f,
  	     * to enforce POSIX semantics on the process used to simulate
  	     * reads and writes in t_cache.c.
              */
-            if(aux_ptr->write_done != NULL)
+            if(aux_ptr->write_done)
                 (aux_ptr->write_done)();
         } /* end if */
 
-        if(H5AC_propagate_flushed_and_still_clean_entries_list(f, dxpl_id, cache_ptr) < 0)
+        if(H5AC__propagate_flushed_and_still_clean_entries_list(f, dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate clean entries list.")
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_rsp__p0_only__flush_to_min_clean() */
+} /* H5AC__rsp__p0_only__flush_to_min_clean() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_run_sync_point
+ * Function:    H5AC__run_sync_point
  *
  * Purpose:     Top level routine for managing a sync point between all
  *		meta data caches in the parallel case.  Since all caches 
@@ -4972,56 +4256,49 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
-herr_t
-H5AC_run_sync_point(H5F_t *f, 
-                    hid_t dxpl_id, 
-		    int sync_point_op)
+static herr_t
+H5AC__run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op)
 {
-    H5AC_t * cache_ptr;
+    H5AC_t     * cache_ptr;
     H5AC_aux_t * aux_ptr;
     herr_t	 ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
-    HDassert( f != NULL );
-
+    /* Sanity checks */
+    HDassert(f != NULL);
     cache_ptr = f->shared->cache;
-
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-
-    HDassert( ( sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN ) ||
-              ( sync_point_op == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED ) );
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert((sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) ||
+        (sync_point_op == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED));
 
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-    HDfprintf(stdout,
-              "%d:H5AC_propagate...:%u: (u/uu/i/iu/r/ru) = %zu/%u/%zu/%u/%zu/%u\n",
-              aux_ptr->mpi_rank,
-              aux_ptr->dirty_bytes_propagations,
-              aux_ptr->unprotect_dirty_bytes,
-              aux_ptr->unprotect_dirty_bytes_updates,
-              aux_ptr->insert_dirty_bytes,
-              aux_ptr->insert_dirty_bytes_updates,
-              aux_ptr->rename_dirty_bytes,
-              aux_ptr->rename_dirty_bytes_updates);
+HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/r/ru) = %zu/%u/%zu/%u/%zu/%u\n",
+    aux_ptr->mpi_rank,
+    aux_ptr->dirty_bytes_propagations,
+    aux_ptr->unprotect_dirty_bytes,
+    aux_ptr->unprotect_dirty_bytes_updates,
+    aux_ptr->insert_dirty_bytes,
+    aux_ptr->insert_dirty_bytes_updates,
+    aux_ptr->rename_dirty_bytes,
+    aux_ptr->rename_dirty_bytes_updates);
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
     switch(aux_ptr->metadata_write_strategy) {
         case H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY:
 	    switch(sync_point_op) {
                 case H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN:
-	            if(H5AC_rsp__p0_only__flush_to_min_clean(f, dxpl_id, cache_ptr) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC_rsp__p0_only__flush_to_min_clean() failed.")
+	            if(H5AC__rsp__p0_only__flush_to_min_clean(f, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC__rsp__p0_only__flush_to_min_clean() failed.")
 		    break;
 
 		case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
-	            if(H5AC_rsp__p0_only__flush(f, dxpl_id, cache_ptr) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC_rsp__p0_only__flush() failed.")
+	            if(H5AC__rsp__p0_only__flush(f, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC__rsp__p0_only__flush() failed.")
 		    break;
 
 		default:
@@ -5033,13 +4310,13 @@ H5AC_run_sync_point(H5F_t *f,
 	case H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED:
 	    switch(sync_point_op) {
                 case H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN:
-	            if(H5AC_rsp__dist_md_write__flush_to_min_clean(f, dxpl_id, cache_ptr) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC_rsp__dist_md_write__flush() failed.")
+	            if(H5AC__rsp__dist_md_write__flush_to_min_clean(f, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC__rsp__dist_md_write__flush_to_min_clean() failed.")
 		    break;
 
 		case H5AC_SYNC_POINT_OP__FLUSH_CACHE:
-	            if(H5AC_rsp__dist_md_write__flush(f, dxpl_id, cache_ptr) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC_rsp__dist_md_write__flush() failed.")
+	            if(H5AC__rsp__dist_md_write__flush(f, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5AC__rsp__dist_md_write__flush() failed.")
 		    break;
 
 		default:
@@ -5068,12 +4345,12 @@ H5AC_run_sync_point(H5F_t *f,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_run_sync_point() */
+} /* H5AC__run_sync_point() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_tidy_cache_0_lists()
+ * Function:    H5AC__tidy_cache_0_lists()
  *
  * Purpose:     In the distributed metadata write strategy, not all dirty
  *		entries are written by process 0 -- thus we must tidy
@@ -5109,29 +4386,24 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC_tidy_cache_0_lists(H5AC_t * cache_ptr,
-                        int num_candidates,
-                        haddr_t * candidates_list_ptr)
-
+H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, int num_candidates,
+    haddr_t *candidates_list_ptr)
 {
-    int                  i;
     H5AC_aux_t         * aux_ptr;
-    herr_t               ret_value = SUCCEED;   /* Return value */
+    int                  i;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC_NOERR
 
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-
+    /* Sanity checks */
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-    HDassert( aux_ptr->metadata_write_strategy == 
-              H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED );
-    HDassert( aux_ptr->mpi_rank == 0 );
-    HDassert( num_candidates > 0 );
-    HDassert( candidates_list_ptr != NULL );
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+    HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
+    HDassert(aux_ptr->mpi_rank == 0);
+    HDassert(num_candidates > 0);
+    HDassert(candidates_list_ptr != NULL);
 
     /* clean up dirtied and flushed and still clean lists by removing 
      * all entries on the candidate list.  Cleared entries should 
@@ -5147,50 +4419,22 @@ H5AC_tidy_cache_0_lists(H5AC_t * cache_ptr,
 
         addr = candidates_list_ptr[i];
 
-        /* addr must be either on the dirtied list, or on the flushed 
+        /* addr may be either on the dirtied list, or on the flushed 
          * and still clean list.  Remove it.
          */
-        d_slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_search(aux_ptr->d_slist_ptr, (void *)&addr);
-        if(d_slist_entry_ptr != NULL) {
-            HDassert(d_slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC);
-            HDassert(d_slist_entry_ptr->addr == addr);
-
-            if(H5SL_remove(aux_ptr->d_slist_ptr, (void *)(&addr)) != d_slist_entry_ptr)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, "Can't delete entry from dirty entry slist.")
-
-            d_slist_entry_ptr->magic = 0;
+        if(NULL != (d_slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->d_slist_ptr, (void *)&addr)))
             d_slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, d_slist_entry_ptr);
-
-            aux_ptr->d_slist_len -= 1;
-
-            HDassert(aux_ptr->d_slist_len >= 0);
-        } /* end if */
-
-        c_slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_search(aux_ptr->c_slist_ptr, (void *)&addr);
-        if(c_slist_entry_ptr != NULL) {
-            HDassert(c_slist_entry_ptr->magic == H5AC__H5AC_SLIST_ENTRY_T_MAGIC);
-            HDassert(c_slist_entry_ptr->addr == addr);
-
-            if(H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&addr)) != c_slist_entry_ptr)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTDELETE, FAIL, "Can't delete entry from clean entry slist.")
-
-            c_slist_entry_ptr->magic = 0;
+        if(NULL != (c_slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->c_slist_ptr, (void *)&addr)))
             c_slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, c_slist_entry_ptr);
-
-            aux_ptr->c_slist_len -= 1;
-
-            HDassert( aux_ptr->c_slist_len >= 0 );
-        } /* end if */
     } /* end for */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_tidy_cache_0_lists() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5AC__tidy_cache_0_lists() */
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_flush_entries
+ * Function:    H5AC__flush_entries
  *
  * Purpose:     Flush the metadata cache associated with the specified file,
  *              only writing from rank 0, but propagating the cleaned entries
@@ -5206,25 +4450,25 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
-herr_t
-H5AC_flush_entries(H5F_t *f)
+static herr_t
+H5AC__flush_entries(H5F_t *f, hid_t dxpl_id)
 {
     herr_t        ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared->cache);
 
     /* Check if we have >1 ranks */
-    if(f->shared->cache->aux_ptr) {
-        if(H5AC_run_sync_point(f, H5AC_dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_CACHE) < 0)
+    if(f->shared->cache->aux_ptr)
+        if(H5AC__run_sync_point(f, dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_CACHE) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't run sync point.")
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_flush_entries() */
+} /* H5AC__flush_entries() */
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -5244,15 +4488,13 @@ done:
  *------------------------------------------------------------------------------
  */
 herr_t
-H5AC_ignore_tags(H5F_t * f)
+H5AC_ignore_tags(const H5F_t *f)
 {
-    /* Variable Declarations */
     herr_t      ret_value = SUCCEED;
 
-    /* Function Enter Macro */
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Assertions */
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
@@ -5279,28 +4521,25 @@ done:
  *------------------------------------------------------------------------------
  */
 herr_t
-H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t * prev_tag)
+H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag)
 {
-    /* Variable Declarations */
-    H5P_genplist_t *dxpl;    /* dataset transfer property list */
+    H5P_genplist_t *dxpl;       /* dataset transfer property list */
     herr_t ret_value = SUCCEED;
 
-    /* Function Enter Macro */
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check Arguments */
     if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, FAIL, "not a property list")
 
-    /* Get the current tag value and return that (if prev_tag is NOT null)*/
-    if(prev_tag) {
+    /* Get the current tag value and return that (if prev_tag is NOT null) */
+    if(prev_tag)
         if((H5P_get(dxpl, "H5AC_metadata_tag", prev_tag)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query dxpl")
-    } /* end if */
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to query dxpl")
 
     /* Set the provided tag value in the dxpl_id. */
     if(H5P_set(dxpl, "H5AC_metadata_tag", &metadata_tag) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set property in dxpl")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set property in dxpl")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5322,21 +4561,17 @@ done:
  *------------------------------------------------------------------------------
  */
 herr_t
-H5AC_retag_copied_metadata(H5F_t * f, haddr_t metadata_tag) 
+H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag) 
 {
-    herr_t ret_value = SUCCEED;
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Function Enter Macro */
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Assertions */
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
      
     /* Call cache-level function to retag entries */
     H5C_retag_copied_metadata(f->shared->cache, metadata_tag);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5AC_retag_copied_metadata */
 

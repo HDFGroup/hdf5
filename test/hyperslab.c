@@ -644,7 +644,7 @@ test_multifill(size_t nx)
     for(i = 0; i < nx; i++) {
         if(dst[i].left != 3333333)
             sprintf(s, "bad dst[%lu].left", (unsigned long)i);
-        else if(!DBL_ABS_EQUAL(dst[i].mid, fill.mid))
+        else if(!H5_DBL_ABS_EQUAL(dst[i].mid, fill.mid))
             /* Check if two DOUBLE values are equal.  If their difference
              * is smaller than the EPSILON value for double, they are
              * considered equal. See the definition in h5test.h.
