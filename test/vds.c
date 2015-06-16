@@ -1001,12 +1001,11 @@ test_basic_io(unsigned config, hid_t fapl)
     hid_t       memspace = -1;  /* Memory dataspace */
     hid_t       srcdset[4] = {-1, -1, -1, -1}; /* Source datsets */
     hid_t       vdset = -1;     /* Virtual dataset */
-    hsize_t     dims[2] = {10, 26}; /* Data space current size */
+    hsize_t     dims[4] = {10, 26, -1, -1}; /* Data space current size */
     hsize_t     start[4];       /* Hyperslab start */
     hsize_t     stride[4];      /* Hyperslab stride */
     hsize_t     count[4];       /* Hyperslab count */
     hsize_t     block[4];       /* Hyperslab block */
-    hsize_t     coord[10];      /* Point selection array */
     int         buf[10][26];    /* Write and expected read buffer */
     int         rbuf[10][26];   /* Read buffer */
     int         rbuf99[9][9];   /* 9x9 Read buffer */
