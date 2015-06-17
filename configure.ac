@@ -194,6 +194,7 @@ AC_SUBST([STATIC_SHARED])
 AC_SUBST([enable_shared])
 AC_SUBST([enable_static])
 AC_SUBST([UNAME_INFO]) UNAME_INFO=`uname -a`
+AC_SUBST([PAC_C_MAX_REAL_PRECISION])
 
 ## ----------------------------------------------------------------------
 ## Some platforms have broken basename, and/or xargs programs. Check
@@ -361,14 +362,26 @@ AC_CHECK_SIZEOF([long double], [8])
 
 ## Check for __FLOAT128 extension
 AC_CHECK_SIZEOF([__float128])
+HAVE_FLOAT128=0
+HAVE_QUADMATH=0
+AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
+PAC_LDBL_DIG
 if test "$ac_cv_sizeof___float128" != 0; then
-  AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
-    HAVE_QUADMATH=0
-    AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
+## Check if __float128 and c_long_double are the same size and precision
+  if test "$ac_cv_sizeof___float128" = "$ac_cv_sizeof_long_double" && test "$LDBL_DIG" = "$FLT128_DIG"; then
+    AC_DEFINE([HAVE_FLOAT128], [0], [Determine if __float128 is available])
+    PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
+  else
+    AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
+    PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
     dnl AC_MSG_CHECKING([for quadmath.h])
     dnl AC_MSG_RESULT([$HAVE_QUADMATH])
+  fi
+else
+  PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
 fi
-
+AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
+AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
 ## ----------------------------------------------------------------------
 ## Check if they would like the Fortran interface compiled
 ##
@@ -489,7 +502,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_KIND])
   AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF])
   AC_SUBST([HAVE_Fortran_INTEGER_SIZEOF_16])
-  AC_SUBST([PAC_C_MAX_REAL_PRECISION])
   AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
   AC_SUBST([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE])
   AC_SUBST([FORTRAN_SIZEOF_LONG_DOUBLE])
@@ -601,7 +613,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
 ## Change back to the C language
   AC_LANG_POP(Fortran)
-  PAC_LDBL_DIG
 else
   FC="no"
 fi

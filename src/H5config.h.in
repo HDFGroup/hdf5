@@ -443,7 +443,7 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Determine the decimal precision of C long double */
+/* Determine the maximum decimal precision in C */
 #undef PAC_C_MAX_REAL_PRECISION
 
 /* Define Fortran Maximum Real Decimal Precision */
