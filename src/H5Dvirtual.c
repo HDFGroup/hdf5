@@ -1663,42 +1663,52 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
             } /* end for */
         } /* end if */
         else {
-            HDassert(storage->list[i].source_dset.clipped_virtual_select);
+            if(storage->list[i].source_dset.clipped_virtual_select) {
+                /* Project intersection of file space and mapping virtual space onto
+                 * memory space */
+                if(H5S_select_project_intersection(file_space, mem_space, storage->list[i].source_dset.clipped_virtual_select, &storage->list[i].source_dset.projected_mem_space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto memory space")
 
-            /* Project intersection of file space and mapping virtual space onto
-             * memory space */
-            if(H5S_select_project_intersection(file_space, mem_space, storage->list[i].source_dset.clipped_virtual_select, &storage->list[i].source_dset.projected_mem_space) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto memory space")
+                /* Check number of elements selected, add to tot_nelmts */
+                if((select_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(storage->list[i].source_dset.projected_mem_space)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get number of elements in selection")
 
-            /* Check number of elements selected, add to tot_nelmts */
-            if((select_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(storage->list[i].source_dset.projected_mem_space)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get number of elements in selection")
+                /* Check if anything is selected */
+                if(select_nelmts > (hssize_t)0) {
+                    /* Open source dataset */
+                    if(!storage->list[i].source_dset.dset) 
+                        /* Try to open dataset */
+                        if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], &storage->list[i].source_dset, io_info->dxpl_id) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
 
-            /* Check if anything is selected */
-            if(select_nelmts > (hssize_t)0) {
-                /* Open source dataset */
-                if(!storage->list[i].source_dset.dset) 
-                    /* Try to open dataset */
-                    if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], &storage->list[i].source_dset, io_info->dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
+                    /* If the source dataset is not open, mark the selected elements
+                     * as zero so projected_mem_space is freed */
+                    if(!storage->list[i].source_dset.dset) {
+                        HDassert(0 && "Checking code coverage..."); //VDSINC
+                        select_nelmts = (hssize_t)0;
+                    } //VDSINC
+                } /* end if */
 
-                /* If the source dataset is not open, mark the selected elements
-                 * as zero so projected_mem_space is freed */
-                if(!storage->list[i].source_dset.dset) {
-                    HDassert(0 && "Checking code coverage..."); //VDSINC
-                    select_nelmts = (hssize_t)0;
-                } //VDSINC
+                /* If there are not elements selected in this mapping, free
+                 * projected_mem_space, otherwise update tot_nelmts */
+                if(select_nelmts == (hssize_t)0) {
+                    if(H5S_close(storage->list[i].source_dset.projected_mem_space) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected memory space")
+                    storage->list[i].source_dset.projected_mem_space = NULL;
+                } /* end if */
+                else
+                    *tot_nelmts += (hsize_t)select_nelmts;
             } /* end if */
-
-            /* If there are not elements selected in this mapping, free
-             * projected_mem_space, otherwise update tot_nelmts */
-            if(select_nelmts == (hssize_t)0) {
-                if(H5S_close(storage->list[i].source_dset.projected_mem_space) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close projected memory space")
-                storage->list[i].source_dset.projected_mem_space = NULL;
-            } /* end if */
-            else
-                *tot_nelmts += (hsize_t)select_nelmts;
+            else {
+                HDassert(0 && "Checking code coverage..."); //VDSINC
+                /* If there is no clipped_dim_virtual, this must be an unlimited
+                 * selection whose dataset was not found in the last call to
+                 * H5Dget_space().  Do not attempt to open it as this might
+                 * affect the extent and we are not going to recalculate it
+                 * here. */
+                HDassert(storage->list[i].unlim_dim_virtual >= 0);
+                HDassert(!storage->list[i].source_dset.dset);
+            } /* end else */
         } /* end else */
     } /* end for */
 
