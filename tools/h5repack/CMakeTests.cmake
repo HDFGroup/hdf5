@@ -585,7 +585,36 @@
          ./testfiles/out-meta_short_N.meta_short.h5
          ./testfiles/out-meta_long_M.meta_long.h5
          ./testfiles/out-meta_long_N.meta_long.h5
-         # from the h5repacktst
+         ./testfiles/1_vds.h5-vds_dset_compa-v.out
+         ./testfiles/1_vds.h5-vds_dset_compa-v.out.err
+         ./testfiles/1_vds.h5-vds_dset_conti-v.out
+         ./testfiles/1_vds.h5-vds_dset_conti-v.out.err
+         ./testfiles/2_vds.h5-vds_null_compa-v.out
+         ./testfiles/2_vds.h5-vds_null_compa-v.out.err
+         ./testfiles/2_vds.h5-vds_null_conti-v.out
+         ./testfiles/2_vds.h5-vds_null_conti-v.out.err
+         ./testfiles/4_vds.h5-vds_compa-v.out
+         ./testfiles/4_vds.h5-vds_compa-v.out.err
+         ./testfiles/4_vds.h5-vds_compa_compa-v.out
+         ./testfiles/4_vds.h5-vds_compa_compa-v.out.err
+         ./testfiles/4_vds.h5-vds_compa_conti-v.out
+         ./testfiles/4_vds.h5-vds_compa_conti-v.out.err
+         ./testfiles/4_vds.h5-vds_conti-v.out
+         ./testfiles/4_vds.h5-vds_conti-v.out.err
+         ./testfiles/4_vds.h5-vds_conti_compa-v.out
+         ./testfiles/4_vds.h5-vds_conti_compa-v.out.err
+         ./testfiles/4_vds.h5-vds_conti_conti-v.out
+         ./testfiles/4_vds.h5-vds_conti_conti-v.out.err
+         ./testfiles/out-vds_compa.4_vds.h5
+         ./testfiles/out-vds_compa_compa.4_vds.h5
+         ./testfiles/out-vds_compa_conti.4_vds.h5
+         ./testfiles/out-vds_conti.4_vds.h5
+         ./testfiles/out-vds_conti_compa.4_vds.h5
+         ./testfiles/out-vds_conti_conti.4_vds.h5
+         ./testfiles/out-vds_dset_compa.1_vds.h5
+         ./testfiles/out-vds_dset_conti.1_vds.h5
+         ./testfiles/out-vds_null_compa.2_vds.h5
+         ./testfiles/out-vds_null_conti.2_vds.h5
          h5repack_attr.h5
          h5repack_attr_out.h5
          h5repack_attr_refs.h5
