@@ -2192,6 +2192,10 @@
 ./tools/h5diff/testfiles/tmptest.he5
 ./tools/h5diff/testfiles/h5diff_tmp2.txt
 ./tools/h5diff/testfiles/tmpSingleSiteBethe.output.h5
+#vds
+./tools/h5diff/testfiles/h5diff_v1.txt
+./tools/h5diff/testfiles/h5diff_v2.txt
+./tools/h5diff/testfiles/h5diff_v3.txt
 
 #test files for h5repack
 ./tools/h5repack/testfiles/README
