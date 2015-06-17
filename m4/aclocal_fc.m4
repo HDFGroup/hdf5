@@ -568,6 +568,8 @@ rm -f pac_Cconftest.out
                 # else
                 #define C_FLT128_DIG 0
                 # endif
+                #else
+                #define C_FLT128_DIG 0
                 #endif
                 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
                 #define C_LDBL_DIG DECIMAL_DIG 
