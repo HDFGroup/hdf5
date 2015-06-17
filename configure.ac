@@ -362,12 +362,14 @@ AC_CHECK_SIZEOF([long double], [8])
 
 ## Check for __FLOAT128 extension
 AC_CHECK_SIZEOF([__float128])
+AC_CHECK_SIZEOF([_Quad])
 HAVE_FLOAT128=0
 HAVE_QUADMATH=0
 AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
 PAC_LDBL_DIG
 
-## __float seems to work for __float128, but it should be _Quad type instead
+## __float128 seems to work intel compilers, but it should be _Quad type instead
+
 if test "$ac_cv_sizeof___float128" != 0 && test "$cc_vendor" = "gcc"; then
 ## Check if __float128 and c_long_double are the same size and precision
   dnl if test "$ac_cv_sizeof___float128" = "$ac_cv_sizeof_long_double"; then
