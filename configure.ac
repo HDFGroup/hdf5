@@ -780,7 +780,7 @@ if test -n "${MAKE-make}"; then
 
   cat >maketest <<EOF
 foo: \$(UNDEFINED) \$(UNDEFINED2)
-  @echo \$(UNDEFINED3) works
+	@echo \$(UNDEFINED3) works
 EOF
 
   if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
