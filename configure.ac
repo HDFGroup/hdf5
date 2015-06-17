@@ -366,17 +366,26 @@ HAVE_FLOAT128=0
 HAVE_QUADMATH=0
 AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
 PAC_LDBL_DIG
-if test "$ac_cv_sizeof___float128" != 0; then
+
+## __float seems to work for __float128, but it should be _Quad type instead
+if test "$ac_cv_sizeof___float128" != 0 && test "$cc_vendor" = "gcc"; then
 ## Check if __float128 and c_long_double are the same size and precision
-  if test "$ac_cv_sizeof___float128" = "$ac_cv_sizeof_long_double" && test "$LDBL_DIG" = "$FLT128_DIG"; then
-    AC_DEFINE([HAVE_FLOAT128], [0], [Determine if __float128 is available])
-    PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
-  else
-    AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
-    PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
+  dnl if test "$ac_cv_sizeof___float128" = "$ac_cv_sizeof_long_double"; then
+  dnl  if test "$LDBL_DIG" = "$FLT128_DIG"; then
+  dnl    AC_DEFINE([HAVE_FLOAT128], [0], [Determine if __float128 is available])
+  dnl    PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
+  dnl  else  
+  dnl    if test "$FLT128_DIG" > "$LDBL_DIG";then
+        dnl choose the larger precision
+        AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
+        PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
+  dnl    else 
+  dnl      AC_DEFINE([HAVE_FLOAT128], [0], [Determine if __float128 is available])
+  dnl       PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
+  dnl    fi
     dnl AC_MSG_CHECKING([for quadmath.h])
     dnl AC_MSG_RESULT([$HAVE_QUADMATH])
-  fi
+ dnl fi
 else
   PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
 fi

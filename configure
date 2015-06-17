@@ -5714,20 +5714,15 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
 
-if test "$ac_cv_sizeof___float128" != 0; then
+
+## __float seems to work for __float128, but it should be _Quad type instead
+if test "$ac_cv_sizeof___float128" != 0 && test "$cc_vendor" = "gcc"; then
 ## Check if __float128 and c_long_double are the same size and precision
-  if test "$ac_cv_sizeof___float128" = "$ac_cv_sizeof_long_double" && test "$LDBL_DIG" = "$FLT128_DIG"; then
-
-$as_echo "#define HAVE_FLOAT128 0" >>confdefs.h
-
-    PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
-  else
 
 $as_echo "#define HAVE_FLOAT128 1" >>confdefs.h
 
-    PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
-          fi
-else
+        PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
+                 else
   PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
 fi
 
