@@ -363,6 +363,10 @@ AC_CHECK_SIZEOF([long double], [8])
 AC_CHECK_SIZEOF([__float128])
 if test "$ac_cv_sizeof___float128" != 0; then
   AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
+    HAVE_QUADMATH=0
+    AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
+    dnl AC_MSG_CHECKING([for quadmath.h])
+    dnl AC_MSG_RESULT([$HAVE_QUADMATH])
 fi
 
 ## ----------------------------------------------------------------------

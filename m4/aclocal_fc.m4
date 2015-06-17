@@ -560,7 +560,9 @@ rm -f pac_Cconftest.out
                 #include <stdio.h>
                 #define CHECK_FLOAT128 $ac_cv_sizeof___float128
                 #if CHECK_FLOAT128!=0
+                # if $HAVE_QUADMATH!=0
                 #include <quadmath.h>
+                # endif
                 #define C_LDBL_DIG FLT128_DIG
                 #else 
                 # if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
