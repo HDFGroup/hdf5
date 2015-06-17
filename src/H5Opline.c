@@ -109,8 +109,8 @@ H5FL_DEFINE(H5O_pline_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
-    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
+H5O_pline_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_pline_t		*pline = NULL;          /* Pipeline message */
     H5Z_filter_info_t   *filter;                /* Filter to decode */
@@ -237,7 +237,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
+H5O_pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p/*out*/, const void *mesg)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t*)mesg;      /* Pipeline message to encode */
     const       H5Z_filter_info_t *filter;      /* Filter to encode */
@@ -430,7 +430,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_pline_size(const H5F_t UNUSED *f, const void *mesg)
+H5O_pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t*)mesg;      /* Pipeline message */
     size_t i;                   /* Local index variable */
@@ -566,8 +566,8 @@ H5O_pline_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_pre_copy_file(H5F_t UNUSED *file_src, const void *mesg_src,
-    hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info, void *_udata)
+H5O_pline_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
+    hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t H5_ATTR_UNUSED *cpy_info, void *_udata)
 {
     const H5O_pline_t *pline_src = (const H5O_pline_t *)mesg_src;    /* Source datatype */
     H5O_copy_file_ud_common_t *udata = (H5O_copy_file_ud_common_t *)_udata; /* Object copying user data */
@@ -606,7 +606,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_pline_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *mesg, FILE *stream,
+H5O_pline_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *mesg, FILE *stream,
 		int indent, int fwidth)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t *)mesg;

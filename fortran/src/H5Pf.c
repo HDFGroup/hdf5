@@ -2836,7 +2836,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5pregisterc_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f UNUSED *value_len)
+nh5pregisterc_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f H5_ATTR_UNUSED *value_len)
 /******/
 {
      int ret_value = -1;
@@ -2869,7 +2869,7 @@ nh5pregisterc_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, _fcd v
  * SOURCE
 */
 int_f
-h5pregister_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void UNUSED *value)
+h5pregister_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, void H5_ATTR_UNUSED *value)
 /******/
 {
      char* c_name = NULL;
@@ -2939,7 +2939,7 @@ nh5pregister_double_c(hid_t_f *cls, _fcd name, int_f *name_len, size_t_f *size, 
  * SOURCE
 */
 int_f
-nh5pinsertc_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f UNUSED *value_len)
+nh5pinsertc_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, _fcd value, int_f H5_ATTR_UNUSED *value_len)
 /******/
 {
      int_f ret_value = -1;
@@ -2972,7 +2972,7 @@ nh5pinsertc_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, _fcd v
  * SOURCE
 */
 int_f
-h5pinsert_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void UNUSED *value)
+h5pinsert_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void H5_ATTR_UNUSED *value)
 /******/
 {
      char* c_name = NULL;
@@ -3437,7 +3437,7 @@ DONE:
  * SOURCE
 */
 int_f
-nh5psetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f UNUSED *value_len)
+nh5psetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f H5_ATTR_UNUSED *value_len)
 /******/
 {
      int_f ret_value = -1;
@@ -3535,7 +3535,7 @@ nh5pset_double_c(hid_t_f *plist, _fcd name, int_f *name_len, void *value)
  * SOURCE
 */
 int_f
-nh5pgetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f UNUSED *value_len)
+nh5pgetc_c(hid_t_f *plist, _fcd name, int_f *name_len, _fcd value, int_f H5_ATTR_UNUSED *value_len)
 /******/
 {
      int_f ret_value = -1;
@@ -5215,7 +5215,7 @@ nh5pset_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_den
  * SOURCE
 */
 int_f
-nh5pset_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_t_f UNUSED *block_size, size_t_f UNUSED *cbuf_size)
+nh5pset_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *alignment, size_t_f H5_ATTR_UNUSED *block_size, size_t_f H5_ATTR_UNUSED *cbuf_size)
 /******/
 {
   int ret_value = -1;
@@ -5258,7 +5258,7 @@ nh5pset_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_
  * SOURCE
 */
 int_f
-nh5pget_fapl_direct_c(hid_t_f UNUSED *fapl_id, size_t_f UNUSED *alignment, size_t_f UNUSED *block_size, size_t_f UNUSED *cbuf_size)
+nh5pget_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *alignment, size_t_f H5_ATTR_UNUSED *block_size, size_t_f H5_ATTR_UNUSED *cbuf_size)
 /******/
 {
   int ret_value = -1;

@@ -80,7 +80,7 @@ void Abrt_Handler (int sig);
 
 /* Handler for SIGABRT - prints the reference count on each id */
 void
-Abrt_Handler (int UNUSED sig)
+Abrt_Handler (int H5_ATTR_UNUSED sig)
 {
     int i, n;
 

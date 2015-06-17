@@ -4,65 +4,65 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-  
+
   # --------------------------------------------------------------------
   # Packed Bits
   # --------------------------------------------------------------------
   #-- Copy all the HDF5 files from the test directory into the source directory
   set (HDF5_REFERENCE_PBITS
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnofilename-with-packed-bits.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsArray.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsCompound.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsIncomplete.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsLengthExceeded.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsCharLengthExceeded.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsIntLengthExceeded.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsLongLengthExceeded.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsLengthPositive.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsMax.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsMaxExceeded.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsOffsetExceeded.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsCharOffsetExceeded.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsIntOffsetExceeded.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsLongOffsetExceeded.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsOffsetNegative.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsOverlapped.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSigned.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsigned.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedInt.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedInt.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLong.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLong.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLongLong.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLongLong.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedWhole.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedWhole.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedIntWhole.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedIntWhole.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLongWhole.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLongWhole.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLongLongWhole.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLongLongWhole.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLongLongWhole1.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLongLongWhole1.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLongLongWhole63.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLongLongWhole63.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSigned4.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsigned4.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedInt8.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedInt8.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLong16.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLong16.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLongLong32.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLongLong32.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSigned2.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsigned2.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedInt4.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedInt4.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLong8.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLong8.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLongLong16.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLongLong16.ddl
+      tnofilename-with-packed-bits.ddl
+      tpbitsArray.ddl
+      tpbitsCompound.ddl
+      tpbitsIncomplete.ddl
+      tpbitsLengthExceeded.ddl
+      tpbitsCharLengthExceeded.ddl
+      tpbitsIntLengthExceeded.ddl
+      tpbitsLongLengthExceeded.ddl
+      tpbitsLengthPositive.ddl
+      tpbitsMax.ddl
+      tpbitsMaxExceeded.ddl
+      tpbitsOffsetExceeded.ddl
+      tpbitsCharOffsetExceeded.ddl
+      tpbitsIntOffsetExceeded.ddl
+      tpbitsLongOffsetExceeded.ddl
+      tpbitsOffsetNegative.ddl
+      tpbitsOverlapped.ddl
+      tpbitsSigned.ddl
+      tpbitsUnsigned.ddl
+      tpbitsSignedInt.ddl
+      tpbitsUnsignedInt.ddl
+      tpbitsSignedLong.ddl
+      tpbitsUnsignedLong.ddl
+      tpbitsSignedLongLong.ddl
+      tpbitsUnsignedLongLong.ddl
+      tpbitsSignedWhole.ddl
+      tpbitsUnsignedWhole.ddl
+      tpbitsSignedIntWhole.ddl
+      tpbitsUnsignedIntWhole.ddl
+      tpbitsSignedLongWhole.ddl
+      tpbitsUnsignedLongWhole.ddl
+      tpbitsSignedLongLongWhole.ddl
+      tpbitsUnsignedLongLongWhole.ddl
+      tpbitsSignedLongLongWhole1.ddl
+      tpbitsUnsignedLongLongWhole1.ddl
+      tpbitsSignedLongLongWhole63.ddl
+      tpbitsUnsignedLongLongWhole63.ddl
+      tpbitsSigned4.ddl
+      tpbitsUnsigned4.ddl
+      tpbitsSignedInt8.ddl
+      tpbitsUnsignedInt8.ddl
+      tpbitsSignedLong16.ddl
+      tpbitsUnsignedLong16.ddl
+      tpbitsSignedLongLong32.ddl
+      tpbitsUnsignedLongLong32.ddl
+      tpbitsSigned2.ddl
+      tpbitsUnsigned2.ddl
+      tpbitsSignedInt4.ddl
+      tpbitsUnsignedInt4.ddl
+      tpbitsSignedLong8.ddl
+      tpbitsUnsignedLong8.ddl
+      tpbitsSignedLongLong16.ddl
+      tpbitsUnsignedLongLong16.ddl
   )
   set (HDF5_REFERENCE_TEST_PBITS
       ${HDF5_TOOLS_SRC_DIR}/testfiles/packedbits.h5
@@ -70,19 +70,19 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5
   )
   set (HDF5_ERROR_REFERENCE_PBITS
-      ${PROJECT_SOURCE_DIR}/errfiles/tnofilename-with-packed-bits.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsCharLengthExceeded.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsCharOffsetExceeded.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsIncomplete.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsIntLengthExceeded.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsIntOffsetExceeded.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsLengthExceeded.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsLengthPositive.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsLongLengthExceeded.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsLongOffsetExceeded.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsMaxExceeded.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsOffsetExceeded.err
-      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsOffsetNegative.err
+      tnofilename-with-packed-bits.err
+      tpbitsCharLengthExceeded.err
+      tpbitsCharOffsetExceeded.err
+      tpbitsIncomplete.err
+      tpbitsIntLengthExceeded.err
+      tpbitsIntOffsetExceeded.err
+      tpbitsLengthExceeded.err
+      tpbitsLengthPositive.err
+      tpbitsLongLengthExceeded.err
+      tpbitsLongOffsetExceeded.err
+      tpbitsMaxExceeded.err
+      tpbitsOffsetExceeded.err
+      tpbitsOffsetNegative.err
   )
 
   foreach (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
@@ -96,7 +96,7 @@
         ARGS       -E copy_if_different ${pbits_h5_file} ${dest}
     )
   endforeach (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
-  
+
 
   foreach (ddl_pbits ${HDF5_REFERENCE_PBITS})
     GET_FILENAME_COMPONENT(fname "${ddl_pbits}" NAME)
@@ -106,7 +106,7 @@
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${ddl_pbits} ${ddldest}
+        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/pbits/${ddl_pbits} ${ddldest}
     )
   endforeach (ddl_pbits ${HDF5_REFERENCE_PBITS})
 
@@ -118,10 +118,10 @@
         TARGET     h5dump
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${ddl_pbits} ${ddldest}
+        ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/errfiles/${ddl_pbits} ${ddldest}
     )
   endforeach (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
-  
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -163,7 +163,7 @@
 
 ##############################################################################
 ##############################################################################
-###           T H E   T E S T S                                          HDF5_ENABLE_USING_MEMCHECKER  ###
+###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
 
@@ -172,7 +172,7 @@
     add_test (
       NAME H5DUMP_PACKED_BITS-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           tnofilename-with-packed-bits.out
           tnofilename-with-packed-bits.out.err
           tpbitsArray.out

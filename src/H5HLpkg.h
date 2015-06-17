@@ -114,9 +114,9 @@ struct H5HL_dblk_t {
 
 /* Struct for heap prefix */
 struct H5HL_prfx_t {
-    H5AC_info_t cache_info;    /* Information for H5AC cache functions, _must_ be */
-                                /* first field in structure */
-    H5HL_t                 *heap;       /* Pointer to heap for prefix */
+    H5AC_info_t cache_info;       /* Information for H5AC cache functions, */
+                                  /* _must_ be first field in structure    */
+    H5HL_t                 *heap; /* Pointer to heap for prefix */
 };
 
 /* Callback information for loading local heap prefix from disk */

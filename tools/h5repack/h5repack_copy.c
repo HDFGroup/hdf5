@@ -66,7 +66,7 @@ static void print_user_block(const char *filename, hid_t fid);
 static herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void *udata);
 
 /* get the major number from the error stack. */
-static herr_t walk_error_callback(UNUSED unsigned n, const H5E_error2_t *err_desc, void *udata) {
+static herr_t walk_error_callback(H5_ATTR_UNUSED unsigned n, const H5E_error2_t *err_desc, void *udata) {
 	if (err_desc)
 		*((hid_t *) udata) = err_desc->maj_num;
 

@@ -16,6 +16,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5FAcache.c
+ *			Jul  2 2009
+ *			Quincey Koziol <koziol@hdfgroup.org>
  *
  * Purpose:		Implement fixed array metadata cache methods.
  *
@@ -41,7 +43,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FApkg.h"		/* Fixed Arrays				*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
@@ -187,7 +189,7 @@ H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata))
 	H5E_THROW(H5E_CANTINIT, "can't wrap buffer")
 
     /* Compute the 'base' size of the fixed array header on disk */
-    size = H5FA_HEADER_SIZE(hdr);
+    size = H5FA_HEADER_SIZE_HDR(hdr);
 
     /* Get a pointer to a buffer that's large enough for serialized header */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
@@ -299,7 +301,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5FA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5FA_hdr_t *hdr, unsigned UNUSED * flags_ptr))
+    H5FA_hdr_t *hdr, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     H5WB_t *wb = NULL;                  /* Wrapped buffer for header data */
     uint8_t hdr_buf[H5FA_HDR_BUF_SIZE]; /* Buffer for header */
@@ -424,7 +426,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_clear() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__cache_hdr_size(const H5F_t UNUSED *f, const H5FA_hdr_t *hdr,
+H5FA__cache_hdr_size(const H5F_t H5_ATTR_UNUSED *f, const H5FA_hdr_t *hdr,
     size_t *size_ptr))
 
     /* Sanity check */
@@ -517,10 +519,10 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(udata && udata->hdr && udata->nelmts > 0);
+    HDassert(udata && udata->hdr);
 
     /* Allocate the fixed array data block */
-    if(NULL == (dblock = H5FA__dblock_alloc(udata->hdr, udata->nelmts)))
+    if(NULL == (dblock = H5FA__dblock_alloc(udata->hdr)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
 
     /* Set the fixed array data block's information */
@@ -575,9 +577,9 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     if(!dblock->npages) {
         /* Decode elements in data block */
         /* Convert from raw elements on disk into native elements in memory */
-        if((udata->hdr->cparam.cls->decode)(p, dblock->elmts, (size_t)udata->nelmts, udata->hdr->cb_ctx) < 0)
+        if((udata->hdr->cparam.cls->decode)(p, dblock->elmts, (size_t)udata->hdr->stats.nelmts, udata->hdr->cb_ctx) < 0)
             H5E_THROW(H5E_CANTDECODE, "can't decode fixed array data elements")
-        p += (udata->nelmts * udata->hdr->cparam.raw_elmt_size);
+        p += (udata->hdr->stats.nelmts * udata->hdr->cparam.raw_elmt_size);
     } /* end if */
 
     /* Sanity check */
@@ -630,7 +632,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5FA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5FA_dblock_t *dblock, unsigned UNUSED * flags_ptr))
+    H5FA_dblock_t *dblock, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     /* Local variables */
     H5WB_t *wb = NULL;                     /* Wrapped buffer for serializing data */
@@ -771,7 +773,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_clear() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__cache_dblock_size(const H5F_t UNUSED *f, const H5FA_dblock_t *dblock,
+H5FA__cache_dblock_size(const H5F_t H5_ATTR_UNUSED *f, const H5FA_dblock_t *dblock,
     size_t *size_ptr))
 
     /* Sanity check */
@@ -868,9 +870,6 @@ H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(udata && udata->hdr && udata->nelmts > 0);
-#ifdef QAK
-HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
-#endif /* QAK */
 
     /* Allocate the fixed array data block page */
     if(NULL == (dblk_page = H5FA__dblk_page_alloc(udata->hdr, udata->nelmts)))
@@ -884,7 +883,7 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 	H5E_THROW(H5E_CANTINIT, "can't wrap buffer")
 
     /* Compute the size of the fixed array data block page on disk */
-    size = H5FA_DBLK_PAGE_SIZE(dblk_page, udata->nelmts);
+    size = H5FA_DBLK_PAGE_SIZE(udata->hdr, udata->nelmts);
 
     /* Get a pointer to a buffer that's large enough for serialized info */
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
@@ -955,7 +954,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5FA__cache_dblk_page_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5FA_dblk_page_t *dblk_page, unsigned UNUSED * flags_ptr))
+    H5FA_dblk_page_t *dblk_page, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     /* Local variables */
     H5WB_t *wb = NULL;                  /* Wrapped buffer for serializing data */
@@ -1071,7 +1070,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_clear() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__cache_dblk_page_size(const H5F_t UNUSED *f, const H5FA_dblk_page_t *dblk_page,
+H5FA__cache_dblk_page_size(const H5F_t H5_ATTR_UNUSED *f, const H5FA_dblk_page_t *dblk_page,
     size_t *size_ptr))
 
     /* Sanity check */
@@ -1103,7 +1102,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_size() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA__cache_dblk_page_dest(H5F_t UNUSED *f, H5FA_dblk_page_t *dblk_page))
+H5FA__cache_dblk_page_dest(H5F_t H5_ATTR_UNUSED *f, H5FA_dblk_page_t *dblk_page))
 
     /* Sanity check */
     HDassert(f);

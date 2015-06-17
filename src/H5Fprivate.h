@@ -244,7 +244,6 @@
 #define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \
 				 HADDR_UNDEF==(X)+(haddr_t)(Z) ||	      \
 				 (X)+(haddr_t)(Z)<(X))
-#define H5F_addr_hash(X,M)	((unsigned)((X)%(M)))
 #define H5F_addr_defined(X)	((X)!=HADDR_UNDEF)
 /* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
  * certain that X is not HADDR_UNDEF and then checking that X equals Y
@@ -395,13 +394,13 @@
  */
 #if (H5_SIZEOF_SIZE_T >= H5_SIZEOF_OFF_T)
 #   define H5F_OVERFLOW_SIZET2OFFT(X)					      \
-    ((size_t)(X)>=(size_t)((size_t)1<<(8*sizeof(off_t)-1)))
+    ((size_t)(X)>=(size_t)((size_t)1<<(8*sizeof(HDoff_t)-1)))
 #else
 #   define H5F_OVERFLOW_SIZET2OFFT(X) 0
 #endif
 #if (H5_SIZEOF_HSIZE_T >= H5_SIZEOF_OFF_T)
 #   define H5F_OVERFLOW_HSIZET2OFFT(X)					      \
-    ((hsize_t)(X)>=(hsize_t)((hsize_t)1<<(8*sizeof(off_t)-1)))
+    ((hsize_t)(X)>=(hsize_t)((hsize_t)1<<(8*sizeof(HDoff_t)-1)))
 #else
 #   define H5F_OVERFLOW_HSIZET2OFFT(X) 0
 #endif

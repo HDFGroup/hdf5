@@ -186,7 +186,7 @@ static herr_t test_select_hyper_iter3(void *elem,hid_t type_id, unsigned ndim, c
 **
 ****************************************************************/
 static herr_t
-test_select_hyper_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
+test_select_hyper_iter1(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_UNUSED ndim, const hsize_t H5_ATTR_UNUSED *point, void *_operator_data)
 {
     uint8_t *tbuf=(uint8_t *)_elem,     /* temporary buffer pointer */
             **tbuf2=(uint8_t **)_operator_data; /* temporary buffer handle */
@@ -385,7 +385,7 @@ struct pnt_iter {
 **
 ****************************************************************/
 static herr_t
-test_select_point_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
+test_select_point_iter1(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_UNUSED ndim, const hsize_t H5_ATTR_UNUSED *point, void *_operator_data)
 {
     uint8_t *elem=(uint8_t *)_elem;  /* Pointer to the element to examine */
     uint8_t *tmp;                       /* temporary ptr to element in operator data */
@@ -662,7 +662,7 @@ test_select_point(hid_t xfer_plist)
 **
 ****************************************************************/
 static herr_t
-test_select_all_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
+test_select_all_iter1(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_UNUSED ndim, const hsize_t H5_ATTR_UNUSED *point, void *_operator_data)
 {
     uint8_t *tbuf=(uint8_t *)_elem,     /* temporary buffer pointer */
             **tbuf2=(uint8_t **)_operator_data; /* temporary buffer handle */
@@ -682,7 +682,7 @@ test_select_all_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, c
 **
 ****************************************************************/
 static herr_t
-test_select_none_iter1(void UNUSED *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void UNUSED *_operator_data)
+test_select_none_iter1(void H5_ATTR_UNUSED *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_UNUSED ndim, const hsize_t H5_ATTR_UNUSED *point, void H5_ATTR_UNUSED *_operator_data)
 {
     return(-1);
 }   /* end test_select_none_iter1() */
@@ -5816,7 +5816,7 @@ test_select_hyper_nota_2d(void)
 **
 ****************************************************************/
 static herr_t
-test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, unsigned ndim, const hsize_t *point, void *_operator_data)
+test_select_hyper_iter2(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndim, const hsize_t *point, void *_operator_data)
 {
     int *tbuf=(int *)_elem,     /* temporary buffer pointer */
         **tbuf2=(int **)_operator_data; /* temporary buffer handle */
@@ -7008,7 +7008,7 @@ typedef struct {
 **
 ****************************************************************/
 static herr_t
-test_select_hyper_iter3(void *_elem, hid_t UNUSED type_id, unsigned ndim, const hsize_t *point, void *_operator_data)
+test_select_hyper_iter3(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndim, const hsize_t *point, void *_operator_data)
 {
     unsigned *tbuf = (unsigned *)_elem;     /* temporary buffer pointer */
     fill_iter_info *iter_info = (fill_iter_info *)_operator_data; /* Get the pointer to the iterator information */
