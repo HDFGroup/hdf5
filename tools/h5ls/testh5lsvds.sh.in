@@ -100,12 +100,6 @@ $SRC_H5LS_TESTFILES/vds/tvds-3_1.ls
 $SRC_H5LS_TESTFILES/vds/tvds-3_2.ls
 $SRC_H5LS_TESTFILES/vds/tvds-4.ls
 $SRC_H5LS_TESTFILES/vds/tvds-5.ls
-$SRC_H5LS_TESTFILES/vds/tvds_layout-1.ls
-$SRC_H5LS_TESTFILES/vds/tvds_layout-2.ls
-$SRC_H5LS_TESTFILES/vds/tvds_layout-3_1.ls
-$SRC_H5LS_TESTFILES/vds/tvds_layout-3_2.ls
-$SRC_H5LS_TESTFILES/vds/tvds_layout-4.ls
-$SRC_H5LS_TESTFILES/vds/tvds_layout-5.ls
 "
 
 

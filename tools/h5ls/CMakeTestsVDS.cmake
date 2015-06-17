@@ -41,12 +41,6 @@
       tvds-3_2.ls
       tvds-4.ls
       tvds-5.ls
-      tvds_layout-1.ls
-      tvds_layout-2.ls
-      tvds_layout-3_1.ls
-      tvds_layout-3_2.ls
-      tvds_layout-4.ls
-      tvds_layout-5.ls
   )
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
