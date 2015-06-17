@@ -563,7 +563,11 @@ rm -f pac_Cconftest.out
                 # if $HAVE_QUADMATH!=0
                 #include <quadmath.h>
                 # endif
+                # ifdef FLT128_DIG
                 #define C_FLT128_DIG FLT128_DIG
+                # else
+                #define C_FLT128_DIG 0
+                # endif
                 #endif
                 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
                 #define C_LDBL_DIG DECIMAL_DIG 
@@ -585,7 +589,7 @@ rm -f pac_Cconftest.out
             fi
             rm -f pac_Cconftest.out
         ],[
-            AC_MSG_WARN([C program fails to build or run!])
+            AC_MSG_ERROR([C program fails to build or run!])
         ],[])
 ])
 
