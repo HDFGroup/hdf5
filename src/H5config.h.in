@@ -566,6 +566,9 @@
 /* The size of `unsigned', as computed by sizeof. */
 #undef SIZEOF_UNSIGNED
 
+/* The size of `_Quad', as computed by sizeof. */
+#undef SIZEOF__QUAD
+
 /* The size of `__float128', as computed by sizeof. */
 #undef SIZEOF___FLOAT128
 
