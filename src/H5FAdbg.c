@@ -117,7 +117,7 @@ H5FA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     } /* end if */
 
     /* Load the fixed array header */
-    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, addr, dbg_ctx, H5AC_READ)))
+    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load fixed array header")
 
     /* Print opening message */
@@ -198,11 +198,11 @@ H5FA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     } /* end if */
 
     /* Load the fixed array header */
-    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, hdr_addr, dbg_ctx, H5AC_READ)))
+    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load fixed array header")
 
     /* Protect data block */
-    if(NULL == (dblock = H5FA__dblock_protect(hdr, dxpl_id, addr, H5AC_READ)))
+    if(NULL == (dblock = H5FA__dblock_protect(hdr, dxpl_id, addr, H5AC__READ_ONLY_FLAG)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block, address = %llu", (unsigned long long)addr)
 
     /* Print opening message */
@@ -246,7 +246,7 @@ H5FA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
 		if(((page_idx + 1) == dblock->npages) && (nelmts_left = hdr->cparam.nelmts % dblock->dblk_page_nelmts))
 		    dblk_page_nelmts = (size_t)nelmts_left;
 
-		if(NULL == (dblk_page = H5FA__dblk_page_protect(hdr, dxpl_id, dblk_page_addr, dblk_page_nelmts, H5AC_READ)))
+		if(NULL == (dblk_page = H5FA__dblk_page_protect(hdr, dxpl_id, dblk_page_addr, dblk_page_nelmts, H5AC__READ_ONLY_FLAG)))
 		    H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
 		HDfprintf(stream, "%*sElements in page %Zu:\n", indent, "", page_idx);
