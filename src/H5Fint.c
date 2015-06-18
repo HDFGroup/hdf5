@@ -795,9 +795,19 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
              *      and also because releasing free space can shrink the file's
              *      'eoa' value)
              */
-            if(H5MF_close(f, dxpl_id) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+            if(H5F_ACC_RDWR & H5F_INTENT(f)) {
+                if(H5MF_close(f, dxpl_id) < 0)
+                    /* Push error, but keep going*/
+                    HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+
+                /* Flush the file again (if requested), as shutting down the
+                 * free space manager may dirty some data structures again.
+                 */
+                if(flush)
+                    if(H5F_flush(f, dxpl_id, TRUE) < 0)
+                        /* Push error, but keep going*/
+                        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+            } /* end if */
 
             /* Unpin the superblock, since we're about to destroy the cache */
             if(H5AC_unpin_entry(f->shared->sblock) < 0)
@@ -852,14 +862,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         if(H5I_dec_ref(f->shared->fcpl_id) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close property list")
-
-        /* Only truncate the file on an orderly close, with write-access */
-        if(f->closing && (H5F_ACC_RDWR & H5F_INTENT(f))) {
-            /* Truncate the file to the current allocated size */
-            if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)TRUE) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
-        } /* end if */
 
         /* Close the file */
         if(H5FD_close(f->shared->lf) < 0)
@@ -1174,6 +1176,15 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
         HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
 
     /* Flush the entire metadata cache */
+    if(H5AC_flush(f, dxpl_id) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
+
+    /* Truncate the file to the current allocated size */
+    if(H5FD_truncate(f->shared->lf, dxpl_id, closing) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
+
+    /* Flush the entire metadata cache again since the EOA could have changed in the truncate call. */
     if(H5AC_flush(f, dxpl_id) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
