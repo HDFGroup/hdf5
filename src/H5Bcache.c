@@ -115,6 +115,7 @@ H5B__load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     HDassert(H5F_addr_defined(addr));
     HDassert(udata);
 
+    /* Allocate the B-tree node in memory */
     if(NULL == (bt = H5FL_MALLOC(H5B_t)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate B-tree struct")
     HDmemset(&bt->cache_info, 0, sizeof(H5AC_info_t));
@@ -141,7 +142,7 @@ H5B__load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* magic number */
     if(HDmemcmp(p, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree signature")
+	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree signature")
     p += 4;
 
     /* node type and level */
@@ -185,7 +186,7 @@ H5B__load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
 done:
     if(!ret_value && bt)
-        if(H5B_node_dest(bt) < 0)
+        if(H5B__node_dest(bt) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -328,7 +329,7 @@ H5B__dest(H5F_t *f, H5B_t *bt)
     } /* end if */
 
     /* Destroy B-tree node */
-    if(H5B_node_dest(bt) < 0)
+    if(H5B__node_dest(bt) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
 
 done:

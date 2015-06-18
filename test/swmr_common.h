@@ -3,7 +3,6 @@
 
 /* Headers needed */
 
-#define _GNU_SOURCE
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
