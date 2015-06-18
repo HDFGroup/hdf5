@@ -79,7 +79,7 @@ main (void)
     *
     */
       status = H5Sselect_hyperslab (vspace, H5S_SELECT_SET, start, stride, count, block);
-      status = H5Pset_virtual (dcpl, vspace, "f-%0b.h5", "/A", src_space);
+      status = H5Pset_virtual (dcpl, vspace, "f-%b.h5", "/A", src_space);
    
 
 
