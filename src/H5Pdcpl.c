@@ -1851,11 +1851,6 @@ H5Pget_virtual_vspace(hid_t dcpl_id, size_t index)
     if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].source_dset.virtual_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
 
-    /* Clip selection to extent */
-    if(H5S_get_select_unlim_dim(space) >= 0)
-        if(H5S_hyper_clip_to_extent(space) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection")
-
     /* Register ID */
     if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space")
@@ -1913,11 +1908,6 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
     if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].source_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")
-
-    /* Clip selection to extent */
-    if(H5S_get_select_unlim_dim(space) >= 0)
-        if(H5S_hyper_clip_to_extent(space) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection")
 
     /* Register ID */
     if((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)

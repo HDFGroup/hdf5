@@ -268,9 +268,10 @@ H5_DLL herr_t H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset);
 H5_DLL htri_t H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset);
 H5_DLL herr_t H5S_hyper_denormalize_offset(H5S_t *space, const hssize_t *old_offset);
 H5_DLL herr_t H5S_hyper_clip_unlim(H5S_t *space, hsize_t clip_size);
-H5_DLL herr_t H5S_hyper_clip_to_extent(H5S_t *space);
-H5_DLL herr_t H5S_hyper_get_clip_extent(const H5S_t *clip_space,
-    const H5S_t *match_space, hsize_t *clip_size, hbool_t incl_trail);
+H5_DLL hsize_t H5S_hyper_get_clip_extent(const H5S_t *clip_space,
+    const H5S_t *match_space, hbool_t incl_trail);
+H5_DLL hsize_t H5S_hyper_get_clip_extent_match(const H5S_t *clip_space,
+    const H5S_t *match_space, hsize_t match_clip_size, hbool_t incl_trail);
 H5_DLL H5S_t *H5S_hyper_get_unlim_block(const H5S_t *space,
     hsize_t block_index);
 H5_DLL hsize_t H5S_hyper_get_first_inc_block(const H5S_t *space,

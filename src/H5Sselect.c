@@ -78,12 +78,6 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
     /* Indicate that the offset was changed */
     space->select.offset_changed = TRUE;
 
-    /* If the selection is 'hyper', update the selection due to changed offset
-     */
-    if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS)
-        if(H5S_hyper_clip_to_extent(space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_offset() */

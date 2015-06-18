@@ -1012,7 +1012,6 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
     hsize_t     clip_size;
     int         rank;
     hbool_t     changed = FALSE;        /* Whether the VDS extent changed */
-    H5S_t       *tmp_space = NULL;      /* Temporary dataspace */
     size_t      i, j, k;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1063,23 +1062,10 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                         /* Use cached result for clip size */
                         clip_size = storage->list[i].clip_size_virtual;
                     else {
-                        /* Copy source mapping */
-                        if(NULL == (tmp_space = H5S_copy(storage->list[i].source_select, FALSE, TRUE)))
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy source selection")
-
-                        /* Clip temporary source space to source extent */
-                        if(H5S_hyper_clip_unlim(tmp_space, curr_dims[storage->list[i].unlim_dim_source]))
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection")
-
                         /* Get size that virtual selection would be clipped to
-                         * to match size of source selection */
-                        if(H5S_hyper_get_clip_extent(storage->list[i].source_dset.virtual_select, tmp_space, &clip_size, storage->view == H5D_VDS_FIRST_MISSING) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get hyperslab clip size")
-
-                        /* Close tmp_space */
-                        if(H5S_close(tmp_space) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
-                        tmp_space = NULL;
+                         * to match size of source selection within source
+                         * extent */
+                        clip_size = H5S_hyper_get_clip_extent_match(storage->list[i].source_dset.virtual_select, storage->list[i].source_select, curr_dims[storage->list[i].unlim_dim_source], storage->view == H5D_VDS_FIRST_MISSING);
 
                         /* If we are setting the extent by the last available
                          * data, clip virtual_select and source_select.  Note
@@ -1307,9 +1293,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "failed to clip unlimited selection")
 
                     /* Get size that source selection will be clipped to to
-                     * match size of source selection */
-                    if(H5S_hyper_get_clip_extent(storage->list[i].source_select, storage->list[i].source_dset.clipped_virtual_select, &clip_size, FALSE) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get hyperslab clip size")
+                     * match size of virtual selection */
+                    clip_size = H5S_hyper_get_clip_extent(storage->list[i].source_select, storage->list[i].source_dset.clipped_virtual_select, FALSE);
 
                     /* Check if the clip size changed */
                     if(clip_size != storage->list[i].clip_size_source) {
@@ -1440,13 +1425,6 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
     storage->init = TRUE;
 
 done:
-    /* Close temporary space */
-    if(tmp_space) {
-        HDassert(ret_value < 0);
-        if(H5S_close(tmp_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space")
-    } /* end if */
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_set_extent_unlim() */
 

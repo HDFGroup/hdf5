@@ -117,18 +117,14 @@ struct H5S_hyper_span_info_t {
 typedef struct {
     hbool_t diminfo_valid;                      /* Whether the dataset has valid diminfo */
     H5S_hyper_dim_t opt_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
-    H5S_hyper_dim_t opt_unlim_diminfo[H5S_MAX_RANK]; /* per-dim selections info */
     H5S_hyper_dim_t app_diminfo[H5S_MAX_RANK];  /* per-dim selection info */
 	/* 'opt_diminfo' points to a [potentially] optimized version of the user's
          * hyperslab information.  'app_diminfo' points to the actual parameters
          * that the application used for setting the hyperslab selection.  These
          * are only used for re-gurgitating the original values used to set the
          * hyperslab to the application when it queries the hyperslab selection
-         * information.  'opt_unlim_diminfo' is similar to opt_diminfo but
-         * contains H5S_UNLIMITED in the count or block of the unlimited
-         * dimension (if any). */
+         * information. */
     int unlim_dim;                              /* Dimension where selection is unlimited, or -1 if none */
-    hssize_t unlim_dim_clip_size;               /* Size to which the selection is clipped in unlimited dimension */
     hsize_t num_elem_non_unlim;                 /* # of elements in a "slice" excluding the unlimited dimension */
     H5S_hyper_span_info_t *span_lst; /* List of hyperslab span information */
 } H5S_hyper_sel_t;
@@ -276,7 +272,7 @@ H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
 H5_DLL herr_t H5S__hyper_project_intersection(const H5S_t *src_space,
     const H5S_t *dst_space, const H5S_t *src_intersect_space,
     H5S_t *proj_space);
-H5_DLL herr_t H5S__hyper_subtract (H5S_t *space, H5S_t *subtract_space);
+H5_DLL herr_t H5S__hyper_subtract(H5S_t *space, H5S_t *subtract_space);
 
 /* Testing functions */
 #ifdef H5S_TESTING

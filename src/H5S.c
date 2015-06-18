@@ -519,12 +519,6 @@ H5S_extent_copy(H5S_t *dst, const H5S_t *src)
         if(H5S_select_all(dst, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
-    /* If the selection is 'hyper', update the selection due to changed extent
-     */
-    if(H5S_GET_SELECT_TYPE(dst) == H5S_SEL_HYPERSLABS)
-        if(H5S_hyper_clip_to_extent(dst) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_extent_copy() */
@@ -1359,12 +1353,6 @@ H5S__set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
     if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_ALL)
         if(H5S_select_all(space, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
-
-    /* If the selection is 'hyper', update the selection due to changed
-     * extent */
-    if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS)
-        if(H5S_hyper_clip_to_extent(space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't update hyperslab")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
