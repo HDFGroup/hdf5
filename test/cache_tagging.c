@@ -117,91 +117,91 @@ print_entry_type_to_screen(int id)
     switch (id) {
     
         case 0:
-            printf("B-tree Node");
+            printf("B-tree Node(0)");
             break;
         case 1: 
-            printf("Symbol Table Node");
+            printf("Symbol Table Node(1)");
             break;
         case 2:
-            printf("Local Heap Prefix");
+            printf("Local Heap Prefix(2)");
             break;
         case 3:
-            printf("Local Heap Data Block");
+            printf("Local Heap Data Block(3)");
             break;
         case 4:
-            printf("Global Heap");
+            printf("Global Heap(4)");
             break;
         case 5:
-            printf("Object Header");
+            printf("Object Header(5)");
             break;
         case 6:
-            printf("Object Header Chunk");
+            printf("Object Header Chunk(6)");
             break;
         case 7:
-            printf("v2 B-tree Header");
+            printf("v2 B-tree Header(7)");
             break;
         case 8:
-            printf("v2 B-tree Internal Node");
+            printf("v2 B-tree Internal Node(8)");
             break;
         case 9:
-            printf("v2 B-tree Leaf Node");
+            printf("v2 B-tree Leaf Node(9)");
             break;
         case 10:
-            printf("Fractal Heap Header");
+            printf("Fractal Heap Header(10)");
             break;
         case 11:
-            printf("Fractal Heap Direct Block");
+            printf("Fractal Heap Direct Block(11)");
             break;
         case 12:
-            printf("Fractal Heap Indirect Block");
+            printf("Fractal Heap Indirect Block(12)");
             break;
         case 13:
-            printf("Free Space Header");
+            printf("Free Space Header(13)");
             break;
         case 14:
-            printf("Free Space Section");
+            printf("Free Space Section(14)");
             break;
         case 15:
-            printf("Shared Object Header Message Master Table");
+            printf("Shared Object Header Message Master Table(15)");
             break;
         case 16:
-            printf("Shared Message Index Stored As A List");
+            printf("Shared Message Index Stored As A List(16)");
             break;
         case 17:
-            printf("Extensible Array Header");
+            printf("Extensible Array Header(17)");
             break;
         case 18:
-            printf("Extensible Array Index Block");
+            printf("Extensible Array Index Block(18)");
             break;
         case 19:
-            printf("Extensible Array Super Block");
+            printf("Extensible Array Super Block(19)");
             break;
         case 20:
-            printf("Extensible Array Data Block");
+            printf("Extensible Array Data Block(20)");
             break;
         case 21:
-            printf("Extensible Array Data Block Page");
+            printf("Extensible Array Data Block Page(21)");
             break;
         case 22:
-            printf("Chunk Proxy");
+            printf("Chunk Proxy(22)");
             break;
         case 23:
-            printf("Fixed Array Header");
+            printf("Fixed Array Header(23)");
             break;
         case 24:
-            printf("Fixed Array Data Block");
+            printf("Fixed Array Data Block(24)");
             break;
         case 25:
-            printf("Fixed Array Data Block Page");
+            printf("Fixed Array Data Block Page(25)");
             break;
         case 26:
-            printf("File Superblock");
+            printf("File Superblock(26)");
             break;
         case 27:
-            printf("Test Entry");
+            printf("Test Entry(27)");
             break;
         case 28:
-            printf("Number of Types");
+            printf("Number of Types(28)");
             break;
         default:
             printf("*Unknown*");
@@ -434,7 +434,8 @@ static int verify_tag(hid_t fid, int id, haddr_t tag)
 
     } /* for */
 
-    if (found == FALSE) TEST_ERROR;
+    if (found == FALSE) 
+        TEST_ERROR;
     
     return 0;
 

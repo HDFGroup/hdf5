@@ -252,7 +252,7 @@ H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict tagged metadata")
 
     /* Re-read the superblock. */
-    if (H5F_super_read(f, dxpl_id) < 0)
+    if (H5F__super_read(f, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "unable to read superblock")
 
 done:

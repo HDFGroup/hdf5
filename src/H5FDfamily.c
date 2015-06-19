@@ -587,26 +587,25 @@ H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned cha
      * h5repart is being used to change member file size.  h5repart will open
      * files for read and write.  When the files are closed, metadata will be
      * flushed to the files and updated to this new size */
-    if(file->mem_newsize) {
+    if(file->mem_newsize)
         file->memb_size = file->pmem_size = file->mem_newsize;
-        HGOTO_DONE(ret_value)
-    } /* end if */
+    else {
+        /* Default - use the saved member size */
+        if(file->pmem_size == H5F_FAMILY_DEFAULT)
+           file->pmem_size = msize;
 
-    /* Default - use the saved member size */
-    if(file->pmem_size == H5F_FAMILY_DEFAULT)
-       file->pmem_size = msize;
+        /* Check if member size from file access property is correct */
+        if(msize != file->pmem_size) {
+            char err_msg[128];
 
-    /* Check if member size from file access property is correct */
-    if(msize != file->pmem_size) {
-        char err_msg[128];
+            HDsnprintf(err_msg, sizeof(err_msg), "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
+        } /* end if */
 
-        HDsnprintf(err_msg, sizeof(err_msg), "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
-    } /* end if */
-
-    /* Update member file size to the size saved in the superblock.
-     * That's the size intended to be. */
-    file->memb_size = msize;
+        /* Update member file size to the size saved in the superblock.
+         * That's the size intended to be. */
+        file->memb_size = msize;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -686,14 +685,11 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 
         /* Check for new family file size. It's used by h5repart only. */
         if(H5P_exist_plist(plist, H5F_ACS_FAMILY_NEWSIZE_NAME) > 0) {
-            hsize_t fam_newsize = 0;        /* New member size, when repartitioning */
-
             /* Get the new family file size */
-            if(H5P_get(plist, H5F_ACS_FAMILY_NEWSIZE_NAME, &fam_newsize) < 0)
+            if(H5P_get(plist, H5F_ACS_FAMILY_NEWSIZE_NAME, &file->mem_newsize) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get new family member size")
 
-            /* Store information for later */
-            file->mem_newsize = fam_newsize; /* New member size passed in through property */
+            /* Set flag for later */
             file->repart_members = TRUE;
         } /* end if */
 

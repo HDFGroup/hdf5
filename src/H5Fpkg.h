@@ -306,10 +306,10 @@ H5_DLL int H5F_term_unmount_cb(void *obj_ptr, hid_t obj_id, void *key);
 H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
 
 /* Superblock related routines */
-H5_DLL herr_t H5F_super_init(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F_super_read(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F_super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_size);
-H5_DLL herr_t H5F_super_free(H5F_super_t *sblock);
+H5_DLL herr_t H5F__super_init(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F__super_read(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F__super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_size);
+H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 
 /* Superblock extension related routines */
 H5_DLL herr_t H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);

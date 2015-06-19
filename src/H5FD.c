@@ -540,11 +540,11 @@ H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_sb_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_sb_decode
+ * Function:	H5FD__sb_decode
  *
  * Purpose:	Decodes the driver information block.
  *
@@ -556,20 +556,61 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+static herr_t
+H5FD__sb_decode(H5FD_t *file, const char *name, const uint8_t *buf)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    HDassert(file && file->cls);
+
+    /* Decode driver information */
+    if(file->cls->sb_decode && (file->cls->sb_decode)(file, name, buf) < 0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_decode request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__sb_decode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_sb_load
+ *
+ * Purpose:	Validate and decode the driver information block.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, July 19, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
-H5FD_sb_decode(H5FD_t *file, const char *name, const uint8_t *buf)
+H5FD_sb_load(H5FD_t *file, const char *name, const uint8_t *buf)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file && file->cls);
-    if(file->cls->sb_decode && (file->cls->sb_decode)(file, name, buf) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_decode request failed")
+
+    /* Check if driver matches driver information saved. Unfortunately, we can't push this
+     * function to each specific driver because we're checking if the driver is correct.
+     */
+    if(!HDstrncmp(name, "NCSAfami", (size_t)8) && HDstrcmp(file->cls->name, "family"))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "family driver should be used")
+    if(!HDstrncmp(name, "NCSAmult", (size_t)8) && HDstrcmp(file->cls->name, "multi"))
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "multi driver should be used")
+
+    /* Decode driver information */
+    if(H5FD__sb_decode(file, name, buf) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode driver information")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_sb_decode() */
+} /* end H5FD_sb_load() */
 
 
 /*-------------------------------------------------------------------------

@@ -611,7 +611,7 @@ H5HL__datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     H5HL_dblk_t *dblk = NULL;       /* Local heap data block deserialized */
     H5HL_cache_dblk_ud_t *udata = (H5HL_cache_dblk_ud_t *)_udata;       /* User data for callback */
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(udata);
@@ -721,7 +721,7 @@ BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5HL__datablock_dest(H5F_t *f, H5HL_dblk_t *dblk))
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(dblk);
     HDassert(dblk->heap);
     HDassert(!dblk->heap->single_cache_obj);
@@ -767,7 +767,7 @@ BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5HL__datablock_clear(H5F_t *f, H5HL_dblk_t *dblk, hbool_t destroy))
 
-    /* check arguments */
+    /* Check arguments */
     HDassert(dblk);
 
     /* Mark local heap data block as clean */
