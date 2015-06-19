@@ -1386,23 +1386,23 @@ h5tools_str_is_zero(const void *_mem, size_t size)
 char *
 h5tools_str_replace ( const char *string, const char *substr, const char *replacement )
 {
-  char *tok = NULL;
-  char *newstr = NULL;
-  char *oldstr = NULL;
-  char *head = NULL;
-
-  if ( substr == NULL || replacement == NULL )
-    return HDstrdup (string);
-
-  newstr = HDstrdup (string);
-  head = newstr;
-  while ( (tok = HDstrstr ( head, substr ))){
-    oldstr = newstr;
-    newstr = HDmalloc ( HDstrlen ( oldstr ) - HDstrlen ( substr ) + HDstrlen ( replacement ) + 1 );
+	char *tok = NULL;
+	char *newstr = NULL;
+	char *oldstr = NULL;
+	char *head = NULL;
+     
+	if ( substr == NULL || replacement == NULL ) 
+		return HDstrdup (string);
+		
+	newstr = HDstrdup (string);
+	head = newstr;
+	while ( (tok = HDstrstr ( head, substr ))){
+		oldstr = newstr;
+		newstr = HDmalloc ( HDstrlen ( oldstr ) - HDstrlen ( substr ) + HDstrlen ( replacement ) + 1 );
 
         if ( newstr == NULL ){
-      HDfree (oldstr);
-      return NULL;
+			HDfree (oldstr);
+			return NULL;
         }
         HDmemcpy ( newstr, oldstr, tok - oldstr );
         HDmemcpy ( newstr + (tok - oldstr), replacement, HDstrlen ( replacement ) );
