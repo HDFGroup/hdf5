@@ -1268,6 +1268,7 @@
 ./tools/h5repack/testh5repack_detect_szip.c
 
 # h5ls sources
+./tools/h5ls/CMakeTestsVDS.cmake
 ./tools/h5ls/Makefile.am
 ./tools/h5ls/Makefile.in
 ./tools/h5ls/h5ls.c
