@@ -121,7 +121,7 @@ main (void)
    }
 
    /* Create a virtual dataset */
-      dset = H5Dcreate (file, DATASET, H5T_NATIVE_INT, space, H5P_DEFAULT,
+      dset = H5Dcreate2 (file, DATASET, H5T_NATIVE_INT, space, H5P_DEFAULT,
                   dcpl, H5P_DEFAULT);
       status = H5Sclose (space);
       status = H5Sclose (nsrc_space);
@@ -138,7 +138,7 @@ main (void)
      * Open file and dataset using the default properties.
      */
     file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
-    dset = H5Dopen (file, DATASET, H5P_DEFAULT);
+    dset = H5Dopen2 (file, DATASET, H5P_DEFAULT);
 
     /*
      * Get creation property list and mapping properties.

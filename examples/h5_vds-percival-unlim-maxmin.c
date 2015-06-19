@@ -93,7 +93,7 @@ main (void)
         src_space = H5Screate_simple (RANK, dims, dims_max);
         dcpl = H5Pcreate(H5P_DATASET_CREATE);
         status = H5Pset_chunk (dcpl, RANK, chunk_dims);
-        dset = H5Dcreate (file, SRC_DATASET[i], H5T_NATIVE_INT, src_space, H5P_DEFAULT,
+        dset = H5Dcreate2 (file, SRC_DATASET[i], H5T_NATIVE_INT, src_space, H5P_DEFAULT,
                     dcpl, H5P_DEFAULT);
         status = H5Dwrite (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                     wdata);
@@ -146,7 +146,7 @@ main (void)
     H5Sselect_none(vspace); 
 
     /* Create a virtual dataset */
-    vdset = H5Dcreate (vfile, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT,
+    vdset = H5Dcreate2 (vfile, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT,
                 dcpl, H5P_DEFAULT);
     status = H5Sclose (vspace);
     status = H5Sclose (src_space);
@@ -168,7 +168,7 @@ main (void)
          */
 
         file = H5Fopen (SRC_FILE[i], H5F_ACC_RDWR, H5P_DEFAULT);
-        dset = H5Dopen (file, SRC_DATASET[i], H5P_DEFAULT);
+        dset = H5Dopen2 (file, SRC_DATASET[i], H5P_DEFAULT);
         extdims[0] = DIM0_1+i+1;
         status = H5Dset_extent (dset, extdims);       
         src_space = H5Dget_space (dset);
@@ -212,7 +212,7 @@ main (void)
 
     for(i = 0; i < 2; i++) {
         status = H5Pset_virtual_view (dapl, i ? H5D_VDS_LAST_AVAILABLE : H5D_VDS_FIRST_MISSING);
-        vdset = H5Dopen (vfile, DATASET, dapl);
+        vdset = H5Dopen2 (vfile, DATASET, dapl);
 
         /* Let's get space of the VDS and its dimension; we should get 32(or 20)x10x10 */
         vspace = H5Dget_space (vdset);
@@ -229,7 +229,7 @@ main (void)
 
     status = H5Pclose (dapl);
 
-    vdset = H5Dopen (vfile, DATASET, H5P_DEFAULT);
+    vdset = H5Dopen2 (vfile, DATASET, H5P_DEFAULT);
 
     /*
      * Get creation property list and mapping properties.

@@ -55,7 +55,7 @@ main (void)
 
      file = H5Fcreate (SRC_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
      space = H5Screate_simple (RANK, dims, NULL);
-     dset = H5Dcreate (file, SRC_DATASET, H5T_NATIVE_INT, space, H5P_DEFAULT,
+     dset = H5Dcreate2 (file, SRC_DATASET, H5T_NATIVE_INT, space, H5P_DEFAULT,
                  H5P_DEFAULT, H5P_DEFAULT);
      status = H5Dwrite (dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
                  wdata[0]);
@@ -82,7 +82,7 @@ main (void)
     status = H5Pset_virtual (dcpl, vspace, SRC_FILE, SRC_DATASET, src_space);
 
     /* Create a virtual dataset. */
-    dset = H5Dcreate (file, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT,
+    dset = H5Dcreate2 (file, DATASET, H5T_NATIVE_INT, vspace, H5P_DEFAULT,
                 dcpl, H5P_DEFAULT);
     status = H5Sclose (vspace);
     status = H5Sclose (src_space);
@@ -97,7 +97,7 @@ main (void)
      * Open the file and virtual dataset.
      */
     file = H5Fopen (FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
-    dset = H5Dopen (file, DATASET, H5P_DEFAULT);
+    dset = H5Dopen2 (file, DATASET, H5P_DEFAULT);
     /*
      * Get creation property list and mapping properties.
      */
