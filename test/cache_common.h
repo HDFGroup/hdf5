@@ -138,12 +138,14 @@
 				 * directly pinned by a single entry.
 				 */
 
-#define FLUSH_OP__NO_OP		0
-#define FLUSH_OP__DIRTY		1
-#define FLUSH_OP__RESIZE	2
-#define FLUSH_OP__MOVE		3
-#define FLUSH_OP__ORDER		4
-#define FLUSH_OP__MAX_OP	4
+#define FLUSH_OP__NO_OP			0
+#define FLUSH_OP__DIRTY			1
+#define FLUSH_OP__RESIZE		2
+#define FLUSH_OP__MOVE			3
+#define FLUSH_OP__ORDER			4
+#define FLUSH_OP__EXPUNGE		5
+#define FLUSH_OP__DEST_FLUSH_DEP	6
+#define FLUSH_OP__MAX_OP		6
 
 #define MAX_FLUSH_OPS		10	/* Maximum number of flush operations
 					 * that can be associated with a
@@ -214,9 +216,31 @@ typedef struct test_entry_t
     struct test_entry_t * self; 	/* pointer to this entry -- used for
 					 * sanity checking.
                                          */
+    H5F_t               * file_ptr;     /* pointer to the file in which the
+                                         * entry resides, or NULL if the entry
+                                         * is not in a file.
+                                         */
     H5C_t               * cache_ptr;	/* pointer to the cache in which
 					 * the entry resides, or NULL if the
 					 * entry is not in cache.
+					 */
+    hbool_t		  written_to_main_addr;
+    					/* Flag indicating whether an image
+					 * of the entry has been written to
+					 * its main address.  Since we no
+					 * longer have a flush callback, we
+					 * set this field to true whenever the
+					 * entry is serialized while at its
+					 * main address.
+					 */
+    hbool_t		  written_to_alt_addr;
+                                        /* Flag indicating whether an image
+					 * of the entry has been written to
+					 * its alternate address.  Since we no
+					 * longer have a flush callback, we
+					 * set this field to true whenever the
+					 * entry is serialized while at its
+					 * alternate address.
 					 */
     haddr_t		  addr;         /* where the cache thinks this entry
                                          * is located
@@ -239,11 +263,11 @@ typedef struct test_entry_t
                                          */
     int32_t		  index;	/* index in its entry array
                                          */
-    int32_t		  reads;	/* number of times this entry has
-					 * been loaded.
+    int32_t		  serializes;	/* number of times this entry has
+					 * been serialized.
                                          */
-    int32_t		  writes;	/* number of times this entry has
-                                         * been written
+    int32_t		  deserializes;	/* number of times this entry has
+                                         * been deserialized
                                          */
     hbool_t		  is_dirty;	/* entry has been modified since
                                          * last write
@@ -302,16 +326,16 @@ typedef struct test_entry_t
 					 * checking code that would otherwise
 					 * cause a false test failure.
 					 */
-    hbool_t		  loaded;       /* entry has been loaded since the
-                                         * last time it was reset.
+    hbool_t		  deserialized; /* entry has been deserialized since
+					 * the last time it was reset.
                                          */
-    hbool_t		  cleared;      /* entry has been cleared since the
-                                         * last time it was reset.
-                                         */
-    hbool_t		  flushed;      /* entry has been flushed since the
+    hbool_t		  serialized;   /* entry has been serialized since the
                                          * last time it was reset.
                                          */
     hbool_t               destroyed;    /* entry has been destroyed since the
+                                         * last time it was reset.
+                                         */
+    hbool_t 		  expunged;     /* entry has been expunged since the 
                                          * last time it was reset.
                                          */
     int                   flush_dep_par_type; /* Entry type of flush dependency parent */
@@ -425,26 +449,26 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
       ( (a).set_initial_size      == (b).set_initial_size ) ) &&      \
     ( ( ! cmp_init_size ) ||                                          \
       ( (a).initial_size          == (b).initial_size ) ) &&          \
-    ( DBL_REL_EQUAL((a).min_clean_fraction, (b).min_clean_fraction, 0.00001 ) ) && \
+    ( H5_DBL_ABS_EQUAL((a).min_clean_fraction, (b).min_clean_fraction) ) && \
     ( (a).max_size                == (b).max_size ) &&                \
     ( (a).min_size                == (b).min_size ) &&                \
     ( (a).epoch_length            == (b).epoch_length ) &&            \
     ( (a).incr_mode               == (b).incr_mode ) &&               \
-    ( DBL_REL_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold, 0.00001 ) ) && \
-    ( DBL_REL_EQUAL((a).increment, (b).increment, 0.00001 ) ) &&      \
+    ( H5_DBL_ABS_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold) ) && \
+    ( H5_DBL_ABS_EQUAL((a).increment, (b).increment) ) &&      \
     ( (a).apply_max_increment     == (b).apply_max_increment ) &&     \
     ( (a).max_increment           == (b).max_increment ) &&           \
     ( (a).flash_incr_mode         == (b).flash_incr_mode ) &&         \
-    ( DBL_REL_EQUAL((a).flash_multiple, (b).flash_multiple, 0.00001 ) ) && \
-    ( DBL_REL_EQUAL((a).flash_threshold, (b).flash_threshold, 0.00001 ) ) && \
+    ( H5_DBL_ABS_EQUAL((a).flash_multiple, (b).flash_multiple) ) && \
+    ( H5_DBL_ABS_EQUAL((a).flash_threshold, (b).flash_threshold) ) && \
     ( (a).decr_mode               == (b).decr_mode ) &&               \
-    ( DBL_REL_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold, 0.00001 ) ) && \
-    ( DBL_REL_EQUAL((a).decrement, (b).decrement, 0.00001 ) ) &&      \
+    ( H5_DBL_ABS_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold) ) && \
+    ( H5_DBL_ABS_EQUAL((a).decrement, (b).decrement) ) &&      \
     ( (a).apply_max_decrement     == (b).apply_max_decrement ) &&     \
     ( (a).max_decrement           == (b).max_decrement ) &&           \
     ( (a).epochs_before_eviction  == (b).epochs_before_eviction ) &&  \
     ( (a).apply_empty_reserve     == (b).apply_empty_reserve ) &&     \
-    ( DBL_REL_EQUAL((a).empty_reserve, (b).empty_reserve, 0.00001 ) ) && \
+    ( H5_DBL_ABS_EQUAL((a).empty_reserve, (b).empty_reserve) ) && \
     ( (a).dirty_bytes_threshold   == (b).dirty_bytes_threshold ) &&   \
     ( (a).metadata_write_strategy == (b).metadata_write_strategy ) )
 
@@ -471,9 +495,6 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
     (i).flash_threshold        = (e).flash_threshold;               \
     (i).decr_mode              = (e).decr_mode;                     \
     (i).upper_hr_threshold     = (e).upper_hr_threshold;            \
-    (i).flash_incr_mode        = (e).flash_incr_mode;               \
-    (i).flash_multiple         = (e).flash_multiple;                \
-    (i).flash_threshold        = (e).flash_threshold;               \
     (i).decrement              = (e).decrement;                     \
     (i).apply_max_decrement    = (e).apply_max_decrement;           \
     (i).max_decrement          = (e).max_decrement;                 \
@@ -481,9 +502,6 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
     (i).apply_empty_reserve    = (e).apply_empty_reserve;           \
     (i).empty_reserve          = (e).empty_reserve;                 \
 }
-
-/* Epsilon for floating-point comparisons */
-#define FP_EPSILON 0.000001f
 
 
 /* misc type definitions */
@@ -493,15 +511,14 @@ struct expected_entry_status
     int			entry_type;
     int                 entry_index;
     size_t              size;
-    unsigned char	in_cache;
-    unsigned char       at_main_addr;
-    unsigned char	is_dirty;
-    unsigned char	is_protected;
-    unsigned char	is_pinned;
-    unsigned char	loaded;
-    unsigned char	cleared;
-    unsigned char	flushed;
-    unsigned char	destroyed;
+    hbool_t		in_cache;
+    hbool_t             at_main_addr;
+    hbool_t		is_dirty;
+    hbool_t		is_protected;
+    hbool_t		is_pinned;
+    hbool_t		deserialized;
+    hbool_t		serialized;
+    hbool_t		destroyed;
     int                 flush_dep_par_type; /* Entry type of flush dependency parent */
     int                 flush_dep_par_idx; /* Index of flush dependency parent */
     uint64_t            child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
@@ -517,12 +534,9 @@ struct expected_entry_status
 
 /* global variable externs: */
 
-extern const char *FILENAME[3];
-
+extern haddr_t saved_actual_base_addr;
 extern hbool_t write_permitted;
 extern hbool_t pass; /* set to false on error */
-extern hbool_t skip_long_tests;
-extern hbool_t run_full_test;
 extern const char *failure_mssg;
 
 extern test_entry_t * entries[NUMBER_OF_ENTRY_TYPES];
@@ -531,13 +545,6 @@ extern const size_t entry_sizes[NUMBER_OF_ENTRY_TYPES];
 extern const haddr_t base_addrs[NUMBER_OF_ENTRY_TYPES];
 extern const haddr_t alt_base_addrs[NUMBER_OF_ENTRY_TYPES];
 extern const char * entry_type_names[NUMBER_OF_ENTRY_TYPES];
-
-
-/* call back function declarations: */
-
-herr_t check_write_permitted(const H5F_t * f,
-                             hid_t dxpl_id,
-                             hbool_t * write_permitted_ptr);
 
 /* callback table extern */
 
@@ -619,6 +626,7 @@ void resize_entry(H5F_t * file_ptr,
 H5F_t *setup_cache(size_t max_cache_size, size_t min_clean_size);
 
 void row_major_scan_forward(H5F_t * file_ptr,
+                            int32_t max_index,
                             int32_t lag,
                             hbool_t verbose,
                             hbool_t reset_stats,
@@ -641,6 +649,7 @@ void hl_row_major_scan_forward(H5F_t * file_ptr,
                                hbool_t do_inserts);
 
 void row_major_scan_backward(H5F_t * file_ptr,
+                             int32_t max_index,
                              int32_t lag,
                              hbool_t verbose,
                              hbool_t reset_stats,
@@ -663,6 +672,7 @@ void hl_row_major_scan_backward(H5F_t * file_ptr,
                                 hbool_t do_inserts);
 
 void col_major_scan_forward(H5F_t * file_ptr,
+                            int32_t max_index,
                             int32_t lag,
                             hbool_t verbose,
                             hbool_t reset_stats,
@@ -681,6 +691,7 @@ void hl_col_major_scan_forward(H5F_t * file_ptr,
                                int dirty_unprotects);
 
 void col_major_scan_backward(H5F_t * file_ptr,
+                             int32_t max_index,
                              int32_t lag,
                              hbool_t verbose,
                              hbool_t reset_stats,
@@ -756,6 +767,11 @@ void validate_mdc_config(hid_t file_id,
                          H5AC_cache_config_t * ext_config_ptr,
                          hbool_t compare_init,
                          int test_num);
+
+/** Debugging functions -- normally commented out ***/
+#if 0
+void dump_LRU(H5F_t * file_ptr);
+#endif 
 
 #endif /* _CACHE_COMMON_H */
 

@@ -231,6 +231,7 @@ typedef enum H5B2_nodepos_t {
 /* Callback info for loading a free space header into the cache */
 typedef struct H5B2_hdr_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
+    haddr_t addr;               /* Address of B-tree header in the file */
     void *ctx_udata;            /* User-data for protecting */
 } H5B2_hdr_cache_ud_t;
 
@@ -305,11 +306,11 @@ H5_DLL herr_t H5B2__hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id);
 
 /* Routines for operating on leaf nodes */
 H5B2_leaf_t *H5B2__protect_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, haddr_t addr,
-    uint16_t nrec, H5AC_protect_t rw);
+    uint16_t nrec, unsigned flags);
 
 /* Routines for operating on internal nodes */
 H5_DLL H5B2_internal_t *H5B2__protect_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t addr, uint16_t nrec, uint16_t depth, H5AC_protect_t rw);
+    haddr_t addr, uint16_t nrec, uint16_t depth, unsigned flags);
 
 /* Routines for allocating nodes */
 H5_DLL herr_t H5B2__split_root(H5B2_hdr_t *hdr, hid_t dxpl_id);
@@ -347,7 +348,7 @@ H5_DLL herr_t H5B2__neighbor_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
 /* Routines for removing records */
 H5_DLL herr_t H5B2__remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
     hbool_t *depth_decreased, void *swap_loc, uint16_t depth,
-    H5AC_info_t *parent_cache_info, hbool_t *parent_cache_info_dirtied_ptr,
+    H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
     H5B2_nodepos_t curr_pos, H5B2_node_ptr_t *curr_node_ptr, void *udata,
     H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2__remove_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
@@ -355,8 +356,8 @@ H5_DLL herr_t H5B2__remove_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     void *udata, H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
     hbool_t *depth_decreased, void *swap_loc, uint16_t depth,
-    H5AC_info_t *parent_cache_info, hbool_t *parent_cache_info_dirtied_ptr,
-    H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, hsize_t idx,
+    H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
+    H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, hsize_t n,
     H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2__remove_leaf_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos,

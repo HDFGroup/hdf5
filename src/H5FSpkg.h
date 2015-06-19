@@ -182,7 +182,9 @@ struct H5FS_t {
     unsigned sinfo_lock_count;  /* # of times the section info has been locked */
     hbool_t sinfo_protected;    /* Whether the section info was protected when locked */
     hbool_t sinfo_modified;     /* Whether the section info has been modified while locked */
-    H5AC_protect_t sinfo_accmode; /* Access mode for protecting the section info */
+    unsigned sinfo_accmode;     /* Access mode for protecting the section info */
+                                /* must be either H5C__NO_FLAGS_SET (i.e r/w)  */
+				/* or H5AC__READ_ONLY_FLAG (i.e. r/o).         */
     size_t max_cls_serial_size; /* Max. additional size of serialized form of section */
     hsize_t    threshold;      	/* Threshold for alignment              */
     hsize_t    alignment;      	/* Alignment                            */

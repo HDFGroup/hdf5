@@ -246,7 +246,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5HG_heap_t *
-H5HG_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
+H5HG_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, unsigned flags)
 {
     H5HG_heap_t *heap;          /* Global heap */
     H5HG_heap_t *ret_value;     /* Return value */
@@ -257,8 +257,11 @@ H5HG_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
 
+    /* only H5AC__READ_ONLY_FLAG may appear in flags */
+    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+
     /* Lock the heap into memory */
-    if(NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, f, rw)))
+    if(NULL == (heap = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, f, flags)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect global heap")
 
     /* Set the heap's address */
@@ -440,7 +443,7 @@ H5HG_extend(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t need)
     HDassert(H5F_addr_defined(addr));
 
     /* Protect the heap */
-    if(NULL == (heap = H5HG_protect(f, dxpl_id, addr, H5AC_WRITE)))
+    if(NULL == (heap = H5HG_protect(f, dxpl_id, addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
 
     /* Re-allocate the heap information in memory */
@@ -554,7 +557,7 @@ H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj, H5HG_t *hobj/*out*/
     } /* end if */
     HDassert(H5F_addr_defined(addr));
 
-    if(NULL == (heap = H5HG_protect(f, dxpl_id, addr, H5AC_WRITE)))
+    if(NULL == (heap = H5HG_protect(f, dxpl_id, addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
 
     /* Split the free space to make room for the new object */
@@ -618,7 +621,7 @@ H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object/*out*/,
     HDassert(hobj);
 
     /* Load the heap */
-    if(NULL == (heap = H5HG_protect(f, dxpl_id, hobj->addr, H5AC_READ)))
+    if(NULL == (heap = H5HG_protect(f, dxpl_id, hobj->addr, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect global heap")
 
     HDassert(hobj->idx < heap->nused);
@@ -692,7 +695,7 @@ H5HG_link(H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust)
 	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Load the heap */
-    if(NULL == (heap = H5HG_protect(f, dxpl_id, hobj->addr, H5AC_WRITE)))
+    if(NULL == (heap = H5HG_protect(f, dxpl_id, hobj->addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
 
     if(adjust != 0) {
@@ -744,7 +747,7 @@ H5HG_get_obj_size(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, size_t *obj_size)
     HDassert(obj_size);
 
     /* Load the heap */
-    if(NULL == (heap = H5HG_protect(f, dxpl_id, hobj->addr, H5AC_READ)))
+    if(NULL == (heap = H5HG_protect(f, dxpl_id, hobj->addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
 
     HDassert(hobj->idx < heap->nused);
@@ -799,7 +802,7 @@ H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
         HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Load the heap */
-    if(NULL == (heap = H5HG_protect(f, dxpl_id, hobj->addr, H5AC_WRITE)))
+    if(NULL == (heap = H5HG_protect(f, dxpl_id, hobj->addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect global heap")
 
     HDassert(hobj->idx < heap->nused);

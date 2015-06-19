@@ -639,6 +639,8 @@ typedef struct H5O_btreek_t {
  * (Data structure in memory)
  */
 typedef struct H5O_drvinfo_t {
+/* Information for H5AC cache functions, _must_ be first field in structure */
+    H5AC_info_t         cache_info;
     char                name[9];                /* Driver name */
     size_t		len;                    /* Length of encoded buffer */
     uint8_t            *buf;                    /* Buffer for encoded info */
@@ -734,7 +736,7 @@ H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
-H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot);
+H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, unsigned prot_flags);
 H5_DLL H5O_t *H5O_pin(const H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5O_unpin(H5O_t *oh);
 H5_DLL herr_t H5O_dec_rc_by_loc(const H5O_loc_t *loc, hid_t dxpl_id);
