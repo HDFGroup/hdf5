@@ -93,6 +93,9 @@ typedef struct H5D_earray_filt_elmt_t {
 /********************/
 /* Local Prototypes */
 /********************/
+/* Extensible array iterator callbacks */
+static int H5D_earray_idx_iterate_cb(hsize_t idx, const void *_elmt, void *_udata);
+static int H5D_earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* Extensible array class callbacks for chunks w/o filters */
 static void *H5D_earray_crt_context(void *udata);
@@ -1274,7 +1277,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_earray_idx_iterate_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
+H5D_earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *_udata)
 {
     H5D_earray_it_ud_t   *udata = (H5D_earray_it_ud_t *)_udata; /* User data */
     unsigned ndims;                 /* Rank of chunk */

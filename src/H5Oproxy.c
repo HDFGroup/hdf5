@@ -74,7 +74,7 @@
 static H5O_proxy_t *H5O_cache_proxy_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     void *udata);
 static herr_t H5O_cache_proxy_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy,
-    haddr_t addr, H5O_proxy_t *proxy, unsigned UNUSED * flags_ptr);
+    haddr_t addr, H5O_proxy_t *proxy, unsigned *flags_ptr);
 static herr_t H5O_cache_proxy_dest(H5F_t *f, H5O_proxy_t *proxy);
 static herr_t H5O_cache_proxy_clear(H5F_t *f, H5O_proxy_t *proxy,
     hbool_t destroy);
@@ -129,7 +129,7 @@ H5FL_DEFINE_STATIC(H5O_proxy_t);
  *-------------------------------------------------------------------------
  */
 static H5O_proxy_t *
-H5O_cache_proxy_load(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t addr, void *udata)
+H5O_cache_proxy_load(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, void *udata)
 {
     H5O_t               *oh = (H5O_t *)udata;           /* Parent object header */
     H5O_proxy_t         *proxy = NULL;                  /* Object header proxy */
@@ -171,8 +171,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_proxy_flush(H5F_t *f, hid_t UNUSED dxpl_id, hbool_t destroy,
-    haddr_t addr, H5O_proxy_t *proxy, unsigned UNUSED *flags_ptr)
+H5O_cache_proxy_flush(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t destroy,
+    haddr_t addr, H5O_proxy_t *proxy, unsigned H5_ATTR_UNUSED *flags_ptr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -208,7 +208,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_proxy_dest(H5F_t UNUSED *f, H5O_proxy_t *proxy)
+H5O_cache_proxy_dest(H5F_t H5_ATTR_UNUSED *f, H5O_proxy_t *proxy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -351,8 +351,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_proxy_size(const H5F_t UNUSED *f,
-    const H5O_proxy_t UNUSED *proxy, size_t *size_ptr)
+H5O_cache_proxy_size(const H5F_t H5_ATTR_UNUSED *f,
+    const H5O_proxy_t H5_ATTR_UNUSED *proxy, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -388,7 +388,7 @@ H5O_cache_proxy_size(const H5F_t UNUSED *f,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_proxy_create(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t *oh)
+H5O_proxy_create(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t *oh)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 

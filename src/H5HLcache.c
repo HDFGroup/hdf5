@@ -388,7 +388,7 @@ END_FUNC(STATIC) /* end H5HL__prefix_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5HL__prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5HL_prfx_t *prfx, unsigned UNUSED *flags_ptr))
+    H5HL_prfx_t *prfx, unsigned H5_ATTR_UNUSED *flags_ptr))
 
     H5WB_t      *wb = NULL;                     /* Wrapped buffer for heap data */
     uint8_t heap_buf[H5HL_SPEC_READ_SIZE];      /* Buffer for heap              */
@@ -539,7 +539,7 @@ END_FUNC(STATIC) /* end H5HL__prefix_dest() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5HL__prefix_clear(H5F_t UNUSED *f, H5HL_prfx_t *prfx, hbool_t destroy))
+H5HL__prefix_clear(H5F_t H5_ATTR_UNUSED *f, H5HL_prfx_t *prfx, hbool_t destroy))
 
     /* check arguments */
     HDassert(prfx);
@@ -573,7 +573,7 @@ END_FUNC(STATIC) /* end H5HL__prefix_clear() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5HL__prefix_size(const H5F_t UNUSED *f, H5HL_prfx_t *prfx, size_t *size_ptr))
+H5HL__prefix_size(const H5F_t H5_ATTR_UNUSED *f, H5HL_prfx_t *prfx, size_t *size_ptr))
 
     /* check arguments */
     HDassert(prfx);
@@ -669,7 +669,7 @@ END_FUNC(STATIC) /* end H5HL__datablock_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5HL__datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5HL_dblk_t *dblk, unsigned UNUSED * flags_ptr))
+    H5HL_dblk_t *dblk, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     /* check arguments */
     HDassert(f);
@@ -846,7 +846,7 @@ END_FUNC(STATIC) /* end H5HL__datablock_notify() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5HL__datablock_size(const H5F_t UNUSED *f, H5HL_dblk_t *dblk, size_t *size_ptr))
+H5HL__datablock_size(const H5F_t H5_ATTR_UNUSED *f, H5HL_dblk_t *dblk, size_t *size_ptr))
 
     /* check arguments */
     HDassert(dblk);

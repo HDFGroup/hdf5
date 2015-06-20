@@ -303,7 +303,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5FA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5FA_hdr_t *hdr, unsigned UNUSED * flags_ptr))
+    H5FA_hdr_t *hdr, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     H5WB_t *wb = NULL;                  /* Wrapped buffer for header data */
     uint8_t hdr_buf[H5FA_HDR_BUF_SIZE]; /* Buffer for header */
@@ -475,7 +475,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_clear() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__cache_hdr_size(const H5F_t UNUSED *f, const H5FA_hdr_t *hdr,
+H5FA__cache_hdr_size(const H5F_t H5_ATTR_UNUSED *f, const H5FA_hdr_t *hdr,
     size_t *size_ptr))
 
     /* Sanity check */
@@ -634,7 +634,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5FA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5FA_dblock_t *dblock, unsigned UNUSED * flags_ptr))
+    H5FA_dblock_t *dblock, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     /* Local variables */
     H5WB_t *wb = NULL;                     /* Wrapped buffer for serializing data */
@@ -869,7 +869,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_notify() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__cache_dblock_size(const H5F_t UNUSED *f, const H5FA_dblock_t *dblock,
+H5FA__cache_dblock_size(const H5F_t H5_ATTR_UNUSED *f, const H5FA_dblock_t *dblock,
     size_t *size_ptr))
 
     /* Sanity check */
@@ -1002,7 +1002,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5FA__cache_dblk_page_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5FA_dblk_page_t *dblk_page, unsigned UNUSED * flags_ptr))
+    H5FA_dblk_page_t *dblk_page, unsigned H5_ATTR_UNUSED * flags_ptr))
 
     /* Local variables */
     H5WB_t *wb = NULL;                  /* Wrapped buffer for serializing data */
@@ -1088,7 +1088,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_flush() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5FA__cache_dblk_page_dest(H5F_t UNUSED *f, H5FA_dblk_page_t *dblk_page))
+H5FA__cache_dblk_page_dest(H5F_t H5_ATTR_UNUSED *f, H5FA_dblk_page_t *dblk_page))
 
     /* Sanity check */
     HDassert(f);
@@ -1154,7 +1154,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_clear() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__cache_dblk_page_size(const H5F_t UNUSED *f, const H5FA_dblk_page_t *dblk_page,
+H5FA__cache_dblk_page_size(const H5F_t H5_ATTR_UNUSED *f, const H5FA_dblk_page_t *dblk_page,
     size_t *size_ptr))
 
     /* Sanity check */

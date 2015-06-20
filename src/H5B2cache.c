@@ -70,19 +70,19 @@
 
 /* Metadata cache callbacks */
 static H5B2_hdr_t *H5B2__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5B2__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_hdr_t *hdr, unsigned UNUSED * flags_ptr);
+static herr_t H5B2__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_hdr_t *hdr, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5B2__cache_hdr_dest(H5F_t *f, H5B2_hdr_t *hdr);
 static herr_t H5B2__cache_hdr_clear(H5F_t *f, H5B2_hdr_t *hdr, hbool_t destroy);
 static herr_t H5B2__cache_hdr_notify(H5AC_notify_action_t action, H5B2_hdr_t *hdr);
 static herr_t H5B2__cache_hdr_size(const H5F_t *f, const H5B2_hdr_t *hdr, size_t *size_ptr);
 static H5B2_internal_t *H5B2__cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5B2__cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *i, unsigned UNUSED * flags_ptr);
+static herr_t H5B2__cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *i, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5B2__cache_internal_dest(H5F_t *f, H5B2_internal_t *internal);
 static herr_t H5B2__cache_internal_clear(H5F_t *f, H5B2_internal_t *i, hbool_t destroy);
 static herr_t H5B2__cache_internal_notify(H5AC_notify_action_t action, H5B2_internal_t *internal);
 static herr_t H5B2__cache_internal_size(const H5F_t *f, const H5B2_internal_t *i, size_t *size_ptr);
 static H5B2_leaf_t *H5B2__cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5B2__cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *l, unsigned UNUSED * flags_ptr);
+static herr_t H5B2__cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *l, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5B2__cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf);
 static herr_t H5B2__cache_leaf_clear(H5F_t *f, H5B2_leaf_t *l, hbool_t destroy);
 static herr_t H5B2__cache_leaf_notify(H5AC_notify_action_t action, H5B2_leaf_t *leaf);
@@ -277,7 +277,7 @@ done:
  */
 static herr_t
 H5B2__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5B2_hdr_t *hdr, unsigned UNUSED * flags_ptr)
+    H5B2_hdr_t *hdr, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     H5WB_t      *wb = NULL;             /* Wrapped buffer for header data */
     uint8_t     hdr_buf[H5B2_HDR_BUF_SIZE]; /* Buffer for header */
@@ -537,7 +537,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_hdr_size(const H5F_t UNUSED *f, const H5B2_hdr_t *hdr, size_t *size_ptr)
+H5B2__cache_hdr_size(const H5F_t H5_ATTR_UNUSED *f, const H5B2_hdr_t *hdr, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -702,7 +702,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *internal, unsigned UNUSED * flags_ptr)
+H5B2__cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *internal, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -963,7 +963,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal, size_t *size_ptr)
+H5B2__cache_internal_size(const H5F_t H5_ATTR_UNUSED *f, const H5B2_internal_t *internal, size_t *size_ptr)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -994,7 +994,7 @@ H5B2__cache_internal_size(const H5F_t UNUSED *f, const H5B2_internal_t *internal
  *-------------------------------------------------------------------------
  */
 static H5B2_leaf_t *
-H5B2__cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
+H5B2__cache_leaf_load(H5F_t H5_ATTR_UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5B2_leaf_cache_ud_t *udata = (H5B2_leaf_cache_ud_t *)_udata;
     H5B2_leaf_t		*leaf = NULL;   /* Pointer to lead node loaded */
@@ -1107,7 +1107,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *leaf, unsigned UNUSED * flags_ptr)
+H5B2__cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *leaf, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1351,7 +1351,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_size(const H5F_t UNUSED *f, const H5B2_leaf_t *leaf, size_t *size_ptr)
+H5B2__cache_leaf_size(const H5F_t H5_ATTR_UNUSED *f, const H5B2_leaf_t *leaf, size_t *size_ptr)
 {
     FUNC_ENTER_STATIC_NOERR
 

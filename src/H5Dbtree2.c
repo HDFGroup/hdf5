@@ -494,7 +494,7 @@ H5D_bt2_decode(const uint8_t *raw, void *_record, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_bt2_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+H5D_bt2_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     int indent, int fwidth, const void *_record, const void *_u_ctx)
 {
     const H5D_bt2_rec_t *record = (const H5D_bt2_rec_t *)_record; /* The native record */
@@ -661,7 +661,7 @@ H5D_bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_bt2_filt_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+H5D_bt2_filt_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     int indent, int fwidth, const void *_record, const void *_u_ctx)
 {
     const H5D_bt2_filt_rec_t *record = (const H5D_bt2_filt_rec_t *)_record; /* The native record */
@@ -698,7 +698,7 @@ H5D_bt2_filt_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
  *-------------------------------------------------------------------------
  */
 static void *
-H5D_bt2_crt_dbg_context(H5F_t *f, hid_t UNUSED dxpl_id, haddr_t obj_addr)
+H5D_bt2_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t obj_addr)
 {
     H5D_bt2_ctx_ud_t *u_ctx;   	/* User data for creating callback context */
     H5O_loc_t obj_loc;          /* Pointer to an object's location */
@@ -802,8 +802,8 @@ H5D_bt2_dst_dbg_context(void *_u_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_bt2_idx_init(const H5D_chk_idx_info_t UNUSED *idx_info,
-    const H5S_t UNUSED *space, haddr_t dset_ohdr_addr)
+H5D_bt2_idx_init(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info,
+    const H5S_t H5_ATTR_UNUSED *space, haddr_t dset_ohdr_addr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1698,7 +1698,7 @@ done:
  */
 static herr_t
 H5D_bt2_idx_copy_shutdown(H5O_storage_chunk_t *storage_src,
-    H5O_storage_chunk_t *storage_dst, hid_t UNUSED dxpl_id)
+    H5O_storage_chunk_t *storage_dst, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 

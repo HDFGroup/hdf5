@@ -386,7 +386,7 @@ print_obj_name(h5tools_str_t *buffer, const iter_t *iter, const char *oname,
  *-------------------------------------------------------------------------
  */
 static hbool_t
-print_native_type(h5tools_str_t *buffer, hid_t type, int UNUSED ind)
+print_native_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
 {
     if (H5Tequal(type, H5T_NATIVE_SCHAR)==TRUE) {
         h5tools_str_append(buffer, "native signed char");
@@ -504,7 +504,7 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int UNUSED ind)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-print_ieee_type(h5tools_str_t *buffer, hid_t type, int UNUSED ind)
+print_ieee_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
 {
     if (H5Tequal(type, H5T_IEEE_F32BE)==TRUE) {
         h5tools_str_append(buffer, "IEEE 32-bit big-endian float");
@@ -1000,7 +1000,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-print_string_type(h5tools_str_t *buffer, hid_t type, int UNUSED ind)
+print_string_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
 {
     H5T_str_t  pad;
     const char  *pad_s=NULL;
@@ -1103,7 +1103,7 @@ print_string_type(h5tools_str_t *buffer, hid_t type, int UNUSED ind)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-print_reference_type(h5tools_str_t *buffer, hid_t type, int UNUSED ind)
+print_reference_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
 {
     if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
 
@@ -1492,8 +1492,8 @@ dump_dataset_values(hid_t dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
-    void UNUSED *op_data)
+list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ainfo,
+    void H5_ATTR_UNUSED *op_data)
 {
     hid_t               attr = -1;
     hid_t               space = -1;
@@ -1744,7 +1744,7 @@ dataset_list1(hid_t dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-dataset_list2(hid_t dset, const char UNUSED *name)
+dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
 {
     hid_t       dcpl;           /* dataset creation property list */
     hid_t       type;           /* data type of dataset */
@@ -1941,7 +1941,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-datatype_list2(hid_t type, const char UNUSED *name)
+datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
 {
     if (verbose_g>0) {
         hsize_t             curr_pos = 0;        /* total data element position   */

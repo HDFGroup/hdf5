@@ -861,9 +861,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5FS_section_info_t *
-H5HF_sect_single_deserialize(const H5FS_section_class_t UNUSED *cls,
-    hid_t UNUSED dxpl_id, const uint8_t UNUSED *buf, haddr_t sect_addr,
-    hsize_t sect_size, unsigned UNUSED *des_flags)
+H5HF_sect_single_deserialize(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
+    hid_t H5_ATTR_UNUSED dxpl_id, const uint8_t H5_ATTR_UNUSED *buf, haddr_t sect_addr,
+    hsize_t sect_size, unsigned H5_ATTR_UNUSED *des_flags)
 {
     H5HF_free_section_t *new_sect;      /* New section */
     H5FS_section_info_t *ret_value;     /* Return value */
@@ -904,7 +904,7 @@ done:
  */
 static htri_t
 H5HF_sect_single_can_merge(const H5FS_section_info_t *_sect1,
-    const H5FS_section_info_t *_sect2, void UNUSED *_udata)
+    const H5FS_section_info_t *_sect2, void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_free_section_t *sect1 = (const H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
     const H5HF_free_section_t *sect2 = (const H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
@@ -1063,7 +1063,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_single_shrink(H5FS_section_info_t **_sect, void UNUSED *_udata)
+H5HF_sect_single_shrink(H5FS_section_info_t **_sect, void H5_ATTR_UNUSED *_udata)
 {
     H5HF_free_section_t **sect = (H5HF_free_section_t **)_sect;   /* Fractal heap free section */
     H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
@@ -1171,7 +1171,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_single_valid(const H5FS_section_class_t UNUSED *cls, const H5FS_section_info_t *_sect)
+H5HF_sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5FS_section_info_t *_sect)
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Pointer to section to check */
 
@@ -1714,7 +1714,7 @@ done:
  */
 static htri_t
 H5HF_sect_row_can_merge(const H5FS_section_info_t *_sect1,
-    const H5FS_section_info_t *_sect2, void UNUSED *_udata)
+    const H5FS_section_info_t *_sect2, void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_free_section_t *sect1 = (const H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
     const H5HF_free_section_t *sect2 = (const H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
@@ -1839,7 +1839,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5HF_sect_row_can_shrink(const H5FS_section_info_t *_sect, void UNUSED *_udata)
+H5HF_sect_row_can_shrink(const H5FS_section_info_t *_sect, void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Fractal heap free section */
     H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */

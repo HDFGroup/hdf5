@@ -249,10 +249,10 @@ const H5C_class_t epoch_marker_class =
  ***************************************************************************/
 
 static void *
-H5C_epoch_marker_load(H5F_t UNUSED * f,
-                      hid_t UNUSED dxpl_id,
-                      haddr_t UNUSED addr,
-                      void UNUSED * udata)
+H5C_epoch_marker_load(H5F_t H5_ATTR_UNUSED * f,
+                      hid_t H5_ATTR_UNUSED dxpl_id,
+                      haddr_t H5_ATTR_UNUSED addr,
+                      void H5_ATTR_UNUSED * udata)
 {
     void * ret_value = NULL;      /* Return value */
 
@@ -268,12 +268,12 @@ done:
 
 
 static herr_t
-H5C_epoch_marker_flush(H5F_t UNUSED *f,
-                       hid_t UNUSED dxpl_id,
-                       hbool_t UNUSED dest,
-                       haddr_t UNUSED addr,
-                       void UNUSED *thing,
-		       unsigned UNUSED * flags_ptr)
+H5C_epoch_marker_flush(H5F_t H5_ATTR_UNUSED *f,
+                       hid_t H5_ATTR_UNUSED dxpl_id,
+                       hbool_t H5_ATTR_UNUSED dest,
+                       haddr_t H5_ATTR_UNUSED addr,
+                       void H5_ATTR_UNUSED *thing,
+		       unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     herr_t ret_value = FAIL;      /* Return value */
 
@@ -289,8 +289,8 @@ done:
 
 
 static herr_t
-H5C_epoch_marker_dest(H5F_t UNUSED * f,
-                      void UNUSED * thing)
+H5C_epoch_marker_dest(H5F_t H5_ATTR_UNUSED * f,
+                      void H5_ATTR_UNUSED * thing)
 {
     herr_t ret_value = FAIL;      /* Return value */
 
@@ -304,9 +304,9 @@ done:
 }
 
 static herr_t
-H5C_epoch_marker_clear(H5F_t UNUSED * f,
-                       void UNUSED * thing,
-                       hbool_t UNUSED dest)
+H5C_epoch_marker_clear(H5F_t H5_ATTR_UNUSED * f,
+                       void H5_ATTR_UNUSED * thing,
+                       hbool_t H5_ATTR_UNUSED dest)
 {
     herr_t ret_value = FAIL;      /* Return value */
 
@@ -320,8 +320,8 @@ done:
 }
 
 static herr_t
-H5C_epoch_marker_notify(H5C_notify_action_t UNUSED action,
-                       void UNUSED * thing)
+H5C_epoch_marker_notify(H5C_notify_action_t H5_ATTR_UNUSED action,
+                       void H5_ATTR_UNUSED * thing)
 {
     herr_t ret_value = FAIL;      /* Return value */
 
@@ -334,9 +334,9 @@ done:
 }
 
 static herr_t
-H5C_epoch_marker_size(const H5F_t UNUSED * f,
-                      const void UNUSED * thing,
-                      size_t UNUSED * size_ptr)
+H5C_epoch_marker_size(const H5F_t H5_ATTR_UNUSED * f,
+                      const void H5_ATTR_UNUSED * thing,
+                      size_t H5_ATTR_UNUSED * size_ptr)
 {
     herr_t ret_value = FAIL;      /* Return value */
 
@@ -1347,7 +1347,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
 #ifndef NDEBUG
                             int32_t version,
 #else /* NDEBUG */
-                            int32_t UNUSED version,
+                            int32_t H5_ATTR_UNUSED version,
 #endif /* NDEBUG */
                             double hit_rate,
                             enum H5C_resize_status status,
@@ -3630,7 +3630,7 @@ H5C_pin_entry_from_client(H5C_t *	          cache_ptr,
                         H5C_cache_entry_t * entry_ptr)
 #else
 static herr_t
-H5C_pin_entry_from_client(H5C_t UNUSED *	cache_ptr,
+H5C_pin_entry_from_client(H5C_t H5_ATTR_UNUSED *	cache_ptr,
                         H5C_cache_entry_t * entry_ptr)
 #endif
 {
@@ -4626,7 +4626,7 @@ H5C_stats(H5C_t * cache_ptr,
           const char *  cache_name,
           hbool_t
 #if !H5C_COLLECT_CACHE_STATS
-          UNUSED
+          H5_ATTR_UNUSED
 #endif /* H5C_COLLECT_CACHE_STATS */
           display_detailed_stats)
 {
@@ -5087,7 +5087,7 @@ H5C_stats__reset(H5C_t * cache_ptr)
 #if H5C_COLLECT_CACHE_STATS
 H5C_stats__reset(H5C_t * cache_ptr)
 #else /* H5C_COLLECT_CACHE_STATS */
-H5C_stats__reset(H5C_t UNUSED * cache_ptr)
+H5C_stats__reset(H5C_t H5_ATTR_UNUSED * cache_ptr)
 #endif /* H5C_COLLECT_CACHE_STATS */
 #endif /* NDEBUG */
 {

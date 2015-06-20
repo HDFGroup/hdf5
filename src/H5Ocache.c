@@ -75,13 +75,13 @@
 
 /* Metadata cache callbacks */
 static H5O_t *H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh, unsigned UNUSED * flags_ptr);
+static herr_t H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_t *oh, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5O_dest(H5F_t *f, H5O_t *oh);
 static herr_t H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy);
 static herr_t H5O_size(const H5F_t *f, const H5O_t *oh, size_t *size_ptr);
 
 static H5O_chunk_proxy_t *H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
-static herr_t H5O_cache_chk_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_chunk_proxy_t *chk_proxy, unsigned UNUSED * flags_ptr);
+static herr_t H5O_cache_chk_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_chunk_proxy_t *chk_proxy, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5O_cache_chk_dest(H5F_t *f, H5O_chunk_proxy_t *chk_proxy);
 static herr_t H5O_cache_chk_clear(H5F_t *f, H5O_chunk_proxy_t *chk_proxy, hbool_t destroy);
 static herr_t H5O_cache_chk_notify(H5AC_notify_action_t action, H5O_chunk_proxy_t *chk_proxy);
@@ -439,7 +439,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr, H5O_t *oh, unsigned UNUSED * flags_ptr)
+H5O_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t H5_ATTR_UNUSED addr, H5O_t *oh, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -714,7 +714,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_size(const H5F_t UNUSED *f, const H5O_t *oh, size_t *size_ptr)
+H5O_size(const H5F_t H5_ATTR_UNUSED *f, const H5O_t *oh, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -845,7 +845,7 @@ done:
  */
 static herr_t
 H5O_cache_chk_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    H5O_chunk_proxy_t *chk_proxy, unsigned UNUSED * flags_ptr)
+    H5O_chunk_proxy_t *chk_proxy, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1082,7 +1082,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cache_chk_size(const H5F_t UNUSED *f, const H5O_chunk_proxy_t *chk_proxy, size_t *size_ptr)
+H5O_cache_chk_size(const H5F_t H5_ATTR_UNUSED *f, const H5O_chunk_proxy_t *chk_proxy, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

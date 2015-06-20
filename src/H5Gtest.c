@@ -666,8 +666,8 @@ done:
  */
 static int
 H5G_verify_cached_stabs_test_cb(H5F_t *f, hid_t dxpl_id,
-    const void UNUSED *_lt_key, haddr_t addr, const void UNUSED *_rt_key,
-    void UNUSED *udata)
+    const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const void H5_ATTR_UNUSED *_rt_key,
+    void H5_ATTR_UNUSED *udata)
 {
     H5G_node_t          *sn = NULL;
     H5O_loc_t           targ_oloc;

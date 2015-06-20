@@ -57,7 +57,7 @@ static herr_t H5O_storage_free(void *_mesg);
 static herr_t H5O_storage_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
 static void *H5O_storage_copy_file(H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hbool_t *recompute_size, unsigned UNUSED *mesg_flags,
+    H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
     H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
 static herr_t H5O_storage_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
@@ -106,8 +106,8 @@ H5FL_DEFINE_STATIC(H5O_storage_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_storage_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
-    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
+H5O_storage_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_storage_t *mesg = NULL; /* Message decoded */
     uint8_t version;            /* Version of message decoded */
@@ -232,7 +232,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_storage_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p,
+H5O_storage_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
     const void *_mesg)
 {
     const H5O_storage_t   *mesg = (const H5O_storage_t *) _mesg;
@@ -370,7 +370,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_storage_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
+H5O_storage_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_storage_t     *mesg = (const H5O_storage_t *) _mesg;
     size_t                  ret_value;
@@ -522,7 +522,7 @@ done:
  */
 static void *
 H5O_storage_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
-    hbool_t UNUSED *recompute_size, unsigned UNUSED *mesg_flags,
+    hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
     H5O_copy_t *cpy_info, void *_udata, hid_t dxpl_id)
 {
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
@@ -611,7 +611,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_storage_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
+H5O_storage_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth)
 {
     const H5O_storage_t     *mesg = (const H5O_storage_t *) _mesg;

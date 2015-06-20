@@ -64,7 +64,7 @@
 /* Metadata cache callbacks */
 static H5HG_heap_t *H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-			 H5HG_heap_t *heap, unsigned UNUSED * flags_ptr);
+			 H5HG_heap_t *heap, unsigned H5_ATTR_UNUSED * flags_ptr);
 static herr_t H5HG_dest(H5F_t *f, H5HG_heap_t *heap);
 static herr_t H5HG_clear(H5F_t *f, H5HG_heap_t *heap, hbool_t destroy);
 static herr_t H5HG_size(const H5F_t *f, const H5HG_heap_t *heap, size_t *size_ptr);
@@ -280,7 +280,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t *heap, unsigned UNUSED * flags_ptr)
+H5HG_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HG_heap_t *heap, unsigned H5_ATTR_UNUSED * flags_ptr)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
@@ -401,7 +401,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG_size(const H5F_t UNUSED *f, const H5HG_heap_t *heap, size_t *size_ptr)
+H5HG_size(const H5F_t H5_ATTR_UNUSED *f, const H5HG_heap_t *heap, size_t *size_ptr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

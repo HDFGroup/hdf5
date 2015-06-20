@@ -599,7 +599,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_dense_lookup_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
+H5G_dense_lookup_by_idx_fh_cb(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_udata)
 {
     H5G_fh_ud_lbi_t *udata = (H5G_fh_ud_lbi_t *)_udata;       /* User data for fractal heap 'op' callback */
     H5O_link_t *tmp_lnk = NULL;         /* Temporary pointer to link */
@@ -889,7 +889,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_dense_iterate_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
+H5G_dense_iterate_fh_cb(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_udata)
 {
     H5G_fh_ud_it_t *udata = (H5G_fh_ud_it_t *)_udata;       /* User data for fractal heap 'op' callback */
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -1101,7 +1101,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_dense_get_name_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
+H5G_dense_get_name_by_idx_fh_cb(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_udata)
 {
     H5G_fh_ud_gnbi_t *udata = (H5G_fh_ud_gnbi_t *)_udata;       /* User data for fractal heap 'op' callback */
     H5O_link_t *lnk;            /* Pointer to link created from heap object */
@@ -1308,7 +1308,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
+H5G_dense_remove_fh_cb(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_udata)
 {
     H5G_fh_ud_rm_t *udata = (H5G_fh_ud_rm_t *)_udata;       /* User data for fractal heap 'op' callback */
     H5O_link_t *lnk = NULL;             /* Pointer to link created from heap object */
@@ -1485,7 +1485,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_dense_remove_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
+H5G_dense_remove_by_idx_fh_cb(const void *obj, size_t H5_ATTR_UNUSED obj_len, void *_udata)
 {
     H5G_fh_ud_rmbi_t *udata = (H5G_fh_ud_rmbi_t *)_udata;       /* User data for fractal heap 'op' callback */
     herr_t ret_value = SUCCEED; /* Return value */

@@ -309,7 +309,7 @@ H5D_none_iterate(const H5D_chk_idx_info_t *idx_info,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_none_remove(const H5D_chk_idx_info_t UNUSED *idx_info, H5D_chunk_common_ud_t UNUSED *udata)
+H5D_none_remove(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, H5D_chunk_common_ud_t H5_ATTR_UNUSED *udata)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -422,7 +422,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_none_size(const H5D_chk_idx_info_t UNUSED *idx_info, hsize_t *index_size)
+H5D_none_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t *index_size)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

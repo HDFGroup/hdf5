@@ -382,7 +382,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_obj_compact_to_dense_cb(const void *_mesg, unsigned UNUSED idx, void *_udata)
+H5G_obj_compact_to_dense_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;  /* Pointer to link */
     H5G_obj_oh_it_ud1_t *udata = (H5G_obj_oh_it_ud1_t *)_udata;     /* 'User data' passed in */

@@ -793,7 +793,7 @@ parse_command_line(int argc, const char *argv[])
  *
  *-------------------------------------------------------------------------
  */
-static void catch_signal(int UNUSED signo)
+static void catch_signal(int H5_ATTR_UNUSED signo)
 {
     /* Exit from h5watch */
     leave(EXIT_SUCCESS);

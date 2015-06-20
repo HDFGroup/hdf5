@@ -314,7 +314,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-long_desc_cb(unsigned UNUSED n, const H5E_error2_t *err_desc, void *client_data)
+long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *client_data)
 {
     char *real_desc  = (char *)client_data;
 

@@ -551,7 +551,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_write(H5HF_t *fh, hid_t dxpl_id, void *_id, hbool_t UNUSED *id_changed,
+H5HF_write(H5HF_t *fh, hid_t dxpl_id, void *_id, hbool_t H5_ATTR_UNUSED *id_changed,
     const void *obj)
 {
     uint8_t *id = (uint8_t *)_id;       /* Object ID */

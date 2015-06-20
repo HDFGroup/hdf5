@@ -97,6 +97,7 @@ typedef struct H5D_farray_filt_elmt_t {
 
 /* Fixed Array iterator callbacks */
 static int H5D_farray_idx_iterate_cb(hsize_t idx, const void *_elmt, void *_udata);
+static int H5D_farray_idx_delete_cb(hsize_t idx, const void *_elmt, void *_udata);
 
 /* Fixed array class callbacks for chunks w/o filters */
 static void *H5D_farray_crt_context(void *udata);
@@ -124,7 +125,7 @@ static herr_t H5D_farray_filt_debug(FILE *stream, int indent, int fwidth,
 
 /* Chunked layout indexing callbacks */
 static herr_t H5D_farray_idx_init(const H5D_chk_idx_info_t *idx_info,
-    const H5S_t UNUSED *space, haddr_t dset_ohdr_addr);
+    const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D_farray_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D_farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
@@ -837,7 +838,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t UNUSED *space, haddr_t dset_ohdr_addr)
+H5D_farray_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t H5_ATTR_UNUSED *space, haddr_t dset_ohdr_addr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1185,7 +1186,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_farray_idx_iterate_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
+H5D_farray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *_udata)
 {
     H5D_farray_it_ud_t   *udata = (H5D_farray_it_ud_t *)_udata; /* User data */
     unsigned ndims;                 /* Rank of chunk */
@@ -1413,7 +1414,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_farray_idx_delete_cb(hsize_t UNUSED idx, const void *_elmt, void *_udata)
+H5D_farray_idx_delete_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *_udata)
 {
     H5D_farray_del_ud_t *udata = (H5D_farray_del_ud_t *)_udata;         /* User data for callback */
     haddr_t chunk_addr;                 /* Address of chunk */
