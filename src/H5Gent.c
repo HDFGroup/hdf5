@@ -173,7 +173,7 @@ H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown symbol table entry cache type")
     } /* end switch */
 
-    *pp = p_ret + H5G_SIZEOF_ENTRY(f);
+    *pp = p_ret + H5G_SIZEOF_ENTRY_FILE(f);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -240,7 +240,7 @@ done:
 herr_t
 H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 {
-    uint8_t	*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
+    uint8_t	*p_ret = *pp + H5G_SIZEOF_ENTRY_FILE(f);
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

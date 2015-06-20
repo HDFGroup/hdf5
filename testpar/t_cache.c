@@ -31,6 +31,7 @@
 #include "H5Iprivate.h"
 
 
+#define BASE_ADDR               (haddr_t)512
 
 
 int     	nerrors = 0;
@@ -767,7 +768,7 @@ init_data(void)
                                       1974, 3194, 5168, 8362, 13539};
     int i;
     int j = 0;
-    haddr_t addr = 512;
+    haddr_t addr = BASE_ADDR;
 
     /* this must hold so moves don't change entry size. */
     HDassert( (NUM_DATA_ENTRIES / 2) % 20 == 0 );
@@ -4709,7 +4710,7 @@ verify_total_writes(int expected_total_writes)
  * 		Updated for the new local_len field in datum.
  *
  *****************************************************************************/
-void
+static void
 unlock_entry(H5F_t * file_ptr,
              int32_t idx,
              unsigned int flags)

@@ -115,26 +115,27 @@ H5_init_library(void)
 #ifdef H5_HAVE_PARALLEL
     {
 	int mpi_initialized;
+	int mpi_finalized;
         int mpi_code;
 
 	MPI_Initialized(&mpi_initialized);
+	MPI_Finalized(&mpi_finalized);
 
 #ifdef H5_HAVE_MPE
         /* Initialize MPE instrumentation library. */
-        if (!H5_MPEinit_g)
-            {
-                int mpe_code;
-                if (mpi_initialized){
-                    mpe_code = MPE_Init_log();
-                    HDassert(mpe_code >=0);
-                    H5_MPEinit_g = TRUE;
-                }
+        if (!H5_MPEinit_g) {
+            int mpe_code;
+            if (mpi_initialized && !mpi_finalized) {
+                mpe_code = MPE_Init_log();
+                HDassert(mpe_code >=0);
+                H5_MPEinit_g = TRUE;
             }
+        }
 #endif /*H5_HAVE_MPE*/
 
         /* add an attribute on MPI_COMM_SELF to call H5_term_library
            when it is destroyed, i.e. on MPI_Finalize */
-        if (mpi_initialized) {
+        if (mpi_initialized && !mpi_finalized) {
             int key_val;
 
             if(MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(MPI_NULL_COPY_FN, 
@@ -334,11 +335,14 @@ H5_term_library(void)
      * down if any of the below code involves using the instrumentation code.
      */
     if(H5_MPEinit_g) {
-	int mpe_code;
 	int mpi_initialized;
+	int mpi_finalized;
+	int mpe_code;
 
 	MPI_Initialized(&mpi_initialized);
-	if(mpi_initialized) {
+	MPI_Finalized(&mpi_finalized);
+
+        if (mpi_initialized && !mpi_finalized) {
 	    mpe_code = MPE_Finish_log("h5log");
 	    HDassert(mpe_code >=0);
 	} /* end if */

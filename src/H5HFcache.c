@@ -262,6 +262,10 @@ H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF__dtable_encode() */
 
+/**************************************************/
+/* metadata cache callback definitions for header */
+/**************************************************/
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF_cache_hdr_load
@@ -379,8 +383,8 @@ H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
         /* Compute the size of the extra filter information */
         filter_info_size = (size_t)(hdr->sizeof_size     /* Size of size for filtered root direct block */
-            + (unsigned)4                       /* Size of filter mask for filtered root direct block */
-            + hdr->filter_len);                 /* Size of encoded I/O filter info */
+            + (unsigned)4		/* Size of filter mask for filtered root direct block */
+            + hdr->filter_len);         /* Size of encoded I/O filter info */
 
         /* Compute the heap header's size */
         hdr->heap_size = size + filter_info_size;
@@ -723,6 +727,10 @@ H5HF_cache_hdr_size(const H5F_t H5_ATTR_UNUSED *f, const H5HF_hdr_t *hdr, size_t
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_cache_hdr_size() */
+
+/***********************************************************/
+/* metadata cache callback definitions for indirect blocks */
+/***********************************************************/
 
 
 /*-------------------------------------------------------------------------
@@ -1365,6 +1373,10 @@ H5HF_cache_iblock_size(const H5F_t H5_ATTR_UNUSED *f, const H5HF_indirect_t *ibl
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_cache_iblock_size() */
+
+/*********************************************************/
+/* metadata cache callback definitions for direct blocks */
+/*********************************************************/
 
 
 /*-------------------------------------------------------------------------

@@ -45,10 +45,10 @@
 
 /* Size of a "tree pointer" (on disk) */
 /* (essentially, the largest internal pointer allowed) */
-#define H5B2_TREE_POINTER_SIZE(h)       (                                     \
-    (h)->sizeof_addr +                                                        \
+#define H5B2_TREE_POINTER_SIZE(sizeof_addr, sizeof_size)       (              \
+    (sizeof_addr) +                                                           \
     H5B2_SIZEOF_RECORDS_PER_NODE +                                            \
-    (h)->sizeof_size                                                          \
+    (sizeof_size)                                                             \
     )
 
 /* Size of a internal node pointer (on disk) */
@@ -70,7 +70,7 @@
     )
 
 /* Size of the v2 B-tree header on disk */
-#define H5B2_HEADER_SIZE(h)   (                                             \
+#define H5B2_HEADER_SIZE(sizeof_addr, sizeof_size)   (                        \
     /* General metadata fields */                                             \
     H5B2_METADATA_PREFIX_SIZE                                                 \
                                                                               \
@@ -80,7 +80,17 @@
     + (unsigned)2 /* Depth of tree */                                         \
     + (unsigned)1 /* Split % of full (as integer, ie. "98" means 98%) */      \
     + (unsigned)1 /* Merge % of full (as integer, ie. "98" means 98%) */      \
-    + H5B2_TREE_POINTER_SIZE(h)  /* Node pointer to root node in tree */      \
+    + H5B2_TREE_POINTER_SIZE(sizeof_addr, sizeof_size)  /* Node pointer to root node in tree */ \
+    )
+
+/* Size of the v2 B-tree header on disk (via file pointer) */
+#define H5B2_HEADER_SIZE_FILE(f)   (                                          \
+    H5B2_HEADER_SIZE(H5F_SIZEOF_ADDR(f), H5F_SIZEOF_SIZE(f))                  \
+    )
+
+/* Size of the v2 B-tree header on disk (via v2 B-tree header) */
+#define H5B2_HEADER_SIZE_HDR(h)   (                                           \
+    H5B2_HEADER_SIZE((h)->sizeof_addr, (h)->sizeof_size)                      \
     )
 
 /* Size of the v2 B-tree internal node prefix */
