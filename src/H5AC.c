@@ -149,16 +149,17 @@ static herr_t H5AC__run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op);
 /*****************************/
 
 /* Default dataset transfer property list for metadata I/O calls */
-/* (Collective set, "block before metadata write" set and "library internal" set) */
+/* (Collective set) */
 /* (Global variable definition, declaration is in H5ACprivate.h also) */
 hid_t H5AC_dxpl_id = (-1);
 
 /* Dataset transfer property list for independent metadata I/O calls */
-/* (just "library internal" set - i.e. independent transfer mode) */
 /* (Global variable definition, declaration is in H5ACprivate.h also) */
 H5P_genplist_t *H5AC_ind_dxpl_g = NULL;
 hid_t H5AC_ind_dxpl_id = (-1);
 
+hid_t H5AC_coll_write_coll_read_dxpl_id=(-1);
+hid_t H5AC_ind_write_coll_read_dxpl_id=(-1);
 
 /*******************/
 /* Local Variables */
@@ -251,6 +252,7 @@ H5AC_init_interface(void)
 #ifdef H5_HAVE_PARALLEL
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
     unsigned coll_meta_write;       /* "collective metadata write" property value */
+    H5P_coll_md_read_flag_t coll_meta_read;
 #endif /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED;     /* Return value */
 
@@ -267,6 +269,7 @@ H5AC_init_interface(void)
     /* Get the property list object */
     if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+            HDassert(xfer_plist);
 
     /* Insert 'collective metadata write' property */
     coll_meta_write = 1;
@@ -287,12 +290,53 @@ H5AC_init_interface(void)
     if(H5P_insert(H5AC_ind_dxpl_g, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
+
+    /* Get an ID for H5AC_coll_write_coll_read_dxpl_id */
+    if((H5AC_coll_write_coll_read_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
+
+    /* Get the property list object */
+    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_coll_write_coll_read_dxpl_id)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+
+    /* Insert 'collective metadata write' property */
+    coll_meta_write = 1;
+    if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
+                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
+
+    /* set 'collective metadata read' property */
+    coll_meta_read = H5P_USER_TRUE;
+    if(H5P_set(xfer_plist, H5_COLL_MD_READ_FLAG_NAME, &coll_meta_read) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set collective metadata read flag")
+
+
+    /* Get an ID for H5AC_ind_write_coll_read_dxpl_id */
+    if((H5AC_ind_write_coll_read_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
+
+    /* Get the property list object */
+    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_ind_write_coll_read_dxpl_id)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+
+    /* Insert 'collective metadata write' property */
+    coll_meta_write = 0;
+    if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
+                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
+    /* set 'collective metadata read' property */
+    coll_meta_read = H5P_USER_TRUE;
+    if(H5P_set(xfer_plist, H5_COLL_MD_READ_FLAG_NAME, &coll_meta_read) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set collective metadata read flag")
+
 #else /* H5_HAVE_PARALLEL */
     /* Sanity check */
     HDassert(H5P_LST_DATASET_XFER_ID_g!=(-1));
 
     H5AC_dxpl_id = H5P_DATASET_XFER_DEFAULT;
     H5AC_ind_dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    H5AC_coll_write_coll_read_dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    H5AC_ind_write_coll_read_dxpl_id = H5P_DATASET_XFER_DEFAULT;
 
     /* Get the property list objects for the IDs */
     if(NULL == (H5AC_ind_dxpl_g = (H5P_genplist_t *)H5I_object(H5AC_ind_dxpl_id)))
@@ -328,17 +372,23 @@ H5AC_term_interface(void)
 
     if(H5_interface_initialize_g) {
 #ifdef H5_HAVE_PARALLEL
-        if(H5AC_dxpl_id > 0 || H5AC_ind_dxpl_id > 0) {
+        if(H5AC_dxpl_id > 0 || H5AC_ind_dxpl_id > 0 || 
+           H5AC_coll_write_coll_read_dxpl_id > 0 ||
+           H5AC_ind_write_coll_read_dxpl_id > 0) {
             /* Indicate more work to do */
             n = 1; /* H5I */
 
             /* Close H5AC dxpl */
-            if(H5I_dec_ref(H5AC_dxpl_id) < 0 || H5I_dec_ref(H5AC_ind_dxpl_id) < 0)
+            if(H5I_dec_ref(H5AC_dxpl_id) < 0 || H5I_dec_ref(H5AC_ind_dxpl_id) < 0 ||
+               H5I_dec_ref(H5AC_coll_write_coll_read_dxpl_id) < 0 ||
+               H5I_dec_ref(H5AC_ind_write_coll_read_dxpl_id) < 0)
                 H5E_clear_stack(NULL); /*ignore error*/
             else {
                 /* Reset static IDs */
                 H5AC_dxpl_id = (-1);
                 H5AC_ind_dxpl_id = (-1);
+                H5AC_coll_write_coll_read_dxpl_id = (-1);
+                H5AC_ind_write_coll_read_dxpl_id = (-1);
 
                 /* Reset interface initialization flag */
                 H5_interface_initialize_g = 0;
@@ -351,6 +401,8 @@ H5AC_term_interface(void)
             H5AC_ind_dxpl_id = (-1);
 #ifdef H5_HAVE_PARALLEL
         } /* end else */
+            H5AC_coll_write_coll_read_dxpl_id = (-1);
+            H5AC_ind_write_coll_read_dxpl_id = (-1);
 #endif /* H5_HAVE_PARALLEL */
 
         /* Reset interface initialization flag */
@@ -564,6 +616,10 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
+    /* destroying the cache, so clear all collective entries */
+    if(H5C_clear_coll_entries(f, dxpl_id, f->shared->cache, 0) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
+
     aux_ptr = (struct H5AC_aux_t *)(f->shared->cache->aux_ptr);
     if(aux_ptr)
         /* Sanity check */
@@ -702,6 +758,10 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
+    /* flushing the cache, so clear all collective entries */
+    if(H5C_clear_coll_entries(f, dxpl_id, f->shared->cache, 0) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
+
     /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
     if(H5AC__flush_entries(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
@@ -4275,6 +4335,14 @@ HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/r/ru) = %zu/%u/%zu/%u/%zu
     aux_ptr->rename_dirty_bytes,
     aux_ptr->rename_dirty_bytes_updates);
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
+
+    /* clear collective access flag on half of the entries in the
+       cache and mark them as independent in case they need to be
+       evicted later. All ranks are guranteed to mark the same entires
+       since we don't modify the order of the collectively accessed
+       entries except through collective access. */
+    if(H5C_clear_coll_entries(f, dxpl_id, cache_ptr, TRUE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
 
     switch(aux_ptr->metadata_write_strategy) {
         case H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY:

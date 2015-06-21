@@ -793,7 +793,7 @@ H5P__decode(const void *buf)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "property decoding routine failed, property: '%s'", name)
         } /* end if */
         else
-            HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "no decode callback for property: '%s', name")
+            HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "no decode callback for property: '%s'", name)
 
         /* Set the value for the property */
         if(H5P_set(plist, name, value_buf) < 0)

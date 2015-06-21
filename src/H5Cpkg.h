@@ -955,7 +955,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
 }
 
 #define H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size, \
-		                         entry_ptr, was_clean)          \
+		                         entry_ptr, was_clean)         \
 if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->index_len <= 0 ) ||                                 \
      ( (cache_ptr)->index_size <= 0 ) ||                                \
@@ -1125,7 +1125,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
     H5C__POST_HT_REMOVE_SC(cache_ptr, entry_ptr)              \
 }
 
-#define H5C__SEARCH_INDEX(cache_ptr, Addr, entry_ptr, fail_val)             \
+#define H5C__SEARCH_INDEX(cache_ptr, Addr, entry_ptr, fail_val) \
 {                                                                           \
     int k;                                                                  \
     int depth = 0;                                                          \
@@ -2351,7 +2351,16 @@ if ( ( (cache_ptr)->index_size !=                                           \
     HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
     HDassert( (entry_ptr)->size > 0 );                                    \
     HDassert( new_size > 0 );                                             \
-				  					  \
+                                                                          \
+    if ( (entry_ptr)->coll_access ) {                                     \
+                                                                          \
+	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->coll_list_len,       \
+			                (cache_ptr)->coll_list_size,      \
+			                (entry_ptr)->size,                \
+					(new_size));                      \
+	                                                                  \
+    }                                                                     \
+                                                                          \
     if ( (entry_ptr)->is_pinned ) {                                       \
                                                                           \
 	H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr)->pel_len,             \
@@ -2700,6 +2709,252 @@ if ( ( (cache_ptr)->index_size !=                                           \
 } /* H5C__UPDATE_RP_FOR_UNPROTECT */
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+
+#ifdef H5_HAVE_PARALLEL
+
+#if H5C_DO_SANITY_CHECKS
+#define H5C__COLL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
+if ( ( (hd_ptr) == NULL ) ||                                                   \
+     ( (tail_ptr) == NULL ) ||                                                 \
+     ( (entry_ptr) == NULL ) ||                                                \
+     ( (len) <= 0 ) ||                                                         \
+     ( (Size) < (entry_ptr)->size ) ||                                         \
+     ( ( (Size) == (entry_ptr)->size ) && ( ! ( (len) == 1 ) ) ) ||            \
+     ( ( (entry_ptr)->coll_prev == NULL ) && ( (hd_ptr) != (entry_ptr) ) ) ||   \
+     ( ( (entry_ptr)->coll_next == NULL ) && ( (tail_ptr) != (entry_ptr) ) ) || \
+     ( ( (len) == 1 ) &&                                                       \
+       ( ! ( ( (hd_ptr) == (entry_ptr) ) && ( (tail_ptr) == (entry_ptr) ) &&   \
+             ( (entry_ptr)->coll_next == NULL ) &&                              \
+             ( (entry_ptr)->coll_prev == NULL ) &&                              \
+             ( (Size) == (entry_ptr)->size )                                   \
+           )                                                                   \
+       )                                                                       \
+     )                                                                         \
+   ) {                                                                         \
+    HDassert(0 && "coll DLL pre remove SC failed");                       \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "coll DLL pre remove SC failed")   \
+}
+
+#define H5C__COLL_DLL_SC(head_ptr, tail_ptr, len, Size, fv)                  \
+if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&              \
+       ( (head_ptr) != (tail_ptr) )                                         \
+     ) ||                                                                   \
+     ( (len) < 0 ) ||                                                       \
+     ( (Size) < 0 ) ||                                                      \
+     ( ( (len) == 1 ) &&                                                    \
+       ( ( (head_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                 \
+         ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )           \
+       )                                                                    \
+     ) ||                                                                   \
+     ( ( (len) >= 1 ) &&                                                    \
+       ( ( (head_ptr) == NULL ) || ( (head_ptr)->coll_prev != NULL ) ||      \
+         ( (tail_ptr) == NULL ) || ( (tail_ptr)->coll_next != NULL )         \
+       )                                                                    \
+     )                                                                      \
+   ) {                                                                      \
+    HDassert(0 && "COLL DLL sanity check failed");                      \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "COLL DLL sanity check failed") \
+}
+
+#define H5C__COLL_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
+if ( ( (entry_ptr) == NULL ) ||                                                \
+     ( (entry_ptr)->coll_next != NULL ) ||                                      \
+     ( (entry_ptr)->coll_prev != NULL ) ||                                      \
+     ( ( ( (hd_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&                   \
+       ( (hd_ptr) != (tail_ptr) )                                              \
+     ) ||                                                                      \
+     ( (len) < 0 ) ||                                                          \
+     ( ( (len) == 1 ) &&                                                       \
+       ( ( (hd_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                      \
+         ( (hd_ptr) == NULL ) || ( (hd_ptr)->size != (Size) )                  \
+       )                                                                       \
+     ) ||                                                                      \
+     ( ( (len) >= 1 ) &&                                                       \
+       ( ( (hd_ptr) == NULL ) || ( (hd_ptr)->coll_prev != NULL ) ||             \
+         ( (tail_ptr) == NULL ) || ( (tail_ptr)->coll_next != NULL )            \
+       )                                                                       \
+     )                                                                         \
+   ) {                                                                         \
+    HDassert(0 && "COLL DLL pre insert SC failed");                     \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (fv), "COLL DLL pre insert SC failed")   \
+}
+
+#else /* H5C_DO_SANITY_CHECKS */
+
+#define H5C__COLL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv)
+#define H5C__COLL_DLL_SC(head_ptr, tail_ptr, len, Size, fv)
+#define H5C__COLL_DLL_PRE_INSERT_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv)
+
+#endif /* H5C_DO_SANITY_CHECKS */
+
+
+#define H5C__COLL_DLL_APPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fail_val) \
+{                                                                            \
+    H5C__COLL_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size,    \
+                               fail_val)                                     \
+    if ( (head_ptr) == NULL )                                                \
+    {                                                                        \
+       (head_ptr) = (entry_ptr);                                             \
+       (tail_ptr) = (entry_ptr);                                             \
+    }                                                                        \
+    else                                                                     \
+    {                                                                        \
+       (tail_ptr)->coll_next = (entry_ptr);                                  \
+       (entry_ptr)->coll_prev = (tail_ptr);                                  \
+       (tail_ptr) = (entry_ptr);                                             \
+    }                                                                        \
+    (len)++;                                                                 \
+    (Size) += entry_ptr->size;                                               \
+} /* H5C__COLL_DLL_APPEND() */
+
+#define H5C__COLL_DLL_PREPEND(entry_ptr, head_ptr, tail_ptr, len, Size, fv)  \
+{                                                                            \
+    H5C__COLL_DLL_PRE_INSERT_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv)\
+    if ( (head_ptr) == NULL )                                                \
+    {                                                                        \
+       (head_ptr) = (entry_ptr);                                             \
+       (tail_ptr) = (entry_ptr);                                             \
+    }                                                                        \
+    else                                                                     \
+    {                                                                        \
+       (head_ptr)->coll_prev = (entry_ptr);                                  \
+       (entry_ptr)->coll_next = (head_ptr);                                  \
+       (head_ptr) = (entry_ptr);                                             \
+    }                                                                        \
+    (len)++;                                                                 \
+    (Size) += entry_ptr->size;                                               \
+} /* H5C__COLL_DLL_PREPEND() */
+
+#define H5C__COLL_DLL_REMOVE(entry_ptr, head_ptr, tail_ptr, len, Size, fv)   \
+{                                                                            \
+    H5C__COLL_DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv)\
+    {                                                                        \
+       if ( (head_ptr) == (entry_ptr) )                                      \
+       {                                                                     \
+          (head_ptr) = (entry_ptr)->coll_next;                               \
+          if ( (head_ptr) != NULL )                                          \
+          {                                                                  \
+             (head_ptr)->coll_prev = NULL;                                   \
+          }                                                                  \
+       }                                                                     \
+       else                                                                  \
+       {                                                                     \
+          (entry_ptr)->coll_prev->coll_next = (entry_ptr)->coll_next;        \
+       }                                                                     \
+       if ( (tail_ptr) == (entry_ptr) )                                      \
+       {                                                                     \
+          (tail_ptr) = (entry_ptr)->coll_prev;                               \
+          if ( (tail_ptr) != NULL )                                          \
+          {                                                                  \
+             (tail_ptr)->coll_next = NULL;                                   \
+          }                                                                  \
+       }                                                                     \
+       else                                                                  \
+       {                                                                     \
+          (entry_ptr)->coll_next->coll_prev = (entry_ptr)->coll_prev;        \
+       }                                                                     \
+       entry_ptr->coll_next = NULL;                                          \
+       entry_ptr->coll_prev = NULL;                                          \
+       (len)--;                                                              \
+       (Size) -= entry_ptr->size;                                            \
+    }                                                                        \
+} /* H5C__COLL_DLL_REMOVE() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__INSERT_IN_COLL_LIST
+ *
+ * Purpose:     Insert entry into collective entries list
+ *
+ * Return:      N/A
+ *
+ * Programmer:  Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)        \
+{                                                                       \
+    HDassert( (cache_ptr) );                                            \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    HDassert( (entry_ptr) );                                            \
+                                                                        \
+    /* insert the entry at the head of the list. */                     \
+                                                                        \
+    H5C__COLL_DLL_PREPEND((entry_ptr), (cache_ptr)->coll_head_ptr,      \
+                          (cache_ptr)->coll_tail_ptr,                   \
+                          (cache_ptr)->coll_list_len,                   \
+                          (cache_ptr)->coll_list_size,                  \
+                          (fail_val))                                   \
+                                                                        \
+} /* H5C__INSERT_IN_COLL_LIST */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__REMOVE_FROM_COLL_LIST
+ *
+ * Purpose:     Remove entry from collective entries list
+ *
+ * Return:      N/A
+ *
+ * Programmer:  Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, fail_val)      \
+{                                                                       \
+    HDassert( (cache_ptr) );                                            \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    HDassert( (entry_ptr) );                                            \
+                                                                        \
+    /* remove the entry from the list. */                               \
+                                                                        \
+    H5C__COLL_DLL_REMOVE((entry_ptr), (cache_ptr)->coll_head_ptr,       \
+                         (cache_ptr)->coll_tail_ptr,                    \
+                         (cache_ptr)->coll_list_len,                    \
+                         (cache_ptr)->coll_list_size,                   \
+                         (fail_val))                                    \
+                                                                        \
+} /* H5C__REMOVE_FROM_COLL_LIST */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__MOVE_TO_TOP_IN_COLL_LIST
+ *
+ * Purpose:     Update entry position in collective entries list
+ *
+ * Return:      N/A
+ *
+ * Programmer:  Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define H5C__MOVE_TO_TOP_IN_COLL_LIST(cache_ptr, entry_ptr, fail_val)   \
+{                                                                       \
+    HDassert( (cache_ptr) );                                            \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                 \
+    HDassert( (entry_ptr) );                                            \
+                                                                        \
+    /* Remove entry and insert at the head of the list. */              \
+    H5C__COLL_DLL_REMOVE((entry_ptr), (cache_ptr)->coll_head_ptr,       \
+                         (cache_ptr)->coll_tail_ptr,                    \
+                         (cache_ptr)->coll_list_len,                    \
+                         (cache_ptr)->coll_list_size,                   \
+                         (fail_val))                                    \
+                                                                        \
+        H5C__COLL_DLL_PREPEND((entry_ptr), (cache_ptr)->coll_head_ptr,  \
+                              (cache_ptr)->coll_tail_ptr,               \
+                              (cache_ptr)->coll_list_len,               \
+                              (cache_ptr)->coll_list_size,              \
+                              (fail_val))                               \
+                                                                        \
+} /* H5C__MOVE_TO_TOP_IN_COLL_LIST */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /****************************/
@@ -3657,6 +3912,14 @@ struct H5C_t {
     size_t                      dLRU_list_size;
     H5C_cache_entry_t *		dLRU_head_ptr;
     H5C_cache_entry_t *	        dLRU_tail_ptr;
+
+#ifdef H5_HAVE_PARALLEL
+    int32_t                     coll_list_len;
+    size_t                      coll_list_size;
+    H5C_cache_entry_t *		coll_head_ptr;
+    H5C_cache_entry_t *		coll_tail_ptr;
+    int32_t                     num_coll_entries; /* MSC - used only for debugging - should remove usage*/
+#endif /* H5_HAVE_PARALLEL */
 
     /* Fields for automatic cache size adjustment */
     hbool_t			size_increase_possible;

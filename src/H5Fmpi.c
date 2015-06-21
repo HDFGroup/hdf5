@@ -77,6 +77,35 @@
 
 
 #ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_mpi_handle
+ *
+ * Purpose:     Retrieves MPI File handle.
+ *
+ * Return:      Success:        The size (positive)
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle)
+{
+    herr_t ret_value = SUCCEED;
+    hid_t fapl = -1;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    assert(f && f->shared);
+
+    /* Dispatch to driver */
+    if ((ret_value = H5FD_get_vfd_handle(f->shared->lf, fapl, (void **)f_handle)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get mpi file handle")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_mpi_handle() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_mpi_get_rank

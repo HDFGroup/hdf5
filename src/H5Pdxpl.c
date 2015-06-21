@@ -168,6 +168,12 @@
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_SIZE	sizeof(uint32_t)
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF	0
 
+/* Definition for reading metadata collectively */
+#define H5D_XFER_COLL_MD_READ_SIZE   sizeof(H5P_coll_md_read_flag_t)
+#define H5D_XFER_COLL_MD_READ_DEF    H5P_USER_FALSE
+#define H5D_XFER_COLL_MD_READ_ENC    H5P__encode_coll_md_read_flag_t
+#define H5D_XFER_COLL_MD_READ_DEC    H5P__decode_coll_md_read_flag_t
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -271,6 +277,7 @@ static const hbool_t H5D_def_direct_chunk_flag_g = H5D_XFER_DIRECT_CHUNK_WRITE_F
 static const uint32_t H5D_def_direct_chunk_filters_g = H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_DEF;	/* Default value for the filters of direct chunk write */
 static const hsize_t *H5D_def_direct_chunk_offset_g = H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_DEF; 	/* Default value for the offset of direct chunk write */
 static const uint32_t H5D_def_direct_chunk_datasize_g = H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF; /* Default value for the datasize of direct chunk write */
+static const H5P_coll_md_read_flag_t H5D_def_coll_md_read_g = H5D_XFER_COLL_MD_READ_DEF;  /* Default setting for the collective metedata read flag */
 
 
 /*-------------------------------------------------------------------------
@@ -463,6 +470,13 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_SIZE, &H5D_def_direct_chunk_datasize_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the metadata collective read flag */
+    if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5D_XFER_COLL_MD_READ_SIZE, 
+            &H5D_def_coll_md_read_g, 
+            NULL, NULL, NULL, H5D_XFER_COLL_MD_READ_ENC, H5D_XFER_COLL_MD_READ_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:

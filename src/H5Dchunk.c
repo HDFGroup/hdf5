@@ -45,6 +45,7 @@
 /****************/
 
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 
 /***********/
@@ -56,6 +57,7 @@
 #endif /* H5_HAVE_PARALLEL */
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"		/* File functions			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -2497,6 +2499,9 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *scaled,
         /* Check for cached information */
         if(!H5D__chunk_cinfo_cache_found(&dset->shared->cache.chunk.last, udata)) {
             H5D_chk_idx_info_t idx_info;        /* Chunked index info */
+#ifdef H5_HAVE_PARALLEL
+            H5P_coll_md_read_flag_t temp_flag;          /* temp flag to hold the coll metadata read setting */
+#endif /* H5_HAVE_PARALLEL */
 
             /* Compose chunked index info struct */
             idx_info.f = dset->oloc.file;
@@ -2505,9 +2510,26 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *scaled,
             idx_info.layout = &dset->shared->layout.u.chunk;
             idx_info.storage = &dset->shared->layout.storage.u.chunk;
 
+#ifdef H5_HAVE_PARALLEL
+            if(H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) {
+                /* disable collective metadata read for chunk indexes
+                   as it is highly unlikely that users would read the
+                   same chunks from all processes. MSC - might turn on
+                   for root node? */
+                temp_flag = idx_info.f->coll_md_read;
+                idx_info.f->coll_md_read = H5P_FORCE_FALSE;
+            }
+#endif /* H5_HAVE_PARALLEL */
+
             /* Go get the chunk information */
             if((dset->shared->layout.storage.u.chunk.ops->get_addr)(&idx_info, udata) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address")
+
+#ifdef H5_HAVE_PARALLEL
+            if(H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) {
+                idx_info.f->coll_md_read = temp_flag;
+            }
+#endif /* H5_HAVE_PARALLEL */
 
             /* Cache the information retrieved */
             H5D__chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, udata);

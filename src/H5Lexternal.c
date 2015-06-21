@@ -553,6 +553,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     size_t      file_name_len;          /* Length of file name string */
     size_t      norm_obj_name_len;      /* Length of normalized object name string */
     uint8_t    *p;                      /* Pointer into external link buffer */
+    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */ 
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -587,8 +588,12 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     p += file_name_len;
     HDstrncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1));       /* External link's object */
 
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
     /* Create an external link */
-    if(H5L_create_ud(&link_loc, link_name, ext_link_buf, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
+    if(H5L_create_ud(&link_loc, link_name, ext_link_buf, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:

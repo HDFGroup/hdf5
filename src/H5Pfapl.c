@@ -170,6 +170,12 @@
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF       524288
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC       H5P__encode_size_t
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC       H5P__decode_size_t
+/* Definition of collective metadata read mode flag */
+#define H5F_ACS_COLL_MD_READ_FLAG_SIZE   sizeof(H5P_coll_md_read_flag_t)
+#define H5F_ACS_COLL_MD_READ_FLAG_DEF    H5P_USER_FALSE
+#define H5F_ACS_COLL_MD_READ_FLAG_ENC    H5P__encode_coll_md_read_flag_t
+#define H5F_ACS_COLL_MD_READ_FLAG_DEC    H5P__decode_coll_md_read_flag_t
+
 
 /******************/
 /* Local Typedefs */
@@ -261,6 +267,7 @@ static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF;                
 static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMAGE_INFO_DEF;                 /* Default file image info and callbacks */
 static const hbool_t H5F_def_core_write_tracking_flag_g = H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF;              /* Default setting for core VFD write tracking */
 static const size_t H5F_def_core_write_tracking_page_size_g = H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF;     /* Default core VFD write tracking page size */
+static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
 
 
 /*-------------------------------------------------------------------------
@@ -419,6 +426,13 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     /* Register the size of the core VFD backing store page size */
     if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE, &H5F_def_core_write_tracking_page_size_g , 
             NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the metadata collective read flag */
+    if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5F_ACS_COLL_MD_READ_FLAG_SIZE, 
+            &H5F_def_coll_md_read_flag_g, 
+            NULL, NULL, NULL, H5F_ACS_COLL_MD_READ_FLAG_ENC, H5F_ACS_COLL_MD_READ_FLAG_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -3083,3 +3097,166 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__encode_coll_md_read_flag_t
+ *
+ * Purpose:        Generic encoding callback routine for 'coll_md_read_flag' properties.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
+{
+    const H5P_coll_md_read_flag_t *coll_md_read_flag = (const H5P_coll_md_read_flag_t *)value;
+    uint8_t **pp = (uint8_t **)_pp;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(coll_md_read_flag);
+    HDassert(size);
+
+    if(NULL != *pp) {
+        /* Encode the value */
+        HDmemcpy(*pp, coll_md_read_flag, sizeof(H5P_coll_md_read_flag_t));
+        *pp += sizeof(H5P_coll_md_read_flag_t);
+    } /* end if */
+
+    /* Set size needed for encoding */
+    *size += sizeof(H5P_coll_md_read_flag_t);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__encode_coll_md_read_flag_t() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__decode_coll_md_read_flag_t
+ *
+ * Purpose:        Generic decoding callback routine for 'coll_md_read_flag' properties.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
+{
+    H5P_coll_md_read_flag_t *coll_md_read_flag = (H5P_coll_md_read_flag_t *)_value;            /* File close degree */
+    const uint8_t **pp = (const uint8_t **)_pp;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(coll_md_read_flag);
+
+    /* Decode file close degree */
+    *coll_md_read_flag = (H5P_coll_md_read_flag_t)*(*pp);
+    *pp += sizeof(H5P_coll_md_read_flag_t);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__decode_coll_md_read_flag_t() */
+
+#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_coll_metadata_read
+ *
+ * Purpose: Tell the library whether the metadata read operations will
+ * be done collectively (1) or not (0). Default is independent. With
+ * collective mode, the library will optimize access to metdata
+ * operations on the file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_coll_metadata_read(hid_t plist_id, hbool_t is_collective)
+{
+    H5P_genplist_t *plist;        /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", plist_id, is_collective);
+
+    /* Compare the property list's class against the other class */
+    if(TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
+       TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) &&
+       TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
+
+    /* set property to either TRUE if > 0, or FALSE otherwise */
+    if(is_collective > 0)
+        is_collective = TRUE;
+    else
+        is_collective = FALSE;
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set values */
+    if(H5P_set(plist, H5_COLL_MD_READ_FLAG_NAME, &is_collective) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set collective metadata read flag")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_coll_metadata_read */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_coll_metadata_read
+ *
+ * Purpose:	Gets information about collective metadata read mode.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_coll_metadata_read(hid_t plist_id, hbool_t *is_collective)
+{
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", plist_id, is_collective);
+
+    /* Compare the property list's class against the other class */
+    if(TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
+       TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) &&
+       TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
+
+    /* Get value */
+    if(is_collective) {
+        H5P_coll_md_read_flag_t internal_flag; /* property setting. we need to convert to either TRUE or FALSE */
+        H5P_genplist_t *plist;      /* Property list pointer */
+
+        /* Get the plist structure */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &internal_flag) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core collective metadata read flag")
+
+        if(internal_flag < 0)
+            *is_collective = FALSE;
+        else
+            *is_collective = (hbool_t)internal_flag;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_coll_metadata_read */
+#endif /* H5_HAVE_PARALLEL */
