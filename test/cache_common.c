@@ -478,18 +478,14 @@ addr_to_type_and_index(haddr_t addr,
  *
  *-------------------------------------------------------------------------
  */
-
-herr_t
-check_write_permitted(const H5F_t H5_ATTR_UNUSED *f,
-                      hid_t H5_ATTR_UNUSED dxpl_id,
-                      hbool_t *write_permitted_ptr)
+static herr_t
+check_write_permitted(const H5F_t H5_ATTR_UNUSED *f, hbool_t *write_permitted_ptr)
 {
+    HDassert(write_permitted_ptr);
 
-    HDassert( write_permitted_ptr );
     *write_permitted_ptr = write_permitted;
 
     return(SUCCEED);
-
 } /* check_write_permitted() */
 
 
@@ -2427,7 +2423,6 @@ H5F_t *
 setup_cache(size_t max_cache_size,
             size_t min_clean_size)
 {
-    const char * fcn_name = "setup_cache()";
     char filename[512];
     hbool_t show_progress = FALSE;
     hbool_t verbose = TRUE;
@@ -2441,7 +2436,7 @@ setup_cache(size_t max_cache_size,
 
     if ( show_progress ) /* 1 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
-                  fcn_name, mile_stone++, (int)pass);
+                  FUNC, mile_stone++, (int)pass);
 
     saved_fid = -1;
 
@@ -2458,7 +2453,7 @@ setup_cache(size_t max_cache_size,
 
     if ( show_progress ) /* 2 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
-                  fcn_name, mile_stone++, (int)pass);
+                  FUNC, mile_stone++, (int)pass);
 
     if ( ( pass ) && ( try_core_file_driver ) ) {
 
@@ -2480,7 +2475,7 @@ setup_cache(size_t max_cache_size,
 	    core_file_driver_failed = TRUE;
 
             if ( verbose ) {
-                HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", fcn_name);
+                HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", FUNC);
             }
 
         } else {
@@ -2491,7 +2486,7 @@ setup_cache(size_t max_cache_size,
 
     if ( show_progress ) /* 3 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
-                  fcn_name, mile_stone++, (int)pass);
+                  FUNC, mile_stone++, (int)pass);
 
     /* if we either aren't using the core file driver, or a create
      * with the core file driver failed, try again with a regular file.
@@ -2509,14 +2504,14 @@ setup_cache(size_t max_cache_size,
             failure_mssg = "H5Fcreate() failed.";
 
             if ( verbose ) {
-                HDfprintf(stdout, "%s: H5Fcreate() failed.\n", fcn_name);
+                HDfprintf(stdout, "%s: H5Fcreate() failed.\n", FUNC);
             }
         }
     }
 
     if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
-                  fcn_name, mile_stone++, (int)pass);
+                  FUNC, mile_stone++, (int)pass);
 
     if ( pass ) {
 
@@ -2530,7 +2525,7 @@ setup_cache(size_t max_cache_size,
             failure_mssg = "H5Fflush() failed.";
 
             if ( verbose ) {
-                HDfprintf(stdout, "%s: H5Fflush() failed.\n", fcn_name);
+                HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
             }
 
         } else {
@@ -2543,7 +2538,7 @@ setup_cache(size_t max_cache_size,
                 failure_mssg = "Can't get file_ptr.";
 
                 if ( verbose ) {
-                    HDfprintf(stdout, "%s: H5Fflush() failed.\n", fcn_name);
+                    HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
                 }
 	    }
         }
@@ -2551,7 +2546,7 @@ setup_cache(size_t max_cache_size,
 
     if ( show_progress ) /* 5 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
-                  fcn_name, mile_stone++, (int)pass);
+                  FUNC, mile_stone++, (int)pass);
 
     if ( pass ) {
 
@@ -2603,7 +2598,7 @@ setup_cache(size_t max_cache_size,
 
     if ( show_progress ) /* 6 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
-                  fcn_name, mile_stone++, (int)pass);
+                  FUNC, mile_stone++, (int)pass);
 
     if ( pass ) {
 
@@ -2613,7 +2608,7 @@ setup_cache(size_t max_cache_size,
             failure_mssg = "H5C_create() failed.";
 
             if ( verbose ) {
-                 HDfprintf(stdout, "%s: H5C_create() failed.\n", fcn_name);
+                 HDfprintf(stdout, "%s: H5C_create() failed.\n", FUNC);
             }
 
         } else if ( cache_ptr->magic != H5C__H5C_T_MAGIC ) {
@@ -2622,14 +2617,14 @@ setup_cache(size_t max_cache_size,
 	    failure_mssg = "Bad cache_ptr magic.";
 
             if ( verbose ) {
-                HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", fcn_name);
+                HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", FUNC);
             }
 	}
     }
 
     if ( show_progress ) /* 7 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
-                  fcn_name, mile_stone++, (int)pass);
+                  FUNC, mile_stone++, (int)pass);
 
     if ( pass ) { /* allocate space for test entries */
 
@@ -2642,7 +2637,7 @@ setup_cache(size_t max_cache_size,
 	    failure_mssg = "H5MF_alloc() failed.";
 
 	    if ( verbose ) {
-                HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", fcn_name);
+                HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", FUNC);
             }
 
 	} else if ( actual_base_addr > BASE_ADDR ) {
@@ -2656,7 +2651,7 @@ setup_cache(size_t max_cache_size,
 
 	    if ( verbose ) {
                 HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n",
-			  fcn_name);
+			  FUNC);
             }
         }
 
@@ -2665,7 +2660,7 @@ setup_cache(size_t max_cache_size,
 
     if ( show_progress ) /* 8 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
-                  fcn_name, mile_stone++, (int)pass);
+                  FUNC, mile_stone++, (int)pass);
 
     if ( pass ) {
 
@@ -2678,7 +2673,7 @@ setup_cache(size_t max_cache_size,
 
     if ( show_progress ) /* 9 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
-                  fcn_name, mile_stone++, (int)pass);
+                  FUNC, mile_stone++, (int)pass);
 
     return(ret_val);
 } /* setup_cache() */
@@ -2798,7 +2793,6 @@ expunge_entry(H5F_t * file_ptr,
               int32_t type,
               int32_t idx)
 {
-    /* const char * fcn_name = "expunge_entry()"; */
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -2861,7 +2855,6 @@ flush_cache(H5F_t * file_ptr,
             hbool_t dump_stats,
             hbool_t dump_detailed_stats)
 {
-    const char * fcn_name = "flush_cache()";
     hbool_t verbose = FALSE;
 
     verify_unprotected();
@@ -2897,7 +2890,7 @@ flush_cache(H5F_t * file_ptr,
             if(verbose) {
                 HDfprintf(stdout,
                         "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n",
-                        fcn_name,
+                        FUNC,
                         (long long)(cache_ptr->index_len),
                         (long long)(cache_ptr->index_size),
                         (long long)(cache_ptr->clean_index_size),
@@ -3635,13 +3628,12 @@ row_major_scan_forward(H5F_t * file_ptr,
                        int dirty_destroys,
                        int dirty_unprotects)
 {
-    const char * fcn_name = "row_major_scan_forward";
-    H5C_t * cache_ptr;
+    H5C_t * cache_ptr = NULL;
     int32_t type = 0;
     int32_t idx;
 
     if ( verbose )
-        HDfprintf(stdout, "%s(): entering.\n", fcn_name);
+        HDfprintf(stdout, "%s(): entering.\n", FUNC);
 
     if ( pass ) {
 
@@ -3927,8 +3919,7 @@ hl_row_major_scan_forward(H5F_t * file_ptr,
                           hbool_t display_detailed_stats,
                           hbool_t do_inserts)
 {
-    const char * fcn_name = "hl_row_major_scan_forward";
-    H5C_t * cache_ptr;
+    H5C_t * cache_ptr = NULL;
     int32_t type = 0;
     int32_t idx;
     int32_t i;
@@ -3936,7 +3927,7 @@ hl_row_major_scan_forward(H5F_t * file_ptr,
     int32_t local_max_index;
 
     if ( verbose )
-        HDfprintf(stdout, "%s(): entering.\n", fcn_name);
+        HDfprintf(stdout, "%s(): entering.\n", FUNC);
 
     if ( pass ) {
 
@@ -4039,13 +4030,12 @@ row_major_scan_backward(H5F_t * file_ptr,
                         int dirty_destroys,
                         int dirty_unprotects)
 {
-    const char * fcn_name = "row_major_scan_backward";
-    H5C_t * cache_ptr;
+    H5C_t * cache_ptr = NULL;
     int32_t type = NUMBER_OF_ENTRY_TYPES - 1;
     int32_t idx;
 
     if ( verbose )
-        HDfprintf(stdout, "%s(): Entering.\n", fcn_name);
+        HDfprintf(stdout, "%s(): Entering.\n", FUNC);
 
     if ( pass ) {
 
@@ -4325,8 +4315,7 @@ hl_row_major_scan_backward(H5F_t * file_ptr,
                            hbool_t display_detailed_stats,
                            hbool_t do_inserts)
 {
-    const char * fcn_name = "hl_row_major_scan_backward";
-    H5C_t * cache_ptr;
+    H5C_t * cache_ptr = NULL;
     int32_t type = NUMBER_OF_ENTRY_TYPES - 1;
     int32_t idx;
     int32_t i;
@@ -4334,7 +4323,7 @@ hl_row_major_scan_backward(H5F_t * file_ptr,
     int32_t local_max_index;
 
     if ( verbose )
-        HDfprintf(stdout, "%s(): entering.\n", fcn_name);
+        HDfprintf(stdout, "%s(): entering.\n", FUNC);
 
     if ( pass ) {
 
@@ -4432,13 +4421,12 @@ col_major_scan_forward(H5F_t * file_ptr,
                        hbool_t do_inserts,
                        int dirty_unprotects)
 {
-    const char * fcn_name = "col_major_scan_forward()";
-    H5C_t * cache_ptr;
+    H5C_t * cache_ptr = NULL;
     int32_t type = 0;
     int32_t idx;
 
     if ( verbose )
-        HDfprintf(stdout, "%s: entering.\n", fcn_name);
+        HDfprintf(stdout, "%s: entering.\n", FUNC);
 
     if ( pass ) {
 
@@ -4533,8 +4521,7 @@ hl_col_major_scan_forward(H5F_t * file_ptr,
                           hbool_t do_inserts,
                           int dirty_unprotects)
 {
-    const char * fcn_name = "hl_col_major_scan_forward()";
-    H5C_t * cache_ptr;
+    H5C_t * cache_ptr = NULL;
     int32_t type = 0;
     int32_t idx;
     int32_t lag = 200;
@@ -4542,7 +4529,7 @@ hl_col_major_scan_forward(H5F_t * file_ptr,
     int32_t local_max_index;
 
     if ( verbose )
-        HDfprintf(stdout, "%s: entering.\n", fcn_name);
+        HDfprintf(stdout, "%s: entering.\n", FUNC);
 
     if ( pass ) {
 
@@ -4650,14 +4637,13 @@ col_major_scan_backward(H5F_t * file_ptr,
                         hbool_t do_inserts,
                         int dirty_unprotects)
 {
-    const char * fcn_name = "col_major_scan_backward()";
-    H5C_t * cache_ptr;
+    H5C_t * cache_ptr = NULL;
     int mile_stone = 1;
     int32_t type;
     int32_t idx;
 
     if ( verbose )
-        HDfprintf(stdout, "%s: entering.\n", fcn_name);
+        HDfprintf(stdout, "%s: entering.\n", FUNC);
 
     if ( pass ) {
 
@@ -4676,7 +4662,7 @@ col_major_scan_backward(H5F_t * file_ptr,
     idx = MAX_ENTRIES + lag;
 
     if ( verbose ) /* 1 */
-        HDfprintf(stdout, "%s: point %d.\n", fcn_name, mile_stone++);
+        HDfprintf(stdout, "%s: point %d.\n", FUNC, mile_stone++);
 
 
     while ( ( pass ) && ( (idx + lag) >= 0 ) )
@@ -4724,7 +4710,7 @@ col_major_scan_backward(H5F_t * file_ptr,
     }
 
     if ( verbose ) /* 2 */
-        HDfprintf(stdout, "%s: point %d.\n", fcn_name, mile_stone++);
+        HDfprintf(stdout, "%s: point %d.\n", FUNC, mile_stone++);
 
     if ( ( pass ) && ( display_stats ) ) {
 
@@ -4732,7 +4718,7 @@ col_major_scan_backward(H5F_t * file_ptr,
     }
 
     if ( verbose )
-        HDfprintf(stdout, "%s: exiting.\n", fcn_name);
+        HDfprintf(stdout, "%s: exiting.\n", FUNC);
 
     return;
 
@@ -4764,16 +4750,15 @@ hl_col_major_scan_backward(H5F_t * file_ptr,
                            hbool_t do_inserts,
                            int dirty_unprotects)
 {
-    const char * fcn_name = "hl_col_major_scan_backward()";
-    H5C_t * cache_ptr;
+    H5C_t * cache_ptr = NULL;
     int32_t type = 0;
-    int32_t idx;
+    int32_t idx = -1;
     int32_t lag = 50;
     int32_t i;
-    int32_t local_max_index;
+    int32_t local_max_index = -1;
 
     if ( verbose )
-        HDfprintf(stdout, "%s: entering.\n", fcn_name);
+        HDfprintf(stdout, "%s: entering.\n", FUNC);
 
     if ( pass ) {
 
@@ -5231,7 +5216,7 @@ check_and_validate_cache_hit_rate(hid_t file_id,
             pass = FALSE;
             failure_mssg = "H5Fget_mdc_hit_rate() failed.";
 
-        } else if ( ! DBL_REL_EQUAL(hit_rate, expected_hit_rate, 0.00001F) ) {
+        } else if ( ! H5_DBL_ABS_EQUAL(hit_rate, expected_hit_rate) ) {
 
             pass = FALSE;
             failure_mssg = "unexpected hit rate.";
@@ -5424,7 +5409,7 @@ resize_configs_are_equal(const H5C_auto_size_ctl_t *a,
         return(FALSE);
     else if(compare_init && (a->initial_size != b->initial_size))
         return(FALSE);
-    else if(HDfabs(a->min_clean_fraction - b->min_clean_fraction) > FP_EPSILON)
+    else if(!H5_DBL_ABS_EQUAL(a->min_clean_fraction, b->min_clean_fraction))
         return(FALSE);
     else if(a->max_size != b->max_size)
         return(FALSE);
@@ -5434,9 +5419,9 @@ resize_configs_are_equal(const H5C_auto_size_ctl_t *a,
         return(FALSE);
     else if(a->incr_mode != b->incr_mode)
         return(FALSE);
-    else if(HDfabs(a->lower_hr_threshold - b->lower_hr_threshold) > FP_EPSILON)
+    else if(!H5_DBL_ABS_EQUAL(a->lower_hr_threshold, b->lower_hr_threshold))
         return(FALSE);
-    else if(HDfabs(a->increment - b->increment) > FP_EPSILON)
+    else if(!H5_DBL_ABS_EQUAL(a->increment, b->increment))
         return(FALSE);
     else if(a->apply_max_increment != b->apply_max_increment)
         return(FALSE);
@@ -5444,15 +5429,15 @@ resize_configs_are_equal(const H5C_auto_size_ctl_t *a,
         return(FALSE);
     else if(a->flash_incr_mode != b->flash_incr_mode)
         return(FALSE);
-    else if(HDfabs(a->flash_multiple - b->flash_multiple) > FP_EPSILON)
+    else if(!H5_DBL_ABS_EQUAL(a->flash_multiple, b->flash_multiple))
         return(FALSE);
-    else if(HDfabs(a->flash_threshold - b->flash_threshold) > FP_EPSILON)
+    else if(!H5_DBL_ABS_EQUAL(a->flash_threshold, b->flash_threshold))
         return(FALSE);
     else if(a->decr_mode != b->decr_mode)
         return(FALSE);
-    else if(HDfabs(a->upper_hr_threshold - b->upper_hr_threshold) > FP_EPSILON)
+    else if(!H5_DBL_ABS_EQUAL(a->upper_hr_threshold, b->upper_hr_threshold))
         return(FALSE);
-    else if(HDfabs(a->decrement - b->decrement) > FP_EPSILON)
+    else if(!H5_DBL_ABS_EQUAL(a->decrement, b->decrement))
         return(FALSE);
     else if(a->apply_max_decrement != b->apply_max_decrement)
         return(FALSE);
@@ -5462,7 +5447,7 @@ resize_configs_are_equal(const H5C_auto_size_ctl_t *a,
         return(FALSE);
     else if(a->apply_empty_reserve != b->apply_empty_reserve)
         return(FALSE);
-    else if(HDfabs(a->empty_reserve - b->empty_reserve) > FP_EPSILON)
+    else if(!H5_DBL_ABS_EQUAL(a->empty_reserve, b->empty_reserve))
         return(FALSE);
     return(TRUE);
 }

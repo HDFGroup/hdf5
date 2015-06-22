@@ -1285,16 +1285,16 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
 	    s_ptr->c[3] != d_ptr->c[3] ||
 	    s_ptr->d    != d_ptr->d    ||
 	    s_ptr->e    != d_ptr->e    ||
-            !FLT_ABS_EQUAL(s_ptr->f, d_ptr->f) ||
-            !FLT_ABS_EQUAL(s_ptr->g, d_ptr->g) ||
-            !FLT_ABS_EQUAL(s_ptr->h[0], d_ptr->h[0]) ||
-            !FLT_ABS_EQUAL(s_ptr->h[1], d_ptr->h[1]) ||
-            !FLT_ABS_EQUAL(s_ptr->i, d_ptr->i) ||
-            !FLT_ABS_EQUAL(s_ptr->j, d_ptr->j) ||
-            !DBL_ABS_EQUAL(s_ptr->k, d_ptr->k) ||
-            !DBL_ABS_EQUAL(s_ptr->l, d_ptr->l) ||
-            !DBL_ABS_EQUAL(s_ptr->m, d_ptr->m) ||
-            !DBL_ABS_EQUAL(s_ptr->n, d_ptr->n) ) {
+            !H5_FLT_ABS_EQUAL(s_ptr->f, d_ptr->f) ||
+            !H5_FLT_ABS_EQUAL(s_ptr->g, d_ptr->g) ||
+            !H5_FLT_ABS_EQUAL(s_ptr->h[0], d_ptr->h[0]) ||
+            !H5_FLT_ABS_EQUAL(s_ptr->h[1], d_ptr->h[1]) ||
+            !H5_FLT_ABS_EQUAL(s_ptr->i, d_ptr->i) ||
+            !H5_FLT_ABS_EQUAL(s_ptr->j, d_ptr->j) ||
+            !H5_DBL_ABS_EQUAL(s_ptr->k, d_ptr->k) ||
+            !H5_DBL_ABS_EQUAL(s_ptr->l, d_ptr->l) ||
+            !H5_DBL_ABS_EQUAL(s_ptr->m, d_ptr->m) ||
+            !H5_DBL_ABS_EQUAL(s_ptr->n, d_ptr->n) ) {
 
 	    H5_FAILED();
 	    printf("    i=%d\n", i);

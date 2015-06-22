@@ -297,11 +297,6 @@
  *		To reitterate, this field is only used on process 0 -- it
  *		should be NULL on all other processes.
  *
- * d_slist_len: Integer field containing the number of entries in the
- *		dirty entry list.  This field should always contain the
- *		value 0 on all processes other than process 0.  It exists
- *		primarily for sanity checking.
- *
  * c_slist_ptr: Pointer to an instance of H5SL_t used to maintain a list
  *		of entries that were dirty, have been flushed
  *		to disk since the last clean entries broadcast, and are
@@ -312,11 +307,6 @@
  *		the next clean entries broadcast.  The list emptied after
  *		each broadcast.
  *
- * c_slist_len: Integer field containing the number of entries in the clean
- *		entries list (*c_slist_ptr).  This field should always
- *		contain the value 0 on all processes other than process 0.
- *		It exists primarily for sanity checking.
- *
  * The following two fields are used only when metadata_write_strategy
  * is H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED.
  *
@@ -324,9 +314,6 @@
  *		to construct a list of entries to be flushed at this sync
  *		point.  This list is then broadcast to the other processes,
  *		which then either flush or mark clean all entries on it.
- *
- * candidate_slist_len: Integer field containing the number of entries on the
- *		candidate list.  It exists primarily for sanity checking.
  *
  * write_done:  In the parallel test bed, it is necessary to ensure that
  *              all writes to the server process from cache 0 complete
@@ -394,15 +381,9 @@ typedef struct H5AC_aux_t
 
     H5SL_t *	d_slist_ptr;
 
-    int32_t	d_slist_len;
-
     H5SL_t *	c_slist_ptr;
 
-    int32_t	c_slist_len;
-
     H5SL_t *	candidate_slist_ptr;
-
-    int32_t	candidate_slist_len;
 
     void	(* write_done)(void);
 
