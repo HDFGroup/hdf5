@@ -6,4 +6,4 @@ vds_dset                 Dataset {9/Inf, 4/4, 4/4}
                       4_%b.h5   /source_dset
                }
     Storage:   576 logical bytes, 0 allocated bytes
-    Type:      native int
+    Type:      32-bit little-endian integer

@@ -140,10 +140,10 @@
     set (last_test "H5LS_VDS-clearall-objects")
   endif (HDF5_ENABLE_USING_MEMCHECKER)
 
-  ADD_H5_VDS_TEST (tvds-1 0 -w80 -v 1_vds.h5)
-  ADD_H5_VDS_TEST (tvds-2 0 -w80 -v 2_vds.h5)
-  ADD_H5_VDS_TEST (tvds-3_1 0 -w80 -v 3_1_vds.h5)
-  ADD_H5_VDS_TEST (tvds-3_2 0 -w80 -v 3_2_vds.h5)
-  ADD_H5_VDS_TEST (tvds-4 0 -w80 -v 4_vds.h5)
-  ADD_H5_VDS_TEST (tvds-5 0 -w80 -v 5_vds.h5)
+  ADD_H5_VDS_TEST (tvds-1 0 -w80 -v -S 1_vds.h5)
+  ADD_H5_VDS_TEST (tvds-2 0 -w80 -v -S 2_vds.h5)
+  ADD_H5_VDS_TEST (tvds-3_1 0 -w80 -v -S 3_1_vds.h5)
+  ADD_H5_VDS_TEST (tvds-3_2 0 -w80 -v -S 3_2_vds.h5)
+  ADD_H5_VDS_TEST (tvds-4 0 -w80 -v -S 4_vds.h5)
+  ADD_H5_VDS_TEST (tvds-5 0 -w80 -v -S 5_vds.h5)
 
