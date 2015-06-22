@@ -1922,8 +1922,7 @@ H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
     int mpi_rank, int mpi_size);
 H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr);
-H5_DLL herr_t H5C_clear_coll_entries(H5F_t * f, hid_t dxpl_id, 
-    H5C_t * cache_ptr, hbool_t partial);
+H5_DLL herr_t H5C_clear_coll_entries(H5C_t * cache_ptr, hbool_t partial);
 #endif /* H5_HAVE_PARALLEL */
 
 #ifndef NDEBUG	/* debugging functions */

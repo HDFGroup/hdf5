@@ -617,7 +617,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
 
 #ifdef H5_HAVE_PARALLEL
     /* destroying the cache, so clear all collective entries */
-    if(H5C_clear_coll_entries(f, dxpl_id, f->shared->cache, 0) < 0)
+    if(H5C_clear_coll_entries(f->shared->cache, 0) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
 
     aux_ptr = (struct H5AC_aux_t *)(f->shared->cache->aux_ptr);
@@ -759,7 +759,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
 
 #ifdef H5_HAVE_PARALLEL
     /* flushing the cache, so clear all collective entries */
-    if(H5C_clear_coll_entries(f, dxpl_id, f->shared->cache, 0) < 0)
+    if(H5C_clear_coll_entries(f->shared->cache, 0) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
 
     /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
@@ -4341,7 +4341,7 @@ HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/r/ru) = %zu/%u/%zu/%u/%zu
        evicted later. All ranks are guranteed to mark the same entires
        since we don't modify the order of the collectively accessed
        entries except through collective access. */
-    if(H5C_clear_coll_entries(f, dxpl_id, cache_ptr, TRUE) < 0)
+    if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
 
     switch(aux_ptr->metadata_write_strategy) {

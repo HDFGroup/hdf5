@@ -2833,9 +2833,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
        {                                                                     \
           (head_ptr) = (entry_ptr)->coll_next;                               \
           if ( (head_ptr) != NULL )                                          \
-          {                                                                  \
              (head_ptr)->coll_prev = NULL;                                   \
-          }                                                                  \
        }                                                                     \
        else                                                                  \
        {                                                                     \
@@ -2845,14 +2843,10 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
        {                                                                     \
           (tail_ptr) = (entry_ptr)->coll_prev;                               \
           if ( (tail_ptr) != NULL )                                          \
-          {                                                                  \
              (tail_ptr)->coll_next = NULL;                                   \
-          }                                                                  \
        }                                                                     \
        else                                                                  \
-       {                                                                     \
           (entry_ptr)->coll_next->coll_prev = (entry_ptr)->coll_prev;        \
-       }                                                                     \
        entry_ptr->coll_next = NULL;                                          \
        entry_ptr->coll_prev = NULL;                                          \
        (len)--;                                                              \
@@ -3918,7 +3912,6 @@ struct H5C_t {
     size_t                      coll_list_size;
     H5C_cache_entry_t *		coll_head_ptr;
     H5C_cache_entry_t *		coll_tail_ptr;
-    int32_t                     num_coll_entries; /* MSC - used only for debugging - should remove usage*/
 #endif /* H5_HAVE_PARALLEL */
 
     /* Fields for automatic cache size adjustment */

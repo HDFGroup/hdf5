@@ -698,7 +698,6 @@ H5C_apply_candidate_list(H5F_t * f,
                ranks. */
             if(TRUE == entry_ptr->coll_access) {
                 entry_ptr->coll_access = FALSE;
-                cache_ptr->num_coll_entries --;
                 H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
             }
         } /* end else */
@@ -1460,7 +1459,6 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->coll_list_size			= (size_t)0;
     cache_ptr->coll_head_ptr			= NULL;
     cache_ptr->coll_tail_ptr			= NULL;
-    cache_ptr->num_coll_entries                 = 0;
 #endif /* H5_HAVE_PARALLEL */
 
     cache_ptr->cLRU_list_len			= 0;
@@ -3277,19 +3275,18 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->coll_access = coll_access;
     if(coll_access) {
         //fprintf(stderr, "NEW (%llu, %s)\n", addr, entry_ptr->type->name);
-        cache_ptr->num_coll_entries ++;
         H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, FAIL)
 
         /* Make sure the size of the collective entries in the cache remain in check */
         if(H5P_USER_TRUE == f->coll_md_read) {
             if(cache_ptr->max_cache_size*0.8 < cache_ptr->coll_list_size) {
-                if(H5C_clear_coll_entries(f, dxpl_id, cache_ptr, 1) < 0)
+                if(H5C_clear_coll_entries(cache_ptr, 1) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
             }
         }
         else {
             if(cache_ptr->max_cache_size*0.4 < cache_ptr->coll_list_size) {
-                if(H5C_clear_coll_entries(f, dxpl_id, cache_ptr, 1) < 0)
+                if(H5C_clear_coll_entries(cache_ptr, 1) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
             }
         }
@@ -3479,7 +3476,6 @@ H5C_mark_entries_as_clean(H5F_t *  f,
              */
             if(TRUE == entry_ptr->coll_access) {
                 entry_ptr->coll_access = FALSE;
-                cache_ptr->num_coll_entries --;
                 H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
             }
 
@@ -4338,7 +4334,6 @@ H5C_protect(H5F_t *		f,
                 HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
 
             entry_ptr->coll_access = TRUE;
-            cache_ptr->num_coll_entries ++;
 
             //fprintf(stderr, "ONLY INSERT (%llu, %s)\n", addr, entry_ptr->type->name);
             H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, NULL)
@@ -4395,7 +4390,6 @@ H5C_protect(H5F_t *		f,
 #ifdef H5_HAVE_PARALLEL
         if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
             if(entry_ptr->coll_access) {
-                cache_ptr->num_coll_entries ++;
                 //fprintf(stderr, "LOAD and INSERT (%llu, %s)\n", addr, entry_ptr->type->name);
                 H5C__INSERT_IN_COLL_LIST(cache_ptr, entry_ptr, NULL)
             }
@@ -4693,14 +4687,14 @@ H5C_protect(H5F_t *		f,
                 //fprintf(stderr, "COLL entries size = %zu, MAX = %zu\n", cache_ptr->coll_list_size, cache_ptr->max_cache_size);
                 if(cache_ptr->max_cache_size*0.8 < cache_ptr->coll_list_size) {
                     //fprintf(stderr, "COLL entries at 80.. CLEARING\n");
-                    if(H5C_clear_coll_entries(f, dxpl_id, cache_ptr, 1) < 0)
+                    if(H5C_clear_coll_entries(cache_ptr, 1) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "H5C_clear_coll_entries() failed.")
                 }
             }
             else {
                 if(cache_ptr->max_cache_size*0.4 < cache_ptr->coll_list_size) {
                     //fprintf(stderr, "COLL entries at 40.. CLEARING\n");
-                    if(H5C_clear_coll_entries(f, dxpl_id, cache_ptr, 1) < 0)
+                    if(H5C_clear_coll_entries(cache_ptr, 1) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "H5C_clear_coll_entries() failed.")
                 }
             }
@@ -10569,7 +10563,6 @@ H5C_make_space_in_cache(H5F_t *	f,
 
                     if(TRUE == entry_ptr->coll_access) {
                         entry_ptr->coll_access = FALSE;
-                        cache_ptr->num_coll_entries --;
                         H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
                     }
 
@@ -10596,7 +10589,6 @@ H5C_make_space_in_cache(H5F_t *	f,
 
                     if(TRUE == entry_ptr->coll_access) {
                         entry_ptr->coll_access = FALSE;
-                        cache_ptr->num_coll_entries --;
                         H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
                     }
 
@@ -11671,7 +11663,8 @@ done:
  *
  * Function:    H5C_clear_coll_entries
  *
- * Purpose:     
+ * Purpose:     Clear half or the entire list of collective entries and 
+ *              mark them as independent.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
@@ -11681,44 +11674,29 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_clear_coll_entries(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5C_t * cache_ptr, 
-                       hbool_t partial)
+H5C_clear_coll_entries(H5C_t * cache_ptr, hbool_t partial)
 { 
-    int32_t		list_len, coll_entries_cleared = 0, coll_dirty_entries=0;
+    int32_t		list_len, coll_entries_cleared = 0;
     H5C_cache_entry_t *	entry_ptr = NULL;
     H5C_cache_entry_t *	prev_ptr;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    //fprintf(stderr, "List len = %d, NUM coll entries = %d\n", cache_ptr->coll_list_len, cache_ptr->num_coll_entries);
     entry_ptr = cache_ptr->coll_tail_ptr;
     list_len = cache_ptr->coll_list_len;
+
     while(entry_ptr && (coll_entries_cleared < (partial ? list_len/2 : list_len))) {
         prev_ptr = entry_ptr->coll_prev;
 
         HDassert(entry_ptr->coll_access);
 
-        if(entry_ptr->is_dirty && partial && 0) {
-            coll_dirty_entries ++;
-            //fprintf(stderr, "%d: %llu Coll entry is Dirty\n", mpi_rank, entry_ptr->addr);
-        }
-        else {
-            entry_ptr->coll_access = FALSE;
-            H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
-            coll_entries_cleared ++;
-            //fprintf(stderr, "Cleared %llu Coll entries Cleaned = %d\n", entry_ptr->addr, coll_entries_cleared);
-        }
+        entry_ptr->coll_access = FALSE;
+        H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
+        coll_entries_cleared ++;
+
         entry_ptr = prev_ptr;
     }
-
-    //fprintf(stderr, "NUM COLL entries = %d, CLEARED %d, Dirty %d\n", 
-    //cache_ptr->num_coll_entries, coll_entries_cleared, coll_dirty_entries);
-
-    cache_ptr->num_coll_entries -= coll_entries_cleared;
-    //fprintf(stderr, "NUM COLL entries = %d, NUM COLL dirty entries = %d\n", cache_ptr->num_coll_entries, coll_dirty_entries);
-    HDassert(cache_ptr->coll_list_len == cache_ptr->num_coll_entries);
-    //HDassert(0 == coll_dirty_entries - cache_ptr->num_coll_entries);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -501,6 +501,7 @@ static hbool_t smoke_check_2(int metadata_write_strategy);
 static hbool_t smoke_check_3(int metadata_write_strategy);
 static hbool_t smoke_check_4(int metadata_write_strategy);
 static hbool_t smoke_check_5(int metadata_write_strategy);
+static hbool_t smoke_check_6(int metadata_write_strategy);
 static hbool_t trace_file_check(int metadata_write_strategy);
 
 
@@ -7148,12 +7149,6 @@ trace_file_check(int metadata_write_strategy)
  * Function:	smoke_check_6()
  *
  * Purpose:	Sixth smoke check for the parallel cache.
- *
- *		Use random reads to vary the loads on the diffferent
- *		processors.  Also force different cache size adjustments.
- *
- *		In this test, load process 0 heavily, and the other
- *		processes lightly.
  *
  * Return:	Success:	TRUE
  *
