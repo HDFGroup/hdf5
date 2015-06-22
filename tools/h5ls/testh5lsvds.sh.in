@@ -239,12 +239,12 @@ COPY_TESTFILES_TO_TESTDIR
 
 ####### test for dataset vds ######
 
-TOOLTEST tvds-1.ls -w80 -v 1_vds.h5
-TOOLTEST tvds-2.ls -w80 -v 2_vds.h5
-TOOLTEST tvds-3_1.ls -w80 -v 3_1_vds.h5
-TOOLTEST tvds-3_2.ls -w80 -v 3_2_vds.h5
-TOOLTEST tvds-4.ls -w80 -v 4_vds.h5
-TOOLTEST tvds-5.ls -w80 -v 5_vds.h5
+TOOLTEST tvds-1.ls 0 -w80 -v 1_vds.h5
+TOOLTEST tvds-2.ls 0 -w80 -v 2_vds.h5
+TOOLTEST tvds-3_1.ls 0 -w80 -v 3_1_vds.h5
+TOOLTEST tvds-3_2.ls 0 -w80 -v 3_2_vds.h5
+TOOLTEST tvds-4.ls 0 -w80 -v 4_vds.h5
+TOOLTEST tvds-5.ls 0 -w80 -v 5_vds.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR
