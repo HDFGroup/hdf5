@@ -105,6 +105,14 @@
     + H5HF_DTABLE_INFO_SIZE(h) /* Size of managed obj. doubling-table info */ \
     )
 
+/* Size of minimum header to decode for determining the full header size */
+#define H5HF_MIN_HEADER_SIZE   (                       	\
+    H5_SIZEOF_MAGIC +   /* Signature */                 \
+    1 +                 /* Version */                   \
+    2 +                 /* Heap ID len */               \
+    2                   /* I/O filters' encoded len */  \
+    )
+
 /* Size of overhead for a direct block */
 #define H5HF_MAN_ABS_DIRECT_OVERHEAD(h) (                                     \
     /* General metadata fields */                                             \

@@ -196,9 +196,9 @@ H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata))
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
         H5E_THROW(H5E_CANTGET, "can't get actual buffer")
 
-    /* Read header from disk */
-    if(H5F_block_read(f, H5FD_MEM_FARRAY_HDR, addr, size, dxpl_id, buf) < 0)
-        H5E_THROW(H5E_READERROR, "can't read fixed array header")
+    /* Read and vaildate header from disk */
+    if(H5F_read_check_metadata(f, H5FD_MEM_FARRAY_HDR, addr, size, size, dxpl_id, buf, &computed_chksum) < 0)
+        H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array header")
 
     /* Get temporary pointer to serialized header */
     p = buf;
@@ -254,17 +254,13 @@ H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata))
     /* (allow for checksum not decoded yet) */
     HDassert((size_t)(p - buf) == (size - H5FA_SIZEOF_CHKSUM));
 
-    /* Compute checksum on entire header */
-    /* (including the filter information, if present) */
-    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
-
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(p - buf) == size);
 
-    /* Verify checksum */
+    /* Verify checksum with checksum computed via H5F_read_check_metadata() */
     if(stored_chksum != computed_chksum)
         H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array header")
 
@@ -544,9 +540,9 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
         H5E_THROW(H5E_CANTGET, "can't get actual buffer")
 
-    /* Read data block from disk */
-    if(H5F_block_read(f, H5FD_MEM_FARRAY_DBLOCK, addr, size, dxpl_id, buf) < 0)
-        H5E_THROW(H5E_READERROR, "can't read fixed array data block")
+     /* Read and validate data block from disk */
+    if(H5F_read_check_metadata(f, H5FD_MEM_FARRAY_DBLOCK, addr, size, size, dxpl_id, buf, &computed_chksum) < 0)
+        H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array data block")
 
     /* Get temporary pointer to serialized header */
     p = buf;
@@ -591,16 +587,13 @@ H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     /* Set the data block's size */
     dblock->size = H5FA_DBLOCK_SIZE(dblock);
 
-    /* Compute checksum on data block */
-    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
-
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(p - buf) == size);
 
-    /* Verify checksum */
+    /* Verify checksum with checksum computed via H5F_read_check_metadata() */
     if(stored_chksum != computed_chksum)
         H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array data block")
 
@@ -937,9 +930,9 @@ H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
     if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
         H5E_THROW(H5E_CANTGET, "can't get actual buffer")
 
-    /* Read data block page from disk */
-    if(H5F_block_read(f, H5FD_MEM_FARRAY_DBLK_PAGE, addr, size, dxpl_id, buf) < 0)
-        H5E_THROW(H5E_READERROR, "can't read fixed array data block page")
+    /* Read and validate data block page from disk */
+    if(H5F_read_check_metadata(f, H5FD_MEM_FARRAY_DBLK_PAGE, addr, size, size, dxpl_id, buf, &computed_chksum) < 0)
+        H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array data block page")
 
     /* Get temporary pointer to serialized header */
     p = buf;
@@ -958,9 +951,6 @@ H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Set the data block page's size */
     dblk_page->size = size;
-
-    /* Compute checksum on data block */
-    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
 
     /* Metadata checksum */
     UINT32DECODE(p, stored_chksum);

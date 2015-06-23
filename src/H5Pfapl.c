@@ -170,6 +170,11 @@
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF       524288
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC       H5P__encode_size_t
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC       H5P__decode_size_t
+/* Definition for # of read attempts */
+#define H5F_ACS_READ_ATTEMPTS_SIZE		sizeof(unsigned)
+#define H5F_ACS_READ_ATTEMPTS_DEF               0
+#define H5F_ACS_READ_ATTEMPTS_ENC             	H5P__encode_unsigned
+#define H5F_ACS_READ_ATTEMPTS_DEC             	H5P__decode_unsigned
 
 /******************/
 /* Local Typedefs */
@@ -261,6 +266,7 @@ static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF;                
 static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMAGE_INFO_DEF;                 /* Default file image info and callbacks */
 static const hbool_t H5F_def_core_write_tracking_flag_g = H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF;              /* Default setting for core VFD write tracking */
 static const size_t H5F_def_core_write_tracking_page_size_g = H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF;     /* Default core VFD write tracking page size */
+static const unsigned H5F_def_read_attempts_g = H5F_ACS_READ_ATTEMPTS_DEF;          /* Default setting for the # of read attempts */
 
 
 /*-------------------------------------------------------------------------
@@ -422,6 +428,11 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register the # of read attempts */
+    if(H5P_register_real(pclass, H5F_ACS_READ_ATTEMPTS_NAME, H5F_ACS_READ_ATTEMPTS_SIZE, &H5F_def_read_attempts_g, 
+            NULL, NULL, NULL, H5F_ACS_READ_ATTEMPTS_ENC, H5F_ACS_READ_ATTEMPTS_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_facc_reg_prop() */
@@ -3083,3 +3094,82 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_read_attempts
+ *
+ * Purpose:	Sets the # of read attempts in the file access property list
+ *		when reading metadata with checksum.
+ *		The # of read attempts set via this routine will apply only 
+ *		when opening file with SWMR access. When opening file with 
+ *		non-SWMR access, the # of read attempts will always be 1.
+ *	
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Sept 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_read_attempts(hid_t plist_id, unsigned attempts)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iIu", plist_id, attempts);
+
+    /* Cannot set the # of attempts to 0 */
+    if(attempts <= 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "number of attempts must be greater than 0");
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_READ_ATTEMPTS_NAME, &attempts) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set # of read attempts")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_read_attempts() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_read_attempts
+ *
+ * Purpose:	Returns the # of read attempts set in the file access property list. 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Sept 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_read_attempts(hid_t plist_id, unsigned *attempts/*out*/)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", plist_id, attempts);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get values */
+    if(attempts) {
+	/* Get the # of read attempts set */
+        if(H5P_get(plist, H5F_ACS_READ_ATTEMPTS_NAME, attempts) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment")
+	/* If not set, return the default value */
+	if(*attempts ==  H5F_ACS_READ_ATTEMPTS_DEF)	/* 0 */
+	    *attempts = H5F_READ_ATTEMPTS;
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_read_attempts() */

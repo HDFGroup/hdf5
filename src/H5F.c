@@ -847,6 +847,9 @@ H5Freopen(hid_t file_id)
     if(NULL == (new_file = H5F_new(old_file->shared, 0, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
+    /* Keep old file's read attempts in new file */
+    new_file->read_attempts = old_file->read_attempts;
+
     /* Duplicate old file's names */
     new_file->open_name = H5MM_xstrdup(old_file->open_name);
     new_file->actual_name = H5MM_xstrdup(old_file->actual_name);

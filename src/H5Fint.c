@@ -194,6 +194,8 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size")
     if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+    if(H5P_set(new_plist, H5F_ACS_READ_ATTEMPTS_NAME, &(f->read_attempts)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
     if(f->shared->efc)
         efc_size = H5F_efc_max_nfiles(f->shared->efc);
     if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
@@ -1062,6 +1064,24 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     shared = file->shared;
     lf = shared->lf;
 
+    file->open_name = H5MM_xstrdup(name);
+
+    /* Get the file access property list, for future queries */
+    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
+    /* Retrieve the # of read attempts here so that sohm in superblock will get the correct # of attempts */
+    if(H5P_get(a_plist, H5F_ACS_READ_ATTEMPTS_NAME, &file->read_attempts) < 0)
+	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get the # of read attempts")
+
+    /* When opening file with SWMR access, the # of read attempts is H5_SWMR_READ_ATTEMPTS if not set */
+    /* When opening file with non-SWMR access, the # of read attempts is always H5F_READ_ATTEMPTS (set or not set) */
+    if(H5F_INTENT(file) & H5F_ACC_SWMR_READ || H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) {
+	if(!file->read_attempts)
+	    file->read_attempts = H5F_SWMR_READ_ATTEMPTS;
+    } else
+	file->read_attempts = H5F_READ_ATTEMPTS;
+
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1092,10 +1112,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 	if(H5G_mkroot(file, dxpl_id, FALSE) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
     } /* end if */
-
-    /* Get the file access property list, for future queries */
-    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
     /*
      * Decide the file close degree.  If it's the first time to open the
