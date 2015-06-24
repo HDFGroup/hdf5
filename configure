@@ -26241,48 +26241,60 @@ $as_echo "#define const /**/" >>confdefs.h
 
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for inline" >&5
-$as_echo_n "checking for inline... " >&6; }
-if ${ac_cv_c_inline+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_cv_c_inline=no
-for ac_kw in inline __inline__ __inline; do
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#ifndef __cplusplus
-typedef int foo_t;
-static $ac_kw foo_t static_foo () {return 0; }
-$ac_kw foo_t foo () {return 0; }
-#endif
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if the compiler understands  __inline__" >&5
+$as_echo_n "checking if the compiler understands  __inline__... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+static __inline__ void f(void){return;};
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_c_inline=$ac_kw
+
+$as_echo "#define HAVE___INLINE__ 1" >>confdefs.h
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  test "$ac_cv_c_inline" != no && break
-done
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if the compiler understands __inline" >&5
+$as_echo_n "checking if the compiler understands __inline... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+static __inline void f(void){return;};
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+$as_echo "#define HAVE___INLINE 1" >>confdefs.h
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_inline" >&5
-$as_echo "$ac_cv_c_inline" >&6; }
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
-case $ac_cv_c_inline in
-  inline | yes) ;;
-  *)
-    case $ac_cv_c_inline in
-      no) ac_val=;;
-      *) ac_val=$ac_cv_c_inline;;
-    esac
-    cat >>confdefs.h <<_ACEOF
-#ifndef __cplusplus
-#define inline $ac_val
-#endif
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if the compiler understands inline" >&5
+$as_echo_n "checking if the compiler understands inline... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+static inline void f(void){return;};
 _ACEOF
-    ;;
-esac
+if ac_fn_c_try_compile "$LINENO"; then :
 
+$as_echo "#define HAVE_INLINE 1" >>confdefs.h
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __attribute__ extension" >&5
 $as_echo_n "checking for __attribute__ extension... " >&6; }
@@ -33133,16 +33145,6 @@ fi
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi
-
-## We don't want inline defined for C++ compilers
-## Don't worry about the C++ ifdef wrappers in the H5pubconf file, since
-## 'H5_inline' isn't a C++ keyword.
-cat >> src/H5config.h <<EOF
-
-#if defined(__cplusplus) && defined(inline)
-#undef inline
-#endif
-EOF
 
 ## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
 ## linker flags:  -l with no library name; -l <libname>, specifically gfortran or m.
