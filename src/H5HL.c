@@ -366,7 +366,6 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw))
             /* Protect the local heap data block */
             if(NULL == (dblk = (H5HL_dblk_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP_DBLK, heap->dblk_addr, &dblk_udata, rw)))
                 H5E_THROW(H5E_CANTPROTECT, "unable to load heap data block");
-                //HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to load heap data block")
 
             /* Pin the prefix, if the data block was loaded from file */
             if(dblk_udata.loaded)

@@ -1030,7 +1030,7 @@ H5FS_cache_sinfo_notify(H5AC_notify_action_t action, H5FS_sinfo_t *sinfo)
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                //* Nothing to do */
+                /* Nothing to do */
                 break;
 
             default:
