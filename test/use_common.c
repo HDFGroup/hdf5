@@ -245,6 +245,7 @@ int write_uc_file(void)
 {
     hid_t	fid;          /* File ID for new HDF5 file */
     hid_t	dsid;         /* dataset ID */
+    hid_t       fapl;         /* File access property list */
     hid_t	dcpl;         /* Dataset creation property list */
     char	*name;
     UC_CTYPE	*buffer, *bufptr;	/* data buffer */
@@ -261,7 +262,12 @@ int write_uc_file(void)
     name = UC_opts.filename;
 
     /* Open the file */
-    if((fid = H5Fopen(name, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), H5P_DEFAULT)) < 0){
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        return -1;
+    if(UC_opts.use_swmr)
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            return -1;
+    if((fid = H5Fopen(name, H5F_ACC_RDWR | (UC_opts.use_swmr ? H5F_ACC_SWMR_WRITE : 0), fapl)) < 0){
 	fprintf(stderr, "H5Fopen failed\n");
         return -1;
     }
@@ -393,6 +399,10 @@ int write_uc_file(void)
     }
     if (H5Sclose(f_sid) < 0){
 	fprintf(stderr, "Failed to close file space\n");
+	return -1;
+    }
+    if (H5Pclose(fapl) < 0){
+	fprintf(stderr, "Failed to property list\n");
 	return -1;
     }
     if (H5Fclose(fid) < 0){

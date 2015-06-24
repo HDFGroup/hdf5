@@ -340,7 +340,7 @@ H5F_get_read_attempts(const H5F_t *f)
 
     HDassert(f);
 
-    FUNC_LEAVE_NOAPI(f->read_attempts)
+    FUNC_LEAVE_NOAPI(f->shared->read_attempts)
 } /* end H5F_get_read_attempts() */
 
 

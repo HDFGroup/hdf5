@@ -61,7 +61,6 @@
 /********************/
 
 
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -834,7 +833,6 @@ H5Freopen(hid_t file_id)
 {
     H5F_t	*old_file = NULL;
     H5F_t	*new_file = NULL;
-    unsigned	i;
     hid_t	ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -847,14 +845,6 @@ H5Freopen(hid_t file_id)
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
     if(NULL == (new_file = H5F_new(old_file->shared, 0, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
-
-    /* Keep old file's read attempts in new file */
-    new_file->read_attempts = old_file->read_attempts;
-
-    new_file->retries_nbins = old_file->retries_nbins;
-    for(i = 0; i < H5AC_NTYPES; i++)
-        new_file->retries[i] = NULL;
-
 
     /* Duplicate old file's names */
     new_file->open_name = H5MM_xstrdup(old_file->open_name);
@@ -1428,7 +1418,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Fget_metadata_read_retries_info
+ * Function:    H5Fget_metadata_read_retry_info
  *
  * Purpose:     To retrieve the collection of read retries for metadata items with checksum.
  *
@@ -1440,7 +1430,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fget_metadata_read_retries_info(hid_t file_id, H5F_retries_info_t *info)
+H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info)
 {
     H5F_t    	*file;           	/* File object for file ID */
     unsigned 	i, j;			/* Local index variable */
@@ -1459,11 +1449,10 @@ H5Fget_metadata_read_retries_info(hid_t file_id, H5F_retries_info_t *info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Copy the # of bins for "retries" array */
-    info->nbins = file->retries_nbins;
+    info->nbins = file->shared->retries_nbins;
 
     /* Initialize the array of "retries" */
-    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++)
-	info->retries[i] = NULL;
+    HDmemset(info->retries, 0, sizeof(info->retries));
 
     /* Return if there are no bins -- no retries */
     if(!info->nbins) 
@@ -1497,14 +1486,17 @@ H5Fget_metadata_read_retries_info(hid_t file_id, H5F_retries_info_t *info)
 	    case H5AC_FARRAY_DBLOCK_ID:
 	    case H5AC_FARRAY_DBLK_PAGE_ID:
             case H5AC_SUPERBLOCK_ID:
-                HDassert(j < NUM_METADATA_READ_RETRIES);
-                if(file->retries[i] != NULL) {
+                HDassert(j < H5F_NUM_METADATA_READ_RETRY_TYPES);
+                if(file->shared->retries[i] != NULL) {
 		    /* Allocate memory for retries[i] */
-                    if((info->retries[j] = (uint32_t *)HDmalloc(tot_size)) == NULL)
+                    if(NULL == (info->retries[j] = (uint32_t *)HDmalloc(tot_size)))
 			HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
 		    /* Copy the information */
-                    HDmemcpy(info->retries[j], file->retries[i], tot_size);
-                }
+                    HDmemcpy(info->retries[j], file->shared->retries[i], tot_size);
+                } /* end if */
+
+                /* Increment location in info->retries[] array */
                 j++;
                 break;
 
@@ -1515,7 +1507,7 @@ H5Fget_metadata_read_retries_info(hid_t file_id, H5F_retries_info_t *info)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Fget_metadata_read_retries_info() */
+} /* end H5Fget_metadata_read_retry_info() */
 
 
 /*-------------------------------------------------------------------------

@@ -335,7 +335,6 @@ int main(int argc, const char *argv[])
         gettimeofday(&t, NULL);
         random_seed = (unsigned)((t.tv_sec * 1000) + t.tv_usec);
     } /* end if */
-    /* random_seed = 125092666; */
     srandom(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
     fprintf(stderr, "Using generator random seed (used in sparse test only): %u\n", random_seed);

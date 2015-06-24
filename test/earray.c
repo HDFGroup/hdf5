@@ -2499,6 +2499,11 @@ main(void)
     unsigned	nerrors = 0;            /* Cumulative error count */
     time_t      curr_time;              /* Current time, for seeding random number generator */
     int		ExpressMode;            /* Test express value */
+    const char  *env_h5_drvr;      /* File Driver value from environment */
+
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if(env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     /* Reset library */
     h5_reset();
