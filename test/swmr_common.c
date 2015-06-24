@@ -240,3 +240,50 @@ shutdown_symbols(void)
 
     return 0;
 } /* end shutdown_symbols() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    print_metadata_retries_info
+ *
+ * Purpose:     To retrieve and print the collection of metadata retries for the file.
+ *
+ * Parameters:  fid: the currently opened file identifier
+ *
+ * Return:      Success:    0
+ *              Failure:    negative
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+print_metadata_retries_info(hid_t fid)
+{
+    H5F_retries_info_t info;
+    unsigned power;
+    unsigned i, j;
+
+    /* Retrieve the collection of retries */
+    if(H5Fget_metadata_read_retries_info(fid, &info) < 0)
+	return (-1);
+
+    /* Print information for each non-NULL retries[i] */
+    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
+	if(info.retries[i] == NULL)
+	    continue;
+
+	fprintf(stderr, "Metadata read retries for item %u:\n", i);
+	power = 1;
+	for(j = 0; j < info.nbins; j++) {
+	    if(info.retries[i][j])
+		fprintf(stderr, "\t# of retries for %u - %u retries: %u\n", 
+		       power, (power * 10) - 1, info.retries[i][j]);
+	    power *= 10;
+	}
+    }
+
+    /* Free memory for each non-NULL retries[i] */
+    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++) {
+        if(info.retries[i] != NULL)
+            free(info.retries[i]);
+    }
+    return 0;
+} /* print_metadata_retries_info() */

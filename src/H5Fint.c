@@ -194,7 +194,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size")
     if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
-    if(H5P_set(new_plist, H5F_ACS_READ_ATTEMPTS_NAME, &(f->read_attempts)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, &(f->read_attempts)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
     if(f->shared->efc)
         efc_size = H5F_efc_max_nfiles(f->shared->efc);
@@ -949,6 +949,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     H5FD_class_t       *drvr;               /*file driver class info        */
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
+    unsigned            i;                  /*local index variable          */
     H5F_t              *ret_value;          /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1071,16 +1072,29 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
     /* Retrieve the # of read attempts here so that sohm in superblock will get the correct # of attempts */
-    if(H5P_get(a_plist, H5F_ACS_READ_ATTEMPTS_NAME, &file->read_attempts) < 0)
+    if(H5P_get(a_plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, &file->read_attempts) < 0)
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get the # of read attempts")
 
-    /* When opening file with SWMR access, the # of read attempts is H5_SWMR_READ_ATTEMPTS if not set */
-    /* When opening file with non-SWMR access, the # of read attempts is always H5F_READ_ATTEMPTS (set or not set) */
-    if(H5F_INTENT(file) & H5F_ACC_SWMR_READ || H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) {
-	if(!file->read_attempts)
-	    file->read_attempts = H5F_SWMR_READ_ATTEMPTS;
+    /* When opening file with SWMR access, the # of read attempts is H5F_SWMR_METADATA_READ_ATTEMPTS if not set */
+    /* When opening file with non-SWMR access, the # of read attempts is always H5F_METADATA_READ_ATTEMPTS (set or not set) */
+    if(H5F_INTENT(file) & H5F_ACC_SWMR_READ || H5F_INTENT(file)& H5F_ACC_SWMR_WRITE) {
+        if(!file->read_attempts)
+            file->read_attempts = H5F_SWMR_METADATA_READ_ATTEMPTS;
+        /* Turn off accumulator */
+        shared->feature_flags = lf->feature_flags & ~H5FD_FEAT_ACCUMULATE_METADATA;
+        if(H5FD_set_feature_flags(lf, shared->feature_flags) < 0)
+             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set feature_flags in VFD")
     } else
-	file->read_attempts = H5F_READ_ATTEMPTS;
+        file->read_attempts = H5F_METADATA_READ_ATTEMPTS;
+
+    /* Determine the # of bins for metdata read retries */
+    file->retries_nbins = 0;
+    if(file->read_attempts > 1)
+        file->retries_nbins = HDlog10((double)(file->read_attempts - 1)) + 1;
+
+    /* Initialize the tracking for metadata read retries */
+    for(i = 0; i < H5AC_NTYPES; i++)
+        file->retries[i] = NULL;
 
     /*
      * Read or write the file superblock, depending on whether the file is
@@ -2074,6 +2088,55 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_file_image() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_track_metadata_read_retries
+ *
+ * Purpose:     To track the # of a "retries" (log10) for a metadata item.
+ *		This routine should be used only when:
+ *		  "retries" > 0
+ *		  f->read_attempts > 1 (does not have retry when 1)
+ *		  f->retries_nbins > 0 (calculated based on f->read_attempts)
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi; October 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_track_metadata_read_retries(H5F_t *f, H5AC_type_t actype, unsigned retries)
+{
+    unsigned log_ind;			/* Index to the array of retries based on log10 of retries */
+    herr_t ret_value = SUCCEED; 	/* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->read_attempts > 1);
+    HDassert(f->retries_nbins > 0);
+    HDassert(retries > 0);
+    HDassert(retries < f->read_attempts);
+    HDassert(actype < H5AC_NTYPES);
+
+    /* Allocate memory for retries */
+    if(f->retries[actype] == NULL)
+        if((f->retries[actype] = (uint32_t *)HDcalloc(f->retries_nbins, sizeof(uint32_t))) == NULL)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Index to retries based on log10 */
+    log_ind = HDlog10((double)retries);
+    HDassert(log_ind < f->retries_nbins);
+
+    /* Increment the # of the "retries" */
+    f->retries[actype][log_ind]++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_track_metadata_read_retries() */
 
 
 /*-------------------------------------------------------------------------

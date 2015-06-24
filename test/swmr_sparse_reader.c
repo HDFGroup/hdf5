@@ -267,6 +267,10 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
             /* Pause */
             sleep(poll_time);
 
+	    /* Retrieve and print the collection of metadata read retries */
+	    if(print_metadata_retries_info(fid) < 0)
+		fprintf(stderr, "Warning: could not obtain metadata retries info\n");
+
             /* Reopen the file */
             if(H5Fclose(fid) < 0)
                 return -1;
@@ -291,6 +295,10 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
             if(verbose)
                 fprintf(stderr, "Reopening file: %s\n", filename);
 
+	    /* Retrieve and print the collection of metadata read retries */
+	    if(print_metadata_retries_info(fid) < 0)
+		fprintf(stderr, "Warning: could not obtain metadata retries info\n");
+
             /* Reopen the file */
             if(H5Fclose(fid) < 0)
                 return -1;
@@ -300,6 +308,11 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
         } /* end if */
     } /* end while */
 
+
+    /* Retrieve and print the collection of metadata read retries */
+    if(print_metadata_retries_info(fid) < 0)
+	fprintf(stderr, "Warning: could not obtain metadata retries info\n");
+    
     /* Close file */
     if(H5Fclose(fid) < 0)
         return -1;

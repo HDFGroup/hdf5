@@ -834,6 +834,7 @@ H5Freopen(hid_t file_id)
 {
     H5F_t	*old_file = NULL;
     H5F_t	*new_file = NULL;
+    unsigned	i;
     hid_t	ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -849,6 +850,11 @@ H5Freopen(hid_t file_id)
 
     /* Keep old file's read attempts in new file */
     new_file->read_attempts = old_file->read_attempts;
+
+    new_file->retries_nbins = old_file->retries_nbins;
+    for(i = 0; i < H5AC_NTYPES; i++)
+        new_file->retries[i] = NULL;
+
 
     /* Duplicate old file's names */
     new_file->open_name = H5MM_xstrdup(old_file->open_name);
@@ -1422,6 +1428,97 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Fget_metadata_read_retries_info
+ *
+ * Purpose:     To retrieve the collection of read retries for metadata items with checksum.
+ *
+ * Return:      Success:        non-negative on success
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi; October 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_metadata_read_retries_info(hid_t file_id, H5F_retries_info_t *info)
+{
+    H5F_t    	*file;           	/* File object for file ID */
+    unsigned 	i, j;			/* Local index variable */
+    size_t	tot_size;		/* Size of each retries[i] */
+    herr_t   	ret_value = SUCCEED;   	/* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*x", file_id, info);
+
+    /* Check args */
+    if(!info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+
+    /* Get the file pointer */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+
+    /* Copy the # of bins for "retries" array */
+    info->nbins = file->retries_nbins;
+
+    /* Initialize the array of "retries" */
+    for(i = 0; i < NUM_METADATA_READ_RETRIES; i++)
+	info->retries[i] = NULL;
+
+    /* Return if there are no bins -- no retries */
+    if(!info->nbins) 
+	HGOTO_DONE(SUCCEED);
+
+    /* Calculate size for each retries[i] */
+    tot_size = info->nbins * sizeof(uint32_t);
+
+    /* Map and copy information to info's retries for metadata items with tracking for read retries */
+    j = 0;
+    for(i = 0; i < H5AC_NTYPES; i++) {
+        switch(i) {
+            case H5AC_OHDR_ID:
+            case H5AC_OHDR_CHK_ID:
+            case H5AC_BT2_HDR_ID:
+            case H5AC_BT2_INT_ID:
+            case H5AC_BT2_LEAF_ID:
+            case H5AC_FHEAP_HDR_ID:
+            case H5AC_FHEAP_DBLOCK_ID:
+            case H5AC_FHEAP_IBLOCK_ID:
+	    case H5AC_FSPACE_HDR_ID:
+	    case H5AC_FSPACE_SINFO_ID:
+	    case H5AC_SOHM_TABLE_ID:
+	    case H5AC_SOHM_LIST_ID:
+            case H5AC_EARRAY_HDR_ID:
+            case H5AC_EARRAY_IBLOCK_ID:
+            case H5AC_EARRAY_SBLOCK_ID:
+            case H5AC_EARRAY_DBLOCK_ID:
+            case H5AC_EARRAY_DBLK_PAGE_ID:
+	    case H5AC_FARRAY_HDR_ID:
+	    case H5AC_FARRAY_DBLOCK_ID:
+	    case H5AC_FARRAY_DBLK_PAGE_ID:
+            case H5AC_SUPERBLOCK_ID:
+                HDassert(j < NUM_METADATA_READ_RETRIES);
+                if(file->retries[i] != NULL) {
+		    /* Allocate memory for retries[i] */
+                    if((info->retries[j] = (uint32_t *)HDmalloc(tot_size)) == NULL)
+			HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+		    /* Copy the information */
+                    HDmemcpy(info->retries[j], file->retries[i], tot_size);
+                }
+                j++;
+                break;
+
+            default:
+                break;
+        } /* end switch */
+    } /* end for */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fget_metadata_read_retries_info() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Fget_free_sections
  *
  * Purpose:     To get free-space section information for free-space manager with
@@ -1496,4 +1593,3 @@ H5Fclear_elink_file_cache(hid_t file_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclear_elink_file_cache() */
-
