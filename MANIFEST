@@ -42,6 +42,7 @@
 ./configure.ac
 
 ./bin/COPYING
+./bin/bbrelease       _DO_NOT_DISTRIBUTE_  
 ./bin/buildhdf5
 ./bin/build_and_package_hdf5_binaries.sh  _DO_NOT_DISTRIBUTE_
 ./bin/checkapi        _DO_NOT_DISTRIBUTE_
