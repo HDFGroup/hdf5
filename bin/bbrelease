@@ -268,12 +268,14 @@ if [ X$revmode = Xyes ]; then
     echo Private release of $VERS
     bin/h5vers -s $VERS
     HDF5_VERS=hdf5-$branch-r$revision
-    HDF5_IN_VERS=hdf5src
+    # use a generic directory name for revision releases
+    HDF5_IN_VERS=hdfsrc
 else
     # Store hdf5-$VERS ("hdf5-1.7.51", e.g.) to a variable to avoid typos
     HDF5_VERS=hdf5-$VERS
+    # directory name matches tar file name for non-revision releases
+    HDF5_IN_VERS=$HDF5_VERS
 fi
-
 
 test "$verbose" && echo "Releasing $HDF5_VERS to $DEST" 1>&2
 if [ ! -d $DEST ]; then
@@ -324,7 +326,6 @@ test "$verbose" && echo "   Running tar..." 1>&2
     tar cf $HDF5_VERS.tar $HDF5_IN_VERS/Makefile \
 	`sed 's/^\.\//'$HDF5_IN_VERS'\//' $MANIFEST` || exit 1 \
 )
-#	`sed 's/^\.\//hdf5-'$VERS'\//' $MANIFEST` || exit 1 \
 
 # Compress
 MD5file=$HDF5_VERS.md5
@@ -347,7 +348,6 @@ for comp in $methods; do
 	    ;;
 	zip)
 	    test "$verbose" && echo "   Creating zip ball..." 1>&2
-#	    tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
 	    tar2zip $HDF5_IN_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
 	    (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file) 
 	    ;;
