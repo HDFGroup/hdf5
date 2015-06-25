@@ -7891,8 +7891,8 @@ $as_echo_n "checking for Fortran interoperable KINDS with C... " >&6; }
 $as_echo "$PAC_FC_ALL_REAL_KINDS" >&6; }
 
     H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"$PAC_FC_ALL_REAL_KINDS\" | perl -e '$count = (<STDIN> =~ tr/,//);print $count+1'`"
-  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/{//g' | sed -e 's/}//g'`/)"
-  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/{//g' | sed -e 's/}//g'`/)"
+  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/{//g' | sed -e 's/}//g' | sed -e 's/ /,/g'`/)"
+    H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/{//g' | sed -e 's/}//g'| sed -e 's/ /,/g'`/)"
 
 
 cat >>confdefs.h <<_ACEOF

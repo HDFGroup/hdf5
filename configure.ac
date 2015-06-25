@@ -596,8 +596,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   dnl count the number of real kinds
   H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -e '$count = (<STDIN> =~ tr/,//);print $count+1'`"
-  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/{//g' | sed -e 's/}//g'`/)"
-  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/{//g' | sed -e 's/}//g'`/)"
+  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/{//g' | sed -e 's/}//g' | sed -e 's/ /,/g'`/)"
+  dnl H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | $PERL -pe 'tr |{}|//|' | $PERL -e 's/ /,/g`)"
+  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/{//g' | sed -e 's/}//g'| sed -e 's/ /,/g'`/)"
 
   AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
   AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])

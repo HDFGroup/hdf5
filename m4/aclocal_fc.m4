@@ -584,6 +584,8 @@ rm -f pac_Cconftest.out
         ])
         AC_RUN_IFELSE([],[
             if test -s pac_Cconftest.out ; then
+dnl LDBL_DIG="`perl -ne '$. == 1 && print && exit'`" 
+dnl FLT128_DIG="`perl -ne '$. == 2 && print && exit'`" 
                 LDBL_DIG="`sed -n '1p' pac_Cconftest.out`"
                 FLT128_DIG="`sed -n '2p' pac_Cconftest.out`"
             else
