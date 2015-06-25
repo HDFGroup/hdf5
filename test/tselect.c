@@ -13432,8 +13432,9 @@ test_hyper_unlim(void)
 
     //VDSINC write test saving unlim selection to file as region reference
     //VDSINC write tests for more general AND/NOTA/NOTB operations with
-    //unlimited selections.  Also return values from H5Sget_select_npoints and
-    // H5Shyper_get_select_nblocks for unlimited selections
+    //unlimited selections.  Also return values from H5Sget_select_npoints,
+    //H5Shyper_get_select_nblocks, and H5Sget_select_bounds for unlimited
+    //selections
 
     /* Close the dataspace */
     ret = H5Sclose(sid);

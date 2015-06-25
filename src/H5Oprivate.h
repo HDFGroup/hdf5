@@ -482,6 +482,8 @@ typedef struct H5O_storage_virtual_t {
     hsize_t     min_dims[H5S_MAX_RANK]; /* Minimum extent of VDS (maximum of all non-unlimited selection bounds) */
     H5D_vds_view_t view;                /* Method for calculating the extent of the virtual dataset with unlimited selections */
     hsize_t     printf_gap;             /* Maximum number of sequential missing source datasets before terminating the search for more */
+    hid_t       source_fapl;            /* FAPL to use to open source files */
+    hid_t       source_dapl;            /* DAPL to use to open source datasets */
     hbool_t     init;                   /* Whether all information has been completely initialized */
 } H5O_storage_virtual_t;
 

@@ -9638,7 +9638,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S__hyper_subtract (H5S_t *space, H5S_t *subtract_space)
+H5S__hyper_subtract(H5S_t *space, H5S_t *subtract_space)
 {
     H5S_hyper_span_info_t *a_not_b = NULL;  /* Span tree for hyperslab spans in old span tree and not in new span tree */
     H5S_hyper_span_info_t *a_and_b = NULL;  /* Span tree for hyperslab spans in both old and new span trees */

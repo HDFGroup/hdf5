@@ -108,8 +108,8 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
     H5D__virtual_read,
     H5D__virtual_write,
 #ifdef H5_HAVE_PARALLEL
-    H5D__virtual_collective_read, //VDSINC
-    H5D__virtual_collective_write, //VDSINC
+    NULL,
+    NULL,
 #endif /* H5_HAVE_PARALLEL */
     NULL,
     NULL,
@@ -132,9 +132,8 @@ H5FL_DEFINE(H5O_storage_virtual_name_seg_t);
  *
  * Purpose:     Updates the virtual layout's "min_dims" field to take into
  *              account the "idx"th entry in the mapping list.  The entry
- *              must be complete, though top level fields list_nused does
- *              (and of course min_dims) do not need to take it into
- *              account.
+ *              must be complete, though top level field list_nused (and
+ *              of course min_dims) does not need to take it into account.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -206,6 +205,9 @@ herr_t
 H5D__virtual_copy_layout(H5O_layout_t *layout)
 {
     H5O_storage_virtual_ent_t *orig_list = NULL;
+    hid_t           orig_source_fapl;
+    hid_t           orig_source_dapl;
+    H5P_genplist_t *plist;
     size_t          i;
     herr_t          ret_value = SUCCEED;
 
@@ -214,11 +216,18 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
     HDassert(layout);
     HDassert(layout->type == H5D_VIRTUAL);
 
-    if(layout->storage.u.virt.list_nused > 0) {
-        HDassert(layout->storage.u.virt.list);
+    /* Save original entry list and top-level property lists and reset in layout
+     * so the originals aren't closed on error */
+    orig_source_fapl = layout->storage.u.virt.source_fapl;
+    layout->storage.u.virt.source_fapl = -1;
+    orig_source_dapl = layout->storage.u.virt.source_dapl;
+    layout->storage.u.virt.source_dapl = -1;
+    orig_list = layout->storage.u.virt.list;
+    layout->storage.u.virt.list = NULL;
 
-        /* Save original entry list for use as the "source" */
-        orig_list = layout->storage.u.virt.list;
+    /* Copy entry list */
+    if(layout->storage.u.virt.list_nused > 0) {
+        HDassert(orig_list);
 
         /* Allocate memory for the list */
         if(NULL == (layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc(layout->storage.u.virt.list_nused * sizeof(H5O_storage_virtual_ent_t))))
@@ -315,13 +324,26 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
         layout->storage.u.virt.list_nalloc = 0;
     } /* end else */
 
+    /* Copy property lists */
+    if(orig_source_fapl >= 0) {
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(orig_source_fapl, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+        if((layout->storage.u.virt.source_fapl = H5P_copy_plist(plist, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy fapl")
+    } /* end if */
+    if(orig_source_dapl >= 0) {
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(orig_source_dapl, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+        if((layout->storage.u.virt.source_dapl = H5P_copy_plist(plist, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dapl")
+    } /* end if */
+
     /* New layout is not fully initialized */
     layout->storage.u.virt.init = FALSE;
 
 done:
     /* Release allocated resources on failure */
-    if((ret_value < 0) && orig_list
-            && (orig_list != layout->storage.u.virt.list))
+    if(ret_value < 0)
         if(H5D__virtual_reset_layout(layout) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset virtual layout")
 
@@ -391,6 +413,14 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
     layout->storage.u.virt.list_nalloc = (size_t)0;
     layout->storage.u.virt.list_nused = (size_t)0;
     (void)HDmemset(layout->storage.u.virt.min_dims, 0, sizeof(layout->storage.u.virt.min_dims));
+
+    /* Close access property lists */
+    if(layout->storage.u.virt.source_fapl >= 0)
+        if(H5I_dec_ref(layout->storage.u.virt.source_fapl) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close source fapl")
+    if(layout->storage.u.virt.source_dapl >= 0)
+        if(H5I_dec_ref(layout->storage.u.virt.source_dapl) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close source dapl")
 
     /* The list is no longer initialized */
     layout->storage.u.virt.init = FALSE;
@@ -470,13 +500,11 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     HDassert(source_dset->dset_name);
 
     /* Get dapl and fapl from current (virtual dataset) location? VDSINC */
-    /* Write code to check if these exist and return without opening dset
-     * otherwise VDSINC */
 
     /* Check if we need to open the source file */
     if(HDstrcmp(source_dset->file_name, ".")) {
         /* Open the source file */
-        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & H5F_ACC_RDWR, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, dxpl_id)))
+        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & H5F_ACC_RDWR, H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
             H5E_clear_stack(NULL); //Quick hack until proper support for H5Fopen with missing file is implemented VDSINC HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "unable to open source file")
         else
             src_file_open = TRUE;
@@ -493,7 +521,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to get path for root group")
 
         /* Open the source dataset */
-        if(NULL == (source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, H5P_DATASET_ACCESS_DEFAULT, dxpl_id)))
+        if(NULL == (source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl, dxpl_id)))
             H5E_clear_stack(NULL); //Quick hack until proper support for H5Fopen with missing file is implemented VDSINC HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
         else
             /* Patch the source selection if necessary */
@@ -1443,8 +1471,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__virtual_init(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    const H5D_t *dset, hid_t dapl_id)
+H5D__virtual_init(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5D_t *dset,
+    hid_t dapl_id)
 {
     H5O_storage_virtual_t *storage;     /* Convenience pointer */
     H5P_genplist_t *dapl;               /* Data access property list object pointer */
@@ -1483,6 +1511,14 @@ H5D__virtual_init(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     } /* end if */
     else
         storage->printf_gap = (hsize_t)0;
+
+    /* Retrieve VDS file FAPL to layout */
+    if((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fapl")
+
+    /* Copy DAPL to layout */
+    if((storage->source_dapl = H5P_copy_plist(dapl, FALSE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dapl")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1838,6 +1874,12 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     storage = &io_info->dset->shared->layout.storage.u.virt;
     HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
+#ifdef H5_HAVE_PARALLEL
+    /* Parallel reads are not supported (yet) */
+    if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel reads not supported on virtual datasets")
+#endif /* H5_HAVE_PARALLEL */
+
     /* Prepare for I/O operation */
     if(H5D__virtual_pre_io(io_info, storage, file_space, mem_space, &tot_nelmts) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation")
@@ -1863,47 +1905,56 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
     /* Fill unmapped part of buffer with fill value */
     if(tot_nelmts != nelmts) {
+        H5D_fill_value_t fill_status;       /* Fill value status */
+
         HDassert(tot_nelmts < nelmts);
 
-        /* Start with fill space equal to memory space */
-        if(NULL == (fill_space = H5S_copy(mem_space, FALSE, TRUE)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy memory selection")
+        /* Check the fill value status */
+        if(H5P_is_fill_value_defined(&io_info->dset->shared->dcpl_cache.fill, &fill_status) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if fill value defined")
 
-        /* Iterate over mappings */
-        for(i = 0; i < storage->list_nused; i++)
-            /* Check for "printf" source dataset resolution */
-            if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
-                /* Iterate over sub-source dsets */
-                for(j = storage->list[i].sub_dset_io_start;
-                        j < storage->list[i].sub_dset_io_end; j++)
-                    if(storage->list[i].sub_dset[j].projected_mem_space)
-                        if(H5S_select_subtract(fill_space, storage->list[i].sub_dset[j].projected_mem_space) < 0)
+        /* Always write fill value to memory buffer unless it is undefined */
+        if(fill_status != H5D_FILL_VALUE_UNDEFINED) {
+            /* Start with fill space equal to memory space */
+            if(NULL == (fill_space = H5S_copy(mem_space, FALSE, TRUE)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy memory selection")
+
+            /* Iterate over mappings */
+            for(i = 0; i < storage->list_nused; i++)
+                /* Check for "printf" source dataset resolution */
+                if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
+                    /* Iterate over sub-source dsets */
+                    for(j = storage->list[i].sub_dset_io_start;
+                            j < storage->list[i].sub_dset_io_end; j++)
+                        if(storage->list[i].sub_dset[j].projected_mem_space)
+                            if(H5S_select_subtract(fill_space, storage->list[i].sub_dset[j].projected_mem_space) < 0)
+                                HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to clip fill selection")
+                } /* end if */
+                else
+                    if(storage->list[i].source_dset.projected_mem_space)
+                        /* Subtract projected memory space from fill space */
+                        if(H5S_select_subtract(fill_space, storage->list[i].source_dset.projected_mem_space) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to clip fill selection")
-            } /* end if */
-            else
-                if(storage->list[i].source_dset.projected_mem_space)
-                    /* Subtract projected memory space from fill space */
-                    if(H5S_select_subtract(fill_space, storage->list[i].source_dset.projected_mem_space) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to clip fill selection")
 
-        /* Write fill values to memory buffer */
-        if(H5D__fill(io_info->dset->shared->dcpl_cache.fill.buf, io_info->dset->shared->type, io_info->u.rbuf, type_info->mem_type, fill_space, io_info->dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "filling buf failed")
+            /* Write fill values to memory buffer */
+            if(H5D__fill(io_info->dset->shared->dcpl_cache.fill.buf, io_info->dset->shared->type, io_info->u.rbuf, type_info->mem_type, fill_space, io_info->dxpl_id) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "filling buf failed")
 
 #ifndef NDEBUG
-        /* Make sure the total number of elements written (including fill
-         * values) == nelmts */
-        {
-            hssize_t    select_nelmts;  /* Number of elements in selection */
+            /* Make sure the total number of elements written (including fill
+             * values) == nelmts */
+            {
+                hssize_t    select_nelmts;  /* Number of elements in selection */
 
-            /* Get number of elements in fill dataspace */
-            if((select_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(fill_space)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get number of elements in selection")
+                /* Get number of elements in fill dataspace */
+                if((select_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(fill_space)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get number of elements in selection")
 
-            /* Verify number of elements is correct */
-            HDassert((tot_nelmts + (hsize_t)select_nelmts) == nelmts);
-        } /* end block */
+                /* Verify number of elements is correct */
+                HDassert((tot_nelmts + (hsize_t)select_nelmts) == nelmts);
+            } /* end block */
 #endif /* NDEBUG */
+        } /* end if */
     } /* end if */
 
 done:
@@ -2011,6 +2062,12 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
     storage = &io_info->dset->shared->layout.storage.u.virt;
     HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
+
+#ifdef H5_HAVE_PARALLEL
+    /* Parallel writes are not supported (yet) */
+    if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel writes not supported on virtual datasets")
+#endif /* H5_HAVE_PARALLEL */
 
     /* Prepare for I/O operation */
     if(H5D__virtual_pre_io(io_info, storage, file_space, mem_space, &tot_nelmts) < 0)

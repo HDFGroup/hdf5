@@ -253,6 +253,9 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                 mesg->storage.u.virt.list_nalloc = 0;
                 mesg->storage.u.virt.view = H5D_VDS_ERROR;
                 mesg->storage.u.virt.printf_gap = HSIZE_UNDEF;
+                mesg->storage.u.virt.source_fapl = -1;
+                mesg->storage.u.virt.source_dapl = -1;
+                mesg->storage.u.virt.init = FALSE;
 
                 /* Decode heap block if it exists */
                 if(mesg->storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF) {
