@@ -69,7 +69,7 @@ H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent, int
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    if(NULL == (h = (H5HL_t *)H5HL_protect(f, dxpl_id, addr, H5AC_READ)))
+    if(NULL == (h = (H5HL_t *)H5HL_protect(f, dxpl_id, addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
     HDfprintf(stream, "%*sLocal Heap...\n", indent, "");

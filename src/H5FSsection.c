@@ -204,7 +204,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_sinfo_lock(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5AC_protect_t accmode)
+H5FS_sinfo_lock(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, unsigned accmode)
 {
     H5FS_sinfo_cache_ud_t cache_udata; /* User-data for cache callback */
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -220,14 +220,21 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
     HDassert(f);
     HDassert(fspace);
 
+    /* only H5AC__READ_ONLY_FLAG may appear in accmode */
+    HDassert((accmode & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+
     /* If the free space header doesn't already "own" the section info, load
      *  section info or create it
      */
     if(fspace->sinfo) {
         /* Check if the section info was protected & we want a different access mode */
+
+        /* only H5AC__READ_ONLY_FLAG may appear in fspace->sinfo_accmode */
+        HDassert(((fspace->sinfo_accmode) & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+
         if(fspace->sinfo_protected && accmode != fspace->sinfo_accmode) {
             /* Check if we need to switch from read-only access to read-write */
-            if(H5AC_WRITE == accmode) {
+	    if(0 == (accmode & (unsigned)(~H5AC__READ_ONLY_FLAG))) {
                 /* Unprotect the read-only section info */
                 if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space section info")
@@ -236,11 +243,11 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
                 cache_udata.f = f;
                 cache_udata.dxpl_id = dxpl_id;
                 cache_udata.fspace = fspace;
-                if(NULL == (fspace->sinfo = (H5FS_sinfo_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, &cache_udata, H5AC_WRITE)))
+                if(NULL == (fspace->sinfo = (H5FS_sinfo_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, &cache_udata, H5AC__NO_FLAGS_SET)))
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to load free space sections")
 
                 /* Switch the access mode we have */
-                fspace->sinfo_accmode = H5AC_WRITE;
+                fspace->sinfo_accmode = H5AC__NO_FLAGS_SET;
             } /* end if */
         } /* end if */
     } /* end if */
@@ -331,7 +338,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
     /* Check if we modified any section */
     if(modified) {
         /* Check if the section info was protected with a different access mode */
-        if(fspace->sinfo_protected && fspace->sinfo_accmode != H5AC_WRITE)
+        if(fspace->sinfo_protected && (0 != ((fspace->sinfo_accmode) & H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTDIRTY, FAIL, "attempt to modify read-only section info")
 
         /* If we modified the section info, mark it dirty */
@@ -915,7 +922,7 @@ H5FS_sect_remove(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     HDassert(sect);
 
     /* Get a pointer to the section info */
-    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC_WRITE) < 0)
+    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
     sinfo_valid = TRUE;
 
@@ -1396,7 +1403,7 @@ HDfprintf(stderr, "%s: *sect = {%a, %Hu, %u, %s}\n", FUNC, sect->addr, sect->siz
     HDassert(sect->size);
 
     /* Get a pointer to the section info */
-    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC_WRITE) < 0)
+    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
     sinfo_valid = TRUE;
 
@@ -1494,7 +1501,7 @@ HDfprintf(stderr, "%s: fspace->ghost_sect_count = %Hu\n", FUNC, fspace->ghost_se
         H5FS_section_info_t *sect;      /* Temporary free space section */
 
         /* Get a pointer to the section info */
-        if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC_WRITE) < 0)
+        if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
         sinfo_valid = TRUE;
 
@@ -1613,7 +1620,7 @@ H5FS_sect_try_merge(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace, H5FS_section_info_t
     HDassert(sect->size);
 
     /* Get a pointer to the section info */
-    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC_WRITE) < 0)
+    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
     sinfo_valid = TRUE;
     saved_fs_size = sect->size;
@@ -1849,7 +1856,7 @@ HDfprintf(stderr, "%s: fspace->ghost_sect_count = %Hu\n", FUNC, fspace->ghost_se
 #endif /* QAK */
     if(fspace->tot_sect_count > 0) {
         /* Get a pointer to the section info */
-        if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC_WRITE) < 0)
+        if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
         sinfo_valid = TRUE;
 
@@ -1997,7 +2004,7 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", FUNC, fspace->tot_sect_c
         unsigned bin;           /* Current bin we are on */
 
         /* Get a pointer to the section info */
-        if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC_READ) < 0)
+        if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__READ_ONLY_FLAG) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
         sinfo_valid = TRUE;
 
@@ -2089,7 +2096,7 @@ H5FS_sect_change_class(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     HDassert(new_class < fspace->nclasses);
 
     /* Get a pointer to the section info */
-    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC_WRITE) < 0)
+    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
     sinfo_valid = TRUE;
 
@@ -2403,7 +2410,7 @@ H5FS_sect_try_shrink_eoa(const H5F_t *f, hid_t dxpl_id, const H5FS_t *fspace, vo
     /* Check arguments. */
     HDassert(fspace);
 
-    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC_WRITE) < 0)
+    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
     sinfo_valid = TRUE;
 

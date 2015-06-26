@@ -148,7 +148,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array info")
 
     /* Lock the array header into memory */
-    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC_WRITE)))
+    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Point extensible array wrapper at header and bump it's ref count */
@@ -209,7 +209,7 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
 #ifdef QAK
 HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
-    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC_READ)))
+    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
         H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header, address = %llu", (unsigned long long)ea_addr)
 
     /* Check for pending array deletion */
@@ -333,7 +333,7 @@ END_FUNC(PRIV)  /* end H5EA_get_addr() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_protect_t thing_acc,
+H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, unsigned thing_acc,
     void **thing, uint8_t **thing_elmt_buf, hsize_t *thing_elmt_idx,
     H5EA__unprotect_func_t *thing_unprot_func))
 
@@ -362,6 +362,9 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
     HDassert(thing_elmt_buf);
     HDassert(thing_unprot_func);
 
+    /* only the H5AC__READ_ONLY_FLAG may be set in thing_acc */
+    HDassert((thing_acc & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+
     /* Set the shared array header's file context for this operation */
     hdr->f = ea->f;
 
@@ -377,7 +380,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
 HDfprintf(stderr, "%s: Index block address not defined!\n", FUNC, idx);
 #endif /* QAK */
         /* Check if we are allowed to create the thing */
-        if(H5AC_WRITE == thing_acc) {
+        if(0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
             /* Create the index block */
             hdr->idx_blk_addr = H5EA__iblock_create(hdr, dxpl_id, &stats_changed);
             if(!H5F_addr_defined(hdr->idx_blk_addr))
@@ -435,7 +438,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
             /* Check if the data block has been allocated on disk yet */
             if(!H5F_addr_defined(iblock->dblk_addrs[dblk_idx])) {
                 /* Check if we are allowed to create the thing */
-                if(H5AC_WRITE == thing_acc) {
+                if(0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                     haddr_t dblk_addr;        /* Address of data block created */
                     hsize_t dblk_off;         /* Offset of data block in array */
 
@@ -475,7 +478,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
             /* Check if the super block has been allocated on disk yet */
             if(!H5F_addr_defined(iblock->sblk_addrs[sblk_off])) {
                 /* Check if we are allowed to create the thing */
-                if(H5AC_WRITE == thing_acc) {
+                if(0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                     haddr_t sblk_addr;        /* Address of data block created */
 
                     /* Create super block */
@@ -508,7 +511,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u, sblock->ndblks = %Zu\n", FUNC, dblk_idx, s
             /* Check if the data block has been allocated on disk yet */
             if(!H5F_addr_defined(sblock->dblk_addrs[dblk_idx])) {
                 /* Check if we are allowed to create the thing */
-                if(H5AC_WRITE == thing_acc) {
+                if(0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                     haddr_t dblk_addr;        /* Address of data block created */
                     hsize_t dblk_off;         /* Offset of data block in array */
 
@@ -568,7 +571,7 @@ HDfprintf(stderr, "%s: sblock->dblk_page_size = %Zu\n", FUNC, sblock->dblk_page_
                 /* Check if page has been initialized yet */
                 if(!H5VM_bit_get(sblock->page_init, page_init_idx)) {
                     /* Check if we are allowed to create the thing */
-                    if(H5AC_WRITE == thing_acc) {
+                    if(0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
                         /* Create the data block page */
                         if(H5EA__dblk_page_create(hdr, dxpl_id, sblock, dblk_page_addr) < 0)
                             H5E_THROW(H5E_CANTCREATE, "unable to create data block page")
@@ -677,7 +680,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
     hdr->f = ea->f;
 
     /* Look up the array metadata containing the element we want to set */
-    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC_WRITE, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
+    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC__NO_FLAGS_SET, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
         H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
 
     /* Sanity check */
@@ -762,7 +765,7 @@ HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
         hdr->f = ea->f;
 
         /* Look up the array metadata containing the element we want to set */
-        if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC_READ, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
+        if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC__READ_ONLY_FLAG, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
             H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
 
         /* Check if the thing holding the element has been created yet */
@@ -905,7 +908,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
     HDassert(ea);
 
     /* Look up the array metadata containing the element we want to set */
-    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC_WRITE, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
+    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC__NO_FLAGS_SET, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
         H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
 
     /* Sanity check */
@@ -960,7 +963,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
     HDassert(ea);
 
     /* Look up the array metadata containing the element we want to set */
-    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC_READ, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
+    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC__READ_ONLY_FLAG, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
         H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
 
     /* Sanity check */
@@ -1048,7 +1051,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
         /* Lock the array header into memory */
         /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-        if(NULL == (hdr = H5EA__hdr_protect(ea->f, dxpl_id, ea_addr, NULL, H5AC_WRITE)))
+        if(NULL == (hdr = H5EA__hdr_protect(ea->f, dxpl_id, ea_addr, NULL, H5AC__NO_FLAGS_SET)))
             H5E_THROW(H5E_CANTLOAD, "unable to load extensible array header")
 
         /* Set the shared array header's file context for this operation */
@@ -1112,7 +1115,7 @@ H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
 #ifdef QAK
 HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
-    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC_WRITE)))
+    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
 
     /* Check for files using shared array header */
