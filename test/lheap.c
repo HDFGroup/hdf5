@@ -102,7 +102,7 @@ main(void)
 	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC_WRITE))) {
+    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC__NO_FLAGS_SET))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -152,7 +152,7 @@ main(void)
         if(j > 4)
             buf[j] = '\0';
 
-        if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC_READ))) {
+        if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC__READ_ONLY_FLAG))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;

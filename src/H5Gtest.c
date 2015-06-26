@@ -639,7 +639,7 @@ H5G__verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "b-tree address is invalid")
 
     /* Verify that the heap address is valid */
-    if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab.heap_addr, H5AC_READ)))
+    if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab.heap_addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "heap address is invalid")
 
 done:
@@ -688,7 +688,7 @@ H5G_verify_cached_stabs_test_cb(H5F_t *f, hid_t dxpl_id,
     HDassert(H5F_addr_defined(addr));
 
     /* Load the node */
-    if(NULL == (sn = (H5G_node_t *)H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, f, H5AC_READ)))
+    if(NULL == (sn = (H5G_node_t *)H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, f, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node")
 
     /* Check each target object to see if its stab message (if present) matches
@@ -703,7 +703,7 @@ H5G_verify_cached_stabs_test_cb(H5F_t *f, hid_t dxpl_id,
         targ_oloc.addr = sn->entry[i].header;
 
         /* Load target object header */
-        if(NULL == (targ_oh = H5O_protect(&targ_oloc, dxpl_id, H5AC_READ)))
+        if(NULL == (targ_oh = H5O_protect(&targ_oloc, dxpl_id, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to protect target object header")
 
         /* Check if a symbol table message exists */

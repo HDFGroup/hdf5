@@ -210,7 +210,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Protect local heap (which actually pins it in the cache) */
-    if(NULL == (lheap = H5HL_protect(f, my_dxpl, lheap_addr, H5AC_READ)))
+    if(NULL == (lheap = H5HL_protect(f, my_dxpl, lheap_addr, H5AC__READ_ONLY_FLAG)))
         FAIL_STACK_ERROR
 
     /* Create an object header */
@@ -230,7 +230,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Protect local heap (which actually pins it in the cache) */
-    if(NULL == (lheap2 = H5HL_protect(f, my_dxpl, lheap_addr2, H5AC_READ)))
+    if(NULL == (lheap2 = H5HL_protect(f, my_dxpl, lheap_addr2, H5AC__READ_ONLY_FLAG)))
         FAIL_STACK_ERROR
 
     /* Unprotect local heap (which actually unpins it from the cache) */
@@ -247,7 +247,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Protect local heap (which actually pins it in the cache) */
-    if(NULL == (lheap3 = H5HL_protect(f, my_dxpl, lheap_addr3, H5AC_READ)))
+    if(NULL == (lheap3 = H5HL_protect(f, my_dxpl, lheap_addr3, H5AC__READ_ONLY_FLAG)))
         FAIL_STACK_ERROR
 
     /* Unprotect local heap (which actually unpins it from the cache) */

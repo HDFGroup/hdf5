@@ -155,8 +155,9 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam, void *ctx_udat
 
     /* Look up the B-tree header */
     cache_udata.f = f;
+    cache_udata.addr = hdr_addr;
     cache_udata.ctx_udata = ctx_udata;
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &cache_udata, H5AC_WRITE)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &cache_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
 
     /* Point v2 B-tree wrapper at header and bump it's ref count */
@@ -215,8 +216,9 @@ H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata)
 
     /* Look up the B-tree header */
     cache_udata.f = f;
+    cache_udata.addr = addr;
     cache_udata.ctx_udata = ctx_udata;
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, &cache_udata, H5AC_READ)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
 
     /* Check for pending heap deletion */
@@ -479,7 +481,7 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
         H5B2_node_ptr_t next_node_ptr;      /* Node pointer info for next node */
 
         /* Lock B-tree current node */
-        if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC_READ)))
+        if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate node pointer for child */
@@ -542,7 +544,7 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
         H5B2_leaf_t *leaf;          /* Pointer to leaf node in B-tree */
 
         /* Lock B-tree leaf node */
-        if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, H5AC_READ)))
+        if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
         /* Locate record */
@@ -662,7 +664,7 @@ H5B2_index(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order, hsize_t idx,
         unsigned u;                         /* Local index variable */
 
         /* Lock B-tree current node */
-        if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC_READ)))
+        if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Search for record with correct index */
@@ -734,7 +736,7 @@ H5B2_index(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order, hsize_t idx,
         H5B2_leaf_t *leaf;          /* Pointer to leaf node in B-tree */
 
         /* Lock B-tree leaf node */
-        if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, H5AC_READ)))
+        if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
         /* Sanity check index */
@@ -1070,7 +1072,7 @@ H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
         H5B2_node_ptr_t next_node_ptr;      /* Node pointer info for next node */
 
         /* Lock B-tree current node */
-        if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC_WRITE)))
+        if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate node pointer for child */
@@ -1142,7 +1144,7 @@ H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
         hbool_t changed = FALSE;/* Whether the 'modify' callback changed the record */
 
         /* Lock B-tree leaf node */
-        if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, H5AC_WRITE)))
+        if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
         /* Locate record */
@@ -1276,7 +1278,7 @@ H5B2_close(H5B2_t *bt2, hid_t dxpl_id)
 
         /* Lock the v2 B-tree header into memory */
         /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-        if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(bt2->f, dxpl_id, H5AC_BT2_HDR, bt2_addr, NULL, H5AC_WRITE)))
+        if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(bt2->f, dxpl_id, H5AC_BT2_HDR, bt2_addr, NULL, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
 
         /* Set the shared v2 B-tree header's file context for this operation */
@@ -1352,8 +1354,9 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata,
 HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 #endif /* QAK */
     cache_udata.f = f;
+    cache_udata.addr = addr;
     cache_udata.ctx_udata = ctx_udata;
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, &cache_udata, H5AC_WRITE)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, &cache_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
 
     /* Remember the callback & context for later */

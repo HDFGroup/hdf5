@@ -412,7 +412,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     }
 
     /* Get source object header */
-    if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC_READ)))
+    if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve user data for particular type of object to copy */
