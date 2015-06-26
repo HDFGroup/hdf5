@@ -260,7 +260,7 @@ create_test_file_eof_gt_eoa(char * filename, hid_t fcpl, hid_t fapl, haddr_t * e
     H5Dclose(did);
     H5Sclose(sid);
     H5Fclose(fid);
-    
+
     /* Re-open file */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR;
 

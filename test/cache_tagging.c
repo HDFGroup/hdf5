@@ -457,7 +457,7 @@ static int evict_entries(hid_t fid)
     /* Evict all we can from the cache to examine full tag creation tree */
         /* This function will likely return failure since the root group
          * is still protected. Thus, don't check its return value. */
-    H5C_flush_cache(f, H5P_DEFAULT, H5P_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+    H5C_flush_cache(f, H5P_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
 
     return 0;
 
@@ -3861,13 +3861,13 @@ check_invalid_tag_application(void)
 
     /* Call H5HL_protect to protect the local heap created above. */
     /* This should fail as no tag is set up during the protect call */
-    if (( lheap = H5HL_protect(f, H5AC_ind_dxpl_id, addr, H5AC_WRITE)) != NULL ) TEST_ERROR;
+    if (( lheap = H5HL_protect(f, H5AC_ind_dxpl_id, addr, H5AC__NO_FLAGS_SET)) != NULL ) TEST_ERROR;
 
     /* Again, set up a valid tag in the DXPL */
     if ( H5AC_tag(H5AC_ind_dxpl_id, (haddr_t)25, NULL) < 0) TEST_ERROR;
 
     /* Call H5HL_protect again to protect the local heap. This should succeed. */
-    if (( lheap = H5HL_protect(f, H5AC_ind_dxpl_id, addr, H5AC_WRITE)) == NULL ) TEST_ERROR;
+    if (( lheap = H5HL_protect(f, H5AC_ind_dxpl_id, addr, H5AC__NO_FLAGS_SET)) == NULL ) TEST_ERROR;
 
     /* Now unprotect the heap, as we're done with the test. */
     if ( H5HL_unprotect(lheap) < 0 ) TEST_ERROR;

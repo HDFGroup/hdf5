@@ -392,6 +392,12 @@ typedef struct H5AC_aux_t
 
 } H5AC_aux_t; /* struct H5AC_aux_t */
 
+/* Package scoped functions */
+H5_DLL herr_t H5AC_set_sync_point_done_callback(H5C_t *cache_ptr,
+    void (*sync_point_done)(int num_writes, haddr_t *written_entries_tbl));
+H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
+    void (* write_done)(void));
+
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5ACpkg_H */

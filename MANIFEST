@@ -43,6 +43,7 @@
 ./configure.ac
 
 ./bin/COPYING
+./bin/bbrelease       _DO_NOT_DISTRIBUTE_
 ./bin/buildhdf5
 ./bin/checkapi        _DO_NOT_DISTRIBUTE_
 ./bin/checkposix      _DO_NOT_DISTRIBUTE_
