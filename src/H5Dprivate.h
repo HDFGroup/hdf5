@@ -52,6 +52,7 @@
 #define H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME   "rdcc_nslots"   /* Size of raw data chunk cache(slots) */
 #define H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME   "rdcc_nbytes"   /* Size of raw data chunk cache(bytes) */
 #define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"       /* Preemption read chunks first */
+#define H5D_ACS_APPEND_FLUSH_NAME    "append_flush"         /* Append flush actions */
 
 /* ======== Data transfer properties ======== */
 #define H5D_XFER_MAX_TEMP_BUF_NAME      "max_temp_buf"  /* Maximum temp buffer size */
@@ -145,6 +146,14 @@ typedef struct H5D_copy_file_ud_t {
     H5T_t *src_dtype;                   /* Copy of datatype for dataset */
     H5O_layout_t *src_layout;           /* Copy of layout for dataset */
 } H5D_copy_file_ud_t;
+
+/* Structure for dataset append flush property (H5Pset_append_flush) */
+typedef struct H5D_append_flush_t {
+    int ndims;				/* The # of dimensions for "boundary" */
+    hsize_t boundary[H5S_MAX_RANK];	/* The dimension sizes for determining boundary */
+    H5D_append_cb_t func;		/* The callback function */
+    void *udata;			/* User data */
+} H5D_append_flush_t;
 
 
 /*****************************/

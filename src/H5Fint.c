@@ -156,6 +156,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5P_genplist_t *old_plist;              /* Old property list */
     void		*driver_info=NULL;
     unsigned            efc_size = 0;
+    H5F_object_flush_t  flush_info;         /* Object flush property values */
     hid_t		ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -195,7 +196,16 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
     if(H5P_set(new_plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, &(f->shared->read_attempts)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'read attempts ' flag")
+
+    /* Obtain object flush property values */
+    flush_info.func = f->shared->object_flush.func;
+    flush_info.udata = f->shared->object_flush.udata;
+
+    /* Set values */
+    if(H5P_set(new_plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &flush_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object flush callback")
+
     if(f->shared->efc)
         efc_size = H5F_efc_max_nfiles(f->shared->efc);
     if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
@@ -711,24 +721,20 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
                 f->shared->read_attempts = H5F_SWMR_METADATA_READ_ATTEMPTS;
 
             /* Turn off accumulator with SWMR */
-            f->shared->feature_flags = lf->feature_flags & ~(unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
-            if(H5FD_set_feature_flags(lf, f->shared->feature_flags) < 0)
+	    f->shared->feature_flags &= ~(unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
+            if(H5FD_set_feature_flags(f->shared->lf, f->shared->feature_flags) < 0)
                  HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set feature_flags in VFD")
         } /* end if */
         else
             f->shared->read_attempts = H5F_METADATA_READ_ATTEMPTS;
 
-        /* Determine the # of bins for metdata read retries */
-        f->shared->retries_nbins = 0;
-        if(f->shared->read_attempts > 1) {
-            double tmp;
+	/* Determine the # of bins for metdata read retries */
+ 	if(H5F_set_retries(f) < 0)
+ 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't set retries and retries_nbins")
 
-            tmp = HDlog10((double)(f->shared->read_attempts - 1));
-            f->shared->retries_nbins = (unsigned)tmp + 1;
-        } /* end if */
-
-        /* Initialize the tracking for metadata read retries */
-        HDmemset(f->shared->retries, 0, sizeof(f->shared->retries));
+ 	/* Get object flush callback information */
+ 	if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
+ 	    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get object flush cb info")
 
 	/*
 	 * Create a metadata cache with the specified number of elements.
@@ -840,10 +846,19 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                 /* Flush the file again (if requested), as shutting down the
                  * free space manager may dirty some data structures again.
                  */
-                if(flush)
+                if(flush) {
+		    /* Clear status_flags */
+                    f->shared->sblock->status_flags &= ~H5F_SUPER_WRITE_ACCESS;
+                    f->shared->sblock->status_flags &= ~H5F_SUPER_SWMR_WRITE_ACCESS;
+                    /* Mark superblock dirty in cache, so change will get encoded */
+                    /* Push error, but keep going*/
+                    if(H5F_super_dirty(f) < 0)
+                        HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+
                     if(H5F_flush(f, dxpl_id, TRUE) < 0)
                         /* Push error, but keep going*/
                         HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+		}
             } /* end if */
 
             /* Unpin the superblock, since we're about to destroy the cache */
@@ -971,6 +986,37 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
  *		The ACCESS_PARMS argument is optional.  A null pointer will
  *		cause the default file access parameters to be used.
  *
+ * The following two tables show results of file opens for single and concurrent access:
+ *
+ * SINGLE PROCESS ACCESS                        CONCURRENT ACCESS
+ *
+ *             #1st open#                                   #1st open#
+ *             -- SR SR -- -- SR SR --                      -- SR SR -- -- SR SR --
+ *             -- -- SW SW SW SW -- --                      -- -- SW SW SW SW -- --
+ *              W  W  W  W  R  R  R  R                       W  W  W  W  R  R  R  R
+ * #2nd open#                                   #2nd open#
+ *            --------------------------                   --------------------------
+ *   -- --  W | s  x  x  s  x  x  f  f |          -- --  W | f  x  x  f  x  x  f  f |
+ *   SR --  W | x  x  x  x  x  x  x  x |          SR --  W | x  x  x  x  x  x  x  x |
+ *   SR SW  W | x  x  x  x  x  x  x  x |          SR SW  W | x  x  x  x  x  x  x  x |
+ *   -- SW  W | f  x  x  s  x  x  f  f |          -- SW  W | f  x  x  f  x  x  f  f |
+ *   -- SW  R | x  x  x  x  x  x  x  x |          -- SW  R | x  x  x  x  x  x  x  x |
+ *   SR SW  R | x  x  x  x  x  x  x  x |          SR SW  R | x  x  x  x  x  x  x  x |
+ *   SR --  R | s  x  x  s  x  x  s  f |          SR --  R | f  x  x  s  x  x  s  s |
+ *   -- --  R | s  x  x  s  x  x  s  s |          -- --  R | f  x  x  f  x  x  s  s |
+ *            --------------------------                   --------------------------
+ *
+ *      Notations:
+ *        W:  H5F_ACC_RDWR
+ *        R:  H5F_ACC_RDONLY
+ *        SW: H5F_ACC_SWMR_WRITE
+ *        SR: H5F_ACC_SWMR_READ
+ *
+ *        x: the first open or second open itself fails due to invalid flags combination
+ *        f: the open fails with flags combination from both the first and second opens
+ *        s: the open succeeds with flags combination from both the first and second opens
+ *
+ *
  * Return:	Success:	A new file pointer.
  *		Failure:	NULL
  *
@@ -990,6 +1036,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     H5FD_class_t       *drvr;               /*file driver class info        */
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
+    hbool_t             set_flag = FALSE;   /*set the status_flags in the superblock */
+    hbool_t             clear = FALSE;      /*clear the status_flags 	    */
     H5F_t              *ret_value;          /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1055,7 +1103,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 	 * exists), or if the new request adds write access (since the
 	 * readers don't expect the file to change under them), or if the
          * SWMR write/read access flags don't agree.
-
 	 */
 	if(H5FD_close(lf) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
@@ -1065,11 +1112,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file exists")
 	if((flags & H5F_ACC_RDWR) && 0 == (shared->flags & H5F_ACC_RDWR))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for read-only")
-	if(((flags & H5F_ACC_SWMR_WRITE) && 0 == (shared->flags & H5F_ACC_SWMR_WRITE))
-                || (0 == (flags & H5F_ACC_SWMR_WRITE) && (shared->flags & H5F_ACC_SWMR_WRITE)))
+
+	if((flags & H5F_ACC_SWMR_WRITE) && 0 == (shared->flags & H5F_ACC_SWMR_WRITE))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "SWMR write access flag not the same for file that is already open")
-	if(((flags & H5F_ACC_SWMR_READ) && 0 == (shared->flags & H5F_ACC_SWMR_READ))
-                || (0 == (flags & H5F_ACC_SWMR_READ) && (shared->flags & H5F_ACC_SWMR_READ)))
+	if((flags & H5F_ACC_SWMR_READ) && !((shared->flags & H5F_ACC_SWMR_WRITE) || (shared->flags & H5F_ACC_SWMR_READ) || (shared->flags & H5F_ACC_RDWR)))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "SWMR read access flag not the same for file that is already open")
 
         /* Allocate new "high-level" file struct */
@@ -1084,18 +1130,24 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
              * open it are different than the desired flags. Close the tentative
              * file and open it for real.
              */
-            if(H5FD_close(lf) < 0) {
-                file = NULL; /*to prevent destruction of wrong file*/
+            if(H5FD_close(lf) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
-            } /* end if */
-            if(NULL == (lf = H5FD_open(name, flags, fapl_id, HADDR_UNDEF))) {
-                file = NULL; /*to prevent destruction of wrong file*/
+
+            if(NULL == (lf = H5FD_open(name, flags, fapl_id, HADDR_UNDEF)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-            } /* end if */
+
         } /* end if */
 
-        if(NULL == (file = H5F_new(NULL, flags, fcpl_id, fapl_id, lf)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
+	/* Place an advisory lock on the file */
+        if((H5FD_lock(lf, (hbool_t)((flags & H5F_ACC_RDWR) ? TRUE : FALSE)) < 0) ||
+           (NULL == (file = H5F_new(NULL, flags, fcpl_id, fapl_id, lf)))) {
+            if(H5FD_close(lf) < 0) /* Closing will remove the lock */
+                HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to lock the file or initialize file structure")
+        }
+
+	/* Need to set status_flags in the superblock */
+        set_flag = TRUE;
     } /* end else */
 
     /* Retain the name the file was opened with */
@@ -1127,6 +1179,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         if(H5G_mkroot(file, dxpl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
     } else if (1 == shared->nrefs) {
+
 	/* Read the superblock if it hasn't been read before. */
         if(H5F__super_read(file, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
@@ -1136,9 +1189,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
     } /* end if */
 
+
     /* Get the file access property list, for future queries */
     if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
     /*
      * Decide the file close degree.  If it's the first time to open the
      * file, set the degree to access property list value; if it's the
@@ -1147,6 +1202,16 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
      */
     if(H5P_get(a_plist, H5F_ACS_CLOSE_DEGREE_NAME, &fc_degree) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file close degree")
+
+    /* This is a private property to clear the status_flags in the super block */
+    /* Use by h5clear and a routine in test/flush2.c to clear the test file's status_flags */
+    if(H5P_exist_plist(a_plist, H5F_ACS_CLEAR_STATUS_FLAGS_NAME) > 0) {
+        if(H5P_get(a_plist, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, &clear) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get clearance for status_flags")
+        else if(clear) {
+            file->shared->sblock->status_flags = 0;
+        }
+    }
 
     if(shared->nrefs == 1) {
         if(fc_degree == H5F_CLOSE_DEFAULT)
@@ -1168,13 +1233,42 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(H5F_build_actual_name(file, a_plist, name, &file->actual_name) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build actual name")
 
+    if(set_flag) {
+        if(H5F_INTENT(file) & H5F_ACC_RDWR) { /* Set and check consistency of status_flags */
+            if(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS ||
+               file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write or SWMR write")
+
+            file->shared->sblock->status_flags |= H5F_SUPER_WRITE_ACCESS;
+
+            if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) { /* Remove the file lock for SWMR_WRITE */
+                file->shared->sblock->status_flags |= H5F_SUPER_SWMR_WRITE_ACCESS;
+                if(H5FD_unlock(file->shared->lf) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to unlock the file")
+            }
+            /* Flush the superblock */
+            if(H5F_super_dirty(file) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, NULL, "unable to mark superblock as dirty")
+            if(H5F_flush_tagged_metadata(file, (haddr_t)0, H5AC_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock")
+        } else { /* H5F_ACC_RDONLY */
+            if(H5F_INTENT(file) & H5F_ACC_SWMR_READ) { /* Check consistency of status_flags */
+                if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS && !(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
+                || (!(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) && file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is not already open for SWMR writing")
+            } else if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) ||
+               (file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for writing")
+        }
+    } /* end if set_flag */
+
     /* Success */
     ret_value = file;
 
 done:
     if(!ret_value && file)
-        if(H5F_dest(file, dxpl_id, FALSE) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+	if(H5F_dest(file, dxpl_id, FALSE) < 0)
+	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
@@ -2084,6 +2178,8 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
     /* test to see if a buffer was provided -- if not, we are done */
     if(buf_ptr != NULL) {
         size_t	space_needed;		/* size of file image */
+	hsize_t tmp;
+        size_t tmp_size;
 
         /* Check for buffer too small */
         if((haddr_t)buf_len < eoa)
@@ -2095,6 +2191,15 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
         /* (Note compensation for base address addition in internal routine) */
         if(H5FD_read(fd_ptr, H5AC_ind_dxpl_g, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "file image read request failed")
+
+	/* Offset to "status_flags" in the superblock */
+        tmp = H5F_SUPER_STATUS_FLAGS_OFF(file->shared->sblock->super_vers);
+        /* Size of "status_flags" depends on the superblock version */
+        tmp_size = H5F_SUPER_STATUS_FLAGS_SIZE(file->shared->sblock->super_vers);
+
+        /* Clear "status_flags" */
+        HDmemset((uint8_t *)(buf_ptr) + tmp, 0, tmp_size);
+
     } /* end if */
     
 done:
@@ -2151,6 +2256,78 @@ H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_track_metadata_read_retries() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_retries
+ *
+ * Purpose:     To initialize data structures for read retries:
+ *		--zero out "retries"
+ *		--set up "retries_nbins" based on read_attempts
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi; November 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_retries(H5F_t *f)
+{
+    double tmp;				/* Temporary variable */
+
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(f);
+
+    /* Initialize the tracking for metadata read retries */
+    HDmemset(f->shared->retries, 0, sizeof(f->shared->retries));
+
+    /* Initialize the # of bins for retries */
+    f->shared->retries_nbins = 0;
+    if(f->shared->read_attempts > 1) {
+        tmp = HDlog10((double)(f->shared->read_attempts - 1));
+        f->shared->retries_nbins = (unsigned)tmp + 1;
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_retries() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_object_flush_cb
+ *
+ * Purpose:     To invoke the callback function for object flush that is set
+ *              in the file's access property list.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi; October 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_object_flush_cb(H5F_t *f, hid_t obj_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Invoke object flush callback if there is one */
+    if(f->shared->object_flush.func && f->shared->object_flush.func(obj_id, f->shared->object_flush.udata) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "object flush callback returns error")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_object_flush_cb() */
 
 
 /*-------------------------------------------------------------------------

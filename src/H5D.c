@@ -1016,9 +1016,8 @@ H5Dflush(hid_t dset_id)
     if(H5D__flush_real(dset, H5AC_dxpl_id) < 0)
 	HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
-    /* Call private function to flush dataset object */
-    if (H5O_flush_metadata(&dset->oloc, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush dataset")
+    if(H5O_flush_common(&dset->oloc, dset_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush dataset and object flush callback")
 
 done:
     FUNC_LEAVE_API(ret_value)

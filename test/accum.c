@@ -1677,7 +1677,7 @@ test_random_write(const H5F_io_info_t *fio_info)
     /* Allocate space for the write & read buffers */
     wbuf = (uint8_t *)HDmalloc((size_t)RANDOM_BUF_SIZE);
     HDassert(wbuf);
-    rbuf = (uint8_t *)HDcalloc((size_t)RANDOM_BUF_SIZE, 1);
+    rbuf = (uint8_t *)HDcalloc((size_t)RANDOM_BUF_SIZE, (size_t)1);
     HDassert(rbuf);
 
     /* Initialize write buffer */
@@ -1821,6 +1821,14 @@ test_swmr_write_big(void)
 
     TESTING("SWMR write of large metadata");
 
+    #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+
+    SKIPPED();
+    HDputs("    Test skipped due to fork or waitpid not defined.");
+    return 0;
+
+#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+
     /* File access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         FAIL_STACK_ERROR
@@ -1951,6 +1959,9 @@ error:
     if(rbuf) HDfree(rbuf);
 
     return 1;
+
+#endif
+
 } /* end test_swmr_write_big() */
 
 

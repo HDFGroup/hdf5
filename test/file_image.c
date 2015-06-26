@@ -41,6 +41,8 @@
 
 #define FAMILY_SIZE (2 * 1024)
 
+#define USERBLOCK_SIZE 512
+
 const char *FILENAME[] = {
     "file_image_core_test",
     NULL
@@ -549,7 +551,7 @@ test_core(void)
     VERIFY(fapl >= 0, "fapl creation failed");
 
     /* Set up the core VFD */
-    ret = H5Pset_fapl_core(fapl, 0, 0);
+    ret = H5Pset_fapl_core(fapl, (size_t)0, 0);
     VERIFY(ret >= 0, "setting core driver in fapl failed");
 
     tmp = h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -665,12 +667,17 @@ error:
  * Programmer:  John Mainzer
  *              Tuesday, November 15, 2011
  *
+ * Modifications:
+ *      Vailin Choi; July 2013
+ *      Add the creation of user block to the file as indicated by the parameter "user".
+ *
  ******************************************************************************
  */
 static int
 test_get_file_image(const char * test_banner,
                     const int file_name_num,
-                    hid_t fapl)
+		    hid_t fapl,
+                    hbool_t user)
 {
     char file_name[1024] = "\0";
     void * insertion_ptr = NULL;
@@ -694,6 +701,8 @@ test_get_file_image(const char * test_banner,
     ssize_t image_size;
     ssize_t file_size;
     h5_stat_t stat_buf;
+    hid_t fcpl = -1;
+    herr_t ret;
 
     TESTING(test_banner);
 
@@ -708,8 +717,15 @@ test_get_file_image(const char * test_banner,
     h5_fixname(FILENAME2[file_name_num], fapl, file_name, sizeof(file_name));
     VERIFY(HDstrlen(file_name)>0, "h5_fixname failed");
 
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    VERIFY(fcpl >= 0, "H5Pcreate");
+    if(user) {
+        ret = H5Pset_userblock(fcpl, (hsize_t)USERBLOCK_SIZE);
+        VERIFY(ret >=0, "H5Pset_userblock");
+    }
+
     /* create the file */
-    file_id = H5Fcreate(file_name, 0, H5P_DEFAULT, fapl);
+    file_id = H5Fcreate(file_name, 0, fcpl, fapl);
     VERIFY(file_id >= 0, "H5Fcreate() failed.");
 
     /* Set up data space for new new data set */
@@ -761,11 +777,15 @@ test_get_file_image(const char * test_banner,
         ssize_t member_size;
         ssize_t size_remaining;
 
+	/*
+         * Modifications need to be made to accommodate userblock when
+         * H5Fget_file_image() works for family driver
+         */
         i = 0;
         file_size = 0;
 
         do {
-            HDsnprintf(member_file_name, 1024, file_name, i);
+            HDsnprintf(member_file_name, (size_t)1024, file_name, i);
 
             /* get the size of the member file */
             result = HDstat(member_file_name, &stat_buf);
@@ -829,6 +849,10 @@ test_get_file_image(const char * test_banner,
          * the remainder of the file is all '\0's.
          */
         file_size = (ssize_t)stat_buf.st_size;
+	if(user) {
+            VERIFY(file_size > USERBLOCK_SIZE, "file size !> userblock size.");
+            file_size -= USERBLOCK_SIZE;
+        }
 
     /* with latest mods to truncate call in core file drive, 
          * file size should match image size 
@@ -842,6 +866,12 @@ test_get_file_image(const char * test_banner,
         /* open the test file using standard I/O calls */
         fd = HDopen(file_name, O_RDONLY, 0666);
         VERIFY(fd >= 0, "HDopen() failed.");
+
+	if(user) {
+            /* Position at userblock */
+            ret = HDlseek(fd, (off_t)USERBLOCK_SIZE, SEEK_SET);
+            VERIFY(ret >= 0, "HDlseek() failed.");
+        }
 
         /* read the test file from disk into the buffer */
         bytes_read = HDread(fd, file_image_ptr, (size_t)file_size);
@@ -1278,13 +1308,18 @@ test_get_file_image_error_rejection(void)
 
 error:
     return 1;
-}
+} /* test_get_file_image_error_rejection() */
 
+/*
+ * Modifications:
+ *     Add testing for file image with or without user block in the file.
+ */
 int
 main(void)
 {
     int errors = 0;
     hid_t fapl;
+    hbool_t user;
 
     h5_reset();
 
@@ -1294,29 +1329,34 @@ main(void)
     errors += test_callbacks();
     errors += test_core();
 
-    /* test H5Fget_file_image() with sec2 driver */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(H5Pset_fapl_sec2(fapl) < 0)
-        errors++;
-    else
-        errors += test_get_file_image("H5Fget_file_image() with sec2 driver",
-                                      0, fapl);
+    /* Perform tests with/without user block */
+    for(user = FALSE; user <= TRUE; user++) {
 
-    /* test H5Fget_file_image() with stdio driver */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(H5Pset_fapl_stdio(fapl) < 0)
-        errors++;
-    else
-        errors += test_get_file_image("H5Fget_file_image() with stdio driver",
-                                      1, fapl);
+	/* test H5Fget_file_image() with sec2 driver */
+	fapl = H5Pcreate(H5P_FILE_ACCESS);
+	if(H5Pset_fapl_sec2(fapl) < 0)
+	    errors++;
+	else
+	    errors += test_get_file_image("H5Fget_file_image() with sec2 driver",
+                                      0, fapl, user);
 
-    /* test H5Fget_file_image() with core driver */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(H5Pset_fapl_core(fapl, (size_t)(64 *1024), TRUE) < 0)
-        errors++;
-    else
-        errors += test_get_file_image("H5Fget_file_image() with core driver",
-                                      2, fapl);
+	/* test H5Fget_file_image() with stdio driver */
+	fapl = H5Pcreate(H5P_FILE_ACCESS);
+	if(H5Pset_fapl_stdio(fapl) < 0)
+	    errors++;
+	else
+	    errors += test_get_file_image("H5Fget_file_image() with stdio driver",
+                                      1, fapl, user);
+
+	/* test H5Fget_file_image() with core driver */
+	fapl = H5Pcreate(H5P_FILE_ACCESS);
+	if(H5Pset_fapl_core(fapl, (size_t)(64 *1024), TRUE) < 0)
+	    errors++;
+	else
+	    errors += test_get_file_image("H5Fget_file_image() with core driver",
+                                      2, fapl, user);
+
+     } /* end for */
 
 #if 0
     /* at present, H5Fget_file_image() rejects files opened with the 

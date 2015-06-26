@@ -21,14 +21,14 @@ DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
 
 CMP='cmp -s'
 DIFF='diff -c'
-CP='cp'
-KILL='kill'
-SLEEP='sleep'
-LD_MONITOR=ld_monitor
+LD_MONITOR='ld_mx -m'
 LD_MONITOR_BIN=`pwd`/$LD_MONITOR
-LD_EXTEND=ld_extend
+LD_EXTEND='ld_mx -x'
 LD_EXTEND_BIN=`pwd`/$LD_EXTEND
-
+# These two message files should be the same as the two defines in ./ld_mx.c
+READER_MESSAGE='LD_READER_MESSAGE'
+WRITER_MESSAGE='LD_WRITER_MESSAGE'
+#
 nerrors=0
 verbose=yes
 
@@ -51,18 +51,24 @@ TESTING() {
 # $2 -- the dataset name to be monitored and extended
 # $3 -- the expected output from monitoring the dataset
 TESTLD() {
-    expect="$srcdir/testfiles/$3"	# the expected output
-    actual="./testfiles/$3.OUT"		# the actual output
-    FNAME="`basename $1 .h5`_$2.h5"	# the HDF5 file
-    $CP $srcdir/$1 ./$FNAME		# copy the file to a temporary file
+    expect="$srcdir/testfiles/$3"		# the expected output
+    actual="./testfiles/$3.OUT"			# the actual output
+    FNAME="`basename $1 .h5`_$2.h5"		# the HDF5 file
+    cp $srcdir/$1 ./$FNAME			# copy the file to a temporary file
+#
+    rm -f $WRITER_MESSAGE			# remove the message file just to be sure
+    rm -f $READER_MESSAGE			# remove the message file just to be sure
+#
+    $LD_EXTEND_BIN $FNAME $2 &			# extend the dataset
+    EXTEND_PID=$!    				# get the id of the "extend" process
     $LD_MONITOR_BIN $FNAME $2 > $actual 2>&1 &	# monitor the dataset in the file
-    MONITOR_PID=$!	    			# get the id of the monitor process
-    $LD_EXTEND_BIN $FNAME $2		# extend the dataset
-    echo "Sleeping for 3 seconds..."	
-    $SLEEP 3				# sleep to allow output to be flushed
-    echo "Killing the monitor..."	
-    $KILL $MONITOR_PID			# kill the monitor process
-    if $CMP $expect $actual; then	# compare the output with the expected output
+    MONITOR_PID=$!	    			# get the id of the "monitor" process
+    wait $EXTEND_PID				# wait for the completion of the "extend" process
+#
+    sleep 1					# sleep to ensure that the monitoring completes
+    kill $MONITOR_PID				# kill the "monitor" process
+#
+    if $CMP $expect $actual; then		# compare the output with the expected output
 	echo " PASSED"
     else
 	echo "*FAILED*"
@@ -70,7 +76,7 @@ TESTLD() {
 	nerrors="`expr $nerrors + 1`"
 	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
-    if test -z "$HDF5_NOCLEANUP"; then	# clean up output file, temporary HDF5 file
+    if test -z "$HDF5_NOCLEANUP"; then		# clean up output file, temporary HDF5 file
 	rm -f $actual $FNAME
     fi
 }
@@ -84,9 +90,11 @@ TESTLD() {
 # Monitor DSET_ONE while extending the dataset
 TESTLD test_ld.h5 DSET_ONE test_ld_out1
 #
+#
 # Monitor DSET_TWO while extending the dataset
 TESTLD test_ld.h5 DSET_TWO test_ld_out2
-
+#
+#
 if test $nerrors -eq 0 ; then
     echo "All high level H5LD concurrent tests passed."
 fi

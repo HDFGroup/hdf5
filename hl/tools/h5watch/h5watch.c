@@ -30,6 +30,7 @@
 #define FIELD_SEP	","	/* nested field separator */
 #define DEFAULT_RETRY 	10	/* number of times to try opening the file */
 
+
 /*
  * Note:(see comments in hl/src/H5LDprivate.h)
  *	This tool uses private routines H5LD_construct_vector()and H5LD_clean_vector()
@@ -107,7 +108,6 @@ static struct long_options l_opts[] = {
     { "ve", no_arg, 'V' },
     { NULL, 0, '\0' }
 };
-
 
 /*-------------------------------------------------------------------------
  * Function: doprint()

@@ -26,16 +26,16 @@ AM_CPPFLAGS+=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src -I$(top_b
 # Test script
 TEST_SCRIPT = test_ld.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = ld_monitor$(EXEEXT) ld_extend$(EXEEXT)
+SCRIPT_DEPEND = ld_mx$(EXEEXT)
 
 # The tests depend on the hdf5, hdf5 test,  and hdf5_hl libraries
 LDADD=$(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
-TEST_PROG=test_lite test_image test_file_image test_table test_ds test_packet test_dset_opt
-	test_ld
-check_PROGRAMS=$(TEST_PROG) ld_monitor ld_extend
+TEST_PROG=test_lite test_image test_file_image test_table test_ds test_packet test_dset_opt \
+	test_ld test_dset_append
+check_PROGRAMS=$(TEST_PROG) ld_mx
 
 # These programs generate test files for the tests.  They don't need to be
 # compiled every time we want to test the library.  However, putting

@@ -65,7 +65,7 @@ main(void)
 	FAIL_STACK_ERROR;
 
     /* Verify the data read is correct */
-    if(HDmemcmp(buf, rbuf, 1024) != 0) 
+    if(HDmemcmp(buf, rbuf, (size_t)1024) != 0) 
 	TEST_ERROR;
 
     /* CLose the file */

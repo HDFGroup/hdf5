@@ -24,6 +24,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
+#include "h5test.h"
 
 /**********/
 /* Macros */
@@ -42,6 +43,9 @@
 
 #define FILENAME        "swmr_data.h5"  /* SWMR test file name */
 #define DTYPE_SIZE      150             /* Data size in opaque type */
+
+/* The message sent by writer that the file open is done--releasing the file lock */
+#define WRITER_MESSAGE "SWMR_WRITER_MESSAGE"
 
 /************/
 /* Typedefs */

@@ -789,9 +789,17 @@ H5Fclose(hid_t file_id)
     if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
-        if(nref == 1)
+        if(nref == 1) {
+	     if(f->shared->sblock) { /* Clear status_flags */
+                    f->shared->sblock->status_flags &= ~H5F_SUPER_WRITE_ACCESS;
+                    f->shared->sblock->status_flags &= ~H5F_SUPER_SWMR_WRITE_ACCESS;
+                    /* Mark superblock dirty in cache, so change will get encoded */
+                    if(H5F_super_dirty(f) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+            }
             if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+	}
     } /* end if */
 
     /*
@@ -1585,3 +1593,136 @@ H5Fclear_elink_file_cache(hid_t file_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclear_elink_file_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Fstart_swmr_write
+ *
+ * Purpose:	To enable SWMR writing mode for the file
+ *		1) Mark the file in SWMR writing mode
+ *	 	2) Set metadata read attempts and retries info
+ *		3) Disable accumulator
+ *		4) Flush the data buffers
+ *		5) Evict all cache entries except the superblock
+ *		6) Unlock the file
+ *		Fail when:
+ *		1) There are opened objects 
+ *		2) The file is not opened with latest library format
+ *		3) The file is not opened with H5F_ACC_RDWR
+ *		4) The file is already marked for SWMR writing
+ *
+ * Return:	Non-negative on success/negative on failure
+ *
+ * Programmer:	
+ *	Vailin Choi; Dec 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fstart_swmr_write(hid_t file_id)
+{
+    H5F_t *file;                /* File info */
+    H5F_io_info_t fio_info;    	/* I/O info for operation */
+    hbool_t setup = FALSE;
+    herr_t ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    /* check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* ???How about nopen_files from (H5F_mount_count_ids(file, &nopen_files, &nopen_objs) */
+    /* For now, just check nopen_objs */
+    if((H5F_addr_defined(file->shared->sblock->ext_addr) && file->nopen_objs > 1) || 
+       (!H5F_addr_defined(file->shared->sblock->ext_addr) && file->nopen_objs > 0))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't start SWMR writing, there are objects still open")
+
+    /* Should have write permission */
+    if((H5F_INTENT(file) & H5F_ACC_RDWR) == 0)
+	HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no write intent on file")
+
+    /* Should be using latest library format */
+    if(!H5F_use_latest_format(file))
+	HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file not opened with latest library format")
+
+    /* Should not be marked for SWMR writing mode already */
+    if(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
+	HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file already in SWMR writing mode")
+
+    HDassert(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS);
+
+    /* Turn on SWMR write in shared file open flags */
+    file->shared->flags |= H5F_ACC_SWMR_WRITE;
+
+    /* Mark the file in SWMR writing mode */
+    file->shared->sblock->status_flags |= H5F_SUPER_SWMR_WRITE_ACCESS;
+
+    /* Set up metadata read attempts */
+    file->shared->read_attempts = H5F_SWMR_METADATA_READ_ATTEMPTS;
+
+    setup = TRUE;
+
+    /* Initialize "retries" and "retries_nbins" */
+    if(H5F_set_retries(file) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't set retries and retries_nbins")
+
+    /* Set up I/O info for operation */
+    fio_info.f = file;
+    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5AC_dxpl_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
+    /* Flush and reset the accumulator */
+    if(H5F__accum_reset(&fio_info, TRUE) < 0)
+	HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator")
+
+    /* Turn off usage of accumulator */
+    file->shared->feature_flags &= ~(unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
+    if(H5FD_set_feature_flags(file->shared->lf, file->shared->feature_flags) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set feature_flags in VFD")
+
+    /* Mark superblock as dirty */
+    if(H5F_super_dirty(file) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+
+    /* Flush data buffers */
+    if(H5F_flush(file, H5AC_dxpl_id, FALSE) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
+
+    /* Evict all flushed entries in the cache except the pinned superblock */
+    if(H5F_evict_cache_entries(file, H5AC_dxpl_id) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to evict file's cached information")
+
+    /* Unlock the file */
+    if(H5FD_unlock(file->shared->lf) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to unlock the file")
+done:
+    if(ret_value < 0 && file && setup) {
+
+	/* Re-enable accumulator */
+	file->shared->feature_flags |= (unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
+	if(H5FD_set_feature_flags(file->shared->lf, file->shared->feature_flags) < 0)
+	    HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set feature_flags in VFD")
+
+	/* Reset the # of read attempts */
+	file->shared->read_attempts = H5F_METADATA_READ_ATTEMPTS;
+	if(H5F_set_retries(file) < 0)
+	    HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't set retries and retries_nbins")
+
+	/* Un-set H5F_ACC_SWMR_WRITE in shared open flags */
+	file->shared->flags &= ~H5F_ACC_SWMR_WRITE;
+
+	/* Unmark the file: not in SWMR writing mode */
+	file->shared->sblock->status_flags &= ~(uint8_t)H5F_SUPER_SWMR_WRITE_ACCESS;
+
+	/* Mark superblock as dirty */
+	if(H5F_super_dirty(file) < 0)
+	    HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+
+	/* Flush the superblock */
+	if(H5F_flush_tagged_metadata(file, (haddr_t)0, H5AC_dxpl_id) < 0)
+	    HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush superblock")
+    }
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fstart_swmr_write() */

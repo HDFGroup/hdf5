@@ -205,6 +205,7 @@
 #define H5C__TAKE_OWNERSHIP_FLAG		0x1000
 #define H5C__FLUSH_LAST_FLAG			0x2000
 #define H5C__FLUSH_COLLECTIVELY_FLAG		0x4000
+#define H5C__EVICT_ALLOW_LAST_PINS_FLAG         0x8000
 
 /* Definitions for cache "tag" property */
 #define H5C_TAG_NAME           "H5C_tag"
@@ -1020,6 +1021,7 @@ H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr, int32_t version,
     size_t old_max_cache_size, size_t new_max_cache_size,
     size_t old_min_clean_size, size_t new_min_clean_size);
 H5_DLL herr_t H5C_dest(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id);
+H5_DLL herr_t H5C_evict(H5F_t * f, hid_t   primary_dxpl_id, hid_t   secondary_dxpl_id);
 H5_DLL herr_t H5C_expunge_entry(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id,
     const H5C_class_t *type, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id,

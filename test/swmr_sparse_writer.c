@@ -293,12 +293,14 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
             } /* end if */
         } /* end if */
 
+#ifdef OUT
         /* Busy wait, to let readers catch up */
         dummy = 0;
         for(v=0; v<BUSY_WAIT; v++)
             dummy++;
         if((unsigned long)dummy != v)
             return -1;
+#endif
     } /* end for */
 
     /* Close the memory dataspace */
@@ -414,6 +416,9 @@ int main(int argc, const char *argv[])
         fprintf(stderr, "Error opening skeleton file!\n");
         exit(1);
     } /* end if */
+
+    /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
+    h5_send_message(WRITER_MESSAGE);
 
     /* Emit informational message */
     if(verbose)
