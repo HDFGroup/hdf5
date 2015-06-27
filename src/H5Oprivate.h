@@ -75,7 +75,8 @@ typedef struct H5O_t H5O_t;
 #define H5O_MSG_FLAG_MARK_IF_UNKNOWN 0x10u
 #define H5O_MSG_FLAG_WAS_UNKNOWN 0x20u
 #define H5O_MSG_FLAG_SHAREABLE  0x40u
-#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE|H5O_MSG_FLAG_MARK_IF_UNKNOWN|H5O_MSG_FLAG_WAS_UNKNOWN|H5O_MSG_FLAG_SHAREABLE)
+#define H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS 0x80u
+#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE|H5O_MSG_FLAG_MARK_IF_UNKNOWN|H5O_MSG_FLAG_WAS_UNKNOWN|H5O_MSG_FLAG_SHAREABLE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS)
 
 /* Flags for updating messages */
 #define H5O_UPDATE_TIME         0x01u
@@ -83,6 +84,9 @@ typedef struct H5O_t H5O_t;
 
 /* Hash value constants */
 #define H5O_HASH_SIZE 32
+
+/* Enable reading/writing "bogus" messages */
+/* #define H5O_ENABLE_BOGUS */
 
 /* ========= Object Creation properties ============ */
 #define H5O_CRT_ATTR_MAX_COMPACT_NAME	"max compact attr"      /* Max. # of attributes to store compactly */
@@ -195,7 +199,6 @@ typedef struct H5O_copy_t {
 #define H5O_FSINFO_ID   0x0017          /* Free-space manager info message.  */
 #define H5O_UNKNOWN_ID  0x0018          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
-
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -438,9 +441,6 @@ typedef struct H5O_layout_t {
     } u;
     H5O_storage_t storage;              /* Information for storing dataset elements */
 } H5O_layout_t;
-
-/* Enable reading/writing "bogus" messages */
-/* #define H5O_ENABLE_BOGUS */
 
 #ifdef H5O_ENABLE_BOGUS
 /*
