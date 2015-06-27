@@ -85,6 +85,9 @@ typedef struct H5O_t H5O_t;
 /* Hash value constants */
 #define H5O_HASH_SIZE 32
 
+/* Enable reading/writing "bogus" messages */
+/* #define H5O_ENABLE_BOGUS */
+
 /* ========= Object Creation properties ============ */
 #define H5O_CRT_ATTR_MAX_COMPACT_NAME	"max compact attr"      /* Max. # of attributes to store compactly */
 #define H5O_CRT_ATTR_MIN_DENSE_NAME	"min dense attr"	/* Min. # of attributes to store densely */
@@ -446,9 +449,6 @@ typedef struct H5O_layout_t {
     } u;
     H5O_storage_t storage;              /* Information for storing dataset elements */
 } H5O_layout_t;
-
-/* Enable reading/writing "bogus" messages */
-/* #define H5O_ENABLE_BOGUS */
 
 #ifdef H5O_ENABLE_BOGUS
 /*
