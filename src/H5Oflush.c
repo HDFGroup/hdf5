@@ -236,6 +236,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
     H5G_loc_t tmp_loc;
     H5G_name_t obj_path;
     H5O_loc_t obj_oloc;
+    hbool_t corked;
     hid_t ret_value = SUCCEED;
     H5I_type_t type;
 
@@ -266,6 +267,10 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
     /* Reset object header pointer */
     oh = NULL;
 
+    /* Get cork status of the object with tag */
+    if(H5AC_cork(oloc.file, tag, H5AC__GET_CORKED, &corked) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
+
     /* Close the object */
     if(H5I_dec_ref(oid) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close object")
@@ -277,6 +282,12 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
     /* Evict the object's tagged metadata */
     if(H5F_evict_tagged_metadata(oloc.file, tag, dxpl_id)<0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to evict metadata")
+
+    /* Re-cork object with tag */
+    if(corked) {
+	if(H5AC_cork(oloc.file, tag, H5AC__SET_CORK, &corked) < 0)
+	    HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to cork the object")
+    }
 
     switch (type)
     {

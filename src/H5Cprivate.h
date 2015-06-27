@@ -259,6 +259,12 @@ typedef enum {
  *		Note that the space allocated on disk may not be contiguous.
  */
 
+/* Cork actions: cork/uncork/get cork status of an object */
+#define H5C__SET_CORK                  0x1
+#define H5C__UNCORK                    0x2
+#define H5C__GET_CORKED                0x4
+
+
 /* Actions that can be reported to 'notify' client callback */
 typedef enum H5C_notify_action_t {
     H5C_NOTIFY_ACTION_AFTER_INSERT,     /* Entry has been added to the cache */
@@ -354,6 +360,9 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
  *
  *		The name is not particularly descriptive, but is retained
  *		to avoid changes in existing code.
+ *
+ * is_corked:	Boolean flag indicating whether the cache entry associated
+ *		with an object is corked or not corked.
  *
  * is_dirty:	Boolean flag indicating whether the contents of the cache
  *		entry has been modified since the last time it was written
@@ -673,6 +682,7 @@ typedef struct H5C_cache_entry_t {
     const H5C_class_t	      *	type;
     haddr_t		        tag;
     int	    	    globality;
+    hbool_t			is_corked;
     hbool_t			is_dirty;
     hbool_t			dirtied;
     hbool_t			is_protected;
@@ -1086,6 +1096,8 @@ H5_DLL herr_t H5C_verify_entry_type(const H5F_t *f, haddr_t addr,
     const H5C_class_t *expected_type, hbool_t *in_cache_ptr,
     hbool_t *type_ok_ptr);
 #endif /* NDEBUG */
+
+H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 
 #endif /* !_H5Cprivate_H */
 

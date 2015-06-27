@@ -2859,6 +2859,11 @@ if ( (cache_ptr)->index_size !=                                             \
  * 		to the slist since the last time this field was set to
  * 		zero.
  *
+ * cork_list_ptr: A skip list to track object addresses that are corked.
+ *                When an entry is inserted or protected in the cache,
+ *                the entry's associated object address (tag field) is
+ *                checked against this skip list.  If found, the entry
+ *                is corked.
  *
  * When a cache entry is protected, it must be removed from the LRU
  * list(s) as it cannot be either flushed or evicted until it is unprotected.
@@ -3440,6 +3445,8 @@ struct H5C_t {
     int64_t			slist_len_increase;
     int64_t			slist_size_increase;
 #endif /* H5C_DO_SANITY_CHECKS */
+
+    H5SL_t *                    cork_list_ptr; /* list of corked object addresses */
 
     /* Fields for tracking protected entries */
     int32_t                     pl_len;

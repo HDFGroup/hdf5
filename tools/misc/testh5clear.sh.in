@@ -35,8 +35,6 @@ FAIL=1
 nerrors=0
 verbose=yes
 
-test -d ../testfiles || mkdir ../testfiles
-
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
 #
@@ -55,7 +53,7 @@ TOOLTEST() {
     fname=$1
     #
     # Try to open the test file
-    $OPENCHK_BIN $fname
+    $OPENCHK_BIN $fname 2>/dev/null		# should fail; ignore error message
     if test $? -eq $SUCCEED; then
        echo ".....$OPENCHK: should fail"
        nerrors=`expr $nerrors + 1`
@@ -80,13 +78,13 @@ TOOLTEST() {
 
 # The input file has an incorrect superblock version #
 # Algorithm:
-#	Use "h5clear" to clear status_flags in the test file--should fail not able to open the file
+#	Use "h5clear" to clear status_flags in the test file--should fail to open the file
 # $1 is the filename to H5Fopen() via h5clear
 TOOLFAIL() {
     TESTING $H5CLEAR $1
     fname=$1
     # Run h5clear to clear the status_flags in the test file
-    $RUNSERIAL $H5CLEAR_BIN $fname
+    $RUNSERIAL $H5CLEAR_BIN $fname 2>/dev/null	# should fail: ignore error message
     if test $? -eq $SUCCEED; then
 	echo ".....$H5CLEAR: should fail"
 	nerrors=`expr $nerrors + 1`

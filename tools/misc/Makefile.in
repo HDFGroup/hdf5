@@ -106,6 +106,7 @@ check_PROGRAMS = $(am__EXEEXT_1) repart_test$(EXEEXT) \
 	clear_open_chk$(EXEEXT)
 bin_PROGRAMS = h5debug$(EXEEXT) h5repart$(EXEEXT) h5mkgrp$(EXEEXT) \
 	h5clear$(EXEEXT)
+noinst_PROGRAMS = h5clear_gentest$(EXEEXT)
 TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
 subdir = tools/misc
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -119,9 +120,8 @@ CONFIG_CLEAN_FILES = h5cc testh5clear.sh testh5mkgrp.sh \
 	testh5repart.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 = h5repart_gentest$(EXEEXT) talign$(EXEEXT) \
-	h5clear_gentest$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS)
+am__EXEEXT_1 = h5repart_gentest$(EXEEXT) talign$(EXEEXT)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 clear_open_chk_SOURCES = clear_open_chk.c
 clear_open_chk_OBJECTS = clear_open_chk.$(OBJEXT)
 clear_open_chk_LDADD = $(LDADD)
@@ -715,7 +715,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5 \
 	../testfiles/fst_family*.h5 ../testfiles/scd_family*.h5
 
 #test script and program
-TEST_PROG = h5repart_gentest talign h5clear_gentest
+TEST_PROG = h5repart_gentest talign
 TEST_SCRIPT = testh5repart.sh testh5mkgrp.sh testh5clear.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5repart$(EXEEXT) h5mkgrp$(EXEEXT) h5clear$(EXEEXT)
@@ -855,6 +855,15 @@ clean-binPROGRAMS:
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+
+clean-noinstPROGRAMS:
+	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -1172,13 +1181,6 @@ talign.log: talign$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-h5clear_gentest.log: h5clear_gentest$(EXEEXT)
-	@p='h5clear_gentest$(EXEEXT)'; \
-	b='h5clear_gentest'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .sh.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -1271,7 +1273,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool mostlyclean-am
+	clean-libtool clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1345,8 +1347,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
 	check-am clean clean-binPROGRAMS clean-checkPROGRAMS \
-	clean-generic clean-libtool cscopelist-am ctags ctags-am \
-	distclean distclean-compile distclean-generic \
+	clean-generic clean-libtool clean-noinstPROGRAMS cscopelist-am \
+	ctags ctags-am distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-binPROGRAMS \
 	install-binSCRIPTS install-data install-data-am install-dvi \
