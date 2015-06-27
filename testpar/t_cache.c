@@ -4248,7 +4248,7 @@ setup_cache_for_test(hid_t * fid_ptr,
 
     if ( success ) {
 
-	if ( H5AC_set_write_done_callback(cache_ptr, do_sync) != SUCCEED ) {
+	if ( H5AC__set_write_done_callback(cache_ptr, do_sync) != SUCCEED ) {
 
             nerrors++;
             if ( verbose ) {
@@ -4263,12 +4263,12 @@ setup_cache_for_test(hid_t * fid_ptr,
 
     if ( success ) {
 
-	if ( H5AC_set_sync_point_done_callback(cache_ptr, verify_writes) != SUCCEED ) {
+	if ( H5AC__set_sync_point_done_callback(cache_ptr, verify_writes) != SUCCEED ) {
 
             nerrors++;
             if ( verbose ) {
 	        HDfprintf(stdout,
-			  "%d:%s: H5AC_set_sync_point_done_callback failed.\n",
+			  "%d:%s: H5AC__set_sync_point_done_callback failed.\n",
                           world_mpi_rank, FUNC);
             }
 	}

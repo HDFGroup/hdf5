@@ -9499,7 +9499,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
  * Modifications:
  *
  *		Updated test for minor changes in the behaviour
- *		of H5C_flush_single_entry().
+ *		of H5C__flush_single_entry().
  *
  *					JRM -- 2/16/15
  *
@@ -10575,7 +10575,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	    failure_mssg = "unexpected size/len in flush op eviction test 12.";
 	}
 
-        /* modifications to the H5C_flush_single_entry() function have 
+        /* modifications to the H5C__flush_single_entry() function have 
          * changed the behavior of the cache slightly, causing 
          * this test to fail.  Comment out for now -- come back and 
          * fix if all goes well.
@@ -10664,7 +10664,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	    failure_mssg = "unexpected size/len in flush op eviction test 13.";
 	}
 
-        /* modifications to the H5C_flush_single_entry() function have 
+        /* modifications to the H5C__flush_single_entry() function have 
          * changed the behavior of the cache slightly, causing 
          * this test to fail.  Comment out for now -- come back and 
          * fix if all goes well.
