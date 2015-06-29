@@ -32,7 +32,6 @@
 /****************/
 
 #define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
-#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
@@ -43,7 +42,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACpkg.h"		/* Metadata cache			*/
-#include "H5Cpkg.h"             /* Cache                                */
+#include "H5Cprivate.h"		/* Cache                                */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/
 #include "H5FDprivate.h"	/* File drivers				*/
@@ -488,7 +487,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
-    aux_ptr = (struct H5AC_aux_t *)(f->shared->cache->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(f->shared->cache);
     if(aux_ptr)
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
@@ -776,7 +775,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 {
     H5AC_aux_t *aux_ptr;
 
-    if(NULL != (aux_ptr = (H5AC_aux_t *)f->shared->cache->aux_ptr)) {
+    if(NULL != (aux_ptr = H5C_get_aux_ptr(f->shared->cache))) {
         /* Log the new entry */
         if(H5AC__log_inserted_entry((H5AC_info_t *)thing) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5AC__log_inserted_entry() failed")
@@ -840,12 +839,11 @@ H5AC_mark_entry_dirty(void *thing)
 {
     H5AC_info_t *entry_ptr = (H5AC_info_t *)thing;
     H5C_t *cache_ptr = entry_ptr->cache_ptr;
+    H5AC_aux_t *aux_ptr;
 
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     if((!entry_ptr->is_dirty) && (!entry_ptr->is_protected) &&
-             (entry_ptr->is_pinned) && (NULL != cache_ptr->aux_ptr))
+             (entry_ptr->is_pinned) && (NULL != aux_ptr))
         if(H5AC__log_dirtied_entry(entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
 }
@@ -912,7 +910,7 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
 
 #ifdef H5_HAVE_PARALLEL
     /* Log moving the entry */
-    if(NULL != (aux_ptr = (H5AC_aux_t *)f->shared->cache->aux_ptr))
+    if(NULL != (aux_ptr = H5C_get_aux_ptr(f->shared->cache)))
         if(H5AC__log_moved_entry(f, old_addr, new_addr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log moved entry")
 #endif /* H5_HAVE_PARALLEL */
@@ -1172,11 +1170,10 @@ H5AC_resize_entry(void *thing, size_t new_size)
 {
     H5AC_info_t * entry_ptr = (H5AC_info_t *)thing;
     H5C_t *cache_ptr = entry_ptr->cache_ptr;
+    H5AC_aux_t *aux_ptr;
 
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-
-    if((!entry_ptr->is_dirty) && (NULL != cache_ptr->aux_ptr))
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
+    if((!entry_ptr->is_dirty) && (NULL != aux_ptr))
         if(H5AC__log_dirtied_entry(entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
 }
@@ -1384,7 +1381,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
-    if(NULL != (aux_ptr = (H5AC_aux_t *)f->shared->cache->aux_ptr)) {
+    if(NULL != (aux_ptr = H5C_get_aux_ptr(f->shared->cache))) {
         if(dirtied && ((H5AC_info_t *)thing)->is_dirty == FALSE)
             if(H5AC__log_dirtied_entry((H5AC_info_t *)thing) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry")
@@ -1502,14 +1499,18 @@ H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    if((cache_ptr == NULL) ||
-#ifdef H5_HAVE_PARALLEL
-             ((cache_ptr->aux_ptr != NULL) &&
-               (((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic != H5AC__H5AC_AUX_T_MAGIC))
-             ||
-#endif /* H5_HAVE_PARALLEL */
-             (config_ptr == NULL) || (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
+    if((cache_ptr == NULL) || (config_ptr == NULL) ||
+            (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr or config_ptr on entry.")
+#ifdef H5_HAVE_PARALLEL
+{
+    H5AC_aux_t *aux_ptr;
+
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
+    if((aux_ptr != NULL) && (aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad aux_ptr on entry.")
+}
+#endif /* H5_HAVE_PARALLEL */
 
     /* Retrieve the configuration */
     if(H5C_get_cache_auto_resize_config((const H5C_t *)cache_ptr, &internal_config) < 0)
@@ -1549,9 +1550,12 @@ H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr,
     config_ptr->apply_empty_reserve    = internal_config.apply_empty_reserve;
     config_ptr->empty_reserve          = internal_config.empty_reserve;
 #ifdef H5_HAVE_PARALLEL
-    if(cache_ptr->aux_ptr != NULL) {
-        config_ptr->dirty_bytes_threshold = ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold;
-	config_ptr->metadata_write_strategy = ((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy;
+{
+    H5AC_aux_t *aux_ptr;
+
+    if(NULL != (aux_ptr = H5C_get_aux_ptr(cache_ptr))) {
+        config_ptr->dirty_bytes_threshold = aux_ptr->dirty_bytes_threshold;
+	config_ptr->metadata_write_strategy = aux_ptr->metadata_write_strategy;
     } /* end if */
     else {
 #endif /* H5_HAVE_PARALLEL */
@@ -1559,6 +1563,7 @@ H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr,
 	config_ptr->metadata_write_strategy = H5AC__DEFAULT_METADATA_WRITE_STRATEGY;
 #ifdef H5_HAVE_PARALLEL
     } /* end else */
+}
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -1684,13 +1689,17 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config
         trace_config = *config_ptr;
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    if((cache_ptr == NULL)
-#ifdef H5_HAVE_PARALLEL
-            || ((cache_ptr->aux_ptr != NULL) &&
-                (((H5AC_aux_t *)(cache_ptr->aux_ptr))->magic != H5AC__H5AC_AUX_T_MAGIC))
-#endif /* H5_HAVE_PARALLEL */
-            )
+    if(cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry.")
+#ifdef H5_HAVE_PARALLEL
+{
+    H5AC_aux_t *aux_ptr;
+
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
+    if((aux_ptr != NULL) && (aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad aux_ptr on entry.")
+}
+#endif /* H5_HAVE_PARALLEL */
 
     /* Validate external configuration */
     if(H5AC_validate_config(config_ptr) != SUCCEED)
@@ -1725,12 +1734,16 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_set_evictions_enabled() failed.")
 
 #ifdef H5_HAVE_PARALLEL
+{
+    H5AC_aux_t *aux_ptr;
+
     /* Set parallel configuration values */
     /* (Which are only held in the H5AC layer -QAK) */
-    if(cache_ptr->aux_ptr != NULL) {
-        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->dirty_bytes_threshold = config_ptr->dirty_bytes_threshold;
-        ((H5AC_aux_t *)(cache_ptr->aux_ptr))->metadata_write_strategy = config_ptr->metadata_write_strategy;
+    if(NULL != (aux_ptr = H5C_get_aux_ptr(cache_ptr))) {
+        aux_ptr->dirty_bytes_threshold = config_ptr->dirty_bytes_threshold;
+        aux_ptr->metadata_write_strategy = config_ptr->metadata_write_strategy;
     } /* end if */
+}
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -1921,9 +1934,6 @@ H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name)
 {
     char     file_name[H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 2];
     FILE *   file_ptr = NULL;
-#ifdef H5_HAVE_PARALLEL
-    H5AC_aux_t * aux_ptr = NULL;
-#endif /* H5_HAVE_PARALLEL */
     herr_t   ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1941,8 +1951,11 @@ H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name)
         HGOTO_ERROR(H5E_CACHE, H5E_FILEOPEN, FAIL, "trace file already open.")
 
 #ifdef H5_HAVE_PARALLEL
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-    if(cache_ptr->aux_ptr == NULL)
+{
+    H5AC_aux_t * aux_ptr;
+
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
+    if(aux_ptr == NULL)
         sprintf(file_name, "%s", trace_file_name);
     else {
 	if(aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC)
@@ -1953,6 +1966,7 @@ H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name)
 
     if(HDstrlen(file_name) > H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 1)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "cooked trace file name too long.")
+}
 #else /* H5_HAVE_PARALLEL */
     HDsnprintf(file_name, (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 1), 
                "%s", trace_file_name);
@@ -2121,7 +2135,7 @@ H5_ATTR_UNUSED
     HDassert(f != NULL);
     HDassert(f->shared != NULL);
     HDassert(f->shared->cache != NULL);
-    aux_ptr = (H5AC_aux_t *)(f->shared->cache->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(f->shared->cache);
     if(aux_ptr != NULL) {
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 

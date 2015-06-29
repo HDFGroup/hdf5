@@ -30,7 +30,6 @@
 /****************/
 
 #define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
-#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
@@ -41,7 +40,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACpkg.h"		/* Metadata cache			*/
-#include "H5Cpkg.h"             /* Cache                                */
+#include "H5Cprivate.h"		/* Cache                                */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/
 #include "H5MMprivate.h"        /* Memory management                    */
@@ -188,8 +187,8 @@ H5AC__set_sync_point_done_callback(H5C_t * cache_ptr,
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(cache_ptr && (cache_ptr->magic == H5C__H5C_T_MAGIC));
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    HDassert(cache_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
@@ -221,10 +220,10 @@ H5AC__set_write_done_callback(H5C_t * cache_ptr, void (* write_done)(void))
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
-    HDassert(cache_ptr && (cache_ptr->magic == H5C__H5C_T_MAGIC));
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
-    HDassert( aux_ptr != NULL );
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
+    HDassert(cache_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
     aux_ptr->write_done = write_done;
 
@@ -261,8 +260,7 @@ H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr)
 
     /* Sanity checks */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
@@ -326,8 +324,7 @@ H5AC__broadcast_candidate_list(H5AC_t *cache_ptr, int *num_entries_ptr,
 
     /* Sanity checks */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->mpi_rank == 0);
@@ -459,8 +456,7 @@ H5AC__broadcast_clean_list(H5AC_t * cache_ptr)
 
     /* Sanity checks */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->mpi_rank == 0);
@@ -542,7 +538,6 @@ H5AC__construct_candidate_list(H5AC_t *cache_ptr, H5AC_aux_t *aux_ptr,
 
     /* Sanity checks */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
@@ -658,8 +653,7 @@ H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr, int *num_entries_pt
 
     /* Sanity checks */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
@@ -735,8 +729,7 @@ H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr)
     addr = entry_ptr->addr;
     cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->mpi_rank == 0);
@@ -792,8 +785,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
     HDassert(entry_ptr->is_dirty == FALSE);
     cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
@@ -876,8 +868,7 @@ H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, hbool_t was_dirty,
 
     /* Sanity check */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->mpi_rank == 0);
@@ -945,8 +936,7 @@ H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr)
     HDassert(entry_ptr);
     cache_ptr = entry_ptr->cache_ptr;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
@@ -1049,8 +1039,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
     HDassert(f->shared);
     cache_ptr = (H5AC_t *)f->shared->cache;
     HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
@@ -1228,8 +1217,7 @@ H5AC__propagate_and_apply_candidate_list(H5F_t  *f, hid_t dxpl_id)
     HDassert(f != NULL);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
@@ -1393,8 +1381,7 @@ H5AC__propagate_flushed_and_still_clean_entries_list(H5F_t  *f, hid_t dxpl_id)
     HDassert(f != NULL);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
@@ -1519,8 +1506,7 @@ H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t dxpl_id)
     HDassert(f != NULL);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->mpi_rank != 0);
@@ -1580,8 +1566,7 @@ H5AC__receive_candidate_list(const H5AC_t *cache_ptr, int *num_entries_ptr,
 
     /* Sanity checks */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->mpi_rank != 0);
@@ -1665,8 +1650,7 @@ H5AC__rsp__dist_md_write__flush(H5F_t *f, hid_t dxpl_id)
     HDassert(f != NULL);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
@@ -1806,8 +1790,7 @@ H5AC__rsp__dist_md_write__flush_to_min_clean(H5F_t *f, hid_t dxpl_id)
     HDassert(f != NULL);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
@@ -1882,8 +1865,7 @@ H5AC__rsp__p0_only__flush(H5F_t *f, hid_t dxpl_id)
     HDassert(f != NULL);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
@@ -1985,8 +1967,7 @@ H5AC__rsp__p0_only__flush_to_min_clean(H5F_t *f, hid_t dxpl_id)
     HDassert(f != NULL);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
@@ -2095,8 +2076,7 @@ H5AC__run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op)
     HDassert(f != NULL);
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert((sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) ||
@@ -2220,8 +2200,7 @@ H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, int num_candidates,
 
     /* Sanity checks */
     HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    aux_ptr = (H5AC_aux_t *)(cache_ptr->aux_ptr);
+    aux_ptr = H5C_get_aux_ptr(cache_ptr);
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert(aux_ptr->metadata_write_strategy == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
@@ -2284,7 +2263,7 @@ H5AC__flush_entries(H5F_t *f, hid_t dxpl_id)
     HDassert(f->shared->cache);
 
     /* Check if we have >1 ranks */
-    if(f->shared->cache->aux_ptr)
+    if(H5C_get_aux_ptr(f->shared->cache))
         if(H5AC__run_sync_point(f, dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_CACHE) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't run sync point.")
 

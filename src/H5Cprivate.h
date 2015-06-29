@@ -40,30 +40,9 @@
 /* Library Private Macros */
 /**************************/
 
-#ifndef NDEBUG
-#define H5C_DO_SANITY_CHECKS		1
-#define H5C_DO_SLIST_SANITY_CHECKS	0
-#define H5C_DO_TAGGING_SANITY_CHECKS	1
-#define H5C_DO_EXTREME_SANITY_CHECKS	0
-#else /* NDEBUG */
-/* With rare execptions, the following defines should be set 
- * to 0 if NDEBUG is defined 
- */
-#define H5C_DO_SANITY_CHECKS		0
-#define H5C_DO_SLIST_SANITY_CHECKS	0
-#define H5C_DO_TAGGING_SANITY_CHECKS	0
-#define H5C_DO_EXTREME_SANITY_CHECKS	0
-#endif /* NDEBUG */
-
-/* Note: The memory sanity checks aren't going to work until I/O filters are
- *      changed to call a particular alloc/free routine for their buffers,
- *      because the H5AC__SERIALIZE_RESIZED_FLAG set by the fractal heap
- *      direct block serialize callback calls H5Z_pipeline().  When the I/O
- *      filters are changed, then we should implement "cache image alloc/free"
- *      routines that the fractal heap direct block (and global heap) serialize
- *      calls can use when resizing (and re-allocating) their image in the
- *      cache. -QAK */
-#define H5C_DO_MEMORY_SANITY_CHECKS	0
+/* Cache configuration settings */
+#define H5C__MAX_NUM_TYPE_IDS	28
+#define H5C__PREFIX_LEN		32
 
 /* This sanity checking constant was picked out of the air.  Increase
  * or decrease it if appropriate.  Its purposes is to detect corrupt
@@ -72,29 +51,6 @@
  *					JRM - 5/17/04
  */
 #define H5C_MAX_ENTRY_SIZE		((size_t)(32 * 1024 * 1024))
-
-/* H5C_COLLECT_CACHE_STATS controls overall collection of statistics
- * on cache activity.  In general, this #define should be set to 1 in
- * debug mode, and 0 in production mode..
- */
-
-#ifndef NDEBUG
-#define H5C_COLLECT_CACHE_STATS	1
-#else /* NDEBUG */
-#define H5C_COLLECT_CACHE_STATS	0
-#endif /* NDEBUG */
-
-/* H5C_COLLECT_CACHE_ENTRY_STATS controls collection of statistics
- * in individual cache entries.
- *
- * H5C_COLLECT_CACHE_ENTRY_STATS should only be defined to true if
- * H5C_COLLECT_CACHE_STATS is also defined to true.
- */
-#if H5C_COLLECT_CACHE_STATS
-#define H5C_COLLECT_CACHE_ENTRY_STATS	1
-#else
-#define H5C_COLLECT_CACHE_ENTRY_STATS	0
-#endif /* H5C_COLLECT_CACHE_STATS */
 
 #ifdef H5_HAVE_PARALLEL
 /* we must maintain the clean and dirty LRU lists when we are compiled
@@ -254,6 +210,55 @@
 #define H5C__FLUSH_LAST_FLAG			0x2000
 #define H5C__FLUSH_COLLECTIVELY_FLAG		0x4000
 #define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG     0x8000
+
+/* Debugging/sanity checking/statistics settings */
+#ifndef NDEBUG
+#define H5C_DO_SANITY_CHECKS		1
+#define H5C_DO_SLIST_SANITY_CHECKS	0
+#define H5C_DO_TAGGING_SANITY_CHECKS	1
+#define H5C_DO_EXTREME_SANITY_CHECKS	0
+#else /* NDEBUG */
+/* With rare execptions, the following defines should be set 
+ * to 0 if NDEBUG is defined 
+ */
+#define H5C_DO_SANITY_CHECKS		0
+#define H5C_DO_SLIST_SANITY_CHECKS	0
+#define H5C_DO_TAGGING_SANITY_CHECKS	0
+#define H5C_DO_EXTREME_SANITY_CHECKS	0
+#endif /* NDEBUG */
+
+/* Note: The memory sanity checks aren't going to work until I/O filters are
+ *      changed to call a particular alloc/free routine for their buffers,
+ *      because the H5AC__SERIALIZE_RESIZED_FLAG set by the fractal heap
+ *      direct block serialize callback calls H5Z_pipeline().  When the I/O
+ *      filters are changed, then we should implement "cache image alloc/free"
+ *      routines that the fractal heap direct block (and global heap) serialize
+ *      calls can use when resizing (and re-allocating) their image in the
+ *      cache. -QAK */
+#define H5C_DO_MEMORY_SANITY_CHECKS	0
+
+/* H5C_COLLECT_CACHE_STATS controls overall collection of statistics
+ * on cache activity.  In general, this #define should be set to 1 in
+ * debug mode, and 0 in production mode..
+ */
+
+#ifndef NDEBUG
+#define H5C_COLLECT_CACHE_STATS	1
+#else /* NDEBUG */
+#define H5C_COLLECT_CACHE_STATS	0
+#endif /* NDEBUG */
+
+/* H5C_COLLECT_CACHE_ENTRY_STATS controls collection of statistics
+ * in individual cache entries.
+ *
+ * H5C_COLLECT_CACHE_ENTRY_STATS should only be defined to true if
+ * H5C_COLLECT_CACHE_STATS is also defined to true.
+ */
+#if H5C_COLLECT_CACHE_STATS
+#define H5C_COLLECT_CACHE_ENTRY_STATS	1
+#else
+#define H5C_COLLECT_CACHE_ENTRY_STATS	0
+#endif /* H5C_COLLECT_CACHE_STATS */
 
 
 /****************************/
@@ -1881,6 +1886,7 @@ H5_DLL herr_t H5C_get_entry_status(const H5F_t *f, haddr_t addr,
     hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr,
     hbool_t *is_flush_dep_parent_ptr, hbool_t *is_flush_dep_child_ptr);
 H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr);
+H5_DLL void * H5C_get_aux_ptr(const H5C_t *cache_ptr);
 H5_DLL FILE *H5C_get_trace_file_ptr(const H5C_t *cache_ptr);
 H5_DLL FILE *H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr);
 H5_DLL herr_t H5C_insert_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
