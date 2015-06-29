@@ -171,8 +171,7 @@ static herr_t H5C_mark_tagged_entries(H5C_t * cache_ptr,
                                       haddr_t tag);
 
 static herr_t H5C_flush_marked_entries(H5F_t * f, 
-                                       hid_t dxpl_id, 
-                                       H5C_t * cache_ptr);
+                                       hid_t dxpl_id);
 
 #if H5C_DO_TAGGING_SANITY_CHECKS
 static herr_t H5C_verify_tag(int id, haddr_t tag);
@@ -2881,8 +2880,6 @@ H5C_protect(H5F_t *		f,
     size_t		empty_space;
     void *		thing;
     H5C_cache_entry_t *	entry_ptr;
-    haddr_t     tag = HADDR_UNDEF;
-    H5P_genplist_t *dxpl;    /* dataset transfer property list */
     void *		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -2924,6 +2921,10 @@ H5C_protect(H5F_t *		f,
             HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, NULL, "incorrect cache entry type")
 
 #if H5C_DO_TAGGING_SANITY_CHECKS
+{
+        H5P_genplist_t *dxpl;    /* dataset transfer property list */
+        haddr_t     tag = HADDR_UNDEF;
+
         /* The entry is already in the cache, but make sure that the tag value 
            being passed in via dxpl is still legal. This will ensure that had
            the entry NOT been in the cache, tagging was still set up correctly
@@ -2946,6 +2947,7 @@ H5C_protect(H5F_t *		f,
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "tag verification failed");
 
         } /* end if */
+}
 #endif
 
         hit = TRUE;
@@ -4696,7 +4698,6 @@ done:
 herr_t
 H5C_unprotect(H5F_t *		  f,
               hid_t		  dxpl_id,
-              const H5C_class_t * type,
               haddr_t		  addr,
               void *		  thing,
               unsigned int        flags)
@@ -4734,7 +4735,6 @@ H5C_unprotect(H5F_t *		  f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( type );
     HDassert( H5F_addr_defined(addr) );
     HDassert( thing );
     HDassert( ! ( pin_entry && unpin_entry ) );
@@ -4745,7 +4745,6 @@ H5C_unprotect(H5F_t *		  f,
     entry_ptr = (H5C_cache_entry_t *)thing;
 
     HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->type == type );
 
     /* also set the dirtied variable if the dirtied field is set in
      * the entry.
@@ -7924,8 +7923,9 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     /* start by updating the statistics */
     if(clear_only) {
         /* only log a clear if the entry was dirty */
-        if(was_dirty)
+        if(was_dirty) {
             H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)
+        } /* end if */
     } else if(write_entry) {
         HDassert(was_dirty);
 
@@ -9687,7 +9687,7 @@ H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, H5C_t * cache_ptr, haddr_t ta
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
 
     /* Flush all marked entries */
-    if(H5C_flush_marked_entries(f, dxpl_id, cache_ptr) < 0)
+    if(H5C_flush_marked_entries(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries")
 
 done:
@@ -9760,7 +9760,7 @@ H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_marked_entries(H5F_t * f, hid_t dxpl_id, H5C_t * cache_ptr)
+H5C_flush_marked_entries(H5F_t * f, hid_t dxpl_id)
 { 
     herr_t ret_value = SUCCEED;
 
@@ -9768,8 +9768,7 @@ H5C_flush_marked_entries(H5F_t * f, hid_t dxpl_id, H5C_t * cache_ptr)
 
     /* Assertions */
     HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
-    HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(f != NULL);
 
     /* Flush all marked entries */
     if(H5C_flush_cache(f, dxpl_id, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)

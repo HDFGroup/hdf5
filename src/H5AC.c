@@ -1395,7 +1395,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
-    if(H5C_unprotect(f, dxpl_id, type, addr, thing, flags) < 0)
+    if(H5C_unprotect(f, dxpl_id, addr, thing, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5C_unprotect() failed.")
 
 #ifdef H5_HAVE_PARALLEL

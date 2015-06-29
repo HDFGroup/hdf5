@@ -1905,8 +1905,8 @@ H5_DLL void H5C_stats__reset(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL herr_t H5C_unpin_entry(void *thing);
 H5_DLL herr_t H5C_destroy_flush_dependency(void *parent_thing, void *child_thing);
-H5_DLL herr_t H5C_unprotect(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
-    haddr_t addr, void *thing, unsigned int flags);
+H5_DLL herr_t H5C_unprotect(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *thing,
+    unsigned int flags);
 H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr,
     unsigned int tests);
 H5_DLL herr_t H5C_ignore_tags(H5C_t *cache_ptr);
