@@ -3770,8 +3770,7 @@ struct H5C_t {
 /* Package Private Prototypes */
 /******************************/
 H5_DLL herr_t H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id,
-    haddr_t addr, unsigned flags, hbool_t del_entry_from_slist_on_destroy,
-    int64_t *entry_size_change_ptr);
+    H5C_cache_entry_t *entry_ptr, unsigned flags, int64_t *entry_size_change_ptr);
 
 #endif /* _H5Cpkg_H */
 

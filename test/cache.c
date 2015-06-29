@@ -34878,8 +34878,8 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
         if ( ( cache_ptr->total_ht_insertions != 33 ) ||
              ( cache_ptr->total_ht_deletions != 1 ) ||
-             ( cache_ptr->successful_ht_searches != 65 ) ||
-             ( cache_ptr->total_successful_ht_search_depth != 195 ) ||
+             ( cache_ptr->successful_ht_searches != 32 ) ||
+             ( cache_ptr->total_successful_ht_search_depth != 96 ) ||
              ( cache_ptr->failed_ht_searches != 33 ) ||
              ( cache_ptr->total_failed_ht_search_depth != 52 ) ||
              ( cache_ptr->max_index_len != 32 ) ||
@@ -34989,8 +34989,8 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
         if ( ( cache_ptr->total_ht_insertions != 33 ) ||
              ( cache_ptr->total_ht_deletions != 33 ) ||
-             ( cache_ptr->successful_ht_searches != 98 ) ||
-             ( cache_ptr->total_successful_ht_search_depth != 198 ) ||
+             ( cache_ptr->successful_ht_searches != 33 ) ||
+             ( cache_ptr->total_successful_ht_search_depth != 99 ) ||
              ( cache_ptr->failed_ht_searches != 33 ) ||
              ( cache_ptr->total_failed_ht_search_depth != 52 ) ||
              ( cache_ptr->max_index_len != 32 ) ||
