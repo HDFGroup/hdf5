@@ -7257,31 +7257,31 @@ else
   cat > conftest.$ac_ext <<_ACEOF
 
 
-        PROGRAM main
+    PROGRAM main
         IMPLICIT NONE
         INTEGER :: ik, k, lastkind, max_decimal_prec
 	INTEGER :: num_rkinds, num_ikinds
         num_ikinds = 0
         lastkind=SELECTED_INT_KIND(1)
         OPEN(8, FILE='pac_fconftest.out', form='formatted')
-        WRITE(8,'(A)',ADVANCE='NO') 'A' ! Find integer KINDs
+        ! Find integer KINDs
         DO ik=2,36
              k = SELECTED_INT_KIND(ik)
              IF (k .NE. lastkind) THEN
 	          num_ikinds = num_ikinds + 1
                   WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
-             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ','
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
 	IF (lastkind.NE.-1) THEN
 	   num_ikinds = num_ikinds + 1
-           WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'B '
+           WRITE(8,'(I0)') lastkind
 	ELSE
-           WRITE(8,'(A)',ADVANCE='NO') 'B '
+           WRITE(8,'()')
         ENDIF
-        WRITE(8,'(A)',ADVANCE='NO') 'C' ! Find real KINDs
+        ! Find real KINDs
         num_rkinds = 0
         lastkind=SELECTED_REAL_KIND(1)
 	max_decimal_prec = 1
@@ -7291,21 +7291,20 @@ else
                   num_rkinds = num_rkinds + 1
                   WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
-             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ','
 	          max_decimal_prec = ik
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
         IF (lastkind.NE.-1)THEN
 	    num_rkinds = num_rkinds + 1
-            WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'D'
+            WRITE(8,'(I0)') lastkind
 	ELSE
-           WRITE(8,'(A)',ADVANCE='NO') 'D'
+           WRITE(8,'()')
         ENDIF
-	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' E',max_decimal_prec,'F'
-
-	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' a',num_ikinds,'b'
-	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' c',num_rkinds,'d'
+	WRITE(8,'(I0)') max_decimal_prec
+	WRITE(8,'(I0)') num_ikinds
+	WRITE(8,'(I0)') num_rkinds
 
         END
 
@@ -7316,25 +7315,36 @@ if ac_fn_fc_try_run "$LINENO"; then :
     if test -s pac_fconftest.out ; then
 
 
-        tmp="`cat pac_fconftest.out`"
-        pac_validIntKinds="`echo $tmp | sed -e 's/.*A\(.*\)B.*/\1/'`"
-        pac_validRealKinds="`echo $tmp | sed -e 's/.*C\(.*\)D.*/\1/'`"
-        PAC_FC_MAX_REAL_PRECISION="`echo $tmp | sed -e 's/.*E\(.*\)F.*/\1/'`"
+        pac_validIntKinds="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
+	pac_validRealKinds="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
+        PAC_FC_MAX_REAL_PRECISION="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
 
 cat >>confdefs.h <<_ACEOF
 #define PAC_FC_MAX_REAL_PRECISION $PAC_FC_MAX_REAL_PRECISION
 _ACEOF
 
 
-        PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
-        PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
+        PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds`}"
+        PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
 
-			H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $tmp | sed -e 's/.*a\(.*\)b.*/\1/'`"
-	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds | sed -e 's/ /,/g'`/)"
+	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
+	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_NUM_RKIND $H5CONFIG_F_NUM_RKIND
+_ACEOF
 
 
 cat >>confdefs.h <<_ACEOF
 #define H5CONFIG_F_NUM_IKIND $H5CONFIG_F_NUM_IKIND
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_RKIND $H5CONFIG_F_RKIND
 _ACEOF
 
 
@@ -7353,6 +7363,7 @@ $as_echo_n "checking for Fortran REAL KINDs... " >&6; }
 $as_echo "$PAC_FC_ALL_REAL_KINDS" >&6; }
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran REALs maximum decimal precision" >&5
 $as_echo_n "checking for Fortran REALs maximum decimal precision... " >&6; }
+
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_MAX_REAL_PRECISION" >&5
 $as_echo "$PAC_FC_MAX_REAL_PRECISION" >&6; }
     else
@@ -7421,13 +7432,14 @@ else
   if ac_fn_fc_try_run "$LINENO"; then :
 
             if test -s pac_fconftest.out ; then
-                PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '1p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '2p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '3p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '4p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '5p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '6p' pac_fconftest.out`"
-            else
+                PAC_FORTRAN_NATIVE_INTEGER_KIND="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_KIND="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`perl -ne '$. == 6 && print && exit' pac_fconftest.out`"
+
+                                                                                                            else
                 { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No output from test program!" >&5
 $as_echo "$as_me: WARNING: No output from test program!" >&2;}
             fi
@@ -7466,31 +7478,31 @@ else
   cat > conftest.$ac_ext <<_ACEOF
 
 
-        PROGRAM main
+    PROGRAM main
         IMPLICIT NONE
         INTEGER :: ik, k, lastkind, max_decimal_prec
 	INTEGER :: num_rkinds, num_ikinds
         num_ikinds = 0
         lastkind=SELECTED_INT_KIND(1)
         OPEN(8, FILE='pac_fconftest.out', form='formatted')
-        WRITE(8,'(A)',ADVANCE='NO') 'A' ! Find integer KINDs
+        ! Find integer KINDs
         DO ik=2,36
              k = SELECTED_INT_KIND(ik)
              IF (k .NE. lastkind) THEN
 	          num_ikinds = num_ikinds + 1
                   WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
-             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ','
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
 	IF (lastkind.NE.-1) THEN
 	   num_ikinds = num_ikinds + 1
-           WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'B '
+           WRITE(8,'(I0)') lastkind
 	ELSE
-           WRITE(8,'(A)',ADVANCE='NO') 'B '
+           WRITE(8,'()')
         ENDIF
-        WRITE(8,'(A)',ADVANCE='NO') 'C' ! Find real KINDs
+        ! Find real KINDs
         num_rkinds = 0
         lastkind=SELECTED_REAL_KIND(1)
 	max_decimal_prec = 1
@@ -7500,21 +7512,20 @@ else
                   num_rkinds = num_rkinds + 1
                   WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
-             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ','
 	          max_decimal_prec = ik
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
         IF (lastkind.NE.-1)THEN
 	    num_rkinds = num_rkinds + 1
-            WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'D'
+            WRITE(8,'(I0)') lastkind
 	ELSE
-           WRITE(8,'(A)',ADVANCE='NO') 'D'
+           WRITE(8,'()')
         ENDIF
-	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' E',max_decimal_prec,'F'
-
-	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' a',num_ikinds,'b'
-	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' c',num_rkinds,'d'
+	WRITE(8,'(I0)') max_decimal_prec
+	WRITE(8,'(I0)') num_ikinds
+	WRITE(8,'(I0)') num_rkinds
 
         END
 
@@ -7525,25 +7536,36 @@ if ac_fn_fc_try_run "$LINENO"; then :
     if test -s pac_fconftest.out ; then
 
 
-        tmp="`cat pac_fconftest.out`"
-        pac_validIntKinds="`echo $tmp | sed -e 's/.*A\(.*\)B.*/\1/'`"
-        pac_validRealKinds="`echo $tmp | sed -e 's/.*C\(.*\)D.*/\1/'`"
-        PAC_FC_MAX_REAL_PRECISION="`echo $tmp | sed -e 's/.*E\(.*\)F.*/\1/'`"
+        pac_validIntKinds="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
+	pac_validRealKinds="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
+        PAC_FC_MAX_REAL_PRECISION="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
 
 cat >>confdefs.h <<_ACEOF
 #define PAC_FC_MAX_REAL_PRECISION $PAC_FC_MAX_REAL_PRECISION
 _ACEOF
 
 
-        PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
-        PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
+        PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds`}"
+        PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
 
-			H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $tmp | sed -e 's/.*a\(.*\)b.*/\1/'`"
-	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds | sed -e 's/ /,/g'`/)"
+	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
+	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_NUM_RKIND $H5CONFIG_F_NUM_RKIND
+_ACEOF
 
 
 cat >>confdefs.h <<_ACEOF
 #define H5CONFIG_F_NUM_IKIND $H5CONFIG_F_NUM_IKIND
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define H5CONFIG_F_RKIND $H5CONFIG_F_RKIND
 _ACEOF
 
 
@@ -7562,6 +7584,7 @@ $as_echo_n "checking for Fortran REAL KINDs... " >&6; }
 $as_echo "$PAC_FC_ALL_REAL_KINDS" >&6; }
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran REALs maximum decimal precision" >&5
 $as_echo_n "checking for Fortran REALs maximum decimal precision... " >&6; }
+
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_MAX_REAL_PRECISION" >&5
 $as_echo "$PAC_FC_MAX_REAL_PRECISION" >&6; }
     else
@@ -7601,7 +7624,8 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 pack_int_sizeof=""
 rm -f pac_fconftest.out
-for kind in $pac_validIntKinds; do
+
+for kind in `echo $pac_validIntKinds | sed -e 's/,/ /g'`; do
   cat > conftest.$ac_ext <<_ACEOF
 
 
@@ -7663,7 +7687,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 pack_real_sizeof=""
 rm -f pac_fconftest.out
-for kind in $pac_validRealKinds; do
+for kind in `echo  $pac_validRealKinds| sed -e 's/,/ /g'`; do
   cat > conftest.$ac_ext <<_ACEOF
 
 

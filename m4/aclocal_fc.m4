@@ -324,31 +324,31 @@ AC_LANG_PUSH([Fortran])
 rm -f pac_fconftest.out
 AC_RUN_IFELSE([
     AC_LANG_SOURCE([
-        PROGRAM main
+    PROGRAM main
         IMPLICIT NONE
         INTEGER :: ik, k, lastkind, max_decimal_prec
 	INTEGER :: num_rkinds, num_ikinds
         num_ikinds = 0
         lastkind=SELECTED_INT_KIND(1)
         OPEN(8, FILE='pac_fconftest.out', form='formatted')
-        WRITE(8,'(A)',ADVANCE='NO') 'A' ! Find integer KINDs
+        ! Find integer KINDs
         DO ik=2,36
              k = SELECTED_INT_KIND(ik)
              IF (k .NE. lastkind) THEN
 	          num_ikinds = num_ikinds + 1	
                   WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
-             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '	
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ','	
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
 	IF (lastkind.NE.-1) THEN
 	   num_ikinds = num_ikinds + 1	
-           WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'B '
+           WRITE(8,'(I0)') lastkind
 	ELSE
-           WRITE(8,'(A)',ADVANCE='NO') 'B '
+           WRITE(8,'()')
         ENDIF
-        WRITE(8,'(A)',ADVANCE='NO') 'C' ! Find real KINDs
+        ! Find real KINDs
         num_rkinds = 0
         lastkind=SELECTED_REAL_KIND(1)
 	max_decimal_prec = 1
@@ -358,52 +358,49 @@ AC_RUN_IFELSE([
                   num_rkinds = num_rkinds + 1
                   WRITE(8,'(I0)',ADVANCE='NO') lastkind
                   lastkind = k
-             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ' '
+             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ','
 	          max_decimal_prec = ik
              ENDIF
              IF (k .LE. 0) EXIT
         ENDDO
         IF (lastkind.NE.-1)THEN
 	    num_rkinds = num_rkinds + 1
-            WRITE(8,'(I0,A)',ADVANCE='NO') lastkind, 'D'
+            WRITE(8,'(I0)') lastkind
 	ELSE
-           WRITE(8,'(A)',ADVANCE='NO') 'D'
+           WRITE(8,'()')
         ENDIF
-	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' E',max_decimal_prec,'F'
-
-	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' a',num_ikinds,'b'
-	WRITE(8,'(A,I0,A)',ADVANCE='NO') ' c',num_rkinds,'d'
+	WRITE(8,'(I0)') max_decimal_prec
+	WRITE(8,'(I0)') num_ikinds
+	WRITE(8,'(I0)') num_rkinds
         
         END
     ])
 ],[
     if test -s pac_fconftest.out ; then
 	
-     dnl The output from the above program will be something like 
-     dnl A1 4 8 16B C4 8 10D E30F a#b c#d where:
-     dnl      - valid integer kinds are the numbers between A and B
-     dnl      - number of valid integer kinds are the numbers between a and b
-     dnl      - valid real kinds are the numbers between A and B
-     dnl      - number of valid real kinds are the numbers between c and d
-     dnl      - max decimal precision for reals is the number between E and F
+     dnl The output from the above program will be:
+     dnl    -- LINE 1 --  valid integer kinds (comma seperated list)
+     dnl    -- LINE 2 --  valid real kinds (comma seperated list)
+     dnl    -- LINE 3 --  max decimal precision for reals
+     dnl    -- LINE 4 --  number of valid integer kinds
+     dnl    -- LINE 5 --  number of valid real kinds
 
-        tmp="`cat pac_fconftest.out`"
-        pac_validIntKinds="`echo $tmp | sed -e 's/.*A\(.*\)B.*/\1/'`"
-        pac_validRealKinds="`echo $tmp | sed -e 's/.*C\(.*\)D.*/\1/'`"
-        PAC_FC_MAX_REAL_PRECISION="`echo $tmp | sed -e 's/.*E\(.*\)F.*/\1/'`"
+        pac_validIntKinds="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
+	pac_validRealKinds="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
+        PAC_FC_MAX_REAL_PRECISION="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
         AC_DEFINE_UNQUOTED([PAC_FC_MAX_REAL_PRECISION], $PAC_FC_MAX_REAL_PRECISION, [Define Fortran Maximum Real Decimal Precision])
 
-        PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds | sed -e 's/ /,/g'`}"
-        PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds | sed -e 's/ /,/g'`}"
+        PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds`}"
+        PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
 
-	dnl H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo $tmp | sed -e 's/.*c\(.*\)d.*/\1/'`"
-	dnl H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds | sed -e 's/ /,/g'`/)"
-	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $tmp | sed -e 's/.*a\(.*\)b.*/\1/'`"
-	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds | sed -e 's/ /,/g'`/)"
+	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
+	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
 
-	dnl AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
+	AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
 	AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_IKIND], $H5CONFIG_F_NUM_IKIND, [Define number of valid Fortran INTEGER KINDs])
-	dnl AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
+	AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
 	AC_DEFINE_UNQUOTED([H5CONFIG_F_IKIND], $H5CONFIG_F_IKIND, [Define valid Fortran INTEGER KINDs])
 
         AC_MSG_CHECKING([for Fortran INTEGER KINDs])
@@ -411,6 +408,7 @@ AC_RUN_IFELSE([
 	AC_MSG_CHECKING([for Fortran REAL KINDs])
 	AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])
 	AC_MSG_CHECKING([for Fortran REALs maximum decimal precision])
+        
 	AC_MSG_RESULT([$PAC_FC_MAX_REAL_PRECISION])
     else
         AC_MSG_RESULT([Error])
@@ -435,7 +433,8 @@ AC_MSG_CHECKING([sizeof of available INTEGER KINDs])
 AC_LANG_PUSH([Fortran])
 pack_int_sizeof=""
 rm -f pac_fconftest.out
-for kind in $pac_validIntKinds; do
+
+for kind in `echo $pac_validIntKinds | sed -e 's/,/ /g'`; do
   AC_LANG_CONFTEST([
       AC_LANG_SOURCE([
                 PROGRAM main
@@ -473,7 +472,7 @@ AC_MSG_CHECKING([sizeof of available REAL KINDs])
 AC_LANG_PUSH([Fortran])
 pack_real_sizeof=""
 rm -f pac_fconftest.out
-for kind in $pac_validRealKinds; do
+for kind in `echo  $pac_validRealKinds| sed -e 's/,/ /g'`; do
   AC_LANG_CONFTEST([
       AC_LANG_SOURCE([
                 PROGRAM main
@@ -532,12 +531,19 @@ rm -f pac_fconftest.out
         ])
         AC_RUN_IFELSE([],[
             if test -s pac_fconftest.out ; then
-                PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '1p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '2p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '3p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '4p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '5p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '6p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_KIND="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_KIND="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`perl -ne '$. == 6 && print && exit' pac_fconftest.out`"
+
+                dnl PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '1p' pac_fconftest.out`"
+                dnl PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '2p' pac_fconftest.out`"
+                dnl PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '3p' pac_fconftest.out`"
+                dnl PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '4p' pac_fconftest.out`"
+                dnl PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '5p' pac_fconftest.out`"
+                dnl PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '6p' pac_fconftest.out`"
             else
                 AC_MSG_WARN([No output from test program!])
             fi
