@@ -98,7 +98,7 @@ static herr_t H5HF__cache_iblock_pre_serialize(const H5F_t *f, hid_t dxpl_id,
     unsigned *flags); 
 static herr_t H5HF__cache_iblock_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
-static herr_t H5HF__cache_iblock_notify(H5C_notify_action_t action, void *thing); 
+static herr_t H5HF__cache_iblock_notify(H5C_notify_action_t action, const H5F_t *f, void *thing); 
 static herr_t H5HF__cache_iblock_free_icr(void *thing);
 
 static herr_t H5HF__cache_dblock_get_load_size(const void *udata, size_t *image_len);
@@ -113,7 +113,7 @@ static herr_t H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id,
     unsigned *flags); 
 static herr_t H5HF__cache_dblock_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
-static herr_t H5HF__cache_dblock_notify(H5C_notify_action_t action, void *thing);
+static herr_t H5HF__cache_dblock_notify(H5C_notify_action_t action, const H5F_t *f, void *thing);
 static herr_t H5HF__cache_dblock_free_icr(void *thing);
 
 /* Debugging Function Prototypes */
@@ -1364,7 +1364,7 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t len,
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_iblock_notify(H5C_notify_action_t action, void *_thing)
+H5HF__cache_iblock_notify(H5C_notify_action_t action, const H5F_t H5_ATTR_UNUSED *f, void *_thing)
 {
     H5HF_indirect_t     *iblock = (H5HF_indirect_t *)_thing;    /* Indirect block info */
     herr_t      	 ret_value = SUCCEED;    /* Return value */
@@ -2361,7 +2361,7 @@ H5HF__cache_dblock_serialize(const H5F_t *f, void *image, size_t len,
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_dblock_notify(H5C_notify_action_t action, void *_thing)
+H5HF__cache_dblock_notify(H5C_notify_action_t action, const H5F_t H5_ATTR_UNUSED *f, void *_thing)
 {
     H5HF_direct_t 	*dblock = (H5HF_direct_t *)_thing;      /* Fractal heap direct block */
     herr_t 		 ret_value = SUCCEED;         /* Return value */

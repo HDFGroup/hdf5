@@ -38,7 +38,7 @@ int main(void)
         return -1;
 
     /* create a multi file driver */
-    if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS))<0)
         return -1;
 
     if (H5Pset_fapl_multi(fapl, NULL, NULL, NULL, NULL, TRUE) < 0)
@@ -80,9 +80,10 @@ static int create_file (hid_t fapl, const char* filename)
                           H5P_DEFAULT, H5P_DEFAULT)) < 0) return -1;
 
     /* Close the file, dataspace, and dataset */
-    H5Sclose(sid);
-    H5Dclose(did);
-    H5Fclose(fid);
+    if(H5Sclose(sid) < 0) return -1;
+    if(H5Dclose(did) < 0) return -1;
+
+    if(H5Fclose(fid) < 0) return -1;
 
     /* Re-open file */
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) return -1;

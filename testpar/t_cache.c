@@ -407,7 +407,7 @@ static herr_t datum_serialize(const H5F_t *f,
                               size_t len,
                               void *thing_ptr);
 
-static herr_t datum_notify(H5C_notify_action_t action, void *thing);
+static herr_t datum_notify(H5C_notify_action_t action, const H5F_t *f, void *thing);
 
 static herr_t datum_free_icr(void * thing);
 
@@ -2577,7 +2577,7 @@ datum_serialize(const H5F_t *f,
  *-------------------------------------------------------------------------
  */
 static herr_t
-datum_notify(H5C_notify_action_t action, void *thing)
+datum_notify(H5C_notify_action_t action, const H5F_t H5_ATTR_UNUSED *f, void *thing)
 {
     hbool_t was_dirty = FALSE;
     herr_t ret_value = SUCCEED;

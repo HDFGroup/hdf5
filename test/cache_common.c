@@ -204,7 +204,7 @@ static herr_t variable_free_icr(void *thing);
 static herr_t notify_free_icr(void *thing);
 
 
-static herr_t notify_notify(H5C_notify_action_t action, void *thing);
+static herr_t notify_notify(H5C_notify_action_t action, const H5F_t *f, void *thing);
 
 /* Generic callback routines */
 static herr_t get_load_size(const void *udata_ptr, size_t *image_len_ptr,
@@ -1505,7 +1505,7 @@ notify(H5C_notify_action_t action, void *thing, int32_t entry_type)
 } /* notify() */
 
 herr_t
-notify_notify(H5C_notify_action_t action, void *thing)
+notify_notify(H5C_notify_action_t action, const H5F_t H5_ATTR_UNUSED *f, void *thing)
 {
     return(notify(action, thing, NOTIFY_ENTRY_TYPE));
 }

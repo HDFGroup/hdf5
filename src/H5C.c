@@ -674,7 +674,6 @@ H5C_apply_candidate_list(H5F_t * f,
               (int)entries_to_flush);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
-
     /* We have now marked all the entries on the candidate list for 
      * either flush or clear -- now scan the LRU and the pinned list
      * for these entries and do the deed.
@@ -3175,7 +3174,7 @@ H5C_insert_entry(H5F_t *             f,
      * notice now that the entry is fully integrated into the cache.
      */
     if(entry_ptr->type->notify &&
-            (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, entry_ptr) < 0)
+       (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, f, entry_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry inserted into cache")
 
     H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
@@ -4327,7 +4326,7 @@ H5C_protect(H5F_t *		f,
          * notice now that the entry is fully integrated into the cache.
          */
         if(entry_ptr->type->notify &&
-                (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_LOAD, entry_ptr) < 0)
+           (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_LOAD, f, entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, NULL, "can't notify client about entry inserted into cache")
     }
 
@@ -9317,7 +9316,7 @@ H5C_flush_single_entry(const H5F_t *	   f,
 
         if ( ( entry_ptr->type->notify ) &&
              ( (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_FLUSH, 
-                                         entry_ptr) < 0 ) )
+                                         f, entry_ptr) < 0 ) )
         {
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, \
                         "can't notify client of entry flush")
@@ -9376,7 +9375,7 @@ H5C_flush_single_entry(const H5F_t *	   f,
 
             if ( ( entry_ptr->type->notify ) &&
                  ( (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_BEFORE_EVICT, 
-                                             entry_ptr) < 0 ) )
+                                             f, entry_ptr) < 0 ) )
             {
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, \
                             "can't notify client about entry to evict")
