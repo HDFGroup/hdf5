@@ -583,13 +583,15 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   max_real_fortran_sizeof="`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -ne '/,(\d+)\}/; print $1'`"
   max_real_fortran_kind="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -ne '/,(\d+)\}/; print $1'`"
 
-  if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof"; then
-     AC_MSG_WARN([
+  if test "$ac_cv_sizeof___float128" != 0;then
+    if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof"; then
+      AC_MSG_WARN([
         Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
                   !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
-     ])
-     PAC_FC_ALL_REAL_KINDS="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | $PERL  -pe 's/,\d+}/}/g;'`"
-     PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | $PERL  -pe 's/,\d+}/}/g;'`"
+      ])
+      PAC_FC_ALL_REAL_KINDS="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | $PERL  -pe 's/,\d+}/}/g;'`"
+      PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | $PERL  -pe 's/,\d+}/}/g;'`"
+    fi
   fi
   AC_MSG_CHECKING([for Fortran interoperable KINDS with C])
   AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])	
