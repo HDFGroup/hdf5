@@ -640,7 +640,7 @@ add_custom_command (
 )
 
 if (GENERATE_ERROR_HEADERS)
-  find_pacakge (Perl)
+  find_package (Perl)
   if (PERL_FOUND)
     add_custom_command (
         OUTPUT ${HDF5_BINARY_DIR}/H5Edefin.h
@@ -736,7 +736,7 @@ if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} libraries)
   endif (BUILD_SHARED_LIBS)
-  
+
   install (
       TARGETS
           ${HDF5_LIB_TARGET}

@@ -9,7 +9,7 @@ set (CTEST_NIGHTLY_START_TIME "18:00:00 CST")
 
 set (CTEST_DROP_METHOD "http")
 if (CDASH_LOCAL)
-  set (CTEST_DROP_SITE "72.36.68.252")
+  set (CTEST_DROP_SITE "10.10.10.82")
   set (CTEST_DROP_LOCATION "/submit.php?project=HDF5.1.8")
 else (CDASH_LOCAL)
   set (CTEST_DROP_SITE "cdash.hdfgroup.org")
