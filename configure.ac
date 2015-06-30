@@ -564,7 +564,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   if test "X$FORTRAN_HAVE_C_LONG_DOUBLE"; then
     PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
     if test "X$FORTRAN_C_LONG_DOUBLE_IS_UNIQUE" = "Xyes"; then
-      FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="1" 
+      FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="1"
       AC_DEFINE([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE], [1], [Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE])
     else
       FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
@@ -596,9 +596,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   dnl count the number of real kinds
   H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -e '$count = (<STDIN> =~ tr/,//);print $count+1'`"
-  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/{//g' | sed -e 's/}//g' | sed -e 's/ /,/g'`/)"
+  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -pe 's/{//g' | perl -pe 's/}//g' | perl -pe 's/ /,/g'`/)"
   dnl H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | $PERL -pe 'tr |{}|//|' | $PERL -e 's/ /,/g`)"
-  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/{//g' | sed -e 's/}//g'| sed -e 's/ /,/g'`/)"
+  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -pe 's/{//g' | perl -pe 's/}//g'| perl -pe 's/ /,/g'`/)"
 
   AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
   AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
