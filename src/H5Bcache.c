@@ -338,10 +338,16 @@ H5B__serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
         /* Encode the final key */
         if(shared->type->encode(shared, image, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
+        image += shared->sizeof_rkey;
     } /* end if */
 
     /* Sanity check */
-    HDassert((size_t)((const uint8_t *)image - (const uint8_t *)_image) <= len);
+    HDassert((size_t)(image - (uint8_t *)_image) <= len);
+
+#ifdef H5_CLEAR_MEMORY
+    /* Clear rest of node */
+    HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+#endif /* H5_CLEAR_MEMORY */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
