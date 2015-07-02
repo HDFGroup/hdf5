@@ -7539,6 +7539,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     hbool_t		was_dirty;
     haddr_t		new_addr = HADDR_UNDEF;
     haddr_t		old_addr = HADDR_UNDEF;
+    haddr_t             entry_addr;
     size_t		new_len = 0;
     size_t		new_compressed_len = 0;
     herr_t		ret_value = SUCCEED;      /* Return value */
@@ -7550,6 +7551,8 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(entry_ptr);
+
+    entry_addr = entry_ptr->addr;
 
     /* If defined, initialize *entry_size_change_ptr to 0 */
     if(entry_size_change_ptr != NULL)
@@ -8144,7 +8147,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     } /* if (destroy) */
 
     if(cache_ptr->log_flush)
-        if((cache_ptr->log_flush)(cache_ptr, entry_ptr->addr, was_dirty, flags) < 0)
+        if((cache_ptr->log_flush)(cache_ptr, entry_addr, was_dirty, flags) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "log_flush callback failed.")
 
 done:
