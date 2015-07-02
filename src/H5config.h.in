@@ -172,6 +172,9 @@
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #undef HAVE_GET_FPC_CSR
 
+/* Define if the compiler understands inline */
+#undef HAVE_INLINE
+
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #undef HAVE_INSTRUMENTED_LIBRARY
@@ -398,6 +401,12 @@
 /* Define to 1 if you have the `_scrsize' function. */
 #undef HAVE__SCRSIZE
 
+/* Define if the compiler understands __inline */
+#undef HAVE___INLINE
+
+/* Define if the compiler understands __inline__ */
+#undef HAVE___INLINE__
+
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #undef INCLUDE_HL
 
@@ -622,12 +631,6 @@
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
-
-/* Define to `__inline__' or `__inline' if that's what the C compiler
-   calls it, or to nothing if 'inline' is not supported under any name.  */
-#ifndef __cplusplus
-#undef inline
-#endif
 
 /* Define to `long int' if <sys/types.h> does not define. */
 #undef off_t

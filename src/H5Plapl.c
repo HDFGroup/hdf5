@@ -237,7 +237,7 @@ H5P_lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
     uint8_t **pp = (uint8_t **)_pp;
     H5P_genplist_t *fapl_plist;         /* Pointer to property list */
     hbool_t non_default_fapl = FALSE;   /* Whether the FAPL is non-default */
-    size_t enc_size = 0;                /* FAPL's encoded size */
+    size_t fapl_size = 0;                /* FAPL's encoded size */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -257,13 +257,30 @@ H5P_lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
     /* Encode the property list, if non-default */
     /* (if *pp == NULL, will only compute the size) */
     if(non_default_fapl) {
-        if(H5P__encode(fapl_plist, TRUE, *pp, &enc_size) < 0)
+        if(H5P__encode(fapl_plist, TRUE, NULL, &fapl_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode property list")
-        if(*pp)
-            *pp += enc_size;
+
+        if(*pp) {
+            uint64_t enc_value;
+            unsigned enc_size;
+
+            /* encode the length of the plist */
+            enc_value = (uint64_t)fapl_size;
+            enc_size = H5VM_limit_enc_size(enc_value);
+            HDassert(enc_size < 256);
+            *(*pp)++ = (uint8_t)enc_size;
+            UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+            /* encode the plist */
+            if(H5P__encode(fapl_plist, TRUE, *pp, &fapl_size) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode property list")
+
+            *pp += fapl_size;
+        }
+        fapl_size += (1 + H5VM_limit_enc_size((uint64_t)fapl_size));
     } /* end if */
 
-    *size += (1 + enc_size);      /* Non-default flag, plus encoded property list size */
+    *size += (1 + fapl_size);      /* Non-default flag, plus encoded property list size */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -304,22 +321,21 @@ H5P_lacc_elink_fapl_dec(const void **_pp, void *_value)
     non_default_fapl = (hbool_t)*(*pp)++;
 
     if(non_default_fapl) {
-        H5P_genplist_t *fapl_plist;         /* Pointer to property list */
-        size_t enc_size = 0;                /* Encoded size of property list */
+        size_t fapl_size = 0;                /* Encoded size of property list */
+        unsigned enc_size;
+        uint64_t enc_value;
+
+        /* Decode the plist length */
+        enc_size = *(*pp)++;
+        HDassert(enc_size < 256);
+        UINT64DECODE_VAR(*pp, enc_value, enc_size);
+        fapl_size = (size_t)enc_value;
 
         /* Decode the property list */
         if((*elink_fapl = H5P__decode(*pp)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode property")
 
-        /* Get the property list object */
-        if(NULL == (fapl_plist = (H5P_genplist_t *)H5P_object_verify(*elink_fapl, H5P_FILE_ACCESS)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property list")
-
-        /* Compute the encoded size of the property list */
-        if(H5P__encode(fapl_plist, TRUE, NULL, &enc_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't compute encoded property list size")
-
-        *pp += enc_size;
+        *pp += fapl_size;
     } /* end if */
     else
         *elink_fapl = H5P_DEFAULT;
@@ -578,7 +594,7 @@ H5P_lacc_elink_pref_dec(const void **_pp, void *_value)
 
     /* Decode the value */
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
-    len = enc_value;
+    len = (size_t)enc_value;
 
     if(0 != len) {
         /* Make a copy of the user's prefix string */

@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.222], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.223], [help@hdfgroup.org])
 
 
 
@@ -1838,7 +1838,27 @@ AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
 ## Check compiler characteristics
 ##
 AC_C_CONST
-AC_C_INLINE
+
+AC_MSG_CHECKING([if the compiler understands  __inline__])
+AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([[static __inline__ void f(void){return;};]])],
+    [AC_DEFINE([HAVE___INLINE__], [1], [Define if the compiler understands __inline__]) AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])]
+)
+
+AC_MSG_CHECKING([if the compiler understands __inline])
+AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([[static __inline void f(void){return;};]])],
+    [AC_DEFINE([HAVE___INLINE], [1], [Define if the compiler understands __inline]) AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])]
+)
+
+AC_MSG_CHECKING([if the compiler understands inline])
+AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([[static inline void f(void){return;};]])],
+    [AC_DEFINE([HAVE_INLINE], [1], [Define if the compiler understands inline]) AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])]
+)
 
 AC_MSG_CHECKING([for __attribute__ extension])
 AC_TRY_COMPILE(,[int __attribute__((unused)) x],
@@ -3051,16 +3071,6 @@ fi
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi
-
-## We don't want inline defined for C++ compilers
-## Don't worry about the C++ ifdef wrappers in the H5pubconf file, since
-## 'H5_inline' isn't a C++ keyword.
-cat >> src/H5config.h <<EOF
-
-#if defined(__cplusplus) && defined(inline)
-#undef inline
-#endif
-EOF
 
 ## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
 ## linker flags:  -l with no library name; -l <libname>, specifically gfortran or m.
