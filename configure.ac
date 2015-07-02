@@ -597,6 +597,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   dnl count the number of real kinds
   H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -e '$count = (<STDIN> =~ tr/,//);print $count+1'`"
+  dnl MSB still need to replace spaces with commas??
   H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -pe 's/{//g' | perl -pe 's/}//g' | perl -pe 's/ /,/g'`/)"
   dnl H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | $PERL -pe 'tr |{}|//|' | $PERL -e 's/ /,/g`)"
   H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -pe 's/{//g' | perl -pe 's/}//g'| perl -pe 's/ /,/g'`/)"
