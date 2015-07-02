@@ -473,20 +473,24 @@ COPY_TESTFILES_TO_TESTDIR
 ####### test for dataset vds ######
 
   # Data read
-TOOLTEST tvds-1.ddl --enable-error-stack 1_vds.h5
-TOOLTEST tvds-2.ddl --enable-error-stack 2_vds.h5
-TOOLTEST tvds-3_1.ddl --enable-error-stack 3_1_vds.h5
-TOOLTEST tvds-3_2.ddl --enable-error-stack 3_2_vds.h5
-TOOLTEST tvds-4.ddl --enable-error-stack 4_vds.h5
-TOOLTEST tvds-5.ddl --enable-error-stack 5_vds.h5
+if test $USE_FILTER_DEFLATE = "yes" ; then
+    TOOLTEST tvds-1.ddl --enable-error-stack 1_vds.h5
+    TOOLTEST tvds-2.ddl --enable-error-stack 2_vds.h5
+    TOOLTEST tvds-3_1.ddl --enable-error-stack 3_1_vds.h5
+    TOOLTEST tvds-3_2.ddl --enable-error-stack 3_2_vds.h5
+    TOOLTEST tvds-4.ddl --enable-error-stack 4_vds.h5
+    TOOLTEST tvds-5.ddl --enable-error-stack 5_vds.h5
+fi
 
   # Layout read
-TOOLTEST tvds_layout-1.ddl -p --enable-error-stack 1_vds.h5
-TOOLTEST tvds_layout-2.ddl -p --enable-error-stack 2_vds.h5
-TOOLTEST tvds_layout-3_1.ddl -p --enable-error-stack 3_1_vds.h5
-TOOLTEST tvds_layout-3_2.ddl -p --enable-error-stack 3_2_vds.h5
-TOOLTEST tvds_layout-4.ddl -p --enable-error-stack 4_vds.h5
-TOOLTEST tvds_layout-5.ddl -p --enable-error-stack 5_vds.h5
+if test $USE_FILTER_DEFLATE = "yes" ; then
+    TOOLTEST tvds_layout-1.ddl -p --enable-error-stack 1_vds.h5
+    TOOLTEST tvds_layout-2.ddl -p --enable-error-stack 2_vds.h5
+    TOOLTEST tvds_layout-3_1.ddl -p --enable-error-stack 3_1_vds.h5
+    TOOLTEST tvds_layout-3_2.ddl -p --enable-error-stack 3_2_vds.h5
+    TOOLTEST tvds_layout-4.ddl -p --enable-error-stack 4_vds.h5
+    TOOLTEST tvds_layout-5.ddl -p --enable-error-stack 5_vds.h5
+fi
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

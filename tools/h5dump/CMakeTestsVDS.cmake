@@ -204,18 +204,35 @@
     set (last_VDS_test "H5DUMP_VDS-clearall-objects")
   endif (HDF5_ENABLE_USING_MEMCHECKER)
 
+# See which filters are usable (and skip tests for filters we
+# don't have).  Do this by searching H5pubconf.h to see which
+# filters are defined.
+
+# detect whether the encoder is present.
+  if (H5_HAVE_FILTER_DEFLATE)
+    set (USE_FILTER_DEFLATE "true")
+  endif (H5_HAVE_FILTER_DEFLATE)
+
+  if (H5_HAVE_FILTER_SZIP)
+    set (USE_FILTER_SZIP "true")
+  endif (H5_HAVE_FILTER_SZIP)
+
   # Data read
-  ADD_H5_VDS_TEST (tvds-1 0 --enable-error-stack 1_vds.h5)
-  ADD_H5_VDS_TEST (tvds-2 0 --enable-error-stack 2_vds.h5)
-  ADD_H5_VDS_TEST (tvds-3_1 0 --enable-error-stack 3_1_vds.h5)
-  ADD_H5_VDS_TEST (tvds-3_2 0 --enable-error-stack 3_2_vds.h5)
-  ADD_H5_VDS_TEST (tvds-4 0 --enable-error-stack 4_vds.h5)
-  ADD_H5_VDS_TEST (tvds-5 0 --enable-error-stack 5_vds.h5)
+  if (USE_FILTER_DEFLATE)
+    ADD_H5_VDS_TEST (tvds-1 0 --enable-error-stack 1_vds.h5)
+    ADD_H5_VDS_TEST (tvds-2 0 --enable-error-stack 2_vds.h5)
+    ADD_H5_VDS_TEST (tvds-3_1 0 --enable-error-stack 3_1_vds.h5)
+    ADD_H5_VDS_TEST (tvds-3_2 0 --enable-error-stack 3_2_vds.h5)
+    ADD_H5_VDS_TEST (tvds-4 0 --enable-error-stack 4_vds.h5)
+    ADD_H5_VDS_TEST (tvds-5 0 --enable-error-stack 5_vds.h5)
+  endif (USE_FILTER_DEFLATE)
 
   # Layout read
-  ADD_H5_VDS_LAYOUT (tvds_layout-1 0 --enable-error-stack 1_vds.h5)
-  ADD_H5_VDS_LAYOUT (tvds_layout-2 0 --enable-error-stack 2_vds.h5)
-  ADD_H5_VDS_LAYOUT (tvds_layout-3_1 0 --enable-error-stack 3_1_vds.h5)
-  ADD_H5_VDS_LAYOUT (tvds_layout-3_2 0 --enable-error-stack 3_2_vds.h5)
-  ADD_H5_VDS_LAYOUT (tvds_layout-4 0 --enable-error-stack 4_vds.h5)
-  ADD_H5_VDS_LAYOUT (tvds_layout-5 0 --enable-error-stack 5_vds.h5)
+  if (USE_FILTER_DEFLATE)
+    ADD_H5_VDS_LAYOUT (tvds_layout-1 0 --enable-error-stack 1_vds.h5)
+    ADD_H5_VDS_LAYOUT (tvds_layout-2 0 --enable-error-stack 2_vds.h5)
+    ADD_H5_VDS_LAYOUT (tvds_layout-3_1 0 --enable-error-stack 3_1_vds.h5)
+    ADD_H5_VDS_LAYOUT (tvds_layout-3_2 0 --enable-error-stack 3_2_vds.h5)
+    ADD_H5_VDS_LAYOUT (tvds_layout-4 0 --enable-error-stack 4_vds.h5)
+    ADD_H5_VDS_LAYOUT (tvds_layout-5 0 --enable-error-stack 5_vds.h5)
+  endif (USE_FILTER_DEFLATE)
