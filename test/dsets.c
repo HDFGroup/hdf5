@@ -9839,7 +9839,7 @@ test_swmr_v1_btree_ci_fail(const char *env_h5_drvr, hid_t fapl)
         did = -1;
         err = -1;
         H5E_BEGIN_TRY {
-            did = H5Dopen(fid, DSET_DEFAULT_NAME, H5P_DEFAULT);
+            did = H5Dopen2(fid, DSET_DEFAULT_NAME, H5P_DEFAULT);
             if(did >= 0) {
                 err = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data);
             }

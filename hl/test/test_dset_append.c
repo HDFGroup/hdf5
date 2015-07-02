@@ -166,7 +166,7 @@ test_dataset_append_lines_columns(hid_t fid)
 	FAIL_STACK_ERROR;
 
     /* Open the dataset again */
-    if((did = H5Dopen(fid, DNAME_UNLIM, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, DNAME_UNLIM, H5P_DEFAULT)) < 0)
 	FAIL_STACK_ERROR;
 
     /* Read the dataset */
@@ -300,7 +300,7 @@ test_dataset_append_lines(hid_t fid)
 	FAIL_STACK_ERROR;
 
     /* Open the dataset again */
-    if((did = H5Dopen(fid, DNAME_LINE, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, DNAME_LINE, H5P_DEFAULT)) < 0)
 	FAIL_STACK_ERROR;
 
     /* Read the dataset */
@@ -435,7 +435,7 @@ test_dataset_append_columns(hid_t fid)
 	FAIL_STACK_ERROR;
 
     /* Open the dataset again */
-    if((did = H5Dopen(fid, DNAME_COLUMN, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, DNAME_COLUMN, H5P_DEFAULT)) < 0)
 	FAIL_STACK_ERROR;
 
     /* Read the dataset */
@@ -920,7 +920,7 @@ test_dataset_append_less(hid_t fid)
 	FAIL_STACK_ERROR;
 
     /* Open the dataset again */
-    if((did = H5Dopen(fid, DNAME_LESS, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, DNAME_LESS, H5P_DEFAULT)) < 0)
 	FAIL_STACK_ERROR;
 
     /* Read the dataset */
@@ -1077,7 +1077,7 @@ test_dataset_append_vary(hid_t fid)
 	FAIL_STACK_ERROR;
 
     /* Open the dataset again */
-    if((did = H5Dopen(fid, DNAME_VARY, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, DNAME_VARY, H5P_DEFAULT)) < 0)
 	FAIL_STACK_ERROR;
 
     /* Read the dataset */

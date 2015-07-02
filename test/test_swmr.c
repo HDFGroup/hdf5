@@ -1527,7 +1527,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
 
     /* Should fail to open the dataset */
     H5E_BEGIN_TRY {
-	did2 = H5Dopen(fid, "dataset2", dapl);
+	did2 = H5Dopen2(fid, "dataset2", dapl);
     } H5E_END_TRY;
     if(did2 >= 0)
 	TEST_ERROR
@@ -1545,7 +1545,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
     boundary[1] = 1;
     if(H5Pset_append_flush(dapl, 2, boundary, append_cb, &count) < 0)
 	FAIL_STACK_ERROR
-    if((did2 = H5Dopen(fid, "dataset2", dapl)) < 0)
+    if((did2 = H5Dopen2(fid, "dataset2", dapl)) < 0)
 	FAIL_STACK_ERROR
 
     /* Get the dataset's access property list */
@@ -1734,7 +1734,7 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
 	FAIL_STACK_ERROR;
 
     /* Should succeed in opening the dataset: append flush property has no effect */
-    if((did2 = H5Dopen(fid, "dataset2", dapl)) < 0)
+    if((did2 = H5Dopen2(fid, "dataset2", dapl)) < 0)
 	TEST_ERROR
 
     /* Get the dataset's access property list */
@@ -1764,7 +1764,7 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
     HDmemset(boundary, 0, sizeof(boundary));
     if(H5Pset_append_flush(dapl, 1, boundary, append_cb, &count) < 0)
 	FAIL_STACK_ERROR
-    if((did2 = H5Dopen(fid, "dataset2", dapl)) < 0)
+    if((did2 = H5Dopen2(fid, "dataset2", dapl)) < 0)
 	FAIL_STACK_ERROR
 
     /* Get the dataset's access property list */
@@ -1826,8 +1826,8 @@ error:
  *		-- should return append flush property values set in dapl1
  *	(2) H5Dcreate(...H5P_DEFAULT...)
  *	    H5Dclose()
- *	    did1 = H5Dopen(...dapl1)
- *	    did2 = H5Dopen(..dapl2) 
+ *	    did1 = H5Dopen2(...dapl1)
+ *	    did2 = H5Dopen2(..dapl2) 
  *	    H5Pget_append_flush(did1, ...)
  *	    H5Pget_append_flush(did2, ...)
  *		-- should return append flush property values set in dapl1
@@ -1963,8 +1963,8 @@ test_append_flush_dataset_multiple(hid_t in_fapl)
      *	For a chunked dataset's access property list:
      *		H5Dcreate(...H5P_DEFAULT...)
      *	    	H5Dclose()
-     *	    	did1 = H5Dopen(...dapl1)
-     *	    	did2 = H5Dopen(..dapl2) 
+     *	    	did1 = H5Dopen2(...dapl1)
+     *	    	did2 = H5Dopen2(..dapl2) 
      *	    	H5Pget_append_flush(did1, ...)
      *	    	H5Pget_append_flush(did2, ...)
      *		-- should return append flush property values set in dapl1
