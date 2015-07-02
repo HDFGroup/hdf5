@@ -253,7 +253,7 @@ static herr_t H5C__epoch_marker_serialize(const H5F_t *f,
 		                          void * image_ptr,
 		                          size_t len,
                                           void * thing);
-static herr_t H5C__epoch_marker_notify(H5C_notify_action_t action, const H5F_t *f, void *thing);
+static herr_t H5C__epoch_marker_notify(H5C_notify_action_t action, const H5F_t *f, void *thing, hid_t dxpl_id);
 static herr_t H5C__epoch_marker_free_icr(void * thing);
 
 static herr_t H5C__epoch_marker_clear(const H5F_t *f, void * thing, 
@@ -354,7 +354,7 @@ H5C__epoch_marker_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *
 
 static herr_t
 H5C__epoch_marker_notify(H5C_notify_action_t H5_ATTR_UNUSED action, const H5F_t H5_ATTR_UNUSED *f,
-                       void H5_ATTR_UNUSED * thing)
+                         void H5_ATTR_UNUSED * thing, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
 
@@ -2309,7 +2309,7 @@ H5C_insert_entry(H5F_t *             f,
      * notice now that the entry is fully integrated into the cache.
      */
     if(entry_ptr->type->notify &&
-       (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, f, entry_ptr) < 0)
+       (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, f, entry_ptr, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry inserted into cache")
 
     H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
@@ -3152,7 +3152,7 @@ H5C_protect(H5F_t *		f,
          * notice now that the entry is fully integrated into the cache.
          */
         if(entry_ptr->type->notify &&
-           (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_LOAD, f, entry_ptr) < 0)
+           (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_LOAD, f, entry_ptr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, NULL, "can't notify client about entry inserted into cache")
     }
 
@@ -7939,7 +7939,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
          * just flushed the entry.
          */
         if(entry_ptr->type->notify &&
-           (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_FLUSH, f, entry_ptr) < 0 )
+           (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_FLUSH, f, entry_ptr, dxpl_id) < 0 )
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client of entry flush")
     } /* if ( write_entry ) */
 
@@ -7978,7 +7978,8 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
      * the entry is still fully integrated in the cache.
      */
     if(destroy)
-        if(entry_ptr->type->notify && (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_BEFORE_EVICT, f, entry_ptr) < 0)
+        if(entry_ptr->type->notify && (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_BEFORE_EVICT, 
+                                                                f, entry_ptr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry to evict")
 
     /* Update the cache internal data structures. */

@@ -407,7 +407,7 @@ static herr_t datum_serialize(const H5F_t *f,
                               size_t len,
                               void *thing_ptr);
 
-static herr_t datum_notify(H5C_notify_action_t action, const H5F_t *f, void *thing);
+static herr_t datum_notify(H5C_notify_action_t action, const H5F_t *f, void *thing, hid_t dxpl_id);
 
 static herr_t datum_free_icr(void * thing);
 
@@ -2577,7 +2577,7 @@ datum_serialize(const H5F_t *f,
  *-------------------------------------------------------------------------
  */
 static herr_t
-datum_notify(H5C_notify_action_t action, const H5F_t H5_ATTR_UNUSED *f, void *thing)
+datum_notify(H5C_notify_action_t action, const H5F_t H5_ATTR_UNUSED *f, void *thing, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     hbool_t was_dirty = FALSE;
     herr_t ret_value = SUCCEED;
@@ -4040,7 +4040,7 @@ setup_cache_for_test(hid_t * fid_ptr,
 {
     hbool_t success = FALSE; /* will set to TRUE if appropriate. */
     hbool_t enable_rpt_fcn = FALSE;
-    hid_t fid = -1;
+    hid_t fid = -1, fcpl = -1;
     H5AC_cache_config_t config;
     H5AC_cache_config_t test_config;
     H5F_t * file_ptr = NULL;
@@ -4051,7 +4051,13 @@ setup_cache_for_test(hid_t * fid_ptr,
     HDassert ( file_ptr_ptr != NULL );
     HDassert ( cache_ptr_ptr != NULL );
 
-    fid = H5Fcreate(filenames[0], H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fcpl = H5Pcreate(H5P_FILE_CREATE);
+    if(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY == metadata_write_strategy)
+        H5Pset_avoid_truncate(fcpl, H5F_AVOID_TRUNCATE_OFF);
+
+    fid = H5Fcreate(filenames[0], H5F_ACC_TRUNC, fcpl, fapl);
+
+    H5Pclose(fcpl);
 
     if ( fid < 0 ) {
         nerrors++;

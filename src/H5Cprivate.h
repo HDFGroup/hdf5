@@ -1084,7 +1084,7 @@ typedef herr_t (*H5C_pre_serialize_func_t)(const H5F_t *f, hid_t dxpl_id,
     unsigned *flags_ptr);
 typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f, void *image_ptr,
     size_t len, void *thing);
-typedef herr_t (*H5C_notify_func_t)(H5C_notify_action_t action, const H5F_t *f, void *thing);
+typedef herr_t (*H5C_notify_func_t)(H5C_notify_action_t action, const H5F_t *f, void *thing, hid_t dxpl_id);
 typedef herr_t (*H5C_free_icr_func_t)(void *thing);
 typedef herr_t (*H5C_clear_func_t)(const H5F_t *f, void * thing, 
     hbool_t about_to_destroy);

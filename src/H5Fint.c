@@ -1197,13 +1197,10 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing)
     if((should_truncate = H5F__should_truncate(f, dxpl_id)) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't check whether truncation is required.")
 
-    if(TRUE == should_truncate) {
+    if(TRUE == should_truncate)
         /* Truncate the file to the current allocated size */
         if(H5FD_truncate(f->shared->lf, dxpl_id, closing) < 0)
             HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
-        if(H5F_super_dirty(f) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to mark Super Block dirty")
-    }
 
     /* Flush the entire metadata cache */
     if(H5AC_flush(f, dxpl_id) < 0)

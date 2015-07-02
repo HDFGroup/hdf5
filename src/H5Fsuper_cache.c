@@ -79,7 +79,7 @@ static herr_t H5F__cache_superblock_pre_serialize(const H5F_t *f,
     size_t *new_compressed_len, unsigned *flags);
 static herr_t H5F__cache_superblock_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5F__cache_superblock_notify(H5C_notify_action_t action, const H5F_t *f, void *thing);
+static herr_t H5F__cache_superblock_notify(H5C_notify_action_t action, const H5F_t *f, void *thing, hid_t dxpl_id);
 static herr_t H5F__cache_superblock_free_icr(void *thing);
 
 static herr_t H5F__cache_drvrinfo_get_load_size(const void *udata, size_t *image_len);
@@ -106,7 +106,7 @@ const H5AC_class_t H5AC_SUPERBLOCK[1] = {{
     H5F__cache_superblock_get_load_size,/* 'get_load_size' callback */
     H5F__cache_superblock_deserialize,  /* 'deserialize' callback */
     H5F__cache_superblock_image_len,    /* 'image_len' callback */
-    H5F__cache_superblock_pre_serialize,/* 'pre_serialize' callback */
+    NULL,//H5F__cache_superblock_pre_serialize,/* 'pre_serialize' callback */
     H5F__cache_superblock_serialize,    /* 'serialize' callback */
     H5F__cache_superblock_notify,       /* 'notify' callback */
     H5F__cache_superblock_free_icr,     /* 'free_icr' callback */
@@ -793,7 +793,7 @@ done:
 } /* H5F__cache_superblock_serialize() */
 
 static herr_t
-H5F__cache_superblock_notify(H5C_notify_action_t action, const H5F_t *f, void *thing)
+H5F__cache_superblock_notify(H5C_notify_action_t action, const H5F_t *f, void *thing, hid_t dxpl_id)
 {
     H5F_super_t *sblock = (H5F_super_t *)thing; /* Pointer to the super block */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -896,7 +896,7 @@ H5F__cache_superblock_notify(H5C_notify_action_t action, const H5F_t *f, void *t
                 if(H5O_msg_write(&ext_loc, H5O_EOA_ID, mesg_flags, H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update EOA header message")
             } /* end if */ 
-#if 0
+
             /* Check for ignoring the driver info for this file */
             if(!H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO)) {
                 /* Check for driver info message */
@@ -919,7 +919,7 @@ H5F__cache_superblock_notify(H5C_notify_action_t action, const H5F_t *f, void *t
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update driver info header message")
                 } /* end if */
             } /* end if */
-#endif
+
             /* Close the superblock extension object header */
             if(H5F_super_ext_close((H5F_t *)f, &ext_loc, dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close file's superblock extension")
