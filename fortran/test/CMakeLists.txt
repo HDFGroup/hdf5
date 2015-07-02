@@ -23,8 +23,8 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
-set_source_files_properties (tf.F90 PROPERTIES LANGUAGE Fortran)
-add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.F90)
+set_source_files_properties (tf.F90 tf_gen.F90 PROPERTIES LANGUAGE Fortran)
+add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.F90 tf_gen.F90)
 
 set (SHARED_LINK_FLAGS " ")
 if (WIN32)

@@ -5602,7 +5602,7 @@ _ACEOF
 
 
 
-## Check for __FLOAT128 extension
+## Check for non-standard extenstion __FLOAT128 extension
 # The cast to long int works around a bug in the HP C Compiler
 # version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
 # declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
@@ -5718,7 +5718,7 @@ main ()
 
                   FILE * pFile;
                   pFile = fopen("pac_Cconftest.out","w");
-                  fprintf(pFile, "%d\n %d\n", C_LDBL_DIG, C_FLT128_DIG);
+                  fprintf(pFile, "%d\n%d\n", C_LDBL_DIG, C_FLT128_DIG);
 
   ;
   return 0;
@@ -6405,7 +6405,6 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran compiler version compatible with Fortran 2003 HDF" >&5
 $as_echo_n "checking if Fortran compiler version compatible with Fortran 2003 HDF... " >&6; }
-    HAVE_FORTRAN_2003="no"
     HAVE_F2003_REQUIREMENTS="no"
     cat > conftest.$ac_ext <<_ACEOF
       program main
@@ -6436,8 +6435,6 @@ rm -f core conftest.err conftest.$ac_objext \
 
   if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
     as_fn_error $? "Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran" "$LINENO" 5
-  else
-    HAVE_FORTRAN_2003="yes"
   fi
 
   ## --------------------------------------------------------------------
@@ -7305,8 +7302,7 @@ else
 	WRITE(8,'(I0)') max_decimal_prec
 	WRITE(8,'(I0)') num_ikinds
 	WRITE(8,'(I0)') num_rkinds
-
-        END
+    END
 
 
 _ACEOF
@@ -7525,8 +7521,7 @@ else
 	WRITE(8,'(I0)') max_decimal_prec
 	WRITE(8,'(I0)') num_ikinds
 	WRITE(8,'(I0)') num_rkinds
-
-        END
+    END
 
 
 _ACEOF
@@ -7833,7 +7828,7 @@ $as_echo "#define FORTRAN_HAVE_C_LONG_DOUBLE 1" >>confdefs.h
   FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
   if test "X$FORTRAN_HAVE_C_LONG_DOUBLE"; then
 
-  FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="no"
+  C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="no"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if Fortran C_LONG_DOUBLE is different from C_DOUBLE" >&5
 $as_echo_n "checking if Fortran C_LONG_DOUBLE is different from C_DOUBLE... " >&6; }
 
@@ -7866,14 +7861,14 @@ _ACEOF
 if ac_fn_fc_try_compile "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-            FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="yes"
+            C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="yes"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
-    if test "X$FORTRAN_C_LONG_DOUBLE_IS_UNIQUE" = "Xyes"; then
+    if test "X$C_LONG_DOUBLE_IS_UNIQUE_FORTRAN" = "Xyes"; then
       FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="1"
 
 $as_echo "#define FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 1" >>confdefs.h
@@ -7895,7 +7890,7 @@ _ACEOF
   max_real_fortran_sizeof="`echo \"$PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -ne '/,(\d+)\}/; print $1'`"
   max_real_fortran_kind="`echo \"$PAC_FC_ALL_REAL_KINDS\" | perl -ne '/,(\d+)\}/; print $1'`"
 
-  if test "$ac_cv_sizeof___float128" != 0;then
+    if test "$ac_cv_sizeof___float128" != 0;then
     if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:
         Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size

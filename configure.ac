@@ -360,7 +360,7 @@ esac
 
 AC_CHECK_SIZEOF([long double], [8])
 
-## Check for __FLOAT128 extension
+## Check for non-standard extenstion __FLOAT128 extension
 AC_CHECK_SIZEOF([__float128])
 AC_CHECK_SIZEOF([_Quad])
 HAVE_FLOAT128=0
@@ -457,8 +457,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
  
   if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
     AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran])
-  else
-    HAVE_FORTRAN_2003="yes"
   fi
 
   ## --------------------------------------------------------------------
@@ -563,7 +561,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
   if test "X$FORTRAN_HAVE_C_LONG_DOUBLE"; then
     PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
-    if test "X$FORTRAN_C_LONG_DOUBLE_IS_UNIQUE" = "Xyes"; then
+    if test "X$C_LONG_DOUBLE_IS_UNIQUE_FORTRAN" = "Xyes"; then
       FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="1"
       AC_DEFINE([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE], [1], [Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE])
     else
@@ -583,6 +581,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   max_real_fortran_sizeof="`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -ne '/,(\d+)\}/; print $1'`"
   max_real_fortran_kind="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -ne '/,(\d+)\}/; print $1'`"
 
+  dnl remove the invalid kind from the list
   if test "$ac_cv_sizeof___float128" != 0;then
     if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof"; then
       AC_MSG_WARN([
@@ -606,7 +605,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
   AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND_SIZEOF], $H5CONFIG_F_RKIND_SIZEOF, [Define valid Fortran REAL KINDs Sizeof])
 
-   dnl remove the invalid kind from the list
      dnl AC_MSG_WARN([...$PAC_FC_ALL_REAL_KINDS_SIZEOF...$PAC_FC_ALL_REAL_KINDS...])
      dnl PAC_FC_ALL_REAL_KINDS="{4,8,16}"
      dnl tmp3="`echo $PAC_FC_ALL_REAL_KINDS | perl -pe 's/,[0-9]*\}$/\}/g'`"

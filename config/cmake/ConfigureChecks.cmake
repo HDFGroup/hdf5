@@ -146,6 +146,10 @@ if (NOT WINDOWS)
   endif (HDF5_ENABLE_DIRECT_VFD)
 endif (NOT WINDOWS)
 
+#-----------------------------------------------------------------------------
+# Check if C has __float128 extension
+#-----------------------------------------------------------------------------
+CHECK_TYPE_SIZE("__float128" H5_HAVE_FLOAT128)
 
 #-----------------------------------------------------------------------------
 # Macro to determine the various conversion capabilities
@@ -197,11 +201,6 @@ MACRO (H5MiscConversionTest  VAR TEST msg)
 ENDMACRO (H5MiscConversionTest)
 
 #-----------------------------------------------------------------------------
-# Check if C has __float128 extension
-#-----------------------------------------------------------------------------
-CHECK_TYPE_SIZE("__float128" _FLOAT128)
-
-#-----------------------------------------------------------------------------
 # Check various conversion capabilities
 #-----------------------------------------------------------------------------
 
@@ -243,3 +242,6 @@ set (FC ${CMAKE_Fortran_COMPILER})
 foreach (LINK_LIB ${LINK_LIBS})
   set (LIBS "${LIBS} -l${LINK_LIB}")
 endforeach (LINK_LIB ${LINK_LIBS})
+
+
+

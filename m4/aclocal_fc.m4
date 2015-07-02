@@ -144,7 +144,7 @@ dnl Check if C_LONG_DOUBLE is different from C_DOUBLE
 
 if  test "X$FORTRAN_HAVE_C_LONG_DOUBLE" = "Xyes"; then
 AC_DEFUN([PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE],[
-  FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="no"	
+  C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="no"	
   AC_MSG_CHECKING([if Fortran C_LONG_DOUBLE is different from C_DOUBLE])
   
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([
@@ -171,7 +171,7 @@ AC_DEFUN([PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE],[
        CALL h5t(d)
      END PROGRAM main
     ])], [AC_MSG_RESULT([yes]) 
-            FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="yes"], 
+            C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="yes"], 
          [AC_MSG_RESULT([no])])
 ])
 fi
@@ -184,7 +184,6 @@ AC_DEFUN([PAC_PROG_FC_HAVE_F2003_REQUIREMENTS],[
 dnl --------------------------------------------------------------------
 dnl Default for FORTRAN 2003 compliant compilers
 dnl
-    HAVE_FORTRAN_2003="no"
     HAVE_F2003_REQUIREMENTS="no"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
 
@@ -372,8 +371,7 @@ AC_RUN_IFELSE([
 	WRITE(8,'(I0)') max_decimal_prec
 	WRITE(8,'(I0)') num_ikinds
 	WRITE(8,'(I0)') num_rkinds
-        
-        END
+    END
     ])
 ],[
     if test -s pac_fconftest.out ; then
@@ -584,7 +582,7 @@ rm -f pac_Cconftest.out
                 ],[[
                   FILE * pFile;
                   pFile = fopen("pac_Cconftest.out","w");
-                  fprintf(pFile, "%d\n %d\n", C_LDBL_DIG, C_FLT128_DIG);
+                  fprintf(pFile, "%d\n%d\n", C_LDBL_DIG, C_FLT128_DIG);
                 ]])
         ])
         AC_RUN_IFELSE([],[
