@@ -1099,7 +1099,7 @@ VERIFY_LAYOUT_ALL vds_null_compa 2_vds.h5 COMPACT -l COMPA
 ################################################################
 # layout conversions
 ###############################################################
-VERIFY_LAYOUT_DSET vds_compa_conti 4_vds.h5} vds_dset CONTIGUOUS -l vds_dset:CONTI
+VERIFY_LAYOUT_DSET vds_compa_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
 VERIFY_LAYOUT_DSET vds_compa_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
 VERIFY_LAYOUT_DSET vds_conti_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
 VERIFY_LAYOUT_DSET vds_conti_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
