@@ -407,7 +407,7 @@ H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     UINT32ENCODE(image, metadata_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(image - (uint8_t *)_image) <= len);
+    HDassert((size_t)(image - (uint8_t *)_image) == len);
 
 END_FUNC(STATIC)   /* end H5FA__cache_hdr_serialize() */
 
@@ -704,7 +704,7 @@ H5FA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     UINT32ENCODE(image, metadata_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(image - (uint8_t *)_image) <= len);
+    HDassert((size_t)(image - (uint8_t *)_image) == len);
 
 CATCH
 
@@ -976,7 +976,7 @@ H5FA__cache_dblk_page_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
     UINT32ENCODE(image, metadata_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(image - (uint8_t *)_image) <= len);
+    HDassert((size_t)(image - (uint8_t *)_image) == len);
 
 CATCH
 
