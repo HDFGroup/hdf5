@@ -432,6 +432,51 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_copy
+ *
+ * Purpose:     Copy virtual storage raw data from SRC file to DST file.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              February 6, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_dst, H5O_layout_t *layout_dst,
+    hid_t H5_ATTR_UNUSED dxpl_id)
+{
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Copy message in memory */
+    if(H5D__virtual_copy_layout(layout_dst) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy virtual layout")
+
+#ifdef NOT_YET
+    /* Check for copy to the same file */
+    if(f_dst == f_src) {
+        /* Increase reference count on global heap object */
+        if((heap_rc = H5HG_link(f_dst, dxpl_id, (H5HG_t *)&(layout_dst->u.virt.serial_list_hobjid), 1)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap refence count")
+    } /* end if */
+    else
+#endif /* NOT_YET */
+    {
+        /* Reset global heap id so a new heap objerct is created when the
+         * message is flushed */
+        layout_dst->storage.u.virt.serial_list_hobjid.addr = HADDR_UNDEF;
+        layout_dst->storage.u.virt.serial_list_hobjid.idx = (size_t)0;
+    } /* end block/else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_copy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__virtual_delete
  *
  * Purpose:     Delete the file space for a virtual dataset
@@ -446,7 +491,10 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
 herr_t
 H5D__virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage)
 {
-    herr_t ret_value = SUCCEED;   /* Return value */
+#ifdef NOT_YET
+    int heap_rc;                /* Reference count of global heap object */
+#endif  /* NOT_YET */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -455,9 +503,15 @@ H5D__virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage)
     HDassert(storage);
     HDassert(storage->type == H5D_VIRTUAL);
 
-    /* Delete the global heap block */
-    if(H5HG_remove(f, dxpl_id, (H5HG_t *)&(storage->u.virt.serial_list_hobjid)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Unable to remove heap object")
+#ifdef NOT_YET
+    /* Unlink the global heap block */
+    if((heap_rc = H5HG_link(f, dxpl_id, (H5HG_t *)&(storage->u.virt.serial_list_hobjid), -1)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap refence count")
+    if(heap_rc == 0)
+#endif /* NOT_YET */
+        /* Delete the global heap block */
+        if(H5HG_remove(f, dxpl_id, (H5HG_t *)&(storage->u.virt.serial_list_hobjid)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to remove heap object")
 
     /* Clear global heap ID in storage */
     storage->u.virt.serial_list_hobjid.addr = HADDR_UNDEF;
@@ -498,8 +552,6 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     HDassert(!source_dset->dset);
     HDassert(source_dset->file_name);
     HDassert(source_dset->dset_name);
-
-    /* Get dapl and fapl from current (virtual dataset) location? VDSINC */
 
     /* Check if we need to open the source file */
     if(HDstrcmp(source_dset->file_name, ".")) {
@@ -2048,7 +2100,7 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 {
     H5O_storage_virtual_t *storage;         /* Convenient pointer into layout struct */
     hsize_t     tot_nelmts;                 /* Total number of elements mapped to mem_space */
-    size_t      i, j;                       /* Local index variable */
+    size_t      i, j;                       /* Local index variables */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
@@ -2092,13 +2144,13 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                     j < storage->list[i].sub_dset_io_end; j++) {
                 HDassert(0 && "Checking code coverage..."); //VDSINC
                 if(H5D__virtual_write_one(io_info, type_info, file_space, &storage->list[i].sub_dset[j]) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to write to source dataset")
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset")
             } //VDSINC
         } /* end if */
         else
             /* Write to source dataset */
             if(H5D__virtual_write_one(io_info, type_info, file_space, &storage->list[i].source_dset) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to write to source dataset")
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset")
     } /* end for */
 
 done:
@@ -2123,41 +2175,37 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_flush(H5D_t H5_ATTR_UNUSED *dset, hid_t H5_ATTR_UNUSED dxpl_id)
+H5D__virtual_flush(H5D_t *dset, hid_t dxpl_id)
 {
-    FUNC_ENTER_STATIC_NOERR
+    H5O_storage_virtual_t *storage;         /* Convenient pointer into layout struct */
+    size_t      i, j;                       /* Local index variables */
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(dset);
+
+    storage = &dset->shared->layout.storage.u.virt;
 
     /* Flush only open datasets */
-    /* No-op for now VDSINC */
+    for(i = 0; i < storage->list_nused; i++)
+        /* Check for "printf" source dataset resolution */
+        if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
+            /* Iterate over sub-source dsets */
+            for(j = 0; j < storage->list[i].sub_dset_nused; j++)
+                if(storage->list[i].sub_dset[j].dset)
+                    /* Flush source dataset */
+                    if(H5D__flush_real(storage->list[i].sub_dset[j].dset, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush source dataset")
+        } /* end if */
+        else
+            if(storage->list[i].source_dset.dset)
+                /* Flush source dataset */
+                if(H5D__flush_real(storage->list[i].source_dset.dset, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to write to source dataset")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_flush() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__virtual_copy
- *
- * Purpose:     Copy virtual storage raw data from SRC file to DST file.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner
- *              February 6, 2015
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_src,
-        const H5O_storage_virtual_t H5_ATTR_UNUSED *storage_src,
-        H5F_t H5_ATTR_UNUSED *f_dst,
-        H5O_storage_virtual_t H5_ATTR_UNUSED *storage_dst,
-        H5T_t H5_ATTR_UNUSED *dt_src, H5O_copy_t H5_ATTR_UNUSED *cpy_info,
-        hid_t H5_ATTR_UNUSED dxpl_id)
-{
-    FUNC_ENTER_PACKAGE_NOERR
-
-    HDassert(0 && "Not yet implemented...");//VDSINC
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D__virtual_copy() */
 

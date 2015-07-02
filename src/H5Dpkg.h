@@ -662,9 +662,7 @@ H5_DLL herr_t H5D__virtual_copy_layout(H5O_layout_t *layout);
 H5_DLL herr_t H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D__virtual_reset_layout(H5O_layout_t *layout);
 H5_DLL herr_t H5D__virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage);
-H5_DLL herr_t H5D__virtual_copy(H5F_t *f_src,
-    const H5O_storage_virtual_t *storage_src, H5F_t *f_dst,
-    H5O_storage_virtual_t *storage_dst, H5T_t *dt_src, H5O_copy_t *cpy_info,
+H5_DLL herr_t H5D__virtual_copy(H5F_t *f_src, H5O_layout_t *layout_dst,
     hid_t dxpl_id);
 H5_DLL herr_t H5D__virtual_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);

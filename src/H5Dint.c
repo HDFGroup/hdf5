@@ -1591,13 +1591,6 @@ H5D_close(H5D_t *dataset)
 #endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
-        /*
-        * Release datatype, dataspace and creation property list -- there isn't
-        * much we can do if one of these fails, so we just continue.
-        */
-        free_failed = (unsigned)(H5I_dec_ref(dataset->shared->type_id) < 0 || H5S_close(dataset->shared->space) < 0 ||
-                          H5I_dec_ref(dataset->shared->dcpl_id) < 0);
-
         /* Remove the dataset from the list of opened objects in the file */
         if(H5FO_top_decr(dataset->oloc.file, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
@@ -1608,6 +1601,13 @@ H5D_close(H5D_t *dataset)
         /* (This closes the file, if this is the last object open) */
         if(H5O_close(&(dataset->oloc)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
+
+        /*
+        * Release datatype, dataspace and creation property list -- there isn't
+        * much we can do if one of these fails, so we just continue.
+        */
+        free_failed = (unsigned)(H5I_dec_ref(dataset->shared->type_id) < 0 || H5S_close(dataset->shared->space) < 0 ||
+                          H5I_dec_ref(dataset->shared->dcpl_id) < 0);
 
         /*
          * Free memory.  Before freeing the memory set the file pointer to NULL.

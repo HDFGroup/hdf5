@@ -32,7 +32,8 @@ typedef enum {
 } test_api_config_t;
 
 const char *FILENAME[] = {
-    "vds_virt",
+    "vds_virt_0",
+    "vds_virt_1",
     "vds_src_0",
     "vds_src_1",
     "vds%_src",
@@ -994,11 +995,13 @@ test_basic_io(unsigned config, hid_t fapl)
 {
     char        srcfilename[FILENAME_BUF_SIZE];
     char        vfilename[FILENAME_BUF_SIZE];
+    char        vfilename2[FILENAME_BUF_SIZE];
     char        srcfilenamepct[FILENAME_BUF_SIZE];
     char        srcfilenamepct_fmt_fix[FILENAME_BUF_SIZE];
     const char *srcfilenamepct_fmt = "vds%%_src";
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
+    hid_t       vfile2 = -1;    /* File with copied virtual dset */
     hid_t       dcpl = -1;      /* Dataset creation property list */
     hid_t       srcspace[4] = {-1, -1, -1, -1}; /* Source dataspaces */
     hid_t       vspace[4] = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
@@ -1021,8 +1024,9 @@ test_basic_io(unsigned config, hid_t fapl)
     TESTING("basic virtual dataset I/O")
 
     h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
-    h5_fixname(FILENAME[1], fapl, srcfilename, sizeof srcfilename);
-    h5_fixname(FILENAME[3], fapl, srcfilenamepct, sizeof srcfilenamepct);
+    h5_fixname(FILENAME[1], fapl, vfilename2, sizeof vfilename2);
+    h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
+    h5_fixname(FILENAME[4], fapl, srcfilenamepct, sizeof srcfilenamepct);
     h5_fixname(srcfilenamepct_fmt, fapl, srcfilenamepct_fmt_fix, sizeof srcfilenamepct_fmt_fix);
 
     /* Create DCPL */
@@ -1107,7 +1111,7 @@ test_basic_io(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -1136,7 +1140,7 @@ test_basic_io(unsigned config, hid_t fapl)
     /* Reopen srcdset and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -1176,7 +1180,7 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /*
      * Test 2: 2 Source datasets, hyperslab virtual mappings, '%' in source
-     * dataset name
+     * dataset name, also test H5Ocopy()
      */
     /* Clear virtual layout in DCPL */
     if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
@@ -1276,7 +1280,7 @@ test_basic_io(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -1305,7 +1309,7 @@ test_basic_io(unsigned config, hid_t fapl)
     /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "%src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -1325,6 +1329,162 @@ test_basic_io(unsigned config, hid_t fapl)
         for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
             if(rbuf[i][j] != buf[i][j])
                 TEST_ERROR
+
+    /* Test H5Ocopy() to same file */
+    /* Copy virtual dataset */
+    if(H5Ocopy(vfile, "v_dset", vfile, "v_dset2", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR
+
+    /* Close v_dset */
+    if(H5Dclose(vdset) < 0)
+        TEST_ERROR
+    vdset = -1;
+
+    /* Adjust write buffer */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            buf[i][j] += (int)(sizeof(buf) / sizeof(buf[0][0]));
+
+    /* Write data directly to source datasets */
+    if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, vspace[0], H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+    if(H5Dwrite(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+        TEST_ERROR
+
+    /* Close srcdsets and srcfile if config option specified */
+    if(config & TEST_IO_CLOSE_SRC) {
+        if(H5Dclose(srcdset[0]) < 0)
+            TEST_ERROR
+        srcdset[0] = -1;
+        if(H5Dclose(srcdset[1]) < 0)
+            TEST_ERROR
+        srcdset[1] = -1;
+
+        if(config & TEST_IO_DIFFERENT_FILE) {
+            if(H5Fclose(srcfile[0]) < 0)
+                TEST_ERROR
+            srcfile[0] = -1;
+        } /* end if */
+    } /* end if */
+
+    /* Reopen virtual file if config option specified */
+    if(config & TEST_IO_REOPEN_VIRT) {
+        if(H5Fclose(vfile) < 0)
+            TEST_ERROR
+        vfile = -1;
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR
+    } /* end if */
+
+    /* Open v_dset2 */
+    if((vdset = H5Dopen2(vfile, "v_dset2", H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Read data through copied virtual dataset */
+    HDmemset(rbuf[0], 0, sizeof(rbuf));
+    if(H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+        TEST_ERROR
+
+    /* Verify read data */
+    for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+        for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+            if(rbuf[i][j] != buf[i][j])
+                TEST_ERROR
+
+    /* Reopen srcdsets and srcfile if config option specified */
+    if(config & TEST_IO_CLOSE_SRC) {
+        if(config & TEST_IO_DIFFERENT_FILE)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
+                TEST_ERROR
+        if((srcdset[0] = H5Dopen2(srcfile[0], "%src_dset1", H5P_DEFAULT)) < 0)
+            TEST_ERROR
+        if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2%", H5P_DEFAULT)) < 0)
+            TEST_ERROR
+    } /* end if */
+
+    /* Only copy to a different file if the source datasets are in a different
+     * file */
+    if(config & TEST_IO_DIFFERENT_FILE) {
+        /* Close v_dset2 */
+        if(H5Dclose(vdset) < 0)
+            TEST_ERROR
+        vdset = -1;
+
+        /* Create file to copy virtual dataset to */
+        if((vfile2 = H5Fcreate(vfilename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
+
+        /* Copy virtual dataset */
+        if(H5Ocopy(vfile, "v_dset", vfile2, "v_dset3", H5P_DEFAULT, H5P_DEFAULT) < 0)
+            TEST_ERROR
+
+        /* Adjust write buffer */
+        for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+            for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+                buf[i][j] += (int)(sizeof(buf) / sizeof(buf[0][0]));
+
+        /* Write data directly to source datasets */
+        if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, vspace[0], H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+            TEST_ERROR
+        if(H5Dwrite(srcdset[1], H5T_NATIVE_INT, vspace[1], H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+            TEST_ERROR
+
+        /* Close srcdsets and srcfile if config option specified */
+        if(config & TEST_IO_CLOSE_SRC) {
+            if(H5Dclose(srcdset[0]) < 0)
+                TEST_ERROR
+            srcdset[0] = -1;
+            if(H5Dclose(srcdset[1]) < 0)
+                TEST_ERROR
+            srcdset[1] = -1;
+
+            if(config & TEST_IO_DIFFERENT_FILE) {
+                if(H5Fclose(srcfile[0]) < 0)
+                    TEST_ERROR
+                srcfile[0] = -1;
+            } /* end if */
+        } /* end if */
+
+        /* Reopen copied virtual file if config option specified */
+        if(config & TEST_IO_REOPEN_VIRT) {
+            if(H5Fclose(vfile2) < 0)
+                TEST_ERROR
+            vfile2 = -1;
+            if((vfile2 = H5Fopen(vfilename2, H5F_ACC_RDWR, fapl)) < 0)
+                TEST_ERROR
+        } /* end if */
+
+        /* Open v_dset3 */
+        if((vdset = H5Dopen2(vfile2, "v_dset3", H5P_DEFAULT)) < 0)
+            TEST_ERROR
+
+        /* Read data through copied virtual dataset */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+        if(H5Dread(vdset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)(sizeof(buf) / sizeof(buf[0])); i++)
+            for(j = 0; j < (int)(sizeof(buf[0]) / sizeof(buf[0][0])); j++)
+                if(rbuf[i][j] != buf[i][j])
+                    TEST_ERROR
+
+        /* Reopen srcdsets and srcfile if config option specified */
+        if(config & TEST_IO_CLOSE_SRC) {
+            if(config & TEST_IO_DIFFERENT_FILE)
+                if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
+                    TEST_ERROR
+            if((srcdset[0] = H5Dopen2(srcfile[0], "%src_dset1", H5P_DEFAULT)) < 0)
+                TEST_ERROR
+            if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2%", H5P_DEFAULT)) < 0)
+                TEST_ERROR
+        } /* end if */
+
+        /* Close copied virtual file */
+        if(H5Fclose(vfile2) < 0)
+            TEST_ERROR
+        vfile2 = -1;
+    } /* end if */
 
     /* Close */
     if(H5Dclose(srcdset[0]) < 0)
@@ -1455,7 +1615,7 @@ test_basic_io(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -1506,7 +1666,7 @@ test_basic_io(unsigned config, hid_t fapl)
     /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilenamepct, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilenamepct, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -1687,7 +1847,7 @@ test_basic_io(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -1765,7 +1925,7 @@ test_basic_io(unsigned config, hid_t fapl)
     /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -1989,7 +2149,7 @@ test_basic_io(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -2058,7 +2218,7 @@ test_basic_io(unsigned config, hid_t fapl)
     /* Reopen srcdsets and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -2313,7 +2473,7 @@ test_basic_io(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -2690,7 +2850,7 @@ test_basic_io(unsigned config, hid_t fapl)
     /* Reopen srcdset and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -2770,6 +2930,8 @@ error:
         } /* end for */
         if(vfile >= 0)
             (void)H5Fclose(vfile);
+        if(vfile2 >= 0)
+            (void)H5Fclose(vfile2);
         for(i = 0; i < (int)(sizeof(srcspace) / sizeof(srcspace[0])); i++) {
             if(srcspace[i] >= 0)
                 (void)H5Sclose(srcspace[i]);
@@ -2837,7 +2999,7 @@ test_unlim(unsigned config, hid_t fapl)
     TESTING("virtual dataset I/O with unlimited selections")
 
     h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
-    h5_fixname(FILENAME[1], fapl, srcfilename, sizeof srcfilename);
+    h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
 
     /* Create DCPLs */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -2992,7 +3154,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -3057,7 +3219,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -3110,7 +3272,7 @@ test_unlim(unsigned config, hid_t fapl)
     /* Reopen srcdset[0] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -3160,7 +3322,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -3227,7 +3389,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -3291,7 +3453,7 @@ test_unlim(unsigned config, hid_t fapl)
     /* Reopen srcdset[1] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -3346,7 +3508,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -3427,7 +3589,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -3662,7 +3824,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -3726,7 +3888,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -3779,7 +3941,7 @@ test_unlim(unsigned config, hid_t fapl)
     /* Reopen srcdset[0] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -3834,7 +3996,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -3900,7 +4062,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -3962,7 +4124,7 @@ test_unlim(unsigned config, hid_t fapl)
     /* Reopen srcdset[1] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -4017,7 +4179,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -4098,7 +4260,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -4380,7 +4542,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -4444,7 +4606,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -4497,7 +4659,7 @@ test_unlim(unsigned config, hid_t fapl)
     /* Reopen srcdset[0] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[0] = H5Dopen2(srcfile[0], "src_dset1", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -4547,7 +4709,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -4612,7 +4774,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -4677,7 +4839,7 @@ test_unlim(unsigned config, hid_t fapl)
     /* Reopen srcdset[2] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[2] = H5Dopen2(srcfile[0], "src_dset3", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -4734,7 +4896,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -4799,7 +4961,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -4856,7 +5018,7 @@ test_unlim(unsigned config, hid_t fapl)
     /* Reopen srcdset[1] and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
                 TEST_ERROR
         if((srcdset[1] = H5Dopen2(srcfile[0], "src_dset2", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -4912,7 +5074,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -4976,7 +5138,7 @@ test_unlim(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -5211,10 +5373,10 @@ test_printf(unsigned config, hid_t fapl)
     TESTING("virtual dataset I/O with printf source")
 
     h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
-    h5_fixname(FILENAME[1], fapl, srcfilename, sizeof srcfilename);
-    h5_fixname(FILENAME[2], fapl, srcfilename2, sizeof srcfilename2);
+    h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
+    h5_fixname(FILENAME[3], fapl, srcfilename2, sizeof srcfilename2);
     h5_fixname(printf_srcfilename_fmt, fapl, printf_srcfilename, sizeof printf_srcfilename);
-    h5_fixname(FILENAME[3], fapl, srcfilenamepct, sizeof srcfilenamepct);
+    h5_fixname(FILENAME[4], fapl, srcfilenamepct, sizeof srcfilenamepct);
     h5_fixname(srcfilenamepct_fmt, fapl, srcfilenamepct_fmt_fix, sizeof srcfilenamepct_fmt_fix);
 
     /* Create DCPL */
@@ -5299,7 +5461,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -5332,7 +5494,7 @@ test_printf(unsigned config, hid_t fapl)
     /* Reopen srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC)
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
 
     /* Create 2 source datasets */
@@ -5400,7 +5562,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -5456,7 +5618,7 @@ test_printf(unsigned config, hid_t fapl)
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
-        if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
 
     /* Create 3rd source dataset */
@@ -5500,7 +5662,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -5687,7 +5849,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -5720,7 +5882,7 @@ test_printf(unsigned config, hid_t fapl)
     /* Reopen srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC)
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilenamepct, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilenamepct, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
 
     /* Create source datasets in a pattern with increasing gaps:
@@ -5846,7 +6008,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -5910,7 +6072,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -5974,7 +6136,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -6038,7 +6200,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -6102,7 +6264,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -6166,7 +6328,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -6309,7 +6471,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(vfile) < 0)
                 TEST_ERROR
             vfile = -1;
-            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
                 TEST_ERROR
@@ -6389,7 +6551,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(vfile) < 0)
                 TEST_ERROR
             vfile = -1;
-            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
                 TEST_ERROR
@@ -6445,7 +6607,7 @@ test_printf(unsigned config, hid_t fapl)
 
         /* Reopen srcfile[1] if config option specified */
         if(config & TEST_IO_CLOSE_SRC)
-            if((srcfile[1] = H5Fopen(srcfilename2, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((srcfile[1] = H5Fopen(srcfilename2, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
 
         /* Create 2nd source dataset */
@@ -6486,7 +6648,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(vfile) < 0)
                 TEST_ERROR
             vfile = -1;
-            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
                 TEST_ERROR
@@ -6619,7 +6781,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(vfile) < 0)
                 TEST_ERROR
             vfile = -1;
-            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
                 TEST_ERROR
@@ -6699,7 +6861,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(vfile) < 0)
                 TEST_ERROR
             vfile = -1;
-            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
                 TEST_ERROR
@@ -6755,7 +6917,7 @@ test_printf(unsigned config, hid_t fapl)
 
         /* Reopen srcfile[1] if config option specified */
         if(config & TEST_IO_CLOSE_SRC)
-            if((srcfile[1] = H5Fopen(srcfilename2, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((srcfile[1] = H5Fopen(srcfilename2, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
 
         /* Create 2nd source dataset */
@@ -6796,7 +6958,7 @@ test_printf(unsigned config, hid_t fapl)
             if(H5Fclose(vfile) < 0)
                 TEST_ERROR
             vfile = -1;
-            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
             if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
                 TEST_ERROR
@@ -6962,7 +7124,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -6995,7 +7157,7 @@ test_printf(unsigned config, hid_t fapl)
     /* Reopen srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC)
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
 
     /* Create 2 source datasets */
@@ -7063,7 +7225,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -7119,7 +7281,7 @@ test_printf(unsigned config, hid_t fapl)
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
-        if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
 
     /* Create 3rd source dataset */
@@ -7162,7 +7324,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -7226,7 +7388,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -7283,7 +7445,7 @@ test_printf(unsigned config, hid_t fapl)
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
-        if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
 
     /* Create 4th source dataset */
@@ -7326,7 +7488,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -7390,7 +7552,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -7455,7 +7617,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -7634,7 +7796,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", H5P_DEFAULT)) < 0)
             TEST_ERROR
@@ -7667,7 +7829,7 @@ test_printf(unsigned config, hid_t fapl)
     /* Reopen srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC)
         if(config & TEST_IO_DIFFERENT_FILE)
-            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDWR, fapl)) < 0)
                 TEST_ERROR
 
     /* Create 2 source datasets */
@@ -7745,7 +7907,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -7809,7 +7971,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -7866,7 +8028,7 @@ test_printf(unsigned config, hid_t fapl)
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
-        if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
 
     /* Create 3rd source dataset */
@@ -7913,7 +8075,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -7977,7 +8139,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
@@ -8033,7 +8195,7 @@ test_printf(unsigned config, hid_t fapl)
 
     /* Reopen srcfile if config option specified */
     if((config & TEST_IO_CLOSE_SRC) && (config & TEST_IO_DIFFERENT_FILE))
-        if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        if((srcfile[0] = H5Fopen(srcfilename, H5F_ACC_RDONLY, fapl)) < 0)
             TEST_ERROR
 
     /* Create 4th source dataset */
@@ -8077,7 +8239,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
             TEST_ERROR
@@ -8141,7 +8303,7 @@ test_printf(unsigned config, hid_t fapl)
         if(H5Fclose(vfile) < 0)
             TEST_ERROR
         vfile = -1;
-        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)

@@ -903,7 +903,10 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
             break;
 
         case H5D_VIRTUAL:
-            HDassert(0 && "Not yet implemented...");//VDSINC
+            /* Copy virtual layout.  Always copy so the memory fields get copied
+             * properly. */
+            if(H5D__virtual_copy(file_dst, layout_dst, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy virtual storage")
             break;
 
         case H5D_LAYOUT_ERROR:
