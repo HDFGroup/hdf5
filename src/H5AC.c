@@ -790,6 +790,7 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
     hbool_t	is_dirty;               /* Entry @ addr is in the cache and dirty */
     hbool_t	is_protected;           /* Entry @ addr is in the cache and protected */
     hbool_t	is_pinned;              /* Entry @ addr is in the cache and pinned */
+    hbool_t	is_corked;
     hbool_t	is_flush_dep_child;     /* Entry @ addr is in the cache and is a flush dependency child */
     hbool_t	is_flush_dep_parent;    /* Entry @ addr is in the cache and is a flush dependency parent */
     herr_t      ret_value = SUCCEED;      /* Return value */
@@ -800,7 +801,7 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry.")
 
     if(H5C_get_entry_status(f, addr, NULL, &in_cache, &is_dirty,
-            &is_protected, &is_pinned, &is_flush_dep_parent, &is_flush_dep_child) < 0)
+            &is_protected, &is_pinned, &is_corked, &is_flush_dep_parent, &is_flush_dep_child) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_status() failed.")
 
     if(in_cache) {
@@ -811,6 +812,8 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
 	    *status |= H5AC_ES__IS_PROTECTED;
 	if(is_pinned)
 	    *status |= H5AC_ES__IS_PINNED;
+	if(is_corked)
+	    *status |= H5AC_ES__IS_CORKED;
 	if(is_flush_dep_parent)
 	    *status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
 	if(is_flush_dep_child)
@@ -3267,7 +3270,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
 
     /* get entry status, size, etc here */
     if(H5C_get_entry_status(f, old_addr, &entry_size, &entry_in_cache,
-            &entry_dirty, NULL, NULL, NULL, NULL) < 0)
+            &entry_dirty, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get entry status.")
     if(!entry_in_cache)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry not in cache.")
