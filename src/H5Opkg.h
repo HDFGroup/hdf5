@@ -635,7 +635,7 @@ H5_DLL herr_t H5O_proxy_undepend(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 
 
 /* These functions operate on object locations */
-H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
+/* H5_DLL H5O_loc_t *H5O_get_loc(hid_t id); */
 
 /* Testing functions */
 #ifdef H5O_TESTING
