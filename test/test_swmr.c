@@ -1551,7 +1551,7 @@ test_start_swmr_write(hid_t in_fapl)
 	FAIL_STACK_ERROR;
 
     /* Open the first dataset */
-    if((did1 = H5Dopen(fid, "dataset1", H5P_DEFAULT)) < 0)
+    if((did1 = H5Dopen2(fid, "dataset1", H5P_DEFAULT)) < 0)
 	FAIL_STACK_ERROR;
 
     /* Create a group */

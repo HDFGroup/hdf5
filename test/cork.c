@@ -14,7 +14,10 @@
 /* Programmer:  Vailin Choi
  *              Feb 20, 2014
  *
- *              This file contains tests for H5Ocork/H5Ouncork/H5Ois_corked.
+ * This file contains tests for:
+ * 	H5Odisable_mdc_flushes()
+ *	H5Oenable_mdc_flushes()
+ *	H5Oare_mdc_flushes_disabled()
  */
 #include "hdf5.h"
 #include "testhdf5.h"
@@ -357,7 +360,7 @@ verify_old_dset_cork(void)
     if(H5Oget_info(did, &oinfo) < 0 ) TEST_ERROR;
     
     /* Cork the dataset: DSET_BT1 */
-    if(H5Ocork(did) < 0 ) TEST_ERROR;
+    if(H5Odisable_mdc_flushes(did) < 0 ) TEST_ERROR;
 
     /* Verify cork status */
     if(verify_cork_tag(fid, oinfo.addr, TRUE) < 0 ) 
@@ -394,7 +397,7 @@ verify_old_dset_cork(void)
     if(H5Oget_info(did2, &oinfo2) < 0 ) TEST_ERROR;
     
     /* Cork the dataset: DSET_COMPACT */
-    if(H5Ocork(did2) < 0 ) TEST_ERROR;
+    if(H5Odisable_mdc_flushes(did2) < 0 ) TEST_ERROR;
 
     /* Verify cork status */
     if(verify_cork_tag(fid, oinfo2.addr, TRUE) < 0 ) 
@@ -438,7 +441,7 @@ verify_old_dset_cork(void)
     if(H5Oget_info(did3, &oinfo3) < 0 ) TEST_ERROR;
 
     /* Cork the dataset: DSET_CONTIG */
-    if(H5Ocork(did3) < 0 ) TEST_ERROR;
+    if(H5Odisable_mdc_flushes(did3) < 0 ) TEST_ERROR;
 
     /* Verify the cork status for DSET_CONTIG */
     if(verify_cork_tag(fid, oinfo3.addr, TRUE) < 0 ) 
@@ -449,7 +452,7 @@ verify_old_dset_cork(void)
 	TEST_ERROR;
 
     /* Un-cork the dataset: DSET_CONTIG */
-    if(H5Ouncork(did3) < 0 ) TEST_ERROR;
+    if(H5Oenable_mdc_flushes(did3) < 0 ) TEST_ERROR;
 
     /* Verify the cork status for DSET_CONTIG */
     if(verify_cork_tag(fid, oinfo3.addr, FALSE) < 0 ) 
@@ -548,7 +551,7 @@ verify_obj_dset_cork(hbool_t swmr)
     if(H5Oget_info(did, &oinfo) < 0 ) TEST_ERROR;
     
     /* Cork the dataset: DSET */
-    if(H5Ocork(did) < 0 ) TEST_ERROR;
+    if(H5Odisable_mdc_flushes(did) < 0 ) TEST_ERROR;
 
     /* Attach and write to an attribute to the dataset: DSET */
     if((aid = H5Acreate2(did, ATTR, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
@@ -583,7 +586,7 @@ verify_obj_dset_cork(hbool_t swmr)
     if(H5Oget_info(did2, &oinfo2) < 0 ) TEST_ERROR;
 
     /* Cork the dataset: DSET_NONE */
-    if(H5Ocork(did2) < 0 ) TEST_ERROR;
+    if(H5Odisable_mdc_flushes(did2) < 0 ) TEST_ERROR;
 
     /* Attach 8 attributes to the dataset */
     for(i = 0;i < 8; i++) {
@@ -627,7 +630,7 @@ verify_obj_dset_cork(hbool_t swmr)
 	TEST_ERROR;
 
     /* Cork the dataset: DSET_NONE */
-    if(H5Ocork(oid) < 0) TEST_ERROR
+    if(H5Odisable_mdc_flushes(oid) < 0) TEST_ERROR
 
     /* Verify cork status of the dataset: DSET_NONE */
     if(verify_cork_tag(fid, oinfo2.addr, TRUE) < 0 ) 
@@ -733,7 +736,7 @@ verify_dset_cork(hbool_t swmr)
     if(H5Oget_info(did, &oinfo) < 0 ) TEST_ERROR;
     
     /* Cork the dataset: DSET_EA */
-    if(H5Ocork(did) < 0 ) TEST_ERROR;
+    if(H5Odisable_mdc_flushes(did) < 0 ) TEST_ERROR;
 
     /* Verify cork status */
     if(verify_cork_tag(fid, oinfo.addr, TRUE) < 0 ) 
@@ -750,10 +753,10 @@ verify_dset_cork(hbool_t swmr)
 	TEST_ERROR;
     
     /* Cork the dataset: DSET_FA */
-    if(H5Ocork(did2) < 0 ) TEST_ERROR;
+    if(H5Odisable_mdc_flushes(did2) < 0 ) TEST_ERROR;
 
     /* Uncork the dataset: DSET_EA */
-    if(H5Ouncork(did) < 0 ) TEST_ERROR;
+    if(H5Oenable_mdc_flushes(did) < 0 ) TEST_ERROR;
 
     /* Verify the cork status for DSET_FA */
     if(verify_cork_tag(fid, oinfo2.addr, TRUE) < 0 ) 
@@ -775,7 +778,7 @@ verify_dset_cork(hbool_t swmr)
 	TEST_ERROR;
 
     /* Cork the dataset: DSET_BT2 */
-    if(H5Ocork(did3) < 0 ) TEST_ERROR;
+    if(H5Odisable_mdc_flushes(did3) < 0 ) TEST_ERROR;
 
     /* Verify the cork status for DSET_BT2 */
     if(verify_cork_tag(fid, oinfo3.addr, TRUE) < 0 ) 
@@ -822,7 +825,7 @@ verify_dset_cork(hbool_t swmr)
         TEST_ERROR;
 
     /* Cork the dataset: DSET_FA */
-    if(H5Ocork(did2) < 0 ) TEST_ERROR;
+    if(H5Odisable_mdc_flushes(did2) < 0 ) TEST_ERROR;
 
     /* Verify the cork status for DSET_FA */
     if(verify_cork_tag(fid, oinfo2.addr, TRUE) < 0 ) 
@@ -838,7 +841,7 @@ verify_dset_cork(hbool_t swmr)
 	TEST_ERROR;
 
     /* Cork the dataset: DSET_BT2 */
-    if(H5Ocork(did3) < 0 ) TEST_ERROR;
+    if(H5Odisable_mdc_flushes(did3) < 0 ) TEST_ERROR;
 
     /* Verify the cork status for DSET_BT2 */
     if(verify_cork_tag(fid, oinfo3.addr, TRUE) < 0 ) 
@@ -929,7 +932,7 @@ verify_group_cork(hbool_t swmr)
 	TEST_ERROR;
 
     /* Cork the second group: GRP2 */
-    if(H5Ocork(gid2) < 0) TEST_ERROR
+    if(H5Odisable_mdc_flushes(gid2) < 0) TEST_ERROR
 
     /* Get group object header addresses */
     if(H5Oget_info(gid, &oinfo) < 0) TEST_ERROR;
@@ -986,7 +989,7 @@ verify_group_cork(hbool_t swmr)
 	    TEST_ERROR;
 	/* Cork the third group while attaching attributes */
 	if(i == 3) {
-	    if(H5Ocork(gid3) < 0) TEST_ERROR
+	    if(H5Odisable_mdc_flushes(gid3) < 0) TEST_ERROR
 	    if(verify_cork_tag(fid, oinfo3.addr, TRUE) < 0) 
 		TEST_ERROR;
 	}
@@ -1096,8 +1099,8 @@ verify_named_cork(hbool_t swmr)
 	TEST_ERROR;
 
     /* Cork 2 named datatypes: /DT and /GRP/GRP2/DT3 */
-    if(H5Ocork(tid) < 0) TEST_ERROR
-    if(H5Ocork(tid3) < 0) TEST_ERROR
+    if(H5Odisable_mdc_flushes(tid) < 0) TEST_ERROR
+    if(H5Odisable_mdc_flushes(tid3) < 0) TEST_ERROR
 
     /* Get named datatype object header addresses */
     if(H5Oget_info(tid, &oinfo) < 0) TEST_ERROR;
@@ -1162,7 +1165,7 @@ verify_named_cork(hbool_t swmr)
 	FAIL_STACK_ERROR
 
     /* Cork the datatype: DT2 */
-    if(H5Ocork(tid2) < 0) TEST_ERROR
+    if(H5Odisable_mdc_flushes(tid2) < 0) TEST_ERROR
 
     /* Create dataspace */
     if((sid = H5Screate(H5S_SCALAR)) < 0 ) TEST_ERROR;
@@ -1176,7 +1179,7 @@ verify_named_cork(hbool_t swmr)
 	    TEST_ERROR;
 	/* Cork the datatype while attaching attributes */
 	if(i == 3) {
-	    if(H5Ocork(tid3) < 0) TEST_ERROR
+	    if(H5Odisable_mdc_flushes(tid3) < 0) TEST_ERROR
 	    if(verify_cork_tag(fid, oinfo3.addr, TRUE) < 0) 
 		TEST_ERROR;
 	}
@@ -1191,7 +1194,7 @@ verify_named_cork(hbool_t swmr)
     if(H5Oget_info(did, &oinfo4) < 0) TEST_ERROR;
 
     /* Cork the dataset: DSET */
-    if(H5Ocork(did) < 0) TEST_ERROR
+    if(H5Odisable_mdc_flushes(did) < 0) TEST_ERROR
 
     /* Verify cork status of the datatype: DT */
     if(verify_cork_tag(fid, oinfo.addr, FALSE) < 0) 
@@ -1204,13 +1207,13 @@ verify_named_cork(hbool_t swmr)
 	TEST_ERROR;
 
     /* Un-cork the datatype: DT3 */
-    if(H5Ouncork(tid3) < 0) TEST_ERROR
+    if(H5Oenable_mdc_flushes(tid3) < 0) TEST_ERROR
     /* Verify cork status of the datatype: DT3 */
     if(verify_cork_tag(fid, oinfo3.addr, FALSE) < 0) 
 	TEST_ERROR;
 
     /* Cork the datatype: DT */
-    if(H5Ocork(tid) < 0) TEST_ERROR
+    if(H5Odisable_mdc_flushes(tid) < 0) TEST_ERROR
 
     /* Verify cork status of the datatype: DT */
     if(verify_cork_tag(fid, oinfo.addr, TRUE) < 0) 
@@ -1378,7 +1381,7 @@ verify_multiple_cork(hbool_t swmr)
 	TEST_ERROR
 
     /* Cork the group: gid2 */
-    if(H5Ocork(gid2) < 0)
+    if(H5Odisable_mdc_flushes(gid2) < 0)
 	TEST_ERROR
 
     /* Verify cork status of the group: gid2 */
@@ -1387,7 +1390,7 @@ verify_multiple_cork(hbool_t swmr)
 	TEST_ERROR
 
     /* Check cork status of the group: gid1 */
-    if(H5Ois_corked(gid1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(gid1, &corked) < 0)
 	TEST_ERROR;
     if(!corked) TEST_ERROR
 
@@ -1404,7 +1407,7 @@ verify_multiple_cork(hbool_t swmr)
 	TEST_ERROR
 
     /* Cork the dataset: did1 */
-    if(H5Ocork(did1) < 0)
+    if(H5Odisable_mdc_flushes(did1) < 0)
 	TEST_ERROR
 
     /* Verify cork status of the dataset: did1 */
@@ -1413,7 +1416,7 @@ verify_multiple_cork(hbool_t swmr)
 	TEST_ERROR
 
     /* Check cork status of the dataset: did2 */
-    if(H5Ois_corked(did2, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did2, &corked) < 0)
 	TEST_ERROR;
     if(!corked) TEST_ERROR
 
@@ -1430,7 +1433,7 @@ verify_multiple_cork(hbool_t swmr)
 	TEST_ERROR
 
     /* Cork the datatype: tid2 */
-    if(H5Ocork(tid2) < 0)
+    if(H5Odisable_mdc_flushes(tid2) < 0)
 	TEST_ERROR
 
     /* Verify cork status of the datatype: tid2 */
@@ -1439,12 +1442,12 @@ verify_multiple_cork(hbool_t swmr)
 	TEST_ERROR;
 
     /* Check cork status of the datatype: tid1 */
-    if(H5Ois_corked(tid1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
 	TEST_ERROR;
     if(!corked) TEST_ERROR
 
     /* Uncork the group: gid1 */
-    if(H5Ouncork(gid1) < 0)
+    if(H5Oenable_mdc_flushes(gid1) < 0)
 	TEST_ERROR
 
     /* Verify cork status of the group: gid1 */
@@ -1453,7 +1456,7 @@ verify_multiple_cork(hbool_t swmr)
 	TEST_ERROR
 
     /* Check cork status of the group: gid2 */
-    if(H5Ois_corked(gid2, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(gid2, &corked) < 0)
 	TEST_ERROR;
     if(corked) TEST_ERROR
 
@@ -1461,7 +1464,7 @@ verify_multiple_cork(hbool_t swmr)
     if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* Check cork status of the group: gid1 */
-    if(H5Ois_corked(gid1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(gid1, &corked) < 0)
 	TEST_ERROR;
     if(corked) TEST_ERROR
 
@@ -1473,7 +1476,7 @@ verify_multiple_cork(hbool_t swmr)
     if(H5Gclose(gid1) < 0) TEST_ERROR
 
     /* Uncork the dataset: gid2 */
-    if(H5Ouncork(did2) < 0)
+    if(H5Oenable_mdc_flushes(did2) < 0)
 	TEST_ERROR
 
     /* Verify cork status of the dataset: did2 */
@@ -1482,7 +1485,7 @@ verify_multiple_cork(hbool_t swmr)
 	TEST_ERROR
 
     /* Check cork status of the dataset: did1 */
-    if(H5Ois_corked(did1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
 	TEST_ERROR;
     if(corked) TEST_ERROR
 
@@ -1490,7 +1493,7 @@ verify_multiple_cork(hbool_t swmr)
     if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* Check cork status of the dataset: did1 */
-    if(H5Ois_corked(did1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
 	TEST_ERROR;
     if(corked) TEST_ERROR
 
@@ -1502,7 +1505,7 @@ verify_multiple_cork(hbool_t swmr)
     if(H5Dclose(did1) < 0) TEST_ERROR
 
     /* Check cork status of the datatype: tid1 */
-    if(H5Ois_corked(tid1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
 	TEST_ERROR;
     if(!corked) TEST_ERROR
 
@@ -1510,7 +1513,7 @@ verify_multiple_cork(hbool_t swmr)
     if(H5Tclose(tid1) < 0) TEST_ERROR
 
     /* Check cork status of the datatype: tid2 */
-    if(H5Ois_corked(tid2, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid2, &corked) < 0)
 	TEST_ERROR;
     if(!corked) TEST_ERROR
 
@@ -1519,21 +1522,21 @@ verify_multiple_cork(hbool_t swmr)
 
     /* Should fail to cork the attribute: aidg2; not an object */
     H5E_BEGIN_TRY {
-	ret = H5Ocork(aidg2);
+	ret = H5Odisable_mdc_flushes(aidg2);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
 
     /* Should fail to uncork the attribute: aidd1; not an object */
     H5E_BEGIN_TRY {
-	ret = H5Ocork(aidd1);
+	ret = H5Odisable_mdc_flushes(aidd1);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
 
     /* Should fail to check cork status of the attribute: aidt2; not an object */
     H5E_BEGIN_TRY {
-	ret = H5Ois_corked(aidt2, &corked);
+	ret = H5Oare_mdc_flushes_disabled(aidt2, &corked);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
@@ -1548,15 +1551,15 @@ verify_multiple_cork(hbool_t swmr)
 
     /* Should fail to cork the file: fid1; not an object */
     H5E_BEGIN_TRY {
-    ret = H5Ois_corked(fid1, &corked);
-	ret = H5Ocork(fid1);
+    ret = H5Oare_mdc_flushes_disabled(fid1, &corked);
+	ret = H5Odisable_mdc_flushes(fid1);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
 
     /* Should fail to uncork the file: fid2; not an object */
     H5E_BEGIN_TRY {
-	ret = H5Ouncork(fid2);
+	ret = H5Oenable_mdc_flushes(fid2);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
@@ -1593,7 +1596,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_objs_cork
  *
- * Purpose:     This function verifies H5Ocork/H5Ouncork/H5Ois_corked public 
+ * Purpose:     This function verifies H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled public 
  *		routines are working as specified.
  *
  * Return:      0 on Success, 1 on Failure
@@ -1616,9 +1619,9 @@ test_objs_cork(hbool_t newformat)
 
     /* Testing Macro */
     if(newformat) {
-	TESTING("H5Ocork/H5Ouncork/H5Ois_corked (new library format)");
+	TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (new library format)");
     } else {
-	TESTING("H5Ocork/H5Ouncork/H5Ois_corked (old library format)");
+	TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library format)");
     }
 
     /* Create fapl */
@@ -1640,16 +1643,16 @@ test_objs_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Check cork status of the group: not corked */
-    if(H5Ois_corked(gid, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(gid, &corked) < 0)
         TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Cork the group: an object */
-    if(H5Ocork(gid) < 0)
+    if(H5Odisable_mdc_flushes(gid) < 0)
 	TEST_ERROR
 
     /* Check cork status of the group: corked */
-    if(H5Ois_corked(gid, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(gid, &corked) < 0)
         TEST_ERROR
     if(!corked) TEST_ERROR
 
@@ -1663,7 +1666,7 @@ test_objs_cork(hbool_t newformat)
 
     /* Should fail to cork the datatype: not an object */
     H5E_BEGIN_TRY {
-	ret = H5Ocork(tid);
+	ret = H5Odisable_mdc_flushes(tid);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
@@ -1673,16 +1676,16 @@ test_objs_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Check cork status of the named datatype: not corked */
-    if(H5Ois_corked(tid, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid, &corked) < 0)
         TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Cork the named datatype: an object */
-    if(H5Ocork(tid) < 0)
+    if(H5Odisable_mdc_flushes(tid) < 0)
 	TEST_ERROR
 
     /* Check cork status of the named datatype: corked */
-    if(H5Ois_corked(tid, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid, &corked) < 0)
         TEST_ERROR
     if(!corked) TEST_ERROR
 
@@ -1698,7 +1701,7 @@ test_objs_cork(hbool_t newformat)
 
     /* Should fail to uncork the dataspace: not an object */
     H5E_BEGIN_TRY {
-	ret = H5Ouncork(sid);
+	ret = H5Oenable_mdc_flushes(sid);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
@@ -1713,22 +1716,22 @@ test_objs_cork(hbool_t newformat)
 
     /* Should fail to check cork status of the attribute: not an object */
     H5E_BEGIN_TRY {
-	ret = H5Ois_corked(aid, &corked);
+	ret = H5Oare_mdc_flushes_disabled(aid, &corked);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
 
     /* Check cork status of the dataset: not corked */
-    if(H5Ois_corked(did, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did, &corked) < 0)
         TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Cork the dataset: an object */
-    if(H5Ocork(did) < 0)
+    if(H5Odisable_mdc_flushes(did) < 0)
 	TEST_ERROR
 
     /* Check cork status of the dataset: corked */
-    if(H5Ois_corked(did, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did, &corked) < 0)
         TEST_ERROR
     if(!corked) TEST_ERROR
 
@@ -1741,23 +1744,23 @@ test_objs_cork(hbool_t newformat)
         TEST_ERROR
 
     /* Check cork status of the group */
-    if(H5Ois_corked(gid, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(gid, &corked) < 0)
         TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Cork the group */
-    if(H5Ocork(gid) < 0)
+    if(H5Odisable_mdc_flushes(gid) < 0)
         TEST_ERROR
 
     /* Should fail to cork the group again */
     H5E_BEGIN_TRY {
-        ret = H5Ocork(gid);
+        ret = H5Odisable_mdc_flushes(gid);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
 
     /* Check cork status of the group */
-    if(H5Ois_corked(gid, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(gid, &corked) < 0)
         TEST_ERROR
     if(!corked) TEST_ERROR
 
@@ -1766,23 +1769,23 @@ test_objs_cork(hbool_t newformat)
         TEST_ERROR
 
     /* Check cork status of the named datatype */
-    if(H5Ois_corked(tid, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid, &corked) < 0)
         TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Should fail to un-cork the named datatype that is not corked yet */
     H5E_BEGIN_TRY {
-	ret = H5Ouncork(tid);
+	ret = H5Oenable_mdc_flushes(tid);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
     
     /* Cork the named datatype */
-    if(H5Ocork(tid) < 0)
+    if(H5Odisable_mdc_flushes(tid) < 0)
         TEST_ERROR
 
     /* Check cork status of the named datatype */
-    if(H5Ois_corked(tid, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid, &corked) < 0)
         TEST_ERROR
     if(!corked) TEST_ERROR
 
@@ -1791,25 +1794,25 @@ test_objs_cork(hbool_t newformat)
         TEST_ERROR
 
     /* Check cork status of the dataset */
-    if(H5Ois_corked(did, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did, &corked) < 0)
         TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Cork the dataset */
-    if(H5Ocork(did) < 0)
+    if(H5Odisable_mdc_flushes(did) < 0)
         TEST_ERROR
 
     /* Check cork status of dataset */
-    if(H5Ois_corked(did, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did, &corked) < 0)
         TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Un-cork the dataset */
-    if(H5Ouncork(did) < 0)
+    if(H5Oenable_mdc_flushes(did) < 0)
         TEST_ERROR
 
     /* Check cork status of the dataset */
-    if(H5Ois_corked(did, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did, &corked) < 0)
         TEST_ERROR
     if(corked) TEST_ERROR
 
@@ -1843,7 +1846,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_dset_cork
  *
- * Purpose:     This function verifies H5Ocork/H5Ouncork/H5Ois_corked are
+ * Purpose:     This function verifies H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled are
  *		working as specified when manipulating datasets.
  *
  * Return:      0 on Success, 1 on Failure
@@ -1874,9 +1877,9 @@ test_dset_cork(hbool_t newformat)
 
     /* Testing Macro */
     if(newformat) {
-	TESTING("H5Ocork/H5Ouncork/H5Ois_corked (new library format)");
+	TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (new library format)");
     } else {
-	TESTING("H5Ocork/H5Ouncork/H5Ois_corked (old library format)");
+	TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library format)");
     }
 
     /* Create fapl */
@@ -1904,7 +1907,7 @@ test_dset_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Cork the named datatype */
-    if(H5Ocork(tid1) < 0)
+    if(H5Odisable_mdc_flushes(tid1) < 0)
 	TEST_ERROR
 
     /* Set up dataset creation property list */
@@ -1930,21 +1933,21 @@ test_dset_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Check cork status of the named datatype */
-    if(H5Ois_corked(tid1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Cork the dataset */
-    if(H5Ocork(did1) < 0)
+    if(H5Odisable_mdc_flushes(did1) < 0)
 	TEST_ERROR
 
     /* Check cork status of the dataset */
-    if(H5Ois_corked(did1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Check cork status of the group */
-    if(H5Ois_corked(gid, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(gid, &corked) < 0)
 	TEST_ERROR
     if(corked) TEST_ERROR
 
@@ -1962,12 +1965,12 @@ test_dset_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Check cork status of the dataset */
-    if(H5Ois_corked(did1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Check cork status of the named datatype */
-    if(H5Ois_corked(tid1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
 
@@ -1980,7 +1983,7 @@ test_dset_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Check cork status of dataset */
-    if(H5Ois_corked(did1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
 	TEST_ERROR
     if(corked) TEST_ERROR
 
@@ -1989,7 +1992,7 @@ test_dset_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Cork the dataset */
-    if(H5Ocork(did1) < 0)
+    if(H5Odisable_mdc_flushes(did1) < 0)
 	TEST_ERROR
 
     /* Delete the dataset */
@@ -1997,7 +2000,7 @@ test_dset_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Check cork status of the dataset */
-    if(H5Ois_corked(did1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
 
@@ -2009,7 +2012,7 @@ test_dset_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Cork the dataset */
-    if(H5Ocork(did1) < 0)
+    if(H5Odisable_mdc_flushes(did1) < 0)
 	TEST_ERROR
 
     /* Write to the dataset */
@@ -2021,7 +2024,7 @@ test_dset_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Check cork status of the dataset */
-    if(H5Ois_corked(did1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
     
@@ -2037,16 +2040,16 @@ test_dset_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Cork the first opened dataset */
-    if(H5Ocork(did1) < 0)
+    if(H5Odisable_mdc_flushes(did1) < 0)
 	TEST_ERROR
 
     /* Check cork status of the first opened dataset */
-    if(H5Ois_corked(did1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Check cork status of the second opened dataset */
-    if(H5Ois_corked(did2, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did2, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
 
@@ -2054,7 +2057,7 @@ test_dset_cork(hbool_t newformat)
     if(H5Dclose(did2) < 0) TEST_ERROR
 
     /* Check cork status of the first opened dataset */
-    if(H5Ois_corked(did1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
 
@@ -2062,7 +2065,7 @@ test_dset_cork(hbool_t newformat)
     if(H5Dclose(did1) < 0) TEST_ERROR
 
     /* Check cork status of the named datatype */
-    if(H5Ois_corked(tid1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
 
@@ -2071,21 +2074,21 @@ test_dset_cork(hbool_t newformat)
 	TEST_ERROR
 
     /* Check cork status of the second opened named datatype */
-    if(H5Ois_corked(tid2, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid2, &corked) < 0)
 	TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Uncork the second opened named datatype */
-    if(H5Ouncork(tid2) < 0)
+    if(H5Oenable_mdc_flushes(tid2) < 0)
 	TEST_ERROR
 
     /* Check cork status of the second opened named datatype */
-    if(H5Ois_corked(tid2, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid2, &corked) < 0)
 	TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Check cork status of the first opened named datatype */
-    if(H5Ois_corked(tid1, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
 	TEST_ERROR
     if(corked) TEST_ERROR
 
@@ -2096,7 +2099,7 @@ test_dset_cork(hbool_t newformat)
     if(H5Tclose(tid2) < 0) TEST_ERROR
 
     /* Check cork status of the group */
-    if(H5Ois_corked(gid, &corked) < 0)
+    if(H5Oare_mdc_flushes_disabled(gid, &corked) < 0)
 	TEST_ERROR
     if(corked) TEST_ERROR
 
