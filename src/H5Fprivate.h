@@ -458,6 +458,9 @@
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME         "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) */
+#define H5F_ACS_USE_MDC_LOGGING_NAME            "use_mdc_logging" /* Whether to use metadata cache logging */
+#define H5F_ACS_MDC_LOG_LOCATION_NAME           "mdc_log_location" /* Name of metadata cache log location */
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME    "start_mdc_log_on_access" /* Whether logging starts on file create/open */
 
 #define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME       "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME  "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
@@ -544,6 +547,9 @@
 #define H5HF_HDR_MAGIC                  "FRHP"          /* Header */
 #define H5HF_IBLOCK_MAGIC               "FHIB"          /* Indirect block */
 #define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
+
+/* Global heap signature */
+#define H5HG_MAGIC	                "GCOL"
 
 /* Global heap signature */
 #define H5HG_MAGIC	                "GCOL"
@@ -669,9 +675,6 @@ H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
-H5_DLL herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl,
-    void **file_handle);
-
 /* Functions that check file mounting information */
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
 H5_DLL hbool_t H5F_has_mount(const H5F_t *file);

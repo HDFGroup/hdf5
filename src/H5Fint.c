@@ -665,6 +665,10 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get sieve buffer size")
         if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
+	if(H5P_get(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &(f->shared->use_mdc_logging)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'use mdc logging' flag")
+        if(H5P_get(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &(f->shared->start_mdc_log_on_access)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'start mdc log on access' flag")
         /* Require the latest format to use SWMR */
         /* (Need to revisit this when the 1.10 release is made, and require
          *      1.10 or later -QAK)
@@ -731,6 +735,22 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
 	/* Determine the # of bins for metdata read retries */
  	if(H5F_set_retries(f) < 0)
  	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't set retries and retries_nbins")
+
+	/* Get the metadata cache log location (if we're logging) */
+        {
+            char *mdc_log_location = NULL;      /* location of metadata cache log location */
+
+            if(H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &mdc_log_location) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get mdc log location")
+            if(mdc_log_location != NULL) {
+                size_t len = HDstrlen(mdc_log_location);
+                if(NULL == (f->shared->mdc_log_location = HDcalloc(len + 1, sizeof(char))))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate memory for mdc log file name")
+                HDstrncpy(f->shared->mdc_log_location, mdc_log_location, len);
+            }
+            else
+                f->shared->mdc_log_location = NULL;
+        }
 
  	/* Get object flush callback information */
  	if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
@@ -877,6 +897,10 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         if(H5AC_dest(f, dxpl_id))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+
+        /* Clean up the metadata cache log location string */
+        if(f->shared->mdc_log_location)
+            HDfree(f->shared->mdc_log_location);
 
         /*
          * Do not close the root group since we didn't count it, but free

@@ -1805,3 +1805,105 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fstart_swmr_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fstart_mdc_logging
+ *
+ * Purpose:     Start metadata cache logging operations for a file.
+ *                  - Logging must have been set up via the fapl.
+ *
+ * Return:      Non-negative on success/Negative on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fstart_mdc_logging(hid_t file_id)
+{
+    H5F_t *file;                /* File info */
+    herr_t ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    /* Sanity check */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
+
+    /* Call mdc logging function */
+    if(H5C_start_logging(file->shared->cache) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGFAIL, FAIL, "unable to start mdc logging")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+
+} /* H5Fstart_mdc_logging() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fstop_mdc_logging
+ *
+ * Purpose:     Stop metadata cache logging operations for a file.
+ *                  - Does not close the log file.
+ *                  - Logging must have been set up via the fapl.
+ *
+ * Return:      Non-negative on success/Negative on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fstop_mdc_logging(hid_t file_id)
+{
+    H5F_t *file;                /* File info */
+    herr_t ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    /* Sanity check */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
+
+    /* Call mdc logging function */
+    if(H5C_stop_logging(file->shared->cache) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGFAIL, FAIL, "unable to stop mdc logging")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+
+} /* H5Fstop_mdc_logging() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_mdc_logging_status
+ *
+ * Purpose:     Get the logging flags. is_enabled determines if logging was
+ *              set up via the fapl. is_currently_logging determines if
+ *              log messages are being recorded at this time.
+ *
+ * Return:      Non-negative on success/Negative on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
+                          hbool_t *is_currently_logging)
+{
+    H5F_t *file;                /* File info */
+    herr_t ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*b*b", file_id, is_enabled, is_currently_logging);
+
+    /* Sanity check */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hid_t identifier is not a file ID")
+
+    /* Call mdc logging function */
+    if(H5C_get_logging_status(file->shared->cache, is_enabled, is_currently_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_LOGFAIL, FAIL, "unable to get logging status")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+
+} /* H5Fstop_mdc_logging() */

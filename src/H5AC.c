@@ -505,6 +505,16 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "H5C_set_prefix() failed")
 #endif /* H5_HAVE_PARALLEL */
 
+    /* Turn on metadata cache logging, if being used */
+    if(f->shared->use_mdc_logging) {
+        if(H5C_set_up_logging(f->shared->cache, f->shared->mdc_log_location, f->shared->start_mdc_log_on_access) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "mdc logging setup failed")
+        /* Write the log header regardless of current logging status */
+        if(H5AC__write_create_cache_log_msg(f->shared->cache) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
+    }
+
+    /* Set the cache parameters */
     if(H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "auto resize configuration failed")
 
@@ -563,10 +573,13 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
     H5AC_stats(f);
 #endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
-#if H5AC__TRACE_FILE_ENABLED
-    if(H5AC_close_trace_file(f->shared->cache) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_close_trace_file() failed.")
-#endif /* H5AC__TRACE_FILE_ENABLED */
+    if(f->shared->use_mdc_logging) {
+        /* Write the log footer regardless of current logging status */
+        if(H5AC__write_destroy_cache_log_msg(f->shared->cache) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
+        if(H5C_tear_down_logging(f->shared->cache) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "mdc logging tear-down failed")
+    }
 
 #ifdef H5_HAVE_PARALLEL
     aux_ptr = (struct H5AC_aux_t *)(f->shared->cache->aux_ptr);
@@ -617,6 +630,8 @@ done:
 herr_t
 H5AC_evict(H5F_t *f, hid_t dxpl_id)
 {
+    hbool_t log_enabled;             /* TRUE if logging was set up */
+    hbool_t curr_logging;            /* TRUE if currently logging */
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -626,11 +641,21 @@ H5AC_evict(H5F_t *f, hid_t dxpl_id)
     HDassert(f->shared);
     HDassert(f->shared->cache);
 
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
+
     /* Evict all entries in the cache except the pinned superblock entry */
     if(H5C_evict(f, dxpl_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't evict cache")
 
 done:
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_evict_cache_log_msg(f->shared->cache, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_evict() */
 
@@ -657,6 +682,8 @@ H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
     char                trace[128] = "";
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    hbool_t log_enabled;              /* TRUE if logging was set up */
+    hbool_t curr_logging;             /* TRUE if currently logging */
     herr_t  ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -669,6 +696,10 @@ H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
     HDassert(type->clear);
     HDassert(type->dest);
     HDassert(H5F_addr_defined(addr));
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
 
 #if H5AC__TRACE_FILE_ENABLED
 {
@@ -687,10 +718,17 @@ H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "H5C_expunge_entry() failed.")
 
 done:
+
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr != NULL)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+        HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_expunge_entry_log_msg(f->shared->cache, addr, type->id, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
+
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_expunge_entry() */
@@ -720,10 +758,12 @@ herr_t
 H5AC_flush(H5F_t *f, hid_t dxpl_id)
 {
 #if H5AC__TRACE_FILE_ENABLED
-    char 	  trace[128] = "";
-    FILE *	  trace_file_ptr = NULL;
+    char          trace[128] = "";
+    FILE *        trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
-    herr_t	  ret_value = SUCCEED;      /* Return value */
+    hbool_t log_enabled;              /* TRUE if logging was set up */
+    hbool_t curr_logging;             /* TRUE if currently logging */
+    herr_t  ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -732,12 +772,16 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
     HDassert(f->shared);
     HDassert(f->shared->cache);
 
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
+
 #if H5AC__TRACE_FILE_ENABLED
     /* For the flush, only the flags are really necessary in the trace file.
      * Write the result to catch occult errors.
      */
     if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
-	sprintf(trace, "%s", FUNC);
+        sprintf(trace, "%s", FUNC);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
@@ -752,14 +796,19 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache.")
 
 done:
+
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr != NULL)
         HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_flush_cache_log_msg(f->shared->cache, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_flush() */
-
 
 
 /*-------------------------------------------------------------------------
@@ -847,11 +896,13 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
     void *thing, unsigned int flags)
 {
 #if H5AC__TRACE_FILE_ENABLED
-    char          	trace[128] = "";
+    char                trace[128] = "";
     size_t              trace_entry_size = 0;
-    FILE *        	trace_file_ptr = NULL;
+    FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
-    herr_t ret_value = SUCCEED;      /* Return value */
+    hbool_t log_enabled;              /* TRUE if logging was set up */
+    hbool_t curr_logging;             /* TRUE if currently logging */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -864,6 +915,10 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
     HDassert(type->size);
     HDassert(H5F_addr_defined(addr));
     HDassert(thing);
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
 
     /* Check for invalid access request */
     if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
@@ -919,11 +974,17 @@ done:
     if(trace_file_ptr != NULL)
 	HDfprintf(trace_file_ptr, "%s %d %d\n", trace, (int)trace_entry_size, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_insert_entry_log_msg(f->shared->cache, addr, type->id, flags,
+                                                ((H5C_cache_entry_t *)thing)->size, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_insert_entry() */
 
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_mark_entry_dirty
  *
@@ -941,10 +1002,14 @@ herr_t
 H5AC_mark_entry_dirty(void *thing)
 {
 #if H5AC__TRACE_FILE_ENABLED
-    char          	trace[128] = "";
-    FILE *        	trace_file_ptr = NULL;
+    char                trace[128] = "";
+    FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    hbool_t log_enabled;              /* TRUE if logging was set up */
+    hbool_t curr_logging;             /* TRUE if currently logging */
+    H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
+    H5C_t *cache_ptr = NULL;          /* Pointer to the entry's associated metadata cache */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -961,29 +1026,37 @@ H5AC_mark_entry_dirty(void *thing)
 	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-#ifdef H5_HAVE_PARALLEL
-{
-    H5AC_info_t *entry_ptr = (H5AC_info_t *)thing;
-    H5C_t *cache_ptr = entry_ptr->cache_ptr;
+    entry_ptr = (H5AC_info_t *)thing;
+    cache_ptr = entry_ptr->cache_ptr;
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache_ptr, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
+
+#ifdef H5_HAVE_PARALLEL
     if((!entry_ptr->is_dirty) && (!entry_ptr->is_protected) &&
              (entry_ptr->is_pinned) && (NULL != cache_ptr->aux_ptr))
         if(H5AC__log_dirtied_entry(entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
-}
 #endif /* H5_HAVE_PARALLEL */
 
     if(H5C_mark_entry_dirty(thing) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't mark pinned or protected entry dirty")
 
 done:
+
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+        HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_mark_dirty_entry_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_dirty() */
@@ -1007,13 +1080,15 @@ herr_t
 H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t new_addr)
 {
 #if H5AC__TRACE_FILE_ENABLED
-    char          	trace[128] = "";
-    FILE *        	trace_file_ptr = NULL;
+    char                trace[128] = "";
+    FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t        *aux_ptr;
 #endif /* H5_HAVE_PARALLEL */
-    herr_t ret_value = SUCCEED;      /* Return value */
+    hbool_t log_enabled;           /* TRUE if logging was set up */
+    hbool_t curr_logging;          /* TRUE if currently logging */
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1024,6 +1099,10 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
     HDassert(H5F_addr_defined(old_addr));
     HDassert(H5F_addr_defined(new_addr));
     HDassert(H5F_addr_ne(old_addr, new_addr));
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
 
 #if H5AC__TRACE_FILE_ENABLED
     /* For the move call, only the old addr and new addr are really
@@ -1055,8 +1134,13 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr != NULL)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+        HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_move_entry_log_msg(f->shared->cache, old_addr, new_addr, type->id, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_move_entry() */
@@ -1082,6 +1166,10 @@ H5AC_pin_protected_entry(void *thing)
     char        trace[128] = "";
     FILE *      trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    hbool_t log_enabled;                /* TRUE if logging was set up */
+    hbool_t curr_logging;               /* TRUE if currently logging */
+    H5AC_info_t *entry_ptr = NULL;      /* Pointer to the cache entry */
+    H5C_t *cache_ptr = NULL;            /* Pointer to the entry's associated metadata cache */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1098,14 +1186,30 @@ H5AC_pin_protected_entry(void *thing)
 	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
+    entry_ptr = (H5AC_info_t *)thing;
+    cache_ptr = entry_ptr->cache_ptr;
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache_ptr, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
+
+    /* pin entry */
     if(H5C_pin_protected_entry(thing) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "can't pin entry")
 
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+        HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_pin_entry_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_pin_protected_entry() */
@@ -1131,6 +1235,10 @@ H5AC_create_flush_dependency(void * parent_thing, void * child_thing)
     char        trace[128] = "";
     FILE *      trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    hbool_t log_enabled;                /* TRUE if logging was set up */
+    hbool_t curr_logging;               /* TRUE if currently logging */
+    H5AC_info_t *entry_ptr = NULL;      /* Pointer to the cache entry */
+    H5C_t *cache_ptr = NULL;            /* Pointer to the entry's associated metadata cache */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1146,14 +1254,31 @@ H5AC_create_flush_dependency(void * parent_thing, void * child_thing)
 	        (unsigned long)(((H5C_cache_entry_t *)child_thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
+    entry_ptr = (H5AC_info_t *)parent_thing;
+    cache_ptr = entry_ptr->cache_ptr;
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache_ptr, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
+
+    /* Create the flush dependency */
     if(H5C_create_flush_dependency(parent_thing, child_thing) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "H5C_create_flush_dependency() failed.")
 
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr != NULL)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+        HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_create_fd_log_msg(cache_ptr, (H5AC_info_t *)parent_thing,
+                                             (H5AC_info_t *)child_thing, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_create_flush_dependency() */
@@ -1187,13 +1312,15 @@ void *
 H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     void *udata, H5AC_protect_t rw)
 {
-    unsigned		protect_flags = H5C__NO_FLAGS_SET;
-    void *		thing;          /* Pointer to native data structure for entry */
 #if H5AC__TRACE_FILE_ENABLED
     char                trace[128] = "";
-    size_t		trace_entry_size = 0;
+    size_t              trace_entry_size = 0;
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    unsigned		protect_flags = H5C__NO_FLAGS_SET;
+    void *		thing;          /* Pointer to native data structure for entry */
+    hbool_t log_enabled;                /* TRUE if logging was set up */
+    hbool_t curr_logging;               /* TRUE if currently logging */
     void *		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1206,6 +1333,10 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     HDassert(type->flush);
     HDassert(type->load);
     HDassert(H5F_addr_defined(addr));
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "unable to get logging status")
 
     /* Check for invalid access request */
     if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR) && rw == H5AC_WRITE)
@@ -1226,21 +1357,14 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
      * catch occult errors.
      */
     if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr))) {
-
 	const char * rw_string;
 
-        if ( rw == H5AC_WRITE ) {
-
+        if (rw == H5AC_WRITE ) 
 	    rw_string = "H5AC_WRITE";
-
-	} else if ( rw == H5AC_READ ) {
-
+	else if (rw == H5AC_READ )
 	    rw_string = "H5AC_READ";
-
-	} else {
-
+	else
 	    rw_string = "???";
-	}
 
         sprintf(trace, "%s 0x%lx %d %s", FUNC, (unsigned long)addr,
 		(int)(type->id), rw_string);
@@ -1271,8 +1395,17 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr != NULL)
-	HDfprintf(trace_file_ptr, "%s %d %d\n", trace, (int)trace_entry_size, (int)(ret_value != NULL));
+        HDfprintf(trace_file_ptr, "%s %d %d\n", trace, (int)trace_entry_size, (int)(ret_value != NULL));
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging) {
+        herr_t fake_ret_value = (NULL == ret_value) ? FAIL : SUCCEED;
+
+        if(H5AC__write_protect_entry_log_msg(f->shared->cache, (H5AC_info_t *)thing,
+                                                 rw, fake_ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "unable to emit log message")
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_protect() */
@@ -1294,10 +1427,14 @@ herr_t
 H5AC_resize_entry(void *thing, size_t new_size)
 {
 #if H5AC__TRACE_FILE_ENABLED
-    char          	trace[128] = "";
-    FILE *        	trace_file_ptr = NULL;
+    char                trace[128] = "";
+    FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    hbool_t log_enabled;              /* TRUE if logging was set up */
+    hbool_t curr_logging;             /* TRUE if currently logging */
+    H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
+    H5C_t *cache_ptr = NULL;          /* Pointer to the entry's associated metadata cache */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1315,28 +1452,36 @@ H5AC_resize_entry(void *thing, size_t new_size)
 		(int)new_size);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    if(H5C_resize_entry(thing, new_size) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
-
-#ifdef H5_HAVE_PARALLEL
-{
-    H5AC_info_t * entry_ptr = (H5AC_info_t *)thing;
-    H5C_t *cache_ptr = entry_ptr->cache_ptr;
+    entry_ptr = (H5AC_info_t *)thing;
+    cache_ptr = entry_ptr->cache_ptr;
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache_ptr, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
+
+    /* resize the entry */
+    if(H5C_resize_entry(thing, new_size) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, "can't resize entry")
+
+#ifdef H5_HAVE_PARALLEL
     if((!entry_ptr->is_dirty) && (NULL != cache_ptr->aux_ptr))
         if(H5AC__log_dirtied_entry(entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
-}
 #endif /* H5_HAVE_PARALLEL */
 
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+        HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_resize_entry_log_msg(cache_ptr, entry_ptr, new_size, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_resize_entry() */
@@ -1362,6 +1507,10 @@ H5AC_unpin_entry(void *thing)
     char                trace[128] = "";
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    hbool_t log_enabled;              /* TRUE if logging was set up */
+    hbool_t curr_logging;             /* TRUE if currently logging */
+    H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
+    H5C_t *cache_ptr = NULL;          /* Pointer to the entry's associated metadata cache */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1378,14 +1527,30 @@ H5AC_unpin_entry(void *thing)
 	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
+    entry_ptr = (H5AC_info_t *)thing;
+    cache_ptr = entry_ptr->cache_ptr;
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache_ptr, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
+
+    /* unpin the entry */
     if(H5C_unpin_entry(thing) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "can't unpin entry")
 
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+        HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_unpin_entry_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_unpin_entry() */
@@ -1410,6 +1575,10 @@ H5AC_destroy_flush_dependency(void * parent_thing, void * child_thing)
     char                trace[128] = "";
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    hbool_t log_enabled;                /* TRUE if logging was set up */
+    hbool_t curr_logging;               /* TRUE if currently logging */
+    H5AC_info_t *entry_ptr = NULL;      /* Pointer to the cache entry */
+    H5C_t *cache_ptr = NULL;            /* Pointer to the entry's associated metadata cache */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1425,14 +1594,31 @@ H5AC_destroy_flush_dependency(void * parent_thing, void * child_thing)
 	        (unsigned long long)(((H5C_cache_entry_t *)child_thing)->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
+    entry_ptr = (H5AC_info_t *)parent_thing;
+    cache_ptr = entry_ptr->cache_ptr;
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache_ptr, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
+
+    /* destry the flush dependency */
     if(H5C_destroy_flush_dependency(parent_thing, child_thing) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "H5C_destroy_flush_dependency() failed.")
 
 done:
 #if H5AC__TRACE_FILE_ENABLED
     if(trace_file_ptr != NULL)
-	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+        HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_destroy_fd_log_msg(cache_ptr, (H5AC_info_t *)parent_thing,
+                                              (H5AC_info_t *)child_thing, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_destroy_flush_dependency() */
@@ -1480,15 +1666,17 @@ herr_t
 H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     void *thing, unsigned flags)
 {
+#if H5AC__TRACE_FILE_ENABLED
+    char                trace[128] = "";
+    FILE *              trace_file_ptr = NULL;
+#endif /* H5AC__TRACE_FILE_ENABLED */
     hbool_t		dirtied;
     hbool_t		deleted;
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t        * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
-#if H5AC__TRACE_FILE_ENABLED
-    char                trace[128] = "";
-    FILE *              trace_file_ptr = NULL;
-#endif /* H5AC__TRACE_FILE_ENABLED */
+    hbool_t log_enabled;              /* TRUE if logging was set up */
+    hbool_t curr_logging;             /* TRUE if currently logging */
     herr_t              ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1504,6 +1692,10 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     HDassert(thing);
     HDassert( ((H5AC_info_t *)thing)->addr == addr );
     HDassert( ((H5AC_info_t *)thing)->type == type );
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
 
 #if H5AC__TRACE_FILE_ENABLED
     /* For the unprotect call, only the addr, type id, flags, and possible
@@ -1558,6 +1750,12 @@ done:
     if(trace_file_ptr != NULL)
 	HDfprintf(trace_file_ptr, "%s 0x%x %d\n", trace, (unsigned)flags, (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_unprotect_entry_log_msg(f->shared->cache, (H5AC_info_t *)thing,
+                                               type->id, flags, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_unprotect() */
@@ -1884,17 +2082,23 @@ done:
 herr_t
 H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config_ptr)
 {
-    H5C_auto_size_ctl_t internal_config;
 #if H5AC__TRACE_FILE_ENABLED
     H5AC_cache_config_t trace_config = H5AC__DEFAULT_CACHE_CONFIG;
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
-    herr_t              ret_value = SUCCEED;      /* Return value */
+    hbool_t log_enabled;                /* TRUE if logging was set up */
+    hbool_t curr_logging;               /* TRUE if currently logging */
+    H5C_auto_size_ctl_t internal_config;
+    herr_t  ret_value = SUCCEED;      	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(cache_ptr);
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache_ptr, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
 
 #if H5AC__TRACE_FILE_ENABLED
     /* Make note of the new configuration.  Don't look up the trace file
@@ -1996,7 +2200,12 @@ done:
 		  (int)ret_value);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_set_cache_config_log_msg(cache_ptr, config_ptr, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5AC_set_cache_auto_resize_config() */
 
 
@@ -2035,6 +2244,9 @@ H5AC_validate_config(H5AC_cache_config_t *config_ptr)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
     if(config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Unknown config version.")
+
+    if((config_ptr->rpt_fcn_enabled != TRUE) && (config_ptr->rpt_fcn_enabled != FALSE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->rpt_fcn_enabled must be either TRUE or FALSE.")
 
     /* don't bother to test trace_file_name unless open_trace_file is TRUE */
     if(config_ptr->open_trace_file) {

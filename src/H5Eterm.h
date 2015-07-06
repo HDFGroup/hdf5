@@ -175,7 +175,8 @@ H5E_CANTEXPUNGE_g=
 H5E_CANTRESIZE_g=    
 H5E_CANTDEPEND_g=    
 H5E_CANTUNDEPEND_g=    
-H5E_CANTNOTIFY_g=
+H5E_CANTNOTIFY_g=    
+H5E_LOGFAIL_g=
 
 /* Link related errors */    
 H5E_TRAVERSE_g=    

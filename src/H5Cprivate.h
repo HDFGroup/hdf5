@@ -1027,6 +1027,14 @@ H5_DLL H5C_t *H5C_create(size_t max_cache_size, size_t min_clean_size,
     int max_type_id, const char *(*type_name_table_ptr),
     H5C_write_permitted_func_t check_write_permitted, hbool_t write_permitted,
     H5C_log_flush_func_t log_flush, void *aux_ptr);
+H5_DLL herr_t H5C_set_up_logging(H5C_t *cache_ptr, const char log_location[], hbool_t start_immediately);
+H5_DLL herr_t H5C_tear_down_logging(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_start_logging(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_stop_logging(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_get_logging_status(const H5C_t *cache_ptr, /*OUT*/ hbool_t *is_enabled,
+    /*OUT*/ hbool_t *is_currently_logging);
+H5_DLL herr_t H5C_write_log_message(const H5C_t *cache_ptr, const char message[]);
+
 H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr, int32_t version,
     double hit_rate, enum H5C_resize_status status,
     size_t old_max_cache_size, size_t new_max_cache_size,
@@ -1066,10 +1074,10 @@ H5_DLL void * H5C_protect(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_
     const H5C_class_t *type, haddr_t addr, void *udata, unsigned flags);
 H5_DLL herr_t H5C_reset_cache_hit_rate_stats(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_resize_entry(void *thing, size_t new_size);
-H5_DLL herr_t H5C_set_cache_auto_resize_config(H5C_t *cache_ptr,
-    H5C_auto_size_ctl_t *config_ptr);
+H5_DLL herr_t H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_ptr);
 H5_DLL herr_t H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled);
 H5_DLL herr_t H5C_set_prefix(H5C_t *cache_ptr, char *prefix);
+H5_DLL herr_t H5C_set_log_file_ptr(H5C_t * cache_ptr, FILE * log_file_ptr);
 H5_DLL herr_t H5C_set_trace_file_ptr(H5C_t *cache_ptr, FILE *trace_file_ptr);
 H5_DLL herr_t H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     hbool_t display_detailed_stats);
@@ -1083,6 +1091,7 @@ H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr,
     unsigned int tests);
 H5_DLL herr_t H5C_ignore_tags(H5C_t *cache_ptr);
 H5_DLL void H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
+H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t primary_dxpl_id,
@@ -1099,8 +1108,6 @@ H5_DLL herr_t H5C_verify_entry_type(const H5F_t *f, haddr_t addr,
     const H5C_class_t *expected_type, hbool_t *in_cache_ptr,
     hbool_t *type_ok_ptr);
 #endif /* NDEBUG */
-
-H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 
 #endif /* !_H5Cprivate_H */
 

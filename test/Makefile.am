@@ -58,7 +58,8 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf farray earray btree2 fheap file_image unregister cork test_swmr
+           freespace mf farray earray btree2 fheap file_image unregister \
+           cache_logging cork test_swmr
 
 bin_PROGRAMS=swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
@@ -153,7 +154,7 @@ flush2.chkexe_: flush1.chkexe_
 # prefix or low-level driver with environment variables will influence
 # the temporary file name in ways that the makefile is not aware of.
 CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
-    dset_offset.h5 chunk_fixed.h5 \
+    dset_offset.h5 chunk_fixed.h5 cache_logging.log \
     max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
     huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_fast.h5 \
     chunk_expand.h5 layout_extend.h5 swmr_fail.h5 partial_chunks.h5 \
@@ -193,7 +194,7 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 # Sources for Use Cases
 use_append_chunk_SOURCES=use_append_chunk.c use_common.c
 use_append_mchunks_SOURCES=use_append_mchunks.c use_common.c
-use_cork_SOURCES=use_disable_mdc_flushes.c
+use_disable_mdc_flushes_SOURCES=use_disable_mdc_flushes.c
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh \

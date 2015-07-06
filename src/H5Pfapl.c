@@ -160,6 +160,16 @@
 #define H5F_ACS_FILE_IMAGE_INFO_DEL             H5P_file_image_info_del
 #define H5F_ACS_FILE_IMAGE_INFO_COPY            H5P_file_image_info_copy
 #define H5F_ACS_FILE_IMAGE_INFO_CLOSE           H5P_file_image_info_close
+/* Definition of core VFD write tracking flag */
+#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE   sizeof(hbool_t)
+#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF    FALSE
+#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_ENC    H5P__encode_hbool_t
+#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEC    H5P__decode_hbool_t
+/* Definition of core VFD write tracking page size */
+#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE      sizeof(size_t)
+#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF       524288
+#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC       H5P__encode_size_t
+#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC       H5P__decode_size_t
 /* Definition for # of metadata read attempts */
 #define H5F_ACS_METADATA_READ_ATTEMPTS_SIZE	sizeof(unsigned)
 #define H5F_ACS_METADATA_READ_ATTEMPTS_DEF     	0
@@ -171,16 +181,25 @@
 /* Definition for status_flags in the superblock */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_SIZE         sizeof(hbool_t)
 #define H5F_ACS_CLEAR_STATUS_FLAGS_DEF          FALSE
-/* Definition of core VFD write tracking flag */
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE   sizeof(hbool_t)
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF    FALSE
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_ENC    H5P__encode_hbool_t
-#define H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEC    H5P__decode_hbool_t
-/* Definition of core VFD write tracking page size */
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE      sizeof(size_t)
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF       524288
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC       H5P__encode_size_t
-#define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC       H5P__decode_size_t
+/* Definition for 'use metadata cache logging' flag */
+#define H5F_ACS_USE_MDC_LOGGING_SIZE            sizeof(hbool_t)
+#define H5F_ACS_USE_MDC_LOGGING_DEF             FALSE
+#define H5F_ACS_USE_MDC_LOGGING_ENC             H5P__encode_hbool_t
+#define H5F_ACS_USE_MDC_LOGGING_DEC             H5P__decode_hbool_t
+/* Definition for 'mdc log location' flag */
+#define H5F_ACS_MDC_LOG_LOCATION_SIZE           sizeof(char *)
+#define H5F_ACS_MDC_LOG_LOCATION_DEF            NULL /* default is no log location */
+#define H5F_ACS_MDC_LOG_LOCATION_ENC            H5P_facc_mdc_log_location_enc
+#define H5F_ACS_MDC_LOG_LOCATION_DEC            H5P_facc_mdc_log_location_dec
+#define H5F_ACS_MDC_LOG_LOCATION_DEL            H5P_facc_mdc_log_location_del
+#define H5F_ACS_MDC_LOG_LOCATION_COPY           H5P_facc_mdc_log_location_copy
+#define H5F_ACS_MDC_LOG_LOCATION_CMP            H5P_facc_mdc_log_location_cmp
+#define H5F_ACS_MDC_LOG_LOCATION_CLOSE          H5P_facc_mdc_log_location_close
+/* Definition for 'start metadata cache logging on access' flag */
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE    sizeof(hbool_t)
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF     FALSE
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC     H5P__encode_hbool_t
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC     H5P__decode_hbool_t
 
 
 /******************/
@@ -215,6 +234,14 @@ static herr_t H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t 
 static herr_t H5P__facc_fclose_degree_dec(const void **pp, void *value);
 static herr_t H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_multi_type_dec(const void **_pp, void *value);
+
+/* Metadata cache log location property callbacks */
+static herr_t H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P_facc_mdc_log_location_dec(const void **_pp, void *value);
+static herr_t H5P_facc_mdc_log_location_del(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P_facc_mdc_log_location_copy(const char *name, size_t size, void *value);
+static int    H5P_facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P_facc_mdc_log_location_close(const char *name, size_t size, void *value);
 
 
 /*********************/
@@ -274,8 +301,11 @@ static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMA
 static const hbool_t H5F_def_core_write_tracking_flag_g = H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF;              /* Default setting for core VFD write tracking */
 static const size_t H5F_def_core_write_tracking_page_size_g = H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF;     /* Default core VFD write tracking page size */
 static const unsigned H5F_def_metadata_read_attempts_g = H5F_ACS_METADATA_READ_ATTEMPTS_DEF;  /* Default setting for the # of metadata read attempts */
-static const H5F_object_flush_t H5F_def_object_flush_cb_g = H5F_ACS_OBJECT_FLUSH_CB_DEF;  	   /* Default setting for object flush callback */
-static const hbool_t H5F_def_clear_status_flags_g = H5F_ACS_CLEAR_STATUS_FLAGS_DEF;             /* Default to clear the superblock status_flags */
+static const H5F_object_flush_t H5F_def_object_flush_cb_g = H5F_ACS_OBJECT_FLUSH_CB_DEF;      /* Default setting for object flush callback */
+static const hbool_t H5F_def_clear_status_flags_g = H5F_ACS_CLEAR_STATUS_FLAGS_DEF;           /* Default to clear the superblock status_flags */
+static const hbool_t H5F_def_use_mdc_logging_g = H5F_ACS_USE_MDC_LOGGING_DEF;                 /* Default metadata cache logging flag */
+static const char *H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF;                 /* Default mdc log location */
+static const hbool_t H5F_def_start_mdc_log_on_access_g = H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF; /* Default mdc log start on access flag */
 
 
 /*-------------------------------------------------------------------------
@@ -453,6 +483,21 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register the metadata cache logging flag. */
+    if(H5P_register_real(pclass, H5F_ACS_USE_MDC_LOGGING_NAME, H5F_ACS_USE_MDC_LOGGING_SIZE, &H5F_def_use_mdc_logging_g,
+            NULL, NULL, NULL, H5F_ACS_USE_MDC_LOGGING_ENC, H5F_ACS_USE_MDC_LOGGING_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the metadata cache log location. */
+    if(H5P_register_real(pclass, H5F_ACS_MDC_LOG_LOCATION_NAME, H5F_ACS_MDC_LOG_LOCATION_SIZE, &H5F_def_mdc_log_location_g,
+        NULL, NULL, NULL, H5F_ACS_MDC_LOG_LOCATION_ENC, H5F_ACS_MDC_LOG_LOCATION_DEC,
+        H5F_ACS_MDC_LOG_LOCATION_DEL, H5F_ACS_MDC_LOG_LOCATION_COPY, H5F_ACS_MDC_LOG_LOCATION_CMP, H5F_ACS_MDC_LOG_LOCATION_CLOSE) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the flag that indicates whether mdc logging starts on file access. */
+    if(H5P_register_real(pclass, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE, &H5F_def_start_mdc_log_on_access_g,
+            NULL, NULL, NULL, H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC, H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1038,7 +1083,7 @@ H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
     /* Get value */
     if(offset) {
         if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, offset) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set offset for family file")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set offset for family file")
     } /* end if */
 
 done:
@@ -1118,7 +1163,7 @@ H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
     /* Get value */
     if(type) {
         if(H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get type for multi driver")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get type for multi driver")
     } /* end if */
 
 done:
@@ -2523,16 +2568,6 @@ H5P__facc_cache_config_cmp(const void *_config1, const void *_config2, size_t H5
     if(config1->rpt_fcn_enabled < config2->rpt_fcn_enabled) HGOTO_DONE(-1);
     if(config1->rpt_fcn_enabled > config2->rpt_fcn_enabled) HGOTO_DONE(1);
 
-    if(config1->open_trace_file < config2->open_trace_file) HGOTO_DONE(-1);
-    if(config1->open_trace_file > config2->open_trace_file) HGOTO_DONE(1);
-
-    if(config1->close_trace_file < config2->close_trace_file) HGOTO_DONE(-1);
-    if(config1->close_trace_file > config2->close_trace_file) HGOTO_DONE(1);
-
-    if((ret_value = HDstrncmp(config1->trace_file_name, config2->trace_file_name, 
-                              (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + 1))) != 0)
-        HGOTO_DONE(ret_value);
-
     if(config1->evictions_enabled < config2->evictions_enabled) HGOTO_DONE(-1);
     if(config1->evictions_enabled > config2->evictions_enabled) HGOTO_DONE(1);
 
@@ -3242,6 +3277,7 @@ H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *udata)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_obj_flush_cb() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_obj_flush_cb
@@ -3282,3 +3318,321 @@ H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func, void **udata)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_obj_flush_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_mdc_log_options
+ *
+ * Purpose:	Set metadata cache log options.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location,
+                       hbool_t start_on_access)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    char *      tmp_location;           /* Working location pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "ib*sb", plist_id, is_enabled, location, start_on_access);
+
+    /* Check arguments */
+    if(H5P_DEFAULT == plist_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
+    if(!location)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "location cannot be NULL")
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list")
+
+    /* Get the current location string and free it */
+    if(H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &tmp_location) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current log location")
+    H5MM_xfree(tmp_location);
+
+    /* Make a copy of the passed-in location */
+    if(NULL == (tmp_location = H5MM_xstrdup(location)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy passed-in log location")
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &is_enabled) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set is_enabled flag")
+    if(H5P_set(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &tmp_location) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set log location")
+    if(H5P_set(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &start_on_access) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set start_on_access flag")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_mdc_log_options() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_mdc_log_options
+ *
+ * Purpose:	Get metadata cache log options. 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location,
+                       size_t *location_size, hbool_t *start_on_access)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    char *location_ptr;                 /* Pointer to location string */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "i*b*s*z*b", plist_id, is_enabled, location, location_size,
+             start_on_access);
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list")
+
+    /* Get simple values */
+    if(is_enabled)
+        if(H5P_get(plist, H5F_ACS_USE_MDC_LOGGING_NAME, is_enabled) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get log location")
+    if(start_on_access)
+        if(H5P_get(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, start_on_access) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get start_on_access flag")
+
+    /* Get the location */
+    if(location || location_size)
+        if(H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &location_ptr) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get log location")
+
+    /* Copy log location to output buffer */
+    if(location_ptr && location)
+        HDmemcpy(location, location_ptr, *location_size);
+
+    /* Get location size, including terminating NULL */
+    if(location_size) {
+        if(location_ptr)
+            *location_size = HDstrlen(location_ptr) + 1;
+        else
+            *location_size = 0;
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_mdc_log_options() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P_facc_mdc_log_location_enc
+ *
+ * Purpose:        Callback routine which is called whenever the metadata
+ *                 cache log location property in the file access property
+ *                 list is encoded.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
+{
+    const char *log_location = *(const char * const *)value;
+    uint8_t **pp = (uint8_t **)_pp;
+    size_t len = 0;
+    uint64_t enc_value;
+    unsigned enc_size;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    /* calculate prefix length */
+    if(NULL != log_location)
+        len = HDstrlen(log_location);
+
+    enc_value = (uint64_t)len;
+    enc_size = H5VM_limit_enc_size(enc_value);
+    HDassert(enc_size < 256);
+
+    if(NULL != *pp) {
+        /* encode the length of the prefix */
+        *(*pp)++ = (uint8_t)enc_size;
+        UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+        /* encode the prefix */
+        if(NULL != log_location) {
+            HDmemcpy(*(char **)pp, log_location, len);
+            *pp += len;
+        } /* end if */
+    } /* end if */
+
+    *size += (1 + enc_size);
+    if(NULL != log_location)
+        *size += len;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P_facc_mdc_log_location_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P_facc_mdc_log_location_dec
+ *
+ * Purpose:        Callback routine which is called whenever the metadata
+ *                 cache log location property in the file access property
+ *                 list is decoded.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P_facc_mdc_log_location_dec(const void **_pp, void *_value)
+{
+    char **log_location = (char **)_value;
+    const uint8_t **pp = (const uint8_t **)_pp;
+    size_t len;
+    uint64_t enc_value;                 /* Decoded property value */
+    unsigned enc_size;                  /* Size of encoded property */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(log_location);
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+
+    /* Decode the value */
+    UINT64DECODE_VAR(*pp, enc_value, enc_size);
+    len = enc_value;
+
+    if(0 != len) {
+        /* Make a copy of the user's prefix string */
+        if(NULL == (*log_location = (char *)H5MM_malloc(len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix")
+        HDstrncpy(*log_location, *(const char **)pp, len);
+        (*log_location)[len] = '\0';
+
+        *pp += len;
+    } /* end if */
+    else
+        *log_location = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_facc_mdc_log_location_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_facc_mdc_log_location_del
+ *
+ * Purpose:     Frees memory used to store the metadata cache log location.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5P_facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(value);
+
+    H5MM_xfree(*(void **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P_facc_mdc_log_location_del() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_facc_mdc_log_location_copy
+ *
+ * Purpose:     Creates a copy of the metadata cache log location string.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5P_facc_mdc_log_location_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(value);
+
+    *(char **)value = H5MM_xstrdup(*(const char **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P_facc_mdc_log_location_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P_facc_mdc_log_location_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the metadata
+ *                 cache log location property in the file creation property
+ *                 list is compared.
+ *
+ * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P_facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
+{
+    const char *pref1 = *(const char * const *)value1;
+    const char *pref2 = *(const char * const *)value2;
+    int ret_value = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(NULL == pref1 && NULL != pref2)
+        HGOTO_DONE(1);
+    if(NULL != pref1 && NULL == pref2)
+        HGOTO_DONE(-1);
+    if(NULL != pref1 && NULL != pref2)
+        ret_value = HDstrcmp(pref1, pref2);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_facc_mdc_log_location_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_facc_mdc_log_location_close
+ *
+ * Purpose:     Frees memory used to store the metadata cache log location
+ *              string
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(value);
+
+    H5MM_xfree(*(void **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P_facc_mdc_log_location_close() */
+
