@@ -150,28 +150,29 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_la_LIBADD =
 am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5timer.lo H5trace.lo H5A.lo H5Abtree2.lo H5Adense.lo \
-	H5Adeprec.lo H5Aint.lo H5Atest.lo H5AC.lo H5ACmpio.lo H5B.lo H5Bcache.lo \
-	H5Bdbg.lo H5B2.lo H5B2cache.lo H5B2dbg.lo H5B2hdr.lo \
-	H5B2int.lo H5B2stat.lo H5B2test.lo H5C.lo H5Cmpio.lo H5CS.lo H5D.lo \
-	H5Dbtree.lo H5Dchunk.lo H5Dcompact.lo H5Dcontig.lo H5Ddbg.lo \
-	H5Ddeprec.lo H5Defl.lo H5Dfill.lo H5Dint.lo H5Dio.lo \
-	H5Dlayout.lo H5Dmpio.lo H5Doh.lo H5Dscatgath.lo H5Dselect.lo \
-	H5Dtest.lo H5E.lo H5Edeprec.lo H5Eint.lo H5EA.lo H5EAcache.lo \
-	H5EAdbg.lo H5EAdblkpage.lo H5EAdblock.lo H5EAhdr.lo \
-	H5EAiblock.lo H5EAint.lo H5EAsblock.lo H5EAstat.lo H5EAtest.lo \
-	H5F.lo H5Fint.lo H5Faccum.lo H5Fcwfs.lo H5Fdbg.lo H5Fdeprec.lo \
-	H5Fefc.lo H5Ffake.lo H5Fio.lo H5Fmount.lo H5Fmpi.lo \
-	H5Fquery.lo H5Fsfile.lo H5Fsuper.lo H5Fsuper_cache.lo \
-	H5Ftest.lo H5FA.lo H5FAcache.lo H5FAdbg.lo H5FAdblock.lo \
-	H5FAdblkpage.lo H5FAhdr.lo H5FAstat.lo H5FAtest.lo H5FD.lo \
-	H5FDcore.lo H5FDdirect.lo H5FDfamily.lo H5FDint.lo H5FDlog.lo \
-	H5FDmpi.lo H5FDmpio.lo H5FDmulti.lo H5FDsec2.lo H5FDspace.lo \
-	H5FDstdio.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo \
-	H5FSsection.lo H5FSstat.lo H5FStest.lo H5G.lo H5Gbtree2.lo \
-	H5Gcache.lo H5Gcompact.lo H5Gdense.lo H5Gdeprec.lo H5Gent.lo \
-	H5Gint.lo H5Glink.lo H5Gloc.lo H5Gname.lo H5Gnode.lo H5Gobj.lo \
-	H5Goh.lo H5Groot.lo H5Gstab.lo H5Gtest.lo H5Gtraverse.lo \
-	H5HF.lo H5HFbtree2.lo H5HFcache.lo H5HFdbg.lo H5HFdblock.lo \
+	H5Adeprec.lo H5Aint.lo H5Atest.lo H5AC.lo H5ACmpio.lo H5B.lo \
+	H5Bcache.lo H5Bdbg.lo H5B2.lo H5B2cache.lo H5B2dbg.lo \
+	H5B2hdr.lo H5B2int.lo H5B2stat.lo H5B2test.lo H5C.lo \
+	H5Cmpio.lo H5CS.lo H5D.lo H5Dbtree.lo H5Dchunk.lo \
+	H5Dcompact.lo H5Dcontig.lo H5Ddbg.lo H5Ddeprec.lo H5Defl.lo \
+	H5Dfill.lo H5Dint.lo H5Dio.lo H5Dlayout.lo H5Dmpio.lo H5Doh.lo \
+	H5Dscatgath.lo H5Dselect.lo H5Dtest.lo H5E.lo H5Edeprec.lo \
+	H5Eint.lo H5EA.lo H5EAcache.lo H5EAdbg.lo H5EAdblkpage.lo \
+	H5EAdblock.lo H5EAhdr.lo H5EAiblock.lo H5EAint.lo \
+	H5EAsblock.lo H5EAstat.lo H5EAtest.lo H5F.lo H5Fint.lo \
+	H5Faccum.lo H5Fcwfs.lo H5Fdbg.lo H5Fdeprec.lo H5Fefc.lo \
+	H5Ffake.lo H5Fio.lo H5Fmount.lo H5Fmpi.lo H5Fquery.lo \
+	H5Fsfile.lo H5Fsuper.lo H5Fsuper_cache.lo H5Ftest.lo H5FA.lo \
+	H5FAcache.lo H5FAdbg.lo H5FAdblock.lo H5FAdblkpage.lo \
+	H5FAhdr.lo H5FAstat.lo H5FAtest.lo H5FD.lo H5FDcore.lo \
+	H5FDdirect.lo H5FDfamily.lo H5FDint.lo H5FDlog.lo H5FDmpi.lo \
+	H5FDmpio.lo H5FDmulti.lo H5FDsec2.lo H5FDspace.lo H5FDstdio.lo \
+	H5FL.lo H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo H5FSsection.lo \
+	H5FSstat.lo H5FStest.lo H5G.lo H5Gbtree2.lo H5Gcache.lo \
+	H5Gcompact.lo H5Gdense.lo H5Gdeprec.lo H5Gent.lo H5Gint.lo \
+	H5Glink.lo H5Gloc.lo H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo \
+	H5Groot.lo H5Gstab.lo H5Gtest.lo H5Gtraverse.lo H5HF.lo \
+	H5HFbtree2.lo H5HFcache.lo H5HFdbg.lo H5HFdblock.lo \
 	H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo H5HFiblock.lo H5HFiter.lo \
 	H5HFman.lo H5HFsection.lo H5HFspace.lo H5HFstat.lo H5HFtest.lo \
 	H5HFtiny.lo H5HG.lo H5HGcache.lo H5HGdbg.lo H5HGquery.lo \
@@ -723,7 +724,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 213
+LT_VERS_REVISION = 214
 LT_VERS_AGE = 0
 
 # Our main target, the HDF5 library
@@ -740,9 +741,11 @@ DISTCLEANFILES = H5pubconf.h
 # library sources
 libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c H5Atest.c \
-        H5AC.c H5ACmpio.c H5B.c H5Bcache.c H5Bdbg.c \
+        H5AC.c H5ACmpio.c \
+        H5B.c H5Bcache.c H5Bdbg.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2hdr.c H5B2int.c H5B2stat.c H5B2test.c \
-        H5C.c H5Cmpio.c H5CS.c \
+        H5C.c H5Cmpio.c \
+        H5CS.c \
         H5D.c H5Dbtree.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
         H5Ddeprec.c H5Defl.c H5Dfill.c H5Dint.c \
         H5Dio.c H5Dlayout.c \
@@ -980,8 +983,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Bcache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Bdbg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5C.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Cmpio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5CS.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Cmpio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5D.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dbtree.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dchunk.Plo@am__quote@
