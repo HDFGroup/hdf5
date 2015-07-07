@@ -26,12 +26,12 @@
  * Function:    main
  * 
  * Purpose:     This is the reader forked/execved by "test_swmr_write_big()" 
- *		test in accum.c.  The reader reads at address 1024 from the file
- *		and verifies that the metadata in the accumulator at address
- * 		1024 does get written to disk.
+ *		        test in accum.c.  The reader reads at address 1024 from the file
+ *		        and verifies that the metadata in the accumulator at address
+ * 		        1024 does get written to disk.
  * 
- * Return:      Success: 0
- *              Failure: 1
+ * Return:      Success: EXIT_SUCCESS
+ *              Failure: EXIT_FAILURE
  * 
  * Programmer:  Vailin Choi; June 2013
  *
@@ -40,11 +40,21 @@
 int
 main(void)
 {
-    hid_t fid = -1;	/* File ID */
-    H5F_t *f = NULL;	/* File pointer */
-    unsigned u;		/* Local index variable */
-    uint8_t rbuf[1024];	/* Buffer for reading */
-    uint8_t buf[1024];	/* Buffer for holding the expected data */
+    hid_t fid = -1;	        /* File ID */
+    hid_t fapl = -1;        /* file access property list ID */
+    H5F_t *f = NULL;	    /* File pointer */
+    unsigned u;		        /* Local index variable */
+    uint8_t rbuf[1024];	    /* Buffer for reading */
+    uint8_t buf[1024];	    /* Buffer for holding the expected data */
+    char *driver = NULL;    /* VFD string (from env variable) */
+
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    driver = HDgetenv("HDF5_DRIVER");
+    if(!H5FD_supports_swmr_test(driver)) {
+        return EXIT_SUCCESS;
+    }
 
     /* Initialize buffers */
     for(u = 0; u < 1024; u++) {
@@ -52,29 +62,35 @@ main(void)
         buf[u] = 1;	/* The expected data should be all 1s */
     }
 
+    if((fapl = h5_fileaccess()) < 0)
+        FAIL_STACK_ERROR
+
     /* Open the file with SWMR_READ */
-    if((fid = H5Fopen(SWMR_FILENAME, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+    if((fid = H5Fopen(SWMR_FILENAME, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
+	    FAIL_STACK_ERROR
 
     /* Get H5F_t * to internal file structure */
     if(NULL == (f = (H5F_t *)H5I_object(fid))) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should read in [1024, 2024] with buf data */
     if(H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Verify the data read is correct */
     if(HDmemcmp(buf, rbuf, (size_t)1024) != 0) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* CLose the file */
+    if(H5Pclose(fapl) < 0)
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
-    return 0;
+    return EXIT_SUCCESS;
 
 error: 
     H5Fclose(fid);
-    return 1;
+    return EXIT_FAILURE;
 } /* end main() */
+

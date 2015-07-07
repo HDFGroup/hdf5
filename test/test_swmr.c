@@ -39,6 +39,11 @@
 #define H5F_TESTING
 #include "H5Fpkg.h"		/* File access	 			*/
 
+/* This file needs to access the file driver testing code */
+#define H5FD_PACKAGE
+#define H5FD_TESTING
+#include "H5FDpkg.h"	/* File drivers	 			*/
+
 
 const char *FILENAME[] = {
     "test_swmr",		/* 0 */
@@ -71,6 +76,8 @@ static int test_append_flush_dataset_chunked(hid_t in_fapl);
 static int test_append_flush_dataset_fixed(hid_t in_fapl);
 static int test_append_flush_dataset_multiple(hid_t in_fapl);
 
+/* Tests for SWMR VFD flag */
+static int test_swmr_vfd_flag();
 
 /*
  * Tests for H5Pget/set_metadata_read_attemps(), H5Fget_metadata_read_retry_info()
@@ -111,48 +118,50 @@ test_metadata_read_attempts(hid_t in_fapl)
      */
     /* Get # of read attempts -- should be the default: 1 */
     if(H5Pget_metadata_read_attempts(fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
-    if(attempts != 1) TEST_ERROR
+	    FAIL_STACK_ERROR
+    if(attempts != 1)
+        TEST_ERROR
 
     /* Set the # of read attempts to 0--should fail */
     H5E_BEGIN_TRY {
-	ret = H5Pset_metadata_read_attempts(fapl, 0);
+	    ret = H5Pset_metadata_read_attempts(fapl, 0);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Set the # of read attempts to a # > 0--should succeed */
     if(H5Pset_metadata_read_attempts(fapl, 9) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Retrieve the # of read attempts -- should be 9 */
     if(H5Pget_metadata_read_attempts(fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
-    if(attempts != 9) TEST_ERROR
+	    FAIL_STACK_ERROR
+    if(attempts != 9)
+        TEST_ERROR
 
     /* Set the # of read attempts to the default for non-SWMR access: H5F_METADATA_READ_ATTEMPTS --should succeed */
     if(H5Pset_metadata_read_attempts(fapl, H5F_METADATA_READ_ATTEMPTS) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Retrieve the # of read attempts -- should be H5F_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Set the # of read attempts to the default for SWMR access: H5F_SWMR_METADATA_READ_ATEMPTS --should succeed */
     if(H5Pset_metadata_read_attempts(fapl, H5F_SWMR_METADATA_READ_ATTEMPTS) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Retrieve the # of read attempts -- should be H5F_SWMR_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_SWMR_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the property list */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* 
      * Set B:
@@ -164,25 +173,25 @@ test_metadata_read_attempts(hid_t in_fapl)
     /* Test 1 */
     /* Create a file with non-SWMR access and default fapl */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file's fapl -- should be H5F_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Test 2 */
     /* Get a copy of the parameter fapl */
@@ -191,33 +200,33 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set to use latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open the file with SWMR access and default read attempts */
     if((fid = H5Fopen(filename, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file's fapl -- should be H5F_SWMR_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_SWMR_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Test 3 */
     /* Get a copy of the parameter fapl */
@@ -226,28 +235,29 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set to use latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the # of read attempts */
     if(H5Pset_metadata_read_attempts(fapl, 9) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open the file with SWMR access and fapl (non-default & set to 9) */
     if((fid = H5Fopen(filename, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file's fapl -- should be 9 */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
-    if(attempts != 9) TEST_ERROR
+	    FAIL_STACK_ERROR
+    if(attempts != 9)
+        TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
@@ -255,7 +265,7 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Close file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Test 4 */
     /* Get a copy of the parameter fapl */
@@ -264,36 +274,37 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set to use latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the # of read attempts */
     if(H5Pset_metadata_read_attempts(fapl, 1) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open the file with SWMR access and fapl (non-default & set to 1) */
     if((fid = H5Fopen(filename, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file fapl -- should be 1 */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
-    if(attempts != 1) TEST_ERROR
+	    FAIL_STACK_ERROR
+    if(attempts != 1)
+        TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Test 5 */
     /* Get a copy of the parameter fapl */
@@ -302,33 +313,33 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set to use latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open the file with SWMR_READ and fapl (non-default read attempts but unset) */
     if((fid = H5Fopen(filename, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file's fapl -- should be H5F_SWMR_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_SWMR_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* 
      * Set C:
@@ -344,56 +355,56 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set to use latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Create a file with non-SWMR access and default read attempts */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file's fapl -- should be H5F_SWMR_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_SWMR_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Test 2 */
     /* Open the file with non-SWMR access and default fapl */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file's fapl -- should be H5F_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Test 3 */
     /* Get a copy of the parameter fapl */
@@ -402,33 +413,33 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set the # of read attempts */
     if(H5Pset_metadata_read_attempts(fapl, 9) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open the file with non-SWMR access and fapl (non-default & set to 9) */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file's fapl -- should be H5F_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Test 4 */
     /* Get a copy of the parameter fapl */
@@ -437,32 +448,33 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set the # of read attempts */
     if(H5Pset_metadata_read_attempts(fapl, 1) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open the file with non-SWMR access and fapl (non-default & set to 1) */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file fapl -- should be 1 */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
-    if(attempts != 1) TEST_ERROR
+	    FAIL_STACK_ERROR
+    if(attempts != 1)
+        TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Test 5 */
     /* Get a copy of the parameter fapl */
@@ -471,29 +483,29 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Open the file with non-SWMR_READ and fapl (non-default but unset) */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file's fapl -- should be H5F_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get a copy of the parameter fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
@@ -501,45 +513,45 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set to use latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the # of read attempts */
     if(H5Pset_metadata_read_attempts(fapl, 9) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Create a file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open file again with non-SWMR access and default fapl */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file fapl -- should be H5F_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get a copy of the parameter fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
@@ -547,33 +559,33 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set to use latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open file again with SWMR access and default read attempts */
     if((fid = H5Fopen(filename, H5F_ACC_SWMR_READ, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file fapl -- should be H5F_SWMR_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_SWMR_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* 
      * Set D:
@@ -585,11 +597,11 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Create a file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get a copy of the parameter fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
@@ -597,73 +609,73 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set to use latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open file again with SWMR access and default read attempts */
     if((fid1 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the # of read attempts */
     if(H5Pset_metadata_read_attempts(fapl, 9) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open file again with SWMR access and fapl (non-default & set to 9) */
     if((fid2 = H5Fopen(filename, (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ), fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Re-open fid1 */
     if((fid = H5Freopen(fid1)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file fapl -- should be H5F_SWMR_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_SWMR_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Re-open fid2 */
     if((fid = H5Freopen(fid2)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file fapl -- should be H5F_SWMR_METADATA_READ_ATTEMPTS, not 9 */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_SWMR_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close all the files */
     if(H5Fclose(fid1) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(H5Fclose(fid2) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* 
      * Set E:
@@ -679,23 +691,23 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set to use latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Create a file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open file again with non-SWMR access and default fapl */
     if((fid1 = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get a copy of the parameter fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0)
@@ -703,65 +715,65 @@ test_metadata_read_attempts(hid_t in_fapl)
 
     /* Set the # of read attempts */
     if(H5Pset_metadata_read_attempts(fapl, 9) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open file again with non-SWMR access and fapl (non-default & set to 9) */
     if((fid2 = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close fapl */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Re-open fid1 */
     if((fid = H5Freopen(fid1)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file fapl -- should be H5F_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Re-open fid2 */
     if((fid = H5Freopen(fid2)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get file's fapl */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from file fapl -- should be H5F_METADATA_READ_ATTEMPTS */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file's fapl */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close all the files */
     if(H5Fclose(fid1) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(H5Fclose(fid2) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -845,7 +857,7 @@ test_metadata_read_retry_info(hid_t in_fapl)
 
     /* Initialize buffer data */
     for(i = n = 0; i < 6; i++)
-	for(j = 0; j < 10; j++)
+	    for(j = 0; j < 10; j++)
               buf[i][j] = (int)n++;
 
     /* Write to the 2 datasets */
@@ -896,16 +908,21 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should be 0 */
-    if(info.nbins != 0) TEST_ERROR
+    if(info.nbins != 0)
+        TEST_ERROR
 
     /* Should be all NULL */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
-	if(info.retries[i] != NULL) TEST_ERROR
+	    if(info.retries[i] != NULL)
+            TEST_ERROR
 
     /* Closing */
-    if(H5Dclose(did1) < 0) FAIL_STACK_ERROR
-    if(H5Dclose(did2) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(did1) < 0)
+        FAIL_STACK_ERROR
+    if(H5Dclose(did2) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
 
 
     /*
@@ -922,16 +939,17 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should be 2 */
-    if(info.nbins != 2) TEST_ERROR
+    if(info.nbins != 2)
+        TEST_ERROR
 
     /* Should be all NULL */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
-	if(info.retries[i] != NULL)
-	    TEST_ERROR
+	    if(info.retries[i] != NULL)
+	        TEST_ERROR
 
     /* Closing */
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
 
     /*
      * Open a file with SWMR access, # of read_attempts is 10:
@@ -953,16 +971,19 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should be 1 */
-    if(info.nbins != 1) TEST_ERROR
+    if(info.nbins != 1)
+        TEST_ERROR
 
     /* Should be all NULL */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
-	if(info.retries[i] != NULL)
-	    TEST_ERROR
+	    if(info.retries[i] != NULL)
+	        TEST_ERROR
 
     /* Closing */
-    if(H5Pclose(new_fapl) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(new_fapl) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
 
     /*
      * Open a file with SWMR access, # of read attempts is 101:
@@ -983,16 +1004,19 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should be 3 */
-    if(info.nbins != 3) TEST_ERROR
+    if(info.nbins != 3)
+        TEST_ERROR
 
     /* Should be all NULL */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
-	if(info.retries[i] != NULL)
-	    TEST_ERROR
+	    if(info.retries[i] != NULL)
+	        TEST_ERROR
 
     /* Closing */
-    if(H5Pclose(new_fapl) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(new_fapl) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
 
     /*
      * Open a file with SWMR access, # of read_attempts is 10000:
@@ -1014,16 +1038,19 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should be 4 */
-    if(info.nbins != 4) TEST_ERROR
+    if(info.nbins != 4)
+        TEST_ERROR
 
     /* Should be all NULL */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
-	if(info.retries[i] != NULL)
-	    TEST_ERROR
+	    if(info.retries[i] != NULL)
+	        TEST_ERROR
 
     /* Closing */
-    if(H5Pclose(new_fapl) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(new_fapl) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
 
     /*
      * Open a file with SWMR access, # of read_attempts is 1:
@@ -1045,16 +1072,19 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should be 0 */
-    if(info.nbins != 0) TEST_ERROR
+    if(info.nbins != 0)
+        TEST_ERROR
 
     /* Should be all NULL */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
-	if(info.retries[i] != NULL)
-	    TEST_ERROR
+	    if(info.retries[i] != NULL)
+	        TEST_ERROR
 
     /* Closing */
-    if(H5Pclose(new_fapl) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(new_fapl) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
 
 
     /* 
@@ -1086,12 +1116,13 @@ test_metadata_read_retry_info(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should be 2 */
-    if(info.nbins != 2) TEST_ERROR
+    if(info.nbins != 2)
+        TEST_ERROR
 
     /* Should be all NULL */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
-	if(info.retries[i] != NULL)
-	    TEST_ERROR
+	    if(info.retries[i] != NULL)
+	        TEST_ERROR
 
     /* Get a pointer to the internal file object */
     if((f = (H5F_t *)H5I_object(fid)) == NULL)
@@ -1106,39 +1137,45 @@ test_metadata_read_retry_info(hid_t in_fapl)
 
     /* v2 B-tree leaf node: log retry 99 for 500 times */
     for(i = 0; i < 500; i++) {
-	if(H5F_track_metadata_read_retries(f, H5AC_BT2_LEAF_ID, 99) < 0)
-	    FAIL_STACK_ERROR
+	    if(H5F_track_metadata_read_retries(f, H5AC_BT2_LEAF_ID, 99) < 0)
+	        FAIL_STACK_ERROR
     }
 
     /* Extensive array data block: log retry 10 for 1000 times */
     for(i = 0; i < 1000; i++)
-	if(H5F_track_metadata_read_retries(f, H5AC_EARRAY_DBLOCK_ID, 10) < 0)
-	    FAIL_STACK_ERROR
+	    if(H5F_track_metadata_read_retries(f, H5AC_EARRAY_DBLOCK_ID, 10) < 0)
+	        FAIL_STACK_ERROR
 
     /* File's superblock: log retry 1 for 1 time */
     if(H5F_track_metadata_read_retries(f, H5AC_SUPERBLOCK_ID, 1) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the collection of metadata read retries */
     if(H5Fget_metadata_read_retry_info(fid, &info) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Verify retries for v2 B-tree leaf node */
-    if(info.retries[4][0] != 0) TEST_ERROR
-    if(info.retries[4][1] != 500) TEST_ERROR
+    if(info.retries[4][0] != 0)
+        TEST_ERROR
+    if(info.retries[4][1] != 500)
+        TEST_ERROR
 
     /* Verify retries for extensive array data block */
-    if(info.retries[15][0] != 0) TEST_ERROR
-    if(info.retries[15][1] != 1000) TEST_ERROR
+    if(info.retries[15][0] != 0)
+        TEST_ERROR
+    if(info.retries[15][1] != 1000)
+        TEST_ERROR
 
     /* Verify retries for file's superblock */
-    if(info.retries[20][0] != 1) TEST_ERROR
-    if(info.retries[20][1] != 0) TEST_ERROR
+    if(info.retries[20][0] != 1)
+        TEST_ERROR
+    if(info.retries[20][1] != 0)
+        TEST_ERROR
 
     /* Free memory for info.retries */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)  {
-	if(info.retries[i] != NULL)
-	    HDfree(info.retries[i]);
+	    if(info.retries[i] != NULL)
+	        HDfree(info.retries[i]);
     }
 
     /* 
@@ -1151,124 +1188,145 @@ test_metadata_read_retry_info(hid_t in_fapl)
 
     /* Object header: log retry 5 for 5 times */
     for(i = 0; i < 5; i++) {
-	if(H5F_track_metadata_read_retries(f, H5AC_OHDR_ID, 5) < 0)
-	    TEST_ERROR
+	    if(H5F_track_metadata_read_retries(f, H5AC_OHDR_ID, 5) < 0)
+	        TEST_ERROR
     }
 
     /* Extensive array data block: log retry 4 for 1 time */
     if(H5F_track_metadata_read_retries(f, H5AC_EARRAY_DBLOCK_ID, 4) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Fixed array header : log retry 50 for 10000 times */
     for(i = 0; i < 10000; i++) {
-	if(H5F_track_metadata_read_retries(f, H5AC_FARRAY_HDR_ID, 50) < 0)
-	    TEST_ERROR
+	    if(H5F_track_metadata_read_retries(f, H5AC_FARRAY_HDR_ID, 50) < 0)
+	        TEST_ERROR
     }
 
     /* File's superblock: log retry 1 for 1 more time */
     if(H5F_track_metadata_read_retries(f, H5AC_SUPERBLOCK_ID, 1) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the collection of metadata read retries */
     if(H5Fget_metadata_read_retry_info(fid, &info) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* 
      * Verify info has both previous + current retries information:
      */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
-	switch(i) {
-	    case 0: /* Object header */
-		if(info.retries[i][0] != 5) TEST_ERROR
-		if(info.retries[i][1] != 0) TEST_ERROR
-		break;
+	    switch(i) {
+	        case 0: /* Object header */
+		        if(info.retries[i][0] != 5)
+                    TEST_ERROR
+		        if(info.retries[i][1] != 0)
+                    TEST_ERROR
+		        break;
 
-	    case 4: /* v2 B-tree leaf node */
-		if(info.retries[i][0] != 0) TEST_ERROR
-		if(info.retries[i][1] != 500) TEST_ERROR
-		break;
+	        case 4: /* v2 B-tree leaf node */
+		        if(info.retries[i][0] != 0)
+                    TEST_ERROR
+		        if(info.retries[i][1] != 500)
+                    TEST_ERROR
+		        break;
     
-	    case 15: /* Extensive array data block */
-		if(info.retries[i][0] != 1) TEST_ERROR
-		if(info.retries[i][1] != 1000) TEST_ERROR
-		break;
+	        case 15: /* Extensive array data block */
+		        if(info.retries[i][0] != 1)
+                    TEST_ERROR
+		        if(info.retries[i][1] != 1000)
+                    TEST_ERROR
+		        break;
 
-	    case 17: /* Fixed array header */
-		if(info.retries[i][0] != 0) TEST_ERROR
-		if(info.retries[i][1] != 10000) TEST_ERROR
-		break;
+	        case 17: /* Fixed array header */
+		        if(info.retries[i][0] != 0)
+                    TEST_ERROR
+		        if(info.retries[i][1] != 10000)
+                    TEST_ERROR
+		        break;
 
-	    case 20: /* File's superblock */
-		if(info.retries[i][0] != 2) TEST_ERROR
-		if(info.retries[i][1] != 0) TEST_ERROR
-		break;
+	        case 20: /* File's superblock */
+		        if(info.retries[i][0] != 2)
+                    TEST_ERROR
+		        if(info.retries[i][1] != 0)
+                    TEST_ERROR
+		        break;
 
-	    default:
-		if(info.retries[i] != NULL) TEST_ERROR
-		break;
-	}
+	        default:
+		        if(info.retries[i] != NULL)
+                    TEST_ERROR
+		        break;
+	    }
     }
 
     /* Free memory for info.retries */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
-	if(info.retries[i] != NULL)
-	    HDfree(info.retries[i]);
+	    if(info.retries[i] != NULL)
+	        HDfree(info.retries[i]);
 
     /* Closing */
-    if(H5Dclose(did1) < 0) FAIL_STACK_ERROR
-    if(H5Dclose(did2) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(did1) < 0)
+        FAIL_STACK_ERROR
+    if(H5Dclose(did2) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
 
     /* Get a copy of the file access property list */
     if((new_fapl = H5Pcopy(fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the number of metadata read attempts to 101 */
     if(H5Pset_metadata_read_attempts(new_fapl, 101) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open the file with SWMR access */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, new_fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
     if((f = (H5F_t *)H5I_object(fid)) == NULL)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* File's superblock: log retry 1 for 1 time */
     if(H5F_track_metadata_read_retries(f, H5AC_SUPERBLOCK_ID, 1) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the collection of metadata read retries */
     if(H5Fget_metadata_read_retry_info(fid, &info) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should be 3 */
-    if(info.nbins != 3) TEST_ERROR
+    if(info.nbins != 3)
+        TEST_ERROR
 
     /* Verify retries info */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
-	switch(i) {
-	    case 20: /* File's superblock */
-		if(info.retries[i][0] != 1) TEST_ERROR
-		if(info.retries[i][1] != 0) TEST_ERROR
-		if(info.retries[i][2] != 0) TEST_ERROR
-		break;
+	    switch(i) {
+	        case 20: /* File's superblock */
+		        if(info.retries[i][0] != 1)
+                    TEST_ERROR
+		        if(info.retries[i][1] != 0)
+                    TEST_ERROR
+		        if(info.retries[i][2] != 0)
+                    TEST_ERROR
+		        break;
 
-	    default:
-		if(info.retries[i] != NULL) TEST_ERROR
-		break;
-	}
+	        default:
+		        if(info.retries[i] != NULL)
+                    TEST_ERROR
+		        break;
+	    }
     }
 
     /* Free memory */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
-	if(info.retries[i] != NULL)
-	    HDfree(info.retries[i]);
+	    if(info.retries[i] != NULL)
+	        HDfree(info.retries[i]);
 
     /* Closing */
-    if(H5Pclose(new_fapl) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(new_fapl) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
 
     /*
      * Case 3: Tests on retrieving the collection of retries
@@ -1284,33 +1342,39 @@ test_metadata_read_retry_info(hid_t in_fapl)
      */
     /* Open the file without SWMR access */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Re-open fid */
     if((fid1 = H5Freopen(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve retries information for fid */
     if(H5Fget_metadata_read_retry_info(fid, &info) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve retries information for fid1*/
     if(H5Fget_metadata_read_retry_info(fid1, &info1)< 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should be 0 */
-    if(info.nbins != 0) TEST_ERROR
-    if(info1.nbins != 0) TEST_ERROR
+    if(info.nbins != 0)
+        TEST_ERROR
+    if(info1.nbins != 0)
+        TEST_ERROR
 
     /* Should be all NULL */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
-	if(info.retries[i] != NULL) TEST_ERROR
-	if(info1.retries[i] != NULL) TEST_ERROR
+	    if(info.retries[i] != NULL)
+            TEST_ERROR
+	    if(info1.retries[i] != NULL)
+            TEST_ERROR
     }
 
     /* Closing */
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid1) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid1) < 0)
+        FAIL_STACK_ERROR
 
     /*
      * Open a file with SWMR access, default # of read attempts:
@@ -1320,75 +1384,88 @@ test_metadata_read_retry_info(hid_t in_fapl)
      */
     /* Open the file with SWMR access */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object for fid */
     if((f = (H5F_t *)H5I_object(fid)) == NULL)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Re-open fid */
     if((fid1 = H5Freopen(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object for fid1 */
     if((f1 = (H5F_t *)H5I_object(fid1)) == NULL)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* For fid: fixed array data block page--log retry 9 for 500 times */
     for(i = 0; i < 500; i++) {
-	if(H5F_track_metadata_read_retries(f, H5AC_FARRAY_DBLK_PAGE_ID, 9) < 0)
-	    FAIL_STACK_ERROR
+	    if(H5F_track_metadata_read_retries(f, H5AC_FARRAY_DBLK_PAGE_ID, 9) < 0)
+	        FAIL_STACK_ERROR
     }
 
     /* For fid1: free-space sections--log retry 99 for 1000 times */
     for(i = 0; i < 1000; i++) {
-	if(H5F_track_metadata_read_retries(f1, H5AC_FSPACE_SINFO_ID, 99) < 0)
-	    FAIL_STACK_ERROR
+	    if(H5F_track_metadata_read_retries(f1, H5AC_FSPACE_SINFO_ID, 99) < 0)
+	        FAIL_STACK_ERROR
     }
 
     /* Retrieve the collection of metadata read retries for fid */
     if(H5Fget_metadata_read_retry_info(fid, &info) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the collection of metadata read retries for fid1 */
     if(H5Fget_metadata_read_retry_info(fid1, &info1) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Verify nbins for fid & fid1: should be 2 */
-    if(info.nbins != 2) TEST_ERROR
-    if(info1.nbins != 2) TEST_ERROR
+    if(info.nbins != 2)
+        TEST_ERROR
+    if(info1.nbins != 2)
+        TEST_ERROR
 
     /* Verify retries for fid: fixed array data block page */
-    if(info.retries[19][0] != 500) TEST_ERROR
-    if(info.retries[19][1] != 0) TEST_ERROR
+    if(info.retries[19][0] != 500)
+        TEST_ERROR
+    if(info.retries[19][1] != 0)
+        TEST_ERROR
 
     /* Verify retries for fid: free-space sections */
     /* (Since file was re-opened) */
-    if(info.retries[9][0] != 0) TEST_ERROR
-    if(info.retries[9][1] != 1000) TEST_ERROR
+    if(info.retries[9][0] != 0)
+        TEST_ERROR
+    if(info.retries[9][1] != 1000)
+        TEST_ERROR
 
     /* Verify retries for fid1: free-space sections */
-    if(info1.retries[9][0] != 0) TEST_ERROR
-    if(info1.retries[9][1] != 1000) TEST_ERROR
+    if(info1.retries[9][0] != 0)
+        TEST_ERROR
+    if(info1.retries[9][1] != 1000)
+        TEST_ERROR
 
     /* Verify retries for fid1: fixed array data block page */
     /* (Since file was re-opened) */
-    if(info1.retries[19][0] != 500) TEST_ERROR
-    if(info1.retries[19][1] != 0) TEST_ERROR
+    if(info1.retries[19][0] != 500)
+        TEST_ERROR
+    if(info1.retries[19][1] != 0)
+        TEST_ERROR
 
     /* Free memory for info.retries and info1.retries */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
-	if(info.retries[i] != NULL)
-	    HDfree(info.retries[i]);
-	if(info1.retries[i] != NULL)
-	    HDfree(info1.retries[i]);
+	    if(info.retries[i] != NULL)
+	        HDfree(info.retries[i]);
+	    if(info1.retries[i] != NULL)
+	        HDfree(info1.retries[i]);
     } /* end for */
 
     /* Closing */
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid1) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid1) < 0)
+        FAIL_STACK_ERROR
 
-    if(H5Pclose(fapl) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -1443,11 +1520,11 @@ test_start_swmr_write(hid_t in_fapl)
 
     /* Get a copy of the parameter fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -1458,183 +1535,183 @@ test_start_swmr_write(hid_t in_fapl)
 
     /* Create the file to work on */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get the file's access_property list */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from the file's fapl */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should be 1 */
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Close the property list */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create a dataset */
     if((sid1 = H5Screate_simple(2, dims, NULL)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((did1 = H5Dcreate2(fid, "dataset1", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Initialize data buffer */
     for(i = 0; i < 50; i++)
-	buf[i] = i;
+	    buf[i] = i;
 
     /* Write to the dataset */
     if(H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Enable SWMR writing */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Read from the dataset */
     if(H5Dread(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Verify the data is correct */
     if(HDmemcmp(buf, rbuf, sizeof(rbuf)))
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the dataset */
     if(H5Dclose(did1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the dataspace */
     if(H5Sclose(sid1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the file's access_property list */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should be 100 */
     if(attempts != H5F_SWMR_METADATA_READ_ATTEMPTS)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Close the file access property list */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Open the file again */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the file's access_property list */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should be 1 */
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Close the property list */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Open the first dataset */
     if((did1 = H5Dopen2(fid, "dataset1", H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create a group */
     if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Create dataspace */
     if((sid2 = H5Screate_simple(1, dim, NULL)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create a second dataset */
     if((did2 = H5Dcreate2(gid, "dataset2", H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Initialize data buffer to all 1s */
     HDmemset(wdata, 1, sizeof(wdata));
 
     /* Write to the second dataset */
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Enable SWMR writing */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Read from the second dataset */
     if(H5Dread(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Verify the data is correct */
     if(HDmemcmp(wdata, rdata, sizeof(rdata)))
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the second dataset */
     if(H5Dclose(did2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the dataspace */
     if(H5Sclose(sid2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the group */
     if(H5Gclose(gid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Clear the data buffer */
     HDmemset(rbuf, 1, sizeof(rbuf));
 
     /* Read from the first dataset */
     if(H5Dread(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Verify the data is correct */
     if(HDmemcmp(buf, rbuf, sizeof(rbuf)))
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the first dataset */
     if(H5Dclose(did1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the file's access_property list */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should be 100 */
     if(attempts != H5F_SWMR_METADATA_READ_ATTEMPTS)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Close the file's file access property list */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the file access property list */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     PASSED();
 
@@ -1642,13 +1719,13 @@ test_start_swmr_write(hid_t in_fapl)
 
 error:
     H5E_BEGIN_TRY {
-	H5Fclose(fid);
-	H5Pclose(fapl);
-	H5Pclose(file_fapl);
-	H5Dclose(did1);
-	H5Dclose(did2);
-	H5Sclose(sid1);
-	H5Sclose(sid2);
+	    H5Fclose(fid);
+	    H5Pclose(fapl);
+	    H5Pclose(file_fapl);
+	    H5Dclose(did1);
+	    H5Dclose(did2);
+	    H5Sclose(sid1);
+	    H5Sclose(sid2);
     } H5E_END_TRY;
 
     return -1;
@@ -1695,11 +1772,11 @@ test_err_start_swmr_write(hid_t in_fapl)
     
     /* Create a copy of the input parameter in_fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -1718,10 +1795,10 @@ test_err_start_swmr_write(hid_t in_fapl)
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 2 */
 
@@ -1731,52 +1808,50 @@ test_err_start_swmr_write(hid_t in_fapl)
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to create the file with SWMR write access when not using latest format */
     H5E_BEGIN_TRY {
-	ret = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, in_fapl);
+	    ret = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, in_fapl);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
 
     /* Case 3 */
 
     /* Create a file with the latest format */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Create and commit a named datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Tcommit2(fid, "TID", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Cannot enable SWMR writing mode when there is an opened named datatype */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the datatype */
     if(H5Tclose(tid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should succeed in enabling SWMR writing */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
-
-
+	    FAIL_STACK_ERROR;
 
     /* 
      * (B) When opening a file with latest format:
@@ -1784,114 +1859,114 @@ test_err_start_swmr_write(hid_t in_fapl)
 
     /* Create and close a file with latest format */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     
     /* Case 1 */
 
     /* Open the file with SWMR write access */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Cannot enable SWMR writing when already in SWMR writing mode */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 2 */
 
     /* Open the file with read only access */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is opened with read only access */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 3 */
 
     /* Open the file file with SWMR read access */
     if((fid = H5Fopen(filename, H5F_ACC_SWMR_READ, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is opened with SWMR read access only */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 4 */
 
     /* Open the file with latest format */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create and commit a named datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Tcommit2(fid, "TID", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create dataspace */
     if((sid = H5Screate(H5S_SCALAR)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Attach an attribute to the named datatype */
     if((aid = H5Acreate2(tid, "attr", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when there are opened named datatype and attribute */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the datatype */
     if(H5Tclose(tid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Still fail to enable SWMR writing when the attribute is still opened */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the attribute */
     if(H5Aclose(aid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should succeed in enabling SWMR writing */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Close the dataspace */
     if(H5Sclose(sid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
 
     /* 
@@ -1902,59 +1977,59 @@ test_err_start_swmr_write(hid_t in_fapl)
 
     /* Open the file without latest format */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, in_fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing mode */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to open the file with SWMR write access when not using latest format */
     H5E_BEGIN_TRY {
-	ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, in_fapl);
+	    ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, in_fapl);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Case 2 */
 
     /* Open the file with read only */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, in_fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is opened with read only */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 3 */
 
     /* Open the file with SWMR read only */
     if((fid = H5Fopen(filename, H5F_ACC_SWMR_READ, in_fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing mode when the file is opened with SWMR read only */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* 
      * (D) Failure cases for multiple opens 
@@ -1964,92 +2039,92 @@ test_err_start_swmr_write(hid_t in_fapl)
 
     /* Create a file with latest format */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should succeed in enabling SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Should fail for a second call to start SWMR writing mode */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
 
     /* Case 2 */
 
     /* Create a file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should succeed in enabling SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Re-open the same file */
     if((fid2 = H5Freopen(fid)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing mode for fid2 */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid2);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the files */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 3 */
 
     /* Create a file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Open the same file */
     if((fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should succeed in enabling SWMR writing mode for fid */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Should fail to enable SWMR writing mode for fid2 */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid2);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the files */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the file access property list */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-	H5Sclose(sid);
-	H5Gclose(gid);
-	H5Dclose(did);
-	H5Fclose(fid);
-	H5Pclose(fapl);
+	    H5Sclose(sid);
+	    H5Gclose(gid);
+	    H5Dclose(did);
+	    H5Fclose(fid);
+	    H5Pclose(fapl);
     } H5E_END_TRY;
 
     return -1;
@@ -2094,22 +2169,22 @@ test_start_swmr_write_concur(hid_t in_fapl)
 #else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
     if((fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Create the test file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Remove the message file to be sure */
     HDremove(DONE_MESSAGE);
@@ -2122,34 +2197,35 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
     /* Fork child process */
     if((childpid = HDfork()) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     if(childpid == 0) { /* Child process */
 
-	/* Wait till parent process completes the open */
-	if(h5_wait_message(DONE_MESSAGE) < 0)
-	    exit(1);
+	    /* Wait till parent process completes the open */
+	    if(h5_wait_message(DONE_MESSAGE) < 0)
+	        exit(1);
 
-	/* Should fail */
-	H5E_BEGIN_TRY {
-	    /* Open the test file */
-	    ret = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
-	} H5E_END_TRY;
-	if(ret >= 0)
-	    exit(1);
-	exit(0);
+	    /* Should fail */
+	    H5E_BEGIN_TRY {
+	        /* Open the test file */
+	        ret = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+	    } H5E_END_TRY;
+	    if(ret >= 0)
+	        exit(1);
+
+	    exit(0);
     }
 
     /* Open the test file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Send the message that the open completes */
     h5_send_message(DONE_MESSAGE);
 
     /* Wait for child process to complete */
     if((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Check exit status of child process */
     if(WIFEXITED(child_status)) {
@@ -2160,7 +2236,7 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* 
      *  Case (2):
@@ -2173,48 +2249,48 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
     /* Fork child process */
     if((childpid = HDfork()) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     if(childpid == 0) { /* Child process */
-	hid_t child_fid;	/* File ID */
+	    hid_t child_fid;	/* File ID */
 
-	/* Wait till parent process completes the open */
-	if(h5_wait_message(DONE_MESSAGE) < 0)
-	    exit(1);
+	    /* Wait till parent process completes the open */
+	    if(h5_wait_message(DONE_MESSAGE) < 0)
+	        exit(1);
 
-	/* Should succeed in opening the test file */
-	if((child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
-	    exit(1);
-	if(H5Fclose(child_fid) < 0)
-	    exit(1);
-	exit(0);
+	    /* Should succeed in opening the test file */
+	    if((child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+	        exit(1);
+	    if(H5Fclose(child_fid) < 0)
+	        exit(1);
+	    exit(0);
     }
 
     /* Open the test file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Enable SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Send the message that H5Fstart_swmr_write() completes */
     h5_send_message(DONE_MESSAGE);
 
     /* Wait for child process to complete */
     if((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Check exit status of child process */
     if(WIFEXITED(child_status)) {
-	if((child_exit_val = WEXITSTATUS(child_status)) != 0)
-	    TEST_ERROR
+	    if((child_exit_val = WEXITSTATUS(child_status)) != 0)
+	        TEST_ERROR
     } else  /* Child process terminated abnormally */
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* 
      *  Case (3):
@@ -2227,38 +2303,38 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
     /* Fork child process */
     if((childpid = HDfork()) < 0)
-	FAIL_STACK_ERROR
-
+	    FAIL_STACK_ERROR
 
     if(childpid == 0) { /* Child process */
 
-	/* Wait till parent process completes the open */
-	if(h5_wait_message(DONE_MESSAGE) < 0)
-	    exit(1);
+	    /* Wait till parent process completes the open */
+	    if(h5_wait_message(DONE_MESSAGE) < 0)
+	        exit(1);
 
-	/* Should fail in opening the test file */
-	H5E_BEGIN_TRY {
-	    ret = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
-	} H5E_END_TRY;
-	if(ret >= 0)
-	    exit(1);
-	exit(0);
+	    /* Should fail in opening the test file */
+	    H5E_BEGIN_TRY {
+	        ret = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+	    } H5E_END_TRY;
+	    if(ret >= 0)
+	        exit(1);
+
+	    exit(0);
     }
 
     /* Open the test file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Enable SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Send the message that H5Fstart_swmr_write() completes */
     h5_send_message(DONE_MESSAGE);
 
     /* Wait for child process to complete */
     if((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Check exit status of child process */
     if(WIFEXITED(child_status)) {
@@ -2269,7 +2345,7 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* 
      *  Case (4):
@@ -2282,37 +2358,38 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
     /* Fork child process */
     if((childpid = HDfork()) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     if(childpid == 0) { /* Child process */
 
-	/* Wait till parent process completes the open */
-	if(h5_wait_message(DONE_MESSAGE) < 0)
-	    exit(1);
+	    /* Wait till parent process completes the open */
+	    if(h5_wait_message(DONE_MESSAGE) < 0)
+	        exit(1);
 
-	/* Should fail in opening the test file */
-	H5E_BEGIN_TRY {
-	    ret = H5Fopen(filename, H5F_ACC_RDWR, fapl);
-	} H5E_END_TRY;
-	if(ret >= 0)
-	    exit(1);
-	exit(0);
+	    /* Should fail in opening the test file */
+	    H5E_BEGIN_TRY {
+	        ret = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+	    } H5E_END_TRY;
+	    if(ret >= 0)
+	        exit(1);
+
+	    exit(0);
     }
 
     /* Open the test file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Enable SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Send the message that H5Fstart_swmr_write() completes */
     h5_send_message(DONE_MESSAGE);
 
     /* Wait for child process to complete */
     if((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Check exit status of child process */
     if(WIFEXITED(child_status)) {
@@ -2323,7 +2400,7 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* 
      *  Case (5):
@@ -2336,37 +2413,38 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
     /* Fork child process */
     if((childpid = HDfork()) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     if(childpid == 0) { /* Child process */
 
-	/* Wait till parent process completes the open */
-	if(h5_wait_message(DONE_MESSAGE) < 0)
-	    exit(1);
+	    /* Wait till parent process completes the open */
+	    if(h5_wait_message(DONE_MESSAGE) < 0)
+	        exit(1);
 
-	/* Should fail in opening the test file */
-	H5E_BEGIN_TRY {
-	    ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
-	} H5E_END_TRY;
-	if(ret >= 0)
-	    exit(1);
-	exit(0);
+	    /* Should fail in opening the test file */
+	    H5E_BEGIN_TRY {
+	        ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+	    } H5E_END_TRY;
+	    if(ret >= 0)
+	        exit(1);
+
+	    exit(0);
     }
 
     /* Open the test file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Enable SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Send the message that H5Fstart_swmr_write() completes */
     h5_send_message(DONE_MESSAGE);
 
     /* Wait for child process to complete */
     if((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Check exit status of child process */
     if(WIFEXITED(child_status)) {
@@ -2377,19 +2455,19 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Close the property list */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-	H5Pclose(fapl);
-	H5Fclose(fid);
+	    H5Pclose(fapl);
+	    H5Fclose(fid);
     } H5E_END_TRY;
 
     return -1;
@@ -2453,10 +2531,10 @@ test_object_flush_cb(hid_t in_fapl)
      */
     /* Should fail if the callback function is not defined but user data is defined */
     H5E_BEGIN_TRY {
-	ret = H5Pset_object_flush_cb(fapl, NULL, &flush_ct);
+	    ret = H5Pset_object_flush_cb(fapl, NULL, &flush_ct);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /*
      * Case (2)
@@ -2466,14 +2544,14 @@ test_object_flush_cb(hid_t in_fapl)
 
     /* Create a copy of file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve object flush property values for the default file access property list */
     if(H5Pget_object_flush_cb(fapl, &ret_cb, &ret_ct) < 0)
-	TEST_ERROR
+	    TEST_ERROR
     /* Should be null */
     if(ret_cb != NULL || ret_ct != NULL)
-	TEST_ERROR
+	    TEST_ERROR
 
     /*
      * Case (3)
@@ -2482,23 +2560,22 @@ test_object_flush_cb(hid_t in_fapl)
      */
     /* Set the object flush property */
     if(H5Pset_object_flush_cb(fapl, flush_cb, &flush_ct) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Increment the counter */
     ++flush_ct;
 
     /* Retrieve object flush property values for the non-default file access property list */
     if(H5Pget_object_flush_cb(fapl, &ret_cb, &ret_ct) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Verify expected values */
     if(ret_cb != flush_cb || *(unsigned *)ret_ct != 1)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the property list */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR;
-
+	    FAIL_STACK_ERROR;
 
     /*
      * Case (4)
@@ -2513,36 +2590,36 @@ test_object_flush_cb(hid_t in_fapl)
 
     /* Make a copy of the input parameter in_fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Create the test file: without setting object flush property in fapl */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get the file's file access property list */
     if((ffapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Retrieve the object flush property values */
     if(H5Pget_object_flush_cb(ffapl, &ret_cb, &ret_ct) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Verify expected values */
     if(ret_cb != NULL || ret_ct != NULL)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Closing */
     if(H5Pclose(ffapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /*
      * Cases (5)
@@ -2558,19 +2635,19 @@ test_object_flush_cb(hid_t in_fapl)
 
     /* Set the object flush property */
     if(H5Pset_object_flush_cb(fapl, flush_cb, &flush_ct) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Open the test file: with object flush property setting in fapl */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create a dataset */
     if((sid = H5Screate_simple(2, dims, dims)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create a dataset */
     if((did1 = H5Dcreate2(fid, "dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Initialize data buffer */
     for(i = 0; i < 50; i++)
@@ -2578,71 +2655,71 @@ test_object_flush_cb(hid_t in_fapl)
 
     /* Write to the dataset */
     if(H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Flush the dataset object */
     if(H5Oflush(did1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the file's file access property list */
     if((ffapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Retrieve the object flush property values */
     if(H5Pget_object_flush_cb(ffapl, &ret_cb, &ret_ct) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Verify expected values */
     if(ret_cb != flush_cb || *(unsigned *)ret_ct != 1)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Create a group */
     if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Flush the group */
     if(H5Gflush(gid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Retrieve the object flush property values */
     if(H5Pget_object_flush_cb(ffapl, &ret_cb, &ret_ct) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Verify expected values */
     if(ret_cb != flush_cb || *(unsigned *)ret_ct != 2)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Create a dataset */
     if((did2 = H5Dcreate2(gid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Flush the dataset */
     if(H5Dflush(did2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Retrieve the object flush property values */
     if(H5Pget_object_flush_cb(ffapl, &ret_cb, &ret_ct) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Verify expected values */
     if(ret_cb != flush_cb || *(unsigned *)ret_ct != 3)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Closing */
     if(H5Sclose(sid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Gclose(gid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(ffapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     PASSED();
 
@@ -2650,13 +2727,13 @@ test_object_flush_cb(hid_t in_fapl)
 
 error:
     H5E_BEGIN_TRY {
-	H5Pclose(fapl);
-	H5Pclose(ffapl);
-	H5Sclose(sid);
-	H5Dclose(did1);
-	H5Dclose(did2);
-	H5Gclose(gid);
-	H5Fclose(fid);
+	    H5Pclose(fapl);
+	    H5Pclose(ffapl);
+	    H5Sclose(sid);
+	    H5Dclose(did1);
+	    H5Dclose(did2);
+	    H5Gclose(gid);
+	    H5Fclose(fid);
     } H5E_END_TRY;
 
     return -1;
@@ -2728,21 +2805,21 @@ test_append_flush_generic(void)
 
     /* Create a copy of dataset access property list */
     if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(dapl, 2, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Verify expected values */
     if(ret_boundary[0] != 0 || ret_boundary[1] != 0)
-	TEST_ERROR;
+	    TEST_ERROR;
     if(ret_cb != NULL || ret_count != NULL)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the property list */
     if(H5Pclose(dapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* 
      * Case (2)
@@ -2755,35 +2832,35 @@ test_append_flush_generic(void)
 
     /* Create a copy of dataset access property list */
     if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Invalid dataset rank: zero value */
     H5E_BEGIN_TRY {
-	ret = H5Pset_append_flush(dapl, 0, NULL, NULL, &count);
+	    ret = H5Pset_append_flush(dapl, 0, NULL, NULL, &count);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Invalid dataset rank: negative value */
     H5E_BEGIN_TRY {
-	ret = H5Pset_append_flush(dapl, -1, NULL, NULL, &count);
+	    ret = H5Pset_append_flush(dapl, -1, NULL, NULL, &count);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Invalid dataset rank: > H5S_MAX_RANK */
     H5E_BEGIN_TRY {
-	ret = H5Pset_append_flush(dapl, H5S_MAX_RANK+1, NULL, NULL, &count);
+	    ret = H5Pset_append_flush(dapl, H5S_MAX_RANK+1, NULL, NULL, &count);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* No boundary specified */
     H5E_BEGIN_TRY {
-	ret = H5Pset_append_flush(dapl, 2, NULL, NULL, &count);
+	    ret = H5Pset_append_flush(dapl, 2, NULL, NULL, &count);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Set up a valid boundary */
     boundary[0] = 1;
@@ -2791,28 +2868,28 @@ test_append_flush_generic(void)
 
     /* Undefined callback function but defined user data */
     H5E_BEGIN_TRY {
-	ret = H5Pset_append_flush(dapl, 2, boundary, NULL, &count);
+	    ret = H5Pset_append_flush(dapl, 2, boundary, NULL, &count);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Invalid boundary size: negative value */
     boundary[0] = (hsize_t)-1;
     boundary[1] = 1;
     H5E_BEGIN_TRY {
-	ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count);
+	    ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Invalid boundary size: H5S_UNLIMITED */
     boundary[0] = 1;
     boundary[1] = H5S_UNLIMITED;
     H5E_BEGIN_TRY {
-	ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count);
+	    ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
     
     /*
      * Case (3)
@@ -2825,27 +2902,27 @@ test_append_flush_generic(void)
     boundary[2] = 0;
     count = 1;
     if(H5Pset_append_flush(dapl, 2, boundary, append_cb, &count) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     ++count;
 
     /* Verify expected values: with boundary rank > set boundary rank */
     if(H5Pget_append_flush(dapl, 3, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
     if(ret_boundary[0] != 1 || ret_boundary[1] != 1 || boundary[2] != 0)
-	TEST_ERROR;
+	    TEST_ERROR;
     if(ret_cb == NULL || ret_count == NULL || *ret_count != 2)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Verify expected values: with boundary rank < set boundary rank */
     HDmemset(ret_boundary, 0, sizeof(ret_boundary));
     if(H5Pget_append_flush(dapl, 1, ret_boundary, NULL, NULL) < 0)
-	TEST_ERROR
+	    TEST_ERROR
     if(ret_boundary[0] != 1 || ret_boundary[1] != 0 || boundary[2] != 0)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Closing */
     if(H5Pclose(dapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     PASSED();
 
@@ -2853,7 +2930,7 @@ test_append_flush_generic(void)
 
 error:
     H5E_BEGIN_TRY {
-	H5Pclose(dapl);
+	    H5Pclose(dapl);
     } H5E_END_TRY;
 
     return -1;
@@ -2911,11 +2988,11 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
 
     /* Get a copy of the input parameter in_fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -2923,35 +3000,35 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
 
     /* Create the test file to work on */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Create a chunked dataset with 1 extendible dimension */
     if((sid = H5Screate_simple(2, dims, maxdims)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((did1 = H5Dcreate2(fid, "dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Get the dataset's access property list */
     if((ddapl = H5Dget_access_plist(did1)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 3, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
     
     /* Verify expected values */
     if(ret_boundary[0] != 0 || ret_boundary[1] != 0 || ret_boundary[2] != 0)
-	TEST_ERROR;
+	    TEST_ERROR;
     if(ret_cb != NULL || ret_count != NULL) 
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the dataset's access property list */
     if(H5Pclose(ddapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* 
      *  Case (2)--
@@ -2964,44 +3041,44 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
      */
     /* Create a copy of dataset access property list */
     if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set boundary dimension rank > the rank of dataset to be created */
     HDmemset(boundary, 0, sizeof(boundary));
     if(H5Pset_append_flush(dapl, 3, boundary, NULL, NULL) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should fail to Create the dataset */
     H5E_BEGIN_TRY {
-	did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
+	    did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
     } H5E_END_TRY;
     if(did2 >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Set boundary for a non-extendible dimension */
     boundary[0] = boundary[1] = 1;
     if(H5Pset_append_flush(dapl, 2, boundary, NULL, NULL) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should fail to create the dataset */
     H5E_BEGIN_TRY {
-	did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
+	    did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
     } H5E_END_TRY;
     if(did2 >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Create and close the dataset */
     if((did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to open the dataset */
     H5E_BEGIN_TRY {
 	did2 = H5Dopen2(fid, "dataset2", dapl);
     } H5E_END_TRY;
     if(did2 >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* 
      *  Case (3)--
@@ -3015,52 +3092,52 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
     boundary[0] = 0;
     boundary[1] = 1;
     if(H5Pset_append_flush(dapl, 2, boundary, append_cb, &count) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if((did2 = H5Dopen2(fid, "dataset2", dapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get the dataset's access property list */
     if((ddapl = H5Dget_access_plist(did2)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     HDmemset(ret_boundary, 0, sizeof(ret_boundary));
     ret_cb = NULL;
     ret_count = NULL;
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 3, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Verify expected values */
     if(ret_cb != append_cb || ret_count != &count)
-	TEST_ERROR
+	    TEST_ERROR
     if(ret_boundary[0] != 0 || ret_boundary[1] != 1 || ret_boundary[2] != 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     HDmemset(ret_boundary, 0, sizeof(ret_boundary));
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 1, ret_boundary, NULL, NULL) < 0)
-	TEST_ERROR
+	    TEST_ERROR
     if(ret_boundary[0] != 0 || ret_boundary[1] != 0 || ret_boundary[2] != 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Closing */
     if(H5Pclose(ddapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(dapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(dcpl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Sclose(sid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     PASSED();
 
@@ -3068,14 +3145,14 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
 
 error:
     H5E_BEGIN_TRY {
-	H5Pclose(dcpl);
-	H5Pclose(dapl);
-	H5Pclose(ddapl);
-	H5Dclose(did1);
-	H5Dclose(did2);
-	H5Pclose(fapl);
-	H5Sclose(sid);
-	H5Fclose(fid);
+	    H5Pclose(dcpl);
+	    H5Pclose(dapl);
+	    H5Pclose(ddapl);
+	    H5Dclose(did1);
+	    H5Dclose(did2);
+	    H5Pclose(fapl);
+	    H5Sclose(sid);
+	    H5Fclose(fid);
     } H5E_END_TRY;
 
     return -1;
@@ -3124,11 +3201,11 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
 
     /* Get a copy of the input parameter in_fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -3136,31 +3213,31 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
 
     /* Create the test file to work on */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Create a dataset */
     if((sid = H5Screate_simple(1, dims, dims)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((did1 = H5Dcreate2(fid, "dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Get the dataset's access property list */
     if((ddapl = H5Dget_access_plist(did1)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 3, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
     
     /* Verify expected values */
     if(ret_boundary[0] != 0 || ret_boundary[1] != 0 || ret_boundary[2] != 0)
-	TEST_ERROR;
+	    TEST_ERROR;
     if(ret_cb != NULL || ret_count != NULL) 
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the dataset's access property list */
     if(H5Pclose(ddapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* 
      *  Case (2)--
@@ -3174,57 +3251,57 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
      */
     /* Create a copy of dataset access property list */
     if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     boundary[0] = 1;
     boundary[1] = boundary[2] = 0;
     if(H5Pset_append_flush(dapl, 3, boundary, append_cb, &count) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should succeed to create the dataset: append flush property has no effect */
     if((did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, dapl)) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Get the dataset's access property list */
     if((ddapl = H5Dget_access_plist(did2)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 3, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Verify expected values */
     if(ret_cb != NULL || ret_count != NULL)
-	TEST_ERROR
+	    TEST_ERROR
     if(ret_boundary[0] != 0 || ret_boundary[1] != 0 || ret_boundary[2] != 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Closing */
     if(H5Pclose(ddapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should succeed in opening the dataset: append flush property has no effect */
     if((did2 = H5Dopen2(fid, "dataset2", dapl)) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Get the dataset's access property list */
     if((ddapl = H5Dget_access_plist(did2)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 3, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Verify expected values */
     if(ret_cb != NULL || ret_count != NULL)
-	TEST_ERROR
+	    TEST_ERROR
     if(ret_boundary[0] != 0 || ret_boundary[1] != 0 || ret_boundary[2] != 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     if(H5Dclose(did2) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     /* 
      * 	Case (3)--
      *	For a non-chunked dataset's access property list:
@@ -3235,39 +3312,39 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
 	 
     HDmemset(boundary, 0, sizeof(boundary));
     if(H5Pset_append_flush(dapl, 1, boundary, append_cb, &count) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if((did2 = H5Dopen2(fid, "dataset2", dapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get the dataset's access property list */
     if((ddapl = H5Dget_access_plist(did2)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 1, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Verify expected values */
     if(ret_cb != NULL || ret_count != NULL)
-	TEST_ERROR
+	    TEST_ERROR
     if(ret_boundary[0] != 0 || ret_boundary[1] != 0 || ret_boundary[2] != 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Closing */
     if(H5Pclose(ddapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(dapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Sclose(sid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     PASSED();
 
@@ -3275,13 +3352,13 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
 
 error:
     H5E_BEGIN_TRY {
-	H5Pclose(dapl);
-	H5Pclose(ddapl);
-	H5Dclose(did1);
-	H5Dclose(did2);
-	H5Pclose(fapl);
-	H5Sclose(sid);
-	H5Fclose(fid);
+	    H5Pclose(dapl);
+	    H5Pclose(ddapl);
+	    H5Dclose(did1);
+	    H5Dclose(did2);
+	    H5Pclose(fapl);
+	    H5Sclose(sid);
+	    H5Fclose(fid);
     } H5E_END_TRY;
 
     return -1;
@@ -3349,85 +3426,85 @@ test_append_flush_dataset_multiple(hid_t in_fapl)
 
     /* Create a copy of dataset access property list */
     if((dapl1 = H5Pcreate(H5P_DATASET_ACCESS)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if((dapl2 = H5Pcreate(H5P_DATASET_ACCESS)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     boundary1[0] = 0;
     boundary1[1] = 1;
     count1 = 0;
     if(H5Pset_append_flush(dapl1, 2, boundary1, append_cb, &count1) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     boundary2[0] = 1;
     boundary2[1] = 0;
     count2 = 0;
     if(H5Pset_append_flush(dapl2, 2, boundary2, append_cb2, &count2) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get a copy of the input parameter in_fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Create the test file to work on */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Create a chunked dataset with 2 extendible dimensions */
     if((sid = H5Screate_simple(2, dims, maxdims)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((did1 = H5Dcreate2(fid, "dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl1)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Open the dataset */
     if((did2 = H5Dopen2(fid, "dataset1", dapl2)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the dataset's access property list for did1 */
     if((ddapl = H5Dget_access_plist(did1)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 3, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
     
     /* Verify expected values: should be the setting in dapl1 */
     if(ret_boundary[0] != 0 || ret_boundary[1] != 1 || ret_boundary[2] != 0)
-	TEST_ERROR;
+	    TEST_ERROR;
     if(ret_cb != append_cb || ret_count != &count1) 
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the dataset's access property list */
     if(H5Pclose(ddapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the dataset's access property list for did2 */
     if((ddapl = H5Dget_access_plist(did2)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 3, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
     
     /* Verify expected values: should be the setting in dapl1 */
     if(ret_boundary[0] != 0 || ret_boundary[1] != 1 || ret_boundary[2] != 0)
-	TEST_ERROR;
+	    TEST_ERROR;
     if(ret_cb != append_cb || ret_count != &count1) 
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the dataset's access property list */
     if(H5Pclose(ddapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     H5Dclose(did1);
     H5Dclose(did2);
 
@@ -3443,70 +3520,70 @@ test_append_flush_dataset_multiple(hid_t in_fapl)
      *		-- should return append flush property values set in dapl1
      */
     if((did1 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Open the dataset with append flush setting in dapl2 */
     if((did1 = H5Dopen2(fid, "dataset2", dapl2)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Open the dataset with append flush setting in dapl1 */
     if((did2 = H5Dopen2(fid, "dataset2", dapl1)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the dataset's access property list for did1 */
     if((ddapl = H5Dget_access_plist(did1)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 3, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
     
     /* Verify expected values: should be the setting in dapl2 */
     if(ret_boundary[0] != 1 || ret_boundary[1] != 0 || ret_boundary[2] != 0)
-	TEST_ERROR;
+	    TEST_ERROR;
     if(ret_cb != append_cb2 || ret_count != &count2) 
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the access property list */
     if(H5Pclose(ddapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
 
     /* Get the dataset's access property list for did2 */
     if((ddapl = H5Dget_access_plist(did2)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the append flush property values */
     if(H5Pget_append_flush(ddapl, 3, ret_boundary, &ret_cb, (void **)&ret_count) < 0)
-	TEST_ERROR
+	    TEST_ERROR
     
     /* Verify expected values: should be the setting in dapl2 */
     if(ret_boundary[0] != 1 || ret_boundary[1] != 0 || ret_boundary[2] != 0)
-	TEST_ERROR;
+	    TEST_ERROR;
     if(ret_cb != append_cb2 || ret_count != &count2) 
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Closing */
     if(H5Pclose(ddapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(dapl2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(dapl1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(dcpl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Dclose(did2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Sclose(sid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     PASSED();
 
@@ -3514,19 +3591,81 @@ test_append_flush_dataset_multiple(hid_t in_fapl)
 
 error:
     H5E_BEGIN_TRY {
-	H5Pclose(dcpl);
-	H5Pclose(dapl1);
-	H5Pclose(dapl2);
-	H5Pclose(ddapl);
-	H5Dclose(did1);
-	H5Dclose(did2);
-	H5Pclose(fapl);
-	H5Sclose(sid);
-	H5Fclose(fid);
+	    H5Pclose(dcpl);
+	    H5Pclose(dapl1);
+	    H5Pclose(dapl2);
+	    H5Pclose(ddapl);
+	    H5Dclose(did1);
+	    H5Dclose(did2);
+	    H5Pclose(fapl);
+	    H5Sclose(sid);
+	    H5Fclose(fid);
     } H5E_END_TRY;
 
     return -1;
 } /* test_append_flush_dataset_multiple() */
+
+static int
+test_swmr_vfd_flag(void)
+{
+    hid_t fid = -1;         /* file ID */
+    hid_t sec2_fapl = -1;   /* fapl ID of a VFD that supports SWMR writes (sec2) */
+    hid_t fam_fapl = -1;    /* fapl ID of a VFD that does not support SWMR writes (family) */
+    char filename[NAME_BUF_SIZE];	/* file name */
+    
+    TESTING("SWMR-enabled VFD flag functionality");
+
+    /* Attempt to open a file using a SWMR-compatible VFD. */
+
+    if((sec2_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_fapl_sec2(sec2_fapl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_libver_bounds(sec2_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR
+
+    h5_fixname(FILENAME[0], sec2_fapl, filename, sizeof(filename));
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, sec2_fapl)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Attempt to open a file using a non-SWMR-compatible VFD. */
+
+    if((fam_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_fapl_family(fam_fapl, H5F_FAMILY_DEFAULT, sec2_fapl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_libver_bounds(fam_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR
+
+    fid = -1;
+    h5_fixname(FILENAME[0], fam_fapl, filename, sizeof(filename));
+    H5E_BEGIN_TRY {
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fam_fapl);
+    } H5E_END_TRY;
+    if(fid >= 0)
+        TEST_ERROR;
+
+    if(H5Pclose(sec2_fapl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(fam_fapl) < 0)
+        FAIL_STACK_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(sec2_fapl);
+        H5Pclose(fam_fapl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+} /* test_swmr_vfd_flag() */
+
 
 #ifdef OUT
 /* 
@@ -3545,11 +3684,11 @@ test_bug_refresh(hid_t in_fapl)
 
     /* Create a copy of the input parameter in_fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -3558,33 +3697,34 @@ test_bug_refresh(hid_t in_fapl)
 
     /* Create a file with the latest format */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(fid)))
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Create groups: compact to dense storage */
     if((gid1 = H5Gcreate2(fid, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((gid2 = H5Gcreate2(fid, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((gid3 = H5Gcreate2(fid, "group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((gid4 = H5Gcreate2(fid, "group4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((gid5 = H5Gcreate2(fid, "group5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((gid6 = H5Gcreate2(fid, "group6", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((gid7 = H5Gcreate2(fid, "group7", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((gid8 = H5Gcreate2(fid, "group8", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((gid9 = H5Gcreate2(fid, "group9", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
-    if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) TEST_ERROR 
+    if (H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+        TEST_ERROR 
 
     if(H5Grefresh(gid1) < 0) TEST_ERROR
     if(H5Grefresh(gid2) < 0) TEST_ERROR
@@ -3612,17 +3752,17 @@ test_bug_refresh(hid_t in_fapl)
 
 error:
     H5E_BEGIN_TRY {
-    H5Gclose(gid1);
-    H5Gclose(gid2);
-    H5Gclose(gid3);
-    H5Gclose(gid4);
-    H5Gclose(gid5);
-    H5Gclose(gid6);
-    H5Gclose(gid7);
-    H5Gclose(gid8);
-    H5Gclose(gid9);
-    H5Pclose(fapl);
-    H5Fclose(fid);
+        H5Gclose(gid1);
+        H5Gclose(gid2);
+        H5Gclose(gid3);
+        H5Gclose(gid4);
+        H5Gclose(gid5);
+        H5Gclose(gid6);
+        H5Gclose(gid7);
+        H5Gclose(gid8);
+        H5Gclose(gid9);
+        H5Pclose(fapl);
+        H5Fclose(fid);
     } H5E_END_TRY;
 
     return -1;
@@ -3639,6 +3779,16 @@ main(void)
 {
     int nerrors = 0;	/* The # of errors */
     hid_t fapl = -1;	/* File access property list ID */
+    char *driver = NULL;    /* VFD string (from env variable) */
+
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    driver = HDgetenv("HDF5_DRIVER");
+    if(!H5FD_supports_swmr_test(driver)) {
+        printf("This VFD does not support SWMR I/O\n");
+        return EXIT_SUCCESS;
+    }
 
     /* Set up */
     h5_reset();
@@ -3668,9 +3818,15 @@ main(void)
     nerrors += test_append_flush_dataset_chunked(fapl);
     nerrors += test_append_flush_dataset_fixed(fapl);
     nerrors += test_append_flush_dataset_multiple(fapl);
+
+    /* Tests SWMR VFD compatibility flag.
+     * Only needs to run when the VFD is the default (sec2).
+     */
+    if(NULL == driver || !HDstrcmp(driver, "") || !HDstrcmp(driver, "sec2"))
+        nerrors += test_swmr_vfd_flag();
     
     if(nerrors)
-	goto error;
+	    goto error;
 
     printf("All tests passed.\n");
 
@@ -3685,3 +3841,4 @@ error:
     return 1;
 
 } /* main() */
+

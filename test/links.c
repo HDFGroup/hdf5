@@ -3961,6 +3961,7 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
                 filename2[NAME_BUF_SIZE];
     herr_t      ret;
     unsigned    flags;
+    char        *driver = NULL;        /* VFD string (from env variable) */
 
     if(new_format)
         TESTING("H5Pset/get_elink_acc_flags() (w/new group format)")
@@ -4030,8 +4031,10 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     /* Close file1 */
     if(H5Fclose(file1) < 0) TEST_ERROR
 
-    /* Can't run this test with multi-file VFDs */
-    if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
+    /* Only run this part with VFDs that support SWMR */
+    driver = HDgetenv("HDF5_DRIVER");
+    if(H5FD_supports_swmr_test(driver)) {
+
         /* Reopen file1, with read-write and SWMR-write access */
         /* Only supported under the latest file format */
         if(new_format) {

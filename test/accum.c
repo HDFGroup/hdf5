@@ -1807,21 +1807,32 @@ error:
 unsigned 
 test_swmr_write_big(void)
 {
-    hid_t fid = -1;			/* File ID */
+    hid_t fid = -1;			    /* File ID */
     hid_t fapl = -1;			/* File access property list */
     H5F_t *rf = NULL;			/* File pointer */
-    uint8_t *wbuf2, *rbuf;       	/* Buffers for reading & writing */
+    uint8_t *wbuf2, *rbuf;      /* Buffers for reading & writing */
     uint8_t wbuf[1024];			/* Buffer for reading & writing */
-    unsigned u;                         /* Local index variable */
-    pid_t pid;				/* Process ID */
-    int status;				/* Status returned from child process */
-    H5F_io_info_t fio_info;             /* I/O info for operation */
+    unsigned u;                 /* Local index variable */
+    pid_t pid;				    /* Process ID */
+    int status;				    /* Status returned from child process */
+    H5F_io_info_t fio_info;     /* I/O info for operation */
     char *new_argv[] = {NULL};
     char *new_envp[] = {NULL};
+    char *driver = NULL;        /* VFD string (from env variable) */
 
     TESTING("SWMR write of large metadata");
 
-    #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    driver = HDgetenv("HDF5_DRIVER");
+    if(!H5FD_supports_swmr_test(driver)) {
+        SKIPPED();
+        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        return EXIT_SUCCESS;
+    }
+
+#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
     SKIPPED();
     HDputs("    Test skipped due to fork or waitpid not defined.");
@@ -1830,7 +1841,7 @@ test_swmr_write_big(void)
 #else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
     /* File access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((fapl = h5_fileaccess()) < 0)
         FAIL_STACK_ERROR
 
     /* Set to use latest library format */
@@ -1868,9 +1879,9 @@ test_swmr_write_big(void)
 
     /* Allocate space for the write & read buffers */
     if((wbuf2 = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE)) == NULL)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((rbuf = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE)) == NULL)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Initialize wbuf with "0, 1, 2...1024"*/
     for(u = 0; u < 1024; u++)
@@ -1878,14 +1889,16 @@ test_swmr_write_big(void)
 
     /* Write [1024, 1024] bytes with wbuf */
     if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, wbuf) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     /* Read the data */
     if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     /* Verify the data read is correct */
-    if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0)
+        TEST_ERROR;
     /* Flush the data to disk */
-    if(accum_reset(&fio_info) < 0) FAIL_STACK_ERROR;
+    if(accum_reset(&fio_info) < 0)
+        FAIL_STACK_ERROR;
 
     /* Initialize wbuf with all 1s */
     for(u = 0; u < 1024; u++)
@@ -1897,31 +1910,33 @@ test_swmr_write_big(void)
 
     /* Write [1024,1024] with wbuf--all 1s */
     if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, wbuf) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     /* Read the data */
     if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     /* Verify the data read is correct */
-    if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0)
+        TEST_ERROR;
     /* The data stays in the accumulator */
 
     /* Write a large piece of metadata [2048, BIG_BUF_SIZE] with wbuf2 */
     if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)2048, (size_t)BIG_BUF_SIZE, H5P_DATASET_XFER_DEFAULT, wbuf2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     /* Read the data */
     if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)2048, (size_t)BIG_BUF_SIZE, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     /* Verify the data read is correct */
-    if(HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)
+        TEST_ERROR;
 
     /* Fork child process to verify that the data at [1024, 2014] does get written to disk */
     if((pid = HDfork()) < 0) {
         HDperror("fork");
         FAIL_STACK_ERROR;
     } else if(0 == pid) { /* Child process */
-	/* Run the reader */
-	status = HDexecve(SWMR_READER, new_argv, new_envp);
-	printf("errno from execve = %s\n", strerror(errno));
+	    /* Run the reader */
+	    status = HDexecve(SWMR_READER, new_argv, new_envp);
+	    printf("errno from execve = %s\n", strerror(errno));
         FAIL_STACK_ERROR;
     }
 
@@ -1931,22 +1946,25 @@ test_swmr_write_big(void)
 
     /* Check if child process terminates normally and its return value */
     if(WIFEXITED(status) && !WEXITSTATUS(status)) {
-	/* Flush the accumulator */
-	if(accum_reset(&fio_info) < 0) FAIL_STACK_ERROR;
-	/* Close the property list */
-	if(H5Pclose(fapl) < 0) 
-	    FAIL_STACK_ERROR;
+	    /* Flush the accumulator */
+	    if(accum_reset(&fio_info) < 0)
+            FAIL_STACK_ERROR;
+	    /* Close the property list */
+	    if(H5Pclose(fapl) < 0) 
+	        FAIL_STACK_ERROR;
 
-	/* Close and remove the file */
-	if(H5Fclose(fid) < 0) 
-	    FAIL_STACK_ERROR;
-	HDremove(SWMR_FILENAME);
+	    /* Close and remove the file */
+	    if(H5Fclose(fid) < 0) 
+	        FAIL_STACK_ERROR;
+	    HDremove(SWMR_FILENAME);
 
-	/* Release memory */
-	if(wbuf2) HDfree(wbuf2);
-	if(rbuf) HDfree(rbuf);
-	PASSED();
-	return 0;
+        /* Release memory */
+        if(wbuf2)
+            HDfree(wbuf2);
+        if(rbuf)
+            HDfree(rbuf);
+        PASSED();
+        return 0;
     }
 
 error:
@@ -1955,8 +1973,10 @@ error:
     H5Fclose(fid);
     HDremove(SWMR_FILENAME);
     /* Release memory */
-    if(wbuf2) HDfree(wbuf2);
-    if(rbuf) HDfree(rbuf);
+    if(wbuf2)
+        HDfree(wbuf2);
+    if(rbuf)
+        HDfree(rbuf);
 
     return 1;
 

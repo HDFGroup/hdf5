@@ -183,7 +183,7 @@ int create_uc_file(void)
     H5D_chunk_index_t idx_type; /* Chunk index type */
 
     /* Create the file */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((fapl = h5_fileaccess()) < 0)
         return -1;
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         return -1;
@@ -262,7 +262,7 @@ int write_uc_file(hbool_t tosend)
     name = UC_opts.filename;
 
     /* Open the file */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((fapl = h5_fileaccess()) < 0)
         return -1;
     if(UC_opts.use_swmr)
         if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
@@ -430,6 +430,7 @@ int write_uc_file(hbool_t tosend)
  */
 int read_uc_file(hbool_t towait)
 {
+    hid_t   fapl;         /* file access property list ID */
     hid_t	fid;          /* File ID for new HDF5 file */
     hid_t	dsid;         /* dataset ID */
     char	*name;
@@ -455,10 +456,17 @@ int read_uc_file(hbool_t towait)
     name = UC_opts.filename;
 
     /* Open the file */
-    if((fid = H5Fopen(name, H5F_ACC_RDONLY | (UC_opts.use_swmr ? H5F_ACC_SWMR_READ : 0), H5P_DEFAULT)) < 0){
+    if((fapl = h5_fileaccess()) < 0)
+        return -1;
+    if((fid = H5Fopen(name, H5F_ACC_RDONLY | (UC_opts.use_swmr ? H5F_ACC_SWMR_READ : 0), fapl)) < 0){
 	fprintf(stderr, "H5Fopen failed\n");
         return -1;
     }
+    if (H5Pclose(fapl) < 0){
+	    fprintf(stderr, "Failed to property list\n");
+	    return -1;
+    }
+
 
     /* Open the dataset of the program name */
     if((dsid = H5Dopen2(fid, progname_g, H5P_DEFAULT)) < 0){

@@ -694,6 +694,7 @@
 ./src/H5FDspace.c
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
+./src/H5FDtest.c
 ./src/H5FDwindows.c
 ./src/H5FDwindows.h
 ./src/H5FL.c
@@ -1067,6 +1068,7 @@
 ./test/specmetaread.h5
 ./test/stab.c
 ./test/swmr_addrem_writer.c
+./test/swmr_check_compat_vfd.c
 ./test/swmr_common.c
 ./test/swmr_common.h
 ./test/swmr_generator.c

@@ -1039,12 +1039,12 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
-        *flags |= H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
-        *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
-        *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
-        *flags |= H5FD_FEAT_ALLOW_FILE_IMAGE;   /* OK to use file image feature with this VFD */
-        *flags |= H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS;       /* OK to use file image callbacks with this VFD */
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA;             /* OK to aggregate metadata allocations                             */
+        *flags |= H5FD_FEAT_ACCUMULATE_METADATA;            /* OK to accumulate metadata for faster writes                      */
+        *flags |= H5FD_FEAT_DATA_SIEVE;                     /* OK to perform data sieving for faster raw data reads & writes    */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;            /* OK to aggregate "small" raw data allocations                     */
+        *flags |= H5FD_FEAT_ALLOW_FILE_IMAGE;               /* OK to use file image feature with this VFD                       */
+        *flags |= H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS;   /* OK to use file image callbacks with this VFD                     */
 
         /* If the backing store is open, a POSIX file handle is available */
         if(file && file->fd >= 0 && file->backing_store)

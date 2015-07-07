@@ -26,7 +26,7 @@ int
 main(void)
 {
     if(VERBOSE_MED)
-	printf("Encode/Decode property list endianess\n");
+	    printf("Encode/Decode property list endianess\n");
 
     /******* ENCODE/DECODE DCPLS *****/
     TESTING("DCPL Encoding/Decoding");
@@ -60,8 +60,8 @@ main(void)
 
     /******* ENCODE/DECODE LAPLS *****/
     TESTING("LAPL Encoding/Decoding");
-    //if(test_plists("testfiles/plist_files/lapl_le", "testfiles/plist_files/lapl_be") < 0)
-        //FAIL_STACK_ERROR
+    if(test_plists("testfiles/plist_files/lapl_le", "testfiles/plist_files/lapl_be") < 0)
+        FAIL_STACK_ERROR
     PASSED();
 
     /******* ENCODE/DECODE OCPLS *****/
@@ -112,7 +112,7 @@ test_plists(const char *filename1, const char *filename2)
     int fd_le, fd_be;
     size_t size_le = 0, size_be = 0;
     void *buf_le = NULL, *buf_be = NULL;
-    hid_t plist_le, plist_be;	       	/* dataset create prop. list */
+    hid_t plist_le, plist_be;
     const char *testfile;
 
     testfile = H5_get_srcdir_filename(filename1);

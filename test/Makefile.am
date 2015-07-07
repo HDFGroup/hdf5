@@ -61,10 +61,6 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            freespace mf farray earray btree2 fheap file_image unregister \
            cache_logging cork test_swmr
 
-bin_PROGRAMS=swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
-    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-    use_append_chunk use_append_mchunks use_disable_mdc_flushes atomic_writer atomic_reader accum_swmr_reader
-
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
 # tcheck_version is used by testcheck_version.sh.
@@ -81,7 +77,8 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     testmeta accum_swmr_reader atomic_writer atomic_reader \
     links_env flushrefresh use_append_chunk use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
-    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer
+    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
+    swmr_check_compat_vfd
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= plugin
 endif
@@ -183,7 +180,8 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     swmr_data.h5 use_use_append_chunk.h5 use_append_mchunks.h5 use_disable_mdc_flushes.h5     \
     flushrefresh.h5 flushrefresh_VERIFICATION_START                  \
     flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
-    flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 test_swmr.h5
+    flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
+    test_swmr*.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
