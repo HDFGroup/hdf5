@@ -204,6 +204,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
     symbol_info_t **sym_rand = NULL;    /* Pointers to array of random dataset IDs */
     hid_t mem_sid;              /* Memory dataspace ID */
     hid_t fid;                  /* SWMR test file ID */
+    hid_t fapl;                 /* File access property list */
     symbol_t record;            /* The record to add to the dataset */
     unsigned v;                 /* Local index variable */
 
@@ -273,6 +274,10 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
     start_time = time(NULL);
     curr_time = start_time;
 
+    /* Create file access property list */
+    if((fapl = h5_fileaccess()) < 0)
+        return -1;
+
     /* Loop over reading records until [at least] the correct # of seconds have passed */
     while(curr_time < (time_t)(start_time + (time_t)nseconds)) {
 
@@ -281,7 +286,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
              fprintf(stderr, "Opening file: %s\n", filename);
 
         /* Open the file */
-        if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, H5P_DEFAULT)) < 0)
+        if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
             return -1;
 
         /* Check 'common' datasets, if any */
@@ -328,6 +333,10 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
         /* Retrieve the current time */
         curr_time = time(NULL);
     } /* end while */
+
+    /* Close the fapl */
+    if(H5Pclose(fapl) < 0)
+        return -1;
 
     /* Close the memory dataspace */
     if(H5Sclose(mem_sid) < 0)

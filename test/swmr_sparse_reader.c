@@ -190,11 +190,15 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
     assert(filename);
     assert(poll_time != 0);
     
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    /* Create file access property list */
+    if((fapl = h5_fileaccess()) < 0)
+        return -1;
+
     H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
+
     /* Emit informational message */
-        if(verbose)
-            fprintf(stderr, "Opening file: %s\n", filename);
+    if(verbose)
+        fprintf(stderr, "Opening file: %s\n", filename);
 
     /* Open the file */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)

@@ -90,7 +90,7 @@ create_file(const char *filename, unsigned verbose,
     assert(index_type);
 
     /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((fapl = h5_fileaccess()) < 0)
         return -1;
 
     /* We ALWAYS select the latest file format for SWMR */
@@ -301,7 +301,7 @@ open_file(const char *filename, unsigned verbose)
     assert(filename);
 
     /* Create file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((fapl = h5_fileaccess()) < 0)
         return -1;
 
     /* Set to use the latest library format */
