@@ -1967,6 +1967,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FDlock
+ *
+ * Purpose:	Set a file lock
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Vailin Choi; March 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDlock(H5FD_t *file, hbool_t rw)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "*xu", file, rw);
+
+    /* Check args */
+    if(!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+
+    /* The real work */
+    if(H5FD_lock(file, rw) < 0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file lock request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDlock() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_lock
  *
  * Purpose:	Private version of H5FDlock()
@@ -1993,6 +2027,39 @@ H5FD_lock(H5FD_t *file, hbool_t rw)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_lock() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDunlock
+ *
+ * Purpose:	Remove a file lock
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Vailin Choi; March 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDunlock(H5FD_t *file)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("a", "*x", file);
+
+    /* Check args */
+    if(!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+
+    /* The real work */
+    if(H5FD_unlock(file) < 0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file unlock request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDunlock() */
 
 
 /*-------------------------------------------------------------------------

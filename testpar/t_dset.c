@@ -4152,16 +4152,20 @@ dataset_atomicity(void)
     MPI_Barrier (comm);
 
     /* make sure setting atomicity fails on a serial file ID */
-    /* open the file collectively */
-    fid=H5Fopen(filename,H5F_ACC_RDWR,H5P_DEFAULT);
-    VRFY((fid >= 0), "H5Fopen succeeed");
+    /* file locking allows only one file open (serial) for writing */
+    if(MAINPROCESS){
+	fid=H5Fopen(filename,H5F_ACC_RDWR,H5P_DEFAULT);
+	VRFY((fid >= 0), "H5Fopen succeeed");
+    }
 
     /* should fail */
     ret = H5Fset_mpi_atomicity (fid , TRUE);
     VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
 
-    ret = H5Fclose(fid);
-    VRFY((ret >= 0), "H5Fclose succeeded");
+    if(MAINPROCESS){
+	ret = H5Fclose(fid);
+	VRFY((ret >= 0), "H5Fclose succeeded");
+    }
 
     MPI_Barrier (comm);
 

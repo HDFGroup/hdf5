@@ -1175,9 +1175,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to lock the file or initialize file structure")
         }
 
-	/* Need to set status_flags in the superblock */
-        set_flag = TRUE;
+	/* Need to set status_flags in the superblock if the driver has a 'lock' method */
+	if(drvr->lock)
+	    set_flag = TRUE;
     } /* end else */
+
 
     /* Retain the name the file was opened with */
     file->open_name = H5MM_xstrdup(name);

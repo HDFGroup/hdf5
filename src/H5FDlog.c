@@ -184,6 +184,8 @@ static herr_t H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr
 static herr_t H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
             size_t size, const void *buf);
 static herr_t H5FD_log_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD_log_lock(H5FD_t *_file, hbool_t rw);
+static herr_t H5FD_log_unlock(H5FD_t *_file);
 
 static const H5FD_class_t H5FD_log_g = {
     "log",					/*name			*/
@@ -215,8 +217,8 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD_log_write,				/*write			*/
     NULL,					/*flush			*/
     H5FD_log_truncate,				/*truncate		*/
-    NULL,                                       /*lock                  */
-    NULL,                                       /*unlock                */
+    H5FD_log_lock,                              /*lock                  */
+    H5FD_log_unlock,                            /*unlock                */
     H5FD_FLMAP_DICHOTOMY			/*fl_map		*/
 };
 
@@ -1580,3 +1582,68 @@ H5FD_log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_U
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_log_truncate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_log_lock
+ *
+ * Purpose:     Place a lock on the file
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL, file not locked.
+ *
+ * Programmer:  Vailin Choi; May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_log_lock(H5FD_t *_file, hbool_t rw)
+{
+    H5FD_log_t	*file = (H5FD_log_t *)_file;
+    int lock;
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(file);
+
+    /* Determine the type of lock */
+    int lock = rw ? LOCK_EX : LOCK_SH;
+
+    /* Place the lock with non-blocking */
+    if(HDflock(file->fd, lock | LOCK_NB) < 0)
+        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_log_lock() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_log_unlock
+ *
+ * Purpose:     Remove the existing lock on the file
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Vailin Choi; May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_log_unlock(H5FD_t *_file)
+{
+    H5FD_log_t  *file = (H5FD_log_t *)_file;       /* VFD file struct */
+    herr_t ret_value = SUCCEED;                         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    if(HDflock(file->fd, LOCK_UN) < 0)
+        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock (unlock) file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_log_unlock() */

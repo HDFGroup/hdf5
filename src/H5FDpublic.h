@@ -362,6 +362,8 @@ H5_DLL herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                         haddr_t addr, size_t size, const void *buf);
 H5_DLL herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
 H5_DLL herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
+H5_DLL herr_t H5FDlock(H5FD_t *file, hbool_t rw);
+H5_DLL herr_t H5FDunlock(H5FD_t *file);
 
 #ifdef __cplusplus
 }
