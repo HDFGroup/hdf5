@@ -1984,7 +1984,7 @@ H5FDlock(H5FD_t *file, hbool_t rw)
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "*xu", file, rw);
+    H5TRACE2("e", "*xb", file, rw);
 
     /* Check args */
     if(!file || !file->cls)
@@ -2047,7 +2047,7 @@ H5FDunlock(H5FD_t *file)
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("a", "*x", file);
+    H5TRACE1("e", "*x", file);
 
     /* Check args */
     if(!file || !file->cls)

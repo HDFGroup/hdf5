@@ -209,7 +209,7 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	freespace$(EXEEXT) mf$(EXEEXT) farray$(EXEEXT) earray$(EXEEXT) \
 	btree2$(EXEEXT) fheap$(EXEEXT) file_image$(EXEEXT) \
 	unregister$(EXEEXT) cache_logging$(EXEEXT) cork$(EXEEXT) \
-	test_swmr$(EXEEXT)
+	swmr$(EXEEXT)
 @HAVE_SHARED_CONDITIONAL_TRUE@am__EXEEXT_2 = plugin$(EXEEXT)
 am__EXEEXT_3 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
@@ -526,6 +526,10 @@ stab_SOURCES = stab.c
 stab_OBJECTS = stab.$(OBJEXT)
 stab_LDADD = $(LDADD)
 stab_DEPENDENCIES = libh5test.la $(LIBHDF5)
+swmr_SOURCES = swmr.c
+swmr_OBJECTS = swmr.$(OBJEXT)
+swmr_LDADD = $(LDADD)
+swmr_DEPENDENCIES = libh5test.la $(LIBHDF5)
 swmr_addrem_writer_SOURCES = swmr_addrem_writer.c
 swmr_addrem_writer_OBJECTS = swmr_addrem_writer.$(OBJEXT)
 swmr_addrem_writer_LDADD = $(LDADD)
@@ -570,10 +574,6 @@ tcheck_version_SOURCES = tcheck_version.c
 tcheck_version_OBJECTS = tcheck_version.$(OBJEXT)
 tcheck_version_LDADD = $(LDADD)
 tcheck_version_DEPENDENCIES = libh5test.la $(LIBHDF5)
-test_swmr_SOURCES = test_swmr.c
-test_swmr_OBJECTS = test_swmr.$(OBJEXT)
-test_swmr_LDADD = $(LDADD)
-test_swmr_DEPENDENCIES = libh5test.la $(LIBHDF5)
 am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tarray.$(OBJEXT) \
 	tattr.$(OBJEXT) tchecksum.$(OBJEXT) tconfig.$(OBJEXT) \
 	tfile.$(OBJEXT) tgenprop.$(OBJEXT) th5o.$(OBJEXT) \
@@ -679,11 +679,11 @@ SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
 	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
 	ntypes.c objcopy.c ohdr.c plugin.c pool.c reserved.c \
-	set_extent.c space_overflow.c stab.c swmr_addrem_writer.c \
-	swmr_check_compat_vfd.c swmr_generator.c swmr_reader.c \
-	swmr_remove_reader.c swmr_remove_writer.c swmr_sparse_reader.c \
-	swmr_sparse_writer.c swmr_start_write.c swmr_writer.c \
-	tcheck_version.c test_swmr.c $(testhdf5_SOURCES) testmeta.c \
+	set_extent.c space_overflow.c stab.c swmr.c \
+	swmr_addrem_writer.c swmr_check_compat_vfd.c swmr_generator.c \
+	swmr_reader.c swmr_remove_reader.c swmr_remove_writer.c \
+	swmr_sparse_reader.c swmr_sparse_writer.c swmr_start_write.c \
+	swmr_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
 	$(ttsafe_SOURCES) twriteorder.c unlink.c unregister.c \
 	$(use_append_chunk_SOURCES) $(use_append_mchunks_SOURCES) \
 	$(use_disable_mdc_flushes_SOURCES) vfd.c
@@ -705,11 +705,11 @@ DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
 	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
 	ntypes.c objcopy.c ohdr.c plugin.c pool.c reserved.c \
-	set_extent.c space_overflow.c stab.c swmr_addrem_writer.c \
-	swmr_check_compat_vfd.c swmr_generator.c swmr_reader.c \
-	swmr_remove_reader.c swmr_remove_writer.c swmr_sparse_reader.c \
-	swmr_sparse_writer.c swmr_start_write.c swmr_writer.c \
-	tcheck_version.c test_swmr.c $(testhdf5_SOURCES) testmeta.c \
+	set_extent.c space_overflow.c stab.c swmr.c \
+	swmr_addrem_writer.c swmr_check_compat_vfd.c swmr_generator.c \
+	swmr_reader.c swmr_remove_reader.c swmr_remove_writer.c \
+	swmr_sparse_reader.c swmr_sparse_writer.c swmr_start_write.c \
+	swmr_writer.c tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
 	$(ttsafe_SOURCES) twriteorder.c unlink.c unregister.c \
 	$(use_append_chunk_SOURCES) $(use_append_mchunks_SOURCES) \
 	$(use_disable_mdc_flushes_SOURCES) vfd.c
@@ -1257,7 +1257,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
            freespace mf farray earray btree2 fheap file_image unregister \
-           cache_logging cork test_swmr
+           cache_logging cork swmr
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -1760,6 +1760,10 @@ stab$(EXEEXT): $(stab_OBJECTS) $(stab_DEPENDENCIES) $(EXTRA_stab_DEPENDENCIES)
 	@rm -f stab$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(stab_OBJECTS) $(stab_LDADD) $(LIBS)
 
+swmr$(EXEEXT): $(swmr_OBJECTS) $(swmr_DEPENDENCIES) $(EXTRA_swmr_DEPENDENCIES) 
+	@rm -f swmr$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(swmr_OBJECTS) $(swmr_LDADD) $(LIBS)
+
 swmr_addrem_writer$(EXEEXT): $(swmr_addrem_writer_OBJECTS) $(swmr_addrem_writer_DEPENDENCIES) $(EXTRA_swmr_addrem_writer_DEPENDENCIES) 
 	@rm -f swmr_addrem_writer$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(swmr_addrem_writer_OBJECTS) $(swmr_addrem_writer_LDADD) $(LIBS)
@@ -1803,10 +1807,6 @@ swmr_writer$(EXEEXT): $(swmr_writer_OBJECTS) $(swmr_writer_DEPENDENCIES) $(EXTRA
 tcheck_version$(EXEEXT): $(tcheck_version_OBJECTS) $(tcheck_version_DEPENDENCIES) $(EXTRA_tcheck_version_DEPENDENCIES) 
 	@rm -f tcheck_version$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(tcheck_version_OBJECTS) $(tcheck_version_LDADD) $(LIBS)
-
-test_swmr$(EXEEXT): $(test_swmr_OBJECTS) $(test_swmr_DEPENDENCIES) $(EXTRA_test_swmr_DEPENDENCIES) 
-	@rm -f test_swmr$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(test_swmr_OBJECTS) $(test_swmr_LDADD) $(LIBS)
 
 testhdf5$(EXEEXT): $(testhdf5_OBJECTS) $(testhdf5_DEPENDENCIES) $(EXTRA_testhdf5_DEPENDENCIES) 
 	@rm -f testhdf5$(EXEEXT)
@@ -1935,6 +1935,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_extent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/space_overflow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stab.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_addrem_writer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_check_compat_vfd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_common.Plo@am__quote@
@@ -1952,7 +1953,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tchecksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tconfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcoords.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_swmr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testframe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testhdf5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testmeta.Po@am__quote@
@@ -2576,9 +2576,9 @@ cork.log: cork$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-test_swmr.log: test_swmr$(EXEEXT)
-	@p='test_swmr$(EXEEXT)'; \
-	b='test_swmr'; \
+swmr.log: swmr$(EXEEXT)
+	@p='swmr$(EXEEXT)'; \
+	b='swmr'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \

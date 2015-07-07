@@ -1067,6 +1067,7 @@
 # ====end distribute this for now. See HDFFV-8236====
 ./test/specmetaread.h5
 ./test/stab.c
+./test/swmr.c
 ./test/swmr_addrem_writer.c
 ./test/swmr_check_compat_vfd.c
 ./test/swmr_common.c
@@ -1100,7 +1101,6 @@
 ./test/test_usecases.sh.in
 ./test/testmeta.c
 ./test/testswmr.sh.in
-./test/test_swmr.c
 ./test/tfile.c
 ./test/tgenprop.c
 ./test/th5o.c
