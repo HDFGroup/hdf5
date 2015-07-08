@@ -2413,7 +2413,6 @@
 
 ./config/cmake_ext_mod/CheckTypeSize.cmake
 ./config/cmake_ext_mod/ConfigureChecks.cmake
-./config/cmake_ext_mod/CPack.Info.plist.in
 ./config/cmake_ext_mod/CTestCustom.cmake
 ./config/cmake_ext_mod/FindMPI.cmake
 ./config/cmake_ext_mod/FindSZIP.cmake
