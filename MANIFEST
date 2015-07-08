@@ -42,7 +42,7 @@
 ./configure.ac
 
 ./bin/COPYING
-./bin/bbrelease       _DO_NOT_DISTRIBUTE_  
+./bin/bbrelease       _DO_NOT_DISTRIBUTE_
 ./bin/buildhdf5
 ./bin/build_and_package_hdf5_binaries.sh  _DO_NOT_DISTRIBUTE_
 ./bin/checkapi        _DO_NOT_DISTRIBUTE_
@@ -2274,7 +2274,6 @@
 
 ./config/cmake_ext_mod/CheckTypeSize.cmake
 ./config/cmake_ext_mod/ConfigureChecks.cmake
-./config/cmake_ext_mod/CPack.Info.plist.in
 ./config/cmake_ext_mod/CTestCustom.cmake
 ./config/cmake_ext_mod/FindMPI.cmake
 ./config/cmake_ext_mod/FindSZIP.cmake
