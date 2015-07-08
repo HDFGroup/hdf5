@@ -8,7 +8,7 @@ ENABLE_LANGUAGE (Fortran)
 # The provided CMake Fortran macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
-MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
+MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
 # MSB CHECK WHY THIS CHECK?
 #  if (NOT DEFINED ${RUN_RESULT_VAR}) 
     message (STATUS "Detecting Fortran ${FUNCTION}")
@@ -22,12 +22,14 @@ MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         "${CODE}"
     )
-    TRY_RUN (${RUN_RESULT_VAR} ${COMPILE_RESULT_VAR}
+    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
         RUN_OUTPUT_VARIABLE OUTPUT
     )
+
+	
 
     set(${RETURN} ${OUTPUT})
 	
@@ -36,25 +38,25 @@ MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
     #message ( "Test result2 ${CMAKE_MATCH_0} ")
     #message ( "Test result4 ${CMAKE_MATCH_1} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #message ( "Test result ${COMPILE_RESULT_VAR} ")
+    #message ( "Test result2 ${COMPILE_RESULT_VAR} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #message ( "Test result ${RUN_RESULT_VAR} ")
+    #message ( "Test result1 ${RUN_RESULT_VAR} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
 
-    if (${RUN_RESULT_VAR})
-      set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have Fortran function ${FUNCTION}")
-      message (STATUS "Testing Fortran ${FUNCTION} - OK")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    if (${COMPILE_RESULT_VAR})
+      if (${RUN_RESULT_VAR} MATCHES 0)
+        message (STATUS "Testing Fortran ${FUNCTION} - OK")
+        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
           "Determining if the Fortran ${FUNCTION} exists passed with the following output:\n"
           "${OUTPUT}\n\n"
-      )
-    else (${RUN_RESULT_VAR})
-      message (STATUS "Testing Fortran ${FUNCTION} - Fail")
-      set (${RUN_RESULT_VAR} "" CACHE INTERNAL "Have Fortran function ${FUNCTION}")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+        )
+      else ()
+        message (STATUS "Testing Fortran ${FUNCTION} - Fail")
+        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Determining if the Fortran ${FUNCTION} exists failed with the following output:\n"
           "${OUTPUT}\n\n")
-    endif (${RUN_RESULT_VAR})
+      endif ()
+    endif ()
 #  endif (NOT DEFINED ${RUN_RESULT_VAR})
 ENDMACRO (FORTRAN_RUN)
 
@@ -69,7 +71,11 @@ CHECK_FORTRAN_FEATURE(c_long_double
   "
   FORTRAN_HAVE_C_LONG_DOUBLE
 )
-set(H5_FORTRAN_HAVE_C_LONG_DOUBLE ${FORTRAN_HAVE_C_LONG_DOUBLE})
+if (${FORTRAN_HAVE_C_LONG_DOUBLE})
+  set(FORTRAN_HAVE_C_LONG_DOUBLE 1)
+else ()
+  set(FORTRAN_HAVE_C_LONG_DOUBLE 0)
+endif()
 
 # Check to see C_LONG_DOUBLE is different from C_DOUBLE
 
@@ -100,6 +106,11 @@ CHECK_FORTRAN_FEATURE(c_long_double
   "
   FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
 )
+if (${FORTRAN_C_LONG_DOUBLE_IS_UNIQUE})
+  set(FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 1)
+else ()
+  set(FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 0)
+endif()
 
 ## Set the sizeof function for use later in the fortran tests
 if(FORTRAN_HAVE_STORAGE_SIZE)
@@ -229,6 +240,7 @@ foreach( KIND ${VAR_KIND} )
 endforeach(KIND)
 string(STRIP ${pack_int_sizeof} pack_int_sizeof)
 
+
 #Remove trailing comma
 string(REGEX REPLACE ",$" "" pack_int_sizeof "${pack_int_sizeof}")
 #Remove spaces
@@ -236,6 +248,7 @@ string(REGEX REPLACE " " "" pack_int_sizeof "${pack_int_sizeof}")
 
 set(PAC_FC_ALL_INTEGER_KINDS_SIZEOF "\{${pack_int_sizeof}\}")
 
+message("...FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
 # **********
 # REALS
 # **********
@@ -273,6 +286,8 @@ string(REGEX REPLACE ",$" "" pack_real_sizeof "${pack_real_sizeof}")
 string(REGEX REPLACE " " "" pack_real_sizeof "${pack_real_sizeof}")
 
 set(H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${pack_real_sizeof}/)")
+
+message("...FOUND SIZEOF for REAL KINDs \{${pack_real_sizeof}\}")
 
 #find the maximum kind of the real
 list(LENGTH VAR_KIND LEN_VAR_KIND)
@@ -321,7 +336,8 @@ list(GET PROG_OUTPUT 3 PAC_FORTRAN_NATIVE_REAL_KIND)
 list(GET PROG_OUTPUT 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
 list(GET PROG_OUTPUT 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
 
-set(FORTRAN_SIZEOF_LONG_DOUBLE ${HDF_PREFIX}_SIZEOF_LONG_DOUBLE)
+set(FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
+#set(H5_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
 
 # remove the invalid kind from the list
 if(NOT(${SIZEOF___FLOAT128} EQUAL 0))
@@ -384,20 +400,22 @@ MACRO (C_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
     #message ( "Test result ${RUN_RESULT_VAR} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
 
-    if (${RUN_RESULT_VAR})
-      set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION}")
-      message (STATUS "Testing C ${FUNCTION} - OK")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "Determining if the C ${FUNCTION} exists passed with the following output:\n"
-          "${OUTPUT}\n\n"
-      )
-    else (${RUN_RESULT_VAR})
-      message (STATUS "Testing C ${FUNCTION} - Fail")
-      set (${RUN_RESULT_VAR} "" CACHE INTERNAL "Have C function ${FUNCTION}")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "Determining if the C ${FUNCTION} exists failed with the following output:\n"
-          "${OUTPUT}\n\n")
-    endif (${RUN_RESULT_VAR})
+    if (${COMPILE_RESULT_VAR})
+      if (${RUN_RESULT_VAR} MATCHES 0)
+        set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION}")
+        message (STATUS "Testing C ${FUNCTION} - OK")
+        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            "Determining if the C ${FUNCTION} exists passed with the following output:\n"
+            "${OUTPUT}\n\n"
+        )
+      else ()
+        message (STATUS "Testing C ${FUNCTION} - Fail")
+        set (${RUN_RESULT_VAR} "" CACHE INTERNAL "Have C function ${FUNCTION}")
+        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+            "Determining if the C ${FUNCTION} exists failed with the following output:\n"
+            "${OUTPUT}\n\n")
+      endif ()
+    endif()
 #  endif (NOT DEFINED ${RUN_RESULT_VAR})
 ENDMACRO (C_RUN)
 
