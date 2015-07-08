@@ -31,6 +31,7 @@
 #
 # HDF5 High-Level Fortran Makefile(.in)
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -105,6 +106,7 @@ DIST_COMMON = $(top_srcdir)/config/commence.am \
 # want to build a shared C library and a static Fortran library.  If so,
 # pass the -static flag to the library linker.
 @FORTRAN_SHARED_CONDITIONAL_FALSE@am__append_1 = -static
+noinst_PROGRAMS = H5HL_buildiface$(EXEEXT)
 TESTS =
 subdir = hl/fortran/src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -148,7 +150,8 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5hl_fortran_la_DEPENDENCIES = $(LIBH5_HL) $(LIBH5F)
 am_libhdf5hl_fortran_la_OBJECTS = H5DSfc.lo H5LTfc.lo H5IMfc.lo \
-	H5IMcc.lo H5TBfc.lo H5DSff.lo H5LTff.lo H5IMff.lo H5TBff.lo
+	H5IMcc.lo H5TBfc.lo H5DSff.lo H5LTff.lo H5IMff.lo H5TBff.lo \
+	H5LTff_gen.lo H5TBff_gen.lo
 libhdf5hl_fortran_la_OBJECTS = $(am_libhdf5hl_fortran_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -158,6 +161,10 @@ libhdf5hl_fortran_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(FCLD) \
 	$(AM_FCFLAGS) $(FCFLAGS) $(libhdf5hl_fortran_la_LDFLAGS) \
 	$(LDFLAGS) -o $@
+PROGRAMS = $(noinst_PROGRAMS)
+am_H5HL_buildiface_OBJECTS = H5HL_buildiface.$(OBJEXT)
+H5HL_buildiface_OBJECTS = $(am_H5HL_buildiface_OBJECTS)
+H5HL_buildiface_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -210,8 +217,9 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libhdf5hl_fortran_la_SOURCES)
-DIST_SOURCES = $(libhdf5hl_fortran_la_SOURCES)
+SOURCES = $(libhdf5hl_fortran_la_SOURCES) $(H5HL_buildiface_SOURCES)
+DIST_SOURCES = $(libhdf5hl_fortran_la_SOURCES) \
+	$(H5HL_buildiface_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -717,12 +725,20 @@ libhdf5hl_fortran_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVI
 #endif
 
 # List sources to include in the HDF5 HL Fortran library.
-libhdf5hl_fortran_la_SOURCES = H5DSfc.c H5LTfc.c  H5IMfc.c H5IMcc.c H5TBfc.c \
-	H5DSff.F90 H5LTff.F90 H5IMff.F90 H5TBff.F90
+libhdf5hl_fortran_la_SOURCES = H5DSfc.c H5LTfc.c H5IMfc.c H5IMcc.c H5TBfc.c \
+	H5DSff.F90 H5LTff.F90 H5IMff.F90 H5TBff.F90 H5LTff_gen.F90 H5TBff_gen.F90
 
+
+#H5LTff_gen.F90 H5TBff_gen.F90 
 
 # HDF5 HL Fortran library depends on HDF5 Library.
 libhdf5hl_fortran_la_LIBADD = $(LIBH5_HL) $(LIBH5F)
+
+#H5TBff_gen.F90: H5HL_buildiface$(EXEEXT)
+
+# H5HL_buildiface.F90 is included in the distribution, and Automake knows
+# how to compile a fortran program given its sources.
+H5HL_buildiface_SOURCES = H5HL_buildiface.F90
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -816,6 +832,19 @@ clean-libLTLIBRARIES:
 
 libhdf5hl_fortran.la: $(libhdf5hl_fortran_la_OBJECTS) $(libhdf5hl_fortran_la_DEPENDENCIES) $(EXTRA_libhdf5hl_fortran_la_DEPENDENCIES) 
 	$(AM_V_FCLD)$(libhdf5hl_fortran_la_LINK) -rpath $(libdir) $(libhdf5hl_fortran_la_OBJECTS) $(libhdf5hl_fortran_la_LIBADD) $(LIBS)
+
+clean-noinstPROGRAMS:
+	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+
+H5HL_buildiface$(EXEEXT): $(H5HL_buildiface_OBJECTS) $(H5HL_buildiface_DEPENDENCIES) $(EXTRA_H5HL_buildiface_DEPENDENCIES) 
+	@rm -f H5HL_buildiface$(EXEEXT)
+	$(AM_V_FCLD)$(FCLINK) $(H5HL_buildiface_OBJECTS) $(H5HL_buildiface_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1095,7 +1124,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LTLIBRARIES) all-local
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
 installdirs:
 	for dir in "$(DESTDIR)$(libdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
@@ -1136,7 +1165,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
-	mostlyclean-am
+	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1209,8 +1238,8 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
 	check-am clean clean-generic clean-libLTLIBRARIES \
-	clean-libtool clean-local cscopelist-am ctags ctags-am \
-	distclean distclean-compile distclean-generic \
+	clean-libtool clean-local clean-noinstPROGRAMS cscopelist-am \
+	ctags ctags-am distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-local distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-data-local install-dvi \
@@ -1258,7 +1287,7 @@ maintainer-clean-local: clean-local
 distclean-local: clean-local
 clean-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(RM) *.$(F9XMODEXT);                                         \
+	  $(RM) *.$(F9XMODEXT) H5LTff_gen.F90 H5TBff_gen.F90; \
 	fi
 
 install-data-local:
@@ -1273,6 +1302,13 @@ uninstall-local:
 	  fi;                                                           \
 	fi
 
+# H5HL_buildiface.F90 generates all the APIs that have a KIND type associated
+# with them.
+
+H5LTff_gen.F90: H5HL_buildiface$(EXEEXT)
+	$(RUNSERIAL) ./H5HL_buildiface$(EXEEXT)
+
+H5TBff_gen.F90: H5HL_buildiface$(EXEEXT)
 # Hardcode the dependencies of these files. There isn't a known way of
 # determining this automagically (like we do with the C files). So, when
 # doing a parallel make, some modules could be made way before the
@@ -1281,6 +1317,8 @@ H5DSff.lo:          $(srcdir)/H5DSff.F90
 H5LTff.lo:          $(srcdir)/H5LTff.F90
 H5IMff.lo:          $(srcdir)/H5IMff.F90
 H5TBff.lo:          $(srcdir)/H5TBff.F90
+H5LTff_gen.lo:      H5LTff_gen.F90
+H5TBff_gen.lo:      H5LTff_gen.F90 H5TBff_gen.F90
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

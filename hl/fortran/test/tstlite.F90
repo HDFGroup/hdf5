@@ -1539,20 +1539,23 @@ SUBROUTINE test_attributes()
   ! double
   !-------------------------------------------------------------------------
 
-  CALL test_begin(' Set/Get attributes double      ')
-
 #ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
   SizeOf_buf_type = STORAGE_SIZE(buf4(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
   SizeOf_buf_type = SIZEOF(buf4(1))
 #endif
+
+  IF(SizeOf_buf_type.LT.16)THEN ! MSB can't handle 16 byte reals
+
+  CALL test_begin(' Set/Get attributes double      ')
+
   !
   ! write attribute.
   !
   f_ptr = C_LOC(buf4(1))
   CALL h5ltset_attribute_f(file_id,dsetname1,attrname4,f_ptr,"real", SizeOf_buf_type, size, errcode)
 
-  !CALL h5ltset_attribute_double_f(file_id,dsetname1,attrname4,f_ptr,"Real", SizeOf_buf_type, size, errcode)
+!  CALL h5ltset_attribute_double_f(file_id,dsetname1,attrname4,buf4, size, errcode)
 
   !
   ! read attribute.
@@ -1567,8 +1570,6 @@ SUBROUTINE test_attributes()
   f_ptr = C_LOC(bufr4(1))
   CALL h5ltget_attribute_f(file_id,dsetname1,attrname4,f_ptr,"REAL",SizeOf_buf_type,errcode)
 
-!  CALL h5ltget_attribute_double_f(file_id,dsetname1,attrname4,bufr4,errcode)
-
   !
   ! compare read and write buffers.
   !
@@ -1581,6 +1582,8 @@ SUBROUTINE test_attributes()
   END DO
 
   CALL passed()
+
+  ENDIF
 
   !-------------------------------------------------------------------------
   ! string

@@ -2334,6 +2334,7 @@
 ./hl/fortran/src/H5IMcc.h
 ./hl/fortran/src/H5IMfc.c
 ./hl/fortran/src/H5IMff.F90
+./hl/fortran/src/H5HL_buildiface.F90
 ./hl/fortran/src/H5LTf90proto.h
 ./hl/fortran/src/H5LTfc.c
 ./hl/fortran/src/H5LTff.F90

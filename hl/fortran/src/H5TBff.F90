@@ -32,7 +32,7 @@
 !
 #include "H5config_f.inc"
 
-MODULE h5tb
+MODULE h5tb_CONST
   
   USE, INTRINSIC :: ISO_C_BINDING
   USE h5fortran_types
@@ -40,51 +40,26 @@ MODULE h5tb
 
   INTERFACE h5tbwrite_field_name_f
      MODULE PROCEDURE h5tbwrite_field_name_f_int
-     MODULE PROCEDURE h5tbwrite_field_name_f_c_float
-     MODULE PROCEDURE h5tbwrite_field_name_f_c_double
-#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-     MODULE PROCEDURE h5tbwrite_field_name_f_c_long_double
-#endif
      MODULE PROCEDURE h5tbwrite_field_name_f_string
   END INTERFACE
   
   INTERFACE h5tbread_field_name_f
      MODULE PROCEDURE h5tbread_field_name_f_int
-     MODULE PROCEDURE h5tbread_field_name_f_c_float
-     MODULE PROCEDURE h5tbread_field_name_f_c_double
-#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-     MODULE PROCEDURE h5tbread_field_name_f_c_long_double
-#endif
      MODULE PROCEDURE h5tbread_field_name_f_string
   END INTERFACE
   
   INTERFACE h5tbwrite_field_index_f
      MODULE PROCEDURE h5tbwrite_field_index_f_int
-     MODULE PROCEDURE h5tbwrite_field_index_f_c_float
-     MODULE PROCEDURE h5tbwrite_field_index_f_c_double
-#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-     MODULE PROCEDURE h5tbwrite_field_index_f_c_long_double
-#endif
      MODULE PROCEDURE h5tbwrite_field_index_f_string
   END INTERFACE
   
   INTERFACE h5tbread_field_index_f
      MODULE PROCEDURE h5tbread_field_index_f_int
-     MODULE PROCEDURE h5tbread_field_index_f_c_float
-     MODULE PROCEDURE h5tbread_field_index_f_c_double
-#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-     MODULE PROCEDURE h5tbread_field_index_f_c_long_double
-#endif
      MODULE PROCEDURE h5tbread_field_index_f_string
   END INTERFACE
   
   INTERFACE h5tbinsert_field_f
      MODULE PROCEDURE h5tbinsert_field_f_int
-     MODULE PROCEDURE h5tbinsert_field_f_c_float
-     MODULE PROCEDURE h5tbinsert_field_f_c_double
-#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-     MODULE PROCEDURE h5tbinsert_field_f_c_long_double
-#endif
      MODULE PROCEDURE h5tbinsert_field_f_string
   END INTERFACE
 
@@ -348,105 +323,6 @@ CONTAINS
     
   END SUBROUTINE h5tbwrite_field_name_f_int
 
-  SUBROUTINE h5tbwrite_field_name_f_c_float(loc_id,&
-       dset_name,&
-       field_name,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-    
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf              ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1                                      ! name length
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-    
-    namelen  = LEN(dset_name)
-    namelen1 = LEN(field_name)
-    
-    errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,f_ptr)
-    
-  END SUBROUTINE h5tbwrite_field_name_f_c_float
-
-  SUBROUTINE h5tbwrite_field_name_f_c_double(loc_id,&
-       dset_name,&
-       field_name,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-    
-    IMPLICIT NONE
-
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-    
-    namelen  = LEN(dset_name)
-    namelen1 = LEN(field_name)
-    
-    errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,f_ptr)
-    
-  END SUBROUTINE h5tbwrite_field_name_f_c_double
-
-#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-  SUBROUTINE h5tbwrite_field_name_f_c_long_double(loc_id,&
-       dset_name,&
-       field_name,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-    
-    IMPLICIT NONE
-
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_LONG_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-    
-    namelen  = LEN(dset_name)
-    namelen1 = LEN(field_name)
-    
-    errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,f_ptr)
-    
-  END SUBROUTINE h5tbwrite_field_name_f_c_long_double
-#endif
 
   SUBROUTINE h5tbwrite_field_name_f_string(loc_id,&
        dset_name,&
@@ -530,104 +406,6 @@ CONTAINS
     
   END SUBROUTINE h5tbread_field_name_f_int
 
-  SUBROUTINE h5tbread_field_name_f_c_float(loc_id,&
-       dset_name,&
-       field_name,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf      ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1                                      ! name length
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1)) 
-
-    namelen  = LEN(dset_name)
-    namelen1 = LEN(field_name)
-    
-    errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,f_ptr)
-
-  END SUBROUTINE h5tbread_field_name_f_c_float
-
-  SUBROUTINE h5tbread_field_name_f_c_double(loc_id,&
-       dset_name,&
-       field_name,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1                                      ! name length
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1)) 
-    
-    namelen  = LEN(dset_name)
-    namelen1 = LEN(field_name)
-    
-    errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,f_ptr)
-
-  END SUBROUTINE h5tbread_field_name_f_c_double
-
-#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-  SUBROUTINE h5tbread_field_name_f_c_long_double(loc_id,&
-       dset_name,&
-       field_name,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_LONG_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1                                      ! name length
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1)) 
-    
-    namelen  = LEN(dset_name)
-    namelen1 = LEN(field_name)
-    
-    errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         start,nrecords,type_size,f_ptr)
-
-  END SUBROUTINE h5tbread_field_name_f_c_long_double
-#endif
-
   SUBROUTINE h5tbread_field_name_f_string(loc_id,&
        dset_name,&
        field_name,&
@@ -706,98 +484,6 @@ CONTAINS
     
   END SUBROUTINE h5tbwrite_field_index_f_int
 
-  SUBROUTINE h5tbwrite_field_index_f_c_float(loc_id,&
-       dset_name,&
-       field_index,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-    
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    INTEGER, INTENT(in) :: field_index                               ! index
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf      ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1)) 
-    
-    namelen  = LEN(dset_name)
-    
-    errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,f_ptr)
-    
-  END SUBROUTINE h5tbwrite_field_index_f_c_float
-
-  SUBROUTINE h5tbwrite_field_index_f_c_double(loc_id,&
-       dset_name,&
-       field_index,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-    
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    INTEGER, INTENT(in) :: field_index                               ! index
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-
-    namelen  = LEN(dset_name)
-    
-    errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,f_ptr)
-    
-  END SUBROUTINE h5tbwrite_field_index_f_c_double
-
-#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-  SUBROUTINE h5tbwrite_field_index_f_c_long_double(loc_id,&
-       dset_name,&
-       field_index,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-    
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    INTEGER, INTENT(in) :: field_index                               ! index
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_LONG_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-
-    namelen  = LEN(dset_name)
-    
-    errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,f_ptr)
-    
-  END SUBROUTINE h5tbwrite_field_index_f_c_long_double
-#endif
-
   SUBROUTINE h5tbwrite_field_index_f_string(loc_id,&
        dset_name,&
        field_index,&
@@ -872,96 +558,6 @@ CONTAINS
     
   END SUBROUTINE h5tbread_field_index_f_int
 
-  SUBROUTINE h5tbread_field_index_f_c_float(loc_id,&
-       dset_name,&
-       field_index,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-
-    IMPLICIT NONE
-
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    INTEGER, INTENT(in) :: field_index                               ! index
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf      ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-    namelen  = LEN(dset_name)
-    
-    errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,f_ptr)
-    
-  END SUBROUTINE h5tbread_field_index_f_c_float
-
-  SUBROUTINE h5tbread_field_index_f_c_double(loc_id,&
-       dset_name,&
-       field_index,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    INTEGER, INTENT(in) :: field_index                               ! index
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-    namelen  = LEN(dset_name)
-    
-    errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,f_ptr)
-
-  END SUBROUTINE h5tbread_field_index_f_c_double
-
-#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-  SUBROUTINE h5tbread_field_index_f_c_long_double(loc_id,&
-       dset_name,&
-       field_index,&
-       start,&
-       nrecords,&
-       type_size,&
-       buf,&
-       errcode )
-
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    INTEGER, INTENT(in) :: field_index                               ! index
-    INTEGER(hsize_t), INTENT(in) :: start                            ! start record
-    INTEGER(hsize_t), INTENT(in) :: nrecords                         ! records
-    INTEGER(size_t),  INTENT(in) :: type_size                        ! type size
-    REAL(KIND=C_LONG_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-    namelen  = LEN(dset_name)
-    
-    errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
-         start,nrecords,type_size,f_ptr)
-
-  END SUBROUTINE h5tbread_field_index_f_c_long_double
-#endif
-
   SUBROUTINE h5tbread_field_index_f_string(loc_id,&
        dset_name,&
        field_index,&
@@ -1034,95 +630,6 @@ CONTAINS
          field_type,field_index,f_ptr)
 
   END SUBROUTINE h5tbinsert_field_f_int
-
-  SUBROUTINE h5tbinsert_field_f_c_float(loc_id,&
-       dset_name,&
-       field_name,&
-       field_type,&
-       field_index,&
-       buf,&
-       errcode )
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
-    INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
-    INTEGER, INTENT(in) :: field_index                               ! field_index
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf      ! data buffer
-    INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1                                      ! name length
-    INTEGER :: errcode                                               ! error code
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-
-    namelen  = LEN(dset_name)
-    namelen1 = LEN(field_name)
-    
-    errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         field_type,field_index,f_ptr)
-    
-  END SUBROUTINE h5tbinsert_field_f_c_float
-
-  SUBROUTINE h5tbinsert_field_f_c_double(loc_id,&
-       dset_name,&
-       field_name,&
-       field_type,&
-       field_index,&
-       buf,&
-       errcode )
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
-    INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
-    INTEGER, INTENT(in) :: field_index                               ! field_index
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
-    INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1                                      ! name length
-    INTEGER :: errcode                                               ! error code
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-
-    namelen  = LEN(dset_name)
-    namelen1 = LEN(field_name)
- 
-    errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         field_type,field_index,f_ptr)
-    
-  END SUBROUTINE h5tbinsert_field_f_c_double
-
-#if FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-  SUBROUTINE h5tbinsert_field_f_c_long_double(loc_id,&
-       dset_name,&
-       field_name,&
-       field_type,&
-       field_index,&
-       buf,&
-       errcode )
-    IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: field_name                       ! name of the field
-    INTEGER(hid_t), INTENT(in)   :: field_type                       ! field type
-    INTEGER, INTENT(in) :: field_index                               ! field_index
-    REAL(KIND=C_LONG_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf     ! data buffer
-    INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(size_t) :: namelen1                                      ! name length
-    INTEGER :: errcode                                               ! error code
-    TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1))
-
-    namelen  = LEN(dset_name)
-    namelen1 = LEN(field_name)
- 
-    errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
-         field_type,field_index,f_ptr)
-    
-  END SUBROUTINE h5tbinsert_field_f_c_long_double
-#endif
 
   SUBROUTINE h5tbinsert_field_f_string(loc_id,&
        dset_name,&
@@ -1201,8 +708,6 @@ CONTAINS
     errcode = h5tbdelete_field_c(loc_id,namelen,dset_name,namelen1,field_name)
 
   END SUBROUTINE h5tbdelete_field_f
-
-
 
 !-------------------------------------------------------------------------
 ! Function: h5tbget_table_info_f
@@ -1334,7 +839,7 @@ CONTAINS
     
   END SUBROUTINE h5tbget_field_info_f
   
-END MODULE H5TB
+END MODULE H5TB_CONST
 
 
 
