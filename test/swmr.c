@@ -88,7 +88,7 @@ static int test_swmr_vfd_flag();
  *
  *  Checks the following two public routines work as specified:
  *	H5Pset_metadata_read_attempts() 
- *  	H5Pget_metadata_read_attempts() 
+ *  H5Pget_metadata_read_attempts() 
  */
 static int
 test_metadata_read_attempts(hid_t in_fapl)
