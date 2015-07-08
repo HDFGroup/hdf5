@@ -29,7 +29,11 @@
 #endif
 
 ! Define if the intrinsic C_LONG_DOUBLE exists
-#define H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
+#define H5_FORTRAN_HAVE_C_LONG_DOUBLE @FORTRAN_HAVE_C_LONG_DOUBLE@
+
+#if H5_FORTRAN_HAVE_C_LONG_DOUBLE==0
+#undef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#endif
 
 ! Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE
 #define H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE @FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
@@ -37,8 +41,13 @@
 ! Define if the intrinsic module ISO_FORTRAN_ENV exists
 #define H5_HAVE_ISO_FORTRAN_ENV @HAVE_ISO_FORTRAN_ENV@
 
-! Define the size of C's long double
-#define H5_SIZEOF_LONG_DOUBLE @SIZEOF_LONG_DOUBLE@
+
+! should this be ${HDF_PREFIX} instead of H5 MSB
+#define H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
+
+#if H5_SIZEOF_LONG_DOUBLE==0
+#undef H5_SIZEOF_LONG_DOUBLE
+#endif
 
 ! Define the maximum decimal precision for reals
 #define H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
@@ -66,24 +75,3 @@
 
 ! valid INTEGER KINDs (need to have a matching C counter-part)
 #define H5_H5CONFIG_F_IKIND @H5CONFIG_F_IKIND@
-
-! should this be ${HDF_PREFIX} instead of H5 MSB
-!#define H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
-
-!#if H5_SIZEOF_LONG_DOUBLE==0
-!#undef H5_SIZEOF_LONG_DOUBLE
-!#endif
-
-! Define if the C intrinsic __FLOAT128 exists
-!#define H5_HAVE_FLOAT128 @HAVE_FLOAT128@
-
-!#if H5_HAVE_FLOAT128==0
-!#undef H5_HAVE_FLOAT128
-!#endif
-
-! Define if INTEGER*16 is available
-!#define H5_HAVE_Fortran_INTEGER_SIZEOF_16 @HAVE_Fortran_INTEGER_SIZEOF_16@
-
-!#if H5_HAVE_Fortran_INTEGER_SIZEOF_16==0
-!#undef H5_HAVE_Fortran_INTEGER_SIZEOF_16
-!#endif
