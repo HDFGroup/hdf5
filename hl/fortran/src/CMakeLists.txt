@@ -12,6 +12,40 @@ if (WIN32)
 endif (WIN32)
 
 #-----------------------------------------------------------------------------
+# Generate the H5LT and H5TB REAL APIs
+#-----------------------------------------------------------------------------
+
+add_executable (H5HL_buildiface
+      ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5HL_buildiface.F90
+  )
+
+if (WIN32 AND MSVC)
+  if (BUILD_SHARED_LIBS)
+    set_target_properties (H5HL_buildiface
+        PROPERTIES
+            COMPILE_FLAGS "/MT"
+    )
+  endif (BUILD_SHARED_LIBS)
+  set_target_properties (H5HL_buildiface
+      PROPERTIES
+          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+  )
+endif (WIN32 AND MSVC)
+set_target_properties (H5HL_buildiface PROPERTIES
+    LINKER_LANGUAGE Fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
+
+set (CMD $<TARGET_FILE:H5HL_buildiface>)
+add_custom_command (
+    OUTPUT ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
+           ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
+    COMMAND ${CMD}
+    WORKING_DIRECTORY ${HDF5_HL_F90_SRC_BINARY_DIR}
+    DEPENDS H5HL_buildiface
+)
+
+#-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (
@@ -54,6 +88,14 @@ set (HDF5_HL_F90_F_SRCS
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTff.F90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMff.F90
 )
+set (HDF5_HL_F90_F_SRCS
+     ${HDF5_HL_F90_F_SRCS}
+
+     # generated files
+     ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
+     ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
+)
+
 set_source_files_properties (${HDF5_HL_F90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 
 add_library (${HDF5_HL_F90_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_F90_F_SRCS})

@@ -43,6 +43,13 @@
 
 
 ! should this be ${HDF_PREFIX} instead of H5 MSB
+#define H5_SIZEOF_DOUBLE @H5_SIZEOF_DOUBLE@
+
+#if H5_SIZEOF_DOUBLE==0
+#undef H5_SIZEOF_DOUBLE
+#endif
+
+! should this be ${HDF_PREFIX} instead of H5 MSB
 #define H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
 
 #if H5_SIZEOF_LONG_DOUBLE==0

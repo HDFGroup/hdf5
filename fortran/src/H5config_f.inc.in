@@ -25,6 +25,9 @@
 #undef HAVE_ISO_FORTRAN_ENV
 
 ! Define the size of C's long double
+#undef SIZEOF_DOUBLE
+
+! Define the size of C's long double
 #undef SIZEOF_LONG_DOUBLE
 
 ! Define the maximum decimal precision for reals

@@ -82,9 +82,9 @@ SUBROUTINE test_table1()
   SIZEOF_X = SIZEOF(bufd(1))
 #endif
 
-  ! If Fortran DOUBLE PRECISION and C DOUBLE sizeof don't match then disable 
+  ! If Fortran DOUBLE PRECISION and C DOUBLE sizeofs don't match then disable 
   ! creating a DOUBLE RECISION field, and instead create a REAL field. This
-  ! is to handle when DOUBLE PRECISION is promoted via a compiler option.
+  ! is needed to handle when DOUBLE PRECISION is promoted via a compiler flag.
   Exclude_double = .FALSE.
   IF(Cs_sizeof_double.NE.SIZEOF_X)THEN
      Exclude_double = .TRUE.
