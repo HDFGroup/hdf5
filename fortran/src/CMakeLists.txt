@@ -42,35 +42,35 @@ configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5fort_type_defines.h.in ${HDF5_F90_B
 # H5fort_type_defines.h   used to generate H5f90i_gen.h + H5fortran_types.F90
 #-----------------------------------------------------------------------------
 
-add_executable (H5test_FortranHavekind
-      ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind.F90
+add_executable (H5_buildiface
+      ${HDF5_F90_SRC_SOURCE_DIR}/H5_buildiface.F90
   )
 
 if (WIN32 AND MSVC)
   if (BUILD_SHARED_LIBS)
-    set_target_properties (H5test_FortranHavekind
+    set_target_properties (H5_buildiface
         PROPERTIES
             COMPILE_FLAGS "/MT"
     )
   endif (BUILD_SHARED_LIBS)
-  set_target_properties (H5test_FortranHavekind
+  set_target_properties (H5_buildiface
       PROPERTIES
           LINK_FLAGS "/SUBSYSTEM:CONSOLE"
   )
 endif (WIN32 AND MSVC)
-set_target_properties (H5test_FortranHavekind PROPERTIES
+set_target_properties (H5_buildiface PROPERTIES
     LINKER_LANGUAGE Fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
-set (CMD $<TARGET_FILE:H5test_FortranHavekind>)
+set (CMD $<TARGET_FILE:H5_buildiface>)
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
            ${HDF5_F90_BINARY_DIR}/H5_KINDff.F90
     COMMAND ${CMD}
     ARGS > ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-    DEPENDS H5test_FortranHavekind
+    DEPENDS H5_buildiface
 )
 #-----------------------------------------------------------------------------
 #add_executable (H5fortran_detect

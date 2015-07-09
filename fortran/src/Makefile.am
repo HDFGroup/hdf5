@@ -106,14 +106,14 @@ endif
 # programs.
 # It's a bit tricky to make sure that Automake builds things in the right
 # order (especially when using 'gmake -j ...')
-# H5test_kind is compiled and run to produce H5fortran_detect.F90.
+# H5_buildiface is compiled and run to produce H5KIND***.
 # H5fortran_detect is compiled and run to produce H5fort_type_defines.h.
 # H5match_types.c then includes this file and can be compiled into
 # H5match_types.  When H5match_types is run, it creates H5f90i_gen.h
 # and H5fortran_types.F90, which are included in the Fortran library.
 
 # These are the helper programs we need to build.
-noinst_PROGRAMS = H5match_types H5test_kind
+noinst_PROGRAMS = H5match_types H5_buildiface
 
 # Tell Automake to create H5f90i_gen.h before it builds the library
 # sources.  When it creates H5f90i_gen.h, it will create
@@ -137,16 +137,16 @@ H5fortran_types.F90 H5f90i_gen.h: H5match_types$(EXEEXT)
 # files.
 #H5fortran_detect_SOURCES = H5fortran_detect.F90
 
-# H5test_kind.F90 generates all the APIs that have a KIND type associated
+# H5_buildiface.F90 generates all the APIs that have a KIND type associated
 # with them.
 
-H5_KINDff.F90: H5test_kind$(EXEEXT)
-	$(RUNSERIAL) ./H5test_kind$(EXEEXT)
+H5_KINDff.F90: H5_buildiface$(EXEEXT)
+	$(RUNSERIAL) ./H5_buildiface$(EXEEXT)
 
-# H5test_kind.F90 is included in the distribution, and Automake knows
+# H5_buildiface.F90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
 
-H5test_kind_SOURCES = H5test_kind.F90
+H5_buildiface_SOURCES = H5_buildiface.F90
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API=yes
@@ -158,7 +158,7 @@ FORTRAN_API=yes
 H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
 #H5fortran_types.lo:  H5fortran_types.F90
 #H5fortran_detect.lo: H5fortran_detect.F90
-H5test_kind.lo:      $(srcdir)/H5test_kind.F90
+H5_buildiface.lo:      $(srcdir)/H5_buildiface.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo
