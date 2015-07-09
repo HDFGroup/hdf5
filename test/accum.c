@@ -1817,7 +1817,6 @@ test_swmr_write_big(void)
     int status;				    /* Status returned from child process */
     H5F_io_info_t fio_info;     /* I/O info for operation */
     char *new_argv[] = {NULL};
-    char *new_envp[] = {NULL};
     char *driver = NULL;        /* VFD string (from env variable) */
 
     TESTING("SWMR write of large metadata");
@@ -1935,8 +1934,8 @@ test_swmr_write_big(void)
         FAIL_STACK_ERROR;
     } else if(0 == pid) { /* Child process */
 	    /* Run the reader */
-	    status = HDexecve(SWMR_READER, new_argv, new_envp);
-	    printf("errno from execve = %s\n", strerror(errno));
+	    status = HDexecv(SWMR_READER, new_argv);
+	    printf("errno from execv = %s\n", strerror(errno));
         FAIL_STACK_ERROR;
     }
 
