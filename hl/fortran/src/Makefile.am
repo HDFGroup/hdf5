@@ -47,7 +47,7 @@ endif
 
 # List sources to include in the HDF5 HL Fortran library.
 libhdf5hl_fortran_la_SOURCES=H5DSfc.c H5LTfc.c H5IMfc.c H5IMcc.c H5TBfc.c \
-	H5DSff.F90 H5LTff.F90 H5IMff.F90 H5TBff.F90 H5LTff_gen.F90 H5TBff_gen.F90
+	H5DSff.F90 H5LTff.F90 H5TBff.F90 H5IMff.F90 H5LTff_gen.F90 H5TBff_gen.F90
 
 #H5LTff_gen.F90 H5TBff_gen.F90 
 
@@ -102,6 +102,6 @@ H5DSff.lo:          $(srcdir)/H5DSff.F90
 H5LTff.lo:          $(srcdir)/H5LTff.F90
 H5IMff.lo:          $(srcdir)/H5IMff.F90
 H5TBff.lo:          $(srcdir)/H5TBff.F90
-H5LTff_gen.lo:      H5LTff_gen.F90
-H5TBff_gen.lo:      H5LTff_gen.F90 H5TBff_gen.F90
+H5LTff_gen.lo:      H5LTff.lo H5LTff_gen.F90
+H5TBff_gen.lo:      H5TBff.lo H5LTff_gen.F90 H5TBff_gen.F90
 include $(top_srcdir)/config/conclude.am

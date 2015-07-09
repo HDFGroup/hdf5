@@ -150,7 +150,7 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5hl_fortran_la_DEPENDENCIES = $(LIBH5_HL) $(LIBH5F)
 am_libhdf5hl_fortran_la_OBJECTS = H5DSfc.lo H5LTfc.lo H5IMfc.lo \
-	H5IMcc.lo H5TBfc.lo H5DSff.lo H5LTff.lo H5IMff.lo H5TBff.lo \
+	H5IMcc.lo H5TBfc.lo H5DSff.lo H5LTff.lo H5TBff.lo H5IMff.lo \
 	H5LTff_gen.lo H5TBff_gen.lo
 libhdf5hl_fortran_la_OBJECTS = $(am_libhdf5hl_fortran_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -726,7 +726,7 @@ libhdf5hl_fortran_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVI
 
 # List sources to include in the HDF5 HL Fortran library.
 libhdf5hl_fortran_la_SOURCES = H5DSfc.c H5LTfc.c H5IMfc.c H5IMcc.c H5TBfc.c \
-	H5DSff.F90 H5LTff.F90 H5IMff.F90 H5TBff.F90 H5LTff_gen.F90 H5TBff_gen.F90
+	H5DSff.F90 H5LTff.F90 H5TBff.F90 H5IMff.F90 H5LTff_gen.F90 H5TBff_gen.F90
 
 
 #H5LTff_gen.F90 H5TBff_gen.F90 
@@ -1317,8 +1317,8 @@ H5DSff.lo:          $(srcdir)/H5DSff.F90
 H5LTff.lo:          $(srcdir)/H5LTff.F90
 H5IMff.lo:          $(srcdir)/H5IMff.F90
 H5TBff.lo:          $(srcdir)/H5TBff.F90
-H5LTff_gen.lo:      H5LTff_gen.F90
-H5TBff_gen.lo:      H5LTff_gen.F90 H5TBff_gen.F90
+H5LTff_gen.lo:      H5LTff.lo H5LTff_gen.F90
+H5TBff_gen.lo:      H5TBff.lo H5LTff_gen.F90 H5TBff_gen.F90
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
