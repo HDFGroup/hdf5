@@ -398,7 +398,9 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
                     H5Aclose(attr_id);
                 } H5E_END_TRY;
 #endif
-		file_id[i] = -1;
+		if (H5Dclose(dset_id[i]) < 0)
+		    FAIL_PUTS_ERROR("H5Dclose() failed");
+		dset_id[i] = -1;
             } /* end if */
             else {
                 /* write dataset without extending it */
@@ -427,7 +429,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
     /* read open file images and verify data */
     for (i = 0; i < open_images; i++) {
         /* if opening the file image failed, continue next iteration */
-        if ((file_id[i] <  0) || (!(input_flags[i] & H5LT_FILE_IMAGE_OPEN_RW )))
+        if ((dset_id[i] < 0) || (file_id[i] <  0) || (!(input_flags[i] & H5LT_FILE_IMAGE_OPEN_RW )))
             continue;
 
         /* open dataset in file image */ 
