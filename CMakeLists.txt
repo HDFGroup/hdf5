@@ -170,6 +170,9 @@ if (NOT HDF5_INSTALL_BIN_DIR)
   set (HDF5_INSTALL_BIN_DIR bin)
 endif (NOT HDF5_INSTALL_BIN_DIR)
 if (NOT HDF5_INSTALL_LIB_DIR)
+  if (APPLE)
+    set (HDF5_INSTALL_FMWK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
+  endif (APPLE)
   set (HDF5_INSTALL_LIB_DIR lib)
 endif (NOT HDF5_INSTALL_LIB_DIR)
 if (NOT HDF5_INSTALL_INCLUDE_DIR)
@@ -177,6 +180,15 @@ if (NOT HDF5_INSTALL_INCLUDE_DIR)
 endif (NOT HDF5_INSTALL_INCLUDE_DIR)
 if (NOT HDF5_INSTALL_DATA_DIR)
   if (NOT WIN32)
+    if (APPLE)
+      option (HDF5_BUILD_FRAMEWORKS "Create a Mac OSX Framework" OFF)
+      if (HDF5_BUILD_FRAMEWORKS)
+        set (HDF5_INSTALL_EXTRA_DIR ../SharedSupport)
+      else (HDF5_BUILD_FRAMEWORKS)
+        set (HDF5_INSTALL_EXTRA_DIR share)
+      endif (HDF5_BUILD_FRAMEWORKS)
+      set (HDF5_INSTALL_FWRK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
+    endif (APPLE)
     set (HDF5_INSTALL_DATA_DIR share)
     set (HDF5_INSTALL_CMAKE_DIR share/cmake)
   else (NOT WIN32)
@@ -286,6 +298,14 @@ set (EXTERNAL_LIBRARYDLL_LIST "")
 include (${HDF_RESOURCES_DIR}/ConfigureChecks.cmake)
 
 set (CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
+
+#-----------------------------------------------------------------------------
+# Mac OS X Options
+#-----------------------------------------------------------------------------
+option (HDF5_BUILD_FRAMEWORKS "TRUE to build as frameworks libraries, FALSE to build according to BUILD_SHARED_LIBS" TRUE)
+if (HDF5_BUILD_FRAMEWORKS AND NOT BUILD_SHARED_LIBS)
+  set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
+endif (HDF5_BUILD_FRAMEWORKS AND NOT BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
 # Option to Build Shared/Static libs, default is static
