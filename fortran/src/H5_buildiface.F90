@@ -102,12 +102,12 @@ PROGRAM test_kind
 ! new APIs to handle those use cases. Handling rank 7 and less is for backward compatibility
 ! with the Fortran 90/95 APIs codes which could never handle rank 15 array sizes.
 
-  OPEN(11,FILE='H5_KINDff.F90')
+  OPEN(11,FILE='H5_gen.F90')
   WRITE(11,'(40(A,/))') &
-'!****h* ROBODoc/H5_KINDff.F90',&
+'!****h* ROBODoc/H5_gen.F90',&
 '!',&
 '! NAME',&
-'!  H5_KIND',&
+'!  H5_gen',&
 '! ',&
 '! PURPOSE',&
 '!  This module is generated at build by H5_buildiface.F90 to handle all the',&
@@ -134,7 +134,7 @@ PROGRAM test_kind
 '!',&
 '!*****'
 
-  WRITE(11,'(a)') "MODULE H5_KIND"
+  WRITE(11,'(a)') "MODULE H5_GEN"
 
   WRITE(11,'(A)') '  USE, INTRINSIC :: ISO_C_BINDING'
   WRITE(11,'(A)') '  USE H5GLOBAL'
@@ -545,7 +545,7 @@ PROGRAM test_kind
      WRITE(11,'(A)') '  END SUBROUTINE h5pinsert_kind_'//TRIM(ADJUSTL(chr2))
   ENDDO
 
-  WRITE(11,'(A)') 'END MODULE H5_KIND'
+  WRITE(11,'(A)') 'END MODULE H5_gen'
 
   CLOSE(11)
 

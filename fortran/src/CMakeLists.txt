@@ -38,7 +38,6 @@ configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5fort_type_defines.h.in ${HDF5_F90_B
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
 # H5test_kind.F90         used to generate various KIND interfaces 
-# H5fortran_detect.F90    used to generate H5fort_type_defines.h
 # H5fort_type_defines.h   used to generate H5f90i_gen.h + H5fortran_types.F90
 #-----------------------------------------------------------------------------
 
@@ -65,39 +64,11 @@ set_target_properties (H5_buildiface PROPERTIES
 
 set (CMD $<TARGET_FILE:H5_buildiface>)
 add_custom_command (
-    OUTPUT ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
-           ${HDF5_F90_BINARY_DIR}/H5_KINDff.F90
+    OUTPUT ${HDF5_F90_BINARY_DIR}/H5_gen.F90
     COMMAND ${CMD}
-    ARGS > ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5_buildiface
 )
-#-----------------------------------------------------------------------------
-#add_executable (H5fortran_detect
-#    ${HDF5_F90_BINARY_DIR}/H5fortran_detect.F90
-#)
-#if (WIN32 AND MSVC)
-#  if (BUILD_SHARED_LIBS)
-#    set_target_properties (H5fortran_detect
-#        PROPERTIES
-#            COMPILE_FLAGS "/MT"
-#    )
-#  endif (BUILD_SHARED_LIBS)
-#  set_target_properties (H5fortran_detect
-#      PROPERTIES
-#          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
-#  )
-#endif (WIN32 AND MSVC)
-#set_target_properties (H5fortran_detect PROPERTIES LINKER_LANGUAGE Fortran)
-#
-#set (CMD $<TARGET_FILE:H5fortran_detect>)
-#add_custom_command (
-#    OUTPUT ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
-#    COMMAND ${CMD}
-#    ARGS > ${HDF5_F90_BINARY_DIR}/H5fort_type_defines.h
-#    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-#    DEPENDS H5fortran_detect
-#)
 
 INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
 #-----------------------------------------------------------------------------
@@ -183,7 +154,7 @@ set (f90_F_SRCS
     ${f90_F_SRCS}
     
     # generated file
-    ${HDF5_F90_BINARY_DIR}/H5_KINDff.F90
+    ${HDF5_F90_BINARY_DIR}/H5_gen.F90
     
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
@@ -265,7 +236,7 @@ set (mod_files
     ${MOD_BUILD_DIR}/h5s.mod
     ${MOD_BUILD_DIR}/h5t.mod
     ${MOD_BUILD_DIR}/h5z.mod
-    ${MOD_BUILD_DIR}/h5_kind.mod
+    ${MOD_BUILD_DIR}/h5_gen.mod
 )
 install (
     FILES
