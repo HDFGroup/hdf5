@@ -16,6 +16,7 @@
 !
 ! This file contains the FORTRAN90 tests for H5LT
 !
+#include <H5config_f.inc>
 
 PROGRAM table_test
 
@@ -70,7 +71,24 @@ SUBROUTINE test_table1()
   INTEGER(SIZE_T),  DIMENSION(1:nfields) :: field_sizesr  ! field sizes
   INTEGER(SIZE_T)  :: type_sizeout = 0                    ! size of the datatype
   INTEGER :: maxlen = 0                                   ! max chararter length of a field name
+  INTEGER :: Cs_sizeof_double = H5_SIZEOF_DOUBLE          ! C's sizeof double
+  INTEGER :: SIZEOF_X
+  LOGICAL :: Exclude_double
 
+  ! Find size of DOUBLE PRECISION
+#ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
+  SIZEOF_X = storage_size(bufd(1))/storage_size(c_char_'a')
+#else
+  SIZEOF_X = SIZEOF(bufd(1))
+#endif
+
+  ! If Fortran DOUBLE PRECISION and C DOUBLE sizeof don't match then disable 
+  ! creating a DOUBLE RECISION field, and instead create a REAL field. This
+  ! is to handle when DOUBLE PRECISION is promoted via a compiler option.
+  Exclude_double = .FALSE.
+  IF(Cs_sizeof_double.NE.SIZEOF_X)THEN
+     Exclude_double = .TRUE.
+  ENDIF
 
   !
   ! Initialize the data arrays.
@@ -110,7 +128,11 @@ SUBROUTINE test_table1()
   CALL h5tset_size_f(type_id_c, type_size, errcode)
   CALL h5tget_size_f(type_id_c, type_sizec, errcode)
   CALL h5tget_size_f(H5T_NATIVE_INTEGER, type_sizei, errcode)
-  CALL h5tget_size_f(H5T_NATIVE_DOUBLE, type_sized, errcode)
+  IF(exclude_double)THEN
+     CALL h5tget_size_f(H5T_NATIVE_REAL, type_sized, errcode)
+  ELSE
+     CALL h5tget_size_f(H5T_NATIVE_DOUBLE, type_sized, errcode)
+  ENDIF
   CALL h5tget_size_f(H5T_NATIVE_REAL, type_sizer, errcode)
   type_size = type_sizec + type_sizei + type_sized + type_sizer
 
@@ -119,7 +141,11 @@ SUBROUTINE test_table1()
   !
   field_types(1) = type_id_c
   field_types(2) = H5T_NATIVE_INTEGER
-  field_types(3) = H5T_NATIVE_DOUBLE
+  IF(exclude_double)THEN
+     field_types(3) = H5T_NATIVE_REAL
+  ELSE
+     field_types(3) = H5T_NATIVE_DOUBLE
+  ENDIF
   field_types(4) = H5T_NATIVE_REAL
 
   !
@@ -167,9 +193,13 @@ SUBROUTINE test_table1()
 
   CALL h5tbwrite_field_name_f(file_id,dsetname1,field_names(2),start,nrecords,type_sizei,&
        bufi,errcode)
-
-  CALL h5tbwrite_field_name_f(file_id,dsetname1,field_names(3),start,nrecords,type_sized,&
-       bufd,errcode)
+  IF(exclude_double)THEN
+     CALL h5tbwrite_field_name_f(file_id,dsetname1,field_names(3),start,nrecords,type_sized,&
+          bufr,errcode)
+  ELSE
+     CALL h5tbwrite_field_name_f(file_id,dsetname1,field_names(3),start,nrecords,type_sized,&
+          bufd,errcode)
+  ENDIF
 
   CALL h5tbwrite_field_name_f(file_id,dsetname1,field_names(4),start,nrecords,type_sizer,&
        bufr,errcode)
@@ -213,7 +243,6 @@ SUBROUTINE test_table1()
   CALL h5tbread_field_name_f(file_id,dsetname1,field_names(2),start,nrecords,type_sizei,&
        bufir,errcode)
 
-
   !
   ! compare read and write buffers.
   !
@@ -225,19 +254,39 @@ SUBROUTINE test_table1()
      ENDIF
   END DO
 
-  CALL h5tbread_field_name_f(file_id,dsetname1,field_names(3),start,nrecords,type_sized,&
-       bufdr,errcode)
+  IF(exclude_double)THEN
+
+     CALL h5tbread_field_name_f(file_id,dsetname1,field_names(3),start,nrecords,type_sized,&
+          bufrr,errcode)
 
   !
   ! compare read and write buffers.
   !
-  DO i = 1, nrecords
-     IF ( bufdr(i) .NE. bufd(i) ) THEN
-        PRINT *, 'read buffer differs from write buffer'
-        PRINT *,  bufdr(i), ' and ',   bufd(i)
-        STOP
-     ENDIF
-  END DO
+     DO i = 1, nrecords
+        IF ( bufrr(i) .NE. bufr(i) ) THEN
+           PRINT *, 'read buffer differs from write buffer'
+           PRINT *,  bufrr(i), ' and ',   bufr(i)
+           STOP
+        ENDIF
+     END DO
+
+  ELSE
+     CALL h5tbread_field_name_f(file_id,dsetname1,field_names(3),start,nrecords,type_sized,&
+          bufdr,errcode)
+
+  !
+  ! compare read and write buffers.
+  !
+     DO i = 1, nrecords
+        IF ( bufdr(i) .NE. bufd(i) ) THEN
+           PRINT *, 'read buffer differs from write buffer'
+           PRINT *,  bufdr(i), ' and ',   bufd(i)
+           STOP
+        ENDIF
+     END DO
+  ENDIF
+
+
 
   CALL h5tbread_field_name_f(file_id,dsetname1,field_names(4),start,nrecords,type_sizer,&
        bufrr,errcode)
@@ -253,8 +302,8 @@ SUBROUTINE test_table1()
      ENDIF
   END DO
 
-
   CALL passed()
+
 
   !-------------------------------------------------------------------------
   ! write field
@@ -268,8 +317,13 @@ SUBROUTINE test_table1()
   CALL h5tbwrite_field_index_f(file_id,dsetname1,2,start,nrecords,type_sizei,&
        bufi,errcode)
 
-  CALL h5tbwrite_field_index_f(file_id,dsetname1,3,start,nrecords,type_sized,&
-       bufd,errcode)
+  IF(exclude_double)THEN
+     CALL h5tbwrite_field_index_f(file_id,dsetname1,3,start,nrecords,type_sized,&
+          bufr,errcode)
+  ELSE
+     CALL h5tbwrite_field_index_f(file_id,dsetname1,3,start,nrecords,type_sized,&
+          bufd,errcode)
+  ENDIF
 
   CALL h5tbwrite_field_index_f(file_id,dsetname1,4,start,nrecords,type_sizer,&
        bufr,errcode)
@@ -307,20 +361,35 @@ SUBROUTINE test_table1()
         STOP
      ENDIF
   END DO
+  IF(exclude_double)THEN
+     CALL h5tbread_field_index_f(file_id,dsetname1,3,start,nrecords,type_sized,&
+          bufrr,errcode)
 
-  CALL h5tbread_field_index_f(file_id,dsetname1,3,start,nrecords,type_sized,&
-       bufdr,errcode)
+     !
+     ! compare read and write buffers.
+     !
+     DO i = 1, nrecords
+        IF ( bufrr(i) .NE. bufr(i) ) THEN
+           PRINT *, 'read buffer differs from write buffer'
+           PRINT *,  bufrr(i), ' and ',   bufr(i)
+           STOP
+        ENDIF
+     END DO
+  ELSE
+     CALL h5tbread_field_index_f(file_id,dsetname1,3,start,nrecords,type_sized,&
+          bufdr,errcode)
 
-  !
-  ! compare read and write buffers.
-  !
-  DO i = 1, nrecords
-     IF ( bufdr(i) .NE. bufd(i) ) THEN
-        PRINT *, 'read buffer differs from write buffer'
-        PRINT *,  bufdr(i), ' and ',   bufd(i)
-        STOP
-     ENDIF
-  END DO
+     !
+     ! compare read and write buffers.
+     !
+     DO i = 1, nrecords
+        IF ( bufdr(i) .NE. bufd(i) ) THEN
+           PRINT *, 'read buffer differs from write buffer'
+           PRINT *,  bufdr(i), ' and ',   bufd(i)
+           STOP
+        ENDIF
+     END DO
+  ENDIF
 
   CALL h5tbread_field_index_f(file_id,dsetname1,4,start,nrecords,type_sizer,&
        bufrr,errcode)
