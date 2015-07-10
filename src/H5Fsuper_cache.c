@@ -470,7 +470,7 @@ H5F__cache_superblock_image_len(const void *_thing, size_t *image_len, hbool_t *
     *image_len = (size_t)H5F_SUPERBLOCK_SIZE(sblock);
 
     /* Set *compressed_ptr to FALSE unconditionally */
-    *compressed_ptr;
+    *compressed_ptr = FALSE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5F__cache_superblock_image_len() */
@@ -716,7 +716,7 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
     } /* end else */
 
     /* Sanity check */
-    HDassert((size_t)(image - (uint8_t *)_image) <= len);
+    HDassert((size_t)(image - (uint8_t *)_image) == len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -976,7 +976,7 @@ H5F__cache_drvrinfo_serialize(const H5F_t *f, void *_image, size_t len,
     image += 8 + drvinfo->len;
 
     /* Sanity check */
-    HDassert((size_t)(image - (uint8_t *)_image) <= len);
+    HDassert((size_t)(image - (uint8_t *)_image) == len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
