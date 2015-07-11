@@ -9843,14 +9843,15 @@ test_swmr_v1_btree_ci_fail(const char *env_h5_driver, hid_t fapl)
     /* Reopen the file with SWMR write access */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fh_fapl)) < 0) FAIL_STACK_ERROR
 
-    /* Attempt to write to a dataset that uses v-1 B-tree chunk indexing under
-     * SWMR semantics.
+    /* 
+     * Attempt to write to a dataset that uses v-1 B-tree chunk indexing with SWMR access.
+     * (dataset is empty)
      */
     did = -1;
     err = -1;
     H5E_BEGIN_TRY {
         did = H5Dopen2(fid, DSET_DEFAULT_NAME, H5P_DEFAULT);
-        if(did >= 0) {
+        if(did >= 0) { /* should fail to write */
             err = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data);
         }
     } H5E_END_TRY;
@@ -9862,9 +9863,79 @@ test_swmr_v1_btree_ci_fail(const char *env_h5_driver, hid_t fapl)
         goto error;
     }
 
-    /* Close everything */
+    /* Close the dataset */
     if(did >= 0)
         if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+
+    /* Reopen the file with write access */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fh_fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Open the dataset */
+    if((did = H5Dopen2(fid, DSET_DEFAULT_NAME, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Write to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
+	FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+
+    /* Reopen the file with SWMR write access */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fh_fapl)) < 0) FAIL_STACK_ERROR
+
+    /* 
+     * Attempt to write to a dataset that uses v-1 B-tree chunk indexing with SWMR access.
+     * (dataset is non-empty)
+     */
+    did = -1;
+    err = -1;
+    H5E_BEGIN_TRY {
+        did = H5Dopen2(fid, DSET_DEFAULT_NAME, H5P_DEFAULT);
+        if(did >= 0) { /* should fail to write */
+            err = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data);
+        }
+    } H5E_END_TRY;
+
+    /* Fail on successful write */
+    if(did >= 0 && err >= 0) {
+        H5_FAILED();
+        puts("    library allowed writing to a version 1 B-tree indexed dataset under SWMR semantics");
+        goto error;
+    }
+
+    /* Close the dataset */
+    if(did >= 0)
+        if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    /* Reopen the file with SWMR read access */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fh_fapl)) < 0) 
+	FAIL_STACK_ERROR
+
+    /* Open the dataset */
+    if((did = H5Dopen2(fid, DSET_DEFAULT_NAME, H5P_DEFAULT)) < 0)
+	TEST_ERROR
+
+    /* Should read the correct data from the dataset */
+    data = 0;
+    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
+        TEST_ERROR
+    if(data != 42)
+        TEST_ERROR
+
+    /* Closing */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
     if(H5Pclose(v1_fapl) < 0) FAIL_STACK_ERROR
     if(H5Pclose(fh_fapl) < 0) FAIL_STACK_ERROR
     if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR

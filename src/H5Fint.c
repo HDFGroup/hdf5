@@ -1268,7 +1268,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         if(H5F_INTENT(file) & H5F_ACC_RDWR) { /* Set and check consistency of status_flags */
             if(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS ||
                file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write or SWMR write")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write/SWMR write (may use <h5clear file> to clear file consistency flags)")
 
             file->shared->sblock->status_flags |= H5F_SUPER_WRITE_ACCESS;
 
@@ -1289,7 +1289,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is not already open for SWMR writing")
             } else if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) ||
                (file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for writing")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write (may use <h5clear file> to clear file consistency flags)")
         }
     } /* end if set_flag */
 
