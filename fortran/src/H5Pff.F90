@@ -7095,7 +7095,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_file_image_f
 
+! *********************************************************************
 ! Fortran interfaces for H5P functions needed by parallel MPI programs.
+! *********************************************************************
+
 #ifdef H5_HAVE_PARALLEL
 !****s* H5P/h5pset_fapl_mpio_f
 !
