@@ -324,6 +324,7 @@
 ./fortran/test/fortranlib_test.f90
 ./fortran/test/fortranlib_test_1_8.f90
 ./fortran/test/fortranlib_test_F03.f90
+./fortran/test/H5_test_buildiface.F90
 ./fortran/test/t.c
 ./fortran/test/t.h
 ./fortran/test/tf.F90
