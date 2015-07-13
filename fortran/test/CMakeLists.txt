@@ -23,8 +23,8 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
-set_source_files_properties (tf.F90 tf_gen.F90 PROPERTIES LANGUAGE Fortran)
-add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.F90 tf_gen.F90)
+set_source_files_properties (tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90 PROPERTIES LANGUAGE Fortran)
+add_library (${HDF5_F90_TEST_LIB_TARGET} ${LIB_TYPE} tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90)
 
 set (SHARED_LINK_FLAGS " ")
 if (WIN32)
@@ -48,6 +48,40 @@ set_target_properties (${HDF5_F90_TEST_LIB_TARGET} PROPERTIES
     LINKER_LANGUAGE Fortran
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
+
+#-----------------------------------------------------------------------------
+# Setup the Fortran auto-detection utilities
+# H5_test_buildiface.F90         used to generate various KIND test interfaces
+#-----------------------------------------------------------------------------
+
+add_executable (H5_test_buildiface
+      ${HDF5_F90_SRC_DIR}/test/H5_test_buildiface.F90
+  )
+
+if (WIN32 AND MSVC)
+  if (BUILD_SHARED_LIBS)
+    set_target_properties (H5_test_buildiface
+        PROPERTIES
+            COMPILE_FLAGS "/MT"
+    )
+  endif (BUILD_SHARED_LIBS)
+  set_target_properties (H5_test_buildiface
+      PROPERTIES
+          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+  )
+endif (WIN32 AND MSVC)
+set_target_properties (H5_test_buildiface PROPERTIES
+    LINKER_LANGUAGE Fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
+
+set (CMD $<TARGET_FILE:H5_test_buildiface>)
+add_custom_command (
+    OUTPUT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+    COMMAND ${CMD}
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+    DEPENDS H5_test_buildiface
 )
 
 #-----------------------------------------------------------------------------

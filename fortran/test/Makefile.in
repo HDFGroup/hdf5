@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -88,6 +89,7 @@ DIST_COMMON = $(top_srcdir)/config/commence.am \
 # pass the -static flag to the library linker.
 @FORTRAN_SHARED_CONDITIONAL_FALSE@am__append_1 = -static
 check_PROGRAMS = $(am__EXEEXT_1)
+noinst_PROGRAMS = H5_test_buildiface$(EXEEXT)
 TESTS = $(am__EXEEXT_1)
 subdir = fortran/test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -111,6 +113,10 @@ am__v_lt_1 =
 am__EXEEXT_1 = fortranlib_test$(EXEEXT) fflush1$(EXEEXT) \
 	fflush2$(EXEEXT) fortranlib_test_1_8$(EXEEXT) \
 	fortranlib_test_F03$(EXEEXT)
+PROGRAMS = $(noinst_PROGRAMS)
+am_H5_test_buildiface_OBJECTS = H5_test_buildiface.$(OBJEXT)
+H5_test_buildiface_OBJECTS = $(am_H5_test_buildiface_OBJECTS)
+H5_test_buildiface_DEPENDENCIES =
 am_fflush1_OBJECTS = fflush1.$(OBJEXT)
 fflush1_OBJECTS = $(am_fflush1_OBJECTS)
 fflush1_LDADD = $(LDADD)
@@ -212,10 +218,12 @@ AM_V_FC = $(am__v_FC_@AM_V@)
 am__v_FC_ = $(am__v_FC_@AM_DEFAULT_V@)
 am__v_FC_0 = @echo "  FC      " $@;
 am__v_FC_1 = 
-SOURCES = $(libh5test_fortran_la_SOURCES) $(fflush1_SOURCES) \
+SOURCES = $(libh5test_fortran_la_SOURCES) \
+	$(H5_test_buildiface_SOURCES) $(fflush1_SOURCES) \
 	$(fflush2_SOURCES) $(fortranlib_test_SOURCES) \
 	$(fortranlib_test_1_8_SOURCES) $(fortranlib_test_F03_SOURCES)
-DIST_SOURCES = $(libh5test_fortran_la_SOURCES) $(fflush1_SOURCES) \
+DIST_SOURCES = $(libh5test_fortran_la_SOURCES) \
+	$(H5_test_buildiface_SOURCES) $(fflush1_SOURCES) \
 	$(fflush2_SOURCES) $(fortranlib_test_SOURCES) \
 	$(fortranlib_test_1_8_SOURCES) $(fortranlib_test_F03_SOURCES)
 am__can_run_installinfo = \
@@ -766,6 +774,14 @@ MOSTLYCLEANFILES = *.tmp
 # from tests in conclude.am)
 FORTRAN_API = yes
 
+# H5_test_buildiface.F90 is included in the distribution, and Automake knows
+# how to compile a fortran program given its sources.
+H5_test_buildiface_SOURCES = H5_test_buildiface.F90
+
+# The build of the H5_test_buildiface does depend on any libraries, so set it 
+# to nothing.
+H5_test_buildiface_LDADD = 
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
@@ -843,6 +859,19 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+
+clean-noinstPROGRAMS:
+	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+
+H5_test_buildiface$(EXEEXT): $(H5_test_buildiface_OBJECTS) $(H5_test_buildiface_DEPENDENCIES) $(EXTRA_H5_test_buildiface_DEPENDENCIES) 
+	@rm -f H5_test_buildiface$(EXEEXT)
+	$(AM_V_FCLD)$(FCLINK) $(H5_test_buildiface_OBJECTS) $(H5_test_buildiface_LDADD) $(LIBS)
 
 fflush1$(EXEEXT): $(fflush1_OBJECTS) $(fflush1_DEPENDENCIES) $(EXTRA_fflush1_DEPENDENCIES) 
 	@rm -f fflush1$(EXEEXT)
@@ -1273,7 +1302,7 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LTLIBRARIES) all-local
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -1312,7 +1341,7 @@ maintainer-clean-generic:
 clean: clean-am
 
 clean-am: clean-checkPROGRAMS clean-generic clean-libtool clean-local \
-	clean-noinstLTLIBRARIES mostlyclean-am
+	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1385,19 +1414,19 @@ uninstall-am:
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
 	check-am clean clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-local clean-noinstLTLIBRARIES cscopelist-am ctags \
-	ctags-am distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-local distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic maintainer-clean-local mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-local pdf pdf-am ps ps-am recheck tags tags-am \
-	uninstall uninstall-am
+	clean-local clean-noinstLTLIBRARIES clean-noinstPROGRAMS \
+	cscopelist-am ctags ctags-am distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-local \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic \
+	maintainer-clean-local mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
+	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am
 
 
 #
@@ -1438,8 +1467,14 @@ maintainer-clean-local: clean-local
 distclean-local: clean-local
 clean-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(RM) *.$(F9XMODEXT);                                         \
+	  $(RM) *.$(F9XMODEXT) tf_gen.F90;                                         \
 	fi
+
+# H5_test_buildiface.F90 generates all the test APIs that have a KIND type associated
+# with them.
+
+tf_gen.F90: H5_test_buildiface$(EXEEXT)
+	$(RUNSERIAL) ./H5_test_buildiface$(EXEEXT)
 
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_
