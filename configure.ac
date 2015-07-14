@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.224], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.225], [help@hdfgroup.org])
 
 
 

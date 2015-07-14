@@ -31,7 +31,7 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5dumpgentest STATIC " " " ")
     target_link_libraries (h5dumpgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)
-    
+
     #add_test (NAME h5dumpgentest COMMAND $<TARGET_FILE:h5dumpgentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
@@ -57,8 +57,5 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5dump
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        toolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

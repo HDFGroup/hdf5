@@ -47,8 +47,5 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5import
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        toolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

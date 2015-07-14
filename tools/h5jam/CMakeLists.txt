@@ -50,7 +50,7 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (testhdf5 ${LIB_TYPE} " " " ")
     target_link_libraries (h5jamgentest ${HDF5_LIB_TARGET})
     set_target_properties (h5jamgentest PROPERTIES FOLDER generator/tools)
-    
+
     #add_test (NAME h5jamgentest COMMAND $<TARGET_FILE:h5jamgentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
@@ -73,8 +73,5 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5jam h5unjam
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        toolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

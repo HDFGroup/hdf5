@@ -200,15 +200,15 @@ set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 install (
-    FILES 
-        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h 
-        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h 
-        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h 
+    FILES
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
         ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
         ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
-    DESTINATION 
+    DESTINATION
         ${HDF5_INSTALL_INCLUDE_DIR}
-    COMPONENT 
+    COMPONENT
         fortheaders
 )
 
@@ -265,5 +265,6 @@ if (HDF5_EXPORTED_TARGETS)
       LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT fortlibraries
+      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT fortlibraries
   )
 endif (HDF5_EXPORTED_TARGETS)

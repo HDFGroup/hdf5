@@ -25,7 +25,7 @@ set_target_properties (${HDF5_HL_CPP_LIB_TARGET} PROPERTIES
 )
 
 #-----------------------------------------------------------------------------
-# Add file(s) to CMake Install 
+# Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 install (
     FILES
@@ -43,7 +43,7 @@ if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_HL_CPP_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} hlcpplibraries)
   endif (BUILD_SHARED_LIBS)
-  
+
   install (
       TARGETS
           ${HDF5_HL_CPP_LIB_TARGET}
@@ -52,5 +52,6 @@ if (HDF5_EXPORTED_TARGETS)
       LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hlcpplibraries
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hlcpplibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hlcpplibraries
+      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT hlcpplibraries
   )
 endif (HDF5_EXPORTED_TARGETS)
