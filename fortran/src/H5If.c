@@ -1,6 +1,6 @@
 /****h* H5If/H5If
  * PURPOSE
- *   This file contains C stubs for H5I Fortran APIs
+ *  This file contains C stubs for H5I Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -25,15 +25,15 @@
 
 /****if* H5If/h5iget_type_c
  * NAME
- *        h5iget_type_c
+ *  h5iget_type_c
  * PURPOSE
- *     Call H5Iget_type to get the type of an object
+ *  Call H5Iget_type to get the type of an object
  * INPUTS
- *      obj_id - object identifier
+ *  obj_id - object identifier
  * OUTPUTS
- *     type - object type
+ *  type - object type
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Xiangyang Su
  *  Thursday, March 24, 2000
@@ -61,24 +61,24 @@ h5iget_type_c (hid_t_f *obj_id, int_f *type)
 }
 /****if* H5If/h5iget_name_c
  * NAME
- *        h5iget_name_c
+ *  h5iget_name_c
  * PURPOSE
- *     Call H5Iget_name to get object's name
+ *  Call H5Iget_name to get object's name
  * INPUTS
- *      obj_id - object identifier
- *              buf_size - size of the buffer
+ *  obj_id - object identifier
+ *  buf_size - size of the buffer
  * OUTPUTS
- *     buf - buffer to hold the name
+ *  buf - buffer to hold the name
  * RETURNS
- *     length of the name on success, -1 on failure
+ *  length of the name on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Wednesday, March 12, 2003
+ *  Wednesday, March 12, 2003
  * HISTORY
  *
- *               Changed the size of c_buf_size to c_buf_size + 1, which
- *               fixes the problem of truncating the string by 1 if the
- *               exact size of the string (buf_size) is passed in.
+ *  Changed the size of c_buf_size to c_buf_size + 1, which
+ *  fixes the problem of truncating the string by 1 if the
+ *  exact size of the string (buf_size) is passed in.
  *               M. Scot Breitenfeld, April 21, 2008
  * SOURCE
 */
@@ -120,15 +120,15 @@ DONE:
 
 /****if* H5If/h5iinc_ref_c
  * NAME
- *        h5iinc_ref_c
+ *  h5iinc_ref_c
  * PURPOSE
- *     Call H5Iinc_ref to increment object's reference count
+ *  Call H5Iinc_ref to increment object's reference count
  * INPUTS
- *      obj_id - object identifier
+ *  obj_id - object identifier
  * OUTPUTS
- *     ref_count - Reference count of ID
+ *  ref_count - Reference count of ID
  * RETURNS
- *     current reference count on success, -1 on failure
+ *  current reference count on success, -1 on failure
  * AUTHOR
  *  Quincey Koziol
  *  Tuesday, December  9, 2003
@@ -156,18 +156,18 @@ done:
 
 /****if* H5If/h5idec_ref_c
  * NAME
- *        h5idec_ref_c
+ *  h5idec_ref_c
  * PURPOSE
- *     Call H5Idec_ref to decrement object's reference count
+ *  Call H5Idec_ref to decrement object's reference count
  * INPUTS
- *      obj_id - object identifier
+ *  obj_id - object identifier
  * OUTPUTS
- *     ref_count - Reference count of ID
+ *  ref_count - Reference count of ID
  * RETURNS
- *     current reference count on success, -1 on failure
+ *  current reference count on success, -1 on failure
  * AUTHOR
  *  Quincey Koziol
- *              Tuesday, December  9, 2003
+ *  Tuesday, December  9, 2003
  * SOURCE
 */
 int_f
@@ -192,15 +192,15 @@ done:
 
 /****if* H5If/h5iget_ref_c
  * NAME
- *        h5iget_ref_c
+ *  h5iget_ref_c
  * PURPOSE
- *     Call H5Iget_ref to retrieve object's reference count
+ *  Call H5Iget_ref to retrieve object's reference count
  * INPUTS
- *      obj_id - object identifier
+ *  obj_id - object identifier
  * OUTPUTS
- *     ref_count - Reference count of ID
+ *  ref_count - Reference count of ID
  * RETURNS
- *     current reference count on success, -1 on failure
+ *  current reference count on success, -1 on failure
  * AUTHOR
  *  Quincey Koziol
  *  Tuesday, December  9, 2003
@@ -229,15 +229,15 @@ done:
 
 /****if* H5If/h5iget_file_id_c
  * NAME
- *        h5iget_file_id_c
+ *  h5iget_file_id_c
  * PURPOSE
- *     Call H5Iget_file_id to obtain file identifier from object identifier
+ *  Call H5Iget_file_id to obtain file identifier from object identifier
  * INPUTS
- *      obj_id - object identifier
+ *  obj_id - object identifier
  * OUTPUTS
- *     file_id - file identifier
+ *  file_id - file identifier
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
  *  Tuesday, August 24, 2004
@@ -266,14 +266,14 @@ done:
 }
 
 /*----------------------------------------------------------------------------
- * Name:        h5iis_valid_c
- * Purpose:     Calls H5Iis_valid
- * Inputs:      obj_id - object identifier
- * Outputs:     0 = false, 1 = true
- * Returns:     0 on success, -1 on failure
- * Programmer:  Elena Pourmal
- *              Tuesday, August 24, 2004
- * Modifications:
+ *  Name:        h5iis_valid_c
+ *  Purpose:     Calls H5Iis_valid
+ *  Inputs:      obj_id - object identifier
+ *  Outputs:     0 = false, 1 = true
+ *  Returns:     0 on success, -1 on failure
+ *  Programmer:  Elena Pourmal
+ *  Tuesday, August 24, 2004
+ *  Modifications:
  *---------------------------------------------------------------------------*/
 int_f
 h5iis_valid_c(hid_t_f *obj_id, int_f *c_valid)

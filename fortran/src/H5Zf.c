@@ -1,6 +1,6 @@
 /****h* H5Zf/H5Zf
  * PURPOSE
- *   This file contains C stubs for H5Z Fortran APIs
+ *  This file contains C stubs for H5Z Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -25,16 +25,16 @@
 
 /****if* H5Zf/h5zunregister_c
  * NAME
- *        h5zunregister_c
+ *  h5zunregister_c
  * PURPOSE
- *     Call H5Zunregister to unregister filter
+ *  Call H5Zunregister to unregister filter
  * INPUTS
- *      filter identifier
+ *  filter identifier
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Wednesday, March 12, 2003
+ *  Wednesday, March 12, 2003
  * HISTORY
  *
  * SOURCE
@@ -92,7 +92,7 @@ h5zfilter_avail_c ( int_f *filter , int_f *flag )
 
 /****if* H5Zf/h5zget_filter_info_c
  * NAME
- *        h5zget_filter_info_c
+ *  h5zget_filter_info_c
  * PURPOSE
  *  Call H5Zget_filter_info to find if filter has its encoder
  *  and/or its decoder available

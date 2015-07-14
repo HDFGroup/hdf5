@@ -1,6 +1,6 @@
 /****h* H5Ef/H5Ef
  * PURPOSE
- *   This file contains C stubs for H5E Fortran APIs
+ *  This file contains C stubs for H5E Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -274,19 +274,19 @@ done:
 
 /****if* H5Ef/h5eset_auto2_c
  * NAME
- *   h5eset_auto2_c
+ *  h5eset_auto2_c
  * PURPOSE
- *   Calls H5Eset_auto2
+ *  Calls H5Eset_auto2
  * INPUTS
- *   estack_id    - Error stack identifier.
- *   func 	 - Function to be called upon an error condition.
- *   client_data - Data passed to the error function.
+ *  estack_id    - Error stack identifier.
+ *  func 	 - Function to be called upon an error condition.
+ *  client_data - Data passed to the error function.
  *   
  * RETURNS
- *   0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *   M. Scot Breitenfeld
- *   July 22, 2009
+ *  July 22, 2009
  * SOURCE
 */
 /* int_f */

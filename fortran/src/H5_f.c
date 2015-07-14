@@ -1,6 +1,6 @@
 /****ih* H5_f/H5_f
  * PURPOSE
- *   This file contains C stubs for H5 Fortran APIs
+ *  This file contains C stubs for H5 Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -30,16 +30,16 @@
  *  Initialize predefined datatypes in Fortran
  * INPUTS
  *  types - array with the predefined Native Fortran
- *          type, its element and length must be the
- *          same as the types array defined in the
+ *  type, its element and length must be the
+ *  same as the types array defined in the
  *          H5f90global.F90
  *  floatingtypes - array with the predefined Floating Fortran
- *                   type, its element and length must be the
- *                   same as the floatingtypes array defined in the
+ *  type, its element and length must be the
+ *  same as the floatingtypes array defined in the
  *                   H5f90global.F90
  *  integertypes - array with the predefined Integer Fortran
- *                 type, its element and length must be the
- *                 same as the integertypes array defined in the
+ *  type, its element and length must be the
+ *  same as the integertypes array defined in the
  *                 H5f90global.F90
  * RETURNS
  *  0 on success, -1 on failure
@@ -341,31 +341,31 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
  *  Closes predefined datatype in Fortran
  * INPUTS
  *  types         - array with the predefined Native Fortran
- *                  type, its element and length must be the
- *                  same as the types array defined in the
+ *  type, its element and length must be the
+ *  same as the types array defined in the
  *                  H5f90global.F90
  *  lentypes      - length of the types array, which must be the
- *                  same as the length of types array defined
- *                  in the H5f90global.F90
+ *  same as the length of types array defined
+ *  in the H5f90global.F90
  *  floatingtypes - array with the predefined Floating Fortran
- *                  type, its element and length must be the
- *                  same as the floatingtypes array defined in the
+ *  type, its element and length must be the
+ *  same as the floatingtypes array defined in the
  *                  H5f90global.F90
  *  floatinglen   - length of the floatingtypes array, which must be the
- *                  same as the length of floatingtypes array defined
- *                  in the H5f90global.F90
+ *  same as the length of floatingtypes array defined
+ *  in the H5f90global.F90
  *  integertypes  - array with the predefined Integer Fortran
- *                  type, its element and length must be the
- *                  same as the integertypes array defined in the
+ *  type, its element and length must be the
+ *  same as the integertypes array defined in the
  *                  H5f90global.F90
  *  integerlen    - length of the floatingtypes array, which must be the
- *                  same as the length of floatingtypes array defined
- *                  in the H5f90global.F90
+ *  same as the length of floatingtypes array defined
+ *  in the H5f90global.F90
  * RETURNS
- *   0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
- *   Elena Pourmal
- *   Tuesday, August 3, 1999
+ *  Elena Pourmal
+ *  Tuesday, August 3, 1999
  * SOURCE
  */
 int_f
@@ -593,11 +593,11 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
     h5o_flags[6] = (int_f)H5O_COPY_ALL; /* All object copying flags (for internal checking) */
 
 /* Flags for shared message indexes.
- * Pass these flags in using the mesg_type_flags parameter in
+ *  Pass these flags in using the mesg_type_flags parameter in
  * H5P_set_shared_mesg_index.
  * (Developers: These flags correspond to object header message type IDs,
- * but we need to assign each kind of message to a different bit so that
- * one index can hold multiple types.)
+ *  but we need to assign each kind of message to a different bit so that
+ *  one index can hold multiple types.)
  */
       h5o_flags[7] = (int_f)H5O_SHMESG_NONE_FLAG;  /* No shared messages */
       h5o_flags[8] = (int_f)H5O_SHMESG_SDSPACE_FLAG; /* Simple Dataspace Message.  */
@@ -616,7 +616,7 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
       h5o_flags[19] = (int_f)H5O_HDR_ALL_FLAGS;
 
 /* Maximum shared message values.  Number of indexes is 8 to allow room to add
- * new types of messages.
+ *  new types of messages.
  */
       h5o_flags[20] = (int_f)H5O_SHMESG_MAX_NINDEXES;
       h5o_flags[21] = (int_f)H5O_SHMESG_MAX_LIST_SIZE;
@@ -796,14 +796,14 @@ h5init1_flags_c(int_f *h5lib_flags)
 
 /****if* H5_f/h5open_c
  * NAME
- *              h5open_c
+ *  h5open_c
  * PURPOSE
- *           Calls H5open call to initialize C HDF5 library
+ *  Calls H5open call to initialize C HDF5 library
  * RETURNS
- *           0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
- *        Elena Pourmal
- *        Friday, November 17, 2000
+ *  Elena Pourmal
+ *  Friday, November 17, 2000
  *
  * SOURCE
  */
@@ -819,13 +819,13 @@ h5open_c(void)
 }
 /****if* H5_f/h5close_c
  * NAME
- *              h5close_c
+ *  h5close_c
  * PURPOSE
- *           Calls H5close call to close C HDF5 library
+ *  Calls H5close call to close C HDF5 library
  * RETURNS
- *           0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
- *        Elena Pourmal
+ *  Elena Pourmal
  * SOURCE
  */
 int_f
@@ -841,23 +841,23 @@ h5close_c(void)
 
 /****if* H5_f/h5get_libversion_c
  * NAME
- *              h5get_libversion_c
+ *  h5get_libversion_c
  * PURPOSE
- *           Calls H5get_libversion function
+ *  Calls H5get_libversion function
  *		      to retrieve library version info.
  * INPUTS
  *
- *                    None
+ *  None
  * OUTPUTS
  *
- *                    majnum - the major version of the library
- *                    minnum - the minor version of the library
- *                    relnum - the release version of the library
+ *  majnum - the major version of the library
+ *  minnum - the minor version of the library
+ *  relnum - the release version of the library
  * RETURNS
- *           0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
- *        Elena Pourmal
- *                    Tuesday, September 24, 2002
+ *  Elena Pourmal
+ *  Tuesday, September 24, 2002
  * SOURCE
  *
  */
@@ -880,23 +880,23 @@ h5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
 
 /****if* H5_f/h5check_version_c
  * NAME
- *              h5check_version_c
+ *  h5check_version_c
  * PURPOSE
- *           Calls H5check_version function
+ *  Calls H5check_version function
  *		      to verify library version info.
  * INPUTS
  *
- *                    majnum - the major version of the library
- *                    minnum - the minor version of the library
- *                    relnum - the release version of the library
+ *  majnum - the major version of the library
+ *  minnum - the minor version of the library
+ *  relnum - the release version of the library
  * OUTPUTS
  *
- *                    None
+ *  None
  * RETURNS
- *           0 on success, aborts on failure
+ *  0 on success, aborts on failure
  * AUTHOR
- *        Elena Pourmal
- *                    Tuesday, September 24, 2002
+ *  Elena Pourmal
+ *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
@@ -918,14 +918,14 @@ h5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
 
 /****if* H5_f/h5garbage_collect_c
  * NAME
- *              h5garbage_collect_c
+ *  h5garbage_collect_c
  * PURPOSE
- *           Calls H5garbage_collect to collect on all free-lists of all types
+ *  Calls H5garbage_collect to collect on all free-lists of all types
  * RETURNS
- *           0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
- *        Elena Pourmal
- *                    Tuesday, September 24, 2002
+ *  Elena Pourmal
+ *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
@@ -941,14 +941,14 @@ h5garbage_collect_c(void)
 
 /****if* H5_f/h5dont_atexit_c
  * NAME
- *              h5dont_atexit_c
+ *  h5dont_atexit_c
  * PURPOSE
- *           Calls H5dont_atexit not to install atexit cleanup routine
+ *  Calls H5dont_atexit not to install atexit cleanup routine
  * RETURNS
- *           0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
- *        Elena Pourmal
- *                    Tuesday, September 24, 2002
+ *  Elena Pourmal
+ *  Tuesday, September 24, 2002
  * SOURCE
  */
 int_f

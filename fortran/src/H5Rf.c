@@ -1,6 +1,6 @@
 /****h* H5Rf/H5Rf
  * PURPOSE
- *   This file contains C stubs for H5R Fortran APIs
+ *  This file contains C stubs for H5R Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -26,19 +26,19 @@
 
 /****if* H5Rf/h5rcreate_region_c
  * NAME
- *        h5rcreate_region_c
+ *  h5rcreate_region_c
  * PURPOSE
- *     Call H5Rcreate to create a reference to dataset region
- *              region
+ *  Call H5Rcreate to create a reference to dataset region
+ *  region
  * INPUTS
- *      loc_id - file or group identifier
- *              name - name of the dataset
- *              namelen - name length
- *              space_id - dataset space identifier
+ *  loc_id - file or group identifier
+ *  name - name of the dataset
+ *  namelen - name length
+ *  space_id - dataset space identifier
  * OUTPUTS
- *     ref  - reference to the dataset region
+ *  ref  - reference to the dataset region
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
  *  Wednesday, December 1, 1999
@@ -125,7 +125,7 @@ h5rcreate_ptr_c (void *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *r
  *  Call H5Rdereference
  * INPUTS
  *  obj_id  - Valid identifier for the file containing the
- *            referenced object or any object in that file.
+ *  referenced object or any object in that file.
  *  ref_typ - The reference type of ref.
  *  ref     - Object reference
  * OUTPUTS
@@ -162,8 +162,8 @@ h5rdereference_ptr_c (hid_t_f *obj_id, int_f *ref_type, void *ref, hid_t_f *ref_
  * PURPOSE
  *  Call H5Rget_region to dereference dataspace region
  * INPUTS
- *   dset_id - dataset identifier
- *       ref - reference to the dataset region
+ *  dset_id - dataset identifier
+ *  ref - reference to the dataset region
  * OUTPUTS
  *  space_id - dereferenced  dataset dataspace identifier
  * RETURNS
@@ -205,8 +205,8 @@ done:
  * PURPOSE
  *  Call H5Rget_region to dereference dataspace region
  * INPUTS
- *   dset_id - dataset identifier
- *       ref - reference to the dataset region
+ *  dset_id - dataset identifier
+ *  ref - reference to the dataset region
  * OUTPUTS
  *  space_id - dereferenced  dataset dataspace identifier
  * RETURNS
@@ -241,17 +241,17 @@ done:
 
 /****if* H5Rf/h5rget_object_type_obj_c
  * NAME
- *        h5rget_object_type_obj_c
+ *  h5rget_object_type_obj_c
  * PURPOSE
- *     Call H5Rget_object_type to retrieve the type of the object reference points
- *              to
+ *  Call H5Rget_object_type to retrieve the type of the object reference points
+ *  to
  * INPUTS
- *      dset_id - dataset identifier
- *              ref - reference to the dataset region
+ *  dset_id - dataset identifier
+ *  ref - reference to the dataset region
  * OUTPUTS
- *     obj_type - type of dereferenced object
+ *  obj_type - type of dereferenced object
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
  *  Wednesday, December 1, 1999
@@ -287,13 +287,13 @@ done:
  *  Call H5Rget_name
  * INPUTS
  *
- *       loc_id - Identifier for the dataset containing the reference or for the group that dataset is in.
- *     ref_type - Type of reference.
- *          ref - An object or dataset region reference.
+ *  loc_id - Identifier for the dataset containing the reference or for the group that dataset is in.
+ *  ref_type - Type of reference.
+ *  ref - An object or dataset region reference.
  *
  * OUTPUTS
- *     name - A name associated with the referenced object or dataset region.
- *     size - The size of the name buffer.
+ *  name - A name associated with the referenced object or dataset region.
+ *  size - The size of the name buffer.
  *
  * RETURNS
  *  0 on success, -1 on failure
@@ -341,24 +341,24 @@ h5rget_name_ptr_c (hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_
 
 /****if* H5Rf/h5rget_obj_type_c
  * NAME
- *   h5rget_obj_type_c
+ *  h5rget_obj_type_c
  * PURPOSE
- *   Call H5Rget_obj_type
+ *  Call H5Rget_obj_type
  * INPUTS
- *   loc_id   - Identifier for the dataset containing the reference or
- *              for the group that dataset is in.
- *   ref_type - Type of reference to query.
- *   ref      - Reference to query.
+ *  loc_id   - Identifier for the dataset containing the reference or
+ *  for the group that dataset is in.
+ *  ref_type - Type of reference to query.
+ *  ref      - Reference to query.
  *
  * OUTPUTS
- *   obj_type - Type of referenced object. These are defined in H5Opublic.h,
- *              enum H5O_type_t
+ *  obj_type - Type of referenced object. These are defined in H5Opublic.h,
+ *  enum H5O_type_t
  *              
  * RETURNS
- *   0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *   M. Scot Breitenfeld
- *   December 17, 2008
+ *  December 17, 2008
  *
  * SOURCE
 */

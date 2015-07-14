@@ -1,6 +1,6 @@
 /****h* H5Df/H5Df
  * PURPOSE
- *   This file contains C stubs for H5D Fortran APIs
+ *  This file contains C stubs for H5D Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -84,19 +84,19 @@ DONE:
  * PURPOSE
  *  Call H5Dopen2 to open a dataset
  * INPUTS
- *      loc_id - file or group identifier
- *              name - name of the dataset
- *              namelen - name length
- *              dapl_id	- Dataset access property list
+ *  loc_id - file or group identifier
+ *  name - name of the dataset
+ *  namelen - name length
+ *  dapl_id	- Dataset access property list
  * OUTPUTS
- *     dset_id - dataset identifier
+ *  dset_id - dataset identifier
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Wednesday, August 4, 1999
+ *  Wednesday, August 4, 1999
  * HISTORY
- * Added 1.8 parameter: dapl_id
+ *  Added 1.8 parameter: dapl_id
  * SOURCE
 */
 int_f
@@ -204,21 +204,21 @@ h5dwrite_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_i
  * PURPOSE
  *  Call H5Dread to read a dataset of dataset region references
  * INPUTS
- *      dset_id - dataset identifier
- *              mem_type_id - memory datatype identifier
- *              mem_space_id - memory dataspace identifier
- *              file_space_id - memory dataspace identifier
- *              xfer_pr  - identifier of transfer property list
- *              buf      - data buffer to store references to the objects.
- *              n - number of references to be stored.
+ *  dset_id - dataset identifier
+ *  mem_type_id - memory datatype identifier
+ *  mem_space_id - memory dataspace identifier
+ *  file_space_id - memory dataspace identifier
+ *  xfer_pr  - identifier of transfer property list
+ *  buf      - data buffer to store references to the objects.
+ *  n - number of references to be stored.
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Wednesday, May 15, 2002
+ *  Wednesday, May 15, 2002
  * HISTORY
- * This function was added to accomodate h5dread_f subroutine
- *                with the dims parameter being of INTEGER(HSIZE_T_F) size.
+ *  This function was added to accomodate h5dread_f subroutine
+ *  with the dims parameter being of INTEGER(HSIZE_T_F) size.
  * SOURCE
 */
 int_f
@@ -274,12 +274,12 @@ h5dread_ref_reg_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id
  * PURPOSE
  *  Call H5Dclose to close a dataset
  * INPUTS
- *      dset_id - identifier of the dataset to be closed
+ *  dset_id - identifier of the dataset to be closed
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Wednesday, August 4, 1999
+ *  Wednesday, August 4, 1999
  * HISTORY
  *
  * SOURCE
@@ -302,14 +302,14 @@ h5dclose_c ( hid_t_f *dset_id )
  * PURPOSE
  *  Call H5Dget_space to obtain dataspace of a dataset
  * INPUTS
- *      dset_id - identifier of the dataset
+ *  dset_id - identifier of the dataset
  * OUTPUTS
- *     space_id - identifier of the dataset's dataspace
+ *  space_id - identifier of the dataset's dataspace
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 19, 1999
+ *  Thursday, August 19, 1999
  * HISTORY
  *
  * SOURCE
@@ -337,14 +337,14 @@ h5dget_space_c ( hid_t_f *dset_id , hid_t_f *space_id)
  * PURPOSE
  *  Call H5Dget_type to obtain datatype of a dataset
  * INPUTS
- *      dset_id - identifier of the dataset
+ *  dset_id - identifier of the dataset
  * OUTPUTS
- *     type_id - identifier of the dataset's datatype
+ *  type_id - identifier of the dataset's datatype
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 19, 1999
+ *  Thursday, August 19, 1999
  * HISTORY
  *
  * SOURCE
@@ -373,16 +373,16 @@ h5dget_type_c ( hid_t_f *dset_id , hid_t_f *type_id)
  *  h5dget_create_plist_c
  * PURPOSE
  *  Call H5Dget_create_plist to obtain creation property list
- *              of a dataset
+ *  of a dataset
  * INPUTS
- *      dset_id - identifier of the dataset
+ *  dset_id - identifier of the dataset
  * OUTPUTS
- *     plist_id - identifier of he dataset creation property list
+ *  plist_id - identifier of he dataset creation property list
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 19, 1999
+ *  Thursday, August 19, 1999
  * HISTORY
  *
  * SOURCE
@@ -413,18 +413,18 @@ h5dget_create_plist_c ( hid_t_f *dset_id , hid_t_f *plist_id)
  * PURPOSE
  *  Call H5Dset_extent to extend dataset with unlimited dimensions
  * INPUTS
- *      dset_id - identifier of the dataset
+ *  dset_id - identifier of the dataset
  * OUTPUTS
- *     dims - array with the dimension sizes
+ *  dims - array with the dimension sizes
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 19, 1999
+ *  Thursday, August 19, 1999
  *
  * HISTORY
- * Changed name from the now obsolete h5dextend
- *                to h5dset_extent in order to match new fortran interface.
+ *  Changed name from the now obsolete h5dextend
+ *  to h5dset_extent in order to match new fortran interface.
  *                -MSB- March 14, 2008
  * SOURCE
 */
@@ -465,16 +465,16 @@ h5dset_extent_c ( hid_t_f *dset_id , hsize_t_f *dims)
  *  h5dget_storage_size_c
  * PURPOSE
  *  Call H5Dget_storage_size to return the amount of storage
- *              required for a dataset
+ *  required for a dataset
  * INPUTS
- *      dset_id - identifier of the dataset
+ *  dset_id - identifier of the dataset
  * OUTPUTS
- *     size    - the amount of storage required for a dataset
+ *  size    - the amount of storage required for a dataset
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Tuesday, October 22, 2002
+ *  Tuesday, October 22, 2002
  * HISTORY
  *
  * SOURCE
@@ -502,16 +502,16 @@ h5dget_storage_size_c ( hid_t_f *dset_id , hsize_t_f *size)
  * PURPOSE
  *  Get the maximum size of the VL dataset element
  * INPUTS
- *      dset_id - identifier of the dataset
- *              type_id - datatype identifier
- *              space_id - dataspace identifier
+ *  dset_id - identifier of the dataset
+ *  type_id - datatype identifier
+ *  space_id - dataspace identifier
  * OUTPUTS
- *     len      - maximum length of the VL dataset element
+ *  len      - maximum length of the VL dataset element
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Tuesday, October 22, 2002
+ *  Tuesday, October 22, 2002
  * HISTORY
  *
  * SOURCE
@@ -560,21 +560,21 @@ DONE:
  * PURPOSE
  *  Write variable length dataset
  * INPUTS
- *      dset_id - identifier of the dataset
- *              mem_type_id - datatype identifier
- *              mem_space_id - dataspace identifier
- *              file_space_id - file dataspace identifier
- *              xfer          - file transfer property
- *              buf           - data buffer
- *              dims          - one-demnsional array of size 2
- *                              dims[0] = MAXLENGTH
- *                              dims[1] = number of elements of VL type
- *              len           - array element lenghts
+ *  dset_id - identifier of the dataset
+ *  mem_type_id - datatype identifier
+ *  mem_space_id - dataspace identifier
+ *  file_space_id - file dataspace identifier
+ *  xfer          - file transfer property
+ *  buf           - data buffer
+ *  dims          - one-demnsional array of size 2
+ *  dims[0] = MAXLENGTH
+ *  dims[1] = number of elements of VL type
+ *  len           - array element lenghts
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Wednesday, October 23, 2002
+ *  Wednesday, October 23, 2002
  * HISTORY
  *
  * SOURCE
@@ -633,22 +633,22 @@ DONE:
  * PURPOSE
  *  Read variable length dataset
  * INPUTS
- *      dset_id - identifier of the dataset
- *              mem_type_id - datatype identifier
- *              mem_space_id - dataspace identifier
- *              file_space_id - file dataspace identifier
- *              xfer          - file transfer property
- *              dims          - one-demnsional array of size 2
- *                              dims[0] = MAXLENGTH
- *                              dims[1] = number of elements of VL type
+ *  dset_id - identifier of the dataset
+ *  mem_type_id - datatype identifier
+ *  mem_space_id - dataspace identifier
+ *  file_space_id - file dataspace identifier
+ *  xfer          - file transfer property
+ *  dims          - one-demnsional array of size 2
+ *  dims[0] = MAXLENGTH
+ *  dims[1] = number of elements of VL type
  * OUTPUTS
- *     buf           - data buffer
- *              len           - array element lenghts
+ *  buf           - data buffer
+ *  len           - array element lenghts
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Wednesday, October 24, 2002
+ *  Wednesday, October 24, 2002
  * HISTORY
  *
  * SOURCE
@@ -705,20 +705,20 @@ DONE:
  * PURPOSE
  *  Write variable length strings from Fortran program
  * INPUTS
- *      dset_id - identifier of the dataset
- *              mem_type_id - datatype identifier
- *              mem_space_id - dataspace identifier
- *              file_space_id - file dataspace identifier
- *              xfer          - file transfer property
- *              buf           - data buffer
- *              dims          - one-demnsional array of size 2
- *                              dims[0] = number of strings of size max_len
- *              len           - array of strings lengths
+ *  dset_id - identifier of the dataset
+ *  mem_type_id - datatype identifier
+ *  mem_space_id - dataspace identifier
+ *  file_space_id - file dataspace identifier
+ *  xfer          - file transfer property
+ *  buf           - data buffer
+ *  dims          - one-demnsional array of size 2
+ *  dims[0] = number of strings of size max_len
+ *  len           - array of strings lengths
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Monday, October 28, 2002
+ *  Monday, October 28, 2002
  * HISTORY
  *
  * SOURCE
@@ -792,20 +792,20 @@ DONE:
  * PURPOSE
  *  Read variable length strings from Fortran program
  * INPUTS
- *      dset_id - identifier of the dataset
- *              mem_type_id - datatype identifier
- *              mem_space_id - dataspace identifier
- *              file_space_id - file dataspace identifier
- *              xfer          - file transfer property
- *              dims          - one-demnsional array of size 2
- *                              dims[0] = number of strings of size max_len
- * Output:      buf           - data buffer
- *              len           - array of strings lengths
+ *  dset_id - identifier of the dataset
+ *  mem_type_id - datatype identifier
+ *  mem_space_id - dataspace identifier
+ *  file_space_id - file dataspace identifier
+ *  xfer          - file transfer property
+ *  dims          - one-demnsional array of size 2
+ *  dims[0] = number of strings of size max_len
+ *  Output:      buf           - data buffer
+ *  len           - array of strings lengths
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Friday, November 1, 2002
+ *  Friday, November 1, 2002
  * HISTORY
  *
  * SOURCE
@@ -875,21 +875,21 @@ h5dread_vl_string_c( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_spac
  * PURPOSE
  *  Write variable length dataset
  * INPUTS
- *      dset_id - identifier of the dataset
- *              mem_type_id - datatype identifier
- *              mem_space_id - dataspace identifier
- *              file_space_id - file dataspace identifier
- *              xfer          - file transfer property
- *              buf           - data buffer
- *              dims          - one-demnsional array of size 2
- *                              dims[0] = MAXLENGTH
- *                              dims[1] = number of elements of VL type
- *              len           - array element lenghts
+ *  dset_id - identifier of the dataset
+ *  mem_type_id - datatype identifier
+ *  mem_space_id - dataspace identifier
+ *  file_space_id - file dataspace identifier
+ *  xfer          - file transfer property
+ *  buf           - data buffer
+ *  dims          - one-demnsional array of size 2
+ *  dims[0] = MAXLENGTH
+ *  dims[1] = number of elements of VL type
+ *  len           - array element lenghts
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Monday, November 11, 2002
+ *  Monday, November 11, 2002
  * HISTORY
  *
  * SOURCE
@@ -948,22 +948,22 @@ DONE:
  * PURPOSE
  *  Read variable length dataset
  * INPUTS
- *      dset_id - identifier of the dataset
- *              mem_type_id - datatype identifier
- *              mem_space_id - dataspace identifier
- *              file_space_id - file dataspace identifier
- *              xfer          - file transfer property
- *              dims          - one-demnsional array of size 2
- *                              dims[0] = MAXLENGTH
- *                              dims[1] = number of elements of VL type
+ *  dset_id - identifier of the dataset
+ *  mem_type_id - datatype identifier
+ *  mem_space_id - dataspace identifier
+ *  file_space_id - file dataspace identifier
+ *  xfer          - file transfer property
+ *  dims          - one-demnsional array of size 2
+ *  dims[0] = MAXLENGTH
+ *  dims[1] = number of elements of VL type
  * OUTPUTS
- *     buf           - data buffer
- *              len           - array element lenghts
+ *  buf           - data buffer
+ *  len           - array element lenghts
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Monday, November 11, 2002
+ *  Monday, November 11, 2002
  * HISTORY
  *
  * SOURCE
@@ -1065,14 +1065,14 @@ h5dfill_c (void * fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, void * b
  * PURPOSE
  *  Call H5Dget_space_status to request dataspace allocation status
  * INPUTS
- *      dset_id - dataset identifier
+ *  dset_id - dataset identifier
  * OUTPUTS
- *     flag - status flag
+ *  flag - status flag
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Wednesday, March 12, 2003
+ *  Wednesday, March 12, 2003
  * HISTORY
  *
  * SOURCE
@@ -1108,17 +1108,17 @@ h5dget_space_status_c ( hid_t_f *dset_id, int_f *flag)
  *		loc_id	   - Identifier of the file or group within which to create the dataset.
  *		type_id	   - Identifier of the datatype to use when creating the dataset.
  *		space_id   - Identifier of the dataspace to use when creating the dataset.
- *              dcpl_id    - Dataset creation property list identifier.
- *              dapl_id    - Dataset access property list identifier.
+ *  dcpl_id    - Dataset creation property list identifier.
+ *  dapl_id    - Dataset access property list identifier.
  * OUTPUTS
  *
- *              dset_id - dataset identifier
+ *  dset_id - dataset identifier
  *
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              February, 2008
+ *  February, 2008
  * SOURCE
 */
 int_f
@@ -1207,8 +1207,8 @@ h5dwrite_f_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id,
  *  file_space_id - file dataspace identifier
  *  xfer          - file transfer property
  *  dims          - one-demnsional array of size 2
- *                   dims[0] = MAXLENGTH
- *                   dims[1] = number of elements of VL type
+ *  dims[0] = MAXLENGTH
+ *  dims[1] = number of elements of VL type
  * OUTPUTS
  *  buf - data buffer
  *  len - array element lenghts
@@ -1288,16 +1288,16 @@ h5dget_access_plist_c (hid_t_f *dset_id, hid_t_f *plist_id)
  * PURPOSE
  *  Call H5Dvlen_reclaim
  * INPUTS
- *   type_id   - Identifier of the datatype. 
- *   space_id  - Identifier of the dataspace. 
- *   plist_id  - Identifier of the property list used to create the buffer. 
- *   buf       - Pointer to the buffer to be reclaimed.    
+ *  type_id   - Identifier of the datatype. 
+ *  space_id  - Identifier of the dataspace. 
+ *  plist_id  - Identifier of the property list used to create the buffer. 
+ *  buf       - Pointer to the buffer to be reclaimed.    
  *
  * RETURNS
- *   0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *   M. Scot Breitenfeld
- *   January 15, 2011 
+ *  January 15, 2011 
  *
  * SOURCE
 */

@@ -1,6 +1,6 @@
 /****h* H5Af/H5Af
  * PURPOSE
- *   This file contains C stubs for H5A Fortran APIs
+ *  This file contains C stubs for H5A Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -26,23 +26,23 @@
 
 /****if* H5Af/h5acreate_c
  * NAME
- *        h5acreate_c
+ *  h5acreate_c
  * PURPOSE
- *     Call H5Acreate2 to create an attribute
+ *  Call H5Acreate2 to create an attribute
  * INPUTS
- *      obj_id - object identifier
- *              name - name of the attribute
- *              namelen - name length
- *              type_id - datatype identifier
- *              space_id - dataspace identifier
- *              crt_pr  - identifier of creation property list
+ *  obj_id - object identifier
+ *  name - name of the attribute
+ *  namelen - name length
+ *  type_id - datatype identifier
+ *  space_id - dataspace identifier
+ *  crt_pr  - identifier of creation property list
  * OUTPUTS
- *     attr_id - attribute identifier
+ *  attr_id - attribute identifier
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 12, 1999
+ *  Thursday, August 12, 1999
  * HISTORY
  *
  * SOURCE
@@ -75,18 +75,18 @@ done:
 
 /****if* H5Af/h5adelete_c
  * NAME
- *        h5adelete_c
+ *  h5adelete_c
  * PURPOSE
- *     Call H5Adelete to delete an attribute
+ *  Call H5Adelete to delete an attribute
  * INPUTS
- *      obj_id - object identifier
- *              name - name of the attribute
- *              namelen - name length
+ *  obj_id - object identifier
+ *  name - name of the attribute
+ *  namelen - name length
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 12, 1999
+ *  Thursday, August 12, 1999
  * HISTORY
  *
  * SOURCE
@@ -120,19 +120,19 @@ done:
 
 /****if* H5Af/h5aopen_idx_c
  * NAME
- *        h5aopen_idx_c
+ *  h5aopen_idx_c
  * PURPOSE
- *     Call H5Aopen_by_idx to open an attribute
+ *  Call H5Aopen_by_idx to open an attribute
  * INPUTS
- *      obj_id - object identifier
- *              idx    - attribute index ( zero based)
+ *  obj_id - object identifier
+ *  idx    - attribute index ( zero based)
  * OUTPUTS
- *     attr_id - attribute identifier
+ *  attr_id - attribute identifier
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 12, 1999
+ *  Thursday, August 12, 1999
  * HISTORY
  *
  * SOURCE
@@ -156,18 +156,18 @@ done:
 
 /****if* H5Af/h5aget_space_c
  * NAME
- *        h5aget_space_c
+ *  h5aget_space_c
  * PURPOSE
- *     Call H5Aget_space to get attribute's dataspace
+ *  Call H5Aget_space to get attribute's dataspace
  * INPUTS
- *      attr_id - attribute identifier
+ *  attr_id - attribute identifier
  * OUTPUTS
- *     space_id - dataspace identifier
+ *  space_id - dataspace identifier
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 12, 1999
+ *  Thursday, August 12, 1999
  * HISTORY
  *
  * SOURCE
@@ -190,18 +190,18 @@ done:
 
 /****if* H5Af/h5aget_type_c
  * NAME
- *        h5aget_type_c
+ *  h5aget_type_c
  * PURPOSE
- *     Call H5Aget_space to get attribute's datatype
+ *  Call H5Aget_space to get attribute's datatype
  * INPUTS
- *      attr_id - attribute identifier
+ *  attr_id - attribute identifier
  * OUTPUTS
- *     type_id - datatype identifier
+ *  type_id - datatype identifier
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 12, 1999
+ *  Thursday, August 12, 1999
  * HISTORY
  *
  * SOURCE
@@ -224,18 +224,18 @@ done:
 
 /****if* H5Af/h5aget_num_attrs_c
  * NAME
- *        h5aget_num_attrs_c
+ *  h5aget_num_attrs_c
  * PURPOSE
- *     Call H5Oget_info to determine number of
- *              attributes of an object
+ *  Call H5Oget_info to determine number of
+ *  attributes of an object
  * INPUTS
- *      obj_id - object identifier
- *              attr_num - number of attributes
+ *  obj_id - object identifier
+ *  attr_num - number of attributes
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 12, 1999
+ *  Thursday, August 12, 1999
  * HISTORY
  *
  * SOURCE
@@ -262,19 +262,19 @@ done:
 
 /****if* H5Af/h5aget_name_c
  * NAME
- *        h5aget_name_c
+ *  h5aget_name_c
  * PURPOSE
- *     Call H5Aget_name to get attribute's name
+ *  Call H5Aget_name to get attribute's name
  * INPUTS
- *      attr_id - attribute identifier
- *              bufsize - size of the buffer
+ *  attr_id - attribute identifier
+ *  bufsize - size of the buffer
  * OUTPUTS
- *     buf - buffer to hold the name
+ *  buf - buffer to hold the name
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *              Thursday, August 12, 1999
+ *  Thursday, August 12, 1999
  * HISTORY
  *
  * SOURCE
@@ -313,18 +313,18 @@ done:
 
 /****if* H5Af/h5aget_storage_size_c
  * NAME
- *        h5aget_storage_size_c
+ *  h5aget_storage_size_c
  * PURPOSE
- *     Call H5Aget_storage_size
+ *  Call H5Aget_storage_size
  * INPUTS
- *      attr_id - identifier of an attribute
+ *  attr_id - identifier of an attribute
  * OUTPUTS
- *     size    - attributes storage requirements
+ *  size    - attributes storage requirements
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -345,18 +345,18 @@ done:
 
 /****if* H5Af/h5aget_create_plist_c
  * NAME
- *        h5aget_create_plist_c
+ *  h5aget_create_plist_c
  * PURPOSE
- *     Call H5Aget_create_plist
+ *  Call H5Aget_create_plist
  * INPUTS
- *      attr_id - identifier of an attribute
+ *  attr_id - identifier of an attribute
  * OUTPUTS
- *     creation_prop_id - Identifier for the attribute’s creation property
+ *  creation_prop_id - Identifier for the attribute’s creation property
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -377,26 +377,26 @@ done:
 
 /****if* H5Af/h5arename_by_name_c
  * NAME
- *      h5arename_by_name_c
+ *  h5arename_by_name_c
  * PURPOSE
- *   Calls H5Arename_by_name
+ *  Calls H5Arename_by_name
  * INPUTS
- *    loc_id        - Object identifier
- *            obj_name      - Name of object, relative to location,
- *                             whose attribute is to be renamed
- *            obj_name_len      - Object name length
- *            old_attr_name     - Prior attribute name
- *            old_attr_name_len - Prior attribute name length
- *            new_attr_name     - New attribute name
- *            new_attr_name_len - New attribute name length
- *            lapl_id       - Link access property list identifier
+ *  loc_id        - Object identifier
+ *  obj_name      - Name of object, relative to location,
+ *  whose attribute is to be renamed
+ *  obj_name_len      - Object name length
+ *  old_attr_name     - Prior attribute name
+ *  old_attr_name_len - Prior attribute name length
+ *  new_attr_name     - New attribute name
+ *  new_attr_name_len - New attribute name length
+ *  lapl_id       - Link access property list identifier
  * OUTPUTS
  *     N/A
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -438,21 +438,21 @@ done:
 
 /****if* H5Af/h5aopen_c
  * NAME
- *        h5aopen_c
+ *  h5aopen_c
  * PURPOSE
- *     Call H5Aopen to open an attribute
+ *  Call H5Aopen to open an attribute
  * INPUTS
- *      obj_id       - Identifer for object to which attribute is attached
+ *  obj_id       - Identifer for object to which attribute is attached
  *	        attr_name    - Attribute access property list
- *              attr_namelen - size of attr_name
- *              aapl_id      - Link access property list
+ *  attr_namelen - size of attr_name
+ *  aapl_id      - Link access property list
  * OUTPUTS
- *     attr_id - dataset identifier
+ *  attr_id - dataset identifier
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  *
  * SOURCE
@@ -483,24 +483,24 @@ done:
 }
 /****if* H5Af/h5adelete_by_name_c
  * NAME
- *        h5adelete_by_name_c
+ *  h5adelete_by_name_c
  * PURPOSE
- *     Call h5adelete_by_name to remove an attribute from a specified location
+ *  Call h5adelete_by_name to remove an attribute from a specified location
  * INPUTS
- *      loc_id - identifer for object to which attribute is attached
- *              obj_name - object identifier
- *              obj_namelen - name length
- *              attr_name - name of the attribute
- *              attr_namelen - name length
- *              lapl_id - link access property list
+ *  loc_id - identifer for object to which attribute is attached
+ *  obj_name - object identifier
+ *  obj_namelen - name length
+ *  attr_name - name of the attribute
+ *  attr_namelen - name length
+ *  lapl_id - link access property list
  *
  * OUTPUTS
  *     N/A
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -536,24 +536,24 @@ done:
 }
 /****if* H5Af/h5adelete_by_idx_c
  * NAME
- *        h5adelete_by_idx_c
+ *  h5adelete_by_idx_c
  * PURPOSE
- *     Call h5adelete_by_idx
+ *  Call h5adelete_by_idx
  * INPUTS
- *      loc_id - Location or object identifier; may be dataset or group
- *              obj_name - object identifier
- *              obj_namelen - name length
- *              attr_name - name of the attribute
- *              attr_namelen - name length
- *              lapl_id - link access property list
+ *  loc_id - Location or object identifier; may be dataset or group
+ *  obj_name - object identifier
+ *  obj_namelen - name length
+ *  attr_name - name of the attribute
+ *  attr_namelen - name length
+ *  lapl_id - link access property list
  *
  * OUTPUTS
  *     N/A
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -586,44 +586,44 @@ done:
 }
 /****if* H5Af/h5aget_name_by_idx_c
  * NAME
- *        h5aget_name_by_idx_c
+ *  h5aget_name_by_idx_c
  * PURPOSE
- *     Call h5aget_name_by_idx
+ *  Call h5aget_name_by_idx
  * INPUTS
  *
  *
- *        loc_id - Identifer for object to which attribute is attached
- *      obj_name - Name of object, relative to location,
- *                  from which attribute is to be removed *TEST* check NULL
- *      idx_type - Type of index; Possible values are:
+ *  loc_id - Identifer for object to which attribute is attached
+ *  obj_name - Name of object, relative to location,
+ *  from which attribute is to be removed *TEST* check NULL
+ *  idx_type - Type of index; Possible values are:
  *                         H5_INDEX_UNKNOWN   - Unknown index type
  *                         H5_INDEX_NAME      - Index on names
  *                         H5_INDEX_CRT_ORDER - Index on creation order
  *                         H5_INDEX_N	      - Number of indices defined
  *
- *      order    - Order in which to iterate over index; Possible values are:
+ *  order    - Order in which to iterate over index; Possible values are:
  *                          H5_ITER_UNKNOWN  - Unknown order
  *                          H5_ITER_INC      - Increasing order
  *                          H5_ITER_DEC      - Decreasing order
  *                          H5_ITER_NATIVE   - No particular order, whatever is fastest
  *                          H5_ITER_N	     - Number of iteration orders
  *
- *            n  - Attribute’s position in index
- *      attr_id  - Attribute identifier
- *         size  - Buffer size ! *TEST* check for 0 value *CHECK* should this return the correct value
+ *  n  - Attribute’s position in index
+ *  attr_id  - Attribute identifier
+ *  size  - Buffer size ! *TEST* check for 0 value *CHECK* should this return the correct value
  *
- *     lapl_id   - Link access property list
- *      hdferr   - Error code:
- *                            Returns attribute name size, -1 if fail
+ *  lapl_id   - Link access property list
+ *  hdferr   - Error code:
+ *  Returns attribute name size, -1 if fail
  *
  * OUTPUTS
- *     name - Attribute name
+ *  name - Attribute name
  *
  * RETURNS
- *     Size of buffer on success, -1 on failure
+ *  Size of buffer on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -677,36 +677,36 @@ done:
 
 /****if* H5Af/h5aopen_by_idx_c
  * NAME
- *        h5aopen_by_idx_c
+ *  h5aopen_by_idx_c
  * PURPOSE
- *     Call H5Aopen_by_idx
+ *  Call H5Aopen_by_idx
  * INPUTS
- *   loc_id    - Object identifier
- *            obj_name - Name of object to which attribute is attached
- *         obj_namelen - name length
- *            idx_type - Type of index; Possible values are:
+ *  loc_id    - Object identifier
+ *  obj_name - Name of object to which attribute is attached
+ *  obj_namelen - name length
+ *  idx_type - Type of index; Possible values are:
  *                         H5_INDEX_UNKNOWN   - Unknown index type
  *                         H5_INDEX_NAME      - Index on names
  *                         H5_INDEX_CRT_ORDER - Index on creation order
  *                         H5_INDEX_N	      - Number of indices defined
  *
- *               order - Order in which to iterate over index; Possible values are:
+ *  order - Order in which to iterate over index; Possible values are:
  *                          H5_ITER_UNKNOWN  - Unknown order
  *                          H5_ITER_INC      - Increasing order
  *                          H5_ITER_DEC      - Decreasing order
  *                          H5_ITER_NATIVE   - No particular order, whatever is fastest
  *                          H5_ITER_N	     - Number of iteration orders
  *
- *                   n - Attribute’s position in index
- *             aapl_id - Attribute access property list
- *             lapl_id - Link access property list
+ *  n - Attribute’s position in index
+ *  aapl_id - Attribute access property list
+ *  lapl_id - Link access property list
  * OUTPUTS
- *    attr_id - attribute identifer
+ *  attr_id - attribute identifer
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -740,23 +740,23 @@ done:
 
 /****if* H5Af/h5aget_info_c
  * NAME
- *        h5aget_info_c
+ *  h5aget_info_c
  * PURPOSE
- *     Call H5Aget_info
+ *  Call H5Aget_info
  * INPUTS
- *     loc_id  - Object identifier
+ *  loc_id  - Object identifier
  * OUTPUTS
  *
- *        corder_valid - Indicates whether the the creation order data is valid for this attribute
- *              corder - Is a positive integer containing the creation order of the attribute
- *                cset - Indicates the character set used for the attribute’s name
- *           data_size - indicates the size, in the number of characters, of the attribute
+ *  corder_valid - Indicates whether the the creation order data is valid for this attribute
+ *  corder - Is a positive integer containing the creation order of the attribute
+ *  cset - Indicates the character set used for the attribute’s name
+ *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -792,40 +792,40 @@ done:
 
 /****if* H5Af/h5aget_info_by_idx_c
  * NAME
- *        h5aget_info_by_idx_c
+ *  h5aget_info_by_idx_c
  * PURPOSE
- *     Call  H5Aget_info_by_idx
+ *  Call  H5Aget_info_by_idx
  * INPUTS
- *    loc_id  - Object identifier
- *            obj_name - Name of object to which attribute is attached
- *         obj_namelen - name length
- *            idx_type - Type of index; Possible values are:
+ *  loc_id  - Object identifier
+ *  obj_name - Name of object to which attribute is attached
+ *  obj_namelen - name length
+ *  idx_type - Type of index; Possible values are:
  *                         H5_INDEX_UNKNOWN   - Unknown index type
  *                         H5_INDEX_NAME      - Index on names
  *                         H5_INDEX_CRT_ORDER - Index on creation order
  *                         H5_INDEX_N	      - Number of indices defined
  *
- *               order - Order in which to iterate over index; Possible values are:
+ *  order - Order in which to iterate over index; Possible values are:
  *                          H5_ITER_UNKNOWN  - Unknown order
  *                          H5_ITER_INC      - Increasing order
  *                          H5_ITER_DEC      - Decreasing order
  *                          H5_ITER_NATIVE   - No particular order, whatever is fastest
  *                          H5_ITER_N	     - Number of iteration orders
  *
- *                   n - Attribute’s position in index
- *             lapl_id - Link access property list
+ *  n - Attribute’s position in index
+ *  lapl_id - Link access property list
  * OUTPUTS
  *
- *        corder_valid - Indicates whether the the creation order data is valid for this attribute
- *              corder - Is a positive integer containing the creation order of the attribute
- *                cset - Indicates the character set used for the attribute’s name
- *           data_size - indicates the size, in the number of characters, of the attribute
+ *  corder_valid - Indicates whether the the creation order data is valid for this attribute
+ *  corder - Is a positive integer containing the creation order of the attribute
+ *  cset - Indicates the character set used for the attribute’s name
+ *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -871,28 +871,28 @@ done:
 
 /****if* H5Af/h5aget_info_by_name_c
  * NAME
- *        h5aget_info_by_name_c
+ *  h5aget_info_by_name_c
  * PURPOSE
- *     Call  H5Aget_info_by_name
+ *  Call  H5Aget_info_by_name
  * INPUTS
- *      loc_id - Object identifier
- *            obj_name - Name of object to which attribute is attached
- *         obj_namelen - name length
- *           attr_name - Attribute name
- *        attr_namelen - attribute name length
- *             lapl_id - Link access property list
+ *  loc_id - Object identifier
+ *  obj_name - Name of object to which attribute is attached
+ *  obj_namelen - name length
+ *  attr_name - Attribute name
+ *  attr_namelen - attribute name length
+ *  lapl_id - Link access property list
  * OUTPUTS
  *
- *        corder_valid - Indicates whether the the creation order data is valid for this attribute
- *              corder - Is a positive integer containing the creation order of the attribute
- *                cset - Indicates the character set used for the attribute’s name
- *           data_size - indicates the size, in the number of characters, of the attribute
+ *  corder_valid - Indicates whether the the creation order data is valid for this attribute
+ *  corder - Is a positive integer containing the creation order of the attribute
+ *  cset - Indicates the character set used for the attribute’s name
+ *  data_size - indicates the size, in the number of characters, of the attribute
  *
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -942,32 +942,32 @@ done:
 
 /****if* H5Af/h5acreate_by_name_c
  * NAME
- *        h5acreate_by_name_c
+ *  h5acreate_by_name_c
  * PURPOSE
- *     Call h5acreate_by_name
+ *  Call h5acreate_by_name
 
  * INPUTS
  *
- *         loc_id  - Object identifier
- *        obj_name - Name of object to which attribute is attached
- *     obj_namelen - name length
- *       attr_name - Attribute name
- *    attr_namelen - attribute name length
- *         type_id - Attribute datatype identifier
- *       space_id  - Attribute dataspace identifier
- *         acpl_id - Attribute creation property list identifier (Currently not used.)
- *         aapl_id - Attribute access property list identifier (Currently not used.)
- *         lapl_id - Link access property list
+ *  loc_id  - Object identifier
+ *  obj_name - Name of object to which attribute is attached
+ *  obj_namelen - name length
+ *  attr_name - Attribute name
+ *  attr_namelen - attribute name length
+ *  type_id - Attribute datatype identifier
+ *  space_id  - Attribute dataspace identifier
+ *  acpl_id - Attribute creation property list identifier (Currently not used.)
+ *  aapl_id - Attribute access property list identifier (Currently not used.)
+ *  lapl_id - Link access property list
  *
  * OUTPUTS
  *
- *            attr - an attribute identifier
+ *  attr - an attribute identifier
  *
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              February, 2008
+ *  February, 2008
  * HISTORY
  * N/A
  * SOURCE
@@ -1008,21 +1008,21 @@ done:
 
 /****if* H5Af/h5aexists_c
  * NAME
- *        h5aexists_c
+ *  h5aexists_c
  * PURPOSE
  *     CAll h5aexists
  * INPUTS
  *
- *             obj_id - Object identifier
- *          attr_name - Attribute name
+ *  obj_id - Object identifier
+ *  attr_name - Attribute name
  * OUTPUTS
  *
- *     attr_exists_c  - returns a positive value, for TRUE, or 0 (zero), for FALSE.
+ *  attr_exists_c  - returns a positive value, for TRUE, or 0 (zero), for FALSE.
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              February, 2008
+ *  February, 2008
  * HISTORY
  *
  * SOURCE
@@ -1054,23 +1054,23 @@ done:
 
 /****if* H5Af/h5aexists_by_name_c
  * NAME
- *        h5aexists_by_name_c
+ *  h5aexists_by_name_c
  * PURPOSE
  *     CAll H5Aexists_by_name
  * INPUTS
  *
- *     loc_id - Location identifier
- *   obj_name - Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot)
+ *  loc_id - Location identifier
+ *  obj_name - Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot)
  *  attr_name - Attribute name
- *    lapl_id - Link access property list identifier
+ *  lapl_id - Link access property list identifier
  * OUTPUTS
  *
- *     attr_exists_c  - returns a positive value, for TRUE, or 0 (zero), for FALSE.
+ *  attr_exists_c  - returns a positive value, for TRUE, or 0 (zero), for FALSE.
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              February, 2008
+ *  February, 2008
  * HISTORY
  *
  * SOURCE
@@ -1108,24 +1108,24 @@ done:
 
 /****if* H5Af/h5aopen_by_name_c
  * NAME
- *        h5aopen_by_name_c
+ *  h5aopen_by_name_c
  * PURPOSE
- *     Call H5Aopen_by_name
+ *  Call H5Aopen_by_name
  * INPUTS
  *
- *     loc_id - Location identifier
- *   obj_name - Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot)
+ *  loc_id - Location identifier
+ *  obj_name - Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot)
  *  attr_name - Attribute name
- *    aapl_id - Attribute access property list (Currently unused; should be passed in as H5P_DEFAULT.)
- *    lapl_id - Link access property list identifier
+ *  aapl_id - Attribute access property list (Currently unused; should be passed in as H5P_DEFAULT.)
+ *  lapl_id - Link access property list identifier
  * OUTPUTS
  *
- *     attr_id  - attribute identifier
+ *  attr_id  - attribute identifier
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              February, 2008
+ *  February, 2008
  * HISTORY
  *
  * SOURCE
@@ -1163,22 +1163,22 @@ h5aopen_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd a
 
 /****if* H5Af/h5arename_c
  * NAME
- *      h5arename_c
+ *  h5arename_c
  * PURPOSE
- *   Calls H5Arename
+ *  Calls H5Arename
  * INPUTS
- *    loc_id            - Object identifier
- *            old_attr_name     - Prior attribute name
- *            old_attr_name_len - Prior attribute name length
- *            new_attr_name     - New attribute name
- *            new_attr_name_len - New attribute name length
+ *  loc_id            - Object identifier
+ *  old_attr_name     - Prior attribute name
+ *  old_attr_name_len - Prior attribute name length
+ *  new_attr_name     - New attribute name
+ *  new_attr_name_len - New attribute name length
  * OUTPUTS
  *     N/A
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              January, 2008
+ *  January, 2008
  * HISTORY
  * N/A
  * SOURCE
