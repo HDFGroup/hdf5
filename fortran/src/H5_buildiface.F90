@@ -121,8 +121,8 @@ PROGRAM test_kind
 '! ',&
 '! PURPOSE',&
 '!  This module is generated at build by H5_buildiface.F90 to handle all the',&
-'!  detected REAL KINDs for APIs being passed REAL KINDs. Currently these ',&
-'!  are H5A, H5D and H5P APIs',&
+'!  detected KINDs for APIs being passed INTEGERs, REALs and CHARACTERs. Currently ',&
+'!  these are H5A, H5D and H5P APIs',&
 '!',&
 '! COPYRIGHT',&
 '! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
