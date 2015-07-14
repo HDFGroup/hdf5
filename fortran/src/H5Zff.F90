@@ -22,8 +22,14 @@
 !  access to either file, you may request a copy from help@hdfgroup.org.       *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! NOTES
-!                         *** IMPORTANT ***
+! NOTES!
+!       _____ __  __ _____   ____  _____ _______       _   _ _______
+!      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
+! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
+! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
+! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
+!      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
+!
 !  If you add a new H5Z function you must add the function name to the
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
@@ -124,6 +130,7 @@ CONTAINS
     IF (flag .EQ. 0) status = .FALSE.
 
   END SUBROUTINE h5zfilter_avail_f
+
 !****s* H5Z/h5zget_filter_info_f
 !
 ! NAME
