@@ -7,15 +7,15 @@
 !  fortran/src/H5_buildiface.f90
 !
 ! PURPOSE
-!  This stand alone program is used at build time to generate the program
-!  H5fortran_detect.f90. It cycles through all the available KIND parameters for
+!  This stand alone program is used at build time to generate the module
+!  H5_gen (H5_gen.F90). It cycles through all the available KIND parameters for
 !  integers and reals. The appropriate program and subroutines are then generated
 !  depending on which of the KIND values are found.
 !
 ! NOTES
 !  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF 
 !  depending on availablity.It generates code that makes use of 
-!  STORAGE_SIZE/SIZEOF in H5fortran_detect.f90. STORAGE_SIZE is standard
+!  STORAGE_SIZE/SIZEOF in H5_gen.F90. STORAGE_SIZE is standard
 !  compliant and should always be chosen over SIZEOF.
 !
 !  The availability of STORAGE_SIZE/SIZEOF is checked at configure time and the TRUE/FALSE
@@ -98,9 +98,9 @@ PROGRAM test_kind
 ! DEVELOPER'S NOTES:
 !
 ! Only interfaces with arrays of rank 7 and less are provided. Even-though, the F2008 
-! standard extended the maximum rank to 15, it was decided that they should use the
+! standard extended the maximum rank to 15, it was decided that user's should use the
 ! new APIs to handle those use cases. Handling rank 7 and less is for backward compatibility
-! with the Fortran 90/95 APIs codes which could never handle rank 15 array sizes.
+! with the Fortran 90/95 APIs codes which could never handle ranks greater than 7.
 
   OPEN(11,FILE='H5_gen.F90')
   WRITE(11,'(40(A,/))') &
@@ -134,7 +134,7 @@ PROGRAM test_kind
 '!',&
 '!*****'
 
-  WRITE(11,'(a)') "MODULE H5_GEN"
+  WRITE(11,'(A)') "MODULE H5_GEN"
 
   WRITE(11,'(A)') '  USE, INTRINSIC :: ISO_C_BINDING'
   WRITE(11,'(A)') '  USE H5GLOBAL'
