@@ -23,7 +23,6 @@
 
 #include "H5f90.h"
 
-
 /****if* H5Tf/h5topen_c
  * NAME
  *  h5topen_c
@@ -74,7 +73,6 @@ done:
 
     return ret_value;
 }
-
 
 /****if* H5Tf/h5tcommit_c
  * NAME
@@ -152,7 +150,6 @@ h5tclose_c ( hid_t_f *type_id )
   if ( H5Tclose(c_type_id) < 0  ) ret_value = -1;
   return ret_value;
 }
-
 
 /****if* H5Tf/h5tcopy_c
  * NAME

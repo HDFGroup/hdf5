@@ -273,7 +273,7 @@ h5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
  * HISTORY
  *
  *  Transpose dimension arrays because of C-FORTRAN storage order
- *              M. Scot Breitenfeld
+ *  M. Scot Breitenfeld
  * SOURCE
 */
 
@@ -346,7 +346,7 @@ h5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
  * HISTORY
  *  swapped array bounds to account for C and Fortran reversed
  *  matrix notation.
- *                M. Scot Breitenfeld
+ *  M. Scot Breitenfeld
  * SOURCE
 */
 

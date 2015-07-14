@@ -357,7 +357,7 @@ h5rget_name_ptr_c (hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
- *   M. Scot Breitenfeld
+ *  M. Scot Breitenfeld
  *  December 17, 2008
  *
  * SOURCE

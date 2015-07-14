@@ -42,10 +42,9 @@
  *  Elena Pourmal
  *  Wednesday, August 5, 1999
  * HISTORY
- *
  *  Changed to call H5Gcreate2 because H5Gcreate flip-flops and
- *              H5Gcreate1 can be compiled out of the library
- *              QAK - 2007/08/23
+ *  H5Gcreate1 can be compiled out of the library
+ *  QAK - 2007/08/23
  * SOURCE
 */
 int_f
@@ -880,8 +879,8 @@ done:
  *  February 15, 2008
  * HISTORY
  *
- *          - Added 'mounted' paramater
- *            M. Scot Breitenfeld
+ *  - Added 'mounted' paramater
+ *  M. Scot Breitenfeld
  *  July 16, 2008
  * SOURCE
 */
@@ -944,9 +943,9 @@ done:
  *  February 18, 2008
  * HISTORY
  *
- *          - Added 'mounted' paramater
- *            M. Scot Breitenfeld
- *  July 16, 2008
+ *  - Added 'mounted' parameter
+ *    M. Scot Breitenfeld
+ *    July 16, 2008
  * SOURCE
 */
 int_f
@@ -1014,9 +1013,9 @@ h5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
  *  February 18, 2008
  * HISTORY
  *
- *          - Added 'mounted' paramater
- *            M. Scot Breitenfeld
- *  July 16, 2008
+ *  - Added 'mounted' paramater
+ *    M. Scot Breitenfeld
+ *    July 16, 2008
  * SOURCE
 */
 int_f
