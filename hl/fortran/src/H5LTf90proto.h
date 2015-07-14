@@ -111,12 +111,42 @@ h5ltget_attribute_c(hid_t_f *loc_id,
 HDF5_HL_F90CSTUBDLL
 int_f
 h5ltget_attribute_string_c(hid_t_f *loc_id,
-                            size_t_f *namelen,
-                            _fcd dsetname,
-                            size_t_f *attrnamelen,
-                            _fcd attrname,
-                            _fcd buf,
-                            size_t_f *buf_size);
+			   size_t_f *namelen,
+			   _fcd dsetname,
+			   size_t_f *attrnamelen,
+			   _fcd attrname,
+			   _fcd buf,
+			   size_t_f *buf_size);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+h5ltset_attribute_float_c(hid_t_f *loc_id,
+			  size_t_f *namelen,
+			  _fcd dsetname,
+			  size_t_f *attrnamelen,
+			  _fcd attrname,
+			  size_t_f *size,
+			  void *buf);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+h5ltset_attribute_double_c(hid_t_f *loc_id,
+			   size_t_f *namelen,
+			   _fcd dsetname,
+			   size_t_f *attrnamelen,
+			   _fcd attrname,
+			   size_t_f *size,
+			   void *buf);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+h5ltset_attribute_string_c(hid_t_f *loc_id,
+			   size_t_f *namelen,
+			   _fcd dsetname,
+			   size_t_f *attrnamelen,
+			   _fcd attrname,
+			   size_t_f *buflen,
+			   void *buf);
 
 HDF5_HL_F90CSTUBDLL
 int_f
