@@ -154,7 +154,14 @@ PROGRAM test_kind
      j = rkind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
-        WRITE(11,'(A)') "     MODULE PROCEDURE h5awrite_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5awrite_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  DO i = 1, num_ikinds
+     j = ikind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5awrite_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO
   WRITE(11,'(A)') "  END INTERFACE"
@@ -179,7 +186,14 @@ PROGRAM test_kind
      j = rkind(i)
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
-        WRITE(11,'(A)') "     MODULE PROCEDURE h5dwrite_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5dwrite_rkind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  DO i = 1, num_ikinds
+     j = ikind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5dwrite_ikind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO
   WRITE(11,'(A)') "  END INTERFACE"
@@ -267,11 +281,11 @@ PROGRAM test_kind
 
 ! DLL definitions for windows
         WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
-        WRITE(11,'(A)') '!DEC$attributes dllexport :: h5awrite_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+        WRITE(11,'(A)') '!DEC$attributes dllexport :: h5awrite_rkind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
         WRITE(11,'(A)') '!DEC$endif'
 
 ! Subroutine API
-        WRITE(11,'(A)') '  SUBROUTINE h5awrite_kind_'//TRIM(ADJUSTL(chr2))&
+        WRITE(11,'(A)') '  SUBROUTINE h5awrite_rkind_'//TRIM(ADJUSTL(chr2))&
              &//'_rank'//chr_rank(j)//'(attr_id, memtype_id, buf, dims, hdferr)'
         WRITE(11,'(A)') '    IMPLICIT NONE'
         WRITE(11,'(A)') '    INTEGER(HID_T)    , INTENT(IN) :: attr_id'
@@ -283,7 +297,33 @@ PROGRAM test_kind
         
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)'
-        WRITE(11,'(A)') '  END SUBROUTINE h5awrite_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+        WRITE(11,'(A)') '  END SUBROUTINE h5awrite_rkind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+     ENDDO
+  ENDDO
+  DO i = 1, num_ikinds
+     k = ikind(i)
+     WRITE(chr2,'(I2)') k
+     DO j = 1, 8
+
+! DLL definitions for windows
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+        WRITE(11,'(A)') '!DEC$attributes dllexport :: h5awrite_ikind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+        WRITE(11,'(A)') '!DEC$endif'
+
+! Subroutine API
+        WRITE(11,'(A)') '  SUBROUTINE h5awrite_ikind_'//TRIM(ADJUSTL(chr2))&
+             &//'_rank'//chr_rank(j)//'(attr_id, memtype_id, buf, dims, hdferr)'
+        WRITE(11,'(A)') '    IMPLICIT NONE'
+        WRITE(11,'(A)') '    INTEGER(HID_T)    , INTENT(IN) :: attr_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T)    , INTENT(IN) :: memtype_id'
+        WRITE(11,'(A)') '    INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(*) :: dims'
+        WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER           , INTENT(OUT) :: hdferr'
+        WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+        
+        WRITE(11,'(A)') f_ptr_line(j)
+        WRITE(11,'(A)') '    hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)'
+        WRITE(11,'(A)') '  END SUBROUTINE h5awrite_ikind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      ENDDO
   ENDDO
 !
@@ -365,10 +405,10 @@ PROGRAM test_kind
      DO j = 1, 8
 ! DLL definitions for windows
         WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
-        WRITE(11,'(A)') '!DEC$attributes dllexport :: h5dwrite_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+        WRITE(11,'(A)') '!DEC$attributes dllexport :: h5dwrite_rkind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
         WRITE(11,'(A)') '!DEC$endif'
 ! Subroutine API
-        WRITE(11,'(A)') '  SUBROUTINE h5dwrite_kind_'//TRIM(ADJUSTL(chr2))&
+        WRITE(11,'(A)') '  SUBROUTINE h5dwrite_rkind_'//TRIM(ADJUSTL(chr2))&
              &//'_rank'//chr_rank(j)//'(dset_id, mem_type_id, buf, dims, hdferr, &'
         WRITE(11,'(A)') '       mem_space_id, file_space_id, xfer_prp)'
         WRITE(11,'(A)') '    USE, INTRINSIC :: ISO_C_BINDING'
@@ -394,7 +434,46 @@ PROGRAM test_kind
         WRITE(11,'(A)') f_ptr_line(j)
         WRITE(11,'(A)') '    hdferr = h5dwrite_f_c(dset_id, mem_type_id, mem_space_id_default, &'
         WRITE(11,'(A)') '         file_space_id_default, xfer_prp_default, f_ptr)'
-        WRITE(11,'(A)') '  END SUBROUTINE h5dwrite_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+        WRITE(11,'(A)') '  END SUBROUTINE h5dwrite_rkind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+     ENDDO
+  ENDDO
+
+  DO i = 1, num_ikinds
+     k = ikind(i)
+     WRITE(chr2,'(I2)') k
+     DO j = 1, 8
+! DLL definitions for windows
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+        WRITE(11,'(A)') '!DEC$attributes dllexport :: h5dwrite_ikind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+        WRITE(11,'(A)') '!DEC$endif'
+! Subroutine API
+        WRITE(11,'(A)') '  SUBROUTINE h5dwrite_ikind_'//TRIM(ADJUSTL(chr2))&
+             &//'_rank'//chr_rank(j)//'(dset_id, mem_type_id, buf, dims, hdferr, &'
+        WRITE(11,'(A)') '       mem_space_id, file_space_id, xfer_prp)'
+        WRITE(11,'(A)') '    USE, INTRINSIC :: ISO_C_BINDING'
+        WRITE(11,'(A)') '    IMPLICIT NONE'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: dset_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), INTENT(IN) :: mem_type_id'
+        WRITE(11,'(A)') '    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims'
+        WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER, INTENT(OUT) :: hdferr'
+        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id'
+        WRITE(11,'(A)') '    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp'
+        WRITE(11,'(A)') '    INTEGER(HID_T) :: xfer_prp_default'
+        WRITE(11,'(A)') '    INTEGER(HID_T) :: mem_space_id_default'
+        WRITE(11,'(A)') '    INTEGER(HID_T) :: file_space_id_default'
+        WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+        WRITE(11,'(A)') '    xfer_prp_default  = H5P_DEFAULT_F'
+        WRITE(11,'(A)') '    mem_space_id_default = H5S_ALL_F'
+        WRITE(11,'(A)') '    file_space_id_default = H5S_ALL_F'
+        WRITE(11,'(A)') '    IF(PRESENT(xfer_prp)) xfer_prp_default = xfer_prp'
+        WRITE(11,'(A)') '    IF(PRESENT(mem_space_id))  mem_space_id_default = mem_space_id'
+        WRITE(11,'(A)') '    IF(PRESENT(file_space_id)) file_space_id_default = file_space_id'
+        WRITE(11,'(A)') f_ptr_line(j)
+        WRITE(11,'(A)') '    hdferr = h5dwrite_f_c(dset_id, mem_type_id, mem_space_id_default, &'
+        WRITE(11,'(A)') '         file_space_id_default, xfer_prp_default, f_ptr)'
+        WRITE(11,'(A)') '  END SUBROUTINE h5dwrite_ikind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      ENDDO
   ENDDO
 

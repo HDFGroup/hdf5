@@ -73,14 +73,6 @@ MODULE H5A
   USE H5GLOBAL
 
   INTERFACE h5awrite_f
-     MODULE PROCEDURE h5awrite_integer_scalar
-     MODULE PROCEDURE h5awrite_integer_1
-     MODULE PROCEDURE h5awrite_integer_2
-     MODULE PROCEDURE h5awrite_integer_3
-     MODULE PROCEDURE h5awrite_integer_4
-     MODULE PROCEDURE h5awrite_integer_5
-     MODULE PROCEDURE h5awrite_integer_6
-     MODULE PROCEDURE h5awrite_integer_7
      MODULE PROCEDURE h5awrite_char_scalar
      MODULE PROCEDURE h5awrite_char_1
      MODULE PROCEDURE h5awrite_char_2

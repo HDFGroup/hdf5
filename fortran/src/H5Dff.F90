@@ -111,14 +111,6 @@ MODULE H5D
   INTERFACE h5dwrite_f
      MODULE PROCEDURE h5dwrite_reference_obj
      MODULE PROCEDURE h5dwrite_reference_dsetreg
-     MODULE PROCEDURE h5dwrite_integer_scalar
-     MODULE PROCEDURE h5dwrite_integer_1
-     MODULE PROCEDURE h5dwrite_integer_2
-     MODULE PROCEDURE h5dwrite_integer_3
-     MODULE PROCEDURE h5dwrite_integer_4
-     MODULE PROCEDURE h5dwrite_integer_5
-     MODULE PROCEDURE h5dwrite_integer_6
-     MODULE PROCEDURE h5dwrite_integer_7
      MODULE PROCEDURE h5dwrite_char_scalar
      MODULE PROCEDURE h5dwrite_char_1
      MODULE PROCEDURE h5dwrite_char_2
