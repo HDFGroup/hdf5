@@ -41,12 +41,12 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5diffgentest STATIC " " " ")
     target_link_libraries (h5diffgentest ${HDF5_LIB_TARGET})
     set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
-    
+
     #add_test (NAME h5diffgentest COMMAND $<TARGET_FILE:h5diffgentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
   include (CMakeTests.cmake)
- 
+
 endif (BUILD_TESTING)
 
 ##############################################################################
@@ -64,10 +64,7 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5diff
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        toolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )
 
 if (H5_HAVE_PARALLEL)
@@ -77,9 +74,6 @@ if (H5_HAVE_PARALLEL)
   install (
       TARGETS
           ph5diff
-      RUNTIME DESTINATION
-          ${HDF5_INSTALL_BIN_DIR}
-      COMPONENT
-          toolsapplications
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
   )
 endif (H5_HAVE_PARALLEL)

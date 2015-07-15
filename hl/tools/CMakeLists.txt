@@ -46,7 +46,7 @@ if (BUILD_TESTING)
       TARGET_C_PROPERTIES (hl_h52gifgentest STATIC " " " ")
       target_link_libraries (hl_h52gifgentest ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
       set_target_properties (hl_h52gifgentest PROPERTIES FOLDER generator/tools/hl)
-    
+
 #      add_test (NAME hl_h52gifgentest COMMAND $<TARGET_FILE:hl_h52gifgentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
@@ -60,8 +60,5 @@ install (
     TARGETS
         gif2h5
         h52gif
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        hltoolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hltoolsapplications
 )

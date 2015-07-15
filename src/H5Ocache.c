@@ -1130,7 +1130,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
             id = *chunk_image++;
 
         /* Check for unknown message ID getting encoded in file */
-        if(id == H5O_UNKNOWN_ID)
+        if(id >= H5O_UNKNOWN_ID)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "'unknown' message ID encoded in file?!?")
 
         /* Message size */
@@ -1218,9 +1218,10 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                 /* Set message to "unknown" class */
                 oh->mesg[mesgno].type = H5O_msg_class_g[H5O_UNKNOWN_ID];
 
-                /* Check for "fail if unknown" message flag */
-                if((udata->file_intent & H5F_ACC_RDWR) && 
-                   (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE))
+                /* Check for "fail if unknown" message flags */
+                if(((udata->file_intent & H5F_ACC_RDWR) && 
+                       (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE))
+                        || (flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS))
                     HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unknown message with 'fail if unknown' flag found")
                 /* Check for "mark if unknown" message flag, etc. */
                 else if((flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN) &&

@@ -48,7 +48,7 @@ H5_SET_LIB_OPTIONS (
     HDF5_TOOLS_LIB_NAME_DEBUG
 )
 #set_target_properties (${HDF5_TOOLS_LIB_TARGET} PROPERTIES COMPILE_DEFINITIONS H5DIFF_DEBUG)
-set_target_properties (${HDF5_TOOLS_LIB_TARGET} PROPERTIES 
+set_target_properties (${HDF5_TOOLS_LIB_TARGET} PROPERTIES
     FOLDER libraries/tools
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
@@ -60,7 +60,7 @@ set_target_properties (${HDF5_TOOLS_LIB_TARGET} PROPERTIES
 ##############################################################################
 
 #-----------------------------------------------------------------------------
-# Add file(s) to CMake Install 
+# Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 install (
     FILES
@@ -78,7 +78,7 @@ if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_TOOLS_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} toolslibraries)
   endif (BUILD_SHARED_LIBS)
-  
+
   install (
       TARGETS
           ${HDF5_TOOLS_LIB_TARGET}
@@ -87,5 +87,6 @@ if (HDF5_EXPORTED_TARGETS)
       LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT toolslibraries
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT toolslibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolslibraries
+      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT toolslibraries
   )
 endif (HDF5_EXPORTED_TARGETS)

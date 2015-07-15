@@ -27,7 +27,7 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5stat_gentest STATIC " " " ")
     target_link_libraries (h5stat_gentest ${HDF5_LIB_TARGET})
     set_target_properties (h5stat_gentest PROPERTIES FOLDER generator/tools)
-    
+
     #add_test (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
@@ -49,8 +49,5 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5stat
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        toolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

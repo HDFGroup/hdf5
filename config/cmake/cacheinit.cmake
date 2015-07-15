@@ -8,6 +8,8 @@ set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries" FORCE)
 
 set (BUILD_TESTING ON CACHE BOOL "Build HDF5 Unit Testing" FORCE)
 
+set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
+
 set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
 
 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
