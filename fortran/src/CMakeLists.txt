@@ -37,7 +37,7 @@ configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5fort_type_defines.h.in ${HDF5_F90_B
 
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
-# H5test_kind.F90         used to generate various KIND interfaces 
+# H5test_kind.F90         used to generate various KIND interfaces
 # H5fort_type_defines.h   used to generate H5f90i_gen.h + H5fortran_types.F90
 #-----------------------------------------------------------------------------
 
@@ -128,7 +128,7 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 #-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
-set (f90_F_SRCS
+set (f90_F_BASE_SRCS
     # generated files
     ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
 
@@ -151,16 +151,27 @@ set (f90_F_SRCS
 )
 
 set (f90_F_SRCS
-    ${f90_F_SRCS}
-    
+    ${f90_F_BASE_SRCS}
+
     # generated file
     ${HDF5_F90_BINARY_DIR}/H5_gen.F90
-    
+
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
 )
 
 set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
+set_source_files_properties(
+    ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+    PROPERTIES OBJECT_DEPENDS
+    ${f90_F_BASE_SRCS}
+)
+set_source_files_properties(
+    ${HDF5_F90_BINARY_DIR}/HDF5.F90
+    PROPERTIES OBJECT_DEPENDS
+    ${f90_F_BASE_SRCS}
+    ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+)
 
 #-----------------------------------------------------------------------------
 # Add Main fortran library
@@ -206,7 +217,6 @@ install (
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
         ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
         ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
-        ${HDF5_F90_BINARY_DIR}/H5_gen.F90
     DESTINATION
         ${HDF5_INSTALL_INCLUDE_DIR}
     COMPONENT
