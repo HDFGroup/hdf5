@@ -235,51 +235,14 @@ done:
     return ret_value;
 }
 
-/****if* H5Ef/h5eset_auto_c
- * NAME
- *  h5eset_auto_c
- * PURPOSE
- *  Call H5Eset_auto to turn automatic error printing on or off.
- * INPUTS
- *  printflag - flag to turn automatic error printing on or off.
- * OUTPUTS
- *
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Friday, November 17, 2000
- * HISTORY
- *  Major bug fix: Function never disabled printing.
- * SOURCE
-*/
-int_f
-h5eset_auto_c(int_f* printflag)
-/******/
-{
-    herr_t status = -1;
-    int_f ret_value = 0;
-
-    if(*printflag == 1)
-        status = H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t)H5Eprint2, stderr);
-    else if(*printflag == 0)
-        status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-    if(status < 0)
-        HGOTO_DONE(FAIL)
-
-done:
-    return ret_value;
-}
-
-
 /****if* H5Ef/h5eset_auto2_c
  * NAME
  *  h5eset_auto2_c
  * PURPOSE
  *  Calls H5Eset_auto2
  * INPUTS
- *  estack_id    - Error stack identifier.
- *  func 	 - Function to be called upon an error condition.
+ *  estack_id   - Error stack identifier.
+ *  func 	- Function to be called upon an error condition.
  *  client_data - Data passed to the error function.
  *   
  * RETURNS
