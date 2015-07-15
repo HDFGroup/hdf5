@@ -1297,9 +1297,12 @@ H5P__init_def_layout(void)
     FUNC_ENTER_STATIC_NOERR
 
     /* Initialize the default layout info for non-contigous layouts */
+    H5D_def_layout_compact_g.storage.type = H5D_COMPACT;
     H5D_def_layout_compact_g.storage.u.compact = def_store_compact;
     H5D_def_layout_chunk_g.u.chunk = def_layout_chunk;
+    H5D_def_layout_chunk_g.storage.type = H5D_CHUNKED;
     H5D_def_layout_chunk_g.storage.u.chunk = def_store_chunk;
+    H5D_def_layout_virtual_g.storage.type = H5D_VIRTUAL;
     H5D_def_layout_virtual_g.storage.u.virt = def_store_virtual;
 
     /* Note that we've initialized the default values */
