@@ -57,7 +57,13 @@
 !  CHARACTER, TARGET :: chr
 !
 !  (B)
-!                         *** IMPORTANT ***
+!       _____ __  __ _____   ____  _____ _______       _   _ _______
+!      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
+! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
+! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
+! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
+!      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
+!
 !  If you add a new H5A function you must add the function name to the
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
@@ -437,39 +443,6 @@ CONTAINS
 
     hdferr = h5aget_name_c(attr_id, size, buf)
   END SUBROUTINE h5aget_name_f
-!!$
-!!$  SUBROUTINE H5Aget_name_f(attr_id, size, buf, hdferr)
-!!$    IMPLICIT NONE
-!!$    INTEGER(HID_T), INTENT(IN) :: attr_id
-!!$    INTEGER(SIZE_T), INTENT(IN) :: size
-!!$    CHARACTER(LEN=*), INTENT(INOUT) :: buf
-!!$    INTEGER, INTENT(OUT) :: hdferr
-!!$!*****
-!!$    CHARACTER(KIND=C_CHAR, LEN=LEN(buf)+1) :: c_buf
-!!$    INTEGER(SIZE_T) :: size_out
-!!$    
-!!$    INTERFACE
-!!$       INTEGER(SIZE_T) FUNCTION H5Aget_name(attr_id, size, buf) BIND(C, NAME='H5Aget_name')
-!!$         IMPORT :: C_CHAR
-!!$         IMPORT :: HID_T, SIZE_T
-!!$         INTEGER(HID_T), INTENT(IN), VALUE :: attr_id
-!!$         INTEGER(SIZE_T), INTENT(IN), VALUE :: size
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buf
-!!$       END FUNCTION H5Aget_name
-!!$    END INTERFACE
-!!$
-!!$    ! add 1 for the null char
-!!$    size_out = H5Aget_name(attr_id, size + 1_SIZE_T, c_buf)
-!!$    
-!!$    hdferr = 0
-!!$    IF(size_out.LT.0)THEN
-!!$       hdferr = -1
-!!$    ELSE
-!!$       CALL H5_Fortran_string_c2f(c_buf, buf)
-!!$    ENDIF
-!!$
-!!$  END SUBROUTINE H5Aget_name_f
-
 !
 !****s* H5A/H5Aget_name_by_idx_f
 !
@@ -572,72 +545,6 @@ CONTAINS
 
 
   END SUBROUTINE h5aget_name_by_idx_f
-!!$  SUBROUTINE H5Aget_name_by_idx_f(loc_id, obj_name, idx_type, order, &
-!!$       n, name, hdferr, size, lapl_id)
-!!$    USE ISO_C_BINDING
-!!$    IMPLICIT NONE
-!!$    INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
-!!$    CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
-!!$                                              !  from which attribute is to be removed *TEST* check NULL
-!!$    INTEGER, INTENT(IN) :: idx_type ! Type of index; Possible values are:
-!!$                                    !    H5_INDEX_UNKNOWN_F   - Unknown index type
-!!$                                    !    H5_INDEX_NAME_F       - Index on names
-!!$                                    !    H5_INDEX_CRT_ORDER_F  - Index on creation order
-!!$                                    !    H5_INDEX_N_F 	      - Number of indices defined
-!!$
-!!$    INTEGER, INTENT(IN) :: order    ! Order in which to iterate over index; Possible values are:
-!!$                                    !    H5_ITER_UNKNOWN_F   - Unknown order
-!!$                                    !    H5_ITER_INC_F      - Increasing order
-!!$                                    !    H5_ITER_DEC_F       - Decreasing order
-!!$                                    !    H5_ITER_NATIVE_F    - No particular order, whatever is fastest
-!!$                                    !    H5_ITER_N_F 	    - Number of iteration orders
-!!$    INTEGER(HSIZE_T), INTENT(IN) :: n !  Attribute’s position in index
-!!$    CHARACTER(LEN=*), INTENT(OUT) :: name ! Attribute name
-!!$    INTEGER, INTENT(OUT) :: hdferr    ! Error code:
-!!$                                      ! Returns attribute name size,
-!!$                                      ! -1 if fail
-!!$    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id ! Link access property list
-!!$    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size  ! Indicates the size, in the number of characters, 
-!!$                                                    ! of the attribute
-!!$!*****
-!!$    INTEGER(HID_T) :: lapl_id_default
-!!$    INTEGER(SIZE_T) :: obj_namelen
-!!$    INTEGER(SIZE_T) :: size_default, c_size
-!!$    CHARACTER(KIND=C_CHAR, LEN=LEN(name)+1) :: c_name
-!!$
-!!$    INTERFACE
-!!$       INTEGER FUNCTION H5Aget_name_by_idx(loc_id, obj_name, idx_type, order, &
-!!$            n, name, size_default, lapl_id_default) BIND(C, NAME='H5Aget_name_by_idx')
-!!$         USE ISO_C_BINDING
-!!$         USE H5GLOBAL
-!!$         INTEGER(HID_T), INTENT(IN) :: loc_id
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
-!!$         INTEGER(C_INT), INTENT(IN) :: idx_type
-!!$         INTEGER(C_INT), INTENT(IN) :: order
-!!$         INTEGER(HSIZE_T), INTENT(IN) :: n
-!!$         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: name
-!!$         INTEGER(SIZE_T) :: size_default
-!!$         INTEGER(HID_T)  :: lapl_id_default
-!!$       END FUNCTION H5Aget_name_by_idx
-!!$    END INTERFACE
-!!$
-!!$    obj_namelen = LEN(obj_name)
-!!$    lapl_id_default = H5P_DEFAULT_F
-!!$    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
-!!$
-!!$    size_default = LEN(name)
-!!$
-!!$    c_size = H5Aget_name_by_idx(loc_id, TRIM(obj_name)//C_NULL_CHAR, INT(idx_type,C_INT), INT(order,C_INT), &
-!!$         n, c_name, size_default, lapl_id_default)
-!!$
-!!$    IF(c_size.LT.0) THEN
-!!$       hdferr = -1
-!!$    ELSE
-!!$       CALL C2F_string(c_name, name)
-!!$       IF(PRESENT(size)) size = c_size
-!!$    ENDIF
-!!$
-!!$  END SUBROUTINE H5Aget_name_by_idx_f
 !
 !****s* H5A/H5Aget_num_attrs_f
 !
