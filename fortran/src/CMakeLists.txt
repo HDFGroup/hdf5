@@ -161,16 +161,12 @@ set (f90_F_SRCS
 )
 
 set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
-set_source_files_properties(
-    ${HDF5_F90_BINARY_DIR}/H5_gen.F90
-    PROPERTIES OBJECT_DEPENDS
-    ${f90_F_BASE_SRCS}
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90
+    PROPERTIES OBJECT_DEPENDS "${f90_F_BASE_SRCS}"
 )
 set_source_files_properties(
     ${HDF5_F90_BINARY_DIR}/HDF5.F90
-    PROPERTIES OBJECT_DEPENDS
-    ${f90_F_BASE_SRCS}
-    ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+    PROPERTIES OBJECT_DEPENDS "${f90_F_BASE_SRCS} ${HDF5_F90_BINARY_DIR}/H5_gen.F90"
 )
 
 #-----------------------------------------------------------------------------

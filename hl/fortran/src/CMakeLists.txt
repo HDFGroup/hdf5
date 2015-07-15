@@ -82,14 +82,14 @@ set_target_properties (${HDF5_HL_F90_C_LIB_TARGET} PROPERTIES
 #-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
-set (HDF5_HL_F90_F_SRCS
+set (HDF5_HL_F90_F_BASE_SRCS
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DSff.F90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5TBff.F90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTff.F90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMff.F90
 )
 set (HDF5_HL_F90_F_SRCS
-     ${HDF5_HL_F90_F_SRCS}
+     ${HDF5_HL_F90_F_BASE_SRCS}
 
      # generated files
      ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
@@ -97,6 +97,13 @@ set (HDF5_HL_F90_F_SRCS
 )
 
 set_source_files_properties (${HDF5_HL_F90_F_SRCS} PROPERTIES LANGUAGE Fortran)
+
+set_source_files_properties(
+    ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
+    ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
+    PROPERTIES OBJECT_DEPENDS "${HDF5_HL_F90_F_BASE_SRCS}"
+)
+
 
 add_library (${HDF5_HL_F90_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_F90_F_SRCS})
 set (SHARED_LINK_FLAGS " ")
