@@ -206,6 +206,7 @@ install (
         ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
         ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
         ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+        ${HDF5_F90_BINARY_DIR}/H5_gen.F90
     DESTINATION
         ${HDF5_INSTALL_INCLUDE_DIR}
     COMPONENT
