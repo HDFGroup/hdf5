@@ -2631,36 +2631,6 @@ h5pget_hyper_vector_size_c ( hid_t_f *prp_id , size_t_f *size)
   *size = (size_t_f)c_size;
   return ret_value;
 }
-/****if* H5Pf/h5pcreate_class_c
- * NAME
- *  h5pcreate_class_c
- * PURPOSE
- *  Call H5Pcreate_class to create a new property class
- * INPUTS
- *  parent - property list class identifier
- *  name   - name of the new class
- *  name_len - lenght of the "name" buffer
- * OUTPUTS
- *  cls - new class identifier
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  October 11, 2002
- *
- * HISTORY
- * SOURCE
-*/
-int_f
-h5pcreate_class_f90_c(hid_t_f *parent, _fcd name, int_f *name_len, hid_t_f *cls)
-/******/
-{
-     int ret_value = -1;
-
-     ret_value = h5pcreate_class_c(parent, name, name_len, cls, NULL, NULL, NULL, NULL, NULL, NULL);
-     return  ret_value;
-}
-
 
 /****if* H5Pf/h5pcreate_class_c
  * NAME

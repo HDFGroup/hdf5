@@ -244,18 +244,6 @@ int main(void)
     }
 #  endif
 #endif
-/*     else { */
-  /*     /\* Did not find the real type, use the next smallest *\/ */
-/*       sprintf(chrA, "%d", RealKinds[i]); */
-/*       if(sizeof(float) > RealKinds_SizeOf[H5_FORTRAN_NUM_REAL_KINDS-2]) { */
-/* 	writeTypedef("float", "float", RealKinds[i]); */
-/* 	strcpy(Real_C_TYPES[i], chrA); */
-/*       } else if(sizeof(double) > RealKinds_SizeOf[H5_FORTRAN_NUM_REAL_KINDS-2]) { */
-/* 	writeTypedef("float", "double", RealKinds[i]); */
-/* 	strcpy(Real_C_TYPES[i], chrA); */
-/*       } else if(sizeof(long double) > RealKinds_SizeOf[H5_FORTRAN_NUM_REAL_KINDS-2]) { */
-/* 	writeTypedef("float", "long double", RealKinds[i]); */
-/* 	strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE"); } */
     else {
       printf("\n                      **** HDF5 WARNING ****\n");
       printf("Fortran REAL(KIND=%d) is %d Bytes, but no corresponding C float type exists of that size\n",RealKinds[i],RealKinds_SizeOf[i]);
@@ -263,8 +251,6 @@ int main(void)
 
       RealKinds_SizeOf[i] = -1;
       RealKinds[i] = -1;
-/*       writeTypedef("float", "long double", RealKinds[i]); */
-/*       strcpy(Real_C_TYPES[i], "C_LONG_DOUBLE"); } */
     }
   }
 
@@ -328,8 +314,6 @@ int main(void)
 
   /* int */
   writeToFiles("int","Fortran_INTEGER", "int_f", H5_FORTRAN_NATIVE_INTEGER_SIZEOF, H5_FORTRAN_NATIVE_INTEGER_KIND);
-  
-
 
   /* int_1, int_2, int_4, int_8 */
 
@@ -409,61 +393,10 @@ int main(void)
       FoundRealSize[i] = (int)RealKinds[i];
       FoundRealSizeKind[i] = (int)RealKinds_SizeOf[i];	
       sprintf(chrA, "Fortran_REAL_%s", Real_C_TYPES[i]);
- /*    sprintf(chrB, "real_%d_f", FoundRealSize[i]); */
       sprintf(chrB, "real_%s_f", Real_C_TYPES[i]);
       writeToFiles("float",chrA, chrB, RealKinds[i], RealKinds_SizeOf[i]);
     }
   }
-
-/*   for(i=0;i<H5_FORTRAN_NUM_REAL_KINDS;i++) { */
-/*     if( FoundRealSize[i] > 0) /\* Found the real type *\/ */
-/* 	{ */
-/* 	  sprintf(chrA, "Fortran_REAL_%d", Real_C_TYPES[i]); */
-/* 	  sprintf(chrB, "real_%d_f", FoundRealSize[i]); */
-/* 	  writeToFiles("float",chrA, chrB, FoundRealSize[i], FoundRealSizeKind[i]); */
-/* 	} */
-/*       else  /\* Did not find the real type *\/ */
-/* 	{ */
-/* 	  flag = 0; /\* flag indicating if found the next highest *\/ */
-/* 	  for(j=i+1;j<3;j++)  /\* search for next highest *\/ */
-/* 	    { */
-/* 	      if( FoundRealSize[j] > 0) /\* Found the next highest *\/ */
-/* 		{ */
-/* 		  sprintf(chrA, "Fortran_REAL_%d", (-1)*FoundRealSize[i]); */
-/* 		  sprintf(chrB, "real_%d_f", (-1)*FoundRealSize[i]); */
-/* 		  if(FoundRealSize[j]>4) { */
-/* 		    writeToFiles("float",chrA, chrB,  FoundRealSize[j], FoundRealSizeKind[j]); */
-/* 		    flag = 1; */
-/* 		  } */
-/* 		/\*   else { *\/ */
-/* /\* 		    writeToFiles("float", chrA, chrB, FoundRealSize[j]); *\/ */
-/* /\* 		  } *\/ */
-/* 		  flag = 1; */
-/* 		  break; */
-/* 		} */
-/* 	    } */
-/* 	  if(flag == 0) /\* No higher one found, so find next lowest *\/ */
-/* 	    { */
-/* 	      for(j=1;j>-1;j--)  /\* Search for next lowest *\/ */
-/* 		{ */
-/* 		  if( FoundRealSize[j] > 0) /\* Found the next lowest *\/ */
-/* 		    { */
-/* 		      sprintf(chrA, "Fortran_REAL_%d", (-1)*FoundRealSize[i]); */
-/* 		      sprintf(chrB, "real_%d_f", (-1)*FoundRealSize[i]); */
-/* 		      if(FoundRealSize[j]>4) */
-/* 			writeToFiles("float",chrA, chrB,  FoundRealSize[j], FoundRealSizeKind[j]); */
-/* 		     /\*  else { *\/ */
-/* /\* 			writeToFiles("float", chrA, chrB, FoundRealSize[j]); *\/ */
-/* /\* 		      } *\/ */
-/* 		      flag = 1; */
-/* 		      break; */
-/* 		    } */
-/* 		} */
-/* 	    } */
-/* 	  if(flag == 0) /\* No higher or lower one found, indicating an error *\/ */
-/* 	     return -1; */
-/* 	} */
-/*     } */
 
   /* hid_t */
   for(i=0;i< H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
@@ -491,9 +424,11 @@ int main(void)
       writeToFilesChr("float","Fortran_REAL", "real_f", H5_FORTRAN_NATIVE_REAL_KIND, "C_DOUBLE");
     else if(H5_FORTRAN_NATIVE_REAL_SIZEOF > sizeof(float))
       writeToFilesChr("float","Fortran_REAL", "real_f", H5_FORTRAN_NATIVE_REAL_KIND, "C_FLOAT");
-    else
+    else {
       /* Error: couldn't find a size for real_f */
+      printf("Error: couldn't find a size for real_f \n");
       return -1;
+    }
   }
 
   /* double_f */
@@ -514,65 +449,10 @@ int main(void)
     }
 #endif
   else {
-/*     /\* No exact match, choose the next highest *\/ */
-/*     if(H5_FORTRAN_NATIVE_DOUBLE_SIZEOF > sizeof(long double)) */
-/*       writeToFilesChr("float","Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_KIND, "C_LONG_DOUBLE"); */
-/*     else if(H5_FORTRAN_NATIVE_DOUBLE_SIZEOF > sizeof(double)) */
-/*       writeToFilesChr("float","Fortran_DOUBLE", "double_f", sizeof(double), "C_DOUBLE"); */
-/*     else if(H5_FORTRAN_NATIVE_DOUBLE_SIZEOF > sizeof(float)) */
-/*       writeToFilesChr("float","Fortran_DOUBLE", "double_f", sizeof(float), "C_FLOAT"); */
-/*     else */
-      /* Error: couldn't find a size for double_f */
-/*       printf("Error: couldn't find a size for double_f \n"); */
-/*       return -1; */
+    /* Error: couldn't find a size for double_f */
+    printf("Error: couldn't find a size for double_f \n");
+    return -1;
   }
-
-
-
-/*   /\* double_f *\/ */
-/*   if(H5_FORTRAN_NATIVE_DOUBLE_SIZEOF == C_LONG_DOUBLE_SIZEOF) */
-/*     writeToFilesChr("float","Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_SIZEOF, "C_LONG_DOUBLE"); */
-/*   else if(H5_FORTRAN_NATIVE_DOUBLE_SIZEOF == C_DOUBLE_SIZEOF) */
-/*     writeToFilesChr("float","Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_SIZEOF, "C_DOUBLE"); */
-/*   else if(H5_FORTRAN_NATIVE_DOUBLE_SIZEOF == C_FLOAT_SIZEOF) */
-/*     writeToFilesChr("float","Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_SIZEOF, "C_FLOAT"); */
-/*   else */
-/*     /\* Error: couldn't find a size for double_f *\/ */
-/*     return -1; */
-
-/*   writeToFiles("float","Fortran_DOUBLE", "double_f", H5_FORTRAN_NATIVE_DOUBLE_SIZEOF, H5_FORTRAN_NATIVE_DOUBLE_KIND); */
-
-/* #elif defined H5_FORTRAN_HAS_DOUBLE_NATIVE_8_KIND */
-/*     writeToFilesChr("float", "Fortran_DOUBLE", "double_f", 8, "C_DOUBLE"); */
-/* #else */
-/*     /\* Error: couldn't find a size for real_f *\/ */
-/*     return -1; */
-/* #endif */
-
-/*     /\* real_f *\/ */
-/*     if(sizeof(float) == C_LONG_DOUBLE_SIZEOF) { */
-/*       writeToFilesChr("float","Fortran_REAL", "real_f", (int)sizeof(float), "C_LONG_DOUBLE"); */
-/*     } else if(sizeof(float) == C_DOUBLE_SIZEOF) { */
-/*       writeToFilesChr("float","Fortran_REAL", "real_f", (int)sizeof(float), "C_DOUBLE"); */
-/*     } else if(sizeof(float) == C_FLOAT_SIZEOF) { */
-/*       writeToFilesChr("float","Fortran_REAL", "real_f", (int)sizeof(float), "C_FLOAT"); */
-/*     } else { */
-/*       /\* Error: couldn't find a size for real_f *\/ */
-/*     return -1; */
-/*     } */
-
-/*     /\* double_f *\/ */
-/*     if(sizeof(double) == C_LONG_DOUBLE_SIZEOF) { */
-/*       writeToFilesChr("float","Fortran_DOUBLE", "double_f", (int)sizeof(double), "C_LONG_DOUBLE"); */
-/*     } else if(sizeof(double) == C_DOUBLE_SIZEOF) { */
-/*       writeToFilesChr("float","Fortran_DOUBLE", "double_f", (int)sizeof(double), "C_DOUBLE"); */
-/*     } else if(sizeof(double) == C_FLOAT_SIZEOF) { */
-/*       writeToFilesChr("float","Fortran_DOUBLE", "double_f", (int)sizeof(double), "C_FLOAT"); */
-/*     } else { */
-/*       /\* Error: couldn't find a size for double_f *\/ */
-/*     return -1; */
-/*     } */
-
 
   /* Need the buffer size for the fortran derive type 'hdset_reg_ref_t_f03'
    * in order to be interoperable with C's structure, the C buffer size

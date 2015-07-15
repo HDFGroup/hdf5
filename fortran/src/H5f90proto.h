@@ -120,7 +120,6 @@ H5_FCDLL int_f h5sget_simple_extent_type_c( hid_t_f *space_id , int_f *classtype
 H5_FCDLL int_f h5soffset_simple_c( hid_t_f *space_id , hssize_t_f *offset);
 H5_FCDLL int_f h5sset_extent_simple_c( hid_t_f *space_id , int_f *rank, hsize_t_f * current_size, hsize_t_f *maximum_size);
 H5_FCDLL int_f h5sis_simple_c( hid_t_f *space_id , int_f *flag );
-H5_FCDLL int_f h5sextent_class_c( hid_t_f *space_id , int_f *classtype);
 H5_FCDLL int_f h5sget_simple_extent_dims_c( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *maxdims);
 H5_FCDLL int_f h5sextent_copy_c( hid_t_f *dest_space_id , hid_t_f *source_space_id);
 H5_FCDLL int_f h5sset_extent_none_c( hid_t_f *space_id );
@@ -464,7 +463,6 @@ H5_FCDLL int_f h5pset_char_encoding_c(hid_t_f *plist_id, int_f *encoding);
 H5_FCDLL int_f h5pget_char_encoding_c(hid_t_f *plist_id, int_f *encoding);
 H5_FCDLL int_f h5pset_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options);
 H5_FCDLL int_f h5pget_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options);
-H5_FCDLL int_f h5pcreate_class_f90_c(hid_t_f *parent, _fcd name, int_f *name_len, hid_t_f *cls);
 H5_FCDLL int_f h5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_len, size_t_f *size);
 H5_FCDLL int_f h5pset_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_len);
 H5_FCDLL int_f h5pget_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint);
