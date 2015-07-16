@@ -48,14 +48,14 @@
 
 #include <H5config_f.inc>
 
-PROGRAM test_kind
+PROGRAM H5_buildiface
   USE, INTRINSIC :: ISO_C_BINDING
   IMPLICIT NONE
 
 ! These values are valid REAL KINDs (with corresponding C float) found during configure
   H5_H5CONFIG_F_NUM_RKIND
   H5_H5CONFIG_F_RKIND
-! These values are valid INTEGER KINDs (with corresponding C float) found during configure
+! These values are valid INTEGER KINDs (with corresponding C integer) found during configure
   H5_H5CONFIG_F_NUM_IKIND
   H5_H5CONFIG_F_IKIND
 
@@ -1018,7 +1018,7 @@ PROGRAM test_kind
 
   CLOSE(11)
 
-END PROGRAM test_kind
+END PROGRAM H5_buildiface
 
 
 

@@ -106,9 +106,8 @@ endif
 # programs.
 # It's a bit tricky to make sure that Automake builds things in the right
 # order (especially when using 'gmake -j ...')
-# H5_buildiface is compiled and run to produce H5KIND***.
-# H5fortran_detect is compiled and run to produce H5fort_type_defines.h.
-# H5match_types.c then includes this file and can be compiled into
+# H5_buildiface is compiled and run to produce H5_gen.F90.
+# H5match_types.c then includes H5fort_type_defines.h and can be compiled into
 # H5match_types.  When H5match_types is run, it creates H5f90i_gen.h
 # and H5fortran_types.F90, which are included in the Fortran library.
 
@@ -125,17 +124,6 @@ BUILT_SOURCES = H5f90i_gen.h
 # it needs to run H5match_types.
 H5fortran_types.F90 H5f90i_gen.h: H5match_types$(EXEEXT)
 	$(RUNSERIAL) ./H5match_types$(EXEEXT)
-
-# H5fort_type_defines.h is created by running H5fortran_detect.
-# Obviously, H5fortran_detect needs to be built first.
-#H5fort_type_defines.h: H5fortran_detect$(EXEEXT)
-#	$(RUNSERIAL) ./H5fortran_detect$(EXEEXT) > H5fort_type_defines.h
-
-#H5match_types.$(OBJEXT): H5fort_type_defines.h
-
-# Automake knows how to build fortran programs if we tell it the source
-# files.
-#H5fortran_detect_SOURCES = H5fortran_detect.F90
 
 # H5_buildiface.F90 generates all the APIs that have a KIND type associated
 # with them.
@@ -156,9 +144,7 @@ FORTRAN_API=yes
 # doing a parallel make, some modules could be made way before the
 # modules they depend upon are actually made. *sigh*
 H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
-#H5fortran_types.lo:  H5fortran_types.F90
-#H5fortran_detect.lo: H5fortran_detect.F90
-H5_buildiface.lo:      $(srcdir)/H5_buildiface.F90
+H5_buildiface.lo:    $(srcdir)/H5_buildiface.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo

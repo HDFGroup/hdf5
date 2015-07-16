@@ -284,8 +284,6 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     if ( H5Tset_precision (types[17], 128) < 0) return ret_value;
 #endif
 
-
-/* #ifdef -MSB-  */
      /*
      * FIND H5T_NATIVE_FLOAT_128
      */
@@ -758,7 +756,7 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 
 
 /*
- *  H5 Generic flags introduced in version 1.8 -MSB-
+ *  H5 Generic flags introduced in version 1.8
  */
 
       /* H5_index_t enum struct */
