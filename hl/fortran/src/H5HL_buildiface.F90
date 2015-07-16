@@ -1,14 +1,14 @@
-!****p* Program/H5test_kind
+!****p* Program/H5HL_buildiface
 !
 ! NAME
-!  Executable: H5test_kind
+!  Executable: H5HL_buildiface
 !
 ! FILE
-!  fortran/src/H5test_kind.f90
+!  fortran/src/H5HL_buildiface.f90
 !
 ! PURPOSE
 !  This stand alone program is used at build time to generate the program
-!  H5fortran_detect.f90. It cycles through all the available KIND parameters for
+!  H5HL_gen.f90. It cycles through all the available KIND parameters for
 !  integers and reals. The appropriate program and subroutines are then generated
 !  depending on which of the KIND values are found.
 !
@@ -48,7 +48,7 @@
 
 #include <H5config_f.inc>
 
-PROGRAM test_kind
+PROGRAM H5HL_buildiface
   USE, INTRINSIC :: ISO_C_BINDING
   IMPLICIT NONE
 
@@ -104,15 +104,15 @@ PROGRAM test_kind
 
   OPEN(11,FILE='H5LTff_gen.F90')
   WRITE(11,'(40(A,/))') &
-'!****h* ROBODoc/H5_KINDff.F90',&
+'!****h* ROBODoc/H5LTff_gen.F90',&
 '!',&
 '! NAME',&
-'!  H5_KIND',&
+'!  H5LTff_gen',&
 '! ',&
 '! PURPOSE',&
-'!  This module is generated at build by H5make_HLinterfaces.F90 to handle all the',&
-'!  detected REAL KINDs for APIs being passed REAL KINDs. Currently these ',&
-'!  are H5LT APIs',&
+'!  This module is generated at build by H5HL_buildiface.F90 to handle all the',&
+'!  detected REAL/INTEGER KINDs for APIs being passed those KINDs. Currently these ',&
+'!  are H5LT and H5TB APIs',&
 '!',&
 '! COPYRIGHT',&
 '! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
@@ -130,7 +130,7 @@ PROGRAM test_kind
 '! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
 '!',&
 '! AUTHOR',&
-'!   H5make_HLinterfaces.F90',&
+'!   H5HL_buildiface.F90',&
 '!',&
 '!*****'
 
@@ -406,18 +406,20 @@ PROGRAM test_kind
 
   CLOSE(11)
 
+! Generate Fortran H5TB* interfaces having multiple KIND interfaces.
+
 
   OPEN(11,FILE='H5TBff_gen.F90')
   WRITE(11,'(40(A,/))') &
 '!****h* ROBODoc/H5TBff_gen.F90',&
 '!',&
 '! NAME',&
-'!  H5_KIND',&
+'!  H5TBff_gen',&
 '! ',&
 '! PURPOSE',&
-'!  This module is generated at build by H5make_HLinterfaces.F90 to handle all the',&
-'!  detected REAL KINDs for APIs being passed REAL KINDs. Currently these ',&
-'!  are H5LT APIs',&
+'!  This module is generated at build by H5HL_buildiface.F90 to handle all the',&
+'!  detected REAL/INTEGER KINDs for APIs being passed those KINDs. Currently these ',&
+'!  are H5LT and H5TB APIs',&
 '!',&
 '! COPYRIGHT',&
 '! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
@@ -435,7 +437,7 @@ PROGRAM test_kind
 '! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
 '!',&
 '! AUTHOR',&
-'!   H5make_HLinterfaces.F90',&
+'!   H5HL_buildiface.F90',&
 '!',&
 '!*****'
 
@@ -671,11 +673,11 @@ PROGRAM test_kind
      WRITE(11,'(A)') '  END SUBROUTINE h5tbinsert_field_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
   ENDDO
 
-  WRITE(11,'(A)') 'END MODULE H5TB' ! change this to be generic MSB
+  WRITE(11,'(A)') 'END MODULE H5TB'
 
   CLOSE(11)
 
-END PROGRAM test_kind
+END PROGRAM H5HL_buildiface
 
 
 
