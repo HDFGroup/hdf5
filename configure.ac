@@ -368,26 +368,11 @@ HAVE_QUADMATH=0
 AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
 PAC_LDBL_DIG
 
-## __float128 seems to work intel compilers, but it should be _Quad type instead
+## __float128 seems to work with intel compilers, but it should be _Quad type instead
 
 if test "$ac_cv_sizeof___float128" != 0 && test "$cc_vendor" = "gcc"; then
-## Check if __float128 and c_long_double are the same size and precision
-  dnl if test "$ac_cv_sizeof___float128" = "$ac_cv_sizeof_long_double"; then
-  dnl  if test "$LDBL_DIG" = "$FLT128_DIG"; then
-  dnl    AC_DEFINE([HAVE_FLOAT128], [0], [Determine if __float128 is available])
-  dnl    PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
-  dnl  else  
-  dnl    if test "$FLT128_DIG" > "$LDBL_DIG";then
-        dnl choose the larger precision
-        AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
-        PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
-  dnl    else 
-  dnl      AC_DEFINE([HAVE_FLOAT128], [0], [Determine if __float128 is available])
-  dnl       PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
-  dnl    fi
-    dnl AC_MSG_CHECKING([for quadmath.h])
-    dnl AC_MSG_RESULT([$HAVE_QUADMATH])
- dnl fi
+  AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
+  PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
 else
   PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
 fi
@@ -400,7 +385,7 @@ AC_SUBST([HDF5_INTERFACES]) HDF5_INTERFACES=""
 AC_MSG_CHECKING([if Fortran interface enabled])
 AC_ARG_ENABLE([fortran],
               [AS_HELP_STRING([--enable-fortran],
-                              [Compile the Fortran 90/95 interface [default=no]])],
+                              [Compile the Fortran interface [default=no]])],
               [HDF_FORTRAN=$enableval])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
@@ -492,10 +477,12 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
   PAC_PROG_FC_ISO_FORTRAN_ENV
-
+  ## Check KIND and size of native integer
   PAC_FC_NATIVE_INTEGER
-
+ 
+  ## Find all available KINDs
   PAC_FC_AVAIL_KINDS
+  ## Find all sizeofs for available KINDs
   PAC_FC_SIZEOF_INT_KINDS
   PAC_FC_SIZEOF_REAL_KINDS
 
@@ -529,13 +516,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     AC_DEFINE([HAVE_Fortran_INTEGER_SIZEOF_16], [0], [Determine if INTEGER*16 is available])
   fi
 
-  ##if test $PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF > ${ac_cv_sizeof_long_double}; then
-  ##  AC_MSG_ERROR([Fortran default DOUBLE PRECISION ("X$PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF" Bytes) can not be represented in C ])
-  ##fi
-
-  ##PAC_FC_AVAIL_INTEGER_MODELS
-	
-  
   if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"; then
     AC_DEFINE([FORTRAN_HAVE_STORAGE_SIZE], [1], [Define if we have Fortran intrinsic STORAGE_SIZE])
   fi
@@ -574,9 +554,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
 
   dnl get the largest sizeof for REAL kinds
-  dnl max_real_fortran_sizeof="`echo $pack_real_sizeof | sed -e 's/, *$//g' | sed -e [0-9]*$`"
-  dnl max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/, }//g' | sed -e [0-9]*$`"
-  dnl max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/\(, \}\)//g' | sed -e 's/.* //g'`"
 
   max_real_fortran_sizeof="`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -ne '/,(\d+)\}/; print $1'`"
   max_real_fortran_kind="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -ne '/,(\d+)\}/; print $1'`"
@@ -597,32 +574,12 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   dnl count the number of real kinds
   H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -e '$count = (<STDIN> =~ tr/,//);print $count+1'`"
-  dnl MSB still need to replace spaces with commas??
   H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -pe 's/{//g' | perl -pe 's/}//g' | perl -pe 's/ /,/g'`/)"
-  dnl H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | $PERL -pe 'tr |{}|//|' | $PERL -e 's/ /,/g`)"
   H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -pe 's/{//g' | perl -pe 's/}//g'| perl -pe 's/ /,/g'`/)"
 
   AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
   AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
   AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND_SIZEOF], $H5CONFIG_F_RKIND_SIZEOF, [Define valid Fortran REAL KINDs Sizeof])
-
-     dnl AC_MSG_WARN([...$PAC_FC_ALL_REAL_KINDS_SIZEOF...$PAC_FC_ALL_REAL_KINDS...])
-     dnl PAC_FC_ALL_REAL_KINDS="{4,8,16}"
-     dnl tmp3="`echo $PAC_FC_ALL_REAL_KINDS | perl -pe 's/,[0-9]*\}$/\}/g'`"
-     dnl tmp1="`echo "${PAC_FC_ALL_REAL_KINDS}" | sed -e 's/,[0-9]*\}*\$/}/g'`"
-     dnl tmp1="`echo $pac_validRealKinds | sed s/'w*$'//`"	
-     dnl tmp2="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/[0-9]*, \}*$/}/g'`"
-     dnl tmp3="$PAC_FC_ALL_REAL_KINDS_SIZEOF"
-     dnl  echo "$tmp3"
-     dnl tmp2=`echo $tmp3 | sed -e 's/[0-9]//'`
-     dnl AC_MSG_WARN([here $tmp2....])
-
-     dnl PAC_FC_ALL_REAL_KINDS="{4,8,16}"
-     dnl  echo "$PAC_FC_ALL_REAL_KINDS" 
-     dnl tmp1="`echo "${PAC_FC_ALL_REAL_KINDS}" | sed -e 's/,[0-9]*\}*\$/}/g'`"
-     dnl tmp1="`echo $pac_validRealKinds | sed s/'w*$'//`"	
-     dnl tmp2="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/[0-9]*, \}*$/}/g'`"
-     dnl tmp3="$PAC_FC_ALL_REAL_KINDS_SIZEOF"
 
 ## Change back to the C language
   AC_LANG_POP(Fortran)

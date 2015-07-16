@@ -1396,17 +1396,6 @@ install-exec-local:
 H5fortran_types.F90 H5f90i_gen.h: H5match_types$(EXEEXT)
 	$(RUNSERIAL) ./H5match_types$(EXEEXT)
 
-# H5fort_type_defines.h is created by running H5fortran_detect.
-# Obviously, H5fortran_detect needs to be built first.
-#H5fort_type_defines.h: H5fortran_detect$(EXEEXT)
-#	$(RUNSERIAL) ./H5fortran_detect$(EXEEXT) > H5fort_type_defines.h
-
-#H5match_types.$(OBJEXT): H5fort_type_defines.h
-
-# Automake knows how to build fortran programs if we tell it the source
-# files.
-#H5fortran_detect_SOURCES = H5fortran_detect.F90
-
 # H5_buildiface.F90 generates all the APIs that have a KIND type associated
 # with them.
 
@@ -1418,9 +1407,7 @@ H5_gen.F90: H5_buildiface$(EXEEXT)
 # doing a parallel make, some modules could be made way before the
 # modules they depend upon are actually made. *sigh*
 H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
-#H5fortran_types.lo:  H5fortran_types.F90
-#H5fortran_detect.lo: H5fortran_detect.F90
-H5_buildiface.lo:      $(srcdir)/H5_buildiface.F90
+H5_buildiface.lo:    $(srcdir)/H5_buildiface.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo

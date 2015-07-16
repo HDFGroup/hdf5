@@ -321,6 +321,7 @@ dnl
 AC_DEFUN([PAC_FC_AVAIL_KINDS],[
 AC_LANG_PUSH([Fortran])
 rm -f pac_fconftest.out
+
 AC_RUN_IFELSE([
     AC_LANG_SOURCE([
     PROGRAM main
@@ -415,13 +416,8 @@ AC_RUN_IFELSE([
 ],[
     AC_MSG_RESULT([Error])
     AC_MSG_WARN([Failed to run program to determine available KINDs])
-],[
-    dnl Even when cross_compiling=yes,
-    dnl pac_validKinds needs to be set for PAC_FC_INTEGER_MODEL_MAP()
-     dnl pac_validKinds="`echo \"$2\" | tr ',' ':'`"
-     dnl AC_MSG_RESULT([$2])
-     dnl ifelse([$1],[],[PAC_FC_ALL_INTEGER_MODELS=$2],[$1=$2])
-])
+],[])
+
 AC_LANG_POP([Fortran])
 ])
 AC_DEFUN([PAC_FC_SIZEOF_INT_KINDS],[
@@ -534,13 +530,6 @@ rm -f pac_fconftest.out
                 PAC_FORTRAN_NATIVE_REAL_SIZEOF="`perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
                 PAC_FORTRAN_NATIVE_DOUBLE_KIND="`perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
                 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`perl -ne '$. == 6 && print && exit' pac_fconftest.out`"
-
-                dnl PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '1p' pac_fconftest.out`"
-                dnl PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '2p' pac_fconftest.out`"
-                dnl PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '3p' pac_fconftest.out`"
-                dnl PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '4p' pac_fconftest.out`"
-                dnl PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '5p' pac_fconftest.out`"
-                dnl PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '6p' pac_fconftest.out`"
             else
                 AC_MSG_WARN([No output from test program!])
             fi
@@ -588,9 +577,7 @@ rm -f pac_Cconftest.out
         AC_RUN_IFELSE([],[
             if test -s pac_Cconftest.out ; then
 	        LDBL_DIG="`perl -ne '$. == 1 && print && exit'  pac_Cconftest.out`" 
-	        FLT128_DIG="`perl -ne '$. == 2 && print && exit' pac_Cconftest.out`" 
-                dnl LDBL_DIG="`sed -n '1p' pac_Cconftest.out`"
-                dnl FLT128_DIG="`sed -n '2p' pac_Cconftest.out`"
+	        FLT128_DIG="`perl -ne '$. == 2 && print && exit' pac_Cconftest.out`"
             else
                 AC_MSG_WARN([No output from test program!])
             fi

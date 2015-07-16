@@ -1567,7 +1567,7 @@ Optional Features:
   --disable-dependency-tracking
                           speeds up one-time build
   --enable-unsupported    Allow unsupported combinations of configure options
-  --enable-fortran        Compile the Fortran 90/95 interface [default=no]
+  --enable-fortran        Compile the Fortran interface [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
   --enable-hl             Enable the high level library [default=yes]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -5736,7 +5736,7 @@ else
             if test -s pac_Cconftest.out ; then
 	        LDBL_DIG="`perl -ne '$. == 1 && print && exit'  pac_Cconftest.out`"
 	        FLT128_DIG="`perl -ne '$. == 2 && print && exit' pac_Cconftest.out`"
-                                            else
+            else
                 { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No output from test program!" >&5
 $as_echo "$as_me: WARNING: No output from test program!" >&2;}
             fi
@@ -5753,15 +5753,14 @@ fi
 
 
 
-## __float128 seems to work intel compilers, but it should be _Quad type instead
+## __float128 seems to work with intel compilers, but it should be _Quad type instead
 
 if test "$ac_cv_sizeof___float128" != 0 && test "$cc_vendor" = "gcc"; then
-## Check if __float128 and c_long_double are the same size and precision
 
 $as_echo "#define HAVE_FLOAT128 1" >>confdefs.h
 
-        PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
-                 else
+  PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
+else
   PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
 fi
 
@@ -7239,7 +7238,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
-
+  ## Check KIND and size of native integer
 
 ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -7247,9 +7246,12 @@ ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 rm -f pac_fconftest.out
+
 if test "$cross_compiling" = yes; then :
-
-
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
 else
   cat > conftest.$ac_ext <<_ACEOF
 
@@ -7380,6 +7382,7 @@ fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
+
 
 ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -7433,8 +7436,7 @@ else
                 PAC_FORTRAN_NATIVE_REAL_SIZEOF="`perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
                 PAC_FORTRAN_NATIVE_DOUBLE_KIND="`perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
                 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`perl -ne '$. == 6 && print && exit' pac_fconftest.out`"
-
-                                                                                                            else
+            else
                 { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No output from test program!" >&5
 $as_echo "$as_me: WARNING: No output from test program!" >&2;}
             fi
@@ -7459,6 +7461,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
+  ## Find all available KINDs
 
 ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -7466,9 +7469,12 @@ ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 rm -f pac_fconftest.out
+
 if test "$cross_compiling" = yes; then :
-
-
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
 else
   cat > conftest.$ac_ext <<_ACEOF
 
@@ -7600,12 +7606,14 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
+
 ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
+  ## Find all sizeofs for available KINDs
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking sizeof of available INTEGER KINDs" >&5
@@ -7766,13 +7774,6 @@ $as_echo "#define HAVE_Fortran_INTEGER_SIZEOF_16 0" >>confdefs.h
 
   fi
 
-  ##if test $PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF > ${ac_cv_sizeof_long_double}; then
-  ##  AC_MSG_ERROR([Fortran default DOUBLE PRECISION ("X$PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF" Bytes) can not be represented in C ])
-  ##fi
-
-  ##PAC_FC_AVAIL_INTEGER_MODELS
-
-
   if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"; then
 
 $as_echo "#define FORTRAN_HAVE_STORAGE_SIZE 1" >>confdefs.h
@@ -7910,8 +7911,8 @@ $as_echo_n "checking for Fortran interoperable KINDS with C... " >&6; }
 $as_echo "$PAC_FC_ALL_REAL_KINDS" >&6; }
 
     H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"$PAC_FC_ALL_REAL_KINDS\" | perl -e '$count = (<STDIN> =~ tr/,//);print $count+1'`"
-    H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo \"$PAC_FC_ALL_REAL_KINDS\" | perl -pe 's/{//g' | perl -pe 's/}//g' | perl -pe 's/ /,/g'`/)"
-    H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo \"$PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -pe 's/{//g' | perl -pe 's/}//g'| perl -pe 's/ /,/g'`/)"
+  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo \"$PAC_FC_ALL_REAL_KINDS\" | perl -pe 's/{//g' | perl -pe 's/}//g' | perl -pe 's/ /,/g'`/)"
+  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo \"$PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -pe 's/{//g' | perl -pe 's/}//g'| perl -pe 's/ /,/g'`/)"
 
 
 cat >>confdefs.h <<_ACEOF
@@ -7927,8 +7928,6 @@ _ACEOF
 cat >>confdefs.h <<_ACEOF
 #define H5CONFIG_F_RKIND_SIZEOF $H5CONFIG_F_RKIND_SIZEOF
 _ACEOF
-
-
 
 
 ## Change back to the C language
