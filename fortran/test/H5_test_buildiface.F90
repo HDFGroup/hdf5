@@ -55,7 +55,7 @@ PROGRAM H5_test_buildiface
 ! These values are valid REAL KINDs (with corresponding C float) found during configure
   H5_H5CONFIG_F_NUM_RKIND
   H5_H5CONFIG_F_RKIND
-! These values are valid INTEGER KINDs (with corresponding C float) found during configure
+! These values are valid INTEGER KINDs (with corresponding C integer) found during configure
   H5_H5CONFIG_F_NUM_IKIND
   H5_H5CONFIG_F_IKIND
 
@@ -92,8 +92,6 @@ PROGRAM H5_test_buildiface
        '    f_ptr = C_LOC(buf(1,1,1,1,1,1))  ', &
        '    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))' &
             /)
-
-
 
 ! Generate Fortran Check routines for the tests KIND interfaces.
 
@@ -246,6 +244,7 @@ PROGRAM H5_test_buildiface
      WRITE(11,'(A)') '!DEC$attributes dllexport :: real_eq_kind_'//TRIM(ADJUSTL(chr2))
      WRITE(11,'(A)') '!DEC$endif'
      WRITE(11,'(A)') '  LOGICAL FUNCTION real_eq_kind_'//TRIM(ADJUSTL(chr2))//'(a,b,ulp)'
+     WRITE(11,'(A)') '    IMPLICIT NONE'
      WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'), INTENT (in):: a,b'
      WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//') :: Rel'
      WRITE(11,'(A)') '    INTEGER,        OPTIONAL, INTENT( IN )  :: ulp'
@@ -286,6 +285,7 @@ PROGRAM H5_test_buildiface
   WRITE(11,'(A)') '!DEC$endif'
 ! Subroutine API
   WRITE(11,'(A)') '  SUBROUTINE verify_logical(string,value,correct_value,total_error)'
+  WRITE(11,'(A)') '    IMPLICIT NONE'
   WRITE(11,'(A)') '    CHARACTER(LEN=*) :: string'
   WRITE(11,'(A)') '    LOGICAL :: value, correct_value'
   WRITE(11,'(A)') '    INTEGER :: total_error'
