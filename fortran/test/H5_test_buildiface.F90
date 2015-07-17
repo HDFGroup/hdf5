@@ -211,13 +211,47 @@ PROGRAM H5_test_buildiface
 ! TEST IF TWO REAL NUMBERS ARE EQUAL
 ! ***********************************
 
+!   [1] The test performed is
+!
+!         ABS( x - y ) < ( ULP * SPACING( MAX(ABS(x),ABS(y)) ) )
+!
+!       The numbers are considered equal if true
+!
+!       The intrinsic function SPACING(x) returns the absolute spacing of numbers
+!       near the value of x,
+!
+!                      {     EXPONENT(x)-DIGITS(x)
+!                      {  2.0                        for x /= 0
+!         SPACING(x) = {
+!                      {  
+!                      {  TINY(x)                    for x == 0
+!
+!       The ULP optional argument scales the comparison:
+!
+!         Unit of data precision. The acronym stands for "unit in
+!         the last place," the smallest possible increment or decrement
+!         that can be made using a machine's floating point arithmetic.
+!         A 0.5 ulp maximum error is the best you could hope for, since
+!         this corresponds to always rounding to the nearest representable
+!         floating-point number. Value must be positive - if a negative
+!         value is supplied, the absolute value is used.
+!         If not specified, the default value is 1.
+!
+!       James Van Buskirk and James Giles suggested this method for floating
+!       point comparisons in the comp.lang.fortran newsgroup.
+!
+!       Reference: [1] Paul van Delst,  paul.vandelst@ssec.wisc.edu
+
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_TEST_DLL)'
      WRITE(11,'(A)') '!DEC$attributes dllexport :: real_eq_kind_'//TRIM(ADJUSTL(chr2))
      WRITE(11,'(A)') '!DEC$endif'
-     WRITE(11,'(A)') '  LOGICAL FUNCTION real_eq_kind_'//TRIM(ADJUSTL(chr2))//'(a,b)'
+     WRITE(11,'(A)') '  LOGICAL FUNCTION real_eq_kind_'//TRIM(ADJUSTL(chr2))//'(a,b,ulp)'
      WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'), INTENT (in):: a,b'
-     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//'), PARAMETER :: eps = 1.e-8'
-     WRITE(11,'(A)') '    real_eq_kind_'//TRIM(ADJUSTL(chr2))//' = ABS(a-b) .LT. eps'
+     WRITE(11,'(A)') '    REAL(KIND='//TRIM(ADJUSTL(chr2))//') :: Rel'
+     WRITE(11,'(A)') '    INTEGER,        OPTIONAL, INTENT( IN )  :: ulp'
+     WRITE(11,'(A)') '    IF ( PRESENT( ulp ) )  Rel = REAL( ABS(ulp), '//TRIM(ADJUSTL(chr2))//')'
+     WRITE(11,'(A)') '    Rel = 1.0_'//TRIM(ADJUSTL(chr2))
+     WRITE(11,'(A)') '    real_eq_kind_'//TRIM(ADJUSTL(chr2))//' = ABS( a - b ) < ( Rel * SPACING( MAX(ABS(a),ABS(b)) ) )'
      WRITE(11,'(A)') '  END FUNCTION real_eq_kind_'//TRIM(ADJUSTL(chr2))
   ENDDO
 
