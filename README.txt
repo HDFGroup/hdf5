@@ -1,4 +1,4 @@
-HDF5 version 1.9.222-swmr0 currently under development
+HDF5 version 1.9.222-swmr0 released on 2015-07-15
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
