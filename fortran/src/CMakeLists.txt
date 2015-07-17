@@ -125,7 +125,7 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
-set_source_files_properties (H5_gen.F90 PROPERTIES GENERATED TRUE)
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERATED TRUE)
 
 #-----------------------------------------------------------------------------
 # Fortran Modules
