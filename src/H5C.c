@@ -4264,7 +4264,7 @@ H5C_protect(H5F_t *		f,
 
 	/* Set the entry's cork status */
 	if(H5C_cork(cache_ptr, entry_ptr->tag, H5C__GET_CORKED, &entry_ptr->is_corked) < 0)
-	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Cannot retrieve entry's cork status")
+	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "Cannot retrieve entry's cork status")
 
         /* If the entry is very large, and we are configured to allow it,
          * we may wish to perform a flash cache size increase.
