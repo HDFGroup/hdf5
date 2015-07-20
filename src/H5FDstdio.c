@@ -1099,14 +1099,15 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 
 
 /*-------------------------------------------------------------------------
- * Function:  H5F_stdio_lock
+ * Function:    H5FD_stdio_lock
  *
- * Purpose:  Lock a file via flock
+ * Purpose:     Lock a file via flock
  *
+ *              NOTE: This function is a no-op if flock() is not present.
  * Errors:
  *    IO    FCNTL    flock failed.
  *
- * Return:  Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Vailin Choi; March 2015
  *
@@ -1115,6 +1116,7 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 static herr_t
 H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
 {
+#ifdef H5_HAVE_FLOCK
     H5FD_stdio_t  *file = (H5FD_stdio_t*)_file;
     int lock;                                   	/* The type of lock */
     static const char *func = "H5FD_stdio_lock";  	/* Function Name for error reporting */
@@ -1129,7 +1131,8 @@ H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
 
     /* Place the lock with non-blocking */
     if(flock(file->fd, lock | LOCK_NB) < 0)
-	H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "flock failed", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "flock failed", -1)
+#endif /* H5_HAVE_FLOCK */
 
     return 0;
 } /* end H5FD_stdio_lock() */
@@ -1139,6 +1142,8 @@ H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
  *
  * Purpose:  Unlock a file via flock
  *
+ *
+ *           NOTE: This function is a no-op if flock() is not present.
  * Errors:
  *    IO    FCNTL    flock failed.
  *
@@ -1151,6 +1156,7 @@ H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
 static herr_t
 H5FD_stdio_unlock(H5FD_t *_file)
 {
+#ifdef H5_HAVE_FLOCK
     H5FD_stdio_t  *file = (H5FD_stdio_t*)_file;
     static const char *func = "H5FD_stdio_unlock";  	/* Function Name for error reporting */
 
@@ -1160,7 +1166,8 @@ H5FD_stdio_unlock(H5FD_t *_file)
     assert(file);
 
     if(flock(file->fd, LOCK_UN) < 0)
-	H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "flock (unlock) failed", -1)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "flock (unlock) failed", -1)
+#endif /* H5_HAVE_FLOCK */
 
     return 0;
 } /* end H5FD_stdio_unlock() */

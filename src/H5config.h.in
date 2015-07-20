@@ -82,6 +82,9 @@
 /* Define if support for szip filter is enabled */
 #undef HAVE_FILTER_SZIP
 
+/* Define to 1 if you have the `flock' function. */
+#undef HAVE_FLOCK
+
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 

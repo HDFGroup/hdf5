@@ -20,17 +20,23 @@
  * Purpose:	Tests the dataset interface (H5D)
  */
 
+#define H5D_PACKAGE
+#define H5D_TESTING
+
+#define H5FD_PACKAGE
+#define H5FD_TESTING
+
+#define H5Z_PACKAGE
+
 #include <stdlib.h>
 #include <time.h>
 
 #include "h5test.h"
 #include "H5srcdir.h"
+#include "H5Dpkg.h"
+#include "H5FDpkg.h"
 #include "H5VMprivate.h"
 
-/*
- * This file needs to access private datatypes from the H5Z package.
- */
-#define H5Z_PACKAGE
 #include "H5Zpkg.h"
 #ifdef H5_HAVE_SZLIB_H
 #   include "szlib.h"

@@ -18,8 +18,10 @@
 #include "h5test.h"
 
 #define H5F_PACKAGE
+#define H5FD_PACKAGE
+#define H5FD_TESTING
 #include "H5Fpkg.h"
-#include "H5FDprivate.h"
+#include "H5FDpkg.h"
 #include "H5Iprivate.h"
 
 /* Filename */

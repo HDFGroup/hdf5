@@ -4030,6 +4030,11 @@ test_file_lock_concur(void)
     SKIPPED();
     HDputs("    Test skipped due to fork or waitpid not defined.");
 
+#elif !defined(H5_HAVE_FLOCK)
+
+    SKIPPED();
+    HDputs("    Test skipped due to a lack of flock() on this system.");
+
 #else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
   
     /* Create the test file */
@@ -4272,6 +4277,11 @@ test_file_lock_swmr_concur(void)
 
     SKIPPED();
     HDputs("    Test skipped due to fork or waitpid not defined.");
+
+#elif !defined(H5_HAVE_FLOCK)
+
+    SKIPPED();
+    HDputs("    Test skipped due to a lack of flock() on this system.");
 
 #else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 

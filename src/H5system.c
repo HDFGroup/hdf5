@@ -622,6 +622,7 @@ HDremove_all(const char *fname)
 }
 #endif
 
+
 /*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
  *
@@ -678,6 +679,27 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
   return 0;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    Wflock
+ *
+ * Purpose:     Wrapper function for flock on Windows systems
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wflock(int fd, int operation) {
+    /* Will eventually use LockFileEx and UnlockFileEx to do work */
+    /* No-op for now */
+    return 0;
+} /* Wflock() */
+
+#ifdef H5_HAVE_WINSOCK2_H
+#pragma comment(lib, "advapi32.lib")
+#endif
 #ifdef H5_HAVE_WINSOCK2_H
 #pragma comment(lib, "advapi32.lib")
 #endif
@@ -722,7 +744,7 @@ int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
     return count;
 }
 
-#endif
+#endif /* H5_HAVE_VISUAL_STUDIO */
 
 
 /*-------------------------------------------------------------------------

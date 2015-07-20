@@ -121,7 +121,7 @@
 /*
  * flock() in sys/file.h is used for the implemention of file locking.
  */
-#ifdef H5_HAVE_SYS_FILE_H
+#if defined(H5_HAVE_FLOCK) && defined(H5_HAVE_SYS_FILE_H)
 #   include <sys/file.h>
 #endif
 
@@ -521,6 +521,18 @@
 #define H5_TB (1024.0F * 1024.0F * 1024.0F * 1024.0F)
 #define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
 
+#ifndef H5_HAVE_FLOCK
+/* flock() operations. Used in the source so we have to define them when
+ * the call is not available (e.g.: Windows). These should NOT be used
+ * with system-provided flock() calls since the values will come from the
+ * header file.
+ */
+#define LOCK_SH     0x01
+#define LOCK_EX     0x02
+#define LOCK_NB     0x04
+#define LOCK_UN     0x08
+#endif /* H5_HAVE_FLOCK */
+
 /*
  * Data types and functions for timing certain parts of the library.
  */
@@ -751,7 +763,14 @@ typedef struct {
     #define HDfileno(F)    fileno(F)
 #endif /* HDfileno */
 #ifndef HDflock
-    #define HDflock(F,L)    flock(F,L)
+    /* Flock is not present on all POSIX systems. When it is not present,
+     * do nothing (locking is advisory only).
+     */
+    #ifdef H5_HAVE_FLOCK
+        #define HDflock(F,L)    flock(F,L)
+    #else
+        #define HDflock(F,L)    0
+    #endif /* H5_HAVE_FLOCK */
 #endif /* HDflock */
 #ifndef HDfloor
     #define HDfloor(X)    floor(X)
