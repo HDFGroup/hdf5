@@ -37,7 +37,7 @@ configure_file (${HDF5_F90_SRC_SOURCE_DIR}/H5fort_type_defines.h.in ${HDF5_F90_B
 
 #-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
-# H5test_kind.F90         used to generate various KIND interfaces
+# H5_buildiface.F90      used to generate various KIND interfaces
 # H5fort_type_defines.h   used to generate H5f90i_gen.h + H5fortran_types.F90
 #-----------------------------------------------------------------------------
 
