@@ -62,13 +62,13 @@ set_target_properties (H5_buildiface PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
-set (CMD $<TARGET_FILE:H5_buildiface>)
-add_custom_command (
-    OUTPUT ${HDF5_F90_BINARY_DIR}/H5_gen.F90
-    COMMAND ${CMD}
-    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-    DEPENDS H5_buildiface
-)
+#set (CMD $<TARGET_FILE:H5_buildiface>)
+#add_custom_command (
+#    OUTPUT ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+#    COMMAND ${CMD}
+#    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+#    DEPENDS H5_buildiface
+#)
 
 INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
 #-----------------------------------------------------------------------------
@@ -162,10 +162,21 @@ set (f90_F_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
 )
 
-set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
-set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90
-    PROPERTIES OBJECT_DEPENDS "${f90_F_BASE_SRCS}"
+set (CMD $<TARGET_FILE:H5_buildiface>)
+add_custom_target (H5gen ALL
+    COMMAND ${CMD}
+#v3.2    BYPRODUCT ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+    DEPENDS ${f90_F_BASE_SRCS}
 )
+
+set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
+
+# Not implemented in cmake VS >=10
+#set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90
+#    PROPERTIES OBJECT_DEPENDS "${f90_F_BASE_SRCS}"
+#)
+
 set_source_files_properties(
     ${HDF5_F90_BINARY_DIR}/HDF5.F90
     PROPERTIES OBJECT_DEPENDS "${f90_F_BASE_SRCS} ${HDF5_F90_BINARY_DIR}/H5_gen.F90"
