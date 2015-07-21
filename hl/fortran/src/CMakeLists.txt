@@ -36,14 +36,14 @@ set_target_properties (H5HL_buildiface PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
-set (CMD $<TARGET_FILE:H5HL_buildiface>)
-add_custom_command (
-    OUTPUT ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
-           ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
-    COMMAND ${CMD}
-    WORKING_DIRECTORY ${HDF5_HL_F90_SRC_BINARY_DIR}
-    DEPENDS H5HL_buildiface
-)
+#set (CMD $<TARGET_FILE:H5HL_buildiface>)
+#add_custom_command (
+#    OUTPUT ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
+#           ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
+#    COMMAND ${CMD}
+#    WORKING_DIRECTORY ${HDF5_HL_F90_SRC_BINARY_DIR}
+#    DEPENDS H5HL_buildiface
+#)
 
 #-----------------------------------------------------------------------------
 # Setup include Directories
@@ -98,12 +98,26 @@ set (HDF5_HL_F90_F_SRCS
 
 set_source_files_properties (${HDF5_HL_F90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 
-set_source_files_properties(
+#set_source_files_properties(
+#    ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
+#    ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
+#    PROPERTIES OBJECT_DEPENDS "${HDF5_HL_F90_F_BASE_SRCS}"
+#)
+
+set_source_files_properties (
     ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
     ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
-    PROPERTIES OBJECT_DEPENDS "${HDF5_HL_F90_F_BASE_SRCS}"
+    PROPERTIES GENERATED TRUE
 )
 
+set (CMD $<TARGET_FILE:H5HL_buildiface>)
+add_custom_target (H5HLgen ALL
+    COMMAND ${CMD}
+#v3.2    BYPRODUCT ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
+#v3.2              ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
+    WORKING_DIRECTORY ${HDF5_HL_F90_SRC_BINARY_DIR}
+    DEPENDS ${HDF5_HL_F90_F_BASE_SRCS}
+)
 
 add_library (${HDF5_HL_F90_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_F90_F_SRCS})
 set (SHARED_LINK_FLAGS " ")
