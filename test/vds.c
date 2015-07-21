@@ -994,11 +994,12 @@ static int
 test_basic_io(unsigned config, hid_t fapl)
 {
     char        srcfilename[FILENAME_BUF_SIZE];
+    char        srcfilename_map[FILENAME_BUF_SIZE];
     char        vfilename[FILENAME_BUF_SIZE];
     char        vfilename2[FILENAME_BUF_SIZE];
     char        srcfilenamepct[FILENAME_BUF_SIZE];
-    char        srcfilenamepct_fmt_fix[FILENAME_BUF_SIZE];
-    const char *srcfilenamepct_fmt = "vds%%_src";
+    char        srcfilenamepct_map[FILENAME_BUF_SIZE];
+    const char *srcfilenamepct_map_orig = "vds%%_src";
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
     hid_t       vfile2 = -1;    /* File with copied virtual dset */
@@ -1026,8 +1027,9 @@ test_basic_io(unsigned config, hid_t fapl)
     h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
     h5_fixname(FILENAME[1], fapl, vfilename2, sizeof vfilename2);
     h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, sizeof srcfilename_map);
     h5_fixname(FILENAME[4], fapl, srcfilenamepct, sizeof srcfilenamepct);
-    h5_fixname(srcfilenamepct_fmt, fapl, srcfilenamepct_fmt_fix, sizeof srcfilenamepct_fmt_fix);
+    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, sizeof srcfilenamepct_map);
 
     /* Create DCPL */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -1055,7 +1057,7 @@ test_basic_io(unsigned config, hid_t fapl)
         TEST_ERROR
 
     /* Add virtual layout mapping */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset", srcspace[0]) < 0)
         TEST_ERROR
 
     /* Create virtual file */
@@ -1212,9 +1214,9 @@ test_basic_io(unsigned config, hid_t fapl)
         TEST_ERROR
 
     /* Add virtual layout mappings */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "%%src_dset1", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "%%src_dset1", srcspace[0]) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset2%%", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset2%%", srcspace[0]) < 0)
         TEST_ERROR
 
     /* Reset dims */
@@ -1547,9 +1549,9 @@ test_basic_io(unsigned config, hid_t fapl)
         TEST_ERROR
 
     /* Add virtual layout mappings */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilenamepct_fmt_fix : ".", "src_dset1", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilenamepct_map : ".", "src_dset1", srcspace[0]) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilenamepct_fmt_fix : ".", "src_dset2", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilenamepct_map : ".", "src_dset2", srcspace[0]) < 0)
         TEST_ERROR
 
     /* Reset dims */
@@ -1758,9 +1760,9 @@ test_basic_io(unsigned config, hid_t fapl)
         TEST_ERROR
 
     /* Add virtual layout mappings */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset1", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset1", srcspace[0]) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset2", srcspace[1]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset2", srcspace[1]) < 0)
         TEST_ERROR
 
     /* Create virtual file */
@@ -2066,9 +2068,9 @@ test_basic_io(unsigned config, hid_t fapl)
         TEST_ERROR
 
     /* Add virtual layout mappings */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset1", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset1", srcspace[0]) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset2", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset2", srcspace[0]) < 0)
         TEST_ERROR
 
     /* Create virtual file */
@@ -2407,9 +2409,9 @@ test_basic_io(unsigned config, hid_t fapl)
         TEST_ERROR
 
     /* Add virtual layout mappings */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset1", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset1", srcspace[0]) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset1", srcspace[1]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset1", srcspace[1]) < 0)
         TEST_ERROR
 
     /* Create virtual file */
@@ -2970,6 +2972,7 @@ static int
 test_unlim(unsigned config, hid_t fapl)
 {
     char        srcfilename[FILENAME_BUF_SIZE];
+    char        srcfilename_map[FILENAME_BUF_SIZE];
     char        vfilename[FILENAME_BUF_SIZE];
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
@@ -3000,6 +3003,7 @@ test_unlim(unsigned config, hid_t fapl)
 
     h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
     h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, sizeof srcfilename_map);
 
     /* Create DCPLs */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -3060,9 +3064,9 @@ test_unlim(unsigned config, hid_t fapl)
         TEST_ERROR
 
     /* Add virtual layout mappings */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset1", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset1", srcspace[0]) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset2", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset2", srcspace[0]) < 0)
         TEST_ERROR
 
     /* Create virtual file */
@@ -3730,9 +3734,9 @@ test_unlim(unsigned config, hid_t fapl)
     start[1] = 0;
 
     /* Add virtual layout mappings */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset1", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset1", srcspace[0]) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset2", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset2", srcspace[0]) < 0)
         TEST_ERROR
 
     /* Create virtual file */
@@ -4416,11 +4420,11 @@ test_unlim(unsigned config, hid_t fapl)
     start[1] = 0;
 
     /* Add virtual layout mappings */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset1", srcspace[0]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset1", srcspace[0]) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset2", srcspace[1]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset2", srcspace[1]) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[2], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset3", srcspace[2]) < 0)
+    if(H5Pset_virtual(dcpl, vspace[2], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset3", srcspace[2]) < 0)
         TEST_ERROR
 
     /* Create virtual file */
@@ -5340,13 +5344,15 @@ static int
 test_printf(unsigned config, hid_t fapl)
 {
     char        srcfilename[FILENAME_BUF_SIZE];
+    char        srcfilename_map[FILENAME_BUF_SIZE];
     char        srcfilename2[FILENAME_BUF_SIZE];
+    char        srcfilename2_map[FILENAME_BUF_SIZE];
     char        vfilename[FILENAME_BUF_SIZE];
-    char        printf_srcfilename[FILENAME_BUF_SIZE];
-    const char *printf_srcfilename_fmt = "vds_src_%b";
+    char        printf_srcfilename_map[FILENAME_BUF_SIZE];
+    const char *printf_srcfilename_map_orig = "vds_src_%b";
     char        srcfilenamepct[FILENAME_BUF_SIZE];
-    char        srcfilenamepct_fmt_fix[FILENAME_BUF_SIZE];
-    const char *srcfilenamepct_fmt = "vds%%_src";
+    char        srcfilenamepct_map[FILENAME_BUF_SIZE];
+    const char *srcfilenamepct_map_orig = "vds%%_src";
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
     hid_t       dcpl = -1;      /* Dataset creation property list */
@@ -5374,10 +5380,12 @@ test_printf(unsigned config, hid_t fapl)
 
     h5_fixname(FILENAME[0], fapl, vfilename, sizeof vfilename);
     h5_fixname(FILENAME[2], fapl, srcfilename, sizeof srcfilename);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename_map, sizeof srcfilename_map);
     h5_fixname(FILENAME[3], fapl, srcfilename2, sizeof srcfilename2);
-    h5_fixname(printf_srcfilename_fmt, fapl, printf_srcfilename, sizeof printf_srcfilename);
+    h5_fixname_printf(FILENAME[2], fapl, srcfilename2_map, sizeof srcfilename2_map);
+    h5_fixname_printf(printf_srcfilename_map_orig, fapl, printf_srcfilename_map, sizeof printf_srcfilename_map);
     h5_fixname(FILENAME[4], fapl, srcfilenamepct, sizeof srcfilenamepct);
-    h5_fixname(srcfilenamepct_fmt, fapl, srcfilenamepct_fmt_fix, sizeof srcfilenamepct_fmt_fix);
+    h5_fixname_printf(srcfilenamepct_map_orig, fapl, srcfilenamepct_map, sizeof srcfilenamepct_map);
 
     /* Create DCPL */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -5423,7 +5431,7 @@ test_printf(unsigned config, hid_t fapl)
         TEST_ERROR
 
     /* Add virtual layout mapping */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset%b", srcspace) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset%b", srcspace) < 0)
         TEST_ERROR
 
     /* Create virtual file */
@@ -5811,7 +5819,7 @@ test_printf(unsigned config, hid_t fapl)
         TEST_ERROR
 
     /* Add virtual layout mapping */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilenamepct_fmt_fix : ".", "src_dset%b", srcspace) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilenamepct_map : ".", "src_dset%b", srcspace) < 0)
         TEST_ERROR
 
     /* Create virtual file */
@@ -6066,7 +6074,7 @@ test_printf(unsigned config, hid_t fapl)
      * config option specified */
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
-    if(H5Pset_virtual_printf_gap(dapl, (size_t)1) < 0)
+    if(H5Pset_virtual_printf_gap(dapl, (hsize_t)1) < 0)
         TEST_ERROR
     if(config & TEST_IO_REOPEN_VIRT) {
         if(H5Fclose(vfile) < 0)
@@ -6130,7 +6138,7 @@ test_printf(unsigned config, hid_t fapl)
      * config option specified */
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
-    if(H5Pset_virtual_printf_gap(dapl, (size_t)2) < 0)
+    if(H5Pset_virtual_printf_gap(dapl, (hsize_t)2) < 0)
         TEST_ERROR
     if(config & TEST_IO_REOPEN_VIRT) {
         if(H5Fclose(vfile) < 0)
@@ -6194,7 +6202,7 @@ test_printf(unsigned config, hid_t fapl)
      * config option specified */
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
-    if(H5Pset_virtual_printf_gap(dapl, (size_t)3) < 0)
+    if(H5Pset_virtual_printf_gap(dapl, (hsize_t)3) < 0)
         TEST_ERROR
     if(config & TEST_IO_REOPEN_VIRT) {
         if(H5Fclose(vfile) < 0)
@@ -6258,7 +6266,7 @@ test_printf(unsigned config, hid_t fapl)
      * config option specified */
     if(H5Dclose(vdset) < 0)
         TEST_ERROR
-    if(H5Pset_virtual_printf_gap(dapl, (size_t)4) < 0)
+    if(H5Pset_virtual_printf_gap(dapl, (hsize_t)4) < 0)
         TEST_ERROR
     if(config & TEST_IO_REOPEN_VIRT) {
         if(H5Fclose(vfile) < 0)
@@ -6452,7 +6460,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
 
         /* Add virtual layout mapping */
-        if(H5Pset_virtual(dcpl, vspace[0], printf_srcfilename, "src_dset", srcspace) < 0)
+        if(H5Pset_virtual(dcpl, vspace[0], printf_srcfilename_map, "src_dset", srcspace) < 0)
             TEST_ERROR
 
         /* Create virtual file */
@@ -6762,7 +6770,7 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
 
         /* Add virtual layout mapping */
-        if(H5Pset_virtual(dcpl, vspace[0], printf_srcfilename, "%%src%%_dset%%%b", srcspace) < 0)
+        if(H5Pset_virtual(dcpl, vspace[0], printf_srcfilename_map, "%%src%%_dset%%%b", srcspace) < 0)
             TEST_ERROR
 
         /* Create virtual file */
@@ -7084,9 +7092,9 @@ test_printf(unsigned config, hid_t fapl)
     start[1] = 0;
 
     /* Add virtual layout mappings */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "%bsrc_dset_a%b%%", srcspace) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "%bsrc_dset_a%b%%", srcspace) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset_b%b%%%%", srcspace) < 0)
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset_b%b%%%%", srcspace) < 0)
         TEST_ERROR
 
     /* Create virtual file */
@@ -7754,11 +7762,11 @@ test_printf(unsigned config, hid_t fapl)
 
     /* Add virtual layout mappings (select ALL in source space for second
      * mapping) */
-    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset_a%b", srcspace) < 0)
+    if(H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset_a%b", srcspace) < 0)
         TEST_ERROR
     if(H5Sselect_all(srcspace) < 0)
         TEST_ERROR
-    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename : ".", "src_dset_b%b", srcspace) < 0)
+    if(H5Pset_virtual(dcpl, vspace[1], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset_b%b", srcspace) < 0)
         TEST_ERROR
 
     /* Create virtual file */
