@@ -438,8 +438,12 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
 {
     const H5O_layout_t *layout = (const H5O_layout_t *)value; /* Create local aliases for values */
     uint8_t **pp = (uint8_t **)_pp;
+    uint8_t *tmp_p;
+    size_t tmp_size;
+    size_t u;               /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(layout);
@@ -451,19 +455,84 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
 
         /* If layout is chunked, encode chunking structure */
         if(H5D_CHUNKED == layout->type) {
-            unsigned u;     /* Local index variable */
-
             /* Encode rank */
             *(*pp)++ = (uint8_t)layout->u.chunk.ndims;
 
             /* Encode chunk dims */
             HDcompile_assert(sizeof(uint32_t) == sizeof(layout->u.chunk.dim[0]));
-            for(u = 0; u < layout->u.chunk.ndims; u++)
+            for(u = 0; u < (size_t)layout->u.chunk.ndims; u++)
                 UINT32ENCODE(*pp, layout->u.chunk.dim[u])
         } /* end if */
         else if(H5D_VIRTUAL == layout->type) {
-            HDassert(0 && "Not yet implemented...");//VDSINC
-        } /* end else */
+            uint64_t nentries = (uint64_t)layout->storage.u.virt.list_nused;
+
+            /* Encode number of entries */
+            UINT64ENCODE(*pp, nentries)
+            *size += (size_t)8;
+
+            /* Iterate over entries */
+            for(u = 0; u < layout->storage.u.virt.list_nused; u++) {
+                /* Source file name */
+                tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_file_name) + (size_t)1;
+                (void)HDmemcpy(*pp, layout->storage.u.virt.list[u].source_file_name, tmp_size);
+                *pp += tmp_size;
+                *size += tmp_size;
+
+                /* Source dataset name */
+                tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_dset_name) + (size_t)1;
+                (void)HDmemcpy(*pp, layout->storage.u.virt.list[u].source_dset_name, tmp_size);
+                *pp += tmp_size;
+                *size += tmp_size;
+
+                /* Source selection.  Note that we are not passing the real
+                 * allocated size because we do no know it.  H5P__encode should
+                 * have verified that the buffer is large enough for the entire
+                 * list before we get here. */
+                tmp_size = (size_t)-1;
+                tmp_p = *pp;
+                if(H5S_encode(layout->storage.u.virt.list[u].source_select, pp, &tmp_size) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
+                *size += (size_t)(*pp - tmp_p);
+
+                /* Virtual dataset selection.  Same notes as above apply. */
+                tmp_size = (size_t)-1;
+                tmp_p = *pp;
+                if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, pp, &tmp_size) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize virtual selection")
+                *size += (size_t)(*pp - tmp_p);
+            } /* end for */
+        } /* end if */
+    } /* end if */
+    else if(H5D_VIRTUAL == layout->type) {
+        /* Calculate size of virtual layout info */
+        /* number of entries */
+        *size += (size_t)8;
+
+        /* NULL pointer to pass to H5S_encode */
+        tmp_p = NULL;
+
+        /* Iterate over entries */
+        for(u = 0; u < layout->storage.u.virt.list_nused; u++) {
+            /* Source file name */
+            tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_file_name) + (size_t)1;
+            *size += tmp_size;
+
+            /* Source dataset name */
+            tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_dset_name) + (size_t)1;
+            *size += tmp_size;
+
+            /* Source selection */
+            tmp_size = (size_t)0;
+            if(H5S_encode(layout->storage.u.virt.list[u].source_select, &tmp_p, &tmp_size) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
+            *size += tmp_size;
+
+            /* Virtual dataset selection */
+            tmp_size = (size_t)0;
+            if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, &tmp_p, &tmp_size) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize virtual selection")
+            *size += tmp_size;
+        } /* end for */
     } /* end if */
 
     /* Size of layout type */
@@ -475,7 +544,8 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
         *size += layout->u.chunk.ndims * sizeof(uint32_t);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dcrt_layout_enc() */
 
 
@@ -498,7 +568,7 @@ static herr_t
 H5P__dcrt_layout_dec(const void **_pp, void *value)
 {
     const H5O_layout_t *layout;         /* Storage layout */
-    H5O_layout_t chunk_layout;          /* Layout structure for chunk info */
+    H5O_layout_t tmp_layout;            /* Temporary local layout structure */
     H5D_layout_t type;                  /* Layout type */
     const uint8_t **pp = (const uint8_t **)_pp;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -538,21 +608,111 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                     unsigned u;             /* Local index variable */
 
                     /* Initialize to default values */
-                    chunk_layout = H5D_def_layout_chunk_g;
+                    tmp_layout = H5D_def_layout_chunk_g;
 
                     /* Set rank & dimensions */
-                    chunk_layout.u.chunk.ndims = (unsigned)ndims;
+                    tmp_layout.u.chunk.ndims = (unsigned)ndims;
                     for(u = 0; u < ndims; u++)
-                        UINT32DECODE(*pp, chunk_layout.u.chunk.dim[u])
+                        UINT32DECODE(*pp, tmp_layout.u.chunk.dim[u])
 
                     /* Point at the newly set up struct */
-                    layout = &chunk_layout;
+                    layout = &tmp_layout;
                 } /* end else */
             }
             break;
 
         case H5D_VIRTUAL:
-            HDassert(0 && "Not yet implemented...");//VDSINC
+            {
+                uint64_t nentries;              /* Number of VDS mappings */
+
+                /* Decode number of entries */
+                UINT64DECODE(*pp, nentries)
+
+                if(nentries == (uint64_t)0)
+                    /* Just use the default struct */
+                    layout = &H5D_def_layout_virtual_g;
+                else {
+                    size_t tmp_size;
+                    size_t u;           /* Local index variable */
+
+                    /* Initialize to default values */
+                    tmp_layout = H5D_def_layout_virtual_g;
+
+                    /* Allocate entry list */
+                    if(NULL == (tmp_layout.storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_calloc((size_t)nentries * sizeof(H5O_storage_virtual_ent_t))))
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate heap block")
+                    tmp_layout.storage.u.virt.list_nalloc = (size_t)nentries;
+                    tmp_layout.storage.u.virt.list_nused = (size_t)nentries;
+
+                    /* Decode each entry */
+                    for(u = 0; u < (size_t)nentries; u++) {
+                        /* Source file name */
+                        tmp_size = HDstrlen((const char *)*pp) + 1;
+                        if(NULL == (tmp_layout.storage.u.virt.list[u].source_file_name = (char *)H5MM_malloc(tmp_size)))
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory for source file name")
+                        (void)HDmemcpy(tmp_layout.storage.u.virt.list[u].source_file_name, *pp, tmp_size);
+                        *pp += tmp_size;
+
+                        /* Source dataset name */
+                        tmp_size = HDstrlen((const char *)*pp) + 1;
+                        if(NULL == (tmp_layout.storage.u.virt.list[u].source_dset_name = (char *)H5MM_malloc(tmp_size)))
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory for source dataset name")
+                        (void)HDmemcpy(tmp_layout.storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
+                        *pp += tmp_size;
+
+                        /* Source selection */
+                        if(NULL == (tmp_layout.storage.u.virt.list[u].source_select = H5S_decode(pp)))
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode source space selection")
+                        tmp_layout.storage.u.virt.list[u].source_space_status = H5O_VIRTUAL_STATUS_USER;
+
+                        /* Virtual selection */
+                        if(NULL == (tmp_layout.storage.u.virt.list[u].source_dset.virtual_select = H5S_decode(pp)))
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode virtual space selection")
+                        tmp_layout.storage.u.virt.list[u].virtual_space_status = H5O_VIRTUAL_STATUS_USER;
+
+                        /* Parse source file and dataset names for "printf"
+                         * style format specifiers */
+                        if(H5D_virtual_parse_source_name(tmp_layout.storage.u.virt.list[u].source_file_name, &tmp_layout.storage.u.virt.list[u].parsed_source_file_name, &tmp_layout.storage.u.virt.list[u].psfn_static_strlen, &tmp_layout.storage.u.virt.list[u].psfn_nsubs) < 0)
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't parse source file name")
+                        if(H5D_virtual_parse_source_name(tmp_layout.storage.u.virt.list[u].source_dset_name, &tmp_layout.storage.u.virt.list[u].parsed_source_dset_name, &tmp_layout.storage.u.virt.list[u].psdn_static_strlen, &tmp_layout.storage.u.virt.list[u].psdn_nsubs) < 0)
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't parse source dataset name")
+
+                        /* Set source names in source_dset struct */
+                        if((tmp_layout.storage.u.virt.list[u].psfn_nsubs == 0)
+                                && (tmp_layout.storage.u.virt.list[u].psdn_nsubs == 0)) {
+                            if(tmp_layout.storage.u.virt.list[u].parsed_source_file_name)
+                                tmp_layout.storage.u.virt.list[u].source_dset.file_name = tmp_layout.storage.u.virt.list[u].parsed_source_file_name->name_segment;
+                            else
+                                tmp_layout.storage.u.virt.list[u].source_dset.file_name = tmp_layout.storage.u.virt.list[u].source_file_name;
+                            if(tmp_layout.storage.u.virt.list[u].parsed_source_dset_name)
+                                tmp_layout.storage.u.virt.list[u].source_dset.dset_name = tmp_layout.storage.u.virt.list[u].parsed_source_dset_name->name_segment;
+                            else
+                                tmp_layout.storage.u.virt.list[u].source_dset.dset_name = tmp_layout.storage.u.virt.list[u].source_dset_name;
+                        } /* end if */
+
+                        /* unlim_dim fields */
+                        tmp_layout.storage.u.virt.list[u].unlim_dim_source = H5S_get_select_unlim_dim(tmp_layout.storage.u.virt.list[u].source_select);
+                        tmp_layout.storage.u.virt.list[u].unlim_dim_virtual = H5S_get_select_unlim_dim(tmp_layout.storage.u.virt.list[u].source_dset.virtual_select);
+                        tmp_layout.storage.u.virt.list[u].unlim_extent_source = HSIZE_UNDEF;
+                        tmp_layout.storage.u.virt.list[u].unlim_extent_virtual = HSIZE_UNDEF;
+                        tmp_layout.storage.u.virt.list[u].clip_size_source = HSIZE_UNDEF;
+                        tmp_layout.storage.u.virt.list[u].clip_size_virtual = HSIZE_UNDEF;
+
+                        /* Clipped selections */
+                        if(tmp_layout.storage.u.virt.list[u].unlim_dim_virtual < 0) {
+                            tmp_layout.storage.u.virt.list[u].source_dset.clipped_source_select = tmp_layout.storage.u.virt.list[u].source_select;
+                            tmp_layout.storage.u.virt.list[u].source_dset.clipped_virtual_select = tmp_layout.storage.u.virt.list[u].source_dset.virtual_select;
+                        } /* end if */
+
+                        /* Update min_dims */
+                        if(H5D_virtual_update_min_dims(&tmp_layout, u) < 0)
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to update virtual dataset minimum dimensions")
+                    } /* end for */
+
+                    /* Point at the newly set up struct */
+                    layout = &tmp_layout;
+                } /* end else */
+            } /* end block */
             break;
 
         case H5D_LAYOUT_ERROR:

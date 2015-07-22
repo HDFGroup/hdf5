@@ -545,11 +545,11 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
                 /* Encode each entry */
                 for(i = 0; i < mesg->storage.u.virt.list_nused; i++) {
                     /* Source file name */
-                    (void)HDstrcpy((char *)heap_block_p, mesg->storage.u.virt.list[i].source_file_name);
+                    (void)HDmemcpy((char *)heap_block_p, mesg->storage.u.virt.list[i].source_file_name, str_size[2 * i]);
                     heap_block_p += str_size[2 * i];
 
                     /* Source dataset name */
-                    (void)HDstrcpy((char *)heap_block_p, mesg->storage.u.virt.list[i].source_dset_name);
+                    (void)HDmemcpy((char *)heap_block_p, mesg->storage.u.virt.list[i].source_dset_name, str_size[(2 * i) + 1]);
                     heap_block_p += str_size[(2 * i) + 1];
 
                     /* Source selection */
@@ -948,7 +948,7 @@ H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
     FILE * stream, int indent, int fwidth)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    unsigned                    u;
+    size_t                  u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -971,7 +971,7 @@ H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
                       "Number of dimensions:",
                       (unsigned long)(mesg->u.chunk.ndims));
             HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Size:");
-            for(u = 0; u < mesg->u.chunk.ndims; u++)
+            for(u = 0; u < (size_t)mesg->u.chunk.ndims; u++)
                 HDfprintf(stream, "%s%lu", u ? ", " : "", (unsigned long)(mesg->u.chunk.dim[u]));
             HDfprintf(stream, "}\n");
 
@@ -1009,8 +1009,23 @@ H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
             break;
 
         case H5D_VIRTUAL:
-            HDassert(0 && "Not yet implemented...");//VDSINC
-
+            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                      "Type:", "Virtual");
+            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+                      "Global heap address:", mesg->storage.u.virt.serial_list_hobjid.addr);
+            HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+                      "Global heap index:", mesg->storage.u.virt.serial_list_hobjid.idx);
+            for(u = 0; u < mesg->storage.u.virt.list_nused; u++) {
+                HDfprintf(stream, "%*sMapping %u:\n", indent, "", u);
+                HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
+                      "Virtual selection:", "<Not yet implemented>");
+                HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
+                      "Source file name:", mesg->storage.u.virt.list[u].source_file_name);
+                HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
+                      "Source dataset name:", mesg->storage.u.virt.list[u].source_dset_name);
+                HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
+                      "Source selection:", "<Not yet implemented>");
+            } /* end for */
             break;
 
         case H5D_LAYOUT_ERROR:

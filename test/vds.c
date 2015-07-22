@@ -25,6 +25,7 @@
 typedef enum {
     TEST_API_BASIC,
     TEST_API_COPY_PLIST,
+    TEST_API_ENCDEC_PLIST,
     TEST_API_CREATE_DSET,
     TEST_API_REOPEN_DSET,
     TEST_API_REOPEN_FILE,
@@ -45,7 +46,6 @@ const char *FILENAME[] = {
 #define TEST_IO_DIFFERENT_FILE  0x02u
 #define TEST_IO_REOPEN_VIRT     0x04u
 #define TEST_IO_NTESTS          0x08u
-//VDSINC add close source, virtual file
 
 #define LIST_DOUBLE_SIZE (H5D_VIRTUAL_DEF_LIST_SIZE + 1)
 
@@ -331,6 +331,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
 {
     hid_t       file = -1;      /* File */
     hid_t       dset = -1;      /* Virtual dataset */
+    void        *plist_buf = NULL; /* Serialized property list buffer */
 
     HDassert((config >= TEST_API_BASIC) && (config < TEST_API_NTESTS));
     HDassert(fapl >= 0);
@@ -386,6 +387,25 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
         if((*ex_dcpl = H5Pcopy(dcpl)) < 0)
             TEST_ERROR
     } /* end if */
+    else if(config == TEST_API_ENCDEC_PLIST) {
+        size_t plist_buf_size;
+
+        /* Encode property list to plist_buf */
+        if(H5Pencode(dcpl, NULL, &plist_buf_size) < 0)
+            TEST_ERROR
+        if(NULL == (plist_buf = HDmalloc(plist_buf_size)))
+            TEST_ERROR
+        if(H5Pencode(dcpl, plist_buf, &plist_buf_size) < 0)
+            TEST_ERROR
+
+        /* Decode serialized property list to *ex_dcpl */
+        if((*ex_dcpl = H5Pdecode(plist_buf)) < 0)
+            TEST_ERROR
+
+        /* Free plist_buf */
+        HDfree(plist_buf);
+        plist_buf = NULL;
+    } /* end if */
     else {
         /* Simply copy the id to ex_dcpl and increment the ref count so ex_dcpl
          * can be closed */
@@ -403,6 +423,8 @@ error:
         if(dset >= 0)
             (void)H5Dclose(dset);
     } H5E_END_TRY;
+    if(plist_buf)
+        HDfree(plist_buf);
 
     return -1;
 } /* end test_api_get_ex_dcpl() */
@@ -439,6 +461,9 @@ test_api(test_api_config_t config, hid_t fapl)
             break;
         case TEST_API_COPY_PLIST:
             TESTING("virtual dataset API functions with copied plists")
+            break;
+        case TEST_API_ENCDEC_PLIST:
+            TESTING("virtual dataset API functions with encoded and decoded plists")
             break;
         case TEST_API_CREATE_DSET:
             TESTING("virtual dataset create")

@@ -1099,8 +1099,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
 
     /* Sanity check */
     HDassert(dset);
-    storage = &dset->shared->layout.storage.u.virt;
     HDassert(dset->shared->layout.storage.type == H5D_VIRTUAL);
+    storage = &dset->shared->layout.storage.u.virt;
     HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
     /* Get rank of VDS */
@@ -1956,10 +1956,8 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     } /* end for */
 
     /* Fill unmapped part of buffer with fill value */
-    if(tot_nelmts != nelmts) {
+    if(tot_nelmts < nelmts) {
         H5D_fill_value_t fill_status;       /* Fill value status */
-
-        HDassert(tot_nelmts < nelmts);
 
         /* Check the fill value status */
         if(H5P_is_fill_value_defined(&io_info->dset->shared->dcpl_cache.fill, &fill_status) < 0)
@@ -1994,7 +1992,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
 #ifndef NDEBUG
             /* Make sure the total number of elements written (including fill
-             * values) == nelmts */
+             * values) >= nelmts */
             {
                 hssize_t    select_nelmts;  /* Number of elements in selection */
 
@@ -2002,8 +2000,10 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 if((select_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(fill_space)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get number of elements in selection")
 
-                /* Verify number of elements is correct */
-                HDassert((tot_nelmts + (hsize_t)select_nelmts) == nelmts);
+                /* Verify number of elements is correct.  Note that since we
+                 * don't check for overlap we can't assert that these are equal
+                 */
+                HDassert((tot_nelmts + (hsize_t)select_nelmts) >= nelmts);
             } /* end block */
 #endif /* NDEBUG */
         } /* end if */
