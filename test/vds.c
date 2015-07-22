@@ -332,6 +332,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
     hid_t       file = -1;      /* File */
     hid_t       dset = -1;      /* Virtual dataset */
     void        *plist_buf = NULL; /* Serialized property list buffer */
+    htri_t      tri_ret;
 
     HDassert((config >= TEST_API_BASIC) && (config < TEST_API_NTESTS));
     HDassert(fapl >= 0);
@@ -413,6 +414,17 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
             TEST_ERROR
         *ex_dcpl = dcpl;
     } /* end else */
+
+    /* Verify examination DCPL is equal to original DCPL.  Do not compare the
+     * plist to itselt, and do not do the comparison if we reopened the file,
+     * because in that case the extent of the source dset will not be corrent.
+     */
+    if((*ex_dcpl != dcpl) && (config != TEST_API_REOPEN_FILE)) {
+        if((tri_ret = H5Pequal(dcpl, *ex_dcpl)) < 0)
+            TEST_ERROR
+        if(!tri_ret)
+            TEST_ERROR
+    } /* end if */
 
     return 0;
 
