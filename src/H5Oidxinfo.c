@@ -86,8 +86,8 @@ const H5O_msg_class_t H5O_MSG_IDXINFO[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_idxinfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
-    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
+H5O_idxinfo_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_idxinfo_t *mesg;
     void *ret_value; /* Return value */
@@ -134,7 +134,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_idxinfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p,
+H5O_idxinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
         const void *_mesg)
 {
     const H5O_idxinfo_t *mesg = (const H5O_idxinfo_t *) _mesg;
@@ -213,7 +213,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_idxinfo_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void *_mesg)
+H5O_idxinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_idxinfo_t *mesg = (const H5O_idxinfo_t *) _mesg;
     size_t ret_value;
@@ -298,7 +298,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_idxinfo_delete(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t *open_oh, void *_mesg)
+H5O_idxinfo_delete(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t *open_oh, void *_mesg)
 {
     hid_t file_id;
     H5O_idxinfo_t *mesg = (H5O_idxinfo_t *) _mesg;
@@ -336,7 +336,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_idxinfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *stream,
+H5O_idxinfo_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg, FILE *stream,
 	       int indent, int fwidth)
 {
     const H5O_idxinfo_t	*mesg = (const H5O_idxinfo_t *)_mesg;

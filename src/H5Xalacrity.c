@@ -950,7 +950,7 @@ done:
  */
 static herr_t
 H5X__alacrity_get_query_ranges(hid_t query_id,
-        H5X_alacrity_range_t *query_ranges, size_t UNUSED *nranges)
+        H5X_alacrity_range_t *query_ranges, size_t H5_ATTR_UNUSED *nranges)
 {
     H5Q_t *query;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1223,7 +1223,7 @@ done:
  *------------------------------------------------------------------------
  */
 static void *
-H5X_alacrity_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t UNUSED xapl_id,
+H5X_alacrity_create(hid_t dataset_id, hid_t H5_ATTR_UNUSED xcpl_id, hid_t H5_ATTR_UNUSED xapl_id,
         size_t *metadata_size, void **metadata)
 {
     H5X_alacrity_t *alacrity = NULL;
@@ -1332,7 +1332,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5X_alacrity_open(hid_t dataset_id, hid_t UNUSED xapl_id, size_t metadata_size,
+H5X_alacrity_open(hid_t dataset_id, hid_t H5_ATTR_UNUSED xapl_id, size_t metadata_size,
         void *metadata)
 {
     H5X_alacrity_t *alacrity = NULL;
@@ -1402,7 +1402,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_alacrity_pre_update(void *idx_handle, hid_t UNUSED dataspace_id, hid_t UNUSED xxpl_id)
+H5X_alacrity_pre_update(void *idx_handle, hid_t H5_ATTR_UNUSED dataspace_id, hid_t H5_ATTR_UNUSED xxpl_id)
 {
     H5X_alacrity_t *alacrity = (H5X_alacrity_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1429,7 +1429,7 @@ done:
  */
 static herr_t
 H5X_alacrity_post_update(void *idx_handle, const void *data,
-        hid_t dataspace_id, hid_t UNUSED xxpl_id)
+        hid_t dataspace_id, hid_t H5_ATTR_UNUSED xxpl_id)
 {
     H5X_alacrity_t *alacrity = (H5X_alacrity_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1472,7 +1472,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_alacrity_query(void *idx_handle, hid_t query_id, hid_t UNUSED xxpl_id,
+H5X_alacrity_query(void *idx_handle, hid_t query_id, hid_t H5_ATTR_UNUSED xxpl_id,
         hid_t *dataspace_id)
 {
     H5X_alacrity_t *alacrity = (H5X_alacrity_t *) idx_handle;

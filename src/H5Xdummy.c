@@ -195,7 +195,7 @@ done:
  *------------------------------------------------------------------------
  */
 static void *
-H5X_dummy_create(hid_t dataset_id, hid_t UNUSED xcpl_id, hid_t UNUSED xapl_id,
+H5X_dummy_create(hid_t dataset_id, hid_t H5_ATTR_UNUSED xcpl_id, hid_t H5_ATTR_UNUSED xapl_id,
         size_t *metadata_size, void **metadata)
 {
     H5X_dummy_t *dummy = NULL;
@@ -310,7 +310,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5X_dummy_open(hid_t dataset_id, hid_t UNUSED xapl_id, size_t metadata_size,
+H5X_dummy_open(hid_t dataset_id, hid_t H5_ATTR_UNUSED xapl_id, size_t metadata_size,
         void *metadata)
 {
     hid_t file_id;
@@ -390,7 +390,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_dummy_pre_update(void *idx_handle, hid_t UNUSED dataspace_id, hid_t UNUSED xxpl_id)
+H5X_dummy_pre_update(void *idx_handle, hid_t H5_ATTR_UNUSED dataspace_id, hid_t H5_ATTR_UNUSED xxpl_id)
 {
     H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -418,7 +418,7 @@ done:
  */
 static herr_t
 H5X_dummy_post_update(void *idx_handle, const void *buf, hid_t dataspace_id,
-        hid_t UNUSED xxpl_id)
+        hid_t H5_ATTR_UNUSED xxpl_id)
 {
     H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
     hid_t mem_type_id, file_space_id;
@@ -454,7 +454,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned UNUSED ndim,
+H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim,
         const hsize_t *point, void *_udata)
 {
     H5X__dummy_query_data_t *udata = (H5X__dummy_query_data_t *)_udata;
@@ -499,7 +499,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t UNUSED xxpl_id,
+H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t H5_ATTR_UNUSED xxpl_id,
         hid_t *dataspace_id)
 {
     H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;

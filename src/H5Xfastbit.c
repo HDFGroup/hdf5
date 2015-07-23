@@ -1033,7 +1033,7 @@ done:
  *------------------------------------------------------------------------
  */
 static void *
-H5X_fastbit_create(hid_t dataset_id, hid_t xcpl_id, hid_t UNUSED xapl_id,
+H5X_fastbit_create(hid_t dataset_id, hid_t xcpl_id, hid_t H5_ATTR_UNUSED xapl_id,
         size_t *metadata_size, void **metadata)
 {
     H5X_fastbit_t *fastbit = NULL;
@@ -1160,7 +1160,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5X_fastbit_open(hid_t dataset_id, hid_t UNUSED xapl_id, size_t metadata_size,
+H5X_fastbit_open(hid_t dataset_id, hid_t H5_ATTR_UNUSED xapl_id, size_t metadata_size,
         void *metadata)
 {
     H5X_fastbit_t *fastbit = NULL;
@@ -1230,7 +1230,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_fastbit_pre_update(void *idx_handle, hid_t UNUSED dataspace_id, hid_t UNUSED xxpl_id)
+H5X_fastbit_pre_update(void *idx_handle, hid_t H5_ATTR_UNUSED dataspace_id, hid_t H5_ATTR_UNUSED xxpl_id)
 {
     H5X_fastbit_t *fastbit = (H5X_fastbit_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1257,7 +1257,7 @@ done:
  */
 static herr_t
 H5X_fastbit_post_update(void *idx_handle, const void *data, hid_t dataspace_id,
-        hid_t UNUSED xxpl_id)
+        hid_t H5_ATTR_UNUSED xxpl_id)
 {
     H5X_fastbit_t *fastbit = (H5X_fastbit_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1300,7 +1300,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t UNUSED xxpl_id,
+H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t H5_ATTR_UNUSED xxpl_id,
         hid_t *dataspace_id)
 {
     H5X_fastbit_t *fastbit = (H5X_fastbit_t *) idx_handle;

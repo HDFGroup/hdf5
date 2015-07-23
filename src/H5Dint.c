@@ -3178,7 +3178,7 @@ H5D_get_index(H5D_t *dset, unsigned max_count, H5X_class_t **idx_class,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_remove_index(H5D_t *dset, unsigned UNUSED plugin_id)
+H5D_remove_index(H5D_t *dset, unsigned H5_ATTR_UNUSED plugin_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
