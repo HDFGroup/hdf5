@@ -40,7 +40,7 @@
  * functionality of FastBit IBIS implementation.  It is primarily for
  * in memory data.
  */
-#include <iapi.h>
+#include <fastbit/iapi.h>
 
 /****************/
 /* Local Macros */
