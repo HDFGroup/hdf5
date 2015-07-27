@@ -281,7 +281,7 @@ test_mpio_gb_file(char *filename)
 	printf("Skipped GB file range test "
 		"because MPI_Offset cannot support it\n");
     }else{
-	buf = HDmalloc(MB);
+	buf = (char *)HDmalloc(MB);
 	VRFY((buf!=NULL), "malloc succeed");
 
 	/* open a new file. Remove it first in case it exists. */
@@ -678,10 +678,9 @@ static int test_mpio_derived_dtype(char *filename) {
     int  mpi_err_strlen;
     int  mpi_err;
     int  i;
-    int  nerrors = 0;		/* number of errors */
     MPI_Datatype  etype,filetype;
     MPI_Datatype  adv_filetype,bas_filetype[2];
-    MPI_Datatype  etypenew, filetypenew;
+    MPI_Datatype  filetypenew;
     MPI_Offset    disp;
     MPI_Status    Status;
     MPI_Aint      adv_disp[2];
@@ -1100,7 +1099,7 @@ main(int argc, char **argv)
      * calls.  By then, MPI calls may not work.
      */
     if (H5dont_atexit() < 0){
-	printf("Failed to turn off atexit processing. Continue.\n", mpi_rank);
+	printf("Failed to turn off atexit processing. Continue.\n");
     };
     H5open();
     if (parse_options(argc, argv) != 0){

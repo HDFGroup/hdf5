@@ -133,6 +133,9 @@
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #undef HAVE_GET_FPC_CSR
 
+/* Define if the compiler understands inline */
+#undef HAVE_INLINE
+
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #undef HAVE_INSTRUMENTED_LIBRARY
@@ -356,12 +359,26 @@
 /* Define to 1 if you have the `_scrsize' function. */
 #undef HAVE__SCRSIZE
 
+/* Define if the compiler understands __inline */
+#undef HAVE___INLINE
+
+/* Define if the compiler understands __inline__ */
+#undef HAVE___INLINE__
+
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #undef INCLUDE_HL
+
+/* Define if your system can convert long double to (unsigned) long long
+   values correctly. */
+#undef LDOUBLE_TO_LLONG_ACCURATE
 
 /* Define if your system converts long double to (unsigned) long values with
    special algorithm. */
 #undef LDOUBLE_TO_LONG_SPECIAL
+
+/* Define if your system can convert (unsigned) long long to long double
+   values correctly. */
+#undef LLONG_TO_LDOUBLE_CORRECT
 
 /* Define if your system can convert (unsigned) long to long double values
    with special algorithm. */
@@ -545,6 +562,9 @@
 /* Version number of package */
 #undef VERSION
 
+/* Data accuracy is prefered to speed during data conversions */
+#undef WANT_DATA_ACCURACY
+
 /* Check exception handling functions during data conversions */
 #undef WANT_DCONV_EXCEPTION
 
@@ -568,12 +588,6 @@
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
-
-/* Define to `__inline__' or `__inline' if that's what the C compiler
-   calls it, or to nothing if 'inline' is not supported under any name.  */
-#ifndef __cplusplus
-#undef inline
-#endif
 
 /* Define to `long int' if <sys/types.h> does not define. */
 #undef off_t

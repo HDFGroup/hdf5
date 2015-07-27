@@ -560,7 +560,19 @@ H5HL__cache_prefix_serialize(const H5F_t *f, void *_image, size_t len,
 
         /* Copy the heap data block into the cache image */
         HDmemcpy(image, heap->dblk_image, heap->dblk_size);
+
+        /* Sanity check */
+        HDassert((size_t)(image - (uint8_t *)_image) + heap->dblk_size == len);
     } /* end if */
+    else {
+        /* Sanity check */
+        HDassert((size_t)(image - (uint8_t *)_image) <= len);
+
+#ifdef H5_CLEAR_MEMORY
+        /* Clear rest of local heap */
+        HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+#endif /* H5_CLEAR_MEMORY */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HL__cache_prefix_serialize() */

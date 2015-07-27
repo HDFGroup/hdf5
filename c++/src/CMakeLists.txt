@@ -94,7 +94,7 @@ set_target_properties (${HDF5_CPP_LIB_TARGET} PROPERTIES
 )
 
 #-----------------------------------------------------------------------------
-# Add file(s) to CMake Install 
+# Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 install (
     FILES
@@ -112,7 +112,7 @@ if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_CPP_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} cpplibraries)
   endif (BUILD_SHARED_LIBS)
-  
+
   install (
       TARGETS
           ${HDF5_CPP_LIB_TARGET}
@@ -121,5 +121,6 @@ if (HDF5_EXPORTED_TARGETS)
       LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT cpplibraries
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT cpplibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT cpplibraries
+      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT cpplibraries
   )
 endif (HDF5_EXPORTED_TARGETS)

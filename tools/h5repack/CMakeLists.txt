@@ -73,14 +73,14 @@ if (BUILD_TESTING)
         TARGET     ${HDF5_TOOL_PLUGIN_LIB_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different 
+        ARGS       -E copy_if_different
           "$<TARGET_FILE:${HDF5_TOOL_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${HDF5_TOOL_PLUGIN_LIB_TARGET}>"
     )
   endif (BUILD_SHARED_LIBS)
 
   include (CMakeTests.cmake)
-  
+
 endif (BUILD_TESTING)
 
 ##############################################################################
@@ -98,8 +98,5 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5repack
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        toolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

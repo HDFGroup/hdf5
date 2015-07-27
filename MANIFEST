@@ -42,6 +42,7 @@
 ./configure.ac
 
 ./bin/COPYING
+./bin/bbrelease       _DO_NOT_DISTRIBUTE_
 ./bin/buildhdf5
 ./bin/checkapi        _DO_NOT_DISTRIBUTE_
 ./bin/checkposix      _DO_NOT_DISTRIBUTE_
@@ -566,6 +567,7 @@
 ./src/H5Aprivate.h
 ./src/H5Apublic.h
 ./src/H5AC.c
+./src/H5ACmpio.c
 ./src/H5ACpkg.h
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
@@ -586,6 +588,7 @@
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
+./src/H5Cmpio.c
 ./src/H5Cpkg.h
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
@@ -2392,6 +2395,7 @@
 ./config/cmake/cacheinit.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/ConfigureChecks.cmake
+./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/FindHDF5.cmake.in
 ./config/cmake/H5cxx_config.h.in
@@ -2410,7 +2414,6 @@
 
 ./config/cmake_ext_mod/CheckTypeSize.cmake
 ./config/cmake_ext_mod/ConfigureChecks.cmake
-./config/cmake_ext_mod/CPack.Info.plist.in
 ./config/cmake_ext_mod/CTestCustom.cmake
 ./config/cmake_ext_mod/FindMPI.cmake
 ./config/cmake_ext_mod/FindSZIP.cmake

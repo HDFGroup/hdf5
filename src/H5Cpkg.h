@@ -60,8 +60,6 @@
 /* Cache configuration settings */
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 #define H5C__H5C_T_MAGIC	0x005CAC0E
-#define H5C__MAX_NUM_TYPE_IDS	28
-#define H5C__PREFIX_LEN		32
 
 /****************************************************************************
  *
@@ -595,7 +593,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)        \
 {                                                                \
     (((cache_ptr)->clears)[(entry_ptr)->type->id])++;            \
-    if ( (entry_ptr)->is_pinned )                                \
+    if((entry_ptr)->is_pinned)                                   \
         (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++; \
     ((entry_ptr)->clears)++;                                     \
 }
@@ -709,9 +707,9 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)         \
 {                                                                 \
-    if ( (entry_ptr)->is_pinned )                                 \
-        (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++;  \
     (((cache_ptr)->clears)[(entry_ptr)->type->id])++;             \
+    if((entry_ptr)->is_pinned)                                    \
+        (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++;  \
 }
 
 #define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)         \
@@ -2713,6 +2711,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
 #ifdef H5_HAVE_PARALLEL
 
 #if H5C_DO_SANITY_CHECKS
+
 #define H5C__COLL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                   \
      ( (tail_ptr) == NULL ) ||                                                 \
@@ -4017,6 +4016,15 @@ struct H5C_t {
 #endif /* NDEBUG */
 };
 
+#ifdef H5_HAVE_PARALLEL
+typedef struct H5C_collective_write_t {
+    size_t length;
+    hbool_t free_buf;
+    void *buf;
+    haddr_t offset;
+} H5C_collective_write_t;
+#endif /* H5_HAVE_PARALLEL */
+
 /*****************************/
 /* Package Private Variables */
 /*****************************/
@@ -4025,7 +4033,12 @@ struct H5C_t {
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-
+H5_DLL herr_t H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id,
+    H5C_cache_entry_t *entry_ptr, unsigned flags, int64_t *entry_size_change_ptr, H5SL_t *collective_write_list);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5C_collective_write(H5F_t *f, hid_t dxpl_id, H5SL_t *collective_write_list);
+H5_DLL herr_t H5C_collective_write_free(void *_item, void *key, void *op_data);
+#endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5Cpkg_H */
 
