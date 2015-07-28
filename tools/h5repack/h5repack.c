@@ -337,7 +337,7 @@ done:
  */
 int named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err) {
 	named_dt_t *dt = *named_dt_head_p;
-	hid_t ret_value = -1;
+	int ret_value = -1;
 
 	while (dt) {
 		/* Pop the datatype off the stack and free it */

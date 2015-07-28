@@ -13,7 +13,7 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
 #------------------------------------------------------------------------------
-# This is the list of files that are part of HDF5 source distribution. 
+# This is the list of files that are part of HDF5 source distribution.
 # All files have a `./' prefix and appear in lexicographic order.
 # Lines that end with _DO_NOT_DISTRIBUTE_ will not be included in a
 # release.  Blank lines and comments are ignored.  Comments must start
@@ -33,6 +33,8 @@
 ./m4/ltversion.m4                       _DO_NOT_DISTRIBUTE_
 ./m4/lt~obsolete.m4                     _DO_NOT_DISTRIBUTE_
 ./m4/ltoptions.m4                       _DO_NOT_DISTRIBUTE_
+./m4/aclocal_cxx.m4
+./m4/aclocal_fc.m4
 ./README.txt
 ./aclocal.m4
 ./acsite.m4
@@ -40,6 +42,7 @@
 ./configure.ac
 
 ./bin/COPYING
+./bin/bbrelease       _DO_NOT_DISTRIBUTE_
 ./bin/buildhdf5
 ./bin/checkapi        _DO_NOT_DISTRIBUTE_
 ./bin/checkposix      _DO_NOT_DISTRIBUTE_
@@ -86,37 +89,31 @@
 ./config/COPYING
 ./config/BlankForm
 ./config/apple
+./config/cce-fflags
+./config/cce-flags
 ./config/commence.am
 ./config/conclude.am
-./config/craynv
-./config/dec-flags
 ./config/examples.am
 ./config/freebsd
 ./config/gnu-fflags
 ./config/gnu-flags
-./config/hpux11.23
 ./config/i386-pc-cygwin32
 ./config/i686-pc-cygwin
-./config/ia64-linux-gnu
 ./config/ibm-aix
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
-./config/irix6.x
 ./config/linux-gnu
 ./config/linux-gnuaout
 ./config/linux-gnulibc1
 ./config/linux-gnulibc2
 ./config/lt_vers.am
-./config/nec-superux14.1
 ./config/Makefile.am.blank
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/powerpc-ibm-aix5.x
 ./config/solaris2.x
-./config/sv1-cray
 ./config/x86_64-pc-cygwin
-./config/x86_64-redstorm-linux-gnu
 
 ./config/site-specific/BlankForm
 
@@ -150,7 +147,7 @@
 ./examples/h5_ref2reg.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
-./examples/h5_external_log_native_vol.c
+./examples/h5_vol_external_log_native.c
 ./examples/testh5cc.sh.in
 ./examples/README
 
@@ -526,34 +523,6 @@
 #
 #------------------------------------------------------------------------------
 
-./perform/COPYING
-./perform/Makefile.am
-./perform/Makefile.in
-./perform/benchpar.c
-./perform/build_h5perf_alone.sh
-./perform/build_h5perf_serial_alone.sh
-./perform/chunk.c
-./perform/gen_report.pl
-./perform/iopipe.c
-./perform/overhead.c
-./perform/perf.c
-./perform/perf_meta.c
-./perform/pio_engine.c
-./perform/pio_perf.c
-./perform/pio_perf.h
-./perform/pio_standalone.c
-./perform/pio_standalone.h
-./perform/pio_timer.c
-./perform/pio_timer.h
-./perform/sio_engine.c
-./perform/sio_perf.c
-./perform/sio_perf.h
-./perform/sio_standalone.c
-./perform/sio_standalone.h
-./perform/sio_timer.c
-./perform/sio_timer.h
-./perform/zip_perf.c
-
 ./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
 ./release_docs/HISTORY-1_9.txt
@@ -599,6 +568,7 @@
 ./src/H5Aprivate.h
 ./src/H5Apublic.h
 ./src/H5AC.c
+./src/H5ACmpio.c
 ./src/H5ACpkg.h
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
@@ -607,7 +577,7 @@
 ./src/H5Bdbg.c
 ./src/H5Bpkg.h
 ./src/H5Bprivate.h
-./src/H5Bpublic.h      
+./src/H5Bpublic.h
 ./src/H5B2.c
 ./src/H5B2cache.c
 ./src/H5B2dbg.c
@@ -615,10 +585,11 @@
 ./src/H5B2int.c
 ./src/H5B2pkg.h
 ./src/H5B2private.h
-./src/H5B2public.h    
+./src/H5B2public.h
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
+./src/H5Cmpio.c
 ./src/H5Cpkg.h
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
@@ -667,14 +638,15 @@
 ./src/H5EAsblock.c
 ./src/H5EAstat.c
 ./src/H5EAtest.c
+./src/H5ESpublic.h
 ./src/H5F.c
-./src/H5Fint.c
 ./src/H5Faccum.c
 ./src/H5Fcwfs.c
 ./src/H5Fdbg.c
 ./src/H5Fdeprec.c
 ./src/H5Fefc.c
 ./src/H5Ffake.c
+./src/H5Fint.c
 ./src/H5Fio.c
 ./src/H5Fmount.c
 ./src/H5Fmpi.c
@@ -772,7 +744,7 @@
 ./src/H5HFman.c
 ./src/H5HFpkg.h
 ./src/H5HFprivate.h
-./src/H5HFpublic.h  
+./src/H5HFpublic.h
 ./src/H5HFsection.c
 ./src/H5HFspace.c
 ./src/H5HFstat.c
@@ -877,6 +849,7 @@
 ./src/H5Ptest.c
 ./src/H5PL.c
 ./src/H5PLprivate.h
+./src/H5PLpublic.h
 ./src/H5PLextern.h
 ./src/H5R.c
 ./src/H5Rdeprec.c
@@ -997,6 +970,8 @@
 ./test/dynlib1.c
 ./test/dynlib2.c
 ./test/dynlib3.c
+./test/dynlibvol1.c
+./test/dynlibvol2.c
 ./test/earray.c
 ./test/efc.c
 ./test/enc_dec_plist.c
@@ -1072,6 +1047,7 @@
 ./test/ohdr.c
 ./test/objcopy.c
 ./test/plugin.c
+./test/vol_test.c
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
@@ -1097,6 +1073,7 @@
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
 ./test/test_plugin.sh.in
+./test/test_vol_plugin.sh.in
 ./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c
@@ -1183,7 +1160,10 @@
 ./testpar/t_pflush2.c
 ./testpar/t_prop.c
 ./testpar/t_shapesame.c
+./testpar/t_pshutdown.c
+./testpar/t_prestart.c
 ./testpar/t_span_tree.c
+./testpar/t_init_term.c
 ./testpar/testpar.h
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
@@ -1334,6 +1314,8 @@
 ./tools/lib/h5tools_type.c
 ./tools/lib/ph5diff.h
 ./tools/lib/h5tools_error.h
+./tools/lib/io_timer.c
+./tools/lib/io_timer.h
 
 ./tools/misc/Makefile.am
 ./tools/misc/Makefile.in
@@ -1467,8 +1449,8 @@
 ./tools/testfiles/tattrintsize.ddl
 ./tools/testfiles/tattrintsize.h5
 ./tools/testfiles/tattrreg.h5
-./tools/testfiles/tattrreg.ddl 
-./tools/testfiles/tattrregR.ddl 
+./tools/testfiles/tattrreg.ddl
+./tools/testfiles/tattrregR.ddl
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/tbinary.h5
@@ -1479,6 +1461,8 @@
 ./tools/testfiles/tbinregR.exp
 ./tools/testfiles/tbinregR.ddl
 ./tools/testfiles/tbitfields.h5
+./tools/testfiles/tbitnopaque.ddl
+./tools/testfiles/tbitnopaque.h5
 ./tools/testfiles/tboot1.ddl
 ./tools/testfiles/tboot2.ddl
 ./tools/testfiles/tboot2A.ddl
@@ -1505,8 +1489,8 @@
 ./tools/testfiles/tcompound2.h5
 ./tools/testfiles/tcompound_complex.h5
 ./tools/testfiles/tdatareg.h5
-./tools/testfiles/tdatareg.ddl 
-./tools/testfiles/tdataregR.ddl 
+./tools/testfiles/tdatareg.ddl
+./tools/testfiles/tdataregR.ddl
 ./tools/testfiles/tdeflate.ddl
 ./tools/testfiles/tdset-1.ddl
 ./tools/testfiles/tdset-2.ddl
@@ -1713,60 +1697,60 @@
 ./tools/h5dump/errfiles/tslink-D.err
 
 # h5dump packed bits validation
-./tools/testfiles/tnofilename-with-packed-bits.ddl
-./tools/testfiles/tpbitsLengthPositive.ddl
-./tools/testfiles/tpbitsMaxExceeded.ddl
-./tools/testfiles/tpbitsSigned.ddl
-./tools/testfiles/tpbitsSigned2.ddl
-./tools/testfiles/tpbitsSigned4.ddl
-./tools/testfiles/tpbitsSignedWhole.ddl
-./tools/testfiles/tpbitsSignedInt.ddl
-./tools/testfiles/tpbitsSignedInt4.ddl
-./tools/testfiles/tpbitsSignedInt8.ddl
-./tools/testfiles/tpbitsSignedIntWhole.ddl
-./tools/testfiles/tpbitsSignedLong.ddl
-./tools/testfiles/tpbitsSignedLong8.ddl
-./tools/testfiles/tpbitsSignedLong16.ddl
-./tools/testfiles/tpbitsSignedLongWhole.ddl
-./tools/testfiles/tpbitsSignedLongLong.ddl
-./tools/testfiles/tpbitsSignedLongLong16.ddl
-./tools/testfiles/tpbitsSignedLongLong32.ddl
-./tools/testfiles/tpbitsSignedLongLongWhole.ddl
-./tools/testfiles/tpbitsSignedLongLongWhole1.ddl
-./tools/testfiles/tpbitsSignedLongLongWhole63.ddl
-./tools/testfiles/tpbitsOffsetNegative.ddl
-./tools/testfiles/tpbitsUnsigned.ddl
-./tools/testfiles/tpbitsUnsigned2.ddl
-./tools/testfiles/tpbitsUnsigned4.ddl
-./tools/testfiles/tpbitsUnsignedWhole.ddl
-./tools/testfiles/tpbitsUnsignedInt.ddl
-./tools/testfiles/tpbitsUnsignedInt4.ddl
-./tools/testfiles/tpbitsUnsignedInt8.ddl
-./tools/testfiles/tpbitsUnsignedIntWhole.ddl
-./tools/testfiles/tpbitsUnsignedLong.ddl
-./tools/testfiles/tpbitsUnsignedLong8.ddl
-./tools/testfiles/tpbitsUnsignedLong16.ddl
-./tools/testfiles/tpbitsUnsignedLongWhole.ddl
-./tools/testfiles/tpbitsUnsignedLongLong.ddl
-./tools/testfiles/tpbitsUnsignedLongLong16.ddl
-./tools/testfiles/tpbitsUnsignedLongLong32.ddl
-./tools/testfiles/tpbitsUnsignedLongLongWhole.ddl
-./tools/testfiles/tpbitsUnsignedLongLongWhole1.ddl
-./tools/testfiles/tpbitsUnsignedLongLongWhole63.ddl
-./tools/testfiles/tpbitsMax.ddl
+./tools/testfiles/pbits/tnofilename-with-packed-bits.ddl
+./tools/testfiles/pbits/tpbitsLengthPositive.ddl
+./tools/testfiles/pbits/tpbitsMaxExceeded.ddl
+./tools/testfiles/pbits/tpbitsSigned.ddl
+./tools/testfiles/pbits/tpbitsSigned2.ddl
+./tools/testfiles/pbits/tpbitsSigned4.ddl
+./tools/testfiles/pbits/tpbitsSignedWhole.ddl
+./tools/testfiles/pbits/tpbitsSignedInt.ddl
+./tools/testfiles/pbits/tpbitsSignedInt4.ddl
+./tools/testfiles/pbits/tpbitsSignedInt8.ddl
+./tools/testfiles/pbits/tpbitsSignedIntWhole.ddl
+./tools/testfiles/pbits/tpbitsSignedLong.ddl
+./tools/testfiles/pbits/tpbitsSignedLong8.ddl
+./tools/testfiles/pbits/tpbitsSignedLong16.ddl
+./tools/testfiles/pbits/tpbitsSignedLongWhole.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLong.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLong16.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLong32.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLongWhole.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLongWhole1.ddl
+./tools/testfiles/pbits/tpbitsSignedLongLongWhole63.ddl
+./tools/testfiles/pbits/tpbitsOffsetNegative.ddl
+./tools/testfiles/pbits/tpbitsUnsigned.ddl
+./tools/testfiles/pbits/tpbitsUnsigned2.ddl
+./tools/testfiles/pbits/tpbitsUnsigned4.ddl
+./tools/testfiles/pbits/tpbitsUnsignedWhole.ddl
+./tools/testfiles/pbits/tpbitsUnsignedInt.ddl
+./tools/testfiles/pbits/tpbitsUnsignedInt4.ddl
+./tools/testfiles/pbits/tpbitsUnsignedInt8.ddl
+./tools/testfiles/pbits/tpbitsUnsignedIntWhole.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLong.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLong8.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLong16.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongWhole.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLong.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLong16.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLong32.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLongWhole.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLongWhole1.ddl
+./tools/testfiles/pbits/tpbitsUnsignedLongLongWhole63.ddl
+./tools/testfiles/pbits/tpbitsMax.ddl
+./tools/testfiles/pbits/tpbitsArray.ddl
+./tools/testfiles/pbits/tpbitsCompound.ddl
+./tools/testfiles/pbits/tpbitsIncomplete.ddl
+./tools/testfiles/pbits/tpbitsLengthExceeded.ddl
+./tools/testfiles/pbits/tpbitsCharLengthExceeded.ddl
+./tools/testfiles/pbits/tpbitsIntLengthExceeded.ddl
+./tools/testfiles/pbits/tpbitsLongLengthExceeded.ddl
+./tools/testfiles/pbits/tpbitsOffsetExceeded.ddl
+./tools/testfiles/pbits/tpbitsCharOffsetExceeded.ddl
+./tools/testfiles/pbits/tpbitsIntOffsetExceeded.ddl
+./tools/testfiles/pbits/tpbitsLongOffsetExceeded.ddl
+./tools/testfiles/pbits/tpbitsOverlapped.ddl
 ./tools/testfiles/packedbits.h5
-./tools/testfiles/tpbitsArray.ddl
-./tools/testfiles/tpbitsCompound.ddl
-./tools/testfiles/tpbitsIncomplete.ddl
-./tools/testfiles/tpbitsLengthExceeded.ddl
-./tools/testfiles/tpbitsCharLengthExceeded.ddl
-./tools/testfiles/tpbitsIntLengthExceeded.ddl
-./tools/testfiles/tpbitsLongLengthExceeded.ddl
-./tools/testfiles/tpbitsOffsetExceeded.ddl
-./tools/testfiles/tpbitsCharOffsetExceeded.ddl
-./tools/testfiles/tpbitsIntOffsetExceeded.ddl
-./tools/testfiles/tpbitsLongOffsetExceeded.ddl
-./tools/testfiles/tpbitsOverlapped.ddl
 
 # h5dump h5import validation
 ./tools/testfiles/out3.h5import
@@ -2161,6 +2145,7 @@
 ./tools/h5diff/testfiles/tmpSingleSiteBethe.output.h5
 
 #test files for h5repack
+./tools/h5repack/testfiles/README
 ./tools/h5repack/testfiles/h5repack_attr.h5
 ./tools/h5repack/testfiles/h5repack_attr_refs.h5
 ./tools/h5repack/testfiles/h5repack_deflate.h5
@@ -2178,6 +2163,8 @@
 ./tools/h5repack/testfiles/h5repack_layout3.h5
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5
 ./tools/h5repack/testfiles/h5repack_named_dtypes.h5
+./tools/h5repack/testfiles/h5repack_nested_8bit_enum_deflated.h5
+./tools/h5repack/testfiles/h5repack_nested_8bit_enum.h5
 ./tools/h5repack/testfiles/h5repack_nbit.h5
 ./tools/h5repack/testfiles/h5repack_objs.h5
 ./tools/h5repack/testfiles/h5repack_refs.h5
@@ -2239,6 +2226,29 @@
 ./tools/testfiles/h5mkgrp_single_v.ls
 ./tools/testfiles/h5mkgrp_single_p.ls
 ./tools/testfiles/h5mkgrp_single_l.ls
+
+./tools/perform/COPYING
+./tools/perform/Makefile.am
+./tools/perform/Makefile.in
+./tools/perform/build_h5perf_alone.sh
+./tools/perform/build_h5perf_serial_alone.sh
+./tools/perform/chunk.c
+./tools/perform/gen_report.pl
+./tools/perform/iopipe.c
+./tools/perform/overhead.c
+./tools/perform/perf.c
+./tools/perform/perf_meta.c
+./tools/perform/pio_engine.c
+./tools/perform/pio_perf.c
+./tools/perform/pio_perf.h
+./tools/perform/pio_standalone.c
+./tools/perform/pio_standalone.h
+./tools/perform/sio_engine.c
+./tools/perform/sio_perf.c
+./tools/perform/sio_perf.h
+./tools/perform/sio_standalone.c
+./tools/perform/sio_standalone.h
+./tools/perform/zip_perf.c
 
 
 # high level libraries
@@ -2346,6 +2356,8 @@
 ./hl/tools/gif2h5/writehdf.c
 ./hl/tools/gif2h5/h52gifgentst.c
 ./hl/tools/gif2h5/h52giftest.sh.in
+./hl/tools/gif2h5/testfiles/REAMDE
+./hl/tools/gif2h5/testfiles/ex_image2.h5
 ./hl/tools/gif2h5/testfiles/image1.gif
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
 
@@ -2395,69 +2407,22 @@
 ./hl/c++/test/Makefile.am
 ./hl/c++/test/Makefile.in
 
-#vms files
-./vms/COPYING
-
-./vms/c++/examples/check.com
-./vms/c++/examples/make.com
-./vms/c++/src/make.com
-./vms/c++/test/check.com
-./vms/c++/test/make.com
-
-./vms/fortran/examples/check.com
-./vms/fortran/examples/make.com
-./vms/fortran/src/make.com
-./vms/fortran/test/check.com
-./vms/fortran/test/make.com
-
-./vms/examples/check.com
-./vms/examples/make.com
-./vms/src/make.com
-./vms/src/h5pubconf.h
-./vms/test/check.com
-./vms/test/make.com
-./vms/test/H5srcdir_str.h
-
-./vms/build.com
-./vms/install.com
-./vms/make.com
-./vms/tools/h5copy/make.com
-./vms/tools/h5copy/check_h5copy.com
-./vms/tools/h5dump/make.com
-./vms/tools/h5dump/check_h5dump.com
-./vms/tools/h5ls/check.com
-./vms/tools/h5ls/check_h5ls.com
-./vms/tools/h5ls/make.com
-./vms/tools/h5diff/check_h5diff.com
-./vms/tools/h5diff/make.com
-./vms/tools/h5import/check_h5import.com
-./vms/tools/h5import/make.com
-./vms/tools/h5jam/check_h5jam.com
-./vms/tools/h5jam/make.com
-./vms/tools/h5repack/check_h5repack.com
-./vms/tools/h5repack/make.com
-./vms/tools/h5stat/make.com
-./vms/tools/lib/make.com
-./vms/tools/misc/make.com
-./vms/tools/testfiles/tattr-3.ddl
-./vms/tools/testfiles/tdset-2.ddl
-./vms/tools/testfiles/tgroup-2.ddl
-./vms/tools/testfiles/tperror.ddl
-
 # CMake-specific Files
 ./config/cmake/cacheinit.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/ConfigureChecks.cmake
+./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/FindHDF5.cmake.in
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
-./config/cmake/hdf5-config.cmake.build.in
-./config/cmake/hdf5-config.cmake.install.in
+./config/cmake/hdf5-config.cmake.in
 ./config/cmake/hdf5-config-version.cmake.in
+./config/cmake/HDFCompilerFlags.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
+./config/cmake/patch.xml
 ./config/cmake/PkgInfo.in
 ./config/cmake/README.txt.cmake.in
 ./config/cmake/userblockTest.cmake
@@ -2465,7 +2430,6 @@
 
 ./config/cmake_ext_mod/CheckTypeSize.cmake
 ./config/cmake_ext_mod/ConfigureChecks.cmake
-./config/cmake_ext_mod/CPack.Info.plist.in
 ./config/cmake_ext_mod/CTestCustom.cmake
 ./config/cmake_ext_mod/FindMPI.cmake
 ./config/cmake_ext_mod/FindSZIP.cmake
@@ -2536,8 +2500,6 @@
 ./hl/test/CMakeTests.cmake
 ./hl/tools/CMakeLists.txt
 ./hl/tools/CMakeTests.cmake
-./perform/CMakeLists.txt
-./perform/CMakeTests.cmake
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
@@ -2565,3 +2527,9 @@
 ./tools/lib/CMakeLists.txt
 ./tools/misc/CMakeLists.txt
 ./tools/misc/CMakeTests.cmake
+./tools/perform/CMakeLists.txt
+./tools/perform/CMakeTests.cmake
+
+# CMake-specific User Scripts
+./config/cmake/scripts/CTestScript.cmake   _DO_NOT_DISTRIBUTE_
+./config/cmake/scripts/HDF518config.cmake   _DO_NOT_DISTRIBUTE_

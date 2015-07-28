@@ -45,8 +45,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"		/* Property Lists			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
-#include "H5VLnative.h" 	/* Native Plugin                        */
-#include "H5VLprivate.h"	/* VOL          		  	*/
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 /****************/
 /* Local Macros */
@@ -120,8 +119,8 @@ static herr_t H5G_traverse_real(const H5G_loc_t *loc, const char *name,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_traverse_slink_cb(H5G_loc_t UNUSED *grp_loc, const char UNUSED *name,
-    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+H5G_traverse_slink_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_trav_slink_t *udata = (H5G_trav_slink_t *)_udata;   /* User data passed in */
@@ -208,6 +207,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     /* Create a group ID to pass to the user-defined callback */
     if(NULL == (grp = H5G_open(&grp_loc_copy, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+
     if((cur_grp = H5VL_native_register(H5I_GROUP, grp, FALSE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
@@ -277,7 +277,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
      */
     if(H5I_dec_ref(cb_return) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
-    cb_return = (-1);
+    cb_return = (hid_t)(-1);
 
 done:
     /* Close location given to callback. */

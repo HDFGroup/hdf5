@@ -89,7 +89,7 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     cache_udata.f = f;
     cache_udata.type = type;
     cache_udata.rc_shared = rc_shared;
-    if(NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, &cache_udata, H5AC_READ)))
+    if(NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree node")
 
     /*
@@ -156,7 +156,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_assert
+ * Function:	H5B__assert
  *
  * Purpose:	Verifies that the tree is structured correctly.
  *
@@ -171,7 +171,7 @@ done:
  */
 #ifdef H5B_DEBUG
 herr_t
-H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void *udata)
+H5B__assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void *udata)
 {
     H5B_t	*bt = NULL;
     H5UC_t	*rc_shared;             /* Ref-counted shared info */
@@ -189,7 +189,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 	struct child_t	       *next;
     } *head = NULL, *tail = NULL, *prev = NULL, *cur = NULL, *tmp = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     if(0 == ncalls++) {
 	if(H5DEBUG(B))
@@ -206,7 +206,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
     cache_udata.f = f;
     cache_udata.type = type;
     cache_udata.rc_shared = rc_shared;
-    bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, &cache_udata, H5AC_READ);
+    bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG);
     HDassert(bt);
     shared = (H5B_shared_t *)H5UC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
@@ -227,7 +227,7 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
      * test.
      */
     for(ncell = 0; cur; ncell++) {
-	bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, cur->addr, &cache_udata, H5AC_READ);
+	bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, cur->addr, &cache_udata, H5AC__READ_ONLY_FLAG);
 	HDassert(bt);
 
 	/* Check node header */
@@ -285,6 +285,6 @@ H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void 
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B_assert() */
+} /* end H5B__assert() */
 #endif /* H5B_DEBUG */
 

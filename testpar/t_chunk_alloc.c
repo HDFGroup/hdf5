@@ -36,12 +36,8 @@ get_filesize(const char *filename)
     int		mpierr;
     MPI_File	fd;
     MPI_Offset	filesize;
-#ifndef H5_HAVE_MPI_GET_SIZE
-    h5_stat_t stat_buf;
-#endif
 
-#ifdef H5_HAVE_MPI_GET_SIZE
-    mpierr = MPI_File_open(MPI_COMM_SELF, (char*)filename, MPI_MODE_RDONLY,
+    mpierr = MPI_File_open(MPI_COMM_SELF, filename, MPI_MODE_RDONLY,
 	MPI_INFO_NULL, &fd);
     VRFY((mpierr == MPI_SUCCESS), "");
 
@@ -50,16 +46,6 @@ get_filesize(const char *filename)
 
     mpierr = MPI_File_close(&fd);
     VRFY((mpierr == MPI_SUCCESS), "");
-#else
-    /* Some systems (only SGI Altix Propack 4 so far) doesn't return correct
-     * file size for MPI_File_get_size.  Use stat instead.
-     */
-    if((mpierr=HDstat(filename, &stat_buf))<0)
-    VRFY((mpierr == MPI_SUCCESS), "");
-
-    /* Hopefully this casting is safe */
-    filesize = (MPI_Offset)(stat_buf.st_size);
-#endif
 
     return(filesize);
 }
@@ -120,7 +106,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
 	VRFY((memspace >= 0), "");
 
 	/* Create a new file. If file exists its contents will be overwritten. */
-	file_id = H5Fcreate(h5_rmprefix(filename), H5F_ACC_TRUNC, H5P_DEFAULT,
+	file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
 		    H5P_DEFAULT);
 	VRFY((file_id >= 0), "H5Fcreate");
 
@@ -289,8 +275,9 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
 
         /* only opens the *dataset */
         case open_only:
-
             break;
+        default:
+            HDassert(0);
     }
 
     /* Close up */
@@ -333,7 +320,8 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
  *    interleaved pattern.
  */
 static void
-verify_data(const char *filename, int chunk_factor, write_type write_pattern, int close, hid_t *file_id, hid_t *dataset)
+verify_data(const char *filename, int chunk_factor, write_type write_pattern, int vclose, 
+            hid_t *file_id, hid_t *dataset)
 {
     /* HDF5 gubbins */
     hid_t    dataspace, memspace;     /* HDF5 file identifier */
@@ -348,7 +336,7 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
     /* Variables used in reading data back */
     char         buffer[CHUNK_SIZE];
     int         value, i;
-    int         index;
+    int         index_l;
     long        nchunks;
     /* Initialize MPI */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -411,11 +399,14 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
 		    value = 100;
 		else
 		    value = 0;
+                break;
+            default:
+                HDassert(0);
 	}
 
         /* verify content of the chunk */
-        for (index = 0; index < CHUNK_SIZE; index++)
-            VRFY((buffer[index] == value), "data verification");
+        for (index_l = 0; index_l < CHUNK_SIZE; index_l++)
+            VRFY((buffer[index_l] == value), "data verification");
     }
 
     hrc = H5Sclose (dataspace);
@@ -429,7 +420,7 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
     VRFY((hrc >= 0), "");
 
     /* Close up */
-    if (close){
+    if (vclose){
         hrc = H5Dclose(*dataset);
         VRFY((hrc >= 0), "");
         *dataset = -1;
@@ -478,7 +469,7 @@ test_chunk_alloc(void)
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
-    filename = GetTestParameters();
+    filename = (const char*)GetTestParameters();
     if (VERBOSE_MED)
 	printf("Extend Chunked allocation test on file %s\n", filename);
 

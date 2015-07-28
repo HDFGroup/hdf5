@@ -65,8 +65,8 @@
         FAIL_STACK_ERROR                                                       \
     if((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                               \
         H5_FAILED();                                                           \
-        printf("    #dtype ids expected: %d; found: %d\n", NMEMBS,             \
-            H5I_nmembers(H5I_DATATYPE));                                       \
+        printf("    #dtype ids expected: %lld; found: %lld\n",                 \
+               (long long)NMEMBS, (long long)H5I_nmembers(H5I_DATATYPE));      \
         goto error;                                                            \
     }
 
@@ -688,8 +688,9 @@ test_compound_2(void)
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
-    hid_t       array_dt;
-    int			i, nmembs;
+    hid_t               array_dt;
+    int64_t		nmembs;
+    int			i;
 
     TESTING("compound element reordering");
 
@@ -809,8 +810,9 @@ test_compound_3(void)
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
-    hid_t       array_dt;
-    int			i, nmembs;
+    hid_t               array_dt;
+    int64_t		nmembs;
+    int			i;
 
     TESTING("compound subset conversions");
 
@@ -931,8 +933,9 @@ test_compound_4(void)
     const hsize_t	four = 4;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
-    hid_t       array_dt;
-    int			i, nmembs;
+    hid_t               array_dt;
+    int64_t		nmembs;
+    int			i;
 
     TESTING("compound element shrinking & reordering");
 
@@ -1066,14 +1069,7 @@ test_compound_5(void)
     void        *bkg = HDcalloc((size_t)2, sizeof(dst_type_t));
     int          retval = 1;
 
-#if 1
     TESTING("optimized struct converter");
-#else
-    /* Turn off optimized compound conversion function to work around
-     * the problem. */
-    TESTING("optimized struct converter bug workaround");
-    H5Tunregister(H5T_PERS_DONTCARE, "struct(opt)", -1, -1, NULL);
-#endif
 
     /* Build datatypes */
     short_array = H5Tcreate(H5T_COMPOUND, 4*sizeof(short));
@@ -1167,7 +1163,8 @@ test_compound_6(void)
     const size_t	nelmts = NTESTELEM;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
-    int			i, nmembs;
+    int64_t		nmembs;
+    int			i;
 
     TESTING("compound element growing");
 
@@ -1560,7 +1557,7 @@ test_compound_8(void)
 
     if(tsize != (sizeof(char) + sizeof(char) + sizeof(int))) {
         H5_FAILED(); AT();
-        printf("The size of the packed compound datatype is incorrect\n");
+        printf("The size of the packed compound datatype is incorrect: tsize = %zu\n", tsize);
         goto error;
     } /* end if */
 
@@ -3011,7 +3008,7 @@ test_compound_16(void)
     if(H5Fget_obj_ids(file, H5F_OBJ_DATATYPE, (size_t)2, open_dtypes) < 0) TEST_ERROR
     if(open_dtypes[1]) {
         H5_FAILED(); AT();
-        printf("    H5Fget_obj_ids returned as second id: %d; expected: 0\n", open_dtypes[1]);
+        printf("    H5Fget_obj_ids returned as second id: %lld; expected: 0\n", (long long)open_dtypes[1]);
         goto error;
     }
 
@@ -3552,6 +3549,7 @@ test_transient (hid_t fapl)
     static hsize_t	ds_size[2] = {10, 20};
     hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1;
     char		filename[1024];
+    hid_t		ret_id;		/* Generic hid_t return value	*/
     herr_t		status;
 
     TESTING("transient datatypes");
@@ -3586,9 +3584,9 @@ test_transient (hid_t fapl)
 
     /* It should not be possible to create an attribute for a transient type */
     H5E_BEGIN_TRY {
-	status = H5Acreate2(type, "attr1", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT);
+	ret_id = H5Acreate2(type, "attr1", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    if (status>=0) {
+    if (ret_id>=0) {
 	H5_FAILED();
 	HDputs ("    Attributes should not be allowed for transient types!");
 	goto error;
@@ -4816,10 +4814,10 @@ test_bitfield_funcs(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-convert_opaque(hid_t UNUSED st, hid_t UNUSED dt, H5T_cdata_t *cdata,
-	       size_t UNUSED nelmts, size_t UNUSED buf_stride,
-               size_t UNUSED bkg_stride, void UNUSED *_buf,
-	       void UNUSED *bkg, hid_t UNUSED dset_xfer_plid)
+convert_opaque(hid_t H5_ATTR_UNUSED st, hid_t H5_ATTR_UNUSED dt, H5T_cdata_t *cdata,
+	       size_t H5_ATTR_UNUSED nelmts, size_t H5_ATTR_UNUSED buf_stride,
+               size_t H5_ATTR_UNUSED bkg_stride, void H5_ATTR_UNUSED *_buf,
+	       void H5_ATTR_UNUSED *bkg, hid_t H5_ATTR_UNUSED dset_xfer_plid)
 {
     if (H5T_CONV_CONV==cdata->command) num_opaque_conversions_g++;
     return 0;
@@ -5150,6 +5148,7 @@ test_encode(void)
     size_t      enum_buf_size = 0;
     size_t      vlstr_buf_size = 0;
     unsigned char       *cmpd_buf=NULL, *enum_buf=NULL, *vlstr_buf=NULL;
+    hid_t	ret_id;
     herr_t      ret;
 
     TESTING("functions of encoding and decoding datatypes");
@@ -5250,9 +5249,9 @@ test_encode(void)
 
     /* Try decoding bogus buffer */
     H5E_BEGIN_TRY {
-	ret = H5Tdecode(cmpd_buf);
+	ret_id = H5Tdecode(cmpd_buf);
     } H5E_END_TRY;
-    if(ret!=FAIL) {
+    if(ret_id!=FAIL) {
         H5_FAILED();
         printf("Decoded bogus buffer!\n");
         goto error;
@@ -5873,8 +5872,8 @@ typedef struct {
 } except_info_t;
 
 static H5T_conv_ret_t
-conv_except(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst_id,
-    void UNUSED *src_buf, void UNUSED *dst_buf, void *_user_data)
+conv_except(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5_ATTR_UNUSED dst_id,
+    void H5_ATTR_UNUSED *src_buf, void H5_ATTR_UNUSED *dst_buf, void *_user_data)
 {
     except_info_t *user_data = (except_info_t *)_user_data;
 

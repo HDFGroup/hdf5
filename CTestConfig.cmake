@@ -9,10 +9,10 @@ set (CTEST_NIGHTLY_START_TIME "18:00:00 CST")
 
 set (CTEST_DROP_METHOD "http")
 if (CDASH_LOCAL)
-  set (CTEST_DROP_SITE "72.36.68.252")
+  set (CTEST_DROP_SITE "10.10.10.82")
   set (CTEST_DROP_LOCATION "/submit.php?project=HDF5Trunk")
 else (CDASH_LOCAL)
-  set (CTEST_DROP_SITE "cdash.hdfgroup.uiuc.edu")
+  set (CTEST_DROP_SITE "cdash.hdfgroup.org")
   set (CTEST_DROP_LOCATION "/submit.php?project=HDF5+Trunk")
 endif (CDASH_LOCAL)
 set (CTEST_DROP_SITE_CDASH TRUE)
@@ -23,9 +23,9 @@ set (VALGRIND_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=
 set (CTEST_MEMORYCHECK_COMMAND "/usr/bin/valgrind")
 set (CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
 
-set (CTEST_TEST_TIMEOUT 3600 CACHE STRING 
+set (CTEST_TEST_TIMEOUT 1200 CACHE STRING 
     "Maximum time allowed before CTest will kill the test.") 
-set (DART_TESTING_TIMEOUT 3600 CACHE STRING 
+set (DART_TESTING_TIMEOUT 1200 CACHE STRING 
     "Maximum time allowed before CTest will kill the test." FORCE)
 
 SET(CTEST_SUBMIT_RETRY_DELAY 20 CACHE STRING

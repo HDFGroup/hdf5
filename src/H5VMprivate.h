@@ -56,8 +56,6 @@ H5_DLL hsize_t H5VM_hyper_stride(unsigned n, const hsize_t *size,
 				 const hsize_t *total_size,
 				 const hsize_t *offset,
 				 hsize_t *stride);
-H5_DLL htri_t H5VM_hyper_disjointp(unsigned n, const hsize_t *offset1,
-    const uint32_t *size1, const hsize_t *offset2, const uint32_t *size2);
 H5_DLL htri_t H5VM_hyper_eq(unsigned n, const hsize_t *offset1,
 			    const hsize_t *size1, const hsize_t *offset2,
 			    const hsize_t *size2);
@@ -88,11 +86,15 @@ H5_DLL hsize_t H5VM_array_offset_pre(unsigned n,
 H5_DLL hsize_t H5VM_array_offset(unsigned n, const hsize_t *total_size,
     const hsize_t *offset);
 H5_DLL herr_t H5VM_array_calc_pre(hsize_t offset, unsigned n,
-        const hsize_t *down, hsize_t *coords);
+    const hsize_t *down, hsize_t *coords);
 H5_DLL herr_t H5VM_array_calc(hsize_t offset, unsigned n,
     const hsize_t *total_size, hsize_t *coords);
-H5_DLL herr_t H5VM_chunk_index(unsigned ndims, const hsize_t *coord,
-    const uint32_t *chunk, const hsize_t *down_nchunks, hsize_t *chunk_idx);
+H5_DLL hsize_t H5VM_chunk_index(unsigned ndims, const hsize_t *coord,
+    const uint32_t *chunk, const hsize_t *down_nchunks);
+H5_DLL void H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord,
+    const uint32_t *chunk, hsize_t *scaled);
+H5_DLL hsize_t H5VM_chunk_index_scaled(unsigned ndims, const hsize_t *coord,
+    const uint32_t *chunk, const hsize_t *down_nchunks, hsize_t *scaled);
 H5_DLL ssize_t H5VM_opvv(size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[],
     hsize_t dst_off_arr[],
     size_t src_max_nseq, size_t *src_curr_seq, size_t src_len_arr[],
@@ -123,7 +125,7 @@ H5_DLL ssize_t H5VM_memcpyvv(void *_dst,
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline hsize_t UNUSED
+static H5_INLINE hsize_t H5_ATTR_UNUSED
 H5VM_vector_reduce_product(unsigned n, const hsize_t *v)
 {
     hsize_t                  ret_value = 1;
@@ -155,7 +157,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline htri_t UNUSED
+static H5_INLINE htri_t H5_ATTR_UNUSED
 H5VM_vector_zerop_u(int n, const hsize_t *v)
 {
     htri_t      ret_value=TRUE;       /* Return value */
@@ -190,7 +192,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline htri_t UNUSED
+static H5_INLINE htri_t H5_ATTR_UNUSED
 H5VM_vector_zerop_s(int n, const hssize_t *v)
 {
     htri_t      ret_value=TRUE;       /* Return value */
@@ -227,7 +229,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline int UNUSED
+static H5_INLINE int H5_ATTR_UNUSED
 H5VM_vector_cmp_u (unsigned n, const hsize_t *v1, const hsize_t *v2)
 {
     int ret_value=0;    /* Return value */
@@ -269,7 +271,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline int UNUSED
+static H5_INLINE int H5_ATTR_UNUSED
 H5VM_vector_cmp_s (unsigned n, const hssize_t *v1, const hssize_t *v2)
 {
     int ret_value=0;    /* Return value */
@@ -306,7 +308,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline void UNUSED
+static H5_INLINE void H5_ATTR_UNUSED
 H5VM_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
 {
     while (n--) *v1++ += *v2++;
@@ -353,32 +355,23 @@ static const unsigned char LogTable256[] =
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline unsigned UNUSED
+static H5_INLINE unsigned H5_ATTR_UNUSED
 H5VM_log2_gen(uint64_t n)
 {
     unsigned r;                         /* r will be log2(n) */
     register unsigned int t, tt, ttt;   /* temporaries */
 
-#ifdef H5_BAD_LOG2_CODE_GENERATED
-    if(n > (uint64_t)0x7fffffffffffffff)
-        r = 63;
-    else {
-        n &= (uint64_t)0x7fffffffffffffff;
-#endif /* H5_BAD_LOG2_CODE_GENERATED */
-        if((ttt = (unsigned)(n >> 32)))
-            if((tt = (unsigned)(n >> 48)))
-                r = (t = (unsigned)(n >> 56)) ? 56 + (unsigned)LogTable256[t] : 48 + (unsigned)LogTable256[tt & 0xFF];
-            else
-                r = (t = (unsigned)(n >> 40)) ? 40 + (unsigned)LogTable256[t] : 32 + (unsigned)LogTable256[ttt & 0xFF];
+    if((ttt = (unsigned)(n >> 32)))
+        if((tt = (unsigned)(n >> 48)))
+            r = (t = (unsigned)(n >> 56)) ? 56 + (unsigned)LogTable256[t] : 48 + (unsigned)LogTable256[tt & 0xFF];
         else
-            if((tt = (unsigned)(n >> 16)))
-                r = (t = (unsigned)(n >> 24)) ? 24 + (unsigned)LogTable256[t] : 16 + (unsigned)LogTable256[tt & 0xFF];
-            else
-                /* Added 'uint8_t' cast to pacify PGCC compiler */
-                r = (t = (unsigned)(n >> 8)) ? 8 + (unsigned)LogTable256[t] : (unsigned)LogTable256[(uint8_t)n];
-#ifdef H5_BAD_LOG2_CODE_GENERATED
-    } /* end else */
-#endif /* H5_BAD_LOG2_CODE_GENERATED  */
+            r = (t = (unsigned)(n >> 40)) ? 40 + (unsigned)LogTable256[t] : 32 + (unsigned)LogTable256[ttt & 0xFF];
+    else
+        if((tt = (unsigned)(n >> 16)))
+            r = (t = (unsigned)(n >> 24)) ? 24 + (unsigned)LogTable256[t] : 16 + (unsigned)LogTable256[tt & 0xFF];
+        else
+            /* Added 'uint8_t' cast to pacify PGCC compiler */
+            r = (t = (unsigned)(n >> 8)) ? 8 + (unsigned)LogTable256[t] : (unsigned)LogTable256[(uint8_t)n];
 
     return(r);
 } /* H5VM_log2_gen() */
@@ -410,7 +403,7 @@ static const unsigned MultiplyDeBruijnBitPosition[32] =
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline unsigned UNUSED
+static H5_INLINE unsigned H5_ATTR_UNUSED
 H5VM_log2_of2(uint32_t n)
 {
 #ifndef NDEBUG
@@ -418,6 +411,29 @@ H5VM_log2_of2(uint32_t n)
 #endif /* NDEBUG */
     return(MultiplyDeBruijnBitPosition[(n * (uint32_t)0x077CB531UL) >> 27]);
 } /* H5VM_log2_of2() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VM_power2up
+ *
+ * Purpose:	Round up a number to the next power of 2
+ *
+ * Return:	Return the number which is a power of 2
+ *
+ * Programmer:	Vailin Choi; Nov 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_INLINE hsize_t H5_ATTR_UNUSED
+H5VM_power2up(hsize_t n)
+{
+    hsize_t     ret_value = 1;  /* Return value */
+
+    while(ret_value < n)
+        ret_value <<= 1;
+
+    return(ret_value);
+} /* H5VM_power2up */
 
 
 /*-------------------------------------------------------------------------
@@ -433,7 +449,7 @@ H5VM_log2_of2(uint32_t n)
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline unsigned UNUSED
+static H5_INLINE unsigned H5_ATTR_UNUSED
 H5VM_limit_enc_size(uint64_t limit)
 {
     return (H5VM_log2_gen(limit) / 8) + 1;
@@ -462,7 +478,7 @@ static const unsigned char H5VM_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline hbool_t UNUSED
+static H5_INLINE hbool_t H5_ATTR_UNUSED
 H5VM_bit_get(const unsigned char *buf, size_t offset)
 {
     /* Test the appropriate bit in the buffer */
@@ -489,7 +505,7 @@ H5VM_bit_get(const unsigned char *buf, size_t offset)
  *
  *-------------------------------------------------------------------------
  */
-static H5_inline void UNUSED
+static H5_INLINE void H5_ATTR_UNUSED
 H5VM_bit_set(unsigned char *buf, size_t offset, hbool_t val)
 {
     /* Set/reset the appropriate bit in the buffer */

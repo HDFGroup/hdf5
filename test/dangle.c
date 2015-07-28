@@ -599,7 +599,7 @@ test_dangle_force(void)
         FAIL_STACK_ERROR
 
     /* Get the number of open objects */
-    if((count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0)
+    if((count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0)
         FAIL_STACK_ERROR
     if(0 == count)
         TEST_ERROR;
@@ -608,7 +608,7 @@ test_dangle_force(void)
     objs = (hid_t*)HDmalloc(sizeof(hid_t) * (size_t)count);
 
     /* Get the list of open IDs */
-    if(H5Fget_obj_ids(H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)count, objs) < 0)
+    if(H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)count, objs) < 0)
         FAIL_STACK_ERROR
 
     /* Close all open IDs */
@@ -617,7 +617,7 @@ test_dangle_force(void)
             H5Idec_ref(objs[u]);
 
     /* Get the number of open objects */
-    if((count = H5Fget_obj_count(H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0)
+    if((count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0)
         FAIL_STACK_ERROR
     if(0 != count)
         TEST_ERROR;

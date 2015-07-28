@@ -172,7 +172,7 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed for fractal heap info")
 
     /* Lock the heap header into memory */
-    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, fh_addr, H5AC_WRITE)))
+    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, fh_addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap header")
 
     /* Point fractal heap wrapper at header and bump it's ref count */
@@ -231,7 +231,7 @@ H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
     HDassert(H5F_addr_defined(fh_addr));
 
     /* Load the heap header into memory */
-    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, fh_addr, H5AC_READ)))
+    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, fh_addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap header")
 
     /* Check for pending heap deletion */
@@ -551,7 +551,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_write(H5HF_t *fh, hid_t dxpl_id, void *_id, hbool_t UNUSED *id_changed,
+H5HF_write(H5HF_t *fh, hid_t dxpl_id, void *_id, hbool_t H5_ATTR_UNUSED *id_changed,
     const void *obj)
 {
     uint8_t *id = (uint8_t *)_id;       /* Object ID */
@@ -821,7 +821,7 @@ H5HF_close(H5HF_t *fh, hid_t dxpl_id)
         H5HF_hdr_t *hdr;            /* Another pointer to fractal heap header */
 
         /* Lock the heap header into memory */
-        if(NULL == (hdr = H5HF_hdr_protect(fh->f, dxpl_id, heap_addr, H5AC_WRITE)))
+        if(NULL == (hdr = H5HF_hdr_protect(fh->f, dxpl_id, heap_addr, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
 
         /* Delete heap, starting with header (unprotects header) */
@@ -865,7 +865,7 @@ H5HF_delete(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
     HDassert(H5F_addr_defined(fh_addr));
 
     /* Lock the heap header into memory */
-    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, fh_addr, H5AC_WRITE)))
+    if(NULL == (hdr = H5HF_hdr_protect(f, dxpl_id, fh_addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap header")
 
     /* Check for files using shared heap header */

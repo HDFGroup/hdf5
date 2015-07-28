@@ -129,8 +129,6 @@ CONTAINS
      !data buffers
      !
      INTEGER, DIMENSION(NX,NY) :: data_in
-     LOGICAL :: differ
-
 
      !
      !Initialize data_in buffer

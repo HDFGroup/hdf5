@@ -51,9 +51,7 @@ nh5zunregister_c (int_f *filter)
       * Call H5Zunregister function.
       */
      c_filter = (H5Z_filter_t)*filter;
-     printf(" filter # %d \n", (int)c_filter);
      status = H5Zunregister(c_filter);
-     printf("From C zunregister %d \n", status);
      if (status < 0) return ret_value;
      ret_value = 0;
      return ret_value;

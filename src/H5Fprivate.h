@@ -29,23 +29,11 @@
 /* Private headers needed by this file */
 #include "H5VMprivate.h"		/* Vectors and arrays */
 
+
 /**************************/
 /* Library Private Macros */
 /**************************/
 
-/* User data for traversal routine to get ID counts */
-typedef struct {
-    ssize_t *obj_count;   /* number of objects counted so far */
-    unsigned types;      /* types of objects to be counted */
-} H5F_trav_obj_cnt_t;
-
-/* User data for traversal routine to get ID lists */
-typedef struct {
-    size_t max_objs;
-    hid_t *oid_list;
-    ssize_t *obj_count;   /* number of objects counted so far */
-    unsigned types;      /* types of objects to be counted */
-} H5F_trav_obj_ids_t;
 
 /*
  * Encode and decode macros for file meta-data.
@@ -257,7 +245,6 @@ typedef struct {
 #define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \
 				 HADDR_UNDEF==(X)+(haddr_t)(Z) ||	      \
 				 (X)+(haddr_t)(Z)<(X))
-#define H5F_addr_hash(X,M)	((unsigned)((X)%(M)))
 #define H5F_addr_defined(X)	((X)!=HADDR_UNDEF)
 /* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
  * certain that X is not HADDR_UNDEF and then checking that X equals Y
@@ -294,7 +281,7 @@ typedef struct {
 #define H5F_NOPEN_OBJS(F)       ((F)->nopen_objs)
 #define H5F_INCR_NOPEN_OBJS(F)  ((F)->nopen_objs++)
 #define H5F_DECR_NOPEN_OBJS(F)  ((F)->nopen_objs--)
-#define H5F_FILE_ID(F)          ((F)->id_exists)//file_id)
+#define H5F_FILE_ID(F)          ((F)->id_exists)
 #define H5F_PARENT(F)           ((F)->parent)
 #define H5F_NMOUNTS(F)          ((F)->nmounts)
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
@@ -408,13 +395,13 @@ typedef struct {
  */
 #if (H5_SIZEOF_SIZE_T >= H5_SIZEOF_OFF_T)
 #   define H5F_OVERFLOW_SIZET2OFFT(X)					      \
-    ((size_t)(X)>=(size_t)((size_t)1<<(8*sizeof(off_t)-1)))
+    ((size_t)(X)>=(size_t)((size_t)1<<(8*sizeof(HDoff_t)-1)))
 #else
 #   define H5F_OVERFLOW_SIZET2OFFT(X) 0
 #endif
 #if (H5_SIZEOF_HSIZE_T >= H5_SIZEOF_OFF_T)
 #   define H5F_OVERFLOW_HSIZET2OFFT(X)					      \
-    ((hsize_t)(X)>=(hsize_t)((hsize_t)1<<(8*sizeof(off_t)-1)))
+    ((hsize_t)(X)>=(hsize_t)((hsize_t)1<<(8*sizeof(HDoff_t)-1)))
 #else
 #   define H5F_OVERFLOW_HSIZET2OFFT(X) 0
 #endif
@@ -458,7 +445,7 @@ typedef struct {
 #define H5F_ACS_GARBG_COLCT_REF_NAME            "gc_ref"        /* Garbage-collect references */
 #define H5F_ACS_FILE_DRV_ID_NAME                "driver_id"     /* File driver ID */
 #define H5F_ACS_FILE_DRV_INFO_NAME              "driver_info"   /* File driver info */
-#define H5F_ACS_VOL_NAME                        "vol_cls"       /* File VOL plugin */
+#define H5F_ACS_VOL_ID_NAME                     "vol_id"        /* File VOL ID */
 #define H5F_ACS_VOL_INFO_NAME                   "vol_info"      /* FILE VOL info */
 #define H5F_ACS_CLOSE_DEGREE_NAME		"close_degree"  /* File close degree */
 #define H5F_ACS_FAMILY_OFFSET_NAME              "family_offset" /* Offset position in file for family file driver */
@@ -503,6 +490,8 @@ typedef struct {
                                                     if it is changed, the code
                                                     must compensate. -QAK
                                                  */
+#define HDF5_BTREE_IK_MAX_ENTRIES       65536 	/* 2^16 - 2 bytes for storing entries (children) */
+						/* See format specification on version 1 B-trees */
 
 /* Default file space handling strategy */
 #define H5F_FILE_SPACE_STRATEGY_DEF	        H5F_FILE_SPACE_ALL
@@ -587,6 +576,12 @@ typedef struct H5F_io_info_t {
     const struct H5P_genplist_t *dxpl;         /* DXPL object */
 } H5F_io_info_t;
 
+/* Concise info about a block of bytes in a file */
+typedef struct H5F_block_t {
+    haddr_t offset;             /* Offset of the block in the file */
+    hsize_t length;             /* Length of the block in the file */
+} H5F_block_t;
+
 
 /*****************************/
 /* Library-private Variables */
@@ -601,14 +596,7 @@ typedef struct H5F_io_info_t {
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
-H5_DLL herr_t H5F_close(H5F_t *f);
 H5_DLL herr_t H5F_try_close(H5F_t *f);
-H5_DLL H5F_t *H5F_reopen(H5F_t *f);
-H5_DLL htri_t H5F_is_hdf5(const char *name);
-H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
-H5_DLL int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
-H5_DLL int H5F_get_obj_count_cb(void *obj_ptr, hid_t obj_id, void *key);
-H5_DLL int H5F_get_obj_ids_cb(void *obj_ptr, hid_t obj_id, void *key);
 
 /* Functions than retrieve values from the file struct */
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);

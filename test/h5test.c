@@ -92,6 +92,8 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
 static const char *multi_letters = "msbrglo";
 
 static herr_t h5_errors(hid_t estack, void *client_data);
+static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
+                              char *fullname, size_t size);
 
 
 /*-------------------------------------------------------------------------
@@ -111,7 +113,7 @@ static herr_t h5_errors(hid_t estack, void *client_data);
  *-------------------------------------------------------------------------
  */
 static herr_t
-h5_errors(hid_t estack, void UNUSED *client_data)
+h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
 {
     H5_FAILED();
     H5Eprint2(estack, stdout);
@@ -268,9 +270,59 @@ h5_reset(void)
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:  h5_fixname_no_suffix
+ *
+ * Purpose:  Same as h5_fixname but with no suffix appended
+ *
+ * Return:  Success:  The FULLNAME pointer.
+ *
+ *    Failure:  NULL if BASENAME or FULLNAME is the null
+ *        pointer or if FULLNAME isn't large enough for
+ *        the result.
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size)
+{
+    return (h5_fixname_real(base_name, fapl, NULL, fullname, size));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:  h5_fixname_real
+ *
+ * Purpose:  Create a file name from a file base name like `test' and
+ *    return it through the FULLNAME (at most SIZE characters
+ *    counting the null terminator). The full name is created by
+ *    prepending the contents of HDF5_PREFIX (separated from the
+ *    base name by a slash) and appending a file extension based on
+ *    the driver supplied, resulting in something like
+ *    `ufs:/u/matzke/test.h5'.
+ *
+ * Return:  Success:  The FULLNAME pointer.
+ *
+ *    Failure:  NULL if BASENAME or FULLNAME is the null
+ *        pointer or if FULLNAME isn't large enough for
+ *        the result.
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, November 19, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+static char *
+h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, 
+                char *fullname, size_t size)
+{
     const char     *prefix = NULL;
-    const char     *suffix = ".h5";     /* suffix has default */
     char           *ptr, last = '\0';
+    const char     *suffix = _suffix;
     size_t          i, j;
     hid_t           driver = -1;
     int             isppdriver = 0;  /* if the driver is MPI parallel */
@@ -285,10 +337,12 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
         if((driver = H5Pget_driver(fapl)) < 0)
             return NULL;
 
-        if(H5FD_FAMILY == driver)
-            suffix = "%05d.h5";
-        else if (H5FD_MULTI == driver)
-            suffix = NULL;
+        if(suffix) {
+            if(H5FD_FAMILY == driver)
+                suffix = "%05d.h5";
+            else if (H5FD_MULTI == driver)
+                suffix = NULL;
+        }
     }
 
     /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
@@ -318,11 +372,11 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
      */
     if(isppdriver) {
 #ifdef H5_HAVE_PARALLEL
-  /*
+        /*
          * For parallel:
          *      First use command line option, then the environment
          *      variable, then try the constant
-   */
+         */
         static int explained = 0;
 
         prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX"));
@@ -335,12 +389,12 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
             if (mpi_rank == 0)
                 printf("*** Hint ***\n"
-                        "You can use environment variable HDF5_PARAPREFIX to "
-                        "run parallel test files in a\n"
-                        "different directory or to add file type prefix. E.g.,\n"
-                        "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
-                        "   export HDF5_PARAPREFIX\n"
-                        "*** End of Hint ***\n");
+                       "You can use environment variable HDF5_PARAPREFIX to "
+                       "run parallel test files in a\n"
+                       "different directory or to add file type prefix. E.g.,\n"
+                       "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
+                       "   export HDF5_PARAPREFIX\n"
+                       "*** End of Hint ***\n");
 
             explained = TRUE;
 #ifdef HDF5_PARAPREFIX
@@ -352,7 +406,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
         /*
          * For serial:
          *      First use the environment variable, then try the constant
-        */
+         */
         prefix = HDgetenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
@@ -425,18 +479,18 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
                 return NULL;
         }
     } else if (HDstrlen(base_name) >= size) {
-  /* Buffer is too small */
-  return NULL;
+        /* Buffer is too small */
+        return NULL;
     } else {
-  HDstrcpy(fullname, base_name);
-   }
+        HDstrcpy(fullname, base_name);
+    }
 
     /* Append a suffix */
     if (suffix) {
-  if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
             return NULL;
 
-  HDstrcat(fullname, suffix);
+        HDstrcat(fullname, suffix);
     }
 
     /* Remove any double slashes in the filename */
@@ -623,7 +677,7 @@ h5_fileaccess(void)
 void
 h5_no_hwconv(void)
 {
-    H5Tunregister(H5T_PERS_HARD, NULL, -1, -1, NULL);
+    H5Tunregister(H5T_PERS_HARD, NULL, (hid_t)-1, (hid_t)-1, NULL);
 }
 
 
@@ -646,21 +700,24 @@ h5_show_hostname(void)
 {
     char  hostname[80];
 #ifdef H5_HAVE_WIN32_API
-     WSADATA wsaData;
-     int err;
+    WSADATA wsaData;
+    int err;
 #endif
 
     /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
     {
-  int mpi_rank, mpi_initialized;
+        int mpi_rank, mpi_initialized, mpi_finalized;
 
-  MPI_Initialized(&mpi_initialized);
-  if (mpi_initialized){
-      MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
-      printf("MPI-process %d.", mpi_rank);
-  }else
-      printf("thread 0.");
+        MPI_Initialized(&mpi_initialized);
+        MPI_Finalized(&mpi_finalized);
+
+        if(mpi_initialized && !mpi_finalized) {
+            MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+            printf("MPI-process %d.", mpi_rank);
+        }
+        else
+            printf("thread 0.");
     }
 #elif defined(H5_HAVE_THREADSAFE)
     printf("thread %lu.", HDpthread_self_ulong());
@@ -669,31 +726,31 @@ h5_show_hostname(void)
 #endif
 #ifdef H5_HAVE_WIN32_API
 
-   err = WSAStartup( MAKEWORD(2,2), &wsaData );
-   if ( err != 0 ) {
-    /* could not find a usable WinSock DLL */
-    return;
-   }
+    err = WSAStartup( MAKEWORD(2,2), &wsaData );
+    if ( err != 0 ) {
+        /* could not find a usable WinSock DLL */
+        return;
+    }
 
-/* Confirm that the WinSock DLL supports 2.2.*/
-/* Note that if the DLL supports versions greater    */
-/* than 2.2 in addition to 2.2, it will still return */
-/* 2.2 in wVersion since that is the version we      */
-/* requested.                                        */
+    /* Confirm that the WinSock DLL supports 2.2.*/
+    /* Note that if the DLL supports versions greater    */
+    /* than 2.2 in addition to 2.2, it will still return */
+    /* 2.2 in wVersion since that is the version we      */
+    /* requested.                                        */
 
-   if ( LOBYTE( wsaData.wVersion ) != 2 ||
-        HIBYTE( wsaData.wVersion ) != 2 ) {
-    /* could not find a usable WinSock DLL */
-     WSACleanup( );
-     return;
-   }
+    if ( LOBYTE( wsaData.wVersion ) != 2 ||
+         HIBYTE( wsaData.wVersion ) != 2 ) {
+        /* could not find a usable WinSock DLL */
+        WSACleanup( );
+        return;
+    }
 
 #endif
 #ifdef H5_HAVE_GETHOSTNAME
     if (gethostname(hostname, (size_t)80) < 0)
-  printf(" gethostname failed\n");
+        printf(" gethostname failed\n");
     else
-  printf(" hostname=%s\n", hostname);
+        printf(" hostname=%s\n", hostname);
 #else
     printf(" gethostname not supported\n");
 #endif
@@ -854,7 +911,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
 {
     char temp[2048];    /* Temporary buffer for file names */
     h5_stat_t  sb;     /* Structure for querying file info */
-  int j = 0;
+    int j = 0;
 
     if(fapl == H5P_DEFAULT) {
         /* Get the file's statistics */
@@ -870,9 +927,6 @@ h5_get_file_size(const char *filename, hid_t fapl)
 
         /* Check for simple cases */
         if(driver == H5FD_SEC2 || driver == H5FD_STDIO || driver == H5FD_CORE ||
-#ifdef H5_HAVE_PARALLEL
-                driver == H5FD_MPIO || 
-#endif /* H5_HAVE_PARALLEL */
 #ifdef H5_HAVE_WINDOWS
                 driver == H5FD_WINDOWS ||
 #endif /* H5_HAVE_WINDOWS */
@@ -907,6 +961,22 @@ h5_get_file_size(const char *filename, hid_t fapl)
             /* Return total size */
             return(tot_size);
         } /* end if */
+#ifdef H5_HAVE_PARALLEL
+        else if(driver == H5FD_MPIO) {
+            MPI_File fh;         /* MPI file handle used to open the file and verify its size */
+            int mpi_ret;
+            MPI_Offset file_size;
+
+            mpi_ret = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+            if (mpi_ret != MPI_SUCCESS) return -1;
+            mpi_ret = MPI_File_get_size(fh, &file_size);
+            if (mpi_ret != MPI_SUCCESS) return -1;
+            mpi_ret = MPI_File_close(&fh);
+            if (mpi_ret != MPI_SUCCESS) return -1;
+
+            return file_size;
+        }
+#endif /* H5_HAVE_PARALLEL */
         else if(driver == H5FD_FAMILY) {
             h5_stat_size_t tot_size = 0;
 
@@ -1032,61 +1102,62 @@ int h5_szip_can_encode(void )
 char *
 getenv_all(MPI_Comm comm, int root, const char* name)
 {
-    int mpi_size, mpi_rank, mpi_initialized;
+    int mpi_size, mpi_rank, mpi_initialized, mpi_finalized;
     int len;
     static char* env = NULL;
 
     assert(name);
 
     MPI_Initialized(&mpi_initialized);
-    if(!mpi_initialized) {
-  /* use original getenv */
-  if(env)
-      HDfree(env);
-  env = HDgetenv(name);
-    } /* end if */
-    else {
-  MPI_Comm_rank(comm, &mpi_rank);
-  MPI_Comm_size(comm, &mpi_size);
-  assert(root < mpi_size);
+    MPI_Finalized(&mpi_finalized);
 
-  /* The root task does the getenv call
-   * and sends the result to the other tasks */
-  if(mpi_rank == root) {
-      env = HDgetenv(name);
-      if(env) {
-    len = (int)HDstrlen(env);
-    MPI_Bcast(&len, 1, MPI_INT, root, comm);
-    MPI_Bcast(env, len, MPI_CHAR, root, comm);
-      }
-      else {
-    /* len -1 indicates that the variable was not in the environment */
-    len = -1;
-    MPI_Bcast(&len, 1, MPI_INT, root, comm);
-      }
-  }
-  else {
-      MPI_Bcast(&len, 1, MPI_INT, root, comm);
-      if(len >= 0) {
-    if(env == NULL)
-        env = (char*) HDmalloc((size_t)len+1);
-    else if(HDstrlen(env) < (size_t)len)
-        env = (char*) HDrealloc(env, (size_t)len+1);
+    if(mpi_initialized && !mpi_finalized) {
+        MPI_Comm_rank(comm, &mpi_rank);
+        MPI_Comm_size(comm, &mpi_size);
+        assert(root < mpi_size);
 
-    MPI_Bcast(env, len, MPI_CHAR, root, comm);
-    env[len] = '\0';
-      }
-      else {
-    if(env)
-        HDfree(env);
-    env = NULL;
-      }
-  }
-    }
+        /* The root task does the getenv call
+         * and sends the result to the other tasks */
+        if(mpi_rank == root) {
+            env = HDgetenv(name);
+            if(env) {
+                len = (int)HDstrlen(env);
+                MPI_Bcast(&len, 1, MPI_INT, root, comm);
+                MPI_Bcast(env, len, MPI_CHAR, root, comm);
+            }
+            else {
+                /* len -1 indicates that the variable was not in the environment */
+                len = -1;
+                MPI_Bcast(&len, 1, MPI_INT, root, comm);
+            }
+        }
+        else {
+            MPI_Bcast(&len, 1, MPI_INT, root, comm);
+            if(len >= 0) {
+                if(env == NULL)
+                    env = (char*) HDmalloc((size_t)len+1);
+                else if(HDstrlen(env) < (size_t)len)
+                    env = (char*) HDrealloc(env, (size_t)len+1);
 
+                MPI_Bcast(env, len, MPI_CHAR, root, comm);
+                env[len] = '\0';
+            }
+            else {
+                if(env)
+                    HDfree(env);
+                env = NULL;
+            }
+        }
 #ifndef NDEBUG
-    MPI_Barrier(comm);
+        MPI_Barrier(comm);
 #endif
+    }
+    else {
+        /* use original getenv */
+        if(env)
+            HDfree(env);
+        env = HDgetenv(name);
+    } /* end if */
 
     return env;
 }
@@ -1113,7 +1184,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+int
 h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
@@ -1155,8 +1226,8 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-h5_verify_cached_stabs_cb(hid_t oid, const char UNUSED *name,
-    const H5O_info_t *oinfo, void UNUSED *udata)
+h5_verify_cached_stabs_cb(hid_t oid, const char H5_ATTR_UNUSED *name,
+    const H5O_info_t *oinfo, void H5_ATTR_UNUSED *udata)
 {
     if(oinfo->type == H5O_TYPE_GROUP)
         return(H5G__verify_cached_stabs_test(oid));

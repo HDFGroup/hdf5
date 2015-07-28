@@ -677,9 +677,9 @@ done:
 
 /****if* H5Lf/h5lget_name_by_idx_c
  * NAME
- *        h5lget_name_by_idx_c
+ *  h5lget_name_by_idx_c
  * PURPOSE
- *     Call  H5Lget_name_by_idx
+ *  Call  H5Lget_name_by_idx
  * INPUTS
  *
  *   loc_id      - File or group identifier specifying location of subject group
@@ -694,10 +694,10 @@ done:
  *   name        - Buffer in which link value is returned
  *   size        - The size of the link name on success
  * RETURNS
- *      0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              March 10, 2008
+ *  March 10, 2008
  * SOURCE
 */
 int_f
@@ -706,9 +706,10 @@ nh5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		      size_t_f *size, _fcd name, hid_t_f *lapl_id)
 /******/
 {
-    char *c_group_name = NULL;          /* Buffer to hold C string */
+    char *c_group_name = NULL;    /* Buffer to hold C string */
     char *c_name = NULL;          /* Buffer to hold C string */
     size_t c_size;
+    ssize_t c_size_link;
     int_f ret_value = 0;          /* Return value */
 
     /*
@@ -725,9 +726,11 @@ nh5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
     if(NULL == (c_name = (char *)HDmalloc(c_size)))
         HGOTO_DONE(FAIL)
 
-    if((*size = (size_t_f)H5Lget_name_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field,
+    if((c_size_link = H5Lget_name_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field,
             (H5_iter_order_t)*order, (hsize_t)*n,c_name, c_size, (hid_t)*lapl_id)) < 0)
         HGOTO_DONE(FAIL)
+
+    *size = (size_t_f)c_size_link;
 
     /*
      * Convert C name to FORTRAN and place it in the given buffer
@@ -987,7 +990,7 @@ done:
  * SOURCE
 */
 int_f
-nh5literate_c(hid_t_f *group_id, int_f *index_type, int_f *order, hsize_t_f *idx, H5L_iterate_t op, void *op_data )
+h5literate_c(hid_t_f *group_id, int_f *index_type, int_f *order, hsize_t_f *idx, H5L_iterate_t op, void *op_data )
 /******/
 {
   int_f ret_value = -1;  /* Return value */
@@ -1010,12 +1013,12 @@ nh5literate_c(hid_t_f *group_id, int_f *index_type, int_f *order, hsize_t_f *idx
 
 /****if* H5Lf/h5literate_by_name_c
  * NAME
- *        h5literate_by_name_c
+ *  h5literate_by_name_c
  * PURPOSE
- *     Call H5Literate_by_name
+ *  Call H5Literate_by_name
  * INPUTS
  *
- *     loc_id - Identifier specifying subject group
+ *      loc_id - Identifier specifying subject group
  *         name - Name of subject group
  *      namelen - Name length
  *   index_type - Type of index which determines the order
@@ -1030,14 +1033,14 @@ nh5literate_c(hid_t_f *group_id, int_f *index_type, int_f *order, hsize_t_f *idx
  *          idx - Position at which an interrupted iteration may be restarted
  *
  * RETURNS
- *     >0 on success, 0< on failure
+ *  >0 on success, 0< on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *              Augest 18, 2008
+ *  August 18, 2008
  * SOURCE
 */
 int_f
-nh5literate_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, int_f *index_type, int_f *order, hsize_t_f *idx, H5L_iterate_t op, void *op_data, hid_t_f *lapl_id)
+h5literate_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, int_f *index_type, int_f *order, hsize_t_f *idx, H5L_iterate_t op, void *op_data, hid_t_f *lapl_id)
 /******/
 {
   int_f ret_value = -1;       /* Return value */

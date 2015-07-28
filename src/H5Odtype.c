@@ -1089,7 +1089,7 @@ done:
     function using malloc() and is returned to the caller.
 --------------------------------------------------------------------------*/
 static void *
-H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh, unsigned UNUSED mesg_flags,
+H5O_dtype_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
     unsigned *ioflags/*in,out*/, const uint8_t *p)
 {
     H5T_t	*dt = NULL;
@@ -1481,7 +1481,7 @@ H5O_dtype_can_share(const void *_mesg)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is immutable")
 
     /* Don't share committed datatypes */
-    if((tri_ret = H5T_committed(mesg)) > 0)
+    if((tri_ret = H5T_is_named(mesg)) > 0)
         HGOTO_DONE(FALSE)
     else if(tri_ret < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can't tell if datatype is shared")
@@ -1508,7 +1508,7 @@ done:
  */
 static herr_t
 H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
-    hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
+    hbool_t H5_ATTR_UNUSED *deleted, const H5O_copy_t H5_ATTR_UNUSED *cpy_info,
     void *_udata)
 {
     const H5T_t	*dt_src = (const H5T_t *)mesg_src;  /* Source datatype */
@@ -1557,9 +1557,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_dtype_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t *mesg_type,
-    void *native_src, H5F_t *file_dst, hbool_t UNUSED *recompute_size,
-    H5O_copy_t UNUSED *cpy_info, void UNUSED *udata, hid_t UNUSED dxpl_id)
+H5O_dtype_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const H5O_msg_class_t *mesg_type,
+    void *native_src, H5F_t *file_dst, hbool_t H5_ATTR_UNUSED *recompute_size,
+    H5O_copy_t H5_ATTR_UNUSED *cpy_info, void H5_ATTR_UNUSED *udata, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     H5T_t *dst_mesg;            /* Destination datatype */
     void *ret_value;            /* Return value */
@@ -1597,21 +1597,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_shared_post_copy_upd(const H5O_loc_t UNUSED *src_oloc,
-    const void UNUSED *mesg_src, H5O_loc_t UNUSED *dst_oloc, void *mesg_dst,
-    hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info)
+H5O_dtype_shared_post_copy_upd(const H5O_loc_t H5_ATTR_UNUSED *src_oloc,
+    const void H5_ATTR_UNUSED *mesg_src, H5O_loc_t H5_ATTR_UNUSED *dst_oloc, void *mesg_dst,
+    hid_t H5_ATTR_UNUSED dxpl_id, H5O_copy_t H5_ATTR_UNUSED *cpy_info)
 {
     H5T_t       *dt_dst = (H5T_t *)mesg_dst;    /* Destination datatype */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(dt_dst->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
-        HDassert(H5T_committed(dt_dst));
+        HDassert(H5T_is_named(dt_dst));
         dt_dst->oloc.file = dt_dst->sh_loc.file;
         dt_dst->oloc.addr = dt_dst->sh_loc.u.loc.oh_addr;
     } /* end if */
     else
-        HDassert(!H5T_committed(dt_dst));
+        HDassert(!H5T_is_named(dt_dst));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_dtype_shared_post_copy_upd */

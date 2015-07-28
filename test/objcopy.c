@@ -269,8 +269,8 @@ attach_ref_attr(hid_t file_id, hid_t loc_id)
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data2) < 0) TEST_ERROR
 
     /* create an attribute with two object references */
-    if(H5Rcreate(&ref[0], file_id, dsetname1, H5R_OBJECT, -1) < 0) TEST_ERROR
-    if(H5Rcreate(&ref[1], file_id, dsetname2, H5R_OBJECT, -1) < 0) TEST_ERROR
+    if(H5Rcreate(&ref[0], file_id, dsetname1, H5R_OBJECT, (hid_t)-1) < 0) TEST_ERROR
+    if(H5Rcreate(&ref[1], file_id, dsetname2, H5R_OBJECT, (hid_t)-1) < 0) TEST_ERROR
     if((aid = H5Acreate2(loc_id, "obj_ref_attr", H5T_STD_REF_OBJ, sid_ref, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Awrite(aid, H5T_STD_REF_OBJ, ref) < 0) TEST_ERROR
 
@@ -750,8 +750,8 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
 
     /* Check raw data read in against data written out */
     if(wbuf) {
-        if(!compare_data(aid, 0, pid, tid, (size_t)nelmts, wbuf, rbuf, obj_owner)) TEST_ERROR
-        if(!compare_data(aid2, 0, pid, tid2, (size_t)nelmts, wbuf, rbuf2, obj_owner)) TEST_ERROR
+        if(!compare_data(aid, (hid_t)0, pid, tid, (size_t)nelmts, wbuf, rbuf, obj_owner)) TEST_ERROR
+        if(!compare_data(aid2, (hid_t)0, pid, tid2, (size_t)nelmts, wbuf, rbuf2, obj_owner)) TEST_ERROR
     } /* end if */
     /* Don't have written data, just compare data between the two attributes */
     else
@@ -1303,8 +1303,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 
     /* Check raw data read in against data written out */
     if(wbuf) {
-        if(!compare_data(did, 0, pid, tid, (size_t)nelmts, wbuf, rbuf, did)) TEST_ERROR
-        if(!compare_data(did2, 0, pid, tid2, (size_t)nelmts, wbuf, rbuf2, did2)) TEST_ERROR
+        if(!compare_data(did, (hid_t)0, pid, tid, (size_t)nelmts, wbuf, rbuf, did)) TEST_ERROR
+        if(!compare_data(did2, (hid_t)0, pid, tid2, (size_t)nelmts, wbuf, rbuf2, did2)) TEST_ERROR
     } /* end if */
     /* Don't have written data, just compare data between the two datasets */
     else
@@ -2315,7 +2315,7 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
 #endif /* H5_CLEAR_MEMORY */
     for(i = 0; i < DIM_SIZE_1; i++) {
         buf[i].a = i;
-        buf[i].d = 1. / (i + 1);
+        buf[i].d = 1.0F / (i + 1);
     } /* end for */
 
     /* Initialize the filenames */
@@ -2447,9 +2447,9 @@ test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
 
     /* set initial data values */
     for(i = 0; i < DIM_SIZE_1; i++) {
-        buf1d[i] = (float)(i / 2.0);
+        buf1d[i] = (float)(i / 2.0F);
         for(j = 0; j < DIM_SIZE_2; j++)
-            buf2d[i][j] = (float)(i + (j / 100.0));
+            buf2d[i][j] = (float)(i + (j / 100.0F));
     } /* end for */
 
     /* Initialize the filenames */
@@ -2790,9 +2790,9 @@ test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
     /* set initial data values */
     for(i = 0; i < DIM_SIZE_1; i++) {
-        buf1d[i] = (float)(i / 10.0);
+        buf1d[i] = (float)(i / 10.0F);
         for(j = 0; j < DIM_SIZE_2; j++)
-            buf2d[i][j] = (float)(i + (j / 100.0));
+            buf2d[i][j] = (float)(i + (j / 100.0F));
     } /* end for */
 
     /* Initialize the filenames */
@@ -2985,7 +2985,7 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     /* set initial data values */
     for (i=0; i<DIM_SIZE_1; i++)
         for (j=0; j<DIM_SIZE_2; j++)
-            buf[i][j] = (float)(100.0);         /* Something easy to compress */
+            buf[i][j] = 100.0F;         /* Something easy to compress */
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
@@ -3114,7 +3114,7 @@ test_copy_dataset_compact(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     /* set initial data values */
     for (i=0; i<DIM_SIZE_1; i++)
         for (j=0; j<DIM_SIZE_2; j++)
-            buf[i][j] = (float)(i+j/100.0);
+            buf[i][j] = (float)(i+j/100.0F);
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
@@ -7591,7 +7591,7 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         buf[i].b.p = (int *)HDmalloc(buf[i].b.len * sizeof(int));
         for(j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
-        buf[i].c = 1. / (i + 1.);
+        buf[i].c = 1.0F / (i + 1.0F);
     } /* end for */
 
     /* Initialize the filenames */
@@ -7730,7 +7730,7 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         buf[i].b.p = (int *)HDmalloc(buf[i].b.len * sizeof(int));
         for(j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
-        buf[i].c = 1. / (i + 1.);
+        buf[i].c = 1.0F / (i + 1.0F);
     } /* end for */
 
     /* Initialize the filenames */
@@ -7875,7 +7875,7 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         buf[i].b.p = (int *)HDmalloc(buf[i].b.len * sizeof(int));
         for(j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
-        buf[i].c = 1. / (i + 1.);
+        buf[i].c = 1.0F / (i + 1.0F);
     } /* end for */
 
     /* Initialize the filenames */
@@ -8045,8 +8045,8 @@ test_copy_null_ref(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
             sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create references */
-    if(H5Rcreate(&obj_buf[0], did1, ".", H5R_OBJECT, -1) < 0) TEST_ERROR
-    if(H5Rcreate(&obj_buf[1], did2, ".", H5R_OBJECT, -1) < 0) TEST_ERROR
+    if(H5Rcreate(&obj_buf[0], did1, ".", H5R_OBJECT, (hid_t)-1) < 0) TEST_ERROR
+    if(H5Rcreate(&obj_buf[1], did2, ".", H5R_OBJECT, (hid_t)-1) < 0) TEST_ERROR
     if(H5Rcreate(&reg_buf[0], did1, ".", H5R_DATASET_REGION, sid) < 0)
         TEST_ERROR
     if(H5Rcreate(&reg_buf[1], did2, ".", H5R_DATASET_REGION, sid) < 0)
@@ -11449,7 +11449,7 @@ error:
  */
 static herr_t
 test_copy_iterate_cb(hid_t loc_id, const char *name,
-    const H5L_info_t UNUSED *link_info, void *op_data)
+    const H5L_info_t H5_ATTR_UNUSED *link_info, void *op_data)
 {
     hid_t dst_loc_id = *((hid_t *)op_data);
 

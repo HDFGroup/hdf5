@@ -50,7 +50,7 @@ class H5_DLLCPP H5Object;  // forward declaration for UserData4Aiterate
 ///\brief	Default constructor: Creates a stub attribute
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-Attribute::Attribute() : AbstractDs(), IdComponent(), id(0) {}
+Attribute::Attribute() : AbstractDs(), IdComponent(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	Attribute copy constructor
@@ -74,7 +74,8 @@ Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent()
 //--------------------------------------------------------------------------
 Attribute::Attribute(const hid_t existing_id) : AbstractDs(), IdComponent()
 {
-   id = existing_id;
+    id = existing_id;
+    incRefCount(); // increment number of references to this id
 }
 
 //--------------------------------------------------------------------------
@@ -162,13 +163,13 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 //	Mar 2008
 //		Corrected a misunderstanding that H5Aread would allocate
 //		space for the buffer.  Obtained the attribute size and
-//		allocated memory properly. - BMR
+//		allocated memory properly. -BMR
 //	Apr 2009
-//		Used getInMemDataSize to get attribute data size. - BMR
+//		Used getInMemDataSize to get attribute data size. -BMR
 //	Jul 2009
 //		Divided into specific private functions for fixed- and
 //		variable-len string data: p_read_fixed_len and
-//		p_read_variable_len.  This should improve readability.
+//		p_read_variable_len.  This should improve readability. -BMR
 //--------------------------------------------------------------------------
 void Attribute::read(const DataType& mem_type, H5std_string& strg) const
 {
@@ -270,8 +271,9 @@ DataSpace Attribute::getSpace() const
    // If the dataspace id is valid, create and return the DataSpace object
    if( dataspace_id > 0 )
    {
-      DataSpace dataspace( dataspace_id );
-      return( dataspace );
+	DataSpace dataspace;
+	f_DataSpace_setId(&dataspace, dataspace_id);
+	return(dataspace);
    }
    else
    {
@@ -392,10 +394,12 @@ H5std_string Attribute::getName() const
 //--------------------------------------------------------------------------
 H5std_string Attribute::getName(size_t len) const
 {
-   H5std_string attr_name;
-   ssize_t name_size = getName(attr_name, len);
-   return(attr_name);
-   // let caller catch exception if any
+    H5std_string attr_name;
+    ssize_t name_size = getName(attr_name, len);
+    if (name_size < 0)
+	return("");
+    else
+	return(attr_name);
 }
 
 //--------------------------------------------------------------------------
@@ -586,7 +590,7 @@ void Attribute::p_read_fixed_len(const DataType& mem_type, H5std_string& strg) c
 // Modification
 //	Jul 2009
 //		Separated the variable length case from the original
-//		Attribute::read
+//		Attribute::read. -BMR
 //--------------------------------------------------------------------------
 void Attribute::p_read_variable_len(const DataType& mem_type, H5std_string& strg) const
 {
@@ -650,7 +654,7 @@ void Attribute::close()
 	    throw AttributeIException("Attribute::close", "H5Aclose failed");
 	}
 	// reset the id
-	id = 0;
+	id = H5I_INVALID_HID;
     }
 }
 

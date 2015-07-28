@@ -30,6 +30,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Rprivate.h"		/* References				*/
+#include "H5VLprivate.h"        /* VOL                                  */
 
 /* Macro for size of temporary buffers to contain a single element */
 #define H5T_ELEM_BUF_SIZE       256
@@ -140,16 +141,15 @@ H5_DLL uint32_t H5T_hash(H5F_t * file, const H5T_t *dt);
 H5_DLL herr_t H5T_set_latest_version(H5T_t *dt);
 H5_DLL herr_t H5T_patch_file(H5T_t *dt, H5F_t *f);
 H5_DLL htri_t H5T_is_variable_str(const H5T_t *dt);
-H5_DLL void * H5T_get_named_type(const H5T_t *dt);
-H5_DLL hid_t H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref);
-H5_DLL herr_t H5T_set_vol_object(H5T_t *type, void *vol_obj);
+H5_DLL H5T_t *H5T_construct_datatype(H5VL_object_t *dt_obj);
+H5_DLL H5VL_object_t *H5T_get_named_type(const H5T_t *dt);
+H5_DLL H5T_t *H5T_get_actual_type(H5T_t *dt);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);
 
 /* Operations on named datatypes */
 H5_DLL H5T_t *H5T_open(const H5G_loc_t *loc, hid_t dxpl_id);
-H5_DLL htri_t H5T_committed(const H5T_t *type);
 H5_DLL int H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id);
 H5_DLL herr_t H5T_update_shared(H5T_t *type);
 

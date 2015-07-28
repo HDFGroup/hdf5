@@ -425,13 +425,12 @@ done:
  */
 herr_t
 H5Xcreate_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id,
-        hid_t trans_id, hid_t estack_id)
+             hid_t trans_id, hid_t estack_id)
 {
     H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (NULL if VOL plugin does not support async) */
     void *idx_handle = NULL; /* pointer to index object created */
-    void *file = NULL, *dset = NULL;
-    H5VL_t *vol_plugin = NULL; /* VOL plugin information */
+    H5VL_object_t *file = NULL, *dset = NULL;
     size_t plugin_index;
     H5P_genplist_t *plist;
     hid_t dataset_id = scope_id; /* TODO for now */
@@ -447,14 +446,12 @@ H5Xcreate_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id,
     /* Check args */
     if ((plugin_id < 0) || (plugin_id > H5X_PLUGIN_MAX))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
-    if (NULL == (file = (void *) H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (file = (H5VL_object_t *) H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID");
     if (NULL == H5I_object_verify(scope_id, H5I_DATASET))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "scope_id is restricted to dataset ID");
-    if (NULL == (dset = (void *) H5VL_get_object(scope_id)))
+    if (NULL == (dset = H5VL_get_object(scope_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object/file identifier");
-    if (NULL == (vol_plugin = (H5VL_t *) H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     /* Is the plugin already registered */
     if (FALSE == H5X__registered(plugin_id, &plugin_index))
@@ -467,15 +464,12 @@ H5Xcreate_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id,
         if (TRUE != H5P_isa_class(xcpl_id, H5P_INDEX_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not index creation property list");
 
-    if (estack_id != H5_EVENT_STACK_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
-        if (NULL == (request = (H5_priv_request_t *) H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        request->req = NULL;
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = dset->vol_info->vol_cls;
     }
 
     /* Store the transaction ID in the xapl_id */
@@ -498,10 +492,9 @@ H5Xcreate_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id,
             metadata_size, metadata, trans_id, req))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot set index info to dataset");
 
-    if (request && *req) {
+    if (request && *req)
         if(H5ES_insert(estack_id, request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
-    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -520,7 +513,6 @@ herr_t
 H5Xremove(hid_t file_id, unsigned plugin_id, hid_t scope_id)
 {
     void *file = NULL, *obj = NULL;
-    H5VL_t *vol_plugin = NULL; /* VOL plugin information */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -556,8 +548,7 @@ H5Xremove_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t trans_id,
 {
     H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (NULL if VOL plugin does not support async) */
-    void *file = NULL, *dset = NULL;
-    H5VL_t *vol_plugin = NULL; /* VOL plugin information */
+    H5VL_object_t *file = NULL, *dset = NULL;
     size_t plugin_index;
     H5P_genplist_t *plist;
     hid_t dataset_id = scope_id; /* TODO for now */
@@ -572,28 +563,23 @@ H5Xremove_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t trans_id,
     /* Check args */
     if ((plugin_id < 0) || (plugin_id > H5X_PLUGIN_MAX))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
-    if (NULL == (file = (void *) H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (file = (H5VL_object_t *) H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID");
     if (NULL == H5I_object_verify(scope_id, H5I_DATASET))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "scope_id is restricted to dataset ID");
-    if (NULL == (dset = (void *) H5VL_get_object(scope_id)))
+    if (NULL == (dset = (H5VL_object_t *) H5VL_get_object(scope_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object/file identifier");
-    if (NULL == (vol_plugin = (H5VL_t *) H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     /* Is the plugin already registered */
     if (FALSE == H5X__registered(plugin_id, &plugin_index))
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin is not registered");
 
-    if (estack_id != H5_EVENT_STACK_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
-        if (NULL == (request = (H5_priv_request_t *) H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        request->req = NULL;
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = dset->vol_info->vol_cls;
     }
 
     /* Store the transaction ID in the xapl_id */
@@ -615,10 +601,9 @@ H5Xremove_ff(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t trans_id,
     if (FAIL == H5VL_iod_dataset_remove_index_info(dset, trans_id, req))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot remove index from dataset");
 
-    if (request && *req) {
+    if (request && *req)
         if(H5ES_insert(estack_id, request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
-    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -661,8 +646,7 @@ H5Xget_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
 {
     H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (NULL if VOL plugin does not support async) */
-    void *dset;
-    H5VL_t *vol_plugin = NULL; /* VOL plugin information */
+    H5VL_object_t *dset;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -675,15 +659,12 @@ H5Xget_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
     if (!idx_count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "idx_count is NULL");
 
-    if (estack_id != H5_EVENT_STACK_NULL) {
+    if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
-        if (NULL == (request = (H5_priv_request_t *) H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        request->req = NULL;
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = dset->vol_info->vol_cls;
     }
 
     /* Get index info */
@@ -691,10 +672,9 @@ H5Xget_count_ff(hid_t scope_id, hsize_t *idx_count, hid_t rcxt_id,
             rcxt_id, req))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSET, FAIL, "cannot get indexing info from dataset");
 
-    if (request && *req) {
+    if (request && *req)
         if(H5ES_insert(estack_id, request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
-    }
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -79,6 +79,9 @@ test_family_h5repart_opens(void)
     if((file=H5Fopen(FILENAME[1], H5F_ACC_RDWR, fapl))<0)
         goto error;
 
+    if(H5Pclose(fapl)<0)
+        goto error;
+
     if(H5Fclose(file)<0)
         goto error;
 

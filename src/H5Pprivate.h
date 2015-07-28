@@ -21,7 +21,6 @@
 
 /* Include package's public header */
 #include "H5Ppublic.h"
-
 #include "H5VLpublic.h"
 
 /* Private headers needed by this file */
@@ -152,7 +151,7 @@ H5_DLL hid_t H5P_get_driver(H5P_genplist_t *plist);
 H5_DLL void * H5P_get_driver_info(H5P_genplist_t *plist);
 H5_DLL herr_t H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id,
             const void *new_driver_info);
-H5_DLL herr_t H5P_set_vol(H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_info);
+H5_DLL herr_t H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info);
 H5_DLL void * H5P_get_vol_info(H5P_genplist_t *plist);
 H5_DLL herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist,
         H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free_t free_func,

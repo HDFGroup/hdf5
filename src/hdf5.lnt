@@ -17,12 +17,6 @@
 // Suppress message about "Constant value boolean" in TRUE macros
 -emacro(506,TRUE)
 
-// Suppress message about "Constant value boolean" in IS_H5FD_MPI* macros
--emacro(506,IS_H5FD_MPI)
-
-// Suppress message about "Boolean within 'if' always evaluates false" in IS_H5FD_MPI* macros
--emacro((774),IS_H5FD_MPI)
-
 // Suppress message about our use of 'goto' in our error macros
 -emacro(801,HGOTO_DONE, H5Epush_goto)
 

@@ -52,7 +52,7 @@
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5VL_init(void);
+
 
 /*
 H5_DLL haddr_t H5VL_alloc_real(H5VL_t *file, hid_t dxpl_id, H5VL_mem_t type,

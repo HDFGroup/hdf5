@@ -29,6 +29,7 @@
 /****************/
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 
+
 /***********/
 /* Headers */
 /***********/
@@ -54,6 +55,7 @@
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Windows buffered I/O                 */
 #endif
+
 
 /****************/
 /* Local Macros */
@@ -170,11 +172,11 @@
 #define H5F_ACS_EFC_SIZE_DEC                    H5P__decode_unsigned
 
 /* Definition for VOL plugin */
-#define H5F_ACS_VOL_SIZE                sizeof(void *)
-#define H5F_ACS_VOL_DEF                 H5VL_NATIVE
+#define H5F_ACS_VOL_ID_SIZE                     sizeof(hid_t)
+#define H5F_ACS_VOL_ID_DEF                      H5VL_NATIVE
 /* Definition for vol info */
-#define H5F_ACS_VOL_INFO_SIZE              sizeof(void*)
-#define H5F_ACS_VOL_INFO_DEF               NULL
+#define H5F_ACS_VOL_INFO_SIZE                   sizeof(void*)
+#define H5F_ACS_VOL_INFO_DEF                    NULL
 
 /* Definition of pointer to initial file image info */
 #define H5F_ACS_FILE_IMAGE_INFO_SIZE            sizeof(H5FD_file_image_info_t)
@@ -302,7 +304,7 @@ static const uint32_t H5F_def_checksum_scope_g = H5F_ACS_CHECKSUM_SCOPE_DEF;
 static herr_t
 H5P_facc_reg_prop(H5P_genclass_t *pclass)
 {
-    H5VL_class_t *vol_cls = H5F_ACS_VOL_DEF;                    /* Default VOL plugin */
+    const hid_t def_vol_id = H5F_ACS_VOL_ID_DEF;                /* Default VOL plugin */
     void *vol_info = H5F_ACS_VOL_INFO_DEF;                      /* Default VOL plugin information*/
     const hid_t def_driver_id = H5F_ACS_FILE_DRV_ID_DEF;        /* Default VFL driver ID (initialized from a variable) */
     hid_t rcxt_id = FAIL;
@@ -432,7 +434,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file VOL ID */
-    if(H5P_register_real(pclass, H5F_ACS_VOL_NAME, H5F_ACS_VOL_SIZE, &vol_cls, 
+    if(H5P_register_real(pclass, H5F_ACS_VOL_ID_NAME, H5F_ACS_VOL_ID_SIZE, &def_vol_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -496,10 +498,10 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_facc_create(hid_t fapl_id, void UNUSED *copy_data)
+H5P_facc_create(hid_t fapl_id, void H5_ATTR_UNUSED *copy_data)
 {
     hid_t          driver_id;
-    H5VL_class_t   *vol_cls;
+    hid_t          vol_id;
     H5P_genplist_t *plist;              /* Property list */
     herr_t         ret_value = SUCCEED;
 
@@ -510,17 +512,17 @@ H5P_facc_create(hid_t fapl_id, void UNUSED *copy_data)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Retrieve VOL plugin property */
-    if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
+    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin")
 
-    if(NULL != vol_cls) {
+    if(vol_id > 0) {
         void  *vol_info;
 
         /* Retrieve VOL plugin info property */
         if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
         /* Set the vol for the property list */
-        if(H5VL_fapl_open(plist, vol_cls, vol_info) < 0)
+        if(H5VL_fapl_open(plist, vol_id, vol_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
     }
 
@@ -562,16 +564,15 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
+H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void H5_ATTR_UNUSED *copy_data)
 {
     hid_t          driver_id;
-    H5VL_class_t   *vol_cls;
+    hid_t          vol_id;
     H5P_genplist_t *src_plist;              /* Source property list */
     H5P_genplist_t *dst_plist;              /* Destination property list */
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
 
     if(NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
@@ -579,9 +580,10 @@ H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* get VOL plugin from source property list */
-    if(H5P_get(src_plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
+    if(H5P_get(src_plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol ID")
-    if(NULL != vol_cls) {
+
+    if(vol_id > 0) {
         void  *vol_info;
 
         /* Retrieve VOL plugin property */
@@ -589,13 +591,14 @@ H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
 
         /* Set the vp; for the destination property list */
-        if(H5VL_fapl_open(dst_plist, vol_cls, vol_info) < 0)
+        if(H5VL_fapl_open(dst_plist, vol_id, vol_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
     } /* end if */
 
     /* Get driver ID from source property list */
     if(H5P_get(src_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
+
     if(driver_id > 0) {
         void *driver_info;
 
@@ -629,10 +632,10 @@ done:
  */
 /* ARGSUSED */
 herr_t
-H5P_facc_close(hid_t fapl_id, void UNUSED *close_data)
+H5P_facc_close(hid_t fapl_id, void H5_ATTR_UNUSED *close_data)
 {
     hid_t          driver_id; 
-    H5VL_class_t   *vol_cls;
+    hid_t          vol_id;
     H5P_genplist_t *plist;              /* Property list */
     herr_t         ret_value = SUCCEED;
 
@@ -643,15 +646,18 @@ H5P_facc_close(hid_t fapl_id, void UNUSED *close_data)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get vol plugin */
-    if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
+    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
         HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
-    if(NULL != vol_cls) {
+
+    if(vol_id > 0) {
         void  *vol_info;
+
         /* Retrieve VOL plugin info property */
         if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
+
         /* Close the driver for the property list */
-        if(H5VL_fapl_close(vol_cls, vol_info) < 0)
+        if(H5VL_fapl_close(vol_id, vol_info) < 0)
             HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
     } /* end if */
 
@@ -1017,6 +1023,7 @@ H5Pget_driver_info(hid_t plist_id)
     void *ret_value;            /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE1("*x", "i", plist_id);
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
@@ -1213,7 +1220,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
+H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts,
 	     size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -2088,27 +2095,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_set_vol(H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_info)
+H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
 {
-    H5VL_class_t *old_vol_cls;
+    hid_t   old_vol_id;
     void   *old_vol_info;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t  ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         /* Get the current vol information */
-        if(H5P_get(plist, H5F_ACS_VOL_NAME, &old_vol_cls) < 0)
+        if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &old_vol_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol class")
         if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &old_vol_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
 
         /* Close the vol for the property list */
-        if(H5VL_fapl_close(old_vol_cls, old_vol_info)<0)
+        if(H5VL_fapl_close(old_vol_id, old_vol_info)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset vol")
 
         /* Set the vol for the property list */
-        if(H5VL_fapl_open(plist, vol_cls, vol_info)<0)
+        if(H5VL_fapl_open(plist, vol_id, vol_info)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
     }
     else
@@ -2138,7 +2145,6 @@ herr_t
 H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    H5VL_class_t *vol_cls;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2147,11 +2153,11 @@ H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
     /* Check arguments */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(new_vol_id, H5I_VOL)))
+    if(NULL == H5I_object_verify(new_vol_id, H5I_VOL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file vol ID")
 
     /* Set the vol */
-    if(H5P_set_vol(plist, vol_cls, new_vol_info) < 0)
+    if(H5P_set_vol(plist, new_vol_id, new_vol_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
 
 done:
@@ -2224,6 +2230,7 @@ H5Pget_vol_info(hid_t plist_id)
     void	*ret_value;     /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE1("*x", "i", plist_id);
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
@@ -2555,7 +2562,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_file_image_info_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_file_image_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     H5FD_file_image_info_t info;        /* Image info struct */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2609,7 +2616,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_file_image_info_copy(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_file_image_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2684,7 +2691,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_file_image_info_close(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_file_image_info_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2734,7 +2741,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P__facc_cache_config_cmp(const void *_config1, const void *_config2, size_t UNUSED size)
+H5P__facc_cache_config_cmp(const void *_config1, const void *_config2, size_t H5_ATTR_UNUSED size)
 {
     const H5AC_cache_config_t *config1 = (const H5AC_cache_config_t *)_config1; /* Create local aliases for values */
     const H5AC_cache_config_t *config2 = (const H5AC_cache_config_t *)_config2; /* Create local aliases for values */
@@ -2959,8 +2966,8 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
         H5_ENCODE_DOUBLE(*pp, config->empty_reserve);
 
-        /* int */
-        INT32ENCODE(*pp, (int32_t)config->dirty_bytes_threshold);
+        /* unsigned */
+        UINT32ENCODE(*pp, (uint32_t)config->dirty_bytes_threshold);
 
         /* int */
         INT32ENCODE(*pp, (int32_t)config->metadata_write_strategy);
@@ -3111,8 +3118,8 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
 
     H5_DECODE_DOUBLE(*pp, config->empty_reserve);
 
-    /* int */
-    INT32DECODE(*pp, config->dirty_bytes_threshold);
+    /* unsigned */
+    UINT32DECODE(*pp, config->dirty_bytes_threshold);
 
     /* int */
     INT32DECODE(*pp, config->metadata_write_strategy);
@@ -3287,6 +3294,10 @@ H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ibz", plist_id, is_enabled, page_size);
 
+    /* The page size cannot be zero */
+    if(page_size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page_size cannot be zero")
+
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
@@ -3339,3 +3350,4 @@ H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled, size_t *page_siz
 done:
     FUNC_LEAVE_API(ret_value)
 }
+

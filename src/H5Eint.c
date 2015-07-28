@@ -272,10 +272,12 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
         /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
         {
-            int mpi_rank, mpi_initialized;
+            int mpi_rank, mpi_initialized, mpi_finalized;
 
 	    MPI_Initialized(&mpi_initialized);
-	    if(mpi_initialized) {
+            MPI_Finalized(&mpi_finalized);
+
+            if(mpi_initialized && !mpi_finalized) {
 	        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 	        fprintf(stream, "MPI-process %d", mpi_rank);
 	    } /* end if */
@@ -402,10 +404,12 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
         {
-            int mpi_rank, mpi_initialized;
+            int mpi_rank, mpi_initialized, mpi_finalized;
 
 	    MPI_Initialized(&mpi_initialized);
-	    if(mpi_initialized) {
+            MPI_Finalized(&mpi_finalized);
+
+            if(mpi_initialized && !mpi_finalized) {
 	        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 	        fprintf(stream, "MPI-process %d", mpi_rank);
 	    } /* end if */
@@ -741,17 +745,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
         HGOTO_DONE(FAIL)
 
     /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
-    while((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap))
-#ifdef H5_VSNPRINTF_WORKS
-            >
-#else /* H5_VSNPRINTF_WORKS */
-            >=
-#endif /* H5_VSNPRINTF_WORKS */
-            (tmp_len - 1)
-#ifndef H5_VSNPRINTF_WORKS
-            || (desc_len < 0)
-#endif /* H5_VSNPRINTF_WORKS */
-            ) {
+    while((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap)) > (tmp_len - 1)) {
         /* shutdown & restart the va_list */
         va_end(ap);
         va_start(ap, fmt);
@@ -760,11 +754,7 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
         H5MM_xfree(tmp);
 
         /* Allocate a description of the appropriate length */
-#ifdef H5_VSNPRINTF_WORKS
         tmp_len = desc_len + 1;
-#else /* H5_VSNPRINTF_WORKS */
-        tmp_len = 2 * tmp_len;
-#endif /* H5_VSNPRINTF_WORKS */
         if(NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
             HGOTO_DONE(FAIL)
     } /* end while */

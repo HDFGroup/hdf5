@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5 C CXX)
 
 #-----------------------------------------------------------------------------
@@ -10,6 +10,24 @@ PROJECT (HDF5 C CXX)
 # set CMAKE_INSTALL_PREFIX to the required install path.
 # Make install can be used to install all components for system-wide use.
 #
+if ("${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
+    MESSAGE(FATAL_ERROR "\nERROR! ${PROJECT_NAME} DOES NOT SUPPORT IN SOURCE BUILDS!\n"
+      "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+      " == CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}\n"
+      "NEXT STEPS:\n"
+      "(1) Delete the CMakeCache.txt file and the CMakeFiles/ directory\n"
+      "     under the source directory for ${PROJECT_NAME}, otherwise you\n"
+      "     will not be able to configure ${PROJECT_NAME} correctly!\n"
+      "      * For example, on linux machines do:\n"
+      "        $ rm -r CMakeCache.txt CMakeFiles/\n"
+      "(2) Create a different directory and configure ${PROJECT_NAME} in that directory.\n"
+      "      * For example, on linux machines do:\n"
+      "        $ mkdir MY_BUILD\n"
+      "        $ cd MY_BUILD\n"
+      "        $ cmake [OPTIONS] ..\n"
+      )
+endif ()
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Sub-Project Build
 #
@@ -29,7 +47,7 @@ PROJECT (HDF5 C CXX)
 #   dependencies to this variable so that external projects pick them up
 #
 # HDF5_EXTERNAL_LIB_PREFIX :
-#   If the parent project needs to install hdf libraries, but avoid 
+#   If the parent project needs to install hdf libraries, but avoid
 #   name conflicts with system versions, then a prefix may be added
 #   to ensure that the correct versions configured are used.
 #
@@ -53,8 +71,8 @@ PROJECT (HDF5 C CXX)
 #   # Setup all necessary overrides for zlib so that HDF5 uses our
 #   # internally compiled zlib rather than any other version
 #   if (HDF5_ENABLE_Z_LIB_SUPPORT)
-#     # We must tell the main HDF5 library that it depends on our zlib 
-#     set (HDF5_LIB_DEPENDENCIES vtkzlib)    
+#     # We must tell the main HDF5 library that it depends on our zlib
+#     set (HDF5_LIB_DEPENDENCIES vtkzlib)
 #     # Override the zlib header file
 #     if (VTK_USE_SYSTEM_ZLIB)
 #       set (H5_ZLIB_HEADER "zlib.h")
@@ -65,7 +83,7 @@ PROJECT (HDF5 C CXX)
 #       set (ZLIB_LIBRARIES vtkzlib)
 #     endif (VTK_USE_SYSTEM_ZLIB)
 #   endif (HDF5_ENABLE_Z_LIB_SUPPORT)
-# 
+#
 #   # Add the sub project
 #   add_subdirectory (Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
@@ -145,13 +163,16 @@ set (HDF5_CPP_TST_DIR        ${HDF5_SOURCE_DIR}/c++/test)
 set (HDF5_HL_SRC_DIR         ${HDF5_SOURCE_DIR}/hl)
 set (HDF5_HL_CPP_SRC_DIR     ${HDF5_SOURCE_DIR}/hl/c++)
 set (HDF5_TOOLS_SRC_DIR      ${HDF5_SOURCE_DIR}/tools)
-set (HDF5_PERFORM_SRC_DIR    ${HDF5_SOURCE_DIR}/perform)
+set (HDF5_PERFORM_SRC_DIR    ${HDF5_SOURCE_DIR}/tools/perform)
 set (HDF5_F90_SRC_DIR        ${HDF5_SOURCE_DIR}/fortran)
 
 if (NOT HDF5_INSTALL_BIN_DIR)
   set (HDF5_INSTALL_BIN_DIR bin)
 endif (NOT HDF5_INSTALL_BIN_DIR)
 if (NOT HDF5_INSTALL_LIB_DIR)
+  if (APPLE)
+    set (HDF5_INSTALL_FMWK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
+  endif (APPLE)
   set (HDF5_INSTALL_LIB_DIR lib)
 endif (NOT HDF5_INSTALL_LIB_DIR)
 if (NOT HDF5_INSTALL_INCLUDE_DIR)
@@ -159,6 +180,15 @@ if (NOT HDF5_INSTALL_INCLUDE_DIR)
 endif (NOT HDF5_INSTALL_INCLUDE_DIR)
 if (NOT HDF5_INSTALL_DATA_DIR)
   if (NOT WIN32)
+    if (APPLE)
+      option (HDF5_BUILD_FRAMEWORKS "Create a Mac OSX Framework" OFF)
+      if (HDF5_BUILD_FRAMEWORKS)
+        set (HDF5_INSTALL_EXTRA_DIR ../SharedSupport)
+      else (HDF5_BUILD_FRAMEWORKS)
+        set (HDF5_INSTALL_EXTRA_DIR share)
+      endif (HDF5_BUILD_FRAMEWORKS)
+      set (HDF5_INSTALL_FWRK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
+    endif (APPLE)
     set (HDF5_INSTALL_DATA_DIR share)
     set (HDF5_INSTALL_CMAKE_DIR share/cmake)
   else (NOT WIN32)
@@ -246,7 +276,7 @@ endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 
 #-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
-# by other projects using FindHDF5. 
+# by other projects using FindHDF5.
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXPORTED_TARGETS)
   set (HDF5_EXPORTED_TARGETS "hdf5-targets")
@@ -270,6 +300,14 @@ include (${HDF_RESOURCES_DIR}/ConfigureChecks.cmake)
 set (CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 
 #-----------------------------------------------------------------------------
+# Mac OS X Options
+#-----------------------------------------------------------------------------
+option (HDF5_BUILD_FRAMEWORKS "TRUE to build as frameworks libraries, FALSE to build according to BUILD_SHARED_LIBS" TRUE)
+if (HDF5_BUILD_FRAMEWORKS AND NOT BUILD_SHARED_LIBS)
+  set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries")
+endif (HDF5_BUILD_FRAMEWORKS AND NOT BUILD_SHARED_LIBS)
+
+#-----------------------------------------------------------------------------
 # Option to Build Shared/Static libs, default is static
 #-----------------------------------------------------------------------------
 option (BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
@@ -283,8 +321,8 @@ if (BUILD_SHARED_LIBS)
 else (BUILD_SHARED_LIBS)
   set (H5_BUILT_AS_STATIC_LIB 1)
   set (H5_ENABLE_STATIC_LIB YES)
-  set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif (BUILD_SHARED_LIBS)
+set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 #-----------------------------------------------------------------------------
 # Option to Build Static executables
@@ -304,7 +342,7 @@ option (HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" O
 if (HDF5_ENABLE_COVERAGE)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -fprofile-arcs -ftest-coverage")
-  set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")   
+  set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
 endif (HDF5_ENABLE_COVERAGE)
 
 #-----------------------------------------------------------------------------
@@ -313,7 +351,7 @@ endif (HDF5_ENABLE_COVERAGE)
 # option (HDF5_ENABLE_USING_DMALLOC "Indicate that dmalloc is used" OFF)
 # if (HDF5_ENABLE_USING_DMALLOC)
 #   find_package (DMALLOC)
-#   set (H5_HAVE_DMALLOC DMALLOC_FOUND)   
+#   set (H5_HAVE_DMALLOC DMALLOC_FOUND)
 # endif (HDF5_ENABLE_USING_DMALLOC)
 
 #-----------------------------------------------------------------------------
@@ -321,7 +359,7 @@ endif (HDF5_ENABLE_COVERAGE)
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
 if (HDF5_ENABLE_USING_MEMCHECKER)
-  set (H5_USING_MEMCHECKER 1)   
+  set (H5_USING_MEMCHECKER 1)
 endif (HDF5_ENABLE_USING_MEMCHECKER)
 
 #-----------------------------------------------------------------------------
@@ -329,9 +367,9 @@ endif (HDF5_ENABLE_USING_MEMCHECKER)
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols" ON)
 if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
-  set (H5_NO_DEPRECATED_SYMBOLS 0)   
+  set (H5_NO_DEPRECATED_SYMBOLS 0)
 else (HDF5_ENABLE_DEPRECATED_SYMBOLS)
-  set (H5_NO_DEPRECATED_SYMBOLS 1)   
+  set (H5_NO_DEPRECATED_SYMBOLS 1)
 endif (HDF5_ENABLE_DEPRECATED_SYMBOLS)
 
 #-----------------------------------------------------------------------------
@@ -369,10 +407,11 @@ endif (MAKE_SYSTEM)
 #-----------------------------------------------------------------------------
 # Add some definitions for Debug Builds
 #-----------------------------------------------------------------------------
+option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
+mark_as_advanced (HDF5_ENABLE_TRACE)
 if (CMAKE_BUILD_TYPE MATCHES Debug)
   add_definitions (-DDEBUG)
   # Enable tracing of the API
-  option (HDF5_ENABLE_TRACE "Enable API tracing capability" ON)
   if (HDF5_ENABLE_TRACE)
     add_definitions (-DH5_DEBUG_API )
   endif (HDF5_ENABLE_TRACE)
@@ -381,36 +420,17 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
   if (HDF5_ENABLE_INSTRUMENT)
     set (H5_HAVE_INSTRUMENTED_LIBRARY 1)
   endif (HDF5_ENABLE_INSTRUMENT)
-  mark_as_advanced (HDF5_Enable_Instrument)
+  mark_as_advanced (HDF5_ENABLE_INSTRUMENT)
   #-- NMake Makefiles will overwhelm the console with warnings if -Wall is used.
   if (NOT WIN32)
     add_definitions (-Wall)
   endif (NOT WIN32)
 else (CMAKE_BUILD_TYPE MATCHES Debug)
   add_definitions (-DNDEBUG)
-  option (HDF5_ENABLE_TRACE "Enable API tracing capability" OFF)
   if (HDF5_ENABLE_TRACE)
     add_definitions (-DH5_DEBUG_API )
   endif (HDF5_ENABLE_TRACE)
 endif (CMAKE_BUILD_TYPE MATCHES Debug)
-
-#-----------------------------------------------------------------------------
-# Compiler specific flags : Shouldn't there be compiler tests for these
-#-----------------------------------------------------------------------------
-if (CMAKE_COMPILER_IS_GNUCC)
-  if (CMAKE_BUILD_TYPE MATCHES Debug)
-    set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99 -finline-functions -fno-common")
-  else (CMAKE_BUILD_TYPE MATCHES Debug)
-    set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS} -std=c99 -fomit-frame-pointer -finline-functions -fno-common")
-  endif (CMAKE_BUILD_TYPE MATCHES Debug)
-endif (CMAKE_COMPILER_IS_GNUCC)
-if (CMAKE_COMPILER_IS_GNUCXX)
-  if (CMAKE_BUILD_TYPE MATCHES Debug)
-    set (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS} -finline-functions -fno-common")
-  else (CMAKE_BUILD_TYPE MATCHES Debug)
-    set (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS} -fomit-frame-pointer -finline-functions -fno-common")
-  endif (CMAKE_BUILD_TYPE MATCHES Debug)
-endif (CMAKE_COMPILER_IS_GNUCXX)
 
 #-----------------------------------------------------------------------------
 # Option to embed library info into executables
@@ -420,210 +440,7 @@ if (HDF5_ENABLE_EMBEDDED_LIBINFO)
   set (H5_HAVE_EMBEDDED_LIBINFO 1)
 endif (HDF5_ENABLE_EMBEDDED_LIBINFO)
 
-#-----------------------------------------------------------------------------
-# Option to allow the user to disable compiler warnings
-#-----------------------------------------------------------------------------
-option (HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings" OFF)
-if (HDF5_DISABLE_COMPILER_WARNINGS)
-  # MSVC uses /w to suppress warnings.  It also complains if another
-  # warning level is given, so remove it.
-  if (MSVC)
-    set (HDF5_WARNINGS_BLOCKED 1)
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
-  endif (MSVC)
-  if (WIN32)
-    add_definitions (-D_CRT_SECURE_NO_WARNINGS)
-  endif (WIN32)
-  # Borland uses -w- to suppress warnings.
-  if (BORLAND)
-    set (HDF5_WARNINGS_BLOCKED 1)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
-  endif (BORLAND)
-
-  # Most compilers use -w to suppress warnings.
-  if (NOT HDF5_WARNINGS_BLOCKED)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-  endif (NOT HDF5_WARNINGS_BLOCKED)
-endif (HDF5_DISABLE_COMPILER_WARNINGS)
-
-#-----------------------------------------------------------------------------
-# CDash is configured to only allow 3000 warnings, so
-# break into groups (from the config/gnu-flags file)
-#-----------------------------------------------------------------------------
-if (NOT MSVC)
-  if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline")
-  else (NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -erroff=%none -DBSD_COMP")
-  endif (NOT ${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-    # Append warning flags
-    # Don't use the '-Wtraditional' flag, we're way past having K&R C code
-    # set (H5_CFLAGS "${H5_CFLAGS} -Wtraditional")
-    # Don't use the '-Wtraditional-conversion' flag, there's too many warnings
-    #  from GCC's assert macro
-    # set (H5_CFLAGS "${H5_CFLAGS} -Wtraditional-conversion")
-
-    # Append warning flags from gcc-3* case
-    # (don't use -Wpadded flag for normal builds, many of the warnings its
-    #   issuing can't be fixed and they are making it hard to detect other,
-    #   more important warnings)
-    #set (H5_CFLAGS "${H5_CFLAGS} -Wfloat-equal -Wmissing-format-attribute -Wpadded")
-    set (H5_CFLAGS1 "${H5_CFLAGS1} -Wfloat-equal -Wmissing-format-attribute")
-
-    # Append warning flags from gcc-3.2* case
-    set (H5_CFLAGS1 "${H5_CFLAGS1} -Wmissing-noreturn -Wpacked -Wdisabled-optimization")
-
-    # Enable more format checking flags, beyond the basic -Wformat included
-    # in -Wall
-    set (H5_CFLAGS1 "${H5_CFLAGS1} -Wformat=2")
-
-    # The "unreachable code" warning appears to be reliable now...
-    # (this warning was removed in gcc 4.5+)
-    #set (H5_CFLAGS "${H5_CFLAGS} -Wunreachable-code")
-
-    # Append warning flags from gcc-3.3* case
-    set (H5_CFLAGS1 "${H5_CFLAGS1} -Wendif-labels")
-
-    # Append warning flags from gcc-3.4* case
-    set (H5_CFLAGS2 "${H5_CFLAGS2} -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch")
-
-    # Append more extra warning flags that only gcc4.0+ know about
-    set (H5_CFLAGS2 "${H5_CFLAGS2} -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros")
-
-    # Append more extra warning flags that only gcc 4.1+ know about
-    set (H5_CFLAGS3 "${H5_CFLAGS3} -Wunsafe-loop-optimizations -Wc++-compat")
-
-    # Append more extra warning flags that only gcc 4.2+ know about
-    set (H5_CFLAGS3 "${H5_CFLAGS3} -Wstrict-overflow")
-
-    # Append more extra warning flags that only gcc 4.3+ know about
-    #
-    # Technically, variable-length arrays are part of the C99 standard, but
-    #   we should approach them a bit cautiously... -QAK
-    set (H5_CFLAGS3 "${H5_CFLAGS3} -Wlogical-op -Wlarger-than=2048 -Wvla")
-
-    # Append more extra warning flags that only gcc 4.4+ know about
-    set (H5_CFLAGS4 "${H5_CFLAGS4} -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat")
-
-    # Append more extra warning flags that only gcc 4.5+ know about
-    set (H5_CFLAGS4 "${H5_CFLAGS4} -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants")
-
-    # Append more extra warning flags that only gcc 4.6+ know about
-    set (H5_CFLAGS5 "${H5_CFLAGS5} -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines")
-
-    # Append more extra warning flags that only gcc 4.7+ know about
-    set (H5_CFLAGS5 "${H5_CFLAGS5} -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
-endif (NOT MSVC)
-  
-#-----------------------------------------------------------------------------
-# Option to allow the user to enable all warnings
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_ALL_WARNINGS "Enable all warnings" OFF)
-if (HDF5_ENABLE_ALL_WARNINGS)
-  if (MSVC)
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Wall")
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
-  else (MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic ${H5_CFLAGS1} ${H5_CFLAGS2} ${H5_CFLAGS3} ${H5_CFLAGS4}")
-  endif (MSVC)
-endif (HDF5_ENABLE_ALL_WARNINGS)
-
-#-----------------------------------------------------------------------------
-# Option to allow the user to enable warnings by groups
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_GROUPZERO_WARNINGS "Enable group zero warnings" OFF)
-if (HDF5_ENABLE_GROUPZERO_WARNINGS)
-  if (MSVC)
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W1")
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W1")
-  else (MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic")
-  endif (MSVC)
-endif (HDF5_ENABLE_GROUPZERO_WARNINGS)
-
-#-----------------------------------------------------------------------------
-# Option to allow the user to enable warnings by groups
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_GROUPONE_WARNINGS "Enable group one warnings" OFF)
-if (HDF5_ENABLE_GROUPONE_WARNINGS)
-  if (MSVC)
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W2")
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W2")
-  else (MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS1}")
-  endif (MSVC)
-endif (HDF5_ENABLE_GROUPONE_WARNINGS)
-
-#-----------------------------------------------------------------------------
-# Option to allow the user to enable warnings by groups
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_GROUPTWO_WARNINGS "Enable group two warnings" OFF)
-if (HDF5_ENABLE_GROUPTWO_WARNINGS)
-  if (MSVC)
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
-  else (MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS2}")
-  endif (MSVC)
-endif (HDF5_ENABLE_GROUPTWO_WARNINGS)
-
-#-----------------------------------------------------------------------------
-# Option to allow the user to enable warnings by groups
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_GROUPTHREE_WARNINGS "Enable group three warnings" OFF)
-if (HDF5_ENABLE_GROUPTHREE_WARNINGS)
-  if (MSVC)
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
-    string (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-  else (MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS3}")
-  endif (MSVC)
-endif (HDF5_ENABLE_GROUPTHREE_WARNINGS)
-
-#-----------------------------------------------------------------------------
-# Option to allow the user to enable warnings by groups
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_GROUPFOUR_WARNINGS "Enable group four warnings" OFF)
-if (HDF5_ENABLE_GROUPFOUR_WARNINGS)
-  if (NOT MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS4}")
-  endif (NOT MSVC)
-endif (HDF5_ENABLE_GROUPFOUR_WARNINGS)
-
-#-----------------------------------------------------------------------------
-# Option to allow the user to enable warnings by groups
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_GROUPFIVE_WARNINGS "Enable group five warnings" OFF)
-if (HDF5_ENABLE_GROUPFIVE_WARNINGS)
-  if (NOT MSVC)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS5}")
-  endif (NOT MSVC)
-endif (HDF5_ENABLE_GROUPFIVE_WARNINGS)
-
-#-----------------------------------------------------------------------------
-# This is in here to help some of the GCC based IDES like Eclipse
-# and code blocks parse the compiler errors and warnings better.
-#-----------------------------------------------------------------------------
-if (CMAKE_COMPILER_IS_GNUCC)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
-endif (CMAKE_COMPILER_IS_GNUCC)
-if (CMAKE_COMPILER_IS_GNUCXX)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
-endif (CMAKE_COMPILER_IS_GNUCXX)
+include (${HDF_RESOURCES_DIR}/HDFCompilerFlags.cmake)
 
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
@@ -643,8 +460,6 @@ if (HDF5_ENABLE_PARALLEL)
     # MPI checks, only do these if MPI_C_FOUND is true, otherwise they always fail
     # and once set, they are cached as false and not regenerated
     set (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}" )
-    CHECK_FUNCTION_EXISTS (MPI_File_get_size H5_HAVE_MPI_GET_SIZE) 
-    set (H5_MPI_FILE_SET_SIZE_BIG 1)
     # Used by Fortran + MPI
     CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
     CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
@@ -762,6 +577,9 @@ endif (HDF5_USE_18_API_DEFAULT)
 #-----------------------------------------------------------------------------
 include (UserMacros.cmake)
 
+#-----------------------------------------------------------------------------
+# Include filter (zlib, szip, etc.) macros
+#-----------------------------------------------------------------------------
 include (CMakeFilters.cmake)
 
 #-----------------------------------------------------------------------------
@@ -774,16 +592,15 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
       PACKAGE_ZLIB_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
     endif (HDF5_ENABLE_Z_LIB_SUPPORT AND ZLIB_FOUND)
-    
+
     if (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
       PACKAGE_SZIP_LIBRARY (${HDF5_ALLOW_EXTERNAL_SUPPORT})
     endif (HDF5_ENABLE_SZIP_SUPPORT AND SZIP_FOUND)
   endif (HDF5_PACKAGE_EXTLIBS)
 endif (NOT HDF5_EXTERNALLY_CONFIGURED)
-
 #-----------------------------------------------------------------------------
 # Option to use threadsafe
-# Note: Currently CMake only allows configuring of threadsafe on 
+# Note: Currently CMake only allows configuring of threadsafe on
 # non-Cygwin WINDOWS.
 #-----------------------------------------------------------------------------
 if (WIN32)
@@ -817,7 +634,7 @@ endif (WIN32)
 
 # -----------------------------------------------------------------------
 # wrapper script variables
-# 
+#
 #set (CFLAGS "${C_DEFINES}")
 #set (CXXFLAGS "${CXX_DEFINES}")
 
@@ -838,7 +655,7 @@ endif (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT 
 #-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
 #-----------------------------------------------------------------------------
-option (BUILD_TESTING "Build HDF5 Unit Testing" OFF)
+option (BUILD_TESTING "Build HDF5 Unit Testing" ON)
 if (BUILD_TESTING)
   set (DART_TESTING_TIMEOUT 1200
       CACHE INTEGER
@@ -851,9 +668,6 @@ if (BUILD_TESTING)
       add_subdirectory (${HDF5_SOURCE_DIR}/tools/lib ${PROJECT_BINARY_DIR}/tools/lib)
       add_subdirectory (${HDF5_SOURCE_DIR}/test      ${PROJECT_BINARY_DIR}/test)
     endif (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
-    if (EXISTS "${HDF5_SOURCE_DIR}/perform" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/perform")
-      add_subdirectory (${HDF5_SOURCE_DIR}/perform   ${PROJECT_BINARY_DIR}/perform)
-    endif (EXISTS "${HDF5_SOURCE_DIR}/perform" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/perform")
     if (H5_HAVE_PARALLEL)
       if (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
         add_subdirectory (${HDF5_SOURCE_DIR}/testpar ${PROJECT_BINARY_DIR}/testpar)
@@ -872,10 +686,41 @@ if (BUILD_TESTING)
     option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
     mark_as_advanced (HDF5_TEST_FHEAP_VFD)
   endif (HDF5_TEST_VFD)
-  
+
   include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
   configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 endif (BUILD_TESTING)
+
+#-----------------------------------------------------------------------------
+# Option to build HDF5 Tools
+#-----------------------------------------------------------------------------
+if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
+  option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" ON)
+  if (HDF5_BUILD_TOOLS)
+    add_subdirectory (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
+  endif (HDF5_BUILD_TOOLS)
+endif (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
+
+#-----------------------------------------------------------------------------
+# Option to build examples
+#-----------------------------------------------------------------------------
+if (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
+  option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" ON)
+  if (HDF5_BUILD_EXAMPLES)
+    add_subdirectory (${HDF5_SOURCE_DIR}/examples ${PROJECT_BINARY_DIR}/examples)
+  endif (HDF5_BUILD_EXAMPLES)
+endif (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
+
+#-----------------------------------------------------------------------------
+# Option to build High Level API's
+#-----------------------------------------------------------------------------
+if (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
+  option (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" ON)
+  if (HDF5_BUILD_HL_LIB)
+    set (H5_INCLUDE_HL 1)
+    add_subdirectory (${HDF5_SOURCE_DIR}/hl ${PROJECT_BINARY_DIR}/hl)
+  endif (HDF5_BUILD_HL_LIB)
+endif (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
 
 #-----------------------------------------------------------------------------
 # Option to build Fortran bindings/tests/examples
@@ -891,7 +736,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
     if (BUILD_SHARED_LIBS AND APPLE)
       message (FATAL_ERROR " **** Shared FORTRAN libraries are unsupported **** ")
     endif (BUILD_SHARED_LIBS AND APPLE)
-    option (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" OFF)
+    option (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" ON)
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
     if (HDF5_ENABLE_F2003)
       if (NOT FORTRAN_HAVE_ISO_C_BINDING)
@@ -901,7 +746,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
 
     # -----------------------------------------------------------------------
     # wrapper script variables
-    # 
+    #
 #    set (FCFLAGS "${Fortran_DEFINES}")
 
     add_subdirectory (${HDF5_SOURCE_DIR}/fortran ${PROJECT_BINARY_DIR}/fortran)
@@ -915,20 +760,10 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
 endif (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/fortran")
 
 #-----------------------------------------------------------------------------
-# Option to build examples
-#-----------------------------------------------------------------------------
-if (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
-  option (HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" OFF)
-  if (HDF5_BUILD_EXAMPLES)
-    add_subdirectory (${HDF5_SOURCE_DIR}/examples ${PROJECT_BINARY_DIR}/examples)
-  endif (HDF5_BUILD_EXAMPLES)
-endif (EXISTS "${HDF5_SOURCE_DIR}/examples" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/examples")
-
-#-----------------------------------------------------------------------------
 # Option to build HDF5 C++ Library
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
-  option (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF)
+  option (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" ON)
   if (HDF5_BUILD_CPP_LIB)
     # check for unsupported options
     if (HDF5_ENABLE_PARALLEL)
@@ -938,29 +773,24 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
       set (H5_NO_STD 1)
     endif (CMAKE_NO_STD_NAMESPACE)
     add_subdirectory (${HDF5_SOURCE_DIR}/c++ ${PROJECT_BINARY_DIR}/c++)
+    if (HDF5_BUILD_HL_LIB)
+      if (EXISTS "${HDF5_SOURCE_DIR}/hl/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/c++")
+        #-- Build the High Level Fortran source codes
+        add_subdirectory (${HDF5_SOURCE_DIR}/hl/c++ ${PROJECT_BINARY_DIR}/hl/c++)
+      endif (EXISTS "${HDF5_SOURCE_DIR}/hl/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/c++")
+    endif (HDF5_BUILD_HL_LIB)
   endif (HDF5_BUILD_CPP_LIB)
 endif (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
 
 #-----------------------------------------------------------------------------
-# Option to build HDF5 Tools
+# Check if Fortran's default real is double precision. If it is and HL is
+# being built then configure should fail due to bug HDFFV-889.
 #-----------------------------------------------------------------------------
-if (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
-  option (HDF5_BUILD_TOOLS  "Build HDF5 Tools" OFF)
-  if (HDF5_BUILD_TOOLS)
-    add_subdirectory (${HDF5_SOURCE_DIR}/tools ${PROJECT_BINARY_DIR}/tools)
-  endif (HDF5_BUILD_TOOLS)
-endif (EXISTS "${HDF5_SOURCE_DIR}/tools" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/tools")
-
-#-----------------------------------------------------------------------------
-# Option to build High Level API's
-#-----------------------------------------------------------------------------
-if (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
-  option (HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" OFF)
-  if (HDF5_BUILD_HL_LIB)
-    set (H5_INCLUDE_HL 1)
-    add_subdirectory (${HDF5_SOURCE_DIR}/hl ${PROJECT_BINARY_DIR}/hl)
-  endif (HDF5_BUILD_HL_LIB)
-endif (EXISTS "${HDF5_SOURCE_DIR}/hl" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl")
+ if (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB )
+   if (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
+     message (FATAL_ERROR " **** Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use HDF5_BUILD_HL_LIB:BOOL=OFF **** ")
+   endif (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
+ endif (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB )
 
 #-----------------------------------------------------------------------------
 # Generate the H5pubconf.h file containing user settings needed by compilation

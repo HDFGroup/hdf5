@@ -37,7 +37,7 @@
 /* The private request structure */
 typedef struct H5_priv_request_t {
     void   *req;            /* pointer to the request belonging to a VOL plugin */
-    H5VL_t *vol_plugin;     /* the vol plugin that owns this request */
+    H5VL_class_t *vol_cls;  /* the vol plugin class that gnerated this request */
     H5ES_status_t status;
     struct H5_priv_request_t *prev;
     struct H5_priv_request_t *next;

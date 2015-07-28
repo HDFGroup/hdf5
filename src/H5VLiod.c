@@ -138,13 +138,12 @@ static void *H5VL_iod_attribute_open(void *obj, H5VL_loc_params_t loc_params, co
 static herr_t H5VL_iod_attribute_read(void *attr, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_attribute_write(void *attr, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_attribute_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_iod_attribute_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_attr_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_attr_specific_t specific_type, hid_t dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments);
 static herr_t H5VL_iod_attribute_close(void *attr, hid_t dxpl_id, void **req);
 
 /* Datatype callbacks */
 static void *H5VL_iod_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_iod_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
-static ssize_t H5VL_iod_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
@@ -155,7 +154,8 @@ static herr_t H5VL_iod_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_spa
                                     hid_t file_space_id, hid_t plist_id, void *buf, void **req);
 static herr_t H5VL_iod_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                      hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
-static herr_t H5VL_iod_dataset_set_extent(void *dset, const hsize_t size[], hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_dataset_specific(void *_dset, H5VL_dataset_specific_t specific_type,
+                                        hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_dataset_close(void *dset, hid_t dxpl_id, void **req);
 
@@ -174,24 +174,22 @@ static herr_t H5VL_iod_group_close(void *grp, hid_t dxpl_id, void **req);
 /* Link callbacks */
 static herr_t H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *obj, 
                                    H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_link_copy(void *src_obj, H5VL_loc_params_t loc_params1,
+                                 void *dst_obj, H5VL_loc_params_t loc_params2,
+                                 hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
                                  void *dst_obj, H5VL_loc_params_t loc_params2,
-                                 hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
-//static herr_t H5VL_iod_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
-//H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-//H5L_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
+                                 hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_iod_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_link_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_specific_t specific_type, 
+                                     hid_t dxpl_id, void **req, va_list arguments);
 
 /* Object callbacks */
 static void *H5VL_iod_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
-//static herr_t H5VL_iod_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
-//void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
-//hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
-//static herr_t H5VL_iod_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
-//H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_iod_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_object_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, 
+                                       hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_object_optional(void *_obj, hid_t dxpl_id, void **req, va_list arguments);
 
 static herr_t H5VL_iod_cancel(void **req, H5ES_status_t *status);
 static herr_t H5VL_iod_test(void **req, H5ES_status_t *status);
@@ -211,7 +209,8 @@ H5FL_DEFINE(H5VL_iod_dset_t);
 H5FL_DEFINE(H5VL_iod_dtype_t);
 
 static H5VL_class_t H5VL_iod_g = {
-    IOD,
+    HDF5_VOL_NATIVE_VERSION_1,                  /* Version number */
+    H5_VOL_IOD,                                 /* Plugin value */
     "iod",					/* name */
     NULL,                                       /* initialize */
     NULL,                                       /* terminate */
@@ -223,33 +222,34 @@ static H5VL_class_t H5VL_iod_g = {
         H5VL_iod_attribute_open,                /* open */
         H5VL_iod_attribute_read,                /* read */
         H5VL_iod_attribute_write,               /* write */
-        NULL,//H5VL_iod_attr_iterate,               /* iterate */
         H5VL_iod_attribute_get,                 /* get */
-        H5VL_iod_attribute_remove,              /* remove */
+        H5VL_iod_attribute_specific,            /* specific */
+        NULL,                                   /* optional */
         H5VL_iod_attribute_close                /* close */
-    },
-    {                                           /* datatype_cls */
-        H5VL_iod_datatype_commit,               /* commit */
-        H5VL_iod_datatype_open,                 /* open */
-        H5VL_iod_datatype_get_binary,           /* get_size */
-        H5VL_iod_datatype_get,                  /* get */
-        H5VL_iod_datatype_close                 /* close */
     },
     {                                           /* dataset_cls */
         H5VL_iod_dataset_create,                /* create */
         H5VL_iod_dataset_open,                  /* open */
         H5VL_iod_dataset_read,                  /* read */
         H5VL_iod_dataset_write,                 /* write */
-        H5VL_iod_dataset_set_extent,            /* set extent */
         H5VL_iod_dataset_get,                   /* get */
+        H5VL_iod_dataset_specific,              /* specific */
+        NULL,                                   /* optional */
         H5VL_iod_dataset_close                  /* close */
+    },
+    {                                           /* datatype_cls */
+        H5VL_iod_datatype_commit,               /* commit */
+        H5VL_iod_datatype_open,                 /* open */
+        H5VL_iod_datatype_get,                  /* get */
+        NULL,                                   /* specific */
+        NULL,                                   /* optional */
+        H5VL_iod_datatype_close                 /* close */
     },
     {                                           /* file_cls */
         H5VL_iod_file_create,                   /* create */
         H5VL_iod_file_open,                     /* open */
-        NULL,                                   /* flush */
         H5VL_iod_file_get,                      /* get */
-        NULL,                                   /* misc */
+        NULL,                                   /* specific */
         NULL,                                   /* optional */
         H5VL_iod_file_close                     /* close */
     },
@@ -257,29 +257,31 @@ static H5VL_class_t H5VL_iod_g = {
         H5VL_iod_group_create,                  /* create */
         H5VL_iod_group_open,                    /* open */
         H5VL_iod_group_get,                     /* get */
+        NULL,                                   /* specific */
+        NULL,                                   /* optional */
         H5VL_iod_group_close                    /* close */
     },
     {                                           /* link_cls */
         H5VL_iod_link_create,                   /* create */
+        H5VL_iod_link_copy,                     /* copy */
         H5VL_iod_link_move,                     /* move */
-        NULL,                                   /* iterate */
         H5VL_iod_link_get,                      /* get */
-        H5VL_iod_link_remove                    /* remove */
+        H5VL_iod_link_specific,                 /* specific */
+        NULL                                    /* optional */
     },
     {                                           /* object_cls */
         H5VL_iod_object_open,                   /* open */
         NULL,                                   /* copy */
-        NULL,                                   /* visit */
         H5VL_iod_object_get,                    /* get */
-        H5VL_iod_object_misc,                   /* misc */
-        NULL,                                   /* optional */
-        NULL                                    /* close */
+        H5VL_native_object_specific,            /* specific */
+        H5VL_native_object_optional             /* optional */
     },
     {
         H5VL_iod_cancel,
         H5VL_iod_test,
         H5VL_iod_wait
-    }
+    };
+    NULL
 };
 
 
@@ -1423,74 +1425,6 @@ H5VL_iod_file_get(void *_obj, H5VL_file_get_t get_type, hid_t UNUSED dxpl_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_file_get() */
-
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_file_misc
- *
- * Purpose:	Perform an operation
- *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              April, 2013
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL_iod_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t dxpl_id, 
-                   void **req, va_list arguments)
-{
-    herr_t       ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    switch (misc_type) {
-        /* H5Fis_accessible */
-        case H5VL_FILE_IS_ACCESSIBLE:
-            {
-                hid_t fapl_id       = va_arg (arguments, hid_t);
-                const char *name    = va_arg (arguments, const char *);
-                htri_t     *ret     = va_arg (arguments, htri_t *);
-                H5VL_iod_file_t *file = NULL;
-#if 0
-                /* attempt to open the file through the MDS plugin */
-                if(NULL == (file = (H5VL_iod_file_t *)H5VL_iod_file_open(name, H5F_ACC_RDONLY, fapl_id,
-                                                                         H5_REQUEST_NULL)))
-                    *ret = FALSE;
-                else
-                    *ret = TRUE;
-
-                /* close the file if it was succesfully opened */
-                if(file && H5VL_iod_file_close((void*)file, H5_REQUEST_NULL) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file");
-                break;
-#endif
-            }
-        /* H5Fmount */
-        case H5VL_FILE_MOUNT:
-            {
-                H5I_type_t type        = va_arg (arguments, H5I_type_t);
-                const char *name       = va_arg (arguments, const char *);
-                H5VL_iod_file_t *child = va_arg (arguments, H5VL_iod_file_t *);
-                hid_t plist_id         = va_arg (arguments, hid_t);
-            }
-        /* H5Fmount */
-        case H5VL_FILE_UNMOUNT:
-            {
-                H5I_type_t  type       = va_arg (arguments, H5I_type_t);
-                const char *name       = va_arg (arguments, const char *);
-            }
-        default:
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "MDS Plugin does not support this operation type")
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_file_misc() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -2942,18 +2876,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
-H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], 
-                            hid_t dxpl_id, void **req)
+static herr_t 
+H5VL_iod_dataset_specific(void *_dset, H5VL_dataset_specific_t specific_type,
+                          hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
-    dset_set_extent_in_t input;
-    int *status = NULL;
-    size_t num_parents = 0;
-    hid_t trans_id;
-    H5TR_t *tr = NULL;
-    H5P_genplist_t *plist = NULL;
-    H5VL_iod_request_t **parent_reqs = NULL;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2968,64 +2895,84 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[],
         dset->common.request = NULL;
     }
 
-    input.dims.rank = H5Sget_simple_extent_ndims(dset->remote_dset.space_id);
-    if(0 == input.dims.rank)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't extend dataset with scalar dataspace");
+    switch (specific_type) {
+        /* H5Dspecific_space */
+        case H5VL_DATASET_SET_EXTENT:
+            {
+                dset_set_extent_in_t input;
+                int *status = NULL;
+                size_t num_parents = 0;
+                hid_t trans_id;
+                H5TR_t *tr = NULL;
+                H5P_genplist_t *plist = NULL;
+                H5VL_iod_request_t **parent_reqs = NULL;
+                const hsize_t *size = va_arg (arguments, const hsize_t *); 
 
-    /* get the transaction ID */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
-    /* get the TR object */
-    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
+                input.dims.rank = H5Sget_simple_extent_ndims(dset->remote_dset.space_id);
+                if(0 == input.dims.rank)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't extend dataset with scalar dataspace");
 
-    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
-                H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+                /* get the transaction ID */
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+                if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+                /* get the TR object */
+                if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
 
-    /* retrieve parent requests */
-    if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)tr, 
-                                    parent_reqs, &num_parents) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+                        if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                                    H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
+                            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
 
-    /* Fill input structure */
-    input.coh = dset->common.file->remote_file.coh;
-    input.iod_oh = dset->remote_dset.iod_oh;
-    input.iod_id = dset->remote_dset.iod_id;
-    input.mdkv_id = dset->remote_dset.mdkv_id;
-    input.space_id = dset->remote_dset.space_id;
-    input.dims.size = size;
-    input.trans_num = tr->trans_num;
-    input.rcxt_num  = tr->c_version;
-    input.cs_scope = dset->common.file->md_integrity_scope;
+                /* retrieve parent requests */
+                if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)tr, 
+                                                parent_reqs, &num_parents) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+                /* Fill input structure */
+                input.coh = dset->common.file->remote_file.coh;
+                input.iod_oh = dset->remote_dset.iod_oh;
+                input.iod_id = dset->remote_dset.iod_id;
+                input.mdkv_id = dset->remote_dset.mdkv_id;
+                input.space_id = dset->remote_dset.space_id;
+                input.dims.size = size;
+                input.trans_num = tr->trans_num;
+                input.rcxt_num  = tr->c_version;
+                input.cs_scope = dset->common.file->md_integrity_scope;
 
 #if H5_EFF_DEBUG
-    printf("Dataset Set Extent (rank %d size %zu), axe id %"PRIu64"\n",
-           input.dims.rank, input.dims.size[0], g_axe_id);
+                printf("Dataset Set Extent (rank %d size %zu), axe id %"PRIu64"\n",
+                       input.dims.rank, input.dims.size[0], g_axe_id);
 #endif
 
-    status = (int *)malloc(sizeof(int));
+                status = (int *)malloc(sizeof(int));
 
-    if(H5VL__iod_create_and_forward(H5VL_DSET_SET_EXTENT_ID, HG_DSET_SET_EXTENT, 
-                                    (H5VL_iod_object_t *)dset, 1,
-                                    num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset set_extent");
+                if(H5VL__iod_create_and_forward(H5VL_DSET_SET_EXTENT_ID, HG_DSET_SET_EXTENT, 
+                                                (H5VL_iod_object_t *)dset, 1,
+                                                num_parents, parent_reqs,
+                                                (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset set_extent");
 
-    /* modify the local dataspace of the dataset */
-    {
-        H5S_t   *space;                     /* Dataset's dataspace */
+                /* modify the local dataspace of the dataset */
+                {
+                    H5S_t   *space;                     /* Dataset's dataspace */
 
-	if(NULL == (space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
-                                                       H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+                    if(NULL == (space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
+                                                                   H5I_DATASPACE)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
-        /* Modify the size of the data space */
-        if(H5S_set_extent(space, size) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space");
+                    /* Modify the size of the data space */
+                    if(H5S_set_extent(space, size) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space");
+                }
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
     }
+
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_set_extent() */
@@ -3516,39 +3463,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_datatype_get_binary
- *
- * Purpose:	gets size required to encode the datatype
- *
- * Return:	Success:	datatype id. 
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              April, 2013
- *
- *-------------------------------------------------------------------------
- */
-static ssize_t
-H5VL_iod_datatype_get_binary(void *obj, unsigned char *buf, size_t size, 
-                             hid_t UNUSED dxpl_id, void UNUSED **req)
-{
-    H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
-    size_t       nalloc = size;
-    ssize_t      ret_value = FAIL;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    if(H5Tencode(dtype->remote_dtype.type_id, buf, &nalloc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't determine serialized length of datatype")
-
-    ret_value = (ssize_t) nalloc;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_datatype_get_binary() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_datatype_get
  *
  * Purpose:	Gets certain information about a datatype
@@ -3562,14 +3476,26 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_datatype_get(void UNUSED *obj, H5VL_datatype_get_t get_type, 
-                      hid_t UNUSED dxpl_id, void UNUSED **req, va_list UNUSED arguments)
+H5VL_iod_datatype_get(void *obj, H5VL_datatype_get_t get_type, 
+                      hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t       ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     switch (get_type) {
+        case H5VL_DATATYPE_GET_BINARY:
+            {
+                ssize_t *nalloc = va_arg (arguments, ssize_t *);
+                void *buf = va_arg (arguments, void *);
+                size_t size = va_arg (arguments, size_t);
+
+                if(H5Tencode(dtype->remote_dtype.type_id, buf, &size) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't determine serialized length of datatype")
+
+                *nalloc = (ssize_t) size;
+                break;
+            }
         /* H5Tget_create_plist */
         case H5VL_DATATYPE_GET_TCPL:
             {
@@ -4293,111 +4219,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_attribute_remove
- *
- * Purpose:	Set Extent of attribute
- *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              October, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *attr_name, 
-                          hid_t dxpl_id, void **req)
-{
-    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the attribute */
-    attr_op_in_t input;
-    iod_obj_id_t iod_id, attrkv_id;
-    iod_handles_t iod_oh;
-    size_t num_parents = 0;
-    hid_t trans_id;
-    H5TR_t *tr = NULL;
-    H5P_genplist_t *plist = NULL;
-    H5VL_iod_request_t **parent_reqs = NULL;
-    int *status = NULL;
-    char *loc_name = NULL;
-    herr_t ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* get the transaction ID */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
-
-    /* get the TR object */
-    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
-
-    /* allocate parent request array */
-    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
-                H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
-
-    /* retrieve parent requests */
-    if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
-
-    /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
-
-    /* MSC - If location object not opened yet, wait for it. */
-    if(IOD_OBJ_INVALID == iod_id) {
-        /* Synchronously wait on the request attached to the dataset */
-        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
-            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        obj->request = NULL;
-        /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
-    }
-
-    if(H5VL_OBJECT_BY_SELF == loc_params.type)
-        loc_name = strdup(".");
-    else if(H5VL_OBJECT_BY_NAME == loc_params.type)
-        loc_name = strdup(loc_params.loc_data.loc_by_name.name);
-
-    /* set the input structure for the HG encode routine */
-    input.coh = obj->file->remote_file.coh;
-    input.cs_scope = obj->file->md_integrity_scope;
-    input.loc_id = iod_id;
-    input.loc_attrkv_id = attrkv_id;
-    input.loc_oh = iod_oh;
-    input.path = loc_name;
-    input.attr_name = attr_name;
-    input.trans_num = tr->trans_num;
-    input.rcxt_num  = tr->c_version;
-
-    status = (int *)malloc(sizeof(int));
-
-#if H5_EFF_DEBUG
-    printf("Attribute Remove loc %s name %s, axe id %"PRIu64"\n", 
-           loc_name, attr_name, g_axe_id);
-#endif
-
-    if(H5VL__iod_create_and_forward(H5VL_ATTR_REMOVE_ID, HG_ATTR_REMOVE, 
-                                    (H5VL_iod_object_t *)obj, 1, 
-                                    num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute remove");
-
-done:
-    if(loc_name) {
-        HDfree(loc_name);
-        loc_name = NULL;
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_attribute_remove() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_attribute_get
  *
  * Purpose:	Gets certain information about a attribute
@@ -4505,13 +4326,162 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 }
                 break;
             }
+        /* H5Aget_info */
+        case H5VL_ATTR_GET_INFO:
+            {
+#if 0
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                H5A_info_t *ainfo = va_arg (arguments, H5A_info_t *);
+
+                if(H5VL_OBJECT_BY_SELF == loc_params.type) {
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get attr info")
+                }
+                else if(H5VL_OBJECT_BY_NAME == loc_params.type) {
+                    char *attr_name = va_arg (arguments, char *);
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get attr info")
+                }
+                else if(H5VL_OBJECT_BY_IDX == loc_params.type) {
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get attr info")
+                }
+                else
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get attr info")
+#endif
+                break;
+            }
+        case H5VL_ATTR_GET_STORAGE_SIZE:
+            {
+                //hsize_t *ret = va_arg (arguments, hsize_t *);
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get attr storage size");
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from attr")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_attribute_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_attr_specific
+ *
+ * Purpose:	Specific operations for attributes
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_attr_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_attr_specific_t specific_type, 
+                       hid_t dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location of operation */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (specific_type) {
+        case H5VL_ATTR_DELETE:
+            {
+                char    *attr_name = va_arg (arguments, char *);
+                attr_op_in_t input;
+                iod_obj_id_t iod_id, attrkv_id;
+                iod_handles_t iod_oh;
+                size_t num_parents = 0;
+                hid_t trans_id;
+                H5TR_t *tr = NULL;
+                H5P_genplist_t *plist = NULL;
+                H5VL_iod_request_t **parent_reqs = NULL;
+                int *status = NULL;
+                char *loc_name = NULL;
+
+                /* get the transaction ID */
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+                if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+
+                /* get the TR object */
+                if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID");
+
+                /* allocate parent request array */
+                if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                            H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+                /* retrieve parent requests */
+                if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+                /* retrieve IOD info of location object */
+                if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == iod_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
+
+                if(H5VL_OBJECT_BY_SELF == loc_params.type)
+                    loc_name = strdup(".");
+                else if(H5VL_OBJECT_BY_NAME == loc_params.type)
+                    loc_name = strdup(loc_params.loc_data.loc_by_name.name);
+
+                /* set the input structure for the HG encode routine */
+                input.coh = obj->file->remote_file.coh;
+                input.cs_scope = obj->file->md_integrity_scope;
+                input.loc_id = iod_id;
+                input.loc_attrkv_id = attrkv_id;
+                input.loc_oh = iod_oh;
+                input.path = loc_name;
+                input.attr_name = attr_name;
+                input.trans_num = tr->trans_num;
+                input.rcxt_num  = tr->c_version;
+
+                status = (int *)malloc(sizeof(int));
+
+#if H5_EFF_DEBUG
+                printf("Attribute Remove loc %s name %s, axe id %"PRIu64"\n", 
+                       loc_name, attr_name, g_axe_id);
+#endif
+
+                if(H5VL__iod_create_and_forward(H5VL_ATTR_REMOVE_ID, HG_ATTR_REMOVE, 
+                                                (H5VL_iod_object_t *)obj, 1, 
+                                                num_parents, parent_reqs,
+                                                (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute remove");
+
+                HDfree(loc_name);
+                loc_name = NULL;
+
+                break;
+            }
         /* H5Aexists/exists_by_name */
         case H5VL_ATTR_EXISTS:
             {
-                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
-                char *attr_name = va_arg (arguments, char *);
-                htri_t *ret = va_arg (arguments, htri_t *);
+                const char *attr_name = va_arg (arguments, const char *);
+                htri_t	*ret = va_arg (arguments, htri_t *);
                 attr_op_in_t input;
+                size_t num_parents = 0;
+                hid_t rcxt_id;
+                H5RC_t *rc = NULL;
+                H5P_genplist_t *plist = NULL;
+                iod_obj_id_t iod_id, mdkv_id, attrkv_id;
+                iod_handles_t iod_oh;
+                H5VL_iod_request_t **parent_reqs = NULL;
+                char *loc_name = NULL;
 
                 /* get the context ID */
                 if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -4578,41 +4548,54 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                     HDfree(loc_name);
                 break;
             }
-        /* H5Aget_info */
-        case H5VL_ATTR_GET_INFO:
+        /* H5Arename/rename_by_name */
+        case H5VL_ATTR_RENAME:
             {
-#if 0
-                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
-                H5A_info_t *ainfo = va_arg (arguments, H5A_info_t *);
+                const char    *old_name  = va_arg (arguments, const char *);
+                const char    *new_name  = va_arg (arguments, const char *);
+                attr_rename_in_t input;
 
-                if(H5VL_OBJECT_BY_SELF == loc_params.type) {
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get attr info")
-                }
-                else if(H5VL_OBJECT_BY_NAME == loc_params.type) {
-                    char *attr_name = va_arg (arguments, char *);
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get attr info")
-                }
-                else if(H5VL_OBJECT_BY_IDX == loc_params.type) {
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get attr info")
-                }
-                else
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get attr info")
+                if(H5VL_OBJECT_BY_SELF == loc_params.type)
+                    loc_name = strdup(".");
+                else if(H5VL_OBJECT_BY_NAME == loc_params.type)
+                    loc_name = strdup(loc_params.loc_data.loc_by_name.name);
+
+                /* set the input structure for the HG encode routine */
+                input.coh = obj->file->remote_file.coh;
+                input.old_attr_name = old_name;
+                input.new_attr_name = new_name;
+                input.loc_id = iod_id;
+                input.loc_attrkv_id = attrkv_id;
+                input.loc_oh = iod_oh;
+                input.path = loc_name;
+                input.trans_num = tr->trans_num;
+                input.rcxt_num  = tr->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
+
+#if H5_EFF_DEBUG
+                printf("Attribute Rename %s to %s LOC ID %"PRIu64", axe id %"PRIu64"\n", 
+                       old_name, new_name, input.loc_id, g_axe_id);
 #endif
-                break;
-            }
-        case H5VL_ATTR_GET_STORAGE_SIZE:
-            {
-                //hsize_t *ret = va_arg (arguments, hsize_t *);
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get attr storage size");
-                break;
-            }
-        default:
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from attr")
-    }
 
+                status = (herr_t *)malloc(sizeof(herr_t));
+
+                if(H5VL__iod_create_and_forward(H5VL_ATTR_RENAME_ID, HG_ATTR_RENAME, 
+                                                obj, 1, num_parents, parent_reqs,
+                                                (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute rename");
+
+                if(loc_name) 
+                    HDfree(loc_name);
+
+                break;
+            }
+        case H5VL_ATTR_ITER:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_attribute_get() */
+} /* end H5VL_iod_attr_specific() */
 
 
 /*-------------------------------------------------------------------------
@@ -4960,6 +4943,132 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_link_copy
+ *
+ * Purpose:	
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_link_copy(void *_src_obj, H5VL_loc_params_t loc_params1, 
+                   void *_dst_obj, H5VL_loc_params_t loc_params2,
+                   hid_t lcpl_id, hid_t lapl_id, 
+                   hid_t dxpl_id, void **req)
+{
+    H5VL_iod_object_t *src_obj = (H5VL_iod_object_t *)_src_obj;
+    H5VL_iod_object_t *dst_obj = (H5VL_iod_object_t *)_dst_obj;
+    link_move_in_t input;
+    int *status = NULL;
+    H5VL_iod_request_t **parent_reqs = NULL;
+    H5P_genplist_t *plist = NULL;
+    size_t num_parents = 0;
+    hid_t trans_id;
+    H5TR_t *tr = NULL;
+    char *src_name = NULL, *dst_name = NULL;
+    herr_t ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get the transaction ID */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
+
+    /* allocate parent request array */
+    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                H5MM_malloc(sizeof(H5VL_iod_request_t *) * 3)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+    /* retrieve parent requests */
+    if(H5VL_iod_get_parent_requests(src_obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+    /* retrieve IOD info of location object */
+    if(H5VL_iod_get_loc_info(src_obj, &input.src_loc_id, &input.src_loc_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == input.src_loc_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(src_obj->file, src_obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        src_obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(src_obj, &input.src_loc_id, 
+                                 &input.src_loc_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+    }
+
+    if(H5VL_OBJECT_BY_SELF == loc_params1.type)
+        src_name = strdup(".");
+    else if(H5VL_OBJECT_BY_NAME == loc_params1.type)
+        src_name = strdup(loc_params1.loc_data.loc_by_name.name);
+
+    /* retrieve parent requests */
+    if(H5VL_iod_get_parent_requests(dst_obj, NULL, parent_reqs, &num_parents) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+    /* retrieve IOD info of location object */
+    if(H5VL_iod_get_loc_info(dst_obj, &input.dst_loc_id, &input.dst_loc_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+    /* MSC - If location object not opened yet, wait for it. */
+    if(IOD_OBJ_INVALID == input.dst_loc_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(dst_obj->file, dst_obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        dst_obj->request = NULL;
+        /* retrieve IOD info of location object */
+        if(H5VL_iod_get_loc_info(dst_obj, &input.dst_loc_id, 
+                                 &input.dst_loc_oh, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+    }
+
+    if(H5VL_OBJECT_BY_SELF == loc_params2.type)
+        dst_name = strdup(".");
+    else if(H5VL_OBJECT_BY_NAME == loc_params2.type)
+        dst_name = strdup(loc_params2.loc_data.loc_by_name.name);
+
+    /* set the input structure for the HG encode routine */
+    input.coh = src_obj->file->remote_file.coh;
+    input.copy_flag = TRUE;
+    input.src_loc_name = src_name;
+    input.dst_loc_name = dst_name;
+    input.lcpl_id = lcpl_id;
+    input.lapl_id = lapl_id;
+    input.trans_num = tr->trans_num;
+    input.rcxt_num  = tr->c_version;
+    input.cs_scope = src_obj->file->md_integrity_scope;
+
+    status = (herr_t *)malloc(sizeof(herr_t));
+
+    if(H5VL__iod_create_and_forward(H5VL_LINK_MOVE_ID, HG_LINK_MOVE, dst_obj, 1,
+                                    num_parents, parent_reqs,
+                                    (H5VL_iod_req_info_t *)tr, &input, 
+                                    status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link move");
+
+done:
+    if(src_name) 
+        free(src_name);
+    if(dst_name) 
+        free(dst_name);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_link_copy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_link_move
  *
  * Purpose:	Renames an object within an HDF5 file and moves it to a new
@@ -4979,7 +5088,7 @@ done:
 herr_t
 H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1, 
                    void *_dst_obj, H5VL_loc_params_t loc_params2,
-                   hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, 
+                   hid_t lcpl_id, hid_t lapl_id, 
                    hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *src_obj = (H5VL_iod_object_t *)_src_obj;
@@ -5063,7 +5172,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
 
     /* if the object, to be moved is open locally, then update its
        link information */
-    if(!copy_flag && 0 == strcmp(src_name, ".")) {
+    if(0 == strcmp(src_name, ".")) {
         char *link_name = NULL;
 
         /* generate the entire path of the new link */
@@ -5083,7 +5192,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
 
     /* set the input structure for the HG encode routine */
     input.coh = src_obj->file->remote_file.coh;
-    input.copy_flag = copy_flag;
+    input.copy_flag = FALSE;
     input.src_loc_name = src_name;
     input.dst_loc_name = dst_name;
     input.lcpl_id = lcpl_id;
@@ -5108,36 +5217,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_move() */
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_link_iterate
- *
- * Purpose:	Iterates through links in a group
- *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              May, 2013
- *
- *-------------------------------------------------------------------------
- */
-static herr_t H5VL_iod_link_iterate(void UNUSED *_obj, H5VL_loc_params_t UNUSED loc_params, 
-                                    hbool_t UNUSED recursive, 
-                                    H5_index_t UNUSED idx_type, H5_iter_order_t UNUSED order, 
-                                    hsize_t UNUSED *idx, 
-                                    H5L_iterate_t UNUSED op, void UNUSED *op_data, 
-                                    hid_t UNUSED dxpl_id, void UNUSED **req)
-{
-    //H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
-    //herr_t ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5VL_iod_link_iterate() */
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_link_get
@@ -5204,40 +5284,6 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
     }
 
     switch (get_type) {
-        /* H5Lexists */
-        case H5VL_LINK_EXISTS:
-            {
-                link_op_in_t input;
-                htri_t *ret    = va_arg (arguments, htri_t *);
-
-                if(H5VL_OBJECT_BY_SELF == loc_params.type)
-                    loc_name = strdup(".");
-                else if(H5VL_OBJECT_BY_NAME == loc_params.type)
-                    loc_name = strdup(loc_params.loc_data.loc_by_name.name);
-
-                /* set the input structure for the HG encode routine */
-                input.coh = obj->file->remote_file.coh;
-                input.loc_id = iod_id;
-                input.loc_oh = iod_oh;
-                input.rcxt_num  = rc->c_version;
-                input.cs_scope = obj->file->md_integrity_scope;
-                input.trans_num  = 0;
-                input.path = loc_name;
-
-#if H5_EFF_DEBUG
-                printf("Link Exists axe %"PRIu64": %s ID %"PRIu64"\n", 
-                       g_axe_id, loc_name, input.loc_id);
-#endif
-
-                if(H5VL__iod_create_and_forward(H5VL_LINK_EXISTS_ID, HG_LINK_EXISTS, 
-                                                obj, 0, num_parents, parent_reqs,
-                                                (H5VL_iod_req_info_t *)rc, &input, ret, ret, req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link exists");
-
-                if(loc_name) 
-                    HDfree(loc_name);
-                break;
-            }
         /* H5Lget_info/H5Lget_info_by_idx */
         case H5VL_LINK_GET_INFO:
             {
@@ -5330,101 +5376,161 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_link_remove
+ * Function:	H5VL_iod_link_specific
  *
- * Purpose:	Removes the specified NAME from the group graph and
- *		decrements the link count for the object to which NAME
- *		points.  If the link count reaches zero then all file-space
- *		associated with the object will be reclaimed (but if the
- *		object is open, then the reclamation of the file space is
- *		delayed until all handles to the object are closed).
+ * Purpose:	Specific operations with links
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Success:	0
+ *		Failure:	-1
  *
  * Programmer:  Mohamad Chaarawi
- *              May, 2013
+ *              April, 2012
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
-H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req)
+static herr_t
+H5VL_iod_link_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
-    link_op_in_t input;
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
-    hid_t trans_id;
-    H5TR_t *tr = NULL;
+    hid_t rcxt_id;
+    H5RC_t *rc = NULL;
     H5P_genplist_t *plist = NULL;
-    int *status = NULL;
+    iod_obj_id_t iod_id;
+    iod_handles_t iod_oh;
     char *loc_name = NULL;
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* get the transaction ID */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+    switch (specific_type) {
+        /* H5Lexists */
+        case H5VL_LINK_EXISTS:
+            {
+                H5VL_iod_request_t **parent_reqs = NULL;
+                size_t num_parents = 0;
+                hid_t rcxt_id;
+                H5RC_t *rc = NULL;
+                H5P_genplist_t *plist = NULL;
+                iod_obj_id_t iod_id;
+                iod_handles_t iod_oh;
+                char *loc_name = NULL;
+                link_op_in_t input;
+                htri_t *ret    = va_arg (arguments, htri_t *);
 
-    /* get the TR object */
-    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
+                if(H5VL_OBJECT_BY_SELF == loc_params.type)
+                    loc_name = strdup(".");
+                else if(H5VL_OBJECT_BY_NAME == loc_params.type)
+                    loc_name = strdup(loc_params.loc_data.loc_by_name.name);
 
-    /* allocate parent request array */
-    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
-                H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
-
-    /* retrieve parent requests */
-    if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
-
-    /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
-
-    /* MSC - If location object not opened yet, wait for it. */
-    if(IOD_OBJ_INVALID == input.loc_id) {
-        /* Synchronously wait on the request attached to the dataset */
-        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
-            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        obj->request = NULL;
-        /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
-    }
-
-    if(H5VL_OBJECT_BY_SELF == loc_params.type)
-        loc_name = strdup(".");
-    else if(H5VL_OBJECT_BY_NAME == loc_params.type)
-        loc_name = strdup(loc_params.loc_data.loc_by_name.name);
-
-    /* set the input structure for the HG encode routine */
-    input.coh = obj->file->remote_file.coh;
-    input.path = loc_name;
-    input.trans_num = tr->trans_num;
-    input.rcxt_num  = tr->c_version;
-    input.cs_scope = obj->file->md_integrity_scope;
+                /* set the input structure for the HG encode routine */
+                input.coh = obj->file->remote_file.coh;
+                input.loc_id = iod_id;
+                input.loc_oh = iod_oh;
+                input.rcxt_num  = rc->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
+                input.trans_num  = 0;
+                input.path = loc_name;
 
 #if H5_EFF_DEBUG
-    printf("Link Remove axe %"PRIu64": %s ID %"PRIu64"\n", 
-           g_axe_id, loc_name, input.loc_id);
+                printf("Link Exists axe %"PRIu64": %s ID %"PRIu64"\n", 
+                       g_axe_id, loc_name, input.loc_id);
 #endif
 
-    status = (int *)malloc(sizeof(int));
+                if(H5VL__iod_create_and_forward(H5VL_LINK_EXISTS_ID, HG_LINK_EXISTS, 
+                                                obj, 0, num_parents, parent_reqs,
+                                                (H5VL_iod_req_info_t *)rc, &input, ret, ret, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link exists");
 
-    if(H5VL__iod_create_and_forward(H5VL_LINK_REMOVE_ID, HG_LINK_REMOVE, obj, 1, 
-                                    num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link remove");
+                if(loc_name) 
+                    HDfree(loc_name);
+                break;
+            }
+        case H5VL_LINK_DELETE:
+            {
+                link_op_in_t input;
+                H5VL_iod_request_t **parent_reqs = NULL;
+                size_t num_parents = 0;
+                hid_t trans_id;
+                H5TR_t *tr = NULL;
+                H5P_genplist_t *plist = NULL;
+                int *status = NULL;
+                char *loc_name = NULL;
+
+                /* get the transaction ID */
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+                if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+
+                /* get the TR object */
+                if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID");
+
+                /* allocate parent request array */
+                if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                            H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+                /* retrieve parent requests */
+                if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+                /* retrieve IOD info of location object */
+                if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == input.loc_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
+
+                if(H5VL_OBJECT_BY_SELF == loc_params.type)
+                    loc_name = strdup(".");
+                else if(H5VL_OBJECT_BY_NAME == loc_params.type)
+                    loc_name = strdup(loc_params.loc_data.loc_by_name.name);
+
+                /* set the input structure for the HG encode routine */
+                input.coh = obj->file->remote_file.coh;
+                input.path = loc_name;
+                input.trans_num = tr->trans_num;
+                input.rcxt_num  = tr->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
+
+#if H5_EFF_DEBUG
+                printf("Link Remove axe %"PRIu64": %s ID %"PRIu64"\n", 
+                       g_axe_id, loc_name, input.loc_id);
+#endif
+
+                status = (int *)malloc(sizeof(int));
+
+                if(H5VL__iod_create_and_forward(H5VL_LINK_REMOVE_ID, HG_LINK_REMOVE, obj, 1, 
+                                                num_parents, parent_reqs,
+                                                (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link remove");
+
+                if(loc_name) 
+                    HDfree(loc_name);
+
+                break;
+            }
+
+        case H5VL_LINK_ITER:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
+    }
 
 done:
-    if(loc_name) 
-        HDfree(loc_name);
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_link_remove() */
+} /* end H5VL_iod_link_specific() */
 
 
 /*-------------------------------------------------------------------------
@@ -7025,38 +7131,10 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_object_copy() */
 #endif
-#if 0
+
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_object_visit
- *
- * Purpose:	Iterates through all objects linked to an object
- *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              November, 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t H5VL_iod_object_visit(void UNUSED *_obj, H5VL_loc_params_t UNUSED loc_params, 
-                                    H5_index_t UNUSED idx_type,
-                                    H5_iter_order_t UNUSED order, H5O_iterate_t UNUSED op, 
-                                    void UNUSED *op_data, 
-                                    hid_t UNUSED dxpl_id, void UNUSED **req)
-{
-    //H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
-    //herr_t ret_value = SUCCEED;  /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5VL_iod_object_visit() */
-#endif
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_object_misc
+ * Function:	H5VL_iod_object_specific
  *
  * Purpose:	Perform a plugin specific operation for an object
  *
@@ -7068,9 +7146,9 @@ static herr_t H5VL_iod_object_visit(void UNUSED *_obj, H5VL_loc_params_t UNUSED 
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, 
-                     hid_t dxpl_id, void **req, va_list arguments)
+static herr_t
+H5VL_iod_object_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, 
+                         hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     iod_obj_id_t iod_id, mdkv_id, attrkv_id;
@@ -7121,12 +7199,11 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
     }
 
     switch (misc_type) {
-        /* H5Arename/rename_by_name */
-        case H5VL_ATTR_RENAME:
+        /* H5Oexists_by_name */
+        case H5VL_OBJECT_EXISTS:
             {
-                const char    *old_name  = va_arg (arguments, const char *);
-                const char    *new_name  = va_arg (arguments, const char *);
-                attr_rename_in_t input;
+                htri_t	  *ret = va_arg (arguments, htri_t *);
+                object_op_in_t input;
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
                     loc_name = strdup(".");
@@ -7135,97 +7212,38 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;
-                input.old_attr_name = old_name;
-                input.new_attr_name = new_name;
-                input.loc_id = iod_id;
-                input.loc_attrkv_id = attrkv_id;
-                input.loc_oh = iod_oh;
-                input.path = loc_name;
-                input.trans_num = tr->trans_num;
-                input.rcxt_num  = tr->c_version;
-                input.cs_scope = obj->file->md_integrity_scope;
-
-#if H5_EFF_DEBUG
-                printf("Attribute Rename %s to %s LOC ID %"PRIu64", axe id %"PRIu64"\n", 
-                       old_name, new_name, input.loc_id, g_axe_id);
-#endif
-
-                status = (herr_t *)malloc(sizeof(herr_t));
-
-                if(H5VL__iod_create_and_forward(H5VL_ATTR_RENAME_ID, HG_ATTR_RENAME, 
-                                                obj, 1, num_parents, parent_reqs,
-                                                (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute rename");
-
-                if(loc_name) 
-                    HDfree(loc_name);
-
-                break;
-            }
-        /* H5Oset_comment */
-        case H5VL_OBJECT_SET_COMMENT:
-            {
-                const char    *comment  = va_arg (arguments, char *);
-                object_set_comment_in_t input;
-
-                if(H5VL_OBJECT_BY_SELF == loc_params.type)
-                    loc_name = strdup(".");
-                else if(H5VL_OBJECT_BY_NAME == loc_params.type)
-                    loc_name = strdup(loc_params.loc_data.loc_by_name.name);
-
-                /* set the input structure for the HG encode routine */
-                input.coh = obj->file->remote_file.coh;
-                input.comment = comment;
                 input.loc_id = iod_id;
                 input.loc_mdkv_id = mdkv_id;
+                input.loc_attrkv_id = IOD_OBJ_INVALID;
                 input.loc_oh = iod_oh;
-                input.path = loc_name;
-                input.trans_num = tr->trans_num;
-                input.rcxt_num  = tr->c_version;
+                input.rcxt_num  = rc->c_version;
                 input.cs_scope = obj->file->md_integrity_scope;
+                input.loc_name = loc_name;
 
-                status = (herr_t *)malloc(sizeof(herr_t));
+#if H5_EFF_DEBUG
+                printf("Object Exists axe %"PRIu64": %s ID %"PRIu64"\n", 
+                       g_axe_id, input.loc_name, input.loc_id);
+#endif
 
-                if(H5VL__iod_create_and_forward(H5VL_OBJECT_SET_COMMENT_ID, HG_OBJECT_SET_COMMENT, 
+                if(H5VL__iod_create_and_forward(H5VL_OBJECT_EXISTS_ID, HG_OBJECT_EXISTS, 
                                                 obj, 0, num_parents, parent_reqs,
-                                                (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object set_comment");
-
-                /* store the comment locally if the object is open */
-                if(loc_params.type == H5VL_OBJECT_BY_SELF)
-                    obj->comment = HDstrdup(comment);
+                                                (H5VL_iod_req_info_t *)rc, &input, ret, ret, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object exists");
 
                 if(loc_name) 
                     HDfree(loc_name);
                 break;
             }
-        /* H5Oincr_refcount / H5Odecr_refcount */
         case H5VL_OBJECT_CHANGE_REF_COUNT:
-            {
-                //int update_ref  = va_arg (arguments, int);
-            }
+        case H5VL_OBJECT_VISIT:
         case H5VL_REF_CREATE:
-            {
-                /*
-                void        *ref      = va_arg (arguments, void *);
-                const char  *name     = va_arg (arguments, char *);
-                H5R_type_t  ref_type  = va_arg (arguments, H5R_type_t);
-                hid_t       space_id  = va_arg (arguments, hid_t);
-                size_t ref_size = 0;
-
-                if(ref_type == H5R_DATASET_REGION)
-                    ref_size = sizeof(hdset_reg_ref_t);
-                else if (ref_type == H5R_OBJECT)
-                    ref_size = sizeof(hobj_ref_t);
-                */
-            }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_object_misc() */
+} /* end H5VL_iod_object_specific() */
 
 
 /*-------------------------------------------------------------------------
@@ -7245,6 +7263,44 @@ herr_t
 H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, 
                     hid_t dxpl_id, void **req, va_list arguments)
 {
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    size_t num_parents = 0;
+    hid_t rcxt_id;
+    H5RC_t *rc = NULL;
+    H5P_genplist_t *plist = NULL;
+    iod_obj_id_t iod_id, mdkv_id, attrkv_id;
+    iod_handles_t iod_oh;
+    H5VL_iod_request_t **parent_reqs = NULL;
+    char *loc_name = NULL;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_object_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_object_optional
+ *
+ * Purpose:	Gets certain data about a file
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_object_optional(void *_obj, hid_t dxpl_id, void **req, va_list arguments)
+{
+    H5VL_object_optional_t optional_type = va_arg (arguments, H5VL_object_optional_t);
+    H5VL_loc_params_t loc_params = va_arg(arguments, H5VL_loc_params_t);
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     size_t num_parents = 0;
     hid_t rcxt_id;
@@ -7292,42 +7348,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
     }
 
-    switch (get_type) {
-        /* H5Oexists_by_name */
-        case H5VL_OBJECT_EXISTS:
-            {
-                htri_t	  *ret = va_arg (arguments, htri_t *);
-                object_op_in_t input;
-
-                if(H5VL_OBJECT_BY_SELF == loc_params.type)
-                    loc_name = strdup(".");
-                else if(H5VL_OBJECT_BY_NAME == loc_params.type)
-                    loc_name = strdup(loc_params.loc_data.loc_by_name.name);
-
-                /* set the input structure for the HG encode routine */
-                input.coh = obj->file->remote_file.coh;
-                input.loc_id = iod_id;
-                input.loc_mdkv_id = mdkv_id;
-                input.loc_attrkv_id = IOD_OBJ_INVALID;
-                input.loc_oh = iod_oh;
-                input.rcxt_num  = rc->c_version;
-                input.cs_scope = obj->file->md_integrity_scope;
-                input.loc_name = loc_name;
-
-#if H5_EFF_DEBUG
-                printf("Object Exists axe %"PRIu64": %s ID %"PRIu64"\n", 
-                       g_axe_id, input.loc_name, input.loc_id);
-#endif
-
-                if(H5VL__iod_create_and_forward(H5VL_OBJECT_EXISTS_ID, HG_OBJECT_EXISTS, 
-                                                obj, 0, num_parents, parent_reqs,
-                                                (H5VL_iod_req_info_t *)rc, &input, ret, ret, req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object exists");
-
-                if(loc_name) 
-                    HDfree(loc_name);
-                break;
-            }
+    switch (optional_type) {
         /* H5Oget_comment / H5Oget_comment_by_name */
         case H5VL_OBJECT_GET_COMMENT:
             {
@@ -7431,36 +7452,49 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                     HDfree(loc_name);
                 break;
             }
-        /* H5Rget_region */
-        case H5VL_REF_GET_REGION:
+        /* H5Oset_comment */
+        case H5VL_OBJECT_SET_COMMENT:
             {
-                //hid_t       *ret     =  va_arg (arguments, hid_t *);
-                //H5R_type_t  ref_type =  va_arg (arguments, H5R_type_t);
-                //void        *ref     =  va_arg (arguments, void *);
-                //H5S_t       *space = NULL;    /* Dataspace object */
-            }
-        /* H5Rget_obj_type2 */
-        case H5VL_REF_GET_TYPE:
-            {
-                //H5O_type_t  *obj_type  =  va_arg (arguments, H5O_type_t *);
-                //H5R_type_t  ref_type   =  va_arg (arguments, H5R_type_t);
-                //const void  *ref       =  va_arg (arguments, const void *);
-            }
-        /* H5Rget_name */
-        case H5VL_REF_GET_NAME:
-            {
-                //ssize_t     *ret       = va_arg (arguments, ssize_t *);
-                //char        *name      = va_arg (arguments, char *);
-                //size_t      size       = va_arg (arguments, size_t);
-                //H5R_type_t  ref_type   = va_arg (arguments, H5R_type_t);
-                //void        *ref       = va_arg (arguments, void *);
+                const char    *comment  = va_arg (arguments, char *);
+                object_set_comment_in_t input;
+
+                if(H5VL_OBJECT_BY_SELF == loc_params.type)
+                    loc_name = strdup(".");
+                else if(H5VL_OBJECT_BY_NAME == loc_params.type)
+                    loc_name = strdup(loc_params.loc_data.loc_by_name.name);
+
+                /* set the input structure for the HG encode routine */
+                input.coh = obj->file->remote_file.coh;
+                input.comment = comment;
+                input.loc_id = iod_id;
+                input.loc_mdkv_id = mdkv_id;
+                input.loc_oh = iod_oh;
+                input.path = loc_name;
+                input.trans_num = tr->trans_num;
+                input.rcxt_num  = tr->c_version;
+                input.cs_scope = obj->file->md_integrity_scope;
+
+                status = (herr_t *)malloc(sizeof(herr_t));
+
+                if(H5VL__iod_create_and_forward(H5VL_OBJECT_SET_COMMENT_ID, HG_OBJECT_SET_COMMENT, 
+                                                obj, 0, num_parents, parent_reqs,
+                                                (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object set_comment");
+
+                /* store the comment locally if the object is open */
+                if(loc_params.type == H5VL_OBJECT_BY_SELF)
+                    obj->comment = HDstrdup(comment);
+
+                if(loc_name) 
+                    HDfree(loc_name);
+                break;
             }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from object")
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_object_get() */
+} /* end H5VL_iod_object_optional() */
 
 void *
 H5VL_iod_map_create(void *_obj, H5VL_loc_params_t UNUSED loc_params, const char *name, 

@@ -47,12 +47,14 @@
  * The disk size for a symbol table entry...
  */
 #define H5G_SIZEOF_SCRATCH      16
-#define H5G_SIZEOF_ENTRY(F)                                                   \
-   (H5F_SIZEOF_SIZE(F) +        /*offset of name into heap              */    \
-    H5F_SIZEOF_ADDR(F) +        /*address of object header              */    \
+#define H5G_SIZEOF_ENTRY(sizeof_addr, sizeof_size)                            \
+   ((sizeof_size) +             /*offset of name into heap              */    \
+    (sizeof_addr) +             /*address of object header              */    \
     4 +                         /*entry type                            */    \
     4 +				/*reserved				*/    \
     H5G_SIZEOF_SCRATCH)         /*scratch pad space                     */
+#define H5G_SIZEOF_ENTRY_FILE(F)                                              \
+    H5G_SIZEOF_ENTRY(H5F_SIZEOF_ADDR(F), H5F_SIZEOF_SIZE(F))
 
 /* ========= Group Creation properties ============ */
 
@@ -202,7 +204,6 @@ H5_DLL herr_t H5G_get_shared_count(H5G_t *grp);
 H5_DLL herr_t H5G_mount(H5G_t *grp);
 H5_DLL hbool_t H5G_mounted(H5G_t *grp);
 H5_DLL herr_t H5G_unmount(H5G_t *grp);
-
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL H5G_obj_t H5G_map_obj_type(H5O_type_t obj_type);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

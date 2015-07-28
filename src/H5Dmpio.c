@@ -254,8 +254,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__mpio_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
-    hsize_t mpi_buf_count, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
+H5D__mpio_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+    hsize_t mpi_buf_count, const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space)
 {
     const H5D_contig_storage_t *store_contig = &(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
     herr_t ret_value = SUCCEED;
@@ -283,8 +283,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__mpio_select_write(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
-    hsize_t mpi_buf_count, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space)
+H5D__mpio_select_write(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+    hsize_t mpi_buf_count, const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space)
 {
     const H5D_contig_storage_t *store_contig = &(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
     herr_t ret_value = SUCCEED;
@@ -438,7 +438,7 @@ H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     /* Get the number of chunks to perform I/O on */
     num_chunkf = 0;
     ori_num_chunkf = H5SL_count(fm->sel_chunks);
-    H5_ASSIGN_OVERFLOW(num_chunkf, ori_num_chunkf, size_t, int);
+    H5_CHECKED_ASSIGN(num_chunkf, int, ori_num_chunkf, size_t);
 
     /* Determine the summation of number of chunks for all processes */
     if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, sum_chunkf, 1, MPI_INT, MPI_SUM, io_info->comm)))
@@ -464,8 +464,8 @@ done:
  */
 herr_t
 H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t UNUSED nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-    H5D_chunk_map_t UNUSED *fm)
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+    H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
     H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
@@ -474,7 +474,7 @@ H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(IS_H5FD_MPIO(io_info->dset->oloc.file));
+    HDassert(H5FD_MPIO == H5F_DRIVER_ID(io_info->dset->oloc.file));
     HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
 
     /* Call generic internal collective I/O routine */
@@ -511,8 +511,8 @@ done:
  */
 herr_t
 H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t UNUSED nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-    H5D_chunk_map_t UNUSED *fm)
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+    H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
     H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
@@ -521,7 +521,7 @@ H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(IS_H5FD_MPIO(io_info->dset->oloc.file));
+    HDassert(H5FD_MPIO == H5F_DRIVER_ID(io_info->dset->oloc.file));
     HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
 
     /* Call generic internal collective I/O routine */
@@ -714,7 +714,7 @@ done:
  */
 herr_t
 H5D__chunk_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
     H5D_chunk_map_t *fm)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -745,7 +745,7 @@ done:
  */
 herr_t
 H5D__chunk_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
     H5D_chunk_map_t *fm)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -826,46 +826,43 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
     } /* end if */
 
     /* Retrieve total # of chunks in dataset */
-    H5_ASSIGN_OVERFLOW(total_chunks, fm->layout->u.chunk.nchunks, hsize_t, size_t);
+    H5_CHECKED_ASSIGN(total_chunks, size_t, fm->layout->u.chunk.nchunks, hsize_t);
 
     /* Handle special case when dataspace dimensions only allow one chunk in
      *  the dataset.  [This sometimes is used by developers who want the
      *  equivalent of compressed contiguous datasets - QAK]
      */
     if(total_chunks == 1) {
-        H5D_chunk_ud_t udata;           /* User data for querying chunk info */
-        hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
         H5SL_node_t *chunk_node;        /* Pointer to chunk node for selection */
         H5S_t *fspace;                  /* Dataspace describing chunk & selection in it */
         H5S_t *mspace;                  /* Dataspace describing selection in memory corresponding to this chunk */
-
-        /* Initialize the chunk coordinates */
-        /* (must be all zero, since there's only one chunk) */
-        HDmemset(coords, 0, sizeof(coords));
-
-        /* Look up address of chunk */
-        if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, coords,
-                io_info->store->chunk.index, &udata) < 0)
-            HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
-        ctg_store.contig.dset_addr = udata.addr;
 
         /* Check for this process having selection in this chunk */
         chunk_node = H5SL_first(fm->sel_chunks);
 
         if(chunk_node == NULL) {
-                /* Set the dataspace info for I/O to NULL, this process doesn't have any I/O to perform */
-                fspace = mspace = NULL;
+            /* Set the dataspace info for I/O to NULL, this process doesn't have any I/O to perform */
+            fspace = mspace = NULL;
+
+            /* Initialize chunk address */
+            ctg_store.contig.dset_addr = 0;
         } /* end if */
         else {
-                H5D_chunk_info_t *chunk_info;
+            H5D_chunk_ud_t udata;           /* User data for querying chunk info */
+            H5D_chunk_info_t *chunk_info;   /* Info for chunk in skiplist */
 
-                /* Get the chunk info, for the selection in the chunk */
-                if(NULL == (chunk_info = H5SL_item(chunk_node)))
-                    HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
+            /* Get the chunk info, for the selection in the chunk */
+            if(NULL == (chunk_info = (H5D_chunk_info_t *)H5SL_item(chunk_node)))
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skip list")
 
-                /* Set the dataspace info for I/O */
-                fspace = chunk_info->fspace;
-                mspace = chunk_info->mspace;
+            /* Set the dataspace info for I/O */
+            fspace = chunk_info->fspace;
+            mspace = chunk_info->mspace;
+
+            /* Look up address of chunk */
+            if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->scaled, &udata) < 0)
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk address")
+            ctg_store.contig.dset_addr = udata.chunk_block.offset;
         } /* end else */
 
         /* Set up the base storage address for this chunk */
@@ -994,15 +991,15 @@ if(H5DEBUG(D))
             } /* end for */
 
             /* Create final MPI derived datatype for the file */
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_struct((int)num_chunk, chunk_mpi_file_counts, chunk_disp_array, chunk_ftype, &chunk_final_ftype)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_struct failed", mpi_code)
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_file_counts, chunk_disp_array, chunk_ftype, &chunk_final_ftype)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
             if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_ftype)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
             chunk_final_ftype_is_derived = TRUE;
 
             /* Create final MPI derived datatype for memory */
-            if(MPI_SUCCESS != (mpi_code = MPI_Type_struct((int)num_chunk, chunk_mpi_mem_counts, chunk_mem_disp_array, chunk_mtype, &chunk_final_mtype)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_struct failed", mpi_code)
+            if(MPI_SUCCESS != (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_mem_counts, chunk_mem_disp_array, chunk_mtype, &chunk_final_mtype)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
             if(MPI_SUCCESS != (mpi_code = MPI_Type_commit(&chunk_final_mtype)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
             chunk_final_mtype_is_derived = TRUE;
@@ -1151,7 +1148,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *ty
 #endif
 
     /* Retrieve total # of chunks in dataset */
-    H5_ASSIGN_OVERFLOW(total_chunk, fm->layout->u.chunk.nchunks, hsize_t, size_t);
+    H5_CHECKED_ASSIGN(total_chunk, size_t, fm->layout->u.chunk.nchunks, hsize_t);
     HDassert(total_chunk != 0);
 
     /* Allocate memories */
@@ -1203,8 +1200,7 @@ if(H5DEBUG(D))
             HDassert(chunk_info->index == u);
 
             /* Pass in chunk's coordinates in a union. */
-            store.chunk.offset  = chunk_info->coords;
-            store.chunk.index   = chunk_info->index;
+            store.chunk.scaled  = chunk_info->scaled;
         } /* end if */
 
         /* Collective IO for this chunk,
@@ -1591,10 +1587,9 @@ if(H5DEBUG(D))
             H5D_chunk_ud_t udata;   /* User data for querying chunk info */
 
             /* Get address of chunk */
-            if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id,
-                    chunk_info->coords, chunk_info->index, &udata) < 0)
+            if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->scaled, &udata) < 0)
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
-            chunk_addr = udata.addr;
+            chunk_addr = udata.chunk_block.offset;
         } /* end if */
         else
             chunk_addr = total_chunk_addr_array[chunk_info->index];
@@ -1645,7 +1640,7 @@ done:
  *              2) Gather all the information to the root process
  *
  *              3) Root process will do the following:
- *                 a) Obtain chunk addresses for all chunks in this dataspace
+ *                 a) Obtain chunk addresses for all chunks in this data space
  *                 b) With the consideration of the user option, calculate IO mode for each chunk
  *                 c) Build MPI derived datatype to combine "chunk address" and "assign_io" information
  *                      in order to do MPI Bcast only once
@@ -1702,7 +1697,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
 
     /* Setup parameters */
-    H5_ASSIGN_OVERFLOW(total_chunks, fm->layout->u.chunk.nchunks, hsize_t, int);
+    H5_CHECKED_ASSIGN(total_chunks, int, fm->layout->u.chunk.nchunks, hsize_t);
     percent_nproc_per_chunk = H5P_peek_unsigned(dx_plist, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME);
     /* if ratio is 0, perform collective io */
     if(0 == percent_nproc_per_chunk) {

@@ -97,7 +97,7 @@ nh5sclose_c ( hid_t_f *space_id )
   int ret_value = 0;
   hid_t c_space_id;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   if ( H5Sclose(c_space_id) < 0  ) ret_value = -1;
   return ret_value;
 }
@@ -163,7 +163,7 @@ nh5scopy_c( hid_t_f *space_id , hid_t_f *new_space_id)
   hid_t c_new_space_id;
   hid_t c_space_id;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_new_space_id = H5Scopy(c_space_id);
   if ( c_new_space_id < 0  ) ret_value = -1;
 
@@ -201,7 +201,7 @@ nh5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
   hid_t c_space_id;
   hssize_t c_num_blocks;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_num_blocks = H5Sget_select_hyper_nblocks(c_space_id);
   if ( c_num_blocks < 0  ) ret_value = -1;
 
@@ -239,7 +239,7 @@ nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
   hid_t c_space_id;
   hssize_t c_num_points;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_num_points = H5Sget_select_elem_npoints(c_space_id);
   if ( c_num_points < 0  ) ret_value = -1;
 
@@ -278,8 +278,8 @@ nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
 */
 
 int_f
-nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
-                                  hsize_t_f * num_blocks, hsize_t_f * buf)
+nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
+                                  hsize_t_f *num_blocks, hsize_t_f *buf)
 /******/
 {
   int ret_value = -1;
@@ -291,14 +291,14 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
   int rank;
   hsize_t c_startblock, *c_buf;
 
-  c_space_id = *space_id;
-  c_num_blocks = * num_blocks;
+  c_space_id = (hid_t)*space_id;
+  c_num_blocks = (hsize_t)*num_blocks;
 
   rank = H5Sget_simple_extent_ndims(c_space_id);
   if (rank < 0 ) return ret_value;
   c_startblock = (hsize_t)*startblock;
 
-  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_blocks*2*rank));
+  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_blocks*2*(hsize_t)rank));
   if (!c_buf) return ret_value;
 
   ret_value = H5Sget_select_hyper_blocklist(c_space_id, c_startblock,
@@ -360,7 +360,7 @@ nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
     int i, rank;
     int_f ret_value = 0;
 
-    c_space_id = *space_id;
+    c_space_id = (hid_t)*space_id;
     rank = H5Sget_simple_extent_ndims(c_space_id);
     if(rank < 0 )
         HGOTO_DONE(FAIL)
@@ -418,14 +418,14 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   int rank;
   int j,i2;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_num_points = (hsize_t)* numpoints;
 
   rank = H5Sget_simple_extent_ndims(c_space_id);
   if (rank < 0 ) return ret_value;
 
   c_startpoint = (hsize_t)*startpoint;
-  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_points*rank));
+  c_buf = (hsize_t*)HDmalloc(sizeof(hsize_t)*(size_t)(c_num_points*(hsize_t)rank));
   if (!c_buf) return ret_value;
   ret_value = H5Sget_select_elem_pointlist(c_space_id, c_startpoint,
                                             c_num_points, c_buf);
@@ -434,7 +434,7 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
   /* and add 1 to account for array's starting at one in Fortran */
   i2 = 0;
   for( i = 0; i < c_num_points; i++) {
-    i1 =  rank*(i+1);
+    i1 =  (hsize_t)rank*(i+1);
     for(j = 0; j < rank; j++) {
       buf[i2] = (hsize_t_f)(c_buf[i1-1]+1);
       i2 = i2 + 1;
@@ -442,18 +442,12 @@ nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
     }
   }
 
-/*   for( i = 0; i < c_num_points*rank; i++) { */
-/*     printf("%i \n", (int)c_buf[i]+1); */
-/*   } */
-
   if (ret_value  >= 0  ) ret_value = 0;
 
   HDfree(c_buf);
 
   return ret_value;
 }
-
-
 
 /****if* H5Sf/h5sselect_all_c
  * NAME
@@ -479,7 +473,7 @@ nh5sselect_all_c ( hid_t_f *space_id )
   int ret_value = 0;
   hid_t c_space_id;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   if ( H5Sselect_all(c_space_id) < 0  ) ret_value = -1;
   return ret_value;
 }
@@ -508,7 +502,7 @@ nh5sselect_none_c ( hid_t_f *space_id )
   int ret_value = 0;
   hid_t c_space_id;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   if ( H5Sselect_none(c_space_id) < 0  ) ret_value = -1;
   return ret_value;
 }
@@ -542,7 +536,7 @@ nh5sselect_valid_c ( hid_t_f *space_id , int_f *flag )
   hid_t c_space_id;
   htri_t status;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   status = H5Sselect_valid(c_space_id);
   *flag = (int_f)status;
   if ( status < 0  ) ret_value = -1;
@@ -577,7 +571,7 @@ nh5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
   hid_t c_space_id;
   hssize_t c_npoints;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_npoints = H5Sget_simple_extent_npoints(c_space_id);
   if ( c_npoints == 0  ) ret_value = -1;
   *npoints = (hsize_t_f)c_npoints;
@@ -612,7 +606,7 @@ nh5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints )
   hssize_t c_npoints;
   hid_t c_space_id;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_npoints = H5Sget_select_npoints(c_space_id);
   if ( c_npoints < 0  ) ret_value = -1;
   *npoints = (hssize_t_f)c_npoints;
@@ -647,7 +641,7 @@ nh5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
   hid_t c_space_id;
   int c_ndims;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_ndims = H5Sget_simple_extent_ndims(c_space_id);
   if ( c_ndims < 0  ) ret_value = -1;
   *ndims = (int_f)c_ndims;
@@ -683,7 +677,7 @@ nh5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
   hid_t c_space_id;
   H5S_class_t c_classtype;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   c_classtype = H5Sget_simple_extent_type(c_space_id);
   if ( c_classtype < 0  ) ret_value = -1;
    *classtype = c_classtype;
@@ -724,7 +718,7 @@ nh5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset)
     int i;
     int_f ret_value = 0;
 
-    c_space_id = *space_id;
+    c_space_id = (hid_t)*space_id;
     rank = H5Sget_simple_extent_ndims(c_space_id);
     if(rank < 0)
         HGOTO_DONE(FAIL)
@@ -820,7 +814,7 @@ nh5sget_simple_extent_dims_c ( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *m
     int i;
     int_f ret_value;
 
-    c_space_id = *space_id;
+    c_space_id = (hid_t)*space_id;
     rank = H5Sget_simple_extent_ndims(c_space_id);
     if(rank < 0)
         HGOTO_DONE(FAIL)
@@ -871,7 +865,7 @@ nh5sis_simple_c ( hid_t_f *space_id , int_f *flag )
   hid_t c_space_id;
   htri_t status;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   status = H5Sis_simple(c_space_id);
   *flag = (int_f)status;
   if ( status < 0  ) ret_value = -1;
@@ -905,8 +899,8 @@ nh5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id)
   hid_t c_dest_space_id, c_source_space_id;
   herr_t status;
 
-  c_dest_space_id = *dest_space_id;
-  c_source_space_id = *source_space_id;
+  c_dest_space_id = (hid_t)*dest_space_id;
+  c_source_space_id = (hid_t)*source_space_id;
   status = H5Sextent_copy(c_dest_space_id, c_source_space_id);
   if ( status < 0  ) ret_value = -1;
   return ret_value;
@@ -937,7 +931,7 @@ nh5sset_extent_none_c ( hid_t_f *space_id )
   hid_t c_space_id;
   herr_t status;
 
-  c_space_id = *space_id;
+  c_space_id = (hid_t)*space_id;
   status = H5Sset_extent_none(c_space_id);
   if ( status < 0  ) ret_value = -1;
   return ret_value;
@@ -1002,6 +996,8 @@ done:
     return ret_value;
 }
 
+
+#ifdef NEW_HYPERSLAB_API
 /****if* H5Sf/h5scombine_hyperslab_c
  * NAME
  *        h5scombine_hyperslab_c
@@ -1125,11 +1121,11 @@ nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t
   ret_value = 0;
   return ret_value;
 }
-/****if* H5Sf/h5smodify_select_c
+/****if* H5Sf/h5sselect_select_c
  * NAME
- *        h5smodify_select_c
+ *        h5sselect_select_c
  * PURPOSE
- *     Call H5Smodify_select
+ *     Call H5Sselect_ select
  * INPUTS
  *      space1_id - identifier of the first dataspace  to modify
  *              operator - defines how the new selection is combined
@@ -1145,7 +1141,7 @@ nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t
 */
 
 int_f
-nh5smodify_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
+nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
 /******/
 {
   int ret_value = -1;
@@ -1157,11 +1153,11 @@ nh5smodify_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
 
   c_space1_id = (hid_t)*space1_id;
   c_space2_id = (hid_t)*space2_id;
-  if( H5Smodify_select(c_space1_id, c_op, c_space2_id)< 0) return ret_value;
+  if( H5Sselect_select(c_space1_id, c_op, c_space2_id)< 0) return ret_value;
   ret_value = 0;
   return ret_value;
 }
-
+#endif /*NEW_HYPERSLAB_API*/
 /****if* H5Sf/h5sget_select_type_c
  * NAME
  *        h5sget_select_type_c
@@ -1228,7 +1224,8 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
   H5S_seloper_t c_op;
   herr_t  status;
   int rank;
-  int i, j;
+  size_t i;
+  int j;
   hsize_t *c_coord;
   size_t c_nelements;
 
@@ -1237,11 +1234,11 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
   c_space_id = *space_id;
   rank = H5Sget_simple_extent_ndims(c_space_id);
 
-  c_coord = (hsize_t *)HDmalloc(sizeof(hsize_t)*rank*(*nelements));
+  c_coord = (hsize_t *)HDmalloc(sizeof(hsize_t)*(size_t)rank*((size_t)*nelements));
   if(!c_coord) return ret_value;
-  for (i=0; i< *nelements; i++) {
+  for (i=0; i< (size_t)*nelements; i++) {
       for (j = 0; j < rank; j++) {
-          c_coord[j+i*rank] = (hsize_t)coord[j + i*rank];
+	c_coord[(size_t)j+i*(size_t)rank] = (hsize_t)coord[(size_t)j + i*(size_t)rank];
       }
   }
 

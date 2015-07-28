@@ -166,14 +166,14 @@ static int cmp_par(hsize_t i, hsize_t j, particle_t *rbuf, particle_t *wbuf )
     if ( ( HDstrcmp( rbuf[i].name, wbuf[j].name ) != 0 ) ||
         rbuf[i].lati != wbuf[j].lati ||
         rbuf[i].longi != wbuf[j].longi ||
-        rbuf[i].pressure != wbuf[j].pressure ||
-        rbuf[i].temperature != wbuf[j].temperature )
+	!H5_FLT_ABS_EQUAL(rbuf[i].pressure,wbuf[j].pressure)  ||
+	!H5_DBL_ABS_EQUAL(rbuf[i].temperature,wbuf[j].temperature) )
     {
         HDfprintf(stderr,"read and write buffers have differences\n");
         HDfprintf(stderr,"%s %ld %f %f %d\n",
-            rbuf[i].name,rbuf[i].longi,rbuf[i].pressure,rbuf[i].temperature,rbuf[i].lati);
+		  rbuf[i].name,rbuf[i].longi,(double)rbuf[i].pressure,rbuf[i].temperature,rbuf[i].lati);
         HDfprintf(stderr,"%s %ld %f %f %d\n",
-            wbuf[j].name,wbuf[j].longi,wbuf[j].pressure,wbuf[j].temperature,wbuf[j].lati);
+		  wbuf[j].name,wbuf[j].longi,(double)wbuf[j].pressure,wbuf[j].temperature,wbuf[j].lati);
         return -1;
     }
     return 0;
@@ -218,7 +218,7 @@ static int test_table(hid_t fid, int do_write)
     hsize_t     chunk_size=10;
     int         compress=0;
     int         *fill=NULL;
-    particle_t  fill1[1] = { {"no data",-1, -99.0f, -99.0, -1} };
+    particle_t  fill1[1] = { {"no data",-1, -99.0f, -99.0f, -1} };
     int         fill1_new[1] = { -100 };
     hsize_t     position;
     char        tname[20];
@@ -246,18 +246,18 @@ static int test_table(hid_t fid, int do_write)
     particle2_t rbuf2[NRECORDS];
     particle3_t rbuf3[NRECORDS];
     particle_t  rbufc[NRECORDS*2];
-    particle_t  abuf[2]={{"eight",80,8.0f,80.0,80},{"nine",90,9.0f,90.0,90}};
-    particle_t  ibuf[2]={{"zero", 0, 0.0f, 0.0, 0},{"zero", 0, 0.0f, 0.0, 0}};
+    particle_t  abuf[2]={{"eight",80,8.0f,80.0f,80},{"nine",90,9.0f,90.0f,90}};
+    particle_t  ibuf[2]={{"zero", 0, 0.0f, 0.0f, 0},{"zero", 0, 0.0f, 0.0f, 0}};
     particle_t  wbufd[NRECORDS];
     particle_t  wbuf[NRECORDS] = {
-        {"zero", 0, 0.0f, 0.0, 0,},
-        {"one",  10, 1.0f, 10.0, 10},
-        {"two",  20, 2.0f, 20.0, 20},
-        {"three",30, 3.0f, 30.0, 30},
-        {"four", 40, 4.0f, 40.0, 40},
-        {"five", 50, 5.0f, 50.0, 50},
-        {"six",  60, 6.0f, 60.0, 60},
-        {"seven",70, 7.0f, 70.0, 70}
+        {"zero", 0, 0.0f, 0.0f, 0,},
+        {"one",  10, 1.0f, 10.0f, 10},
+        {"two",  20, 2.0f, 20.0f, 20},
+        {"three",30, 3.0f, 30.0f, 30},
+        {"four", 40, 4.0f, 40.0f, 40},
+        {"five", 50, 5.0f, 50.0f, 50},
+        {"six",  60, 6.0f, 60.0f, 60},
+        {"seven",70, 7.0f, 70.0f, 70}
     };
     /* buffers for the field "Pressure" and "New_field" */
     float           pressure_in [NRECORDS] = { 0.0f,1.0f,2.0f,3.0f,4.0f,5.0f,6.0f,7.0f };
@@ -390,14 +390,14 @@ static int test_table(hid_t fid, int do_write)
 
     /* Define an array of Particles */
     particle4_t  p_data[NRECORDS] = {
-        {12112, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
-        {12113, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
-        {12114, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
-        {12115, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
-        {12116, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
-        {12117, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
-        {12118, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
-        {12119, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}}
+        {12112, 1.4f, 2.5f, {1,2,3},{4,5,6}, {99,100}},
+        {12113, 1.4f, 2.5f, {1,2,3},{4,5,6}, {99,100}},
+        {12114, 1.4f, 2.5f, {1,2,3},{4,5,6}, {99,100}},
+        {12115, 1.4f, 2.5f, {1,2,3},{4,5,6}, {99,100}},
+        {12116, 1.4f, 2.5f, {1,2,3},{4,5,6}, {99,100}},
+        {12117, 1.4f, 2.5f, {1,2,3},{4,5,6}, {99,100}},
+        {12118, 1.4f, 2.5f, {1,2,3},{4,5,6}, {99,100}},
+        {12119, 1.4f, 2.5f, {1,2,3},{4,5,6}, {99,100}}
     };
 
     /*-------------------------------------------------------------------------
@@ -1138,14 +1138,14 @@ static int test_table(hid_t fid, int do_write)
             {
                 if ( i >= 2 && i <= 4 )
                 {
-                    if ( rbuf[i].lati        != position_in[i-NRECORDS_ADD+1].lati ||
+                    if ( rbuf[i].lati       != position_in[i-NRECORDS_ADD+1].lati ||
                         rbuf[i].longi       != position_in[i-NRECORDS_ADD+1].longi ||
-                        rbuf[i].pressure    != pressure_in[i-NRECORDS_ADD+1] )
+			!H5_FLT_ABS_EQUAL(rbuf[i].pressure,pressure_in[i-NRECORDS_ADD+1]) )
                     {
                         HDfprintf(stderr,"%ld %f %d\n",
-                            rbuf[i].longi,rbuf[i].pressure,rbuf[i].lati);
+				  rbuf[i].longi,(double)rbuf[i].pressure,rbuf[i].lati);
                         HDfprintf(stderr,"%ld %f %d\n",
-                            position_in[i].longi,pressure_in[i],position_in[i].lati);
+                            position_in[i].longi,(double)pressure_in[i],position_in[i].lati);
                         goto out;
                     }
                 }
@@ -1186,18 +1186,23 @@ static int test_table(hid_t fid, int do_write)
             goto out;
     }
 
-    /* read the "Pressure" field */
     start    = 0;
     nrecords = NRECORDS;
+
+    /* read an invalid field, should fail */
+    if ( H5TBread_fields_name(fid,"table10","DoesNotExist",start,nrecords,
+        sizeof(float),0,field_sizes_pre,pressure_out) >=0)
+      goto out;
+    
+    /* read the "Pressure" field */
     if ( H5TBread_fields_name(fid,"table10","Pressure",start,nrecords,
         sizeof(float),0,field_sizes_pre,pressure_out)<0)
         goto out;
 
-
     /* Compare the extracted table with the initial values */
-    for( i = 0; i < NRECORDS; i++ )
+    for ( i = 0; i < NRECORDS; i++ )
     {
-        if ( pressure_out[i] != pressure_in[i] ) {
+        if ( !H5_FLT_ABS_EQUAL(pressure_out[i], pressure_in[i]) ) {
             goto out;
         }
     }
@@ -1260,7 +1265,7 @@ static int test_table(hid_t fid, int do_write)
     for( i = 0; i < NRECORDS; i++ )
     {
         if ( ( HDstrcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
-            namepre_out[i].pressure != namepre_in[i].pressure ) {
+	     !H5_FLT_ABS_EQUAL(namepre_out[i].pressure,namepre_in[i].pressure) ) {
                 goto out;
         }
     }
@@ -1289,7 +1294,7 @@ static int test_table(hid_t fid, int do_write)
     {
         hsize_t iistart = start;
         if ( ( HDstrcmp( namepre_out[i].name,  namepre_in[iistart+i].name ) != 0 ) ||
-            namepre_out[i].pressure != namepre_in[iistart+i].pressure ) {
+	     !H5_FLT_ABS_EQUAL(namepre_out[i].pressure, namepre_in[iistart+i].pressure) ) {
                 goto out;
         }
     }
@@ -1348,7 +1353,7 @@ static int test_table(hid_t fid, int do_write)
             {
                 if ( rbuf[i].lati        != position_in[i-NRECORDS_ADD+1].lati ||
                     rbuf[i].longi       != position_in[i-NRECORDS_ADD+1].longi ||
-                    rbuf[i].pressure    != pressure_in[i-NRECORDS_ADD+1] )
+		    !H5_FLT_ABS_EQUAL(rbuf[i].pressure,pressure_in[i-NRECORDS_ADD+1]) )
                     goto out;
             }
         }
@@ -1401,7 +1406,7 @@ static int test_table(hid_t fid, int do_write)
     /* compare the extracted table with the initial values */
     for( i = 0; i < NRECORDS; i++ )
     {
-        if ( pressure_out[i] != pressure_in[i] ) {
+      if ( !H5_FLT_ABS_EQUAL(pressure_out[i], pressure_in[i]) ) {
             goto out;
         }
     }
@@ -1466,10 +1471,10 @@ static int test_table(hid_t fid, int do_write)
     /* compare the extracted table with the initial values */
     for( i = 0; i < NRECORDS; i++ )
     {
-        if ( ( HDstrcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
-            namepre_out[i].pressure != namepre_in[i].pressure ) {
-                goto out;
-        }
+      if ( ( HDstrcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
+	   !H5_FLT_ABS_EQUAL(namepre_out[i].pressure,namepre_in[i].pressure) ) {
+	goto out;
+      }
     }
 
     /* reset buffer */
@@ -1497,8 +1502,8 @@ static int test_table(hid_t fid, int do_write)
     for( i = 0; i < 3; i++ )
     {
         int iistart = (int) start;
-        if ( ( HDstrcmp( namepre_out[i].name,  wbuf[iistart+i].name ) != 0 ) ||
-            namepre_out[i].pressure != wbuf[iistart+i].pressure ) {
+        if ( ( HDstrcmp( namepre_out[i].name,  wbuf[iistart+(int)i].name ) != 0 ) ||
+	     !H5_FLT_ABS_EQUAL(namepre_out[i].pressure, wbuf[iistart+(int)i].pressure) ) {
                 goto out;
         }
     }
@@ -1541,8 +1546,8 @@ static int test_table(hid_t fid, int do_write)
             if ( ( HDstrcmp( rbuf2[i].name,  wbuf[i].name ) != 0 ) ||
                 rbuf2[i].lati          != wbuf[i].lati ||
                 rbuf2[i].longi         != wbuf[i].longi ||
-                rbuf2[i].pressure      != wbuf[i].pressure ||
-                rbuf2[i].temperature   != wbuf[i].temperature ||
+		!H5_FLT_ABS_EQUAL(rbuf2[i].pressure,wbuf[i].pressure) ||
+		!H5_DBL_ABS_EQUAL(rbuf2[i].temperature,wbuf[i].temperature) ||
                 rbuf2[i].new_field     != buf_new[i] ) {
                     goto out;
             }
@@ -1582,7 +1587,7 @@ static int test_table(hid_t fid, int do_write)
             if ( ( HDstrcmp( rbuf3[i].name, wbuf[i].name ) != 0 ) ||
                 rbuf3[i].lati != wbuf[i].lati ||
                 rbuf3[i].longi != wbuf[i].longi ||
-                rbuf3[i].temperature != wbuf[i].temperature ) {
+		!H5_DBL_ABS_EQUAL(rbuf3[i].temperature,wbuf[i].temperature) ) {
                     goto out;
             }
         }

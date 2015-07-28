@@ -135,7 +135,7 @@ static int H5FD_sec2_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_sec2_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_sec2_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_sec2_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-static haddr_t H5FD_sec2_get_eof(const H5FD_t *_file);
+static haddr_t H5FD_sec2_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD_sec2_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
             size_t size, void *buf);
@@ -187,17 +187,22 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
  *
  * Purpose:     Initializes any interface-specific data or routines.
  *
- * Return:      Success:    The driver ID for the sec2 driver.
- *              Failure:    Negative
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD_sec2_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
 
-    FUNC_LEAVE_NOAPI(H5FD_sec2_init())
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5FD_sec2_init() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize sec2 VFD")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_sec2_init_interface() */
 
 
@@ -353,7 +358,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
 
     file->fd = fd;
-    H5_ASSIGN_OVERFLOW(file->eof, sb.st_size, h5_stat_size_t, haddr_t);
+    H5_CHECKED_ASSIGN(file->eof, haddr_t, sb.st_size, h5_stat_size_t);
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
 #ifdef H5_HAVE_WIN32_API
@@ -563,7 +568,7 @@ H5FD_sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_sec2_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
+H5FD_sec2_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_sec2_t	*file = (const H5FD_sec2_t *)_file;
 
@@ -588,7 +593,7 @@ H5FD_sec2_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_sec2_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
+H5FD_sec2_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t *)_file;
 
@@ -616,13 +621,13 @@ H5FD_sec2_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_sec2_get_eof(const H5FD_t *_file)
+H5FD_sec2_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_sec2_t   *file = (const H5FD_sec2_t *)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(MAX(file->eof, file->eoa))
+    FUNC_LEAVE_NOAPI(file->eof)
 } /* end H5FD_sec2_get_eof() */
 
 
@@ -639,7 +644,7 @@ H5FD_sec2_get_eof(const H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_sec2_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void **file_handle)
+H5FD_sec2_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handle)
 {
     H5FD_sec2_t         *file = (H5FD_sec2_t *)_file;
     herr_t              ret_value = SUCCEED;
@@ -673,7 +678,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id,
+H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
     haddr_t addr, size_t size, void *buf /*out*/)
 {
     H5FD_sec2_t     *file       = (H5FD_sec2_t *)_file;
@@ -689,9 +694,6 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu", (unsigned long long)addr)
-    if((addr + size) > file->eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%lu, eoa=%llu", 
-                    (unsigned long long)addr, size, (unsigned long long)file->eoa)
 
     /* Seek to the correct location */
     if(addr != file->pos || OP_READ != file->op) {
@@ -771,7 +773,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id,
+H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
                 haddr_t addr, size_t size, const void *buf)
 {
     H5FD_sec2_t     *file       = (H5FD_sec2_t *)_file;
@@ -787,8 +789,6 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %llu", (unsigned long long)addr)
     if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu", (unsigned long long)addr, (unsigned long long)size)
-    if((addr + size) > file->eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu", (unsigned long long)addr, (unsigned long long)size, (unsigned long long)file->eoa)
 
     /* Seek to the correct location */
     if(addr != file->pos || OP_WRITE != file->op) {
@@ -863,7 +863,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_sec2_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
+H5FD_sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
     H5FD_sec2_t *file = (H5FD_sec2_t *)_file;
     herr_t ret_value = SUCCEED;                 /* Return value */

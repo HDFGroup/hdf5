@@ -25,8 +25,6 @@
 #include "H5Tprivate.h"		/* Datatypes         			*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
-#ifdef H5_HAVE_FILTER_NBIT
-
 /* Struct of parameters needed for compressing/decompressing
  * one nbit atomic datatype: integer or floating-point
  */
@@ -130,7 +128,7 @@ static unsigned parms_index = 0;
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5Z_can_apply_nbit(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+H5Z_can_apply_nbit(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     const H5T_t	*type;                  /* Datatype */
     htri_t ret_value = TRUE;            /* Return value */
@@ -794,7 +792,7 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get dataspace */
     if(NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Get total number of elements in the chunk */
     if((npoints = H5S_GET_EXTENT_NPOINTS(ds)) < 0)
@@ -805,7 +803,7 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     cd_values_index = 2;
 
     /* Set "local" parameter for number of elements in the chunk */
-    H5_ASSIGN_OVERFLOW(cd_values[cd_values_index++], npoints, hssize_t, unsigned);
+    H5_CHECKED_ASSIGN(cd_values[cd_values_index++], unsigned, npoints, hssize_t);
 
     /* Assume no need to compress now, will be changed to FALSE later if not */
     need_not_compress = TRUE;
@@ -1424,4 +1422,4 @@ static void H5Z_nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned c
     * the last byte, increment the value by 1. */
    *buffer_size = new_size + 1;
 }
-#endif /* H5_HAVE_FILTER_NBIT */
+

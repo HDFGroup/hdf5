@@ -56,11 +56,12 @@ const H5std_string	DSET_TCONV_NAME	("tconv");
 const H5std_string	DSET_COMPRESS_NAME("compressed");
 const H5std_string	DSET_BOGUS_NAME	("bogus");
 
+/* Temporary filter IDs used for testing */
 const int H5Z_FILTER_BOGUS = 305;
 
-// Local prototypes
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+// H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
 
 /*-------------------------------------------------------------------------
  * Function:	test_create
@@ -458,13 +459,10 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *-------------------------------------------------------------------------
  */
 static size_t
-/*bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED cd_values[], size_t nbytes,
-      size_t UNUSED *buf_size, void UNUSED **buf)
-BMR: removed UNUSED for now until asking Q. or R. to pass compilation*/
 filter_bogus(unsigned int flags, size_t cd_nelmts,
       const unsigned int cd_values[], size_t nbytes,
       size_t *buf_size, void **buf)
+// H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
 {
     return nbytes;
 }
@@ -1083,6 +1081,7 @@ void test_dset()
 
 	// Close the file before testing data size.
 	file.close();
+
 	nerrors += test_datasize(fapl) <0 ? 1:0;
     }
     catch (Exception E)

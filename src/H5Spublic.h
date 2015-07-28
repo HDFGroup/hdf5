@@ -24,7 +24,7 @@
 #include "H5Ipublic.h"
 
 /* Define atomic datatypes */
-#define H5S_ALL         0
+#define H5S_ALL         (hid_t)0
 #define H5S_UNLIMITED	((hsize_t)(hssize_t)(-1))
 
 /* Define user-level maximum number of dimensions */
@@ -119,15 +119,20 @@ H5_DLL herr_t H5Sget_reg_hyperslab_params(hid_t space_id,
                                           hsize_t stride[],
                                           hsize_t count[],
                                           hsize_t block[]);
+/* #define NEW_HYPERSLAB_API */
+/* Note that these haven't been working for a while and were never
+ *      publicly released - QAK */
+#ifdef NEW_HYPERSLAB_API
 H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
 				   const hsize_t start[],
 				   const hsize_t _stride[],
 				   const hsize_t count[],
 				   const hsize_t _block[]);
-H5_DLL herr_t H5Smodify_select(hid_t space1_id, H5S_seloper_t op,
+H5_DLL herr_t H5Sselect_select(hid_t space1_id, H5S_seloper_t op,
                                   hid_t space2_id);
 H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op,
                                   hid_t space2_id);
+#endif /* NEW_HYPERSLAB_API */
 H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
     size_t num_elem, const hsize_t *coord);
 H5_DLL H5S_class_t H5Sget_simple_extent_type(hid_t space_id);
@@ -138,6 +143,9 @@ H5_DLL herr_t H5Sselect_all(hid_t spaceid);
 H5_DLL herr_t H5Sselect_none(hid_t spaceid);
 H5_DLL herr_t H5Soffset_simple(hid_t space_id, const hssize_t *offset);
 H5_DLL htri_t H5Sselect_valid(hid_t spaceid);
+H5_DLL htri_t H5Sis_regular_hyperslab(hid_t spaceid);
+H5_DLL htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[],
+    hsize_t stride[], hsize_t count[], hsize_t block[]);
 H5_DLL hssize_t H5Sget_select_hyper_nblocks(hid_t spaceid);
 H5_DLL hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
 H5_DLL herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,

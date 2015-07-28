@@ -90,7 +90,7 @@ H5D__layout_version_test(hid_t did, unsigned *version)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(version)
@@ -129,7 +129,7 @@ H5D__layout_contig_size_test(hid_t did, hsize_t *size)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(size) {
@@ -170,7 +170,7 @@ H5D__current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+    if(NULL == (dset = (H5D_t *)H5VL_object_verify(did, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     if(nbytes_used) {

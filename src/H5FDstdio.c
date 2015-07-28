@@ -185,7 +185,7 @@ static herr_t H5FD_stdio_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
 static haddr_t H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-static haddr_t H5FD_stdio_get_eof(const H5FD_t *_file);
+static haddr_t H5FD_stdio_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD_stdio_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_stdio_read(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
                 size_t size, void *buf);
@@ -608,7 +608,7 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long *flags /* out */)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl_id, hsize_t size)
+H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*H5_ATTR_UNUSED*/ type, hid_t /*H5_ATTR_UNUSED*/ dxpl_id, hsize_t size)
 {
     H5FD_stdio_t    *file = (H5FD_stdio_t*)_file;
     haddr_t         addr;
@@ -653,7 +653,7 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
+H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*H5_ATTR_UNUSED*/ type)
 {
     const H5FD_stdio_t *file = (const H5FD_stdio_t *)_file;
 
@@ -684,7 +684,7 @@ H5FD_stdio_get_eoa(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, haddr_t addr)
+H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*H5_ATTR_UNUSED*/ type, haddr_t addr)
 {
     H5FD_stdio_t  *file = (H5FD_stdio_t*)_file;
 
@@ -719,14 +719,14 @@ H5FD_stdio_set_eoa(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_stdio_get_eof(const H5FD_t *_file)
+H5FD_stdio_get_eof(const H5FD_t *_file, H5FD_mem_t /*H5_ATTR_UNUSED*/ type)
 {
     const H5FD_stdio_t  *file = (const H5FD_stdio_t *)_file;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    return MAX(file->eof, file->eoa);
+    return(file->eof);
 } /* end H5FD_stdio_get_eof() */
 
 
@@ -799,8 +799,6 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
         H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     if (REGION_OVERFLOW(addr, size))
         H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
-    if((addr + size) > file->eoa)
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
 
     /* Check easy cases */
     if (0 == size)
@@ -905,8 +903,6 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     if (HADDR_UNDEF == addr)
         H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
     if (REGION_OVERFLOW(addr, size))
-        H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
-    if (addr+size > file->eoa)
         H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_OVERFLOW, "file address overflowed", -1)
 
     /* Seek to the correct file position. */

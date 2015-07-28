@@ -39,7 +39,7 @@
 #define CHECK_H5DRW_ERROR(_fun, _did, _mtid, _msid, _fsid, _pid, _buf)  {  \
     H5E_BEGIN_TRY {  \
         if(_fun(_did, _mtid, _msid, _fsid, _pid, _buf) < 0) {  \
-            int _err_num = 0; \
+            hid_t _err_num = 0; \
             char _msg[80]; \
             H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, &_err_num); \
             H5Eget_msg(_err_num, NULL, _msg, (size_t)80); \
@@ -66,9 +66,9 @@ static void print_user_block(const char *filename, hid_t fid);
 static herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void *udata);
 
 /* get the major number from the error stack. */
-static herr_t walk_error_callback(UNUSED unsigned n, const H5E_error2_t *err_desc, void *udata) {
+static herr_t walk_error_callback(H5_ATTR_UNUSED unsigned n, const H5E_error2_t *err_desc, void *udata) {
 	if (err_desc)
-		*((int *) udata) = err_desc->maj_num;
+		*((hid_t *) udata) = err_desc->maj_num;
 
 	return 0;
 }

@@ -2502,7 +2502,6 @@ extend_readAll(void)
  * Example of using the parallel HDF5 library to read a compressed
  * dataset in an HDF5 file with collective parallel access support.
  */
-
 #ifdef H5_HAVE_FILTER_DEFLATE
 void
 compress_readAll(void)
@@ -3451,7 +3450,6 @@ actual_io_mode_tests(void) {
 #define DSET_NOCOLCAUSE "nocolcause"
 #define NELM          2
 #define FILE_EXTERNAL "nocolcause_extern.data"
-#undef H5_HAVE_FILTER_FLETCHER32
 static void 
 test_no_collective_cause_mode(int selection_mode) 
 {
@@ -3487,9 +3485,9 @@ test_no_collective_cause_mode(int selection_mode)
     hid_t       file_space = -1;
     hsize_t     chunk_dims[RANK];
     herr_t      ret;
-#ifdef H5_HAVE_FILTER_FLETCHER32            
+#ifdef LATER /* fletcher32 */
     H5Z_filter_t filter_info;
-#endif    
+#endif /* LATER */
     /* set to global value as default */
     int l_facc_type = facc_type;   
     char message[256];
@@ -3521,7 +3519,7 @@ test_no_collective_cause_mode(int selection_mode)
         is_chunked = 0;
     }
 
-#ifdef H5_HAVE_FILTER_FLETCHER32
+#ifdef LATER /* fletcher32 */
     if (selection_mode & TEST_FILTERS) {
         ret = H5Zfilter_avail(H5Z_FILTER_FLETCHER32);
         VRFY ((ret >=0 ), "Fletcher32 filter is available.\n");
@@ -3532,7 +3530,7 @@ test_no_collective_cause_mode(int selection_mode)
         ret = H5Pset_fletcher32(dcpl);
         VRFY((ret >= 0),"set filter (flecher32) succeeded");
     }
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
+#endif /* LATER */
 
     if (selection_mode & TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
         sid = H5Screate(H5S_NULL);
@@ -3540,9 +3538,16 @@ test_no_collective_cause_mode(int selection_mode)
         is_chunked = 0;
     }
     else {
-        /* Create the basic Space */    
-        dims[0] = dim0;
-        dims[1] = dim1;
+        /* Create the basic Space */
+        /* if this is a compact dataset, create a small dataspace that does not exceed 64K */
+        if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT) {
+            dims[0] = ROW_FACTOR * 6;
+            dims[1] = COL_FACTOR * 6;
+        }
+        else {
+            dims[0] = dim0;
+            dims[1] = dim1;
+        }
         sid = H5Screate_simple (RANK, dims, NULL);
         VRFY((sid >= 0), "H5Screate_simple succeeded");
     }
@@ -3606,13 +3611,13 @@ test_no_collective_cause_mode(int selection_mode)
         no_collective_cause_global_expected |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
     }
 
-#ifdef H5_HAVE_FILTER_FLETCHER32            
+#ifdef LATER /* fletcher32 */
     if (selection_mode & TEST_FILTERS) {
         test_name = "Broken Collective I/O - Filter is required";
         no_collective_cause_local_expected |= H5D_MPIO_FILTERS;
         no_collective_cause_global_expected |= H5D_MPIO_FILTERS;
     }
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
+#endif /* LATER */
 
     if (selection_mode & TEST_COLLECTIVE) {
         test_name = "Broken Collective I/O - Not Broken";
@@ -3645,7 +3650,7 @@ test_no_collective_cause_mode(int selection_mode)
     }
 
     /* Get the number of elements in the selection */
-    length = dim0 * dim1;
+    length = dims[0] * dims[1];
 
     /* Allocate and initialize the buffer */
     buffer = (int *)HDmalloc(sizeof(int) * length);
@@ -3801,9 +3806,9 @@ test_no_collective_cause_mode_filter(int selection_mode)
     hid_t       file_space = -1;
     hsize_t     chunk_dims[RANK];
     herr_t      ret;
-#ifdef H5_HAVE_FILTER_FLETCHER32            
+#ifdef LATER /* fletcher32 */
     H5Z_filter_t filter_info;
-#endif    
+#endif /* LATER */
     char message[256];
 
     /* Set up MPI parameters */
@@ -3822,7 +3827,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     VRFY((dcpl >= 0), "dataset creation plist created successfully");
 
     if (selection_mode == TEST_FILTERS_READ )  {
-#ifdef H5_HAVE_FILTER_FLETCHER32            
+#ifdef LATER /* fletcher32 */
             ret = H5Zfilter_avail(H5Z_FILTER_FLETCHER32);
             VRFY ((ret >=0 ), "Fletcher32 filter is available.\n");
 
@@ -3831,7 +3836,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
 
             ret = H5Pset_fletcher32(dcpl);
             VRFY((ret >= 0),"set filter (flecher32) succeeded");
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
+#endif /* LATER */
     }
     else  {
         VRFY(0, "Unexpected mode, only test for TEST_FILTERS_READ.");
@@ -3869,12 +3874,12 @@ test_no_collective_cause_mode_filter(int selection_mode)
             dcpl, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dcreate2() dataset succeeded");
 
-#ifdef H5_HAVE_FILTER_FLETCHER32            
+#ifdef LATER /* fletcher32 */
     /* Set expected cause */
     test_name = "Broken Collective I/O - Filter is required";
     no_collective_cause_local_expected = H5D_MPIO_FILTERS;
     no_collective_cause_global_expected = H5D_MPIO_FILTERS;
-#endif
+#endif /* LATER */
 
     /* Get the file dataspace */
     file_space = H5Dget_space(dataset);
@@ -4003,13 +4008,13 @@ no_collective_cause_tests(void)
     test_no_collective_cause_mode (TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES);
     test_no_collective_cause_mode (TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
     test_no_collective_cause_mode (TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
-#ifdef H5_HAVE_FILTER_FLETCHER32            
+#ifdef LATER /* fletcher32 */
    /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and 
     * H5Dwrite is ready for mpio + filter feature.
     */
     /* test_no_collective_cause_mode (TEST_FILTERS); */
     test_no_collective_cause_mode_filter (TEST_FILTERS_READ);
-#endif    
+#endif /* LATER */ 
 
     /* 
      * Test combined causes 
@@ -4365,6 +4370,11 @@ test_dense_attr(void)
     hid_t atFileSpace, atid;
     hsize_t atDims[1] = {10000};
     herr_t status;
+    const char *filename;
+
+    /* get filename */
+    filename = (const char *)GetTestParameters();
+    HDassert( filename != NULL );
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -4376,7 +4386,7 @@ test_dense_attr(void)
     VRFY((status >= 0), "H5Pset_libver_bounds succeeded");
     status = H5Pset_fapl_mpio(fpid, MPI_COMM_WORLD, MPI_INFO_NULL);
     VRFY((status >= 0), "H5Pset_fapl_mpio succeeded");
-    fid = H5Fcreate("ph5Dense.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fpid);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fpid);
     VRFY((fid > 0), "H5Fcreate succeeded");
     status = H5Pclose(fpid);
     VRFY((status >= 0), "H5Pclose succeeded");

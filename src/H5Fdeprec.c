@@ -164,7 +164,7 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
      * the top file in a mount hierarchy)
      */
     if(H5I_get_type(obj_id) == H5I_FILE ) {
-        if(NULL == (f = (H5F_t *)H5I_object(obj_id)))
+        if(NULL == (f = (H5F_t *)H5VL_object(obj_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
     } /* end if */
     else {
@@ -181,7 +181,7 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo)
     HDmemset(finfo, 0, sizeof(*finfo));
 
     /* Get the size of the superblock extension */
-    if(H5F_super_size(f, H5AC_ind_dxpl_id, NULL, &finfo->super_ext_size) < 0)
+    if(H5F__super_size(f, H5AC_ind_dxpl_id, NULL, &finfo->super_ext_size) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
 
     /* Check for SOHM info */
@@ -227,7 +227,7 @@ H5Fis_hdf5(const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* Call private routine */
-    if((ret_value = H5F_is_hdf5(name)) < 0)
+    if((ret_value = H5F_is_hdf5(name, H5P_FILE_ACCESS_DEFAULT)) < 0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
 done:

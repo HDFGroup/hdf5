@@ -354,7 +354,6 @@ AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
-AS = @AS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -386,7 +385,6 @@ DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
-DYNAMIC_DIRS = @DYNAMIC_DIRS@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -406,17 +404,14 @@ FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
 FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
-FILTERS = @FILTERS@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 GREP = @GREP@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
-H5_CXX_SHARED = @H5_CXX_SHARED@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
 H5_LDFLAGS = @H5_LDFLAGS@
-H5_LONE_COLON = @H5_LONE_COLON@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
@@ -461,7 +456,6 @@ MERCURY_CFLAGS = @MERCURY_CFLAGS@
 MERCURY_LIBS = @MERCURY_LIBS@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
-MPI_GET_SIZE = @MPI_GET_SIZE@
 MYALACRITY_LIBS = @MYALACRITY_LIBS@
 MYAXE_LIBS = @MYAXE_LIBS@
 MYDAOS_LIBS = @MYDAOS_LIBS@
@@ -507,7 +501,6 @@ R_INTEGER = @R_INTEGER@
 R_LARGE = @R_LARGE@
 SEARCH = @SEARCH@
 SED = @SED@
-SETX = @SETX@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIZE_T = @SIZE_T@
@@ -522,10 +515,6 @@ TR = @TR@
 TRACE_API = @TRACE_API@
 UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
-USE_FILTER_FLETCHER32 = @USE_FILTER_FLETCHER32@
-USE_FILTER_NBIT = @USE_FILTER_NBIT@
-USE_FILTER_SCALEOFFSET = @USE_FILTER_SCALEOFFSET@
-USE_FILTER_SHUFFLE = @USE_FILTER_SHUFFLE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
 VERSION = @VERSION@
@@ -639,8 +628,9 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(EXTLINK_DIRS) *.h5
+# *.clog and *.clog2 are from the MPE option.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 $(EXTLINK_DIRS) \
+	*.h5
 @BUILD_PARALLEL_CONDITIONAL_TRUE@EXAMPLE_PROG_PARA = ph5example
 @BUILD_EFF_CONDITIONAL_TRUE@EXAMPLE_PROG_EFF = h5ff_server \
 @BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_map h5ff_client_multiple_cont h5ff_client_obj \
@@ -1132,7 +1122,7 @@ h5_dtransform: $(srcdir)/h5_dtransform.c
 h5_extlink: $(srcdir)/h5_extlink.c $(EXTLINK_DIRS)
 h5_elink_unix2win: $(srcdir)/h5_elink_unix2win.c $(EXTLINK_DIRS)
 h5_shared_mesg: $(srcdir)/h5_shared_mesg.c
-h5_external_log_native_vol: $(srcdir)/h5_external_log_native_vol.c
+h5_vol_external_log_native: $(srcdir)/h5_vol_external_log_native.c
 
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):

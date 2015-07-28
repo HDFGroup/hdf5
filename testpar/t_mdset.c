@@ -74,6 +74,63 @@ get_size(void)
 } /* get_size() */
 
 /*
+ * Example of using PHDF5 to create a zero sized dataset.
+ *
+ */
+void zero_dim_dset(void)
+{
+    int          mpi_size, mpi_rank;
+    const char	*filename;
+    hid_t        fid, plist, dcpl, dsid, sid;
+    hsize_t      dim, chunk_dim;
+    herr_t       ret;
+    int          data[1];
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
+    filename = GetTestParameters();
+
+    plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    VRFY((plist>=0), "create_faccess_plist succeeded");
+
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
+    VRFY((fid>=0), "H5Fcreate succeeded");
+    ret = H5Pclose(plist);
+    VRFY((ret>=0), "H5Pclose succeeded");
+
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl>=0), "failed H5Pcreate");
+
+    /* Set 1 chunk size */
+    chunk_dim = 1;
+    ret = H5Pset_chunk(dcpl, 1, &chunk_dim);
+    VRFY((ret>=0), "failed H5Pset_chunk");
+
+    /* Create 1D dataspace with 0 dim size */
+    dim = 0;
+    sid = H5Screate_simple(1, &dim, NULL);
+    VRFY((sid>=0), "failed H5Screate_simple");
+
+    /* Create chunked dataset */
+    dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    VRFY((dsid>=0), "failed H5Dcreate2");
+
+    /* write 0 elements from dataset */
+    ret = H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data);
+    VRFY((ret>=0), "failed H5Dwrite");
+
+    /* Read 0 elements from dataset */
+    ret = H5Dread(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data);
+    VRFY((ret>=0), "failed H5Dread");
+
+    H5Pclose(dcpl);
+    H5Dclose(dsid);
+    H5Sclose(sid);
+    H5Fclose(fid);
+}
+
+/*
  * Example of using PHDF5 to create ndatasets datasets.  Each process write
  * a slab of array to the file.
  *

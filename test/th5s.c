@@ -79,7 +79,7 @@ struct space4_struct {
     unsigned u;
     float f;
     char c2;
- } space4_data={'v',987123,(float)-3.14,'g'}; /* Test data for 4th dataspace */
+ } space4_data={'v',987123,-3.14F,'g'}; /* Test data for 4th dataspace */
 
 /****************************************************************
 **
@@ -1171,6 +1171,7 @@ test_h5s_encode(void)
     H5S_sel_type        sel_type;
     H5S_class_t         space_type;
     hssize_t            nblocks;
+    hid_t		ret_id;		/* Generic hid_t return value	*/
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1195,9 +1196,9 @@ test_h5s_encode(void)
 
     /* Try decoding bogus buffer */
     H5E_BEGIN_TRY {
-	ret = H5Sdecode(sbuf);
+	ret_id = H5Sdecode(sbuf);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Sdecode");
+    VERIFY(ret_id, FAIL, "H5Sdecode");
 
     ret = H5Sencode(sid1, sbuf, &sbuf_size);
     CHECK(ret, FAIL, "H5Sencode");
@@ -1580,7 +1581,7 @@ test_h5s_compound_scalar_read(void)
     if(HDmemcmp(&space4_data,&rdata,sizeof(struct space4_struct))) {
         printf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c1);
         printf("scalar data different: space4_data.u=%u, read_data4.u=%u\n",space4_data.u,rdata.u);
-        printf("scalar data different: space4_data.f=%f, read_data4.f=%f\n",space4_data.f,rdata.f);
+        printf("scalar data different: space4_data.f=%f, read_data4.f=%f\n",(double)space4_data.f,(double)rdata.f);
         TestErrPrintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n",space4_data.c1,rdata.c2);
      } /* end if */
 
@@ -1646,7 +1647,7 @@ test_h5s_chunk(void)
     /* Initialize float array */
     for(i = 0; i < 50000; i++)
         for(j = 0; j < 3; j++)
-            chunk_data_flt[i][j] = (float)((i + 1) * 2.5 - j * 100.3);
+            chunk_data_flt[i][j] = (float)((i + 1) * 2.5F - j * 100.3F);
 
     status = H5Dwrite(dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
     CHECK(status, FAIL, "H5Dwrite");
@@ -1682,8 +1683,8 @@ test_h5s_chunk(void)
     for(i=0; i<50000; i++) {
         for(j=0; j<3; j++) {
             /* Check if the two values are within 0.001% range. */
-            if(!DBL_REL_EQUAL(chunk_data_dbl[i][j], chunk_data_flt[i][j], 0.00001))
-                TestErrPrintf("%u: chunk_data_dbl[%d][%d]=%e, chunk_data_flt[%d][%d]=%e\n", (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j, chunk_data_flt[i][j]);
+            if(!H5_DBL_REL_EQUAL(chunk_data_dbl[i][j], chunk_data_flt[i][j], 0.00001F))
+                TestErrPrintf("%u: chunk_data_dbl[%d][%d]=%e, chunk_data_flt[%d][%d]=%e\n", (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j, (double)chunk_data_flt[i][j]);
         } /* end for */
     } /* end for */
 } /* test_h5s_chunk() */
@@ -2206,6 +2207,125 @@ test_h5s_extent_equal(void)
 
 /****************************************************************
 **
+**  test_h5s_extent_copy(): Exercise extent copy code
+**
+****************************************************************/
+static void
+test_h5s_extent_copy(void)
+{
+    hid_t spaces[14] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}; /* Array of all dataspaces */
+    hid_t tmp_space = -1;
+    hsize_t d1_dims1[1] = {10}, /* 1-D dimensions */
+        d1_dims2[1] = {20},
+        d1_dims3[1] = {H5S_UNLIMITED};
+    hsize_t d2_dims1[2] = {10, 10},             /* 2-D dimensions */
+        d2_dims2[2] = {20, 20},
+        d2_dims3[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t d3_dims1[3] = {10, 10, 10},         /* 3-D dimensions */
+        d3_dims2[3] = {20, 20, 20},
+        d3_dims3[3] = {H5S_UNLIMITED, H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t npoints[14];        /* Expected number of points in selection for each element in spaces */
+    hssize_t npoints_ret;       /* Number of points returned by H5Sget_select_npoints() */
+    htri_t ext_equal;           /* Whether two dataspace extents are equal */
+    const unsigned num_spaces = sizeof(spaces) / sizeof(spaces[0]);
+    unsigned i, j;
+    herr_t ret;                 /* Generic error return */
+
+    /* Create dataspaces */
+    spaces[0] = H5Screate(H5S_NULL);
+    CHECK(spaces[0], FAIL, "H5Screate");
+    npoints[0] = (hsize_t)0;
+
+    spaces[1] = H5Screate(H5S_SCALAR);
+    CHECK(spaces[1], FAIL, "H5Screate");
+    npoints[1] = (hsize_t)1;
+
+    spaces[2] = H5Screate_simple(1, d1_dims1, NULL);
+    CHECK(spaces[2], FAIL, "H5Screate");
+    npoints[2] = d1_dims1[0];
+    spaces[3] = H5Screate_simple(1, d1_dims2, NULL);
+    CHECK(spaces[3], FAIL, "H5Screate");
+    npoints[3] = d1_dims2[0];
+    spaces[4] = H5Screate_simple(1, d1_dims1, d1_dims2);
+    CHECK(spaces[4], FAIL, "H5Screate");
+    npoints[4] = d1_dims1[0];
+    spaces[5] = H5Screate_simple(1, d1_dims1, d1_dims3);
+    CHECK(spaces[5], FAIL, "H5Screate");
+    npoints[5] = d1_dims1[0];
+
+    spaces[6] = H5Screate_simple(2, d2_dims1, NULL);
+    CHECK(spaces[6], FAIL, "H5Screate");
+    npoints[6] = d2_dims1[0] * d2_dims1[1];
+    spaces[7] = H5Screate_simple(2, d2_dims2, NULL);
+    CHECK(spaces[7], FAIL, "H5Screate");
+    npoints[7] = d2_dims2[0] * d2_dims2[1];
+    spaces[8] = H5Screate_simple(2, d2_dims1, d2_dims2);
+    CHECK(spaces[8], FAIL, "H5Screate");
+    npoints[8] = d2_dims1[0] * d2_dims1[1];
+    spaces[9] = H5Screate_simple(2, d2_dims1, d2_dims3);
+    CHECK(spaces[9], FAIL, "H5Screate");
+    npoints[9] = d2_dims1[0] * d2_dims1[1];
+
+    spaces[10] = H5Screate_simple(3, d3_dims1, NULL);
+    CHECK(spaces[10], FAIL, "H5Screate");
+    npoints[10] = d3_dims1[0] * d3_dims1[1] * d3_dims1[2];
+    spaces[11] = H5Screate_simple(3, d3_dims2, NULL);
+    CHECK(spaces[11], FAIL, "H5Screate");
+    npoints[11] = d3_dims2[0] * d3_dims2[1] * d3_dims2[2];
+    spaces[12] = H5Screate_simple(3, d3_dims1, d3_dims2);
+    CHECK(spaces[12], FAIL, "H5Screate");
+    npoints[12] = d3_dims1[0] * d3_dims1[1] * d3_dims1[2];
+    spaces[13] = H5Screate_simple(3, d3_dims1, d3_dims3);
+    CHECK(spaces[13], FAIL, "H5Screate");
+    npoints[13] = d3_dims1[0] * d3_dims1[1] * d3_dims1[2];
+
+    tmp_space = H5Screate(H5S_NULL);
+    CHECK(tmp_space, FAIL, "H5Screate");
+
+    /* Copy between all dataspace combinations.  Note there are a few
+     * duplicates. */
+    for(i = 0; i < num_spaces; i++)
+        for(j = i; j < num_spaces; j++) {
+            /* Copy from i to j, unless the inner loop just restarted, in which
+             * case i and j are the same, so the second call to H5Sextent_copy()
+             * will test copying from i/j to i/j */
+            ret = H5Sextent_copy(tmp_space, spaces[j]);
+            CHECK(ret, FAIL, "H5Sextent_copy");
+
+            /* Verify that the extents are equal */
+            ext_equal = H5Sextent_equal(tmp_space, spaces[j]);
+            VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+
+            /* Verify that the correct number of elements is selected */
+            npoints_ret = H5Sget_select_npoints(tmp_space);
+            VERIFY((hsize_t)npoints_ret, npoints[j], "H5Sget_select_npoints");
+
+            /* Copy from j to i */
+            ret = H5Sextent_copy(tmp_space, spaces[i]);
+            CHECK(ret, FAIL, "H5Sextent_copy");
+
+            /* Verify that the extents are equal */
+            ext_equal = H5Sextent_equal(tmp_space, spaces[i]);
+            VERIFY(ext_equal, TRUE, "H5Sextent_equal");
+
+            /* Verify that the correct number of elements is selected */
+            npoints_ret = H5Sget_select_npoints(tmp_space);
+            VERIFY((hsize_t)npoints_ret, npoints[i], "H5Sget_select_npoints");
+        } /* end for */
+
+    /* Close dataspaces */
+    for(i = 0; i < num_spaces; i++) {
+        ret = H5Sclose(spaces[i]);
+        CHECK(ret, FAIL, "H5Sclose");
+        spaces[i] = -1;
+    } /* end for */
+
+    ret = H5Sclose(tmp_space);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* test_h5s_extent_copy() */
+
+/****************************************************************
+**
 **  test_h5s(): Main H5S (dataspace) testing routine.
 **
 ****************************************************************/
@@ -2229,6 +2349,7 @@ test_h5s(void)
     test_h5s_chunk();	        /* Exercise bug fix for chunked I/O */
 
     test_h5s_extent_equal();	/* Test extent comparison code */
+    test_h5s_extent_copy();     /* Test extent copy code */
 } /* test_h5s() */
 
 

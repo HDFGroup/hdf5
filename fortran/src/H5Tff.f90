@@ -335,20 +335,22 @@ CONTAINS
 !  Returns the datatype class identifier.
 !
 ! INPUTS
-!  type_id 	 - datatype identifier
+!  type_id - Datatype identifier
 ! OUTPUTS
-!  class 	 - class, possible values are:
-!                   H5T_NO_CLASS_F (-1)
-!                   H5T_INTEGER_F  (0)
-!                   H5T_FLOAT_F (1)
-!                   H5T_TIME_F  (2)
-!                   H5T_STRING_F (3)
-!                   H5T_BITFIELD_F (4)
-!                   H5T_OPAQUE_F (5)
-!                   H5T_COMPOUND_F (6)
-!                   H5T_REFERENCE_F (7)
-!                   H5T_ENUM_F (8)
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  class   - Class, possible values are:
+!            H5T_NO_CLASS_F (-1)
+!            H5T_INTEGER_F  (0)
+!            H5T_FLOAT_F (1)
+!            H5T_TIME_F  (2)
+!            H5T_STRING_F (3)
+!            H5T_BITFIELD_F (4)
+!            H5T_OPAQUE_F (5)
+!            H5T_COMPOUND_F (6)
+!            H5T_REFERENCE_F (7)
+!            H5T_ENUM_F (8)
+!            H5T_VLEN_F (9)
+!            H5T_ARRAY_F (10)  
+!  hdferr  - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  Elena Pourmal
@@ -361,35 +363,24 @@ CONTAINS
 !
 ! SOURCE
   SUBROUTINE h5tget_class_f(type_id, class, hdferr)
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
-            INTEGER, INTENT(OUT) :: class
-                           ! Datatype class, possible values are:
-                                          ! H5T_NO_CLASS_F (-1)
-                                          ! H5T_INTEGER_F  (0)
-                                          ! H5T_FLOAT_F (1)
-                                          ! H5T_TIME_F  (2)
-                                          ! H5T_STRING_F (3)
-                                          ! H5T_BITFIELD_F (4)
-                                          ! H5T_OPAQUE_F (5)
-                                          ! H5T_COMPOUND_F (6)
-                                          ! H5T_REFERENCE_F (7)
-                                          ! H5T_ENUM_F (8)
-          INTEGER, INTENT(OUT) :: hdferr        ! Error code
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: type_id
+    INTEGER, INTENT(OUT) :: class         
+    INTEGER, INTENT(OUT) :: hdferr
 !*****
-            INTERFACE
-              INTEGER FUNCTION h5tget_class_c(type_id, class)
-              USE H5GLOBAL
-              !DEC$IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TGET_CLASS_C'::h5tget_class_c
-              !DEC$ENDIF
-              INTEGER(HID_T), INTENT(IN) :: type_id
-              INTEGER, INTENT(OUT) :: class
-              END FUNCTION h5tget_class_c
-            END INTERFACE
+    INTERFACE
+       INTEGER FUNCTION h5tget_class_c(type_id, class)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TGET_CLASS_C'::h5tget_class_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN) :: type_id
+         INTEGER, INTENT(OUT) :: class
+       END FUNCTION h5tget_class_c
+    END INTERFACE
 
-          hdferr = h5tget_class_c(type_id, class)
-          END SUBROUTINE h5tget_class_f
+    hdferr = h5tget_class_c(type_id, class)
+  END SUBROUTINE h5tget_class_f
 !
 !****s* H5T/h5tget_size_f
 !
@@ -2344,57 +2335,6 @@ CONTAINS
 
             hdferr = h5tenum_create_c(parent_id, new_type_id)
           END SUBROUTINE h5tenum_create_f
-
-!
-!****s* H5T/h5tenaum_insert_f
-!
-! NAME
-!  h5tenaum_insert_f
-!
-! PURPOSE
-!  Inserts a new enumeration datatype member.
-!
-! INPUTS
-!  type_id 	 - datatype identifier
-! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces were added for
-!  called C functions (it is needed for Windows
-!  port).  March 7, 2001
-! SOURCE
-  SUBROUTINE h5tenum_insert_f(type_id,  name, value, hdferr)
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
-            CHARACTER(LEN=*), INTENT(IN) :: name  !Name of  the new member
-            INTEGER, INTENT(IN) :: value !value of the new member
-            INTEGER, INTENT(OUT) :: hdferr        ! Error code
-!*****
-            INTEGER :: namelen
-
-            INTERFACE
-              INTEGER FUNCTION h5tenum_insert_c(type_id, name, namelen, value)
-              USE H5GLOBAL
-              !DEC$IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TENUM_INSERT_C'::h5tenum_insert_c
-              !DEC$ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              INTEGER(HID_T), INTENT(IN) :: type_id
-              CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER, INTENT(IN) :: value
-              INTEGER :: namelen
-              END FUNCTION h5tenum_insert_c
-            END INTERFACE
-
-            namelen = LEN(name)
-            hdferr = h5tenum_insert_c(type_id, name, namelen, value)
-          END SUBROUTINE h5tenum_insert_f
-
 !
 !****s* H5T/h5tenum_nameof_f
 !

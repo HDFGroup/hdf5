@@ -48,7 +48,6 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
 static herr_t
 test_filters_endianess(void)
 {
-#if defined H5_HAVE_FILTER_FLETCHER32
     hid_t     fid = -1;              /* file ID */
     hid_t     dsid = -1;             /* dataset ID */
     hid_t     sid = -1;              /* dataspace ID */
@@ -85,10 +84,8 @@ test_filters_endianess(void)
     if(H5Sclose(sid) < 0) goto error;
     if(H5Fclose(fid) < 0) goto error;
 
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
     return 0;
 
-#if defined H5_HAVE_FILTER_FLETCHER32
 error:
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
@@ -97,7 +94,6 @@ error:
         H5Fclose(fid);
     } H5E_END_TRY;
     return -1;
-#endif /* H5_HAVE_FILTER_FLETCHER32 */
 } /* end test_filters_endianess() */
 
 /* This message derives from H5Z */
@@ -127,9 +123,9 @@ const H5Z_class2_t H5Z_BOGUS[1] = {{
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
-      size_t UNUSED *buf_size, void UNUSED **buf)
+filter_bogus(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+      const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
+      size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return nbytes;
 }

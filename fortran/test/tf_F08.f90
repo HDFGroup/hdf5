@@ -65,7 +65,7 @@ MODULE TH5_MISC_PROVISIONAL
 CONTAINS
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
 !DEC$attributes dllexport :: h5_sizeof_cmpd
 !DEC$endif
   INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_CMPD(a)
@@ -77,7 +77,7 @@ CONTAINS
   END FUNCTION H5_SIZEOF_CMPD
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
 !DEC$attributes dllexport :: h5_sizeof_chr
 !DEC$endif
   INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_CHR(a)
@@ -89,7 +89,7 @@ CONTAINS
   END FUNCTION H5_SIZEOF_CHR
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
 !DEC$attributes dllexport :: h5_sizeof_i
 !DEC$endif
   INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_I(a)
@@ -102,7 +102,7 @@ CONTAINS
 
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
 !DEC$attributes dllexport :: h5_sizeof_sp
 !DEC$endif
   INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_SP(a)
@@ -114,7 +114,7 @@ CONTAINS
   END FUNCTION H5_SIZEOF_SP
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
 !DEC$attributes dllexport :: h5_sizeof_dp
 !DEC$endif
   INTEGER(C_SIZE_T) FUNCTION H5_SIZEOF_DP(a)

@@ -41,7 +41,7 @@
 #define CHUNK_NX     4
 #define CHUNK_NY     4
 
-#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001)+12)
+#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001F)+12)
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS1	305
@@ -496,25 +496,25 @@ error:
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_bogus1(unsigned int flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
+filter_bogus1(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+      const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
     int *int_ptr=(int *)*buf;          /* Pointer to the data values */
-    ssize_t buf_left=*buf_size;  /* Amount of data buffer left to process */
+    ssize_t buf_left=(ssize_t)*buf_size;  /* Amount of data buffer left to process */
 
     if(flags & H5Z_FLAG_REVERSE) { /* read */
         /* Substract the "add on" value to all the data values */
         while(buf_left>0) {
             *int_ptr++ -= (int)ADD_ON;
-            buf_left -= sizeof(int);
+            buf_left -= (ssize_t)sizeof(int);
         } /* end while */
     } /* end if */
     else { /* write */
         /* Add the "add on" value to all the data values */
         while(buf_left>0) {
             *int_ptr++ += (int)ADD_ON;
-            buf_left -= sizeof(int);
+            buf_left -= (ssize_t)sizeof(int);
         } /* end while */
     } /* end else */
 
@@ -533,25 +533,25 @@ filter_bogus1(unsigned int flags, size_t UNUSED cd_nelmts,
  *-------------------------------------------------------------------------
  */
 static size_t
-filter_bogus2(unsigned int flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
+filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
+      const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
     int *int_ptr=(int *)*buf;          /* Pointer to the data values */
-    ssize_t buf_left=*buf_size;  /* Amount of data buffer left to process */
+    ssize_t buf_left=(ssize_t)*buf_size;  /* Amount of data buffer left to process */
 
     if(flags & H5Z_FLAG_REVERSE) { /* read */
         /* Substract the "add on" value to all the data values */
         while(buf_left>0) {
             *int_ptr++ /= (int)FACTOR;
-            buf_left -= sizeof(int);
+            buf_left -= (ssize_t)sizeof(int);
         } /* end while */
     } /* end if */
     else { /* write */
         /* Add the "add on" value to all the data values */
         while(buf_left>0) {
             *int_ptr++ *= (int)FACTOR;
-            buf_left -= sizeof(int);
+            buf_left -= (ssize_t)sizeof(int);
         } /* end while */
     } /* end else */
 
@@ -1016,13 +1016,13 @@ test_invalid_parameters(hid_t file)
 
     /* Check invalid dataset ID */ 
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5DOwrite_chunk((hid_t)-1, dxpl, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 
     /* Check invalid DXPL ID */
     H5E_BEGIN_TRY {
-        if((status = H5DOwrite_chunk(dataset, -1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
+        if((status = H5DOwrite_chunk(dataset, (hid_t)-1, filter_mask, offset, buf_size, direct_buf)) != FAIL)
             goto error;
     } H5E_END_TRY;
 

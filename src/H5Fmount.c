@@ -28,7 +28,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5VLprivate.h"	/* VOL plugins				*/
+#include "H5VLprivate.h"	/* VOL          			*/
 
 /* PRIVATE PROTOTYPES */
 static void H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
@@ -126,7 +126,7 @@ done:
  */
 herr_t
 H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
-	  hid_t UNUSED plist_id, hid_t dxpl_id)
+	  hid_t H5_ATTR_UNUSED plist_id, hid_t dxpl_id)
 {
     H5G_t	*mount_point = NULL;	/*mount point group		*/
     H5F_t	*ancestor = NULL;	/*ancestor files		*/
@@ -468,10 +468,8 @@ H5F_is_mount(const H5F_t *file)
 herr_t
 H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 {
-    void       *obj;
-    void       *file;
-    H5VL_t     *vol_plugin1;         /* VOL structure attached to loc_id */
-    H5VL_t     *vol_plugin2;         /* VOL structure attached to child_id */
+    H5VL_object_t *obj;
+    H5VL_object_t *file;
     H5I_type_t  type;
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -492,25 +490,19 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or group object")
     }
 
-    /* get the plugin pointers */
-    if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(child_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
-    /* check if both objects are associated with the same VOL plugin */
-    if (vol_plugin1->cls != vol_plugin2->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL plugin")
-
     /* get the group/file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the file object */
-    if(NULL == (file = (void *)H5I_object(child_id)))
+    if(NULL == (file = (H5VL_object_t *)H5I_object(child_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if((ret_value = H5VL_file_misc(obj, vol_plugin1, H5VL_FILE_MOUNT, H5AC_dxpl_id, H5_EVENT_STACK_NULL, 
-                                   type, name, file, plist_id)) < 0)
+    /* check if both objects are associated with the same VOL plugin */
+    if (obj->vol_info->vol_cls->value != file->vol_info->vol_cls->value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL plugin")
+
+    if(H5VL_file_specific(obj->vol_obj, obj->vol_info->vol_cls, H5VL_FILE_MOUNT, H5AC_dxpl_id, 
+                          H5_REQUEST_NULL, type, name, file->vol_obj, plist_id) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
 done:
@@ -540,8 +532,7 @@ done:
 herr_t
 H5Funmount(hid_t loc_id, const char *name)
 {
-    void       *obj;
-    H5VL_t     *vol_plugin;         /* VOL structure attached to loc_id */
+    H5VL_object_t *obj;
     H5I_type_t  type;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -557,15 +548,12 @@ H5Funmount(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or group object")
     }
 
-    /* get the plugin pointers */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
     /* get the group/file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if((ret_value = H5VL_file_misc(obj, vol_plugin, H5VL_FILE_UNMOUNT, H5AC_dxpl_id, H5_EVENT_STACK_NULL, type, name)) < 0)
+    if(H5VL_file_specific(obj->vol_obj, obj->vol_info->vol_cls, H5VL_FILE_UNMOUNT, H5AC_dxpl_id, 
+                          H5_REQUEST_NULL, type, name) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
 done:

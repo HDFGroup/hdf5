@@ -114,20 +114,24 @@ struct H5HL_dblk_t {
 
 /* Struct for heap prefix */
 struct H5HL_prfx_t {
-    H5AC_info_t cache_info;    /* Information for H5AC cache functions, _must_ be */
-                                /* first field in structure */
-    H5HL_t                 *heap;       /* Pointer to heap for prefix */
+    H5AC_info_t cache_info;       /* Information for H5AC cache functions, */
+                                  /* _must_ be first field in structure    */
+    H5HL_t                 *heap; /* Pointer to heap for prefix */
 };
 
 /* Callback information for loading local heap prefix from disk */
 typedef struct H5HL_cache_prfx_ud_t {
     /* Downwards */
+    hbool_t made_attempt;               /* Whether the deserialize routine */
+                                        /* was already attempted */
     size_t sizeof_size;                 /* Size of file sizes */
     size_t sizeof_addr;                 /* Size of file addresses */
     haddr_t prfx_addr;                  /* Address of prefix */
     size_t sizeof_prfx;                 /* Size of heap prefix */
 
     /* Upwards */
+    hbool_t loaded;                     /* Whether prefix was loaded */
+                                        /* from file */
 } H5HL_cache_prfx_ud_t;
 
 /* Callback information for loading local heap data block from disk */

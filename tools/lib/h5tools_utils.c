@@ -89,28 +89,11 @@ void parallel_print(const char* format, ...)
         HDvprintf(format, ap);
     else {
         if(overflow_file == NULL) /*no overflow has occurred yet */ {
-#if 0
-            printf("calling HDvsnprintf: OUTBUFF_SIZE=%ld, outBuffOffset=%ld, ", (long)OUTBUFF_SIZE, (long)outBuffOffset);
-#endif
             bytes_written = HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
-#if 0
-            printf("bytes_written=%ld\n", (long)bytes_written);
-#endif
             HDva_end(ap);
             HDva_start(ap, format);
 
-#if 0
-            printf("Result: bytes_written=%ld, OUTBUFF_SIZE-outBuffOffset=%ld\n", (long)bytes_written, (long)OUTBUFF_SIZE-outBuffOffset);
-#endif
-
-            if ((bytes_written < 0) ||
-#ifdef H5_VSNPRINTF_WORKS
-                    (bytes_written >= (OUTBUFF_SIZE-outBuffOffset))
-#else
-                    ((bytes_written+1) == (OUTBUFF_SIZE-outBuffOffset))
-#endif
-            )
-            {
+            if((bytes_written < 0) || (bytes_written >= (OUTBUFF_SIZE - outBuffOffset))) {
                 /* Terminate the outbuff at the end of the previous output */
                 outBuff[outBuffOffset] = '\0';
 

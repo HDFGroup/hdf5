@@ -358,8 +358,7 @@ static const H5I_class_t H5I_GENPROPCLS_CLS[1] = {{
     H5I_GENPROP_CLS,		/* ID class value */
     0,				/* Class flags */
     0,				/* # of reserved IDs for class */
-    (H5I_free_t)H5P_close_class,/* Callback routine for closing objects of this class */
-    NULL                        /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5P_close_class /* Callback routine for closing objects of this class */
 }};
 
 /* Generic Property List ID class */
@@ -367,8 +366,7 @@ static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
     H5I_GENPROP_LST,		/* ID class value */
     0,				/* Class flags */
     0,				/* # of reserved IDs for class */
-    (H5I_free_t)H5P_close,	/* Callback routine for closing objects of this class */
-    NULL                        /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5P_close 	/* Callback routine for closing objects of this class */
 }};
 
 /* Property value defaults */
@@ -535,7 +533,6 @@ H5P_init_interface(void)
      */
     if(H5I_register_type(H5I_GENPROPCLS_CLS) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
-
     if(H5I_register_type(H5I_GENPROPLST_CLS) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
@@ -615,28 +612,27 @@ done:
 int
 H5P_term_interface(void)
 {
-    int	nlist=0;
-    int	nclass=0;
-    int	n=0;
+    int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
+        int64_t	nlist, nclass;
+
         /* Destroy HDF5 library property classes & lists */
 
         /* Check if there are any open property list classes or lists */
         nclass = H5I_nmembers(H5I_GENPROP_CLS);
         nlist = H5I_nmembers(H5I_GENPROP_LST);
-        n=nclass+nlist;
 
         /* If there are any open classes or groups, attempt to get rid of them. */
-        if(n) {
+        if((nclass + nlist) > 0) {
             /* Clear the lists */
-            if(nlist>0) {
-                H5I_clear_type(H5I_GENPROP_LST, FALSE, FALSE);
+            if(nlist > 0) {
+                (void)H5I_clear_type(H5I_GENPROP_LST, FALSE, FALSE);
 
                 /* Reset the default property lists, if they've been closed */
-                if(H5I_nmembers(H5I_GENPROP_LST)==0) {
+                if(H5I_nmembers(H5I_GENPROP_LST) == 0) {
                     H5P_LST_FILE_CREATE_ID_g =
                         H5P_LST_FILE_ACCESS_ID_g =
                         H5P_LST_DATASET_CREATE_ID_g =
@@ -666,11 +662,11 @@ H5P_term_interface(void)
             } /* end if */
 
             /* Only attempt to close the classes after all the lists are closed */
-            if(nlist==0 && nclass>0) {
-                H5I_clear_type(H5I_GENPROP_CLS, FALSE, FALSE);
+            if(nlist == 0 && nclass > 0) {
+                (void)H5I_clear_type(H5I_GENPROP_CLS, FALSE, FALSE);
 
                 /* Reset the default property lists, if they've been closed */
-                if(H5I_nmembers(H5I_GENPROP_CLS)==0) {
+                if(H5I_nmembers(H5I_GENPROP_CLS) == 0) {
                         H5P_CLS_ROOT_g =
                         H5P_CLS_OBJECT_CREATE_g =
                         H5P_CLS_FILE_CREATE_g =
@@ -730,6 +726,8 @@ H5P_term_interface(void)
                         H5P_CLS_FILE_MOUNT_ID_g = (-1);
                 } /* end if */
             } /* end if */
+
+            n++; /*H5I*/
         } else {
             /* Close public interface */
             n += H5P__term_pub_interface();
@@ -737,16 +735,19 @@ H5P_term_interface(void)
             /* Close deprecated interface */
             n += H5P__term_deprec_interface();
 
-            H5I_dec_type_ref(H5I_GENPROP_LST);
+            /* Destroy the property list and class id groups */
+            (void)H5I_dec_type_ref(H5I_GENPROP_LST);
             n++; /*H5I*/
-            H5I_dec_type_ref(H5I_GENPROP_CLS);
+            (void)H5I_dec_type_ref(H5I_GENPROP_CLS);
             n++; /*H5I*/
 
+            /* Mark closed */
             H5_interface_initialize_g = 0;
-        }
-    }
+        } /* end else */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(n)
-}
+} /* end H5P_term_interface() */
 
 
 /*--------------------------------------------------------------------------
@@ -1438,7 +1439,7 @@ H5P_free_prop(H5P_genprop_t *prop)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_free_prop_cb(void *item, void UNUSED *key, void *op_data)
+H5P_free_prop_cb(void *item, void H5_ATTR_UNUSED *key, void *op_data)
 {
     H5P_genprop_t *tprop=(H5P_genprop_t *)item; /* Temporary pointer to property */
     hbool_t make_cb = *(hbool_t *)op_data;      /* Whether to make property 'close' callback */
@@ -1478,7 +1479,7 @@ H5P_free_prop_cb(void *item, void UNUSED *key, void *op_data)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_free_del_name_cb(void *item, void UNUSED *key, void UNUSED *op_data)
+H5P_free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op_data)
 {
     char *del_name=(char *)item;       /* Temporary pointer to deleted name */
 
@@ -1608,7 +1609,7 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static int
-H5P_open_class_path_cb(void *_obj, hid_t UNUSED id, void *_key)
+H5P_open_class_path_cb(void *_obj, hid_t H5_ATTR_UNUSED id, void *_key)
 {
     H5P_genclass_t *obj = (H5P_genclass_t *)_obj; /* Pointer to the class for this ID */
     H5P_check_class_t *key = (H5P_check_class_t *)_key; /* Pointer to key information for comparison */
@@ -2115,8 +2116,8 @@ done:
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to decode.
-        size_t *size;       IN: UNUSED
-        void *value;        IN: UNUSED
+        size_t *size;       IN: H5_ATTR_UNUSED
+        void *value;        IN: H5_ATTR_UNUSED
         void *plist;        IN: The property list structure.
         uint8_t **buf;      IN: The buffer that holds the binary encoded property;
     The 'decode' routine decodes the binary buffer passed in and transforms it into
@@ -2293,8 +2294,8 @@ done:
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to decode.
-        size_t *size;       IN: UNUSED
-        void *value;        IN: UNUSED
+        size_t *size;       IN: H5_ATTR_UNUSED
+        void *value;        IN: H5_ATTR_UNUSED
         void *plist;        IN: The property list structure.
         uint8_t **buf;      IN: The buffer that holds the binary encoded property;
     The 'decode' routine decodes the binary buffer passed in and transforms it into
@@ -2534,8 +2535,8 @@ done:
         void *value, void *plist, uint8_t **buf);
     where the parameters to the callback function are:
         void *f;            IN: A fake file structure used to decode.
-        size_t *size;       IN: UNUSED
-        void *value;        IN: UNUSED
+        size_t *size;       IN: H5_ATTR_UNUSED
+        void *value;        IN: H5_ATTR_UNUSED
         void *plist;        IN: The property list structure.
         uint8_t **buf;      IN: The buffer that holds the binary encoded property;
     The 'decode' routine decodes the binary buffer passed in and transforms it into

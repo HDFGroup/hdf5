@@ -26,6 +26,14 @@
 #define H5B2_TESTING
 #include "H5B2pkg.h"
 
+/*
+ * This file needs to access private information from the H5F package.
+ * This file also needs to access the file testing code.
+ */
+#define H5F_PACKAGE
+#define H5F_TESTING
+#include "H5Fpkg.h"		/* File access	 			*/
+
 /* Other private headers that this test requires */
 #include "H5Iprivate.h"
 
@@ -104,7 +112,7 @@ create_file(hid_t *file, H5F_t **f, hid_t fapl)
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (*f = (H5F_t *)H5I_object_verify(*file, H5I_FILE)))
+    if(NULL == (*f = (H5F_t *)H5VL_object(*file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2806,7 +2814,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2845,7 +2853,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6375,7 +6383,7 @@ gen_l4_btree2(const char *filename, hid_t fapl, const H5B2_create_t *cparam,
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6531,7 +6539,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6627,7 +6635,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6716,7 +6724,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6802,7 +6810,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7153,7 +7161,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7198,7 +7206,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7256,7 +7264,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7314,7 +7322,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */

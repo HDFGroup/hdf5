@@ -1285,33 +1285,33 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
 	    s_ptr->c[3] != d_ptr->c[3] ||
 	    s_ptr->d    != d_ptr->d    ||
 	    s_ptr->e    != d_ptr->e    ||
-            !FLT_ABS_EQUAL(s_ptr->f, d_ptr->f) ||
-            !FLT_ABS_EQUAL(s_ptr->g, d_ptr->g) ||
-            !FLT_ABS_EQUAL(s_ptr->h[0], d_ptr->h[0]) ||
-            !FLT_ABS_EQUAL(s_ptr->h[1], d_ptr->h[1]) ||
-            !FLT_ABS_EQUAL(s_ptr->i, d_ptr->i) ||
-            !FLT_ABS_EQUAL(s_ptr->j, d_ptr->j) ||
-            !DBL_ABS_EQUAL(s_ptr->k, d_ptr->k) ||
-            !DBL_ABS_EQUAL(s_ptr->l, d_ptr->l) ||
-            !DBL_ABS_EQUAL(s_ptr->m, d_ptr->m) ||
-            !DBL_ABS_EQUAL(s_ptr->n, d_ptr->n) ) {
+            !H5_FLT_ABS_EQUAL(s_ptr->f, d_ptr->f) ||
+            !H5_FLT_ABS_EQUAL(s_ptr->g, d_ptr->g) ||
+            !H5_FLT_ABS_EQUAL(s_ptr->h[0], d_ptr->h[0]) ||
+            !H5_FLT_ABS_EQUAL(s_ptr->h[1], d_ptr->h[1]) ||
+            !H5_FLT_ABS_EQUAL(s_ptr->i, d_ptr->i) ||
+            !H5_FLT_ABS_EQUAL(s_ptr->j, d_ptr->j) ||
+            !H5_DBL_ABS_EQUAL(s_ptr->k, d_ptr->k) ||
+            !H5_DBL_ABS_EQUAL(s_ptr->l, d_ptr->l) ||
+            !H5_DBL_ABS_EQUAL(s_ptr->m, d_ptr->m) ||
+            !H5_DBL_ABS_EQUAL(s_ptr->n, d_ptr->n) ) {
 
 	    H5_FAILED();
 	    printf("    i=%d\n", i);
 	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
 		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
 		   s_ptr->c[3], s_ptr->c[4], s_ptr->c[5], s_ptr->c[6], s_ptr->c[7],
-                   s_ptr->d, s_ptr->e, s_ptr->f, s_ptr->g,s_ptr->h[0],s_ptr->h[1],s_ptr->h[2],
-                   s_ptr->h[3],s_ptr->h[4],s_ptr->h[5],s_ptr->h[6],s_ptr->h[7],s_ptr->h[8],
-                   s_ptr->h[9],s_ptr->h[10],s_ptr->h[11],s_ptr->h[12],s_ptr->h[13],s_ptr->h[14],
-                   s_ptr->h[15], s_ptr->i,s_ptr->j,s_ptr->k,s_ptr->l,s_ptr->m,s_ptr->n);
+                   s_ptr->d, s_ptr->e, (double)s_ptr->f, (double)s_ptr->g,(double)s_ptr->h[0],(double)s_ptr->h[1],(double)s_ptr->h[2],
+                   (double)s_ptr->h[3],(double)s_ptr->h[4],(double)s_ptr->h[5],(double)s_ptr->h[6],(double)s_ptr->h[7],(double)s_ptr->h[8],
+                   (double)s_ptr->h[9],(double)s_ptr->h[10],(double)s_ptr->h[11],(double)s_ptr->h[12],(double)s_ptr->h[13],(double)s_ptr->h[14],
+                   (double)s_ptr->h[15], (double)s_ptr->i,(double)s_ptr->j,s_ptr->k,s_ptr->l,s_ptr->m,s_ptr->n);
 	    printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
 		   d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
 		   d_ptr->c[3], d_ptr->c[4], d_ptr->c[5], d_ptr->c[6], d_ptr->c[7],
-                   d_ptr->d, d_ptr->e, d_ptr->f, d_ptr->g,d_ptr->h[0],d_ptr->h[1],d_ptr->h[2],
-                   d_ptr->h[3],d_ptr->h[4],d_ptr->h[5],d_ptr->h[6],d_ptr->h[7],d_ptr->h[8],
-                   d_ptr->h[9],d_ptr->h[10],d_ptr->h[11],d_ptr->h[12],d_ptr->h[13],
-                   d_ptr->h[14], d_ptr->h[15], d_ptr->i,d_ptr->j,d_ptr->k,d_ptr->l,
+                   d_ptr->d, d_ptr->e, (double)d_ptr->f, (double)d_ptr->g,(double)d_ptr->h[0],(double)d_ptr->h[1],(double)d_ptr->h[2],
+                   (double)d_ptr->h[3],(double)d_ptr->h[4],(double)d_ptr->h[5],(double)d_ptr->h[6],(double)d_ptr->h[7],(double)d_ptr->h[8],
+                   (double)d_ptr->h[9],(double)d_ptr->h[10],(double)d_ptr->h[11],(double)d_ptr->h[12],(double)d_ptr->h[13],
+                   (double)d_ptr->h[14],(double)d_ptr->h[15],(double)d_ptr->i,(double)d_ptr->j,d_ptr->k,d_ptr->l,
                    d_ptr->m,d_ptr->n);
 	    goto error;
 	}
@@ -2183,7 +2183,7 @@ main (int argc, char *argv[])
 	    fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
 	    exit(1);
 	}
-	H5Tunregister(H5T_PERS_DONTCARE, NULL, -1, -1, H5T__conv_struct_opt);
+	H5Tunregister(H5T_PERS_DONTCARE, NULL, (hid_t)-1, (hid_t)-1, H5T__conv_struct_opt);
     }
 
     /* Create the file */

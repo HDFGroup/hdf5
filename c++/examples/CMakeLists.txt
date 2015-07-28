@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed
 # with "cpp_ex_". This allows for easier filtering of the examples.
@@ -35,7 +35,7 @@ set (tutr_examples
 foreach (example ${examples})
   add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
   TARGET_NAMING (cpp_ex_${example} ${LIB_TYPE})
-  TARGET_C_PROPERTIES (cpp_ex_${example} " " " ")
+  TARGET_C_PROPERTIES (cpp_ex_${example} ${LIB_TYPE} " " " ")
   target_link_libraries (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
 endforeach (example ${examples})
@@ -43,7 +43,7 @@ endforeach (example ${examples})
 foreach (example ${tutr_examples})
   add_executable (cpp_ex_${example} ${HDF5_CPP_EXAMPLES_SOURCE_DIR}/${example}.cpp)
   TARGET_NAMING (cpp_ex_${example} ${LIB_TYPE})
-  TARGET_C_PROPERTIES (cpp_ex_${example} " " " ")
+  TARGET_C_PROPERTIES (cpp_ex_${example} ${LIB_TYPE} " " " ")
   target_link_libraries (cpp_ex_${example} ${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (cpp_ex_${example} PROPERTIES FOLDER examples/cpp)
 endforeach (example ${tutr_examples})

@@ -469,7 +469,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
 
         /* 6. fill value is undefined while fill write time is H5D_FILL_TIME_ALLOC.
          * Supposed to fail. */
-        if(H5Pset_fill_value(dcpl, -1, NULL) < 0) goto error;
+        if(H5Pset_fill_value(dcpl, (hid_t)-1, NULL) < 0) goto error;
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
         H5E_BEGIN_TRY {
             if(H5Dcreate2(file, "dset7", H5T_NATIVE_LONG, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)!=FAIL)
@@ -510,7 +510,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
 
     /* 4. fill value is undefined while fill write time is H5D_FILL_TIME_ALLOC.
      * Supposed to fail. */
-    if(H5Pset_fill_value(dcpl, -1, NULL) < 0) goto error;
+    if(H5Pset_fill_value(dcpl, (hid_t)-1, NULL) < 0) goto error;
     H5E_BEGIN_TRY {
         if(H5Dcreate2(file, "dset7", H5T_NATIVE_LONG, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)!=FAIL)
             goto error;
@@ -627,7 +627,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
            H5_FAILED();
            puts("    Got wrong fill value");
            printf("    Got rd_c.a=%f, rd_c.y=%f and rd_c.x=%d, rd_c.z=%c\n",
-                  rd_c.a, rd_c.y, rd_c.x, rd_c.z);
+                  (double)rd_c.a, rd_c.y, rd_c.x, rd_c.z);
         }
         if(H5Dclose(dset9) < 0) goto error;
         if(H5Pclose(dcpl) < 0) goto error;
@@ -700,7 +700,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
         H5_FAILED();
         puts("    Got wrong fill value");
         printf("    Got rd_c.a=%f, rd_c.y=%f and rd_c.x=%d, rd_c.z=%c\n",
-		rd_c.a, rd_c.y, rd_c.x, rd_c.z);
+		(double)rd_c.a, rd_c.y, rd_c.x, rd_c.z);
     }
     if(H5Dclose(dset8) < 0) goto error;
     if(H5Pclose(dcpl) < 0) goto error;
@@ -820,8 +820,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                        "Fill value: %f, %d, %f, %c\n",
                        hs_offset[0], hs_offset[1],
                        hs_offset[2], hs_offset[3],
-                       hs_offset[4], rd_c.a, rd_c.x, rd_c.y, rd_c.z,
-			fill_c.a, fill_c.x, fill_c.y, fill_c.z);
+                       hs_offset[4], (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z,
+			(double)fill_c.a, fill_c.x, fill_c.y, fill_c.z);
                 goto error;
             }
         }
@@ -888,8 +888,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                             hs_offset[0], hs_offset[1],
                             hs_offset[2], hs_offset[3],
                             hs_offset[4],
-                            buf_c[u].a, buf_c[u].x, buf_c[u].y, buf_c[u].z,
-                            fill_c.a, fill_c.x, fill_c.y, fill_c.z);
+                            (double)buf_c[u].a, buf_c[u].x, buf_c[u].y, buf_c[u].z,
+                            (double)fill_c.a, fill_c.x, fill_c.y, fill_c.z);
                     goto error;
                 } /* end if */
             } /* end for */
@@ -909,9 +909,9 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     else if(datatype == H5T_COMPOUND) {
         HDmemset(buf_c, 0, ((size_t)nelmts * sizeof(comp_datatype)));
         for(u = 0; u < nelmts; u++) {
-	    buf_c[u].a = (float)1111.11;
+	    buf_c[u].a = 1111.11F;
  	    buf_c[u].x = 2222;
-	    buf_c[u].y = 3333.3333;
+	    buf_c[u].y = 3333.3333F;
 	    buf_c[u].z = 'd';
 	}
         if(H5Dwrite(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, buf_c) < 0)
@@ -1002,7 +1002,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                            (long)hs_offset[0], (long)hs_offset[1],
                            (long)hs_offset[2], (long)hs_offset[3],
                            (long)hs_offset[4],
-			   rd_c.a, rd_c.x, rd_c.y, rd_c.z, should_be_c.a,
+			   (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z, (double)should_be_c.a,
 		           should_be_c.x,should_be_c.y,should_be_c.z);
                     goto error;
  		}
@@ -1021,7 +1021,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                            (long)hs_offset[0], (long)hs_offset[1],
                            (long)hs_offset[2], (long)hs_offset[3],
                            (long)hs_offset[4],
-                           rd_c.a, rd_c.x, rd_c.y, rd_c.z, should_be_c.a,
+                           (double)rd_c.a, rd_c.x, rd_c.y, rd_c.z, (double)should_be_c.a,
                            should_be_c.x,should_be_c.y,should_be_c.z);
                     goto error;
                 }
@@ -1111,40 +1111,40 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
         fillval = 0;
         nerrors += test_rdwr_cases(file, dcpl, "dset1", &fillval, H5D_FILL_TIME_ALLOC,
-	           			layout, H5T_INTEGER, -1);
+                                   layout, H5T_INTEGER, (hid_t)-1);
 
         /* case for H5D_FILL_TIME_NEVER as fill write time and fill value to be default */
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) goto error;
         nerrors += test_rdwr_cases(file, dcpl, "dset2", &fillval, H5D_FILL_TIME_NEVER,
-				layout, H5T_INTEGER, -1);
+                                   layout, H5T_INTEGER, (hid_t)-1);
 
         /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value is user-defined */
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
         fillval = 0x4c70f1cd;
         if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0) goto error;
         nerrors += test_rdwr_cases(file, dcpl, "dset3", &fillval, H5D_FILL_TIME_ALLOC,
-				layout, H5T_INTEGER, -1);
+                                   layout, H5T_INTEGER, (hid_t)-1);
 
         /* case for H5D_FILL_TIME_NEVER as fill write time and fill value is user-defined */
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) goto error;
         if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0) goto error;
         nerrors += test_rdwr_cases(file, dcpl, "dset4", &fillval, H5D_FILL_TIME_NEVER,
-				layout, H5T_INTEGER, -1);
+                                   layout, H5T_INTEGER, (hid_t)-1);
 
         /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value is undefined */
         /* This case has been tested in test_create() function */
 
         /* case for H5D_FILL_TIME_NEVER as fill write time and fill value is undefined */
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) goto error;
-        if(H5Pset_fill_value(dcpl, -1, NULL) < 0) goto error;
+        if(H5Pset_fill_value(dcpl, (hid_t)-1, NULL) < 0) goto error;
         nerrors += test_rdwr_cases(file, dcpl, "dset5", &fillval, H5D_FILL_TIME_NEVER,
-				layout, H5T_INTEGER, -1);
+                                   layout, H5T_INTEGER, (hid_t)-1);
 
         /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value is user-defined
          * as compound type */
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
         HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
-        fill_ctype.y = 4444.4444;
+        fill_ctype.y = 4444.4444F;
         if(H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0) goto error;
         nerrors += test_rdwr_cases(file, dcpl, "dset11", &fill_ctype, H5D_FILL_TIME_ALLOC,
 				layout, H5T_COMPOUND, ctype_id);
@@ -1164,40 +1164,40 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
     fillval = 0;
     nerrors += test_rdwr_cases(file, dcpl, "dset6", &fillval, H5D_FILL_TIME_ALLOC,
-				layout, H5T_INTEGER, -1);
+                               layout, H5T_INTEGER, (hid_t)-1);
 
     /* case for H5D_FILL_TIME_NEVER as fill write time and fill value to be default */
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) goto error;
     nerrors += test_rdwr_cases(file, dcpl, "dset7", &fillval, H5D_FILL_TIME_NEVER, layout,
-        			H5T_INTEGER, -1);
+                               H5T_INTEGER, (hid_t)-1);
 
     /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value is user-defined */
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
     fillval = 0x4c70f1cd;
     if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0) goto error;
     nerrors += test_rdwr_cases(file, dcpl, "dset8", &fillval, H5D_FILL_TIME_ALLOC,
-				layout, H5T_INTEGER, -1);
+                               layout, H5T_INTEGER, (hid_t)-1);
 
     /* case for H5D_FILL_TIME_NEVER as fill write time and fill value is user-defined */
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) goto error;
     if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0) goto error;
     nerrors += test_rdwr_cases(file, dcpl, "dset9", &fillval, H5D_FILL_TIME_NEVER,
-				layout, H5T_INTEGER, -1);
+                               layout, H5T_INTEGER, (hid_t)-1);
 
     /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value is undefined */
     /* This case has been tested in test_create() function */
 
     /* case for H5D_FILL_TIME_NEVER as fill write time and fill value is undefined */
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) goto error;
-    if(H5Pset_fill_value(dcpl, -1, NULL) < 0) goto error;
+    if(H5Pset_fill_value(dcpl, (hid_t)-1, NULL) < 0) goto error;
     nerrors += test_rdwr_cases(file, dcpl, "dset10", &fillval, H5D_FILL_TIME_NEVER,
-				layout, H5T_INTEGER, -1);
+                               layout, H5T_INTEGER, (hid_t)-1);
 
     /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value is user-defined
      * as compound type */
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
     HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
-    fill_ctype.y = 4444.4444;
+    fill_ctype.y = 4444.4444F;
     if(H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0) goto error;
     nerrors += test_rdwr_cases(file, dcpl, "dset12", &fill_ctype, H5D_FILL_TIME_ALLOC,
                                 layout, H5T_COMPOUND, ctype_id);
@@ -1301,7 +1301,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_extend_release_integer(void UNUSED *_elmt)
+test_extend_release_integer(void H5_ATTR_UNUSED *_elmt)
 {
     return 0;
 } /* end test_extend_release_integer() */

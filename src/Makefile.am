@@ -42,9 +42,11 @@ DISTCLEANFILES=H5pubconf.h
 # library sources
 libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c H5Atest.c \
-        H5AC.c H5B.c H5Bcache.c H5Bdbg.c \
+        H5AC.c H5ACmpio.c \
+        H5B.c H5Bcache.c H5Bdbg.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2hdr.c H5B2int.c H5B2stat.c H5B2test.c \
-        H5C.c H5CS.c \
+        H5C.c H5Cmpio.c \
+        H5CS.c \
         H5D.c H5Dbtree.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
         H5Ddeprec.c H5Defl.c H5Dfill.c H5Dint.c \
         H5Dio.c H5Dlayout.c \
@@ -120,7 +122,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
 include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5version.h \
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
-        H5Epubgen.h H5Epublic.h H5Fpublic.h \
+        H5Epubgen.h H5Epublic.h H5ESpublic.h H5Fpublic.h \
         H5FDpublic.h H5FDcore.h H5FDdirect.h \
 	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
@@ -129,7 +131,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Mpublic.h H5ASpublic.h H5Vpublic.h H5Xpublic.h\
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h \
-        H5PLextern.h \
+        H5PLextern.h H5PLpublic.h \
         H5Qpublic.h \
         H5Rpublic.h H5Spublic.h \
         H5Tpublic.h H5Zpublic.h

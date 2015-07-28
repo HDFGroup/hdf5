@@ -77,8 +77,7 @@ H5FL_BLK_EXTERN(gheap_chunk);
  * largest data type is eight bytes.
  */
 #define H5HG_ALIGNMENT	8
-#define H5HG_ALIGN(X)	(H5HG_ALIGNMENT*(((X)+H5HG_ALIGNMENT-1)/	      \
-					 H5HG_ALIGNMENT))
+#define H5HG_ALIGN(X)	(H5HG_ALIGNMENT*(((X)+H5HG_ALIGNMENT-1)/H5HG_ALIGNMENT))
 #define H5HG_ISALIGNED(X) ((X)==H5HG_ALIGN(X))
 
 /*
@@ -86,20 +85,20 @@ H5FL_BLK_EXTERN(gheap_chunk);
  * that the stuff that follows the header is aligned.
  */
 #define H5HG_SIZEOF_HDR(f)						      \
-    H5HG_ALIGN(4 +			/*magic number		*/	      \
-	       1 +			/*version number	*/	      \
-	       3 +			/*reserved		*/	      \
-	       H5F_SIZEOF_SIZE(f))	/*collection size	*/
+    (size_t)H5HG_ALIGN(4 +			/*magic number		*/ \
+                       1 +			/*version number	*/ \
+                       3 +			/*reserved		*/ \
+                       H5F_SIZEOF_SIZE(f))	/*collection size	*/
 
 /*
  * The overhead associated with each object in the heap, always a multiple of
  * the alignment so that the stuff that follows the header is aligned.
  */
 #define H5HG_SIZEOF_OBJHDR(f)						      \
-    H5HG_ALIGN(2 +			/*object id number	*/	      \
-	       2 +			/*reference count	*/	      \
-	       4 +			/*reserved		*/	      \
-	       H5F_SIZEOF_SIZE(f))	/*object data size	*/
+    (size_t)H5HG_ALIGN(2 +			/*object id number	*/ \
+                       2 +			/*reference count	*/ \
+                       4 +			/*reserved		*/ \
+                       H5F_SIZEOF_SIZE(f))	/*object data size	*/
 
 /*
  * The initial guess for the number of messages in a collection.  We assume
@@ -108,8 +107,8 @@ H5FL_BLK_EXTERN(gheap_chunk);
  * some overhead and each message has some overhead.  The `+2' accounts for
  * rounding and for the free space object.
  */
-#define H5HG_NOBJS(f,z) (int)((((z)-H5HG_SIZEOF_HDR(f))/		      \
-			       H5HG_SIZEOF_OBJHDR(f)+2))
+#define H5HG_NOBJS(f,z) ((((z)-H5HG_SIZEOF_HDR(f))/		      \
+                          H5HG_SIZEOF_OBJHDR(f)+2))
 
 
 /****************************/
@@ -144,7 +143,7 @@ struct H5HG_heap_t {
 /* Package Private Prototypes */
 /******************************/
 H5_DLL herr_t H5HG_free(H5HG_heap_t *heap);
-H5_DLL H5HG_heap_t *H5HG_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw);
+H5_DLL H5HG_heap_t *H5HG_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, unsigned flags);
 
 #endif /* _H5HGpkg_H */
 

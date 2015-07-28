@@ -203,7 +203,7 @@ H5Tget_ebias(hid_t type_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, 0, "operation not defined for datatype class")
 
     /* bias */
-    H5_ASSIGN_OVERFLOW(ret_value, dt->shared->u.atomic.u.f.ebias, uint64_t, size_t);
+    H5_CHECKED_ASSIGN(ret_value, size_t, dt->shared->u.atomic.u.f.ebias, uint64_t);
 
 done:
     FUNC_LEAVE_API(ret_value)

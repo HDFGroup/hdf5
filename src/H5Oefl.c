@@ -89,8 +89,8 @@ const H5O_msg_class_t H5O_MSG_EFL[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
-    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
+H5O_efl_decode(H5F_t *f, hid_t dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_efl_t		*mesg = NULL;
     int			version;
@@ -128,7 +128,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
 #ifndef NDEBUG
     HDassert(H5F_addr_defined(mesg->heap_addr));
 
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr, H5AC_READ)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
 
     s = (const char *)H5HL_offset_into(heap, 0);
@@ -145,7 +145,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
     if(NULL == mesg->slot)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr, H5AC_READ)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
     for(u = 0; u < mesg->nused; u++) {
 	/* Name */
@@ -192,7 +192,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_efl_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O_efl_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *)_mesg;
     size_t		u;      /* Local index variable */
@@ -340,7 +340,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_efl_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
+H5O_efl_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_efl_t	*mesg = (const H5O_efl_t *) _mesg;
     size_t		ret_value = 0;
@@ -454,9 +454,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
-    hbool_t UNUSED *recompute_size, unsigned UNUSED *mesg_flags,
-    H5O_copy_t UNUSED *cpy_info, void UNUSED *_udata, hid_t dxpl_id)
+H5O_efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
+    hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
+    H5O_copy_t H5_ATTR_UNUSED *cpy_info, void H5_ATTR_UNUSED *_udata, hid_t dxpl_id)
 {
     H5O_efl_t   *efl_src = (H5O_efl_t *) mesg_src;
     H5O_efl_t   *efl_dst = NULL;
@@ -487,7 +487,7 @@ H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
         HGOTO_ERROR(H5E_EFL, H5E_CANTINIT, NULL, "can't create heap")
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(file_dst, dxpl_id, efl_dst->heap_addr, H5AC_WRITE)))
+    if(NULL == (heap = H5HL_protect(file_dst, dxpl_id, efl_dst->heap_addr, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_EFL, H5E_PROTECT, NULL, "unable to protect EFL file name heap")
 
     /* Insert "empty" name first */
@@ -541,7 +541,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_efl_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * stream,
+H5O_efl_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg, FILE * stream,
 	      int indent, int fwidth)
 {
     const H5O_efl_t	   *mesg = (const H5O_efl_t *) _mesg;

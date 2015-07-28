@@ -241,11 +241,9 @@ H5ES_insert(hid_t es_id, H5_priv_request_t *req)
     /* Check arguments. */
     if(NULL == req)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "bad request");
-    if(H5I_ES != H5I_get_type(es_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an event stack ID")
 
     /* get the e_stack object */
-    if(NULL == (e_stack = (H5ES_t *)H5I_object(es_id)))
+    if(NULL == (e_stack = (H5ES_t *)H5I_object_verify(es_id, H5I_ES)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event stack identifier")
  
     req->next = NULL;
@@ -339,7 +337,7 @@ H5ES_wait(H5ES_t *e_stack, size_t event_idx, H5ES_status_t *_status)
 
     if(H5ES_STATUS_IN_PROGRESS == cur->status) {
         /* wait on the request */
-        if(H5VL_request_wait(&cur->req, cur->vol_plugin, &status) < 0)
+        if(H5VL_request_wait(&cur->req, cur->vol_cls, &status) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to test request");
 
         e_stack->in_progress --;
@@ -423,7 +421,7 @@ H5ES_wait_all(H5ES_t *e_stack, H5ES_status_t *_status)
 
         if(cur->status == H5ES_STATUS_IN_PROGRESS) {
             /* wait on the request */
-            if(H5VL_request_wait(&cur->req, cur->vol_plugin, &status) < 0)
+            if(H5VL_request_wait(&cur->req, cur->vol_cls, &status) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to test request");
             e_stack->in_progress --;
             cur->status = status;
@@ -540,7 +538,7 @@ H5ES_test(H5ES_t *e_stack, size_t event_idx, H5ES_status_t *_status)
 
     if(H5ES_STATUS_IN_PROGRESS == cur->status) {
         /* test on the request */
-        if(H5VL_request_test(&cur->req, cur->vol_plugin, &status) < 0)
+        if(H5VL_request_test(&cur->req, cur->vol_cls, &status) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to test request");
 
         cur->status = status;
@@ -627,7 +625,7 @@ H5ES_test_all(H5ES_t *e_stack, H5ES_status_t *_status)
 
         if(cur->status == H5ES_STATUS_IN_PROGRESS) {
             /* test on the request */
-            if(H5VL_request_test(&cur->req, cur->vol_plugin, &status) < 0)
+            if(H5VL_request_test(&cur->req, cur->vol_cls, &status) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to test request");
 
             if(status != H5ES_STATUS_IN_PROGRESS) {
@@ -749,7 +747,7 @@ H5ES_cancel(H5ES_t *e_stack, size_t event_idx, H5ES_status_t *_status)
 
     if(cur->status == H5ES_STATUS_IN_PROGRESS) {
         /* cancel on the request */
-        if(H5VL_request_cancel(&cur->req, cur->vol_plugin, &status) < 0)
+        if(H5VL_request_cancel(&cur->req, cur->vol_cls, &status) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to cancel request");
 
         cur->status = status;
@@ -833,7 +831,7 @@ H5ES_cancel_all(H5ES_t *e_stack, H5ES_status_t *_status)
 
         if(cur->status == H5ES_STATUS_IN_PROGRESS) {
             /* cancel on the request */
-            if(H5VL_request_cancel(&cur->req, cur->vol_plugin, &status) < 0)
+            if(H5VL_request_cancel(&cur->req, cur->vol_cls, &status) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to cancel request");
             e_stack->in_progress --;
             cur->status = status;
@@ -956,12 +954,7 @@ H5ESclear(hid_t es_id)
         /* free the request */
         HDassert(H5ES_STATUS_IN_PROGRESS != tail->status);
 
-        tail->vol_plugin->nrefs --;
-        if (0 == tail->vol_plugin->nrefs) {
-            tail->vol_plugin->container_name = H5MM_xfree(tail->vol_plugin->container_name);
-            tail->vol_plugin = (H5VL_t *)H5MM_xfree(tail->vol_plugin);
-        }
-        tail->vol_plugin = NULL;
+        tail->vol_cls = NULL;
         tail->req = NULL;
         tail->next = NULL;
         tail->prev = NULL;
@@ -1054,7 +1047,6 @@ H5EScreate(hid_t fapl_id)
 {
     void *e_stack = NULL;                    /* event stack token */
     H5VL_class_t *vol_cls;              /* VOL class attached to fapl_id */
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin information from fapl */
     H5P_genplist_t  *plist;             /* Property list pointer */
     hid_t ret_value = SUCCEED;          /* Return value */
 

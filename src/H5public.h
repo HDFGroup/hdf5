@@ -94,10 +94,10 @@ extern "C" {
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	9	/* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	185	/* For tweaks, bug-fixes, or development     */
+#define H5_VERS_RELEASE	224	/* For tweaks, bug-fixes, or development     */
 #define H5_VERS_SUBRELEASE ""	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.9.185"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.9.224"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
@@ -285,9 +285,6 @@ H5_GCC_DIAG_ON(long-long)
 #   error "nothing appropriate for uint64_t"
 #endif
 
-/* Default value for all property list classes */
-#define H5P_DEFAULT     0
-
 /* Common iteration orders */
 typedef enum {
     H5_ITER_UNKNOWN = -1,       /* Unknown order */
@@ -348,6 +345,8 @@ H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
 			       unsigned relnum);
 H5_DLL herr_t H5free_memory(void *mem);
 H5_DLL uint32_t H5checksum(const void *key, size_t length, H5_checksum_seed_t *cs);
+H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);
+H5_DLL void *H5resize_memory(void *mem, size_t size);
 
 #ifdef __cplusplus
 }

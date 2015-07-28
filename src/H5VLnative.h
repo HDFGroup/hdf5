@@ -23,15 +23,15 @@
 #define H5VLnative_H
 
 #define H5VL_NATIVE	(H5VL_native_init())
+#define HDF5_VOL_NATIVE_VERSION_1	1	/* Version number of Native VOL plugin */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5_DLL H5VL_class_t *H5VL_native_init(void);
+H5_DLL hid_t H5VL_native_init(void);
 H5_DLL herr_t H5Pset_fapl_native(hid_t fapl_id);
-    //H5_DLL herr_t H5VL_native_register_aux(hid_t obj_id);
-H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);
+
 #ifdef __cplusplus
 }
 #endif

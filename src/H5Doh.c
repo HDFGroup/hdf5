@@ -30,8 +30,7 @@
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
-#include "H5VLnative.h" 	/* Native Plugin                        */
-#include "H5VLprivate.h"	/* VOL          		  	*/
+
 
 /****************/
 /* Local Macros */
@@ -333,7 +332,7 @@ H5O__dset_get_oloc(hid_t obj_id)
     FUNC_ENTER_STATIC
 
     /* Get the dataset */
-    if(NULL == (dset = (H5D_t *)H5I_object(obj_id)))
+    if(NULL == (dset = (H5D_t *)H5VL_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
 
     /* Get the dataset's object header location */

@@ -57,7 +57,7 @@ hid_t   ERR_MIN_WRITE;
 hid_t   ERR_MIN_GETNUM;
 
 #define DSET_NAME               "a_dataset"
-#define FAKE_ID                 0
+#define FAKE_ID                 (hid_t)0
 
 #define ERR_CLS_NAME            "Error Test"
 #define ERR_CLS2_NAME           "Second Test"
@@ -314,7 +314,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-long_desc_cb(unsigned UNUSED n, const H5E_error2_t *err_desc, void *client_data)
+long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *client_data)
 {
     char *real_desc  = (char *)client_data;
 

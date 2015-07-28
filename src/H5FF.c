@@ -13,12 +13,8 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
- *              March, 2013
- *
  * Purpose:	Wrappers around existing HDF5 to support Exascale FastForward
  *              functionality.
- *              
  */
 
 
@@ -137,7 +133,12 @@ hid_t
 H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t estack_id)
 {
     void    *file = NULL;            /* file token from VOL plugin */
-    H5VL_t  *vol_plugin;             /* VOL plugin information */
+    H5P_genplist_t *plist;        /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    hid_t plugin_id;              /* VOL plugin identigier attached to fapl_id */
+    H5VL_class_t *vol_cls = NULL; /* VOL Class structure for callback info */
+    H5VL_t *vol_info = NULL;      /* VOL info struct */
     hid_t    ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -169,13 +170,42 @@ H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
+    /* get the VOL info from the fapl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = vol_cls;
+    }
+
     /* create a new file or truncate an existing file through the VOL */
-    if(NULL == (file = H5VL_file_create(&vol_plugin, filename, flags, fcpl_id, fapl_id, 
-                                        H5AC_dxpl_id, estack_id)))
+    if(NULL == (file = H5VL_file_create(vol_cls, filename, flags, fcpl_id, fapl_id, 
+                                        H5AC_dxpl_id, req)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
-    /* Get an atom for the file with the VOL information as the auxilary struct*/
-    if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
+    /* setup VOL info struct */
+    if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
+    vol_info->vol_cls = vol_cls;
+    vol_info->vol_id = plugin_id;
+    if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+
+    /* Get an atom for the file */
+    if((ret_value = H5VL_register_id(H5I_FILE, file, vol_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
 done:
@@ -204,7 +234,12 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
            hid_t *rcxt_id, hid_t estack_id)
 {
     void    *file = NULL;            /* file token from VOL plugin */
-    H5VL_t  *vol_plugin;             /* VOL plugin information */
+    H5P_genplist_t *plist;        /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    hid_t plugin_id;              /* VOL plugin identigier attached to fapl_id */
+    H5VL_class_t *vol_cls = NULL; /* VOL Class structure for callback info */
+    H5VL_t *vol_info = NULL;      /* VOL info struct */
     hid_t    ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -223,6 +258,23 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
         if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
+    /* get the VOL info from the fapl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    /* setup VOL info struct */
+    if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
+    vol_info->vol_cls = vol_cls;
+    vol_info->vol_id = plugin_id;
+    if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+
     /* determine if we want to acquire the latest readable version
        when the file is opened */
     if(rcxt_id) {
@@ -233,7 +285,7 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
         if(NULL == (rc = H5RC_create(file, IOD_TID_UNKNOWN)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context");
         /* Get an atom for the event queue with the VOL information as the auxilary struct */
-        if((*rcxt_id = H5I_register(H5I_RC, rc, TRUE)) < 0)
+        if((*rcxt_id = H5VL_register_id(H5I_RC, rc, vol_info, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize read context handle");
 
         /* Get the plist structure */
@@ -243,21 +295,25 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rxct id")
     }
 
-    /* Open the file through the VOL layer */
-    if(NULL == (file = H5VL_file_open(&vol_plugin, filename, flags, fapl_id, 
-                                      H5AC_dxpl_id, estack_id)))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
-
-    if(rcxt_id) {
-        /* attach VOL information to the ID */
-        if (H5I_register_aux(*rcxt_id, vol_plugin) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = vol_cls;
     }
 
-    /* Get an atom for the file with the VOL information as the auxilary struct*/
-    if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+    /* Open the file through the VOL layer */
+    if(NULL == (file = H5VL_file_open(vol_cls, filename, flags, fapl_id, H5AC_dxpl_id, req)))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
+    /* Get an atom for the file */
+    if((ret_value = H5VL_register_id(H5I_FILE, file, vol_info, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen_ff() */
@@ -284,21 +340,22 @@ done:
 herr_t
 H5Fclose_ff(hid_t file_id, hbool_t persist_flag, hid_t estack_id)
 {
-    H5VL_t  *vol_plugin = NULL;
+    H5VL_object_t *file;
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ibi", file_id, persist_flag, estack_id);
 
+    /* Check/fix arguments. */
+    if(NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID");
+
     /* If persist flag is FALSE (non-default), then set that flag in the file struct */
     if(FALSE == persist_flag) {
-        H5VL_iod_file_t *file = NULL;
+        H5VL_iod_file_t *iod_file = NULL;
 
-        /* Check/fix arguments. */
-        if(NULL == (file = (H5VL_iod_file_t *)H5I_object_verify(file_id, H5I_FILE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID");
-
-        file->persist_on_close = persist_flag;
+        iod_file = (H5VL_iod_file_t *)file->vol_obj;
+        iod_file->persist_on_close = persist_flag;
     }
     else {
         /* Check/fix arguments. */
@@ -306,12 +363,9 @@ H5Fclose_ff(hid_t file_id, hbool_t persist_flag, hid_t estack_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
     }
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
-    vol_plugin->close_estack_id = estack_id;
-    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+    /* set the event request and dxpl IDs to be passed on to the VOL layer */
+    file->close_estack_id = estack_id;
+    file->close_dxpl_id = H5AC_dxpl_id;
 
     /* Decrement reference count on atom.  When it reaches zero the file will be closed. */
     if(H5I_dec_app_ref(file_id) < 0)
@@ -343,11 +397,12 @@ H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t
              hid_t trans_id, hid_t estack_id)
 {
     void    *grp = NULL;        /* dset token from VOL plugin */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;          /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t  *plist;            /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -383,8 +438,11 @@ H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    if(H5P_set(plist, H5VL_GRP_LCPL_ID, &lcpl_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -392,28 +450,34 @@ H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-    loc_params.type = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
-
     /* get the location object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
 
     /* Create the group through the VOL */
-    if(NULL == (grp = H5VL_group_create(obj, loc_params, vol_plugin, name, gcpl_id, gapl_id, 
-                                        dxpl_id, estack_id)))
+    if(NULL == (grp = H5VL_group_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, name, 
+                                        gcpl_id, gapl_id, H5AC_dxpl_id, req)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
     /* Get an atom for the group */
-    if((ret_value = H5I_register2(H5I_GROUP, grp, vol_plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(H5I_GROUP, grp, obj->vol_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, vol_plugin, H5AC_dxpl_id, estack_id) < 0)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -441,10 +505,11 @@ H5Gopen_ff(hid_t loc_id, const char *name, hid_t gapl_id,
            hid_t rcxt_id, hid_t estack_id)
 {
     void    *grp = NULL;       /* dset token from VOL plugin */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;          /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     hid_t       ret_value;              /* Return value */
 
@@ -465,12 +530,9 @@ H5Gopen_ff(hid_t loc_id, const char *name, hid_t gapl_id,
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the location object */
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -478,16 +540,32 @@ H5Gopen_ff(hid_t loc_id, const char *name, hid_t gapl_id,
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    /* Create the group through the VOL */
-    if(NULL == (grp = H5VL_group_open(obj, loc_params, vol_plugin, name, gapl_id, 
-                                      dxpl_id, estack_id)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
+    /* Open the group through the VOL */
+    if(NULL == (grp = H5VL_group_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                      name, gapl_id, H5AC_ind_dxpl_id, req)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
     /* Get an atom for the group */
-    if((ret_value = H5I_register2(H5I_GROUP, grp, vol_plugin, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    if((ret_value = H5VL_register_id(H5I_GROUP, grp, obj->vol_info, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
 
 done:
+    if (ret_value < 0 && grp)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen_ff() */
 
@@ -508,22 +586,19 @@ done:
 herr_t
 H5Gclose_ff(hid_t group_id, hid_t estack_id)
 {
-    H5VL_t  *vol_plugin = NULL;
+    H5VL_object_t *obj;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ii", group_id, estack_id);
 
     /* Check args */
-    if(NULL == H5I_object_verify(group_id,H5I_GROUP))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+    if(NULL == (obj == (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(group_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
-    vol_plugin->close_estack_id = estack_id;
-    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+    /* set the async request and dxpl IDs to be passed on to the VOL layer */
+    obj->close_estack_id = estack_id;
+    obj->close_dxpl_id = H5AC_dxpl_id;
 
     /*
      * Decrement the counter on the group atom.	 It will be freed if the count
@@ -558,11 +633,12 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
              hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id, hid_t trans_id, hid_t estack_id)
 {
     void    *dset = NULL;       /* dset token from VOL plugin */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t  *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -598,11 +674,11 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_DSET_TYPE_ID, &type_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_DSET_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
-    if(H5P_set(plist, H5VL_DSET_SPACE_ID, &space_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
-    if(H5P_set(plist, H5VL_DSET_LCPL_ID, &lcpl_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
@@ -614,27 +690,35 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the location object */
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
 
     /* Create the dataset through the VOL */
-    if(NULL == (dset = H5VL_dataset_create(obj, loc_params, vol_plugin, name, dcpl_id, dapl_id, 
-                                           dxpl_id, estack_id)))
+    if(NULL == (dset = H5VL_dataset_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                           name, dcpl_id, dapl_id, H5AC_dxpl_id, req)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
     /* Get an atom for the dataset */
-    if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(H5I_DATASET, dset, obj->vol_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
 
 done:
     if (ret_value < 0 && dset)
-        if(H5VL_dataset_close(dset, vol_plugin, H5AC_dxpl_id, estack_id) < 0)
+        if(H5VL_dataset_close (dset, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate_ff() */
 
@@ -660,11 +744,12 @@ H5Dcreate_anon_ff(hid_t file_id, hid_t type_id, hid_t space_id,
                   hid_t dcpl_id, hid_t dapl_id, hid_t trans_id, hid_t estack_id)
 {
     void    *dset = NULL;       /* dset token from VOL plugin */
-    void    *obj = NULL;        /* object token of file_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t  *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -690,9 +775,9 @@ H5Dcreate_anon_ff(hid_t file_id, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_DSET_TYPE_ID, &type_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_DSET_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
-    if(H5P_set(plist, H5VL_DSET_SPACE_ID, &space_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
@@ -704,27 +789,36 @@ H5Dcreate_anon_ff(hid_t file_id, hid_t type_id, hid_t space_id,
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the location object */
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
 
     /* Create the dataset through the VOL */
-    if(NULL == (dset = H5VL_dataset_create(obj, loc_params, vol_plugin, NULL, dcpl_id, dapl_id, 
-                                           dxpl_id, estack_id)))
+    if(NULL == (dset = H5VL_dataset_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                           NULL, dcpl_id, dapl_id, 
+                                           H5AC_dxpl_id, req)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
     /* Get an atom for the dataset */
-    if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(H5I_DATASET, dset, obj->vol_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
 
 done:
     if (ret_value < 0 && dset)
-        if(H5VL_dataset_close(dset, vol_plugin, H5AC_dxpl_id, estack_id) < 0)
+        if(H5VL_dataset_close (dset, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate_anon_ff() */
 
@@ -749,10 +843,11 @@ hid_t
 H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t estack_id)
 {
     void    *dset = NULL;       /* dset token from VOL plugin */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     hid_t       ret_value;              /* Return value */
 
@@ -773,12 +868,9 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the location object */
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -786,14 +878,26 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    /* Open the dataset through the VOL */
-    if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, 
-                                         dapl_id, dxpl_id, estack_id)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
+    /* Create the dataset through the VOL */
+    if(NULL == (dset = H5VL_dataset_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, name, 
+                                         dapl_id, dxpl_id, req)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
     /* Get an atom for the dataset */
-    if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    if((ret_value = H5VL_register_id(H5I_DATASET, dset, obj->vol_info, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
 
 #ifdef H5_HAVE_INDEXING
     {
@@ -841,9 +945,8 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t rcxt_id, hid_t e
 
 done:
     if (ret_value < 0 && dset)
-        if(H5VL_dataset_close (dset, vol_plugin, H5AC_dxpl_id, estack_id) < 0)
+        if(H5VL_dataset_close (dset, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen_ff() */
 
@@ -866,13 +969,15 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
             hid_t file_space_id, hid_t dxpl_id, const void *buf,
             hid_t trans_id, hid_t estack_id)
 {
-    H5VL_t     *vol_plugin;
-    void       *dset;
+    H5VL_object_t   *dset = NULL;
 #ifdef H5_HAVE_INDEXING
     void       *idx_handle;
 #endif
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t      ret_value;              /* Return value */
+
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "iiiii*xii", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf, trans_id, estack_id);
@@ -880,6 +985,8 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* check arguments */
     if(!dset_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
@@ -893,13 +1000,6 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *) H5I_get_aux(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the dataset object */
-    if(NULL == (dset = (void *)H5I_object(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
 #ifdef H5_HAVE_INDEXING
     /* Get the index handle */
@@ -927,10 +1027,22 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     }
 #endif
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = dset->vol_info->vol_cls;
+    }
+
     /* Write the data through the VOL */
-    if((ret_value = H5VL_dataset_write(dset, vol_plugin, mem_type_id, mem_space_id, 
-                                       file_space_id, dxpl_id, buf, estack_id)) < 0)
+    if((ret_value = H5VL_dataset_write(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 
+                                       file_space_id, dxpl_id, buf, req)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -955,15 +1067,18 @@ H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
            hid_t file_space_id, hid_t dxpl_id, void *buf,
            hid_t rcxt_id, hid_t estack_id)
 {
-    H5VL_t     *vol_plugin;
-    void       *dset;
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5VL_object_t   *dset = NULL;
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "iiiii*xii", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf, rcxt_id, estack_id);
 
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(mem_space_id < 0 || file_space_id < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
@@ -974,23 +1089,28 @@ H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the dataset object */
-    if(NULL == (dset = (void *)H5I_object(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
-
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = dset->vol_info->vol_cls;
+    }
+
     /* Read the data through the VOL */
-    if((ret_value = H5VL_dataset_read(dset, vol_plugin, mem_type_id, mem_space_id, 
-                                      file_space_id, dxpl_id, buf, estack_id)) < 0)
+    if((ret_value = H5VL_dataset_read(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 
+                                      file_space_id, plist_id, buf, req)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1013,14 +1133,19 @@ done:
 herr_t
 H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t trans_id, hid_t estack_id)
 {
-    H5VL_t *vol_plugin;
-    void   *dset;
+    H5VL_object_t *dset;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*hii", dset_id, size, trans_id, estack_id);
+
+    /* Check args */
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     if(!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
@@ -1031,19 +1156,25 @@ H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t trans_id, hid_t esta
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the dataset object */
-    if(NULL == (dset = (void *)H5I_object(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = dset->vol_info->vol_cls;
+    }
 
     /* set the extent through the VOL */
-    if((ret_value = H5VL_dataset_set_extent(dset, vol_plugin, size, dxpl_id, estack_id)) < 0)
+    if((ret_value = H5VL_dataset_specific(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_SET_EXTENT, 
+                                          H5AC_dxpl_id, req, size)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
 
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
 done:
-        FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Dset_extent_ff() */
 
 
@@ -1068,27 +1199,19 @@ H5Dclose_ff(hid_t dset_id, hid_t estack_id)
     unsigned plugin_id;
     void *idx_handle = NULL;
 #endif
-    void *dset;
-    H5VL_t      *vol_plugin = NULL;
+    H5VL_object_t *dset;
     herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ii", dset_id, estack_id);
 
-    /* Check/fix arguments. */
-    if(H5I_DATASET != H5I_get_type(dset_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID")
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
-    vol_plugin->close_estack_id = estack_id;
-    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
-
-    /* get the dataset object */
-    if(NULL == (dset = (void *)H5I_object(dset_id)))
+    /* Check args */
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
+    /* set the async request and dxpl IDs to be passed on to the VOL layer */
+    dset->close_estack_id = estack_id;
+    dset->close_dxpl_id = H5AC_dxpl_id;
 
 #ifdef H5_HAVE_INDEXING
     /* Get the index handle if there is one */
@@ -1148,11 +1271,13 @@ H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
              hid_t tcpl_id, hid_t tapl_id, hid_t trans_id, hid_t estack_id)
 {
     void    *dt = NULL;
+    H5VL_object_t *new_obj = NULL;      /* VOL object that holds the datatype object and the VOL info */
     H5T_t   *type = NULL;
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1161,10 +1286,12 @@ H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
              trans_id, estack_id);
 
     /* Check arguments */
-    if (H5Tcommitted(type_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is already committed")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(H5T_is_named(type))
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is already committed")
 
     /* Get correct property list */
     if(H5P_DEFAULT == lcpl_id)
@@ -1187,9 +1314,6 @@ H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
         if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
-    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
@@ -1200,25 +1324,36 @@ H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
     /* get the object from the loc_id */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
 
     /* commit the datatype through the VOL */
-    if (NULL == (dt = H5VL_datatype_commit(obj, loc_params, vol_plugin, name, type_id, lcpl_id, 
-                                           tcpl_id, tapl_id, dxpl_id, estack_id)))
+    if (NULL == (dt = H5VL_datatype_commit(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                           name, type_id, lcpl_id, tcpl_id, tapl_id, 
+                                           H5AC_dxpl_id, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
-    /* attach the vol object created using the commit call to the 
-       library datatype structure */
-    /* set the committed type object to the VOL pluging pointer in the H5T_t struct */
-    type->vol_obj = dt;
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
-    /* attach VOL information to the ID */
-    if (H5I_register_aux(type_id, vol_plugin) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+    /* setup VOL object */
+    if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
+	HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
+    new_obj->vol_info = obj->vol_info;
+    new_obj->vol_info->nrefs ++;
+    new_obj->vol_obj = dt;
+
+    /* set the committed type object to the VOL pluging pointer in the H5T_t struct */
+    type->vol_obj = new_obj;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1243,11 +1378,11 @@ hid_t
 H5Topen_ff(hid_t loc_id, const char *name, hid_t tapl_id, hid_t rcxt_id, hid_t estack_id)
 {
     void    *vol_dt = NULL;       /* datatype token from VOL plugin */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
-    H5T_t   *dt = NULL;
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     hid_t     ret_value = FAIL;      /* Return value */
 
@@ -1268,12 +1403,9 @@ H5Topen_ff(hid_t loc_id, const char *name, hid_t tapl_id, hid_t rcxt_id, hid_t e
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    /* get the location object */
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -1281,23 +1413,31 @@ H5Topen_ff(hid_t loc_id, const char *name, hid_t tapl_id, hid_t rcxt_id, hid_t e
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
     /* Create the datatype through the VOL */
-    if(NULL == (vol_dt = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, 
-                                        dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype");
+    if(NULL == (vol_dt = H5VL_datatype_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                            name, tapl_id, dxpl_id, req)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
     /* Get an atom for the datatype */
-    if ((ret_value = H5VL_create_datatype(vol_dt, vol_plugin, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle");
-
-    /* Get an atom for the datatype with the VOL information as the auxilary struct*/
-    //if((ret_value = H5I_register2(H5I_DATATYPE, dt, vol_plugin, app_ref)) < 0)
-    //HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+    if((ret_value = H5VL_register_id(H5I_DATATYPE, vol_dt, obj->vol_info, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
 
 done:
-    if (ret_value < 0 && dt)
-        if(H5VL_datatype_close (dt, vol_plugin, H5AC_dxpl_id, estack_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+    if (ret_value < 0 && vol_dt)
+        if(H5VL_datatype_close (vol_dt, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release datatype")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen_ff() */
 
@@ -1318,7 +1458,7 @@ herr_t
 H5Tclose_ff(hid_t type_id, hid_t estack_id)
 {
     H5T_t   *dt;                    /* Pointer to datatype to close */
-    H5VL_t  *vol_plugin = NULL;
+    H5VL_object_t *obj;
     herr_t   ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1330,12 +1470,10 @@ H5Tclose_ff(hid_t type_id, hid_t estack_id)
     if(H5T_STATE_IMMUTABLE == dt->shared->state)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(type_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
-    vol_plugin->close_estack_id = estack_id;
-    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+    if(NULL != (obj = (H5VL_object_t *)type->vol_obj)) {
+        obj->close_estack_id = estack_id;
+        obj->close_dxpl_id = H5AC_dxpl_id;
+    }
 
     /* When the reference count reaches zero the resources are freed */
     if(H5I_dec_app_ref(type_id) < 0)
@@ -1359,8 +1497,7 @@ H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
              hid_t acpl_id, hid_t aapl_id, hid_t trans_id, hid_t estack_id)
 {
     void    *attr = NULL;       /* attr token from VOL plugin */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5P_genplist_t      *plist;            /* Property list pointer */
     H5VL_loc_params_t   loc_params;
@@ -1385,9 +1522,9 @@ H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_ATTR_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
-    if(H5P_set(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_ATTR_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
@@ -1400,25 +1537,34 @@ H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
 
     /* Create the attribute through the VOL */
-    if(NULL == (attr = H5VL_attr_create(obj, loc_params, vol_plugin, attr_name, acpl_id, aapl_id, 
-                                        dxpl_id, estack_id)))
+    if(NULL == (attr = H5VL_attr_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, attr_name, 
+                                        acpl_id, aapl_id, H5AC_dxpl_id, req)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
     /* Get an atom for the attribute */
-    if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    if((ret_value = H5VL_register_id(H5I_ATTR, attr, obj->vol_info, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize attribute handle")
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, estack_id) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+        if(H5VL_attr_close(attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate_ff() */
 
@@ -1437,8 +1583,7 @@ H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t lapl_id, hid_t trans_id, hid_t estack_id)
 {
     void    *attr = NULL;       /* attr token from VOL plugin */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5P_genplist_t      *plist;            /* Property list pointer */
     H5VL_loc_params_t    loc_params;
@@ -1465,15 +1610,15 @@ H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_ATTR_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
-    if(H5P_set(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
+    if(H5P_set(plist, H5VL_PROP_ATTR_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -1481,27 +1626,35 @@ H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the location object */
+    if(NULL == (obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
 
     /* Create the attribute through the VOL */
-    if(NULL == (attr = H5VL_attr_create(obj, loc_params, vol_plugin, attr_name, acpl_id, 
-                                        aapl_id, dxpl_id, estack_id)))
+    if(NULL == (attr = H5VL_attr_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, attr_name, 
+                                        acpl_id, aapl_id, H5AC_dxpl_id, req)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
     /* Get an atom for the attribute */
-    if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    if((ret_value = H5VL_register_id(H5I_ATTR, attr, obj->vol_info, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize attribute handle")
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, estack_id) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+        if(H5VL_attr_close (attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate_by_name_ff() */
 
@@ -1519,10 +1672,11 @@ H5Aopen_ff(hid_t loc_id, const char *attr_name, hid_t aapl_id,
            hid_t rcxt_id, hid_t estack_id)
 {
     void    *attr = NULL;       /* attr token from VOL plugin */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params; 
     hid_t		ret_value;
 
@@ -1538,13 +1692,9 @@ H5Aopen_ff(hid_t loc_id, const char *attr_name, hid_t aapl_id,
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the location object */
+    if(NULL == (obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -1552,18 +1702,31 @@ H5Aopen_ff(hid_t loc_id, const char *attr_name, hid_t aapl_id,
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    /* Create the attribute through the VOL */
-    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, attr_name, aapl_id, dxpl_id, estack_id)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
+    /* Open the attribute through the VOL */
+    if(NULL == (attr = H5VL_attr_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                      attr_name, aapl_id, H5AC_ind_dxpl_id, req)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
     /* Get an atom for the attribute */
-    if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    if((ret_value = H5VL_register_id(H5I_ATTR, attr, obj->vol_info, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize attribute handle")
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, estack_id) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+        if(H5VL_attr_close (attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_ff() */
 
@@ -1581,10 +1744,11 @@ H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t aapl_id, hid_t lapl_id, hid_t rcxt_id, hid_t estack_id)
 {
     void    *attr = NULL;       /* attr token from VOL plugin */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t   loc_params;
     hid_t		ret_value;
 
@@ -1610,12 +1774,9 @@ H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the location object */
+    if(NULL == (obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -1623,18 +1784,31 @@ H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    /* Create the attribute through the VOL */
-    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, attr_name, aapl_id, dxpl_id, estack_id)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
+    /* Open the attribute through the VOL */
+    if(NULL == (attr = H5VL_attr_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                      attr_name, aapl_id, H5AC_ind_dxpl_id, req)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
     /* Get an atom for the attribute */
-    if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    if((ret_value = H5VL_register_id(H5I_ATTR, attr, obj->vol_info, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize attribute handle")
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, estack_id) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+        if(H5VL_attr_close (attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_by_name_ff() */
 
@@ -1650,16 +1824,19 @@ done:
 herr_t
 H5Awrite_ff(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t trans_id, hid_t estack_id)
 {
-    H5VL_t     *vol_plugin;
-    void       *attr;
+    H5VL_object_t *attr;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ii*xii", attr_id, dtype_id, buf, trans_id, estack_id);
 
     /* check arguments */
+    if(NULL == (attr = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
@@ -1669,16 +1846,22 @@ H5Awrite_ff(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t trans_id, hid_
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the dataset object */
-    if(NULL == (attr = (void *)H5I_object(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = attr->vol_info->vol_cls;
+    }
 
     /* write the data through the VOL */
-    if((ret_value = H5VL_attr_write(attr, vol_plugin, dtype_id, buf, dxpl_id, estack_id)) < 0)
+    if((ret_value = H5VL_attr_write(attr->vol_obj, attr->vol_info->vol_cls, 
+                                    dtype_id, buf, H5AC_dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1696,16 +1879,19 @@ done:
 herr_t
 H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, hid_t rcxt_id, hid_t estack_id)
 {
-    H5VL_t     *vol_plugin;
-    void       *attr;
+    H5VL_object_t *attr;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "ii*xii", attr_id, dtype_id, buf, rcxt_id, estack_id);
 
     /* check arguments */
+    if(NULL == (attr = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
@@ -1715,16 +1901,22 @@ H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, hid_t rcxt_id, hid_t estack
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the dataset object */
-    if(NULL == (attr = (void *)H5I_object(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = attr->vol_info->vol_cls;
+    }
 
     /* Read the data through the VOL */
-    if((ret_value = H5VL_attr_read(attr, vol_plugin, dtype_id, buf, dxpl_id, estack_id)) < 0)
+    if((ret_value = H5VL_attr_read(attr->vol_obj, attr->vol_info->vol_cls, 
+                                   dtype_id, buf, H5AC_ind_dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1761,14 +1953,19 @@ H5Arename_ff(hid_t loc_id, const char *old_name, const char *new_name,
 
     /* Avoid thrashing things if the names are the same */
     if(HDstrcmp(old_name, new_name)) {
-        H5VL_t     *vol_plugin;
-        void       *obj;
+        H5VL_object_t *obj;
         hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+        H5P_genplist_t *plist;     /* Property list pointer */
+        H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+        void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
         H5VL_loc_params_t loc_params;
 
         loc_params.type = H5VL_OBJECT_BY_SELF;
         loc_params.obj_type = H5I_get_type(loc_id);
+
+        /* get the location object */
+        if(NULL == (obj = H5VL_get_object(loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
         /* store the transaction ID in the dxpl */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -1776,17 +1973,22 @@ H5Arename_ff(hid_t loc_id, const char *old_name, const char *new_name,
         if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-        /* get the file object */
-        if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+        if(estack_id != H5_EVENT_STACK_NULL) {
+            /* create the private request */
+            if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            req = &request->req;
+            request->vol_cls = obj->vol_info->vol_cls;
+        }
 
         /* rename the attribute info through the VOL */
-        if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_ATTR_RENAME, dxpl_id, 
-                            estack_id, old_name, new_name) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+        if((ret_value = H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_RENAME,
+                                           H5AC_dxpl_id, req, old_name, new_name)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute");
+
+        if(request && *req)
+            if(H5ES_insert(estack_id, request) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
     }
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1833,10 +2035,11 @@ H5Arename_by_name_ff(hid_t loc_id, const char *obj_name, const char *old_attr_na
 
     /* Avoid thrashing things if the names are the same */
     if(HDstrcmp(old_attr_name, new_attr_name)) {
-        H5VL_t     *vol_plugin;
-        void       *obj;
+        H5VL_object_t *obj;
         hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+        H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
         H5VL_loc_params_t loc_params;
 
         loc_params.type = H5VL_OBJECT_BY_NAME;
@@ -1851,16 +2054,25 @@ H5Arename_by_name_ff(hid_t loc_id, const char *obj_name, const char *old_attr_na
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
         /* get the file object */
-        if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        if(NULL == (obj = H5VL_get_object(loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+        if(estack_id != H5_EVENT_STACK_NULL) {
+            /* create the private request */
+            if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            req = &request->req;
+            request->vol_cls = obj->vol_info->vol_cls;
+        }
 
         /* rename the attribute info through the VOL */
-        if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_ATTR_RENAME, dxpl_id, 
-                            estack_id, old_attr_name, new_attr_name) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+        if((ret_value = H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_RENAME,
+                                           H5AC_dxpl_id, req, old_attr_name, new_attr_name)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute");
+
+        if(request && *req)
+            if(H5ES_insert(estack_id, request) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
     } /* end if */
 
 done:
@@ -1879,11 +2091,12 @@ done:
 herr_t
 H5Adelete_ff(hid_t loc_id, const char *name, hid_t trans_id, hid_t estack_id)
 {
-    H5VL_t     *vol_plugin;
-    void       *obj;
+    H5VL_object_t *obj;
     H5VL_loc_params_t loc_params;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1904,16 +2117,26 @@ H5Adelete_ff(hid_t loc_id, const char *name, hid_t trans_id, hid_t estack_id)
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
-    /* Open the attribute through the VOL */
-    if(H5VL_attr_remove(obj, loc_params, vol_plugin, name, dxpl_id, estack_id) < 0)
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
+    /* Delete the attribute through the VOL */
+    if((ret_value = H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_DELETE,
+                                       H5AC_dxpl_id, req, name)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1934,11 +2157,12 @@ herr_t
 H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t lapl_id, hid_t trans_id, hid_t estack_id)
 {
-    H5VL_t     *vol_plugin;
-    void       *obj;
+    H5VL_object_t *obj;
     H5VL_loc_params_t loc_params;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1969,16 +2193,26 @@ H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
-    /* Open the attribute through the VOL */
-    if(H5VL_attr_remove(obj, loc_params, vol_plugin, attr_name, dxpl_id, estack_id) < 0)
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
+    /* Delete the attribute through the VOL */
+    if((ret_value = H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_DELETE,
+                                       H5AC_dxpl_id, req, attr_name)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2002,11 +2236,12 @@ done:
 herr_t
 H5Aexists_ff(hid_t obj_id, const char *attr_name, hbool_t *ret, hid_t rcxt_id, hid_t estack_id)
 {
-    H5VL_t     *vol_plugin;
-    void       *obj;
+    H5VL_object_t *obj;
     H5VL_loc_params_t loc_params;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t	ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2018,11 +2253,8 @@ H5Aexists_ff(hid_t obj_id, const char *attr_name, hbool_t *ret, hid_t rcxt_id, h
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
+    if(NULL == (obj = H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
@@ -2034,10 +2266,22 @@ H5Aexists_ff(hid_t obj_id, const char *attr_name, hbool_t *ret, hid_t rcxt_id, h
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    /* get the attribute info through the VOL */
-    if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_EXISTS, dxpl_id, estack_id, 
-                     loc_params, attr_name, (htri_t *)ret) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
+    /* Check existence of attribute through the VOL */
+    if(H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_EXISTS,
+                          H5AC_ind_dxpl_id, req, attr_name, &ret_value) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2061,11 +2305,12 @@ herr_t
 H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
                      hid_t lapl_id, hbool_t *ret, hid_t rcxt_id, hid_t estack_id)
 {
-    H5VL_t     *vol_plugin;
-    void       *obj;
+    H5VL_object_t *obj;
     H5VL_loc_params_t loc_params;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t	ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2085,11 +2330,8 @@ H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
@@ -2103,10 +2345,22 @@ H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    /* get the attribute info through the VOL */
-    if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_EXISTS, dxpl_id, estack_id, 
-                     loc_params, attr_name, (htri_t *)ret) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
+    /* Check existence of attribute through the VOL */
+    if(H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_EXISTS,
+                          H5AC_ind_dxpl_id, req, attr_name, &ret_value) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2128,22 +2382,19 @@ done:
 herr_t
 H5Aclose_ff(hid_t attr_id, hid_t estack_id)
 {
-    H5VL_t *vol_plugin = NULL;
+    H5VL_object_t *obj;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ii", attr_id, estack_id);
 
-    /* check arguments */
-    if(NULL == H5I_object_verify(attr_id, H5I_ATTR))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+    /* Check args */
+    if(NULL == (obj == (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute ID")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
-    vol_plugin->close_estack_id = estack_id;
-    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+    /* set the async request and dxpl IDs to be passed on to the VOL layer */
+    obj->close_estack_id = estack_id;
+    obj->close_dxpl_id = H5AC_dxpl_id;
 
     /* Decrement references to that atom (and close it) */
     if(H5I_dec_app_ref(attr_id) < 0)
@@ -2175,14 +2426,14 @@ herr_t
 H5Lmove_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
            const char *dst_name, hid_t lcpl_id, hid_t lapl_id, hid_t trans_id, hid_t estack_id)
 {
-    void    *obj1 = NULL;        /* object token of src_id */
-    H5VL_t  *vol_plugin1 = NULL;        /* VOL plugin information */
+    H5VL_object_t *obj1 = NULL;        /* object token of src_id */
     H5VL_loc_params_t loc_params1;
-    void    *obj2 = NULL;        /* object token of dst_id */
-    H5VL_t  *vol_plugin2 = NULL;        /* VOL plugin information */
+    H5VL_object_t *obj2 = NULL;        /* object token of dst_id */
     H5VL_loc_params_t loc_params2;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2221,21 +2472,16 @@ H5Lmove_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         /* get the file object */
         if(NULL == (obj1 = (void *)H5I_object(src_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(src_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     }
     if(H5L_SAME_LOC != dst_loc_id) {
         /* get the file object */
         if(NULL == (obj2 = (void *)H5I_object(dst_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(dst_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     }
+
     /* Make sure that the VOL plugins are the same */
-    if(H5L_SAME_LOC != dst_loc_id && H5L_SAME_LOC != src_loc_id) {
-        if (vol_plugin1->cls != vol_plugin2->cls)
+    if(obj1 && obj2) {
+        if (obj1->vol_info->vol_cls->value != obj2->vol_info->vol_cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
     }
 
@@ -2245,11 +2491,24 @@ H5Lmove_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = (obj1 ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls);
+    }
+
     /* Move the link through the VOL */
-    if((ret_value = H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
-                                   (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
-                                   FALSE, lcpl_id, lapl_id, dxpl_id, estack_id)) < 0)
+    if(H5VL_link_move((obj1 ? obj1->vol_obj : NULL), loc_params1, 
+                      (obj2 ? obj2->vol_obj : NULL), loc_params2, 
+                      (obj1 ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
+                      lcpl_id, lapl_id, H5AC_dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2274,14 +2533,14 @@ herr_t
 H5Lcopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
            const char *dst_name, hid_t lcpl_id, hid_t lapl_id, hid_t trans_id, hid_t estack_id)
 {
-    void    *obj1 = NULL;        /* object token of src_id */
-    H5VL_t  *vol_plugin1 = NULL;        /* VOL plugin information */
+    H5VL_object_t *obj1 = NULL;        /* object token of src_id */
     H5VL_loc_params_t loc_params1;
-    void    *obj2 = NULL;        /* object token of dst_id */
-    H5VL_t  *vol_plugin2 = NULL;        /* VOL plugin information */
+    H5VL_object_t *obj2 = NULL;        /* object token of dst_id */
     H5VL_loc_params_t loc_params2;
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2318,23 +2577,17 @@ H5Lcopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     if(H5L_SAME_LOC != src_loc_id) {
         /* get the file object */
-        if(NULL == (obj1 = (void *)H5I_object(src_loc_id)))
+        if(NULL == (obj1 = (H5VL_object_t *)H5I_object(src_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(src_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     }
     if(H5L_SAME_LOC != dst_loc_id) {
         /* get the file object */
-        if(NULL == (obj2 = (void *)H5I_object(dst_loc_id)))
+        if(NULL == (obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(dst_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     }
     /* Make sure that the VOL plugins are the same */
-    if(H5L_SAME_LOC != dst_loc_id && H5L_SAME_LOC != src_loc_id) {
-        if (vol_plugin1->cls != vol_plugin2->cls)
+    if(obj1 && obj2) {
+        if (obj1->vol_info->vol_cls->value != obj2->vol_info->vol_cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
     }
 
@@ -2344,11 +2597,25 @@ H5Lcopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-    /* Move the link through the VOL */
-    if((ret_value = H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
-                                   (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
-                                   TRUE, lcpl_id, lapl_id, dxpl_id, estack_id)) < 0)
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = (obj1 ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls);
+    }
+
+    /* Copy the link through the VOL */
+    if(H5VL_link_copy((obj1 ? obj1->vol_obj : NULL), loc_params1, 
+                      (obj2 ? obj2->vol_obj : NULL), loc_params2, 
+                      (obj1 ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
+                      lcpl_id, lapl_id, H5AC_dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lcopy_ff() */
@@ -2376,8 +2643,7 @@ herr_t
 H5Lcreate_soft_ff(const char *link_target, hid_t link_loc_id, const char *link_name, 
                   hid_t lcpl_id, hid_t lapl_id, hid_t trans_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -2409,31 +2675,40 @@ H5Lcreate_soft_ff(const char *link_target, hid_t link_loc_id, const char *link_n
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
     loc_params.obj_type = H5I_get_type(link_loc_id);
 
+    /* get the location object */
+    if(NULL == (obj = (H5VL_object_t *)H5VL_get_object(link_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(link_loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(link_loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &link_target) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_TARGET_NAME, &link_target) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj, loc_params, vol_plugin,
-                                     lcpl_id, lapl_id, dxpl_id, estack_id)) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj->vol_obj, loc_params, obj->vol_info->vol_cls,
+                        lcpl_id, lapl_id, H5AC_dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2461,10 +2736,8 @@ H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
                   const char *new_name, hid_t lcpl_id, hid_t lapl_id, 
                   hid_t trans_id, hid_t estack_id)
 {
-    void    *obj1 = NULL;        /* object token of loc_id */
-    void    *obj2 = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin1 = NULL; /* VOL plugin information */
-    H5VL_t  *vol_plugin2 = NULL; /* VOL plugin information */
+    H5VL_object_t *obj1 = NULL;        /* object token of loc_id */
+    H5VL_object_t *obj2 = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -2504,23 +2777,17 @@ H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
 
     if(H5L_SAME_LOC != cur_loc_id) {
         /* get the file object */
-        if(NULL == (obj1 = (void *)H5I_object(cur_loc_id)))
+        if(NULL == (obj1 = (H5VL_object_t *)H5VL_get_object(cur_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(cur_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     }
     if(H5L_SAME_LOC != new_loc_id) {
         /* get the file object */
-        if(NULL == (obj2 = (void *)H5I_object(new_loc_id)))
+        if(NULL == (obj2 = (H5VL_object_t *)H5VL_get_object(new_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(new_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     }
     /* Make sure that the VOL plugins are the same */
-    if(H5L_SAME_LOC != new_loc_id && H5L_SAME_LOC != cur_loc_id) {
-        if (vol_plugin1->cls != vol_plugin2->cls)
+    if(obj1 && obj2) {
+        if (obj1->vol_info->vol_cls->value != obj2->vol_info->vol_cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
     }
 
@@ -2529,9 +2796,9 @@ H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_LINK_TARGET, &obj1) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_TARGET, (obj1 ? &(obj1->vol_obj) : NULL)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-    if(H5P_set(plist, H5VL_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
     /* store the transaction ID in the dxpl */
@@ -2540,11 +2807,23 @@ H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = (obj1!=NULL ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls);
+    }
+
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
-                                     (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
-                                     lcpl_id, lapl_id, dxpl_id, estack_id)) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, (obj2 ? (obj2->vol_obj) : NULL), loc_params2, 
+                        (obj1!=NULL ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
+                        lcpl_id, lapl_id, H5AC_dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2571,10 +2850,11 @@ done:
 herr_t
 H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t trans_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -2597,16 +2877,25 @@ H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t trans_id, hid_
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, dxpl_id, 
-                                     estack_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
+    if(H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_DELETE, 
+                          H5AC_dxpl_id, req) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2630,10 +2919,11 @@ herr_t
 H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, hbool_t *ret, 
              hid_t rcxt_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;
 
@@ -2655,11 +2945,8 @@ H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, hbool_t *ret,
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -2667,10 +2954,22 @@ H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, hbool_t *ret,
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
     /* check link existence through the VOL */
-    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_EXISTS, 
-                     dxpl_id, estack_id, (htri_t *)ret) < 0)
+    if(H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_EXISTS,
+                          H5AC_ind_dxpl_id, req, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2694,10 +2993,11 @@ herr_t
 H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo ,
                hid_t lapl_id, hid_t rcxt_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;
 
@@ -2718,11 +3018,8 @@ H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo ,
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -2730,10 +3027,22 @@ H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo ,
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, 
-                                  dxpl_id, estack_id, linfo)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
+    if(H5VL_link_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_GET_INFO, 
+                     H5AC_ind_dxpl_id, req, linfo) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2763,10 +3072,11 @@ herr_t
 H5Lget_val_ff(hid_t loc_id, const char *name, void *buf, size_t size,
               hid_t lapl_id, hid_t rcxt_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -2788,11 +3098,8 @@ H5Lget_val_ff(hid_t loc_id, const char *name, void *buf, size_t size,
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -2800,10 +3107,22 @@ H5Lget_val_ff(hid_t loc_id, const char *name, void *buf, size_t size,
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
-                                  dxpl_id, estack_id, buf, size)) < 0)
+    if(H5VL_link_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_GET_VAL, 
+                     H5AC_ind_dxpl_id, req, buf, size) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2835,12 +3154,13 @@ done:
 hid_t
 H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5I_type_t  opened_type;
-    void       *opened_obj = NULL;
+    H5VL_object_t    *opened_obj = NULL;
     H5VL_loc_params_t loc_params;
     hid_t       ret_value = FAIL;
 
@@ -2856,11 +3176,8 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -2868,13 +3185,25 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id)
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    /* Open the object through the VOL */
-    if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
-                                              dxpl_id, H5_EVENT_STACK_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
 
-    if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    /* Open the object through the VOL */
+    if(NULL == (opened_obj = H5VL_object_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, &opened_type, 
+                                              H5AC_dxpl_id, req)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
+    if((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2899,17 +3228,17 @@ done:
 herr_t
 H5Oget_token(hid_t obj_id, void *token, size_t *token_size)
 {
-    void *obj = NULL;        /* object token of loc_id */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     herr_t ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*x*z", obj_id, token, token_size);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
+    if(NULL == (obj = H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier");
 
-    if(H5VL_iod_get_token(obj, token, token_size) < 0)
+    if(H5VL_iod_get_token(obj->vol_obj, token, token_size) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get object token");
 
 done:
@@ -2938,7 +3267,6 @@ hid_t
 H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id)
 {
     H5TR_t *tr = NULL;
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5I_type_t opened_type;
@@ -2955,19 +3283,12 @@ H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id)
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(trans_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = attr->vol_info->vol_cls;
     }
 
     if(NULL == (opened_obj = H5VL_iod_obj_open_token(token, tr, &opened_type, req)))
@@ -2975,15 +3296,11 @@ H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id)
 
     /* TODO add indexing part from H5Dopen */
 
-    if(request && *req) {
-        /* insert in stack */
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
-    vol_plugin->nrefs ++;
-    /* create hid_t for opened object */
-    if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
 
 done:
@@ -3016,10 +3333,8 @@ herr_t
 H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
            hid_t lapl_id, hid_t trans_id, hid_t estack_id)
 {
-    void    *obj1 = NULL;        /* object token of loc_id */
-    void    *obj2 = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin1 = NULL;  /* VOL plugin information */
-    H5VL_t  *vol_plugin2 = NULL;  /* VOL plugin information */
+    H5VL_object_t *obj1 = NULL;        /* object token of loc_id */
+    H5VL_object_t *obj2 = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -3057,23 +3372,17 @@ H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
 
     if(H5L_SAME_LOC != obj_id) {
         /* get the file object */
-        if(NULL == (obj1 = (void *)H5VL_get_object(obj_id)))
+        if(NULL == (obj1 = H5VL_get_object(obj_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     }
     if(H5L_SAME_LOC != new_loc_id) {
         /* get the file object */
-        if(NULL == (obj2 = (void *)H5VL_get_object(new_loc_id)))
+        if(NULL == (obj2 = H5VL_get_object(new_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(new_loc_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     }
     /* Make sure that the VOL plugins are the same */
-    if(H5L_SAME_LOC != new_loc_id && H5L_SAME_LOC != obj_id) {
-        if (vol_plugin1->cls != vol_plugin2->cls)
+    if(obj1 && obj2) {
+        if (obj1->vol_info->vol_cls->value != obj2->vol_info->vol_cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
     }
 
@@ -3082,9 +3391,9 @@ H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_LINK_TARGET, &obj1) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_TARGET, &obj1->vol_obj) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-    if(H5P_set(plist, H5VL_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
+    if(H5P_set(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
 
     /* store the transaction ID in the dxpl */
@@ -3093,11 +3402,23 @@ H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = (obj1!=NULL ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls);
+    }
+
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
-                                     (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
-                                     lcpl_id, lapl_id, dxpl_id, estack_id)) < 0)
+    if(H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2->vol_obj, loc_params2, 
+                        (obj1!=NULL ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
+                        lcpl_id, lapl_id, H5AC_dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3121,10 +3442,11 @@ herr_t
 H5Oexists_by_name_ff(hid_t loc_id, const char *name, hbool_t *ret, hid_t lapl_id,
                      hid_t rcxt_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t  ret_value = SUCCEED;       /* Return value */
 
@@ -3146,11 +3468,8 @@ H5Oexists_by_name_ff(hid_t loc_id, const char *name, hbool_t *ret, hid_t lapl_id
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -3158,10 +3477,22 @@ H5Oexists_by_name_ff(hid_t loc_id, const char *name, hbool_t *ret, hid_t lapl_id
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
     /* change the ref count through the VOL */
-    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_EXISTS, 
-                       dxpl_id, estack_id, (htri_t *)ret) < 0)
+    if(H5VL_object_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_OBJECT_EXISTS, 
+                            H5AC_ind_dxpl_id, req, &ret_value) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3188,10 +3519,11 @@ done:
 herr_t
 H5Oset_comment_ff(hid_t obj_id, const char *comment, hid_t trans_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3202,11 +3534,8 @@ H5Oset_comment_ff(hid_t obj_id, const char *comment, hid_t trans_id, hid_t estac
     loc_params.obj_type = H5I_get_type(obj_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
+    if(NULL == (obj = H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -3214,10 +3543,22 @@ H5Oset_comment_ff(hid_t obj_id, const char *comment, hid_t trans_id, hid_t estac
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
     /* set comment on object through the VOL */
-    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, 
-                        dxpl_id, estack_id, comment) < 0)
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+                            H5VL_OBJECT_SET_COMMENT, loc_params, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3245,10 +3586,11 @@ herr_t
 H5Oset_comment_by_name_ff(hid_t loc_id, const char *name, const char *comment,
                           hid_t lapl_id, hid_t trans_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3270,11 +3612,8 @@ H5Oset_comment_by_name_ff(hid_t loc_id, const char *name, const char *comment,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -3282,10 +3621,22 @@ H5Oset_comment_by_name_ff(hid_t loc_id, const char *name, const char *comment,
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
     /* set comment on object through the VOL */
-    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, 
-                        dxpl_id, estack_id, comment) < 0)
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+                            H5VL_OBJECT_SET_COMMENT, loc_params, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3308,10 +3659,11 @@ herr_t
 H5Oget_comment_ff(hid_t loc_id, char *comment, size_t bufsize, ssize_t *ret,
                   hid_t rcxt_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;              /* Return value */
 
@@ -3322,11 +3674,8 @@ H5Oget_comment_ff(hid_t loc_id, char *comment, size_t bufsize, ssize_t *ret,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -3334,9 +3683,21 @@ H5Oget_comment_ff(hid_t loc_id, char *comment, size_t bufsize, ssize_t *ret,
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, 
-                       dxpl_id, estack_id, comment, bufsize, ret) < 0)
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+                            H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3359,10 +3720,11 @@ herr_t
 H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *comment, size_t bufsize,
                           ssize_t *ret, hid_t lapl_id, hid_t rcxt_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;              /* Return value */
 
@@ -3385,11 +3747,8 @@ H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *comment, size_t 
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -3397,98 +3756,25 @@ H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *comment, size_t 
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, 
-                       dxpl_id, estack_id, comment, bufsize, ret) < 0)
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+                            H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_comment_by_name_ff() */
-
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function:    H5Ocopy_ff
- *
- * Purpose:     Copy an object (group or dataset) to destination location
- *              within a file or cross files. PLIST_ID is a property list
- *              which is used to pass user options and properties to the
- *              copy. The name, dst_name, must not already be taken by some
- *              other object in the destination group.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *              May 2013
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Ocopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
-           const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, 
-           hid_t trans_id, hid_t estack_id)
-{
-    void    *obj1 = NULL;        /* object token of src_id */
-    H5VL_t  *vol_plugin1;        /* VOL plugin information */
-    H5VL_loc_params_t loc_params1;
-    void    *obj2 = NULL;        /* object token of dst_id */
-    H5VL_t  *vol_plugin2;        /* VOL plugin information */
-    H5VL_loc_params_t loc_params2;
-    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value = SUCCEED;        /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE8("e", "i*si*siiii", src_loc_id, src_name, dst_loc_id, dst_name,
-             ocpypl_id, lcpl_id, trans_id, estack_id);
-
-    /* Get correct property lists */
-    if(H5P_DEFAULT == lcpl_id)
-        lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
-
-    /* Get object copy property list */
-    if(H5P_DEFAULT == ocpypl_id)
-        ocpypl_id = H5P_OBJECT_COPY_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(ocpypl_id, H5P_OBJECT_COPY))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object copy property list")
-
-    /* get the object */
-    if(NULL == (obj1 = (void *)H5I_object(src_loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(src_loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "src ID does not contain VOL information")
-    loc_params1.type = H5VL_OBJECT_BY_SELF;
-    loc_params1.obj_type = H5I_get_type(src_loc_id);
-
-    /* get the object */
-    if(NULL == (obj2 = (void *)H5I_object(dst_loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(dst_loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst ID does not contain VOL information")
-    loc_params2.type = H5VL_OBJECT_BY_SELF;
-    loc_params2.obj_type = H5I_get_type(dst_loc_id);
-
-    /* store the transaction ID in the dxpl */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
-
-    /* Open the object through the VOL */
-    if((ret_value = H5VL_object_copy(obj1, loc_params1, vol_plugin1, src_name, 
-                                     obj2, loc_params2, vol_plugin2, dst_name, 
-                                     ocpypl_id, lcpl_id, dxpl_id, estack_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Ocopy_ff() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -3507,10 +3793,11 @@ done:
 herr_t
 H5Oget_info_ff(hid_t loc_id, H5O_ff_info_t *oinfo, hid_t rcxt_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3525,11 +3812,8 @@ H5Oget_info_ff(hid_t loc_id, H5O_ff_info_t *oinfo, hid_t rcxt_id, hid_t estack_i
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -3537,10 +3821,22 @@ H5Oget_info_ff(hid_t loc_id, H5O_ff_info_t *oinfo, hid_t rcxt_id, hid_t estack_i
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_INFO, 
-                                    dxpl_id, estack_id, oinfo)) < 0)
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+                            H5VL_OBJECT_GET_INFO, loc_params, oinfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3564,10 +3860,11 @@ herr_t
 H5Oget_info_by_name_ff(hid_t loc_id, const char *name, H5O_ff_info_t *oinfo, 
                        hid_t lapl_id, hid_t rcxt_id, hid_t estack_id)
 {
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
-    H5P_genplist_t *plist ;     /* Property list pointer */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3591,11 +3888,8 @@ H5Oget_info_by_name_ff(hid_t loc_id, const char *name, H5O_ff_info_t *oinfo,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -3603,10 +3897,22 @@ H5Oget_info_by_name_ff(hid_t loc_id, const char *name, H5O_ff_info_t *oinfo,
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
+    if(estack_id != H5_EVENT_STACK_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        req = &request->req;
+        request->vol_cls = obj->vol_info->vol_cls;
+    }
+
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_INFO, 
-                                    dxpl_id, estack_id, oinfo)) < 0)
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+                            H5VL_OBJECT_GET_INFO, loc_params, oinfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
+
+    if(request && *req)
+        if(H5ES_insert(estack_id, request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3634,7 +3940,7 @@ done:
 herr_t
 H5Oclose_ff(hid_t object_id, hid_t estack_id)
 {
-    H5VL_t      *vol_plugin = NULL;
+    H5VL_object_t *obj;
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -3646,15 +3952,13 @@ H5Oclose_ff(hid_t object_id, hid_t estack_id)
         case H5I_DATATYPE:
         case H5I_DATASET:
         case H5I_MAP:
-            /* check ID */
-            if(H5I_object(object_id) == NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object");
-            /* get the plugin pointer */
-            if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(object_id)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-            /* set the event queue and dxpl IDs to be passed on to the VOL layer */
-            vol_plugin->close_estack_id = estack_id;
-            vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+            /* Check args */
+            if(NULL == (obj == (H5VL_object_t *)H5I_object(group_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid object ID")
+
+                    /* set the async request and dxpl IDs to be passed on to the VOL layer */
+            obj->close_estack_id = estack_id;
+            obj->close_dxpl_id = H5AC_dxpl_id;
 
             if(H5I_dec_app_ref(object_id) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object");
@@ -4279,47 +4583,39 @@ done:
 H5_DLL herr_t H5Aprefetch_ff(hid_t attr_id, hid_t rcxt_id, hrpl_t *replica_id,
                              hid_t dxpl_id, hid_t estack_id)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void    *attr = NULL;       /* pointer to attr object */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    H5VL_object_t *attr = NULL;       /* pointer to attr object */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
     /* get the map object */
-    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
     if(H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not data transfer property list")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = attr->vol_info->vol_cls;
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_prefetch(attr, rcxt_id, replica_id, dxpl_id, req)) < 0)
+    if((ret_value = H5VL_iod_prefetch(attr->vol_obj, rcxt_id, replica_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch attribute")
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -4342,8 +4638,7 @@ H5_DLL herr_t H5Aevict_ff(hid_t attr_id, uint64_t c_version, hid_t dxpl_id, hid_
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generated request pointer */
-    void    *attr = NULL;       /* pointer to attr object */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *attr = NULL;       /* pointer to attr object */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -4366,21 +4661,17 @@ H5_DLL herr_t H5Aevict_ff(hid_t attr_id, uint64_t c_version, hid_t dxpl_id, hid_
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = attr->vol_info->vol_cls;
     }
 
     /* Get the data through the IOD VOL */
     if((ret_value = H5VL_iod_evict(attr, c_version, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict attribute")
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -4404,18 +4695,14 @@ H5_DLL herr_t H5Dprefetch_ff(hid_t dset_id, hid_t rcxt_id, hrpl_t *replica_id,
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void    *dset = NULL;        /* pointer to dset object */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *dset = NULL;        /* pointer to dset object */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
     /* get the map object */
-    if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
     if(H5P_DEFAULT == dxpl_id)
@@ -4428,21 +4715,17 @@ H5_DLL herr_t H5Dprefetch_ff(hid_t dset_id, hid_t rcxt_id, hrpl_t *replica_id,
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = dset->vol_info->vol_cls;
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_prefetch(dset, rcxt_id, replica_id, dxpl_id, req)) < 0)
+    if((ret_value = H5VL_iod_prefetch(dset->vol_obj, rcxt_id, replica_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch dataset")
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -4464,15 +4747,14 @@ done:
 H5_DLL herr_t H5Devict_ff(hid_t dset_id, uint64_t c_version, hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generated request pointer */
-    void    *dset = NULL;       /* pointer to dset object */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    void **req = NULL;       /* pointer to plugin generated request pointer */
+    H5VL_object_t *dset = NULL;       /* pointer to dset object */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
     /* get the map object */
-    if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
@@ -4489,21 +4771,17 @@ H5_DLL herr_t H5Devict_ff(hid_t dset_id, uint64_t c_version, hid_t dxpl_id, hid_
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = dset->vol_info->vol_cls;
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_evict(dset, c_version, dxpl_id, req)) < 0)
+    if((ret_value = H5VL_iod_evict(dset->vol_obj, c_version, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict dataset")
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -4527,14 +4805,13 @@ H5_DLL herr_t H5Gprefetch_ff(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void    *grp = NULL;        /* pointer to grp object */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *grp = NULL;        /* pointer to grp object */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
     /* get the map object */
-    if(NULL == (grp = (void *)H5I_object_verify(grp_id, H5I_GROUP)))
+    if(NULL == (grp = (H5VL_object_t *)H5I_object_verify(grp_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(grp_id)))
@@ -4551,21 +4828,17 @@ H5_DLL herr_t H5Gprefetch_ff(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = grp->vol_info->vol_cls;
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_prefetch(grp, rcxt_id, replica_id, dxpl_id, req)) < 0)
+    if((ret_value = H5VL_iod_prefetch(grp->vol_obj, rcxt_id, replica_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch group")
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -4588,18 +4861,14 @@ H5_DLL herr_t H5Gevict_ff(hid_t grp_id, uint64_t c_version, hid_t dxpl_id, hid_t
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generated request pointer */
-    void    *grp = NULL;       /* pointer to grp object */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *grp = NULL;       /* pointer to grp object */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
     /* get the map object */
-    if(NULL == (grp = (void *)H5I_object_verify(grp_id, H5I_GROUP)))
+    if(NULL == (grp = (H5VL_object_t *)H5I_object_verify(grp_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(grp_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
     if(H5P_DEFAULT == dxpl_id)
@@ -4612,21 +4881,17 @@ H5_DLL herr_t H5Gevict_ff(hid_t grp_id, uint64_t c_version, hid_t dxpl_id, hid_t
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = grp->vol_info->vol_cls;
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_evict(grp, c_version, dxpl_id, req)) < 0)
+    if((ret_value = H5VL_iod_evict(grp->vol_obj, c_version, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict group")
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -4650,8 +4915,7 @@ H5_DLL herr_t H5Tprefetch_ff(hid_t dtype_id, hid_t rcxt_id, hrpl_t *replica_id,
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;  /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void    *dtype = NULL; /* pointer to dtype object */
-    H5VL_t  *vol_plugin;   /* VOL plugin information */
+    H5VL_object_t *dtype = NULL; /* pointer to dtype object */
     H5T_t   *type;         /* Datatype object for ID */
     htri_t   status;       /* Generic status value */
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -4676,32 +4940,24 @@ H5_DLL herr_t H5Tprefetch_ff(hid_t dtype_id, hid_t rcxt_id, hrpl_t *replica_id,
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dtype_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
     /* get the named datatype object */
-    if(NULL == (dtype = H5VL_get_object(dtype_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    dtype = type->vol_obj;
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = dtype->vol_info->vol_cls;
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_prefetch(dtype, rcxt_id, replica_id, dxpl_id, req)) < 0)
+    if((ret_value = H5VL_iod_prefetch(dtype->vol_obj, rcxt_id, replica_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't prefetch datatype")
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -4724,8 +4980,7 @@ H5_DLL herr_t H5Tevict_ff(hid_t dtype_id, uint64_t c_version, hid_t dxpl_id, hid
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;  /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void    *dtype = NULL; /* pointer to dtype object */
-    H5VL_t  *vol_plugin;   /* VOL plugin information */
+    H5VL_object_t *dtype = NULL; /* pointer to dtype object */
     H5T_t   *type;         /* Datatype object for ID */
     htri_t   status;       /* Generic status value */
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -4750,32 +5005,24 @@ H5_DLL herr_t H5Tevict_ff(hid_t dtype_id, uint64_t c_version, hid_t dxpl_id, hid
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dtype_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
     /* get the named datatype object */
-    if(NULL == (dtype = H5VL_get_object(dtype_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    dtype = type->vol_obj;
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = dtype->vol_info->vol_cls;
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_evict(dtype, c_version, dxpl_id, req)) < 0)
+    if((ret_value = H5VL_iod_evict(dtype->vol_obj, c_version, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict datatype")
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -5033,7 +5280,7 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE4("i", "iiii", dset_id, query_id, scope_id, rcxt_id);
 
-    if(NULL == (dset = (void *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
 #ifdef H5_HAVE_INDEXING

@@ -1072,3 +1072,4 @@ H5F_use_tmp_space(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->use_tmp_space)
 } /* end H5F_use_tmp_space() */
+

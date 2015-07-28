@@ -68,7 +68,7 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INTEGER(HID_T) :: group_id
+    INTEGER(HID_T), VALUE :: group_id
     CHARACTER(LEN=1), DIMENSION(1:180) :: name
     TYPE(h5o_info_t) :: oinfo
     TYPE(ovisit_ud_t) :: op_data
@@ -116,11 +116,11 @@ END MODULE visit_cb
 MODULE TH5O_F03
 
 CONTAINS
-!/****************************************************************
+!***************************************************************
 !**
 !**  test_h5o_refcount(): Test H5O refcounting functions.
 !**
-!****************************************************************/
+!***************************************************************
 
 SUBROUTINE test_h5o_refcount(total_error)
 

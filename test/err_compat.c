@@ -40,7 +40,7 @@ const char *FILENAME[] = {
 int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 
 #define DSET_NAME               "a_dataset"
-#define FAKE_ID                 -1
+#define FAKE_ID                 (hid_t)-1
 
 herr_t custom_print_cb1(int n, H5E_error1_t *err_desc, void* client_data);
 herr_t custom_print_cb2(int n, H5E_error2_t *err_desc, void* client_data);

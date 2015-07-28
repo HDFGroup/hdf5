@@ -120,10 +120,10 @@ void tts_cancel(void)
     assert(ret==0);
 }
 
-void *tts_cancel_thread(void UNUSED *arg)
+void *tts_cancel_thread(void H5_ATTR_UNUSED *arg)
 {
     int datavalue;
-    int *buffer;
+    int buffer;
     hid_t dataspace, datatype, dataset;
     hsize_t dimsf[1];	/* dataset dimensions */
     cancel_cleanup_t *cleanup_structure;
@@ -156,10 +156,9 @@ void *tts_cancel_thread(void UNUSED *arg)
     ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
     assert(ret>=0);
 
-    buffer = HDmalloc(sizeof(int));
-    ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+    ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
     assert(ret>=0);
-    ret=H5Diterate(buffer, H5T_NATIVE_INT, dataspace, tts_cancel_callback, &dataset);
+    ret=H5Diterate(&buffer, H5T_NATIVE_INT, dataspace, tts_cancel_callback, &dataset);
     assert(ret>=0);
 
     sleep(3);
@@ -183,8 +182,8 @@ void *tts_cancel_thread(void UNUSED *arg)
     return NULL;
 }
 
-herr_t tts_cancel_callback(void *elem, hid_t UNUSED type_id, unsigned UNUSED ndim,
-			   const hsize_t UNUSED *point, void *operator_data)
+herr_t tts_cancel_callback(void *elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_UNUSED ndim,
+			   const hsize_t H5_ATTR_UNUSED *point, void *operator_data)
 {
     int value = *(int *)elem;
     hid_t dataset = *(hid_t *)operator_data;

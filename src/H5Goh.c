@@ -29,8 +29,7 @@
 #include "H5Gpkg.h"             /* Groups				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
-#include "H5VLnative.h" 	/* Native Plugin                        */
-#include "H5VLprivate.h"	/* VOL          		  	*/
+
 
 /****************/
 /* Local Macros */
@@ -211,7 +210,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5O_group_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
+H5O_group_open(const H5G_loc_t *obj_loc, hid_t H5_ATTR_UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
     H5G_t       *grp = NULL;            /* Group opened */
     hid_t	ret_value;              /* Return value */
@@ -308,7 +307,7 @@ H5O_group_get_oloc(hid_t obj_id)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Get the group */
-    if(NULL ==  (grp = (H5G_t *)H5I_object(obj_id)))
+    if(NULL ==  (grp = (H5G_t *)H5VL_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
 
     /* Get the group's object header location */

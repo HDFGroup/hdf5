@@ -40,7 +40,7 @@
 
 int_f
 nh5immake_image_8bit_c (hid_t_f *loc_id,
-                        int_f *namelen,
+                        size_t_f *namelen,
                         _fcd name,
                         hsize_t_f *width,
                         hsize_t_f *height,
@@ -50,15 +50,13 @@ nh5immake_image_8bit_c (hid_t_f *loc_id,
     herr_t  ret;
     hid_t   c_loc_id;
     char    *c_name = NULL;
-    int     c_namelen;
     hsize_t w = (hsize_t)*width;
     hsize_t h = (hsize_t)*height;
 
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = (int)*namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
         goto done;
 
@@ -103,30 +101,25 @@ done:
 
 int_f
 nh5imread_image_c (hid_t_f *loc_id,
-                   int_f *namelen,
+                   size_t_f *namelen,
                    _fcd name,
                    int_f *buf)
 {
     int     ret_value = -1;
     herr_t  ret;
-    hid_t   c_loc_id;
     char    *c_name = NULL;
-    int     c_namelen;
 
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = (int)*namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
         goto done;
 
     /*
     * call H5IMread_image function.
     */
-    c_loc_id = (hid_t)*loc_id;
-
-    ret = H5IMread_imagef(c_loc_id,c_name,buf);
+    ret = H5IMread_imagef((hid_t)*loc_id,c_name,buf);
 
     if (ret < 0)
         goto done;
@@ -161,9 +154,9 @@ done:
 
 int_f
 nh5immake_image_24bit_c (hid_t_f *loc_id,
-                         int_f *namelen,
+                         size_t_f *namelen,
                          _fcd name,
-                         int_f *ilen,
+                         size_t_f *ilen,
                          _fcd il,
                          hsize_t_f *width,
                          hsize_t_f *height,
@@ -173,22 +166,18 @@ nh5immake_image_24bit_c (hid_t_f *loc_id,
     herr_t  ret;
     hid_t   c_loc_id;
     char    *c_name = NULL;
-    int     c_namelen;
     char    *c_il = NULL;
-    int     c_ilen;
     hsize_t w = (hsize_t)*width;
     hsize_t h = (hsize_t)*height;
 
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = *namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
         goto done;
 
-    c_ilen = *ilen;
-    c_il = (char *)HD5f2cstring(il, c_ilen);
+    c_il = (char *)HD5f2cstring(il, (size_t)*ilen);
     if (c_il == NULL)
         goto done;
 
@@ -197,7 +186,7 @@ nh5immake_image_24bit_c (hid_t_f *loc_id,
     */
     c_loc_id = (hid_t)*loc_id;
 
-    ret = H5IMmake_image_24bitf(c_loc_id,c_name,w,h,c_il,buf);
+    ret = H5IMmake_image_24bitf(c_loc_id,c_name,w,h,c_il,(int_f *)buf);
 
     if (ret < 0)
         goto done;
@@ -234,20 +223,19 @@ done:
 
 int_f
 nh5imget_image_info_c(hid_t_f *loc_id,
-                      int_f *namelen,
+                      size_t_f *namelen,
                       _fcd name,
                       hsize_t_f *width,
                       hsize_t_f *height,
                       hsize_t_f *planes,
                       hsize_t_f *npals,
-                      int_f *ilen,
+                      size_t_f *ilen,
                       _fcd interlace)
 {
     int          ret_value = -1;
     herr_t       ret;
     hid_t        c_loc_id;
     char         *c_name = NULL;
-    int          c_namelen;
     hsize_t      c_width;
     hsize_t      c_height;
     hsize_t      c_planes;
@@ -257,15 +245,14 @@ nh5imget_image_info_c(hid_t_f *loc_id,
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = *namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
         goto done;
 
     /*
     * allocate buffer to hold name of an attribute
     */
-    if ((c_buf = HDmalloc((size_t)*ilen +1)) == NULL)
+    if ((c_buf = (char *)HDmalloc((size_t)*ilen +1)) == NULL)
         goto done;
 
     /*
@@ -321,19 +308,17 @@ done:
 
 int_f
 nh5imis_image_c(hid_t_f *loc_id,
-                int_f *namelen,
+                size_t_f *namelen,
                 _fcd name)
 {
     hid_t   c_loc_id;
     char    *c_name = NULL;
-    int     c_namelen;
     herr_t  ret;
 
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = *namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL) return -1;
 
     /*
@@ -372,7 +357,7 @@ nh5imis_image_c(hid_t_f *loc_id,
 
 int_f
 nh5immake_palette_c (hid_t_f *loc_id,
-                     int_f *namelen,
+                     size_t_f *namelen,
                      _fcd name,
                      hsize_t_f *dims,
                      void *buf)
@@ -386,16 +371,16 @@ nh5immake_palette_c (hid_t_f *loc_id,
     /*
     * convert FORTRAN name to C name
     */
-    if(NULL == (c_name = (char *)HD5f2cstring(name, (int)*namelen)))
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
         HGOTO_DONE(FAIL)
 
     for(i = 0; i < rank ; i++)
-        c_dims[i] =  dims[i];
+      c_dims[i] =  (hsize_t)dims[i];
 
     /*
     * call H5IMmake_palette function.
     */
-    if(H5IMmake_palettef((hid_t)*loc_id, c_name, c_dims, buf) < 0)
+    if(H5IMmake_palettef((hid_t)*loc_id, c_name, c_dims, (int_f *)buf) < 0)
         HGOTO_DONE(FAIL)
 
 done:
@@ -427,9 +412,9 @@ done:
 
 int_f
 nh5imlink_palette_c (hid_t_f *loc_id,
-                     int_f *namelen,
+                     size_t_f *namelen,
                      _fcd name,
-                     int_f *ilen,
+                     size_t_f *ilen,
                      _fcd pal_name)
 {
     int     ret_value = -1;
@@ -437,19 +422,15 @@ nh5imlink_palette_c (hid_t_f *loc_id,
     hid_t   c_loc_id;
     char    *c_name = NULL;
     char    *c_namepal = NULL;
-    int     c_namelen;
-    int     c_namelenpal;
 
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = *namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
         goto done;
 
-    c_namelenpal = *ilen;
-    c_namepal = (char *)HD5f2cstring(pal_name, c_namelenpal);
+    c_namepal = (char *)HD5f2cstring(pal_name, (size_t)*ilen);
     if (c_namepal == NULL)
         goto done;
 
@@ -496,9 +477,9 @@ done:
 
 int_f
 nh5imunlink_palette_c (hid_t_f *loc_id,
-                       int_f *namelen,
+                       size_t_f *namelen,
                        _fcd name,
-                       int_f *ilen,
+                       size_t_f *ilen,
                        _fcd pal_name)
 {
     int     ret_value = -1;
@@ -506,20 +487,15 @@ nh5imunlink_palette_c (hid_t_f *loc_id,
     hid_t   c_loc_id;
     char    *c_name = NULL;
     char    *c_namepal = NULL;
-    int     c_namelen;
-    int     c_namelenpal;
-
 
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = *namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
         goto done;
 
-    c_namelenpal = *ilen;
-    c_namepal = (char *)HD5f2cstring(pal_name, c_namelenpal);
+    c_namepal = (char *)HD5f2cstring(pal_name, (size_t)*ilen);
     if (c_namepal == NULL)
         goto done;
 
@@ -567,7 +543,7 @@ done:
 
 int_f
 nh5imget_npalettes_c(hid_t_f *loc_id,
-                     int_f *namelen,
+                     size_t_f *namelen,
                      _fcd name,
                      hsize_t_f *npals)
 {
@@ -575,14 +551,12 @@ nh5imget_npalettes_c(hid_t_f *loc_id,
     herr_t       ret;
     hid_t        c_loc_id;
     char         *c_name = NULL;
-    int          c_namelen;
     hssize_t     c_npals;
 
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = *namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
         goto done;
 
@@ -631,7 +605,7 @@ done:
 
 int_f
 nh5imget_palette_info_c(hid_t_f *loc_id,
-                        int_f *namelen,
+                        size_t_f *namelen,
                         _fcd name,
                         int_f *pal_number,
                         hsize_t_f *dims)
@@ -640,15 +614,13 @@ nh5imget_palette_info_c(hid_t_f *loc_id,
     herr_t       ret;
     hid_t        c_loc_id;
     char         *c_name = NULL;
-    int          c_namelen;
     hsize_t      c_dims[2];
     int          i;
 
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = *namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
         goto done;
 
@@ -700,7 +672,7 @@ done:
 
 int_f
 nh5imget_palette_c(hid_t_f *loc_id,
-                   int_f *namelen,
+                   size_t_f *namelen,
                    _fcd name,
                    int_f *pal_number,
                    void *buf)
@@ -709,13 +681,11 @@ nh5imget_palette_c(hid_t_f *loc_id,
     herr_t       ret;
     hid_t        c_loc_id;
     char         *c_name = NULL;
-    int          c_namelen;
 
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = *namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
          goto done;
 
@@ -724,7 +694,7 @@ nh5imget_palette_c(hid_t_f *loc_id,
     */
     c_loc_id = (hid_t)*loc_id;
 
-    ret = H5IMget_palettef(c_loc_id,c_name,*pal_number,buf);
+    ret = H5IMget_palettef(c_loc_id,c_name,*pal_number,(int_f *)buf);
 
     if (ret < 0)
          goto done;
@@ -760,19 +730,17 @@ done:
 
 int_f
 nh5imis_palette_c(hid_t_f *loc_id,
-                  int_f *namelen,
+                  size_t_f *namelen,
                   _fcd name)
 {
     hid_t   c_loc_id;
     char    *c_name;
-    int     c_namelen;
     herr_t  ret;
 
     /*
     * convert FORTRAN name to C name
     */
-    c_namelen = *namelen;
-    c_name = (char *)HD5f2cstring(name, c_namelen);
+    c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL) return -1;
 
     /*

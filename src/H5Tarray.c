@@ -202,7 +202,7 @@ H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
 
     /* Copy the array dimensions & compute the # of elements in the array */
     for(u = 0, ret_value->shared->u.array.nelem = 1; u < ndims; u++) {
-        H5_ASSIGN_OVERFLOW(ret_value->shared->u.array.dim[u], dim[u], hsize_t, size_t);
+        H5_CHECKED_ASSIGN(ret_value->shared->u.array.dim[u], size_t, dim[u], hsize_t);
         ret_value->shared->u.array.nelem *= (size_t)dim[u];
     } /* end for */
 
@@ -376,7 +376,7 @@ H5T__get_array_dims(const H5T_t *dt, hsize_t dims[])
  */
 hid_t
 H5Tarray_create1(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
-    const int UNUSED perm[/* ndims */])
+    const int H5_ATTR_UNUSED perm[/* ndims */])
 {
     H5T_t	*base;		/* base datatype	*/
     H5T_t	*dt = NULL;	/* new array datatype	*/
@@ -429,7 +429,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int UNUSED perm[])
+H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int H5_ATTR_UNUSED perm[])
 {
     H5T_t *dt;		/* Array datatype to query	*/
     int	ret_value;	/* return value			*/

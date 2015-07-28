@@ -36,7 +36,7 @@
 /* prototypes */
 void showhelp(void);
 void parse(int ac, char **av);
-void abort_intercept (int UNUSED sig);
+void abort_intercept (int H5_ATTR_UNUSED sig);
 
 /* global variables */
 unsigned	major = H5_VERS_MAJOR;
@@ -105,7 +105,7 @@ parse(int ac, char **av)
  * This tries to eliminate those side effects.
  */
 void
-abort_intercept (int UNUSED sig)
+abort_intercept (int H5_ATTR_UNUSED sig)
 {
     HDexit(6);
 }

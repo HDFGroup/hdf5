@@ -462,11 +462,11 @@ test_reference_group(void)
 
 	// Check number of objects in the group dereferenced by constructor
 	hsize_t nobjs = refgroup.getNumObjs();
-	verify_val(nobjs, 3, "H5Group::getNumObjs",__LINE__,__FILE__);
+	verify_val(nobjs, (hsize_t)3, "H5Group::getNumObjs",__LINE__,__FILE__);
 
 	// Check number of objects in the group dereferenced by ::reference
 	nobjs = group.getNumObjs();
-	verify_val(nobjs, 3, "H5Group::getNumObjs",__LINE__,__FILE__);
+	verify_val(nobjs, (hsize_t)3, "H5Group::getNumObjs",__LINE__,__FILE__);
 
 	// Check getting file name given the group dereferenced via constructor
 	H5std_string fname = refgroup.getFileName();
@@ -479,7 +479,7 @@ test_reference_group(void)
 	// Unlink one of the objects in the dereferenced group, and re-check
 	refgroup.unlink(GROUPNAME2);
 	nobjs = refgroup.getNumObjs();
-	verify_val(nobjs, 2, "H5Group::getNumObjs",__LINE__,__FILE__);
+	verify_val(nobjs, (hsize_t)2, "H5Group::getNumObjs",__LINE__,__FILE__);
 
 	// Close resources
 	group.close();
@@ -686,43 +686,43 @@ test_reference_region_1D(void)
 	reg_sp.getSelectHyperBlocklist((hsize_t)0, (hsize_t)nelms, coords);
 
 	// Verify values in the list
-	verify_val(coords[0],   2, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[1],   3, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[2],   7, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[3],   8, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[4],  12, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[5],  13, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[6],  17, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[7],  18, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[8],  22, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[9],  23, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[10], 27, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[11], 28, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[12], 32, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[13], 33, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[14], 37, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[15], 38, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[16], 42, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[17], 43, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[18], 47, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[19], 48, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[20], 52, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[21], 53, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[22], 57, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[23], 58, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[24], 62, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[25], 63, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[26], 67, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[27], 68, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[28], 72, "Hyperslab Coordinates",__LINE__,__FILE__);
-	verify_val(coords[29], 73, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[0], (hsize_t)2, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[1], (hsize_t)3, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[2], (hsize_t)7, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[3], (hsize_t)8, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[4],(hsize_t)12, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[5],(hsize_t)13, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[6],(hsize_t)17, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[7],(hsize_t)18, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[8],(hsize_t)22, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[9],(hsize_t)23, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[10],(hsize_t)27, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[11],(hsize_t)28, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[12],(hsize_t)32, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[13],(hsize_t)33, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[14],(hsize_t)37, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[15],(hsize_t)38, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[16],(hsize_t)42, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[17],(hsize_t)43, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[18],(hsize_t)47, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[19],(hsize_t)48, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[20],(hsize_t)52, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[21],(hsize_t)53, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[22],(hsize_t)57, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[23],(hsize_t)58, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[24],(hsize_t)62, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[25],(hsize_t)63, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[26],(hsize_t)67, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[27],(hsize_t)68, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[28],(hsize_t)72, "Hyperslab Coordinates",__LINE__,__FILE__);
+	verify_val(coords[29],(hsize_t)73, "Hyperslab Coordinates",__LINE__,__FILE__);
 
 	HDfree(coords);
 
 	// Check boundaries
 	reg_sp.getSelectBounds(low, high);
-	verify_val(low[0], 2, "DataSpace::getSelectBounds",__LINE__,__FILE__);
-	verify_val(high[0], 73, "DataSpace::getSelectBounds",__LINE__,__FILE__);
+	verify_val(low[0],(hsize_t)2, "DataSpace::getSelectBounds",__LINE__,__FILE__);
+	verify_val(high[0],(hsize_t)73, "DataSpace::getSelectBounds",__LINE__,__FILE__);
 
 	/* Close region space */
 	reg_sp.close();
@@ -760,8 +760,8 @@ test_reference_region_1D(void)
 
 	// Check boundaries
 	elm_sp.getSelectBounds(low, high);
-	verify_val(low[0], 3, "DataSpace::getSelectBounds",__LINE__,__FILE__);
-	verify_val(high[0], 97, "DataSpace::getSelectBounds",__LINE__,__FILE__);
+	verify_val(low[0],(hsize_t)3, "DataSpace::getSelectBounds",__LINE__,__FILE__);
+	verify_val(high[0],(hsize_t)97, "DataSpace::getSelectBounds",__LINE__,__FILE__);
 
 	// Close element space
 	elm_sp.close();

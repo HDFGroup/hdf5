@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_TEST)
 
 #-----------------------------------------------------------------------------
@@ -27,7 +27,7 @@ set (TEST_LIB_HEADERS
 )
 
 add_library (${HDF5_TEST_LIB_TARGET} ${LIB_TYPE} ${TEST_LIB_SRCS} ${TEST_LIB_HEADERS})
-TARGET_C_PROPERTIES (${HDF5_TEST_LIB_TARGET} " " " ")
+TARGET_C_PROPERTIES (${HDF5_TEST_LIB_TARGET} ${LIB_TYPE} " " " ")
 if (MSVC)
   target_link_libraries (${HDF5_TEST_LIB_TARGET} "ws2_32.lib")
 endif (MSVC)
@@ -68,7 +68,7 @@ if (BUILD_SHARED_LIBS)
     INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
 
     add_library (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
-    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} " " " ")
+    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} " " " ")
     target_link_libraries (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     H5_SET_LIB_OPTIONS (
         ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
@@ -85,7 +85,7 @@ if (BUILD_SHARED_LIBS)
         TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different 
+        ARGS       -E copy_if_different
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/testdir1/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
     )
@@ -99,7 +99,7 @@ if (BUILD_SHARED_LIBS)
     INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
 
     add_library (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
-    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} " " " ")
+    TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} " " " ")
     target_link_libraries (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     H5_SET_LIB_OPTIONS (
         ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
@@ -116,11 +116,53 @@ if (BUILD_SHARED_LIBS)
         TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different 
+        ARGS       -E copy_if_different
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/testdir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
     )
   endforeach (test_lib ${TEST2_PLUGIN_LIBS})
+
+  # make vol_plugins dir
+  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/voltestdir")
+
+  #-----------------------------------------------------------------------------
+  # Define Test Library Sources
+  #-----------------------------------------------------------------------------
+  set (TEST_VOL_PLUGIN_LIBS
+      dynlibvol1
+      dynlibvol2
+  )
+
+  foreach (test_vol_lib ${TEST_VOL_PLUGIN_LIBS})
+    set (HDF5_TEST_VOL_PLUGIN_LIB_CORENAME         "${test_vol_lib}")
+    set (HDF5_TEST_VOL_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_VOL_PLUGIN_LIB_CORENAME}")
+    set (HDF5_TEST_VOL_PLUGIN_LIB_TARGET           ${HDF5_TEST_VOL_PLUGIN_LIB_CORENAME})
+    add_definitions (${HDF_EXTRA_C_FLAGS})
+    INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
+
+    add_library (${HDF5_TEST_VOL_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${HDF5_TEST_SOURCE_DIR}/${test_vol_lib}.c)
+    TARGET_C_PROPERTIES (${HDF5_TEST_VOL_PLUGIN_LIB_TARGET} ${LIB_TYPE} " " " ")
+    target_link_libraries (${HDF5_TEST_VOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+    H5_SET_LIB_OPTIONS (
+        ${HDF5_TEST_VOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_VOL_PLUGIN_LIB_NAME}
+        ${LIB_TYPE}
+        HDF5_TEST_VOL_PLUGIN_LIB_NAME_RELEASE
+        HDF5_TEST_VOL_PLUGIN_LIB_NAME_DEBUG
+    )
+    set_target_properties (${HDF5_TEST_VOL_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_VOL_PLUGIN)
+
+    #-----------------------------------------------------------------------------
+    # Copy plugin library to a plugins folder
+    #-----------------------------------------------------------------------------
+    add_custom_command (
+        TARGET     ${HDF5_TEST_VOL_PLUGIN_LIB_TARGET}
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different
+          "$<TARGET_FILE:${HDF5_TEST_VOL_PLUGIN_LIB_TARGET}>"
+          "${CMAKE_BINARY_DIR}/voltestdir/$<TARGET_FILE_NAME:${HDF5_TEST_VOL_PLUGIN_LIB_TARGET}>"
+    )
+  endforeach (test_vol_lib ${TEST_VOL_PLUGIN_LIBS})
 endif (BUILD_SHARED_LIBS)
 
 set (testhdf5_SRCS
@@ -154,14 +196,14 @@ set (testhdf5_SRCS
 #-- Adding test for testhdf5
 add_executable (testhdf5 ${testhdf5_SRCS})
 TARGET_NAMING (testhdf5 ${LIB_TYPE})
-TARGET_C_PROPERTIES (testhdf5 " " " ")
+TARGET_C_PROPERTIES (testhdf5 ${LIB_TYPE} " " " ")
 target_link_libraries (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (testhdf5 PROPERTIES FOLDER test)
 
 MACRO (ADD_H5_EXE file)
   add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
   TARGET_NAMING (${file} ${LIB_TYPE})
-  TARGET_C_PROPERTIES (${file} " " " ")
+  TARGET_C_PROPERTIES (${file} ${LIB_TYPE} " " " ")
   target_link_libraries (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (${file} PROPERTIES FOLDER test)
 ENDMACRO (ADD_H5_EXE file)
@@ -237,21 +279,21 @@ endforeach (test ${H5_TESTS})
 #-- Adding test for cache
 add_executable (cache ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache ${LIB_TYPE})
-TARGET_C_PROPERTIES (cache " " " ")
+TARGET_C_PROPERTIES (cache ${LIB_TYPE} " " " ")
 target_link_libraries (cache ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (cache PROPERTIES FOLDER test)
 
 #-- Adding test for cache_api
 add_executable (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache_api ${LIB_TYPE})
-TARGET_C_PROPERTIES (cache_api " " " ")
+TARGET_C_PROPERTIES (cache_api ${LIB_TYPE} " " " ")
 target_link_libraries (cache_api ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (cache_api PROPERTIES FOLDER test)
 
 #-- Adding test for cache_tagging
 add_executable (cache_tagging ${HDF5_TEST_SOURCE_DIR}/cache_tagging.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
 TARGET_NAMING (cache_tagging ${LIB_TYPE})
-TARGET_C_PROPERTIES (cache_tagging " " " ")
+TARGET_C_PROPERTIES (cache_tagging ${LIB_TYPE} " " " ")
 target_link_libraries (cache_tagging ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (cache_tagging PROPERTIES FOLDER test)
 
@@ -264,7 +306,7 @@ add_executable (ttsafe
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
 )
 TARGET_NAMING (ttsafe ${LIB_TYPE})
-TARGET_C_PROPERTIES (ttsafe " " " ")
+TARGET_C_PROPERTIES (ttsafe ${LIB_TYPE} " " " ")
 target_link_libraries (ttsafe ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (ttsafe PROPERTIES FOLDER test)
 
@@ -272,7 +314,7 @@ set_target_properties (ttsafe PROPERTIES FOLDER test)
 if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
   add_executable (err_compat ${HDF5_TEST_SOURCE_DIR}/err_compat.c)
   TARGET_NAMING (err_compat ${LIB_TYPE})
-  TARGET_C_PROPERTIES (err_compat " " " ")
+  TARGET_C_PROPERTIES (err_compat ${LIB_TYPE} " " " ")
   target_link_libraries (err_compat ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
   set_target_properties (err_compat PROPERTIES FOLDER test)
 endif (HDF5_ENABLE_DEPRECATED_SYMBOLS)
@@ -280,20 +322,20 @@ endif (HDF5_ENABLE_DEPRECATED_SYMBOLS)
 #-- Adding test for error_test
 add_executable (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
 TARGET_NAMING (error_test ${LIB_TYPE})
-TARGET_C_PROPERTIES (error_test " " " ")
+TARGET_C_PROPERTIES (error_test ${LIB_TYPE} " " " ")
 target_link_libraries (error_test ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (error_test PROPERTIES FOLDER test)
 
 #-- Adding test for links_env
 add_executable (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
 TARGET_NAMING (links_env ${LIB_TYPE})
-TARGET_C_PROPERTIES (links_env " " " ")
+TARGET_C_PROPERTIES (links_env ${LIB_TYPE} " " " ")
 target_link_libraries (links_env ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (links_env PROPERTIES FOLDER test)
 
 #-- Adding test for libinfo
 set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
-file (WRITE ${GREP_RUNNER} 
+file (WRITE ${GREP_RUNNER}
   "file (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
 if (\${TEST_RESULT} STREQUAL \"0\")
   message (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")
@@ -308,8 +350,8 @@ endif (\${TEST_RESULT} STREQUAL \"0\")
 ##############################################################################
 if (BUILD_SHARED_LIBS)
   add_executable (plugin ${HDF5_TEST_SOURCE_DIR}/plugin.c)
-  TARGET_NAMING (plugin ${LIB_TYPE})
-  TARGET_C_PROPERTIES (plugin " " " ")
+  TARGET_NAMING (plugin SHARED)
+  TARGET_C_PROPERTIES (plugin SHARED " " " ")
   target_link_libraries (plugin ${HDF5_TEST_PLUGIN_LIB_TARGET})
   set_target_properties (plugin PROPERTIES FOLDER test)
 endif (BUILD_SHARED_LIBS)

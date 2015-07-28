@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
@@ -11,6 +11,8 @@ if (WIN32)
       endif (NOT H5_HAVE_PARALLEL)
       if (NOT HDF5_ENABLE_F2003)
         set (H5_NOF03EXP ";")
+      else (NOT HDF5_ENABLE_F2003)
+        set (H5_F03EXP ";")
       endif (NOT HDF5_ENABLE_F2003)
       configure_file (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
     endif (MSVC)
@@ -38,7 +40,6 @@ else (FORTRAN_HAVE_STORAGE_SIZE)
       add_executable (H5test_FortranHavekind
           ${HDF5_F90_SRC_SOURCE_DIR}/H5test_kind.f90
       )
-      set (H5_TEST_KIND_NAME "h5test_kind_mod")
     endif (FORTRAN_HAVE_SIZEOF)
 endif (FORTRAN_HAVE_STORAGE_SIZE)
 if (WIN32 AND MSVC)
@@ -53,7 +54,10 @@ if (WIN32 AND MSVC)
           LINK_FLAGS "/SUBSYSTEM:CONSOLE"
   )
 endif (WIN32 AND MSVC)
-set_target_properties (H5test_FortranHavekind PROPERTIES LINKER_LANGUAGE Fortran)
+set_target_properties (H5test_FortranHavekind PROPERTIES
+    LINKER_LANGUAGE Fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
 
 set (CMD $<TARGET_FILE:H5test_FortranHavekind>)
 add_custom_command (
@@ -133,7 +137,6 @@ if (H5_HAVE_PARALLEL)
       ${HDF5_F90_SRC_SOURCE_DIR}/H5FDmpiof.c
   )
 endif (H5_HAVE_PARALLEL)
-
 set_source_files_properties (${f90CStub_C_SRCS} PROPERTIES LANGUAGE C)
 
 set (f90CStub_C_HDRS
@@ -142,7 +145,7 @@ set (f90CStub_C_HDRS
 )
 
 add_library (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} ${f90CStub_C_SRCS} ${f90CStub_C_HDRS})
-TARGET_C_PROPERTIES (${HDF5_F90_C_LIB_TARGET} " " " ")
+TARGET_C_PROPERTIES (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} " " " ")
 target_link_libraries (${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_LIB_TARGET} ${HDF5_F90_C_LIB_NAME} ${LIB_TYPE})
@@ -156,10 +159,10 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 # Fortran 2003 standard
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_F2003)
-  # default real is 4 bytes, so include double signatures
+  # F2003 features are enabled
   set (F_STATUS "_F03")
 else (HDF5_ENABLE_F2003)
-  # default real is 8 bytes, so exclude double signatures
+  # F2003 features are not enabled
   set (F_STATUS "_F90")
 endif (HDF5_ENABLE_F2003)
 
@@ -225,6 +228,7 @@ else (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.f90
   )
 endif (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
+set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 
 #-----------------------------------------------------------------------------
 # Add Main fortran library
@@ -246,8 +250,7 @@ if (WIN32)
         HDF5F90_WINDOWS
   )
 endif (WIN32)
-TARGET_FORTRAN_PROPERTIES (${HDF5_F90_LIB_TARGET} " " ${SHARED_LINK_FLAGS})
-set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES LINKER_LANGUAGE Fortran)
+TARGET_FORTRAN_PROPERTIES (${HDF5_F90_LIB_TARGET} ${LIB_TYPE} " " ${SHARED_LINK_FLAGS})
 target_link_libraries (${HDF5_F90_LIB_TARGET} ${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET})
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   target_link_libraries (${HDF5_F90_LIB_TARGET} ${MPI_Fortran_LIBRARIES})
@@ -256,109 +259,79 @@ set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF
 H5_SET_LIB_OPTIONS (${HDF5_F90_LIB_TARGET} ${HDF5_F90_LIB_NAME} ${LIB_TYPE})
 set_target_properties (${HDF5_F90_LIB_TARGET} PROPERTIES
     FOLDER libraries/fortran
+    LINKER_LANGUAGE Fortran
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 install (
-    FILES 
-        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h 
-        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h 
-        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h 
+    FILES
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90i.h
+        ${HDF5_F90_SRC_SOURCE_DIR}/H5f90proto.h
         ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
         ${HDF5_F90_BINARY_DIR}/H5fortran_types.f90
-    DESTINATION 
+    DESTINATION
         ${HDF5_INSTALL_INCLUDE_DIR}
-    COMPONENT 
+    COMPONENT
         fortheaders
 )
 
 if (WIN32)
-  install (
-      FILES
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5fortran_types.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/${H5_TEST_KIND_NAME}.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/hdf5.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5global.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5a.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5d.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5e.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5f.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5g.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5i.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5l.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5lib.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5o.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5p.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5r.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5s.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5t.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5z.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5a_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5d_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5e_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5f_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5l_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5lib_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5o_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5p_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5r_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5t_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/h5_dble_interface.mod
-      DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}
-      COMPONENT
-          fortheaders
-  )
+  set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE})
 else (WIN32)
-  install (
-      FILES
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5fortran_types.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/${H5_TEST_KIND_NAME}.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/hdf5.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5global.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5f.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5a.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5d.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5e.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5f.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5g.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5i.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5l.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5lib.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5o.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5p.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5r.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5s.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5t.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5z.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5a_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5d_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5e_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5e_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5l_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5lib_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5o_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5p_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5r_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5t_provisional.mod
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/h5_dble_interface.mod
-      DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}
-      COMPONENT
-          fortheaders
-  )
+  set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY})
 endif (WIN32)
+
+set (mod_files
+    ${MOD_BUILD_DIR}/h5fortran_types.mod
+    ${MOD_BUILD_DIR}/hdf5.mod
+    ${MOD_BUILD_DIR}/h5global.mod
+    ${MOD_BUILD_DIR}/h5a.mod
+    ${MOD_BUILD_DIR}/h5d.mod
+    ${MOD_BUILD_DIR}/h5e.mod
+    ${MOD_BUILD_DIR}/h5f.mod
+    ${MOD_BUILD_DIR}/h5g.mod
+    ${MOD_BUILD_DIR}/h5i.mod
+    ${MOD_BUILD_DIR}/h5l.mod
+    ${MOD_BUILD_DIR}/h5lib.mod
+    ${MOD_BUILD_DIR}/h5o.mod
+    ${MOD_BUILD_DIR}/h5p.mod
+    ${MOD_BUILD_DIR}/h5r.mod
+    ${MOD_BUILD_DIR}/h5s.mod
+    ${MOD_BUILD_DIR}/h5t.mod
+    ${MOD_BUILD_DIR}/h5z.mod
+    ${MOD_BUILD_DIR}/h5a_provisional.mod
+    ${MOD_BUILD_DIR}/h5d_provisional.mod
+    ${MOD_BUILD_DIR}/h5e_provisional.mod
+    ${MOD_BUILD_DIR}/h5f_provisional.mod
+    ${MOD_BUILD_DIR}/h5l_provisional.mod
+    ${MOD_BUILD_DIR}/h5lib_provisional.mod
+    ${MOD_BUILD_DIR}/h5o_provisional.mod
+    ${MOD_BUILD_DIR}/h5p_provisional.mod
+    ${MOD_BUILD_DIR}/h5r_provisional.mod
+    ${MOD_BUILD_DIR}/h5t_provisional.mod
+    ${MOD_BUILD_DIR}/h5_dble_interface.mod
+)
+install (
+    FILES
+        ${mod_files}
+    DESTINATION
+        ${HDF5_INSTALL_INCLUDE_DIR}
+    COMPONENT
+        fortheaders
+)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
-    INSTALL_TARGET_PDB (${HDF5_F90_C_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
-    #INSTALL_TARGET_PDB (${HDF5_F90_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
+    INSTALL_TARGET_PDB (${HDF5_F90_C_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} fortlibraries)
+    #INSTALL_TARGET_PDB (${HDF5_F90_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} fortlibraries)
   endif (BUILD_SHARED_LIBS)
 
   install (
@@ -370,5 +343,6 @@ if (HDF5_EXPORTED_TARGETS)
       LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT fortlibraries
+      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT fortlibraries
   )
 endif (HDF5_EXPORTED_TARGETS)

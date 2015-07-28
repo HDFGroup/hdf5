@@ -97,14 +97,14 @@ H5FL_BLK_DEFINE(type_conv);
  *		passed to this function with the PLIST_ID argument.
  *
  *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *		that the entire file dataspace is to be referenced.
+ *		that the entire file data space is to be referenced.
  *
  *		The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *		the memory dataspace is the same as the file dataspace
+ *		the memory data space is the same as the file data space
  *		defined when the dataset was created.
  *
- *		The number of elements in the memory dataspace must match
- *		the number of elements in the file dataspace.
+ *		The number of elements in the memory data space must match
+ *		the number of elements in the file data space.
  *
  *		The PLIST_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
@@ -120,16 +120,37 @@ herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
-    H5VL_t     *vol_plugin = NULL;
-    void       *dset = NULL;
-    herr_t      ret_value = SUCCEED;  /* Return value */
+    H5VL_object_t   *dset = NULL;
+    const H5S_t	    *mem_space = NULL;
+    const H5S_t	    *file_space = NULL;
+    herr_t           ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
              plist_id, buf);
 
+    /* check arguments */
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(mem_space_id < 0 || file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+    if(H5S_ALL != mem_space_id) {
+	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(mem_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+    } /* end if */
+    if(H5S_ALL != file_space_id) {
+	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(file_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+    } /* end if */
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == plist_id)
@@ -138,18 +159,10 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the dataset object */
-    if(NULL == (dset = (void *)H5I_object(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
-
     /* Read the data through the VOL */
-    if((ret_value = H5VL_dataset_read(dset, vol_plugin, mem_type_id, mem_space_id, 
-                                      file_space_id, plist_id, buf, H5_EVENT_STACK_NULL)) < 0)
+    if((ret_value = H5VL_dataset_read(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 
+                                      file_space_id, plist_id, buf, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
-
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -168,14 +181,14 @@ done:
  *		PLIST_ID argument.
  *
  *		The FILE_SPACE_ID can be the constant H5S_ALL which indicates
- *		that the entire file dataspace is to be referenced.
+ *		that the entire file data space is to be referenced.
  *
  *		The MEM_SPACE_ID can be the constant H5S_ALL in which case
- *		the memory dataspace is the same as the file dataspace
+ *		the memory data space is the same as the file data space
  *		defined when the dataset was created.
  *
- *		The number of elements in the memory dataspace must match
- *		the number of elements in the file dataspace.
+ *		The number of elements in the memory data space must match
+ *		the number of elements in the file data space.
  *
  *		The PLIST_ID can be the constant H5P_DEFAULT in which
  *		case the default data transfer properties are used.
@@ -191,17 +204,20 @@ herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
-    H5VL_t     *vol_plugin;
-    void       *dset;
-    herr_t      ret_value = SUCCEED;  /* Return value */
+    H5VL_object_t          *dset = NULL;
+    H5P_genplist_t 	   *plist;      /* Property list pointer */
+    const H5S_t            *mem_space = NULL;
+    const H5S_t            *file_space = NULL;
+    hbool_t                 direct_write = FALSE;
+    herr_t                  ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf);
 
     /* check arguments */
-    if(!dset_id)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
@@ -210,16 +226,40 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-    /* get the dataset object */
-    if(NULL == (dset = (void *)H5I_object(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    /* Get the dataset transfer property list */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+
+    /* Retrieve the 'direct write' flag */
+    if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &direct_write) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting flag for direct chunk write")
+
+    /* Check dataspace selections if this is not a direct write */
+    if(!direct_write) {
+        if(mem_space_id < 0 || file_space_id < 0)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+	if(H5S_ALL != mem_space_id) {
+	    if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+	    /* Check for valid selection */
+	    if(H5S_SELECT_VALID(mem_space) != TRUE)
+		HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
+	} /* end if */
+	if(H5S_ALL != file_space_id) {
+	    if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+		HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+	    /* Check for valid selection */
+	    if(H5S_SELECT_VALID(file_space) != TRUE)
+		HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
+	} /* end if */
+    }
 
     /* Write the data through the VOL */
-    if((ret_value = H5VL_dataset_write(dset, vol_plugin, mem_type_id, mem_space_id, 
-                                       file_space_id, dxpl_id, buf, H5_EVENT_STACK_NULL)) < 0)
+    if((ret_value = H5VL_dataset_write(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 
+                                       file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
@@ -240,38 +280,26 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
-	const H5S_t *file_space, hid_t dxpl_id, const void *buf)
+H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, 
+         const H5S_t *mem_space, const H5S_t *file_space, 
+         hid_t dxpl_id, const void *buf)
 {
-    H5P_genplist_t 	   *plist;      /* Property list pointer */
-    hbool_t		    direct_write = FALSE;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_PACKAGE
-
-    /* Get the default dataset transfer property list if the user didn't provide one */
-    if(H5P_DEFAULT == dxpl_id)
-        dxpl_id= H5P_DATASET_XFER_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-
-    /* Get the dataset transfer property list */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
-    /* Retrieve the 'direct write' flag */
-    if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &direct_write) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting flag for direct chunk write")
+    FUNC_ENTER_STATIC
 
     /* Direct chunk write */
     if(direct_write) {
+        H5P_genplist_t *plist;      /* Property list pointer */
         uint32_t direct_filters;
         hsize_t *direct_offset;
         uint32_t direct_datasize;
-	int      ndims = 0;
-	hsize_t  dims[H5O_LAYOUT_NDIMS];
 	hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
-	int      i;
+	unsigned u;                 /* Local index variable */
+
+        /* Get the dataset transfer property list */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
         if(H5D_CHUNKED != dset->shared->layout.type)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
@@ -286,23 +314,20 @@ H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
 
 	/* The library's chunking code requires the offset terminates with a zero. So transfer the 
          * offset array to an internal offset array */ 
-	if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dims, NULL)) < 0)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
-
-	for(i = 0; i < ndims; i++) {
+	for(u = 0; u < dset->shared->ndims; u++) {
 	    /* Make sure the offset doesn't exceed the dataset's dimensions */
-            if(direct_offset[i] > dims[i])
+            if(direct_offset[u] > dset->shared->curr_dims[u])
 		HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
 
             /* Make sure the offset fall right on a chunk's boundary */
-	    if(direct_offset[i] % dset->shared->layout.u.chunk.dim[i])
+	    if(direct_offset[u] % dset->shared->layout.u.chunk.dim[u])
 		HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
 
-	    internal_offset[i] = direct_offset[i]; 
+	    internal_offset[u] = direct_offset[u]; 
 	} /* end for */
 	   
 	/* Terminate the offset with a zero */ 
-	internal_offset[ndims] = 0;
+	internal_offset[dset->shared->ndims] = 0;
 
 	/* write raw data */
 	if(H5D__chunk_direct_write(dset, dxpl_id, direct_filters, internal_offset, direct_datasize, buf) < 0)
@@ -342,7 +367,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
                                         /* projection of the supplied mem_space to a new  */
-                                        /* dataspace with rank equal to that of          */
+                                        /* data space with rank equal to that of          */
                                         /* file_space.                                    */
                                         /*                                                */
                                         /* This field is only used if                     */
@@ -376,7 +401,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         mem_space = file_space;
     if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dst dataspace has invalid selection")
-    H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
+    H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
 
     /* Fill the DXPL cache values for later use */
     if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
@@ -396,7 +421,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Make certain that the number of elements in each selection is the same */
     if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest dataspaces have different sizes")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
 
     /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
     if(NULL == buf) {
@@ -558,7 +583,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
                                         /* projection of the supplied mem_space to a new  */
-                                        /* dataspace with rank equal to that of          */
+                                        /* data space with rank equal to that of          */
                                         /* file_space.                                    */
                                         /*                                                */
                                         /* This field is only used if                     */
@@ -646,11 +671,11 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
+    H5_CHECKED_ASSIGN(nelmts, hsize_t, snelmts, hssize_t);
 
     /* Make certain that the number of elements in each selection is the same */
     if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest dataspaces have different sizes")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
 
     /* Check for a NULL buffer, after the H5S_ALL dataspace selection has been handled */
     if(NULL == buf) {
@@ -704,7 +729,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Retrieve dataset properties */
     /* <none needed currently> */
 
-    /* Allocate dataspace and initialize it if it hasn't been. */
+    /* Allocate data space and initialize it if it hasn't been. */
     if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
             !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
         hssize_t file_nelmts;   /* Number of elements in file dataset's dataspace */
@@ -909,7 +934,7 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     } /* end else */
 
     /*
-     * Locate the type conversion function and dataspace conversion
+     * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
      * type conversion is necessary then register datatype atoms. Data type
      * conversion is necessary if the user has set the `need_bkg' to a high

@@ -35,6 +35,7 @@
 #include "H5Spublic.h"		/* Dataspace functions			*/
 
 /* Private headers needed by this file */
+#include "H5private.h"          /* Generic Functions                    */
 #include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5SLprivate.h"	/* Skip lists				*/
@@ -70,11 +71,12 @@ typedef struct H5O_t H5O_t;
 #define H5O_MSG_FLAG_CONSTANT	0x01u
 #define H5O_MSG_FLAG_SHARED	0x02u
 #define H5O_MSG_FLAG_DONTSHARE	0x04u
-#define H5O_MSG_FLAG_FAIL_IF_UNKNOWN 0x08u
+#define H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE 0x08u
 #define H5O_MSG_FLAG_MARK_IF_UNKNOWN 0x10u
 #define H5O_MSG_FLAG_WAS_UNKNOWN 0x20u
 #define H5O_MSG_FLAG_SHAREABLE  0x40u
-#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN|H5O_MSG_FLAG_MARK_IF_UNKNOWN|H5O_MSG_FLAG_WAS_UNKNOWN|H5O_MSG_FLAG_SHAREABLE)
+#define H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS 0x80u
+#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE|H5O_MSG_FLAG_MARK_IF_UNKNOWN|H5O_MSG_FLAG_WAS_UNKNOWN|H5O_MSG_FLAG_SHAREABLE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS)
 
 /* Flags for updating messages */
 #define H5O_UPDATE_TIME         0x01u
@@ -82,6 +84,9 @@ typedef struct H5O_t H5O_t;
 
 /* Hash value constants */
 #define H5O_HASH_SIZE 32
+
+/* Enable reading/writing "bogus" messages */
+/* #define H5O_ENABLE_BOGUS */
 
 /* ========= Object Creation properties ============ */
 #define H5O_CRT_ATTR_MAX_COMPACT_NAME	"max compact attr"      /* Max. # of attributes to store compactly */
@@ -194,7 +199,6 @@ typedef struct H5O_copy_t {
 #define H5O_FSINFO_ID   0x0017          /* Free-space manager info message.  */
 #define H5O_UNKNOWN_ID  0x0018          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
-
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -424,8 +428,8 @@ typedef struct H5O_layout_chunk_t {
     uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
     uint32_t    size;                   /* Size of chunk in bytes            */
     hsize_t     nchunks;                /* Number of chunks in dataset	     */
-    hsize_t     chunks[H5O_LAYOUT_NDIMS]; /* # of chunks in dataset dimensions */
-    hsize_t    	down_chunks[H5O_LAYOUT_NDIMS];	/* "down" size of number of chunks in each dimension */
+    hsize_t     chunks[H5O_LAYOUT_NDIMS];          /* # of chunks in each dataset dimension  */
+    hsize_t    	down_chunks[H5O_LAYOUT_NDIMS];     /* "down" size of number of chunks in each dimension */
 } H5O_layout_chunk_t;
 
 typedef struct H5O_layout_t {
@@ -437,9 +441,6 @@ typedef struct H5O_layout_t {
     } u;
     H5O_storage_t storage;              /* Information for storing dataset elements */
 } H5O_layout_t;
-
-/* Enable reading/writing "bogus" messages */
-/* #define H5O_ENABLE_BOGUS */
 
 #ifdef H5O_ENABLE_BOGUS
 /*
@@ -563,6 +564,8 @@ typedef struct H5O_btreek_t {
  * (Data structure in memory)
  */
 typedef struct H5O_drvinfo_t {
+/* Information for H5AC cache functions, _must_ be first field in structure */
+    H5AC_info_t         cache_info;
     char                name[9];                /* Driver name */
     size_t		len;                    /* Length of encoded buffer */
     uint8_t            *buf;                    /* Buffer for encoded info */
@@ -658,7 +661,7 @@ H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
-H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot);
+H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, unsigned prot_flags);
 H5_DLL H5O_t *H5O_pin(const H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5O_unpin(H5O_t *oh);
 H5_DLL herr_t H5O_dec_rc_by_loc(const H5O_loc_t *loc, hid_t dxpl_id);

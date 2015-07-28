@@ -25,6 +25,14 @@
 #include "H5HLprivate.h"
 #include "H5Iprivate.h"
 
+/*
+ * This file needs to access private information from the H5F package.
+ * This file also needs to access the file testing code.
+ */
+#define H5F_PACKAGE
+#define H5F_TESTING
+#include "H5Fpkg.h"		/* File access	 			*/
+
 const char *FILENAME[] = {
     "lheap",
     NULL
@@ -79,7 +87,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
 	H5_FAILED();
 	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
@@ -94,7 +102,7 @@ main(void)
 	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
-    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC_WRITE))) {
+    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC__NO_FLAGS_SET))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -127,7 +135,7 @@ main(void)
     TESTING("local heap read");
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) goto error;
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE))) {
+    if(NULL == (f = (H5F_t *)H5VL_object(file))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -144,7 +152,7 @@ main(void)
         if(j > 4)
             buf[j] = '\0';
 
-        if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC_READ))) {
+        if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC__READ_ONLY_FLAG))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;

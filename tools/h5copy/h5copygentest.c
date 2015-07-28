@@ -454,23 +454,23 @@ static herr_t gen_obj_ref(hid_t loc_id)
 
     /*--------------
      * add group  */
-     oid = H5Gcreate2 (loc_id, OBJ_REF_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    oid = H5Gcreate2 (loc_id, OBJ_REF_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (oid < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Gcreate2 failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
-     H5Gclose(oid);
+    H5Gclose(oid);
 
-    status = H5Rcreate (&or_data[0], loc_id, OBJ_REF_DS, H5R_OBJECT, -1);
+    status = H5Rcreate (&or_data[0], loc_id, OBJ_REF_DS, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
-    status = H5Rcreate (&or_data[1], loc_id, OBJ_REF_GRP, H5R_OBJECT, -1);
+    status = H5Rcreate (&or_data[1], loc_id, OBJ_REF_GRP, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);

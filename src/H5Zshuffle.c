@@ -24,8 +24,6 @@
 #include "H5Tprivate.h"		/* Datatypes         			*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
-#ifdef H5_HAVE_FILTER_SHUFFLE
-
 /* Local function prototypes */
 static herr_t H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
@@ -65,7 +63,7 @@ const H5Z_class2_t H5Z_SHUFFLE[1] = {{
  */
 /* ARGSUSED */
 static herr_t
-H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     H5P_genplist_t *dcpl_plist;     /* Property list pointer */
     const H5T_t	*type;                  /* Datatype */
@@ -291,5 +289,4 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
-#endif /*H5_HAVE_FILTER_SHUFFLE */
 

@@ -124,6 +124,7 @@ typedef struct H5S_sel_iter_t {
 #define H5S_GET_SELECT_TYPE(S)          ((S)->select.type->type)
 #define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)             ((*(S)->select.type->get_seq_list)(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
 #define H5S_SELECT_VALID(S)             ((*(S)->select.type->is_valid)(S))
+#define H5S_SELECT_RELEASE(S)           ((*(S)->select.type->release)(S))
 #define H5S_SELECT_SERIAL_SIZE(S)       ((*(S)->select.type->serial_size)(S))
 #define H5S_SELECT_SERIALIZE(S,BUF)     ((*(S)->select.type->serialize)(S,BUF))
 #define H5S_SELECT_BOUNDS(S,START,END)  ((*(S)->select.type->bounds)(S,START,END))
@@ -149,6 +150,7 @@ typedef struct H5S_sel_iter_t {
 #define H5S_GET_SELECT_TYPE(S)          (H5S_get_select_type(S))
 #define H5S_SELECT_GET_SEQ_LIST(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN)       (H5S_select_get_seq_list(S,FLAGS,ITER,MAXSEQ,MAXBYTES,NSEQ,NBYTES,OFF,LEN))
 #define H5S_SELECT_VALID(S)             (H5S_select_valid(S))
+#define H5S_SELECT_RELEASE(S)           (H5S_select_release(S))
 #define H5S_SELECT_SERIAL_SIZE(S)       (H5S_select_serial_size(S))
 #define H5S_SELECT_SERIALIZE(S,BUF)     (H5S_select_serialize(S,BUF))
 #define H5S_SELECT_BOUNDS(S,START,END)  (H5S_get_select_bounds(S,START,END))
@@ -167,9 +169,8 @@ typedef struct H5S_sel_iter_t {
 #define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        (H5S_select_iter_next_block(ITER))
 #define H5S_SELECT_ITER_RELEASE(ITER)   (H5S_select_iter_release(ITER))
 #endif /* H5S_PACKAGE */
-/* Handle these callbacks in a special way, since they have prologs that need to be executed */
+/* Handle these two callbacks in a special way, since they have prologs that need to be executed */
 #define H5S_SELECT_COPY(DST,SRC,SHARE)  (H5S_select_copy(DST,SRC,SHARE))
-#define H5S_SELECT_RELEASE(S)           (H5S_select_release(S))
 #define H5S_SELECT_DESERIALIZE(S,BUF)   (H5S_select_deserialize(S,BUF))
 
 
@@ -205,7 +206,7 @@ H5_DLL int H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t 
 H5_DLL htri_t H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2);
 
 /* Operations on selections */
-H5_DLL herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);
+H5_DLL herr_t H5S_select_deserialize(H5S_t **space, const uint8_t **p);
 H5_DLL H5S_sel_type H5S_get_select_type(const H5S_t *space);
 H5_DLL herr_t H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space,
     H5D_operator_t op, void *operator_data);
@@ -226,7 +227,7 @@ H5_DLL herr_t H5S_select_get_seq_list(const H5S_t *space, unsigned flags,
     H5S_sel_iter_t *iter, size_t maxseq, size_t maxbytes,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 H5_DLL hssize_t H5S_select_serial_size(const H5S_t *space);
-H5_DLL herr_t H5S_select_serialize(const H5S_t *space, uint8_t *buf);
+H5_DLL herr_t H5S_select_serialize(const H5S_t *space, uint8_t **p);
 H5_DLL htri_t H5S_select_is_contiguous(const H5S_t *space);
 H5_DLL htri_t H5S_select_is_single(const H5S_t *space);
 H5_DLL htri_t H5S_select_is_regular(const H5S_t *space);
@@ -248,10 +249,13 @@ H5_DLL herr_t H5S_select_elements(H5S_t *space, H5S_seloper_t op,
 H5_DLL herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op, const hsize_t start[],
     const hsize_t *stride, const hsize_t count[], const hsize_t *block);
 H5_DLL herr_t H5S_hyper_add_span_element(H5S_t *space, unsigned rank,
-    const hsize_t *coords);
+    hsize_t *coords);
 H5_DLL herr_t H5S_hyper_reset_scratch(H5S_t *space);
 H5_DLL herr_t H5S_hyper_convert(H5S_t *space);
-H5_DLL htri_t H5S_hyper_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end);
+#ifdef LATER
+H5_DLL htri_t H5S_hyper_intersect (H5S_t *space1, H5S_t *space2);
+#endif /* LATER */
+H5_DLL htri_t H5S_hyper_intersect_block (H5S_t *space, hsize_t *start, hsize_t *end);
 H5_DLL herr_t H5S_hyper_adjust_s(H5S_t *space, const hssize_t *offset);
 H5_DLL htri_t H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset);
 H5_DLL herr_t H5S_hyper_denormalize_offset(H5S_t *space, const hssize_t *old_offset);

@@ -29,8 +29,8 @@ static herr_t op_continue(hid_t did, unsigned dim, hid_t dsid, void *visitor_dat
 static herr_t op_stop(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
 
 /* prototypes */
-static int create_test_file(const char *fileext);
-static int open_test_file(const char *fileext);
+static hid_t create_test_file(const char *fileext);
+static hid_t open_test_file(const char *fileext);
 herr_t create_char_dataset(hid_t fid, const char *dsidx, int fulldims);
 herr_t create_short_dataset(hid_t fid, const char *dsidx, int fulldims);
 herr_t create_int_dataset(hid_t fid, const char *dsidx, int fulldims);
@@ -3126,7 +3126,7 @@ static int test_simple(void)
     if(H5DSget_scale_name(dsid, name_out, (size_t)name_len+1) < 0)
         goto out;
 
-    if(HDstrncmp("Latitude set 0",name_out, name_len)!=0)
+    if(HDstrncmp("Latitude set 0",name_out, (size_t)name_len)!=0)
         goto out;
     if(name_out) {
         HDfree(name_out);

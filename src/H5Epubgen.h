@@ -334,14 +334,12 @@ H5_DLLVAR hid_t H5E_CANTRECV_g;      /* Can't receive data */
 #define H5E_CANTNEXT         (H5OPEN H5E_CANTNEXT_g)
 #define H5E_BADSELECT        (H5OPEN H5E_BADSELECT_g)
 #define H5E_CANTCOMPARE      (H5OPEN H5E_CANTCOMPARE_g)
-#define H5E_INCONSISTENTSTATE (H5OPEN H5E_INCONSISTENTSTATE_g)
 H5_DLLVAR hid_t H5E_CANTCLIP_g;      /* Can't clip hyperslab region */
 H5_DLLVAR hid_t H5E_CANTCOUNT_g;     /* Can't count elements */
 H5_DLLVAR hid_t H5E_CANTSELECT_g;    /* Can't select hyperslab */
 H5_DLLVAR hid_t H5E_CANTNEXT_g;      /* Can't move to next iterator location */
 H5_DLLVAR hid_t H5E_BADSELECT_g;     /* Invalid selection */
 H5_DLLVAR hid_t H5E_CANTCOMPARE_g;   /* Can't compare objects */
-H5_DLLVAR hid_t H5E_INCONSISTENTSTATE_g; /* Internal states are inconsistent */
 
 /* Argument errors */
 #define H5E_UNINITIALIZED    (H5OPEN H5E_UNINITIALIZED_g)

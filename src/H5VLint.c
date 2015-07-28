@@ -39,7 +39,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5ESprivate.h"        /* Event Stacks                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Ipkg.h"		/* IDs Package header	  		*/
 #include "H5Lprivate.h"		/* Links        		  	*/
@@ -48,6 +47,45 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5VLpkg.h"		/* VOL package header		  	*/
 #include "H5VLprivate.h"	/* VOL          		  	*/
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+/* Declare a free list to manage the H5VL_t struct */
+H5FL_DEFINE(H5VL_t);
+
+/* Declare a free list to manage the H5VL_object_t struct */
+H5FL_DEFINE(H5VL_object_t);
 
 
 /*--------------------------------------------------------------------------
@@ -118,53 +156,91 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register() */
 
-
 /*-------------------------------------------------------------------------
- * Function:	H5VL_get_class
+ * Function:   H5VL_register_id
  *
- * Purpose:	Obtains a pointer to the vol plugin struct containing all the
- *		callback pointers, etc. The PLIST_ID argument can be a file
- *		access property list or a vol plugin identifier.
+ * Purpose:    Wrapper to register an object ID with a VOL aux struct 
+ *             and increment ref count on VOL plugin ID
  *
- * Return:	Success:	Ptr to the vol plugin information. The pointer is
- *				only valid as long as the vol plugin remains
- *				registered or some file or property list
- *				exists which references the vol plugin.
+ * Return:     Success:Positive Identifier
+ * Failure:    A negative value.
  *
- *		Failure:	NULL
- *
- * Programmer:	Mohamad Chaarawi
- *              January, 2012
- *
+ * Programmer: Mohamad Chaarawi
+ *             August, 2014
  *-------------------------------------------------------------------------
  */
-H5VL_class_t *
-H5VL_get_class(hid_t id)
+hid_t
+H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref)
 {
-    H5VL_class_t	*ret_value = NULL;
+    H5VL_object_t *new_obj = NULL;
+    hid_t ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI(FAIL)
 
-    if(H5I_VOL == H5I_get_type(id))
-	ret_value = (H5VL_class_t *)H5I_object(id);
+    /* Check arguments */
+    HDassert(object);
+    HDassert(vol_plugin);
+
+    /* setup VOL object */
+    if(NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
+	HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "can't allocate top object structure")
+    new_obj->vol_info = vol_plugin;
+    vol_plugin->nrefs ++;
+    new_obj->vol_obj = object;
+
+    if(H5I_DATATYPE == type) {
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = H5T_construct_datatype(new_obj)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't construct datatype object");
+
+        if((ret_value = H5I_register(type, dt, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize handle")
+    }
     else {
-        H5P_genplist_t *plist;      /* Property list pointer */
-
-        /* Get the plist structure */
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
-
-        if(TRUE == H5P_isa_class(id, H5P_FILE_ACCESS)) {
-            if(H5P_get(plist, H5F_ACS_VOL_NAME, &ret_value) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin")
-        } else {
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a vol plugin id, file access property list")
-        }
-    } /* end if */
+        if((ret_value = H5I_register(type, new_obj, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize handle")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_get_class() */
+} /* end H5VL_register_id() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_free_id
+ *
+ * Purpose:     Wrapper to register an object ID with a VOL aux struct 
+ *              and increment ref count on VOL plugin ID
+ *
+ * Return:      Success:Positive Identifier
+ * Failure:     A negative value.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2014
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_free_object(H5VL_object_t *obj)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(SUCCEED)
+
+    /* Check arguments */
+    HDassert(obj);
+
+    obj->vol_info->nrefs --;
+    if (0 == obj->vol_info->nrefs) {
+        if(H5I_dec_ref(obj->vol_info->vol_id) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL plugin")
+        obj->vol_info = H5FL_FREE(H5VL_t, obj->vol_info);
+    }
+
+    obj = H5FL_FREE(H5VL_object_t, obj);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_free_id() */
 
 
 /*-------------------------------------------------------------------------
@@ -182,18 +258,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_fapl_open(H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_info)
+H5VL_fapl_open(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
 {
     void  *copied_vol_info = NULL;     /* Temporary VOL driver info */
     herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5VL_fapl_copy(vol_cls, vol_info, &copied_vol_info) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "can't copy VFL driver info")
+    /* increment the refcount on the plugin id */
+    if(H5I_inc_ref(vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+    if(H5VL_fapl_copy(vol_id, vol_info, &copied_vol_info) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "can't copy VOL plugin info")
 
     /* Set the vol properties for the list */
-    if(H5P_set(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
+    if(H5P_set(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol ID")
     if(H5P_set(plist, H5F_ACS_VOL_INFO_NAME, &copied_vol_info) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol info")
@@ -201,7 +280,7 @@ H5VL_fapl_open(H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_inf
 
 done:
     if(ret_value < 0)
-        if(copied_vol_info && H5VL_fapl_close(vol_cls, copied_vol_info) < 0)
+        if(copied_vol_info && H5VL_fapl_close(vol_id, copied_vol_info) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close copy of driver info")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_fapl_open() */
@@ -221,12 +300,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_fapl_copy(H5VL_class_t *vol_cls, const void *vol_info, void **copied_info)
+H5VL_fapl_copy(hid_t vol_id, const void *vol_info, void **copied_info)
 {
+    H5VL_class_t *vol_cls;
     void *new_info = NULL;
     herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object(vol_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL ID")
 
     /* Copy old pl, if one exists */
     if(vol_info) {
@@ -268,13 +351,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_fapl_close(H5VL_class_t *vol_cls, void *vol_info)
+H5VL_fapl_close(hid_t vol_id, void *vol_info)
 {
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    H5VL_class_t *vol_cls;
+    herr_t       ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL != vol_cls) {
+    if(vol_id > 0) {
+        if(NULL == (vol_cls = (H5VL_class_t *)H5I_object(vol_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL ID")
+
         /* Allow driver to free or do it ourselves */
         if(vol_info && vol_cls->fapl_free) {
             if((vol_cls->fapl_free)(vol_info) < 0)
@@ -282,35 +369,15 @@ H5VL_fapl_close(H5VL_class_t *vol_cls, void *vol_info)
         } /* end if */
         else
             H5MM_xfree(vol_info);
+
+        /* Decrement reference count for plugin */
+        if(H5I_dec_ref(vol_id) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't decrement reference count for plugin")
     }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_fapl_close() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_close
- *
- * Purpose: decrements the ref count on the number of references
- *          outstanding for a VOL plugin
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *		May, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_close(H5VL_class_t UNUSED *vol_plugin)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -329,19 +396,22 @@ done:
 ssize_t
 H5VL_get_plugin_name(hid_t id, char *name/*out*/, size_t size)
 {
-    H5VL_t       *vol_plugin;            /* VOL structure attached to id */
+    H5VL_object_t *obj = NULL;
+    const H5VL_class_t *vol_cls = NULL;
     size_t        len;
     ssize_t       ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux (id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Object/File does not contain VOL information")
+    /* get the object pointer */
+    if(NULL == (obj = H5VL_get_object(id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    len = HDstrlen(vol_plugin->cls->name);
+    vol_cls = obj->vol_info->vol_cls;
 
+    len = HDstrlen(vol_cls->name);
     if(name) {
-        HDstrncpy(name, vol_plugin->cls->name, MIN(len + 1,size));
+        HDstrncpy(name, vol_cls->name, MIN(len + 1,size));
         if(len >= size)
             name[size-1]='\0';
     } /* end if */
@@ -369,62 +439,28 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin, hbool_t app_ref)
+H5VL_object_register(void *obj, H5I_type_t obj_type, hid_t plugin_id, hbool_t app_ref)
 {
+    H5VL_class_t *vol_cls = NULL;
+    H5VL_t *vol_info = NULL;        /* VOL info struct */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Get an atom for the object and attach VOL information and free function to the ID */
-    switch(obj_type) {
-        case H5I_FILE:
-            if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-            break;
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
-        case H5I_ATTR:
-            if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize attribute handle")
-            break;
+    /* setup VOL info struct */
+    if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
+    vol_info->vol_cls = vol_cls;
+    vol_info->vol_id = plugin_id;
+    if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
-        case H5I_GROUP:
-            if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
-            break;
-
-        case H5I_MAP:
-            if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize map handle")
-            break;
-
-        case H5I_DATASET:
-            if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-            break;
-
-        case H5I_DATATYPE:
-            if ((ret_value = H5VL_create_datatype(obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
-            break;
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_DATASPACE:
-        case H5I_REFERENCE:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_RC:
-        case H5I_TR:
-        case H5I_ES:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "invalid object type")
-    } /* end switch */
+    /* Get an atom for the object */
+    if((ret_value = H5VL_register_id(obj_type, obj, vol_info, app_ref)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -447,25 +483,181 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+H5VL_object_t *
 H5VL_get_object(hid_t id)
 {
+    void *obj = NULL;
+    H5I_type_t obj_type = H5I_get_type(id);
+    H5VL_object_t *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    if(H5I_FILE == obj_type || H5I_GROUP == obj_type || H5I_ATTR == obj_type || 
+       H5I_DATASET == obj_type || H5I_DATATYPE == obj_type) {
+        /* get the object */
+        if(NULL == (obj = H5I_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+
+        /* if this is a datatype, get the VOL object attached to the H5T_t struct */
+        if (H5I_DATATYPE == obj_type) {
+            if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+        }
+    }
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier type to function")
+
+
+    ret_value = (H5VL_object_t *)obj;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_get_object() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_object
+ *
+ * Purpose:     utility function to return the VOL object pointer associated with
+ *              an hid_t.
+ *
+ * Return:      Success:        object pointer
+ *              Failure:        NULL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              September, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_object(hid_t id)
+{
+    H5VL_object_t *obj = NULL;    
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* get the object */
-    if(NULL == (ret_value = (void *)H5I_object(id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+    /* Get the symbol table entry */
+    switch(H5I_get_type(id)) {
+        case H5I_GROUP:
+        case H5I_DATASET:
+        case H5I_FILE:            
+        case H5I_ATTR:
+            /* get the object */
+            if(NULL == (obj = (H5VL_object_t *)H5I_object(id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
 
-    /* if this is a datatype, get the VOL object attached to the H5T_t struct */
-    if (H5I_DATATYPE == H5I_get_type(id)) {
-        if (NULL == (ret_value = H5T_get_named_type((H5T_t *)ret_value)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+            ret_value = obj->vol_obj;
+            break;
+        case H5I_DATATYPE:
+            {
+                H5T_t *dt;
+
+                /* get the object */
+                if(NULL == (dt = (H5T_t *)H5I_object(id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+
+                /* Get the actual datatype object that should be the vol_obj */
+                if(NULL == (obj = H5T_get_named_type(dt)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+
+                ret_value = obj->vol_obj;
+                break;
+            }
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unknown data object type")
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_get_object() */
+} /* end H5VL_object() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_object_verify
+ *
+ * Purpose:     utility function to return the VOL object pointer associated with
+ *              an hid_t.
+ *
+ * Return:      Success:        object pointer
+ *              Failure:        NULL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              September, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_object_verify(hid_t id, H5I_type_t obj_type)
+{
+    H5VL_object_t *obj = NULL;    
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Get the symbol table entry */
+    switch(obj_type) {
+        case H5I_GROUP:
+        case H5I_DATASET:
+        case H5I_FILE:            
+        case H5I_ATTR:
+            /* get the object */
+            if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(id, obj_type)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+
+            ret_value = obj->vol_obj;
+            break;
+        case H5I_DATATYPE:
+            {
+                H5T_t *dt;
+
+                /* get the object */
+                if(NULL == (dt = (H5T_t *)H5I_object_verify(id, obj_type)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
+
+                /* Get the actual datatype object that should be the vol_obj */
+                if(NULL == (obj = H5T_get_named_type(dt)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+
+                ret_value = obj->vol_obj;
+                break;
+            }
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unknown data object type")
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_object_verify() */
+
+void *
+H5VL_plugin_object(H5VL_object_t *obj)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(obj->vol_obj)
+} /* end H5VL_plugin_object() */
 
 
 /*-------------------------------------------------------------------------
@@ -483,40 +675,21 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, hid_t estack_id)
+H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, const char *name, 
+                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* check if the corresponding VOL create callback exists */
-    if(NULL == vol_plugin->cls->attr_cls.create)
+    if(NULL == vol_cls->attr_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `attr create' method")
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_plugin->cls->attr_cls.create) (obj, loc_params, name, acpl_id, 
-                                                                aapl_id, dxpl_id, req)))
+    if(NULL == (ret_value = (vol_cls->attr_cls.create) 
+                (obj, loc_params, name, acpl_id, aapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
-    vol_plugin->nrefs ++;
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -538,41 +711,21 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_attr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-               hid_t aapl_id, hid_t dxpl_id, hid_t estack_id)
+H5VL_attr_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, const char *name, 
+               hid_t aapl_id, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* check if the type specific corresponding VOL open callback exists */
-    if(NULL == vol_plugin->cls->attr_cls.open)
+    if(NULL == vol_cls->attr_cls.open)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `attr open' method")
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* call the corresponding VOL open callback */
-    if(NULL == (ret_value = (vol_plugin->cls->attr_cls.open) (obj, loc_params, name, aapl_id, 
-                                                              dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "attribute open failed")
-
-    vol_plugin->nrefs ++;
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
+    if(NULL == (ret_value = (vol_cls->attr_cls.open) 
+                (obj, loc_params, name, aapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "attribute open failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -593,37 +746,17 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5VL_attr_read(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, void *buf, 
-                      hid_t dxpl_id, hid_t estack_id)
+herr_t H5VL_attr_read(void *attr, const H5VL_class_t *vol_cls, hid_t mem_type_id, void *buf, 
+                      hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->attr_cls.read)
+    if(NULL == vol_cls->attr_cls.read)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr read' method")
-
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if((ret_value = (vol_plugin->cls->attr_cls.read)(attr, mem_type_id, buf, 
-                                                     dxpl_id, req)) < 0)
+    if((ret_value = (vol_cls->attr_cls.read)(attr, mem_type_id, buf, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "read failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -644,74 +777,21 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5VL_attr_write(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, const void *buf, 
-                       hid_t dxpl_id, hid_t estack_id)
+herr_t H5VL_attr_write(void *attr, const H5VL_class_t *vol_cls, hid_t mem_type_id, const void *buf, 
+                       hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->attr_cls.write)
+    if(NULL == vol_cls->attr_cls.write)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr write' method")
-
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if((ret_value = (vol_plugin->cls->attr_cls.write)(attr, mem_type_id, buf, 
-                                                      dxpl_id, req)) < 0)
+    if((ret_value = (vol_cls->attr_cls.write)(attr, mem_type_id, buf, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "write failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_write() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_attr_iterate
- *
- * Purpose:	Iterate over attrs in an object
- *
- * Return:	Success:        non negative
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              June, 2013
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5VL_attr_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                  H5_index_t idx_type, H5_iter_order_t order, hsize_t *n, 
-                  H5A_operator2_t op, void *op_data, hid_t dxpl_id, hid_t UNUSED estack_id)
-{
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(NULL == vol_plugin->cls->attr_cls.iterate)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr iterate' method")
-    if((ret_value = (vol_plugin->cls->attr_cls.iterate)(obj, loc_params, idx_type, order, n, op, 
-                                                        op_data, dxpl_id, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "iteration failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_attr_iterate() */
 
 
 /*-------------------------------------------------------------------------
@@ -729,39 +809,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, 
-              hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_attr_get(void *obj, const H5VL_class_t *vol_cls, H5VL_attr_get_t get_type, 
+              hid_t dxpl_id, void **req, ...)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->attr_cls.get)
+    if(NULL == vol_cls->attr_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr get' method")
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->attr_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->attr_cls.get)
+        (obj, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -769,54 +832,75 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_attr_remove
+ * Function:	H5VL_attr_specific
  *
- * Purpose:	Removes an attribute through the VOL
+ * Purpose:	specific operation on attributes through the VOL
  *
- * Return:	Success:	Non Negative
+ * Return:	Success:        non negative
  *
- *		Failure:	Negative
+ *		Failure:	negative
  *
  * Programmer:	Mohamad Chaarawi
  *              March, 2012
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
-H5VL_attr_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                 const char *attr_name, hid_t dxpl_id, hid_t estack_id)
+herr_t
+H5VL_attr_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, 
+                   H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t              ret_value = SUCCEED;
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->attr_cls.remove)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr remove' method")
+    if(NULL == vol_cls->attr_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr specific' method")
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if((ret_value = (vol_plugin->cls->attr_cls.remove)(obj, loc_params, attr_name, dxpl_id, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDELETE, FAIL, "remove failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->attr_cls.specific)
+        (obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute specific callback")
+    va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_attr_remove() */
+} /* end H5VL_attr_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_attr_optional
+ *
+ * Purpose:	optional operation specific to plugins.
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_attr_optional(void *obj, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_cls->attr_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->attr_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute attribute optional callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_attr_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -834,44 +918,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t estack_id)
+H5VL_attr_close(void *attr, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
             
-    /* if the VOL class does not implement a specific attr close
-       callback, try the object close */    
-    if(NULL == vol_plugin->cls->attr_cls.close)
+    if(NULL == vol_cls->attr_cls.close)
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr close' method")
-
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if((ret_value = (vol_plugin->cls->attr_cls.close)(attr, dxpl_id, req)) < 0)
+    if((ret_value = (vol_cls->attr_cls.close)(attr, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
-
-    vol_plugin->nrefs --;
-
-    if (0 == vol_plugin->nrefs) {
-        vol_plugin->container_name = (const char *)H5MM_xfree(vol_plugin->container_name);
-        vol_plugin = (H5VL_t *)H5MM_xfree(vol_plugin);
-    }
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -893,41 +949,22 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
+H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, const char *name, 
                      hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, 
-                     hid_t dxpl_id, hid_t estack_id)
+                     hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void *ret_value = NULL;             /* Return value */
+    void *ret_value = NULL;              /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* check if the corresponding VOL commit callback exists */
-    if(NULL == vol_plugin->cls->datatype_cls.commit)
+    if(NULL == vol_cls->datatype_cls.commit)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `datatype commit' method")
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* call the corresponding VOL commit callback */
-    if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.commit) 
+    if(NULL == (ret_value = (vol_cls->datatype_cls.commit) 
         (obj, loc_params, name, type_id, lcpl_id, tcpl_id, tapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "commit failed")
-    vol_plugin->nrefs ++;
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -949,97 +986,25 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                   hid_t tapl_id, hid_t dxpl_id, hid_t estack_id)
+H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, const char *name, 
+                   hid_t tapl_id, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void *ret_value = NULL;             /* Return value */
+    void *ret_value = NULL;              /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* check if the type specific corresponding VOL open callback exists */
-    if(NULL == vol_plugin->cls->datatype_cls.open)
+    if(NULL == vol_cls->datatype_cls.open)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "no datatype open callback");
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* call the corresponding VOL open callback */
-    if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.open)(obj, loc_params, name, tapl_id, 
-                                                                 dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
-    vol_plugin->nrefs ++;
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
+    if(NULL == (ret_value = (vol_cls->datatype_cls.open)
+                (obj, loc_params, name, tapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_open() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_datatype_get_binary
- *
- * Purpose:	gets required size to serialize datatype description
- *
- * Return:      Success: size needed
- *
- *		Failure: negative
- *
- * Programmer:	Mohamad Chaarawi
- *              March, 2012
- *
- *-------------------------------------------------------------------------
- */
-ssize_t 
-H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, 
-                         hid_t dxpl_id, hid_t estack_id)
-{
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    ssize_t ret_value = FAIL;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* check if the type specific corresponding VOL open callback exists */
-    if(NULL == vol_plugin->cls->datatype_cls.get_binary)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "no datatype get_binary callback");
-
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    /* call the corresponding VOL open callback */
-    if((ret_value = (vol_plugin->cls->datatype_cls.get_binary)(obj, buf, size, dxpl_id, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "get binary failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_datatype_get_binary() */
 
 
 /*-------------------------------------------------------------------------
@@ -1057,25 +1022,97 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_datatype_get(void *obj, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type, 
-                  hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_datatype_get(void *obj, const H5VL_class_t *vol_cls, H5VL_datatype_get_t get_type, 
+                  hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->datatype_cls.get)
+    if(NULL == vol_cls->datatype_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype get' method")
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->datatype_cls.get)(obj, get_type, dxpl_id, 
-                                                        H5_REQUEST_NULL, arguments)) < 0)
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->datatype_cls.get)(obj, get_type, dxpl_id, 
+                                                        req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_datatype_specific
+ *
+ * Purpose:	specific operation on datatypes through the VOL
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_datatype_specific(void *obj, const H5VL_class_t *vol_cls, H5VL_datatype_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_cls->datatype_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype specific' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->datatype_cls.specific)
+        (obj, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype specific callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_datatype_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_datatype_optional
+ *
+ * Purpose:	optional operation specific to plugins.
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_datatype_optional(void *obj, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_cls->datatype_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->datatype_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute datatype optional callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_datatype_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -1092,43 +1129,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t estack_id)
+H5VL_datatype_close(void *dt, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check if the corresponding VOL close callback exists */
-    if(NULL == vol_plugin->cls->datatype_cls.close)
+    if(NULL == vol_cls->datatype_cls.close)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype close' method")
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* call the corresponding VOL close callback */
-    if((ret_value = (vol_plugin->cls->datatype_cls.close)(dt, dxpl_id, req)) < 0)
+    if((ret_value = (vol_cls->datatype_cls.close)(dt, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
-
-    vol_plugin->nrefs --;
-    if (0 == vol_plugin->nrefs) {
-        vol_plugin->container_name = (const char *)H5MM_xfree(vol_plugin->container_name);
-        vol_plugin = (H5VL_t *)H5MM_xfree(vol_plugin);
-    }
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1150,39 +1163,21 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_dataset_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, hid_t estack_id)
+H5VL_dataset_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, const char *name, 
+                    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* check if the corresponding VOL create callback exists */
-    if(NULL == vol_plugin->cls->dataset_cls.create)
+    if(NULL == vol_cls->dataset_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `dataset create' method")
-    /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.create)(obj, loc_params, name, dcpl_id, 
-                                                                  dapl_id, dxpl_id, req)))
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
-    vol_plugin->nrefs ++;
 
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
+    /* call the corresponding VOL create callback */
+    if(NULL == (ret_value = (vol_cls->dataset_cls.create)
+                (obj, loc_params, name, dcpl_id, dapl_id, dxpl_id, req)))
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1204,48 +1199,21 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_dataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                  hid_t dapl_id, hid_t dxpl_id, hid_t estack_id)
+H5VL_dataset_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, const char *name, 
+                  hid_t dapl_id, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* check if the type specific corresponding VOL open callback exists */
-    if(NULL == vol_plugin->cls->dataset_cls.open) {
-        ;
-#if 0
-        /* Open the object class */
-        if((ret_value = H5VL_object_open(id, loc_params, dxpl_id, estack_id)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to open object")
-#endif
-    }
-    else {
-        /* call the corresponding VOL open callback */
-        if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.open)(obj, loc_params, name, 
-                                                                    dapl_id, dxpl_id, req)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
-        vol_plugin->nrefs ++;
+    if(NULL == vol_cls->dataset_cls.open)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no 'dset open' method")
 
-    }
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
+    /* call the corresponding VOL open callback */
+    if(NULL == (ret_value = (vol_cls->dataset_cls.open)
+                (obj, loc_params, name, dapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1267,36 +1235,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_dataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
-                  hid_t file_space_id, hid_t plist_id, void *buf, hid_t estack_id)
+H5VL_dataset_read(void *dset, const H5VL_class_t *vol_cls, hid_t mem_type_id, hid_t mem_space_id, 
+                  hid_t file_space_id, hid_t plist_id, void *buf, void **req)
 {
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if(NULL == vol_plugin->cls->dataset_cls.read)
+    if(NULL == vol_cls->dataset_cls.read)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset read' method")
-    if((ret_value = (vol_plugin->cls->dataset_cls.read)
+    if((ret_value = (vol_cls->dataset_cls.read)
         (dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "read failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1318,90 +1268,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_dataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
-                   hid_t file_space_id, hid_t plist_id, const void *buf, hid_t estack_id)
+H5VL_dataset_write(void *dset, const H5VL_class_t *vol_cls, hid_t mem_type_id, hid_t mem_space_id, 
+                   hid_t file_space_id, hid_t plist_id, const void *buf, void **req)
 {
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if(NULL == vol_plugin->cls->dataset_cls.write)
+    if(NULL == vol_cls->dataset_cls.write)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset write' method")
-    if((ret_value = (vol_plugin->cls->dataset_cls.write)
+    if((ret_value = (vol_cls->dataset_cls.write)
         (dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "write failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_write() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_dataset_set_extent
- *
- * Purpose:	Modifies the dimensions of a dataset
- *
- * Return:	Success:	Non Negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *              March, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5VL_dataset_set_extent(void *dset, H5VL_t *vol_plugin, const hsize_t size[], 
-                        hid_t dxpl_id, hid_t estack_id)
-{
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t              ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if(NULL == vol_plugin->cls->dataset_cls.set_extent)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset set_extent' method")
-    if((ret_value = (vol_plugin->cls->dataset_cls.set_extent)(dset, size, dxpl_id, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "set_extent failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_dataset_set_extent() */
 
 
 /*-------------------------------------------------------------------------
@@ -1419,43 +1301,97 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, 
-                 hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_dataset_get(void *dset, const H5VL_class_t *vol_cls, H5VL_dataset_get_t get_type, 
+                 hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->dataset_cls.get)
+    if(NULL == vol_cls->dataset_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset get' method")
 
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->dataset_cls.get)(dset, get_type, dxpl_id, 
-                                                       H5_REQUEST_NULL, arguments)) < 0)
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->dataset_cls.get)(dset, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
-
-#if 0
-    /* if the get_type is a named datatype, create a wrapper for it */
-    if(H5VL_DATASET_GET_TYPE == get_type) {
-        hid_t           *ret_id;
-
-        va_start (arguments, estack_id);
-        ret_id = va_arg (arguments, hid_t *);
-
-        if(H5Tcommitted(*ret_id)) {
-            /* attach VOL information to the ID */
-            if (H5I_register_aux(*ret_id, vol_plugin, (H5I_free_t)H5VL_close) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-        }
-        va_end (arguments);
-    }
-#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_dataset_specific
+ *
+ * Purpose:	specific operation on datasets through the VOL
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_dataset_specific(void *obj, const H5VL_class_t *vol_cls, H5VL_dataset_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_cls->dataset_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset specific' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->dataset_cls.specific)
+        (obj, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset specific callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_dataset_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_dataset_optional
+ *
+ * Purpose:	optional operation specific to plugins.
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_dataset_optional(void *obj, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_cls->dataset_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->dataset_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute dataset optional callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_dataset_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -1473,39 +1409,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t estack_id)
+H5VL_dataset_close(void *dset, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-    if((ret_value = (vol_plugin->cls->dataset_cls.close)(dset, dxpl_id, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
-
-    vol_plugin->nrefs --;
-    if (0 == vol_plugin->nrefs) {
-        vol_plugin->container_name = (const char *)H5MM_xfree(vol_plugin->container_name);
-        vol_plugin = (H5VL_t *)H5MM_xfree(vol_plugin);
-    }
+    if(NULL == vol_cls->dataset_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dset close' method")
+    if((ret_value = (vol_cls->dataset_cls.close)(dset, dxpl_id, req)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_close() */
 
@@ -1525,56 +1441,19 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_create(H5VL_t **plugin, const char *filename, unsigned flags, hid_t fcpl_id, 
-                 hid_t fapl_id, hid_t dxpl_id, hid_t estack_id)
+H5VL_file_create(const H5VL_class_t *vol_cls, const char *name, unsigned flags, hid_t fcpl_id, 
+                 hid_t fapl_id, hid_t dxpl_id, void **req)
 {
-    H5P_genplist_t     *plist;                 /* Property list pointer */
-    H5VL_class_t       *vol_cls;               /* VOL class attached to fapl_id */
-    H5VL_t             *vol_plugin = NULL;     /* the public VOL struct */
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void	       *ret_value;             /* Return value */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
-
-    /* get the VOL info from the fapl */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
-    if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID");
-
-    /* Build the vol plugin struct */
-    if(NULL == (*plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    vol_plugin = *plugin;
-    vol_plugin->cls = vol_cls;
-    vol_plugin->nrefs = 1;
-    if((vol_plugin->container_name = H5MM_xstrdup(filename)) == NULL)
-        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,NULL,"memory allocation failed");
-
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
 
     /* check if the corresponding VOL create callback exists */
     if(NULL == vol_cls->file_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file create' method")
     /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_cls->file_cls.create)(filename, flags, fcpl_id, fapl_id, 
-                                                       dxpl_id, req)))
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed");
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
+    if(NULL == (ret_value = (vol_cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, req)))
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1596,111 +1475,23 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_open(H5VL_t **plugin, const char *filename, unsigned flags, hid_t fapl_id, 
-               hid_t dxpl_id, hid_t estack_id)
+H5VL_file_open(const H5VL_class_t *vol_cls, const char *name, unsigned flags, hid_t fapl_id, 
+               hid_t dxpl_id, void **req)
 {
-    H5P_genplist_t     *plist;                 /* Property list pointer */
-    H5VL_class_t       *vol_cls;               /* VOL class attached to fapl_id */
-    H5VL_t             *vol_plugin = NULL;     /* the public VOL struct */
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void	       *ret_value;             /* Return value */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
-
-    /* get the VOL info from the fapl */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
-
-    /* Build the vol plugin struct */
-    if(NULL == (*plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    vol_plugin = *plugin;
-    vol_plugin->cls = vol_cls;
-    vol_plugin->nrefs = 1;
-    if((vol_plugin->container_name = H5MM_xstrdup(filename)) == NULL)
-        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,NULL,"memory allocation failed")
-
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
 
     /* check if the corresponding VOL create callback exists */
     if(NULL == vol_cls->file_cls.open)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file open' method")
     /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_cls->file_cls.open)(filename, flags, fapl_id, 
-                                                     dxpl_id, req)))
+    if(NULL == (ret_value = (vol_cls->file_cls.open)(name, flags, fapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_open() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_file_flush
- *
- * Purpose:	Flushes a file through the VOL
- *
- * Return:	Success:	Non Negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *              February, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_file_flush(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5F_scope_t scope, 
-                hid_t dxpl_id, hid_t estack_id)
-{
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t              ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if(NULL == vol_plugin->cls->file_cls.flush)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file flush' method")
-    if((ret_value = (vol_plugin->cls->file_cls.flush)(obj, loc_params, scope, 
-                                                      dxpl_id, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTFLUSH, FAIL, "flush failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_file_flush() */
 
 
 /*-------------------------------------------------------------------------
@@ -1718,19 +1509,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, 
-              hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_file_get(void *file, const H5VL_class_t *vol_cls, H5VL_file_get_t get_type, 
+              hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->file_cls.get)
+    if(NULL == vol_cls->file_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file get' method")
 
-    va_start(arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->file_cls.get)(file, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    va_start(arguments, req);
+    if((ret_value = (vol_cls->file_cls.get)(file, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end(arguments);
 
@@ -1740,9 +1531,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_file_misc
+ * Function:	H5VL_file_specific
  *
- * Purpose:	perform a specified operation through the VOL
+ * Purpose:	perform File specific operations through the VOL
  *
  * Return:	Success:        non negative
  *		Failure:	negative
@@ -1753,48 +1544,53 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, 
-               hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_file_specific(void *file, const H5VL_class_t *vol_cls, H5VL_file_specific_t specific_type, 
+                   hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (misc_type == H5VL_FILE_IS_ACCESSIBLE) {
+    if(specific_type == H5VL_FILE_IS_ACCESSIBLE) {
         H5P_genplist_t     *plist;          /* Property list pointer */
-        H5VL_class_t       *vol_cls;        /* VOL class attached to fapl_id */
+        hid_t               vol_id;         /* VOL plugin identigier attached to fapl_id */
         va_list             tmp_args;       /* argument list passed from the API call */
         hid_t               fapl_id;
 
-        va_start (tmp_args, estack_id);
+        va_start (tmp_args, req);
         fapl_id = va_arg (tmp_args, hid_t);
         va_end (tmp_args);
 
         /* get the VOL info from the fapl */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-        if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
+        if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin")
 
-        va_start (arguments, estack_id);
-        if((ret_value = (vol_cls->file_cls.misc)(file, misc_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "misc failed")
+        if(NULL == (vol_cls = (H5VL_class_t *)H5I_object(vol_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL ID")
+
+        va_start (arguments, req);
+        if((ret_value = (vol_cls->file_cls.specific)
+            (file, specific_type, dxpl_id, req, arguments)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "specific failed")
         va_end (arguments);
     }
     else {
-        if(NULL == vol_plugin->cls->file_cls.misc)
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file misc' method")
+        if(NULL == vol_cls->file_cls.specific)
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file specific' method")
 
-        va_start (arguments, estack_id);
-        if((ret_value = (vol_plugin->cls->file_cls.misc)(file, misc_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "misc failed")
+        va_start (arguments, req);
+        if((ret_value = (vol_cls->file_cls.specific)
+            (file, specific_type, dxpl_id, req, arguments)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "specific failed")
         va_end (arguments);
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_file_misc() */
+} /* end H5VL_file_specific() */
 
 
 /*-------------------------------------------------------------------------
@@ -1811,26 +1607,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_type, 
-                   hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_file_optional(void *file, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->file_cls.optional)
+    if(NULL == vol_cls->file_cls.optional)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file optional' method")
 
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->file_cls.optional)(file, optional_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->file_cls.optional)(file, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "optional failed")
     va_end (arguments);
-
-    /* if the get_type is a named datatype, attach the vol info to it */
-    if(H5VL_FILE_REOPEN == optional_type) {
-        vol_plugin->nrefs ++;
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1852,40 +1642,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t estack_id)
+H5VL_file_close(void *file, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if(NULL == vol_plugin->cls->file_cls.close)
+    if(NULL == vol_cls->file_cls.close)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file close' method")
-    if((ret_value = (vol_plugin->cls->file_cls.close)(file, dxpl_id, req)) < 0)
+    if((ret_value = (vol_cls->file_cls.close)(file, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
-
-    vol_plugin->nrefs --;
-    if (0 == vol_plugin->nrefs) {
-        vol_plugin->container_name = (const char *)H5MM_xfree(vol_plugin->container_name);
-        vol_plugin = (H5VL_t *)H5MM_xfree(vol_plugin);
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1907,39 +1673,21 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_group_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                  hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, hid_t estack_id)
+H5VL_group_create(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, const char *name, 
+                  hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* check if the corresponding VOL create callback exists */
-    if(NULL == vol_plugin->cls->group_cls.create)
+    if(NULL == vol_cls->group_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `group create' method")
-    /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_plugin->cls->group_cls.create)(obj, loc_params, name, gcpl_id, 
-                                                                gapl_id, dxpl_id, req)))
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
-    vol_plugin->nrefs ++;
 
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
+    /* call the corresponding VOL create callback */
+    if(NULL == (ret_value = (vol_cls->group_cls.create)
+                (obj, loc_params, name, gcpl_id, gapl_id, dxpl_id, req)))
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1961,47 +1709,19 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_group_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                hid_t gapl_id, hid_t dxpl_id, hid_t estack_id)
+H5VL_group_open(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, const char *name, 
+                hid_t gapl_id, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
+    if(NULL == vol_cls->group_cls.open)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `group open' method")
 
-    /* check if the type specific corresponding VOL open callback exists */
-    if(NULL == vol_plugin->cls->group_cls.open) {
-        ;
-#if 0
-        /* Open the object class */
-        if((ret_value = H5VL_object_open(id, loc_params, dxpl_id, estack_id)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to open object")
-#endif
-    }
-    else {
-        /* call the corresponding VOL open callback */
-        if(NULL == (ret_value = (vol_plugin->cls->group_cls.open)(obj, loc_params, name, 
-                                                                  gapl_id, dxpl_id, req)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
-        vol_plugin->nrefs ++;
-    }
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
+    if(NULL == (ret_value = (vol_cls->group_cls.open)
+                (obj, loc_params, name, gapl_id, dxpl_id, req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2023,24 +1743,98 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_group_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, 
-               hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_group_get(void *obj, const H5VL_class_t *vol_cls, H5VL_group_get_t get_type, 
+               hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->group_cls.get)
+    if(NULL == vol_cls->group_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group get' method")
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->group_cls.get)(obj, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->group_cls.get)
+        (obj, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_group_specific
+ *
+ * Purpose:	specific operation on groups through the VOL
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_group_specific(void *obj, const H5VL_class_t *vol_cls, H5VL_group_specific_t specific_type, 
+                       hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_cls->group_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group specific' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->group_cls.specific)
+        (obj, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group specific callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_group_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_group_optional
+ *
+ * Purpose:	optional operation specific to plugins.
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_group_optional(void *obj, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_cls->group_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->group_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute group optional callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_group_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -2058,38 +1852,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t estack_id)
+H5VL_group_close(void *grp, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event stack */
-    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if((ret_value = (vol_plugin->cls->group_cls.close)(grp, dxpl_id, req)) < 0)
+    if(NULL == vol_cls->group_cls.close)
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group close' method")
+    if((ret_value = (vol_cls->group_cls.close)(grp, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
-
-    vol_plugin->nrefs --;
-    if (0 == vol_plugin->nrefs) {
-        vol_plugin->container_name = (const char *)H5MM_xfree(vol_plugin->container_name);
-        vol_plugin = (H5VL_t *)H5MM_xfree(vol_plugin);
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2110,37 +1882,19 @@ done:
  */
 herr_t
 H5VL_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
-                 H5VL_t *vol_plugin, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, hid_t estack_id)
+                 const H5VL_class_t *vol_cls, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t               ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* check if the corresponding VOL create callback exists */
-    if(NULL == vol_plugin->cls->link_cls.create)
+    if(NULL == vol_cls->link_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link create' method")
     /* call the corresponding VOL create callback */
-    if((ret_value = (vol_plugin->cls->link_cls.create)
+    if((ret_value = (vol_cls->link_cls.create)
         (create_type, obj, loc_params, lcpl_id, lapl_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link create failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2148,9 +1902,45 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_link_copy
+ *
+ * Purpose:	Copys a link from src to dst.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_link_copy(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
+               H5VL_loc_params_t loc_params2, const H5VL_class_t *vol_cls,  
+               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
+{
+    herr_t               ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* check if the corresponding VOL copy callback exists */
+    if(NULL == vol_cls->link_cls.copy)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link copy' method")
+
+    /* call the corresponding VOL copy callback */
+    if((ret_value = (vol_cls->link_cls.copy)
+        (src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, 
+         lapl_id, dxpl_id, req)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link copy failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_link_copy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_link_move
  *
- * Purpose:	Copy or move a link from src to dst.
+ * Purpose:	Moves a link from src to dst.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2161,93 +1951,26 @@ done:
  */
 herr_t 
 H5VL_link_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
-               H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin, hbool_t copy_flag, 
-               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, hid_t estack_id)
+               H5VL_loc_params_t loc_params2, const H5VL_class_t *vol_cls,  
+               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t               ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* check if the corresponding VOL move callback exists */
-    if(NULL == vol_plugin->cls->link_cls.move)
+    if(NULL == vol_cls->link_cls.move)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link move' method")
-    /* call the corresponding VOL move callback */
-    if((ret_value = (vol_plugin->cls->link_cls.move)
-        (src_obj, loc_params1, dst_obj, loc_params2, copy_flag, lcpl_id, lapl_id, dxpl_id, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link move failed")
 
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+    /* call the corresponding VOL move callback */
+    if((ret_value = (vol_cls->link_cls.move)
+        (src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, 
+         lapl_id, dxpl_id, req)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link move failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_move() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_link_iterate
- *
- * Purpose:	Iterate over links in a group
- *
- * Return:	Success:        non negative
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              May, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t 
-H5VL_link_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                  hbool_t recursive, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                  H5L_iterate_t op, void *op_data, hid_t dxpl_id, hid_t estack_id)
-{
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if(NULL == vol_plugin->cls->link_cls.iterate)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link iterate' method")
-    if((ret_value = (vol_plugin->cls->link_cls.iterate)(obj, loc_params, recursive, idx_type,
-                                                        order, idx, op, op_data, dxpl_id, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "iteration failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)    
-} /* end H5VL_link_iterate() */
 
 
 /*-------------------------------------------------------------------------
@@ -2265,38 +1988,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_link_get_t get_type, 
-              hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_link_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, H5VL_link_get_t get_type, 
+              hid_t dxpl_id, void **req, ...)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if(NULL == vol_plugin->cls->link_cls.get)
+    if(NULL == vol_cls->link_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link get' method")
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->link_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments)) < 0)
+
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->link_cls.get)
+        (obj, loc_params, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2304,53 +2011,75 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_link_remove
+ * Function:	H5VL_link_specific
  *
- * Purpose:	Removes a link through the VOL.
+ * Purpose:	specific operation on links through the VOL
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
  *
  * Programmer:	Mohamad Chaarawi
- *              April, 2012
+ *              March, 2012
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
-H5VL_link_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                 hid_t dxpl_id, hid_t estack_id)
+herr_t
+H5VL_link_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, 
+                   H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t             ret_value = SUCCEED;    /* Return value */
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
+    if(NULL == vol_cls->link_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link specific' method")
 
-    /* check if the corresponding VOL remove callback exists */
-    if(NULL == vol_plugin->cls->link_cls.remove)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link remove' method")
-    /* call the corresponding VOL remove callback */
-    if((ret_value = (vol_plugin->cls->link_cls.remove)(obj, loc_params, dxpl_id, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link remove failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->link_cls.specific)
+        (obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link specific callback")
+    va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_link_remove() */
+} /* end H5VL_link_specific() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_link_optional
+ *
+ * Purpose:	optional operation specific to plugins.
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_link_optional(void *obj, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_cls->link_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link optional' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->link_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute link optional callback")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_link_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -2368,39 +2097,21 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_object_open(void *obj, H5VL_loc_params_t params, H5VL_t *vol_plugin, H5I_type_t *opened_type,
-                 hid_t dxpl_id, hid_t estack_id)
+H5VL_object_open(void *obj, H5VL_loc_params_t params, const H5VL_class_t *vol_cls, H5I_type_t *opened_type,
+                 hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
     /* check if the corresponding VOL open callback exists */
-    if(NULL == vol_plugin->cls->object_cls.open)
+    if(NULL == vol_cls->object_cls.open)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `object open' method")
-    /* call the corresponding VOL open callback */
-    if(NULL == (ret_value = (vol_plugin->cls->object_cls.open)(obj, params, opened_type, 
-                                                               dxpl_id, req)))
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
-    vol_plugin->nrefs++;
 
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event stack");
-    }
+    /* call the corresponding VOL open callback */
+    if(NULL == (ret_value = (vol_cls->object_cls.open)
+                (obj, params, opened_type, dxpl_id, req)))
+	HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2421,173 +2132,29 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugin1, const char *src_name, 
-                 void *dst_obj, H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin2, const char *dst_name, 
-                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, hid_t estack_id)
+H5VL_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const H5VL_class_t *vol_cls1, const char *src_name, 
+                 void *dst_obj, H5VL_loc_params_t loc_params2, const H5VL_class_t *vol_cls2, const char *dst_name, 
+                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin1;
-    }
+    /* Make sure that the VOL plugins are the same */
+    if (vol_cls1->value != vol_cls2->value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
 
-    /* check if both objects are associated with the same VOL plugin */
-    if(vol_plugin1->cls != vol_plugin2->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
-                    "Objects are accessed through different VOL plugins and can't be copied")
-
-    if(NULL == vol_plugin1->cls->object_cls.copy)
+    if(NULL == vol_cls1->object_cls.copy)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object copy' method")
-    if((ret_value = (vol_plugin1->cls->object_cls.copy)
-        (src_obj, loc_params1, src_name, dst_obj, loc_params2, dst_name, 
-         ocpypl_id, lcpl_id, dxpl_id, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "copy failed")
 
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+    if((ret_value = (vol_cls1->object_cls.copy)
+        (src_obj, loc_params1, src_name, dst_obj, loc_params2, dst_name, ocpypl_id, 
+         lcpl_id, dxpl_id, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "copy failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_copy() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_object_visit
- *
- * Purpose:	Iterate over links in a group
- *
- * Return:	Success:        non negative
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              May, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t H5VL_object_visit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                         H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_t op, 
-                         void *op_data, hid_t dxpl_id, hid_t estack_id)
-{
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if(NULL == vol_plugin->cls->object_cls.visit)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object visit' method")
-
-    if((ret_value = (vol_plugin->cls->object_cls.visit)(obj, loc_params, idx_type, order, op, 
-                                                        op_data, dxpl_id, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "object visitation failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)    
-} /* end H5VL_object_visit() */
-
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_object_lookup
- *
- * Purpose:	Lookup the object location in the file
- *
- * Return:	Success:        non negative
- *
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              March, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_object_lookup(hid_t id, H5VL_loc_type_t lookup_type, void **location, 
-                   hid_t dxpl_id, hid_t estack_id, ...)
-{
-    va_list           arguments;             /* argument list passed from the API call */
-    H5VL_class_t      *vol_plugin;            /* VOL structure attached to id */
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
-    if(NULL == vol_plugin->object_cls.lookup)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object lookup' method")
-
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->object_cls.lookup)(id, lookup_type, location, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "lookup of object location failed")
-    va_end (arguments);
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_object_lookup() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_object_free_loc
- *
- * Purpose:	Free the location token
- *
- * Return:	Success:        non negative
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              May, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_object_free_loc(hid_t id, void *location, hid_t dxpl_id, hid_t estack_id)
-{
-    H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
-    if(NULL == vol_plugin->object_cls.free_loc)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object free_loc' method")
-
-    if((ret_value = (vol_plugin->object_cls.free_loc)(location, dxpl_id, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "freeing location token of object location failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_object_free_loc() */
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -2605,40 +2172,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_get_t get_type, 
-                hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_object_get(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, H5VL_object_get_t get_type, 
+                hid_t dxpl_id, void **req, ...)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
-
-    if(NULL == vol_plugin->cls->object_cls.get)
+    if(NULL == vol_cls->object_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object get' method")
 
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->object_cls.get)(obj, loc_params, get_type, 
-                                                      dxpl_id, req, arguments)) < 0)
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->object_cls.get)
+        (obj, loc_params, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2646,9 +2195,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_object_misc
+ * Function:	H5VL_object_specific
  *
- * Purpose:	perform a plugin specific operation
+ * Purpose:	specific operation on objects through the VOL
  *
  * Return:	Success:        non negative
  *		Failure:	negative
@@ -2659,54 +2208,36 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t misc_type, 
-                 hid_t dxpl_id, hid_t estack_id, ...)
+H5VL_object_specific(void *obj, H5VL_loc_params_t loc_params, const H5VL_class_t *vol_cls, 
+                     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, ...)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
+    if(NULL == vol_cls->object_cls.specific)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object specific' method")
 
-    if(NULL == vol_plugin->cls->object_cls.misc)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object misc' method")
-
-    va_start (arguments, estack_id);
-    if((ret_value = (vol_plugin->cls->object_cls.misc)(obj, loc_params, misc_type, 
-                                                       dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "misc failed")
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->object_cls.specific)
+        (obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "specific failed")
     va_end (arguments);
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_object_misc() */
+} /* end H5VL_object_specific() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_object_close
+ * Function:	H5VL_object_optional
  *
- * Purpose:	Closes a object through the VOL
+ * Purpose:	optional operation specific to plugins.
  *
- * Return:	Success:	Non Negative
+ * Return:	Success:        non negative
  *
- *		Failure:	Negative
+ *		Failure:	negative
  *
  * Programmer:	Mohamad Chaarawi
  *              March, 2012
@@ -2714,39 +2245,24 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                  hid_t dxpl_id, hid_t estack_id)
+H5VL_object_optional(void *obj, const H5VL_class_t *vol_cls, hid_t dxpl_id, void **req, ...)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event stack */
-    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    herr_t              ret_value = SUCCEED;
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
-        req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
-    }
+    if(NULL == vol_cls->object_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object optional' method")
 
-    if(NULL == vol_plugin->cls->object_cls.close)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object close' method")
-    if((ret_value = (vol_plugin->cls->object_cls.close)(obj, loc_params, dxpl_id, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
-
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+    va_start (arguments, req);
+    if((ret_value = (vol_cls->object_cls.optional)(obj, dxpl_id, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "Unable to execute object optional callback")
+    va_end (arguments);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_object_close() */
+} /* end H5VL_object_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -2763,15 +2279,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_request_cancel(void **req, H5VL_t *vol_plugin, H5ES_status_t *status)
+H5VL_request_cancel(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status)
 {
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->async_cls.cancel)
+    if(NULL == vol_cls->async_cls.cancel)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `async cancel' method");
-    if((ret_value = (vol_plugin->cls->async_cls.cancel)(req, status)) < 0)
+    if((ret_value = (vol_cls->async_cls.cancel)(req, status)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request cancel failed")
 
 done:
@@ -2793,15 +2309,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_request_test(void **req, H5VL_t *vol_plugin, H5ES_status_t *status)
+H5VL_request_test(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status)
 {
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->async_cls.test)
+    if(NULL == vol_cls->async_cls.test)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `async test' method");
-    if((ret_value = (vol_plugin->cls->async_cls.test)(req, status)) < 0)
+    if((ret_value = (vol_cls->async_cls.test)(req, status)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request test failed")
 
 done:
@@ -2823,15 +2339,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_request_wait(void **req, H5VL_t *vol_plugin, H5ES_status_t *status)
+H5VL_request_wait(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status)
 {
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == vol_plugin->cls->async_cls.wait)
+    if(NULL == vol_cls->async_cls.wait)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `async wait' method");
-    if((ret_value = (vol_plugin->cls->async_cls.wait)(req, status)) < 0)
+    if((ret_value = (vol_cls->async_cls.wait)(req, status)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request wait failed")
 
 done:

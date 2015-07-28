@@ -443,22 +443,24 @@
 </pre>
 
 <hr />
-<a name="H5F2fh5fis5fhdf55ff"></a>
-<a name="robo145"></a><h2>h5fis_hdf5_f</h2>
+<a name="H5F2fh5fis5f5accessibleff"></a>
+<a name="robo145"></a><h2>h5fis_accessible_f</h2>
 
 <p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
 <p class="item_name">NAME</p>
-<pre>  <strong>h5fis_hdf5_f</strong>
+<pre>  <strong>h5fis_accessible_f</strong>
 </pre>
 <p class="item_name">PURPOSE</p>
-<pre>  Determines whether a file is in the <a href="./HDF5_f90.html#robo76">HDF5</a> format.
+<pre>  Check if the file can be opened with the given fapl.
 </pre>
 <p class="item_name">INPUTS</p>
 <pre>  name          - name of the file to check
+  fapl_id          - the file access property list with which to
+                     attempt to access the file.
 </pre>
 <p class="item_name">OUTPUTS</p>
-<pre>  status        - indicates if file is and <a href="./HDF5_f90.html#robo76">HDF5</a> file
-  hdferr        - Returns 0 if successful and -1 if fails
+<pre>  status        - indicates if file is accessible
+  hdferr        - Returns TRUE/FALSE if successful and -1 if fails
 </pre>
 <p class="item_name">AUTHOR</p>
 <pre>  Elena Pourmal
@@ -470,9 +472,11 @@
   port).  February 28, 2001
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source">  SUBROUTINE <strong>h5fis_hdf5_f</strong><span class="sign">(</span>name<span class="sign">,</span> status<span class="sign">,</span> hdferr<span class="sign">)</span>
+<pre class="source">  SUBROUTINE <strong>h5fis_accessible_f</strong><span class="sign">(</span>name<span class="sign">,</span> status<span class="sign">,</span> hdferr<span class="sign">)</span>
     IMPLICIT NONE
     CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the file
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> fapl_id   <span class="sign">!</span> Identifier <span class="keyword">for</span> file access property list
+                                           <span class="sign">!</span> with which to attempt to access the file
     LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> status         <span class="sign">!</span> Indicates <span class="keyword">if</span> file
                                            <span class="sign">!</span> is an <a href="./HDF5_f90.html#robo76">HDF5</a> file
     INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code

@@ -45,7 +45,6 @@
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
-#include "H5VLnative.h" 	/* Native Plugin                        */
 #include "H5VLprivate.h"	/* VOL          		  	*/
 
 /****************/
@@ -108,6 +107,7 @@ H5FL_DEFINE(H5G_shared_t);
 
 /* Declare the free list to manage H5_obj_t's */
 H5FL_DEFINE(H5_obj_t);
+
 
 /*****************************/
 /* Library Private Variables */
@@ -867,7 +867,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_free_visit_visited(void *item, void UNUSED *key, void UNUSED *operator_data/*in,out*/)
+H5G_free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *operator_data/*in,out*/)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

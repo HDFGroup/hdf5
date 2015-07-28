@@ -16,7 +16,7 @@ set (HDF5_BUILD_EXAMPLES ON CACHE BOOL "Build HDF5 Library Examples" FORCE)
 
 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
 
-set (HDF5_ENABLE_F2003 OFF CACHE BOOL "Enable FORTRAN 2003 Standard" FORCE)
+set (HDF5_ENABLE_F2003 ON CACHE BOOL "Enable FORTRAN 2003 Standard" FORCE)
 
 set (HDF5_BUILD_HL_LIB ON CACHE BOOL "Build HIGH Level HDF5 Library" FORCE)
 
@@ -64,10 +64,6 @@ set (HDF5_NO_PACKAGES ON CACHE BOOL "CPACK - Disable packaging" FORCE)
 
 set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO SVN TGZ)" FORCE)
 set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO SVN TGZ)
-
-set (ZLIB_SVN_URL "http://svn.hdfgroup.uiuc.edu/zlib/trunk" CACHE STRING "Use ZLib from HDF repository" FORCE)
-
-set (SZIP_SVN_URL "http://svn.hdfgroup.uiuc.edu/szip/trunk" CACHE STRING "Use SZip from HDF repository" FORCE)
 
 set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
 

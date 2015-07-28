@@ -26,8 +26,6 @@
 #include "H5Tprivate.h"		/* Datatypes         			*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
-#ifdef H5_HAVE_FILTER_SCALEOFFSET
-
 /* Struct of parameters needed for compressing/decompressing one atomic datatype */
 typedef struct {
    size_t size;        /* datatype size */
@@ -691,7 +689,7 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5Z_can_apply_scaleoffset(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+H5Z_can_apply_scaleoffset(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     const H5T_t	*type;                  /* Datatype */
     H5T_class_t dtype_class;            /* Datatype's class */
@@ -896,14 +894,14 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
     /* Get dataspace */
     if(NULL == (ds = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Get total number of elements in the chunk */
     if((npoints = H5S_GET_EXTENT_NPOINTS(ds)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
 
     /* Set "local" parameter for this dataset's number of elements */
-    H5_ASSIGN_OVERFLOW(cd_values[H5Z_SCALEOFFSET_PARM_NELMTS],npoints,hssize_t,unsigned);
+    H5_CHECKED_ASSIGN(cd_values[H5Z_SCALEOFFSET_PARM_NELMTS], unsigned, npoints, hssize_t);
 
     /* Get datatype's class */
     if((dtype_class = H5T_get_class(type, TRUE)) == H5T_NO_CLASS)
@@ -1722,5 +1720,4 @@ H5Z_scaleoffset_compress(unsigned char *data, unsigned d_nelmts,
    for(i = 0; i < d_nelmts; i++)
        H5Z_scaleoffset_compress_one_atomic(data, i * p.size, buffer, &j, &buf_len, p);
 }
-#endif /* H5_HAVE_FILTER_SCALEOFFSET */
 

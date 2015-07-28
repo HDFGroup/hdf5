@@ -470,7 +470,7 @@ herr_t H5IM_get_palette(hid_t loc_id,
  hid_t      attr_space_id;
  hid_t      attr_class;
  hssize_t   n_refs;
- hsize_t    dim_ref;
+ size_t    dim_ref;
  hobj_ref_t *refbuf;     /* buffer to read references */
  hid_t      pal_id;
 
@@ -503,9 +503,9 @@ herr_t H5IM_get_palette(hid_t loc_id,
 
    n_refs = H5Sget_simple_extent_npoints(attr_space_id);
 
-   dim_ref = n_refs;
+   dim_ref = (size_t)n_refs;
 
-   refbuf = HDmalloc(sizeof(hobj_ref_t) * (int)dim_ref);
+   refbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * dim_ref);
 
    if(H5Aread(attr_id, attr_type, refbuf) < 0)
     goto out;

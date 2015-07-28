@@ -50,6 +50,10 @@ typedef struct {
     hid_t fid;                      /* File ID being traversed */
 } trav_print_udata_t;
 
+typedef struct trav_path_op_data_t {
+    const char *path;
+} trav_path_op_data_t;
+
 /* format for hsize_t */
 #ifdef H5TRAV_PRINT_SPACE
 #define HSIZE_T_FORMAT   "%" H5_PRINTF_LL_WIDTH "u"
@@ -400,7 +404,7 @@ trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
  */
 int
 trav_info_visit_obj(const char *path, const H5O_info_t *oinfo,
-    const char UNUSED *already_visited, void *udata)
+    const char H5_ATTR_UNUSED *already_visited, void *udata)
 {
     size_t idx;
     trav_info_t *info_p;
@@ -624,7 +628,7 @@ trav_table_visit_obj(const char *path, const H5O_info_t *oinfo,
  *-------------------------------------------------------------------------
  */
 static int
-trav_table_visit_lnk(const char *path, const H5L_info_t UNUSED *linfo, void *udata)
+trav_table_visit_lnk(const char *path, const H5L_info_t H5_ATTR_UNUSED *linfo, void *udata)
 {
     /* Add the link to the 'table' struct */
     trav_table_add((trav_table_t *)udata, path, NULL);
@@ -897,13 +901,13 @@ void trav_table_free( trav_table_t *table )
 static herr_t
 trav_attr(hid_t
 #ifndef H5TRAV_PRINT_SPACE
-UNUSED
+H5_ATTR_UNUSED
 #endif /* H5TRAV_PRINT_SPACE */
-obj, const char *attr_name, const H5A_info_t UNUSED *ainfo, void *op_data)
+obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ainfo, void *_op_data)
 {
-    char               *buf;
+    trav_path_op_data_t *op_data = (trav_path_op_data_t *)_op_data;
+    const char          *buf = op_data->path;
 
-    buf = (char*)op_data;
     if((strlen(buf)==1) && (*buf=='/'))
         printf(" %-10s %s%s", "attribute", buf, attr_name);
     else
@@ -1009,10 +1013,14 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
 
     /* Check if we've already seen this object */
     if(NULL == already_visited) {
+        trav_path_op_data_t op_data;
+
+        op_data.path = path;
         /* Finish printing line about object */
         printf("\n");
         if(trav_verbosity > 0)
-            H5Aiterate_by_name(print_udata->fid, path, trav_index_by, trav_index_order, NULL, trav_attr, (void *)path, H5P_DEFAULT);
+            H5Aiterate_by_name(print_udata->fid, path, trav_index_by, trav_index_order, 
+                               NULL, trav_attr, &op_data, H5P_DEFAULT);
     }
     else
         /* Print the link's original name */

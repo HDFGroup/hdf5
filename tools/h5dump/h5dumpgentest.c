@@ -109,6 +109,7 @@
 #define FILE77  "tcmpdints.h5"
 #define FILE78  "tscalarintattrsize.h5"
 #define FILE79  "tintsattrs.h5"
+#define FILE80  "tbitnopaque.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -127,13 +128,13 @@ write_dset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
 
 /* a filter operation callback function */
 static size_t
-myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-        const unsigned int UNUSED *cd_values, size_t nbytes,
-        size_t UNUSED *buf_size, void UNUSED **buf);
+myfilter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+        const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
+        size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf);
 
 /* a "set local" callback     */
 static herr_t
-set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t UNUSED sid);
+set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t H5_ATTR_UNUSED sid);
 
 #define MYFILTER_ID 405
 
@@ -150,8 +151,8 @@ const H5Z_class2_t H5Z_MYFILTER[1] = {{
 
 
 /* A UD link traversal function.  Shouldn't actually be called. */
-static hid_t UD_traverse(UNUSED const char * link_name, UNUSED hid_t cur_group,
-        UNUSED const void * udata, UNUSED size_t udata_size, UNUSED hid_t lapl_id)
+static hid_t UD_traverse(H5_ATTR_UNUSED const char * link_name, H5_ATTR_UNUSED hid_t cur_group,
+        H5_ATTR_UNUSED const void * udata, H5_ATTR_UNUSED size_t udata_size, H5_ATTR_UNUSED hid_t lapl_id)
 {
     return -1;
 }
@@ -349,6 +350,8 @@ typedef struct s1_t {
 #define F77_DATASETNAME2   "CompoundRInts"
 #define F77_LENGTH      64
 
+#define F80_DIM32      32
+
 static void
 gent_group(void)
 {
@@ -426,7 +429,7 @@ gent_dataset(void)
 
     for(i = 0; i < 30; i++)
         for(j = 0; j < 20; j++)
-            dset2[i][j] = 0.0001 * j + i;
+            dset2[i][j] = 0.0001F * j + i;
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
 
@@ -521,7 +524,7 @@ gent_attribute(void)
     space = H5Screate_simple(1, dims, NULL);
     attr = H5Acreate2(root, "attr3", H5T_IEEE_F64BE, space, H5P_DEFAULT, H5P_DEFAULT);
 
-    for(i = 0; i < 10; i++) d[i] = 0.1 * i;
+    for(i = 0; i < 10; i++) d[i] = 0.1F * i;
 
     H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
     H5Sclose(space);
@@ -949,16 +952,16 @@ static void gent_compound_dt(void) {       /* test compound data type */
     for(i = 0; i < (int)sdim; i++) {
         dset1[i].a = i;
         dset1[i].b = (float)(i*i);
-        dset1[i].c = (float)(1./(i+1));
+        dset1[i].c = (float)(1.0F/(i+1));
 
         dset2[i].a = i;
-        dset2[i].b = (float)(i+ i*0.1);
+        dset2[i].b = (float)(i+ i*0.1F);
 
         dset4[i].a = i;
         dset4[i].b = (float)(i+3);
 
         dset5[i].a = i;
-        dset5[i].b = (float)(i*0.1);
+        dset5[i].b = (float)(i*0.1F);
     }
 
 
@@ -1134,16 +1137,16 @@ static void gent_compound_dt2(void) {       /* test compound data type */
     for(i = 0; i < (int)sdim; i++) {
         dset1[i].a = i;
         dset1[i].b = (float)(i*i);
-        dset1[i].c = (float)(1./(i+1));
+        dset1[i].c = (float)(1.0F/(i+1));
 
         dset2[i].a = i;
-        dset2[i].b = (float)(i+ i*0.1);
+        dset2[i].b = (float)(i+ i*0.1F);
 
         dset4[i].a = i;
-        dset4[i].b = (float)(i*1.0);
+        dset4[i].b = (float)(i*1.0F);
 
         dset5[i].a = i;
-        dset5[i].b = (float)(i*1.0);
+        dset5[i].b = (float)(i*1.0F);
     }
 
     fid = H5Fcreate(FILE9, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1383,7 +1386,7 @@ static void gent_all(void)
     space = H5Screate_simple(1, dims, NULL);
     dataset = H5Dcreate2(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     for(i = 0; i < 10; i++)
-        dset2_1[i] = (float)(i * 0.1 + 1);
+        dset2_1[i] = (float)(i * 0.1F + 1);
     H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
     H5Sclose(space);
     H5Dclose(dataset);
@@ -1394,7 +1397,7 @@ static void gent_all(void)
     dataset = H5Dcreate2(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     for(i = 0; i < 3; i++)
         for(j = 0; j < 5; j++)
-            dset2_2[i][j] = (float)((i + 1) * j * 0.1);
+            dset2_2[i][j] = (float)((i + 1) * j * 0.1F);
     H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_2);
     H5Sclose(space);
     H5Dclose(dataset);
@@ -1562,7 +1565,7 @@ gent_many(void)
     space2 = H5Screate_simple(1, dims, NULL);
     attr = H5Acreate2(dataset, "attr3", H5T_IEEE_F64BE, space2, H5P_DEFAULT, H5P_DEFAULT);
     for(i = 0; i < 10; i++)
-        d[i] = 0.1 * i;
+        d[i] = 0.1F * i;
     H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
     H5Sclose(space2);
     H5Aclose(attr);
@@ -2080,16 +2083,16 @@ static void gent_objref(void)
     dataset = H5Dcreate2(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create reference to dataset */
-    H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_OBJECT, -1);
+    H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_OBJECT, (hid_t)-1);
 
     /* Create reference to dataset */
-    H5Rcreate(&wbuf[1], fid1, "/Group1/Dataset2", H5R_OBJECT, -1);
+    H5Rcreate(&wbuf[1], fid1, "/Group1/Dataset2", H5R_OBJECT, (hid_t)-1);
 
     /* Create reference to group */
-    H5Rcreate(&wbuf[2], fid1, "/Group1", H5R_OBJECT, -1);
+    H5Rcreate(&wbuf[2], fid1, "/Group1", H5R_OBJECT, (hid_t)-1);
 
     /* Create reference to named datatype */
-    H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, -1);
+    H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, (hid_t)-1);
 
     /* Write selection to disk */
     H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
@@ -2375,10 +2378,10 @@ static void gent_nestcomp(void)
     for(i = 0; i< 10; i++) {
         s1[i].a = i;
         s1[i].b = (float)(i*i);
-        s1[i].c = 1./(i+1);
+        s1[i].c = 1.0F/(i+1);
         s1[i].d.a = 65 + i;
-        s1[i].d.b[0] = -100.;
-        s1[i].d.b[1] =  100.;
+        s1[i].d.b[0] = -100.0F;
+        s1[i].d.b[1] =  100.0F;
     }
 
     /*
@@ -2579,7 +2582,7 @@ static void gent_vldatatypes(void)
         wdata[i].len = i + 1;
 
         for(j = 0; j < i + 1; j++)
-            ((float *)wdata[i].p)[j] = (float)(i * 10 + ((float)j) / 10.0);
+            ((float *)wdata[i].p)[j] = (float)(i * 10 + ((float)j) / 10.0F);
     }
 
     /* write out the floats in little-endian format */
@@ -2713,7 +2716,7 @@ static void gent_vldatatypes3(void)
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
         wdata[i].i=i*10;
-        wdata[i].f=(float)((i*20)/3.0);
+        wdata[i].f=(float)((i*20)/3.0F);
         wdata[i].v.p=HDmalloc((i+1)*sizeof(unsigned int));
         wdata[i].v.len=i+1;
         for(j=0; j<(i+1); j++)
@@ -2785,7 +2788,7 @@ static void gent_vldatatypes4(void)
         wdata[i].len=i+1;
         for(j=0; j<(i+1); j++) {
             ((s1 *)wdata[i].p)[j].i=i*10+j;
-            ((s1 *)wdata[i].p)[j].f=(float)((i*20+j)/3.0);
+            ((s1 *)wdata[i].p)[j].f=(float)((i*20+j)/3.0F);
         } /* end for */
     } /* end for */
 
@@ -3156,7 +3159,7 @@ static void gent_array4(void)
     for(i=0; i<SPACE1_DIM1; i++)
         for(j=0; j<ARRAY1_DIM1; j++) {
             wdata[i][j].i=i*10+j;
-            wdata[i][j].f=(float)(i*2.5+j);
+            wdata[i][j].f=(float)(i*2.5F+j);
         } /* end for */
 
     /* Create file */
@@ -3224,7 +3227,7 @@ static void gent_array5(void)
         for(j=0; j<ARRAY1_DIM1; j++) {
             wdata[i][j].i=i*10+j;
             for(k=0; k<ARRAY1_DIM1; k++)
-                wdata[i][j].f[k]=(float)(i*10+j*2.5+k);
+                wdata[i][j].f[k]=(float)(i*10+j*2.5F+k);
         } /* end for */
 
     /* Create file */
@@ -3950,8 +3953,8 @@ static void write_attr_in(hid_t loc_id,
     /* Create references to dataset */
     if(dset_name)
     {
-        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,-1);
-        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,-1);
+        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1);
         write_attr(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
     }
 
@@ -4057,7 +4060,7 @@ static void write_attr_in(hid_t loc_id,
     {
         for(i = 0; i < 3; i++) {
             for(j = 0; j < 2; j++) {
-                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,-1);
+                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_attr(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
@@ -4188,7 +4191,7 @@ static void write_attr_in(hid_t loc_id,
         for(i = 0; i < 4; i++) {
             for(j = 0; j < 3; j++) {
                 for(k = 0; k < 2; k++)
-                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,-1);
+                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_attr(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
@@ -4392,8 +4395,8 @@ static void write_dset_in(hid_t loc_id,
     /* Create references to dataset */
     if(dset_name)
     {
-        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,-1);
-        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,-1);
+        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1);
         write_dset(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
     }
 
@@ -4499,7 +4502,7 @@ static void write_dset_in(hid_t loc_id,
     {
         for(i = 0; i < 3; i++) {
             for(j = 0; j < 2; j++) {
-                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,-1);
+                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_dset(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
@@ -4642,7 +4645,7 @@ static void write_dset_in(hid_t loc_id,
         for(i = 0; i < 4; i++) {
             for(j = 0; j < 3; j++) {
                 for(k = 0; k < 2; k++)
-                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,-1);
+                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1);
             }
         }
         write_dset(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
@@ -4767,8 +4770,8 @@ static void gent_attr_all(void)
      */
 
     write_attr_in(did,"dset",fid);
-    write_attr_in(group_id,NULL,0);
-    write_attr_in(root_id,NULL,0);
+    write_attr_in(group_id,NULL,(hid_t)0);
+    write_attr_in(root_id,NULL,(hid_t)0);
 
     /*-------------------------------------------------------------------------
      * write a series of datasets on group 2
@@ -4930,10 +4933,10 @@ static void gent_compound_complex(void)
             }
         }
 
-        Array1[m].e = (float)( m * .96 );
+        Array1[m].e = (float)( m * 0.96F );
 
         for(n = 0; n < F41_ARRAY_DIMf; n++) {
-            Array1[m].f[n] = ( m * 1024.9637 );
+            Array1[m].f[n] = ( m * 1024.9637F );
         }
 
         Array1[m].g = 'm';
@@ -5430,7 +5433,7 @@ static void gent_filters(void)
      * shuffle
      *-------------------------------------------------------------------------
      */
-#if defined (H5_HAVE_FILTER_SHUFFLE)
+
     /* remove the filters from the dcpl */
     ret = H5Premove_filter(dcpl,H5Z_FILTER_ALL);
     HDassert(ret >= 0);
@@ -5441,14 +5444,13 @@ static void gent_filters(void)
 
     ret=make_dset(fid,"shuffle",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);
-#endif
 
 
     /*-------------------------------------------------------------------------
      * checksum
      *-------------------------------------------------------------------------
      */
-#if defined (H5_HAVE_FILTER_FLETCHER32)
+
     /* remove the filters from the dcpl */
     ret = H5Premove_filter(dcpl,H5Z_FILTER_ALL);
     HDassert(ret >= 0);
@@ -5459,13 +5461,12 @@ static void gent_filters(void)
 
     ret=make_dset(fid,"fletcher32",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);
-#endif
 
     /*-------------------------------------------------------------------------
      * nbit
      *-------------------------------------------------------------------------
      */
-#if defined (H5_HAVE_FILTER_NBIT)
+
     /* remove the filters from the dcpl */
     ret = H5Premove_filter(dcpl,H5Z_FILTER_ALL);
     HDassert(ret >= 0);
@@ -5478,13 +5479,12 @@ static void gent_filters(void)
     H5Tset_precision(tid,H5Tget_size(tid)-1);
     ret=make_dset(fid,"nbit",sid,tid,dcpl,buf1);
     HDassert(ret >= 0);
-#endif
 
     /*-------------------------------------------------------------------------
      * scaleoffset
      *-------------------------------------------------------------------------
      */
-#if defined (H5_HAVE_FILTER_SCALEOFFSET)
+
     /* remove the filters from the dcpl */
     ret = H5Premove_filter(dcpl,H5Z_FILTER_ALL);
     HDassert(ret >= 0);
@@ -5495,7 +5495,6 @@ static void gent_filters(void)
 
     ret=make_dset(fid,"scaleoffset",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);
-#endif
 
     /*-------------------------------------------------------------------------
      * all filters
@@ -5505,11 +5504,9 @@ static void gent_filters(void)
     ret = H5Premove_filter(dcpl,H5Z_FILTER_ALL);
     HDassert(ret >= 0);
 
-#if defined (H5_HAVE_FILTER_SHUFFLE)
     /* set the shuffle filter */
     ret = H5Pset_shuffle(dcpl);
     HDassert(ret >= 0);
-#endif
 
 #ifdef H5_HAVE_FILTER_SZIP
     if(h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
@@ -5526,17 +5523,13 @@ static void gent_filters(void)
     HDassert(ret >= 0);
 #endif
 
-#if defined (H5_HAVE_FILTER_FLETCHER32)
     /* set the checksum filter */
     ret = H5Pset_fletcher32(dcpl);
     HDassert(ret >= 0);
-#endif
 
-#if defined (H5_HAVE_FILTER_NBIT)
     /* set the nbit filter */
     ret = H5Pset_nbit(dcpl);
     HDassert(ret >= 0);
-#endif
 
     ret=make_dset(fid,"all",sid,H5T_NATIVE_INT,dcpl,buf1);
     HDassert(ret >= 0);
@@ -5633,9 +5626,9 @@ static void gent_filters(void)
  *-------------------------------------------------------------------------
  */
 static size_t
-myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-        const unsigned int UNUSED *cd_values, size_t nbytes,
-        size_t UNUSED *buf_size, void UNUSED **buf)
+myfilter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+        const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes,
+        size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     return nbytes;
 }
@@ -5650,7 +5643,7 @@ myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
  */
 
 static herr_t
-set_local_myfilter(hid_t dcpl_id, hid_t UNUSED tid, hid_t UNUSED sid)
+set_local_myfilter(hid_t dcpl_id, hid_t H5_ATTR_UNUSED tid, hid_t H5_ATTR_UNUSED sid)
 {
     unsigned flags;                        /* Filter flags */
     size_t   cd_nelmts = 0;                /* Number of filter parameters */
@@ -6880,7 +6873,7 @@ gent_fpformat(void)
 {
     hid_t    fid, sid, did;
     hsize_t  dims[1]  = {6};
-    double   dbuf[6]  = {-0.1234567, 0.1234567, 0, 0, 0, 0};
+    double   dbuf[6]  = {-0.1234567f, 0.1234567f, 0, 0, 0, 0};
     float    fbuf[6]  = {-0.1234567f, 0.1234567f, 0, 0, 0, 0};
 
     fid = H5Fcreate(FILE60, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -7200,7 +7193,7 @@ gent_packedbits(void)
 
     for(i = 0; i < dims[0]; i++)
         for(j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001 * j + i;
+            dsetdbl[i][j] = 0.0001F * j + i;
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetdbl);
 
@@ -7390,7 +7383,7 @@ gent_attr_intsize(void)
 
     for(i = 0; i < dims[0]; i++)
         for(j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001 * j + i;
+            dsetdbl[i][j] = 0.0001F * j + i;
 
     H5Awrite(attr, H5T_NATIVE_DOUBLE, dsetdbl);
 
@@ -7598,7 +7591,7 @@ static void gent_compound_intsizes(void) {
 
         for(n = 0; n < dims[0]; n++)
             for(o = 0; o < dims[1]; o++)
-                Array1[m].dsetdbl[n][o] = 0.0001 * o + n;
+                Array1[m].dsetdbl[n][o] = 0.0001F * o + n;
     }
 
     /* Create the array data type for the 8 bits signed int array             */
@@ -7873,7 +7866,7 @@ static void gent_compound_attr_intsizes(void) {
 
         for(n = 0; n < dims[0]; n++)
             for(o = 0; o < dims[1]; o++)
-                Array1[m].dsetdbl[n][o] = 0.0001 * o + n;
+                Array1[m].dsetdbl[n][o] = 0.0001F * o + n;
     }
 
     /* Create the array data type for the 8 bits signed int array             */
@@ -8041,17 +8034,17 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
         dset1[i].b = (float)(i*i);
 
         dset2[i].a = i;
-        dset2[i].b = (float)(i+i*0.1);
+        dset2[i].b = (float)(i+i*0.1F);
         dset2[i].c = GREEN;
 
         for(j = 0; j < 5; j++) {
             dset3[i].a[j] = i*j;
             for(k = 0; k < 6; k++) {
-                dset3[i].b[j][k] = (float)(i*j*k*1.0);
+                dset3[i].b[j][k] = (float)(i*j*k*1.0F);
             }
         }
         dset3[i].c.a = i;
-        dset3[i].c.b = (float)(i*1.0);
+        dset3[i].c.b = (float)(i*1.0F);
     }
 
     fid = H5Fcreate(FILE72, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -8339,7 +8332,7 @@ gent_intscalars(void)
 
     for(i = 0; i < dims[0]; i++)
         for(j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001 * j + i;
+            dsetdbl[i][j] = 0.0001F * j + i;
 
     H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetdbl);
 
@@ -8538,7 +8531,7 @@ gent_attr_intscalars(void)
 
     for(i = 0; i < dims[0]; i++)
         for(j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001 * j + i;
+            dsetdbl[i][j] = 0.0001F * j + i;
 
     H5Awrite(attr, tid, dsetdbl);
 
@@ -8724,7 +8717,7 @@ static void gent_compound_int_array(void) {
         dims[0] = F76_DIM8;
 
         for(n = 0; n < dims[0]; n++)
-           	Cmpd1[m].dsetdbl[n] = 0.0001 + n;
+           	Cmpd1[m].dsetdbl[n] = 0.0001F + n;
     }
 
     /* Create the array data type for the 8 bits signed int array             */
@@ -8955,8 +8948,8 @@ static void gent_compound_ints(void) {
 		val64bits <<= 1;
 
         /* Double Dummy set for failure tests */
-       	Cmpd1[m].dsetdbl = 0.0001 + m;
-       	Cmpd2[m].dsetdbl = 0.0001 + m;
+       	Cmpd1[m].dsetdbl = 0.0001F + m;
+       	Cmpd2[m].dsetdbl = 0.0001F + m;
     }
 
     /* Create the dataspace                                           */
@@ -9293,7 +9286,7 @@ gent_intattrscalars(void)
 
     for(i = 0; i < dims[0]; i++)
         for(j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001 * j + i;
+            dsetdbl[i][j] = 0.0001F * j + i;
 
     H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetdbl);
     /* Attribute of double */
@@ -9558,7 +9551,7 @@ gent_intsattrs(void)
 
     for(i = 0; i < dims[0]; i++)
         for(j = 0; j < dims[1]; j++) {
-            dsetdbl[i][j] = 0.0001 * j + i;
+            dsetdbl[i][j] = 0.0001F * j + i;
             asetdbl[i*dims[1]+j] = dsetdbl[i][j];
         }
 
@@ -9573,6 +9566,156 @@ gent_intsattrs(void)
     H5Sclose(space);
     H5Dclose(dataset);
     H5Fclose(fid);
+}
+
+static void gent_bitnopaquefields(void)
+{
+    /* Compound datatype */
+    typedef struct s_t
+    {
+        unsigned char   a;
+        unsigned int    b;
+        unsigned long    c;
+        unsigned long long    d;
+    } s_t;
+    hid_t  file, grp=-1, type=-1, space=-1, dset=-1;
+    size_t  i;
+    hsize_t  nelmts = F80_DIM32;
+    unsigned char buf[F80_DIM32];    /* bitfield, opaque */
+    unsigned int buf2[F80_DIM32];    /* bitfield, opaque */
+    unsigned long buf3[F80_DIM32];    /* bitfield, opaque */
+    unsigned long long buf4[F80_DIM32];    /* bitfield, opaque */
+    s_t      buf5[F80_DIM32];        /* compound */
+
+    file = H5Fcreate(FILE80, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    if ((grp = H5Gcreate2(file, "bittypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+        /* bitfield_1 */
+        if ((type = H5Tcopy(H5T_STD_B8LE)) >= 0) {
+            if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                if ((dset = H5Dcreate2(grp, "bitfield_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    for (i = 0; i < nelmts; i++) {
+                        buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+                    }
+                    H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+                    H5Dclose(dset);
+                }
+                H5Sclose(space);
+            }
+            H5Tclose(type);
+        }
+
+        /* bitfield_2 */
+        if ((type = H5Tcopy(H5T_STD_B16LE)) >= 0) {
+            if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                if ((dset = H5Dcreate2(grp, "bitfield_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    for (i = 0; i < nelmts; i++) {
+                        buf2[i] = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                    }
+                    H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
+                    H5Dclose(dset);
+                }
+                H5Sclose(space);
+            }
+            H5Tclose(type);
+        }
+
+        /* bitfield_3 */
+        if ((type = H5Tcopy(H5T_STD_B32LE)) >= 0) {
+            if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                if ((dset = H5Dcreate2(grp, "bitfield_3", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    for (i = 0; i < nelmts; i++) {
+                        buf3[i] = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                    }
+                    H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf3);
+                    H5Dclose(dset);
+                }
+                H5Sclose(space);
+            }
+            H5Tclose(type);
+        }
+
+        /* bitfield_4 */
+        if ((type = H5Tcopy(H5T_STD_B64LE)) >= 0) {
+            if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                if ((dset = H5Dcreate2(grp, "bitfield_4", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    for (i = 0; i < nelmts; i++) {
+                        buf4[i] = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                    }
+                    H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf4);
+                    H5Dclose(dset);
+                }
+                H5Sclose(space);
+            }
+            H5Tclose(type);
+        }
+
+        H5Gclose(grp);
+    }
+
+    if ((grp = H5Gcreate2(file, "opaquetypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+        /* opaque_1 */
+        if ((type = H5Tcreate(H5T_OPAQUE, 1)) >= 0) {
+            if ((H5Tset_tag(type, "1-byte opaque type")) >= 0) {
+                if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                    if ((dset = H5Dcreate2(grp, "opaque_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                        for(i = 0; i < nelmts; i++)
+                            buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+                        H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+                        H5Dclose(dset);
+                    }
+                    H5Sclose(space);
+                }
+            }
+            H5Tclose(type);
+        }
+
+        /* opaque_2 */
+        if ((type = H5Tcreate(H5T_OPAQUE, 2)) >= 0) {
+            if ((H5Tset_tag(type, "2-byte opaque type")) >= 0) {
+                if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                    if ((dset = H5Dcreate2(grp, "opaque_2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                        for(i = 0; i < nelmts; i++)
+                            buf2[i] = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+
+                        H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2);
+                        H5Dclose(dset);
+                    }
+                    H5Sclose(space);
+                }
+            }
+            H5Tclose(type);
+        }
+        H5Gclose(grp);
+    }
+
+    if ((grp = H5Gcreate2(file, "cmpdtypetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+        /* compound_1 */
+        if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+            H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+            H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+            H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+            H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+            if ((space = H5Screate_simple(1, &nelmts, NULL)) >= 0) {
+                if ((dset = H5Dcreate2(grp, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    for(i = 0; i < nelmts; i++) {
+                        buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+                        buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                        buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                        buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                    }
+
+                    H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+                    H5Dclose(dset);
+                }
+                H5Sclose(space);
+            }
+            H5Tclose(type);
+        }
+        H5Gclose(grp);
+    }
+
+    H5Fclose(file);
 }
 
 
@@ -9665,6 +9808,7 @@ int main(void)
     gent_compound_ints();
     gent_intattrscalars();
     gent_intsattrs();
+    gent_bitnopaquefields();
 
     return 0;
 }

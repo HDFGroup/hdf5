@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_TOOLS_H5STAT)
 
 #-----------------------------------------------------------------------------
@@ -11,7 +11,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 # --------------------------------------------------------------------
 add_executable (h5stat ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat.c)
 TARGET_NAMING (h5stat ${LIB_TYPE})
-TARGET_C_PROPERTIES (h5stat " " " ")
+TARGET_C_PROPERTIES (h5stat ${LIB_TYPE} " " " ")
 target_link_libraries (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5stat PROPERTIES FOLDER tools)
 
@@ -23,11 +23,11 @@ if (BUILD_TESTING)
   # --------------------------------------------------------------------
   if (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     add_executable (h5stat_gentest ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
-    TARGET_NAMING (h5stat_gentest ${LIB_TYPE})
-    TARGET_C_PROPERTIES (h5stat_gentest " " " ")
+    TARGET_NAMING (h5stat_gentest STATIC)
+    TARGET_C_PROPERTIES (h5stat_gentest STATIC " " " ")
     target_link_libraries (h5stat_gentest ${HDF5_LIB_TARGET})
     set_target_properties (h5stat_gentest PROPERTIES FOLDER generator/tools)
-    
+
     #add_test (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
   endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
 
@@ -49,8 +49,5 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5stat
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        toolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

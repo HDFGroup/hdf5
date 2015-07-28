@@ -128,12 +128,6 @@ H5AS_invoke(const char *file_name, hid_t query_id, const char *split_script,
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL,
                 "can't start iod analysis shipping execution")
 
-    if(request && *req) {
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL,
-                    "failed to insert request in event stack");
-    }
-
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)

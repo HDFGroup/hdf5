@@ -731,7 +731,7 @@ test_vltypes_vlen_compound(void)
         wdata[i].len=i+1;
         for(j=0; j<(i+1); j++) {
             ((s1 *)wdata[i].p)[j].i=i*10+j;
-            ((s1 *)wdata[i].p)[j].f=(float)((i*20+j)/3.0);
+            ((s1 *)wdata[i].p)[j].f=(float)((i*20+j)/3.0F);
           } /* end for */
     } /* end for */
 
@@ -798,7 +798,7 @@ test_vltypes_vlen_compound(void)
                 TestErrPrintf("VL data values don't match!, wdata[%d].p[%d].i=%d, rdata[%d].p[%d].i=%d\n",(int)i,(int)j, (int)((s1 *)wdata[i].p)[j].i, (int)i,(int)j, (int)((s1 *)rdata[i].p)[j].i);
                 continue;
             } /* end if */
-            if(!FLT_ABS_EQUAL(((s1 *)wdata[i].p)[j].f,((s1 *)rdata[i].p)[j].f)) {
+            if(!H5_FLT_ABS_EQUAL(((s1 *)wdata[i].p)[j].f,((s1 *)rdata[i].p)[j].f)) {
                 TestErrPrintf("VL data values don't match!, wdata[%d].p[%d].f=%f, rdata[%d].p[%d].f=%f\n",(int)i,(int)j, (double)((s1 *)wdata[i].p)[j].f, (int)i,(int)j, (double)((s1 *)rdata[i].p)[j].f);
                 continue;
             } /* end if */
@@ -877,7 +877,7 @@ rewrite_vltypes_vlen_compound(void)
         wdata[i].len = i + increment;
         for(j = 0; j < (i + increment); j++) {
             ((s1 *)wdata[i].p)[j].i = i * 40 + j;
-            ((s1 *)wdata[i].p)[j].f = (float)((i * 60 + j) / 3.0);
+            ((s1 *)wdata[i].p)[j].f = (float)((i * 60 + j) / 3.0F);
           } /* end for */
     } /* end for */
 
@@ -943,7 +943,7 @@ rewrite_vltypes_vlen_compound(void)
                 TestErrPrintf("VL data values don't match!, wdata[%d].p[%d].i=%d, rdata[%d].p[%d].i=%d\n",(int)i,(int)j, (int)((s1 *)wdata[i].p)[j].i, (int)i,(int)j, (int)((s1 *)rdata[i].p)[j].i);
                 continue;
             } /* end if */
-            if(!FLT_ABS_EQUAL(((s1 *)wdata[i].p)[j].f,((s1 *)rdata[i].p)[j].f)) {
+            if(!H5_FLT_ABS_EQUAL(((s1 *)wdata[i].p)[j].f,((s1 *)rdata[i].p)[j].f)) {
                 TestErrPrintf("VL data values don't match!, wdata[%d].p[%d].f=%f, rdata[%d].p[%d].f=%f\n",(int)i,(int)j, (double)((s1 *)wdata[i].p)[j].f, (int)i,(int)j, (double)((s1 *)rdata[i].p)[j].f);
                 continue;
             } /* end if */
@@ -1018,7 +1018,7 @@ test_vltypes_compound_vlen_vlen(void)
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE3_DIM1; i++) {
         wdata[i].i=i*10;
-        wdata[i].f=(float)((i*20)/3.0);
+        wdata[i].f=(float)((i*20)/3.0F);
         wdata[i].v.p=HDmalloc((i+L1_INCM)*sizeof(hvl_t));
         wdata[i].v.len=i+L1_INCM;
         for(t1=(wdata[i].v).p,j=0; j<(i+L1_INCM); j++, t1++) {
@@ -1092,7 +1092,7 @@ test_vltypes_compound_vlen_vlen(void)
             TestErrPrintf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
             continue;
         } /* end if */
-        if(!FLT_ABS_EQUAL(wdata[i].f,rdata[i].f)) {
+        if(!H5_FLT_ABS_EQUAL(wdata[i].f,rdata[i].f)) {
             TestErrPrintf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
             continue;
         } /* end if */
@@ -1479,7 +1479,7 @@ test_vltypes_compound_vlen_atomic(void)
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
         wdata[i].i=i*10;
-        wdata[i].f=(float)((i*20)/3.0);
+        wdata[i].f=(float)((i*20)/3.0F);
         wdata[i].v.p=HDmalloc((i+1)*sizeof(unsigned int));
         wdata[i].v.len=i+1;
         for(j=0; j<(i+1); j++)
@@ -1546,7 +1546,7 @@ test_vltypes_compound_vlen_atomic(void)
             TestErrPrintf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
             continue;
         } /* end if */
-        if(!FLT_ABS_EQUAL(wdata[i].f,rdata[i].f)) {
+        if(!H5_FLT_ABS_EQUAL(wdata[i].f,rdata[i].f)) {
             TestErrPrintf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
             continue;
         } /* end if */
@@ -1595,8 +1595,8 @@ test_vltypes_compound_vlen_atomic(void)
 
     /* Check data read in */
     for(i = 0; i < SPACE1_DIM1; i++)
-        if(rdata[i].i != 0 || !FLT_ABS_EQUAL(rdata[i].f, 0.0) || rdata[i].v.len != 0 || rdata[i].v.p != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d].i=%d, rdata[%d].f=%f, rdata[%d].v.len=%u, rdata[%d].v.p=%p\n",(int)i,rdata[i].i,(int)i,rdata[i].f,(int)i,(unsigned)rdata[i].v.len,(int)i,rdata[i].v.p);
+        if(rdata[i].i != 0 || !H5_FLT_ABS_EQUAL(rdata[i].f, 0.0F) || rdata[i].v.len != 0 || rdata[i].v.p != NULL)
+            TestErrPrintf("VL doesn't match!, rdata[%d].i=%d, rdata[%d].f=%f, rdata[%d].v.len=%u, rdata[%d].v.p=%p\n",(int)i,rdata[i].i,(int)i,(double)rdata[i].f,(int)i,(unsigned)rdata[i].v.len,(int)i,rdata[i].v.p);
 
     /* Write dataset to disk */
     ret = H5Dwrite(dataset, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -1612,7 +1612,7 @@ test_vltypes_compound_vlen_atomic(void)
             TestErrPrintf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
             continue;
         } /* end if */
-        if(!FLT_ABS_EQUAL(wdata[i].f,rdata[i].f)) {
+        if(!H5_FLT_ABS_EQUAL(wdata[i].f,rdata[i].f)) {
             TestErrPrintf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
             continue;
         } /* end if */
@@ -1697,7 +1697,7 @@ rewrite_vltypes_compound_vlen_atomic(void)
     /* Allocate and initialize VL data to write */
     for(i = 0; i < SPACE1_DIM1; i++) {
         wdata[i].i = i * 40;
-        wdata[i].f = (float)((i * 50) / 3.0);
+        wdata[i].f = (float)((i * 50) / 3.0F);
         wdata[i].v.p = HDmalloc((i + increment) * sizeof(unsigned int));
         wdata[i].v.len = i + increment;
         for(j = 0; j < (i + increment); j++)
@@ -1764,7 +1764,7 @@ rewrite_vltypes_compound_vlen_atomic(void)
             TestErrPrintf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
             continue;
         } /* end if */
-        if(!FLT_ABS_EQUAL(wdata[i].f,rdata[i].f)) {
+        if(!H5_FLT_ABS_EQUAL(wdata[i].f,rdata[i].f)) {
             TestErrPrintf("Float components don't match!, wdata[%d].f=%f, rdata[%d].f=%f\n",(int)i,(double)wdata[i].f,(int)i,(double)rdata[i].f);
             continue;
         } /* end if */
@@ -2430,8 +2430,8 @@ test_vltypes_fill_value(void)
     hsize_t small_dims[] = {SPACE4_DIM_SMALL};
     hsize_t large_dims[] = {SPACE4_DIM_LARGE};
     size_t dset_elmts;                  /* Number of elements in a particular dataset */
-    const dtype1_struct fill1 = {1, 2, "foobar", "", NULL, "\0", "dead", 3, 4.0, 100.0, 1.0, "liquid", "meter"};
-    const dtype1_struct wdata = {3, 4, "", NULL, "\0", "foo", "two", 6, 8.0, 200.0, 2.0, "solid", "yard"};
+    const dtype1_struct fill1 = {1, 2, "foobar", "", NULL, "\0", "dead", 3, 4.0F, 100.0F, 1.0F, "liquid", "meter"};
+    const dtype1_struct wdata = {3, 4, "", NULL, "\0", "foo", "two", 6, 8.0F, 200.0F, 2.0F, "solid", "yard"};
     dtype1_struct *rbuf = NULL;         /* Buffer for reading data */
     size_t mem_used = 0;                /* Memory used during allocation */
     H5D_layout_t layout;                /* Dataset storage layout */

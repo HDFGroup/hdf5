@@ -466,7 +466,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
                 HDfprintf(stream, "%sDS", (flag_printed ? ", " : "<"));
                 flag_printed = TRUE;
             } /* end if */
-            if(oh->mesg[i].flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN) {
+            if(oh->mesg[i].flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE) {
                 HDfprintf(stream, "%sFIU", (flag_printed ? ", " : "<"));
                 flag_printed = TRUE;
             } /* end if */
@@ -566,7 +566,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     loc.addr = addr;
     loc.holding_file = FALSE;
 
-    if(NULL == (oh = H5O_protect(&loc, dxpl_id, H5AC_READ)))
+    if(NULL == (oh = H5O_protect(&loc, dxpl_id, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* debug */

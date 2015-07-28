@@ -14,18 +14,18 @@
 !
 ! COPYRIGHT
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!  Copyright by The HDF Group.                                               *
-!  Copyright by the Board of Trustees of the University of Illinois.         *
-!  All rights reserved.                                                      *
-!  *
-!  This file is part of HDF5.  The full HDF5 copyright notice, including     *
-!  terms governing use, modification, and redistribution, is contained in    *
-!  the files COPYING and Copyright.html.  COPYING can be found at the root   *
-!  of the source code distribution tree; Copyright.html can be found at the  *
-!  root level of an installed copy of the electronic HDF5 document set and   *
-!  is linked from the top-level documents page.  It can also be found at     *
-!  http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-!  access to either file, you may request a copy from help@hdfgroup.org.     *
+!  Copyright by The HDF Group.                                                 *
+!  Copyright by the Board of Trustees of the University of Illinois.           *
+!  All rights reserved.                                                        *
+!                                                                              *
+!  This file is part of HDF5.  The full HDF5 copyright notice, including       *
+!  terms governing use, modification, and redistribution, is contained in      *
+!  the files COPYING and Copyright.html.  COPYING can be found at the root     *
+!  of the source code distribution tree; Copyright.html can be found at the    *
+!  root level of an installed copy of the electronic HDF5 document set and     *
+!  is linked from the top-level documents page.  It can also be found at       *
+!  http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have            *
+!  access to either file, you may request a copy from help@hdfgroup.org.       *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! NOTES
@@ -90,29 +90,24 @@ MODULE H5R_PROVISIONAL
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5rget_name_ptr_c(loc_id, ref_type, ref, name, name_len, size_default)
-       USE, INTRINSIC :: ISO_C_BINDING
+     INTEGER FUNCTION h5rget_name_ptr_c(loc_id, ref_type, ref, name, name_len, size_default) &
+          BIND(C, NAME='h5rget_name_ptr_c')
+       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr
        USE H5GLOBAL
-       !DEC$IF DEFINED(HDF5F90_WINDOWS)
-       !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RGET_NAME_PTR_C':: h5rget_name_ptr_c
-       !DEC$ENDIF
-       !DEC$ATTRIBUTES reference :: name
        INTEGER(HID_T), INTENT(IN) :: loc_id
        INTEGER, INTENT(IN) :: ref_type
        TYPE(C_PTR), INTENT(IN), VALUE :: ref
-       CHARACTER(LEN=*), INTENT(OUT) :: name
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        INTEGER(SIZE_T) :: name_len
        INTEGER(SIZE_T) :: size_default
      END FUNCTION h5rget_name_ptr_c
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5rdereference_ptr_c(obj_id, ref_type, ref, ref_obj_id)
+     INTEGER FUNCTION h5rdereference_ptr_c(obj_id, ref_type, ref, ref_obj_id) &
+          BIND(C, NAME='h5rdereference_ptr_c')
+       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
        USE H5GLOBAL
-       USE, INTRINSIC :: ISO_C_BINDING
-       !DEC$IF DEFINED(HDF5F90_WINDOWS)
-       !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RDEREFERENCE_PTR_C':: h5rdereference_ptr_c
-       !DEC$ENDIF
        INTEGER(HID_T), INTENT(IN) :: obj_id
        INTEGER, INTENT(IN) :: ref_type
        TYPE(C_PTR), INTENT(IN), VALUE :: ref
@@ -121,16 +116,13 @@ MODULE H5R_PROVISIONAL
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5rcreate_ptr_c(ref, loc_id, name, namelen, ref_type, space_id)
-       USE, INTRINSIC :: ISO_C_BINDING
+     INTEGER FUNCTION h5rcreate_ptr_c(ref, loc_id, name, namelen, ref_type, space_id) &
+          BIND(C, NAME='h5rcreate_ptr_c')
+       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char, c_ptr
        USE H5GLOBAL
-       !DEC$IF DEFINED(HDF5F90_WINDOWS)
-       !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RCREATE_PTR_C':: h5rcreate_ptr_c
-       !DEC$ENDIF
-       !DEC$ATTRIBUTES reference :: name
        TYPE(C_PTR), VALUE :: ref
        INTEGER(HID_T), INTENT(IN) :: loc_id
-       CHARACTER(LEN=*), INTENT(IN) :: name
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        INTEGER :: namelen
        INTEGER, INTENT(IN) :: ref_type
        INTEGER(HID_T), INTENT(IN) :: space_id
@@ -138,12 +130,10 @@ MODULE H5R_PROVISIONAL
   END INTERFACE
 
   INTERFACE
-     INTEGER FUNCTION h5rget_region_ptr_c(dset_id, ref, space_id)
-       USE, INTRINSIC :: ISO_C_BINDING
+     INTEGER FUNCTION h5rget_region_ptr_c(dset_id, ref, space_id) &
+          BIND(C, NAME='h5rget_region_ptr_c')
+       USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
        USE H5GLOBAL
-       !DEC$IF DEFINED(HDF5F90_WINDOWS)
-       !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RGET_REGION_PTR_C':: h5rget_region_ptr_c
-       !DEC$ENDIF
        INTEGER(HID_T), INTENT(IN) :: dset_id
        TYPE(C_PTR), VALUE :: ref
        INTEGER(HID_T), INTENT(OUT) :: space_id
@@ -281,7 +271,6 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
     INTEGER :: namelen                     ! Name length
-
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(ref)
@@ -562,7 +551,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     TYPE(hobj_ref_t_f), INTENT(IN), TARGET :: ref
     INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
-    CHARACTER(LEN=*), INTENT(OUT) :: name
+    CHARACTER(LEN=*), INTENT(INOUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
 !*****
 
@@ -609,7 +598,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     TYPE(hdset_reg_ref_t_f), INTENT(IN), TARGET :: ref
     INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
-    CHARACTER(LEN=*), INTENT(OUT) :: name
+    CHARACTER(LEN=*), INTENT(INOUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTEGER(SIZE_T) :: size_default
@@ -658,7 +647,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER, INTENT(IN) :: ref_type
     TYPE(C_PTR), INTENT(IN) :: ref
-    CHARACTER(LEN=*), INTENT(OUT) :: name
+    CHARACTER(LEN=*), INTENT(INOUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
 !*****
@@ -689,11 +678,10 @@ CONTAINS
   !
   ! Outputs:
   !  obj_type - Type of referenced object. 
-  !               H5G_UNKNOWN_F (-1)
-  !               H5G_LINK_F      0
-  !               H5G_GROUP_F     1
-  !               H5G_DATASET_F   2
-  !               H5G_TYPE_F      3
+  !               H5G_UNKNOWN_F
+  !               H5G_GROUP_F
+  !               H5G_DATASET_F
+  !               H5G_TYPE_F
   !              
   !  hdferr   - Returns 0 if successful and -1 if fails.
   !
@@ -713,12 +701,10 @@ CONTAINS
     !*****
 
     INTERFACE
-       INTEGER FUNCTION h5rget_obj_type_c(loc_id, ref_type, ref, obj_type)
-         USE, INTRINSIC :: ISO_C_BINDING
+       INTEGER FUNCTION h5rget_obj_type_c(loc_id, ref_type, ref, obj_type) &
+            BIND(C, NAME='h5rget_obj_type_c')
+         USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_ptr
          USE H5GLOBAL
-         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RGET_OBJ_TYPE_C':: h5rget_obj_type_c
-         !DEC$ENDIF
          INTEGER(HID_T), INTENT(IN) :: loc_id
          INTEGER, INTENT(IN) :: ref_type
          TYPE(C_PTR), VALUE :: ref

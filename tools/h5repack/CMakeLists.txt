@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_TOOLS_H5REPACK)
 
 #-----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ set (REPACK_COMMON_SRCS
 
 add_executable (h5repack ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
 TARGET_NAMING (h5repack ${LIB_TYPE})
-TARGET_C_PROPERTIES (h5repack " " " ")
+TARGET_C_PROPERTIES (h5repack ${LIB_TYPE} " " " ")
 target_link_libraries (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5repack PROPERTIES FOLDER tools)
 
@@ -34,13 +34,13 @@ if (BUILD_TESTING)
   # --------------------------------------------------------------------
   add_executable (testh5repack_detect_szip ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testh5repack_detect_szip.c)
   TARGET_NAMING (testh5repack_detect_szip ${LIB_TYPE})
-  TARGET_C_PROPERTIES (testh5repack_detect_szip " " " ")
+  TARGET_C_PROPERTIES (testh5repack_detect_szip ${LIB_TYPE} " " " ")
   target_link_libraries (testh5repack_detect_szip ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
   set_target_properties (testh5repack_detect_szip PROPERTIES FOLDER tools)
 
   add_executable (h5repacktest ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repacktst.c)
   TARGET_NAMING (h5repacktest ${LIB_TYPE})
-  TARGET_C_PROPERTIES (h5repacktest " " " ")
+  TARGET_C_PROPERTIES (h5repacktest ${LIB_TYPE} " " " ")
   target_link_libraries (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
   set_target_properties (h5repacktest PROPERTIES FOLDER tools)
 
@@ -54,12 +54,12 @@ if (BUILD_TESTING)
     add_definitions (${HDF_EXTRA_C_FLAGS})
     INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
 
-    add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${LIB_TYPE} dynlib_rpk.c)
-    TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} " " " ")
+    add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_rpk.c)
+    TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED " " " ")
     target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
     H5_SET_LIB_OPTIONS (
         ${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME}
-        ${LIB_TYPE}
+        SHARED
         HDF5_TOOL_PLUGIN_LIB_NAME_RELEASE
         HDF5_TOOL_PLUGIN_LIB_NAME_DEBUG
     )
@@ -73,14 +73,14 @@ if (BUILD_TESTING)
         TARGET     ${HDF5_TOOL_PLUGIN_LIB_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different 
+        ARGS       -E copy_if_different
           "$<TARGET_FILE:${HDF5_TOOL_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${HDF5_TOOL_PLUGIN_LIB_TARGET}>"
     )
   endif (BUILD_SHARED_LIBS)
 
   include (CMakeTests.cmake)
-  
+
 endif (BUILD_TESTING)
 
 ##############################################################################
@@ -98,8 +98,5 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5repack
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        toolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

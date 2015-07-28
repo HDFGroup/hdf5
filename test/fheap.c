@@ -597,7 +597,7 @@ reopen_file(hid_t *file, H5F_t **f, const char *filename, hid_t fapl, hid_t dxpl
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (*f = (H5F_t *)H5I_object_verify(*file, H5I_FILE)))
+        if(NULL == (*f = (H5F_t *)H5VL_object(*file)))
             FAIL_STACK_ERROR
 
         /* Ignore metadata tags in the file's cache */
@@ -648,7 +648,7 @@ open_heap(char *filename, hid_t fapl, hid_t dxpl, const H5HF_create_t *cparam,
     /* Check for deleting the entire heap */
     if(tparam->del_dir != FHEAP_DEL_HEAP) {
         /* Get a pointer to the internal file object */
-        if(NULL == (*f = (H5F_t *)H5I_object_verify(*file, H5I_FILE)))
+        if(NULL == (*f = (H5F_t *)H5VL_object(*file)))
             FAIL_STACK_ERROR
 
         /* Ignore metadata tags in the file's cache */
@@ -690,7 +690,7 @@ open_heap(char *filename, hid_t fapl, hid_t dxpl, const H5HF_create_t *cparam,
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (*f = (H5F_t *)H5I_object_verify(*file, H5I_FILE)))
+    if(NULL == (*f = (H5F_t *)H5VL_object(*file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -1827,7 +1827,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam)
+test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
@@ -1860,7 +1860,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -1944,7 +1944,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam)
+test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
@@ -1977,7 +1977,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2020,7 +2020,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Ignore metadata tags in the file's cache */
@@ -2090,7 +2090,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam)
+test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
     hid_t	file2 = -1;             /* File ID */
@@ -2126,7 +2126,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2178,7 +2178,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-            if(NULL == (f2 = (H5F_t *)H5I_object_verify(file2, H5I_FILE)))
+    if(NULL == (f2 = (H5F_t *)H5VL_object(file2)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2262,7 +2262,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam)
+test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t	file = -1;              /* File ID */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
@@ -2296,7 +2296,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *t
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2369,7 +2369,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *t
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+        if(NULL == (f = (H5F_t *)H5VL_object(file)))
             FAIL_STACK_ERROR
 
         /* Ignore metadata tags in the file's cache */
@@ -2455,7 +2455,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2798,7 +2798,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2841,7 +2841,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2921,7 +2921,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -2975,7 +2975,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -3064,7 +3064,7 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file1, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file1)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -3108,7 +3108,7 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object (file1) */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file1, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file1)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -3130,7 +3130,7 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam)
 
 
     /* Get a pointer to the internal file object (file2) */
-            if(NULL == (f = (H5F_t *)H5I_object_verify(file2, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file2)))
         FAIL_STACK_ERROR
 
     /* Reopen the heap */
@@ -3203,7 +3203,7 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -3313,7 +3313,7 @@ test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -3414,7 +3414,7 @@ test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -3511,7 +3511,7 @@ test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -3610,7 +3610,7 @@ test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -3716,7 +3716,7 @@ test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -3823,7 +3823,7 @@ test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -3934,7 +3934,7 @@ test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -4030,7 +4030,7 @@ test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -4133,7 +4133,7 @@ test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -4234,7 +4234,7 @@ test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -4345,7 +4345,7 @@ test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -4442,7 +4442,7 @@ test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -4538,7 +4538,7 @@ test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -4640,7 +4640,7 @@ test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -4750,7 +4750,7 @@ test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -4853,7 +4853,7 @@ test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -4964,7 +4964,7 @@ test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -5072,7 +5072,7 @@ test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_te
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Create absolute heap */
@@ -5170,7 +5170,7 @@ test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -5279,7 +5279,7 @@ test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_te
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -5382,7 +5382,7 @@ test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -5492,7 +5492,7 @@ test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -5603,7 +5603,7 @@ test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -5710,7 +5710,7 @@ test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -5818,7 +5818,7 @@ test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -5933,7 +5933,7 @@ test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6053,7 +6053,7 @@ test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6165,7 +6165,7 @@ test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6280,7 +6280,7 @@ test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6414,7 +6414,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6567,7 +6567,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6608,7 +6608,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6731,7 +6731,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6772,7 +6772,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6924,7 +6924,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -6965,7 +6965,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7093,7 +7093,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7134,7 +7134,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7337,7 +7337,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7378,7 +7378,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -7636,7 +7636,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -13839,7 +13839,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -15019,7 +15019,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -15205,7 +15205,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -15269,7 +15269,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Get a pointer to the internal file object */
-            if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+            if(NULL == (f = (H5F_t *)H5VL_object(file)))
                 FAIL_STACK_ERROR
 
             /* Ignore metadata tags in the file's cache */
@@ -15305,7 +15305,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Get a pointer to the internal file object */
-            if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+            if(NULL == (f = (H5F_t *)H5VL_object(file)))
                 FAIL_STACK_ERROR
 
             /* Ignore metadata tags in the file's cache */
@@ -15342,7 +15342,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Get a pointer to the internal file object */
-            if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+            if(NULL == (f = (H5F_t *)H5VL_object(file)))
                 FAIL_STACK_ERROR
 
             /* Ignore metadata tags in the file's cache */
@@ -15378,7 +15378,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Get a pointer to the internal file object */
-            if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+            if(NULL == (f = (H5F_t *)H5VL_object(file)))
                 FAIL_STACK_ERROR
 
             /* Ignore metadata tags in the file's cache */
@@ -15884,9 +15884,9 @@ error:
 /* Custom filter used to verify that the filters are actually called and do not
  * just silently fail */
 static hbool_t test_write_filter_called;
-static size_t test_write_filter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-    const unsigned int UNUSED cd_values[], size_t nbytes, size_t UNUSED *buf_size,
-    void UNUSED **buf)
+static size_t test_write_filter(unsigned int H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
+    const unsigned int H5_ATTR_UNUSED cd_values[], size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+    void H5_ATTR_UNUSED **buf)
 {
     test_write_filter_called = TRUE;
 
@@ -16019,7 +16019,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -16061,9 +16061,9 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 
         /* Change size of data to write */
         if(u < 20)
-            obj_size = (size_t)(obj_size * 1.3);
+            obj_size = (size_t)(obj_size * 1.3F);
         else
-            obj_size = (size_t)(obj_size / 1.3);
+            obj_size = (size_t)(obj_size / 1.3F);
     } /* end for */
 
     /* Close the fractal heap */
@@ -16086,7 +16086,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -16110,9 +16110,9 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 
         /* Change size of data to write */
         if(u < 20)
-            obj_size = (size_t)(obj_size * 1.3);
+            obj_size = (size_t)(obj_size * 1.3F);
         else
-            obj_size = (size_t)(obj_size / 1.3);
+            obj_size = (size_t)(obj_size / 1.3F);
     } /* end for */
 
     /* Close the fractal heap */
@@ -16251,7 +16251,7 @@ test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
@@ -16281,7 +16281,7 @@ test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file, H5I_FILE)))
+    if(NULL == (f = (H5F_t *)H5VL_object(file)))
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */

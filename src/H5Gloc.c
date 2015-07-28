@@ -126,6 +126,7 @@ static herr_t H5G_loc_get_comment_cb(H5G_loc_t *grp_loc, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata,
     H5G_own_loc_t *own_loc);
 
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -178,8 +179,7 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
                 H5T_t *dt = NULL;
 
                 /* Get the actual datatype object if the VOL object is set */
-                if(NULL == (dt = (H5T_t *)H5T_get_named_type((const H5T_t *)obj)))
-                    dt = (H5T_t *) obj;
+                dt = H5T_get_actual_type((H5T_t *)obj);
 
                 if(NULL == (loc->oloc = H5T_oloc(dt)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
@@ -235,105 +235,18 @@ done:
 herr_t
 H5G_loc(hid_t loc_id, H5G_loc_t *loc)
 {
+    void        *obj = NULL;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(H5G_loc_real(H5I_object(loc_id), H5I_get_type(loc_id), loc) < 0)
+    /* get the object */
+    if(NULL == (obj = H5VL_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid identifier")
+
+    if(H5G_loc_real(obj, H5I_get_type(loc_id), loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-#if 0
-    switch(H5I_get_type(loc_id)) {
-        case H5I_FILE:
-            {
-                H5F_t	*f;
-
-                /* Get the file struct */
-                if(NULL == (f = (H5F_t *)H5I_object(loc_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file ID")
-
-                /* Construct a group location for root group of the file */
-                if(H5G_root_loc(f, loc) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
-            } /* end case */
-            break;
-
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of property list")
-
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of error class, message or stack")
-
-        case H5I_GROUP:
-            {
-                H5G_t	*group;
-
-                if(NULL == (group = (H5G_t *)H5I_object(loc_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group ID")
-                if(NULL == (loc->oloc = H5G_oloc(group)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of group")
-                if(NULL == (loc->path = H5G_nameof(group)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of group")
-            } /* end case */
-            break;
-
-        case H5I_DATATYPE:
-            {
-                H5T_t	*dt;
-
-                if(NULL == (dt = (H5T_t *)H5I_object(loc_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid type ID")
-                if(NULL == (loc->oloc = H5T_oloc(dt)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
-                if(NULL == (loc->path = H5T_nameof(dt)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of datatype")
-            } /* end case */
-            break;
-
-        case H5I_DATASPACE:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of dataspace")
-
-        case H5I_DATASET:
-            {
-                H5D_t	*dset;
-
-                if(NULL == (dset = (H5D_t *)H5I_object(loc_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid data ID")
-                if(NULL == (loc->oloc = H5D_oloc(dset)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of dataset")
-                if(NULL == (loc->path = H5D_nameof(dset)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of dataset")
-            } /* end case */
-            break;
-
-        case H5I_ATTR:
-            {
-                H5A_t	*attr;
-
-                if(NULL == (attr = (H5A_t *)H5I_object(loc_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid attribute ID")
-                if(NULL == (loc->oloc = H5A_oloc(attr)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of attribute")
-                if(NULL == (loc->path = H5A_nameof(attr)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of attribute")
-            } /* end case */
-            break;
-
-        case H5I_REFERENCE:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of reference")
-
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object ID")
-    } /* end switch */
-#endif
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_loc() */
@@ -452,8 +365,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char *name,
-    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+H5G_loc_find_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char *name,
+    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_loc_fnd_t *udata = (H5G_loc_fnd_t *)_udata;   /* User data passed in */
@@ -529,8 +442,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_loc_find_by_idx_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
-    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+H5G_loc_find_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_loc_fbi_t *udata = (H5G_loc_fbi_t *)_udata;   /* User data passed in */
@@ -688,8 +601,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_loc_exists_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
-    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+H5G_loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_loc_exists_t *udata = (H5G_loc_exists_t *)_udata;   /* User data passed in */
@@ -766,7 +679,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_loc_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
+H5G_loc_info_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name, const H5O_link_t H5_ATTR_UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_loc_info_t *udata = (H5G_loc_info_t *)_udata;   /* User data passed in */
@@ -845,7 +758,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_loc_set_comment_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
+H5G_loc_set_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name, const H5O_link_t H5_ATTR_UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_loc_sc_t *udata = (H5G_loc_sc_t *)_udata;   /* User data passed in */
@@ -937,7 +850,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_loc_get_comment_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
+H5G_loc_get_comment_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name, const H5O_link_t H5_ATTR_UNUSED *lnk,
     H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_loc_gc_t *udata = (H5G_loc_gc_t *)_udata;   /* User data passed in */

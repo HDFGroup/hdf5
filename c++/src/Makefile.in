@@ -103,9 +103,6 @@ DIST_COMMON = $(top_srcdir)/config/commence.am \
 	$(srcdir)/Makefile.am $(top_srcdir)/bin/mkinstalldirs \
 	$(srcdir)/h5c++.in $(top_srcdir)/bin/depcomp \
 	$(include_HEADERS) $(top_srcdir)/bin/test-driver
-
-# Shared C++ libraries aren't universally supported.
-@CXX_SHARED_CONDITIONAL_FALSE@am__append_1 = -static
 TESTS =
 subdir = c++/src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -417,10 +414,9 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
-AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@ $(am__append_1)
+AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
-AS = @AS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -452,7 +448,6 @@ DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
-DYNAMIC_DIRS = @DYNAMIC_DIRS@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -472,17 +467,14 @@ FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
 FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
-FILTERS = @FILTERS@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 GREP = @GREP@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
-H5_CXX_SHARED = @H5_CXX_SHARED@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
 H5_LDFLAGS = @H5_LDFLAGS@
-H5_LONE_COLON = @H5_LONE_COLON@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
@@ -527,7 +519,6 @@ MERCURY_CFLAGS = @MERCURY_CFLAGS@
 MERCURY_LIBS = @MERCURY_LIBS@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
-MPI_GET_SIZE = @MPI_GET_SIZE@
 MYALACRITY_LIBS = @MYALACRITY_LIBS@
 MYAXE_LIBS = @MYAXE_LIBS@
 MYDAOS_LIBS = @MYDAOS_LIBS@
@@ -573,7 +564,6 @@ R_INTEGER = @R_INTEGER@
 R_LARGE = @R_LARGE@
 SEARCH = @SEARCH@
 SED = @SED@
-SETX = @SETX@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIZE_T = @SIZE_T@
@@ -588,10 +578,6 @@ TR = @TR@
 TRACE_API = @TRACE_API@
 UNAME_INFO = @UNAME_INFO@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
-USE_FILTER_FLETCHER32 = @USE_FILTER_FLETCHER32@
-USE_FILTER_NBIT = @USE_FILTER_NBIT@
-USE_FILTER_SCALEOFFSET = @USE_FILTER_SCALEOFFSET@
-USE_FILTER_SHUFFLE = @USE_FILTER_SHUFFLE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
 VERSION = @VERSION@
@@ -705,13 +691,15 @@ TRACE = perl $(top_srcdir)/bin/trace
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog are from the MPE option.
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog
+# *.clog and *.clog2 are from the MPE option.
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
+# After making changes, run bin/reconfigure to update other configure related
+# files like Makefile.in.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 175
+LT_VERS_REVISION = 214
 LT_VERS_AGE = 0
 
 # This is our main target

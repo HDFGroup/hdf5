@@ -917,7 +917,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P__dxfr_xform_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
+H5P__dxfr_xform_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -949,7 +949,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P__dxfr_xform_copy(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P__dxfr_xform_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -979,7 +979,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t UNUSED size)
+H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t H5_ATTR_UNUSED size)
 {
     const H5Z_data_xform_t * const *xform1 = (const H5Z_data_xform_t * const *)_xform1; /* Create local aliases for values */
     const H5Z_data_xform_t * const *xform2 = (const H5Z_data_xform_t * const *)_xform2; /* Create local aliases for values */
@@ -1034,7 +1034,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P__dxfr_xform_close(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P__dxfr_xform_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 

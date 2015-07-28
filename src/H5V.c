@@ -76,8 +76,7 @@ static const H5I_class_t H5I_VIEW_CLS[1] = {{
     H5I_VIEW,                   /* ID class value */
     0,                          /* Class flags */
     0,                          /* # of reserved IDs for class */
-    (H5I_free_t)H5V_close,      /* Callback routine for closing objects of this class */
-    NULL                        /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5V_close       /* Callback routine for closing objects of this class */
 }};
 
 
@@ -304,8 +303,7 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void    *view = NULL;       /* pointer to view object created */
-    void    *obj = NULL;        /* object token of loc_id */
-    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -319,37 +317,30 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not view creation property list")
 
     /* get the object */
-    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object/file identifier")
-    /* get the plugin pointer */
-    if(NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(vol_plugin->cls->value != IOD)
+    if(vol_plugin->cls->value != H5_VOL_IOD)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "only IOD plugin supports VIEW objects for now")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        request->req = NULL;
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = obj->vol_info->vol_cls;
     }
 
     /* call the IOD specific private routine to create a view object */
     if(NULL == (view = H5VL_iod_view_create(obj, query_id, vcpl_id, rcxt_id, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create view")
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
-    }
 
-    /* Get an atom for the view */
-    if((ret_value = H5I_register2(H5I_VIEW, view, vol_plugin, TRUE)) < 0)
+    /* Get an atom for the attribute */
+    if((ret_value = H5VL_register_id(H5I_VIEW, view, obj->vol_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize view handle")
 
 done:
@@ -378,18 +369,20 @@ done:
 herr_t
 H5Vget_query(hid_t view_id, hid_t *query_id)
 {
+    H5VL_object_t *obj = NULL;
     H5VL_iod_view_t *view = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*i", view_id, query_id);
 
+    /* Check args */
     if(NULL == query_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid return pointer")
+    if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(view_id, H5I_VIEW)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
-    /* Check args */
-    if(NULL == (view = (H5VL_iod_view_t *)H5I_object_verify(view_id, H5I_VIEW)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an view ID");
+    view = (H5VL_iod_view_t *)obj->vol_obj;
 
     if(H5I_inc_ref(view->query_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count");
@@ -418,6 +411,7 @@ done:
 herr_t
 H5Vget_counts(hid_t view_id, hsize_t *attr_count, hsize_t *obj_count, hsize_t *elem_region_count)
 {
+    H5VL_object_t *obj = NULL;
     H5VL_iod_view_t *view = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -425,13 +419,15 @@ H5Vget_counts(hid_t view_id, hsize_t *attr_count, hsize_t *obj_count, hsize_t *e
     H5TRACE4("e", "i*h*h*h", view_id, attr_count, obj_count, elem_region_count);
 
     /* Check args */
-    if(NULL == (view = (H5VL_iod_view_t *)H5I_object_verify(view_id, H5I_VIEW)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an view ID");
+    if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(view_id, H5I_VIEW)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
+    view = (H5VL_iod_view_t *)obj->vol_obj;
 
     if(view->common.request) {
         if(H5VL_IOD_PENDING == view->common.request->state) {
             if(H5VL_iod_request_wait(view->common.file, view->common.request) < 0)
-                HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on operation");
+                HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on operation")
         }
     }
 
@@ -464,10 +460,10 @@ done:
 herr_t
 H5Vget_location_ff(hid_t view_id, hid_t *loc_id, hid_t estack_id)
 {
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5I_type_t opened_type;
+    H5VL_object_t *obj = NULL; 
     void  *opened_obj = NULL;
     H5VL_iod_view_t *view = NULL;
     H5TR_t tr;
@@ -478,24 +474,17 @@ H5Vget_location_ff(hid_t view_id, hid_t *loc_id, hid_t estack_id)
 
     if(NULL == loc_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid return pointer")
+    if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(view_id, H5I_VIEW)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
-    /* Check args */
-    if(NULL == (view = (H5VL_iod_view_t *)H5I_object_verify(view_id, H5I_VIEW)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an view ID");
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(view_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    view = (H5VL_iod_view_t *)obj->vol_obj;
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = obj->vol_info->vol_cls;
     }
 
     tr.file = view->common.file;
@@ -509,15 +498,12 @@ H5Vget_location_ff(hid_t view_id, hid_t *loc_id, hid_t estack_id)
                                                     &tr, &opened_type, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object");
 
-    if(request && *req) {
-        /* insert in stack */
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
-    vol_plugin->nrefs ++;
     /* create hid_t for opened object */
-    if ((*loc_id = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
+    if((*loc_id = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
 
 done:
@@ -543,7 +529,7 @@ herr_t
 H5Vget_elem_regions_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t dataset_id[], 
                        hid_t dataspace_id[], hid_t estack_id)
 {
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
+    H5VL_object_t *obj = NULL;
     H5VL_iod_view_t *view = NULL;
     hsize_t i, k = 0;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -553,8 +539,10 @@ H5Vget_elem_regions_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t datase
              estack_id);
 
     /* Check args */
-    if(NULL == (view = (H5VL_iod_view_t *)H5I_object_verify(view_id, H5I_VIEW)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an view ID");
+    if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(view_id, H5I_VIEW)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
+    view = (H5VL_iod_view_t *)obj->vol_obj;
 
     if(view->common.request) {
         if(H5VL_IOD_PENDING == view->common.request->state) {
@@ -581,11 +569,8 @@ H5Vget_elem_regions_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t datase
             /* create the private request */
             if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            request->req = NULL;
             req = &request->req;
-            request->next = NULL;
-            request->vol_plugin = vol_plugin;
-            vol_plugin->nrefs ++;
+            request->vol_cls = obj->vol_info->vol_cls;
         }
 
         tr.file = view->common.file;
@@ -601,16 +586,13 @@ H5Vget_elem_regions_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t datase
 
         HDassert(H5I_DATASET == opened_type);
 
-        if(request && *req) {
-            /* insert in stack */
+        if(request && *req)
             if(H5ES_insert(estack_id, request) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-        }
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
-        vol_plugin->nrefs ++;
         /* create hid_t for opened object */
-        if ((dataset_id[k] = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
+        if((dataset_id[k] = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
 
         if(H5I_inc_ref(view->remote_view.region_info.regions[i], TRUE) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count");        
@@ -625,7 +607,7 @@ done:
 herr_t
 H5Vget_objs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t obj_id[], hid_t estack_id)
 {
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
+    H5VL_object_t *obj = NULL;
     H5VL_iod_view_t *view = NULL;
     hsize_t i, k = 0;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -634,8 +616,10 @@ H5Vget_objs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t obj_id[], hid_
     H5TRACE5("e", "ihh*ii", view_id, start, count, obj_id, estack_id);
 
     /* Check args */
-    if(NULL == (view = (H5VL_iod_view_t *)H5I_object_verify(view_id, H5I_VIEW)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an view ID");
+    if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(view_id, H5I_VIEW)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
+    view = (H5VL_iod_view_t *)obj->vol_obj;
 
     if(view->common.request) {
         if(H5VL_IOD_PENDING == view->common.request->state) {
@@ -662,11 +646,8 @@ H5Vget_objs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t obj_id[], hid_
             /* create the private request */
             if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            request->req = NULL;
             req = &request->req;
-            request->next = NULL;
-            request->vol_plugin = vol_plugin;
-            vol_plugin->nrefs ++;
+            request->vol_cls = obj->vol_info->vol_cls;
         }
 
         tr.file = view->common.file;
@@ -680,15 +661,13 @@ H5Vget_objs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t obj_id[], hid_
                                                          &tr, &opened_type, req)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object");
 
-        if(request && *req) {
-            /* insert in stack */
+        if(request && *req)
             if(H5ES_insert(estack_id, request) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-        }
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
         vol_plugin->nrefs ++;
         /* create hid_t for opened object */
-        if ((obj_id[k] = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
+        if((obj_id[k] = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
 
         k++;
@@ -700,7 +679,7 @@ done:
 herr_t
 H5Vget_attrs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t attr_id[], hid_t estack_id)
 {
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
+    H5VL_object_t *obj = NULL;
     H5VL_iod_view_t *view = NULL;
     hsize_t i, k = 0;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -709,8 +688,10 @@ H5Vget_attrs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t attr_id[], hi
     H5TRACE5("e", "ihh*ii", view_id, start, count, attr_id, estack_id);
 
     /* Check args */
-    if(NULL == (view = (H5VL_iod_view_t *)H5I_object_verify(view_id, H5I_VIEW)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an view ID");
+    if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(view_id, H5I_VIEW)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
+    view = (H5VL_iod_view_t *)obj->vol_obj;
 
     if(view->common.request) {
         if(H5VL_IOD_PENDING == view->common.request->state) {
@@ -737,11 +718,8 @@ H5Vget_attrs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t attr_id[], hi
             /* create the private request */
             if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-            request->req = NULL;
             req = &request->req;
-            request->next = NULL;
-            request->vol_plugin = vol_plugin;
-            vol_plugin->nrefs ++;
+            request->vol_cls = obj->vol_info->vol_cls;
         }
 
         tr.file = view->common.file;
@@ -757,15 +735,13 @@ H5Vget_attrs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t attr_id[], hi
 
         HDassert(H5I_ATTR == opened_type);
 
-        if(request && *req) {
-            /* insert in stack */
+        if(request && *req)
             if(H5ES_insert(estack_id, request) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-        }
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
         vol_plugin->nrefs ++;
         /* create hid_t for opened object */
-        if ((attr_id[k] = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
+        if((attr_id[k] = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
 
         k++;
@@ -823,14 +799,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_close(void *view)
+H5V_close(void *_view)
 {
+    H5VL_object_t *view = (H5VL_object_t *)_view;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if((ret_value = H5VL_iod_view_close((H5VL_iod_view_t *)view)) < 0)
+    if((ret_value = H5VL_iod_view_close((H5VL_iod_view_t *)view->vol_obj)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close view")
+
+    /* free view */
+    if(H5VL_free_object(view) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object")
 
 done:
     FUNC_LEAVE_NOAPI(SUCCEED)

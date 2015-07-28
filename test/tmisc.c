@@ -1847,8 +1847,20 @@ test_misc11(void)
     ret = H5Pset_sizes(fcpl, (size_t)MISC11_SIZEOF_OFF, (size_t)MISC11_SIZEOF_LEN);
     CHECK(ret, FAIL, "H5Pset_sizes");
 
+    /* This should fail as (32770*2) will exceed ^16 - 2 bytes for storing btree entries */
+    H5E_BEGIN_TRY {
+	ret=H5Pset_sym_k(fcpl, 32770, 0);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Pset_sym_k");
+
     ret=H5Pset_sym_k(fcpl,MISC11_SYM_IK,MISC11_SYM_LK);
     CHECK(ret, FAIL, "H5Pset_sym_k");
+
+    /* This should fail as (32770*2) will exceed ^16 - 2 bytes for storing btree entries */
+    H5E_BEGIN_TRY {
+	ret=H5Pset_istore_k(fcpl, 32770);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Pset_istore_k");
 
     ret=H5Pset_istore_k(fcpl,MISC11_ISTORE_IK);
     CHECK(ret, FAIL, "H5Pset_istore_k");
@@ -2427,17 +2439,17 @@ test_misc13(void)
 static void
 test_misc14(void)
 {
-    hid_t file_id;              /* File ID */
-    hid_t fapl;                 /* File access property list ID */
-    hid_t DataSpace;            /* Dataspace ID */
-    hid_t Dataset1;             /* Dataset ID #1 */
-    hid_t Dataset2;             /* Dataset ID #2 */
-    hid_t Dataset3;             /* Dataset ID #3 */
-    double data1 = 5.0;         /* Data to write for dataset #1 */
-    double data2 = 10.0;        /* Data to write for dataset #2 */
-    double data3 = 15.0;        /* Data to write for dataset #3 */
-    double rdata;               /* Data read in */
-    herr_t ret;                 /* Generic return value */
+    hid_t file_id;                  /* File ID */
+    hid_t fapl;                     /* File access property list ID */
+    hid_t DataSpace;                /* Dataspace ID */
+    hid_t Dataset1;                 /* Dataset ID #1 */
+    hid_t Dataset2;                 /* Dataset ID #2 */
+    hid_t Dataset3;                 /* Dataset ID #3 */
+    double data1 = 5.0F;            /* Data to write for dataset #1 */
+    double data2 = 10.0F;           /* Data to write for dataset #2 */
+    double data3 = 15.0F;           /* Data to write for dataset #3 */
+    double rdata;                   /* Data read in */
+    herr_t ret;                     /* Generic return value */
 
     /* Test creating two datasets and deleting the second */
 
@@ -2474,7 +2486,7 @@ test_misc14(void)
     /* Check data from first dataset */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata, data1))
+    if(!H5_DBL_ABS_EQUAL(rdata, data1))
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Unlink second dataset */
@@ -2488,7 +2500,7 @@ test_misc14(void)
     /* Verify the data from dataset #1 */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data1))
+    if(!H5_DBL_ABS_EQUAL(rdata,data1))
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Close first dataset */
@@ -2522,7 +2534,7 @@ test_misc14(void)
     /* Check data from second dataset */
     ret = H5Dread(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data2))
+    if(!H5_DBL_ABS_EQUAL(rdata,data2))
         TestErrPrintf("Error on line %d: data2!=rdata\n",__LINE__);
 
     /* Unlink first dataset */
@@ -2536,7 +2548,7 @@ test_misc14(void)
     /* Verify the data from dataset #2 */
     ret = H5Dread(Dataset2, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data2))
+    if(!H5_DBL_ABS_EQUAL(rdata,data2))
         TestErrPrintf("Error on line %d: data2!=rdata\n",__LINE__);
 
     /* Close second dataset */
@@ -2577,13 +2589,13 @@ test_misc14(void)
     /* Check data from first dataset */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data1))
+    if(!H5_DBL_ABS_EQUAL(rdata,data1))
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Check data from third dataset */
     ret = H5Dread(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data3))
+    if(!H5_DBL_ABS_EQUAL(rdata,data3))
         TestErrPrintf("Error on line %d: data3!=rdata\n",__LINE__);
 
     /* Unlink second dataset */
@@ -2597,13 +2609,13 @@ test_misc14(void)
     /* Verify the data from dataset #1 */
     ret = H5Dread(Dataset1, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data1))
+    if(!H5_DBL_ABS_EQUAL(rdata,data1))
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Verify the data from dataset #3 */
     ret = H5Dread(Dataset3, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if(!DBL_ABS_EQUAL(rdata,data3))
+    if(!H5_DBL_ABS_EQUAL(rdata,data3))
         TestErrPrintf("Error on line %d: data3!=rdata\n",__LINE__);
 
     /* Close first dataset */
@@ -2667,7 +2679,7 @@ test_misc15(void)
 
     /* Verify that the file is still OK */
     ret = H5Fis_accessible(MISC15_FILE, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Fis_hdf5");
+    CHECK(ret, FAIL, "H5Fis_accessible");
 
     file = H5Fopen(MISC15_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
@@ -4949,7 +4961,7 @@ test_misc28(void)
      * bytes). */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
-    ret = H5Pset_cache(fapl, MISC28_NSLOTS, MISC28_NSLOTS, MISC28_SIZE, 0.75);
+    ret = H5Pset_cache(fapl, MISC28_NSLOTS, MISC28_NSLOTS, MISC28_SIZE, 0.75F);
     CHECK(ret, FAIL, "H5Pset_cache");
 
     /* Create the dcpl and set the chunk size */
@@ -5125,8 +5137,8 @@ test_misc29(void)
 
 
 static int
-test_misc30_get_info_cb(hid_t loc_id, const char *name, const H5L_info_t UNUSED *info,
-    void UNUSED *op_data)
+test_misc30_get_info_cb(hid_t loc_id, const char *name, const H5L_info_t H5_ATTR_UNUSED *info,
+    void H5_ATTR_UNUSED *op_data)
 {
     H5O_info_t object_info;
 
@@ -5304,6 +5316,73 @@ test_misc31(void)
 
 
 /****************************************************************
+ *
+ *  test_misc32(): Simple test of filter memory allocation
+ *                 functions.
+ *
+ ***************************************************************/
+static void
+test_misc32(void)
+{
+    void *buffer;
+    void *resized;
+    size_t size;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Edge case test of filter memory allocation functions\n"));
+
+    /* Test that the filter memory allocation functions behave correctly
+     * at edge cases.
+     */
+
+    /* FREE */
+
+    /* Test freeing a NULL pointer.
+     * No real confirmation check here, but Valgrind will confirm no
+     * shenanigans.
+     */
+    buffer = NULL;
+    H5free_memory(buffer);
+
+    /* ALLOCATE */
+
+    /* Size zero returns NULL.
+     * Also checks that a size of zero and setting the buffer clear flag
+     * to TRUE can be used together.
+     *
+     * Note that we have asserts in the code, so only check when NDEBUG
+     * is defined.
+     */
+#ifdef NDEBUG
+    buffer = H5allocate_memory(0, FALSE);
+    CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
+    buffer = H5allocate_memory(0, TRUE);
+    CHECK_PTR_NULL(buffer, "H5allocate_memory"); /*BAD*/
+#endif /* NDEBUG */
+
+    /* RESIZE */
+
+    /* Size zero returns NULL. Valgrind will confirm buffer is freed. */
+    size = 1024;
+    buffer = H5allocate_memory(size, TRUE);
+    resized = H5resize_memory(buffer, 0);
+    CHECK_PTR_NULL(resized, "H5resize_memory");
+
+    /* NULL input pointer returns new buffer */
+    resized = H5resize_memory(NULL, 1024);
+    CHECK_PTR(resized, "H5resize_memory");
+    H5free_memory(resized);
+
+    /* NULL input pointer and size zero returns NULL */
+#ifdef NDEBUG
+    resized = H5resize_memory(NULL, 0);
+    CHECK_PTR_NULL(resized, "H5resize_memory"); /*BAD*/
+#endif /* NDEBUG */
+    
+} /* end test_misc32() */
+
+
+/****************************************************************
 **
 **  test_misc(): Main misc. test routine.
 **
@@ -5349,6 +5428,7 @@ test_misc(void)
     test_misc29();      /* Test that speculative metadata reads are handled correctly */
     test_misc30();      /* Exercise local heap loading bug where free lists were getting dropped */
     test_misc31();      /* Test Reentering library through deprecated routines after H5close() */
+    test_misc32();      /* Test filter memory allocation functions */
 
 } /* test_misc() */
 

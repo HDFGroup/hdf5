@@ -330,6 +330,32 @@ static void test_file_open()
         verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
         verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
 
+	// Test H5File constructor with existing file id
+	H5File file2(file1.getId());
+	file1.close();
+
+	// Try truncating the file, and it should fail because the file is
+	// still opened with file2.
+    	try {
+	    H5File file3 (FILE2, H5F_ACC_TRUNC);  // should throw E
+
+	    // Should FAIL but didn't, so throw an invalid action exception
+	    throw InvalidActionException("H5File constructor", "Attempt truncating an opened file.");
+    	}
+	catch( FileIException E ) // catching H5F_ACC_TRUNC on opened file
+	{} // do nothing, FAIL expected
+
+	// Now, really close the file.
+	file2.close();
+
+	// Truncating should succeed now.
+	H5File file3(FILE2, H5F_ACC_TRUNC);
+
+	// Opening another file to file3 object, FILE2 should be closed, so
+	// the next attempt to truncate FILE2 should succeed.
+	file3.openFile(FILE1, H5F_ACC_RDONLY);
+	H5File file4(FILE2, H5F_ACC_TRUNC);
+
 	PASSED();
     }   // end of try block
 
@@ -501,6 +527,7 @@ const H5std_string	FATTR1_NAME ("file attribute 1");
 const H5std_string	FATTR2_NAME ("file attribute 2");
 int fattr_data[ATTR1_DIM1]={512,-234,98123}; /* Test data for file attribute */
 int dattr_data[ATTR1_DIM1]={256,-123,1000}; /* Test data for dataset attribute */
+
 static void test_file_attribute()
 {
     int rdata[ATTR1_DIM1];
@@ -598,9 +625,122 @@ static void test_file_attribute()
     }   // end of try block
 
     catch (Exception E) {
-        issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_file_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_file_attribute()
+
+const H5std_string	FILE6("tfile5.h5");
+const H5std_string	ROOTGROUP("/");
+const H5std_string	GROUP1("/G1");
+const H5std_string	SUBGROUP3("/G1/G3");
+
+/*-------------------------------------------------------------------------
+ * Function:	test_libver_bounds_real
+ *
+ * Purpose:	Verify that a file created and modified with the
+ *		specified libver bounds has the specified object header
+ *		versions for the right objects.
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler (use C version)
+ *		March, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_libver_bounds_real(
+		H5F_libver_t libver_create, unsigned oh_vers_create,
+		H5F_libver_t libver_mod, unsigned oh_vers_mod)
+{
+    try {
+
+    /*
+     * Create a new file using the default creation property and access property
+     * with latest library version.
+     */
+    FileAccPropList fapl;
+    fapl.setLibverBounds(libver_create, H5F_LIBVER_LATEST);
+    H5File file(FILE6, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+
+    /*
+     * Make sure the root group has the correct object header version
+     */
+    unsigned obj_version = file.childObjVersion(ROOTGROUP);
+    verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__);
+
+    /*
+     * Reopen the file and make sure the root group still has the correct version
+     */
+    file.close();
+
+    fapl.setLibverBounds(libver_mod, H5F_LIBVER_LATEST);
+
+    file.openFile(FILE6, H5F_ACC_RDWR, fapl);
+
+    obj_version = file.childObjVersion(ROOTGROUP);
+    verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__);
+
+    /*
+     * Create a group named "/G1" in the file, and make sure it has the correct
+     * object header version
+     */
+    Group group = file.createGroup(GROUP1);
+
+    obj_version = file.childObjVersion(GROUP1);
+    verify_val(obj_version, oh_vers_mod, "H5File::childObjVersion", __LINE__, __FILE__);
+
+    group.close(); // close "/G1"
+
+    /*
+     * Create a group named "/G1/G3" in the file, and make sure it has the
+     * correct object header version
+     */
+    group = file.createGroup(SUBGROUP3);
+
+    obj_version = group.childObjVersion(SUBGROUP3);
+    verify_val(obj_version, oh_vers_mod, "H5File::childObjVersion", __LINE__, __FILE__);
+
+    group.close(); // close "/G1/G3"
+
+    /*
+     * Make sure the root group still has the correct object header version
+     */
+    obj_version = file.childObjVersion(ROOTGROUP);
+    verify_val(obj_version, oh_vers_create, "H5File::childObjVersion", __LINE__, __FILE__);
+
+    // Everything should be closed as they go out of scope
+    }   // end of try block
+
+    catch (Exception E) {
+        issue_fail_msg("test_libver_bounds_real()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+} /* end test_libver_bounds_real() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    test_libver_bounds
+ *
+ * Purpose:     Verify that a file created and modified with various
+ *		libver bounds is handled correctly.
+ *
+ * Return:      None
+ *
+ * Programmer:  Binh-Minh Ribler (use C version)
+ *              March 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_libver_bounds()
+{
+    // Output message about test being performed
+    SUBTEST("Setting library version bounds");
+
+    /* Run the tests */
+    test_libver_bounds_real(H5F_LIBVER_EARLIEST, H5O_VERSION_1, H5F_LIBVER_LATEST, H5O_VERSION_2);
+    test_libver_bounds_real(H5F_LIBVER_LATEST, H5O_VERSION_2, H5F_LIBVER_EARLIEST, H5O_VERSION_1);
+    PASSED();
+} /* end test_libver_bounds() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_file
@@ -622,13 +762,14 @@ extern "C"
 void test_file()
 {
     // Output message about test being performed
-    MESSAGE(5, ("Testing File I/O operations\n"));
+    MESSAGE(5, ("Testing File I/O Operations\n"));
 
     test_file_create();	// Test file creation (also creation templates)
     test_file_open();	// Test file opening
     test_file_size();	// Test file size
     test_file_name();	// Test getting file's name
     test_file_attribute();	// Test file attribute feature
+    test_libver_bounds();	// Test format version
 }   // test_file()
 
 
@@ -655,4 +796,5 @@ void cleanup_file()
     HDremove(FILE3.c_str());
     HDremove(FILE4.c_str());
     HDremove(FILE5.c_str());
+    HDremove(FILE6.c_str());
 }   // cleanup_file

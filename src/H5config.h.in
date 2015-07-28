@@ -3,25 +3,15 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
-/* Define if your system generates wrong code for log2 routine. */
-#undef BAD_LOG2_CODE_GENERATED
-
 /* Define if the memory buffers being written to disk should be cleared before
    writing. */
 #undef CLEAR_MEMORY
-
-/* Define if your system can handle converting denormalized floating-point
-   values. */
-#undef CONVERT_DENORMAL_FLOAT
 
 /* Define if C++ compiler recognizes offsetof */
 #undef CXX_HAVE_OFFSETOF
 
 /* Define the default plugins path to compile */
 #undef DEFAULT_PLUGINDIR
-
-/* Define the default virtual file driver to compile */
-#undef DEFAULT_VFD
 
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
@@ -40,21 +30,6 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
 
-/* Define if your system can handle overflow converting floating-point to
-   integer values. */
-#undef FP_TO_INTEGER_OVERFLOW_WORKS
-
-/* Define if your system roundup accurately converting floating-point to
-   unsigned long long values. */
-#undef FP_TO_ULLONG_ACCURATE
-
-/* Define if your system has right maximum convert floating-point to unsigned
-   long long values. */
-#undef FP_TO_ULLONG_RIGHT_MAXIMUM
-
-/* Define if gettimeofday() populates the tz pointer passed in */
-#undef GETTIMEOFDAY_GIVES_TZ
-
 /* Define if ALACRITY indexing is supported. */
 #undef HAVE_ALACRITY
 
@@ -72,9 +47,6 @@
 
 /* Define to 1 if you have the <axe.h> header file. */
 #undef HAVE_AXE_H
-
-/* Define to 1 if you have the `BSDgettimeofday' function. */
-#undef HAVE_BSDGETTIMEOFDAY
 
 /* Define if the compiler understands C99 designated initialization of structs
    and unions */
@@ -98,14 +70,10 @@
 /* Define if Darwin or Mac OS X */
 #undef HAVE_DARWIN
 
-/* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
-   */
-#undef HAVE_DECL_TZNAME
-
 /* Define to 1 if you have the `difftime' function. */
 #undef HAVE_DIFFTIME
 
-/* Define if the direct I/O virtual file driver should be compiled */
+/* Define if the direct I/O virtual file driver (VFD) should be compiled */
 #undef HAVE_DIRECT
 
 /* Define to 1 if you have the <dirent.h> header file. */
@@ -131,18 +99,6 @@
 
 /* Define if support for deflate (zlib) filter is enabled */
 #undef HAVE_FILTER_DEFLATE
-
-/* Define if support for Fletcher32 checksum is enabled */
-#undef HAVE_FILTER_FLETCHER32
-
-/* Define if support for nbit filter is enabled */
-#undef HAVE_FILTER_NBIT
-
-/* Define if support for scaleoffset filter is enabled */
-#undef HAVE_FILTER_SCALEOFFSET
-
-/* Define if support for shuffle filter is enabled */
-#undef HAVE_FILTER_SHUFFLE
 
 /* Define if support for szip filter is enabled */
 #undef HAVE_FILTER_SZIP
@@ -198,11 +154,11 @@
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #undef HAVE_GET_FPC_CSR
 
-/* Define to 1 if you have the <iapi.h> header file. */
-#undef HAVE_IAPI_H
-
 /* Define id indexing code should be enabled. */
 #undef HAVE_INDEXING
+
+/* Define if the compiler understands inline */
+#undef HAVE_INLINE
 
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
@@ -265,15 +221,6 @@
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #undef HAVE_LIBMPE
 
-/* Define to 1 if you have the `mpi' library (-lmpi). */
-#undef HAVE_LIBMPI
-
-/* Define to 1 if you have the `mpich' library (-lmpich). */
-#undef HAVE_LIBMPICH
-
-/* Define to 1 if you have the `mpio' library (-lmpio). */
-#undef HAVE_LIBMPIO
-
 /* Define to 1 if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL
 
@@ -318,9 +265,6 @@
 
 /* Define to 1 if you have the <mpe.h> header file. */
 #undef HAVE_MPE_H
-
-/* Define if MPI_File_get_size works correctly */
-#undef HAVE_MPI_GET_SIZE
 
 /* Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists */
 #undef HAVE_MPI_MULTI_LANG_Comm
@@ -409,12 +353,6 @@
 /* Define if `struct text_info' is defined */
 #undef HAVE_STRUCT_TEXT_INFO
 
-/* Define if `struct timezone' is defined */
-#undef HAVE_STRUCT_TIMEZONE
-
-/* Define to 1 if `tm_zone' is a member of `struct tm'. */
-#undef HAVE_STRUCT_TM_TM_ZONE
-
 /* Define if `struct videoconfig' is defined */
 #undef HAVE_STRUCT_VIDEOCONFIG
 
@@ -475,14 +413,6 @@
 /* Define if `tm_gmtoff' is a member of `struct tm' */
 #undef HAVE_TM_GMTOFF
 
-/* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
-   `HAVE_STRUCT_TM_TM_ZONE' instead. */
-#undef HAVE_TM_ZONE
-
-/* Define to 1 if you don't have `tm_zone' but do have the external array
-   `tzname'. */
-#undef HAVE_TZNAME
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
@@ -510,44 +440,18 @@
 /* Define to 1 if you have the `_scrsize' function. */
 #undef HAVE__SCRSIZE
 
-/* Define if `__tm_gmtoff' is a member of `struct tm' */
-#undef HAVE___TM_GMTOFF
+/* Define if the compiler understands __inline */
+#undef HAVE___INLINE
 
-/* Define if your system can't handle converting floating-point values to long
-   long. */
-#undef HW_FP_TO_LLONG_NOT_WORKS
+/* Define if the compiler understands __inline__ */
+#undef HAVE___INLINE__
 
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #undef INCLUDE_HL
 
-/* Define if your system can accurately convert from integers to long double
-   values. */
-#undef INTEGER_TO_LDOUBLE_ACCURATE
-
-/* Define if your system can convert long double to integers accurately. */
-#undef LDOUBLE_TO_INTEGER_ACCURATE
-
-/* Define if your system can convert from long double to integer values. */
-#undef LDOUBLE_TO_INTEGER_WORKS
-
-/* Define if your system can convert long double to (unsigned) long long
-   values correctly. */
-#undef LDOUBLE_TO_LLONG_ACCURATE
-
 /* Define if your system converts long double to (unsigned) long values with
    special algorithm. */
 #undef LDOUBLE_TO_LONG_SPECIAL
-
-/* Define if your system can convert long double to unsigned int values
-   correctly. */
-#undef LDOUBLE_TO_UINT_ACCURATE
-
-/* Define if your system can compile long long to floating-point casts. */
-#undef LLONG_TO_FP_CAST_WORKS
-
-/* Define if your system can convert (unsigned) long long to long double
-   values correctly. */
-#undef LLONG_TO_LDOUBLE_CORRECT
 
 /* Define if your system can convert (unsigned) long to long double values
    with special algorithm. */
@@ -560,18 +464,11 @@
 /* Define if the metadata trace file code is to be compiled in */
 #undef METADATA_TRACE_FILE
 
-/* Define if your system's `MPI_File_set_size' function works for files over
-   2GB. */
-#undef MPI_FILE_SET_SIZE_BIG
-
 /* Define if we can violate pointer alignment restrictions */
 #undef NO_ALIGNMENT_RESTRICTIONS
 
 /* Define if deprecated public API symbols are disabled */
 #undef NO_DEPRECATED_SYMBOLS
-
-/* Define if shared writing must be disabled (CodeWarrior only) */
-#undef NO_SHARED_WRITING
 
 /* Name of package */
 #undef PACKAGE
@@ -727,25 +624,6 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
-/* Define to 1 if your <sys/time.h> declares `struct tm'. */
-#undef TM_IN_SYS_TIME
-
-/* Define if your system can compile unsigned long long to floating-point
-   casts. */
-#undef ULLONG_TO_FP_CAST_WORKS
-
-/* Define if your system can convert unsigned long long to long double with
-   correct precision. */
-#undef ULLONG_TO_LDOUBLE_PRECISION
-
-/* Define if your system accurately converting unsigned long to float values.
-   */
-#undef ULONG_TO_FLOAT_ACCURATE
-
-/* Define if your system can accurately convert unsigned (long) long values to
-   floating-point values. */
-#undef ULONG_TO_FP_BOTTOM_BIT_ACCURATE
-
 /* Define using v1.6 public API symbols by default */
 #undef USE_16_API_DEFAULT
 
@@ -756,13 +634,6 @@
 
 /* Version number of package */
 #undef VERSION
-
-/* Define if vsnprintf() returns the correct value for formatted strings that
-   don't fit into size allowed */
-#undef VSNPRINTF_WORKS
-
-/* Data accuracy is prefered to speed during data conversions */
-#undef WANT_DATA_ACCURACY
 
 /* Check exception handling functions during data conversions */
 #undef WANT_DCONV_EXCEPTION
@@ -787,12 +658,6 @@
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
-
-/* Define to `__inline__' or `__inline' if that's what the C compiler
-   calls it, or to nothing if 'inline' is not supported under any name.  */
-#ifndef __cplusplus
-#undef inline
-#endif
 
 /* Define to `long int' if <sys/types.h> does not define. */
 #undef off_t

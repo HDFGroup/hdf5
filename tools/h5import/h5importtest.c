@@ -40,13 +40,13 @@ main(void)
     FILE      *sp;
 
     float     row4[3], col4[4], pln4[5];
-    float     rowo4 = (float)11.0e0, colo4 = (float)21.0e0, plno4 = (float)51.0e0;
-    float     rowi4 = (float)1.0e0, coli4 = (float)2.0e0, plni4 = (float)5.0e0;
+    float     rowo4 = 11.0F, colo4 = 21.0F, plno4 = 51.0F;
+    float     rowi4 = 1.0F, coli4 = 2.0F, plni4 = 5.0F;
 
     int       b32i3[5][3][4];
     int       row4i[3], col4i[4], pln4i[5];
-    int       rowo4i = (int)11 , colo4i = (int)21 , plno4i = (int)51 ;
-    int       rowi4i = (int)1 , coli4i = (int)2 , plni4i = (int)5 ;
+    int       rowo4i = 11 , colo4i = 21 , plno4i = 51 ;
+    int       rowi4i = 1 , coli4i = 2 , plni4i = 5 ;
 
 #ifdef H5_SIZEOF_LONG_LONG
     long long row4i64[3], col4i64[4], pln4i64[5];
@@ -66,8 +66,8 @@ main(void)
 
     double    b64r3[5][3][4];
     double    row8[3], col8[4], pln8[5];
-    double    rowo8 = 11.0e0, colo8 = 21.0e0, plno8 = 51.0e0;
-    double    rowi8 = 1.0e0, coli8 = 2.0e0, plni8 = 5.0e0;
+    double    rowo8 = 11.0F, colo8 = 21.0F, plno8 = 51.0F;
+    double    rowi8 = 1.0F, coli8 = 2.0F, plni8 = 5.0F;
 
 
     /*

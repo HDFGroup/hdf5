@@ -121,7 +121,7 @@ H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
     /*
      * Load the free space header.
      */
-    if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, addr, &cache_udata, H5AC_READ)))
+    if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
 
     /* Print opening message */
@@ -232,7 +232,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int indent, int fwidth,
+H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int indent, int fwidth,
     haddr_t fs_addr, haddr_t client_addr)
 {
     H5FS_t	*fspace = NULL;         /* Free space header info */
@@ -263,7 +263,7 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
     /*
      * Load the free space header.
      */
-    if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC_READ)))
+    if(NULL == (fspace = (H5FS_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
 
     /* Retrieve the client id */

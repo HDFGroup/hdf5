@@ -36,29 +36,15 @@
 /* Define if building universal (internal helper macro) */
 #cmakedefine H5_AC_APPLE_UNIVERSAL_BUILD @H5_AC_APPLE_UNIVERSAL_BUILD@
 
-/* Define if your system generates wrong code for log2 routine. */
-#cmakedefine H5_BAD_LOG2_CODE_GENERATED @H5_BAD_LOG2_CODE_GENERATED@
-
 /* Define if the memory buffers being written to disk should be cleared before
    writing. */
 #cmakedefine H5_CLEAR_MEMORY @H5_CLEAR_MEMORY@
 
-/* Define if your system can handle converting denormalized floating-point
-   values. */
-#cmakedefine H5_CONVERT_DENORMAL_FLOAT @H5_CONVERT_DENORMAL_FLOAT@
-
 /* Define if C++ compiler recognizes offsetof */
 #cmakedefine H5_CXX_HAVE_OFFSETOF @H5_CXX_HAVE_OFFSETOF@
 
-/* Define a macro for Cygwin (on XP only) where the compiler has rounding
-   problem converting from unsigned long long to long double */
-#cmakedefine H5_CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM @H5_CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM@
-
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
-
-/* Define the default virtual file driver to compile */
-#cmakedefine H5_DEFAULT_VFD @H5_DEFAULT_VFD@
 
 /* Define the default vol plugin to compile */
 #cmakedefine H5_DEFAULT_VOL @H5_DEFAULT_VOL@
@@ -80,29 +66,14 @@
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #define @H5_FC_FUNC_@
 
-/* Define if your system can handle overflow converting floating-point to
-   integer values. */
-#cmakedefine H5_FP_TO_INTEGER_OVERFLOW_WORKS @H5_FP_TO_INTEGER_OVERFLOW_WORKS@
-
-/* Define if your system roundup accurately converting floating-point to
-   unsigned long long values. */
-#cmakedefine H5_FP_TO_ULLONG_ACCURATE @H5_FP_TO_ULLONG_ACCURATE@
-
-/* Define if your system has right maximum convert floating-point to unsigned
-   long long values. */
-#cmakedefine H5_FP_TO_ULLONG_RIGHT_MAXIMUM @H5_FP_TO_ULLONG_RIGHT_MAXIMUM@
-
-/* Define if gettimeofday() populates the tz pointer passed in */
-#cmakedefine H5_GETTIMEOFDAY_GIVES_TZ @H5_GETTIMEOFDAY_GIVES_TZ@
-
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
 
+/* Define to 1 if you have the `asprintf' function. */
+#cmakedefine H5_HAVE_ASPRINTF @H5_HAVE_ASPRINTF@
+
 /* Define if the __attribute__(()) extension is present */
 #cmakedefine H5_HAVE_ATTRIBUTE @H5_HAVE_ATTRIBUTE@
-
-/* Define to 1 if you have the `BSDgettimeofday' function. */
-#cmakedefine H5_HAVE_BSDGETTIMEOFDAY @H5_HAVE_BSDGETTIMEOFDAY@
 
 /* Define if the compiler understands C99 designated initialization of structs
    and unions */
@@ -119,10 +90,6 @@
 
 /* Define if Darwin or Mac OS X */
 #cmakedefine H5_HAVE_DARWIN @H5_HAVE_DARWIN@
-
-/* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
-   */
-#cmakedefine H5_HAVE_DECL_TZNAME @H5_HAVE_DECL_TZNAME@
 
 /* Define to 1 if you have the `difftime' function. */
 #cmakedefine H5_HAVE_DIFFTIME @H5_HAVE_DIFFTIME@
@@ -147,18 +114,6 @@
 
 /* Define if support for deflate (zlib) filter is enabled */
 #cmakedefine H5_HAVE_FILTER_DEFLATE @H5_HAVE_FILTER_DEFLATE@
-
-/* Define if support for Fletcher32 checksum is enabled */
-#cmakedefine H5_HAVE_FILTER_FLETCHER32 @H5_HAVE_FILTER_FLETCHER32@
-
-/* Define if support for nbit filter is enabled */
-#cmakedefine H5_HAVE_FILTER_NBIT @H5_HAVE_FILTER_NBIT@
-
-/* Define if support for scaleoffset filter is enabled */
-#cmakedefine H5_HAVE_FILTER_SCALEOFFSET @H5_HAVE_FILTER_SCALEOFFSET@
-
-/* Define if support for shuffle filter is enabled */
-#cmakedefine H5_HAVE_FILTER_SHUFFLE @H5_HAVE_FILTER_SHUFFLE@
 
 /* Define if support for szip filter is enabled */
 #cmakedefine H5_HAVE_FILTER_SZIP @H5_HAVE_FILTER_SZIP@
@@ -211,12 +166,6 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #cmakedefine H5_HAVE_GETTIMEOFDAY @H5_HAVE_GETTIMEOFDAY@
 
-/* Define to 1 if you have the `gettimeofday' function declared in time.h . */
-#cmakedefine H5_HAVE_TIME_GETTIMEOFDAY @H5_HAVE_TIME_GETTIMEOFDAY@
-
-/* Define to 1 if you have the `gettimeofday' function declared in sys/time.h . */
-#cmakedefine H5_HAVE_SYS_TIME_GETTIMEOFDAY @H5_HAVE_SYS_TIME_GETTIMEOFDAY@
-
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #cmakedefine H5_HAVE_GET_FPC_CSR @H5_HAVE_GET_FPC_CSR@
 
@@ -239,23 +188,11 @@
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #cmakedefine H5_HAVE_LIBDMALLOC @H5_HAVE_LIBDMALLOC@
 
-/* Define to 1 if you have the `lmpe' library (-llmpe). */
-#cmakedefine H5_HAVE_LIBLMPE @H5_HAVE_LIBLMPE@
-
 /* Define to 1 if you have the `m' library (-lm). */
 #cmakedefine H5_HAVE_LIBM @H5_HAVE_LIBM@
 
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #cmakedefine H5_HAVE_LIBMPE @H5_HAVE_LIBMPE@
-
-/* Define to 1 if you have the `mpi' library (-lmpi). */
-#cmakedefine H5_HAVE_LIBMPI @H5_HAVE_LIBMPI@
-
-/* Define to 1 if you have the `mpich' library (-lmpich). */
-#cmakedefine H5_HAVE_LIBMPICH @H5_HAVE_LIBMPICH@
-
-/* Define to 1 if you have the `mpio' library (-lmpio). */
-#cmakedefine H5_HAVE_LIBMPIO @H5_HAVE_LIBMPIO@
 
 /* Define to 1 if you have the `nsl' library (-lnsl). */
 #cmakedefine H5_HAVE_LIBNSL @H5_HAVE_LIBNSL@
@@ -296,9 +233,6 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #cmakedefine H5_HAVE_MPE_H @H5_HAVE_MPE_H@
 
-/* Define if MPI_File_get_size works correctly */
-#cmakedefine H5_HAVE_MPI_GET_SIZE @H5_HAVE_MPI_GET_SIZE@
-
 /* Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Comm @H5_HAVE_MPI_MULTI_LANG_Comm@
 
@@ -335,7 +269,7 @@
 /* Define to 1 if you have the `rand_r' function. */
 #cmakedefine H5_HAVE_RAND_R @H5_HAVE_RAND_R@
 
-/* Define to 1 if you have the `sigsetjmp' function. */
+/* Define to 1 if you have the `setjmp' function. */
 #cmakedefine H5_HAVE_SETJMP @H5_HAVE_SETJMP@
 
 /* Define to 1 if you have the <setjmp.h> header file. */
@@ -343,9 +277,6 @@
 
 /* Define to 1 if you have the `setsysinfo' function. */
 #cmakedefine H5_HAVE_SETSYSINFO @H5_HAVE_SETSYSINFO@
-
-/* Define to 1 if you have the `sigaction' function. */
-#cmakedefine H5_HAVE_SIGACTION @H5_HAVE_SIGACTION@
 
 /* Define to 1 if you have the `siglongjmp' function. */
 #cmakedefine H5_HAVE_SIGLONGJMP @H5_HAVE_SIGLONGJMP@
@@ -395,12 +326,6 @@
 /* Define if `struct text_info' is defined */
 #cmakedefine H5_HAVE_STRUCT_TEXT_INFO @H5_HAVE_STRUCT_TEXT_INFO@
 
-/* Define if `struct timezone' is defined */
-#cmakedefine H5_HAVE_STRUCT_TIMEZONE @H5_HAVE_STRUCT_TIMEZONE@
-
-/* Define to 1 if `tm_zone' is a member of `struct tm'. */
-#cmakedefine H5_HAVE_STRUCT_TM_TM_ZONE @H5_HAVE_STRUCT_TM_TM_ZONE@
-
 /* Define if `struct videoconfig' is defined */
 #cmakedefine H5_HAVE_STRUCT_VIDEOCONFIG @H5_HAVE_STRUCT_VIDEOCONFIG@
 
@@ -434,9 +359,6 @@
 /* Define to 1 if you have the <sys/timeb.h> header file. */
 #cmakedefine H5_HAVE_SYS_TIMEB_H @H5_HAVE_SYS_TIMEB_H@
 
-/* Define to 1 if you have the <time.h> header file. */
-#cmakedefine H5_HAVE_TIME_H @H5_HAVE_TIME_H@
-
 /* Define to 1 if you have the <sys/time.h> header file. */
 #cmakedefine H5_HAVE_SYS_TIME_H @H5_HAVE_SYS_TIME_H@
 
@@ -464,19 +386,8 @@
 /* Define if `tm_gmtoff' is a member of `struct tm' */
 #cmakedefine H5_HAVE_TM_GMTOFF @H5_HAVE_TM_GMTOFF@
 
-/* Define to 1 if your `struct tm' has `tm_zone'. Deprecated, use
-   `HAVE_STRUCT_TM_TM_ZONE' instead. */
-#cmakedefine H5_HAVE_TM_ZONE @H5_HAVE_TM_ZONE@
-
-/* Define to 1 if you don't have `tm_zone' but do have the external array
-   `tzname'. */
-#cmakedefine H5_HAVE_TZNAME @H5_HAVE_TZNAME@
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine H5_HAVE_UNISTD_H @H5_HAVE_UNISTD_H@
-
-/* Define to 1 if you have the `asprintf' function. */
-#cmakedefine H5_HAVE_ASPRINTF @H5_HAVE_ASPRINTF@
 
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine H5_HAVE_VASPRINTF @H5_HAVE_VASPRINTF@
@@ -502,44 +413,12 @@
 /* Define to 1 if you have the `_scrsize' function. */
 #cmakedefine H5_HAVE__SCRSIZE @H5_HAVE__SCRSIZE@
 
-/* Define if `__tm_gmtoff' is a member of `struct tm' */
-#cmakedefine H5_HAVE___TM_GMTOFF @H5_HAVE___TM_GMTOFF@
-
-/* Define if your system can't handle converting floating-point values to long
-   long. */
-#cmakedefine H5_HW_FP_TO_LLONG_NOT_WORKS @H5_HW_FP_TO_LLONG_NOT_WORKS@
-
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #cmakedefine H5_INCLUDE_HL @H5_INCLUDE_HL@
-
-/* Define if your system can accurately convert from integers to long double
-   values. */
-#cmakedefine H5_INTEGER_TO_LDOUBLE_ACCURATE @H5_INTEGER_TO_LDOUBLE_ACCURATE@
-
-/* Define if your system can convert long double to integers accurately. */
-#cmakedefine H5_LDOUBLE_TO_INTEGER_ACCURATE @H5_LDOUBLE_TO_INTEGER_ACCURATE@
-
-/* Define if your system can convert from long double to integer values. */
-#cmakedefine H5_LDOUBLE_TO_INTEGER_WORKS @H5_LDOUBLE_TO_INTEGER_WORKS@
-
-/* Define if your system can convert long double to (unsigned) long long
-   values correctly. */
-#cmakedefine H5_LDOUBLE_TO_LLONG_ACCURATE @H5_LDOUBLE_TO_LLONG_ACCURATE@
 
 /* Define if your system converts long double to (unsigned) long values with
    special algorithm. */
 #cmakedefine H5_LDOUBLE_TO_LONG_SPECIAL @H5_LDOUBLE_TO_LONG_SPECIAL@
-
-/* Define if your system can convert long double to unsigned int values
-   correctly. */
-#cmakedefine H5_LDOUBLE_TO_UINT_ACCURATE @H5_LDOUBLE_TO_UINT_ACCURATE@
-
-/* Define if your system can compile long long to floating-point casts. */
-#cmakedefine H5_LLONG_TO_FP_CAST_WORKS @H5_LLONG_TO_FP_CAST_WORKS@
-
-/* Define if your system can convert (unsigned) long long to long double
-   values correctly. */
-#cmakedefine H5_LLONG_TO_LDOUBLE_CORRECT @H5_LLONG_TO_LDOUBLE_CORRECT@
 
 /* Define if your system can convert (unsigned) long to long double values
    with special algorithm. */
@@ -552,18 +431,11 @@
 /* Define if the metadata trace file code is to be compiled in */
 #cmakedefine H5_METADATA_TRACE_FILE @H5_METADATA_TRACE_FILE@
 
-/* Define if your system's `MPI_File_set_size' function works for files over
-   2GB. */
-#cmakedefine H5_MPI_FILE_SET_SIZE_BIG @H5_MPI_FILE_SET_SIZE_BIG@
-
 /* Define if we can violate pointer alignment restrictions */
 #cmakedefine H5_NO_ALIGNMENT_RESTRICTIONS @H5_NO_ALIGNMENT_RESTRICTIONS@
 
 /* Define if deprecated public API symbols are disabled */
 #cmakedefine H5_NO_DEPRECATED_SYMBOLS @H5_NO_DEPRECATED_SYMBOLS@
-
-/* Define if shared writing must be disabled (CodeWarrior only) */
-#cmakedefine H5_NO_SHARED_WRITING @H5_NO_SHARED_WRITING@
 
 /* Name of package */
 #define H5_PACKAGE "@HDF5_PACKAGE@"
@@ -738,25 +610,6 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #cmakedefine H5_TIME_WITH_SYS_TIME @H5_TIME_WITH_SYS_TIME@
 
-/* Define to 1 if your <sys/time.h> declares `struct tm'. */
-#cmakedefine H5_TM_IN_SYS_TIME @H5_TM_IN_SYS_TIME@
-
-/* Define if your system can compile unsigned long long to floating-point
-   casts. */
-#cmakedefine H5_ULLONG_TO_FP_CAST_WORKS @H5_ULLONG_TO_FP_CAST_WORKS@
-
-/* Define if your system can convert unsigned long long to long double with
-   correct precision. */
-#cmakedefine H5_ULLONG_TO_LDOUBLE_PRECISION @H5_ULLONG_TO_LDOUBLE_PRECISION@
-
-/* Define if your system accurately converting unsigned long to float values.
-   */
-#cmakedefine H5_ULONG_TO_FLOAT_ACCURATE @H5_ULONG_TO_FLOAT_ACCURATE@
-
-/* Define if your system can accurately convert unsigned (long) long values to
-   floating-point values. */
-#cmakedefine H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE @H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE@
-
 /* Define using v1.6 public API symbols by default */
 #cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
 
@@ -770,13 +623,6 @@
 
 /* Version number of package */
 #define H5_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
-
-/* Define if vsnprintf() returns the correct value for formatted strings that
-   don't fit into size allowed */
-#cmakedefine H5_VSNPRINTF_WORKS @H5_VSNPRINTF_WORKS@
-
-/* Data accuracy is prefered to speed during data conversions */
-#cmakedefine H5_WANT_DATA_ACCURACY @H5_WANT_DATA_ACCURACY@
 
 /* Check exception handling functions during data conversions */
 #cmakedefine H5_WANT_DCONV_EXCEPTION @H5_WANT_DCONV_EXCEPTION@
@@ -821,9 +667,5 @@
 
 /* Define to `long' if <sys/types.h> does not define. */
 #cmakedefine H5_ssize_t
-
-#if defined(__cplusplus) && defined(inline)
-#undef inline
-#endif
 
 #endif

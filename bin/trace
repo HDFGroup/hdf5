@@ -84,7 +84,6 @@ $Source = "";
 	       "H5RC_request_t"             => "Rc",
 	       "hrpl_t"                     => "Rp",
                "char"                       => "s",
-               "unsigned char"              => "s",
                "H5S_class_t"                => "Sc",
                "H5S_seloper_t"              => "Ss",
                "H5S_sel_type"               => "St",
@@ -101,17 +100,20 @@ $Source = "";
                "unsigned long"              => "Ul",
                "unsigned long long"         => "UL",
                "H5VL_attr_get_t"            => "Va",
-               "H5VL_dataset_get_t"         => "Vd",
-               "H5VL_file_get_t"            => "Vf",
-               "H5VL_file_misc_t"           => "Vm",
-               "H5VL_file_optional_t"       => "Vn",
-               "H5VL_group_get_t"           => "Vg",
-               "H5VL_datatype_get_t"        => "Vt",
-               "H5VL_link_create_type_t"    => "Vc",
+               "H5VL_attr_specific_t"       => "Vb",
+               "H5VL_dataset_get_t"         => "Vc",
+               "H5VL_dataset_specific_t"    => "Vd",
+               "H5VL_datatype_get_t"        => "Ve",
+               "H5VL_datatype_specific_t"   => "Vf",
+               "H5VL_file_get_t"            => "Vg",
+               "H5VL_file_specific_t"       => "Vh",
+               "H5VL_group_get_t"           => "Vi",
+               "H5VL_group_specific_t"      => "Vj",
+               "H5VL_link_create_type_t"    => "Vk",
                "H5VL_link_get_t"            => "Vl",
-               "H5VL_object_misc_t"         => "Vx",
-               "H5VL_object_optional_t"     => "Vp",
-               "H5VL_object_get_t"          => "Vo",
+               "H5VL_link_specific_t"       => "Vm",
+               "H5VL_object_get_t"          => "Vn",
+               "H5VL_object_specific_t"     => "Vo",
                "void"                       => "x",
                "H5_request_t"               => "x",
                "FILE"                       => "x",
@@ -138,9 +140,10 @@ $Source = "";
                "H5G_iterate_t"              => "x",
 	       "H5G_info_t"                 => "x",
 	       "H5I_free_t"                 => "x",
-	       "H5I_iterate_func_t"         => "x",
+               "H5I_iterate_func_t"         => "x",
                "H5L_class_t"                => "x",
                "H5L_ff_info_t"              => "x",
+               "H5I_search_func_t"         =>  "x",
                "H5L_elink_traverse_t"       => "x",
                "H5L_iterate_t"              => "x",
                "H5MM_allocate_t"            => "x",
@@ -205,7 +208,7 @@ sub argstring ($$$) {
   # Normalize the data type by removing redundant white space,
   # certain type qualifiers, and indirection.
   $atype =~ s/^\bconst\b//;
-  $atype =~ s/\bUNUSED\b//g;
+  $atype =~ s/\bH5_ATTR_UNUSED\b//g;
   $atype =~ s/\s+/ /g;
   $ptr = length $1 if  $atype =~ s/(\*+)//;
   $atype =~ s/^\s+//;
@@ -308,14 +311,10 @@ sub rewrite_func ($$$$$) {
 
   # The H5TRACE() statement
   if ($body =~ /\/\*[ \t]*NO[ \t]*TRACE[ \t]*\*\//) {
-    if ($body =~ /\s*H5TRACE\d+\s*\(/) {
-      errmesg $file, $name, "warning: trace info was not updated because of NO TRACE comment";
-    } else {
-      errmesg $file, $name, "warning: trace info was not inserted because of NO TRACE comment";
-    }
+    # Ignored due to NO TRACE comment.
   } elsif ($body =~ s/((\n[ \t]*)H5TRACE\d+\s*\(.*?\);)\n/"$2$trace"/es) {
-    # Replaced an H5TRACE macro
-  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*\s*\(.*?\);??)\n/"$1$2$trace"/es) {
+    # Replaced an H5TRACE macro.
+  } elsif ($body=~s/((\n[ \t]*)FUNC_ENTER\w*\s*(\(.*?\))?;??)\n/"$1$2$trace"/es) {
     # Added an H5TRACE macro after a FUNC_ENTER macro.
   } else {
     errmesg $file, $name, "unable to insert tracing information";
@@ -344,14 +343,14 @@ for $file (@ARGV) {
 
     # Make modifications
     my $original = $Source;
-    my $napi = $Source =~ s/\n([A-Za-z]\w*(\s+[a-z]\w*)*)\s*\n #type
+    my $napi = $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
                               (H5[A-Z]{0,2}[^_A-Z0-9]\w*)      #name
                               \s*\((.*?)\)\s*               #args
                               (\{.*?\n\}[^\n]*)             #body
                            /rewrite_func($file,$1,$3,$4,$5)/segx;
     $total_api += $napi;
 
-    # If the source changed then print out the new version
+# If the source changed then print out the new version
     if ($original ne $Source) {
       printf "%s: instrumented %d API function%s\n", 
              $file, $napi, 1==$napi?"":"s";
@@ -362,3 +361,6 @@ for $file (@ARGV) {
     }
   }
 }
+
+printf "Finished processing HDF5 API calls\n"
+

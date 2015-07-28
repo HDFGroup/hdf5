@@ -154,15 +154,6 @@ typedef struct H5D_copy_file_ud_t {
 /******************************/
 /* Library Private Prototypes */
 /******************************/
-/* Internal I/O routines */
-H5_DLL herr_t H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
-                             const H5S_t *file_space, hid_t dxpl_id, const void *buf);
-H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, 
-                        const H5S_t *file_space, hid_t dset_xfer_plist,
-                        void *buf/*out*/);
-H5_DLL herr_t H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, 
-                         const H5S_t *file_space, hid_t dset_xfer_plist,
-                         const void *buf);
 
 H5_DLL herr_t H5D_init(void);
 H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id);
@@ -185,7 +176,7 @@ H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_ad
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
-				int indent, int fwidth, unsigned ndims);
+    int indent, int fwidth, unsigned ndims, const uint32_t *dim);
 
 #endif /* _H5Dprivate_H */
 

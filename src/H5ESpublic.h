@@ -59,9 +59,9 @@ extern "C" {
 
 H5_DLL hid_t H5EScreate(void);
 H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
-    //H5_DLL herr_t H5ESget_event_info(hid_t es_id,  size_t start_idx,  size_t count, 
-    //const char *ev_trace_str_arr[], H5ES_status_t ev_status_arr[], 
-    //H5E_stack_id ev_err_stack_id_arr[]);
+//H5_DLL herr_t H5ESget_event_info(hid_t es_id,  size_t start_idx,  size_t count, 
+//const char *ev_trace_str_arr[], H5ES_status_t ev_status_arr[], 
+//H5E_stack_id ev_err_stack_id_arr[]);
 H5_DLL herr_t H5EStest(hid_t es_id, size_t event_idx, H5ES_status_t *status);
 H5_DLL herr_t H5EStest_all(hid_t es_id,  H5ES_status_t *status);
 H5_DLL herr_t H5ESwait(hid_t es_id, size_t event_idx, H5ES_status_t *status);

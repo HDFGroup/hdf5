@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.11)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_HL C CXX)
 
 #-----------------------------------------------------------------------------
@@ -38,7 +38,3 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     add_subdirectory (${HDF5_HL_SOURCE_DIR}/test ${HDF5_HL_BINARY_DIR}/test)
   endif (BUILD_TESTING)
 endif (NOT HDF5_EXTERNALLY_CONFIGURED)
-
-if (HDF5_BUILD_CPP_LIB)
-  add_subdirectory (${HDF5_HL_SOURCE_DIR}/c++ ${HDF5_HL_BINARY_DIR}/c++)
-endif (HDF5_BUILD_CPP_LIB)

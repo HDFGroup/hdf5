@@ -170,7 +170,7 @@ static htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr,
  */
 static herr_t
 H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
+    unsigned H5_ATTR_UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_cvt_t *udata = (H5O_iter_cvt_t *)_udata;   /* Operator user data */
     H5A_t *attr = (H5A_t *)mesg->native;        /* Pointer to attribute to insert */
@@ -416,7 +416,7 @@ done:
  */
 static herr_t
 H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
-    unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
+    unsigned H5_ATTR_UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_opn_t *udata = (H5O_iter_opn_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -483,7 +483,7 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     HDassert(name);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
     /* Check for attribute info stored */
@@ -632,7 +632,7 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ATTR, H5E_BADITER, NULL, "can't locate attribute")
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
     /* Find out whether it has already been opened.  If it has, close the object
@@ -726,7 +726,7 @@ H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char* name_t
             unsigned long attr_fnum;        /* Attributes file serial number */
 
             /* Get pointer to attribute */
-            if(NULL == (*attr = (H5A_t *)H5I_object_verify(attr_id_list[u], H5I_ATTR)))
+            if(NULL == (*attr = (H5A_t *)H5VL_object_verify(attr_id_list[u], H5I_ATTR)))
                 HGOTO_ERROR(H5E_ATTR, H5E_BADTYPE, FAIL, "not an attribute")
 
             /* Get file serial number for attribute */
@@ -850,7 +850,7 @@ done:
  */
 static herr_t
 H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
+    unsigned H5_ATTR_UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_wrt_t *udata = (H5O_iter_wrt_t *)_udata;   /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
@@ -1008,8 +1008,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
+H5O_attr_rename_chk_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned H5_ATTR_UNUSED sequence, unsigned H5_ATTR_UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -1055,7 +1055,7 @@ H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
  */
 static herr_t
 H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
+    unsigned H5_ATTR_UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
@@ -1283,7 +1283,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     HDassert(attr_op);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
@@ -1517,7 +1517,7 @@ done:
  */
 static herr_t
 H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
+    unsigned H5_ATTR_UNUSED sequence, unsigned *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
@@ -1795,8 +1795,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_exists_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned UNUSED *oh_modified, void *_udata/*in,out*/)
+H5O_attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned H5_ATTR_UNUSED sequence, unsigned H5_ATTR_UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
@@ -1846,7 +1846,7 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     HDassert(name);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
@@ -2000,7 +2000,7 @@ H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
     HDassert(loc);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve # of attributes on object */

@@ -807,12 +807,7 @@ TOOLTEST h5diff_80.txt -v h5diff_dset1.h5 h5diff_dset2.h5
 TOOLTEST h5diff_90.txt -v h5diff_basic2.h5 h5diff_basic2.h5
 
 # 10. read by hyperslab, print indexes
-if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
-    # skip this test which sometimes hangs in some THG machines
-    SKIP -v h5diff_hyper1.h5 h5diff_hyper2.h5
-else
-    TOOLTEST h5diff_100.txt -v h5diff_hyper1.h5 h5diff_hyper2.h5 
-fi
+TOOLTEST h5diff_100.txt -v h5diff_hyper1.h5 h5diff_hyper2.h5 
 
 # 11. floating point comparison
 # double value

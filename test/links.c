@@ -141,7 +141,7 @@ const char *FILENAME[] = {
 #define H5L_DIM1 100
 #define H5L_DIM2 100
 
-#define FILTER_FILESIZE_MAX_FRACTION .9
+#define FILTER_FILESIZE_MAX_FRACTION 0.9F
 
 /* Creation order macros */
 #define CORDER_GROUP_NAME       "corder_group"
@@ -4023,10 +4023,6 @@ external_set_elink_acc_flags(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY;
     if(ret != FAIL) TEST_ERROR
     H5E_BEGIN_TRY {
-        ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_DEBUG);
-    } H5E_END_TRY;
-    if(ret != FAIL) TEST_ERROR
-    H5E_BEGIN_TRY {
         ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_CREAT);
     } H5E_END_TRY;
     if(ret != FAIL) TEST_ERROR
@@ -4145,7 +4141,8 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     op_data.target_file = filename2;
     /* Core file driver has issues when used as the member file driver for a family file */
     /* Family file driver cannot be used with family or multi drivers for member files */
-    /* Also disable parellel member drivers, because IS_H5FD_MPI whould report FALSE, causing problems */
+    /* Also disable parallel member drivers, because H5F_HAS_FEATURE(H5FD_FEAT_HAS_MPI) 
+       would report FALSE, causing problems */
     base_driver = H5Pget_driver(fapl);
     op_data.base_fapl = (base_driver == H5FD_FAMILY || base_driver ==  H5FD_MULTI
             || base_driver == H5FD_MPIO || base_driver == H5FD_CORE) ? H5P_DEFAULT : fapl;
@@ -6077,7 +6074,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY
 
     /* Test H5Rcreate */
-    if(H5Rcreate(&obj_ref, fid1, "elink/elink/elink/type1_moved", H5R_OBJECT, (-1)) < 0) TEST_ERROR
+    if(H5Rcreate(&obj_ref, fid1, "elink/elink/elink/type1_moved", H5R_OBJECT, (hid_t)(-1)) < 0) TEST_ERROR
 
     /* Test unlink */
     if(H5Ldelete(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT) < 0) TEST_ERROR
@@ -7323,8 +7320,8 @@ error:
 /* Callback functions for UD hard links. */
 /* UD_hard_create increments the object's reference count */
 static herr_t
-UD_hard_create(const char UNUSED * link_name, hid_t loc_group, const void *udata,
-    size_t udata_size, hid_t UNUSED lcpl_id)
+UD_hard_create(const char H5_ATTR_UNUSED * link_name, hid_t loc_group, const void *udata,
+    size_t udata_size, hid_t H5_ATTR_UNUSED lcpl_id)
 {
     haddr_t addr;
     hid_t target_obj = -1;
@@ -7392,8 +7389,8 @@ done:
 
 /* Traverse a hard link by opening the object */
 static hid_t
-UD_hard_traverse(const char UNUSED *link_name, hid_t cur_group,
-    const void *udata, size_t udata_size, hid_t UNUSED lapl_id)
+UD_hard_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
+    const void *udata, size_t udata_size, hid_t H5_ATTR_UNUSED lapl_id)
 {
     haddr_t addr;
     hid_t ret_value = -1;
@@ -7410,7 +7407,7 @@ UD_hard_traverse(const char UNUSED *link_name, hid_t cur_group,
 
 /* UD_hard_delete decrements the object's reference count */
 static herr_t
-UD_hard_delete(const char UNUSED * link_name, hid_t file, const void *udata,
+UD_hard_delete(const char H5_ATTR_UNUSED * link_name, hid_t file, const void *udata,
     size_t udata_size)
 {
     haddr_t addr;
@@ -7628,8 +7625,8 @@ ud_hard_links(hid_t fapl)
  * in the current group named REREG_TARGET_NAME
  */
 static hid_t
-UD_rereg_traverse(const char UNUSED * link_name, hid_t cur_group,
-    const void UNUSED *udata, size_t UNUSED udata_size, hid_t lapl_id)
+UD_rereg_traverse(const char H5_ATTR_UNUSED * link_name, hid_t cur_group,
+    const void H5_ATTR_UNUSED *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id)
 {
     hid_t ret_value;
 
@@ -8067,8 +8064,8 @@ error:
  *-------------------------------------------------------------------------
  */
 static hid_t
-UD_plist_traverse(const char UNUSED * link_name, hid_t cur_group,
-    const void UNUSED *udata, size_t udata_size, hid_t lapl_id)
+UD_plist_traverse(const char H5_ATTR_UNUSED * link_name, hid_t cur_group,
+    const void H5_ATTR_UNUSED *udata, size_t udata_size, hid_t lapl_id)
 {
     char target[NAME_BUF_SIZE];
     hid_t ret_value;
@@ -8206,8 +8203,8 @@ lapl_udata(hid_t fapl, hbool_t new_format)
  *-------------------------------------------------------------------------
  */
 static herr_t
-UD_cbsucc_create(const char UNUSED * link_name, hid_t UNUSED loc_group,
-    const void *udata, size_t udata_size, hid_t UNUSED lcpl_id)
+UD_cbsucc_create(const char H5_ATTR_UNUSED * link_name, hid_t H5_ATTR_UNUSED loc_group,
+    const void *udata, size_t udata_size, hid_t H5_ATTR_UNUSED lcpl_id)
 {
     /* Check to make sure that this "soft link" has a target */
     if(udata_size < 1 || !udata)
@@ -8217,8 +8214,8 @@ UD_cbsucc_create(const char UNUSED * link_name, hid_t UNUSED loc_group,
 } /* end UD_cbsucc_create() */
 
 static hid_t
-UD_cbsucc_traverse(const char UNUSED *link_name, hid_t cur_group,
-    const void *udata, size_t UNUSED udata_size, hid_t lapl_id)
+UD_cbsucc_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
+    const void *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id)
 {
     const char *target = (const char *)udata;
     hid_t ret_value;
@@ -8235,8 +8232,8 @@ error:
 
 /* Failure callback for when the link is moved or renamed */
 static herr_t
-UD_cbfail_move(const char UNUSED *new_name, hid_t UNUSED new_loc,
-    const void UNUSED *udata, size_t UNUSED udata_size)
+UD_cbfail_move(const char H5_ATTR_UNUSED *new_name, hid_t H5_ATTR_UNUSED new_loc,
+    const void H5_ATTR_UNUSED *udata, size_t H5_ATTR_UNUSED udata_size)
 {
     /* This traversal function will always fail. */
     return -1;
@@ -8244,8 +8241,8 @@ UD_cbfail_move(const char UNUSED *new_name, hid_t UNUSED new_loc,
 
 /* SuccessCallback for when the link is moved or renamed */
 static herr_t
-UD_cbsucc_move(const char UNUSED *new_name, hid_t UNUSED new_loc,
-    const void UNUSED *udata, size_t UNUSED udata_size)
+UD_cbsucc_move(const char H5_ATTR_UNUSED *new_name, hid_t H5_ATTR_UNUSED new_loc,
+    const void H5_ATTR_UNUSED *udata, size_t H5_ATTR_UNUSED udata_size)
 {
     /* This traversal function will always succeed. */
     return 0;
@@ -8253,8 +8250,8 @@ UD_cbsucc_move(const char UNUSED *new_name, hid_t UNUSED new_loc,
 
 /* Callback for when the link is deleted.  Also called during move */
 static herr_t
-UD_cbsucc_delete(const char UNUSED *link_name, hid_t UNUSED file,
-    const void UNUSED *udata, size_t UNUSED udata_size)
+UD_cbsucc_delete(const char H5_ATTR_UNUSED *link_name, hid_t H5_ATTR_UNUSED file,
+    const void H5_ATTR_UNUSED *udata, size_t H5_ATTR_UNUSED udata_size)
 {
     /* This callback will always succeed */
     return 0;
@@ -8262,8 +8259,8 @@ UD_cbsucc_delete(const char UNUSED *link_name, hid_t UNUSED file,
 
 /* Callback for when the link is deleted.  Also called during move */
 static herr_t
-UD_cbfail_delete(const char UNUSED *link_name, hid_t UNUSED file,
-    const void UNUSED *udata, size_t UNUSED udata_size)
+UD_cbfail_delete(const char H5_ATTR_UNUSED *link_name, hid_t H5_ATTR_UNUSED file,
+    const void H5_ATTR_UNUSED *udata, size_t H5_ATTR_UNUSED udata_size)
 {
     /* This traversal function will always fail. */
     /* Note: un-deletable links are in general a very bad idea! */
@@ -8272,8 +8269,8 @@ UD_cbfail_delete(const char UNUSED *link_name, hid_t UNUSED file,
 
 /* Callback for when the link is queried */
 static ssize_t
-UD_cbfail_query(const char UNUSED *link_name, const void UNUSED *udata,
-    size_t UNUSED udata_size, void UNUSED *buf, size_t UNUSED buf_size)
+UD_cbfail_query(const char H5_ATTR_UNUSED *link_name, const void H5_ATTR_UNUSED *udata,
+    size_t H5_ATTR_UNUSED udata_size, void H5_ATTR_UNUSED *buf, size_t H5_ATTR_UNUSED buf_size)
 {
     /* This traversal function will always fail. */
     return -1;
@@ -8281,8 +8278,8 @@ UD_cbfail_query(const char UNUSED *link_name, const void UNUSED *udata,
 
 /* Callback for when the link is queried */
 static ssize_t
-UD_cbfail_on_write_query(const char UNUSED *link_name, const void UNUSED *udata,
-    size_t UNUSED udata_size, void *buf, size_t UNUSED buf_size)
+UD_cbfail_on_write_query(const char H5_ATTR_UNUSED *link_name, const void H5_ATTR_UNUSED *udata,
+    size_t H5_ATTR_UNUSED udata_size, void *buf, size_t H5_ATTR_UNUSED buf_size)
 {
     /* This traversal function will return a buffer size,
      * but will fail when a buffer is passed in ("writing to the buffer"
@@ -8297,8 +8294,8 @@ UD_cbfail_on_write_query(const char UNUSED *link_name, const void UNUSED *udata,
 
 /* Callback for when the link is queried */
 static ssize_t
-UD_cbsucc_query(const char UNUSED *link_name, const void UNUSED *udata,
-    size_t UNUSED udata_size, void *buf, size_t buf_size)
+UD_cbsucc_query(const char H5_ATTR_UNUSED *link_name, const void H5_ATTR_UNUSED *udata,
+    size_t H5_ATTR_UNUSED udata_size, void *buf, size_t buf_size)
 {
     /* This traversal function will return a buffer size,
      * but will fail when a buffer is passed in ("writing to the buffer"
@@ -9010,7 +9007,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-visit_link_cb(hid_t UNUSED group_id, const char *name, const H5L_info_t *linfo,
+visit_link_cb(hid_t H5_ATTR_UNUSED group_id, const char *name, const H5L_info_t *linfo,
     void *_op_data)
 {
     lvisit_ud_t *op_data = (lvisit_ud_t *)_op_data;
@@ -9188,7 +9185,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-visit_obj_cb(hid_t UNUSED group_id, const char *name, const H5O_info_t *oinfo,
+visit_obj_cb(hid_t H5_ATTR_UNUSED group_id, const char *name, const H5O_info_t *oinfo,
     void *_op_data)
 {
     ovisit_ud_t *op_data = (ovisit_ud_t *)_op_data;
@@ -9366,7 +9363,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-visit_obj_stop_cb(hid_t UNUSED group_id, const char UNUSED *name, const H5O_info_t UNUSED *oinfo,
+visit_obj_stop_cb(hid_t H5_ATTR_UNUSED group_id, const char H5_ATTR_UNUSED *name, const H5O_info_t H5_ATTR_UNUSED *oinfo,
     void *_op_data)
 {
     unsigned *op_data = (unsigned *)_op_data;
@@ -9492,8 +9489,8 @@ static herr_t link_filter_set_local(hid_t dcpl_id, hid_t type_id, hid_t space_id
 } /* end link_filter_set_local */
 
 static size_t link_filter_filter(unsigned int flags, size_t cd_nelmts,
-    const unsigned int cd_values[], size_t nbytes, size_t UNUSED *buf_size,
-    void UNUSED **buf)
+    const unsigned int cd_values[], size_t nbytes, size_t H5_ATTR_UNUSED *buf_size,
+    void H5_ATTR_UNUSED **buf)
 {
     if(flags & H5Z_FLAG_OPTIONAL || cd_nelmts != 1 || cd_values[0] != 2112)
         return 0;
@@ -11422,6 +11419,12 @@ delete_by_idx(hid_t fapl)
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
+                /* Check for deletion on non-existing group */
+                H5E_BEGIN_TRY {
+                    ret = H5Ldelete_by_idx(group_id, "None", idx_type, order, (hsize_t)0, H5P_DEFAULT);
+                } H5E_END_TRY;
+                if(ret >= 0) TEST_ERROR
+
                 /* Create several links, up to limit of compact form */
                 for(u = 0; u < max_compact; u++) {
                     hid_t group_id2;	        /* Group ID */
@@ -11987,8 +11990,8 @@ group_iterate_cb(hid_t group_id, const char *link_name, void *_op_data)
  *-------------------------------------------------------------------------
  */
 static int
-link_iterate_fail_cb(hid_t UNUSED group_id, const char UNUSED *link_name,
-    const H5L_info_t UNUSED *info, void UNUSED *_op_data)
+link_iterate_fail_cb(hid_t H5_ATTR_UNUSED group_id, const char H5_ATTR_UNUSED *link_name,
+    const H5L_info_t H5_ATTR_UNUSED *info, void H5_ATTR_UNUSED *_op_data)
 {
     return(H5_ITER_ERROR);
 } /* end link_iterate_fail_cb() */
@@ -12600,13 +12603,13 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     /* Check for iteration w/bad location ID */
     skip = 0;
     H5E_BEGIN_TRY {
-        ret = H5Literate((-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
+        ret = H5Literate((hid_t)(-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
     } H5E_END_TRY;
     if(ret >= 0) TEST_ERROR
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     H5E_BEGIN_TRY {
-        ret = H5Giterate((-1), ".", &gskip, group_iterate_old_cb, iter_info);
+        ret = H5Giterate((hid_t)(-1), ".", &gskip, group_iterate_old_cb, iter_info);
     } H5E_END_TRY;
     if(ret >= 0) TEST_ERROR
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -12872,7 +12875,7 @@ open_by_idx(hid_t fapl)
     char        valname[NAME_BUF_SIZE]; /* Link value */
     haddr_t     *objno = NULL;          /* Addresses of the objects created */
     unsigned    u;                      /* Local index variable */
-    herr_t      ret;                    /* Generic return value */
+    hid_t       ret;                    /* Generic return value */
 
     /* Create group creation property list */
     if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
@@ -13097,7 +13100,7 @@ open_by_idx_old(hid_t fapl)
     char        valname[NAME_BUF_SIZE]; /* Link value */
     haddr_t     objno[CORDER_NLINKS];   /* Addresses of the objects created */
     unsigned    u;                      /* Local index variable */
-    herr_t      ret;                    /* Generic return value */
+    hid_t       ret;                    /* Generic return value */
 
     /* Create file to mount */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);

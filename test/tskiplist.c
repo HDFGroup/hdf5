@@ -592,7 +592,7 @@ test_skiplist_string(void)
 } /* end test_skiplist_string() */
 
 static herr_t
-test_skiplist_iter(void *item, void UNUSED *key, void *op_data)
+test_skiplist_iter(void *item, void H5_ATTR_UNUSED *key, void *op_data)
 {
     size_t *up=(size_t *)op_data;
 
@@ -1070,7 +1070,7 @@ test_skiplist_add(void)
 } /* end test_skiplist_add() */
 
 static herr_t
-test_skiplist_destroy_free(void *item, void UNUSED *key, void *op_data)
+test_skiplist_destroy_free(void *item, void H5_ATTR_UNUSED *key, void *op_data)
 {
     unsigned *free_count=(unsigned *)op_data;
 

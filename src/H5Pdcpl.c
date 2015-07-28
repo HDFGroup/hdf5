@@ -80,7 +80,7 @@
 /* Define default layout information */
 #define H5D_DEF_STORAGE_COMPACT_INIT  {(hbool_t)FALSE, (size_t)0, NULL}
 #define H5D_DEF_STORAGE_CONTIG_INIT   {HADDR_UNDEF, (hsize_t)0}
-#define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_BTREE, HADDR_UNDEF,  NULL, {{HADDR_UNDEF, NULL}}}
+#define H5D_DEF_STORAGE_CHUNK_INIT    {H5D_CHUNK_IDX_BTREE, HADDR_UNDEF,  NULL, {{HADDR_UNDEF, NULL}}}
 #define H5D_DEF_LAYOUT_CHUNK_INIT    {(unsigned)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, (uint32_t)0, (hsize_t)0, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}}
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 #define H5D_DEF_STORAGE_COMPACT  {H5D_COMPACT, { .compact = H5D_DEF_STORAGE_COMPACT_INIT }}
@@ -296,17 +296,17 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type ID property*/
-    if(H5P_register_real(pclass, H5VL_DSET_TYPE_ID, sizeof(hid_t), &type_id, 
+    if(H5P_register_real(pclass, H5VL_PROP_DSET_TYPE_ID, sizeof(hid_t), &type_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the space ID property */
-    if(H5P_register_real(pclass, H5VL_DSET_SPACE_ID, sizeof(hid_t), &space_id, 
+    if(H5P_register_real(pclass, H5VL_PROP_DSET_SPACE_ID, sizeof(hid_t), &space_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the lcpl ID property */
-    if(H5P_register_real(pclass, H5VL_DSET_LCPL_ID, sizeof(hid_t), &lcpl_id, 
+    if(H5P_register_real(pclass, H5VL_PROP_DSET_LCPL_ID, sizeof(hid_t), &lcpl_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -332,7 +332,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P__dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
+H5P__dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void H5_ATTR_UNUSED *copy_data)
 {
     H5O_fill_t     src_fill, dst_fill;          /* Source & destination fill values */
     H5O_efl_t      src_efl, dst_efl;            /* Source & destination external file lists */
@@ -446,7 +446,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P__dcrt_close(hid_t dcpl_id, void UNUSED *close_data)
+H5P__dcrt_close(hid_t dcpl_id, void H5_ATTR_UNUSED *close_data)
 {
     H5O_fill_t      fill;               /* Fill value */
     H5O_efl_t       efl;                /* External file list */
@@ -638,7 +638,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t UNUSED size)
+H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t H5_ATTR_UNUSED size)
 {
     const H5O_layout_t *layout1 = (const H5O_layout_t *)_layout1,     /* Create local aliases for values */
         *layout2 = (const H5O_layout_t *)_layout2;
@@ -870,7 +870,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5P_fill_value_cmp(const void *_fill1, const void *_fill2, size_t UNUSED size)
+H5P_fill_value_cmp(const void *_fill1, const void *_fill2, size_t H5_ATTR_UNUSED size)
 {
     const H5O_fill_t *fill1 = (const H5O_fill_t *)_fill1,     /* Create local aliases for values */
         *fill2 = (const H5O_fill_t *)_fill2;
@@ -1107,7 +1107,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P__dcrt_ext_file_list_cmp(const void *_efl1, const void *_efl2, size_t UNUSED size)
+H5P__dcrt_ext_file_list_cmp(const void *_efl1, const void *_efl2, size_t H5_ATTR_UNUSED size)
 {
     const H5O_efl_t *efl1 = (const H5O_efl_t *)_efl1,     /* Create local aliases for values */
         *efl2 = (const H5O_efl_t *)_efl2;

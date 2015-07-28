@@ -29,8 +29,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Tpkg.h"		/* Datatypes				*/
-#include "H5VLnative.h" 	/* Native Plugin                        */
-#include "H5VLprivate.h"	/* VOL          		  	*/
+
 
 /****************/
 /* Local Macros */
@@ -131,28 +130,29 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
+H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t H5_ATTR_UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
-    H5T_t       *dt = NULL; /* Datatype opened */
-    hid_t	ret_value;                /* Return value */
+    H5T_t       *type = NULL;           /* Datatype opened */
+    hid_t	ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(obj_loc);
 
     /* Open the datatype */
-    if(NULL == (dt = H5T_open(obj_loc, dxpl_id)))
+    if(NULL == (type = H5T_open(obj_loc, dxpl_id)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
-
+    if(type->vol_obj != NULL) 
+        printf("TRIGERRED\n");
     /* Register an ID for the datatype */
-    if((ret_value = H5I_register(H5I_DATATYPE, dt, app_ref)) < 0)
+    if((ret_value = H5I_register(H5I_DATATYPE, type, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
 
 done:
-    if(ret_value < 0) {
-        if(dt && H5T_close(dt) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
-    }
+    if(ret_value < 0)
+        if(type && H5T_close(type) < 0)
+            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_open() */
 
@@ -225,9 +225,8 @@ H5O_dtype_get_oloc(hid_t obj_id)
     /* Get the datatype */
     if(NULL == (dt = (H5T_t *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
-
-    if(NULL == (type = (H5T_t *)H5T_get_named_type(dt)))
-        type = dt;
+    /* If this is a named datatype, get the plugin pointer to the datatype */
+    type = (H5T_t *)H5T_get_actual_type(dt);
 
     /* Get the datatype's object header location */
     if(NULL == (ret_value = H5T_oloc(type)))
