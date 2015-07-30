@@ -5443,7 +5443,7 @@ H5D__apply_index_query(void *idx_handle, H5X_class_t *idx_class, hid_t query_id,
         ret = H5D__apply_index_query(idx_handle, idx_class, qid2, xxpl_id, &sid2);
         if(ret != 0)
             HGOTO_ERROR_FF(ret, "Error applying index query");
-
+#if 0
         /* combine result1 and result2 */
         if(H5Q_COMBINE_AND == comb_type) {
             if(FAIL == (*space_id = H5Scombine_select(sid1, H5S_SELECT_AND, sid2)))
@@ -5454,6 +5454,7 @@ H5D__apply_index_query(void *idx_handle, H5X_class_t *idx_class, hid_t query_id,
                 HGOTO_ERROR_FF(ret, "Unable to AND 2 dataspace selections");
         }
         else
+#endif
             HGOTO_ERROR_FF(FAIL, "invalid query combine OP");
 
         if(sid1!=FAIL && H5Sclose(sid1) < 0)

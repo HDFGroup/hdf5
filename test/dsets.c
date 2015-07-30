@@ -7917,8 +7917,6 @@ error:
     return -1;
 } /* end test_large_chunk_shrink() */
 
-/* MSC - support removed in FF */
-#if 0
 
 /*-------------------------------------------------------------------------
  * Function: test_zero_dim_dset
@@ -9144,7 +9142,7 @@ main(void)
 	nerrors += (test_layout_extend(my_fapl) < 0		? 1 : 0);
 	nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
 	nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
-
+#endif
         if(H5Fclose(file) < 0)
             goto error;
     } /* end for */

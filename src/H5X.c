@@ -405,8 +405,6 @@ H5Xcreate(hid_t file_id, unsigned plugin_id, hid_t scope_id, hid_t xcpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID");
     if (NULL == (obj = (void *) H5VL_get_object(scope_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object/file identifier");
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     /* TODO */
     /* Call H5VL layer */

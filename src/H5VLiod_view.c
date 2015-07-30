@@ -568,7 +568,7 @@ H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
                 *result = result1 + result2;
 
                 if(sid1!=FAIL && sid2!=FAIL) {
-                    if(FAIL == (*region = H5Scombine_select(sid1, H5S_SELECT_AND, sid2)))
+                    //if(FAIL == (*region = H5Scombine_select(sid1, H5S_SELECT_AND, sid2)))
                         HGOTO_ERROR_FF(ret, "Unable to AND 2 dataspace selections");
 
                 }
@@ -581,7 +581,7 @@ H5VL__iod_apply_query(hid_t file_id, hid_t rcxt_id, hid_t qid, hid_t vcpl_id,
                 *result = result1 + result2 + 1;
 
                 if(sid1!=FAIL && sid2!=FAIL) {
-                    if(FAIL == (*region = H5Scombine_select(sid1, H5S_SELECT_OR, sid2)))
+                    //if(FAIL == (*region = H5Scombine_select(sid1, H5S_SELECT_OR, sid2)))
                         HGOTO_ERROR_FF(ret, "Unable to AND 2 dataspace selections");
                 }
                 else if(sid1!=FAIL)

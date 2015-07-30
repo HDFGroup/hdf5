@@ -984,8 +984,8 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
                     first_space = FALSE;
                 }
                 else {
-                    if(H5Smodify_select(space_id, H5S_SELECT_OR, space_layout) < 0)
-                        HGOTO_ERROR_FF(FAIL, "Unable to OR 2 dataspace selections");
+                    //if(H5Smodify_select(space_id, H5S_SELECT_OR, space_layout) < 0)
+                    //HGOTO_ERROR_FF(FAIL, "Unable to OR 2 dataspace selections");
                 }
 
                 if(H5Sclose(space_layout) < 0)
@@ -999,8 +999,8 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         if(space_id == FAIL)
             continue;
 
-        if(H5Smodify_select(space_id, H5S_SELECT_AND, region) < 0)
-            HGOTO_ERROR_FF(FAIL, "Unable to AND 2 dataspace selections");
+        //if(H5Smodify_select(space_id, H5S_SELECT_AND, region) < 0)
+        //HGOTO_ERROR_FF(FAIL, "Unable to AND 2 dataspace selections");
 
         farm_input.space_id = space_id;
         farm_input.coh = cohs[i];
@@ -1097,8 +1097,8 @@ H5VL__iod_farm_work(iod_obj_map_t *obj_map, iod_handle_t *cohs,
         if(FAIL == (space_layout = H5VL__iod_get_space_layout(coords, region)))
             HGOTO_ERROR_FF(FAIL, "can't generate local dataspace selection");
 
-        if(H5Smodify_select(space_layout, H5S_SELECT_AND, region) < 0)
-            HGOTO_ERROR_FF(FAIL, "Unable to AND 2 dataspace selections");
+        //if(H5Smodify_select(space_layout, H5S_SELECT_AND, region) < 0)
+        //HGOTO_ERROR_FF(FAIL, "Unable to AND 2 dataspace selections");
 
         farm_input.space_id = space_layout;
         farm_input.coh = cohs[worker];
