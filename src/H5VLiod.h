@@ -65,6 +65,8 @@ extern "C" {
 #define H5O_XFER_LOW_KEY_BUF_NAME "low_key_range"
 #define H5O_XFER_HIGH_KEY_BUF_NAME "high_key_range"
 
+#define HDF5_VOL_IOD_VERSION_1	1	/* Version number of IOD VOL plugin */
+
 typedef enum H5FF_layout_t {
     H5_DEFAULT_LAYOUT = 0,
     H5_LOCAL_NODE,
@@ -76,7 +78,7 @@ typedef enum H5FF_dset_dim_layout_t {
     H5D_COL_MAJOR
 } H5FF_dset_dim_layout_t;
 
-H5_DLL H5VL_class_t *H5VL_iod_init(void);
+H5_DLL hid_t H5VL_iod_init(void);
 H5_DLL herr_t H5Pset_fapl_iod(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t EFF_start_server(MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t EFF_init(MPI_Comm comm, MPI_Info info);

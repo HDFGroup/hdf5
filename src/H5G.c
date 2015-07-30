@@ -91,6 +91,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5ESprivate.h"        /* Event Stacks                         */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -714,7 +715,7 @@ H5Gclose(hid_t group_id)
     H5TRACE1("e", "i", group_id);
 
     /* Check args */
-    if(NULL == (obj == (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")
 
     /* set the async request and dxpl IDs to be passed on to the VOL layer */

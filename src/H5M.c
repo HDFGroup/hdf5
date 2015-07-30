@@ -781,7 +781,7 @@ H5Mclose_ff(hid_t map_id, hid_t estack_id)
     H5TRACE2("e", "ii", map_id, estack_id);
 
     /* Check args */
-    if(NULL == (obj == (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a map ID")
 
     /* set the async request and dxpl IDs to be passed on to the VOL layer */

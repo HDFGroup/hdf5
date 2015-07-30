@@ -28,6 +28,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5ESprivate.h"        /* Event Stacks                         */
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -832,7 +833,7 @@ H5Fclose(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* set the async request and dxpl IDs to be passed on to the VOL layer */
-    obj->close_estack_id = H5_EVENT_STACK_NULL;
+    file->close_estack_id = H5_EVENT_STACK_NULL;
     file->close_dxpl_id = H5AC_dxpl_id;
 
     /* Decrement reference count on atom.  When it reaches zero the file will be closed. */

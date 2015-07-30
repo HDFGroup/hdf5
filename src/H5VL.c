@@ -147,7 +147,7 @@ done:
 int
 H5VL_term_interface(void)
 {
-    int	n = 0, n1 = 0;
+    int n = 0, n1 = 0;
     hbool_t term = TRUE;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -653,7 +653,7 @@ done:
 herr_t
 H5VLget_object(hid_t obj_id, void **obj)
 {
-    hid_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i**x", obj_id, obj);

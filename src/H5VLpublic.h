@@ -351,20 +351,6 @@ typedef struct H5VL_class_t {
     herr_t (*optional)(void *obj, hid_t dxpl_id, void **req, va_list arguments); /* Optional callback */
 } H5VL_class_t;
 
-/*
- * The main datatype for each plugin. Public fields common to all
- * plugins are declared here and the plugin appends private fields in
- * memory.
- */
-struct H5VL_t {
-    const H5VL_class_t *cls;            /*constant class info       */
-    const char         *container_name; /* name of the underlying storage container */
-    unsigned long       feature_flags;  /* VOL Driver feature Flags */
-    int                 nrefs;          /* number of references by objects using this struct */
-    hid_t               close_estack_id;
-    hid_t               close_dxpl_id;
-};
-
 #ifdef __cplusplus
 extern "C" {
 #endif
