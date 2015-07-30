@@ -154,6 +154,9 @@
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #undef HAVE_GET_FPC_CSR
 
+/* Define to 1 if you have the <iapi.h> header file. */
+#undef HAVE_IAPI_H
+
 /* Define id indexing code should be enabled. */
 #undef HAVE_INDEXING
 
@@ -208,9 +211,6 @@
 
 /* Define to 1 if you have the `iodcorrupt' library (-liodcorrupt). */
 #undef HAVE_LIBIODCORRUPT
-
-/* Define to 1 if you have the `lmpe' library (-llmpe). */
-#undef HAVE_LIBLMPE
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM

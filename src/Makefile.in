@@ -109,7 +109,8 @@ noinst_PROGRAMS = H5detect$(EXEEXT) H5make_libsettings$(EXEEXT)
 TESTS =
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
+	$(top_srcdir)/m4/aclocal_fc.m4 $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4/ax_python.m4 \
 	$(top_srcdir)/m4/ax_python_devel.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -151,38 +152,39 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_la_LIBADD =
 am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5timer.lo H5trace.lo H5A.lo H5Abtree2.lo H5Adense.lo \
-	H5Adeprec.lo H5Aint.lo H5Atest.lo H5AC.lo H5B.lo H5Bcache.lo \
-	H5Bdbg.lo H5B2.lo H5B2cache.lo H5B2dbg.lo H5B2hdr.lo \
-	H5B2int.lo H5B2stat.lo H5B2test.lo H5C.lo H5CS.lo H5D.lo \
-	H5Dbtree.lo H5Dchunk.lo H5Dcompact.lo H5Dcontig.lo H5Ddbg.lo \
-	H5Ddeprec.lo H5Defl.lo H5Dfill.lo H5Dint.lo H5Dio.lo \
-	H5Dlayout.lo H5Dmpio.lo H5Doh.lo H5Dscatgath.lo H5Dselect.lo \
-	H5Dtest.lo H5E.lo H5Edeprec.lo H5Eint.lo H5EA.lo H5EAcache.lo \
-	H5EAdbg.lo H5EAdblkpage.lo H5EAdblock.lo H5EAhdr.lo \
-	H5EAiblock.lo H5EAint.lo H5EAsblock.lo H5EAstat.lo H5EAtest.lo \
-	H5F.lo H5Fint.lo H5Faccum.lo H5Fcwfs.lo H5Fdbg.lo H5Fdeprec.lo \
-	H5Fefc.lo H5Ffake.lo H5Fio.lo H5Fmount.lo H5Fmpi.lo \
-	H5Fquery.lo H5Fsfile.lo H5Fsuper.lo H5Fsuper_cache.lo \
-	H5Ftest.lo H5FA.lo H5FAcache.lo H5FAdbg.lo H5FAdblock.lo \
-	H5FAdblkpage.lo H5FAhdr.lo H5FAstat.lo H5FAtest.lo H5VL.lo \
-	H5VLint.lo H5VLnative.lo H5VLiod.lo H5VLiod_props.lo \
-	H5VLiod_common.lo H5VLiod_client.lo H5VLiod_server.lo \
-	H5VLiod_encdec.lo H5VLiod_util.lo H5VLiod_file.lo \
-	H5VLiod_group.lo H5VLiod_map.lo H5VLiod_dset.lo \
-	H5VLiod_dtype.lo H5VLiod_index.lo H5VLiod_attr.lo \
-	H5VLiod_link.lo H5VLiod_obj.lo H5VLiod_trans.lo \
-	H5VLiod_view.lo H5VLiod_analysis.lo H5FD.lo H5FDcore.lo \
-	H5FDdirect.lo H5FDfamily.lo H5FDint.lo H5FDlog.lo H5FDmpi.lo \
-	H5FDmpio.lo H5FDmulti.lo H5FDsec2.lo H5FDspace.lo H5FDstdio.lo \
-	H5FF.lo H5ES.lo H5RC.lo H5TR.lo H5M.lo H5AS.lo H5V.lo H5FL.lo \
-	H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo H5FSsection.lo \
-	H5FSstat.lo H5FStest.lo H5G.lo H5Gbtree2.lo H5Gcache.lo \
-	H5Gcompact.lo H5Gdense.lo H5Gdeprec.lo H5Gent.lo H5Gint.lo \
-	H5Glink.lo H5Gloc.lo H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo \
-	H5Groot.lo H5Gstab.lo H5Gtest.lo H5Gtraverse.lo H5HF.lo \
-	H5HFbtree2.lo H5HFcache.lo H5HFdbg.lo H5HFdblock.lo \
-	H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo H5HFiblock.lo H5HFiter.lo \
-	H5HFman.lo H5HFsection.lo H5HFspace.lo H5HFstat.lo H5HFtest.lo \
+	H5Adeprec.lo H5Aint.lo H5Atest.lo H5AC.lo H5ACmpio.lo H5B.lo \
+	H5Bcache.lo H5Bdbg.lo H5B2.lo H5B2cache.lo H5B2dbg.lo \
+	H5B2hdr.lo H5B2int.lo H5B2stat.lo H5B2test.lo H5C.lo \
+	H5Cmpio.lo H5CS.lo H5D.lo H5Dbtree.lo H5Dchunk.lo \
+	H5Dcompact.lo H5Dcontig.lo H5Ddbg.lo H5Ddeprec.lo H5Defl.lo \
+	H5Dfill.lo H5Dint.lo H5Dio.lo H5Dlayout.lo H5Dmpio.lo H5Doh.lo \
+	H5Dscatgath.lo H5Dselect.lo H5Dtest.lo H5E.lo H5Edeprec.lo \
+	H5Eint.lo H5EA.lo H5EAcache.lo H5EAdbg.lo H5EAdblkpage.lo \
+	H5EAdblock.lo H5EAhdr.lo H5EAiblock.lo H5EAint.lo \
+	H5EAsblock.lo H5EAstat.lo H5EAtest.lo H5F.lo H5Fint.lo \
+	H5Faccum.lo H5Fcwfs.lo H5Fdbg.lo H5Fdeprec.lo H5Fefc.lo \
+	H5Ffake.lo H5Fio.lo H5Fmount.lo H5Fmpi.lo H5Fquery.lo \
+	H5Fsfile.lo H5Fsuper.lo H5Fsuper_cache.lo H5Ftest.lo H5FA.lo \
+	H5FAcache.lo H5FAdbg.lo H5FAdblock.lo H5FAdblkpage.lo \
+	H5FAhdr.lo H5FAstat.lo H5FAtest.lo H5VL.lo H5VLint.lo \
+	H5VLnative.lo H5VLiod.lo H5VLiod_props.lo H5VLiod_common.lo \
+	H5VLiod_client.lo H5VLiod_server.lo H5VLiod_encdec.lo \
+	H5VLiod_util.lo H5VLiod_file.lo H5VLiod_group.lo \
+	H5VLiod_map.lo H5VLiod_dset.lo H5VLiod_dtype.lo \
+	H5VLiod_index.lo H5VLiod_attr.lo H5VLiod_link.lo \
+	H5VLiod_obj.lo H5VLiod_trans.lo H5VLiod_view.lo \
+	H5VLiod_analysis.lo H5FD.lo H5FDcore.lo H5FDdirect.lo \
+	H5FDfamily.lo H5FDint.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo \
+	H5FDmulti.lo H5FDsec2.lo H5FDspace.lo H5FDstdio.lo H5FF.lo \
+	H5ES.lo H5RC.lo H5TR.lo H5M.lo H5AS.lo H5V.lo H5FL.lo H5FO.lo \
+	H5FS.lo H5FScache.lo H5FSdbg.lo H5FSsection.lo H5FSstat.lo \
+	H5FStest.lo H5G.lo H5Gbtree2.lo H5Gcache.lo H5Gcompact.lo \
+	H5Gdense.lo H5Gdeprec.lo H5Gent.lo H5Gint.lo H5Glink.lo \
+	H5Gloc.lo H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo H5Groot.lo \
+	H5Gstab.lo H5Gtest.lo H5Gtraverse.lo H5HF.lo H5HFbtree2.lo \
+	H5HFcache.lo H5HFdbg.lo H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo \
+	H5HFhuge.lo H5HFiblock.lo H5HFiter.lo H5HFman.lo \
+	H5HFsection.lo H5HFspace.lo H5HFstat.lo H5HFtest.lo \
 	H5HFtiny.lo H5HG.lo H5HGcache.lo H5HGdbg.lo H5HGquery.lo \
 	H5HL.lo H5HLcache.lo H5HLdbg.lo H5HLint.lo H5HP.lo H5I.lo \
 	H5Itest.lo H5L.lo H5Lexternal.lo H5lib_settings.lo H5MF.lo \
@@ -563,7 +565,6 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTRUMENT = @INSTRUMENT@
 INSTRUMENT_LIBRARY = @INSTRUMENT_LIBRARY@
 IOD_CORRUPT_TOOL = @IOD_CORRUPT_TOOL@
-LARGEFILE = @LARGEFILE@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -1016,6 +1017,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5A.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5AC.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5ACmpio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5AS.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Abtree2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Adense.Plo@am__quote@

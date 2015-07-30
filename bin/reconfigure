@@ -65,7 +65,7 @@ if test -z ${M4}; then
   M4=/mnt/hdf/packages/m4/m4-1.4.17/bin/m4
 fi
 if test -z ${PKGCONFIG}; then
-  PKGCONFIG=/mnt/hdf/packages/pkg-config/pkg-config-0.27/bin/pkg-config
+  PKGCONFIG=/scr/chaarawi/install/autotools/bin/pkg-config
 fi
 
 # Check version numbers of all autotools against the "correct" versions
