@@ -224,7 +224,7 @@ PROGRAM H5HL_buildiface
      DO j = 1, 8
 
 ! DLL definitions for windows
-        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
         WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltmake_dataset_real_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
         WRITE(11,'(A)') '!DEC$endif'
 
@@ -256,7 +256,7 @@ PROGRAM H5HL_buildiface
      DO j = 1, 8
 
 ! DLL definitions for windows
-        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
         WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltread_dataset_real_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
         WRITE(11,'(A)') '!DEC$endif'
 
@@ -287,7 +287,7 @@ PROGRAM H5HL_buildiface
      DO j = 1, 8
 
 ! DLL definitions for windows
-        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
         WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltmake_dataset_float_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
         WRITE(11,'(A)') '!DEC$endif'
 
@@ -318,7 +318,7 @@ PROGRAM H5HL_buildiface
      DO j = 1, 8
 
 ! DLL definitions for windows
-        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
         WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltread_dataset_float_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
         WRITE(11,'(A)') '!DEC$endif'
 
@@ -348,7 +348,7 @@ PROGRAM H5HL_buildiface
      DO j = 1, 8
 
 ! DLL definitions for windows
-        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
         WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltmake_dataset_double_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
         WRITE(11,'(A)') '!DEC$endif'
 
@@ -379,7 +379,7 @@ PROGRAM H5HL_buildiface
      DO j = 1, 8
 
 ! DLL definitions for windows
-        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
         WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltread_dataset_double_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
         WRITE(11,'(A)') '!DEC$endif'
 
@@ -514,7 +514,7 @@ PROGRAM H5HL_buildiface
      WRITE(chr2,'(I2)') k
      j = 2
 ! DLL definitions for windows
-     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
      WRITE(11,'(A)') '!DEC$attributes dllexport :: h5tbwrite_field_name_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      WRITE(11,'(A)') '!DEC$endif'
 
@@ -548,7 +548,7 @@ PROGRAM H5HL_buildiface
      WRITE(chr2,'(I2)') k
      j = 2
 ! DLL definitions for windows
-     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
      WRITE(11,'(A)') '!DEC$attributes dllexport :: h5tbread_field_name_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      WRITE(11,'(A)') '!DEC$endif'
 
@@ -582,7 +582,7 @@ PROGRAM H5HL_buildiface
      WRITE(chr2,'(I2)') k
      j = 2
 ! DLL definitions for windows
-     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
      WRITE(11,'(A)') '!DEC$attributes dllexport :: h5tbwrite_field_index_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      WRITE(11,'(A)') '!DEC$endif'
 
@@ -614,7 +614,7 @@ PROGRAM H5HL_buildiface
      WRITE(chr2,'(I2)') k
      j = 2
 ! DLL definitions for windows
-     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
      WRITE(11,'(A)') '!DEC$attributes dllexport :: h5tbread_field_index_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      WRITE(11,'(A)') '!DEC$endif'
 
@@ -646,7 +646,7 @@ PROGRAM H5HL_buildiface
      WRITE(chr2,'(I2)') k
      j = 2
 ! DLL definitions for windows
-     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_DLL)'
+     WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
      WRITE(11,'(A)') '!DEC$attributes dllexport :: h5tbinsert_field_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      WRITE(11,'(A)') '!DEC$endif'
 
