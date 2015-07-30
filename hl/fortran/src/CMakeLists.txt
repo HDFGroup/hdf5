@@ -36,15 +36,6 @@ set_target_properties (H5HL_buildiface PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
-#set (CMD $<TARGET_FILE:H5HL_buildiface>)
-#add_custom_command (
-#    OUTPUT ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
-#           ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
-#    COMMAND ${CMD}
-#    WORKING_DIRECTORY ${HDF5_HL_F90_SRC_BINARY_DIR}
-#    DEPENDS H5HL_buildiface
-#)
-
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
@@ -52,6 +43,7 @@ INCLUDE_DIRECTORIES (
     ${HDF5_HL_SRC_DIR}/src
     ${HDF5_F90_SRC_DIR}/src
     ${HDF5_F90_BINARY_DIR}
+    ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
 #-----------------------------------------------------------------------------
@@ -98,12 +90,6 @@ set (HDF5_HL_F90_F_SRCS
 
 set_source_files_properties (${HDF5_HL_F90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 
-#set_source_files_properties(
-#    ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
-#    ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
-#    PROPERTIES OBJECT_DEPENDS "${HDF5_HL_F90_F_BASE_SRCS}"
-#)
-
 set_source_files_properties (
     ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
     ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
@@ -121,8 +107,8 @@ add_custom_target (H5HLgen ALL
 
 add_library (${HDF5_HL_F90_LIB_TARGET} ${LIB_TYPE} ${HDF5_HL_F90_F_SRCS})
 set (SHARED_LINK_FLAGS " ")
-if (BUILD_SHARED_LIBS)
-  if (WIN32)
+if (WIN32)
+  if (BUILD_SHARED_LIBS)
     set_property (TARGET ${HDF5_HL_F90_LIB_TARGET}
       APPEND PROPERTY COMPILE_DEFINITIONS
         BUILD_HDF5_HL_DLL
@@ -130,9 +116,7 @@ if (BUILD_SHARED_LIBS)
     if (MSVC)
       set (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_HL_F90_SRC_BINARY_DIR}/hdf5_hl_fortrandll.def")
     endif (MSVC)
-  endif (WIN32)
-endif (BUILD_SHARED_LIBS)
-if (WIN32)
+  endif (BUILD_SHARED_LIBS)
   set_property (TARGET ${HDF5_HL_F90_LIB_TARGET}
       APPEND PROPERTY COMPILE_DEFINITIONS
         HDF5F90_WINDOWS
@@ -162,7 +146,9 @@ endif (WIN32)
 set (mod_files
     ${MOD_BUILD_DIR}/h5ds.mod
     ${MOD_BUILD_DIR}/h5tb.mod
+    ${MOD_BUILD_DIR}/h5tb_const.mod
     ${MOD_BUILD_DIR}/h5lt.mod
+    ${MOD_BUILD_DIR}/h5lt_const.mod
     ${MOD_BUILD_DIR}/h5im.mod
 )
 
