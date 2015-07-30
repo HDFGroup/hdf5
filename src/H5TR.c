@@ -81,8 +81,7 @@ static const H5I_class_t H5I_TR_CLS[1] = {{
     H5I_TR,        		/* ID class value */
     0,				/* Class flags */
     2,				/* # of reserved IDs for class */
-    (H5I_free_t)H5TR_close,   	/* Callback routine for closing objects of this class */
-    NULL                        /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5TR_close    	/* Callback routine for closing objects of this class */
 }};
 
 
@@ -166,16 +165,17 @@ H5TR_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_TR))) {
-	    H5I_clear_type(H5I_TR, FALSE, FALSE);
+	if(H5I_nmembers(H5I_TR) > 0) {
+	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+            n++; /*H5I*/
 	} /* end if */
         else {
-	    /* Free data types */
-	    H5I_dec_type_ref(H5I_TR);
+            /* Destroy the dataspace object id group */
+	    (void)H5I_dec_type_ref(H5I_TR);
+            n++; /*H5I*/
 
 	    /* Shut down interface */
 	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
 	} /* end else */
     } /* end if */
 
@@ -288,8 +288,7 @@ done:
 hid_t
 H5TRcreate(hid_t file_id, hid_t rc_id, uint64_t trans_num)
 {
-    void *file = NULL;
-    H5VL_t *vol_plugin = NULL;
+    H5VL_object_t *file = NULL;
     H5TR_t *tr = NULL;
     H5RC_t *rc = NULL;
     hid_t ret_value;
@@ -298,21 +297,20 @@ H5TRcreate(hid_t file_id, hid_t rc_id, uint64_t trans_num)
     H5TRACE3("i", "iiIl", file_id, rc_id, trans_num);
 
     /* get the file object */
-    if(NULL == (file = (void *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the Read Context object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rc_id, H5I_RC)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a read context ID")
+
+    tr->vol_cls = file->vol_info->vol_cls;
 
     /* create a new transaction object */
     if(NULL == (tr = H5TR_create(file, rc, trans_num)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create transaction object")
 
-    /* Get an atom for the event queue with the VOL information as the auxilary struct*/
-    if((ret_value = H5I_register2(H5I_TR, tr, vol_plugin, TRUE)) < 0)
+    /* Get an atom for the TR */
+    if((ret_value = H5I_register(H5I_TR, tr, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize transaction handle")
 
 done:
@@ -419,7 +417,6 @@ herr_t
 H5TRstart(hid_t tr_id, hid_t trspl_id, hid_t estack_id)
 {
     H5TR_t *tr = NULL;
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t ret_value = SUCCEED;
@@ -438,28 +435,20 @@ H5TRstart(hid_t tr_id, hid_t trspl_id, hid_t estack_id)
         if(TRUE != H5P_isa_class(trspl_id, H5P_TR_START))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not transaction start property list")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(tr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = tr->vol_cls;
     }
 
     if(H5VL_iod_tr_start(tr, trspl_id, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction start");
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -489,7 +478,6 @@ H5TRfinish(hid_t tr_id, hid_t trfpl_id, hid_t *rcxt_id, hid_t estack_id)
     H5TR_t *tr = NULL;
     H5RC_t *rc = NULL;
     hbool_t acquire = FALSE;
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t ret_value = SUCCEED;
@@ -508,10 +496,6 @@ H5TRfinish(hid_t tr_id, hid_t trfpl_id, hid_t *rcxt_id, hid_t estack_id)
         if(TRUE != H5P_isa_class(trfpl_id, H5P_TR_FINISH))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not transaction finish property list")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(tr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-
     /* create a new read context object (if user requested it) with
        the provided transaction number to finish */
     if(rcxt_id) {
@@ -519,8 +503,11 @@ H5TRfinish(hid_t tr_id, hid_t trfpl_id, hid_t *rcxt_id, hid_t estack_id)
 
         if(NULL == (rc = H5RC_create(tr->file, tr->trans_num)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context");
-        /* Get an atom for the event queue with the VOL information as the auxilary struct */
-        if((*rcxt_id = H5I_register2(H5I_RC, rc, vol_plugin, TRUE)) < 0)
+
+        rc->vol_cls = tr->vol_cls;
+
+        /* Get an atom for the RC */
+        if((*rcxt_id = H5I_register(H5I_RC, rc, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize read context handle");
     }
 
@@ -528,20 +515,16 @@ H5TRfinish(hid_t tr_id, hid_t trfpl_id, hid_t *rcxt_id, hid_t estack_id)
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = tr->vol_cls;
     }
 
     if(H5VL_iod_tr_finish(tr, acquire, trfpl_id, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction finish");
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -568,7 +551,6 @@ herr_t
 H5TRset_dependency(hid_t tr_id, uint64_t trans_num, hid_t estack_id)
 {
     H5TR_t *tr = NULL;
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t ret_value = SUCCEED;
@@ -583,28 +565,20 @@ H5TRset_dependency(hid_t tr_id, uint64_t trans_num, hid_t estack_id)
     if(tr->trans_num <= trans_num)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "The dependent transaction must be higher than the one it depends on")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(tr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = tr->vol_cls;
     }
 
     if(H5VL_iod_tr_set_dependency(tr, trans_num, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction set_dependency");
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -627,8 +601,7 @@ done:
 herr_t
 H5TRskip(hid_t file_id, uint64_t start_trans_num, uint64_t count, hid_t estack_id)
 {
-    void *file = NULL;
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
+    H5VL_object_t *file = NULL;
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t ret_value = SUCCEED;
@@ -637,31 +610,23 @@ H5TRskip(hid_t file_id, uint64_t start_trans_num, uint64_t count, hid_t estack_i
     H5TRACE4("e", "iIlIli", file_id, start_trans_num, count, estack_id);
 
     /* get the file object */
-    if(NULL == (file = (void *)H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = file->vol_info->vol_cls;
     }
 
-    if(H5VL_iod_tr_skip((H5VL_iod_file_t *)file, start_trans_num, count, req) < 0)
+    if(H5VL_iod_tr_skip((H5VL_iod_file_t *)file->vol_obj, start_trans_num, count, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction skip");
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -685,17 +650,12 @@ herr_t
 H5TRabort(hid_t tr_id, hid_t estack_id)
 {
     H5TR_t *tr = NULL;
-    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ii", tr_id, estack_id);
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(tr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(tr_id, H5I_TR)))
@@ -705,20 +665,16 @@ H5TRabort(hid_t tr_id, hid_t estack_id)
         /* create the private request */
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        request->req = NULL;
         req = &request->req;
-        request->next = NULL;
-        request->vol_plugin = vol_plugin;
-        vol_plugin->nrefs ++;
+        request->vol_cls = tr->vol_cls;
     }
 
     if(H5VL_iod_tr_abort(tr, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a transaction abort");
 
-    if(request && *req) {
+    if(request && *req)
         if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack");
-    }
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
 done:
     FUNC_LEAVE_API(ret_value)

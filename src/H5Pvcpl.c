@@ -153,7 +153,7 @@ done:
  */
 /* ARGSUSED */
 herr_t
-H5P_dataspace_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_dataspace_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     hid_t          space_id;
     herr_t         ret_value = SUCCEED;
@@ -187,7 +187,7 @@ done:
  */
 /* ARGSUSED */
 herr_t
-H5P_dataspace_copy(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_dataspace_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     hid_t          space_id;
     herr_t         ret_value = SUCCEED;
@@ -232,7 +232,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5P_dataspace_cmp(const void *value1, const void *value2, size_t UNUSED size)
+H5P_dataspace_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
 {
     const hid_t *space1_id = (const hid_t *)value1;
     const hid_t *space2_id = (const hid_t *)value2;
@@ -276,7 +276,7 @@ done:
  */
 /* ARGSUSED */
 herr_t
-H5P_dataspace_close(const char UNUSED *name, size_t UNUSED size, void *value)
+H5P_dataspace_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     hid_t          space_id;
     herr_t         ret_value = SUCCEED;

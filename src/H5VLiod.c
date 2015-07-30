@@ -22,6 +22,7 @@
  */
 
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5VL_iod_init_interface
@@ -32,6 +33,7 @@
 #include "H5FFprivate.h"        /* Fast Forward            		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Ppkg.h"		/* Property lists			*/
 #include "H5Sprivate.h"		/* Dataspaces		  		*/
@@ -56,10 +58,7 @@ static int coresident = 0;
 static AXE_task_t g_axe_id;
 static H5VL_iod_axe_list_t axe_list;
 
-/*
- * The vol identification number.
- */
-static hid_t H5VL_IOD_g = 0;
+hid_t H5VL_IOD_g = 0;
 
 /* function shipper IDs for different routines */
 hg_id_t H5VL_EFF_INIT_ID;
@@ -191,7 +190,6 @@ static herr_t H5VL_iod_link_specific(void *_obj, H5VL_loc_params_t loc_params, H
 
 /* Object callbacks */
 static void *H5VL_iod_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
-static herr_t H5VL_iod_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_object_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_specific_t specific_type, 
                                        hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_object_optional(void *_obj, hid_t dxpl_id, void **req, va_list arguments);
@@ -277,9 +275,9 @@ static H5VL_class_t H5VL_iod_g = {
     {                                           /* object_cls */
         H5VL_iod_object_open,                   /* open */
         NULL,                                   /* copy */
-        H5VL_iod_object_get,                    /* get */
-        H5VL_iod_object_specific,            /* specific */
-        H5VL_iod_object_optional             /* optional */
+        NULL,                                   /* get */
+        H5VL_iod_object_specific,               /* specific */
+        H5VL_iod_object_optional                /* optional */
     },
     {
         H5VL_iod_cancel,
@@ -4722,9 +4720,9 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 H5VL_iod_object_t *target_obj = NULL;
                 H5VL_loc_params_t target_params;
 
-                if(H5P_get(plist, H5VL_PROP_LINK_TARGET, &cur_obj) < 0)
+                if(H5P_get(plist, H5VL_PROP_LINK_TARGET, &target_obj) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current location id")
-                if(H5P_get(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &cur_params) < 0)
+                if(H5P_get(plist, H5VL_PROP_LINK_TARGET_LOC_PARAMS, &target_params) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current name")
 
                 /* object is H5L_SAME_LOC */
@@ -4820,7 +4818,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
 
                 target_params.type = H5VL_OBJECT_BY_NAME;
                 target_params.loc_data.loc_by_name.name = target_name;
-                target_params.loc_data.loc_by_name.plist_id = lapl_id;
+                target_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
                 if('/' == *target_name) {
                     /* The target location object is the file root */
@@ -5387,30 +5385,54 @@ H5VL_iod_link_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_speci
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
-    hid_t rcxt_id;
-    H5RC_t *rc = NULL;
     H5P_genplist_t *plist = NULL;
-    iod_obj_id_t iod_id;
-    iod_handles_t iod_oh;
     char *loc_name = NULL;
+    link_op_in_t input;
     herr_t ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     switch (specific_type) {
         /* H5Lexists */
         case H5VL_LINK_EXISTS:
             {
-                H5VL_iod_request_t **parent_reqs = NULL;
-                size_t num_parents = 0;
+                htri_t *ret    = va_arg (arguments, htri_t *);
                 hid_t rcxt_id;
                 H5RC_t *rc = NULL;
-                H5P_genplist_t *plist = NULL;
-                iod_obj_id_t iod_id;
-                iod_handles_t iod_oh;
-                char *loc_name = NULL;
-                link_op_in_t input;
-                htri_t *ret    = va_arg (arguments, htri_t *);
+
+                /* get the context ID */
+                if(H5P_get(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+                /* get the RC object */
+                if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
+
+                /* allocate parent request array */
+                if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                            H5MM_malloc(sizeof(H5VL_iod_request_t *))))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+                /* retrieve parent requests */
+                if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, parent_reqs, &num_parents) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+                /* retrieve IOD info of location object */
+                if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == input.loc_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &input.loc_id, &input.loc_oh, NULL, NULL) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
                     loc_name = strdup(".");
@@ -5419,8 +5441,6 @@ H5VL_iod_link_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_speci
 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;
-                input.loc_id = iod_id;
-                input.loc_oh = iod_oh;
                 input.rcxt_num  = rc->c_version;
                 input.cs_scope = obj->file->md_integrity_scope;
                 input.trans_num  = 0;
@@ -5436,27 +5456,17 @@ H5VL_iod_link_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_speci
                                                 (H5VL_iod_req_info_t *)rc, &input, ret, ret, req) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link exists");
 
-                if(loc_name) 
-                    HDfree(loc_name);
                 break;
             }
         case H5VL_LINK_DELETE:
             {
-                link_op_in_t input;
-                H5VL_iod_request_t **parent_reqs = NULL;
-                size_t num_parents = 0;
                 hid_t trans_id;
                 H5TR_t *tr = NULL;
-                H5P_genplist_t *plist = NULL;
                 int *status = NULL;
-                char *loc_name = NULL;
 
                 /* get the transaction ID */
-                if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-                    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
                 if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
-
                 /* get the TR object */
                 if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID");
@@ -5509,9 +5519,6 @@ H5VL_iod_link_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_speci
                                                 (H5VL_iod_req_info_t *)tr, &input, status, status, req) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link remove");
 
-                if(loc_name) 
-                    HDfree(loc_name);
-
                 break;
             }
 
@@ -5521,6 +5528,8 @@ H5VL_iod_link_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_speci
     }
 
 done:
+    if(loc_name) 
+        HDfree(loc_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_specific() */
 
@@ -5906,6 +5915,24 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
         ret_value = (void *)map;
         *opened_type = H5I_MAP;
         break;
+    case H5I_UNINIT:
+    case H5I_BADID:
+    case H5I_FILE:
+    case H5I_DATASPACE:
+    case H5I_REFERENCE:
+    case H5I_VFL:
+    case H5I_VOL:
+    case H5I_ES:
+    case H5I_RC:
+    case H5I_TR:
+    case H5I_QUERY:
+    case H5I_VIEW:
+    case H5I_GENPROP_CLS:
+    case H5I_GENPROP_LST:
+    case H5I_ERROR_CLASS:
+    case H5I_ERROR_MSG:
+    case H5I_ERROR_STACK:
+    case H5I_NTYPES:
     default:
         HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "not a valid file object (dataset, map, group, or datatype)");
     }
@@ -6002,7 +6029,25 @@ done:
                 if(map)
                     map = H5FL_FREE(H5VL_iod_map_t, map);
                 break;
-            default:
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_ES:
+        case H5I_RC:
+        case H5I_TR:
+        case H5I_QUERY:
+        case H5I_VIEW:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
                 HDONE_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "not a valid object type");
         } /* end switch */
     } /* end if */
@@ -7145,10 +7190,7 @@ H5VL_iod_object_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_s
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     iod_obj_id_t iod_id, mdkv_id, attrkv_id;
     iod_handles_t iod_oh;
-    int *status = NULL;
     size_t num_parents = 0;
-    hid_t trans_id;
-    H5TR_t *tr = NULL;
     H5P_genplist_t *plist = NULL;
     H5VL_iod_request_t **parent_reqs = NULL;
     char *loc_name = NULL;
@@ -7159,43 +7201,45 @@ H5VL_iod_object_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_s
     /* get the transaction ID */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
 
-    /* get the TR object */
-    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
-
-    /* allocate parent request array */
-    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
-                H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
-
-    /* retrieve parent requests */
-    if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
-
-    /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
-
-    /* MSC - If location object not opened yet, wait for it. */
-    if(IOD_OBJ_INVALID == iod_id) {
-        /* Synchronously wait on the request attached to the dataset */
-        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
-            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        obj->request = NULL;
-        /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
-    }
-
-    switch (misc_type) {
+    switch (specific_type) {
         /* H5Oexists_by_name */
         case H5VL_OBJECT_EXISTS:
             {
                 htri_t	  *ret = va_arg (arguments, htri_t *);
+                hid_t rcxt_id;
+                H5RC_t *rc = NULL;
                 object_op_in_t input;
+
+                if(H5P_get(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+                /* get the RC object */
+                if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
+
+                /* allocate parent request array */
+                if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                            H5MM_malloc(sizeof(H5VL_iod_request_t *))))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+                /* retrieve parent requests */
+                if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, parent_reqs, &num_parents) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+                /* retrieve IOD info of location object */
+                if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == iod_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
                     loc_name = strdup(".");
@@ -7239,43 +7283,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_object_get
- *
- * Purpose:	Gets certain data about a file
- *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              November, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, 
-                    hid_t dxpl_id, void **req, va_list arguments)
-{
-    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
-    size_t num_parents = 0;
-    hid_t rcxt_id;
-    H5RC_t *rc = NULL;
-    H5P_genplist_t *plist = NULL;
-    iod_obj_id_t iod_id, mdkv_id, attrkv_id;
-    iod_handles_t iod_oh;
-    H5VL_iod_request_t **parent_reqs = NULL;
-    char *loc_name = NULL;
-    herr_t ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from object")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_object_get() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_object_optional
  *
  * Purpose:	Gets certain data about a file
@@ -7295,8 +7302,6 @@ H5VL_iod_object_optional(void *_obj, hid_t dxpl_id, void **req, va_list argument
     H5VL_loc_params_t loc_params = va_arg(arguments, H5VL_loc_params_t);
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     size_t num_parents = 0;
-    hid_t rcxt_id;
-    H5RC_t *rc = NULL;
     H5P_genplist_t *plist = NULL;
     iod_obj_id_t iod_id, mdkv_id, attrkv_id;
     iod_handles_t iod_oh;
@@ -7306,50 +7311,52 @@ H5VL_iod_object_optional(void *_obj, hid_t dxpl_id, void **req, va_list argument
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* get the context ID */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    if(H5P_get(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
-
-    /* get the RC object */
-    if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
-
-    /* allocate parent request array */
-    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
-                H5MM_malloc(sizeof(H5VL_iod_request_t *))))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
-
-    /* retrieve parent requests */
-    if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, parent_reqs, &num_parents) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
-
-    /* retrieve IOD info of location object */
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
-
-    /* MSC - If location object not opened yet, wait for it. */
-    if(IOD_OBJ_INVALID == iod_id) {
-        /* Synchronously wait on the request attached to the dataset */
-        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
-            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        obj->request = NULL;
-        /* retrieve IOD info of location object */
-        if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
-    }
 
     switch (optional_type) {
         /* H5Oget_comment / H5Oget_comment_by_name */
         case H5VL_OBJECT_GET_COMMENT:
             {
+                hid_t rcxt_id;
+                H5RC_t *rc = NULL;
                 char *comment =  va_arg (arguments, char *);
                 size_t size  =  va_arg (arguments, size_t);
                 ssize_t *ret =  va_arg (arguments, ssize_t *);
                 object_get_comment_in_t input;
                 object_get_comment_out_t *result = NULL;
                 size_t len;
+
+                /* get the context ID */
+                if(H5P_get(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+                /* get the RC object */
+                if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
+
+                /* allocate parent request array */
+                if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                            H5MM_malloc(sizeof(H5VL_iod_request_t *))))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+                /* retrieve parent requests */
+                if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, parent_reqs, &num_parents) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+                /* retrieve IOD info of location object */
+                if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == iod_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
 
                 /* If the comment is present locally, get it and return */
                 if(loc_params.type == H5VL_OBJECT_BY_SELF && obj->comment) {
@@ -7404,16 +7411,46 @@ H5VL_iod_object_optional(void *_obj, hid_t dxpl_id, void **req, va_list argument
                                                 obj, 0, num_parents, parent_reqs,
                                                 (H5VL_iod_req_info_t *)rc, &input, result, result, req) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object get_comment");
-
-                if(loc_name) 
-                    HDfree(loc_name);
                 break;
             }
         /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */
         case H5VL_OBJECT_GET_INFO:
             {
+                hid_t rcxt_id;
+                H5RC_t *rc = NULL;
                 H5O_ff_info_t  *oinfo = va_arg (arguments, H5O_ff_info_t *);
                 object_op_in_t input;
+
+                /* get the context ID */
+                if(H5P_get(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+                /* get the RC object */
+                if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID");
+
+                /* allocate parent request array */
+                if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                            H5MM_malloc(sizeof(H5VL_iod_request_t *))))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+                /* retrieve parent requests */
+                if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)rc, parent_reqs, &num_parents) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+                /* retrieve IOD info of location object */
+                if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == iod_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
                     loc_name = strdup(".");
@@ -7439,9 +7476,6 @@ H5VL_iod_object_optional(void *_obj, hid_t dxpl_id, void **req, va_list argument
                                                 obj, 0, num_parents, parent_reqs,
                                                 (H5VL_iod_req_info_t *)rc, &input, oinfo, oinfo, req) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object get_info");
-
-                if(loc_name) 
-                    HDfree(loc_name);
                 break;
             }
         /* H5Oset_comment */
@@ -7449,6 +7483,40 @@ H5VL_iod_object_optional(void *_obj, hid_t dxpl_id, void **req, va_list argument
             {
                 const char    *comment  = va_arg (arguments, char *);
                 object_set_comment_in_t input;
+                hid_t trans_id;
+                H5TR_t *tr = NULL;
+                int *status = NULL;
+
+                /* get the transaction ID */
+                if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+                /* get the TR object */
+                if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID");
+
+                /* allocate parent request array */
+                if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                            H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+                /* retrieve parent requests */
+                if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+                /* retrieve IOD info of location object */
+                if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == iod_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, &mdkv_id, &attrkv_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
                     loc_name = strdup(".");
@@ -7476,15 +7544,14 @@ H5VL_iod_object_optional(void *_obj, hid_t dxpl_id, void **req, va_list argument
                 /* store the comment locally if the object is open */
                 if(loc_params.type == H5VL_OBJECT_BY_SELF)
                     obj->comment = HDstrdup(comment);
-
-                if(loc_name) 
-                    HDfree(loc_name);
                 break;
             }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from object")
     }
 done:
+    if(loc_name) 
+        HDfree(loc_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_object_optional() */
 

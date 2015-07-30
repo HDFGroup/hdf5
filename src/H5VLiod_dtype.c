@@ -39,9 +39,9 @@
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine, 
-                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_dtype_commit_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                                size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                                size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                                 void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -321,9 +321,9 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine, 
-                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_dtype_open_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                              size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                              size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                               void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -514,9 +514,9 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine, 
-                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_dtype_close_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                               size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                               size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                                void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;

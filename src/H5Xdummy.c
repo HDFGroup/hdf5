@@ -183,7 +183,7 @@ done:
  *------------------------------------------------------------------------
  */
 static void *
-H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
+H5X_dummy_create(hid_t file_id, hid_t dataset_id, hid_t H5_ATTR_UNUSED xcpl_id,
         hid_t xapl_id, size_t *metadata_size, void **metadata)
 {
     H5X_dummy_t *dummy = NULL;
@@ -264,8 +264,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_dummy_remove(hid_t UNUSED file_id, hid_t UNUSED dataset_id, size_t UNUSED metadata_size,
-        void UNUSED *metadata)
+H5X_dummy_remove(hid_t H5_ATTR_UNUSED file_id, hid_t H5_ATTR_UNUSED dataset_id, size_t H5_ATTR_UNUSED metadata_size,
+        void H5_ATTR_UNUSED *metadata)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -375,7 +375,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_dummy_pre_update(void *idx_handle, hid_t UNUSED dataspace_id, hid_t UNUSED xxpl_id)
+H5X_dummy_pre_update(void *idx_handle, hid_t H5_ATTR_UNUSED dataspace_id, hid_t H5_ATTR_UNUSED xxpl_id)
 {
     H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -443,7 +443,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned UNUSED ndim,
+H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim,
         const hsize_t *point, void *_udata)
 {
     H5X__dummy_query_data_t *udata = (H5X__dummy_query_data_t *)_udata;

@@ -41,6 +41,7 @@ typedef struct H5TR_t {
     struct H5VL_iod_file_t *file;
     uint64_t c_version;
     uint64_t trans_num;
+    const H5VL_class_t *vol_cls;  /* the vol plugin class that gnerated this request */
 } H5TR_t;
 
 /*****************************/

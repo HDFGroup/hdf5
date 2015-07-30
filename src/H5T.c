@@ -1712,7 +1712,7 @@ H5Tclose(hid_t type_id)
     /* get the plugin pointer - 
      * if it exists, then we know that the datatype is committed, 
      * so we attach synchronous request to it so it can pass through the VL layer. */
-    if(NULL != (obj = (H5VL_object_t *)type->vol_obj)) {
+    if(NULL != (obj = (H5VL_object_t *)dt->vol_obj)) {
         obj->close_estack_id = H5_EVENT_STACK_NULL;
         obj->close_dxpl_id = H5AC_dxpl_id;
     }

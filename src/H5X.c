@@ -70,8 +70,8 @@ static size_t       H5X_table_used_g = 0;
 static H5X_class_t *H5X_table_g = NULL;
 
 
-static H5_inline hbool_t
-H5X__registered(unsigned plugin_id, size_t *index)
+static hbool_t
+H5X__registered(unsigned plugin_id, size_t *my_index)
 {
     size_t plugin_index;
     hbool_t registered = FALSE;
@@ -80,7 +80,7 @@ H5X__registered(unsigned plugin_id, size_t *index)
     for (plugin_index = 0; plugin_index < H5X_table_used_g; plugin_index++) {
         if (H5X_table_g[plugin_index].id == plugin_id) {
             registered = TRUE;
-            if (index) *index = plugin_index;
+            if (my_index) *my_index = plugin_index;
             break;
         }
     }
@@ -512,7 +512,7 @@ done:
 herr_t
 H5Xremove(hid_t file_id, unsigned plugin_id, hid_t scope_id)
 {
-    void *file = NULL, *obj = NULL;
+    H5VL_object_t *file = NULL;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -521,12 +521,8 @@ H5Xremove(hid_t file_id, unsigned plugin_id, hid_t scope_id)
     /* Check args */
     if ((plugin_id < 0) || (plugin_id > H5X_PLUGIN_MAX))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid plugin identification number");
-    if (NULL == (file = (void *)H5I_object_verify(file_id, H5I_FILE)))
+    if (NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID");
-    if (NULL == (obj = (void *) H5VL_get_object(scope_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object/file identifier");
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
     /* Call H5VL layer */
 done:

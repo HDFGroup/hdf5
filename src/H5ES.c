@@ -77,8 +77,7 @@ static const H5I_class_t H5I_ES_CLS[1] = {{
     H5I_ES,        		/* ID class value */
     0,				/* Class flags */
     2,				/* # of reserved IDs for class */
-    (H5I_free_t)H5ES_close,   	/* Callback routine for closing objects of this class */
-    NULL                        /* Callback routine for closing auxilary objects of this class */
+    (H5I_free_t)H5ES_close   	/* Callback routine for closing objects of this class */
 }};
 
 
@@ -162,16 +161,17 @@ H5ES_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_ES))) {
-	    H5I_clear_type(H5I_ES, FALSE, FALSE);
+	if(H5I_nmembers(H5I_ES) > 0) {
+	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+            n++; /*H5I*/
 	} /* end if */
         else {
-	    /* Free data types */
-	    H5I_dec_type_ref(H5I_ES);
+            /* Destroy the dataspace object id group */
+	    (void)H5I_dec_type_ref(H5I_ES);
+            n++; /*H5I*/
 
 	    /* Shut down interface */
 	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
 	} /* end else */
     } /* end if */
 

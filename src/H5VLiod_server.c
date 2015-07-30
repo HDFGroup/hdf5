@@ -98,7 +98,7 @@ hg_id_t H5VL_EFF_ANALYSIS_FARM_TRANSFER;
         return ret_value;                                               \
     }
 herr_t
-EFF_start_server(MPI_Comm comm, MPI_Info UNUSED info)
+EFF_start_server(MPI_Comm comm, MPI_Info H5_ATTR_UNUSED info)
 {
     na_class_t *network_class = NULL;
     AXE_engine_attr_t engine_attr;
@@ -400,7 +400,7 @@ done:
 } /* end H5VL_iod_server_eff_finalize() */
 
 herr_t
-EFF_setup_coresident(MPI_Comm comm, MPI_Info UNUSED info)
+EFF_setup_coresident(MPI_Comm comm, MPI_Info H5_ATTR_UNUSED info)
 {
     AXE_engine_attr_t engine_attr;
     char *coresident_s = NULL;

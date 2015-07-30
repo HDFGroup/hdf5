@@ -65,7 +65,7 @@ H5VL__iod_server_vl_data_read(iod_handle_t coh, AXE_engine_t axe_engine, AXE_tas
                               hid_t dxpl_id, iod_trans_id_t rtid);
 
 static herr_t 
-H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndims, 
+H5VL__iod_server_vl_data_write_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned ndims, 
                                   const hsize_t *point, void *_udata);
 
 static iod_obj_id_t
@@ -117,9 +117,9 @@ H5VL__iod_get_vl_blob_oid(iod_obj_id_t dset_id, hid_t space_id, const hsize_t *p
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, 
-                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_dset_create_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                               size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                               size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                                void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -460,9 +460,9 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine, 
-                             size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                             size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_dset_open_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                             size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                             size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                              void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -607,8 +607,8 @@ done:
  */
 void
 H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine, 
-                             size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                             size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                             size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                             size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                              void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -828,9 +828,9 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t UNUSED axe_engine, 
-                                    size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                                    size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                                    size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                                    size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                                     void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -1009,9 +1009,9 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine, 
-                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_dset_write_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                              size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                              size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                               void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -1301,9 +1301,9 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine, 
-                                   size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                                   size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_dset_set_extent_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                                   size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                                   size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                                    void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -1412,9 +1412,9 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine, 
-                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_dset_close_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                              size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                              size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                               void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -1469,7 +1469,7 @@ done:
 herr_t 
 H5VL__iod_server_final_io(iod_handle_t coh, iod_handle_t iod_oh, hid_t space_id, 
                           size_t elmt_size, hbool_t write_op, void *buf, 
-                          size_t UNUSED buf_size, iod_checksum_t UNUSED cs, 
+                          size_t H5_ATTR_UNUSED buf_size, iod_checksum_t H5_ATTR_UNUSED cs, 
                           uint32_t cs_scope, iod_trans_id_t tid)
 {
     int ndims, i; /* dataset's rank/number of dimensions */
@@ -1694,7 +1694,7 @@ done:
 static herr_t 
 H5VL__iod_server_vl_data_read(iod_handle_t coh, AXE_engine_t axe_engine, AXE_task_t axe_id, 
                               size_t nelmts, void *buf, 
-                              hid_t UNUSED dxpl_id, iod_trans_id_t rtid)
+                              hid_t H5_ATTR_UNUSED dxpl_id, iod_trans_id_t rtid)
 {
     void *vlen_buf = NULL;
     uint8_t *vlen_buf_ptr;
@@ -1840,10 +1840,10 @@ done:
  */
 static herr_t 
 H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handles_t iod_oh, 
-                               hid_t space_id, hid_t mem_type_id, hid_t UNUSED dset_type_id, 
+                               hid_t space_id, hid_t mem_type_id, hid_t H5_ATTR_UNUSED dset_type_id, 
                                H5VL_iod_type_info_t type_info, size_t nelmts,
                                size_t num_segments, void **addrs, size_t *sizes,
-                               hid_t UNUSED dxpl_id, iod_trans_id_t wtid, iod_trans_id_t rtid,
+                               hid_t H5_ATTR_UNUSED dxpl_id, iod_trans_id_t wtid, iod_trans_id_t rtid,
                                na_addr_t source, hg_bulk_t bulk_handle, uint32_t cs_scope,
                                na_bool_t is_coresident)
 {
@@ -1942,7 +1942,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL__iod_server_vl_data_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndims, 
+H5VL__iod_server_vl_data_write_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned ndims, 
                                   const hsize_t *point, void *_udata)
 {
     H5VL_iod_server_vl_write_t *udata = (H5VL_iod_server_vl_write_t *)_udata;

@@ -78,6 +78,8 @@ typedef enum H5FF_dset_dim_layout_t {
     H5D_COL_MAJOR
 } H5FF_dset_dim_layout_t;
 
+extern hid_t H5VL_IOD_g;
+
 H5_DLL hid_t H5VL_iod_init(void);
 H5_DLL herr_t H5Pset_fapl_iod(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t EFF_start_server(MPI_Comm comm, MPI_Info info);

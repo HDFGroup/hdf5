@@ -26,6 +26,7 @@
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#define H5O_PACKAGE             /*suppress error about including H5Opkg   */
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 /* Interface initialization */
@@ -44,6 +45,7 @@
 #include "H5Gpkg.h"             /* Group access				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Qprivate.h"		/* Query        			*/
 #include "H5Tpkg.h"             /* Datatype access			*/
@@ -278,14 +280,16 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
     /* determine if we want to acquire the latest readable version
        when the file is opened */
     if(rcxt_id) {
-        H5P_genplist_t  *plist = NULL;            /* Property list pointer */
         H5RC_t *rc = NULL;
 
         /* create a new read context object (if user requested it) */
         if(NULL == (rc = H5RC_create(file, IOD_TID_UNKNOWN)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context");
+
+        rc->vol_cls = vol_info->vol_cls;
+
         /* Get an atom for the event queue with the VOL information as the auxilary struct */
-        if((*rcxt_id = H5VL_register_id(H5I_RC, rc, vol_info, TRUE)) < 0)
+        if((*rcxt_id = H5I_register(H5I_RC, rc, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize read context handle");
 
         /* Get the plist structure */
@@ -593,7 +597,7 @@ H5Gclose_ff(hid_t group_id, hid_t estack_id)
     H5TRACE2("e", "ii", group_id, estack_id);
 
     /* Check args */
-    if(NULL == (obj == (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")
 
     /* set the async request and dxpl IDs to be passed on to the VOL layer */
@@ -740,7 +744,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dcreate_anon_ff(hid_t file_id, hid_t type_id, hid_t space_id,
+H5Dcreate_anon_ff(hid_t loc_id, hid_t type_id, hid_t space_id,
                   hid_t dcpl_id, hid_t dapl_id, hid_t trans_id, hid_t estack_id)
 {
     void    *dset = NULL;       /* dset token from VOL plugin */
@@ -753,7 +757,7 @@ H5Dcreate_anon_ff(hid_t file_id, hid_t type_id, hid_t space_id,
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("i", "iiiiiii", file_id, type_id, space_id, dcpl_id, dapl_id, trans_id,
+    H5TRACE7("i", "iiiiiii", loc_id, type_id, space_id, dcpl_id, dapl_id, trans_id,
              estack_id);
 
     /* Get correct property list */
@@ -781,7 +785,7 @@ H5Dcreate_anon_ff(hid_t file_id, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(file_id);
+    loc_params.obj_type = H5I_get_type(loc_id);
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -1105,7 +1109,7 @@ H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     /* Read the data through the VOL */
     if((ret_value = H5VL_dataset_read(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 
-                                      file_space_id, plist_id, buf, req)) < 0)
+                                      file_space_id, dxpl_id, buf, req)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
     if(request && *req)
@@ -1470,7 +1474,7 @@ H5Tclose_ff(hid_t type_id, hid_t estack_id)
     if(H5T_STATE_IMMUTABLE == dt->shared->state)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
 
-    if(NULL != (obj = (H5VL_object_t *)type->vol_obj)) {
+    if(NULL != (obj = (H5VL_object_t *)dt->vol_obj)) {
         obj->close_estack_id = estack_id;
         obj->close_dxpl_id = H5AC_dxpl_id;
     }
@@ -1499,8 +1503,10 @@ H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     void    *attr = NULL;       /* attr token from VOL plugin */
     H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    H5VL_loc_params_t loc_params;
     H5P_genplist_t      *plist;            /* Property list pointer */
-    H5VL_loc_params_t   loc_params;
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1585,6 +1591,8 @@ H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     void    *attr = NULL;       /* attr token from VOL plugin */
     H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5P_genplist_t      *plist;            /* Property list pointer */
     H5VL_loc_params_t    loc_params;
     hid_t		 ret_value;        /* Return value */
@@ -1771,7 +1779,7 @@ H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the location object */
@@ -2044,7 +2052,7 @@ H5Arename_by_name_ff(hid_t loc_id, const char *obj_name, const char *old_attr_na
 
         loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = obj_name;
-        loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+        loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
         loc_params.obj_type = H5I_get_type(loc_id);
 
         /* store the transaction ID in the dxpl */
@@ -2184,7 +2192,7 @@ H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* store the transaction ID in the dxpl */
@@ -2336,7 +2344,7 @@ H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* store the transaction ID in the dxpl */
@@ -2389,7 +2397,7 @@ H5Aclose_ff(hid_t attr_id, hid_t estack_id)
     H5TRACE2("e", "ii", attr_id, estack_id);
 
     /* Check args */
-    if(NULL == (obj == (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute ID")
 
     /* set the async request and dxpl IDs to be passed on to the VOL layer */
@@ -2460,22 +2468,22 @@ H5Lmove_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* set location paramter for source object */
     loc_params1.type = H5VL_OBJECT_BY_NAME;
     loc_params1.loc_data.loc_by_name.name = src_name;
-    loc_params1.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params1.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params1.obj_type = H5I_get_type(src_loc_id);
     /* set location paramter for destination object */
     loc_params2.type = H5VL_OBJECT_BY_NAME;
     loc_params2.loc_data.loc_by_name.name = dst_name;
-    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params2.obj_type = H5I_get_type(dst_loc_id);
 
     if(H5L_SAME_LOC != src_loc_id) {
         /* get the file object */
-        if(NULL == (obj1 = (void *)H5I_object(src_loc_id)))
+        if(NULL == (obj1 = (H5VL_object_t *)H5I_object(src_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     }
     if(H5L_SAME_LOC != dst_loc_id) {
         /* get the file object */
-        if(NULL == (obj2 = (void *)H5I_object(dst_loc_id)))
+        if(NULL == (obj2 = (H5VL_object_t *)H5I_object(dst_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     }
 
@@ -2567,12 +2575,12 @@ H5Lcopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* set location paramter for source object */
     loc_params1.type = H5VL_OBJECT_BY_NAME;
     loc_params1.loc_data.loc_by_name.name = src_name;
-    loc_params1.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params1.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params1.obj_type = H5I_get_type(src_loc_id);
     /* set location paramter for destination object */
     loc_params2.type = H5VL_OBJECT_BY_NAME;
     loc_params2.loc_data.loc_by_name.name = dst_name;
-    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params2.obj_type = H5I_get_type(dst_loc_id);
 
     if(H5L_SAME_LOC != src_loc_id) {
@@ -2646,6 +2654,8 @@ H5Lcreate_soft_ff(const char *link_target, hid_t link_loc_id, const char *link_n
     H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5VL_loc_params_t loc_params;
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -2672,7 +2682,7 @@ H5Lcreate_soft_ff(const char *link_target, hid_t link_loc_id, const char *link_n
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = link_name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(link_loc_id);
 
     /* get the location object */
@@ -2740,6 +2750,8 @@ H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
     H5VL_object_t *obj2 = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
+    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5P_genplist_t *plist;      /* Property list pointer */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     herr_t   ret_value = SUCCEED;            /* Return value */
@@ -2768,12 +2780,12 @@ H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
     loc_params1.type = H5VL_OBJECT_BY_NAME;
     loc_params1.obj_type = H5I_get_type(cur_loc_id);
     loc_params1.loc_data.loc_by_name.name = cur_name;
-    loc_params1.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params1.loc_data.loc_by_name.lapl_id = lapl_id;
 
     loc_params2.type = H5VL_OBJECT_BY_NAME;
     loc_params2.obj_type = H5I_get_type(new_loc_id);
     loc_params2.loc_data.loc_by_name.name = new_name;
-    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
 
     if(H5L_SAME_LOC != cur_loc_id) {
         /* get the file object */
@@ -2868,7 +2880,7 @@ H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t trans_id, hid_
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -2942,7 +2954,7 @@ H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, hbool_t *ret,
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
@@ -3015,7 +3027,7 @@ H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo ,
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
@@ -3095,7 +3107,7 @@ H5Lget_val_ff(hid_t loc_id, const char *name, void *buf, size_t size,
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
     /* get the file object */
     if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
@@ -3157,8 +3169,6 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id)
     H5VL_object_t *obj = NULL;        /* object token of loc_id */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     H5P_genplist_t *plist;     /* Property list pointer */
-    H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
-    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5I_type_t  opened_type;
     H5VL_object_t    *opened_obj = NULL;
     H5VL_loc_params_t loc_params;
@@ -3172,7 +3182,7 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id)
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -3185,22 +3195,11 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id)
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    if(estack_id != H5_EVENT_STACK_NULL) {
-        /* create the private request */
-        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-        req = &request->req;
-        request->vol_cls = obj->vol_info->vol_cls;
-    }
-
     /* Open the object through the VOL */
-    if(NULL == (opened_obj = H5VL_object_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, &opened_type, 
-                                              H5AC_dxpl_id, req)))
+    if(NULL == (opened_obj = (H5VL_object_t *)H5VL_object_open(obj->vol_obj, loc_params, 
+                                                               obj->vol_info->vol_cls, &opened_type, 
+                                                               H5AC_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
-
-    if(request && *req)
-        if(H5ES_insert(estack_id, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
     if((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
@@ -3271,6 +3270,7 @@ H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id)
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5I_type_t opened_type;
     void  *opened_obj = NULL;
+    H5VL_t *vol_info = NULL;      /* VOL info struct */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -3288,7 +3288,7 @@ H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id)
         if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         req = &request->req;
-        request->vol_cls = attr->vol_info->vol_cls;
+        request->vol_cls = tr->vol_cls;
     }
 
     if(NULL == (opened_obj = H5VL_iod_obj_open_token(token, tr, &opened_type, req)))
@@ -3300,7 +3300,16 @@ H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id)
         if(H5ES_insert(estack_id, request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
-    if((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
+    /* setup VOL info struct */
+    if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
+    vol_info->vol_cls = tr->vol_cls;
+    HDassert(tr->vol_cls->value == H5_VOL_IOD);
+
+    if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+
+    if((ret_value = H5VL_register_id(opened_type, opened_obj, vol_info, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
 
 done:
@@ -3337,6 +3346,8 @@ H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     H5VL_object_t *obj2 = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5P_genplist_t *plist;      /* Property list pointer */
     hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
     herr_t         ret_value = SUCCEED;       /* Return value */
@@ -3368,7 +3379,7 @@ H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     loc_params2.type = H5VL_OBJECT_BY_NAME;
     loc_params2.obj_type = H5I_get_type(new_loc_id);
     loc_params2.loc_data.loc_by_name.name = new_name;
-    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params2.loc_data.loc_by_name.lapl_id = lapl_id;
 
     if(H5L_SAME_LOC != obj_id) {
         /* get the file object */
@@ -3464,7 +3475,7 @@ H5Oexists_by_name_ff(hid_t loc_id, const char *name, hbool_t *ret, hid_t lapl_id
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -3608,7 +3619,7 @@ H5Oset_comment_by_name_ff(hid_t loc_id, const char *name, const char *comment,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -3743,7 +3754,7 @@ H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *comment, size_t 
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -3884,7 +3895,7 @@ H5Oget_info_by_name_ff(hid_t loc_id, const char *name, H5O_ff_info_t *oinfo,
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
-    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
@@ -3953,7 +3964,7 @@ H5Oclose_ff(hid_t object_id, hid_t estack_id)
         case H5I_DATASET:
         case H5I_MAP:
             /* Check args */
-            if(NULL == (obj == (H5VL_object_t *)H5I_object(group_id)))
+            if(NULL == (obj = (H5VL_object_t *)H5I_object(object_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid object ID")
 
                     /* set the async request and dxpl IDs to be passed on to the VOL layer */
@@ -4644,11 +4655,8 @@ H5_DLL herr_t H5Aevict_ff(hid_t attr_id, uint64_t c_version, hid_t dxpl_id, hid_
     FUNC_ENTER_API(FAIL)
 
     /* get the map object */
-    if(NULL == (attr = (void *)H5I_object_verify(attr_id, H5I_ATTR)))
+    if(NULL == (attr = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
     if(H5P_DEFAULT == dxpl_id)
@@ -4756,9 +4764,6 @@ H5_DLL herr_t H5Devict_ff(hid_t dset_id, uint64_t c_version, hid_t dxpl_id, hid_
     /* get the map object */
     if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
     if(H5P_DEFAULT == dxpl_id)
@@ -4804,7 +4809,7 @@ H5_DLL herr_t H5Gprefetch_ff(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
                           hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void    **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_object_t *grp = NULL;        /* pointer to grp object */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -4813,9 +4818,6 @@ H5_DLL herr_t H5Gprefetch_ff(hid_t grp_id, hid_t rcxt_id, hrpl_t *replica_id,
     /* get the map object */
     if(NULL == (grp = (H5VL_object_t *)H5I_object_verify(grp_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(grp_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get correct property list */
     if(H5P_DEFAULT == dxpl_id)
@@ -4926,7 +4928,7 @@ H5_DLL herr_t H5Tprefetch_ff(hid_t dtype_id, hid_t rcxt_id, hrpl_t *replica_id,
     if(NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     /* Check if the datatype is committed */
-    if((status = H5T_committed(type)) < 0)
+    if((status = H5T_is_named(type)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check whether datatype is committed")
 
     if(FALSE == status) {
@@ -4991,7 +4993,7 @@ H5_DLL herr_t H5Tevict_ff(hid_t dtype_id, uint64_t c_version, hid_t dxpl_id, hid
     if(NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     /* Check if the datatype is committed */
-    if((status = H5T_committed(type)) < 0)
+    if((status = H5T_is_named(type)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check whether datatype is committed")
 
     if(FALSE == status) {
@@ -5048,7 +5050,8 @@ H5VLiod_get_file_id(const char *filename, iod_handle_t coh, hid_t fapl_id, hid_t
     H5VL_iod_file_t *file = NULL;            /* file token from VOL plugin */
     H5P_genplist_t  *plist;          /* Property list pointer */
     H5VL_class_t    *vol_cls;        /* VOL class attached to fapl_id */
-    H5VL_t  *vol_plugin;             /* VOL plugin information */
+    hid_t plugin_id;              /* VOL plugin identigier attached to fapl_id */
+    H5VL_t  *vol_info;             /* VOL plugin information */
     iod_handles_t root_oh;           /* root object handle */
     iod_cont_trans_stat_t *tids = NULL;
     iod_trans_id_t rtid;
@@ -5070,18 +5073,21 @@ H5VLiod_get_file_id(const char *filename, iod_handle_t coh, hid_t fapl_id, hid_t
     /* get info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID");
     if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &cs_scope) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
+    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
 
-    /* Build the vol plugin struct */
-    if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    vol_plugin->cls = vol_cls;
-    vol_plugin->nrefs = 1;
-    if((vol_plugin->container_name = H5MM_xstrdup(filename)) == NULL)
-        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,FAIL,"memory allocation failed");
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    /* setup VOL info struct */
+    if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
+    vol_info->vol_cls = vol_cls;
+    vol_info->vol_id = plugin_id;
+    if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
     /* allocate the file object that is returned to the user */
     if(NULL == (file = H5FL_CALLOC(H5VL_iod_file_t)))
@@ -5175,7 +5181,7 @@ H5VLiod_get_file_id(const char *filename, iod_handle_t coh, hid_t fapl_id, hid_t
     file->common.file = file;
 
     /* Get an atom for the file with the VOL information as the auxilary struct*/
-    if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
+    if((ret_value = H5VL_register_id(H5I_FILE, file, vol_info, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* determine if we want to acquire the latest readable version
@@ -5187,8 +5193,10 @@ H5VLiod_get_file_id(const char *filename, iod_handle_t coh, hid_t fapl_id, hid_t
         if(NULL == (rc = H5RC_create(file, rtid)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context");
 
+        rc->vol_cls = vol_info->vol_cls;
+
         /* Get an atom for the event queue with the VOL information as the auxilary struct */
-        if((*rcxt_id = H5I_register2(H5I_RC, rc, vol_plugin, TRUE)) < 0)
+        if((*rcxt_id = H5I_register(H5I_RC, rc, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize read context handle");
     }
 
@@ -5213,26 +5221,18 @@ done:
 herr_t
 H5VLiod_close_file_id(hid_t file_id)
 {
+    H5VL_object_t *obj;
     H5VL_iod_file_t *file = NULL;            /* file token from VOL plugin */
-    H5VL_t  *vol_plugin;             /* VOL plugin information */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
-
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-    vol_plugin->nrefs --;
-    if (0 == vol_plugin->nrefs) {
-        vol_plugin->container_name = (const char *)H5MM_xfree(vol_plugin->container_name);
-        vol_plugin = (H5VL_t *)H5MM_xfree(vol_plugin);
-    }
-
     /* get the file object */
-    if(NULL == (file = (H5VL_iod_file_t *)H5I_remove_verify(file_id, H5I_FILE)))
+    if(NULL == (obj = (H5VL_object_t *)H5I_remove_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    file = (H5VL_iod_file_t *)obj->vol_obj;
 
     free(file->file_name);
     free(file->common.obj_name);
@@ -5246,6 +5246,10 @@ H5VLiod_close_file_id(hid_t file_id)
        H5Pclose(file->remote_file.fcpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "failed to close plist");
     file = H5FL_FREE(H5VL_iod_file_t, file);
+
+    /* free file */
+    if(H5VL_free_object(obj) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -5295,7 +5299,7 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
         if (NULL == (idx_class = H5X_registered(plugin_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
 
-        if(NULL == (plist = H5I_object(H5P_INDEX_XFER_DEFAULT)))
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(H5P_INDEX_XFER_DEFAULT)))
             HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
         if((xxpl_id = H5P_copy_plist((H5P_genplist_t *)plist, TRUE)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list");
@@ -5373,7 +5377,7 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
         ret_value = udata.space_query;
 
         {
-            hsize_t start_coord[H5S_MAX_RANK + 1], end_coord[H5S_MAX_RANK + 1], nelmts;
+            hsize_t start_coord[H5S_MAX_RANK + 1], end_coord[H5S_MAX_RANK + 1];
 
             if (FAIL == H5Sget_select_bounds(ret_value, start_coord, end_coord))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to get bounds");

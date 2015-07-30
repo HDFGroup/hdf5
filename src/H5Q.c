@@ -100,7 +100,7 @@ static herr_t H5Q_apply_attr_name(H5Q_t *query, hbool_t *result,
 static herr_t H5Q_apply_link_name(H5Q_t *query, hbool_t *result,
         const char *name);
 
-static H5_inline void
+static void
 H5Q_encode_memcpy(unsigned char **buf_ptr, size_t *nalloc, const void *data,
         size_t data_size)
 {
@@ -111,7 +111,7 @@ H5Q_encode_memcpy(unsigned char **buf_ptr, size_t *nalloc, const void *data,
     *nalloc += data_size;
 }
 
-static H5_inline void
+static void
 H5Q_decode_memcpy(void *data, size_t data_size, const unsigned char **buf_ptr)
 {
     if (*buf_ptr != NULL) {
@@ -140,8 +140,7 @@ static const H5I_class_t H5I_QUERY_CLS[1] = {{
     H5I_QUERY,             /* Class ID for the type */
     0,                     /* Class behavior flags */
     0,                     /* Number of reserved IDs for this type */
-    (H5I_free_t)H5Q_close, /* Free function for object's of this type */
-    NULL                   /* Free function for auxilary objects of this type */
+    (H5I_free_t)H5Q_close  /* Free function for object's of this type */
 }};
 
 /*-------------------------------------------------------------------------
@@ -217,18 +216,19 @@ H5Q_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_interface_initialize_g) {
-        if ((n = H5I_nmembers(H5I_QUERY))) {
-            H5I_clear_type(H5I_QUERY, FALSE, FALSE);
-        } /* end if */
+    if(H5_interface_initialize_g) {
+	if(H5I_nmembers(H5I_QUERY) > 0) {
+	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+            n++; /*H5I*/
+	} /* end if */
         else {
-            /* Free data types */
-            H5I_dec_type_ref(H5I_QUERY);
+            /* Destroy the dataspace object id group */
+	    (void)H5I_dec_type_ref(H5I_QUERY);
+            n++; /*H5I*/
 
-            /* Shut down interface */
-            H5_interface_initialize_g = 0;
-            n = 1; /* H5I */
-        } /* end else */
+	    /* Shut down interface */
+	    H5_interface_initialize_g = 0;
+	} /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
@@ -1135,7 +1135,7 @@ H5Qapply(hid_t query_id, hbool_t *result, ...)
 {
     H5Q_t *query = NULL;
     H5T_t *native_type = NULL;
-    hid_t ret_value;
+    herr_t ret_value;
     va_list ap;
 
     FUNC_ENTER_API(FAIL)
@@ -1234,7 +1234,7 @@ H5Qapply_combine(hid_t query_id, hbool_t *result, hid_t type_id, const void *val
 {
     H5Q_t *query = NULL;
     H5T_t *type = NULL, *native_type = NULL;
-    hid_t ret_value;
+    herr_t ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*bi*x", query_id, result, type_id, value);

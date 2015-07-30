@@ -51,6 +51,7 @@ typedef struct H5RC_t {
     H5VL_iod_req_info_t req_info; /* must be first */
     struct H5VL_iod_file_t *file;
     uint64_t c_version;
+    const H5VL_class_t *vol_cls;  /* the vol plugin class that gnerated this request */
 } H5RC_t;
 
 /*****************************/

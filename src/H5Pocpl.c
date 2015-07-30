@@ -43,6 +43,7 @@
 #include "H5PLprivate.h"	/* Dynamic plugin			*/
 #include "H5Zprivate.h"	        /* Filter pipeline			*/
 
+#include "H5VLiod.h"            /* Iod VOL plugin			*/
 
 /****************/
 /* Local Macros */

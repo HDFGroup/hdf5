@@ -8887,11 +8887,10 @@ H5Sselect_is_regular(hid_t space_id)
 
     /* Rebuild diminfo if it is invalid and has not been confirmed to be
      * impossible */
-    if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO) {
+    if(space->select.sel_info.hslab->diminfo_valid == FALSE)
         (void)H5S_hyper_rebuild((H5S_t *)space);
-    }
 
-    if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES)
+    if(space->select.sel_info.hslab->diminfo_valid == TRUE)
         ret_value = TRUE;
     else
         ret_value = FALSE;
@@ -8926,16 +8925,14 @@ H5Sget_reg_hyperslab_params(hid_t space_id, hsize_t start[], hsize_t stride[],
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-    if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_IMPOSSIBLE)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "not a regular hyperslab selection")
 
     /* Rebuild diminfo if it is invalid and has not been confirmed to be
      * impossible */
-    if(space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO) {
+    if(space->select.sel_info.hslab->diminfo_valid == FALSE) {
         (void)H5S_hyper_rebuild((H5S_t *)space);
     }
 
-    if(space->select.sel_info.hslab->diminfo_valid != H5S_DIMINFO_VALID_YES) {
+    if(space->select.sel_info.hslab->diminfo_valid != TRUE) {
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "not a regular hyperslab selection")
     }
 

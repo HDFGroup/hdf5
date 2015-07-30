@@ -1156,7 +1156,7 @@ done:
  */
 herr_t
 H5VL__iod_server_adjust_buffer(hid_t mem_type_id, hid_t dset_type_id, size_t nelmts, 
-                               hid_t UNUSED dxpl_id, na_bool_t is_coresident, size_t size, void **buf, 
+                               hid_t H5_ATTR_UNUSED dxpl_id, na_bool_t is_coresident, size_t size, void **buf, 
                                hbool_t *is_vl_data, size_t *_buf_size)
 {
     herr_t ret_value = SUCCEED;

@@ -110,8 +110,6 @@ herr_t
 H5AS_invoke(const char *file_name, hid_t query_id, const char *split_script, 
             const char *combine_script, const char *integrate_script, hid_t estack_id)
 {
-    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -124,7 +122,7 @@ H5AS_invoke(const char *file_name, hid_t query_id, const char *split_script,
 
     /* Get the data through the IOD VOL */
     if((ret_value = H5VL_iod_analysis_invoke(file_name, query_id, split_script, 
-                                             combine_script, integrate_script, req)) < 0)
+                                             combine_script, integrate_script, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL,
                 "can't start iod analysis shipping execution")
 

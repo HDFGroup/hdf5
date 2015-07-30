@@ -54,7 +54,7 @@
 /* Local Prototypes */
 /********************/
 
-static herr_t H5M_close_map(void *map, H5VL_t *vol_plugin);
+static herr_t H5M_close_map(void *map);
 
 /*********************/
 /* Package Variables */
@@ -160,14 +160,19 @@ H5M_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_MAP))>0) {
-	    (void)H5I_clear_type(H5I_MAP, FALSE, FALSE);
-	} else {
+	if(H5I_nmembers(H5I_MAP) > 0) {
+	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+            n++; /*H5I*/
+	} /* end if */
+        else {
+            /* Destroy the dataspace object id group */
 	    (void)H5I_dec_type_ref(H5I_MAP);
+            n++; /*H5I*/
+
+	    /* Shut down interface */
 	    H5_interface_initialize_g = 0;
-	    n = 1;
-	}
-    }
+	} /* end else */
+    } /* end if */
     FUNC_LEAVE_NOAPI(n)
 } /* H5M_term_interface() */
 
@@ -743,7 +748,7 @@ H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
     }
 
     /* delete the key pair through the IOD VOL */
-    if((ret_value = H5VL_iod_map_delete(map->obj, key_mem_type_id, key, trans_id, req)) < 0)
+    if((ret_value = H5VL_iod_map_delete(map->vol_obj, key_mem_type_id, key, trans_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get map value")
 
     if(request && *req)
@@ -944,7 +949,7 @@ H5_DLL herr_t H5Mevict_ff(hid_t map_id, uint64_t c_version, hid_t dxpl_id, hid_t
     }
 
     /* Get the data through the IOD VOL */
-    if((ret_value = H5VL_iod_evict(map->obj, c_version, dxpl_id, req)) < 0)
+    if((ret_value = H5VL_iod_evict(map->vol_obj, c_version, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't evict map")
 
     if(request && *req)

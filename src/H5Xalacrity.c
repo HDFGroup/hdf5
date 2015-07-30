@@ -1274,7 +1274,7 @@ done:
  *------------------------------------------------------------------------
  */
 static void *
-H5X_alacrity_create(hid_t file_id, hid_t dataset_id, hid_t UNUSED xcpl_id,
+H5X_alacrity_create(hid_t file_id, hid_t dataset_id, hid_t H5_ATTR_UNUSED xcpl_id,
         hid_t xapl_id, size_t *metadata_size, void **metadata)
 {
     H5X_alacrity_t *alacrity = NULL;
@@ -1350,8 +1350,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_alacrity_remove(hid_t UNUSED file_id, hid_t UNUSED dataset_id,
-        size_t UNUSED metadata_size, void UNUSED *metadata)
+H5X_alacrity_remove(hid_t H5_ATTR_UNUSED file_id, hid_t H5_ATTR_UNUSED dataset_id,
+        size_t H5_ATTR_UNUSED metadata_size, void H5_ATTR_UNUSED *metadata)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1457,7 +1457,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5X_alacrity_pre_update(void *idx_handle, hid_t UNUSED dataspace_id, hid_t UNUSED xxpl_id)
+H5X_alacrity_pre_update(void *idx_handle, hid_t H5_ATTR_UNUSED dataspace_id, hid_t H5_ATTR_UNUSED xxpl_id)
 {
     H5X_alacrity_t *alacrity = (H5X_alacrity_t *) idx_handle;
     herr_t ret_value = SUCCEED; /* Return value */

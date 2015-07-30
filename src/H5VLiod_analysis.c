@@ -107,9 +107,9 @@ static herr_t H5VL__iod_read_selection(iod_handle_t coh, iod_obj_id_t obj_id,
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_analysis_invoke_cb(AXE_engine_t UNUSED axe_engine, 
-                                   size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                                   size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_analysis_invoke_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                                   size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                                   size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                                    void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -1286,9 +1286,9 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5VL_iod_server_analysis_farm_cb(AXE_engine_t UNUSED axe_engine, 
-                                 size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
-                                 size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+H5VL_iod_server_analysis_farm_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                                 size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                                 size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
                                  void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;
@@ -1348,8 +1348,8 @@ done:
  */
 void
 H5VL_iod_server_analysis_transfer_cb(AXE_engine_t axe_engine,
-        size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[],
-        size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[],
+        size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[],
+        size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[],
         void *_op_data)
 {
     op_data_t *op_data = (op_data_t *)_op_data;

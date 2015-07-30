@@ -160,14 +160,20 @@ H5V_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_VIEW))>0) {
-	    (void)H5I_clear_type(H5I_VIEW, FALSE, FALSE);
-	} else {
+	if(H5I_nmembers(H5I_VIEW) > 0) {
+	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+            n++; /*H5I*/
+	} /* end if */
+        else {
+            /* Destroy the dataspace object id group */
 	    (void)H5I_dec_type_ref(H5I_VIEW);
+            n++; /*H5I*/
+
+	    /* Shut down interface */
 	    H5_interface_initialize_g = 0;
-	    n = 1;
-	}
-    }
+	} /* end else */
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(n)
 } /* H5V_term_interface() */
 
@@ -320,7 +326,7 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
     if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object/file identifier")
 
-    if(vol_plugin->cls->value != H5_VOL_IOD)
+    if(obj->vol_info->vol_cls->value != H5_VOL_IOD)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "only IOD plugin supports VIEW objects for now")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
@@ -554,10 +560,6 @@ H5Vget_elem_regions_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t datase
     if(start >= view->remote_view.region_info.count || start+count > view->remote_view.region_info.count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "start/count out of range")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(view_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-
     for(i=start; i<count; i++) {
         H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
         void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -631,10 +633,6 @@ H5Vget_objs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t obj_id[], hid_
     if(start >= view->remote_view.obj_info.count || start+count > view->remote_view.obj_info.count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "start/count out of range")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(view_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-
     for(i=start; i<count; i++) {
         H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
         void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -665,7 +663,6 @@ H5Vget_objs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t obj_id[], hid_
             if(H5ES_insert(estack_id, request) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
-        vol_plugin->nrefs ++;
         /* create hid_t for opened object */
         if((obj_id[k] = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
@@ -703,10 +700,6 @@ H5Vget_attrs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t attr_id[], hi
     if(start >= view->remote_view.attr_info.count || start+count > view->remote_view.attr_info.count)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "start/count out of range")
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(view_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-
     for(i=start; i<count; i++) {
         H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
         void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -739,7 +732,6 @@ H5Vget_attrs_ff(hid_t view_id, hsize_t start, hsize_t count, hid_t attr_id[], hi
             if(H5ES_insert(estack_id, request) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
-        vol_plugin->nrefs ++;
         /* create hid_t for opened object */
         if((attr_id[k] = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
