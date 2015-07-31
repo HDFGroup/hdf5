@@ -1202,11 +1202,15 @@ done:
  PURPOSE
     Return unlimited dimension of selection, or -1 if none
  USAGE
-    VDSINC
+    int H5S_point_unlim_dim(space)
+        H5S_t *space;           IN: Dataspace pointer to check
  RETURNS
     Unlimited dimension of selection, or -1 if none (never fails).
  DESCRIPTION
-    VDSINC
+    Returns the index of the unlimited dimension in this selection, or -1
+    if the selection has no unlimited dimension.  Currently point
+    selections cannot have an unlimited dimension, so this function always
+    returns -1.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES

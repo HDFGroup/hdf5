@@ -1805,6 +1805,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     H5O_layout_t layout;        /* Layout information for setting chunk info */
     H5S_t *vspace;              /* Virtual dataset space selection */
     H5S_t *src_space;           /* Source dataset space selection */
+    hssize_t nelmts;           /* Number of elements */
     hbool_t new_layout = FALSE; /* Whether we are adding a new virtual layout message to plist */
     H5O_storage_virtual_ent_t *ent = NULL; /* Convenience pointer to new VDS entry */
     hbool_t adding_entry = FALSE; /* Whether we are in the middle of adding an entry */
@@ -1824,9 +1825,14 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
     if(NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-
-    //VDSINC add check for overlapping virtual spaces and same number of
-    // elements in vspace and src_space
+    nelmts = H5S_GET_SELECT_NPOINTS(vspace);
+    if((nelmts != H5S_UNLIMITED)
+            && (nelmts != H5S_GET_SELECT_NPOINTS(src_space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "virtual and source space selections have different numbers of elements")
+    /* Check for unlimited selections having the same number of elements in the
+     * non-unlimited dimensions, and check for printf selections having the
+     * correct numbers of elements and unlimited/non-unlimited dimensions VDSINC
+     */
 
 #ifndef H5_HAVE_C99_DESIGNATED_INITIALIZER
     /* If the compiler doesn't support C99 designated initializers, check if

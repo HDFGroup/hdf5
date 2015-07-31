@@ -2170,16 +2170,25 @@ done:
     H5S_select_project_intersection
 
  PURPOSE
-    VDSINC
+    Projects the intersection of of the selections of src_space and
+    src_intersect_space within the selection of src_space as a selection
+    within the selection of dst_space
 
  USAGE
-    VDSINC
+    herr_t H5S_select_project_intersection(src_space,dst_space,src_intersect_space,proj_space)
+        H5S_t *src_space;       IN: Selection that is mapped to dst_space, and intersected with src_intersect_space
+        H5S_t *dst_space;       IN: Selection that is mapped to src_space, and which contains the result
+        H5S_t *src_intersect_space; IN: Selection whose intersection with src_space is projected to dst_space to obtain the result
+        H5S_t *proj_space;      OUT: Will contain the result (intersection of src_intersect_space and src_space projected from src_space to dst_space) after the operation
 
  RETURNS
     Non-negative on success/Negative on failure.
 
  DESCRIPTION
-    VDSINC
+    Projects the intersection of of the selections of src_space and
+    src_intersect_space within the selection of src_space as a selection
+    within the selection of dst_space.  The result is placed in the
+    selection of proj_space.
     
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -2259,16 +2268,20 @@ done:
     H5S_select_subtract
 
  PURPOSE
-    VDSINC
+    Subtract one selection from another
 
  USAGE
-    VDSINC
+    herr_t H5S_select_subtract(space,subtract_space)
+        H5S_t *space;           IN/OUT: Selection to be operated on
+        H5S_t *subtract_space;  IN: Selection that will be subtracted from space
 
  RETURNS
     Non-negative on success/Negative on failure.
 
  DESCRIPTION
-    VDSINC
+    Removes any and all portions of space that are also present in
+    subtract_space.  In essence, performs an A_NOT_B operation with the
+    two selections.
     
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS

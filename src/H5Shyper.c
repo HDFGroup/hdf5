@@ -2984,11 +2984,13 @@ done:
  PURPOSE
     Return unlimited dimension of selection, or -1 if none
  USAGE
-    VDSINC
+    int H5S_hyper_unlim_dim(space)
+        H5S_t *space;           IN: Dataspace pointer to check
  RETURNS
     Unlimited dimension of selection, or -1 if none (never fails).
  DESCRIPTION
-    VDSINC
+    Returns the index of the unlimited dimension of the selection, or -1
+    if the selection has no unlimited dimension.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
@@ -9221,7 +9223,11 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned H5_ATTR_UNUSED flags, H5S_se
     src_intersect_space within the selection of src_space as a selection
     within the selection of dst_space
  USAGE
-    VDSINC
+    herr_t H5S__hyper_project_intersection(src_space,dst_space,src_intersect_space,proj_space)
+        H5S_t *src_space;       IN: Selection that is mapped to dst_space, and intersected with src_intersect_space
+        H5S_t *dst_space;       IN: Selection that is mapped to src_space, and which contains the result
+        H5S_t *src_intersect_space; IN: Selection whose intersection with src_space is projected to dst_space to obtain the result
+        H5S_t *proj_space;      OUT: Will contain the result (intersection of src_intersect_space and src_space projected from src_space to dst_space) after the operation
  RETURNS
     Non-negative on success/Negative on failure.
  DESCRIPTION
@@ -9621,13 +9627,17 @@ done:
  NAME
     H5S__hyper_subtract
  PURPOSE
-    VDSINC
+    Subtract one hyperslab selection from another
  USAGE
-    VDSINC
+    herr_t H5S__hyper_subtract(space,subtract_space)
+        H5S_t *space;           IN/OUT: Selection to be operated on
+        H5S_t *subtract_space;  IN: Selection that will be subtracted from space
  RETURNS
     Non-negative on success/Negative on failure.
  DESCRIPTION
-    VDSINC
+    Removes any and all portions of space that are also present in
+    subtract_space.  In essence, performs an A_NOT_B operation with the
+    two selections.
 
     Note this function basically duplicates a subset of the functionality
     of H5S_select_select().  It should probably be removed when that
@@ -9735,7 +9745,12 @@ done:
     unlimited dimension to include clip_size.  The returned selection may
     extent beyond clip_size.
  USAGE
-    VDSINC
+    void H5S__hyper_get_clip_diminfo(start,stride,count,block,clip_size)
+        hsize_t start;          IN: Start of hyperslab in unlimited dimension
+        hsize_t stride;         IN: Stride of hyperslab in unlimited dimension
+        hsize_t *count;         IN/OUT: Count of hyperslab in unlimited dimension
+        hsize_t *block;         IN/OUT: Block of hyperslab in unlimited dimension
+        hsize_t clip_size;      IN: Extent that hyperslab will be clipped to
  RETURNS
     Non-negative on success/Negative on failure.
  DESCRIPTION
@@ -9784,12 +9799,15 @@ H5S__hyper_get_clip_diminfo(hsize_t start, hsize_t stride, hsize_t *count,
     Clips the unlimited dimension of the hyperslab selection to the
     specified size
  USAGE
-    VDSINC
+    void H5S_hyper_clip_unlim(space,clip_size)
+        H5S_t *space,           IN/OUT: Unlimited space to clip
+        hsize_t clip_size;      IN: Extent that hyperslab will be clipped to
  RETURNS
     Non-negative on success/Negative on failure.
  DESCRIPTION
-    This function recalculates the internal description of the hyperslab
-    to make the unlimited dimension extend to the specified extent.
+    This function changes the unlimited selection into a limited selection
+    with the extent of the formerly unlimited dimension specified by
+    * clip_size.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
     Note this function does not take the offset into account.
@@ -9895,13 +9913,23 @@ done:
  NAME
     H5S__hyper_get_clip_extent_real
  PURPOSE
-    VDSINC
+    Gets the extent a space should be clipped to in order to contain the
+    specified number of slices in the unlimited dimension
  USAGE
-    VDSINC
+    hsize_t H5S__hyper_get_clip_extent_real(clip_space,num_slices,incl_trail)
+        const H5S_t *clip_space, IN: Space that clip size will be calculated based on
+        hsize_t num_slizes,     IN: Number of slices clip_space should contain when clipped
+        hbool_t incl_trail;     IN: Whether to include trailing unselected space
  RETURNS
-    Non-negative on success/Negative on failure.
+    Clip extent to match num_slices (never fails)
  DESCRIPTION
-    VDSINC
+    Calculates and returns the extent that clip_space should be clipped to
+    (via H5S_hyper_clip_unlim) in order for it to contain num_slices
+    slices in the unlimited dimension.  If the clipped selection would end
+    immediately before a section of unselected space (i.e. at the end of a
+    block), then if incl_trail is TRUE, the returned clip extent is
+    selected to include that trailing "blank" space, otherwise it is
+    selected to end at the end before the blank space.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
     Note this assumes the offset has been normalized.
@@ -9970,13 +9998,23 @@ H5S__hyper_get_clip_extent_real(const H5S_t *clip_space, hsize_t num_slices,
  NAME
     H5S_hyper_get_clip_extent
  PURPOSE
-    VDSINC
+    Gets the extent a space should be clipped to in order to contain the
+    same number of elements as another space
  USAGE
-    VDSINC
+    hsize_t H5S__hyper_get_clip_extent(clip_space,match_space,incl_trail)
+        const H5S_t *clip_space, IN: Space that clip size will be calculated based on
+        const H5S_t *match_space, IN: Space containing the same number of elements as clip_space should after clipping
+        hbool_t incl_trail;     IN: Whether to include trailing unselected space
  RETURNS
-    Non-negative on success/Negative on failure.
+    Calculated clip extent (never fails)
  DESCRIPTION
-    VDSINC
+    Calculates and returns the extent that clip_space should be clipped to
+    (via H5S_hyper_clip_unlim) in order for it to contain the same number
+    of elements as match_space.  If the clipped selection would end
+    immediately before a section of unselected space (i.e. at the end of a
+    block), then if incl_trail is TRUE, the returned clip extent is
+    selected to include that trailing "blank" space, otherwise it is
+    selected to end at the end before the blank space.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
     Note this assumes the offset has been normalized.
@@ -10015,13 +10053,26 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
  NAME
     H5S_hyper_get_clip_extent_match
  PURPOSE
-    VDSINC
+    Gets the extent a space should be clipped to in order to contain the
+    same number of elements as another unlimited space that has been
+    clipped to a different extent
  USAGE
-    VDSINC
+    hsize_t H5S__hyper_get_clip_extent_match(clip_space,match_space,match_clip_size,incl_trail)
+        const H5S_t *clip_space, IN: Space that clip size will be calculated based on
+        const H5S_t *match_space, IN: Space that, after being clipped to match_clip_size, contains the same number of elements as clip_space should after clipping
+        hsize_t match_clip_size, IN: Extent match_space would be clipped to to match the number of elements in clip_space
+        hbool_t incl_trail;     IN: Whether to include trailing unselected space
  RETURNS
-    Non-negative on success/Negative on failure.
+    Calculated clip extent (never fails)
  DESCRIPTION
-    VDSINC
+    Calculates and returns the extent that clip_space should be clipped to
+    (via H5S_hyper_clip_unlim) in order for it to contain the same number
+    of elements as match_space would have after being clipped to
+    match_clip_size.  If the clipped selection would end immediately
+    before a section of unselected space (i.e. at the end of a block),
+    then if incl_trail is TRUE, the returned clip extent is selected to
+    include that trailing "blank" space, otherwise it is selected to end
+    at the end before the blank space.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
     Note this assumes the offset has been normalized.
@@ -10090,13 +10141,18 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space,
  NAME
     H5S_hyper_get_unlim_block
  PURPOSE
-    VDSINC
+    Get the nth block in the unlimited dimension
  USAGE
-    VDSINC
+    H5S_t *H5S_hyper_get_unlim_block(space,block_index)
+        const H5S_t *space,     IN: Space with unlimited selection
+        hsize_t block_index,    IN: Index of block to return in unlimited dimension
+        hbool_t incl_trail;     IN: Whether to include trailing unselected space
  RETURNS
     New space on success/NULL on failure.
  DESCRIPTION
-    VDSINC
+    Returns a space containing only the block_indexth block in the
+    unlimited dimension on space.  All blocks in all other dimensions are
+    preserved.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
     Note this assumes the offset has been normalized.
@@ -10172,13 +10228,20 @@ done:
  NAME
     H5S_hyper_get_first_inc_block
  PURPOSE
-    VDSINC
+    Get the index of the first incomplete block in the specified extent
  USAGE
-    VDSINC
+    hsize_t H5S_hyper_get_first_inc_block(space,clip_size,partial)
+        const H5S_t *space,     IN: Space with unlimited selection
+        hsize_t clip_size,      IN: Extent space would be clipped to
+        hbool_t *partial;       OUT: Whether the ret_valueth block (first incomplete block) is partial
  RETURNS
     Index of first incomplete block in clip_size (never fails).
  DESCRIPTION
-    VDSINC
+    Calculates and returns the index (as would be passed to
+    H5S_hyper_get_unlim_block()) of the first block in the unlimited
+    dimension of space which would be incomplete or missing when space is
+    clipped to clip_size.  partial is set to TRUE if the first incomplete
+    block is partial, and FALSE if the first incomplete block is missing.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
     Note this assumes the offset has been normalized.

@@ -17,7 +17,24 @@
  *              Wednesday, January 28, 2015
  *
  * Purpose:
- *      VDSINC
+ *      Virtual Dataset (VDS) functions.  Creates a layout type which allows
+ *      definition of a virtual dataset, where the actual dataset is stored in
+ *      other datasets (called source datasets).  The mappings between the
+ *      virtual and source datasets are specified by hyperslab or "all"
+ *      dataspace selections.  Point selections are not currently supported.
+ *      Overlaps in the mappings in the virtual dataset result in undefined
+ *      behaviour.
+ *
+ *      Mapping selections may be unlimited, in which case the size of the
+ *      virtual dataset is determined by the size of the source dataset(s).
+ *      Names for the source datasets may also be generated procedurally, in
+ *      which case the virtual selection should be unlimited with an unlimited
+ *      count and the source selection should be limited with a size equal to
+ *      that of the virtual selection with the unlimited count set to 1.
+ *
+ *      Source datasets are opened lazily (only when needed for I/O or to
+ *      determine the size of the virtual dataset), and are currently held open
+ *      until the virtual dataset is closed.
  */
 
 /****************/
@@ -1786,7 +1803,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_post_io
  *
- * Purpose:     VDSINC
+ * Purpose:     Frees memory structures allocated by H5D__virtual_pre_io.
  *
  * Return:      Non-negative on success/Negative on failure
  *
