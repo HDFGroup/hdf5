@@ -57,8 +57,19 @@ New Features
 
     Configuration
     -------------
-    - 
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - Inline functions now correctly annotated w/ Autotools builds.
+
+      The method used to detect the appropriate inline markup scheme was
+      nonfunctional in Autotools builds. The Autotools have been modified
+      to correctly detect the compiler's inline markup symbol and apply it
+      to the source. Note that only a very small number of internal
+      functions are marked inline so this was not a very big change or
+      likely to significantly affect performance.
+
+      As a part of this change, the H5_inline symbol no longer appears in
+      H5pubconf.h.
+
+      (DER - 2015/08/13 HDFFV-9119, HDFFV-9421)
       
 
 
