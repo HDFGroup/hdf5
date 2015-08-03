@@ -74,7 +74,6 @@ typedef int64_t hid_t;
  * (failure) then the object will remain in the ID type.
  */
 typedef herr_t (*H5I_free_t)(void*);
-typedef herr_t (*H5I_free2_t)(void*,void*);
 
 /* Type of the function to compare objects & keys */
 typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);

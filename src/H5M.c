@@ -161,7 +161,7 @@ H5M_term_interface(void)
 
     if(H5_interface_initialize_g) {
 	if(H5I_nmembers(H5I_MAP) > 0) {
-	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+	    (void)H5I_clear_type(H5I_MAP, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
         else {
@@ -173,6 +173,7 @@ H5M_term_interface(void)
 	    H5_interface_initialize_g = 0;
 	} /* end else */
     } /* end if */
+
     FUNC_LEAVE_NOAPI(n)
 } /* H5M_term_interface() */
 
@@ -203,9 +204,9 @@ H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype,
              hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, hid_t trans_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void    **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void    *map = NULL;        /* pointer to map object created */
-    H5VL_object_t *obj = NULL;          /* object token of loc_id */
+    H5VL_object_t *obj = NULL;  /* object token of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t ret_value;
 
@@ -267,7 +268,7 @@ H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype,
 
     /* Get an atom for the map */
     if((ret_value = H5VL_register_id(H5I_MAP, map, obj->vol_info, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize map handle")
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize map handle");
 
 done:
     if (ret_value < 0 && map)
@@ -299,8 +300,8 @@ hid_t
 H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void    *map = NULL;        /* pointer to map object created */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void *map = NULL;  /* pointer to map object created */
     H5VL_object_t *obj = NULL;          /* object token of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t ret_value;
@@ -382,7 +383,7 @@ H5Mset_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
           const void *value, hid_t dxpl_id, hid_t trans_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_object_t *map = NULL;        /* pointer to map object created */
     herr_t ret_value = SUCCEED;    /* Return value */
 
@@ -448,7 +449,7 @@ H5Mget_ff(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_ty
           void *value, hid_t dxpl_id, hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_object_t *map = NULL;        /* pointer to map object created */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -515,7 +516,7 @@ H5Mget_types_ff(hid_t map_id, hid_t *key_type_id, hid_t *val_type_id,
                 hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_object_t *map = NULL;        /* pointer to map object created */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -568,7 +569,7 @@ herr_t
 H5Mget_count_ff(hid_t map_id, hsize_t *count, hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_object_t *map = NULL;        /* pointer to map object created */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -624,7 +625,7 @@ H5Mexists_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
              hbool_t *exists, hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_object_t *map = NULL;        /* pointer to map object created */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -728,7 +729,7 @@ H5Mdelete_ff(hid_t map_id, hid_t key_mem_type_id, const void *key,
              hid_t trans_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_object_t *map = NULL;        /* pointer to map object created */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -823,9 +824,9 @@ static herr_t
 H5M_close_map(void *_map)
 {
     H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
-    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_object_t *map = (H5VL_object_t *)_map;
-    herr_t              ret_value = SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -870,7 +871,7 @@ H5_DLL herr_t H5Mprefetch_ff(hid_t map_id, hid_t rcxt_id, hrpl_t *replica_id,
                           hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_object_t *map = NULL;        /* pointer to map object */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -923,7 +924,7 @@ done:
 H5_DLL herr_t H5Mevict_ff(hid_t map_id, uint64_t c_version, hid_t dxpl_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generated request pointer */
+    void **req = NULL; /* pointer to plugin generated request pointer */
     H5VL_object_t *map = NULL;       /* pointer to map object */
     herr_t ret_value = SUCCEED; /* Return value */
 

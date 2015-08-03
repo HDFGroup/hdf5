@@ -305,7 +305,7 @@ static herr_t
 H5VL_iod_init_interface(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-
+    H5VL_iod_init();
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5VL_iod_init_interface() */
 
@@ -1708,21 +1708,23 @@ done:
     /* If the operation is synchronous and it failed at the server, or
        it failed locally, then cleanup and return fail */
     if(NULL == ret_value) {
-        if(grp->common.obj_name) {
-            HDfree(grp->common.obj_name);
-            grp->common.obj_name = NULL;
-        }
-        if(grp->common.comment) {
-            HDfree(grp->common.comment);
-            grp->common.comment = NULL;
-        }
-        if(grp->gapl_id != FAIL && H5I_dec_ref(grp->gapl_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(grp->remote_group.gcpl_id != FAIL && 
-           H5I_dec_ref(grp->remote_group.gcpl_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
-        if(grp)
+        if(grp) {
+            if(grp->common.obj_name) {
+                HDfree(grp->common.obj_name);
+                grp->common.obj_name = NULL;
+            }
+            if(grp->common.comment) {
+                HDfree(grp->common.comment);
+                grp->common.comment = NULL;
+            }
+            if(grp->gapl_id != FAIL && H5I_dec_ref(grp->gapl_id) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+            if(grp->remote_group.gcpl_id != FAIL && 
+               H5I_dec_ref(grp->remote_group.gcpl_id) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close plist");
+
             grp = H5FL_FREE(H5VL_iod_group_t, grp);
+        }
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4405,6 +4407,7 @@ H5VL_iod_attribute_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_attr_
             {
                 char    *attr_name = va_arg (arguments, char *);
                 attr_op_in_t input;
+
                 /* get the transaction ID */
                 if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
                     HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
@@ -4545,6 +4548,40 @@ H5VL_iod_attribute_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_attr_
                 const char    *old_name  = va_arg (arguments, const char *);
                 const char    *new_name  = va_arg (arguments, const char *);
                 attr_rename_in_t input;
+
+                /* get the transaction ID */
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+                if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
+
+                /* get the TR object */
+                if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID");
+
+                /* allocate parent request array */
+                if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                            H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+
+                /* retrieve parent requests */
+                if(H5VL_iod_get_parent_requests(obj, (H5VL_iod_req_info_t *)tr, parent_reqs, &num_parents) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+                /* retrieve IOD info of location object */
+                if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+
+                /* MSC - If location object not opened yet, wait for it. */
+                if(IOD_OBJ_INVALID == iod_id) {
+                    /* Synchronously wait on the request attached to the dataset */
+                    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    obj->request = NULL;
+                    /* retrieve IOD info of location object */
+                    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, &attrkv_id) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current location group info");
+                }
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type)
                     loc_name = strdup(".");
@@ -7685,11 +7722,10 @@ H5VL_iod_map_create(void *_obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, con
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship map create");
 
     ret_value = (void *)map;
-
 done:
     /* If the operation is synchronous and it failed at the server, or
        it failed locally, then cleanup and return fail */
-    if(NULL == ret_value) {
+    if(NULL == ret_value && map) {
         /* free map components */
         if(map->common.obj_name) {
             HDfree(map->common.obj_name);
@@ -7703,8 +7739,8 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
         if(map->remote_map.valtype_id != FAIL && H5I_dec_ref(map->remote_map.valtype_id) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "failed to close dtype");
-        if(map)
-            map = H5FL_FREE(H5VL_iod_map_t, map);
+
+        map = H5FL_FREE(H5VL_iod_map_t, map);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

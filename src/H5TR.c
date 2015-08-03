@@ -166,7 +166,7 @@ H5TR_term_interface(void)
 
     if(H5_interface_initialize_g) {
 	if(H5I_nmembers(H5I_TR) > 0) {
-	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+	    (void)H5I_clear_type(H5I_TR, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
         else {
@@ -303,11 +303,11 @@ H5TRcreate(hid_t file_id, hid_t rc_id, uint64_t trans_num)
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rc_id, H5I_RC)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a read context ID")
 
-    tr->vol_cls = file->vol_info->vol_cls;
-
     /* create a new transaction object */
-    if(NULL == (tr = H5TR_create(file, rc, trans_num)))
+    if(NULL == (tr = H5TR_create(file->vol_obj, rc, trans_num)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create transaction object")
+
+    tr->vol_cls = file->vol_info->vol_cls;
 
     /* Get an atom for the TR */
     if((ret_value = H5I_register(H5I_TR, tr, TRUE)) < 0)

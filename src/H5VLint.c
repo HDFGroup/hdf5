@@ -28,7 +28,6 @@
 /****************/
 
 #define H5VL_PACKAGE		/*suppress error about including H5VLpkg  */
-#define H5I_PACKAGE		/*suppress error about including H5Ipkg  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5VL_int_init_interface
@@ -40,7 +39,6 @@
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Ipkg.h"		/* IDs Package header	  		*/
 #include "H5Lprivate.h"		/* Links        		  	*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -173,7 +171,7 @@ hid_t
 H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref)
 {
     H5VL_object_t *new_obj = NULL;
-    hid_t ret_value = FAIL;
+    hid_t ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -493,7 +491,7 @@ H5VL_get_object(hid_t id)
     FUNC_ENTER_NOAPI(NULL)
 
     if(H5I_FILE == obj_type || H5I_GROUP == obj_type || H5I_ATTR == obj_type || 
-       H5I_DATASET == obj_type || H5I_DATATYPE == obj_type) {
+       H5I_DATASET == obj_type || H5I_DATATYPE == obj_type || H5I_MAP == obj_type) {
         /* get the object */
         if(NULL == (obj = H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")

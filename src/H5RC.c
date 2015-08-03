@@ -165,7 +165,7 @@ H5RC_term_interface(void)
 
     if(H5_interface_initialize_g) {
 	if(H5I_nmembers(H5I_RC) > 0) {
-	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+	    (void)H5I_clear_type(H5I_RC, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
         else {
@@ -288,7 +288,7 @@ H5RCcreate(hid_t file_id, uint64_t c_version)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* create a new read context object */
-    if(NULL == (rc = H5RC_create(file, c_version)))
+    if(NULL == (rc = H5RC_create(file->vol_obj, c_version)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context")
 
     rc->vol_cls = file->vol_info->vol_cls;
@@ -409,9 +409,11 @@ H5RCacquire(hid_t file_id, uint64_t *c_version,
     /* create a new read context object with the provided container
        version. The container version associated with the RC object
        might be changed if the version is not available for read. */
-    if(NULL == (rc = H5RC_create(file, *c_version)))
+    if(NULL == (rc = H5RC_create(file->vol_obj, *c_version)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context")
+
     rc->vol_cls = file->vol_info->vol_cls;
+
     /* Get an atom for the RC*/
     if((rc_id = H5I_register(H5I_RC, rc, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize read context handle")
@@ -424,7 +426,7 @@ H5RCacquire(hid_t file_id, uint64_t *c_version,
         request->vol_cls = rc->vol_cls;
     }
 
-    if(H5VL_iod_rc_acquire((H5VL_iod_file_t *)file, rc, c_version, rcapl_id, req) < 0)
+    if(H5VL_iod_rc_acquire((H5VL_iod_file_t *)file->vol_obj, rc, c_version, rcapl_id, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a read context on container");
 
     if(request && *req)

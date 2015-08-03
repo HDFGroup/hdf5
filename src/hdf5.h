@@ -30,21 +30,27 @@
 #include "H5ESpublic.h"		/* Event Stacks				*/
 #include "H5Fpublic.h"		/* Files				*/
 #include "H5FDpublic.h"		/* File drivers				*/
-#include "H5FFpublic.h"         /* FastForward wrappers                 */
 #include "H5Gpublic.h"		/* Groups				*/
 #include "H5Ipublic.h"		/* ID management			*/
 #include "H5Lpublic.h"		/* Links				*/
 #include "H5MMpublic.h"		/* Memory management			*/
 #include "H5Opublic.h"		/* Object headers			*/
-#include "H5Ppublic.h"      /* Property lists           */
-#include "H5PLpublic.h"     /* Plugins           */
-#include "H5Qpublic.h"          /* Queries                              */
+#include "H5Ppublic.h"          /* Property lists                       */
+#include "H5PLpublic.h"         /* Plugins                              */
 #include "H5Rpublic.h"		/* References				*/
-#include "H5RCpublic.h"		/* Read Contexts			*/
 #include "H5Spublic.h"		/* Dataspaces				*/
 #include "H5Tpublic.h"		/* Datatypes				*/
+
+/* FastForward headers */
+#include "H5FFpublic.h"         /* FastForward wrappers                 */
+#include "H5Mpublic.h"          /* Map wrappers                         */
+#include "H5Qpublic.h"          /* Queries                              */
+#include "H5RCpublic.h"		/* Read Contexts			*/
 #include "H5TRpublic.h"		/* Transactions 			*/
 #include "H5Vpublic.h"		/* Views				*/
+#include "H5VLiod.h"            /* IOD VOL plugin                       */
+
+
 #ifdef H5_HAVE_INDEXING
 #include "H5Xpublic.h"		/* Index plugins			*/
 #endif
@@ -53,7 +59,6 @@
 
 /* Predefined VOL plugins */
 #include "H5VLnative.h"		/* Native HDF5 plugin           	*/
-#include "H5VLiod.h"            /* IOD VOL plugin                       */
 
 /* Predefined file drivers */
 #include "H5FDcore.h"		/* Files stored entirely in memory	*/

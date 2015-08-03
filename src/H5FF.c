@@ -441,7 +441,6 @@ H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
     if(H5P_set(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
@@ -468,7 +467,7 @@ H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t
 
     /* Create the group through the VOL */
     if(NULL == (grp = H5VL_group_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, name, 
-                                        gcpl_id, gapl_id, H5AC_dxpl_id, req)))
+                                        gcpl_id, gapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     if(request && *req)
@@ -481,7 +480,7 @@ H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -554,7 +553,7 @@ H5Gopen_ff(hid_t loc_id, const char *name, hid_t gapl_id,
 
     /* Open the group through the VOL */
     if(NULL == (grp = H5VL_group_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                      name, gapl_id, H5AC_ind_dxpl_id, req)))
+                                      name, gapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     if(request && *req)
@@ -567,7 +566,7 @@ H5Gopen_ff(hid_t loc_id, const char *name, hid_t gapl_id,
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -708,7 +707,7 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
     /* Create the dataset through the VOL */
     if(NULL == (dset = H5VL_dataset_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                           name, dcpl_id, dapl_id, H5AC_dxpl_id, req)))
+                                           name, dcpl_id, dapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     if(request && *req)
@@ -721,7 +720,7 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
 done:
     if (ret_value < 0 && dset)
-        if(H5VL_dataset_close (dset, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_dataset_close (dset, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate_ff() */
@@ -808,7 +807,7 @@ H5Dcreate_anon_ff(hid_t loc_id, hid_t type_id, hid_t space_id,
     /* Create the dataset through the VOL */
     if(NULL == (dset = H5VL_dataset_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
                                            NULL, dcpl_id, dapl_id, 
-                                           H5AC_dxpl_id, req)))
+                                           dxpl_id, req)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     if(request && *req)
@@ -821,7 +820,7 @@ H5Dcreate_anon_ff(hid_t loc_id, hid_t type_id, hid_t space_id,
 
 done:
     if (ret_value < 0 && dset)
-        if(H5VL_dataset_close (dset, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_dataset_close (dset, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate_anon_ff() */
@@ -1007,7 +1006,7 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
 #ifdef H5_HAVE_INDEXING
     /* Get the index handle */
-    if (NULL != (idx_handle = H5VL_iod_dataset_get_index(dset))) {
+    if (NULL != (idx_handle = H5VL_iod_dataset_get_index(dset->vol_obj))) {
         H5X_class_t *idx_class = NULL;
         H5P_genplist_t *xxpl_plist; /* Property list pointer */
         unsigned plugin_id;
@@ -1019,7 +1018,7 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if(H5P_set(xxpl_plist, H5VL_TRANS_ID, &trans_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
 
-        if (!(plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset)))
+        if (!(plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset->vol_obj)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin ID from dataset");
         if (NULL == (idx_class = H5X_registered(plugin_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
@@ -1170,7 +1169,7 @@ H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t trans_id, hid_t esta
 
     /* set the extent through the VOL */
     if((ret_value = H5VL_dataset_specific(dset->vol_obj, dset->vol_info->vol_cls, H5VL_DATASET_SET_EXTENT, 
-                                          H5AC_dxpl_id, req, size)) < 0)
+                                          dxpl_id, req, size)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
 
     if(request && *req)
@@ -1219,8 +1218,8 @@ H5Dclose_ff(hid_t dset_id, hid_t estack_id)
 
 #ifdef H5_HAVE_INDEXING
     /* Get the index handle if there is one */
-    idx_handle = H5VL_iod_dataset_get_index(dset);
-    if (idx_handle && !(plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset)))
+    idx_handle = H5VL_iod_dataset_get_index(dset->vol_obj);
+    if (idx_handle && !(plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset->vol_obj)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin ID from dataset");
 #endif
 
@@ -1342,7 +1341,7 @@ H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     /* commit the datatype through the VOL */
     if (NULL == (dt = H5VL_datatype_commit(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
                                            name, type_id, lcpl_id, tcpl_id, tapl_id, 
-                                           H5AC_dxpl_id, req)))
+                                           dxpl_id, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     if(request && *req)
@@ -1556,7 +1555,7 @@ H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
 
     /* Create the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, attr_name, 
-                                        acpl_id, aapl_id, H5AC_dxpl_id, req)))
+                                        acpl_id, aapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
     if(request && *req)
@@ -1569,7 +1568,7 @@ H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close(attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_attr_close(attr, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate_ff() */
@@ -1648,7 +1647,7 @@ H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     /* Create the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, attr_name, 
-                                        acpl_id, aapl_id, H5AC_dxpl_id, req)))
+                                        acpl_id, aapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
     if(request && *req)
@@ -1661,7 +1660,7 @@ H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close (attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_attr_close (attr, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate_by_name_ff() */
@@ -1720,7 +1719,7 @@ H5Aopen_ff(hid_t loc_id, const char *attr_name, hid_t aapl_id,
 
     /* Open the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                      attr_name, aapl_id, H5AC_ind_dxpl_id, req)))
+                                      attr_name, aapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     if(request && *req)
@@ -1733,7 +1732,7 @@ H5Aopen_ff(hid_t loc_id, const char *attr_name, hid_t aapl_id,
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close (attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_attr_close (attr, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_ff() */
@@ -1802,7 +1801,7 @@ H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     /* Open the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                      attr_name, aapl_id, H5AC_ind_dxpl_id, req)))
+                                      attr_name, aapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     if(request && *req)
@@ -1815,7 +1814,7 @@ H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close (attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_attr_close (attr, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_by_name_ff() */
@@ -1864,7 +1863,7 @@ H5Awrite_ff(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t trans_id, hid_
 
     /* write the data through the VOL */
     if((ret_value = H5VL_attr_write(attr->vol_obj, attr->vol_info->vol_cls, 
-                                    dtype_id, buf, H5AC_dxpl_id, req)) < 0)
+                                    dtype_id, buf, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
 
     if(request && *req)
@@ -1919,7 +1918,7 @@ H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, hid_t rcxt_id, hid_t estack
 
     /* Read the data through the VOL */
     if((ret_value = H5VL_attr_read(attr->vol_obj, attr->vol_info->vol_cls, 
-                                   dtype_id, buf, H5AC_ind_dxpl_id, req)) < 0)
+                                   dtype_id, buf, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
 
     if(request && *req)
@@ -1991,7 +1990,7 @@ H5Arename_ff(hid_t loc_id, const char *old_name, const char *new_name,
 
         /* rename the attribute info through the VOL */
         if((ret_value = H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_RENAME,
-                                           H5AC_dxpl_id, req, old_name, new_name)) < 0)
+                                           dxpl_id, req, old_name, new_name)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute");
 
         if(request && *req)
@@ -2075,7 +2074,7 @@ H5Arename_by_name_ff(hid_t loc_id, const char *obj_name, const char *old_attr_na
 
         /* rename the attribute info through the VOL */
         if((ret_value = H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_RENAME,
-                                           H5AC_dxpl_id, req, old_attr_name, new_attr_name)) < 0)
+                                           dxpl_id, req, old_attr_name, new_attr_name)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute");
 
         if(request && *req)
@@ -2139,7 +2138,7 @@ H5Adelete_ff(hid_t loc_id, const char *name, hid_t trans_id, hid_t estack_id)
 
     /* Delete the attribute through the VOL */
     if((ret_value = H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_DELETE,
-                                       H5AC_dxpl_id, req, name)) < 0)
+                                       dxpl_id, req, name)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
     if(request && *req)
@@ -2215,7 +2214,7 @@ H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     /* Delete the attribute through the VOL */
     if((ret_value = H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_DELETE,
-                                       H5AC_dxpl_id, req, attr_name)) < 0)
+                                       dxpl_id, req, attr_name)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
     if(request && *req)
@@ -2284,7 +2283,7 @@ H5Aexists_ff(hid_t obj_id, const char *attr_name, hbool_t *ret, hid_t rcxt_id, h
 
     /* Check existence of attribute through the VOL */
     if(H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_EXISTS,
-                          H5AC_ind_dxpl_id, req, attr_name, &ret_value) < 0)
+                          dxpl_id, req, attr_name, (htri_t *)ret) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
     if(request && *req)
@@ -2363,7 +2362,7 @@ H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
 
     /* Check existence of attribute through the VOL */
     if(H5VL_attr_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_ATTR_EXISTS,
-                          H5AC_ind_dxpl_id, req, attr_name, &ret_value) < 0)
+                          dxpl_id, req, attr_name, (htri_t *)ret) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
     if(request && *req)
@@ -2511,7 +2510,7 @@ H5Lmove_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(H5VL_link_move((obj1 ? obj1->vol_obj : NULL), loc_params1, 
                       (obj2 ? obj2->vol_obj : NULL), loc_params2, 
                       (obj1 ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
-                      lcpl_id, lapl_id, H5AC_dxpl_id, req) < 0)
+                      lcpl_id, lapl_id, dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
     if(request && *req)
@@ -2617,7 +2616,7 @@ H5Lcopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(H5VL_link_copy((obj1 ? obj1->vol_obj : NULL), loc_params1, 
                       (obj2 ? obj2->vol_obj : NULL), loc_params2, 
                       (obj1 ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
-                      lcpl_id, lapl_id, H5AC_dxpl_id, req) < 0)
+                      lcpl_id, lapl_id, dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
     if(request && *req)
@@ -2713,7 +2712,7 @@ H5Lcreate_soft_ff(const char *link_target, hid_t link_loc_id, const char *link_n
 
     /* Create the link through the VOL */
     if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj->vol_obj, loc_params, obj->vol_info->vol_cls,
-                        lcpl_id, lapl_id, H5AC_dxpl_id, req) < 0)
+                        lcpl_id, lapl_id, dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
     if(request && *req)
@@ -2830,7 +2829,7 @@ H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
     /* Create the link through the VOL */
     if(H5VL_link_create(H5VL_LINK_CREATE_HARD, (obj2 ? (obj2->vol_obj) : NULL), loc_params2, 
                         (obj1!=NULL ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
-                        lcpl_id, lapl_id, H5AC_dxpl_id, req) < 0)
+                        lcpl_id, lapl_id, dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
     if(request && *req)
@@ -2902,7 +2901,7 @@ H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t trans_id, hid_
 
     /* Delete the link through the VOL */
     if(H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_DELETE, 
-                          H5AC_dxpl_id, req) < 0)
+                          dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
     if(request && *req)
@@ -2976,7 +2975,7 @@ H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, hbool_t *ret,
 
     /* check link existence through the VOL */
     if(H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_EXISTS,
-                          H5AC_ind_dxpl_id, req, &ret_value) < 0)
+                          dxpl_id, req, (htri_t *)ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
     if(request && *req)
@@ -3049,7 +3048,7 @@ H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo ,
 
     /* Get the link info through the VOL */
     if(H5VL_link_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_GET_INFO, 
-                     H5AC_ind_dxpl_id, req, linfo) < 0)
+                     dxpl_id, req, linfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
     if(request && *req)
@@ -3129,7 +3128,7 @@ H5Lget_val_ff(hid_t loc_id, const char *name, void *buf, size_t size,
 
     /* Get the link info through the VOL */
     if(H5VL_link_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_GET_VAL, 
-                     H5AC_ind_dxpl_id, req, buf, size) < 0)
+                     dxpl_id, req, buf, size) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
     if(request && *req)
@@ -3198,7 +3197,7 @@ H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id)
     /* Open the object through the VOL */
     if(NULL == (opened_obj = (H5VL_object_t *)H5VL_object_open(obj->vol_obj, loc_params, 
                                                                obj->vol_info->vol_cls, &opened_type, 
-                                                               H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                                               dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
     if((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
@@ -3424,7 +3423,7 @@ H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     /* Create the link through the VOL */
     if(H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2->vol_obj, loc_params2, 
                         (obj1!=NULL ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
-                        lcpl_id, lapl_id, H5AC_dxpl_id, req) < 0)
+                        lcpl_id, lapl_id, dxpl_id, req) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
     if(request && *req)
@@ -3498,7 +3497,7 @@ H5Oexists_by_name_ff(hid_t loc_id, const char *name, hbool_t *ret, hid_t lapl_id
 
     /* change the ref count through the VOL */
     if(H5VL_object_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_OBJECT_EXISTS, 
-                            H5AC_ind_dxpl_id, req, &ret_value) < 0)
+                            dxpl_id, req, (htri_t *)ret) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
     if(request && *req)
@@ -3563,7 +3562,7 @@ H5Oset_comment_ff(hid_t obj_id, const char *comment, hid_t trans_id, hid_t estac
     }
 
     /* set comment on object through the VOL */
-    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, dxpl_id, req, 
                             H5VL_OBJECT_SET_COMMENT, loc_params, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
@@ -3641,7 +3640,7 @@ H5Oset_comment_by_name_ff(hid_t loc_id, const char *name, const char *comment,
     }
 
     /* set comment on object through the VOL */
-    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, dxpl_id, req, 
                             H5VL_OBJECT_SET_COMMENT, loc_params, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
@@ -3702,7 +3701,7 @@ H5Oget_comment_ff(hid_t loc_id, char *comment, size_t bufsize, ssize_t *ret,
         request->vol_cls = obj->vol_info->vol_cls;
     }
 
-    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, dxpl_id, req, 
                             H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
 
@@ -3775,7 +3774,7 @@ H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *comment, size_t 
         request->vol_cls = obj->vol_info->vol_cls;
     }
 
-    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, dxpl_id, req, 
                             H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
 
@@ -3841,7 +3840,7 @@ H5Oget_info_ff(hid_t loc_id, H5O_ff_info_t *oinfo, hid_t rcxt_id, hid_t estack_i
     }
 
     /* Get the group info through the VOL using the location token */
-    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, dxpl_id, req, 
                             H5VL_OBJECT_GET_INFO, loc_params, oinfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
@@ -3917,7 +3916,7 @@ H5Oget_info_by_name_ff(hid_t loc_id, const char *name, H5O_ff_info_t *oinfo,
     }
 
     /* Get the group info through the VOL using the location token */
-    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, req, 
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, dxpl_id, req, 
                             H5VL_OBJECT_GET_INFO, loc_params, oinfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 

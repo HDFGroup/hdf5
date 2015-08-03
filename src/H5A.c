@@ -1741,7 +1741,7 @@ herr_t
 H5A_close_attr(void *_attr)
 {
     H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
-    void **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     H5VL_object_t *attr = (H5VL_object_t *)_attr;
     herr_t ret_value = SUCCEED;    /* Return value */
 

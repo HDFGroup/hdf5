@@ -218,7 +218,7 @@ H5Q_term_interface(void)
 
     if(H5_interface_initialize_g) {
 	if(H5I_nmembers(H5I_QUERY) > 0) {
-	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
+	    (void)H5I_clear_type(H5I_QUERY, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
         else {
