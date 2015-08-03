@@ -166,9 +166,10 @@ int main(int argc, char **argv) {
         assert(gid3 > 0);
 
         dcpl_id = H5Pcreate (H5P_DATASET_CREATE);
-        H5Pset_dcpl_dim_layout(dcpl_id, H5D_COL_MAJOR);
-        H5Pset_dcpl_stripe_count(dcpl_id, 4);
-        H5Pset_dcpl_stripe_size(dcpl_id, 5);
+        /* MSC - Was working in FF, but not working now. Seems like IOD regression bug. */
+        //H5Pset_dcpl_dim_layout(dcpl_id, H5D_COL_MAJOR);
+        //H5Pset_dcpl_stripe_count(dcpl_id, 4);
+        //H5Pset_dcpl_stripe_size(dcpl_id, 5);
 
         /* create datasets */
         did1 = H5Dcreate_ff(gid1, "D1", dtid, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT, tid1, e_stack);

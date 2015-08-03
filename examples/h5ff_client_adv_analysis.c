@@ -93,7 +93,7 @@ write_dataset(hid_t group_id, const char *dataset_name,
 
     /* Create a dataset. */
     dataset_id = H5Dcreate_ff(group_id, dataset_name, datatype_id, space_id,
-            H5P_DEFAULT, dcpl_id, H5P_DEFAULT, trans_id, estack_id);
+                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, trans_id, estack_id);
     assert(dataset_id);
 
     /* Write the first dataset. */

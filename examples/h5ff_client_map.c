@@ -147,21 +147,24 @@ int main(int argc, char **argv) {
 
         /* create two groups */
         gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        assert(gid1);
         gid2 = H5Gcreate_ff(gid1, "G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, tid1, e_stack);
+        assert(gid2);
 
         /* Create 3 Map objects with the key type being 32 bit LE integer */
 
         /* First Map object with a Value type a 32 bit LE integer */
         map1 = H5Mcreate_ff(file_id, "MAP_1", H5T_STD_I32LE, H5T_STD_I32LE, 
                             H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
-
+        assert(map1);
         /* Second Map object with a Value type being an HDF5 VL datatype */
         map2 = H5Mcreate_ff(gid1, "MAP_2", H5T_STD_I32LE, dtid1, 
                             H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
-
+        assert(map2);
         /* Third Map object with a Value type being an HDF5 VL string */
         map3 = H5Mcreate_ff(gid2, "MAP_3", H5T_STD_I32LE, dtid2, 
                             H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
+        assert(map3);
 
         /* write some KV pairs to each map object. */
         {
@@ -357,8 +360,10 @@ int main(int argc, char **argv) {
         key = 1;
         ret = H5Mdelete_ff(map3, H5T_STD_I32LE, &key, tid2, H5_EVENT_STACK_NULL);
 
+        H5E_BEGIN_TRY {
         temp_id = H5Gcreate_ff(file_id, "temp_group", H5P_DEFAULT, H5P_DEFAULT, 
                                H5P_DEFAULT, tid2, H5_EVENT_STACK_NULL);
+        } H5E_END_TRY;
         if(temp_id > 0)
             assert(H5Gclose_ff(temp_id, H5_EVENT_STACK_NULL) ==0);
     }
@@ -375,15 +380,22 @@ int main(int argc, char **argv) {
         assert(0 == ret);
     }
     else {
+        H5E_BEGIN_TRY {
         ret = H5TRfinish(tid2, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+        } H5E_END_TRY;
         if(ret < 0)
             fprintf(stderr, "Transaction finish failed as expected (aborted)\n");
     }
 
+    H5E_BEGIN_TRY {
     ret = H5TRfinish(tid3, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+    } H5E_END_TRY;
     if(ret < 0)
         fprintf(stderr, "Transaction finish failed (aborted)\n");
+
+    H5E_BEGIN_TRY {
     ret = H5TRfinish(tid4, H5P_DEFAULT, NULL, H5_EVENT_STACK_NULL);
+    } H5E_END_TRY;
     if(ret < 0)
         fprintf(stderr, "Transaction finish failed (aborted)\n");
 
@@ -412,13 +424,19 @@ int main(int argc, char **argv) {
 
     /* acquire container version 3, 4, 5 - EXACT  (Should Fail since 2 is aborted) */
     version = 3;
+    H5E_BEGIN_TRY {
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    } H5E_END_TRY;
     assert(rid3 < 0);
     version = 4;
+    H5E_BEGIN_TRY {
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    } H5E_END_TRY;
     assert(rid3 < 0);
     version = 5;
+    H5E_BEGIN_TRY {
     rid3 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
+    } H5E_END_TRY;
     assert(rid3 < 0);
 
     /* Now read some data from the container at version 1*/

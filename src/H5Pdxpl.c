@@ -58,14 +58,14 @@
 
 /* layout type of prefetched data */
 #define H5O_XFER_LAYOUT_TYPE_SIZE    sizeof(int32_t)
-#define H5O_XFER_LAYOUT_TYPE_DEF  H5_DEFAULT_LAYOUT
+#define H5O_XFER_LAYOUT_TYPE_DEF     H5_DEFAULT_LAYOUT
 #define H5O_XFER_LAYOUT_TYPE_ENC     H5P__encode_uint32_t
 #define H5O_XFER_LAYOUT_TYPE_DEC     H5P__decode_uint32_t
 /* Definitions for dataspace selections for prefetched datasets */
-#define H5O_XFER_SELECTION_SIZE         sizeof(unsigned)
+#define H5O_XFER_SELECTION_SIZE         sizeof(hid_t)
 #define H5O_XFER_SELECTION_DEF          -1
 /* Definitions for datatypes for MAPS */
-#define H5O_XFER_KEY_TYPE_SIZE           sizeof(unsigned)
+#define H5O_XFER_KEY_TYPE_SIZE           sizeof(hid_t)
 #define H5O_XFER_KEY_TYPE_DEF            -1
 /* Definitions for map low key buffer property */
 #define H5O_XFER_LOW_KEY_BUF_SIZE           sizeof(void *)

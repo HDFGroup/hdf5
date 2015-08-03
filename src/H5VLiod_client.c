@@ -158,6 +158,7 @@ H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
     /* remove the request from the container link list */
     prev = request->file_prev;
     next = request->file_next;
+
     if (prev) {
         if (next) {
             prev->file_next = next;
@@ -2897,15 +2898,15 @@ H5VLiod_query_map(hid_t obj_id, iod_trans_id_t rtid, iod_obj_map_t **obj_map)
 {
     iod_obj_id_t iod_id;
     iod_handles_t iod_oh;
-    H5VL_iod_object_t *obj = NULL;
+    H5VL_object_t *obj = NULL;
     herr_t ret, ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
-    if(NULL == (obj = (H5VL_iod_object_t *)H5VL_get_object(obj_id)))
+    if(NULL == (obj = (H5VL_object_t *)H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "invalid object identifier");
 
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+    if(H5VL_iod_get_loc_info((H5VL_iod_object_t *)obj->vol_obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object iod location info");
 
     ret = iod_obj_query_map(iod_oh.rd_oh, rtid, obj_map, NULL);
@@ -2921,15 +2922,15 @@ H5VLiod_close_map(hid_t obj_id, iod_obj_map_t *obj_map)
 {
     iod_obj_id_t iod_id;
     iod_handles_t iod_oh;
-    H5VL_iod_object_t *obj = NULL;
+    H5VL_object_t *obj = NULL;
     herr_t ret, ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
-    if(NULL == (obj = (H5VL_iod_object_t *)H5VL_get_object(obj_id)))
+    if(NULL == (obj = (H5VL_object_t *)H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "invalid object identifier");
 
-    if(H5VL_iod_get_loc_info(obj, &iod_id, &iod_oh, NULL, NULL) < 0)
+    if(H5VL_iod_get_loc_info((H5VL_iod_object_t *)obj->vol_obj, &iod_id, &iod_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object iod location info");
 
     ret = iod_obj_free_map(iod_oh.rd_oh, obj_map);

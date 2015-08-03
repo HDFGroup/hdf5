@@ -3299,11 +3299,13 @@ H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id)
         if(H5ES_insert(estack_id, request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
 
+    HDassert(tr->vol_cls->value == H5_VOL_IOD);
+
     /* setup VOL info struct */
     if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
     vol_info->vol_cls = tr->vol_cls;
-    HDassert(tr->vol_cls->value == H5_VOL_IOD);
+    vol_info->vol_id = H5VL_IOD_g;
 
     if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
@@ -3683,7 +3685,7 @@ H5Oget_comment_ff(hid_t loc_id, char *comment, size_t bufsize, ssize_t *ret,
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* get the file object */
+    /* get the vol object */
     if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
@@ -3702,7 +3704,7 @@ H5Oget_comment_ff(hid_t loc_id, char *comment, size_t bufsize, ssize_t *ret,
     }
 
     if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, dxpl_id, req, 
-                            H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
+                            H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
 
     if(request && *req)
@@ -3775,7 +3777,7 @@ H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *comment, size_t 
     }
 
     if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, dxpl_id, req, 
-                            H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret_value) < 0)
+                            H5VL_OBJECT_GET_COMMENT, loc_params, comment, bufsize, &ret) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
 
     if(request && *req)
@@ -3959,20 +3961,37 @@ H5Oclose_ff(hid_t object_id, hid_t estack_id)
     /* Get the type of the object and close it in the correct way */
     switch(H5I_get_type(object_id)) {
         case H5I_GROUP:
-        case H5I_DATATYPE:
         case H5I_DATASET:
         case H5I_MAP:
             /* Check args */
             if(NULL == (obj = (H5VL_object_t *)H5I_object(object_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid object ID")
 
-                    /* set the async request and dxpl IDs to be passed on to the VOL layer */
+            /* set the async request and dxpl IDs to be passed on to the VOL layer */
             obj->close_estack_id = estack_id;
             obj->close_dxpl_id = H5AC_dxpl_id;
 
             if(H5I_dec_app_ref(object_id) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object");
             break;
+        case H5I_DATATYPE:
+            {
+                H5T_t *dt = NULL;
+
+                /* Check args */
+                if(NULL == (dt = (H5T_t *)H5I_object(object_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid datatype ID");
+
+                if (NULL != dt->vol_obj) {
+                    /* set the async request and dxpl IDs to be passed on to the VOL layer */
+                    dt->vol_obj->close_estack_id = estack_id;
+                    dt->vol_obj->close_dxpl_id = H5AC_dxpl_id;
+                }
+
+                if(H5I_dec_app_ref(object_id) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object");
+                break;
+            }
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_FILE:
@@ -5272,12 +5291,13 @@ done:
 hid_t
 H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
 {
-    void *dset = NULL;
+    H5VL_object_t *dset = NULL;
     hid_t xxpl_id = FAIL;
     unsigned plugin_id;
     void *buf = NULL;
     hid_t type_id=FAIL, space_id=scope_id, dset_space_id=FAIL;
     hbool_t use_region_scope = TRUE;
+    herr_t ret;
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -5288,12 +5308,12 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
 
 #ifdef H5_HAVE_INDEXING
     /* Use indexing query callback if it exists */
-    if (H5X_PLUGIN_NONE != (plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset))) {
+    if (H5X_PLUGIN_NONE != (plugin_id = H5VL_iod_dataset_get_index_plugin_id(dset->vol_obj))) {
         void *idx_handle = NULL; /* index */
         H5X_class_t *idx_class = NULL;
         H5P_genplist_t *xxpl_plist = NULL, *plist = NULL; /* Property list pointer */
 
-        if (NULL == (idx_handle = H5VL_iod_dataset_get_index(dset)))
+        if (NULL == (idx_handle = H5VL_iod_dataset_get_index(dset->vol_obj)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index handle from dataset");
         if (NULL == (idx_class = H5X_registered(plugin_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
@@ -5353,11 +5373,11 @@ H5Dquery_ff(hid_t dset_id, hid_t query_id, hid_t scope_id, hid_t rcxt_id)
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate data buffer");
 
         FUNC_LEAVE_API_THREADSAFE;
-        ret_value = H5Dread_ff(dset_id, type_id, H5S_ALL, space_id, H5P_DEFAULT, 
+        ret = H5Dread_ff(dset_id, type_id, H5S_ALL, space_id, H5P_DEFAULT, 
                                buf, rcxt_id, H5_EVENT_STACK_NULL);
         FUNC_ENTER_API_THREADSAFE;
 
-        if(SUCCEED != ret_value)
+        if(SUCCEED != ret)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't read data from dataset");
 
         if(FAIL == (udata.space_query = H5Scopy(space_id)))

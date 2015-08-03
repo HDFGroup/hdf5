@@ -172,7 +172,9 @@ int main(int argc, char **argv) {
         H5Dclose_ff(did2, H5_EVENT_STACK_NULL);
 
         /* should fail */
+        H5E_BEGIN_TRY {
         did2 = H5Dopen_ff(file_id,"/G1/G2/G3/D2", H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
+        } H5E_END_TRY;
         assert(did2 < 0);
 
         /* release container version 1. This is async. */

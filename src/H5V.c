@@ -307,9 +307,9 @@ hid_t
 H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t estack_id)
 {
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
-    void    **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    void    *view = NULL;       /* pointer to view object created */
-    H5VL_object_t *obj = NULL;        /* object token of loc_id */
+    void    **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void    *view = NULL; /* pointer to view object created */
+    H5VL_object_t *obj = NULL;  /* object token of loc_id */
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -338,7 +338,7 @@ H5Vcreate_ff(hid_t loc_id, hid_t query_id, hid_t vcpl_id, hid_t rcxt_id, hid_t e
     }
 
     /* call the IOD specific private routine to create a view object */
-    if(NULL == (view = H5VL_iod_view_create(obj, query_id, vcpl_id, rcxt_id, req)))
+    if(NULL == (view = H5VL_iod_view_create(obj->vol_obj, query_id, vcpl_id, rcxt_id, req)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create view")
 
     if(request && *req)

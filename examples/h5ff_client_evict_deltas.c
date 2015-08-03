@@ -216,8 +216,12 @@ int main(int argc, char **argv) {
         assert(rid2 > 0);
     }
 
+    /* wait on all requests and print completion status */
     gid = H5Oopen_ff(file_id, "G1", H5P_DEFAULT, rid2);
     assert(gid);
+    H5ESget_count(e_stack, &num_events);
+    printf("%d events in event stack. Completion status = %d\n", num_events, status);
+
     dtid = H5Oopen_ff(file_id, "DT1", H5P_DEFAULT, rid2);
     assert(dtid);
     did = H5Oopen_ff(gid,"D1", H5P_DEFAULT, rid2);

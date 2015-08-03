@@ -46,8 +46,7 @@
 /****************/
 
 /* ========  View creation properties ======== */
-/* Definitions for create intermediate groups flag */
-#define H5V_CRT_ELMT_SCOPE_SIZE         sizeof(unsigned)
+#define H5V_CRT_ELMT_SCOPE_SIZE         sizeof(hid_t)
 #define H5V_CRT_ELMT_SCOPE_DEF          -1
 #define H5V_CRT_ELMT_SCOPE_ENC          H5P_dataspace_enc
 #define H5V_CRT_ELMT_SCOPE_DEC          H5P_dataspace_dec

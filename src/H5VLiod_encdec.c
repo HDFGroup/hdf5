@@ -858,7 +858,7 @@ int hg_proc_hid_t(hg_proc_t proc, void *data)
         }
         break;
     case H5I_UNINIT:
-        ret = hg_proc_int32_t(proc, (hid_t *)data);
+        ret = hg_proc_int64_t(proc, (hid_t *)data);
         if (ret != HG_SUCCESS) {
             HG_ERROR_DEFAULT("Proc error");
             ret = HG_FAIL;

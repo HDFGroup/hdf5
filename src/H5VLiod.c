@@ -588,7 +588,7 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
                     request->state = H5VL_IOD_COMPLETED;
                 }
             }
-        } 
+        }
         else {
             /* Synchronously wait on the request */
             if(H5VL_iod_request_wait(request_obj->file, request) < 0)
