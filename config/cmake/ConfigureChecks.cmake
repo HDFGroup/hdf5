@@ -33,6 +33,18 @@ endif (HDF5_METADATA_TRACE_FILE)
 MARK_AS_ADVANCED (HDF5_METADATA_TRACE_FILE)
 
 # ----------------------------------------------------------------------
+# Decide whether the data accuracy has higher priority during data
+# conversions.  If not, some hard conversions will still be prefered even
+# though the data may be wrong (for example, some compilers don't
+# support denormalized floating values) to maximize speed.
+#
+option (HDF5_WANT_DATA_ACCURACY "IF data accuracy is guaranteed during data conversions" ON)
+if (HDF5_WANT_DATA_ACCURACY)
+  set (H5_WANT_DATA_ACCURACY 1)
+endif (HDF5_WANT_DATA_ACCURACY)
+MARK_AS_ADVANCED (HDF5_WANT_DATA_ACCURACY)
+
+# ----------------------------------------------------------------------
 # Decide whether the presence of user's exception handling functions is
 # checked and data conversion exceptions are returned.  This is mainly
 # for the speed optimization of hard conversions.  Soft conversions can
@@ -220,6 +232,24 @@ H5ConversionTests (H5_LDOUBLE_TO_LONG_SPECIAL  "Checking IF your system converts
 # macro and skip the test for now until we know about the algorithm.
 #
 H5ConversionTests (H5_LONG_TO_LDOUBLE_SPECIAL "Checking IF your system can convert (unsigned) long to long double values with special algorithm")
+# ----------------------------------------------------------------------
+# Set the flag to indicate that the machine can accurately convert
+# 'long double' to '(unsigned) long long' values.  (This flag should be set for
+# all machines, except for Mac OS 10.4 and SGI IRIX64 6.5.  When the bit sequence
+# of long double is 0x4351ccf385ebc8a0bfcc2a3c..., the values of (unsigned)long long
+# start to go wrong on these two machines.  Adjusting it higher to
+# 0x4351ccf385ebc8a0dfcc... or 0x4351ccf385ebc8a0ffcc... will make the converted
+# values wildly wrong.  This test detects this wrong behavior and disable the test.
+#
+H5ConversionTests (H5_LDOUBLE_TO_LLONG_ACCURATE "Checking IF correctly converting long double to (unsigned) long long values")
+# ----------------------------------------------------------------------
+# Set the flag to indicate that the machine can accurately convert
+# '(unsigned) long long' to 'long double' values.  (This flag should be set for
+# all machines, except for Mac OS 10.4, when the bit sequences are 003fff...,
+# 007fff..., 00ffff..., 01ffff..., ..., 7fffff..., the converted values are twice
+# as big as they should be.
+#
+H5ConversionTests (H5_LLONG_TO_LDOUBLE_CORRECT "Checking IF correctly converting (unsigned) long long to long double values")
 # ----------------------------------------------------------------------
 # Check if pointer alignments are enforced
 #

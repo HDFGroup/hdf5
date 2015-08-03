@@ -416,9 +416,17 @@
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #cmakedefine H5_INCLUDE_HL @H5_INCLUDE_HL@
 
+/* Define if your system can convert long double to (unsigned) long long
+   values correctly. */
+#cmakedefine H5_LDOUBLE_TO_LLONG_ACCURATE @H5_LDOUBLE_TO_LLONG_ACCURATE@
+
 /* Define if your system converts long double to (unsigned) long values with
    special algorithm. */
 #cmakedefine H5_LDOUBLE_TO_LONG_SPECIAL @H5_LDOUBLE_TO_LONG_SPECIAL@
+
+/* Define if your system can convert (unsigned) long long to long double
+   values correctly. */
+#cmakedefine H5_LLONG_TO_LDOUBLE_CORRECT @H5_LLONG_TO_LDOUBLE_CORRECT@
 
 /* Define if your system can convert (unsigned) long to long double values
    with special algorithm. */
@@ -623,6 +631,9 @@
 
 /* Version number of package */
 #define H5_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
+
+/* Data accuracy is prefered to speed during data conversions */
+#cmakedefine H5_WANT_DATA_ACCURACY @H5_WANT_DATA_ACCURACY@
 
 /* Check exception handling functions during data conversions */
 #cmakedefine H5_WANT_DCONV_EXCEPTION @H5_WANT_DCONV_EXCEPTION@

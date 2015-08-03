@@ -46,7 +46,8 @@
 #   include <io.h>
 #endif
 
-#ifndef H5_HAVE_ATTRIBUTE
+/* Solaris Studio defines attribute, but for the attributes we need */
+#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus || defined(__SUNPRO_C)
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define H5_ATTR_UNUSED /*void*/
