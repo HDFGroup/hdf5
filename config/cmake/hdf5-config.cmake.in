@@ -6,6 +6,8 @@
 string(TOUPPER @HDF5_PACKAGE@ HDF5_PACKAGE_NAME)
 
 set (${HDF5_PACKAGE_NAME}_VALID_COMPONENTS
+    static
+    shared
     C
     CXX
     Fortran
@@ -68,12 +70,6 @@ if (${HDF5_PACKAGE_NAME}_BUILD_TOOLS)
   set_and_check (${HDF5_PACKAGE_NAME}_TOOLS_DIR "@PACKAGE_CURRENT_BUILD_DIR@/bin")
 endif ()
 
-if (HDF5_BUILD_SHARED_LIBS)
-  set (H5_BUILT_AS_DYNAMIC_LIB 1)
-else ()
-  set (H5_BUILT_AS_STATIC_LIB 1)
-endif ()
-
 #-----------------------------------------------------------------------------
 # Version Strings
 #-----------------------------------------------------------------------------
@@ -95,14 +91,25 @@ if (NOT TARGET "@HDF5_PACKAGE@")
   include (@PACKAGE_SHARE_INSTALL_DIR@/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake)
 endif ()
 
-# Handle default component :
+# Handle default component(static) :
 if (NOT ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
-    set (${HDF5_PACKAGE_NAME}_FIND_COMPONENTS C HL)
-    set (${HDF5_PACKAGE_NAME}_FIND_REQUIRED_C true)
+    set (${HDF5_PACKAGE_NAME}_LIB_TYPE)
+    set (${HDF5_PACKAGE_NAME}_FIND_COMPONENTS C HL static)
+    set (${HDF5_PACKAGE_NAME}_FIND_REQUIRED_static_C true)
 endif ()
 
 # Handle requested components:
 list (REMOVE_DUPLICATES ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+foreach (comp IN LISTS ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
+  if (${comp} STREQUAL "shared")
+    list (REMOVE_ITEM ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS ${comp})
+    set (${HDF5_PACKAGE_NAME}_LIB_TYPE ${${HDF5_PACKAGE_NAME}_LIB_TYPE} ${comp})
+  elseif (${comp} STREQUAL "static")
+    list (REMOVE_ITEM ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS ${comp})
+    set (${HDF5_PACKAGE_NAME}_LIB_TYPE ${${HDF5_PACKAGE_NAME}_LIB_TYPE} ${comp})
+  endif ()
+endforeach ()
+foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
   foreach (comp IN LISTS ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
     set (hdf5_comp2)
     if (${comp} STREQUAL "C")
@@ -122,26 +129,28 @@ list (REMOVE_DUPLICATES ${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
       set (hdf5_comp2 "hdf5_hl_f90cstub")
       set (hdf5_comp "hdf5_hl_fortran")
     endif ()
-    list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp}" HAVE_COMP) 
+    list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp}-${libtype}" HAVE_COMP) 
     if (${HAVE_COMP} LESS 0) 
-      set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 0)
+      set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 0)
     else ()
       if (hdf5_comp2)
-        list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp2}" HAVE_COMP2) 
+        list (FIND ${HDF5_PACKAGE_NAME}_EXPORT_LIBRARIES "${hdf5_comp2}-${libtype}" HAVE_COMP2) 
         if (${HAVE_COMP2} LESS 0)
-          set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 0)
+          set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 0)
         else ()
-          set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 1)
-          string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_LIBRARY COMP_LIBRARY)
-          set (${HDF5_PACKAGE_NAME}_LIBRARIES ${${HDF5_PACKAGE_NAME}_LIBRARIES} ${hdf5_comp2} ${hdf5_comp})
+          set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 1)
+          string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_${libtype}_LIBRARY COMP_LIBRARY)
+          set (${COMP_LIBRARY} ${${COMP_LIBRARY}} ${hdf5_comp2}-${libtype} ${hdf5_comp}-${libtype})
         endif ()
       else ()
-        set (${HDF5_PACKAGE_NAME}_${comp}_FOUND 1)
-        string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_LIBRARY COMP_LIBRARY)
-        set (${HDF5_PACKAGE_NAME}_LIBRARIES ${${HDF5_PACKAGE_NAME}_LIBRARIES} ${hdf5_comp})
+        set (${HDF5_PACKAGE_NAME}_${libtype}_${comp}_FOUND 1)
+        string(TOUPPER ${HDF5_PACKAGE_NAME}_${comp}_${libtype}_LIBRARY COMP_LIBRARY)
+        set (${COMP_LIBRARY} ${${COMP_LIBRARY}} ${hdf5_comp}-${libtype})
       endif ()
     endif ()
   endforeach ()
+endforeach ()
 
-  check_required_components(${HDF5_PACKAGE_NAME}_FIND_COMPONENTS)
-  
+foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
+  check_required_components(${HDF5_PACKAGE_NAME}_${libtype})
+endforeach ()
