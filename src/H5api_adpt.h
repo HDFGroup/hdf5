@@ -47,7 +47,7 @@
 /* This will only be defined if HDF5 was built with CMake */
 #ifdef H5_BUILT_AS_DYNAMIC_LIB
 
-#if defined(hdf5_EXPORTS)
+#if defined(hdf5_shared_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define H5_DLL __declspec(dllexport)
     #define H5_DLLVAR extern __declspec(dllexport)
@@ -70,7 +70,7 @@
   #define H5_DLLVAR extern
 #endif /* _HDF5DLL_ */
 
-#if defined(hdf5_test_EXPORTS)
+#if defined(hdf5_test_shared_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define H5TEST_DLL __declspec(dllexport)
     #define H5TEST_DLLVAR extern __declspec(dllexport)
@@ -93,7 +93,7 @@
   #define H5TEST_DLLVAR extern
 #endif /* H5TEST_DLL */
 
-#if defined(hdf5_tools_EXPORTS)
+#if defined(hdf5_tools_shared_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define H5TOOLS_DLL __declspec(dllexport)
     #define H5TOOLS_DLLVAR extern __declspec(dllexport)
@@ -116,7 +116,7 @@
   #define H5TOOLS_DLLVAR extern
 #endif /* H5TOOLS_DLL */
 
-#if defined(hdf5_cpp_EXPORTS)
+#if defined(hdf5_cpp_shared_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define H5_DLLCPP __declspec(dllexport)
     #define H5_DLLCPPVAR extern __declspec(dllexport)
@@ -139,7 +139,7 @@
   #define H5_DLLCPPVAR extern
 #endif /* H5_DLLCPP */
 
-#if defined(hdf5_hl_EXPORTS)
+#if defined(hdf5_hl_shared_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define H5_HLDLL __declspec(dllexport)
     #define H5_HLDLLVAR extern __declspec(dllexport)
@@ -162,7 +162,7 @@
   #define H5_HLDLLVAR extern
 #endif /* H5_HLDLL */
 
-#if defined(hdf5_hl_cpp_EXPORTS)
+#if defined(hdf5_hl_cpp_shared_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define H5_HLCPPDLL __declspec(dllexport)
     #define H5_HLCPPDLLVAR extern __declspec(dllexport)
@@ -185,7 +185,7 @@
   #define H5_HLCPPDLLVAR extern
 #endif /* H5_HLCPPDLL */
 
-#if defined(hdf5_f90cstub_EXPORTS)
+#if defined(hdf5_f90cstub_shared_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define H5_FCDLL __declspec(dllexport)
     #define H5_FCDLLVAR extern __declspec(dllexport)
@@ -208,7 +208,7 @@
   #define H5_FCDLLVAR extern
 #endif /* H5_FCDLL */
 
-#if defined(hdf5_test_f90cstub_EXPORTS)
+#if defined(hdf5_test_f90cstub_shared_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define H5_FCTESTDLL __declspec(dllexport)
     #define H5_FCTESTDLLVAR extern __declspec(dllexport)
@@ -231,7 +231,7 @@
   #define H5_FCTESTDLLVAR extern
 #endif /* H5_FCTESTDLL */
 
-#if defined(hdf5_hl_f90cstub_EXPORTS)
+#if defined(hdf5_hl_f90cstub_shared_EXPORTS)
   #if defined (_MSC_VER)  /* MSVC Compiler Case */
     #define HDF5_HL_F90CSTUBDLL __declspec(dllexport)
     #define HDF5_HL_F90CSTUBDLLVAR extern __declspec(dllexport)
