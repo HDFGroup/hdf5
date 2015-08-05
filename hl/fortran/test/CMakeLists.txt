@@ -4,7 +4,7 @@ PROJECT (HDF5_HL_FORTRAN_TESTS C CXX Fortran)
 #-----------------------------------------------------------------------------
 # Add Tests
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
+INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
 
 #-- Adding test for hl_f90_tstds
 add_executable (hl_f90_tstds tstds.f90)

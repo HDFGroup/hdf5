@@ -87,6 +87,7 @@ endif ()
 #   # Add the sub project
 #   add_subdirectory (Utilities/hdf5-1.8)
 #-----------------------------------------------------------------------------
+string(TIMESTAMP CONFIG_DATE "%Y-%m-%d")
 
 #-----------------------------------------------------------------------------
 # Allow Visual Studio solution directories

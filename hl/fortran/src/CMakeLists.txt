@@ -8,6 +8,7 @@ INCLUDE_DIRECTORIES (
     ${HDF5_HL_SRC_DIR}/src
     ${HDF5_F90_SRC_DIR}/src
     ${HDF5_F90_BINARY_DIR}
+    ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
 #-----------------------------------------------------------------------------
