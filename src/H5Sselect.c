@@ -507,7 +507,7 @@ H5S_select_deserialize(const H5F_t *f, H5S_t **space, const uint8_t **p)
 
             /* Patch the rank of the allocated dataspace */
             (void)HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
-            if(H5S__set_extent_simple(tmp_space, rank, dims, NULL) < 0)
+            if(H5S_set_extent_simple(tmp_space, rank, dims, NULL) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions")
         } /* end if */
         else
@@ -725,6 +725,51 @@ H5S_get_select_unlim_dim(const H5S_t *space)
 
     ret_value = (*space->select.type->unlim_dim)(space);
 
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5S_get_select_unlim_dim() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_num_elem_non_unlim
+ PURPOSE
+    Gets the number of elements in the non-unlimited dimensions
+ USAGE
+    herr_t H5S_get_select_num_elem_non_unlim(space,num_elem_non_unlim)
+        H5S_t *space;           IN: Dataspace pointer to check
+        hsize_t *num_elem_non_unlim; OUT: Number of elements in the non-unlimited dimensions
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Returns the number of elements in a slice through the non-unlimited
+    dimensions of the selection.  Fails if the selection has no unlimited
+    dimension.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_get_select_num_elem_non_unlim(const H5S_t *space,
+    hsize_t *num_elem_non_unlim)
+{
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check args */
+    HDassert(space);
+    HDassert(num_elem_non_unlim);
+
+    /* Check for selection callback */
+    if(!space->select.type->num_elem_non_unlim)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type has no num_elem_non_unlim callback")
+
+    /* Make selection callback */
+    if((*space->select.type->num_elem_non_unlim)(space, num_elem_non_unlim) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements in non-unlimited dimension")
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_get_select_unlim_dim() */
 
@@ -2240,7 +2285,7 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     else if((src_intersect_space->select.type->type == H5S_SEL_POINTS)
             || (src_space->select.type->type == H5S_SEL_POINTS)
             || (dst_space->select.type->type == H5S_SEL_POINTS))
-        HDassert(0 && "Not yet implemented...");//VDSINC
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "point selections not currently supported")
     else {
         HDassert(src_intersect_space->select.type->type == H5S_SEL_HYPERSLABS);
         /* Intersecting space is hyperslab selection.  Call the hyperslab
@@ -2314,7 +2359,7 @@ H5S_select_subtract(H5S_t *space, H5S_t *subtract_space)
             /* Check for point selection in subtract_space, convert to
              * hyperslab */
             if(subtract_space->select.type->type == H5S_SEL_POINTS)
-                HDassert(0 && "Not yet implemented...");//VDSINC
+                HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "point selections not currently supported")
 
             /* Check for point or all selection in space, convert to hyperslab
              */
@@ -2340,7 +2385,7 @@ H5S_select_subtract(H5S_t *space, H5S_t *subtract_space)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't convert selection")
             } /* end if */
             else if(space->select.type->type == H5S_SEL_POINTS)
-                HDassert(0 && "Not yet implemented...");//VDSINC
+                HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "point selections not currently supported")
 
             HDassert(space->select.type->type == H5S_SEL_HYPERSLABS);
             HDassert(subtract_space->select.type->type == H5S_SEL_HYPERSLABS);

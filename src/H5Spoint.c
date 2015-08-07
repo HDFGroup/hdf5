@@ -80,6 +80,7 @@ const H5S_select_class_t H5S_sel_point[1] = {{
     H5S_point_bounds,
     H5S_point_offset,
     H5S_point_unlim_dim,
+    NULL,
     H5S_point_is_contiguous,
     H5S_point_is_single,
     H5S_point_is_regular,

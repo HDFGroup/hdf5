@@ -1268,7 +1268,7 @@ H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[/*rank*/],
     }
 
     /* Do it */
-    if (H5S__set_extent_simple(space, (unsigned)rank, dims, max)<0)
+    if (H5S_set_extent_simple(space, (unsigned)rank, dims, max)<0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set simple extent")
 
 done:
@@ -1277,7 +1277,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__set_extent_simple
+ * Function:	H5S_set_extent_simple
  *
  * Purpose:	This is where the real work happens for
  *		H5Sset_extent_simple().
@@ -1292,13 +1292,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S__set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
+H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
 		       const hsize_t *max)
 {
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(rank <= H5S_MAX_RANK);
@@ -1354,7 +1354,7 @@ H5S__set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5S__set_extent_simple() */
+} /* H5S_set_extent_simple() */
 
 
 /*-------------------------------------------------------------------------
@@ -1465,7 +1465,7 @@ H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
     /* Create the space and set the extent */
     if(NULL==(ret_value=H5S_create(H5S_SIMPLE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, NULL, "can't create simple dataspace")
-    if(H5S__set_extent_simple(ret_value,rank,dims,maxdims)<0)
+    if(H5S_set_extent_simple(ret_value,rank,dims,maxdims)<0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "can't set dimensions")
 
 done:

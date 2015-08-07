@@ -65,6 +65,8 @@ static herr_t H5S_hyper_deserialize(const H5F_t *f, H5S_t *space,
 static herr_t H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_hyper_offset(const H5S_t *space, hsize_t *offset);
 static int H5S_hyper_unlim_dim(const H5S_t *space);
+static herr_t H5S_hyper_num_elem_non_unlim(const H5S_t *space,
+    hsize_t *num_elem_non_unlim);
 static htri_t H5S_hyper_is_contiguous(const H5S_t *space);
 static htri_t H5S_hyper_is_single(const H5S_t *space);
 static htri_t H5S_hyper_is_regular(const H5S_t *space);
@@ -102,6 +104,7 @@ const H5S_select_class_t H5S_sel_hyper[1] = {{
     H5S_hyper_bounds,
     H5S_hyper_offset,
     H5S_hyper_unlim_dim,
+    H5S_hyper_num_elem_non_unlim,
     H5S_hyper_is_contiguous,
     H5S_hyper_is_single,
     H5S_hyper_is_regular,
@@ -3003,6 +3006,48 @@ H5S_hyper_unlim_dim(const H5S_t *space)
 
     FUNC_LEAVE_NOAPI(space->select.sel_info.hslab->unlim_dim)
 } /* end H5S_hyper_get_unlim_dim() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_hyper_num_elem_non_unlim
+ PURPOSE
+    Return number of elements in the non-unlimited dimensions
+ USAGE
+    herr_t H5S_hyper_num_elem_non_unlim(space,num_elem_non_unlim)
+        H5S_t *space;           IN: Dataspace pointer to check
+        hsize_t *num_elem_non_unlim; OUT: Number of elements in the non-unlimited dimensions
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Returns the number of elements in a slice through the non-unlimited
+    dimensions of the selection.  Fails if the selection has no unlimited
+    dimension.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5S_hyper_num_elem_non_unlim(const H5S_t *space, hsize_t *num_elem_non_unlim)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(space);
+    HDassert(num_elem_non_unlim);
+
+    /* Get number of elements in the non-unlimited dimensions */
+    if(space->select.sel_info.hslab->unlim_dim >= 0)
+        *num_elem_non_unlim = space->select.sel_info.hslab->num_elem_non_unlim;
+    else
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "selection has no unlimited dimension")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_hyper_num_elem_non_unlim() */
 
 
 /*--------------------------------------------------------------------------

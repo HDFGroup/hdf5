@@ -461,6 +461,7 @@ test_api(test_api_config_t config, hid_t fapl)
     hsize_t     block[2];       /* Hyperslab block */
     hsize_t     coord[10];      /* Point selection array */
     size_t      size_out;
+    herr_t      ret;
     unsigned    i;
 
     /* Initialize vspace */
@@ -616,6 +617,7 @@ test_api(test_api_config_t config, hid_t fapl)
     ex_dcpl = -1;
 
 
+#ifdef VDS_POINT_SELECTIONS /* VDS does not currently support point selections */
     /*
      * Test 3: Point - point selection
      */
@@ -892,6 +894,57 @@ test_api(test_api_config_t config, hid_t fapl)
     if(H5Pclose(ex_dcpl) < 0)
         TEST_ERROR
     ex_dcpl = -1;
+#else /* VDS_POINT_SELECTIONS */
+    /*
+     * Test 3: Verify point selections fail
+     */
+    /* Clear virtual layout in DCPL */
+    if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR
+
+    /* Create source dataspace */
+    if((srcspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspace */
+    if((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Select points in source space */
+    coord[0] = 5;
+    coord[1] = 15;
+    coord[2] = 7;
+    coord[3] = 19;
+    coord[4] = 8;
+    coord[5] = 0;
+    coord[6] = 2;
+    coord[7] = 14;
+    coord[8] = 8;
+    coord[9] = 18;
+    if(H5Sselect_elements(srcspace[0], H5S_SELECT_SET, (size_t)5, coord) < 0)
+        TEST_ERROR
+
+    /* Select points in virtual space */
+    coord[0] = 3;
+    coord[1] = 12;
+    coord[2] = 7;
+    coord[3] = 11;
+    coord[4] = 4;
+    coord[5] = 9;
+    coord[6] = 7;
+    coord[7] = 11;
+    coord[8] = 5;
+    coord[9] = 5;
+    if(H5Sselect_elements(vspace[0], H5S_SELECT_SET, (size_t)5, coord) < 0)
+        TEST_ERROR
+
+    /* Attempt to add virtual layout mapping */
+    H5E_BEGIN_TRY {
+        ret = H5Pset_virtual(dcpl, vspace[0], src_file[0], src_dset[0], srcspace[0]);
+    } H5E_END_TRY
+    if(ret >= 0)
+        TEST_ERROR
+#endif /* VDS_POINT_SELECTIONS */
 
 
     /*

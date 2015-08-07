@@ -154,6 +154,9 @@ typedef herr_t (*H5S_sel_bounds_func_t)(const H5S_t *space, hsize_t *start, hsiz
 typedef herr_t (*H5S_sel_offset_func_t)(const H5S_t *space, hsize_t *offset);
 /* Method to get unlimited dimension of selection (or -1 for none) */
 typedef int (*H5S_sel_unlim_dim_func_t)(const H5S_t *space);
+/* Method to get the number of elements in a slice through the unlimited dimension */
+typedef herr_t (*H5S_sel_num_elem_non_unlim_func_t)(const H5S_t *space,
+    hsize_t *num_elem_non_unlim);
 /* Method to determine if current selection is contiguous */
 typedef htri_t (*H5S_sel_is_contiguous_func_t)(const H5S_t *space);
 /* Method to determine if current selection is a single block */
@@ -184,6 +187,7 @@ typedef struct {
     H5S_sel_bounds_func_t bounds;               /* Method to determine to smallest n-D bounding box containing the current selection */
     H5S_sel_offset_func_t offset;               /* Method to determine linear offset of initial element in selection within dataspace */
     H5S_sel_unlim_dim_func_t unlim_dim;              /* Method to get unlimited dimension of selection (or -1 for none) */
+    H5S_sel_num_elem_non_unlim_func_t num_elem_non_unlim; /* Method to get the number of elements in a slice through the unlimited dimension */
     H5S_sel_is_contiguous_func_t is_contiguous; /* Method to determine if current selection is contiguous */
     H5S_sel_is_single_func_t is_single;         /* Method to determine if current selection is a single block */
     H5S_sel_is_regular_func_t is_regular;       /* Method to determine if current selection is "regular" */
@@ -262,8 +266,6 @@ H5_DLLVAR const H5S_select_class_t H5S_sel_none[1];
 H5_DLLVAR const H5S_select_class_t H5S_sel_point[1];
 
 /* Extent functions */
-H5_DLL herr_t H5S__set_extent_simple(H5S_t *space, unsigned rank,
-    const hsize_t *dims, const hsize_t *max);
 H5_DLL herr_t H5S_extent_release(H5S_extent_t *extent);
 H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
     hbool_t copy_max);

@@ -1805,7 +1805,10 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     H5O_layout_t layout;        /* Layout information for setting chunk info */
     H5S_t *vspace;              /* Virtual dataset space selection */
     H5S_t *src_space;           /* Source dataset space selection */
-    hssize_t nelmts;           /* Number of elements */
+    H5S_sel_type select_type;   /* Selection type */
+    hsize_t nelmts_vs;         /* Number of elements in virtual selection */
+    hsize_t nelmts_ss;         /* Number of elements in source selection */
+    H5S_t *tmp_space = NULL;    /* Temporary dataspace */
     hbool_t new_layout = FALSE; /* Whether we are adding a new virtual layout message to plist */
     H5O_storage_virtual_ent_t *ent = NULL; /* Convenience pointer to new VDS entry */
     hbool_t adding_entry = FALSE; /* Whether we are in the middle of adding an entry */
@@ -1825,14 +1828,43 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
     if(NULL == (src_space = (H5S_t *)H5I_object_verify(src_space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-    nelmts = H5S_GET_SELECT_NPOINTS(vspace);
-    if((nelmts != H5S_UNLIMITED)
-            && (nelmts != H5S_GET_SELECT_NPOINTS(src_space)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "virtual and source space selections have different numbers of elements")
-    /* Check for unlimited selections having the same number of elements in the
-     * non-unlimited dimensions, and check for printf selections having the
-     * correct numbers of elements and unlimited/non-unlimited dimensions VDSINC
-     */
+
+    /* Check for point selections (currently unsupported) */
+    if(H5S_SEL_ERROR == (select_type = H5S_GET_SELECT_TYPE(vspace)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get selection type")
+    if(select_type == H5S_SEL_POINTS)
+        HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "point selections not currently supported with virtual datasets")
+    if(H5S_SEL_ERROR == (select_type = H5S_GET_SELECT_TYPE(src_space)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get selection type")
+    if(select_type == H5S_SEL_POINTS)
+        HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "point selections not currently supported with virtual datasets")
+
+    /* Get number of elements in spaces */
+    nelmts_vs = (hsize_t)H5S_GET_SELECT_NPOINTS(vspace);
+    nelmts_ss = (hsize_t)H5S_GET_SELECT_NPOINTS(src_space);
+
+    /* Check for unlimited vspace */
+    if(nelmts_vs == H5S_UNLIMITED) {
+        /* Check for unlimited src_space */
+        if(nelmts_ss == H5S_UNLIMITED) {
+            hsize_t nenu_vs;    /* Number of elements in the non-unlimited dimensions of vspace */
+            hsize_t nenu_ss;    /* Number of elements in the non-unlimited dimensions of src_space */
+
+            /* Non-printf unlimited selection.  Make sure both selections have
+             * the same number of elements in the non-unlimited dimension */
+            if(H5S_get_select_num_elem_non_unlim(vspace, &nenu_vs) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTCOUNT, FAIL, "can't get number of elements in non-unlimited dimension")
+            if(H5S_get_select_num_elem_non_unlim(src_space, &nenu_ss) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTCOUNT, FAIL, "can't get number of elements in non-unlimited dimension")
+            if(nenu_vs != nenu_ss)
+                HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "numbers of elemnts in the non-unlimited dimensions is different for source and virtual spaces")
+        } /* end if */
+        /* We will handle the printf case after parsing the source names */
+    } /* end if */
+    else
+        /* Limited selections.  Check number of points is the same. */
+        if(nelmts_vs != nelmts_ss)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "virtual and source space selections have different numbers of elements")
 
 #ifndef H5_HAVE_C99_DESIGNATED_INITIALIZER
     /* If the compiler doesn't support C99 designated initializers, check if
@@ -1913,13 +1945,44 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
         ent->source_dset.clipped_source_select = ent->source_select;
         ent->source_dset.clipped_virtual_select = ent->source_dset.virtual_select;
     } /* end if */
-        
     ent->unlim_extent_source = HSIZE_UNDEF;
     ent->unlim_extent_virtual = HSIZE_UNDEF;
     ent->clip_size_source = HSIZE_UNDEF;
     ent->clip_size_virtual = HSIZE_UNDEF;
     ent->source_space_status = H5O_VIRTUAL_STATUS_USER;
     ent->virtual_space_status = H5O_VIRTUAL_STATUS_USER;
+
+    /* Check for printf selection */
+    if((nelmts_vs == H5S_UNLIMITED) && (nelmts_ss != H5S_UNLIMITED)) {
+        /* Make sure there at least one %b substitution in the source file or
+         * dataset name */
+        if((ent->psfn_nsubs == 0) && (ent->psdn_nsubs == 0))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unlimited virtual selection, limited source selection, and no printf specifiers in source names")
+
+        /* Make sure virtual space uses hyperslab selection */
+        if(H5S_GET_SELECT_TYPE(vspace) != H5S_SEL_HYPERSLABS)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "virtual selection with printf mapping must be hyperslab")
+
+        /* Get first block in virtual selection */
+        if(NULL == (tmp_space = H5S_hyper_get_unlim_block(vspace, (hsize_t)0)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get first block in virtual selection")
+
+        /* Check that the number of elements in one block in the virtual
+         * selection matches the total number of elements in the source
+         * selection */
+        nelmts_vs = (hsize_t)H5S_GET_SELECT_NPOINTS(tmp_space);
+        if(nelmts_vs != nelmts_ss)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "virtual (single block) and source space selections have different numbers of elements")
+
+        /* Close tmp_space */
+        if(H5S_close(tmp_space) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "can't close dataspace")
+        tmp_space = NULL;
+    } /* end if */
+    else
+        /* Make sure there are no printf substitutions */
+        if((ent->psfn_nsubs > 0) || (ent->psdn_nsubs > 0))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "printf specifier(s) in source name(s) without an unlimited virtual selection and limited source selection")
 
     /* Update min_dims */
     if(H5D_virtual_update_min_dims(&layout, layout.storage.u.virt.list_nused) < 0)
@@ -1972,6 +2035,11 @@ done:
             /* Free list if necessary */
             if(free_list)
                 layout.storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_xfree(layout.storage.u.virt.list);
+
+            /* Free temporary space */
+            if(tmp_space)
+                if(H5S_close(tmp_space) < 0)
+                    HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "can't close dataspace")
         } /* end if */
     } /* end if */
 
@@ -2108,14 +2176,44 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index)
     if(H5D_VIRTUAL != layout.type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
-    /* Attempt to open source dataset and patch extent if extent status is not
-     * H5O_VIRTUAL_STATUS_CORRECT, otherwise if status is
-     * H5O_VIRTUAL_STATUS_INVALID, patch with bounds of selection VDSINC */
-
-    /* Get the source space */
+    /* Check index */
     if(index >= layout.storage.u.virt.list_nused)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
+
+    /* Attempt to open source dataset and patch extent if extent status is not
+     * H5O_VIRTUAL_STATUS_CORRECT?  -NAF */
+    /* If source space status is H5O_VIRTUAL_STATUS_INVALID, patch with bounds
+     * of selection */
+    if((layout.storage.u.virt.list[index].source_space_status
+            == H5O_VIRTUAL_STATUS_INVALID)
+            && (layout.storage.u.virt.list[index].unlim_dim_source < 0)) {
+        hsize_t bounds_start[H5S_MAX_RANK];
+        hsize_t bounds_end[H5S_MAX_RANK];
+        int rank;
+        int i;
+
+        /* Get rank of source space */
+        if((rank = H5S_GET_EXTENT_NDIMS(layout.storage.u.virt.list[index].source_select)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get source space rank")
+
+        /* Get bounds of selection */
+        if(H5S_SELECT_BOUNDS(layout.storage.u.virt.list[index].source_select, bounds_start, bounds_end) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get selection bounds")
+
+        /* Adjust bounds to extent */
+        for(i = 0; i < rank; i++)
+            bounds_end[i]++;
+
+        /* Set extent */
+        if(H5S_set_extent_simple(layout.storage.u.virt.list[index].source_select, (unsigned)rank, bounds_end, NULL) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set source space extent")
+
+        /* Update source space status */
+        layout.storage.u.virt.list[index].source_space_status = H5O_VIRTUAL_STATUS_SEL_BOUNDS;
+    } /* end if */
+
+    /* Get the source space */
     if(NULL == (space = H5S_copy(layout.storage.u.virt.list[index].source_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")
 

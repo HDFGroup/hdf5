@@ -79,6 +79,7 @@ const H5S_select_class_t H5S_sel_none[1] = {{
     H5S_none_bounds,
     H5S_none_offset,
     H5S_none_unlim_dim,
+    NULL,
     H5S_none_is_contiguous,
     H5S_none_is_single,
     H5S_none_is_regular,

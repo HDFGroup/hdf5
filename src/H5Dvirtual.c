@@ -574,7 +574,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     if(HDstrcmp(source_dset->file_name, ".")) {
         /* Open the source file */
         if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & H5F_ACC_RDWR, H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
-            H5E_clear_stack(NULL); //Quick hack until proper support for H5Fopen with missing file is implemented VDSINC HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "unable to open source file")
+            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
         else
             src_file_open = TRUE;
     } /* end if */
@@ -591,7 +591,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
 
         /* Open the source dataset */
         if(NULL == (source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl, dxpl_id)))
-            H5E_clear_stack(NULL); //Quick hack until proper support for H5Fopen with missing file is implemented VDSINC HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
+            H5E_clear_stack(NULL); /* Quick hack until proper support for H5Dopen with missing file is implemented */
         else
             /* Patch the source selection if necessary */
             if(virtual_ent->source_space_status != H5O_VIRTUAL_STATUS_CORRECT) {
@@ -1352,13 +1352,21 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
             changed = TRUE;
     } /* end for */
 
-    /* If we did not change the VDS dimensions, there is nothing more to update
-     */
-    if(changed || (!storage->init && (storage->view == H5D_VDS_FIRST_MISSING))) {
+    /* Update extent if it changed */
+    if(changed) {
         /* Update VDS extent */
         if(H5S_set_extent(dset->shared->space, new_dims) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
 
+        /* Mark the space as dirty, for later writing to the file */
+        if(H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR) 
+            if(H5D__mark(dset, dxpl_id, H5D_MARK_SPACE) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
+    } /* end if */
+
+    /* If we did not change the VDS dimensions, there is nothing more to update
+     */
+    if(changed || (!storage->init && (storage->view == H5D_VDS_FIRST_MISSING))) {
         /* Iterate over mappings again to update source selections and virtual
          * mapping extents */
         for(i = 0; i < storage->list_nalloc; i++) {
@@ -1516,7 +1524,6 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
         } /* end for */
     } /* end if */
 
-    /* Call H5D__mark so dataspace is updated on disk? VDSINC */
 
     /* Mark layout as fully initialized */
     storage->init = TRUE;
@@ -1555,14 +1562,16 @@ H5D__virtual_init(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5D_t *dset,
     storage = &dset->shared->layout.storage.u.virt;
     HDassert(storage->list || (storage->list_nused == 0));
 
-    /* Patch the virtual selection dataspaces */
+    /* Patch the virtual selection dataspaces.  Note we always patch the space
+     * status because this layout could be from an old version held in the
+     * object header message code.  We cannot update that held message because
+     * the layout message is constant, so just overwrite the values here (and
+     * invalidate other fields by setting storage->init to FALSE below). */
     for(i = 0; i < storage->list_nused; i++) {
-        if(storage->list[i].virtual_space_status != H5O_VIRTUAL_STATUS_CORRECT) {
-            if(H5S_extent_copy(storage->list[i].source_dset.virtual_select, dset->shared->space) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy virtual dataspace extent")
-            storage->list[i].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
-            HDassert(storage->list[i].sub_dset_nalloc == 0);
-        } /* end if */
+        if(H5S_extent_copy(storage->list[i].source_dset.virtual_select, dset->shared->space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy virtual dataspace extent")
+        storage->list[i].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
+        HDassert(storage->list[i].sub_dset_nalloc == 0);
     } /* end for */
 
     /* Get dataset access property list */
@@ -1588,6 +1597,10 @@ H5D__virtual_init(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5D_t *dset,
     /* Copy DAPL to layout */
     if((storage->source_dapl = H5P_copy_plist(dapl, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dapl")
+
+    /* Mark layout as not fully initialized (must be done prior to I/O for
+     * unlimited/printf selections) */
+    storage->init = FALSE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2069,8 +2082,9 @@ H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         HDassert(source_dset->dset);
         HDassert(source_dset->clipped_source_select);
 
-        /* Extend source dataset if necessary and there is an unlimited
-         * dimension VDSINC */
+        /* In the future we may wish to extent this implementation to extend
+         * source datasets if a write to a virtual dataset goes past the current
+         * extent in the unlimited dimension.  -NAF */
         /* Project intersection of file space and mapping virtual space onto
          * mapping source space */
         if(H5S_select_project_intersection(source_dset->virtual_select, source_dset->clipped_source_select, file_space, &projected_src_space) < 0)
