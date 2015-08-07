@@ -15,7 +15,7 @@
 
 /***********************************************************
 *
-* Test program:	 test_swmr
+* Test program:	 swmr
 *
 * 	To test new public routines from SWMR project:
 *		H5Pget/set_metadata_read_attempts()
@@ -46,9 +46,11 @@
 
 
 const char *FILENAME[] = {
-    "test_swmr",		/* 0 */
+    "swmr0",		/* 0 */
+    "swmr1",		/* 1 */
     NULL
 };
+
 
 #define NAME_BUF_SIZE  	1024		/* Length of file name */
 
@@ -75,6 +77,14 @@ static int test_append_flush_generic(void);
 static int test_append_flush_dataset_chunked(hid_t in_fapl);
 static int test_append_flush_dataset_fixed(hid_t in_fapl);
 static int test_append_flush_dataset_multiple(hid_t in_fapl);
+
+/* Tests for file open flags/SWMR flags: single process access */
+static int test_file_lock_same(hid_t fapl);              
+static int test_file_lock_swmr_same(hid_t fapl);         
+
+/* Tests for file open flags/SWMR flags: concurrent process access */
+static int test_file_lock_concur(hid_t fapl);            
+static int test_file_lock_swmr_concur(hid_t fapl);       
 
 /* Tests for SWMR VFD flag */
 static int test_swmr_vfd_flag();
@@ -3605,6 +3615,1438 @@ error:
     return -1;
 } /* test_append_flush_dataset_multiple() */
 
+
+
+/****************************************************************
+**
+**  test_file_lock_same():
+**    With the implementation of file locking, this test checks file
+**    open with different combinations of flags.
+**    This is for single process access.
+**
+*****************************************************************/
+static int
+test_file_lock_same(hid_t in_fapl)
+{
+    hid_t fid, fid2;    		/* File IDs */
+    hid_t fapl;				/* File access property list */
+    unsigned intent;    		/* File access flags */
+    char filename[NAME_BUF_SIZE];       /* file name */
+
+    /* Output message about test being performed */
+    TESTING("File open with different combinations of flags--single process access");
+
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+
+    /* 
+     * Case 1: 1) RDWR 2) RDWR : should succeed 
+     */
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Get and check file intent */
+    if(H5Fget_intent(fid, &intent) < 0)
+	FAIL_STACK_ERROR
+
+    if(intent != H5F_ACC_RDWR)
+	TEST_ERROR
+
+    /* Open the same file with RDWR */
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Get and check the intent */
+    if(H5Fget_intent(fid2, &intent) < 0)
+	FAIL_STACK_ERROR
+    if(intent != H5F_ACC_RDWR) 
+	TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+	FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid2) < 0)
+	FAIL_STACK_ERROR
+
+    /* 
+     * Case 2: 1) RDWR 2) RDONLY : should succeed 
+     */
+    /* Open file with RDWR */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Get and check the intent */
+    if(H5Fget_intent(fid, &intent) < 0)
+	FAIL_STACK_ERROR
+    if(intent != H5F_ACC_RDWR)
+	TEST_ERROR
+
+    /* Open file with RDONLY */
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Get and check the intent: should get intent from 1st open */
+    if(H5Fget_intent(fid2, &intent) < 0)
+	FAIL_STACK_ERROR
+    if(intent != H5F_ACC_RDWR)
+	TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+	FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid2) < 0)
+	FAIL_STACK_ERROR
+
+    /* 
+     * Case 3: 1) RDONLY 2) RDWR : should fail 
+     */
+    /* Open file with RDONLY */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Get and check the intent */
+    if(H5Fget_intent(fid, &intent) < 0)
+	FAIL_STACK_ERROR
+    if(intent != H5F_ACC_RDONLY)
+	TEST_ERROR
+
+    /* Open file with RDWR should fail */
+    H5E_BEGIN_TRY {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+	TEST_ERROR
+
+    /* Close first file */
+    if(H5Fclose(fid) < 0)
+	FAIL_STACK_ERROR
+
+    /* 
+     * Case 4: 1) RDONLY 2) RDONLY : should succeed 
+     */
+    /* Open file with RDONLY */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Get and check the intent */
+    if(H5Fget_intent(fid, &intent) < 0)
+	FAIL_STACK_ERROR
+    if(intent != H5F_ACC_RDONLY) 
+	TEST_ERROR
+
+    /* Open file with RDONLY */
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Get and check the intent */
+    if(H5Fget_intent(fid2, &intent) < 0)
+	FAIL_STACK_ERROR
+    if(intent != H5F_ACC_RDONLY)
+	TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+	FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid2) < 0)
+	FAIL_STACK_ERROR
+
+    /* Close the property list */
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Pclose(fapl);
+	H5Fclose(fid);
+	H5Fclose(fid2);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_file_lock_same() */
+
+/****************************************************************
+**
+**  test_file_lock_swmr_same():
+**    With the implementation of file locking, this test checks file
+**    open with different combinations of flags + SWMR flags.
+**    This is for single process access.
+**
+*****************************************************************/
+static int
+test_file_lock_swmr_same(hid_t in_fapl)
+{
+    hid_t fid, fid2;    /* File IDs */
+    hid_t fapl;		/* File access property list */
+    char filename[NAME_BUF_SIZE];       /* file name */
+
+    /* Output message about test being performed */
+    TESTING("File open with different combinations of flags + SWMR flags--single process access");
+
+    /* Get a copy of the parameter in_fapl */
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+
+    /* Set to use latest library format */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+    
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Cases a, b, c, d: H5Fopen failure cases 
+     */
+
+    /* 
+     * Case a: RDWR|SWRM_READ : should fail  
+     */
+    H5E_BEGIN_TRY {
+	fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_READ, fapl);
+    } H5E_END_TRY;
+    if(fid >= 0)
+	TEST_ERROR
+
+    /* 
+     * Case b: RDWR|SWMM_WRTE|SWMR_READ : should fail 
+     */
+    H5E_BEGIN_TRY {
+	fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE|H5F_ACC_SWMR_READ, fapl);
+    } H5E_END_TRY;
+    if(fid >= 0)
+	TEST_ERROR
+
+    /* 
+     * Case c: RDONLY|SWMM_WRITE : should fail 
+     */
+    H5E_BEGIN_TRY {
+	fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_WRITE, fapl);
+    } H5E_END_TRY;
+    if(fid >= 0)
+	TEST_ERROR
+
+    /* 
+     * Case d: RDONLY|SWMM_WRITE|SWMR_READ : should fail 
+     */
+    H5E_BEGIN_TRY {
+	fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_WRITE|H5F_ACC_SWMR_READ, fapl);
+    } H5E_END_TRY;
+    if(fid >= 0)
+	TEST_ERROR
+
+    /* 
+     * Cases 1 - 12: combinations of different flags for 1st and 2nd opens 
+     */
+
+    /* 
+     * Case 1: 1) RDWR 2) RDWR|SWMR_WRITE : should fail 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    H5E_BEGIN_TRY {
+	fid2 = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+	TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 2: 1) RDWR 2) RDONLY|SWMR_READ : should succeed 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+	TEST_ERROR
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+	TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 3: 1) RDWR|SWMR_WRITE 2)RDWR : should succeed 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 4: 1) RDWR|SWMR_WRITE 2) RDWR|SWMR_WRITE : should succeed 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 5: 1) RDWR|SWMR_WRITE 2) RDONLY|SWMR_READ : should succeed 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 6: 1) RDWR|SWMR_WRITE 2) RDONLY : should succeed 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 7: 1) RDONLY|SWMR_READ 2)RDWR : should fail 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    H5E_BEGIN_TRY {
+	fid2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+	TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 8: 1) RDONLY|SWMR_READ 2) RDWR|SWMR_WRITE : should fail 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    H5E_BEGIN_TRY {
+	fid2 = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+	TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 9: 1) RDONLY|SWMR_READ 2) RDONLY|SWMR_READ : should succeed 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+        FAIL_STACK_ERROR
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 10: 1) RDONLY|SWMR_READ 2) RDONLY : should succeed 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+        TEST_ERROR
+    if((fid2 = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 11: 1) RDONLY 2) RDWR|SWMR_WRITE: should fail 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    H5E_BEGIN_TRY {
+	fid2 = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+    } H5E_END_TRY;
+    if(fid2 >= 0)
+	TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 12: 1) RDONLY 2) RDONLY|SWMR_READ : should fail 
+     */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    H5E_BEGIN_TRY {
+	fid2 = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+    } H5E_END_TRY;
+    if(fid2 >=0 )
+	TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the property list */
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Pclose(fapl);
+	H5Fclose(fid);
+	H5Fclose(fid2);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_file_lock_swmr_same() */
+
+
+/****************************************************************
+**
+**  test_file_lock_concur():
+**    With the implementation of file locking, this test checks file
+**    open with different combinations of flags.
+**    This is for concurrent access.
+**
+*****************************************************************/
+static int
+test_file_lock_concur(hid_t in_fapl)
+{
+    hid_t fid;    			/* File ID */
+    hid_t fapl;                 	/* File access property list */
+    char filename[NAME_BUF_SIZE];       /* file name */
+    pid_t childpid=0;			/* Child process ID */
+    int child_status;			/* Status passed to waitpid */
+    int child_wait_option=0;		/* Options passed to waitpid */
+
+    /* Output message about test being performed */
+    TESTING("File open with different combinations of flags--concurrent access");
+
+#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+
+    SKIPPED();
+    HDputs("    Test skipped due to fork or waitpid not defined.");
+    return 0;
+
+#elif !defined(H5_HAVE_FLOCK)
+
+    SKIPPED();
+    HDputs("    Test skipped due to a lack of flock() on this system.");
+
+#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+  
+    /* Create the test file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 1: 1) RDWR 2) RDWR : should fail
+     */
+
+    /* Remove the message file to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+	} H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL) 
+	    exit(0);
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+	/* Check exit status of the child */
+	if(WEXITSTATUS(child_status) != 0)
+	    TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 2: 1) RDWR 2) RDONLY : should fail
+     */
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid; 	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Opens the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+	} H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL) 
+	    exit(0);
+	exit(1);
+    }
+
+    /* Opens the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 3: 1) RDONLY 2) RDWR : should fail
+     */
+
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Opens the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+	} H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL)
+	    exit(0);
+	exit(1);
+    }
+
+    /* Opens the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 4: 1) RDONLY 2) RDONLY : should succeed
+     */
+
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Opens the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+	} H5E_END_TRY;
+
+	/* Should succeed */
+	if(child_fid >= 0) {
+	    /* Close the file */
+	    if(H5Fclose(child_fid) < 0)
+		FAIL_STACK_ERROR
+	    exit(0);
+	}
+	exit(1);
+    }
+
+    /* Create file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the property list */
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Pclose(fapl);
+	H5Fclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+#endif
+
+} /* end test_file_lock_concur() */
+
+/****************************************************************
+**
+**  test_file_lock_swmr_concur(): low-level file test routine.
+**    With the implementation of file locking, this test checks file
+**    open with different combinations of flags + SWMR flags.
+**    This is for concurrent access.
+**
+*****************************************************************/
+static int
+test_file_lock_swmr_concur(hid_t in_fapl)
+{
+    hid_t fid;    			/* File ID */
+    hid_t fapl;    			/* File access property list */
+    char filename[NAME_BUF_SIZE];       /* file name */
+    pid_t childpid=0;			/* Child process ID */
+    int child_status;			/* Status passed to waitpid */
+    int child_wait_option=0;		/* Options passed to waitpid */
+
+    /* Output message about test being performed */
+    TESTING("File open with different combintations of flags + SWMR flags--concurrent access");
+
+#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+
+    SKIPPED();
+    HDputs("    Test skipped due to fork or waitpid not defined.");
+    return 0;
+
+#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+
+    if((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+
+    /* Set to use latest library format */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create the test file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 1: 1) RDWR 2) RDWR|SWMR_WRITE : should fail
+     */
+
+    /* Remove the message file to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+	} H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL) 
+	    exit(0);
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 2: 1) RDWR 2) RDONLY|SWMR_READ: should fail
+     */
+
+    /* Remove the message file to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+	FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+	} H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL) 
+	    exit(0);
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+	FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 3: 1) RDWR|SWMR_WRITE 2) RDWR : should fail
+     */
+
+    /* Remove the message file to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+	} H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL) 
+	    exit(0);
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 4: 1) RDWR|SWMR_WRITE 2) RDWR|SWMR_WRITE : should fail
+     */
+
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+	FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+	} H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL) 
+	    exit(0);
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+	FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 5: 1) RDWR|SWMR_WRITE 2) RDONLY|SWMR_READ : should succeed
+     */
+
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+	FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+	} H5E_END_TRY;
+
+	/* Should succeed */
+	if(child_fid >= 0) {
+	    if(H5Fclose(child_fid) < 0)
+		FAIL_STACK_ERROR
+	    exit(0);
+	}
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+	FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 6: 1) RDWR|SWMR_WRITE 2) RDONLY : should fail
+     */
+
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+        } H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL) 
+	    exit(0);
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 7: 1) RDONLY|SWMR_READ 2) RDWR : should fail
+     */
+
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+	} H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL) 
+	    exit(0);
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 8: 1) RDONLY|SWMR_READ 2) RDWR|SWMR_WRITE : should fail
+     */
+
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+	} H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL) 
+	    exit(0);
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 9: 1) RDONLY|SWMR_READ 2) RDONLY|SWMR_READ : should succeed
+     */
+
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+	} H5E_END_TRY;
+
+	/* Should succeed */
+	if(child_fid >= 0) {
+	    if(H5Fclose(child_fid) < 0)
+		FAIL_STACK_ERROR
+	    exit(0);
+	}
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 10: 1) RDONLY|SWMR_READ 2) RDONLY : should succeed
+     */
+
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	if((child_fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+	    FAIL_STACK_ERROR
+
+	/* Should succeed */
+	if(child_fid >= 0) {
+	    if(H5Fclose(child_fid) < 0)
+		FAIL_STACK_ERROR
+	    exit(0);
+	}
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+	FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 11: 1) RDONLY 2) RDWR|SWMR_WRITE : should fail
+     */
+
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+	} H5E_END_TRY;
+
+	/* Should fail */
+	if(child_fid == FAIL) 
+	    exit(0);
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* 
+     * Case 12: 1) RDONLY 2) RDONLY|SWMR_READ : should succeed
+     */
+
+    /* Remove the message file just to be sure */
+    HDremove(DONE_MESSAGE);
+
+    /* Fork child process */
+    if((childpid = HDfork()) < 0)
+        FAIL_STACK_ERROR
+
+    if(childpid == 0) { /* Child process */
+	hid_t child_fid;	/* File ID */
+
+	/* Wait till parent process completes the open */
+	if(h5_wait_message(DONE_MESSAGE) < 0)
+	    exit(1);
+
+	/* Open the test file */
+	H5E_BEGIN_TRY {
+	    child_fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+	} H5E_END_TRY;
+
+	/* Should succeed */
+	if(child_fid >= 0) {
+	    if(H5Fclose(child_fid) < 0)
+		FAIL_STACK_ERROR
+	    exit(0);
+	}
+	exit(1);
+    }
+
+    /* Open the test file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Send the message that the open completes */
+    h5_send_message(DONE_MESSAGE);
+
+    /* Wait for child process to complete */
+    if(HDwaitpid(childpid, &child_status, child_wait_option) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check if child terminated normally */
+    if(WIFEXITED(child_status)) {
+        /* Check exit status of the child */
+        if(WEXITSTATUS(child_status) != 0)
+            TEST_ERROR
+    } else
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the property list */
+    if(H5Pclose(fapl) < 0)
+	FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+
+    return -1;
+
+#endif
+
+} /* end test_file_lock_swmr_concur() */
+
 static int
 test_swmr_vfd_flag(void)
 {
@@ -3665,7 +5107,6 @@ error:
 
     return -1;
 } /* test_swmr_vfd_flag() */
-
 
 #ifdef OUT
 /* 
@@ -3819,6 +5260,18 @@ main(void)
     nerrors += test_append_flush_dataset_fixed(fapl);
     nerrors += test_append_flush_dataset_multiple(fapl);
 
+    /* 
+     * Tests for:
+     *   file open flags--single process access
+     *	 file open flags+SWMR flags--single process access
+     * 	 file open flags--concurrent access
+     * 	 file open flags+SWMR flags--concurrent access 
+     */
+    nerrors += test_file_lock_same(fapl);              
+    nerrors += test_file_lock_swmr_same(fapl);         
+    nerrors += test_file_lock_concur(fapl);            
+    nerrors += test_file_lock_swmr_concur(fapl);       
+
     /* Tests SWMR VFD compatibility flag.
      * Only needs to run when the VFD is the default (sec2).
      */
@@ -3826,7 +5279,7 @@ main(void)
         nerrors += test_swmr_vfd_flag();
     
     if(nerrors)
-	    goto error;
+	goto error;
 
     printf("All tests passed.\n");
 

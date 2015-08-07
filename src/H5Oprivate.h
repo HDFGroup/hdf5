@@ -832,7 +832,6 @@ H5_DLL herr_t H5O_msg_lock(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id
 H5_DLL herr_t H5O_msg_unlock(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 
 /* Object metadata flush/evict routines */
-H5_DLL herr_t H5O_flush_metadata(const H5O_loc_t *oloc, hid_t dxpl_id);
 H5_DLL herr_t H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id);
 
 H5_DLL herr_t H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id);

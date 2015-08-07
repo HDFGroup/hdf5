@@ -9224,21 +9224,17 @@ H5C_make_space_in_cache(H5F_t *	f,
 
 		prev_is_dirty = prev_ptr->is_dirty;
 	    }
-            if ( (entry_ptr->type)->id == H5C__EPOCH_MARKER_TYPE) {
 
-                /* Skip epoch markers.  Set result to SUCCEED to avoid
-                 * triggering the error code below.
-                 */
-                didnt_flush_entry = TRUE;
-                result = SUCCEED;
-	    } else if (entry_ptr->is_corked && entry_ptr->is_dirty) {
+	    if (entry_ptr->is_corked && entry_ptr->is_dirty) {
+
                 /* Skip "dirty" corked entries.  Set result to SUCCEED to avoid
                  * triggering the error code below.
                  */
 		++num_corked_entries;
                 didnt_flush_entry = TRUE;
                 result = SUCCEED;
-	    } else {
+
+	    } else if ( (entry_ptr->type)->id != H5C__EPOCH_MARKER_TYPE) {
 
                 didnt_flush_entry = FALSE;
 
@@ -9294,7 +9290,14 @@ H5C_make_space_in_cache(H5F_t *	f,
                 total_entries_scanned++;
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-            } 
+	    } else {
+
+                /* Skip epoch markers.  Set result to SUCCEED to avoid
+                 * triggering the error code below.
+                 */
+                didnt_flush_entry = TRUE;
+                result = SUCCEED;
+	    }
 
             if ( result < 0 ) {
 
@@ -10120,52 +10123,9 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_flush_tagged_entries
- *
- * Purpose:     Flushes all entries with the specified tag to disk.
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mike McGreevy
- *              August 19, 2010
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_flush_tagged_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, haddr_t tag)
-{
-    /* Variable Declarations */
-    H5C_t      *cache_ptr = NULL;
-    herr_t      result;
-    herr_t      ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Assertions */
-    HDassert(f);
-    HDassert(f->shared);
-
-    /* Get cache pointer */
-    cache_ptr = f->shared->cache;
-
-    /* Mark all entries with specified tag */
-    if ( (result = H5C_mark_tagged_entries(cache_ptr, tag, FALSE)) < 0 )
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
-
-    /* Flush all marked entries */
-    if(H5C_flush_marked_entries(f, primary_dxpl_id, secondary_dxpl_id, cache_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_flush_tagged_entries */
-
-
-/*-------------------------------------------------------------------------
- *
  * Function:    H5C_evict_tagged_entries
  *
- * Purpose:     Evicts all entries with the specified tag to disk.
+ * Purpose:     Evicts all entries with the specified tag from cache
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
@@ -10177,9 +10137,16 @@ done:
 herr_t
 H5C_evict_tagged_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, haddr_t tag)
 {
-    /* Variables */
+    /* Variable Declarations */
+    herr_t status;
+    H5C_cache_entry_t * entry_ptr = NULL;
+    H5C_cache_entry_t * next_entry_ptr = NULL;
+    int i;
+    hbool_t evicted_entries_last_pass;
+    hbool_t pinned_entries_need_evicted;
+    hbool_t first_flush = TRUE;
+
     H5C_t      *cache_ptr = NULL;
-    herr_t      result;
     herr_t ret_value = SUCCEED;
 
     /* Function Enter Macro */
@@ -10192,21 +10159,84 @@ H5C_evict_tagged_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_
     /* Get cache pointer */
     cache_ptr = f->shared->cache;
 
-    /* Mark all entries with specified tag */
-    if ( (result = H5C_mark_tagged_entries(cache_ptr, tag, TRUE)) < 0 )
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
 
-    /* Evict all marked entries */
-    if ( (result = H5C_evict_marked_entries(f,
-                                            primary_dxpl_id,
-                                            secondary_dxpl_id,
-                                            cache_ptr)) < 0 )
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't evict marked entries")
+    /* Start evicting entries */
+    do {
+
+        /* Reset pinned/evicted trackers */
+        pinned_entries_need_evicted = FALSE;
+        evicted_entries_last_pass = FALSE;
+
+        /* Iterate through entries in the index. */
+        for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+
+            next_entry_ptr = cache_ptr->index[i];
+
+            while ( next_entry_ptr != NULL ) {
+
+                entry_ptr = next_entry_ptr;
+                next_entry_ptr = entry_ptr->ht_next;
+
+		if(( entry_ptr->tag == tag ) ||
+		    ( entry_ptr->globality == H5C_GLOBALITY_MAJOR)) {
+
+                    /* This entry will need to be evicted */
+
+                    if ( entry_ptr->is_protected ) {
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot evict protected entry");
+                    } else if (entry_ptr->is_dirty) {
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot evict dirty entry");
+                    } else if (entry_ptr->is_pinned) {
+                        
+                        /* Can't evict at this time, but let's note that we hit a pinned
+                            entry and we'll loop back around again (as evicting other
+                            entries will hopefully unpin this entry) */
+    
+                        pinned_entries_need_evicted = TRUE;
+
+                    } else {
+
+                        /* Evict the Entry */
+
+                        status = H5C_flush_single_entry(f,
+                                                        primary_dxpl_id,
+                                                        secondary_dxpl_id,
+                                                        entry_ptr->type,
+                                                        entry_ptr->addr,
+                                                        H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
+                                                        &first_flush,
+                                                        TRUE);
+
+                        if ( status < 0 ) {
+
+                            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                        "Entry eviction failed.")
+
+                        }
+
+                        evicted_entries_last_pass = TRUE;
+
+                    } /* end if */
+
+                } /* end if */
+
+            } /* end while */
+
+        } /* end for */
+
+    /* Keep doing this until we have stopped evicted entries */
+    } while ((evicted_entries_last_pass == TRUE));
+
+    /* If we stop evicting entries and pinned entries still need evicted, 
+       then we have a problem. */
+    if (pinned_entries_need_evicted) {
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Pinned entries still need evicted?!");
+    } /* end if */
 
 done:
- 
-    /* Function Leave Macro */
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value);
 
 } /* H5C_evict_tagged_entries */
 
@@ -10307,113 +10337,45 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_evict_marked_entries
+ * Function:    H5C_flush_tagged_entries
  *
- * Purpose:     Evicts all marked entries in the cache. 
+ * Purpose:     Flushes all entries with the specified tag to disk.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
  * Programmer:  Mike McGreevy
- *              July 16, 2010
+ *              August 19, 2010
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5C_evict_marked_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, H5C_t * cache_ptr)
-{ 
+herr_t
+H5C_flush_tagged_entries(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, haddr_t tag)
+{
     /* Variable Declarations */
-    herr_t status;
-    herr_t ret_value = SUCCEED;
-    H5C_cache_entry_t * entry_ptr = NULL;
-    H5C_cache_entry_t * next_entry_ptr = NULL;
-    int i;
-    hbool_t evicted_entries_last_pass;
-    hbool_t pinned_entries_need_evicted;
-    hbool_t first_flush = TRUE;
+    H5C_t      *cache_ptr = NULL;
+    herr_t      result;
+    herr_t      ret_value = SUCCEED;
 
-    /* Function Enter Macro */
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Assertions */
-    HDassert( cache_ptr != NULL );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert(f);
+    HDassert(f->shared);
 
-    /* Start evicting entries */
-    do {
+    /* Get cache pointer */
+    cache_ptr = f->shared->cache;
 
-        /* Reset pinned/evicted trackers */
-        pinned_entries_need_evicted = FALSE;
-        evicted_entries_last_pass = FALSE;
+    /* Mark all entries with specified tag */
+    if((result = H5C_mark_tagged_entries(cache_ptr, tag, FALSE)) < 0 )
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
 
-        /* Iterate through entries in the index. */
-        for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
-
-            next_entry_ptr = cache_ptr->index[i];
-
-            while ( next_entry_ptr != NULL ) {
-
-                entry_ptr = next_entry_ptr;
-                next_entry_ptr = entry_ptr->ht_next;
-
-                if ( entry_ptr->flush_marker == TRUE )  {
-
-                    /* This entry will need to be evicted */
-
-                    if ( entry_ptr->is_protected ) {
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot evict protected entry");
-                    } else if (entry_ptr->is_dirty) {
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot evict dirty entry");
-                    } else if (entry_ptr->is_pinned) {
-                        
-                        /* Can't evict at this time, but let's note that we hit a pinned
-                            entry and we'll loop back around again (as evicting other
-                            entries will hopefully unpin this entry) */
-    
-                        pinned_entries_need_evicted = TRUE;
-
-                    } else {
-
-                        /* Evict the Entry */
-
-                        status = H5C_flush_single_entry(f,
-                                                        primary_dxpl_id,
-                                                        secondary_dxpl_id,
-                                                        entry_ptr->type,
-                                                        entry_ptr->addr,
-                                                        H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG,
-                                                        &first_flush,
-                                                        TRUE);
-
-                        if ( status < 0 ) {
-
-                            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                                        "Entry eviction failed.")
-
-                        }
-
-                        evicted_entries_last_pass = TRUE;
-
-                    } /* end if */
-
-                } /* end if */
-
-            } /* end while */
-
-        } /* end for */
-
-    /* Keep doing this until we have stopped evicted entries */
-    } while ((evicted_entries_last_pass == TRUE));
-
-    /* If we stop evicting entries and pinned entries still need evicted, 
-       then we have a problem. */
-    if (pinned_entries_need_evicted) {
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Pinned entries still need evicted?!");
-    } /* end if */
+    /* Flush all marked entries */
+    if(H5C_flush_marked_entries(f, primary_dxpl_id, secondary_dxpl_id, cache_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-
-} /* H5C_evict_marked_entries */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_flush_tagged_entries */
 
 
 /*-------------------------------------------------------------------------

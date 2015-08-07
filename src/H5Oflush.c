@@ -42,6 +42,11 @@
 #include "H5Iprivate.h"        /* IDs    */
 #include "H5Opkg.h"         /* Objects  */
 
+/********************/
+/* Local Prototypes */
+/********************/
+static herr_t H5O_oh_tag(const H5O_loc_t *oloc, hid_t dxpl_id, haddr_t *tag);
+
 /*************/
 /* Functions */
 /*************/
@@ -109,13 +114,17 @@ done:
 herr_t
 H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id)
 {
+    haddr_t 	tag = 0;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Private function */
-    if(H5O_flush_metadata(oloc, H5AC_dxpl_id) < 0)
+    if(H5O_oh_tag(oloc, H5AC_dxpl_id, &tag) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object metadata")
+
+    /* Flush metadata based on tag value of the object */
+    if(H5F_flush_tagged_metadata(oloc->file, tag, H5AC_dxpl_id)<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
 
     /* Check to invoke callback */
     if(H5F_object_flush_cb(oloc->file, obj_id) < 0)
@@ -126,24 +135,23 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_flush_metadata
+ * Function:    H5O_oh_tag
  *
- * Purpose:     Flush any metadata associated with this object.
+ * Purpose:     Get object header's address--tag value for the object
  *
- * Return:  Success:    Non-negative
- *          Failure:    Negative
+ * Return:  	Success:    Non-negative
+ *          	Failure:    Negative
  *
  * Programmer: Mike McGreevy
  *             May 19, 2010
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5O_flush_metadata(const H5O_loc_t *oloc, hid_t dxpl_id)
+static herr_t
+H5O_oh_tag(const H5O_loc_t *oloc, hid_t dxpl_id, haddr_t *tag)
 {
     H5O_t       *oh = NULL;             /* Object header */
     herr_t      ret_value = SUCCEED;    /* Return value */
-    haddr_t tag = 0;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -155,7 +163,7 @@ H5O_flush_metadata(const H5O_loc_t *oloc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object's object header")
 
     /* Get object header's address (i.e. the tag value for this object) */
-    if (HADDR_UNDEF == (tag = H5O_OH_GET_ADDR(oh)))
+    if (HADDR_UNDEF == (*tag = H5O_OH_GET_ADDR(oh)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get address of object header")
 
     /* Unprotect object header before attempting to flush it */
@@ -165,17 +173,13 @@ H5O_flush_metadata(const H5O_loc_t *oloc, hid_t dxpl_id)
     /* Reset object header pointer */
     oh = NULL;
 
-    /* Flush metadata based on tag value of the object */
-    if (H5F_flush_tagged_metadata(oloc->file, tag, dxpl_id)<0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
-
 done:
     /* Unprotect object header on failure */
     if(oh && H5O_unprotect(oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_flush_metadata() */
+} /* end H5O_oh_tag() */
 
 
 /*-------------------------------------------------------------------------
@@ -245,10 +249,10 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
     obj_loc.path = &obj_path;
     H5G_loc_reset(&obj_loc);
 
-    if((H5O_refresh_metadata_close(oid, oloc, &obj_loc, H5AC_dxpl_id)) < 0)
+    if((H5O_refresh_metadata_close(oid, oloc, &obj_loc, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
-    if((H5O_refresh_metadata_reopen(oid, &obj_loc, H5AC_dxpl_id)) < 0)
+    if((H5O_refresh_metadata_reopen(oid, &obj_loc, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:
@@ -285,24 +289,12 @@ H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t 
 
     FUNC_ENTER_NOAPI(FAIL)
     
-    /* Get the object's object header */
-    if(NULL == (oh = H5O_protect(&oloc, dxpl_id, H5AC_READ)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object's object header")
-
     /* Make deep local copy of object's location information */
     H5G_loc(oid, &tmp_loc);
     H5G_loc_copy(obj_loc, &tmp_loc, H5_COPY_DEEP);
 
-    /* Get object header's address (i.e. the tag value for this object) */
-    if(HADDR_UNDEF == (tag = H5O_OH_GET_ADDR(oh)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get address of object header")
-
-    /* Unprotect object header before attempting to flush it */
-    if(oh && H5O_unprotect(&oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
-     
-    /* Reset object header pointer */
-    oh = NULL;
+    if(H5O_oh_tag(&oloc, dxpl_id, &tag) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to get object header address")
 
     /* Get cork status of the object with tag */
     if(H5AC_cork(oloc.file, tag, H5AC__GET_CORKED, &corked) < 0)
@@ -312,9 +304,9 @@ H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t 
     if(H5I_dec_ref(oid) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close object")
 
-    /* Flush the object's metadata before evicting it */
-    if(H5O_flush_metadata(&oloc, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush object's metadata")
+    /* Flush metadata based on tag value of the object */
+    if(H5F_flush_tagged_metadata(oloc.file, tag, dxpl_id)<0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
 
     /* Evict the object's tagged metadata */
     if(H5F_evict_tagged_metadata(oloc.file, tag, dxpl_id)<0)

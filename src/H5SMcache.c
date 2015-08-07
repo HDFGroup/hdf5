@@ -214,7 +214,8 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void H5_ATTR_UNUSED *udat
         /* Address of the index's heap */
         H5F_addr_decode(f, &p, &(table->indexes[u].heap_addr));
 
-        /* Compute the size of a list index for this SOHM index */
+	/* Compute the size of a list index for this SOHM index */
+        table->indexes[u].list_size = H5SM_LIST_SIZE(f, table->indexes[u].list_max);
     } /* end for */
 
     /* Already decoded and compared stored checksum earlier, when reading */
