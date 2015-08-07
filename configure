@@ -26079,7 +26079,7 @@ if test "$ac_res" != no; then :
 
 fi
 
-for ac_func in alarm clock_gettime difftime flock fork frexpf frexpl
+for ac_func in alarm clock_gettime difftime fcntl flock fork frexpf
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -26091,7 +26091,7 @@ _ACEOF
 fi
 done
 
-for ac_func in gethostname getpwuid getrusage gettimeofday
+for ac_func in frexpl gethostname getpwuid getrusage gettimeofday
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -26103,7 +26103,7 @@ _ACEOF
 fi
 done
 
-for ac_func in lstat rand_r random setsysinfo
+for ac_func in lockf lstat rand_r random setsysinfo
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

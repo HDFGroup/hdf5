@@ -73,6 +73,9 @@
 /* Define if library information should be embedded in the executables */
 #undef HAVE_EMBEDDED_LIBINFO
 
+/* Define to 1 if you have the `fcntl' function. */
+#undef HAVE_FCNTL
+
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
@@ -178,6 +181,9 @@
 
 /* Define to 1 if you have the `z' library (-lz). */
 #undef HAVE_LIBZ
+
+/* Define to 1 if you have the `lockf' function. */
+#undef HAVE_LOCKF
 
 /* Define to 1 if you have the `longjmp' function. */
 #undef HAVE_LONGJMP

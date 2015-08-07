@@ -1680,9 +1680,9 @@ AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGETD;],
 ## NOTE: clock_gettime may require linking to the rt or posix4 library
 ##       so we'll search for it before calling AC_CHECK_FUNCS.
 AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AC_CHECK_FUNCS([alarm clock_gettime difftime flock fork frexpf frexpl])
-AC_CHECK_FUNCS([gethostname getpwuid getrusage gettimeofday])
-AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
+AC_CHECK_FUNCS([alarm clock_gettime difftime fcntl flock fork frexpf])
+AC_CHECK_FUNCS([frexpl gethostname getpwuid getrusage gettimeofday])
+AC_CHECK_FUNCS([lockf lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
