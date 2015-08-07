@@ -1552,6 +1552,7 @@ H5D__virtual_init(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5D_t *dset,
 {
     H5O_storage_virtual_t *storage;     /* Convenience pointer */
     H5P_genplist_t *dapl;               /* Data access property list object pointer */
+    hssize_t old_offset[H5O_LAYOUT_NDIMS]; /* Old selection offset (unused) */
     size_t      i;                      /* Local index variables */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1566,12 +1567,23 @@ H5D__virtual_init(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5D_t *dset,
      * status because this layout could be from an old version held in the
      * object header message code.  We cannot update that held message because
      * the layout message is constant, so just overwrite the values here (and
-     * invalidate other fields by setting storage->init to FALSE below). */
+     * invalidate other fields by setting storage->init to FALSE below).  Also
+     * remove offset from selections.  We only have to update
+     * source_space_status and virtual_space_status because others will be based
+     * on these and should therefore already have been normalized. */
     for(i = 0; i < storage->list_nused; i++) {
+        HDassert(storage->list[i].sub_dset_nalloc == 0);
+
+        /* Patch extent */
         if(H5S_extent_copy(storage->list[i].source_dset.virtual_select, dset->shared->space) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy virtual dataspace extent")
         storage->list[i].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
-        HDassert(storage->list[i].sub_dset_nalloc == 0);
+
+        /* Normalize offsets, toss out old offset values */
+        if(H5S_hyper_normalize_offset(storage->list[i].source_dset.virtual_select, old_offset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+        if(H5S_hyper_normalize_offset(storage->list[i].source_select, old_offset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
     } /* end for */
 
     /* Get dataset access property list */
