@@ -18,7 +18,7 @@
 #include "h5test.h"
 
 #define LOG_LOCATION "cache_logging.log"
-#define FILE_NAME    "cache_logging.h5"
+#define FILE_NAME    "cache_logging"
 
 #define N_GROUPS 100
 
@@ -46,11 +46,13 @@ test_logging_api(void)
     hid_t       gid;
     hbool_t     is_currently_logging;
     char        group_name[8];
+    char        filename[1024];
     int         i;
 
     TESTING("metadata cache log api calls");
 
     fapl = h5_fileaccess();
+    h5_fixname(FILE_NAME, fapl, filename, sizeof filename);
 
     /* Set up metadata cache logging */
     is_enabled = TRUE;
@@ -85,7 +87,7 @@ test_logging_api(void)
     /* Create a file */
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         TEST_ERROR;
-    if((fid = H5Fcreate(FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
     if(H5Pclose(fapl) < 0)
         TEST_ERROR;
@@ -140,8 +142,7 @@ test_logging_api(void)
 
 error:
     return 1;
- }
-
+ } /* test_logging_api() */
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -163,7 +164,7 @@ main(void)
 
     printf("Testing basic metadata cache logging functionality.\n");
 
-    nerrors += test_logging_api() < 0           ? 1 : 0;
+    nerrors += test_logging_api();
 
     if(nerrors) {
         printf("***** %d Metadata cache logging TEST%s FAILED! *****\n",
