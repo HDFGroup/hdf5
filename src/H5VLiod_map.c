@@ -847,7 +847,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
 
         if(raw_cs_scope) {
             /* calculate a checksum for the data to be sent */
-            output.val_cs = H5_checksum_crc64(val_buf, val_size);
+            output.val_cs = H5_checksum_crc64(val_buf, src_size);
         }
 #if H5_EFF_DEBUG
         else {
