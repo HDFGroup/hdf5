@@ -5059,7 +5059,7 @@ test_swmr_vfd_flag(void)
 {
     hid_t fid = -1;         /* file ID */
     hid_t sec2_fapl = -1;   /* fapl ID of a VFD that supports SWMR writes (sec2) */
-    hid_t fam_fapl = -1;    /* fapl ID of a VFD that does not support SWMR writes (family) */
+    hid_t bad_fapl = -1;    /* fapl ID of a VFD that does not support SWMR writes (stdio) */
     char filename[NAME_BUF_SIZE];	/* file name */
     
     TESTING("SWMR-enabled VFD flag functionality");
@@ -5081,24 +5081,24 @@ test_swmr_vfd_flag(void)
 
     /* Attempt to open a file using a non-SWMR-compatible VFD. */
 
-    if((fam_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((bad_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         FAIL_STACK_ERROR;
-    if(H5Pset_fapl_family(fam_fapl, H5F_FAMILY_DEFAULT, sec2_fapl) < 0)
+    if(H5Pset_fapl_stdio(bad_fapl) < 0)
         FAIL_STACK_ERROR;
-    if(H5Pset_libver_bounds(fam_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+    if(H5Pset_libver_bounds(bad_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         FAIL_STACK_ERROR
 
     fid = -1;
-    h5_fixname(FILENAME[0], fam_fapl, filename, sizeof(filename));
+    h5_fixname(FILENAME[0], bad_fapl, filename, sizeof(filename));
     H5E_BEGIN_TRY {
-        fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fam_fapl);
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, bad_fapl);
     } H5E_END_TRY;
     if(fid >= 0)
         TEST_ERROR;
 
     if(H5Pclose(sec2_fapl) < 0)
         FAIL_STACK_ERROR;
-    if(H5Pclose(fam_fapl) < 0)
+    if(H5Pclose(bad_fapl) < 0)
         FAIL_STACK_ERROR;
 
     PASSED();
@@ -5108,7 +5108,7 @@ test_swmr_vfd_flag(void)
 error:
     H5E_BEGIN_TRY {
         H5Pclose(sec2_fapl);
-        H5Pclose(fam_fapl);
+        H5Pclose(bad_fapl);
         H5Fclose(fid);
     } H5E_END_TRY;
 
