@@ -749,7 +749,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get mdc log location")
             if(mdc_log_location != NULL) {
                 size_t len = HDstrlen(mdc_log_location);
-                if(NULL == (f->shared->mdc_log_location = HDcalloc(len + 1, sizeof(char))))
+                if(NULL == (f->shared->mdc_log_location = (char *)HDcalloc(len + 1, sizeof(char))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate memory for mdc log file name")
                 HDstrncpy(f->shared->mdc_log_location, mdc_log_location, len);
             }

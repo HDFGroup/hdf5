@@ -51,11 +51,6 @@
 
 #endif
 
-#ifdef MAX
-#undef MAX
-#endif /* MAX */
-#define MAX(X,Y)  ((X)>(Y)?(X):(Y))
-
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_STDIO_g = 0;
 
@@ -733,6 +728,9 @@ H5FD_stdio_get_eof(const H5FD_t *_file, H5FD_mem_t /*H5_ATTR_UNUSED*/ type)
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
+
+    /* Quiet the compiler */
+    type = type;
 
     return(file->eof);
 } /* end H5FD_stdio_get_eof() */

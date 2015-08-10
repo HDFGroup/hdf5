@@ -28,7 +28,6 @@
 
 #include "hdf5.h"
 #include "h5test.h"
-#include "H5srcdir.h"
 #include "H5Iprivate.h"
 
 /*
@@ -87,7 +86,7 @@ static int test_file_lock_concur(hid_t fapl);
 static int test_file_lock_swmr_concur(hid_t fapl);       
 
 /* Tests for SWMR VFD flag */
-static int test_swmr_vfd_flag();
+static int test_swmr_vfd_flag(void);
 
 /*
  * Tests for H5Pget/set_metadata_read_attemps(), H5Fget_metadata_read_retry_info()
@@ -1826,9 +1825,9 @@ test_err_start_swmr_write(hid_t in_fapl)
 
     /* Should fail to create the file with SWMR write access when not using latest format */
     H5E_BEGIN_TRY {
-	    ret = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, in_fapl);
+	    fid = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, in_fapl);
     } H5E_END_TRY;
-    if(ret >= 0)
+    if(fid >= 0)
 	    TEST_ERROR
 
 
@@ -2002,9 +2001,9 @@ test_err_start_swmr_write(hid_t in_fapl)
 
     /* Should fail to open the file with SWMR write access when not using latest format */
     H5E_BEGIN_TRY {
-	    ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, in_fapl);
+	    fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, in_fapl);
     } H5E_END_TRY;
-    if(ret >= 0)
+    if(fid >= 0)
 	    TEST_ERROR
 
     /* Case 2 */
@@ -2160,7 +2159,6 @@ test_start_swmr_write_concur(hid_t in_fapl)
 {
     hid_t fid;    			/* File ID */
     hid_t fapl;    			/* File access property list */
-    herr_t ret;         		/* Generic return value */
     pid_t childpid=0;			/* Child process ID */
     pid_t tmppid;			/* Child process ID returned by waitpid */
     int child_status;			/* Status passed to waitpid */
@@ -2218,9 +2216,9 @@ test_start_swmr_write_concur(hid_t in_fapl)
 	    /* Should fail */
 	    H5E_BEGIN_TRY {
 	        /* Open the test file */
-	        ret = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
+	        fid = H5Fopen(filename, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl);
 	    } H5E_END_TRY;
-	    if(ret >= 0)
+	    if(fid >= 0)
 	        exit(1);
 
 	    exit(0);
@@ -2323,9 +2321,9 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
 	    /* Should fail in opening the test file */
 	    H5E_BEGIN_TRY {
-	        ret = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+	        fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
 	    } H5E_END_TRY;
-	    if(ret >= 0)
+	    if(fid >= 0)
 	        exit(1);
 
 	    exit(0);
@@ -2378,9 +2376,9 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
 	    /* Should fail in opening the test file */
 	    H5E_BEGIN_TRY {
-	        ret = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+	        fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
 	    } H5E_END_TRY;
-	    if(ret >= 0)
+	    if(fid >= 0)
 	        exit(1);
 
 	    exit(0);
@@ -2433,9 +2431,9 @@ test_start_swmr_write_concur(hid_t in_fapl)
 
 	    /* Should fail in opening the test file */
 	    H5E_BEGIN_TRY {
-	        ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+	        fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
 	    } H5E_END_TRY;
-	    if(ret >= 0)
+	    if(fid >= 0)
 	        exit(1);
 
 	    exit(0);
