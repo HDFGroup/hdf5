@@ -32,8 +32,10 @@
 !*****
 MODULE liter_cb_mod
 
-  USE HDF5
-  USE ISO_C_BINDING
+  USE HDF5 
+  USE TH5_MISC 
+  USE TH5_MISC_GEN
+  USE, INTRINSIC :: ISO_C_BINDING
   IMPLICIT NONE
 
   TYPE iter_enum
@@ -45,7 +47,7 @@ MODULE liter_cb_mod
 
   ! Custom group iteration callback data 
   TYPE, bind(c) ::  iter_info
-     CHARACTER(LEN=1), DIMENSION(1:10) :: name !  The name of the object 
+     CHARACTER(KIND=C_CHAR), DIMENSION(1:10) :: name !  The name of the object 
      INTEGER(c_int) :: TYPE    !  The TYPE of the object 
      INTEGER(c_int) :: command ! The TYPE of RETURN value 
   END TYPE iter_info
@@ -60,8 +62,6 @@ CONTAINS
 
   INTEGER(KIND=C_INT) FUNCTION liter_cb(group, name, link_info, op_data) bind(C)
 
-    USE HDF5
-    USE ISO_C_BINDING
     IMPLICIT NONE
 
     INTEGER(HID_T), VALUE :: group
@@ -123,9 +123,6 @@ CONTAINS
 !***************************************************************
 SUBROUTINE test_iter_group(total_error)
 
-  USE HDF5 
-  USE TH5_MISC
-  USE ISO_C_BINDING
   USE liter_cb_mod
   IMPLICIT NONE
 
@@ -251,11 +248,11 @@ SUBROUTINE test_iter_group(total_error)
      CALL H5Literate_f(file, H5_INDEX_NAME_F, H5_ITER_INC_F, idx, f1, f2, ret_value, error)
      IF(error.LT.0) EXIT
      !  Verify return value from iterator gets propagated correctly 
-     CALL VERIFY("H5Literate", ret_value, 2, total_error)
+     CALL verify("H5Literate", ret_value, 2, total_error)
      !  Increment the number of times "2" is returned 
      i = i + 1
      ! Verify that the index is the correct value 
-     CALL VERIFY("H5Literate", INT(idx), INT(i), total_error)
+     CALL verify("H5Literate", INT(idx), INT(i), total_error)
      IF(idx .GT.ndatasets+2)THEN
         PRINT*,"ERROR: Group iteration function walked too far!"
      ENDIF
@@ -264,14 +261,14 @@ SUBROUTINE test_iter_group(total_error)
      DO j = 1, 10
         ichr10(j:j) = info%name(j)(1:1)
      ENDDO
-     CALL verifystring("H5Literate_f", ichr10, lnames(INT(idx)), total_error)
+     CALL verify("H5Literate_f", ichr10, lnames(INT(idx)), total_error)
      IF(i.EQ.52)EXIT ! prints out error message otherwise (for gcc/gfortran/g95) not intel (why) -FIXME- scot
   END DO
 
   ! put check if did not walk far enough -scot FIXME
 
   IF(i .NE. (NDATASETS + 2)) THEN
-     CALL VERIFY("H5Literate_f", i, INT(NDATASETS + 2), total_error)
+     CALL verify("H5Literate_f", i, INT(NDATASETS + 2), total_error)
      PRINT*,"ERROR: Group iteration function didn't perform multiple iterations correctly"
   ENDIF
 
@@ -288,13 +285,13 @@ SUBROUTINE test_iter_group(total_error)
 
      CALL H5Literate_f(file, H5_INDEX_NAME_F, H5_ITER_INC_F, idx, f1, f2, ret_value, error)
      IF(error.LT.0) EXIT
-     CALL VERIFY("H5Literate_f", ret_value, 1, total_error)
+     CALL verify("H5Literate_f", ret_value, 1, total_error)
 
      ! Increment the number of times "1" is returned 
      i = i + 1
 
      ! Verify that the index is the correct value 
-     CALL VERIFY("H5Literate_f", INT(idx), INT(i+10), total_error)
+     CALL verify("H5Literate_f", INT(idx), INT(i+10), total_error)
 
      IF(idx .GT.ndatasets+2)THEN
         PRINT*,"Group iteration function walked too far!"
@@ -304,7 +301,7 @@ SUBROUTINE test_iter_group(total_error)
         ichr10(j:j) = info%name(j)(1:1)
      ENDDO
      ! Verify that the correct name is retrieved 
-     CALL verifystring("H5Literate_f", ichr10, lnames(INT(idx)), total_error)
+     CALL verify("H5Literate_f", ichr10, lnames(INT(idx)), total_error)
      IF(i.EQ.42)EXIT ! prints out error message otherwise (for gcc/gfortran/g95) not intel (why) -FIX- scot
   ENDDO
 

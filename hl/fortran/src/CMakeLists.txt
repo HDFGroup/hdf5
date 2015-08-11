@@ -2,6 +2,41 @@ cmake_minimum_required (VERSION 3.1.0)
 PROJECT(HDF5_HL_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
+# configure def file for shared libs on windows
+if (WIN32)
+  if (BUILD_SHARED_LIBS)
+    if (MSVC)
+      configure_file (${HDF5_HL_F90_SRC_SOURCE_DIR}/hdf5_hl_fortrandll.def.in ${HDF5_HL_F90_SRC_BINARY_DIR}/hdf5_hl_fortrandll.def @ONLY)
+    endif (MSVC)
+  endif (BUILD_SHARED_LIBS)
+endif (WIN32)
+
+#-----------------------------------------------------------------------------
+# Generate the H5LT and H5TB REAL APIs
+#-----------------------------------------------------------------------------
+
+add_executable (H5HL_buildiface
+      ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5HL_buildiface.F90
+  )
+
+if (WIN32 AND MSVC)
+  if (BUILD_SHARED_LIBS)
+    set_target_properties (H5HL_buildiface
+        PROPERTIES
+            COMPILE_FLAGS "/MT"
+    )
+  endif (BUILD_SHARED_LIBS)
+  set_target_properties (H5HL_buildiface
+      PROPERTIES
+          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+  )
+endif (WIN32 AND MSVC)
+set_target_properties (H5HL_buildiface PROPERTIES
+    LINKER_LANGUAGE Fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
+
+#-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
 INCLUDE_DIRECTORIES (
@@ -56,13 +91,36 @@ endif (BUILD_SHARED_LIBS)
 #-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
-set (HDF5_HL_F90_F_SRCS
-    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DSff.f90
-    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5TBff.f90
-    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTff.f90
-    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMff.f90
+set (HDF5_HL_F90_F_BASE_SRCS
+    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DSff.F90
+    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5TBff.F90
+    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTff.F90
+    ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMff.F90
 )
+set (HDF5_HL_F90_F_SRCS
+     ${HDF5_HL_F90_F_BASE_SRCS}
+
+     # generated files
+     ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
+     ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
+)
+
 set_source_files_properties (${HDF5_HL_F90_F_SRCS} PROPERTIES LANGUAGE Fortran)
+
+set_source_files_properties (
+    ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
+    ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
+    PROPERTIES GENERATED TRUE
+)
+
+set (CMD $<TARGET_FILE:H5HL_buildiface>)
+add_custom_target (H5HLgen ALL
+    COMMAND ${CMD}
+#v3.2    BYPRODUCT ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
+#v3.2              ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
+    WORKING_DIRECTORY ${HDF5_HL_F90_SRC_BINARY_DIR}
+    DEPENDS ${HDF5_HL_F90_F_BASE_SRCS}
+)
 
 add_library (${HDF5_HL_F90_LIB_TARGET} STATIC ${HDF5_HL_F90_F_SRCS})
 TARGET_FORTRAN_PROPERTIES (${HDF5_HL_F90_LIB_TARGET} STATIC " " " ")
@@ -86,7 +144,7 @@ if (BUILD_SHARED_LIBS)
   add_library (${HDF5_HL_F90_LIBSH_TARGET} SHARED ${HDF5_HL_F90_F_SRCS})
   set (SHARED_LINK_FLAGS " ")
   if (WIN32 AND MSVC)
-    set (SHARED_LINK_FLAGS "/DLL")
+    set (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_HL_F90_SRC_BINARY_DIR}/hdf5_hl_fortrandll.def")
   endif (WIN32 AND MSVC)
   TARGET_FORTRAN_PROPERTIES (${HDF5_HL_F90_LIBSH_TARGET} SHARED " " ${SHARED_LINK_FLAGS})
   target_link_libraries (${HDF5_HL_F90_LIBSH_TARGET} ${HDF5_HL_F90_C_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET})
@@ -128,7 +186,9 @@ endif (BUILD_SHARED_LIBS)
 set (mod_files
     ${MOD_BUILD_DIR}/h5ds.mod
     ${MOD_BUILD_DIR}/h5tb.mod
+    ${MOD_BUILD_DIR}/h5tb_const.mod
     ${MOD_BUILD_DIR}/h5lt.mod
+    ${MOD_BUILD_DIR}/h5lt_const.mod
     ${MOD_BUILD_DIR}/h5im.mod
 )
 
@@ -149,7 +209,7 @@ if (HDF5_EXPORTED_TARGETS)
     INSTALL_TARGET_PDB (${HDF5_HL_F90_C_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hlfortlibraries)
     #INSTALL_TARGET_PDB (${HDF5_HL_F90_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hlfortlibraries)
   endif (BUILD_SHARED_LIBS)
-  
+
   install (
       TARGETS
           ${install_targets}

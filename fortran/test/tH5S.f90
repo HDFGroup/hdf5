@@ -35,12 +35,14 @@
 !*****
 MODULE TH5S
 
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
+  USE TH5_MISC_GEN
+
 CONTAINS
 
         SUBROUTINE dataspace_basic_test(cleanup, total_error)
 
-        USE HDF5 ! This module contains all necessary modules
-        USE TH5_MISC
 
           IMPLICIT NONE
           LOGICAL, INTENT(IN)  :: cleanup
