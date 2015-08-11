@@ -379,6 +379,7 @@
 ./c++/src/Makefile.in
 ./c++/src/RM_stylesheet.css
 ./c++/src/cpp_doc_config
+./c++/src/footer.html
 ./c++/src/h5c++.in
 ./c++/src/header.html
 ./c++/src/header_files/filelist.xml
