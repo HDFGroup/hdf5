@@ -106,7 +106,7 @@ rc=$?
 if [[ $rc != 0 ]] ; then
     echo
     echo "The VFD specified by the HDF5_DRIVER environment variable"
-    echo "does not support SWMR"
+    echo "does not support SWMR."
     echo
     echo "SWMR acceptance tests skipped"
     echo
