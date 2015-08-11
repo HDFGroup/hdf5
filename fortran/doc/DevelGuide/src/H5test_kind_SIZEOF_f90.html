@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5test_kind_SIZEOF.f90</title>
+<!-- Source: ./src/H5test_kind_SIZEOF.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="Program2fH5test5fkind5fSIZEOF"></a>
+<a name="robo421"></a><h2>H5test_kind_SIZEOF</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_procedures.html#robo_top_of_doc">Procedures</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  Executable: <a href="./H5test_kind_f90.html#robo420">H5test_kind</a>
+</pre>
+<p class="item_name">FILE</p>
+<pre>  fortran/src/<a href="#robo_top_of_doc">H5test_kind_SIZEOF.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This stand alone program is used at build time to generate the program
+  H5fortran_detect.f90. It cycles through all the available KIND parameters for
+  integers and reals. The appropriate program and subroutines are then generated
+  depending on which of the KIND values are found.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  This program is used in place of <a href="./H5test_kind_f90.html#robo_top_of_doc">H5test_kind.f90</a> when the Fortran intrinsic
+  function SIZEOF is available. It generates code that makes use of SIZEOF in
+  H5fortran_detect.f90 which is a portable solution.
+
+  The availability of SIZEOF is checked at configure time and the TRUE/FALSE
+  condition is set in the configure variable "FORTRAN_HAVE_SIZEOF".
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5test_kind_SIZEOF.f90 on Sun Aug 14 2011 22:49:37
+</p>
+</div> <!-- footer -->
+</body>
+</html>

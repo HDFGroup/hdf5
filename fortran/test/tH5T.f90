@@ -29,10 +29,6 @@
 
 MODULE TH5T
 
-  USE HDF5
-  USE TH5_MISC
-  USE TH5_MISC_GEN
-
 CONTAINS
 
     SUBROUTINE compoundtest(cleanup, total_error)
@@ -51,6 +47,8 @@ CONTAINS
 ! h5tget_class_f, h5tget_member_name_f, h5tget_member_offset_f, h5tget_member_type_f,
 ! h5tequal_f, h5tinsert_array_f, h5tcommit_f, h5tencode_f, h5tdecode_f
 
+     USE HDF5 ! This module contains all necessary modules
+     USE TH5_MISC
 
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
@@ -157,6 +155,7 @@ CONTAINS
      
      CALL h5tclose_f(fixed_str2,error)
      CALL check("h5tclose_f", error, total_error)
+
      data_dims(1) = dimsize
      !
      ! Initialize data buffer.
@@ -179,47 +178,47 @@ CONTAINS
      ! during write/read to/from dataset with compound datatype.
      !
      CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
-     CALL check("h5pcreate_f", error, total_error)
+         CALL check("h5pcreate_f", error, total_error)
      CALL h5pset_preserve_f(plist_id, flag, error)
-     CALL check("h5pset_preserve_f", error, total_error)
+         CALL check("h5pset_preserve_f", error, total_error)
      !
      ! Create a new file using default properties.
      !
-      CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
               write(*,*) "Cannot modify filename"
               stop
           endif
      CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
-     CALL check("h5fcreate_f", error, total_error)
+         CALL check("h5fcreate_f", error, total_error)
 
      !
      ! Create the dataspace.
      !
      CALL h5screate_simple_f(rank, dims, dspace_id, error)
-     CALL check("h5screate_simple_f", error, total_error)
+         CALL check("h5screate_simple_f", error, total_error)
      !
      ! Create compound datatype.
      !
      ! First calculate total size by calculating sizes of each member
      !
      CALL h5tcopy_f(H5T_NATIVE_CHARACTER, dt5_id, error)
-     CALL check("h5tcopy_f", error, total_error)
+         CALL check("h5tcopy_f", error, total_error)
      sizechar = 2
      CALL h5tset_size_f(dt5_id, sizechar, error)
-     CALL check("h5tset_size_f", error, total_error)
+         CALL check("h5tset_size_f", error, total_error)
      CALL h5tget_size_f(dt5_id, type_sizec, error)
-     CALL check("h5tget_size_f", error, total_error)
+         CALL check("h5tget_size_f", error, total_error)
      CALL h5tget_size_f(H5T_NATIVE_INTEGER, type_sizei, error)
-     CALL check("h5tget_size_f", error, total_error)
+         CALL check("h5tget_size_f", error, total_error)
      CALL h5tget_size_f(H5T_NATIVE_DOUBLE, type_sized, error)
-     CALL check("h5tget_size_f", error, total_error)
+         CALL check("h5tget_size_f", error, total_error)
      CALL h5tget_size_f(H5T_NATIVE_REAL, type_sizer, error)
-     CALL check("h5tget_size_f", error, total_error)
+         CALL check("h5tget_size_f", error, total_error)
      !write(*,*) "get sizes", type_sizec, type_sizei, type_sizer, type_sized
      type_size = type_sizec + type_sizei + type_sized + type_sizer
      CALL h5tcreate_f(H5T_COMPOUND_F, type_size, dtype_id, error)
-     CALL check("h5tcreate_f", error, total_error)
+         CALL check("h5tcreate_f", error, total_error)
      !
      ! Insert memebers
      !
@@ -227,19 +226,19 @@ CONTAINS
      !
      offset = 0
      CALL h5tinsert_f(dtype_id, "char_field", offset, dt5_id, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      ! INTEGER member
      !
      offset = offset + type_sizec ! Offset of the second memeber is 2
      CALL h5tinsert_f(dtype_id, "integer_field", offset, H5T_NATIVE_INTEGER, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      ! DOUBLE PRECISION member
      !
      offset = offset + type_sizei  ! Offset of the third memeber is 6
      CALL h5tinsert_f(dtype_id, "double_field", offset, H5T_NATIVE_DOUBLE, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      ! REAL member
      !
@@ -251,122 +250,123 @@ CONTAINS
      !
      CALL h5dcreate_f(file_id, dsetname, dtype_id, dspace_id, &
                       dset_id, error)
-     CALL check("h5dcreate_f", error, total_error)
+         CALL check("h5dcreate_f", error, total_error)
      !
      ! Create memory types. We have to create a compound datatype
      ! for each member we want to write.
      !
      CALL h5tcreate_f(H5T_COMPOUND_F, type_sizec, dt1_id, error)
-     CALL check("h5tcreate_f", error, total_error)
+         CALL check("h5tcreate_f", error, total_error)
      offset = 0
      CALL h5tinsert_f(dt1_id, "char_field", offset, dt5_id, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      CALL h5tcreate_f(H5T_COMPOUND_F, type_sizei, dt2_id, error)
-     CALL check("h5tcreate_f", error, total_error)
+         CALL check("h5tcreate_f", error, total_error)
      offset = 0
      CALL h5tinsert_f(dt2_id, "integer_field", offset, H5T_NATIVE_INTEGER, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      CALL h5tcreate_f(H5T_COMPOUND_F, type_sized, dt3_id, error)
-     CALL check("h5tcreate_f", error, total_error)
+         CALL check("h5tcreate_f", error, total_error)
      offset = 0
      CALL h5tinsert_f(dt3_id, "double_field", offset, H5T_NATIVE_DOUBLE, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      CALL h5tcreate_f(H5T_COMPOUND_F, type_sizer, dt4_id, error)
-     CALL check("h5tcreate_f", error, total_error)
+         CALL check("h5tcreate_f", error, total_error)
      offset = 0
      CALL h5tinsert_f(dt4_id, "real_field", offset, H5T_NATIVE_REAL, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      ! Write data by fields in the datatype. Fields order is not important.
      !
      CALL h5dwrite_f(dset_id, dt4_id, real_member, data_dims, error, xfer_prp = plist_id)
-     CALL check("h5dwrite_f", error, total_error)
+         CALL check("h5dwrite_f", error, total_error)
      CALL h5dwrite_f(dset_id, dt1_id, char_member, data_dims, error, xfer_prp = plist_id)
-     CALL check("h5dwrite_f", error, total_error)
+         CALL check("h5dwrite_f", error, total_error)
      CALL h5dwrite_f(dset_id, dt3_id, double_member, data_dims, error, xfer_prp = plist_id)
-     CALL check("h5dwrite_f", error, total_error)
+         CALL check("h5dwrite_f", error, total_error)
      CALL h5dwrite_f(dset_id, dt2_id, int_member, data_dims, error, xfer_prp = plist_id)
-     CALL check("h5dwrite_f", error, total_error)
+         CALL check("h5dwrite_f", error, total_error)
 
      !
      ! End access to the dataset and release resources used by it.
      !
      CALL h5dclose_f(dset_id, error)
-     CALL check("h5dclose_f", error, total_error)
+         CALL check("h5dclose_f", error, total_error)
 
      !
      ! Terminate access to the data space.
      !
      CALL h5sclose_f(dspace_id, error)
-     CALL check("h5sclose_f", error, total_error)
+         CALL check("h5sclose_f", error, total_error)
      !
      ! Terminate access to the datatype
      !
      CALL h5tclose_f(dtype_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dt1_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dt2_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dt3_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dt4_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
+
      !
      ! Create and store compound datatype with the character and
      ! array members.
      !
      type_size = type_sizec + elements*type_sizer ! Size of compound datatype
      CALL h5tcreate_f(H5T_COMPOUND_F, type_size, dtarray_id, error)
-     CALL check("h5tcreate_f", error, total_error)
+         CALL check("h5tcreate_f", error, total_error)
      offset = 0
      CALL h5tinsert_f(dtarray_id, "char_field", offset, H5T_NATIVE_CHARACTER, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      offset = type_sizec
      CALL h5tarray_create_f(H5T_NATIVE_REAL, array_dims_range, array_dims, arrayt_id, error)
-     CALL check("h5tarray_create_f", error, total_error)
+         CALL check("h5tarray_create_f", error, total_error)
      CALL h5tinsert_f(dtarray_id,"array_field", offset, arrayt_id, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      CALL h5tcommit_f(file_id, "Compound_with_array_member", dtarray_id, error)
-     CALL check("h5tcommit_f", error, total_error)
+         CALL check("h5tcommit_f", error, total_error)
      CALL h5tclose_f(arrayt_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dtarray_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
 
      !
      ! Close the file.
      !
      CALL h5fclose_f(file_id, error)
-     CALL check("h5fclose_f", error, total_error)
+         CALL check("h5fclose_f", error, total_error)
 
      !
      ! Open the file.
      !
      CALL h5fopen_f (fix_filename, H5F_ACC_RDWR_F, file_id, error)
-     CALL check("h5fopen_f", error, total_error)
+         CALL check("h5fopen_f", error, total_error)
      !
      ! Open the dataset.
      !
      CALL h5dopen_f(file_id, dsetname, dset_id, error)
-     CALL check("h5dopen_f", error, total_error)
+         CALL check("h5dopen_f", error, total_error)
      !
      ! Get datatype of the open dataset.
      ! Check it class, number of members,  and member's names.
      !
      CALL h5dget_type_f(dset_id, dtype_id, error)
-     CALL check("h5dget_type_f", error, total_error)
+         CALL check("h5dget_type_f", error, total_error)
      CALL h5tget_class_f(dtype_id, class, error)
-     CALL check("h5dget_class_f", error, total_error)
+         CALL check("h5dget_class_f", error, total_error)
          if (class .ne. H5T_COMPOUND_F) then
             write(*,*) " Wrong class type returned"
             total_error = total_error + 1
          endif
      CALL h5tget_nmembers_f(dtype_id, num_members, error)
-     CALL check("h5dget_nmembers_f", error, total_error)
+         CALL check("h5dget_nmembers_f", error, total_error)
          if (num_members .ne. COMP_NUM_MEMBERS ) then
             write(*,*) " Wrong number of members returned"
             total_error = total_error + 1
@@ -377,11 +377,11 @@ CONTAINS
      !
      do i = 1, num_members
         CALL h5tget_member_name_f(dtype_id, i-1, member_name, len, error)
-     CALL check("h5tget_member_name_f", error, total_error)
+         CALL check("h5tget_member_name_f", error, total_error)
         CALL h5tget_member_offset_f(dtype_id, i-1, offset_out, error)
-     CALL check("h5tget_member_offset_f", error, total_error)
+         CALL check("h5tget_member_offset_f", error, total_error)
         CALL h5tget_member_index_f(dtype_id, member_name(1:len), member_index, error)
-     CALL check("h5tget_member_index_f", error, total_error)
+         CALL check("h5tget_member_index_f", error, total_error)
          if(member_index .ne. i-1) then
             write(*,*) "Index returned is incorrect"
             write(*,*) member_index, i-1
@@ -394,16 +394,16 @@ CONTAINS
                write(*,*) "Offset of the char member is incorrect"
                total_error = total_error + 1
              endif
-         CALL h5tget_member_type_f(dtype_id, i-1, membtype_id, error)
-          CALL check("h5tget_member_type_f", error, total_error)
-         CALL h5tequal_f(membtype_id, dt5_id, flag, error)
-          CALL check("h5tequal_f", error, total_error)
+             CALL h5tget_member_type_f(dtype_id, i-1, membtype_id, error)
+              CALL check("h5tget_member_type_f", error, total_error)
+             CALL h5tequal_f(membtype_id, dt5_id, flag, error)
+              CALL check("h5tequal_f", error, total_error)
              if(.not. flag) then
                 write(*,*) "Wrong member type returned for character member"
                 total_error = total_error + 1
              endif
-         CALL h5tget_member_class_f(dtype_id, i-1, class, error)
-          CALL check("h5tget_member_class_f",error, total_error)
+             CALL h5tget_member_class_f(dtype_id, i-1, class, error)
+              CALL check("h5tget_member_class_f",error, total_error)
               if (class .ne. H5T_STRING_F) then
                  write(*,*) "Wrong class returned for character member"
                  total_error = total_error + 1
@@ -413,16 +413,16 @@ CONTAINS
                write(*,*) "Offset of the integer member is incorrect"
                total_error = total_error + 1
              endif
-         CALL h5tget_member_type_f(dtype_id, i-1, membtype_id, error)
-          CALL check("h5tget_member_type_f", error, total_error)
-         CALL h5tequal_f(membtype_id, H5T_NATIVE_INTEGER, flag, error)
-          CALL check("h5tequal_f", error, total_error)
+             CALL h5tget_member_type_f(dtype_id, i-1, membtype_id, error)
+              CALL check("h5tget_member_type_f", error, total_error)
+             CALL h5tequal_f(membtype_id, H5T_NATIVE_INTEGER, flag, error)
+              CALL check("h5tequal_f", error, total_error)
              if(.not. flag) then
                 write(*,*) "Wrong member type returned for integer memebr"
                 total_error = total_error + 1
              endif
-         CALL h5tget_member_class_f(dtype_id, i-1, class, error)
-          CALL check("h5tget_member_class_f",error, total_error)
+             CALL h5tget_member_class_f(dtype_id, i-1, class, error)
+              CALL check("h5tget_member_class_f",error, total_error)
               if (class .ne. H5T_INTEGER_F) then
                  write(*,*) "Wrong class returned for INTEGER member"
                  total_error = total_error + 1
@@ -432,16 +432,16 @@ CONTAINS
                write(*,*) "Offset of the double precision member is incorrect"
                total_error = total_error + 1
              endif
-         CALL h5tget_member_type_f(dtype_id, i-1, membtype_id, error)
-          CALL check("h5tget_member_type_f", error, total_error)
-         CALL h5tequal_f(membtype_id, H5T_NATIVE_DOUBLE, flag, error)
-          CALL check("h5tequal_f", error, total_error)
+             CALL h5tget_member_type_f(dtype_id, i-1, membtype_id, error)
+              CALL check("h5tget_member_type_f", error, total_error)
+             CALL h5tequal_f(membtype_id, H5T_NATIVE_DOUBLE, flag, error)
+              CALL check("h5tequal_f", error, total_error)
              if(.not. flag) then
                 write(*,*) "Wrong member type returned for double precision memebr"
                 total_error = total_error + 1
              endif
-         CALL h5tget_member_class_f(dtype_id, i-1, class, error)
-          CALL check("h5tget_member_class_f",error, total_error)
+             CALL h5tget_member_class_f(dtype_id, i-1, class, error)
+              CALL check("h5tget_member_class_f",error, total_error)
               if (class .ne. H5T_FLOAT_F) then
                  write(*,*) "Wrong class returned for double precision member"
                  total_error = total_error + 1
@@ -451,16 +451,16 @@ CONTAINS
                write(*,*) "Offset of the real member is incorrect"
                total_error = total_error + 1
              endif
-         CALL h5tget_member_type_f(dtype_id, i-1, membtype_id, error)
-          CALL check("h5tget_member_type_f", error, total_error)
-         CALL h5tequal_f(membtype_id, H5T_NATIVE_REAL, flag, error)
-          CALL check("h5tequal_f", error, total_error)
+             CALL h5tget_member_type_f(dtype_id, i-1, membtype_id, error)
+              CALL check("h5tget_member_type_f", error, total_error)
+             CALL h5tequal_f(membtype_id, H5T_NATIVE_REAL, flag, error)
+              CALL check("h5tequal_f", error, total_error)
              if(.not. flag) then
                 write(*,*) "Wrong member type returned for real memebr"
                 total_error = total_error + 1
              endif
-         CALL h5tget_member_class_f(dtype_id, i-1, class, error)
-          CALL check("h5tget_member_class_f",error, total_error)
+             CALL h5tget_member_class_f(dtype_id, i-1, class, error)
+              CALL check("h5tget_member_class_f",error, total_error)
               if (class .ne. H5T_FLOAT_F) then
                  write(*,*) "Wrong class returned for real member"
                  total_error = total_error + 1
@@ -476,22 +476,22 @@ CONTAINS
      ! Create memory datatype to read character member of the compound datatype.
      !
      CALL h5tcopy_f(H5T_NATIVE_CHARACTER, dt2_id, error)
-     CALL check("h5tcopy_f", error, total_error)
+         CALL check("h5tcopy_f", error, total_error)
      sizechar = 2
      CALL h5tset_size_f(dt2_id, sizechar, error)
-     CALL check("h5tset_size_f", error, total_error)
+         CALL check("h5tset_size_f", error, total_error)
      CALL h5tget_size_f(dt2_id, type_size, error)
-     CALL check("h5tget_size_f", error, total_error)
+         CALL check("h5tget_size_f", error, total_error)
      CALL h5tcreate_f(H5T_COMPOUND_F, type_size, dt1_id, error)
-     CALL check("h5tcreate_f", error, total_error)
+         CALL check("h5tcreate_f", error, total_error)
      offset = 0
      CALL h5tinsert_f(dt1_id, "char_field", offset, dt2_id, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      ! Read part of the dataset
      !
      CALL h5dread_f(dset_id, dt1_id, char_member_out, data_dims, error)
-     CALL check("h5dread_f", error, total_error)
+         CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
             if (char_member_out(i) .ne. char_member(i)) then
                 write(*,*) " Wrong character data is read back "
@@ -500,15 +500,15 @@ CONTAINS
          enddo
      !
      CALL h5tcreate_f(H5T_COMPOUND_F, type_sizei, dt5_id, error)
-     CALL check("h5tcreate_f", error, total_error)
+         CALL check("h5tcreate_f", error, total_error)
      offset = 0
      CALL h5tinsert_f(dt5_id, "integer_field", offset, H5T_NATIVE_INTEGER, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      ! Read part of the dataset
      !
      CALL h5dread_f(dset_id, dt5_id, int_member_out, data_dims, error)
-     CALL check("h5dread_f", error, total_error)
+         CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
             if (int_member_out(i) .ne. int_member(i)) then
                 write(*,*) " Wrong integer data is read back "
@@ -518,33 +518,39 @@ CONTAINS
      !
      !
      CALL h5tcreate_f(H5T_COMPOUND_F, type_sized, dt3_id, error)
-     CALL check("h5tcreate_f", error, total_error)
+         CALL check("h5tcreate_f", error, total_error)
      offset = 0
      CALL h5tinsert_f(dt3_id, "double_field", offset, H5T_NATIVE_DOUBLE, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      ! Read part of the dataset
      !
      CALL h5dread_f(dset_id, dt3_id, double_member_out, data_dims, error)
-     CALL check("h5dread_f", error, total_error)
-     DO i = 1, dimsize
-        CALL VERIFY("h5dread_f:Wrong double precision data is read back", double_member_out(i), double_member(i), total_error)   
-     ENDDO
+         CALL check("h5dread_f", error, total_error)
+         do i = 1, dimsize
+            IF( .NOT.dreal_eq( REAL(double_member_out(i),dp), REAL( double_member(i), dp)) ) THEN
+                write(*,*) " Wrong double precision data is read back "
+                total_error = total_error + 1
+            endif
+         enddo
      !
      !
      CALL h5tcreate_f(H5T_COMPOUND_F, type_sizer, dt4_id, error)
-     CALL check("h5tcreate_f", error, total_error)
+         CALL check("h5tcreate_f", error, total_error)
      offset = 0
      CALL h5tinsert_f(dt4_id, "real_field", offset, H5T_NATIVE_REAL, error)
-     CALL check("h5tinsert_f", error, total_error)
+         CALL check("h5tinsert_f", error, total_error)
      !
      ! Read part of the dataset
      !
      CALL h5dread_f(dset_id, dt4_id, real_member_out, data_dims, error)
-     CALL check("h5dread_f", error, total_error)
-     DO i = 1, dimsize
-        CALL VERIFY("h5dread_f:Wrong double precision data is read back", real_member_out(i), real_member(i), total_error)   
-     ENDDO
+         CALL check("h5dread_f", error, total_error)
+         DO i = 1, dimsize
+            IF( .NOT.dreal_eq( REAL(real_member_out(i),dp), REAL( real_member(i), dp)) ) THEN
+               WRITE(*,*) " Wrong real precision data is read back "
+               total_error = total_error + 1
+            ENDIF
+         ENDDO
      !
      ! *-----------------------------------------------------------------------
      ! * Test encoding and decoding compound datatypes
@@ -559,7 +565,7 @@ CONTAINS
      !  Try decoding bogus buffer 
 
      CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
-     CALL verify("H5Tdecode_f", error, -1, total_error)
+     CALL VERIFY("H5Tdecode_f", error, -1, total_error)
 
      CALL H5Tencode_f(dtype_id, cmpd_buf, cmpd_buf_size, error)
      CALL check("H5Tencode_f", error, total_error)
@@ -572,27 +578,27 @@ CONTAINS
 
      CALL H5Tequal_f(decoded_tid1, dtype_id, flag, error)
      CALL check("H5Tequal_f", error, total_error)
-     CALL verify("H5Tequal_f", flag, .TRUE., total_error)
+     CALL VerifyLogical("H5Tequal_f", flag, .TRUE., total_error)
      !
      ! Close all open objects.
      !
      CALL h5dclose_f(dset_id, error)
-     CALL check("h5dclose_f", error, total_error)
+         CALL check("h5dclose_f", error, total_error)
      CALL h5tclose_f(dt1_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dt2_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dt3_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dt4_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5tclose_f(dt5_id, error)
-     CALL check("h5tclose_f", error, total_error)
+         CALL check("h5tclose_f", error, total_error)
      CALL h5fclose_f(file_id, error)
-     CALL check("h5fclose_f", error, total_error)
+         CALL check("h5fclose_f", error, total_error)
 
-     IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
-     CALL check("h5_cleanup_f", error, total_error)
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
      RETURN
      END SUBROUTINE compoundtest
 
@@ -607,6 +613,9 @@ CONTAINS
 !   H5tset_sign_f, H5tget_ebias_f,H5tset_ebias_f, H5tget_norm_f,
 !   H5tset_norm_f, H5tget_inpad_f, H5tset_inpad_f, H5tget_cset_f,
 !   H5tset_cset_f, H5tget_strpad_f, H5tset_strpad_f
+
+     USE HDF5 ! This module contains all necessary modules
+     USE TH5_MISC
 
      IMPLICIT NONE
      INTEGER, INTENT(OUT) :: total_error
@@ -893,7 +902,7 @@ CONTAINS
     CALL check("H5Tget_order_f",error, total_error)
     CALL H5Tget_order_f(H5T_NATIVE_INTEGER, order2, error)
     CALL check("H5Tget_order_f",error, total_error)
-    CALL verify("H5Tget_native_type_f",order1, order2, total_error)
+    CALL VERIFY("H5Tget_native_type_f",order1, order2, total_error)
 
     ! this test depends on whether -i8 was specified
 
@@ -901,11 +910,11 @@ CONTAINS
 !!$    CALL check("H5Tget_size_f",error, total_error)
 !!$    CALL H5Tget_size_f(H5T_STD_I32BE, type_size2, error)
 !!$    CALL check("H5Tget_size_f",error, total_error)
-!!$    CALL verify("H5Tget_native_type_f", INT(type_size1), INT(type_size2), total_error)
+!!$    CALL VERIFY("H5Tget_native_type_f", INT(type_size1), INT(type_size2), total_error)
 
     CALL H5Tget_class_f(native_type, class, error)
     CALL check("H5Tget_class_f",error, total_error)
-    CALL verify("H5Tget_native_type_f", INT(class), INT(H5T_ENUM_F), total_error)
+    CALL VERIFY("H5Tget_native_type_f", INT(class), INT(H5T_ENUM_F), total_error)
 
     CALL h5dclose_f(dset_id,error)
     CALL check("h5dclose_f", error, total_error)
@@ -963,6 +972,8 @@ CONTAINS
 
 SUBROUTINE test_derived_flt(cleanup, total_error)
 
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -1049,24 +1060,24 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
   CALL check("H5Tget_fields_f", error, total_error)
 
   IF(spos.NE.44 .OR. epos.NE.34 .OR. esize.NE.10 .OR. mpos.NE.3 .OR. msize.NE.31)THEN
-     CALL verify("H5Tget_fields_f", -1, 0, total_error)
+     CALL VERIFY("H5Tget_fields_f", -1, 0, total_error)
   ENDIF
 
   CALL H5Tget_precision_f(tid1, precision1, error)
   CALL check("H5Tget_precision_f", error, total_error)
-  CALL verify("H5Tget_precision_f", INT(precision1), 42, total_error)
+  CALL VERIFY("H5Tget_precision_f", INT(precision1), 42, total_error)
 
   CALL H5Tget_offset_f(tid1, offset1, error)
   CALL check("H5Tget_offset_f", error, total_error)
-  CALL verify("H5Tget_offset_f", INT(offset1), 3, total_error)
+  CALL VERIFY("H5Tget_offset_f", INT(offset1), 3, total_error)
 
   CALL H5Tget_size_f(tid1, size1, error)
   CALL check("H5Tget_size_f", error, total_error)
-  CALL verify("H5Tget_size_f", INT(size1), 7, total_error)
+  CALL VERIFY("H5Tget_size_f", INT(size1), 7, total_error)
 
   CALL H5Tget_ebias_f(tid1, ebias1, error)
   CALL check("H5Tget_ebias_f", error, total_error)
-  CALL verify("H5Tget_ebias_f", INT(ebias1), 511, total_error)
+  CALL VERIFY("H5Tget_ebias_f", INT(ebias1), 511, total_error)
 
   !--------------------------------------------------------------------------
   ! *                   2nd floating-point type
@@ -1110,24 +1121,24 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
   CALL check("H5Tget_fields_f", error, total_error)
 
   IF(spos.NE.23 .OR. epos.NE.16 .OR. esize.NE.7 .OR. mpos.NE.0 .OR. msize.NE.16)THEN
-     CALL verify("H5Tget_fields_f", -1, 0, total_error)
+     CALL VERIFY("H5Tget_fields_f", -1, 0, total_error)
   ENDIF
 
   CALL H5Tget_precision_f(tid2, precision2, error)
   CALL check("H5Tget_precision_f", error, total_error)
-  CALL verify("H5Tget_precision_f", INT(precision2), 24, total_error)
+  CALL VERIFY("H5Tget_precision_f", INT(precision2), 24, total_error)
 
   CALL H5Tget_offset_f(tid2, offset2, error)
   CALL check("H5Tget_offset_f", error, total_error)
-  CALL verify("H5Tget_offset_f", INT(offset2), 0, total_error)
+  CALL VERIFY("H5Tget_offset_f", INT(offset2), 0, total_error)
 
   CALL H5Tget_size_f(tid2, size2, error)
   CALL check("H5Tget_size_f", error, total_error)
-  CALL verify("H5Tget_size_f", INT(size2), 3, total_error)
+  CALL VERIFY("H5Tget_size_f", INT(size2), 3, total_error)
 
   CALL H5Tget_ebias_f(tid2, ebias2, error)
   CALL check("H5Tget_ebias_f", error, total_error)
-  CALL verify("H5Tget_ebias_f", INT(ebias2), 63, total_error)
+  CALL VERIFY("H5Tget_ebias_f", INT(ebias2), 63, total_error)
 
   CALL h5tclose_f(tid1, error)
   CALL check("h5tclose_f", error, total_error)

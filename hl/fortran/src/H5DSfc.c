@@ -35,7 +35,7 @@
 *-------------------------------------------------------------------------
 */
 int_f
-h5dsset_scale_c(hid_t_f *dsid, _fcd dimname, size_t_f *dimnamelen) 
+nh5dsset_scale_c(hid_t_f *dsid, _fcd dimname, size_t_f *dimnamelen) 
 {
   char *c_dimname = NULL;
   int_f ret_value = 0;
@@ -61,7 +61,7 @@ h5dsset_scale_c(hid_t_f *dsid, _fcd dimname, size_t_f *dimnamelen)
 
   return ret_value;
 
-} /* end h5dsset_scale_c() */
+} /* end nh5dsset_scale_c() */
 
 
 /*-------------------------------------------------------------------------
@@ -80,7 +80,7 @@ h5dsset_scale_c(hid_t_f *dsid, _fcd dimname, size_t_f *dimnamelen)
 *-------------------------------------------------------------------------
 */
 int_f
-h5dsattach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx) 
+nh5dsattach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx) 
 {
   int_f ret_value = 0;
   
@@ -94,7 +94,7 @@ h5dsattach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx)
   done:
     return ret_value;
 
-} /* end h5dsattach_scale_c() */
+} /* end nh5dsattach_scale_c() */
 
 
 /*-------------------------------------------------------------------------
@@ -113,7 +113,7 @@ h5dsattach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx)
 *-------------------------------------------------------------------------
 */
 int_f
-h5dsdetach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx) 
+nh5dsdetach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx) 
 {
   int_f ret_value = 0;
   
@@ -127,7 +127,7 @@ h5dsdetach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx)
   done:
     return ret_value;
 
-} /* end h5dsdetach_scale_c() */
+} /* end nh5dsdetach_scale_c() */
 
 
 /*-------------------------------------------------------------------------
@@ -146,7 +146,7 @@ h5dsdetach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx)
 *-------------------------------------------------------------------------
 */
 int_f
-h5dsis_attached_c( hid_t_f *did, hid_t_f *dsid, int_f *idx, int_f *is_attached) 
+nh5dsis_attached_c( hid_t_f *did, hid_t_f *dsid, int_f *idx, int_f *is_attached) 
 {
   int_f ret_value = 0;
   htri_t c_is_attached;
@@ -163,7 +163,7 @@ h5dsis_attached_c( hid_t_f *did, hid_t_f *dsid, int_f *idx, int_f *is_attached)
   done:
       return ret_value;
 
-} /* end h5dsis_attached_c() */
+} /* end nh5dsis_attached_c() */
 
 /*-------------------------------------------------------------------------
 * Function: H5DSis_scale_c
@@ -181,7 +181,7 @@ h5dsis_attached_c( hid_t_f *did, hid_t_f *dsid, int_f *idx, int_f *is_attached)
 *-------------------------------------------------------------------------
 */
 int_f
-h5dsis_scale_c( hid_t_f *did, int_f *is_scale) 
+nh5dsis_scale_c( hid_t_f *did, int_f *is_scale) 
 {
   int_f ret_value = 0;
   htri_t c_is_scale;
@@ -198,7 +198,7 @@ h5dsis_scale_c( hid_t_f *did, int_f *is_scale)
   done:
     return ret_value;
 
-} /* end h5dsis_scale_c() */
+} /* end nh5dsis_scale_c() */
 
 
 /*-------------------------------------------------------------------------
@@ -217,7 +217,7 @@ h5dsis_scale_c( hid_t_f *did, int_f *is_scale)
 *-------------------------------------------------------------------------
 */
 int_f
-h5dsset_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *labellen) 
+nh5dsset_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *labellen) 
 {
   char *c_label = NULL;
   int_f ret_value = 0;
@@ -242,7 +242,7 @@ h5dsset_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *labellen)
 
   return ret_value;
 
-} /* end h5dsset_label_c() */
+} /* end nh5dsset_label_c() */
 
 /*-------------------------------------------------------------------------
 * Function: h5dsget_label_c
@@ -260,7 +260,7 @@ h5dsset_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *labellen)
 *-------------------------------------------------------------------------
 */
 int_f
-h5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size) 
+nh5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size) 
 {
   char *c_label = NULL;
   ssize_t size_c = -1;
@@ -291,7 +291,7 @@ done:
      if(c_label) HDfree(c_label);
      return ret_value;
 
-} /* end h5dsget_label_c() */
+} /* end nh5dsget_label_c() */
 
 /*-------------------------------------------------------------------------
 * Function: h5dsget_scale_name_c
@@ -309,7 +309,7 @@ done:
 *-------------------------------------------------------------------------
 */
 int_f
-h5dsget_scale_name_c(hid_t_f *did, _fcd name, size_t_f *size) 
+nh5dsget_scale_name_c(hid_t_f *did, _fcd name, size_t_f *size) 
 {
   char *c_scale_name = NULL;
   ssize_t size_c = -1;
@@ -338,7 +338,7 @@ done:
   if(c_scale_name) HDfree(c_scale_name);
   return ret_value;
 
-} /* end h5dsget_scale_name_c() */
+} /* end nh5dsget_scale_name_c() */
 
 /*-------------------------------------------------------------------------
 * Function: H5DSget_num_scales_c
@@ -356,7 +356,7 @@ done:
 *-------------------------------------------------------------------------
 */
 int_f
-h5dsget_num_scales_c( hid_t_f *did, int_f *idx, int_f *num_scales) 
+nh5dsget_num_scales_c( hid_t_f *did, int_f *idx, int_f *num_scales) 
 {
   int_f ret_value = 0;
   
@@ -370,4 +370,4 @@ h5dsget_num_scales_c( hid_t_f *did, int_f *idx, int_f *num_scales)
   done:
     return ret_value;
 
-} /* end h5dsget_num_scales_c() */
+} /* end nh5dsget_num_scales_c() */

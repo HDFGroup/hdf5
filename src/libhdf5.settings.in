@@ -39,6 +39,7 @@ Languages:
 ----------
                         Fortran: @HDF_FORTRAN@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               Fortran Compiler: @FC_VERSION@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@          Fortran 2003 Compiler: @HAVE_FORTRAN_2003@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@                  Fortran Flags: @FCFLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               H5 Fortran Flags: @H5_FCFLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               AM Fortran Flags: @AM_FCFLAGS@

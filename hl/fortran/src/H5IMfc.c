@@ -39,7 +39,7 @@
 */
 
 int_f
-h5immake_image_8bit_c (hid_t_f *loc_id,
+nh5immake_image_8bit_c (hid_t_f *loc_id,
                         size_t_f *namelen,
                         _fcd name,
                         hsize_t_f *width,
@@ -100,7 +100,7 @@ done:
 */
 
 int_f
-h5imread_image_c (hid_t_f *loc_id,
+nh5imread_image_c (hid_t_f *loc_id,
                    size_t_f *namelen,
                    _fcd name,
                    int_f *buf)
@@ -153,7 +153,7 @@ done:
 */
 
 int_f
-h5immake_image_24bit_c (hid_t_f *loc_id,
+nh5immake_image_24bit_c (hid_t_f *loc_id,
                          size_t_f *namelen,
                          _fcd name,
                          size_t_f *ilen,
@@ -222,7 +222,7 @@ done:
 */
 
 int_f
-h5imget_image_info_c(hid_t_f *loc_id,
+nh5imget_image_info_c(hid_t_f *loc_id,
                       size_t_f *namelen,
                       _fcd name,
                       hsize_t_f *width,
@@ -307,7 +307,7 @@ done:
 */
 
 int_f
-h5imis_image_c(hid_t_f *loc_id,
+nh5imis_image_c(hid_t_f *loc_id,
                 size_t_f *namelen,
                 _fcd name)
 {
@@ -356,7 +356,7 @@ h5imis_image_c(hid_t_f *loc_id,
 */
 
 int_f
-h5immake_palette_c (hid_t_f *loc_id,
+nh5immake_palette_c (hid_t_f *loc_id,
                      size_t_f *namelen,
                      _fcd name,
                      hsize_t_f *dims,
@@ -411,7 +411,7 @@ done:
 */
 
 int_f
-h5imlink_palette_c (hid_t_f *loc_id,
+nh5imlink_palette_c (hid_t_f *loc_id,
                      size_t_f *namelen,
                      _fcd name,
                      size_t_f *ilen,
@@ -476,7 +476,7 @@ done:
 */
 
 int_f
-h5imunlink_palette_c (hid_t_f *loc_id,
+nh5imunlink_palette_c (hid_t_f *loc_id,
                        size_t_f *namelen,
                        _fcd name,
                        size_t_f *ilen,
@@ -542,7 +542,7 @@ done:
 */
 
 int_f
-h5imget_npalettes_c(hid_t_f *loc_id,
+nh5imget_npalettes_c(hid_t_f *loc_id,
                      size_t_f *namelen,
                      _fcd name,
                      hsize_t_f *npals)
@@ -604,7 +604,7 @@ done:
 
 
 int_f
-h5imget_palette_info_c(hid_t_f *loc_id,
+nh5imget_palette_info_c(hid_t_f *loc_id,
                         size_t_f *namelen,
                         _fcd name,
                         int_f *pal_number,
@@ -671,7 +671,7 @@ done:
 
 
 int_f
-h5imget_palette_c(hid_t_f *loc_id,
+nh5imget_palette_c(hid_t_f *loc_id,
                    size_t_f *namelen,
                    _fcd name,
                    int_f *pal_number,
@@ -729,7 +729,7 @@ done:
 */
 
 int_f
-h5imis_palette_c(hid_t_f *loc_id,
+nh5imis_palette_c(hid_t_f *loc_id,
                   size_t_f *namelen,
                   _fcd name)
 {

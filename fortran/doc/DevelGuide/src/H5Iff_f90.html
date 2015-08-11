@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Iff.f90</title>
+<!-- Source: ./src/H5Iff.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5I"></a>
+<a name="robo47"></a><h2>H5I</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5I</strong>
+</pre>
+<p class="item_name">FILE</p>
+<pre>  fortran/src/<a href="#robo_top_of_doc">H5Iff.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5I</strong> functions.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5I</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5I2fh5idec5fref5ff"></a>
+<a name="robo170"></a><h2>h5idec_ref_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo47">H5I</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5idec_ref_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Decrements the reference count of an ID
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - Object identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  ref_count     - Current reference count of the ID
+  hdferr:       - Error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Quincey Koziol
+  December  9, 2003
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5idec_ref_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> ref_count<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id <span class="sign">!</span> Object identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ref_count    <span class="sign">!</span> Current reference count of ID
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5I2fh5iget5ffile5fid5ff"></a>
+<a name="robo171"></a><h2>h5iget_file_id_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo47">H5I</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5iget_file_id_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Obtains file identifier from the object identifier
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - object identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  file_id       - file identifier
+  hdferr:       - error code
+                    Success:  0
+                    Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 23, 2004
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5iget_file_id_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> file_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> obj_id   <span class="sign">!</span> Object identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id  <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5I2fh5iget5fname5ff"></a>
+<a name="robo172"></a><h2>h5iget_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo47">H5I</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5iget_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets a name of an object specified by its idetifier.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id    - attribute identifier
+  buf_size  - size of a buffer to read name in
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  buf       - buffer to read name in, name will be truncated if
+              buffer is not big enough
+  name_size - name size
+  hdferr:   - error code
+               Success:  0
+               Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  March 12, 2003
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5iget_name_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> buf<span class="sign">,</span> buf_size<span class="sign">,</span> name_size<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id      <span class="sign">!</span> Object identifier
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buf_size   <span class="sign">!</span> Buffer size
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buf      <span class="sign">!</span> Buffer to hold object name
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name_size <span class="sign">!</span> Actual name size
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr            <span class="sign">!</span> Error code<span class="sign">:</span>
+                                              <span class="sign">!</span>   0 <span class="keyword">if</span> successful<span class="sign">,</span>
+                                              <span class="sign">!</span>   <span class="sign">-</span>1 <span class="keyword">if</span> fail
+</pre>
+
+<hr />
+<a name="H5I2fh5iget5fref5ff"></a>
+<a name="robo173"></a><h2>h5iget_ref_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo47">H5I</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5iget_ref_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the reference count of an ID
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - object identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  ref_count     - Current reference count of the ID
+  hdferr:         - error code
+  Success:  0
+  Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Quincey Koziol
+  December  9, 2003
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5iget_ref_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> ref_count<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id <span class="sign">!</span> Object identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ref_count    <span class="sign">!</span> Current reference count of ID
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5I2fh5iget5ftype5ff"></a>
+<a name="robo174"></a><h2>h5iget_type_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo47">H5I</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5iget_type_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the type of an object.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id   - object identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  type     - type of the object, possible values:
+              H5I_FILE_F
+              H5I_GROUP_F
+              H5I_DATATYPE_F
+              H5I_DATASPACE_F
+              H5I_DATASET_F
+              H5I_ATTR_F
+              H5I_BADID_F
+  hdferr:  - error code
+              Success:  0
+              Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5iget_type_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> TYPE<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id  <span class="sign">!</span> Object identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> TYPE <span class="sign">!</span> type of an object<span class="sign">.</span>
+                                 <span class="sign">!</span> possible values are<span class="sign">:</span>
+                                 <span class="sign">!</span>   H5I_FILE_F
+                                 <span class="sign">!</span>   H5I_GROUP_F
+                                 <span class="sign">!</span>   H5I_DATATYPE_F
+                                 <span class="sign">!</span>   H5I_DATASPACE_F
+                                 <span class="sign">!</span>   H5I_DATASET_F
+                                 <span class="sign">!</span>   H5I_ATTR_F
+                                 <span class="sign">!</span>   H5I_BADID_F
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr  <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5I2fh5iinc5fref5ff"></a>
+<a name="robo175"></a><h2>h5iinc_ref_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo47">H5I</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5iinc_ref_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Increments the reference count of an ID
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - object identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  ref_count     - Current reference count of the ID
+  hdferr:              - error code
+  Success:  0
+  Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Quincey Koziol
+  December  9, 2003
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5iinc_ref_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> ref_count<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id <span class="sign">!</span> Object identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ref_count    <span class="sign">!</span> Current reference count of ID
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5I2fh5iis5fvalid5ff"></a>
+<a name="robo176"></a><h2>h5iis_valid_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo47">H5I</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <a href="#robo171">h5iget_file_id_f</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Check if an ID is valid without producing an error message
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  id           - identifier 
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  valid        - status of id as a valid identifier
+  hdferr:      - error code            
+                  Success:  0
+                  Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  April 13, 2009
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5iis_valid_f</strong><span class="sign">(</span>id<span class="sign">,</span> valid<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> id <span class="sign">!</span> Identifier 
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> valid     <span class="sign">!</span> Status of id as a valid identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr    <span class="sign">!</span> Error code
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Iff.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Rff_F90.f90</title>
+<!-- Source: ./src/H5Rff_F90.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5R2028F9029"></a>
+<a name="robo66"></a><h2>H5R (F90)</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE H5R_PROVISIONAL
+</pre>
+<p class="item_name">FILE</p>
+<pre>  fortran/src/<a href="#robo_top_of_doc">H5Rff_F90.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran 90 interfaces for <a href="./H5Rff_f90.html#robo64">H5R</a> functions. It contains
+  the same functions as <a href="./H5Rff_F03_f90.html#robo_top_of_doc">H5Rff_F03.f90</a> but excludes the Fortran 2003 functions
+  and the interface listings. This file will be compiled instead of <a href="./H5Rff_F03_f90.html#robo_top_of_doc">H5Rff_F03.f90</a>
+  if Fortran 2003 functions are not enabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <a href="./H5Rff_f90.html#robo64">H5R</a> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5R2028F90292fh5rcreate5fobject5ff"></a>
+<a name="robo359"></a><h2>h5rcreate_object_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo66">H5R (F90)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5rcreate_object_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates reference to the object
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - name of the object at the specified location
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  ref           - reference to the specified object
+  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  This is a module procedure for the h5rcreate_f subroutine.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5rcreate_object_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> ref<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> Location identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the object at location specified
+                                           <span class="sign">!</span> by loc_id identifier
+    TYPE<span class="sign">(</span>hobj_ref_t_f<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ref <span class="sign">!</span> Object reference
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5R2028F90292fh5rcreate5fregion5ff"></a>
+<a name="robo361"></a><h2>h5rcreate_region_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo66">H5R (F90)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5rcreate_region_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates reference to the dataset region
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - name of the dataset at the specified location
+  space_id      - dataspace identifier that describes selected region
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  ref           - reference to the dataset region
+  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  This is a module procedure for the h5rcreate_f subroutine.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5rcreate_region_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> space_id<span class="sign">,</span> ref<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> Location identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the dataset at location specified
+                                           <span class="sign">!</span> by loc_id identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataset<span class="squote">'s dataspace identifier
+    TYPE(hdset_reg_ref_t_f), INTENT(OUT) :: ref ! Dataset region reference
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+</pre>
+
+<hr />
+<a name="H5R2028F90292fh5rdereference5fobject5ff"></a>
+<a name="robo364"></a><h2>h5rdereference_object_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo66">H5R (F90)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5rdereference_object_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens the <a href="./HDF5_f90.html#robo76">HDF5</a> object referenced
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dset_id  - identifier of the dataset containing reference
+  ref      - reference to open
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  obj_id   - object_identifier
+  hdferr   - error code
+              Success:  0
+              Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  This is a module procedure for the h5rdereference_f subroutine.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5rdereference_object_f</strong><span class="sign">(</span>dset_id<span class="sign">,</span> ref<span class="sign">,</span> obj_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dset_id   <span class="sign">!</span> Dataset identifier
+    TYPE<span class="sign">(</span>hobj_ref_t_f<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ref   <span class="sign">!</span> Object reference
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id   <span class="sign">!</span> Object identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5R2028F90292fh5rdereference5fregion5ff"></a>
+<a name="robo367"></a><h2>h5rdereference_region_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo66">H5R (F90)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5rdereference_region_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens the dataset region
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dset_id       - identifier of the dataset containing
+                  reference to teh regions
+  ref           - reference to open
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  obj_id        - dataspace identifier
+  hdferr        - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  This is a module procedure for the h5rdereference_f subroutine.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5rdereference_region_f</strong><span class="sign">(</span>dset_id<span class="sign">,</span> ref<span class="sign">,</span> obj_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dset_id      <span class="sign">!</span> Dataset identifier
+    TYPE<span class="sign">(</span>hdset_reg_ref_t_f<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ref <span class="sign">!</span> Object reference
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id   <span class="sign">!</span> Dataspace identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5R2028F90292fh5rget5fname5fobject5ff"></a>
+<a name="robo368"></a><h2>h5rget_name_object_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo66">H5R (F90)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5rget_name_object_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves a name of a referenced object.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id  - Identifier for the dataset containing the reference or for the group that dataset is in.
+  ref     - An object or dataset region reference.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  name    - A name associated with the referenced object or dataset region.
+
+  hdferr  - error code
+             Success:  0
+             Failure: -1
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  size    - The size of the name buffer.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  March 28, 2008
+
+ SOURCES
+ or for the group that dataset is in.
+ returning 0 (zero) if no name is associated with the identifier
+</pre>
+
+<hr />
+<a name="H5R2028F90292fh5rget5fname5fregion5ff"></a>
+<a name="robo371"></a><h2>h5rget_name_region_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo66">H5R (F90)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5rget_name_region_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves a name of a dataset region.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Identifier for the dataset containing the reference or
+                  for the group that dataset is in.
+  ref           - An object or dataset region reference.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  name          - A name associated with the referenced object or dataset region.
+  hdferr        - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  size          - The size of the name buffer.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  March 28, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5rget_name_region_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> ref<span class="sign">,</span> name<span class="sign">,</span> hdferr<span class="sign">,</span> size<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> Identifier <span class="keyword">for</span> the dataset containing the reference
+                                           <span class="sign">!</span> or <span class="keyword">for</span> the group that dataset is in<span class="sign">.</span>
+    TYPE<span class="sign">(</span>hdset_reg_ref_t_f<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ref       <span class="sign">!</span> Object reference
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size   <span class="sign">!</span> The size of the name buffer<span class="sign">,</span>
+                                                     <span class="sign">!</span> returning 0 <span class="sign">(</span>zero<span class="sign">)</span> <span class="keyword">if</span> no name is associated 
+                                                     <span class="sign">!</span> with the identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span> A name associated with the referenced object or dataset region<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Rff_F90.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

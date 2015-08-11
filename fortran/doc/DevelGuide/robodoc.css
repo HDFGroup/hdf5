@@ -1,0 +1,302 @@
+/****h* ROBODoc/ROBODoc Cascading Style Sheet
+ * FUNCTION
+ *   This is the default cascading style sheet for documentation
+ *   generated with ROBODoc.
+ *   You can edit this file to your own liking and then use
+ *   it with the option
+ *      --css <filename>
+ *
+ *   This style-sheet defines the following layout
+ *      +----------------------------------------+
+ *      |    logo                                |
+ *      +----------------------------------------+
+ *      |    extra                               |
+ *      +----------------------------------------+
+ *      |                              | navi-   |
+ *      |                              | gation  |
+ *      |      content                 |         |
+ *      |                              |         |
+ *      +----------------------------------------+
+ *      |    footer                              |
+ *      +----------------------------------------+
+ *
+ *   This style-sheet is based on a style-sheet that was automatically
+ *   generated with the Strange Banana stylesheet generator.
+ *   See http://www.strangebanana.com/generator.aspx
+ *
+ ******
+ * $Id: html_generator.c,v 1.94 2008/06/17 11:49:27 gumpu Exp $
+ */
+
+body
+{
+    background-color:    rgb(255,255,255);
+    color:               rgb(98,84,55);
+    font-family:         Arial, serif;
+    border-color:        rgb(226,199,143);
+}
+
+pre
+{
+    font-family:      monospace;
+    margin:      15px;
+    padding:     5px;
+    white-space: pre;
+    color:       #000;
+}
+
+pre.source
+{
+    background-color: #ffe;
+    border: dashed #aa9 1px;
+}
+
+p
+{
+    margin:15px;
+}
+
+p.item_name 
+{
+    font-weight: bolder;
+    margin:5px;
+    font-size: 120%;
+}
+
+#content
+{
+    font-size:           100%;
+    color:               rgb(0,0,0);
+    background-color:    rgb(255,255,255);
+    border-left-width:   0px; 
+    border-right-width:  0px; 
+    border-top-width:    0px; 
+    border-bottom-width: 0px;
+    border-left-style:   none; 
+    border-right-style:  none; 
+    border-top-style:    none; 
+    border-bottom-style: none;
+    padding:             40px 31px 14px 17px;
+    border-color:        rgb(0,0,0);
+    text-align:          justify;
+}
+
+#navigation
+{
+    background-color: rgb(98,84,55);
+    color:            rgb(230,221,202);
+    font-family:      "Times New Roman", serif;
+    font-style:       normal;
+    border-color:     rgb(0,0,0);
+}
+
+a.menuitem
+{
+    font-size: 120%;
+    background-color:    rgb(0,0,0);
+    color:               rgb(195,165,100);
+    font-variant:        normal;
+    text-transform:      none;
+    font-weight:         normal;
+    padding:             1px 8px 3px 1px;
+    margin-left:         5px; 
+    margin-right:        5px; 
+    margin-top:          5px; 
+    margin-bottom:       5px;
+    border-color:        rgb(159,126,57);
+    text-align:          right;
+}
+
+#logo, #logo a
+{
+    font-size: 130%;
+    background-color:   rgb(198,178,135);
+    color:              rgb(98,84,55);
+    font-family:        Georgia, serif;
+    font-style:         normal;
+    font-variant:       normal;
+    text-transform:     none;
+    font-weight:        bold;
+    padding:            20px 18px 20px 18px;
+    border-color:       rgb(255,255,255);
+    text-align:         right;
+}
+
+#extra, #extra a
+{
+    font-size: 128%;
+    background-color:    rgb(0,0,0);
+    color:               rgb(230,221,202);
+    font-style:          normal;
+    font-variant:        normal;
+    text-transform:      none;
+    font-weight:         normal;
+    border-left-width:   0px; 
+    border-right-width:  0px; 
+    border-top-width:    0px; 
+    border-bottom-width: 0px;
+    border-left-style:   none; 
+    border-right-style:  none; 
+    border-top-style:    none; 
+    border-bottom-style: none;
+    padding: 12px 12px 12px 12px;
+    border-color:        rgb(195,165,100);
+    text-align:          center;
+}
+
+#content a
+{
+    color:              rgb(159,126,57);
+    text-decoration:    none;
+}
+
+#content a:hover, #content a:active
+{
+    color:              rgb(255,255,255);
+    background-color:   rgb(159,126,57);
+}
+
+a.indexitem
+{
+    display: block;
+}
+
+h1, h2, h3, h4, h5, h6
+{
+    background-color: rgb(221,221,221);
+    font-family:      Arial, serif;
+    font-style:       normal;
+    font-variant:     normal;
+    text-transform:   none;
+    font-weight:      normal;
+}
+
+h1
+{
+    font-size: 151%;
+}
+
+h2
+{
+    font-size: 142%;
+}
+
+h3
+{
+    font-size: 133%;
+}
+
+h4
+{
+    font-size: 124%;
+}
+
+h5
+{
+    font-size: 115%;
+}
+
+h6
+{
+    font-size: 106%;
+}
+
+#navigation a
+{
+    text-decoration: none;
+}
+
+.menuitem:hover
+{
+    background-color:   rgb(195,165,100);
+    color:              rgb(0,0,0);
+}
+
+#extra a
+{
+    text-decoration: none;
+}
+
+#logo a
+{
+    text-decoration: none;
+}
+
+#extra a:hover
+{
+}
+
+/* layout */
+#navigation
+{
+    width:       22%; 
+    position:    relative; 
+    top:         0; 
+    right:       0; 
+    float:       right; 
+    text-align:  center;
+    margin-left: 10px;
+}
+
+.menuitem       {width: auto;}
+#content        {width: auto;}
+.menuitem       {display: block;}
+
+
+div#footer
+{
+    background-color: rgb(198,178,135);
+    color:      rgb(98,84,55);
+    clear:      left;
+    width:      100%;
+    font-size:   71%;
+}
+
+div#footer a
+{
+    background-color: rgb(198,178,135);
+    color:            rgb(98,84,55);
+}
+
+div#footer p
+{
+    margin:0;
+    padding:5px 10px
+}
+
+span.keyword
+{
+    color: #00F;
+}
+
+span.comment
+{
+    color: #080;
+}
+
+span.quote
+{
+    color: #F00;
+}
+
+span.squote
+{
+    color: #F0F;
+}
+
+span.sign
+{
+    color: #008B8B;
+}
+
+span.line_number
+{
+    color: #808080;
+}
+
+@media print
+{
+    #navigation {display: none;}
+    #content    {padding: 0px;}
+    #content a  {text-decoration: underline;}
+}

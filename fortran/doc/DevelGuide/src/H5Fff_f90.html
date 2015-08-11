@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Fff.f90</title>
+<!-- Source: ./src/H5Fff.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5F"></a>
+<a name="robo39"></a><h2>H5F</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5F</strong>
+</pre>
+<p class="item_name">FILE</p>
+<pre>  <a href="#robo_top_of_doc">H5Fff.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5F</strong> functions.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5F</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5F2fh5fclose5ff"></a>
+<a name="robo135"></a><h2>h5fclose_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fclose_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Closes <a href="./HDF5_f90.html#robo76">HDF5</a> file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  file_id       - file identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fclose_f</strong><span class="sign">(</span>file_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5F2fh5fcreate5ff"></a>
+<a name="robo136"></a><h2>h5fcreate_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fcreate_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates <a href="./HDF5_f90.html#robo76">HDF5</a> files.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  name          - name of the file to create
+  access_flags  - File access flags. Allowable values are:
+                   H5F_ACC_TRUNC_F
+                   H5F_ACC_EXCL_F
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  file_id       - file identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  creation_prp  - file creation property list identifier
+  access_prp    - file access property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fcreate_f</strong><span class="sign">(</span>name<span class="sign">,</span> access_flags<span class="sign">,</span> file_id<span class="sign">,</span> hdferr<span class="sign">,</span> <span class="sign">&amp;</span>
+       creation_prp<span class="sign">,</span> access_prp<span class="sign">)</span>
+    IMPLICIT NONE
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the file
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> access_flags    <span class="sign">!</span> File access flags
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> creation_prp
+                                           <span class="sign">!</span> File creation propertly
+                                           <span class="sign">!</span> list identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> access_prp
+                                           <span class="sign">!</span> File access property list
+                                           <span class="sign">!</span> identifier
+</pre>
+
+<hr />
+<a name="H5F2fh5fflush5ff"></a>
+<a name="robo137"></a><h2>h5fflush_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fflush_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Flushes all buffers associated WITH a file to disk
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  object_id     - identifier of object used to identify the file.
+  scope         - specifies the scope of the flushing action.
+                  Possible values are:
+                    H5F_SCOPE_GLOBAL_F
+                    H5F_SCOPE_LOCAL_F
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  creation_prp  - file creation property list identifier
+  access_prp    - file access property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fflush_f</strong><span class="sign">(</span>object_id<span class="sign">,</span> scope<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> object_id <span class="sign">!</span>identifier <span class="keyword">for</span> any object
+                                            <span class="sign">!</span>associate with a file<span class="sign">,</span>
+                                            <span class="sign">!</span>including the file itself<span class="sign">,</span>
+                                            <span class="sign">!</span>a dataset<span class="sign">,</span> a group<span class="sign">,</span> an
+                                            <span class="sign">!</span>attribute<span class="sign">,</span> or a named
+                                            <span class="sign">!</span>data type
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> scope            <span class="sign">!</span>scope of the flushing
+                                            <span class="sign">!</span>action<span class="sign">,</span> possible values
+                                            <span class="sign">!</span>are<span class="sign">:</span> H5F_SCOPE_GLOBAL_F
+                                            <span class="sign">!</span> which flushes the entire
+                                            <span class="sign">!</span>virtual file<span class="sign">,</span>
+                                            <span class="sign">!</span>and H5F_SCOPE_LOCAL_F
+                                            <span class="sign">!</span>which flushes only the
+                                            <span class="sign">!</span>specified file<span class="sign">.</span>
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5F2fh5fget5faccess5fplist5ff"></a>
+<a name="robo138"></a><h2>h5fget_access_plist_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fget_access_plist_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns a file access property list identifier.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  file_id       - identifier of a file to creation property list of
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  access_id     - access property list identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fget_access_plist_f</strong><span class="sign">(</span>file_id<span class="sign">,</span> access_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id      <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> access_id   <span class="sign">!</span> File access property
+                                               <span class="sign">!</span> list identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr             <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5F2fh5fget5fcreate5fplist5ff"></a>
+<a name="robo139"></a><h2>h5fget_create_plist_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fget_create_plist_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns a file creation property list identifier.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  file_id       - identifier of a file to creation property list of
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  prop_id       - creation property list identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fget_create_plist_f</strong><span class="sign">(</span>file_id<span class="sign">,</span> prop_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id    <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> prop_id   <span class="sign">!</span> File creation property
+                                             <span class="sign">!</span> list identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr           <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5F2fh5fget5ffilesize5ff"></a>
+<a name="robo140"></a><h2>h5fget_filesize_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fget_filesize_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the file size of the <a href="./HDF5_f90.html#robo76">HDF5</a> file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  file_id       - file identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  size          - file size
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  July 7, 2004
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fget_filesize_f</strong><span class="sign">(</span>file_id<span class="sign">,</span> size<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id  <span class="sign">!</span> file identifier
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size  <span class="sign">!</span> Size of the file
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code<span class="sign">:</span> 0 on success<span class="sign">,</span>
+                                           <span class="sign">!</span>     <span class="sign">-</span>1 <span class="keyword">if</span> fail
+</pre>
+
+<hr />
+<a name="H5F2fh5fget5ffreespace5ff"></a>
+<a name="robo141"></a><h2>h5fget_freespace_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fget_freespace_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Get amount of free space within a file
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  file_id       - file identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  free_space    - amount of free space in file
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Quincey Koziol
+  October 7, 2003
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fget_freespace_f</strong><span class="sign">(</span>file_id<span class="sign">,</span> free_space<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">(</span>HSSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> free_space
+                                          <span class="sign">!</span> amount of free space in file
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5F2fh5fget5fname5ff"></a>
+<a name="robo142"></a><h2>h5fget_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fget_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets the name of the file from the object identifier
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - object identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  buf           - buffer to store the read name
+  size          - actual size of the name
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  July 6, 2004
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fget_name_f</strong><span class="sign">(</span>obj_id<span class="sign">,</span> buf<span class="sign">,</span> size<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id   <span class="sign">!</span> Object identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>INOUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buf
+                                           <span class="sign">!</span> Buffer to hold file name
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size   <span class="sign">!</span> Size of the file name
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code<span class="sign">:</span> 0 on success<span class="sign">,</span>
+                                           <span class="sign">!</span>     <span class="sign">-</span>1 <span class="keyword">if</span> fail
+</pre>
+
+<hr />
+<a name="H5F2fh5fget5fobj5fcount5ff"></a>
+<a name="robo143"></a><h2>h5fget_obj_count_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fget_obj_count_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets number of the objects open within a file
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  file_id       - file identifier
+  obj_type      - type of the object; possible values are:
+                    H5F_OBJ_FILE_F
+                    H5F_OBJ_DATASET_F
+                    H5F_OBJ_GROUP_F
+                    H5F_OBJ_DATATYPE_F
+                    H5F_OBJ_ALL_F
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  obj_count     - number of open objects
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  September 30, 2002
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Changed the type of obj_count to INTEGER(SIZE_T)
+  September 25, 2008 EIP
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fget_obj_count_f</strong><span class="sign">(</span>file_id<span class="sign">,</span> obj_type<span class="sign">,</span> obj_count<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> obj_type      <span class="sign">!</span> Object type
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_count
+                                          <span class="sign">!</span> Number of open objects
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5F2fh5fget5fobj5fids5ff"></a>
+<a name="robo144"></a><h2>h5fget_obj_ids_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fget_obj_ids_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Get list of open objects identifiers within a file
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  file_id       - file identifier
+  obj_type      - type of the object; possible values are:
+                    H5F_OBJ_FILE_F
+                    H5F_OBJ_DATASET_F
+                    H5F_OBJ_GROUP_F
+                    H5F_OBJ_DATATYPE_F
+                    H5F_OBJ_ALL_F
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  obj_ids       - array of open object identifiers
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  num_objs      - number of open objects
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  September 30, 2002
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Added optional parameter num_objs for number of open objects
+  of the specified type and changed type of max_obj to
+  INTEGER(SIZE_T)
+  September 25, 2008 EIP
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fget_obj_ids_f</strong><span class="sign">(</span>file_id<span class="sign">,</span> obj_type<span class="sign">,</span> max_objs<span class="sign">,</span> obj_ids<span class="sign">,</span> hdferr<span class="sign">,</span> num_objs<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id      <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> obj_type           <span class="sign">!</span> Object type
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> max_objs   <span class="sign">!</span> Maximum <span class="sign">#</span> of objects to retrieve
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="comment">(*), INTENT(INOUT) :: obj_ids
+                                               ! Array of open objects iidentifiers
+    INTEGER, INTENT(OUT) :: hdferr             ! Error code
+    INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: num_objs ! number of open objects
+</pre>
+
+<hr />
+<a name="H5F2fh5fis5fhdf55ff"></a>
+<a name="robo145"></a><h2>h5fis_hdf5_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fis_hdf5_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines whether a file is in the <a href="./HDF5_f90.html#robo76">HDF5</a> format.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  name          - name of the file to check
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  status        - indicates if file is and <a href="./HDF5_f90.html#robo76">HDF5</a> file
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fis_hdf5_f</strong><span class="sign">(</span>name<span class="sign">,</span> status<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the file
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> status         <span class="sign">!</span> Indicates <span class="keyword">if</span> file
+                                           <span class="sign">!</span> is an <a href="./HDF5_f90.html#robo76">HDF5</a> file
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5F2fh5fmount5ff"></a>
+<a name="robo146"></a><h2>h5fmount_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fmount_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Mounts a file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - the identifier for of file or group in
+                  which name is defined
+  name          - the name of the group onto which the file
+                  specified by child_id is to be mounted.
+  child_id      - the identifier of the file to be mounted.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  access_prp    - the identifier of the property list to be used
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fmount_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> child_id<span class="sign">,</span> hdferr<span class="sign">,</span> access_prp<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> Identifier <span class="keyword">for</span> file or group
+                                           <span class="sign">!</span> in which dsetname is defined
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the group
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> child_id <span class="sign">!</span> File identifier <span class="keyword">for</span> the
+                                           <span class="sign">!</span> file to be mounted
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> access_prp
+                                           <span class="sign">!</span> File access property list
+                                           <span class="sign">!</span> identifier
+</pre>
+
+<hr />
+<a name="H5F2fh5fopen5ff"></a>
+<a name="robo147"></a><h2>h5fopen_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5fopen_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens <a href="./HDF5_f90.html#robo76">HDF5</a> file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  name          - name of the file to acecss
+  access_flags  - File access flags. Allowable values are:
+                   H5F_ACC_RDWR_F
+                   H5F_ACC_RDONLY_F
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  file_id       - file identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  access_prp    - file access property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5fopen_f</strong><span class="sign">(</span>name<span class="sign">,</span> access_flags<span class="sign">,</span> file_id<span class="sign">,</span> hdferr<span class="sign">,</span> access_prp<span class="sign">)</span>
+    IMPLICIT NONE
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the file
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> access_flags    <span class="sign">!</span> File access flags
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> access_prp
+                                           <span class="sign">!</span> File access property list
+                                           <span class="sign">!</span> identifier
+</pre>
+
+<hr />
+<a name="H5F2fh5freopen5ff"></a>
+<a name="robo148"></a><h2>h5freopen_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5freopen_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Reopens <a href="./HDF5_f90.html#robo76">HDF5</a> file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  file_id       - identifier of a file for which an
+                  additional identifier is required
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  ret_file_id   - new file identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5freopen_f</strong><span class="sign">(</span>file_id<span class="sign">,</span> ret_file_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> file_id      <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ret_file_id <span class="sign">!</span> New File identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr             <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5F2fh5funmount5ff"></a>
+<a name="robo149"></a><h2>h5funmount_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo39">H5F</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5funmount_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Unmounts a file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - the identifier for of file or group in
+                  which name is defined
+  name          - the name of the mount point
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  February 28, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5funmount_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> Identifier <span class="keyword">for</span> file or group
+                                           <span class="sign">!</span> at which the specified file
+                                           <span class="sign">!</span> is to be unmounted
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the mount point
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Fff.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

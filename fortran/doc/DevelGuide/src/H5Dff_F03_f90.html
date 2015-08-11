@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Dff_F03.f90</title>
+<!-- Source: ./src/H5Dff_F03.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5D2028F0329"></a>
+<a name="robo32"></a><h2>H5D (F03)</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  H5D_PROVISIONAL
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran 90 and Fortran 2003 interfaces for <a href="./H5Dff_f90.html#robo31">H5D</a> functions.
+  It contains the same functions as H5Dff_DEPRECIATE.f90 but includes the
+  Fortran 2003 functions and the interface listings. This file will be compiled
+  instead of H5Dff_DEPRECIATE.f90 if Fortran 2003 functions are enabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  (1) The maximum rank of an array allowed in Fortran is 7, therefore
+  we only provide an interface for arrays up to and including rank 7.
+
+  (2) Unfortunately we are using a generic interface and one of the factors
+  used in determining the proper routine to select is that of the array
+  rank being passed. Therefore, we can not create just one subroutine for
+  each array type (integer, real, etc...) and use a
+  rank 1 array of assumed size to handle multiple ranks, i.e.
+  (i.e. integer, dimension(*) :: ... )
+  (i.e. real   , dimension(*) :: ... ) etc...
+
+  (3) Could not place the USE ISO_C_BINDING in the module header because it may
+  conflict with the USE ISO_C_BINDING included in the user's program. Moved
+  the statement instead to each subroutine.
+
+
+  (4) C_LOC and character strings according to the Fortran 2003 standard:
+
+  15.1.2.5 C_LOC(X)
+
+  Argument. X shall either
+
+  (A) have interoperable type and type parameters and be
+  (a) a variable that has the TARGET attribute and is interoperable,
+  (b) an allocated allocatable variable that has the TARGET attribute
+  and is not an array of zero size, or
+  (c) an associated scalar pointer, or
+  (B) be a nonpolymorphic scalar, have no length type parameters, and be
+  (a) a nonallocatable, nonpointer variable that has the TARGET attribute,
+  (b) an allocated allocatable variable that has the TARGET attribute, or
+  (c) an associated pointer.
+
+        - When X is a character, for interoperability the standard is:
+
+  15.2.1 Interoperability of intrinsic types
+
+  ...if the type is character, interoperability also requires that the length type parameter
+  be omitted or be specified by an initialization expression whose value is one.
+
+  THEREFORE compilers that have not extended the standard require the
+  argument in C_LOC to be of the variant:
+
+  CHARACTER(LEN=1), TARGET :: chr
+  or
+  CHARACTER, TARGET :: chr
+  (B)
+                         *** IMPORTANT ***
+  If you add a new <a href="./H5Dff_f90.html#robo31">H5D</a> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5D2fh5dvlen5freclaim"></a>
+<a name="robo127"></a><h2>h5dvlen_reclaim</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="./H5Dff_f90.html#robo31">H5D</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5dvlen_reclaim</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Reclaims VL datatype memory buffers. 
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id  - Identifier of the datatype. 
+  space_id - Identifier of the dataspace. 
+  plist_id - Identifier of the property list used to create the buffer. 
+       buf - Pointer to the buffer to be reclaimed. 
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr   - error code
+               Success:  0
+               Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre> M. Scot Breitenfeld
+ January 11, 2011
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE H5Dvlen_reclaim_f<span class="sign">(</span>type_id<span class="sign">,</span> space_id<span class="sign">,</span> plist_id<span class="sign">,</span> buf<span class="sign">,</span> hdferr<span class="sign">)</span>
+
+    USE ISO_C_BINDING
+    IMPLICIT NONE
+
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id   <span class="sign">!</span> Identifier of the datatype<span class="sign">.</span> 
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id  <span class="sign">!</span> Identifier of the dataspace<span class="sign">.</span> 
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> plist_id  <span class="sign">!</span> Identifier of the property list used to create the buffer<span class="sign">.</span> 
+    TYPE<span class="sign">(</span>C_PTR<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>INOUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buf       <span class="sign">!</span> Pointer to the buffer to be reclaimed<span class="sign">.</span> 
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code<span class="sign">.</span>
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Dff_F03.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

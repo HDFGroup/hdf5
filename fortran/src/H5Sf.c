@@ -1,6 +1,6 @@
 /****h* H5Sf/H5Sf
  * PURPOSE
- *  This file contains C stubs for H5S Fortran APIs
+ *   This file contains C stubs for H5S Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -26,27 +26,27 @@
 
 /****if* H5Sf/h5screate_simple_c
  * NAME
- *  h5screate_simple_c
+ *        h5screate_simple_c
  * PURPOSE
- *  Call H5Screate_simple to create a dataspace
+ *     Call H5Screate_simple to create a dataspace
  * INPUTS
- *  rank - number of dimensions of dataspace
- *  dims - array of the size of each dimension
+ *      rank - number of dimensions of dataspace
+ *              dims - array of the size of each dimension
                 maxdims - an array of the maximum size of each dimension
  * OUTPUTS
- *  space_id - identifier of the created dataspace
+ *     space_id - identifier of the created dataspace
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 4, 1999
+ *              Wednesday, August 4, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5screate_simple_c ( int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *space_id )
+nh5screate_simple_c ( int_f *rank, hsize_t_f *dims, hsize_t_f *maxdims, hid_t_f *space_id )
 /******/
 {
     hsize_t c_dims[H5S_MAX_RANK];
@@ -75,23 +75,23 @@ done:
 
 /****if* H5Sf/h5sclose_c
  * NAME
- *  h5sclose_c
+ *        h5sclose_c
  * PURPOSE
- *  Call H5Sclose to close the dataspace
+ *     Call H5Sclose to close the dataspace
  * INPUTS
- *  space_id - identifier of the dataspace to be closed
+ *      space_id - identifier of the dataspace to be closed
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 4, 1999
+ *              Wednesday, August 4, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sclose_c ( hid_t_f *space_id )
+nh5sclose_c ( hid_t_f *space_id )
 /******/
 {
   int ret_value = 0;
@@ -104,25 +104,25 @@ h5sclose_c ( hid_t_f *space_id )
 
 /****if* H5Sf/h5screate_c
  * NAME
- *  h5screate_c
+ *        h5screate_c
  * PURPOSE
- *  Call H5Screate to create a dataspace
+ *     Call H5Screate to create a dataspace
  * INPUTS
- *  classtype - type of the dataspace class
+ *      classtype - type of the dataspace class
  * OUTPUTS
- *  space_id - identifier of the created dataspace
+ *     space_id - identifier of the created dataspace
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Tuesday, August 10, 1999
+ *              Tuesday, August 10, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5screate_c ( int_f *classtype, hid_t_f *space_id )
+nh5screate_c ( int_f *classtype, hid_t_f *space_id )
 /******/
 {
   H5S_class_t c_classtype;
@@ -138,25 +138,25 @@ h5screate_c ( int_f *classtype, hid_t_f *space_id )
 
 /****if* H5Sf/h5scopy_c
  * NAME
- *  h5scopy_c
+ *        h5scopy_c
  * PURPOSE
- *  Call H5Scopy to copy dataspace
+ *     Call H5Scopy to copy dataspace
  * INPUTS
- *  space_id - identifier of the dataspace to be copied
+ *      space_id - identifier of the dataspace to be copied
  * OUTPUTS
- *  new_space_id - identifier of the new datspace
+ *     new_space_id - identifier of the new datspace
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Tuesday, August 10, 1999
+ *              Tuesday, August 10, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5scopy_c( hid_t_f *space_id , hid_t_f *new_space_id)
+nh5scopy_c( hid_t_f *space_id , hid_t_f *new_space_id)
 /******/
 {
   int ret_value = 0;
@@ -173,28 +173,28 @@ h5scopy_c( hid_t_f *space_id , hid_t_f *new_space_id)
 
 /****if* H5Sf/h5sget_select_hyper_nblocks_c
  * NAME
- *  h5sget_select_hyper_nblocks_c
+ *        h5sget_select_hyper_nblocks_c
  * PURPOSE
- *  Call H5SH5Sget_select_hyper_nblocks to
- *  get the the number of hyperslab blocks in
- *  the current dataspace selection if successful
+ *     Call H5SH5Sget_select_hyper_nblocks to
+ *              get the the number of hyperslab blocks in
+ *              the current dataspace selection if successful
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  num_blocks -  number of hyperslab blocks in
- *  the current dataspace selection
+ *     num_blocks -  number of hyperslab blocks in
+ *              the current dataspace selection
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Xiangyang Su
- *  Friday, November 12, 1999
+ *              Friday, November 12, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
+nh5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
 /******/
 {
   int ret_value = 0;
@@ -211,28 +211,28 @@ h5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
 
 /****if* H5Sf/h5sget_select_elem_npoints_c
  * NAME
- *  h5sget_select_elem_npoints_c
+ *        h5sget_select_elem_npoints_c
  * PURPOSE
- *  Call H5Sget_select_elem_npoints to
- *  get the the number of element points in
- *  the current dataspace selection if successful
+ *     Call H5Sget_select_elem_npoints to
+ *              get the the number of element points in
+ *              the current dataspace selection if successful
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  num_points -  number of element points in
- *  the current dataspace selection
+ *     num_points -  number of element points in
+ *              the current dataspace selection
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Xiangyang Su
- *  Monday, November 15, 1999
+ *              Monday, November 15, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
+nh5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
 /******/
 {
   int ret_value = 0;
@@ -249,36 +249,36 @@ h5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
 
 /****if* H5Sf/h5sget_select_hyper_blocklist_c
  * NAME
- *  h5sget_select_hyper_blocklist_c
+ *        h5sget_select_hyper_blocklist_c
  * PURPOSE
- *  Call H5Sget_select_hyper_blocklist to
- *  get a list of the hyperslab blocks currently selected
- *  Starting with the startblock-th block in the
- *  list of blocks, num_blocks blocks are put into the user's
- *  buffer. If the user's buffer fills up before numblocks
- *  blocks are inserted, the buffer
- *  will contain only as many blocks as fit.
+ *     Call H5Sget_select_hyper_blocklist to
+ *              get a list of the hyperslab blocks currently selected
+ *              Starting with the startblock-th block in the
+ *              list of blocks, num_blocks blocks are put into the user's
+ *              buffer. If the user's buffer fills up before numblocks
+ *              blocks are inserted, the buffer
+ *              will contain only as many blocks as fit.
  * INPUTS
- *  space_id - identifier of the dataspace
- *  startblock - Hyperslab block to start with
- *  num_blocks -  number of hyperslab blocks in
- *  the current dataspace selection
+ *      space_id - identifier of the dataspace
+ *              startblock - Hyperslab block to start with
+ *              num_blocks -  number of hyperslab blocks in
+ *                            the current dataspace selection
  * OUTPUTS
- *  buf - List of hyperslab blocks selected
+ *     buf - List of hyperslab blocks selected
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Xiangyang Su
- *  Monday, November 15, 1999
+ *              Monday, November 15, 1999
  * HISTORY
  *
- *  Transpose dimension arrays because of C-FORTRAN storage order
- *  M. Scot Breitenfeld
+ *              Transpose dimension arrays because of C-FORTRAN storage order
+ *              M. Scot Breitenfeld
  * SOURCE
 */
 
 int_f
-h5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
+nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
                                   hsize_t_f *num_blocks, hsize_t_f *buf)
 /******/
 {
@@ -327,31 +327,31 @@ h5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
 
 /****if* H5Sf/h5sget_select_bounds_c
  * NAME
- *  h5sget_select_bounds_c
+ *        h5sget_select_bounds_c
  * PURPOSE
- *  Call H5Sget_select_bounds to retrieve the coordinates
- *  of the bounding box containing the current selection
- *  and places them into user-supplied buffers
+ *     Call H5Sget_select_bounds to retrieve the coordinates
+ *              of the bounding box containing the current selection
+ *              and places them into user-supplied buffers
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  start -  Starting coordinates of the bounding box
- *  end -  Ending coordinates of the bounding box,
- *  i.e., the coordinates of the diagonally opposite corne
+ *     start -  Starting coordinates of the bounding box
+ *              end -  Ending coordinates of the bounding box,
+ *                     i.e., the coordinates of the diagonally opposite corne
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Xiangyang Su
- *  Wednesday, November 17, 1999
+ *              Wednesday, November 17, 1999
  * HISTORY
- *  swapped array bounds to account for C and Fortran reversed
- *  matrix notation.
- *  M. Scot Breitenfeld
+ * swapped array bounds to account for C and Fortran reversed
+ *                matrix notation.
+ *                M. Scot Breitenfeld
  * SOURCE
 */
 
 int_f
-h5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
+nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
 /******/
 {
     hid_t c_space_id;
@@ -379,34 +379,34 @@ done:
 
 /****if* H5Sf/h5sget_select_elem_pointlist_c
  * NAME
- *  h5sget_select_elem_pointlist_c
+ *        h5sget_select_elem_pointlist_c
  * PURPOSE
- *  Call  H5Sget_select_elem_pointlist
- *  get a list of  element points in the
- *  current dataspace selectin.
- *  Starting with the startpoint-th point in the
- *  list of points, numpoints points are put into the user's
- *  buffer. If the user's buffer fills up before numpoints
- *  points are inserted, the buffer
- *  will contain only as many points as fit.
+ *     Call  H5Sget_select_elem_pointlist
+ *              get a list of  element points in the
+ *              current dataspace selectin.
+ *              Starting with the startpoint-th point in the
+ *              list of points, numpoints points are put into the user's
+ *              buffer. If the user's buffer fills up before numpoints
+ *              points are inserted, the buffer
+ *              will contain only as many points as fit.
  * INPUTS
- *  space_id - identifier of the dataspace
- *  startpoint - Element point to start with
- *  numpoints -  Number of element points to get
+ *      space_id - identifier of the dataspace
+ *              startpoint - Element point to start with
+ *              numpoints -  Number of element points to get
  * OUTPUTS
- *  buf - List of element points selected
+ *     buf - List of element points selected
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Xiangyang Su
- *  Wednesday, November 17, 1999
+ *              Wednesday, November 17, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
+nh5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
                                   hsize_t_f * numpoints, hsize_t_f * buf)
 /******/
 {
@@ -451,23 +451,23 @@ h5sget_select_elem_pointlist_c( hid_t_f *space_id ,hsize_t_f * startpoint,
 
 /****if* H5Sf/h5sselect_all_c
  * NAME
- *  h5sselect_all_c
+ *        h5sselect_all_c
  * PURPOSE
- *  Call H5Sselect_all to select entire dataspace
+ *     Call H5Sselect_all to select entire dataspace
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Tuesday, August 10, 1999
+ *              Tuesday, August 10, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sselect_all_c ( hid_t_f *space_id )
+nh5sselect_all_c ( hid_t_f *space_id )
 /******/
 {
   int ret_value = 0;
@@ -480,23 +480,23 @@ h5sselect_all_c ( hid_t_f *space_id )
 
 /****if* H5Sf/h5sselect_none_c
  * NAME
- *  h5sselect_none_c
+ *        h5sselect_none_c
  * PURPOSE
- *  Call H5Sselect_none to reset the selection region
+ *     Call H5Sselect_none to reset the selection region
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Tuesday, August 10, 1999
+ *              Tuesday, August 10, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sselect_none_c ( hid_t_f *space_id )
+nh5sselect_none_c ( hid_t_f *space_id )
 /******/
 {
   int ret_value = 0;
@@ -509,27 +509,27 @@ h5sselect_none_c ( hid_t_f *space_id )
 
 /****if* H5Sf/h5sselect_valid_c
  * NAME
- *  h5sselect_valid_c
+ *        h5sselect_valid_c
  * PURPOSE
- *  Call H5Sselect_valid to verify that selection
- *  is within dataspace extent.
+ *     Call H5Sselect_valid to verify that selection
+ *              is within dataspace extent.
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  flag - 0 if not valid selection, 1 if is valid selection,
- *  and negative on failure.
+ *     flag - 0 if not valid selection, 1 if is valid selection,
+ *              and negative on failure.
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Tuesday, August 10, 1999
+ *              Tuesday, August 10, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sselect_valid_c ( hid_t_f *space_id , int_f *flag )
+nh5sselect_valid_c ( hid_t_f *space_id , int_f *flag )
 /******/
 {
   int ret_value = 0;
@@ -545,26 +545,26 @@ h5sselect_valid_c ( hid_t_f *space_id , int_f *flag )
 
 /****if* H5Sf/h5sget_simple_extent_npoints_c
  * NAME
- *  h5sget_simple_extent_npoints_c
+ *        h5sget_simple_extent_npoints_c
  * PURPOSE
- *  Call H5Sget_simple_extent_npoints to determine the number
- *  of elements in a dataspace
+ *     Call H5Sget_simple_extent_npoints to determine the number
+ *              of elements in a dataspace
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  npoints - number of points in a dataspace
+ *     npoints - number of points in a dataspace
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
+nh5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
 /******/
 {
   int ret_value = 0;
@@ -580,26 +580,26 @@ h5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
 
 /****if* H5Sf/h5sget_select_npoints_c
  * NAME
- *  h5sget_select_npoints_c
+ *        h5sget_select_npoints_c
  * PURPOSE
- *  Call H5Sget_select_npoints to determine the number
- *  of elements in a dataspace selection
+ *     Call H5Sget_select_npoints to determine the number
+ *              of elements in a dataspace selection
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  npoints - number of points in a dataspace selection
+ *     npoints - number of points in a dataspace selection
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints )
+nh5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints )
 /******/
 {
   int ret_value = 0;
@@ -615,26 +615,26 @@ h5sget_select_npoints_c ( hid_t_f *space_id , hssize_t_f *npoints )
 
 /****if* H5Sf/h5sget_simple_extent_ndims_c
  * NAME
- *  h5sget_simple_extent_ndims_c
+ *        h5sget_simple_extent_ndims_c
  * PURPOSE
- *  Call H5Sget_simple_extent_ndims to determine the number
- *  dimensions
+ *     Call H5Sget_simple_extent_ndims to determine the number
+ *              dimensions
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  rank - number of dataspace dimensions
+ *     rank - number of dataspace dimensions
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
+nh5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
 /******/
 {
   int ret_value = 0;
@@ -650,27 +650,27 @@ h5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
 
 /****if* H5Sf/h5sget_simple_extent_type_c
  * NAME
- *  h5sget_simple_extent_type_c
+ *        h5sget_simple_extent_type_c
  * PURPOSE
- *  Call H5Sget_simple_extent_type to determine the class type
- *  of a dataspace
+ *     Call H5Sget_simple_extent_type to determine the class type
+ *              of a dataspace
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  classtype - class type; possible values are:
+ *     classtype - class type; possible values are:
  *              H5S_SCALAR_F (0), H5S_SIMPLE_F (1), H5S_NULL_F (2)
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
+nh5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
 /******/
 {
   int ret_value = 0;
@@ -691,25 +691,25 @@ h5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
 
 /****if* H5Sf/h5soffset_simple_c
  * NAME
- *  h5soffset_simple_c
+ *        h5soffset_simple_c
  * PURPOSE
- *  Call H5Soffset_simple to set the offset of a simple
- *  dataspace
+ *     Call H5Soffset_simple to set the offset of a simple
+ *              dataspace
  * INPUTS
- *  space_id - identifier of the dataspace
- *  offset - offset array
+ *      space_id - identifier of the dataspace
+ *              offset - offset array
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset)
+nh5soffset_simple_c ( hid_t_f *space_id , hssize_t_f *offset)
 /******/
 {
     hid_t c_space_id;
@@ -738,27 +738,27 @@ done:
 
 /****if* H5Sf/h5sset_extent_simple_c
  * NAME
- *  h5sset_extent_simple_c
+ *        h5sset_extent_simple_c
  * PURPOSE
- *  Call H5Sset_extent_simple to set or reset size of
- *  existing  dataspace
+ *     Call H5Sset_extent_simple to set or reset size of
+ *              existing  dataspace
  * INPUTS
- *  space_id - identifier of the dataspace
- *  rank - dataspace rank
- *  current_size - array with the new dimension sizes
- *  maximum_size - aray with maximum sizes of dimensions
+ *      space_id - identifier of the dataspace
+ *              rank - dataspace rank
+ *              current_size - array with the new dimension sizes
+ *              maximum_size - aray with maximum sizes of dimensions
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sset_extent_simple_c ( hid_t_f *space_id , int_f *rank, hsize_t_f *current_size, hsize_t_f *maximum_size)
+nh5sset_extent_simple_c ( hid_t_f *space_id , int_f *rank, hsize_t_f *current_size, hsize_t_f *maximum_size)
 /******/
 {
     hsize_t c_current_size[H5S_MAX_RANK];
@@ -784,27 +784,27 @@ done:
 
 /****if* H5Sf/h5sget_simple_extent_dims_c
  * NAME
- *  h5sget_simple_extent_dims_c
+ *        h5sget_simple_extent_dims_c
  * PURPOSE
- *  Call H5Sget_simple_extent_dims to retrieve sizes of an
- *  existing  dataspace
+ *     Call H5Sget_simple_extent_dims to retrieve sizes of an
+ *              existing  dataspace
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  dims - array with the dimension sizes
- *  maxdims - aray with maximum sizes of dimensions
+ *     dims - array with the dimension sizes
+ *              maxdims - aray with maximum sizes of dimensions
  * RETURNS
- *  number of dataspace dimensions (rank) on success, -1 on failure
+ *     number of dataspace dimensions (rank) on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sget_simple_extent_dims_c ( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *maxdims)
+nh5sget_simple_extent_dims_c ( hid_t_f *space_id , hsize_t_f *dims, hsize_t_f *maxdims)
 /******/
 {
     hid_t c_space_id;
@@ -838,27 +838,27 @@ done:
 
 /****if* H5Sf/h5sis_simple_c
  * NAME
- *  h5sis_simple_c
+ *        h5sis_simple_c
  * PURPOSE
- *  Call H5Sis_simple to detrmine if the dataspace
- *  is simple.
+ *     Call H5Sis_simple to detrmine if the dataspace
+ *              is simple.
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  flag - 0 if not simple, 1 if is simple,
- *  and negative on failure.
+ *     flag - 0 if not simple, 1 if is simple,
+ *              and negative on failure.
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sis_simple_c ( hid_t_f *space_id , int_f *flag )
+nh5sis_simple_c ( hid_t_f *space_id , int_f *flag )
 /******/
 {
   int ret_value = 0;
@@ -875,24 +875,24 @@ h5sis_simple_c ( hid_t_f *space_id , int_f *flag )
 
 /****if* H5Sf/h5sextent_copy_c
  * NAME
- *  h5sextent_copy_c
+ *        h5sextent_copy_c
  * PURPOSE
- *  Call H5Sextent_copy to copy an extent of dataspace
+ *     Call H5Sextent_copy to copy an extent of dataspace
  * INPUTS
- *  dest_space_id - identifier of the destination dataspace
- *  source_space_id - identifier of the source dataspace
+ *      dest_space_id - identifier of the destination dataspace
+ *              source_space_id - identifier of the source dataspace
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id)
+nh5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id)
 /******/
 {
   int ret_value = 0;
@@ -908,23 +908,23 @@ h5sextent_copy_c ( hid_t_f *dest_space_id , hid_t_f *source_space_id)
 
 /****if* H5Sf/h5sset_extent_none_c
  * NAME
- *  h5sset_extent_none_c
+ *        h5sset_extent_none_c
  * PURPOSE
- *  Call H5Sset_extent_none to remove extent from a dataspace
+ *     Call H5Sset_extent_none to remove extent from a dataspace
  * INPUTS
- *  space_id - dataspace identifier
+ *      space_id - dataspace identifier
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sset_extent_none_c ( hid_t_f *space_id )
+nh5sset_extent_none_c ( hid_t_f *space_id )
 /******/
 {
   int ret_value = 0;
@@ -939,30 +939,30 @@ h5sset_extent_none_c ( hid_t_f *space_id )
 
 /****if* H5Sf/h5sselect_hyperslab_c
  * NAME
- *  h5sselect_hyperslab_c
+ *        h5sselect_hyperslab_c
  * PURPOSE
- *  Call H5Sselect_hyperslab to select a hyperslab
+ *     Call H5Sselect_hyperslab to select a hyperslab
  * INPUTS
- *  space_id - identifier of the dataspace
- *  operator - defines how the new selection is combined
- *  with the previous one; current values are
+ *      space_id - identifier of the dataspace
+ *              operator - defines how the new selection is combined
+ *              with the previous one; current values are
  *              H5S_SELECT_SET_F (0) and H5S_SELECT_OR_F (1)
- *  start - offset of start of hyperslab
- *  count - number of blocks included in the hyperslab
- *  stride - hyperslab stride (interval between blocks)
- *  block - size of block in the hyperslab
+ *              start - offset of start of hyperslab
+ *              count - number of blocks included in the hyperslab
+ *              stride - hyperslab stride (interval between blocks)
+ *              block - size of block in the hyperslab
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block)
+nh5sselect_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block)
 /******/
 {
     hsize_t c_start[H5S_MAX_RANK];
@@ -1000,30 +1000,30 @@ done:
 #ifdef NEW_HYPERSLAB_API
 /****if* H5Sf/h5scombine_hyperslab_c
  * NAME
- *  h5scombine_hyperslab_c
+ *        h5scombine_hyperslab_c
  * PURPOSE
- *  Call H5Scombine_hyperslab
+ *     Call H5Scombine_hyperslab
  * INPUTS
- *  space_id - identifier of the dataspace
- *  operator - defines how the new selection is combined
- *  start - offset of start of hyperslab
- *  count - number of blocks included in the hyperslab
- *  stride - hyperslab stride (interval between blocks)
- *  block - size of block in the hyperslab
+ *      space_id - identifier of the dataspace
+ *              operator - defines how the new selection is combined
+ *              start - offset of start of hyperslab
+ *              count - number of blocks included in the hyperslab
+ *              stride - hyperslab stride (interval between blocks)
+ *              block - size of block in the hyperslab
  * OUTPUTS
- *  hyper_id - identifier for the new dataspace
+ *     hyper_id - identifier for the new dataspace
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Monday, October 7, 2002
+ *              Monday, October 7, 2002
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id)
+nh5scombine_hyperslab_c ( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id)
 /******/
 {
   int ret_value = -1;
@@ -1082,27 +1082,27 @@ DONE:
 }
 /****if* H5Sf/h5scombine_select_c
  * NAME
- *  h5scombine_select_c
+ *        h5scombine_select_c
  * PURPOSE
- *  Call H5Scombine_ select
+ *     Call H5Scombine_ select
  * INPUTS
- *  space1_id - identifier of the first dataspace
- *  operator - defines how the new selection is combined
- *  space2_id - identifier of the second dataspace
+ *      space1_id - identifier of the first dataspace
+ *              operator - defines how the new selection is combined
+ *              space2_id - identifier of the second dataspace
  * OUTPUTS
- *  ds_id   - identifier for the new dataspace
+ *     ds_id   - identifier for the new dataspace
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Monday, October 7, 2002
+ *              Monday, October 7, 2002
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id)
+nh5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id)
 /******/
 {
   int ret_value = -1;
@@ -1123,25 +1123,25 @@ h5scombine_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_
 }
 /****if* H5Sf/h5sselect_select_c
  * NAME
- *  h5sselect_select_c
+ *        h5sselect_select_c
  * PURPOSE
- *  Call H5Sselect_ select
+ *     Call H5Sselect_ select
  * INPUTS
- *  space1_id - identifier of the first dataspace  to modify
- *  operator - defines how the new selection is combined
- *  space2_id - identifier of the second dataspace
+ *      space1_id - identifier of the first dataspace  to modify
+ *              operator - defines how the new selection is combined
+ *              space2_id - identifier of the second dataspace
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Monday, October 7, 2002
+ *              Monday, October 7, 2002
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
+nh5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
 /******/
 {
   int ret_value = -1;
@@ -1160,24 +1160,24 @@ h5sselect_select_c ( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id)
 #endif /*NEW_HYPERSLAB_API*/
 /****if* H5Sf/h5sget_select_type_c
  * NAME
- *  h5sget_select_type_c
+ *        h5sget_select_type_c
  * PURPOSE
- *  Call H5Sget_select_type
+ *     Call H5Sget_select_type
  * INPUTS
- *  space_id - identifier of the dataspace
+ *      space_id - identifier of the dataspace
  * OUTPUTS
- *  type - type of selection
+ *     type - type of selection
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Monday, October 7, 2002
+ *              Monday, October 7, 2002
  * HISTORY
  *
  * SOURCE
 */
 int_f
-h5sget_select_type_c ( hid_t_f *space_id , int_f *type)
+nh5sget_select_type_c ( hid_t_f *space_id , int_f *type)
 /******/
 {
   int ret_value = -1;
@@ -1195,28 +1195,28 @@ h5sget_select_type_c ( hid_t_f *space_id , int_f *type)
 
 /****if* H5Sf/h5sselect_elements_c
  * NAME
- *  h5sselect_elements_c
+ *        h5sselect_elements_c
  * PURPOSE
- *  Call H5Sselect_elements to select elements of a dataspace
+ *     Call H5Sselect_elements to select elements of a dataspace
  * INPUTS
- *  space_id - identifier of the dataspace
- *  operator - defines how the new selection is combined
- *  with the previous one; current values are
+ *      space_id - identifier of the dataspace
+ *              operator - defines how the new selection is combined
+ *              with the previous one; current values are
  *              H5S_SELECT_SET_F (0)
- *  nelements - number of elements in the selection
- *  coord - arrays with the elements coordinates
+ *              nelements - number of elements in the selection
+ *              coord - arrays with the elements coordinates
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, August 11, 1999
+ *              Wednesday, August 11, 1999
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsize_t_f *coord)
+nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsize_t_f *coord)
 /******/
 {
   int ret_value = -1;
@@ -1251,28 +1251,28 @@ h5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsiz
 
 /****if* H5Sf/h5sdecode_c
  * NAME
- *  h5sdecode_c
+ *        h5sdecode_c
  * PURPOSE
- *  Call H5Sdecode
+ *     Call H5Sdecode
  * INPUTS
  *
  *		buf     - Buffer for the data space object to be decoded.
  * OUTPUTS
  *
- *  obj_id  - Object_id (non-negative)
+ *              obj_id  - Object_id (non-negative)
  *
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *  March 26, 2008
+ *              March 26, 2008
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sdecode_c ( _fcd buf, hid_t_f *obj_id )
+nh5sdecode_c ( _fcd buf, hid_t_f *obj_id )
 /******/
 {
   int ret_value = -1;
@@ -1297,26 +1297,26 @@ h5sdecode_c ( _fcd buf, hid_t_f *obj_id )
 
 /****if* H5Sf/h5sencode_c
  * NAME
- *  h5sencode_c
+ *        h5sencode_c
  * PURPOSE
- *  Call H5Sencode
+ *     Call H5Sencode
  * INPUTS
  *
- *  obj_id - Identifier of the object to be encoded.
+ *            obj_id - Identifier of the object to be encoded.
  *		 buf - Buffer for the object to be encoded into.
- *  nalloc - The size of the allocated buffer.
+ *            nalloc - The size of the allocated buffer.
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *  March 26, 2008
+ *              March 26, 2008
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
+nh5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
 /******/
 {
   int ret_value = -1;
@@ -1366,28 +1366,28 @@ h5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
 
 /****if* H5Sf/h5sextent_equal_c
  * NAME
- *  h5sextent_equal_c
+ *        h5sextent_equal_c
  * PURPOSE
- *  Call H5Sextent_equal
+ *     Call H5Sextent_equal
  * INPUTS
  *
  *		space1_id - First dataspace identifier.
- *  space2_id - Second dataspace identifier.
+ *              space2_id - Second dataspace identifier.
  * OUTPUTS
  *
- *  equal - TRUE if equal, FALSE if unequal.
+ *              equal - TRUE if equal, FALSE if unequal.
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
- *  April 4, 2008
+ *              April 4, 2008
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5sextent_equal_c ( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal)
+nh5sextent_equal_c ( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal)
 /******/
 {
   int ret_value = -1;

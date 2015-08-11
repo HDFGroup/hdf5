@@ -52,6 +52,8 @@ CONTAINS
   
   INTEGER FUNCTION test_genprop_cls_cb1_f(list_id, create_data ) bind(C)
     
+    USE HDF5
+    USE ISO_C_BINDING
     IMPLICIT NONE
 
     INTEGER(HID_T), INTENT(IN), VALUE :: list_id
@@ -68,11 +70,6 @@ CONTAINS
 END MODULE test_genprop_cls_cb1_mod
 
 MODULE TH5P_F03
-
-  USE HDF5 
-  USE TH5_MISC 
-  USE TH5_MISC_GEN
-  USE ISO_C_BINDING
 
 CONTAINS
 
@@ -95,6 +92,9 @@ CONTAINS
 
 SUBROUTINE test_create(total_error)
 
+  USE HDF5 
+  USE TH5_MISC
+  USE ISO_C_BINDING
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error
@@ -187,12 +187,18 @@ SUBROUTINE test_create(total_error)
   CALL check("H5Pset_fill_value_f",error, total_error)
   CALL h5pget_fill_value_f(dcpl, H5T_NATIVE_DOUBLE, dpfill, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
-  CALL VERIFY("***ERROR: Returned wrong fill value (double)", dpfill, 1.0_dp, total_error)
+  IF(.NOT.dreal_eq( REAL(dpfill,dp), 1.0_dp))THEN
+     PRINT*,"***ERROR: Returned wrong fill value (double)"
+     total_error = total_error + 1
+  ENDIF
   CALL H5Pset_fill_value_f(dcpl, H5T_NATIVE_REAL, 2.0, error)
   CALL check("H5Pset_fill_value_f",error, total_error)
   CALL h5pget_fill_value_f(dcpl, H5T_NATIVE_REAL, rfill, error)
   CALL check("H5Pget_fill_value_f",error, total_error)
-  CALL VERIFY("***ERROR: Returned wrong fill value (real)", rfill, 2.0, total_error)
+  IF(.NOT.dreal_eq( REAL(rfill,dp), REAL(2.0,dp)))THEN
+     PRINT*,"***ERROR: Returned wrong fill value (real)"
+     total_error = total_error + 1
+  ENDIF
 
   ! For the actual compound type
   CALL H5Pset_fill_value_f(dcpl, comp_type_id, f_ptr, error)
@@ -228,10 +234,10 @@ SUBROUTINE test_create(total_error)
 
   CALL H5Pget_fill_value_f(dcpl, comp_type_id, f_ptr, error)
   CALL check("H5Pget_fill_value_f", error, total_error)
-  CALL verify("***ERROR: Returned wrong fill value", rd_c%a, fill_ctype%a, total_error)
-  CALL verify("***ERROR: Returned wrong fill value", rd_c%y, fill_ctype%y, total_error)
 
-  IF( rd_c%x .NE. fill_ctype%x .OR. &
+  IF( .NOT.dreal_eq( REAL(rd_c%a,dp), REAL(fill_ctype%a, dp)) .OR. &
+      .NOT.dreal_eq( REAL(rd_c%y,dp), REAL(fill_ctype%y, dp)) .OR. &
+      rd_c%x .NE. fill_ctype%x .OR. &
       rd_c%z .NE. fill_ctype%z )THEN
 
      PRINT*,"***ERROR: Returned wrong fill value"
@@ -263,6 +269,9 @@ SUBROUTINE test_genprop_class_callback(total_error)
   !
   !
 
+  USE HDF5
+  USE TH5_MISC
+  USE ISO_C_BINDING
   USE test_genprop_cls_cb1_mod
   IMPLICIT NONE
 
@@ -321,7 +330,7 @@ SUBROUTINE test_genprop_class_callback(total_error)
   !  Check the number of properties in class 
   CALL h5pget_nprops_f(cid1, nprops, error)
   CALL check("h5pget_nprops_f", error, total_error)
-  CALL verify("h5pget_nprops_f", INT(nprops), 4, total_error)
+  CALL VERIFY("h5pget_nprops_f", INT(nprops), 4, total_error)
 
   !  Initialize class callback structs 
 
@@ -341,12 +350,12 @@ SUBROUTINE test_genprop_class_callback(total_error)
   !  Check that the list's class is correct 
   CALL H5Pequal_f(cid2, cid1, flag, error)
   CALL check("H5Pequal_f", error, total_error)
-  CALL verify("H5Pequal_f", flag, .TRUE., total_error)
+  CALL verifylogical("H5Pequal_f", flag, .TRUE., total_error)
 
   ! Check the class name
   CALL H5Pget_class_name_f(cid2, CLASS1_NAME_BUF, CLASS1_NAME_SIZE, error)
   CALL check("H5Pget_class_name_f", error, total_error)
-  CALL verify("H5Pget_class_name_f", CLASS1_NAME_BUF, CLASS1_NAME, error)
+  CALL verifystring("H5Pget_class_name_f", CLASS1_NAME_BUF, CLASS1_NAME, error)
   IF(error.NE.0)THEN
      WRITE(*,*) 'Class names do not match! name=',CLASS1_NAME_BUF, 'CLASS1_NAME=',CLASS1_NAME
      total_error = total_error + 1
@@ -356,42 +365,42 @@ SUBROUTINE test_genprop_class_callback(total_error)
   CALL check("h5pclose_class_f", error, total_error)
 
   ! Verify that the creation callback occurred 
-  CALL verify("h5pcreate_f", crt_cb_struct%count, 1, total_error)
-  CALL verify("h5pcreate_f", crt_cb_struct%id, lid1, total_error)
+  CALL VERIFY("h5pcreate_f", crt_cb_struct%count, 1, total_error)
+  CALL VERIFY_INTEGER_HID_T("h5pcreate_f", crt_cb_struct%id, lid1, total_error)
 
   !  Check the number of properties in list 
   CALL h5pget_nprops_f(lid1,nprops, error)
   CALL check("h5pget_nprops_f", error, total_error)
-  CALL verify("h5pget_nprops_f", INT(nprops), 4, total_error)
+  CALL VERIFY("h5pget_nprops_f", INT(nprops), 4, total_error)
 
   !  Create another property list from the class 
   CALL h5pcreate_f(cid1, lid2, error)
   CALL check("h5pcreate_f", error, total_error)
 
   !  Verify that the creation callback occurred 
-  CALL verify("h5pcreate_f", crt_cb_struct%count, 2, total_error)
-  CALL verify("h5pcreate_f", crt_cb_struct%id, lid2, total_error)
+  CALL VERIFY("h5pcreate_f", crt_cb_struct%count, 2, total_error)
+  CALL VERIFY_INTEGER_HID_T("h5pcreate_f", crt_cb_struct%id, lid2, total_error)
 
   !  Check the number of properties in list 
   CALL h5pget_nprops_f(lid2,nprops, error)
   CALL check("h5pget_nprops_f", error, total_error)
-  CALL verify("h5pget_nprops_f", INT(nprops), 4, total_error)
+  CALL VERIFY("h5pget_nprops_f", INT(nprops), 4, total_error)
 
   !  Close first list 
   CALL h5pclose_f(lid1, error);
   CALL check("h5pclose_f", error, total_error)
 
   ! Verify that the close callback occurred 
-  CALL verify("h5pcreate_f", cls_cb_struct%count, 1, total_error)
-  CALL verify("h5pcreate_f", cls_cb_struct%id, lid1, total_error)
+  CALL VERIFY("h5pcreate_f", cls_cb_struct%count, 1, total_error)
+  CALL VERIFY_INTEGER_HID_T("h5pcreate_f", cls_cb_struct%id, lid1, total_error)
 
   ! Close second list 
   CALL h5pclose_f(lid2, error);
   CALL check("h5pclose_f", error, total_error)
 
   ! Verify that the close callback occurred
-  CALL verify("h5pcreate_f", cls_cb_struct%count, 2, total_error)
-  CALL verify("h5pcreate_f", cls_cb_struct%id, lid2, total_error)
+  CALL VERIFY("h5pcreate_f", cls_cb_struct%count, 2, total_error)
+  CALL verify_INTEGER_HID_T("h5pcreate_f", cls_cb_struct%id, lid2, total_error)
 
   ! Close class 
   CALL h5pclose_class_f(cid1, error)
@@ -414,6 +423,8 @@ END SUBROUTINE test_genprop_class_callback
 
 SUBROUTINE test_h5p_file_image(total_error)
 
+  USE HDF5
+  USE TH5_MISC
   USE, INTRINSIC :: iso_c_binding
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -464,11 +475,11 @@ SUBROUTINE test_h5p_file_image(total_error)
   CALL check("h5pget_file_image_f", error, total_error)
 
   ! Check that sizes are the same, and that the buffers are identical but separate
-  CALL verify("h5pget_file_image_f", INT(temp_size), INT(size), total_error)
+  CALL VERIFY("h5pget_file_image_f", INT(temp_size), INT(size), total_error)
   
   ! Verify the image data is correct
   DO i = 1, count
-     CALL verify("h5pget_file_image_f", temp(i), buffer(i), total_error)
+     CALL VERIFY("h5pget_file_image_f", temp(i), buffer(i), total_error)
   ENDDO
 
 END SUBROUTINE test_h5p_file_image
@@ -487,6 +498,10 @@ END SUBROUTINE test_h5p_file_image
 !-------------------------------------------------------------------------
 !
 SUBROUTINE external_test_offset(cleanup,total_error)
+
+  USE ISO_C_BINDING
+  USE TH5_MISC
+  USE HDF5 ! This module contains all necessary modules
 
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error

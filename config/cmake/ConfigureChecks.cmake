@@ -158,17 +158,6 @@ if (NOT WINDOWS)
   endif (HDF5_ENABLE_DIRECT_VFD)
 endif (NOT WINDOWS)
 
-#-----------------------------------------------------------------------------
-# Check if C has __float128 extension
-#-----------------------------------------------------------------------------
-
-CHECK_TYPE_SIZE("__float128" SIZEOF___FLOAT128)
-if(${HAVE_SIZEOF___FLOAT128})
-  SET(H5_HAVE_FLOAT128 1)
-else (${HAVE_SIZEOF___FLOAT128})
-  SET(H5_HAVE_FLOAT128 0)
-  SET(SIZEOF___FLOAT128 0)
-endif(${HAVE_SIZEOF___FLOAT128})
 
 #-----------------------------------------------------------------------------
 # Macro to determine the various conversion capabilities

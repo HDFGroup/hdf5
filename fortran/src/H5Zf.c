@@ -1,6 +1,6 @@
 /****h* H5Zf/H5Zf
  * PURPOSE
- *  This file contains C stubs for H5Z Fortran APIs
+ *   This file contains C stubs for H5Z Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -25,22 +25,22 @@
 
 /****if* H5Zf/h5zunregister_c
  * NAME
- *  h5zunregister_c
+ *        h5zunregister_c
  * PURPOSE
- *  Call H5Zunregister to unregister filter
+ *     Call H5Zunregister to unregister filter
  * INPUTS
- *  filter identifier
+ *      filter identifier
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, March 12, 2003
+ *              Wednesday, March 12, 2003
  * HISTORY
  *
  * SOURCE
 */
 int_f
-h5zunregister_c (int_f *filter)
+nh5zunregister_c (int_f *filter)
 /******/
 {
      int ret_value = -1;
@@ -58,25 +58,25 @@ h5zunregister_c (int_f *filter)
 }
 /****if* H5Zf/h5zfiletr_avail_c
  * NAME
- *  h5zfiletr_avail_c
+ *        h5zfiletr_avail_c
  * PURPOSE
- *  Call H5Zfilter_avail to find if filter is available
+ *     Call H5Zfilter_avail to find if filter is available
  * INPUTS
- *  filter - filter identifier
+ *      filter - filter identifier
  * OUTPUTS
- *  flag - status flag
+ *     flag - status flag
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Elena Pourmal
- *  Wednesday, March 12, 2003
+ *              Wednesday, March 12, 2003
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5zfilter_avail_c ( int_f *filter , int_f *flag )
+nh5zfilter_avail_c ( int_f *filter , int_f *flag )
 /******/
 {
   int ret_value = 0;
@@ -92,26 +92,26 @@ h5zfilter_avail_c ( int_f *filter , int_f *flag )
 
 /****if* H5Zf/h5zget_filter_info_c
  * NAME
- *  h5zget_filter_info_c
+ *        h5zget_filter_info_c
  * PURPOSE
- *  Call H5Zget_filter_info to find if filter has its encoder
- *  and/or its decoder available
+ *     Call H5Zget_filter_info to find if filter has its encoder
+ *              and/or its decoder available
  * INPUTS
- *  filter - filter identifier
+ *      filter - filter identifier
  * OUTPUTS
- *  flag - status flag
+ *     flag - status flag
  * RETURNS
- *  0 on success, -1 on failure
+ *     0 on success, -1 on failure
  * AUTHOR
  *  Nat Furrer and James Laird
- *  Wednesday, June 16, 2004
+ *              Wednesday, June 16, 2004
  * HISTORY
  *
  * SOURCE
 */
 
 int_f
-h5zget_filter_info_c ( int_f *filter , int_f *flag )
+nh5zget_filter_info_c ( int_f *filter , int_f *flag )
 /******/
 {
   int ret_value = 0;

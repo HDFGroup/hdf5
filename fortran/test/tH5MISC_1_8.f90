@@ -25,13 +25,11 @@
 !*****
 MODULE TH5MISC_1_8
 
-  USE HDF5 ! This module contains all necessary modules
-  USE TH5_MISC
-  USE TH5_MISC_GEN
-
 CONTAINS
 
 SUBROUTINE dtransform(cleanup, total_error)
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -59,22 +57,22 @@ SUBROUTINE dtransform(cleanup, total_error)
 
   CALL H5Pget_data_transform_f(dxpl_id_c_to_f, ptrgetTest, error, size=size)
   CALL check("dtransform.H5Pget_data_transform_f",  error, total_error)
-  CALL verify("dtransform.H5Pget_data_transform_f", c_to_f, ptrgetTest, total_error)
-  CALL verify("dtransform.H5Pget_data_transform_f", INT(size),15, total_error)
+  CALL VerifyString("dtransform.H5Pget_data_transform_f", c_to_f, ptrgetTest, total_error)
+  CALL VERIFY("dtransform.H5Pget_data_transform_f", INT(size),15, total_error)
 
 ! check case when receiving buffer to small
 
   CALL H5Pget_data_transform_f(dxpl_id_c_to_f, ptrgetTest_small, error, size=size)
   CALL check("dtransform.H5Pget_data_transform_f",  error, total_error)
-  CALL verify("dtransform.H5Pget_data_transform_f", c_to_f(1:7), ptrgetTest_small, total_error)
-  CALL verify("dtransform.H5Pget_data_transform_f", INT(size),15, total_error)
+  CALL VerifyString("dtransform.H5Pget_data_transform_f", c_to_f(1:7), ptrgetTest_small, total_error)
+  CALL VERIFY("dtransform.H5Pget_data_transform_f", INT(size),15, total_error)
 
 ! check case when receiving buffer to big
 
   CALL H5Pget_data_transform_f(dxpl_id_c_to_f, ptrgetTest_big, error, size=size)
   CALL check("dtransform.H5Pget_data_transform_f",  error, total_error)
-  CALL verify("dtransform.H5Pget_data_transform_f", c_to_f(1:15), ptrgetTest_big(1:15), total_error)
-  CALL verify("dtransform.H5Pget_data_transform_f", INT(size), 15, total_error)
+  CALL VerifyString("dtransform.H5Pget_data_transform_f", c_to_f(1:15), ptrgetTest_big(1:15), total_error)
+  CALL VERIFY("dtransform.H5Pget_data_transform_f", INT(size), 15, total_error)
 
   CALL H5Fclose_f(file_id, error)
   CALL check("H5Fclose_f", error, total_error)
@@ -93,6 +91,9 @@ END SUBROUTINE dtransform
 !***************************************************************
 
 SUBROUTINE test_genprop_basic_class(total_error)
+
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -116,7 +117,7 @@ SUBROUTINE test_genprop_basic_class(total_error)
 
   cid1 = 456
   CALL H5Pget_class_name_f(cid1, name, size, error)
-  CALL verify("H5Pget_class_name", error, -1, error)
+  CALL VERIFY("H5Pget_class_name", error, -1, error)
 
   !  Create a new generic class, derived from the root of the class hierarchy 
   CALL H5Pcreate_class_f(H5P_ROOT_F, CLASS1_NAME, cid1, error)
@@ -125,8 +126,8 @@ SUBROUTINE test_genprop_basic_class(total_error)
   !  Check class name 
   CALL H5Pget_class_name_f(cid1, name, size, error)
   CALL check("H5Pget_class_name", error, total_error)
-  CALL verify("H5Pget_class_name", size,7,error)
-  CALL verify("H5Pget_class_name", name, CLASS1_NAME, error)
+  CALL VERIFY("H5Pget_class_name", size,7,error)
+  CALL verifystring("H5Pget_class_name", name, CLASS1_NAME, error)
   IF(error.NE.0)THEN
      WRITE(*,*) 'Class names do not match! name=',name, 'CLASS1_NAME=',CLASS1_NAME
      total_error = total_error + 1
@@ -135,8 +136,8 @@ SUBROUTINE test_genprop_basic_class(total_error)
   !  Check class name smaller buffer
   CALL H5Pget_class_name_f(cid1, name_small, size, error)
   CALL check("H5Pget_class_name", error, total_error)
-  CALL verify("H5Pget_class_name", size,7,error)
-  CALL verify("H5Pget_class_name", name_small(1:4), CLASS1_NAME(1:4), error)
+  CALL VERIFY("H5Pget_class_name", size,7,error)
+  CALL verifystring("H5Pget_class_name", name_small(1:4), CLASS1_NAME(1:4), error)
   IF(error.NE.0)THEN
      WRITE(*,*) 'Class names do not match! name=',name_small(1:4), 'CLASS1_NAME=',CLASS1_NAME(1:4)
      total_error = total_error + 1
@@ -145,8 +146,8 @@ SUBROUTINE test_genprop_basic_class(total_error)
   !  Check class name bigger buffer
   CALL H5Pget_class_name_f(cid1, name_big, size, error)
   CALL check("H5Pget_class_name", error, total_error)
-  CALL verify("H5Pget_class_name", size,7,error)
-  CALL verify("H5Pget_class_name", TRIM(name_big), TRIM(CLASS1_NAME), error)
+  CALL VERIFY("H5Pget_class_name", size,7,error)
+  CALL verifystring("H5Pget_class_name", TRIM(name_big), TRIM(CLASS1_NAME), error)
   IF(error.NE.0)THEN
      WRITE(*,*) 'Class names do not match! name=',TRIM(name_small), 'CLASS1_NAME=',TRIM(CLASS1_NAME)
      total_error = total_error + 1
@@ -159,13 +160,13 @@ SUBROUTINE test_genprop_basic_class(total_error)
   !  Verify class parent correct 
   CALL H5Pequal_f(cid2, H5P_ROOT_F, flag, error)
   CALL check("H5Pequal_f", error, total_error)
-  CALL verify("H5Pequal_f", flag, .TRUE., total_error)
+  CALL verifylogical("H5Pequal_f", flag, .TRUE., total_error)
 
 
   !  Make certain false postives aren't being returned 
   CALL H5Pequal_f(cid2, H5P_FILE_CREATE_F, flag, error)
   CALL check("H5Pequal_f", error, total_error)
-  CALL verify("H5Pequal_f", flag, .FALSE., total_error)
+  CALL verifylogical("H5Pequal_f", flag, .FALSE., total_error)
 
   ! Close parent class 
   CALL H5Pclose_class_f(cid2, error)
@@ -186,6 +187,8 @@ SUBROUTINE test_h5s_encode(total_error)
 !**
 !***************************************************************
 
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
 
@@ -238,7 +241,7 @@ SUBROUTINE test_h5s_encode(total_error)
   !  Try decoding bogus buffer 
 
   CALL H5Sdecode_f(sbuf, decoded_sid1, error)
-  CALL verify("H5Sdecode", error, -1, total_error)
+  CALL VERIFY("H5Sdecode", error, -1, total_error)
 
   CALL H5Sencode_f(sid1, sbuf, sbuf_size, error)
   CALL check("H5Sencode", error, total_error)
@@ -251,7 +254,7 @@ SUBROUTINE test_h5s_encode(total_error)
   !  Verify the decoded dataspace 
   CALL h5sget_simple_extent_npoints_f(decoded_sid1, n, error)
   CALL check("h5sget_simple_extent_npoints_f", error, total_error)
-  CALL verify("h5sget_simple_extent_npoints_f", INT(n), INT(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3), &
+  CALL VERIFY("h5sget_simple_extent_npoints_f", INT(n), INT(SPACE1_DIM1 * SPACE1_DIM2 * SPACE1_DIM3), &
        total_error)
 
   !
@@ -294,16 +297,16 @@ SUBROUTINE test_h5s_encode(total_error)
 
   CALL H5Sget_simple_extent_type_f(decoded_sid3, space_type, error)
   CALL check("H5Sget_simple_extent_type_f", error, total_error)
-  CALL verify("H5Sget_simple_extent_type_f", space_type, H5S_SCALAR_F, total_error)
+  CALL VERIFY("H5Sget_simple_extent_type_f", space_type, H5S_SCALAR_F, total_error)
 
   !  Verify decoded dataspace 
   CALL h5sget_simple_extent_npoints_f(decoded_sid3, n, error)
   CALL check("h5sget_simple_extent_npoints_f", error, total_error)
-  CALL verify("h5sget_simple_extent_npoints_f", INT(n), 1, total_error)
+  CALL VERIFY("h5sget_simple_extent_npoints_f", INT(n), 1, total_error)
 
   CALL H5Sget_simple_extent_ndims_f(decoded_sid3, rank, error)
   CALL CHECK("H5Sget_simple_extent_ndims_f", error, total_error)
-  CALL verify("H5Sget_simple_extent_ndims_f", rank, 0, total_error )
+  CALL VERIFY("H5Sget_simple_extent_ndims_f", rank, 0, total_error )
 
   CALL h5sclose_f(sid3, error)
   CALL check("h5sclose_f", error, total_error)
@@ -332,6 +335,8 @@ END SUBROUTINE test_h5s_encode
 
 SUBROUTINE test_scaleoffset(cleanup, total_error )
 
+  USE HDF5
+  USE TH5_MISC
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error

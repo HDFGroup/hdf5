@@ -63,20 +63,6 @@ dnl was required" problem when libtool is also used
 dnl [1] MPICH.org
 dnl
 
-dnl See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
-
-AC_DEFUN([PAC_PROG_FC_ISO_FORTRAN_ENV],[
-  HAVE_ISO_FORTRAN_ENV="no"
-  AC_MSG_CHECKING([if Fortran compiler supports intrinsic module ISO_FORTRAN_ENV])
-  AC_LINK_IFELSE([AC_LANG_SOURCE([ 
-   PROGRAM main
-     USE, INTRINSIC :: ISO_FORTRAN_ENV
-   END PROGRAM
-  ])],[AC_MSG_RESULT([yes])
-     	HAVE_ISO_FORTRAN_ENV="yes"],
-      [AC_MSG_RESULT([no])])
-])
-
 dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
 
 AC_DEFUN([PAC_PROG_FC_SIZEOF],[
@@ -125,56 +111,38 @@ AC_DEFUN([PAC_PROG_FC_STORAGE_SIZE],[
 
 ])
 
-dnl Check to see C_LONG_DOUBLE is available
+dnl Check to see if -r8 was specified to determine if we need to
+dnl compile the DOUBLE PRECISION interfaces.
 
-AC_DEFUN([PAC_PROG_FC_HAVE_C_LONG_DOUBLE],[
-  HAVE_C_LONG_DOUBLE_FORTRAN="no"
-  AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_LONG_DOUBLE])
-  AC_LINK_IFELSE([AC_LANG_SOURCE([
-   PROGRAM main
-     USE ISO_C_BINDING
-     REAL(KIND=C_LONG_DOUBLE) :: d
-   END PROGRAM
-  ])], [AC_MSG_RESULT([yes])
-     	HAVE_C_LONG_DOUBLE_FORTRAN="yes"],
-     [AC_MSG_RESULT([no])])
-])
-
-dnl Check if C_LONG_DOUBLE is different from C_DOUBLE
-
-if  test "X$FORTRAN_HAVE_C_LONG_DOUBLE" = "Xyes"; then
-AC_DEFUN([PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE],[
-  C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="no"	
-  AC_MSG_CHECKING([if Fortran C_LONG_DOUBLE is different from C_DOUBLE])
+AC_DEFUN([PAC_PROG_FC_DEFAULT_REALisDBLE],[
+  FORTRAN_DEFAULT_REALisDBLE="no"	
+  AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
   
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([
      MODULE type_mod
-       USE ISO_C_BINDING
        INTERFACE h5t	
-         MODULE PROCEDURE h5t_c_double
-         MODULE PROCEDURE h5t_c_long_double
+         MODULE PROCEDURE h5t_real
+         MODULE PROCEDURE h5t_dble
        END INTERFACE
      CONTAINS
-       SUBROUTINE h5t_c_double(r)
-         REAL(KIND=C_DOUBLE) :: r
-       END SUBROUTINE h5t_c_double
-       SUBROUTINE h5t_c_long_double(d)
-         REAL(KIND=C_LONG_DOUBLE) :: d
-       END SUBROUTINE h5t_c_long_double
+       SUBROUTINE h5t_real(r)
+         REAL :: r
+       END SUBROUTINE h5t_real
+       SUBROUTINE h5t_dble(d)
+         DOUBLE PRECISION :: d
+       END SUBROUTINE h5t_dble
      END MODULE type_mod
      PROGRAM main
-       USE ISO_C_BINDING
        USE type_mod
-       REAL(KIND=C_DOUBLE)      :: r
-       REAL(KIND=C_LONG_DOUBLE) :: d
+       REAL :: r
+       DOUBLE PRECISION :: d
        CALL h5t(r)
        CALL h5t(d)
      END PROGRAM main
-    ])], [AC_MSG_RESULT([yes]) 
-            C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="yes"], 
-         [AC_MSG_RESULT([no])])
+    ])], [AC_MSG_RESULT([no])], 
+         [AC_MSG_RESULT([yes])
+            FORTRAN_DEFAULT_REALisDBLE="yes"])
 ])
-fi
 
 dnl Checking if the compiler supports the required Fortran 2003 features and
 dnl disable Fortran 2003 if it does not.
@@ -184,6 +152,7 @@ AC_DEFUN([PAC_PROG_FC_HAVE_F2003_REQUIREMENTS],[
 dnl --------------------------------------------------------------------
 dnl Default for FORTRAN 2003 compliant compilers
 dnl
+    HAVE_FORTRAN_2003="no"
     HAVE_F2003_REQUIREMENTS="no"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
 
@@ -311,280 +280,4 @@ dnl   Try link a simple MPI program.
 dnl   Change to the C language
       AC_LANG_POP(Fortran)
 ])
-
-dnl ------------------------------------------------------
-dnl Determine the available KINDs for REALs and INTEGERs
-dnl ------------------------------------------------------
-dnl
-dnl This is a runtime test.
-dnl
-AC_DEFUN([PAC_FC_AVAIL_KINDS],[
-AC_LANG_PUSH([Fortran])
-rm -f pac_fconftest.out
-
-AC_RUN_IFELSE([
-    AC_LANG_SOURCE([
-    PROGRAM main
-        IMPLICIT NONE
-        INTEGER :: ik, k, lastkind, max_decimal_prec
-	INTEGER :: num_rkinds, num_ikinds
-        num_ikinds = 0
-        lastkind=SELECTED_INT_KIND(1)
-        OPEN(8, FILE='pac_fconftest.out', form='formatted')
-        ! Find integer KINDs
-        DO ik=2,36
-             k = SELECTED_INT_KIND(ik)
-             IF (k .NE. lastkind) THEN
-	          num_ikinds = num_ikinds + 1	
-                  WRITE(8,'(I0)',ADVANCE='NO') lastkind
-                  lastkind = k
-             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ','	
-             ENDIF
-             IF (k .LE. 0) EXIT
-        ENDDO
-	IF (lastkind.NE.-1) THEN
-	   num_ikinds = num_ikinds + 1	
-           WRITE(8,'(I0)') lastkind
-	ELSE
-           WRITE(8,'()')
-        ENDIF
-        ! Find real KINDs
-        num_rkinds = 0
-        lastkind=SELECTED_REAL_KIND(1)
-	max_decimal_prec = 1
-        DO ik=2,36
-             k = SELECTED_REAL_KIND(ik)
-             IF (k .NE. lastkind) THEN
-                  num_rkinds = num_rkinds + 1
-                  WRITE(8,'(I0)',ADVANCE='NO') lastkind
-                  lastkind = k
-             	  IF(k.GT.0) WRITE(8,'(A)',ADVANCE='NO') ','
-	          max_decimal_prec = ik
-             ENDIF
-             IF (k .LE. 0) EXIT
-        ENDDO
-        IF (lastkind.NE.-1)THEN
-	    num_rkinds = num_rkinds + 1
-            WRITE(8,'(I0)') lastkind
-	ELSE
-           WRITE(8,'()')
-        ENDIF
-	WRITE(8,'(I0)') max_decimal_prec
-	WRITE(8,'(I0)') num_ikinds
-	WRITE(8,'(I0)') num_rkinds
-    END
-    ])
-],[
-    if test -s pac_fconftest.out ; then
 	
-     dnl The output from the above program will be:
-     dnl    -- LINE 1 --  valid integer kinds (comma seperated list)
-     dnl    -- LINE 2 --  valid real kinds (comma seperated list)
-     dnl    -- LINE 3 --  max decimal precision for reals
-     dnl    -- LINE 4 --  number of valid integer kinds
-     dnl    -- LINE 5 --  number of valid real kinds
-
-        pac_validIntKinds="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
-	pac_validRealKinds="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
-        PAC_FC_MAX_REAL_PRECISION="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
-        AC_DEFINE_UNQUOTED([PAC_FC_MAX_REAL_PRECISION], $PAC_FC_MAX_REAL_PRECISION, [Define Fortran Maximum Real Decimal Precision])
-
-        PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds`}"
-        PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
-
-	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
-	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
-	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
-	H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
-
-	AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
-	AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_IKIND], $H5CONFIG_F_NUM_IKIND, [Define number of valid Fortran INTEGER KINDs])
-	AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
-	AC_DEFINE_UNQUOTED([H5CONFIG_F_IKIND], $H5CONFIG_F_IKIND, [Define valid Fortran INTEGER KINDs])
-
-        AC_MSG_CHECKING([for Fortran INTEGER KINDs])
-        AC_MSG_RESULT([$PAC_FC_ALL_INTEGER_KINDS])
-	AC_MSG_CHECKING([for Fortran REAL KINDs])
-	AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])
-	AC_MSG_CHECKING([for Fortran REALs maximum decimal precision])
-	AC_MSG_RESULT([$PAC_FC_MAX_REAL_PRECISION])
-    else
-        AC_MSG_RESULT([Error])
-        AC_MSG_WARN([No output from test program!])
-    fi
-    rm -f pac_fconftest.out
-],[
-    AC_MSG_RESULT([Error])
-    AC_MSG_WARN([Failed to run program to determine available KINDs])
-],[])
-
-AC_LANG_POP([Fortran])
-])
-AC_DEFUN([PAC_FC_SIZEOF_INT_KINDS],[
-AC_REQUIRE([PAC_FC_AVAIL_KINDS])
-AC_MSG_CHECKING([sizeof of available INTEGER KINDs])
-AC_LANG_PUSH([Fortran])
-pack_int_sizeof=""
-rm -f pac_fconftest.out
-
-for kind in `echo $pac_validIntKinds | perl -pe 's/,/ /g'`; do
-  AC_LANG_CONFTEST([
-      AC_LANG_SOURCE([
-                PROGRAM main
-                USE ISO_C_BINDING
-                IMPLICIT NONE
-                INTEGER (KIND=$kind) a
-                OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
-                WRITE(8,'(I0)') $FC_SIZEOF_A
-                CLOSE(8)
-                END
-            ])
-        ])
-        AC_RUN_IFELSE([],[
-            if test -s pac_fconftest.out ; then
-                sizes="`cat pac_fconftest.out`"
-                pack_int_sizeof="$pack_int_sizeof $sizes,"
-            else
-                AC_MSG_WARN([No output from test program!])
-            fi
-            rm -f pac_fconftest.out
-        ],[
-            AC_MSG_WARN([Fortran program fails to build or run!])
-        ],[
-            pack_int_sizeof="$2"
-        ])
-done
-PAC_FC_ALL_INTEGER_KINDS_SIZEOF="{`echo $pack_int_sizeof | perl -pe 's/,$//' | perl -pe 's/ //g'`}"
-AC_MSG_RESULT([$PAC_FC_ALL_INTEGER_KINDS_SIZEOF])
-AC_LANG_POP([Fortran])
-])
-
-AC_DEFUN([PAC_FC_SIZEOF_REAL_KINDS],[
-AC_REQUIRE([PAC_FC_AVAIL_KINDS])
-AC_MSG_CHECKING([sizeof of available REAL KINDs])
-AC_LANG_PUSH([Fortran])
-pack_real_sizeof=""
-rm -f pac_fconftest.out
-for kind in `echo  $pac_validRealKinds| perl -pe 's/,/ /g'`; do
-  AC_LANG_CONFTEST([
-      AC_LANG_SOURCE([
-                PROGRAM main
-                USE ISO_C_BINDING
-                IMPLICIT NONE
-                REAL (KIND=$kind) :: a
-                OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
-                WRITE(8,'(I0)') $FC_SIZEOF_A
-                CLOSE(8)
-                END
-            ])
-        ])
-        AC_RUN_IFELSE([],[
-            if test -s pac_fconftest.out ; then
-                sizes="`cat pac_fconftest.out`"
-                pack_real_sizeof="$pack_real_sizeof $sizes,"
-            else
-                AC_MSG_WARN([No output from test program!])
-            fi
-            rm -f pac_fconftest.out
-        ],[
-            AC_MSG_WARN([Fortran program fails to build or run!])
-        ],[
-            pack_real_sizeof="$2"
-        ])
-done
-PAC_FC_ALL_REAL_KINDS_SIZEOF="{`echo $pack_real_sizeof | perl -pe 's/,$//' | perl -pe 's/ //g'`}"
-AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS_SIZEOF])
-AC_LANG_POP([Fortran])
-])
-
-AC_DEFUN([PAC_FC_NATIVE_INTEGER],[
-AC_REQUIRE([PAC_FC_AVAIL_KINDS])
-AC_MSG_CHECKING([sizeof of native KINDS])
-AC_LANG_PUSH([Fortran])
-pack_int_sizeof=""
-rm -f pac_fconftest.out
-  AC_LANG_CONFTEST([
-      AC_LANG_SOURCE([
-                PROGRAM main
-                USE ISO_C_BINDING
-                IMPLICIT NONE
-                INTEGER a
-                REAL b
-                DOUBLE PRECISION c
-                OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
-                WRITE(8,*) $FC_SIZEOF_A
-	        WRITE(8,*) kind(a)
-	        WRITE(8,*) $FC_SIZEOF_B
-	        WRITE(8,*) kind(b)
-                WRITE(8,*) $FC_SIZEOF_C
-                WRITE(8,*) kind(c)
-                CLOSE(8)
-                END
-            ])
-        ])
-        AC_RUN_IFELSE([],[
-            if test -s pac_fconftest.out ; then
-                PAC_FORTRAN_NATIVE_INTEGER_KIND="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_KIND="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`perl -ne '$. == 6 && print && exit' pac_fconftest.out`"
-            else
-                AC_MSG_WARN([No output from test program!])
-            fi
-            rm -f pac_fconftest.out
-        ],[
-            AC_MSG_WARN([Fortran program fails to build or run!])
-        ],[
-            pack_int_sizeof="$2"
-        ])
-AC_MSG_RESULT([$pack_int_sizeof])
-AC_LANG_POP([Fortran])
-])
-
-AC_DEFUN([PAC_FC_LDBL_DIG],[
-AC_MSG_CHECKING([maximum decimal precision for C])
-rm -f pac_Cconftest.out
-  AC_LANG_CONFTEST([
-      AC_LANG_PROGRAM([
-                #include <float.h>
-                #include <stdio.h>
-                #define CHECK_FLOAT128 $ac_cv_sizeof___float128
-                #if CHECK_FLOAT128!=0
-                # if $HAVE_QUADMATH!=0
-                #include <quadmath.h>
-                # endif
-                # ifdef FLT128_DIG
-                #define C_FLT128_DIG FLT128_DIG
-                # else
-                #define C_FLT128_DIG 0
-                # endif
-                #else
-                #define C_FLT128_DIG 0
-                #endif
-                #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-                #define C_LDBL_DIG DECIMAL_DIG 
-                #else
-                #define C_LDBL_DIG LDBL_DIG
-                #endif
-                ],[[
-                  FILE * pFile;
-                  pFile = fopen("pac_Cconftest.out","w");
-                  fprintf(pFile, "%d\n%d\n", C_LDBL_DIG, C_FLT128_DIG);
-                ]])
-        ])
-        AC_RUN_IFELSE([],[
-            if test -s pac_Cconftest.out ; then
-	        LDBL_DIG="`perl -ne '$. == 1 && print && exit'  pac_Cconftest.out`" 
-	        FLT128_DIG="`perl -ne '$. == 2 && print && exit' pac_Cconftest.out`"
-            else
-                AC_MSG_WARN([No output from test program!])
-            fi
-            rm -f pac_Cconftest.out
-        ],[
-            AC_MSG_ERROR([C program fails to build or run!])
-        ],[])
-])
-
-

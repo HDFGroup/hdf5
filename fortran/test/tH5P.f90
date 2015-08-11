@@ -27,9 +27,6 @@
 !
 !*****
 MODULE TH5P
-  USE HDF5 ! This module contains all necessary modules 
-  USE TH5_MISC
-  USE TH5_MISC_GEN
 
 CONTAINS
 
@@ -39,6 +36,8 @@ SUBROUTINE external_test(cleanup, total_error)
 !   h5pset_external_f,  h5pget_external_count_f,
 !   h5pget_external_f
 
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -154,6 +153,8 @@ SUBROUTINE external_test(cleanup, total_error)
 END SUBROUTINE external_test
 
 SUBROUTINE multi_file_test(cleanup, total_error)
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN) :: cleanup
@@ -420,7 +421,10 @@ END SUBROUTINE multi_file_test
 !                     April 16, 2009
 !-------------------------------------------------------------------------
 !
-SUBROUTINE test_chunk_cache(cleanup, total_error)
+SUBROUTINE test_chunk_cache(cleanup, total_error) 
+
+  USE HDF5 ! This module contains all necessary modules 
+  USE TH5_MISC
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -466,16 +470,19 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Pget_cache_f", error, total_error)
   CALL H5Pget_chunk_cache_f(dapl1, nslots_4, nbytes_4, w0_4, error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
-  CALL verify("H5Pget_chunk_cache_f", nslots_1, nslots_4, total_error)
-  CALL verify("H5Pget_chunk_cache_f", nbytes_1, nbytes_4, total_error)
-  CALL verify("H5Pget_chunk_cache_f", w0_1, w0_4, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_1), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_1), INT(nbytes_4), total_error)
+
+  IF( .NOT.dreal_eq( REAL(w0_1,dp), REAL( w0_4, dp)) ) THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
 
   !  Set a lapl property on dapl1 (to verify inheritance) 
   CALL H5Pset_nlinks_f(dapl1, 134_size_t , error)
   CALL check("H5Pset_nlinks_f", error, total_error)
   CALL H5Pget_nlinks_f(dapl1, nlinks, error)
   CALL check("H5Pget_nlinks_f", error, total_error)
-  CALL verify("H5Pget_nlinks_f", INT(nlinks), 134, total_error)
+  CALL VERIFY("H5Pget_nlinks_f", INT(nlinks), 134, total_error)
 
 
   CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_local, error)
@@ -522,9 +529,11 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Dget_access_plist_f", error, total_error)
   CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", w0_2, w0_4, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF( .NOT.dreal_eq( REAL(w0_2,dp), REAL( w0_4, dp)) ) THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
   CALL H5Pclose_f(dapl2,error) 
   CALL check("H5Pclose_f", error, total_error)
   
@@ -552,9 +561,11 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Dget_access_plist_f", error, total_error)
   CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nslots_3), INT(nslots_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", w0_3, w0_4, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_3), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF( .NOT.dreal_eq( REAL(w0_3,dp), REAL( w0_4, dp)) ) THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f4", .TRUE., .FALSE., total_error)
+  ENDIF
   CALL H5Pclose_f(dapl2,error)
   CALL check("H5Pclose_f", error, total_error)
 
@@ -570,9 +581,11 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Dget_access_plist_f", error, total_error)
   CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", w0_2, w0_4, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF( .NOT.dreal_eq( REAL(w0_2,dp), REAL( w0_4, dp)) ) THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
   CALL H5Pclose_f(dapl2,error) 
   CALL check("H5Pclose_f", error, total_error)
 
@@ -588,9 +601,11 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
 
   CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", w0_2, w0_4, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF( .NOT.dreal_eq( REAL(w0_2,dp), REAL( w0_4, dp)) ) THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
   ! Don't close dapl2, we will use it in the next section
 
   ! Modify cache values on fapl_local
@@ -623,9 +638,11 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Dget_access_plist_f", error, total_error)
   CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", w0_2, w0_4, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF( .NOT.dreal_eq( REAL(w0_2,dp), REAL( w0_4, dp)) ) THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
 
   ! Test H5D_CHUNK_CACHE_NSLOTS_DEFAULT and H5D_CHUNK_CACHE_W0_DEFAULT
   nslots_2 = H5D_CHUNK_CACHE_NSLOTS_DFLT_F
@@ -646,9 +663,11 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Dget_access_plist_f", error, total_error)
   CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
   CALL check("H5Pget_chunk_cache_f", error, total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nslots_3), INT(nslots_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
-  CALL verify("H5Pget_chunk_cache_f", w0_3, w0_4, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_3), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF( .NOT.dreal_eq( REAL(w0_3,dp), REAL( w0_4, dp)) ) THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
 
 ! Close
 

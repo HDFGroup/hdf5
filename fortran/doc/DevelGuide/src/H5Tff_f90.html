@@ -1,0 +1,2378 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Tff.f90</title>
+<!-- Source: ./src/H5Tff.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5T"></a>
+<a name="robo70"></a><h2>H5T</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5T</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5T</strong> functions. It includes
+  all the functions that are independent on whether the Fortran 2003 functions
+  are enabled or disabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5T</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5T2fh5tarray5fcreate5ff"></a>
+<a name="robo404"></a><h2>h5tarray_create_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tarray_create_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates an array datatype object.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  base_id       - datatype identifier for the array
+                  base datatype
+  rank          - rank of the array
+  dims          - array dimension sizes
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  type_id       - array datatype identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tarray_create_f</strong><span class="sign">(</span>base_id<span class="sign">,</span> rank<span class="sign">,</span> dims<span class="sign">,</span> type_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> base_id <span class="sign">!</span> identifier of array base datatype
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span>  rank <span class="sign">!</span> Rank of the array
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="comment">(*), INTENT(IN) :: dims !Sizes of each array dimension
+            INTEGER(HID_T), INTENT(OUT) :: type_id ! identifier of the array datatype
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tclose5ff"></a>
+<a name="robo405"></a><h2>h5tclose_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tclose_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Releases a datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tclose_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tcommit5fanon5ff"></a>
+<a name="robo406"></a><h2>h5tcommit_anon_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tcommit_anon_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Commits a transient datatype to a file,
+  creating a new named datatype,
+  but does not link it into the file structure.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - A file or group identifier specifying the file
+                  in which the new named datatype is to be created.
+  dtype_id      - A datatype identifier.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  tcpl_id       - A datatype creation property list identifier.
+                  (H5P_DEFAULT_F for the default property list.)
+  tapl_id       - A datatype access property list identifier.
+                  should always be passed as the value H5P_DEFAULT_F.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 25, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tcommit_anon_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> dtype_id<span class="sign">,</span> hdferr<span class="sign">,</span> tcpl_id<span class="sign">,</span> tapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id  <span class="sign">!</span> A file or group identifier specifying
+                                          <span class="sign">!</span> the file in which the new named datatype
+                                          <span class="sign">!</span> is to be created<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dtype_id  <span class="sign">!</span> Datatype identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> tcpl_id <span class="sign">!</span> A datatype creation property
+                                                    <span class="sign">!</span> list identifier<span class="sign">.</span>
+                                                    <span class="sign">!</span> <span class="sign">(</span>H5P_DEFAULT_F <span class="keyword">for</span> the <span class="keyword">default</span> property list<span class="sign">.</span><span class="sign">)</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> tapl_id <span class="sign">!</span> A datatype access property list identifier<span class="sign">.</span>
+                                                    <span class="sign">!</span> should always be passed as the value H5P_DEFAULT_F<span class="sign">.</span>
+</pre>
+
+<hr />
+<a name="H5T2fh5tcommit5ff"></a>
+<a name="robo407"></a><h2>h5tcommit_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tcommit_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Commits a transient datatype to a file, creating a
+  new named datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - name of the datatype to be stored
+                  at the specified location
+  type_id       - identifier of a datatype to be stored
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lcpl_id       - Link creation property list
+  tcpl_id       - Datatype creation property list
+  tapl_id       - Datatype access property list
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>        - Explicit Fortran interfaces were added for
+          called C functions (it is needed for Windows
+          port).  March 7, 2001
+
+        - Added optional parameters introduced in version 1.8
+          M. Scot Breitenfeld
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tcommit_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> type_id<span class="sign">,</span> hdferr<span class="sign">,</span> <span class="sign">&amp;</span>
+       lcpl_id<span class="sign">,</span> tcpl_id<span class="sign">,</span> tapl_id  <span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id  <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name
+                                  <span class="sign">!</span> Datatype name within file or group
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id  <span class="sign">!</span> Datatype identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lcpl_id <span class="sign">!</span> Link creation property list
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> tcpl_id <span class="sign">!</span> Datatype creation property list
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> tapl_id <span class="sign">!</span> Datatype access property list
+</pre>
+
+<hr />
+<a name="H5T2fh5tcommitted5ff"></a>
+<a name="robo408"></a><h2>h5tcommitted_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tcommitted_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines whether a datatype is a named type or a transient type.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dtype_id      - A datatype identifier.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  committed     - .TRUE., if the datatype has been committed
+                  .FALSE., if the datatype has not been committed.
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 25, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tcommitted_f</strong><span class="sign">(</span>dtype_id<span class="sign">,</span> committed<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dtype_id  <span class="sign">!</span> A datatype identifier
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> committed <span class="sign">!</span> <span class="sign">.</span>TRUE<span class="sign">.</span><span class="sign">,</span> <span class="keyword">if</span> the datatype has been committed
+                                      <span class="sign">!</span><span class="sign">.</span>FALSE<span class="sign">.</span><span class="sign">,</span> <span class="keyword">if</span> the datatype has not been committed<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr     <span class="sign">!</span> Error code<span class="sign">:</span>
+<span class="sign">!</span>  Success<span class="sign">:</span>  0
+<span class="sign">!</span>  Failure<span class="sign">:</span> <span class="sign">-</span>1
+</pre>
+
+<hr />
+<a name="H5T2fh5tcompiler5fconv5ff"></a>
+<a name="robo409"></a><h2>h5tcompiler_conv_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tcompiler_conv_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Check whether the library’s default conversion is hard conversion.R
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  src_id        - Identifier for the source datatype.
+  dst_id        - Identifier for the destination datatype.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  flag          - TRUE for compiler conversion, FALSE for library conversion
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  April 9, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tcompiler_conv_f</strong><span class="sign">(</span> src_id<span class="sign">,</span> dst_id<span class="sign">,</span> flag<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> src_id <span class="sign">!</span> Identifier <span class="keyword">for</span> the source datatype<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dst_id <span class="sign">!</span> Identifier <span class="keyword">for</span> the destination datatype<span class="sign">.</span>
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> flag  <span class="sign">!</span> <span class="sign">.</span>TRUE<span class="sign">.</span> <span class="keyword">for</span> compiler conversion<span class="sign">,</span> <span class="sign">.</span>FALSE<span class="sign">.</span> <span class="keyword">for</span> library conversion
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr  <span class="sign">!</span> Error code<span class="sign">:</span>
+                                    <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+<hr />
+<a name="H5T2fh5tcopy5ff"></a>
+<a name="robo411"></a><h2>h5tcopy_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tcopy_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a copy of exisiting datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  new_type_id   - identifier of datatype's copy
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tcopy_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> new_type_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_type_id
+                                 <span class="sign">!</span> Identifier of datatype<span class="squote">'s copy
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tcreate5ff"></a>
+<a name="robo412"></a><h2>h5tcreate_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tcreate_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a new dataype
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  class         - datatype class, possible values are:
+                    H5T_COMPOUND_F
+                    H5T_ENUM_F
+                    H5T_OPAQUE_F
+  size          - datattype size
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  type_id       - datatype identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tcreate_f</strong><span class="sign">(</span>class<span class="sign">,</span> size<span class="sign">,</span> type_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> class <span class="sign">!</span> Datatype class can be one of
+                                         <span class="sign">!</span> H5T_COMPOUND_F
+                                         <span class="sign">!</span> H5T_ENUM_F
+                                         <span class="sign">!</span> H5T_OPAQUE_F
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size <span class="sign">!</span> Size of the datatype
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fH5Tdecode5ff"></a>
+<a name="robo413"></a><h2>H5Tdecode_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Tdecode_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Decode a binary object description of data type and return a new object handle.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  buf           -  Buffer for the data space object to be decoded.
+  obj_id        - Object ID
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  April 9, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5tdecode_f<span class="sign">(</span>buf<span class="sign">,</span> obj_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buf <span class="sign">!</span> Buffer <span class="keyword">for</span> the data space object to be decoded<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id  <span class="sign">!</span> Object ID
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr     <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tenaum5finsert5ff"></a>
+<a name="robo414"></a><h2>h5tenaum_insert_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tenaum_insert_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Inserts a new enumeration datatype member.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5tenum_insert_f<span class="sign">(</span>type_id<span class="sign">,</span>  name<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span>Name of  the new member
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span>value of the new member
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fH5Tencode5ff"></a>
+<a name="robo415"></a><h2>H5Tencode_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Tencode_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Encode a data type object description into a binary buffer.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - Identifier of the object to be encoded.
+  buf           - Buffer for the object to be encoded into.
+  nalloc        - The size of the allocated buffer.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  nalloc        - The size of the buffer needed.
+  hdferr        - Returns 0 if successful and -1 if fails.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  April 9, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5tencode_f<span class="sign">(</span>obj_id<span class="sign">,</span> buf<span class="sign">,</span> nalloc<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id <span class="sign">!</span> Identifier of the object to be encoded<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buf <span class="sign">!</span> Buffer <span class="keyword">for</span> the object to be encoded into<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>INOUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> nalloc <span class="sign">!</span> The size of the allocated buffer<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr     <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tenum5fcreate5ff"></a>
+<a name="robo416"></a><h2>h5tenum_create_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tenum_create_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a new enumeration datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  parent_id     - datatype identifier for base datatype
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  new_type_id   - datatype identifier for the enumeration datatype
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tenum_create_f</strong><span class="sign">(</span>parent_id<span class="sign">,</span> new_type_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> parent_id  <span class="sign">!</span> Datatype identifier <span class="keyword">for</span>
+                                                     <span class="sign">!</span> the  base datatype
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_type_id
+                                                     <span class="sign">!</span>datatype identifier <span class="keyword">for</span> the
+                                                     <span class="sign">!</span> new enumeration datatype
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tenum5fnameof5ff"></a>
+<a name="robo417"></a><h2>h5tenum_nameof_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tenum_nameof_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the symbol name corresponding to a specified
+  member of an enumeration datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  value         - value of the enumeration datatype
+  namelen       - name buffer size
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  name          - buffer to hold symbol name
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+
+ NOTE
+   According to the standard: Because an INTENT(OUT) variable is considered undefined 
+   on entry to the procedure, any default initialization specified for its type will 
+   be applied. So we need to blank out the "name" to be portable and eliminate any 
+   characters the "name' may contain upon entry, depending on compiler implementation.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tenum_nameof_f</strong><span class="sign">(</span>type_id<span class="sign">,</span>  value<span class="sign">,</span> namelen<span class="sign">,</span> name<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span>Name of the  enumeration datatype<span class="sign">.</span>
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> namelen <span class="sign">!</span>length of the name
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span>value of the  enumeration datatype<span class="sign">.</span>
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tenum5fvaluof5ff"></a>
+<a name="robo418"></a><h2>h5tenum_valuof_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tenum_valuof_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the value corresponding to a specified
+  member of an enumeration datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  name          - symbol name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  value         - value of the enumeration datatype
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5tenum_valueof_f<span class="sign">(</span>type_id<span class="sign">,</span>  name<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name  <span class="sign">!</span>Name of the  enumeration datatype<span class="sign">.</span>
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span>value of the  enumeration datatype<span class="sign">.</span>
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tequal5ff"></a>
+<a name="robo419"></a><h2>h5tequal_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tequal_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines whether two datatype identifiers refer
+  to the same datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type1_id      - datatype identifier
+  type2_id      - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  flag          - TRUE/FALSE flag to indicate
+                  if two datatypes are equal
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tequal_f</strong><span class="sign">(</span>type1_id<span class="sign">,</span> type2_id<span class="sign">,</span> flag<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type1_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type2_id <span class="sign">!</span> Datatype identifier
+            LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> flag <span class="sign">!</span> TRUE<span class="sign">/</span>FALSE flag to indicate <span class="keyword">if</span> two
+                                         <span class="sign">!</span> datatypes are equal
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5farray5fdims5ff"></a>
+<a name="robo422"></a><h2>h5tget_array_dims_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_array_dims_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns sizes of array dimensions.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - array datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  dims          - buffer to store array datatype dimensions
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_array_dims_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> dims<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Array datatype identifier
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span>DIMENSION<span class="comment">(*), INTENT(OUT) ::  dims !buffer to store array datatype
+                                                                ! dimensions
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5farray5fndims5ff"></a>
+<a name="robo423"></a><h2>h5tget_array_ndims_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_array_ndims_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the rank of an array datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - array datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  ndims         - number of array dimensions
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_array_ndims_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> ndims<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Array datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span>  ndims <span class="sign">!</span> number of array dimensions
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fclass5ff"></a>
+<a name="robo424"></a><h2>h5tget_class_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_class_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the datatype class identifier.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  class         - class, possible values are:
+                   H5T_NO_CLASS_F (-1)
+                   H5T_INTEGER_F  (0)
+                   H5T_FLOAT_F (1)
+                   H5T_TIME_F  (2)
+                   H5T_STRING_F (3)
+                   H5T_BITFIELD_F (4)
+                   H5T_OPAQUE_F (5)
+                   H5T_COMPOUND_F (6)
+                   H5T_REFERENCE_F (7)
+                   H5T_ENUM_F (8)
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_class_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> class<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> class
+                           <span class="sign">!</span> Datatype class<span class="sign">,</span> possible values are<span class="sign">:</span>
+                                          <span class="sign">!</span> H5T_NO_CLASS_F <span class="sign">(</span><span class="sign">-</span>1<span class="sign">)</span>
+                                          <span class="sign">!</span> H5T_INTEGER_F  <span class="sign">(</span>0<span class="sign">)</span>
+                                          <span class="sign">!</span> H5T_FLOAT_F <span class="sign">(</span>1<span class="sign">)</span>
+                                          <span class="sign">!</span> H5T_TIME_F  <span class="sign">(</span>2<span class="sign">)</span>
+                                          <span class="sign">!</span> H5T_STRING_F <span class="sign">(</span>3<span class="sign">)</span>
+                                          <span class="sign">!</span> H5T_BITFIELD_F <span class="sign">(</span>4<span class="sign">)</span>
+                                          <span class="sign">!</span> H5T_OPAQUE_F <span class="sign">(</span>5<span class="sign">)</span>
+                                          <span class="sign">!</span> H5T_COMPOUND_F <span class="sign">(</span>6<span class="sign">)</span>
+                                          <span class="sign">!</span> H5T_REFERENCE_F <span class="sign">(</span>7<span class="sign">)</span>
+                                          <span class="sign">!</span> H5T_ENUM_F <span class="sign">(</span>8<span class="sign">)</span>
+          INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fcreate5fplist5ff"></a>
+<a name="robo425"></a><h2>h5tget_create_plist_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_create_plist_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns a copy of a datatype creation property list.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dtype_id      - Datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  dtpl_id       - Datatype property list identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  April 9, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_create_plist_f</strong><span class="sign">(</span>dtype_id<span class="sign">,</span> dtpl_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dtype_id  <span class="sign">!</span> Datatype identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dtpl_id  <span class="sign">!</span> Datatype property list identifier<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr       <span class="sign">!</span> Error code<span class="sign">:</span>
+                                         <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fcset5ff"></a>
+<a name="robo426"></a><h2>h5tget_cset_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_cset_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the character set type of a string datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id  - Datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  cset     - Character set type of a string datatype
+              Possible values are:
+              H5T_CSET_ASCII_F = 0
+              H5T_CSET_UTF8_F
+  hdferr   - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_cset_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> cset<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> cset   <span class="sign">!</span> character set type of a string datatype
+                                           <span class="sign">!</span>  Possible values are<span class="sign">:</span>
+                                           <span class="sign">!</span>  H5T_CSET_ASCII_F <span class="sign">=</span> 0
+                                           <span class="sign">!</span>  H5T_CSET_UTF8_F
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5febias5ff"></a>
+<a name="robo427"></a><h2>h5tget_ebias_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_ebias_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the exponent bias of a floating-point type.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  ebias         - datatype exponent bias
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_ebias_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> ebias<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ebias <span class="sign">!</span> Datatype exponent bias of a floating<span class="sign">-</span>point type
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5ffields5ff"></a>
+<a name="robo428"></a><h2>h5tget_fields_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_fields_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves floating point datatype bit field information.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  spos          - sign bit-position
+  epos          - exponent bit-position
+  esize         - size of exponent in bits
+  mpos          - mantissa position
+  msize         - size of mantissa in bits
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_fields_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> spos<span class="sign">,</span> epos<span class="sign">,</span> esize<span class="sign">,</span> mpos<span class="sign">,</span> msize<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> spos   <span class="sign">!</span> sign bit<span class="sign">-</span>position
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> epos   <span class="sign">!</span> exponent bit<span class="sign">-</span>position
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> esize  <span class="sign">!</span> size of exponent in bits
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> mpos   <span class="sign">!</span> mantissa bit<span class="sign">-</span>position
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> msize  <span class="sign">!</span> size of mantissa in bits
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5finpad5ff"></a>
+<a name="robo429"></a><h2>h5tget_inpad_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_inpad_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the internal padding type for unused bits
+  in floating-point datatypes.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  padtype       - padding type for unused bits
+                  Possible values of padding type are:
+                    H5T_PAD_ZERO_F = 0
+                    H5T_PAD_ONE_F = 1
+                    H5T_PAD_BACKGROUND_F = 2
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_inpad_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> padtype<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> padtype <span class="sign">!</span> padding type <span class="keyword">for</span> unused bits
+                                            <span class="sign">!</span> in floating<span class="sign">-</span>point datatypes<span class="sign">.</span>
+                                            <span class="sign">!</span> Possible values of padding type are<span class="sign">:</span>
+                                            <span class="sign">!</span> H5T__PAD_ZERO_F <span class="sign">=</span> 0
+                                            <span class="sign">!</span> H5T__PAD_ONE_F <span class="sign">=</span> 1
+                                            <span class="sign">!</span> H5T__PAD_BACKGROUND_F <span class="sign">=</span> 2
+
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fmember5fclass5ff"></a>
+<a name="robo430"></a><h2>h5tget_member_class_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_member_class_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns datatype class of compound datatype member.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datartpe identifier
+  member_no     - index of compound datatype member
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  class         - class type for compound dadtype member
+                  Valid classes:
+                    H5T_NO_CLASS_F (error)
+                    H5T_INTEGER_F
+                    H5T_FLOAT_F
+                    H5T_TIME_F
+                    H5T_STRING_F
+                    H5T_BITFIELD_F
+                    H5T_OPAQUE_F
+                    H5T_COMPOUND_F
+                    H5T_REFERENCE_F
+                    H5T_ENUM_F
+                    H5T_VLEN_F
+                    H5T_ARRAY_F
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  April 6, 2005
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_member_class_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> member_no<span class="sign">,</span> class<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id  <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>       <span class="sign">:</span><span class="sign">:</span> member_no  <span class="sign">!</span> Member number
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span>     <span class="sign">:</span><span class="sign">:</span> class      <span class="sign">!</span> Member class
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr      <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fmember5findex5ff"></a>
+<a name="robo431"></a><h2>h5tget_member_index_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_member_index_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the index of a compound or enumeration datatype member.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  name          - name of the field or member whose index to
+  to be retrieved from the datatype.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  index         - 0-based index of the filed or member (0 to N-1)
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  September 26, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_member_index_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> name<span class="sign">,</span> index<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id  <span class="sign">!</span> Datatype identifier
+            CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Field or member name
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> index          <span class="sign">!</span> Field or member index
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fmember5fname5ff"></a>
+<a name="robo432"></a><h2>h5tget_member_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_member_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the name of a field of a compound datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  index         - filed index (0-based)
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  member_name   - buffer to hold member's name
+  namelen       - name length
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_member_name_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> index<span class="sign">,</span> member_name<span class="sign">,</span>  namelen<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> index <span class="sign">!</span>Field index <span class="sign">(</span>0<span class="sign">-</span>based<span class="sign">)</span> of the field name to retrieve
+            CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> member_name <span class="sign">!</span>name of a field of
+                                                         <span class="sign">!</span>a compound datatype
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> namelen <span class="sign">!</span> Length of the name
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fmember5foffset5ff"></a>
+<a name="robo433"></a><h2>h5tget_member_offset_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_member_offset_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the offset of a field of a compound datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  member_no     - number of the field
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  offset        - byte offset of the requested field
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_member_offset_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> member_no<span class="sign">,</span> offset<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> member_no <span class="sign">!</span>Number of the field
+                                                       <span class="sign">!</span>whose offset is requested
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> offset <span class="sign">!</span>byte offset of the beginning of the field
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fmember5ftype5ff"></a>
+<a name="robo434"></a><h2>h5tget_member_type_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_member_type_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the datatype of the specified member.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - compound datatype identifier
+  field_idx     - field index (0-based)
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  datatype      - idnetifier of the member's datatype
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_member_type_f</strong><span class="sign">(</span>type_id<span class="sign">,</span>  field_idx<span class="sign">,</span> datatype<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> field_idx <span class="sign">!</span>Field index <span class="sign">(</span>0<span class="sign">-</span>based<span class="sign">)</span> of the field type to retrieve
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> datatype <span class="sign">!</span>identifier of a copy of
+                                                    <span class="sign">!</span>the datatype of the field
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fmember5fvalue5ff"></a>
+<a name="robo435"></a><h2>h5tget_member_value_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_member_value_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the value of an enumeration datatype member.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  member_no     - number of the enumeration datatype member
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  value         - value of the enumeration datatype
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_member_value_f</strong><span class="sign">(</span>type_id<span class="sign">,</span>  member_no<span class="sign">,</span> value<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> member_no <span class="sign">!</span>Number of the enumeration datatype member
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> value <span class="sign">!</span>value of the  enumeration datatype<span class="sign">.</span>
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fnative5ftype5ff"></a>
+<a name="robo436"></a><h2>h5tget_native_type_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_native_type_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the native datatype of a specified datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dtype_id      - Datatype identifier for the dataset datatype.
+  
+  direction     - Direction of search:
+                  H5T_DIR_DEFAULT     = 0,    /*default direction is inscendent */
+                  H5T_DIR_ASCEND      = 1,    /*in inscendent order             */
+                  H5T_DIR_DESCEND     = 2     /*in descendent order             */
+  * NOTE: In C it is defined as a structure: H5T_direction_t
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  native_dtype_id - The native datatype identifier for the specified dataset datatype
+  hdferr          - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  June 18, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_native_type_f</strong><span class="sign">(</span>dtype_id<span class="sign">,</span> direction<span class="sign">,</span> native_dtype_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dtype_id  <span class="sign">!</span> Datatype identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> direction  <span class="sign">!</span> Direction of search<span class="sign">:</span>
+                                      <span class="sign">!</span> H5T_DIR_ASCEND_F      <span class="sign">=</span> 1  in inscendent order
+                                      <span class="sign">!</span> H5T_DIR_DESCEND_F     <span class="sign">=</span> 2  in descendent order
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> native_dtype_id  <span class="sign">!</span> The native datatype identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr    <span class="sign">!</span> Error code<span class="sign">:</span>
+                                      <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fnmembers5ff"></a>
+<a name="robo437"></a><h2>h5tget_nmembers_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_nmembers_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the number of fields in a compound datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  num_members   - number of members
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_nmembers_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> num_members<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> num_members <span class="sign">!</span>number of fields in a compound datatype
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fnorm5ff"></a>
+<a name="robo438"></a><h2>h5tget_norm_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_norm_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves mantissa normalization of a floating-point
+  datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  norm          - normalization types, valid values are:
+                    H5T_NORM_IMPLIED_F(0)
+                    H5T_NORM_MSBSET_F(1)
+                    H5T_NORM_NONE_F(2)
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_norm_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> norm<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> norm <span class="sign">!</span>mantissa normalization of a floating<span class="sign">-</span>point datatype
+                                         <span class="sign">!</span>Valid normalization types are<span class="sign">:</span>
+                                         <span class="sign">!</span>H5T_NORM_IMPLIED_F<span class="sign">(</span>0<span class="sign">)</span><span class="sign">,</span>MSB of mantissa is not
+                                         <span class="sign">!</span>stored<span class="sign">,</span> always 1<span class="sign">,</span>  H5T_NORM_MSBSET_F<span class="sign">(</span>1<span class="sign">)</span><span class="sign">,</span> MSB of
+                                         <span class="sign">!</span>mantissa is always 1<span class="sign">,</span> H5T_NORM_NONE_F<span class="sign">(</span>2<span class="sign">)</span>
+                                         <span class="sign">!</span>Mantissa is not normalize
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5foffset5ff"></a>
+<a name="robo439"></a><h2>h5tget_offset_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_offset_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the bit offset of the first significant bit.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  offset        - offset value
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_offset_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> offset<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> offset <span class="sign">!</span> Datatype bit offset of the
+                                           <span class="sign">!</span> first significant bit
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5forder5ff"></a>
+<a name="robo440"></a><h2>h5tget_order_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_order_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the byte order of an atomic datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  order         - byte order for the datatype, possible
+                  values are:
+                    H5T_ORDER_LE_F
+                    H5T_ORDER_BE_F
+                    H5T_ORDER_VAX_F (not implemented yet)
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_order_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> order<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order
+                                    <span class="sign">!</span> Datatype byte order<span class="sign">,</span> possible values are<span class="sign">:</span>
+                                    <span class="sign">!</span> H5T_ORDER_LE_F
+                                    <span class="sign">!</span> H5T_ORDER_BE_F
+                                    <span class="sign">!</span> H5T_ORDER_VAX_F
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr  <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fpad5ff"></a>
+<a name="robo441"></a><h2>h5tget_pad_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_pad_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the padding type of the least and
+  most          -significant bit padding.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  lsbpad        - least-significant bit padding type
+  msbpad        - most-significant bit padding type
+                  Possible values of padding type are:
+                    H5T_PAD_ERROR_F      = -1
+                    H5T_PAD_ZERO_F = 0
+                    H5T_PAD_ONE_F = 1
+                    H5T_PAD_BACKGROUND_F = 2
+                    H5T_PAD_NPAD_F      = 3
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_pad_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> lsbpad<span class="sign">,</span> msbpad<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lsbpad <span class="sign">!</span> padding type of the
+                                           <span class="sign">!</span> least significant bit
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> msbpad <span class="sign">!</span> padding type of the
+                                           <span class="sign">!</span> most significant bit
+                                           <span class="sign">!</span> Possible values of padding type are<span class="sign">:</span>
+                                           <span class="sign">!</span> H5T__PAD_ZERO_F <span class="sign">=</span> 0
+                                           <span class="sign">!</span> H5T__PAD_ONE_F <span class="sign">=</span> 1
+                                           <span class="sign">!</span> H5T__PAD_BACKGROUND_F <span class="sign">=</span> 2
+                                           <span class="sign">!</span> H5T_PAD_ERROR_F      <span class="sign">=</span> <span class="sign">-</span>1
+                                           <span class="sign">!</span> H5T_PAD_NPAD_F      <span class="sign">=</span> 3
+
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fprecision5ff"></a>
+<a name="robo442"></a><h2>h5tget_precision_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_precision_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the precision of an atomic datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  precision     - precision of the datatype
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_precision_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> precision<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> precision <span class="sign">!</span> Datatype precision
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fsign5ff"></a>
+<a name="robo443"></a><h2>h5tget_sign_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_sign_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the sign type for an integer type.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  sign          - sign type
+                  Possible values are:
+                    - Unsigned integer type 
+                        H5T_SGN_NONE_F = 0
+                    - Two's complement signed integer type
+                        H5T_SGN_2_F = 1
+                    - error value: H5T_SGN_ERROR_F=-1
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_sign_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> sign<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> sign <span class="sign">!</span> sign type <span class="keyword">for</span> an integer type
+                                         <span class="sign">!</span>possible values are<span class="sign">:</span>
+                                         <span class="sign">!</span>Unsigned integer type H5T_SGN_NONE_F <span class="sign">=</span> 0
+                                         <span class="sign">!</span>Two<span class="squote">'s complement signed integer type
+                                         !H5T_SGN_2_F = 1
+                                         !or error value: H5T_SGN_ERROR_F=-1
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fsize5ff"></a>
+<a name="robo444"></a><h2>h5tget_size_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_size_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the size of a datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  size          - datatype size
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_size_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> size<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size <span class="sign">!</span> Datatype size
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fstrpad5ff"></a>
+<a name="robo445"></a><h2>h5tget_strpad_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_strpad_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves the storage mechanism for a string datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  strpad        - storage method for a string datatype
+                  Possible values are:
+                    H5T_STR_NULLTERM_F,
+                    H5T_STR_NULLPAD_F,
+                    H5T_STR_SPACEPAD_F
+                    H5T_STR_ERROR_F
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_strpad_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> strpad<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> strpad
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5fsuper5ff"></a>
+<a name="robo446"></a><h2>h5tget_super_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_super_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the base datatype from which a datatype is derived.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  base_type_id          - identifier of the base type
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_super_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> base_type_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> datatype identifier
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> base_type_id <span class="sign">!</span> identifier of the datatype
+                                           <span class="sign">!</span> from which datatype <span class="sign">(</span>type_id<span class="sign">)</span> was derived
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tget5ftag5ff"></a>
+<a name="robo447"></a><h2>h5tget_tag_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tget_tag_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets the tag associated with an opaque datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - identifier for opaque datatype
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  tag           - unique ASCII string associated with opaque
+                  datatype
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tget_tag_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> tag<span class="sign">,</span>taglen<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> tag  <span class="sign">!</span> Unique ASCII string with which
+                                                  <span class="sign">!</span>  the opaque datatype is to be tagged
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> taglen        <span class="sign">!</span> Length of tag
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span>      <span class="sign">:</span><span class="sign">:</span> tag_size      <span class="sign">!</span> Declared character length of tab 
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tinsert5ff"></a>
+<a name="robo448"></a><h2>h5tinsert_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tinsert_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Adds a new member to a compound datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - compound dattype identifier
+  name          - name of the field to insert
+  offset        - start of the member in an instance of
+                  the compound datatype
+  field_id      - datatype identifier of the field to insert
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tinsert_f</strong><span class="sign">(</span>type_id<span class="sign">,</span>  name<span class="sign">,</span> offset<span class="sign">,</span> field_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name <span class="sign">!</span>Name of the field to insert
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> offset <span class="sign">!</span>start of the member in an instance of
+                                                   <span class="sign">!</span>the compound datatype
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> field_id <span class="sign">!</span>datatype identifier of the new member
+
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tis5fvariable5fstr5ff"></a>
+<a name="robo449"></a><h2>h5tis_variable_str_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tis_variable_str_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines whether a dattype is a variable string.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datartpe identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  status        - flag to indicate if datatype
+                  is a variable string
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  March 12, 2003
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tis_variable_str_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> status<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id  <span class="sign">!</span> Datatype identifier
+            LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> status      <span class="sign">!</span> Flag<span class="sign">,</span> idicates <span class="keyword">if</span> datatype
+                                                <span class="sign">!</span> is a variable string or not <span class="sign">(</span> TRUE or
+                                                <span class="sign">!</span> FALSE<span class="sign">)</span>
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr      <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5topen5ff"></a>
+<a name="robo450"></a><h2>h5topen_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5topen_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens named datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - a datatype name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  type_id       - datatype identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  tapl_id       - datatype access property list identifier.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+
+  Added optional parameter 'tapl_id' for compatability
+  with H5Topen2. April 9, 2009.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5topen_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> type_id<span class="sign">,</span> hdferr<span class="sign">,</span> tapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id  <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name <span class="sign">!</span> Datatype name within file or group
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id  <span class="sign">!</span> Datatype identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr <span class="sign">!</span> Error code
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> tapl_id <span class="sign">!</span> datatype access property list identifier
+</pre>
+
+<hr />
+<a name="H5T2fh5tpack5ff"></a>
+<a name="robo451"></a><h2>h5tpack_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tpack_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Recursively removes padding from within a compound datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - compound datatype identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tpack_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5fcset5ff"></a>
+<a name="robo452"></a><h2>h5tset_cset_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_cset_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets character set to be used.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  cset          - character set type of a string datatype
+                    Possible values are:
+                     H5T_CSET_ASCII_F = 0
+                     H5T_CSET_UTF8_F
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_cset_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> cset<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> cset <span class="sign">!</span>character set type of a string datatype
+                                           <span class="sign">!</span> Possible values of padding type are<span class="sign">:</span>
+                                           <span class="sign">!</span> H5T_CSET_ASCII_F <span class="sign">=</span> 0
+                                           <span class="sign">!</span> H5T_CSET_UTF8_F
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5febias5ff"></a>
+<a name="robo453"></a><h2>h5tset_ebias_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_ebias_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets the exponent bias of a floating-point type.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  ebias         - datatype exponent bias
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_ebias_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> ebias<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> ebias <span class="sign">!</span>Datatype exponent bias of a floating<span class="sign">-</span>point type
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5ffields5ff"></a>
+<a name="robo454"></a><h2>h5tset_fields_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_fields_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets locations and sizes of floating point bit fields.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  spos          - sign bit-position
+  epos          - exponent bit-position
+  esize         - size of exponent in bits
+  mpos          - mantissa position
+  msize         - size of mantissa in bits
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_fields_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> spos<span class="sign">,</span> epos<span class="sign">,</span> esize<span class="sign">,</span> mpos<span class="sign">,</span> msize<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> spos   <span class="sign">!</span> sign bit<span class="sign">-</span>position
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> epos   <span class="sign">!</span> exponent bit<span class="sign">-</span>position
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> esize  <span class="sign">!</span> size of exponent in bits
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> mpos   <span class="sign">!</span> mantissa bit<span class="sign">-</span>position
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> msize  <span class="sign">!</span> size of mantissa in bits
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5finpad5ff"></a>
+<a name="robo455"></a><h2>h5tset_inpad_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_inpad_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Fills unused internal floating point bits.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  padtype       - padding type for unused bits
+                  Possible values of padding type are:
+                    H5T_PAD_ZERO_F = 0
+                    H5T_PAD_ONE_F = 1
+                    H5T_PAD_BACKGROUND_F = 2
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_inpad_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> padtype<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> padtype <span class="sign">!</span> padding type <span class="keyword">for</span> unused bits
+                                           <span class="sign">!</span> in floating<span class="sign">-</span>point datatypes<span class="sign">.</span>
+                                           <span class="sign">!</span> Possible values of padding type are<span class="sign">:</span>
+                                           <span class="sign">!</span> H5T__PAD_ZERO_F <span class="sign">=</span> 0
+                                           <span class="sign">!</span> H5T__PAD_ONE_F <span class="sign">=</span> 1
+                                           <span class="sign">!</span> H5T__PAD_BACKGROUND_F <span class="sign">=</span> 2
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5fnorm5ff"></a>
+<a name="robo456"></a><h2>h5tset_norm_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_norm_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets the mantissa normalization of a floating-point datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  norm          - normalization types, valid values are:
+                    H5T_NORM_IMPLIED_F(0)
+                    H5T_NORM_MSBSET_F(1)
+                    H5T_NORM_NONE_F(2)
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_norm_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> norm<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> norm <span class="sign">!</span>mantissa normalization of a floating<span class="sign">-</span>point datatype
+                                         <span class="sign">!</span>Valid normalization types are<span class="sign">:</span>
+                                         <span class="sign">!</span>H5T_NORM_IMPLIED_F<span class="sign">(</span>0<span class="sign">)</span><span class="sign">,</span>MSB of mantissa is not
+                                         <span class="sign">!</span>stored<span class="sign">,</span> always 1<span class="sign">,</span>  H5T_NORM_MSBSET_F<span class="sign">(</span>1<span class="sign">)</span><span class="sign">,</span> MSB of
+                                         <span class="sign">!</span>mantissa is always 1<span class="sign">,</span> H5T_NORM_NONE_F<span class="sign">(</span>2<span class="sign">)</span>
+                                         <span class="sign">!</span>Mantissa is not normalize
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5foffset5ff"></a>
+<a name="robo457"></a><h2>h5tset_offset_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_offset_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets the bit offset of the first significant bit.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  offset        - offset value
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_offset_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> offset<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> offset <span class="sign">!</span> Datatype bit offset of the
+                                           <span class="sign">!</span> first significant bit
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5forder5ff"></a>
+<a name="robo458"></a><h2>h5tset_order_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_order_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets the byte ordering of an atomic datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  order         - datatype byte order Possible values are:
+                    H5T_ORDER_LE_F
+                    H5T_ORDER_BE_F
+                    H5T_ORDER_VAX_F (not implemented yet)
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_order_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> order<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order   <span class="sign">!</span> Datatype byte order<span class="sign">,</span> possible values
+                                   <span class="sign">!</span> are<span class="sign">:</span>
+                                   <span class="sign">!</span> H5T_ORDER_LE_F
+                                   <span class="sign">!</span> H5T_ORDER_BE_F
+                                   <span class="sign">!</span> H5T_ORDER_VAX_F
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5fpad5ff"></a>
+<a name="robo459"></a><h2>h5tset_pad_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_pad_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets the least and most-significant bits padding types.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  lsbpad        - least-significant bit padding type
+  msbpad        - most-significant bit padding type
+                  Possible values of padding type are:
+                    H5T_PAD_ERROR_F      = -1
+                    H5T_PAD_ZERO_F = 0
+                    H5T_PAD_ONE_F = 1
+                    H5T_PAD_BACKGROUND_F = 2
+                    H5T_PAD_NPAD_F      = 3
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_pad_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> lsbpad<span class="sign">,</span> msbpad<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lsbpad <span class="sign">!</span> padding type of the
+                                           <span class="sign">!</span> least significant bit
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> msbpad <span class="sign">!</span> padding type of the
+                                           <span class="sign">!</span> most significant bit
+                                           <span class="sign">!</span> Possible values of padding type are<span class="sign">:</span>
+                                           <span class="sign">!</span> H5T_PAD_ZERO_F <span class="sign">=</span> 0
+                                           <span class="sign">!</span> H5T_PAD_ONE_F <span class="sign">=</span> 1
+                                           <span class="sign">!</span> H5T_PAD_BACKGROUND_F <span class="sign">=</span> 2
+                                           <span class="sign">!</span> H5T_PAD_ERROR_F      <span class="sign">=</span> <span class="sign">-</span>1
+                                           <span class="sign">!</span> H5T_PAD_NPAD_F      <span class="sign">=</span> 3
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5fprecision5ff"></a>
+<a name="robo460"></a><h2>h5tset_precision_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_precision_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets the precision of an atomic datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  precision     - datatype precision
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_precision_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> precision<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> precision <span class="sign">!</span> Datatype precision
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5fsign5ff"></a>
+<a name="robo461"></a><h2>h5tset_sign_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_sign_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets the sign proprety for an integer type.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  sign          - sign type
+                  Possible values are:
+                    - Unsigned integer type 
+                        H5T_SGN_NONE_F = 0
+                    - Two's complement signed integer type
+                        H5T_SGN_2_F = 1
+                    - error value: H5T_SGN_ERROR_F=-1
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_sign_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> sign<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> sign <span class="sign">!</span>sign type <span class="keyword">for</span> an integer type
+                                         <span class="sign">!</span>possible values are<span class="sign">:</span>
+                                         <span class="sign">!</span>Unsigned integer type H5T_SGN_NONE_F <span class="sign">=</span> 0
+                                         <span class="sign">!</span>Two<span class="squote">'s complement signed integer type
+                                         !H5T_SGN_2_F = 1
+                                         !or error value: H5T_SGN_ERROR_F=-1
+            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5fsize5ff"></a>
+<a name="robo462"></a><h2>h5tset_size_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_size_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets the total size for an atomic datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  size          - size of the datatype
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_size_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> size<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size <span class="sign">!</span> Datatype size
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5fstrpad5ff"></a>
+<a name="robo463"></a><h2>h5tset_strpad_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_strpad_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Defines the storage mechanism for character strings.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - datatype identifier
+  strpad        - storage method for a string datatype
+                  Possible values are:
+                    H5T_STR_NULLTERM_F,
+                    H5T_STR_NULLPAD_F,
+                    H5T_STR_SPACEPAD_F
+                    H5T_STR_ERROR_F
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_strpad_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> strpad<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> strpad <span class="sign">!</span> string padding method <span class="keyword">for</span> a string datatype
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tset5ftag5ff"></a>
+<a name="robo464"></a><h2>h5tset_tag_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tset_tag_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Tags an opaque datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - identifier for opaque datatype
+  tag           - unique ASCII string with which the opaque
+                  datatype is to be tagged.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 7, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tset_tag_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> tag<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type_id <span class="sign">!</span> Datatype identifier
+            CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> tag <span class="sign">!</span>Unique ASCII string with which
+                                                <span class="sign">!</span>the opaque datatype is to be tagged
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5T2fh5tvlen5fcreate5ff"></a>
+<a name="robo465"></a><h2>h5tvlen_create_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo70">H5T</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5tvlen_create_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a new variable-length datatype.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  type_id       - identifier iof base datatype
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  vltype_id     - identifier for VL datatype
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  Wednesday, October 23, 2002
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  Only basic Fortran base datatypes are supported
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5tvlen_create_f</strong><span class="sign">(</span>type_id<span class="sign">,</span> vltype_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> type_id    <span class="sign">!</span> Datatype identifier
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> vltype_id  <span class="sign">!</span> VL datatype identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr            <span class="sign">!</span> Error code
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Tff.f90 on Sun Aug 14 2011 22:49:37
+</p>
+</div> <!-- footer -->
+</body>
+</html>

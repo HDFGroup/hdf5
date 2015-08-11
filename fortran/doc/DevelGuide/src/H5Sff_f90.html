@@ -1,0 +1,1165 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Sff.f90</title>
+<!-- Source: ./src/H5Sff.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5S"></a>
+<a name="robo68"></a><h2>H5S</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5S</strong>
+</pre>
+<p class="item_name">FILE</p>
+<pre>  fortran/src/<a href="#robo_top_of_doc">H5Sff.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5S</strong> functions. It includes
+  all the functions that are independent on whether the Fortran 2003 functions
+  are enabled or disabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5S</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5S2fh5sclose5ff"></a>
+<a name="robo376"></a><h2>h5sclose_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sclose_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Releases and terminates access to a dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id    - identifier of dataspace to release
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sclose_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5scopy5ff"></a>
+<a name="robo377"></a><h2>h5scopy_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5scopy_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates an exact copy of a dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  new_space_id  - identifier of dataspace's copy
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5scopy_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> new_space_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_space_id
+                                             <span class="sign">!</span> Identifier of dataspace<span class="squote">'s copy
+            INTEGER, INTENT(OUT) :: hdferr   ! Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5screate5ff"></a>
+<a name="robo378"></a><h2>h5screate_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5screate_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a new dataspace of a specified type.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  classtype   - the type of the dataspace to be created
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  space_id    - dataspace identifier
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5screate_f</strong><span class="sign">(</span>classtype<span class="sign">,</span> space_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> classtype     <span class="sign">!</span> The type of the dataspace
+                                                 <span class="sign">!</span> to be created<span class="sign">.</span>
+                                                 <span class="sign">!</span> Possible values are<span class="sign">:</span>
+                                                 <span class="sign">!</span>  H5S_SCALAR_F <span class="sign">(</span>0<span class="sign">)</span>
+                                                 <span class="sign">!</span>  H5S_SIMPLE_F<span class="sign">(</span>1<span class="sign">)</span>
+                                                 <span class="sign">!</span>  H5S_NULL_F<span class="sign">(</span>2<span class="sign">)</span>
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5screate5fsimple5ff"></a>
+<a name="robo379"></a><h2>h5screate_simple_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5screate_simple_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a new simple data space and opens it for access      .
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  rank        - number of dimensions
+  dims        - an array of the size of each dimension
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  space_id    - dataspace identifier
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  maxdims     - an array of the maximum size of each dimension
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5screate_simple_f</strong><span class="sign">(</span>rank<span class="sign">,</span> dims<span class="sign">,</span> space_id<span class="sign">,</span> hdferr<span class="sign">,</span> maxdims<span class="sign">)</span>
+
+            IMPLICIT NONE
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> rank             <span class="sign">!</span> Number of dataspace dimensions
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dims<span class="sign">(</span>rank<span class="sign">)</span>
+                                                    <span class="sign">!</span> Array with the dimension
+                                                    <span class="sign">!</span> sizes
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> maxdims<span class="sign">(</span>rank<span class="sign">)</span>
+                                                    <span class="sign">!</span> Array with the maximum
+                                                    <span class="sign">!</span> dimension sizes
+</pre>
+
+<hr />
+<a name="H5S2fH5Sdecode5ff"></a>
+<a name="robo380"></a><h2>H5Sdecode_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Sdecode_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Decode a binary object description of data space and return a new object handle.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  buf   -  Buffer for the data space object to be decoded.
+  obj_id        - Object ID
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  March 26, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5sdecode_f<span class="sign">(</span>buf<span class="sign">,</span> obj_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buf <span class="sign">!</span> Buffer <span class="keyword">for</span> the data space object to be decoded<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id  <span class="sign">!</span> Object ID
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr     <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fH5Sencode5ff"></a>
+<a name="robo381"></a><h2>H5Sencode_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Sencode_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Encode a data space object description into a binary buffer.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  obj_id        - Identifier of the object to be encoded.
+  buf   - Buffer for the object to be encoded into.
+  nalloc        - The size of the allocated buffer.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  nalloc        - The size of the buffer needed.
+  hdferr      - Returns 0 if successful and -1 if fails.
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  March 26, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5sencode_f<span class="sign">(</span>obj_id<span class="sign">,</span> buf<span class="sign">,</span> nalloc<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_id <span class="sign">!</span> Identifier of the object to be encoded<span class="sign">.</span>
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buf <span class="sign">!</span> Buffer <span class="keyword">for</span> the object to be encoded into<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>INOUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> nalloc <span class="sign">!</span> The size of the allocated buffer<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr     <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sextent5fcopy5ff"></a>
+<a name="robo382"></a><h2>h5sextent_copy_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sextent_copy_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Copies the extent of a dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  dest_space_id         - the identifier for the dataspace to which
+  the extent is copied
+  source_space_id       - the identifier for the dataspace from
+  which the extent is copied
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  NONE
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">NOTES</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sextent_copy_f</strong><span class="sign">(</span>dest_space_id<span class="sign">,</span> source_space_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dest_space_id  <span class="sign">!</span> Identifier of destination
+                                                         <span class="sign">!</span> dataspace
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> source_space_id <span class="sign">!</span> Identifier of source
+                                                          <span class="sign">!</span> dataspace
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr                <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sextent5fequal5ff"></a>
+<a name="robo383"></a><h2>h5sextent_equal_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sextent_equal_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines whether two dataspace extents are equal.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space1_id     - First dataspace identifier.
+  space2_id     - Second dataspace identifier.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  Equal         - .TRUE. if equal, .FALSE. if unequal.
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  April 2, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5sextent_equal_f</strong><span class="sign">(</span>space1_id<span class="sign">,</span> space2_id<span class="sign">,</span> equal<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space1_id <span class="sign">!</span> First dataspace identifier<span class="sign">.</span>
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space2_id <span class="sign">!</span> Second dataspace identifier<span class="sign">.</span>
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> Equal <span class="sign">!</span> <span class="sign">.</span>TRUE<span class="sign">.</span> <span class="keyword">if</span> equal<span class="sign">,</span> <span class="sign">.</span>FALSE<span class="sign">.</span> <span class="keyword">if</span> unequal<span class="sign">.</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr                <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fselect5fbounds5ff"></a>
+<a name="robo384"></a><h2>h5sget_select_bounds_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_select_bounds_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets the bounding box containing the current selection.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id    - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  start       - starting coordinates of bounding box
+  end         - ending coordinates of bounding box
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  NONE
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE  <strong>h5sget_select_bounds_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> start<span class="sign">,</span> END<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="comment">(*), INTENT(OUT) :: start
+                                           ! Starting coordinates of the bounding box.
+    INTEGER(HSIZE_T), DIMENSION(*)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> END
+                                           <span class="sign">!</span>Ending coordinates of the bounding box<span class="sign">,</span>
+                                           <span class="sign">!</span>i<span class="sign">.</span>e<span class="sign">.</span><span class="sign">,</span> the coordinates of the diagonally
+                                           <span class="sign">!</span>opposite corner
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fselect5felem5fnpoints5ff"></a>
+<a name="robo385"></a><h2>h5sget_select_elem_npoints_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_select_elem_npoints_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets the number of element points in the current selection
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  num_points    - number of element points in the current
+                  dataspace selection
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sget_select_elem_npoints_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> num_points<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">(</span>HSSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> num_points
+                                             <span class="sign">!</span>number of element points
+                                             <span class="sign">!</span>in the current dataspace
+                                             <span class="sign">!</span>selection
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr   <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fselect5felem5fpointlist5ff"></a>
+<a name="robo386"></a><h2>h5sget_select_elem_pointlist_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_select_elem_pointlist_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets the list of element points currently selected.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id    - dataspace identifier
+  startpoint  - element point to start with
+  num_points  - number of elemnt points to get
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  buf         - buffer with element points selected
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sget_select_elem_pointlist_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> startpoint<span class="sign">,</span> <span class="sign">&amp;</span>
+                                                    num_points<span class="sign">,</span> buf<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> startpoint
+                                             <span class="sign">!</span>Element point to start with<span class="sign">.</span>
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> num_points
+                                             <span class="sign">!</span>Number of element points to get
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="comment">(*), INTENT(OUT) :: buf
+                                             !List of element points selected
+            INTEGER, INTENT(OUT) :: hdferr   ! Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fselect5fhyper5fblocklist5ff"></a>
+<a name="robo387"></a><h2>h5sget_select_hyper_blocklist_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_select_hyper_blocklist_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets the list of hyperslab blocks currently selected.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id    - dataspace identifier
+  startblock  - hyperslab block to start with
+  num_blocks  - number of blocks to get
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  buf         - buffer to hold block list
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sget_select_hyper_blocklist_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> startblock<span class="sign">,</span> <span class="sign">&amp;</span>
+                                                    num_blocks<span class="sign">,</span> buf<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> startblock
+                                             <span class="sign">!</span>Hyperslab block to start with<span class="sign">.</span>
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> num_blocks
+                                             <span class="sign">!</span>number of hyperslab blocks
+                                             <span class="sign">!</span>to get in the current dataspace
+                                             <span class="sign">!</span>selection
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="comment">(*), INTENT(OUT) :: buf
+                                             !List of hyperslab blocks selected
+            INTEGER, INTENT(OUT) :: hdferr   ! Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fselect5fhyper5fnblocks5ff"></a>
+<a name="robo388"></a><h2>h5sget_select_hyper_nblocks_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_select_hyper_nblocks_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Get number of hyperslab blocks.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id    - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  num_blocks  - number of hyperslab blocks in the current
+                hyperslab selection
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sget_select_hyper_nblocks_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> num_blocks<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">(</span>HSSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> num_blocks
+                                             <span class="sign">!</span>number of hyperslab blocks
+                                             <span class="sign">!</span>in the current dataspace
+                                             <span class="sign">!</span>selection
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr   <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fselect5fnpoints5ff"></a>
+<a name="robo389"></a><h2>h5sget_select_npoints_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_select_npoints_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines the number of elements in a dataspace selection.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  npoints       - number of points in the dataspace selection
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sget_select_npoints_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> npoints<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id     <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">(</span>HSSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> npoints  <span class="sign">!</span> Number of elements in the
+                                                       <span class="sign">!</span> selection
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr             <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fselect5ftype5ff"></a>
+<a name="robo390"></a><h2>h5sget_select_type_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_select_type_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieve the type of selection
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace iidentifier with selection
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  type          - flag, valid values are:
+                    H5S_SEL_ERROR_F
+                    H5S_SEL_NONE_F
+                    H5S_SEL_POINTS_F
+                    H5S_SEL_HYPERSLABS_F
+                    H5S_SEL_ALL_F
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  October 7, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sget_select_type_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> type<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>INOUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier to
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> type        <span class="sign">!</span> Selection type
+                                                <span class="sign">!</span>  H5S_SEL_ERROR_F
+                                                <span class="sign">!</span>  H5S_SEL_NONE_F
+                                                <span class="sign">!</span>  H5S_SEL_POINTS_F
+                                                <span class="sign">!</span>  H5S_SEL_HYPERSLABS_F
+                                                <span class="sign">!</span>  H5S_SEL_ALL_F
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr     <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fsimple5fextent5fdims5ff"></a>
+<a name="robo391"></a><h2>h5sget_simple_extent_dims_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_simple_extent_dims_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves dataspace dimension size and maximum size.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  dims          - array to store size of each dimension
+  maxdims       - array to store maximum size of each
+  dimension
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sget_simple_extent_dims_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> dims<span class="sign">,</span> maxdims<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="comment">(*), INTENT(OUT) :: dims
+                                                   ! Array to store dimension sizes
+            INTEGER(HSIZE_T), DIMENSION(*)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> maxdims
+                                                   <span class="sign">!</span> Array to store max dimension
+                                                   <span class="sign">!</span> sizes
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code<span class="sign">:</span> <span class="sign">-</span>1 on failure<span class="sign">,</span>
+                                                   <span class="sign">!</span> number of dimensions on
+                                                   <span class="sign">!</span> on success
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fsimple5fextent5fndims5ff"></a>
+<a name="robo392"></a><h2>h5sget_simple_extent_ndims_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_simple_extent_ndims_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines the dimensionality of a dataspace
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  rank          - number of dataspace dimensions
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sget_simple_extent_ndims_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> rank<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id     <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> rank               <span class="sign">!</span> Number of dimensions
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr             <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fsimple5fextent5fnpoints5ff"></a>
+<a name="robo393"></a><h2>h5sget_simple_extent_npoints_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_simple_extent_npoints_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines the number of elements in a dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  npoints       - number of elements in the dataspace
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sget_simple_extent_npoints_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> npoints<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id     <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> npoints  <span class="sign">!</span> Number of elements in
+                                                       <span class="sign">!</span> dataspace
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr             <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sget5fsimple5fextent5ftype5ff"></a>
+<a name="robo394"></a><h2>h5sget_simple_extent_type_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sget_simple_extent_type_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determine the current class of a dataspace
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  classtype     - class type, possible values are:
+  H5S_NO_CLASS_F (-1)
+  H5S_SCALAR_F (0)
+  H5S_SIMPLE_F (1)
+  H5S_NULL_F   (2)
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sget_simple_extent_type_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> classtype<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> classtype      <span class="sign">!</span> Class type <span class="sign">,</span> possible values
+                                                   <span class="sign">!</span> are<span class="sign">:</span>
+                                                   <span class="sign">!</span>  H5S_NO_CLASS_F <span class="sign">(</span><span class="sign">-</span>1<span class="sign">)</span>
+                                                   <span class="sign">!</span>  H5S_SCALAR_F <span class="sign">(</span>0<span class="sign">)</span>
+                                                   <span class="sign">!</span>  H5S_SIMPLE_F <span class="sign">(</span>1<span class="sign">)</span>
+                                                   <span class="sign">!</span>  H5S_NULL_F   <span class="sign">(</span>2<span class="sign">)</span>
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sis5fsimple5ff"></a>
+<a name="robo395"></a><h2>h5sis_simple_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sis_simple_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Determines whether a dataspace is a simple dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  status        - flag to indicate if dataspace
+  is simple or not
+  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sis_simple_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> status<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id  <span class="sign">!</span> Dataspace identifier
+            LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> status      <span class="sign">!</span> Flag<span class="sign">,</span> idicates <span class="keyword">if</span> dataspace
+                                                <span class="sign">!</span> is simple or not <span class="sign">(</span> TRUE or
+                                                <span class="sign">!</span> FALSE<span class="sign">)</span>
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr      <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5soffset5fsimple5ff"></a>
+<a name="robo396"></a><h2>h5soffset_simple_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5soffset_simple_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets the offset of a simple dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+  offset        - the offset at which to position the
+  selection
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  NONE
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5soffset_simple_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> offset<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">(</span>HSSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="comment">(*), INTENT(IN) ::  offset
+                                                   ! The offset at which to position
+                                                   ! the selection
+            INTEGER, INTENT(OUT) :: hdferr         ! Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sselect5fall5ff"></a>
+<a name="robo397"></a><h2>h5sselect_all_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sselect_all_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Selects the entire dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id    - Identifier for the dataspace in which
+                selection being made
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sselect_all_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id  <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sselect5felements5ff"></a>
+<a name="robo398"></a><h2>h5sselect_elements_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sselect_elements_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Selects elements to be included in the selection for
+  a dataspace
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+  operator      - flag, valid values are:
+                   H5S_SELECT_SET_F 
+                   H5S_SELECT_APPEND_F 
+                   H5S_SELECT_PREPEND_F
+  rank          - number of dataspace dimensions
+  num_elements  - number of elements to be selected
+  coord         - 2D (rank x num_elements) array with the
+                  elements coordinates ( 1-based); in C the
+                  array is stored in 2D as (num_element x rank)
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5sselect_elements_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> OPERATOR<span class="sign">,</span> rank<span class="sign">,</span> <span class="sign">&amp;</span>
+       num_elements<span class="sign">,</span> coord<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span>   INTENT<span class="sign">(</span>IN<span class="sign">)</span>                                <span class="sign">:</span><span class="sign">:</span> space_id
+    INTEGER<span class="sign">,</span>          INTENT<span class="sign">(</span>IN<span class="sign">)</span>                                <span class="sign">:</span><span class="sign">:</span> OPERATOR
+    INTEGER<span class="sign">,</span>          INTENT<span class="sign">(</span>IN<span class="sign">)</span>                                <span class="sign">:</span><span class="sign">:</span> rank
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span>  INTENT<span class="sign">(</span>IN<span class="sign">)</span>                                <span class="sign">:</span><span class="sign">:</span> num_elements
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">,</span> DIMENSION<span class="sign">(</span>rank<span class="sign">,</span>num_elements<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> coord
+    INTEGER<span class="sign">,</span>          INTENT<span class="sign">(</span>OUT<span class="sign">)</span>                               <span class="sign">:</span><span class="sign">:</span> hdferr 
+</pre>
+
+<hr />
+<a name="H5S2fh5sselect5fhyperslab5ff"></a>
+<a name="robo399"></a><h2>h5sselect_hyperslab_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sselect_hyperslab_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Selects a hyperslab region to add to the current selected
+  region
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+  operator      - flag, valid values are:
+  H5S_SELECT_SET_F (0)
+  H5S_SELECT_OR_F (1)
+  start         - array with hyperslab offsets
+  count         - number of blocks included in the
+  hyperslab
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  stride        - array with hyperslab strides
+  block         - array with hyperslab block sizes
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sselect_hyperslab_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> operator<span class="sign">,</span> start<span class="sign">,</span> count<span class="sign">,</span> <span class="sign">&amp;</span>
+                                           hdferr<span class="sign">,</span> stride<span class="sign">,</span> block<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> operator     <span class="sign">!</span> Flag<span class="sign">,</span> valid values are<span class="sign">:</span>
+                                                <span class="sign">!</span> H5S_SELECT_SET_F <span class="sign">(</span>0<span class="sign">)</span>
+                                                <span class="sign">!</span> H5S_SELECT_OR_F <span class="sign">(</span>1<span class="sign">)</span>
+                                                <span class="sign">!</span>
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="comment">(*), INTENT(IN) :: start
+                                          ! Starting coordinates of the hyperslab
+            INTEGER(HSIZE_T), DIMENSION(*)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> count
+                                          <span class="sign">!</span> Number of blocks to select
+                                          <span class="sign">!</span> from dataspace
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr     <span class="sign">!</span> Error code
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="sign">(</span><span class="sign">:</span><span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> stride
+                                          <span class="sign">!</span> Array of how many elements to move
+                                          <span class="sign">!</span> in each direction
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="sign">(</span><span class="sign">:</span><span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> block
+                                          <span class="sign">!</span> Sizes of element block
+</pre>
+
+<hr />
+<a name="H5S2fh5sselect5fnone5ff"></a>
+<a name="robo400"></a><h2>h5sselect_none_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sselect_none_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Resets the selection region to include no elements.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id    - the identifier for the dataspace in which
+                the selection is being reset.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sselect_none_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id  <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sselect5fvalid5ff"></a>
+<a name="robo401"></a><h2>h5sselect_valid_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sselect_valid_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Verifies that the selection is within the extent of
+  the dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - identifier for the dataspace for which
+  selection is verified
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sselect_valid_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> status<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id  <span class="sign">!</span> Dataspace identifier
+            LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> status          <span class="sign">!</span> TRUE <span class="keyword">if</span> the selection is
+                                                    <span class="sign">!</span> contained within the extent<span class="sign">,</span>
+                                                    <span class="sign">!</span> FALSE otherwise<span class="sign">.</span>
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sset5fextent5fnone5ff"></a>
+<a name="robo402"></a><h2>h5sset_extent_none_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sset_extent_none_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Removes the extent from a dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sset_extent_none_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id  <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr          <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5S2fh5sset5fextent5fsimple5ff"></a>
+<a name="robo403"></a><h2>h5sset_extent_simple_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo68">H5S</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5sset_extent_simple_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets or resets the size of an existing dataspace.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  space_id      - dataspace identifier
+  rank          - dataspace number of dimensions
+  current_size          - array with the new sizes of dimensions
+  maximum_size          - array with the new maximum sizes of
+  dimensions
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr      - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 6, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">          SUBROUTINE <strong>h5sset_extent_simple_f</strong><span class="sign">(</span>space_id<span class="sign">,</span> rank<span class="sign">,</span> current_size<span class="sign">,</span> <span class="sign">&amp;</span>
+                                            maximum_size<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> space_id <span class="sign">!</span> Dataspace identifier
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> rank            <span class="sign">!</span> Dataspace rank
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="sign">(</span>rank<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> current_size
+                                                   <span class="sign">!</span> Array with the new sizes
+                                                   <span class="sign">!</span> of dimensions
+            INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> DIMENSION<span class="sign">(</span>rank<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> maximum_size
+                                                   <span class="sign">!</span> Array with the new maximum
+                                                   <span class="sign">!</span> sizes of dimensions
+                                                   <span class="sign">!</span> sizes
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Sff.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

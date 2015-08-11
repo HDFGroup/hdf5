@@ -112,8 +112,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/H5config.h \
-	$(top_builddir)/fortran/src/H5config_f.inc
+CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = tstds$(EXEEXT) tstlite$(EXEEXT) tstimage$(EXEEXT) \
@@ -150,17 +149,14 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src -I$(top_builddir)/fortran/src
-PPFCCOMPILE = $(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_FCFLAGS) $(FCFLAGS)
-LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=compile $(FC) $(DEFS) \
-	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_FCFLAGS) $(FCFLAGS)
-AM_V_PPFC = $(am__v_PPFC_@AM_V@)
-am__v_PPFC_ = $(am__v_PPFC_@AM_DEFAULT_V@)
-am__v_PPFC_0 = @echo "  PPFC    " $@;
-am__v_PPFC_1 = 
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
+FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+LTFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)
+AM_V_FC = $(am__v_FC_@AM_V@)
+am__v_FC_ = $(am__v_FC_@AM_DEFAULT_V@)
+am__v_FC_0 = @echo "  FC      " $@;
+am__v_FC_1 = 
 FCLD = $(FC)
 FCLINK = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(FCLD) $(AM_FCFLAGS) $(FCFLAGS) \
@@ -464,21 +460,14 @@ F9XMODEXT = @F9XMODEXT@
 F9XMODFLAG = @F9XMODFLAG@
 F9XSUFFIXFLAG = @F9XSUFFIXFLAG@
 FC = @FC@
+FC2003 = @FC2003@
 FCFLAGS = @FCFLAGS@
 FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
 FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
-FORTRAN_C_LONG_DOUBLE_IS_UNIQUE = @FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
-FORTRAN_HAVE_C_LONG_DOUBLE = @FORTRAN_HAVE_C_LONG_DOUBLE@
-FORTRAN_SIZEOF_LONG_DOUBLE = @FORTRAN_SIZEOF_LONG_DOUBLE@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 GREP = @GREP@
-H5CONFIG_F_IKIND = @H5CONFIG_F_IKIND@
-H5CONFIG_F_NUM_IKIND = @H5CONFIG_F_NUM_IKIND@
-H5CONFIG_F_NUM_RKIND = @H5CONFIG_F_NUM_RKIND@
-H5CONFIG_F_RKIND = @H5CONFIG_F_RKIND@
-H5CONFIG_F_RKIND_SIZEOF = @H5CONFIG_F_RKIND_SIZEOF@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
@@ -488,12 +477,13 @@ H5_LDFLAGS = @H5_LDFLAGS@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
-HAVE_Fortran_INTEGER_SIZEOF_16 = @HAVE_Fortran_INTEGER_SIZEOF_16@
+HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
+HDF_FORTRAN2003 = @HDF_FORTRAN2003@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
@@ -535,18 +525,6 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
-PAC_C_MAX_REAL_PRECISION = @PAC_C_MAX_REAL_PRECISION@
-PAC_FC_ALL_INTEGER_KINDS = @PAC_FC_ALL_INTEGER_KINDS@
-PAC_FC_ALL_INTEGER_KINDS_SIZEOF = @PAC_FC_ALL_INTEGER_KINDS_SIZEOF@
-PAC_FC_ALL_REAL_KINDS = @PAC_FC_ALL_REAL_KINDS@
-PAC_FC_ALL_REAL_KINDS_SIZEOF = @PAC_FC_ALL_REAL_KINDS_SIZEOF@
-PAC_FC_MAX_REAL_PRECISION = @PAC_FC_MAX_REAL_PRECISION@
-PAC_FORTRAN_NATIVE_DOUBLE_KIND = @PAC_FORTRAN_NATIVE_DOUBLE_KIND@
-PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF = @PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF@
-PAC_FORTRAN_NATIVE_INTEGER_KIND = @PAC_FORTRAN_NATIVE_INTEGER_KIND@
-PAC_FORTRAN_NATIVE_INTEGER_SIZEOF = @PAC_FORTRAN_NATIVE_INTEGER_SIZEOF@
-PAC_FORTRAN_NATIVE_REAL_KIND = @PAC_FORTRAN_NATIVE_REAL_KIND@
-PAC_FORTRAN_NATIVE_REAL_SIZEOF = @PAC_FORTRAN_NATIVE_REAL_SIZEOF@
 PARALLEL = @PARALLEL@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PERL = @PERL@
@@ -696,10 +674,10 @@ TEST_PROG = tstds tstlite tstimage tsttable
 LDADD = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL)  $(LIBHDF5)
 
 # Source files for the programs
-tstds_SOURCES = tstds.F90
-tstlite_SOURCES = tstlite.F90
-tstimage_SOURCES = tstimage.F90
-tsttable_SOURCES = tsttable.F90
+tstds_SOURCES = tstds.f90
+tstlite_SOURCES = tstlite.f90
+tstimage_SOURCES = tstimage.f90
+tsttable_SOURCES = tsttable.f90
 
 # Mark this directory as part of the Fortran API (this affects output
 # from tests in conclude.am)
@@ -727,7 +705,7 @@ TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chkexe_)
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .F90 .lo .log .o .obj .sh .sh$(EXEEXT) .trs
+.SUFFIXES: .f90 .lo .log .o .obj .sh .sh$(EXEEXT) .trs
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -791,14 +769,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-.F90.o:
-	$(AM_V_PPFC)$(PPFCCOMPILE) -c -o $@ $<
+.f90.o:
+	$(AM_V_FC)$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
-.F90.obj:
-	$(AM_V_PPFC)$(PPFCCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+.f90.obj:
+	$(AM_V_FC)$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) `$(CYGPATH_W) '$<'`
 
-.F90.lo:
-	$(AM_V_PPFC)$(LTPPFCCOMPILE) -c -o $@ $<
+.f90.lo:
+	$(AM_V_FC)$(LTFCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 mostlyclean-libtool:
 	-rm -f *.lo

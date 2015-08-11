@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Aff_F03.f90</title>
+<!-- Source: ./src/H5Aff_F03.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5A2028F0329"></a>
+<a name="robo28"></a><h2>H5A (F03)</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  H5A_PROVISIONAL
+</pre>
+<p class="item_name">FILE</p>
+<pre>  src/fortran/src/<a href="#robo_top_of_doc">H5Aff_F03.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran 90 and Fortran 2003 interfaces for <a href="./H5Aff_f90.html#robo27">H5A</a> functions.
+  It contains the same functions as <a href="./H5Aff_F90_f90.html#robo_top_of_doc">H5Aff_F90.f90</a> but includes the
+  Fortran 2003 functions and the interface listings. This file will be compiled
+  instead of <a href="./H5Aff_F90_f90.html#robo_top_of_doc">H5Aff_F90.f90</a> if Fortran 2003 functions are enabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  (A) C_LOC and character strings according to the Fortran 2003 standard:
+
+  15.1.2.5 C_LOC(X)
+
+  Argument. X shall either
+
+  (1) have interoperable type and type parameters and be
+    (a) a variable that has the TARGET attribute and is interoperable,
+    (b) an allocated allocatable variable that has the TARGET attribute
+        and is not an array of zero size, or
+    (c) an associated scalar pointer, or
+  (2) be a nonpolymorphic scalar, have no length type parameters, and be
+    (a) a nonallocatable, nonpointer variable that has the TARGET attribute,
+    (b) an allocated allocatable variable that has the TARGET attribute, or
+    (c) an associated pointer.
+
+  - When X is a character, for interoperability the standard is:
+
+  15.2.1 Interoperability of intrinsic types
+
+  ...if the type is character, interoperability also requires that the length type parameter
+  be omitted or be specified by an initialization expression whose value is one.
+
+  THEREFORE compilers that have not extended the standard  require
+
+  CHARACTER(LEN=1), TARGET :: chr
+  or
+  CHARACTER, TARGET :: chr
+
+  (B)
+                         *** IMPORTANT ***
+  If you add a new <a href="./H5Aff_f90.html#robo27">H5A</a> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5A2028F03292fh5aread5ff"></a>
+<a name="robo108"></a><h2>h5aread_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo28">H5A (F03)</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5aread_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Reads an attribute.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  attr_id       - attribute identifier
+  memtype_id    - attribute memory type identifier
+  dims          - 1D array of size 7, stores sizes of the
+                - buf array dimensions.
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  buf           - buffer to read attribute data in
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces are added for
+  called C functions (it is needed for Windows
+  port).  February 27, 2001
+
+  dims parameter was added to make code portable;
+  Aprile 4, 2001
+
+  Changed buf intent to INOUT to be consistant
+  with how the C functions handles it. The pg
+  compiler will return 0 if a buf value is not set.
+  February, 2008
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  This function is overloaded to write INTEGER,
+  REAL, DOUBLE PRECISION and CHARACTER buffers
+  up to 7 dimensions.
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Aff_F03.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>

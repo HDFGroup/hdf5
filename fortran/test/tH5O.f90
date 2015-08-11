@@ -28,13 +28,11 @@
 !*****
 MODULE TH5O
 
-  USE HDF5 ! This module contains all necessary modules
-  USE TH5_MISC
-  USE TH5_MISC_GEN
-
 CONTAINS
 
 SUBROUTINE test_h5o(cleanup, total_error)
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -58,6 +56,9 @@ END SUBROUTINE test_h5o
 !***************************************************************
 
 SUBROUTINE test_h5o_link(total_error)
+
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
 
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
@@ -156,7 +157,7 @@ SUBROUTINE test_h5o_link(total_error)
 
   CALL H5Tcommitted_f(type_id, committed, error)
   CALL check("H5Tcommitted_f",error,total_error)
-  CALL verify("H5Tcommitted_f", committed, .TRUE., total_error)
+  CALL verifyLogical("H5Tcommitted_f", committed, .TRUE., total_error)
 
   !  Create a dataset with no name using the committed datatype
   CALL H5Dcreate_anon_f(file_id, type_id, space_id, dset_id, error ) ! using no optional parameters
@@ -180,7 +181,7 @@ SUBROUTINE test_h5o_link(total_error)
   !  Verify the data 
   DO i = 1, TEST6_DIM1
      DO j = 1, TEST6_DIM2
-        CALL verify("H5Dread_f",wdata(i,j),rdata(i,j),total_error)
+        CALL VERIFY("H5Dread_f",wdata(i,j),rdata(i,j),total_error)
         wdata(i,j) = i*j
      ENDDO
   ENDDO
@@ -228,7 +229,7 @@ SUBROUTINE test_h5o_link(total_error)
   !  Verify the data 
   DO i = 1, TEST6_DIM1
      DO j = 1, TEST6_DIM2
-        CALL verify("H5Dread",wdata(i,j),rdata(i,j),total_error)
+        CALL VERIFY("H5Dread",wdata(i,j),rdata(i,j),total_error)
      ENDDO
   ENDDO
   !  Close open IDs 
@@ -463,7 +464,7 @@ SUBROUTINE test_h5o_link(total_error)
   nlinks = 0
   CALL h5pget_nlinks_f(plist, nlinks, error)
   CALL check("h5pget_nlinks_f",error,total_error)
-  CALL verify("h5pget_nlinks_f", INT(nlinks), 2, total_error)
+  CALL VERIFY("h5pget_nlinks_f", INT(nlinks), 2, total_error)
 
   ! See if the link exists
   CALL h5oexists_by_name_f(file_id,"/G1_LINK", link_exists, error, plist)
@@ -577,6 +578,9 @@ END SUBROUTINE test_h5o_link
 
 SUBROUTINE test_h5o_plist(total_error)
 
+  USE HDF5 ! This module contains all necessary modules
+  USE TH5_MISC
+
   IMPLICIT NONE
   INTEGER, INTENT(INOUT) :: total_error
 
@@ -627,18 +631,18 @@ SUBROUTINE test_h5o_plist(total_error)
   !  Retrieve attribute phase change values on each creation property list and verify 
   CALL H5Pget_attr_phase_change_f(gcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
-  CALL verify("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
-  CALL verify("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
   CALL H5Pget_attr_phase_change_f(dcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
-  CALL verify("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
-  CALL verify("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
   CALL H5Pget_attr_phase_change_f(tcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
-  CALL verify("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
-  CALL verify("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
   ! Create a group, dataset, and committed datatype within the file,
   ! using the respective type of creation property lists.
@@ -696,18 +700,18 @@ SUBROUTINE test_h5o_plist(total_error)
   !  Retrieve attribute phase change values on each creation property list and verify 
   CALL H5Pget_attr_phase_change_f(gcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
-  CALL verify("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
-  CALL verify("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
   CALL H5Pget_attr_phase_change_f(dcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
-  CALL verify("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
-  CALL verify("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
   CALL H5Pget_attr_phase_change_f(tcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
-  CALL verify("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
-  CALL verify("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
   ! Close current objects 
   CALL h5pclose_f(gcpl,error)
@@ -753,18 +757,18 @@ SUBROUTINE test_h5o_plist(total_error)
   !  Retrieve attribute phase change values on each creation property list and verify 
   CALL H5Pget_attr_phase_change_f(gcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
-  CALL verify("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
-  CALL verify("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
   CALL H5Pget_attr_phase_change_f(dcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
-  CALL verify("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
-  CALL verify("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
   CALL H5Pget_attr_phase_change_f(tcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
-  CALL verify("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
-  CALL verify("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
   !  Close current objects 
   CALL h5pclose_f(gcpl,error)

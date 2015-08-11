@@ -1,6 +1,6 @@
 /****ih* H5_f/H5_f
  * PURPOSE
- *  This file contains C stubs for H5 Fortran APIs
+ *   This file contains C stubs for H5 Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -22,7 +22,7 @@
 */
 
 #include "H5f90.h"
-#include "H5fort_type_defines.h"
+
 /****if* H5_f/h5init_types_c
  * NAME
  *  h5init_types_c
@@ -30,17 +30,17 @@
  *  Initialize predefined datatypes in Fortran
  * INPUTS
  *  types - array with the predefined Native Fortran
- *  type, its element and length must be the
- *  same as the types array defined in the
- *          H5f90global.F90
+ *          type, its element and length must be the
+ *          same as the types array defined in the
+ *          H5f90global.f90
  *  floatingtypes - array with the predefined Floating Fortran
- *  type, its element and length must be the
- *  same as the floatingtypes array defined in the
- *                   H5f90global.F90
+ *                   type, its element and length must be the
+ *                   same as the floatingtypes array defined in the
+ *                   H5f90global.f90
  *  integertypes - array with the predefined Integer Fortran
- *  type, its element and length must be the
- *  same as the integertypes array defined in the
- *                 H5f90global.F90
+ *                 type, its element and length must be the
+ *                 same as the integertypes array defined in the
+ *                 H5f90global.f90
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -49,14 +49,14 @@
  * SOURCE
 */
 int_f
-h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes )
+nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes )
 /******/
 {
     int ret_value = -1;
     hid_t c_type_id;
     size_t tmp_val;
 
-/* Fortran INTEGER may not be the same as C; do all checking to find
+/* Fortran INTEGER is may not be the same as C in; do all checking to find
    an appropriate size
 */
     if (sizeof(int_f) == sizeof(int)) {
@@ -90,12 +90,6 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
 #if H5_SIZEOF_LONG_DOUBLE!=0
     else if(sizeof(double_f)==sizeof(long double)) {
        if ((types[2] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
-    }/*end else */
-#endif
-#ifdef H5_HAVE_FLOAT128
-    else if(sizeof(double_f)==sizeof(__float128)) {
-      if ((types[2] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[2], 128) < 0) return ret_value;
     }/*end else */
 #endif
 
@@ -132,11 +126,7 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
       if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
     } /*end if */
     else if (sizeof(int_1_f) == sizeof(long long)) {
-      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
-    } /*end if */
-    else {
-      if ((types[6] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[6], 128) < 0) return ret_value;
+	if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
     /*
      * FIND H5T_NATIVE_INTEGER_2
@@ -153,10 +143,6 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     else if (sizeof(int_2_f) == sizeof(long long)) {
 	if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
-    else {
-      if ((types[7] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[7], 128) < 0) return ret_value;
-    } /*end else */
     /*
      * FIND H5T_NATIVE_INTEGER_4
      */
@@ -171,10 +157,6 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     } /*end if */
     else if (sizeof(int_4_f) == sizeof(long long)) {
 	if ((types[8] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
-    } /*end else */
-    else {
-      if ((types[8] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[8], 128) < 0) return ret_value;
     } /*end else */
     /*
      * FIND H5T_NATIVE_INTEGER_8
@@ -191,65 +173,47 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     else if (sizeof(int_8_f) == sizeof(long long)) {
 	if ((types[9] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
-    else {
-      if ((types[9] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[9], 128) < 0) return ret_value;
-    } /*end else */
-
     /*
-     * FIND H5T_NATIVE_REAL_C_FLOAT
+     * FIND H5T_NATIVE_REAL_4
      */
-    if (sizeof(real_C_FLOAT_f) == sizeof(float)) {
+    if (sizeof(real_4_f) == sizeof(float)) {
       if ((types[10] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /*end if */
-    else if (sizeof(real_C_FLOAT_f) == sizeof(double)) {
+    else if (sizeof(real_4_f) == sizeof(double)) {
       if ((types[10] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /*end if */
 #if H5_SIZEOF_LONG_DOUBLE!=0
-    else if (sizeof(real_C_FLOAT_f) == sizeof(long double)) {
+    else if (sizeof(real_4_f) == sizeof(long double)) {
 	if ((types[10] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     } /*end else */
 #endif
     /*
-     * FIND H5T_NATIVE_REAL_C_DOUBLE
+     * FIND H5T_NATIVE_REAL_8
      */
-    if (sizeof(real_C_DOUBLE_f) == sizeof(float)) {
+    if (sizeof(real_8_f) == sizeof(float)) {
       if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /*end if */
-    else if (sizeof(real_C_DOUBLE_f) == sizeof(double)) {
+    else if (sizeof(real_8_f) == sizeof(double)) {
       if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /*end if */
 #if H5_SIZEOF_LONG_DOUBLE!=0
-    else if (sizeof(real_C_DOUBLE_f) == sizeof(long double)) {
+    else if (sizeof(real_8_f) == sizeof(long double)) {
 	if ((types[11] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     } /*end else */
 #endif
     /*
-     * FIND H5T_NATIVE_REAL_C_LONG_DOUBLE
+     * FIND H5T_NATIVE_REAL_16
      */
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-    if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(float)) {
+    if (sizeof(real_16_f) == sizeof(float)) {
       if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /*end if */
-    else if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(double)) {
+    else if (sizeof(real_16_f) == sizeof(double)) {
       if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /*end if */
-# if H5_FORTRAN_HAVE_C_LONG_DOUBLE!=0
-    else if (sizeof(real_C_LONG_DOUBLE_f) == sizeof(long double)) {
-      if ( H5_PAC_C_MAX_REAL_PRECISION >= H5_PAC_FC_MAX_REAL_PRECISION) {
+#if H5_SIZEOF_LONG_DOUBLE!=0
+    else if (sizeof(real_16_f) == sizeof(long double)) {
 	if ((types[12] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
-      }
-      else {
-	if ((types[12] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
-	if ( H5Tset_precision (types[12], 128) < 0) return ret_value;
-      }
-    }
-# else
-    if ((types[12] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
-    if ( H5Tset_precision (types[12], 64) < 0) return ret_value;
-# endif
-#else
-    if ((types[12] = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
+    } /*end else */
 #endif
     /*
      * FIND H5T_NATIVE_B_8
@@ -257,38 +221,7 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     if ((types[13] = (hid_t_f)H5Tcopy(H5T_NATIVE_B8))  < 0) return ret_value;
     if ((types[14] = (hid_t_f)H5Tcopy(H5T_NATIVE_B16)) < 0) return ret_value;
     if ((types[15] = (hid_t_f)H5Tcopy(H5T_NATIVE_B32)) < 0) return ret_value;
-    if ((types[16] = (hid_t_f)H5Tcopy(H5T_NATIVE_B64)) < 0) return ret_value;
-
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-     /*
-     * FIND H5T_NATIVE_INTEGER_16
-     */
-    if (sizeof(int_16_f) == sizeof(char)) {
-      if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_16_f) == sizeof(short)) {
-      if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_SHORT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_16_f) == sizeof(int)) {
-      if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_16_f) == sizeof(long long)) {
-	if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
-    } /*end else */
-    else {
-      if ((types[17] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[17], 128) < 0) return ret_value;
-    } /*end else */
-#else
-    if ((types[17] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-    if ( H5Tset_precision (types[17], 128) < 0) return ret_value;
-#endif
-
-     /*
-     * FIND H5T_NATIVE_FLOAT_128
-     */
-    if ((types[18] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
-    if ( H5Tset_precision (types[18], 128) < 0) return ret_value;
+    if ((types[16] = (hid_t_f)H5Tcopy(H5T_NATIVE_B64)) < 0) return ret_value;  
 
     if ((floatingtypes[0] = (hid_t_f)H5Tcopy(H5T_IEEE_F32BE)) < 0) return ret_value;
     if ((floatingtypes[1] = (hid_t_f)H5Tcopy(H5T_IEEE_F32LE)) < 0) return ret_value;
@@ -339,35 +272,35 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
  *  Closes predefined datatype in Fortran
  * INPUTS
  *  types         - array with the predefined Native Fortran
- *  type, its element and length must be the
- *  same as the types array defined in the
- *                  H5f90global.F90
+ *                  type, its element and length must be the
+ *                  same as the types array defined in the
+ *                  H5f90global.f90
  *  lentypes      - length of the types array, which must be the
- *  same as the length of types array defined
- *  in the H5f90global.F90
+ *                  same as the length of types array defined
+ *                  in the H5f90global.f90
  *  floatingtypes - array with the predefined Floating Fortran
- *  type, its element and length must be the
- *  same as the floatingtypes array defined in the
- *                  H5f90global.F90
+ *                  type, its element and length must be the
+ *                  same as the floatingtypes array defined in the
+ *                  H5f90global.f90
  *  floatinglen   - length of the floatingtypes array, which must be the
- *  same as the length of floatingtypes array defined
- *  in the H5f90global.F90
+ *                  same as the length of floatingtypes array defined
+ *                  in the H5f90global.f90
  *  integertypes  - array with the predefined Integer Fortran
- *  type, its element and length must be the
- *  same as the integertypes array defined in the
- *                  H5f90global.F90
+ *                  type, its element and length must be the
+ *                  same as the integertypes array defined in the
+ *                  H5f90global.f90
  *  integerlen    - length of the floatingtypes array, which must be the
- *  same as the length of floatingtypes array defined
- *  in the H5f90global.F90
+ *                  same as the length of floatingtypes array defined
+ *                  in the H5f90global.f90
  * RETURNS
- *  0 on success, -1 on failure
+ *   0 on success, -1 on failure
  * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
+ *   Elena Pourmal
+ *   Tuesday, August 3, 1999
  * SOURCE
  */
 int_f
-h5close_types_c( hid_t_f * types, int_f *lentypes,
+nh5close_types_c( hid_t_f * types, int_f *lentypes,
                   hid_t_f * floatingtypes, int_f* floatinglen,
                   hid_t_f * integertypes,  int_f * integerlen )
 /******/
@@ -377,16 +310,16 @@ h5close_types_c( hid_t_f * types, int_f *lentypes,
     int i;
 
     for (i = 0; i < *lentypes; i++) {
-      c_type_id = types[i];
-      if ( H5Tclose(c_type_id) < 0) return ret_value;
+        c_type_id = types[i];
+        if ( H5Tclose(c_type_id) < 0) return ret_value;
     }
     for (i = 0; i < *floatinglen; i++) {
-      c_type_id = floatingtypes[i];
-      if ( H5Tclose(c_type_id) < 0) return ret_value;
+        c_type_id = floatingtypes[i];
+        if ( H5Tclose(c_type_id) < 0) return ret_value;
     }
     for (i = 0; i < *integerlen; i++) {
-      c_type_id = integertypes[i];
-      if ( H5Tclose(c_type_id) < 0) return ret_value;
+        c_type_id = integertypes[i];
+        if ( H5Tclose(c_type_id) < 0) return ret_value;
     }
     ret_value = 0;
     return ret_value;
@@ -435,7 +368,7 @@ h5close_types_c( hid_t_f * types, int_f *lentypes,
  * SOURCE
  */
 int_f
-h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags, 
+nh5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags, 
 		 int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
                  int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
                  int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
@@ -591,11 +524,11 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
     h5o_flags[6] = (int_f)H5O_COPY_ALL; /* All object copying flags (for internal checking) */
 
 /* Flags for shared message indexes.
- *  Pass these flags in using the mesg_type_flags parameter in
+ * Pass these flags in using the mesg_type_flags parameter in
  * H5P_set_shared_mesg_index.
  * (Developers: These flags correspond to object header message type IDs,
- *  but we need to assign each kind of message to a different bit so that
- *  one index can hold multiple types.)
+ * but we need to assign each kind of message to a different bit so that
+ * one index can hold multiple types.)
  */
       h5o_flags[7] = (int_f)H5O_SHMESG_NONE_FLAG;  /* No shared messages */
       h5o_flags[8] = (int_f)H5O_SHMESG_SDSPACE_FLAG; /* Simple Dataspace Message.  */
@@ -614,7 +547,7 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
       h5o_flags[19] = (int_f)H5O_HDR_ALL_FLAGS;
 
 /* Maximum shared message values.  Number of indexes is 8 to allow room to add
- *  new types of messages.
+ * new types of messages.
  */
       h5o_flags[20] = (int_f)H5O_SHMESG_MAX_NINDEXES;
       h5o_flags[21] = (int_f)H5O_SHMESG_MAX_LIST_SIZE;
@@ -756,7 +689,7 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 
 
 /*
- *  H5 Generic flags introduced in version 1.8
+ *  H5 Generic flags introduced in version 1.8 -MSB-
  */
 
       /* H5_index_t enum struct */
@@ -780,7 +713,7 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
 }
 
 int_f
-h5init1_flags_c(int_f *h5lib_flags)
+nh5init1_flags_c(int_f *h5lib_flags)
 /******/
 {
     int ret_value = -1;
@@ -794,19 +727,19 @@ h5init1_flags_c(int_f *h5lib_flags)
 
 /****if* H5_f/h5open_c
  * NAME
- *  h5open_c
+ *              h5open_c
  * PURPOSE
- *  Calls H5open call to initialize C HDF5 library
+ *           Calls H5open call to initialize C HDF5 library
  * RETURNS
- *  0 on success, -1 on failure
+ *           0 on success, -1 on failure
  * AUTHOR
- *  Elena Pourmal
- *  Friday, November 17, 2000
+ *        Elena Pourmal
+ *        Friday, November 17, 2000
  *
  * SOURCE
  */
 int_f
-h5open_c(void)
+nh5open_c(void)
 /******/
 {
     int ret_value = -1;
@@ -817,17 +750,17 @@ h5open_c(void)
 }
 /****if* H5_f/h5close_c
  * NAME
- *  h5close_c
+ *              h5close_c
  * PURPOSE
- *  Calls H5close call to close C HDF5 library
+ *           Calls H5close call to close C HDF5 library
  * RETURNS
- *  0 on success, -1 on failure
+ *           0 on success, -1 on failure
  * AUTHOR
- *  Elena Pourmal
+ *        Elena Pourmal
  * SOURCE
  */
 int_f
-h5close_c(void)
+nh5close_c(void)
 /******/
 {
     int ret_value = -1;
@@ -839,28 +772,28 @@ h5close_c(void)
 
 /****if* H5_f/h5get_libversion_c
  * NAME
- *  h5get_libversion_c
+ *              h5get_libversion_c
  * PURPOSE
- *  Calls H5get_libversion function
+ *           Calls H5get_libversion function
  *		      to retrieve library version info.
  * INPUTS
  *
- *  None
+ *                    None
  * OUTPUTS
  *
- *  majnum - the major version of the library
- *  minnum - the minor version of the library
- *  relnum - the release version of the library
+ *                    majnum - the major version of the library
+ *                    minnum - the minor version of the library
+ *                    relnum - the release version of the library
  * RETURNS
- *  0 on success, -1 on failure
+ *           0 on success, -1 on failure
  * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
+ *        Elena Pourmal
+ *                    Tuesday, September 24, 2002
  * SOURCE
  *
  */
 int_f
-h5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
+nh5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
 /******/
 {
 
@@ -878,27 +811,27 @@ h5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum)
 
 /****if* H5_f/h5check_version_c
  * NAME
- *  h5check_version_c
+ *              h5check_version_c
  * PURPOSE
- *  Calls H5check_version function
+ *           Calls H5check_version function
  *		      to verify library version info.
  * INPUTS
  *
- *  majnum - the major version of the library
- *  minnum - the minor version of the library
- *  relnum - the release version of the library
+ *                    majnum - the major version of the library
+ *                    minnum - the minor version of the library
+ *                    relnum - the release version of the library
  * OUTPUTS
  *
- *  None
+ *                    None
  * RETURNS
- *  0 on success, aborts on failure
+ *           0 on success, aborts on failure
  * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
+ *        Elena Pourmal
+ *                    Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
-h5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
+nh5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
 /******/
 {
     int ret_value = -1;
@@ -916,18 +849,18 @@ h5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum)
 
 /****if* H5_f/h5garbage_collect_c
  * NAME
- *  h5garbage_collect_c
+ *              h5garbage_collect_c
  * PURPOSE
- *  Calls H5garbage_collect to collect on all free-lists of all types
+ *           Calls H5garbage_collect to collect on all free-lists of all types
  * RETURNS
- *  0 on success, -1 on failure
+ *           0 on success, -1 on failure
  * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
+ *        Elena Pourmal
+ *                    Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
-h5garbage_collect_c(void)
+nh5garbage_collect_c(void)
 /******/
 {
     int ret_value = -1;
@@ -939,18 +872,18 @@ h5garbage_collect_c(void)
 
 /****if* H5_f/h5dont_atexit_c
  * NAME
- *  h5dont_atexit_c
+ *              h5dont_atexit_c
  * PURPOSE
- *  Calls H5dont_atexit not to install atexit cleanup routine
+ *           Calls H5dont_atexit not to install atexit cleanup routine
  * RETURNS
- *  0 on success, -1 on failure
+ *           0 on success, -1 on failure
  * AUTHOR
- *  Elena Pourmal
- *  Tuesday, September 24, 2002
+ *        Elena Pourmal
+ *                    Tuesday, September 24, 2002
  * SOURCE
  */
 int_f
-h5dont_atexit_c(void)
+nh5dont_atexit_c(void)
 /******/
 {
     int ret_value = -1;

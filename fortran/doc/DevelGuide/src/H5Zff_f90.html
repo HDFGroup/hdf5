@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Zff.f90</title>
+<!-- Source: ./src/H5Zff.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5Z"></a>
+<a name="robo74"></a><h2>H5Z</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5Z</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5Z</strong> functions. It includes
+  all the functions that are independent on whether the Fortran 2003 functions
+  are enabled or disabled.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5Z</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5Z2fh5zfilter5favail5ff"></a>
+<a name="robo466"></a><h2>h5zfilter_avail_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo74">H5Z</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5zfilter_avail_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Queries if filter is available
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  filter        - filter
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  status        - status; .TRUE. if filter is available,
+                  .FALSE. otherwise
+  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  March 12, 2003
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5zfilter_avail_f</strong><span class="sign">(</span>filter<span class="sign">,</span> status<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> filter      <span class="sign">!</span> Filter<span class="sign">;</span> may be one of the following<span class="sign">:</span>
+                                        <span class="sign">!</span>   H5Z_FILTER_DEFLATE_F
+                                        <span class="sign">!</span>   H5Z_FILTER_SZIP_F
+                                        <span class="sign">!</span>   H5Z_FILTER_NBIT_F
+                                        <span class="sign">!</span>   H5Z_FILTER_SCALEOFFSET_F
+                                        <span class="sign">!</span>   H5Z_FILTER_SHUFFLE_F
+                                        <span class="sign">!</span>   H5Z_FILTER_FLETCHER32_F
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> status      <span class="sign">!</span> Flag<span class="sign">,</span> idicates <span class="keyword">if</span> filter
+                                        <span class="sign">!</span> is availble  not <span class="sign">(</span> TRUE or
+                                        <span class="sign">!</span> FALSE<span class="sign">)</span>
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr      <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5Z2fh5zget5ffilter5finfo5ff"></a>
+<a name="robo467"></a><h2>h5zget_filter_info_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo74">H5Z</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5zget_filter_info_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Queries if filter has its encoder and/or decoder
+  available
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  filter        - filter
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  config_flags  - Bit vector possibly containing the
+                  following values:
+                     H5Z_FILTER_ENCODE_ENABLED_F
+                     H5Z_FILTER_DECODE_ENABLED_F
+  hdferr:       - error code
+                   Success:  0
+                   Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Nat Furrer and James Laird
+  June 16, 2004
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5zget_filter_info_f</strong><span class="sign">(</span>filter<span class="sign">,</span> config_flags<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> filter      <span class="sign">!</span> Filter<span class="sign">;</span> may be one of the following<span class="sign">:</span>
+                                        <span class="sign">!</span>   H5Z_FILTER_DEFLATE_F
+                                        <span class="sign">!</span>   H5Z_FILTER_SZIP_F
+                                        <span class="sign">!</span>   H5Z_FILTER_NBIT_F
+                                        <span class="sign">!</span>   H5Z_FILTER_SCALEOFFSET_F
+                                        <span class="sign">!</span>   H5Z_FILTER_SHUFFLE_F
+                                        <span class="sign">!</span>   H5Z_FILTER_FLETCHER32_F
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> config_flags<span class="sign">!</span> Flag<span class="sign">,</span> indicates <span class="keyword">if</span> filter
+                                        <span class="sign">!</span> has its encoder and<span class="sign">/</span>or decoder
+                                        <span class="sign">!</span> available
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr      <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5Z2fh5zunregister5ff"></a>
+<a name="robo468"></a><h2>h5zunregister_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo74">H5Z</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5zunregister_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Unregisters specified filetr
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  filter - filter; may have one of the following values:
+            H5Z_FILTER_DEFLATE_F
+            H5Z_FILTER_SZIP_F
+            H5Z_FILTER_NBIT_F
+            H5Z_FILTER_SCALEOFFSET_F
+            H5Z_FILTER_SHUFFLE_F
+            H5Z_FILTER_FLETCHER32_F
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr - error code
+            Success:  0
+            Failure: -1
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  March 12, 2003
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5zunregister_f</strong><span class="sign">(</span>filter<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> filter
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr  <span class="sign">!</span> Error code
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Zff.f90 on Sun Aug 14 2011 22:49:37
+</p>
+</div> <!-- footer -->
+</body>
+</html>

@@ -1,0 +1,840 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1" />
+<link rel="stylesheet" href="../robodoc.css" type="text/css" />
+<title>./src/H5Gff.f90</title>
+<!-- Source: ./src/H5Gff.f90 -->
+</head>
+<body>
+<div id="logo">
+<a name="robo_top_of_doc">HDF5 FORTRAN Developer's Guide</a>
+</div> <!-- logo -->
+<div id="navigation">
+<a class="menuitem" href="../toc_index.html#top">Table of Contents</a>
+<a class="menuitem" href="../robo_sourcefiles.html#top">Sourcefiles</a>
+<a class="menuitem" href="../masterindex.html#top">Index</a>
+<a class="menuitem" href="../robo_functions.html#top">Functions</a>
+<a class="menuitem" href="../robo_modules.html#top">Modules</a>
+<a class="menuitem" href="../robo_procedures.html#top">Procedures</a>
+<a class="menuitem" href="../robo_subroutines.html#top">Subroutines</a>
+</div> <!-- navigation -->
+<div id="content">
+<hr />
+<a name="ROBODoc2fH5G"></a>
+<a name="robo44"></a><h2>H5G</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="../robo_modules.html#robo_top_of_doc">Modules</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  MODULE <strong>H5G</strong>
+</pre>
+<p class="item_name">FILE</p>
+<pre>  fortran/src/<a href="#robo_top_of_doc">H5Gff.f90</a>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  This file contains Fortran interfaces for <strong>H5G</strong> functions.
+</pre>
+<p class="item_name">NOTES</p>
+<pre>                         *** IMPORTANT ***
+  If you add a new <strong>H5G</strong> function you must add the function name to the
+  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+  This is needed for Windows based operating systems.
+</pre>
+
+<hr />
+<a name="H5G2fh5gclose5ff"></a>
+<a name="robo151"></a><h2>h5gclose_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gclose_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Closes the specified group.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  grp_id        - group identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gclose_f</strong><span class="sign">(</span>grp_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> grp_id  <span class="sign">!</span> Group identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fH5Gcreate5fanon5ff"></a>
+<a name="robo152"></a><h2>H5Gcreate_anon_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Gcreate_anon_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a new empty group without linking it into the file structure.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - Location identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  grp_id        - group identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  gcpl_id       - Group creation property list identifier
+  gapl_id       - Group access property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 15, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5Gcreate_anon_f<span class="sign">(</span>loc_id<span class="sign">,</span> grp_id<span class="sign">,</span> hdferr<span class="sign">,</span> gcpl_id<span class="sign">,</span> gapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> grp_id  <span class="sign">!</span> Group identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> gcpl_id  <span class="sign">!</span> Property list <span class="keyword">for</span> group creation
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> gapl_id  <span class="sign">!</span> Property list <span class="keyword">for</span> group access
+</pre>
+
+<hr />
+<a name="H5G2fh5gcreate5ff"></a>
+<a name="robo153"></a><h2>h5gcreate_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gcreate_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a new group.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - group name at the specified location
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  grp_id        - group identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  size_hint     - a parameter indicating the number of bytes to
+                  reserve for the names that will appear in the group
+  lcpl_id       - Property list for link creation
+  gcpl_id       - Property list for group creation
+  gapl_id       - Property list for group access
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+
+  Added additional optional paramaters in 1.8
+  MSB - February 27, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gcreate_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> grp_id<span class="sign">,</span> hdferr<span class="sign">,</span> size_hint<span class="sign">,</span> lcpl_id<span class="sign">,</span> gcpl_id<span class="sign">,</span> gapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the group
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> grp_id  <span class="sign">!</span> Group identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size_hint
+                                           <span class="sign">!</span> Parameter indicating
+                                           <span class="sign">!</span> the number of bytes
+                                           <span class="sign">!</span> to reserve <span class="keyword">for</span> the
+                                           <span class="sign">!</span> names that will appear
+                                           <span class="sign">!</span> in the group<span class="sign">.</span> Set to OBJECT_NAMELEN_DEFAULT_F
+                                           <span class="sign">!</span> <span class="keyword">if</span> using any of the optional
+                                           <span class="sign">!</span> parameters lcpl_id<span class="sign">,</span> gcpl_id<span class="sign">,</span> and<span class="sign">/</span>or gapl_id when not
+                                           <span class="sign">!</span> using keywords in specifying the optional parameters
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lcpl_id  <span class="sign">!</span> Property list <span class="keyword">for</span> link creation
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> gcpl_id  <span class="sign">!</span> Property list <span class="keyword">for</span> group creation
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> gapl_id  <span class="sign">!</span> Property list <span class="keyword">for</span> group access
+</pre>
+
+<hr />
+<a name="H5G2fh5gget5fcomment5ff"></a>
+<a name="robo155"></a><h2>h5gget_comment_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gget_comment_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves comment for specified object.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - name of the object at specified location
+  size          - size of the buffer required to hold comment
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  buffer        - buffer to hold object's comment
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gget_comment_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> buffer<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Current name of an object
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size    <span class="sign">!</span> Maximum number of buffer
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span>size<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buffer
+                                           <span class="sign">!</span> Buffer to hold a comment
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fH5Gget5fcreate5fplist5ff"></a>
+<a name="robo156"></a><h2>H5Gget_create_plist_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>H5Gget_create_plist_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Gets a group creation property list identifier.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  grp_id        - group identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  gcpl_id       - Group creation property list identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 15, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE h5gget_create_plist_f<span class="sign">(</span>grp_id<span class="sign">,</span> gcpl_id<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>  <span class="sign">:</span><span class="sign">:</span> grp_id  <span class="sign">!</span> Group identifier
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> gcpl_id <span class="sign">!</span> Property list <span class="keyword">for</span> group creation
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fh5gget5finfo5fby5fidx5ff"></a>
+<a name="robo157"></a><h2>h5gget_info_by_idx_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gget_info_by_idx_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves information about a group, according to the group’s position within an index.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - File or group identifier
+  group_name    - Name of group containing group for which information is to be retrieved
+  index_type    - Index type
+  order         - Order of the count in the index
+  n             - Position in the index of the group for which information is retrieved
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  storage_type  - Type of storage for links in group
+                    H5G_STORAGE_TYPE_COMPACT: Compact storage
+                    H5G_STORAGE_TYPE_DENSE: Indexed storage
+                    H5G_STORAGE_TYPE_SYMBOL_TABLE: Symbol tables, the original <a href="./HDF5_f90.html#robo76">HDF5</a> structure
+  nlinks        - Number of links in group
+  max_corder    - Current maximum creation order value for group
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list
+  mounted       - Whether group has a file mounted on it
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  In C the output is defined as a structure: H5G_info_t
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 18, 2008
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Added 'mounted' paramater
+  M. Scot Breitenfeld
+  July 16, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gget_info_by_idx_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> group_name<span class="sign">,</span> index_type<span class="sign">,</span> order<span class="sign">,</span> n<span class="sign">,</span> <span class="sign">&amp;</span>
+       storage_type<span class="sign">,</span> nlinks<span class="sign">,</span> max_corder<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">,</span> mounted<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id       <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> group_name <span class="sign">!</span> Name of group containing group <span class="keyword">for</span> which information is to be retrieved
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> index_type <span class="sign">!</span> Index type
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> order      <span class="sign">!</span> Order of the count in the index
+    INTEGER<span class="sign">(</span>HSIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> n <span class="sign">!</span> Position in the index of the group <span class="keyword">for</span> which information is retrieved
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> storage_type <span class="sign">!</span> Type of storage <span class="keyword">for</span> links in group<span class="sign">:</span>
+                                         <span class="sign">!</span>   H5G_STORAGE_TYPE_COMPACT_F<span class="sign">:</span> Compact storage
+                                         <span class="sign">!</span>   H5G_STORAGE_TYPE_DENSE_F<span class="sign">:</span> Indexed storage
+                                         <span class="sign">!</span>   H5G_STORAGE_TYPE_SYMBOL_TABLE_F<span class="sign">:</span> Symbol tables<span class="sign">,</span> the original <a href="./HDF5_f90.html#robo76">HDF5</a> structure
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> nlinks      <span class="sign">!</span> Number of links in group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> max_corder  <span class="sign">!</span> Current maximum creation order value <span class="keyword">for</span> group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr      <span class="sign">!</span> Error code<span class="sign">:</span>
+                                        <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span><span class="sign">,</span> OPTIONAL <span class="sign">:</span><span class="sign">:</span> mounted       <span class="sign">!</span> Whether group has a file mounted on it
+</pre>
+
+<hr />
+<a name="H5G2fh5gget5finfo5fby5fname5ff"></a>
+<a name="robo158"></a><h2>h5gget_info_by_name_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gget_info_by_name_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves information about a group.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - File or group identifier
+  group_name    - Name of group containing group for which information is to be retrieved
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  storage_type  - Type of storage for links in group
+                    H5G_STORAGE_TYPE_COMPACT: Compact storage
+                    H5G_STORAGE_TYPE_DENSE: Indexed storage
+                    H5G_STORAGE_TYPE_SYMBOL_TABLE: Symbol tables, the original <a href="./HDF5_f90.html#robo76">HDF5</a> structure
+  nlinks        - Number of links in group
+  max_corder    - Current maximum creation order value for group
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  lapl_id       - Link access property list
+  mounted       - Whether group has a file mounted on it
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  In C the output is defined as a structure: H5G_info_t
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 18, 2008
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Added 'mounted' paramater
+  M. Scot Breitenfeld
+  July 16, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gget_info_by_name_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> group_name<span class="sign">,</span> <span class="sign">&amp;</span>
+       storage_type<span class="sign">,</span> nlinks<span class="sign">,</span> max_corder<span class="sign">,</span> hdferr<span class="sign">,</span> lapl_id<span class="sign">,</span> mounted<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id       <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> group_name <span class="sign">!</span> Name of group containing group <span class="keyword">for</span> which information is to be retrieved
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> storage_type  <span class="sign">!</span> Type of storage <span class="keyword">for</span> links in group<span class="sign">:</span>
+                                          <span class="sign">!</span> H5G_STORAGE_TYPE_COMPACT_F<span class="sign">:</span> Compact storage
+                                          <span class="sign">!</span> H5G_STORAGE_TYPE_DENSE_F<span class="sign">:</span> Indexed storage
+                                          <span class="sign">!</span> H5G_STORAGE_TYPE_SYMBOL_TABLE_F<span class="sign">:</span> Symbol tables<span class="sign">,</span> the original <a href="./HDF5_f90.html#robo76">HDF5</a> structure
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> nlinks        <span class="sign">!</span> Number of links in group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> max_corder    <span class="sign">!</span> Current maximum creation order value <span class="keyword">for</span> group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code<span class="sign">:</span>
+                                          <span class="sign">!</span>   0 on success and <span class="sign">-</span>1 on failure
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> lapl_id <span class="sign">!</span> Link access property list
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span><span class="sign">,</span> OPTIONAL <span class="sign">:</span><span class="sign">:</span> mounted       <span class="sign">!</span> Whether group has a file mounted on it
+</pre>
+
+<hr />
+<a name="H5G2fh5gget5finfo5ff"></a>
+<a name="robo159"></a><h2>h5gget_info_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gget_info_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Retrieves information about a group
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  group_id      - Group identifier
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  storage_type  - Type of storage for links in group
+                    H5G_STORAGE_TYPE_COMPACT: Compact storage
+                    H5G_STORAGE_TYPE_DENSE: Indexed storage
+                    H5G_STORAGE_TYPE_SYMBOL_TABLE: Symbol tables, the original <a href="./HDF5_f90.html#robo76">HDF5</a> structure
+  nlinks        - Number of links in group
+  max_corder    - Current maximum creation order value for group
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  mounted       - Whether group has a file mounted on it
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  M. Scot Breitenfeld
+  February 15, 2008
+</pre>
+<p class="item_name">NOTES</p>
+<pre>  In C the output is defined as a structure: H5G_info_t
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  - Added 'mounted' paramater
+    M. Scot Breitenfeld
+    July 16, 2008
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gget_info_f</strong><span class="sign">(</span>group_id<span class="sign">,</span> storage_type<span class="sign">,</span> nlinks<span class="sign">,</span> max_corder<span class="sign">,</span> hdferr<span class="sign">,</span> mounted<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> group_id <span class="sign">!</span> Group identifier
+
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> storage_type  <span class="sign">!</span> Type of storage <span class="keyword">for</span> links in group<span class="sign">:</span>
+                                          <span class="sign">!</span> H5G_STORAGE_TYPE_COMPACT_F<span class="sign">:</span> Compact storage
+                                          <span class="sign">!</span> H5G_STORAGE_TYPE_DENSE_F<span class="sign">:</span> Indexed storage
+                                          <span class="sign">!</span> H5G_STORAGE_TYPE_SYMBOL_TABLE_F<span class="sign">:</span> Symbol tables<span class="sign">,</span> the original <a href="./HDF5_f90.html#robo76">HDF5</a> structure
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> nlinks        <span class="sign">!</span> Number of links in group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> max_corder    <span class="sign">!</span> Current maximum creation order value <span class="keyword">for</span> group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr        <span class="sign">!</span> Error code<span class="sign">:</span>
+                                          <span class="sign">!</span> 0 on success and <span class="sign">-</span>1 on failure
+    LOGICAL<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span><span class="sign">,</span> OPTIONAL <span class="sign">:</span><span class="sign">:</span> mounted  <span class="sign">!</span> Whether group has a file mounted on it
+</pre>
+
+<hr />
+<a name="H5G2fh5gget5flinkval5ff"></a>
+<a name="robo160"></a><h2>h5gget_linkval_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gget_linkval_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the name of the object that the symbolic link
+  points to.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - symbolic link to the object whose name
+                  is to be returned.
+  size          - maximum number of characters to be returned
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  buffer        - a buffer to hold the name of the object
+  being sought
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gget_linkval_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> size<span class="sign">,</span> buffer<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Current name of an object
+    INTEGER<span class="sign">(</span>SIZE_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> size    <span class="sign">!</span> Maximum number of buffer
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span>size<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> buffer
+                                           <span class="sign">!</span> Buffer to hold a name of
+                                           <span class="sign">!</span> the object symbolic link
+                                           <span class="sign">!</span> points to
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fh5gget5fobj5finfo5fidx5ff"></a>
+<a name="robo161"></a><h2>h5gget_obj_info_idx_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gget_obj_info_idx_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns name and type of the group member identified by
+  its index.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - name of the group at the specified location
+  idx           - object index (zero-based)
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  obj_name      - object name
+  obj_type      - object type
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gget_obj_info_idx_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> idx<span class="sign">,</span> <span class="sign">&amp;</span>
+       obj_name<span class="sign">,</span> obj_type<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the group
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> idx             <span class="sign">!</span> Index of member object
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_name   <span class="sign">!</span> Name of the object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> obj_type       <span class="sign">!</span> Object type
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fh5glink25ff"></a>
+<a name="robo162"></a><h2>h5glink2_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5glink2_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a link of the specified type from new_name
+  to current_name. current_name and new_name are interpreted
+  releative to current and new location identifiers.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  cur_loc_id    - location identifier
+  cur_name      - name of the existing object if link is a
+                  hard link. Can be anything for the soft link.
+  link_type     - link type; possible values are:
+                    H5G_LINK_HARD_F (0)
+                    H5G_LINK_SOFT_F (1)
+  new_loc_id    - new location identifier
+  new_name      - new name for the object
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  September 25, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5glink2_f</strong><span class="sign">(</span>cur_loc_id<span class="sign">,</span> cur_name<span class="sign">,</span> link_type<span class="sign">,</span> new_loc_id<span class="sign">,</span> <span class="sign">&amp;</span>
+       new_name<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> cur_loc_id <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> cur_name
+                                             <span class="sign">!</span> Current name of an object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_type         <span class="sign">!</span> link type
+                                                 <span class="sign">!</span> Possible values are<span class="sign">:</span>
+                                                 <span class="sign">!</span> H5G_LINK_HARD_F <span class="sign">(</span>0<span class="sign">)</span> or
+                                                 <span class="sign">!</span> H5G_LINK_SOFT_F <span class="sign">(</span>1<span class="sign">)</span>
+
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_loc_id <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_name <span class="sign">!</span> New name of an object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr           <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fh5glink5ff"></a>
+<a name="robo163"></a><h2>h5glink_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5glink_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Creates a link of the specified type from new_name
+  to current_name.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  link_type     - link type; possible values are:
+                    H5G_LINK_HARD_F (0)
+                    H5G_LINK_SOFT_F (1)
+  current_name  - name of the existing object if link is a
+                  hard link. Can be anything for the soft link
+  new_name      - new name for the object
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5glink_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> link_type<span class="sign">,</span> current_name<span class="sign">,</span> <span class="sign">&amp;</span>
+       new_name<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> link_type       <span class="sign">!</span> link type
+                                                   <span class="sign">!</span> Possible values are<span class="sign">:</span>
+                                                   <span class="sign">!</span> H5G_LINK_HARD_F <span class="sign">(</span>0<span class="sign">)</span> or
+                                                   <span class="sign">!</span> H5G_LINK_SOFT_F <span class="sign">(</span>1<span class="sign">)</span>
+
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> current_name
+                                                   <span class="sign">!</span> Current name of an object
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_name <span class="sign">!</span> New name of an object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fh5gmove25ff"></a>
+<a name="robo164"></a><h2>h5gmove2_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gmove2_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Renames an object within an <a href="./HDF5_f90.html#robo76">HDF5</a> file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  src_loc_id    - original location identifier
+  src_name      - object's name at specified original location
+  dst_loc_id    - original location identifier
+  dst_name      - object's new name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  September 25, 2002
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gmove2_f</strong><span class="sign">(</span>src_loc_id<span class="sign">,</span> src_name<span class="sign">,</span> dst_loc_id<span class="sign">,</span> dst_name<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>   <span class="sign">:</span><span class="sign">:</span> src_loc_id  <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> src_name    <span class="sign">!</span> Original name of an object
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span>   <span class="sign">:</span><span class="sign">:</span> dst_loc_id  <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> dst_name    <span class="sign">!</span> New name of an object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span>         <span class="sign">:</span><span class="sign">:</span> hdferr      <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fh5gmove5ff"></a>
+<a name="robo165"></a><h2>h5gmove_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gmove_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Renames an object within an <a href="./HDF5_f90.html#robo76">HDF5</a> file.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - object's name at specified location
+  new_name      - object's new name
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gmove_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> new_name<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id     <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name     <span class="sign">!</span> Current name of an object
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> new_name <span class="sign">!</span> New name of an object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr           <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fh5gn5fmembers5ff"></a>
+<a name="robo166"></a><h2>h5gn_members_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gn_members_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Returns the number of group members.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - name of the group at the specified location
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  nmembers      - number of group members
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gn_members_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> nmembers<span class="sign">,</span> hdferr<span class="sign">)</span>
+            IMPLICIT NONE
+            INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+            CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the group
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> nmembers       <span class="sign">!</span> Number of members in the
+                                                   <span class="sign">!</span> group
+            INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fh5gopen5ff"></a>
+<a name="robo167"></a><h2>h5gopen_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gopen_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Opens an existing group.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - name of the group to open
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  grp_id        - group identifier
+  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">OPTIONAL PARAMETERS</p>
+<pre>  gapl_id       - Group access property list identifier
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+
+  Added 1.8 (optional) parameter gapl_id
+  February, 2008 M. Scot Breitenfeld
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gopen_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> grp_id<span class="sign">,</span> hdferr<span class="sign">,</span> gapl_id<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of the group
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> grp_id  <span class="sign">!</span> File identifier
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> OPTIONAL<span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> gapl_id  <span class="sign">!</span> Group access property list identifier
+</pre>
+
+<hr />
+<a name="H5G2fh5gset5fcomment5ff"></a>
+<a name="robo168"></a><h2>h5gset_comment_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gset_comment_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Sets comment for specified object.
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - name of the object
+  comment       - comment to set for the object
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gset_comment_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> comment<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Current name of an object
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> comment <span class="sign">!</span> New name of an object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+<hr />
+<a name="H5G2fh5gunlink5ff"></a>
+<a name="robo169"></a><h2>h5gunlink_f</h2>
+
+<p>[ <a href="#robo_top_of_doc">Top</a> ] [ <a href="#robo44">H5G</a> ] [ <a href="../robo_subroutines.html#robo_top_of_doc">Subroutines</a> ]</p>
+<p class="item_name">NAME</p>
+<pre>  <strong>h5gunlink_f</strong>
+</pre>
+<p class="item_name">PURPOSE</p>
+<pre>  Removes the specified name from the group graph and
+  decrements the link count for the object to which name
+  points
+</pre>
+<p class="item_name">INPUTS</p>
+<pre>  loc_id        - location identifier
+  name          - name of the object to unlink
+</pre>
+<p class="item_name">OUTPUTS</p>
+<pre>  hdferr        - Returns 0 if successful and -1 if fails
+</pre>
+<p class="item_name">AUTHOR</p>
+<pre>  Elena Pourmal
+  August 12, 1999
+</pre>
+<p class="item_name">HISTORY</p>
+<pre>  Explicit Fortran interfaces were added for
+  called C functions (it is needed for Windows
+  port).  March 5, 2001
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source">  SUBROUTINE <strong>h5gunlink_f</strong><span class="sign">(</span>loc_id<span class="sign">,</span> name<span class="sign">,</span> hdferr<span class="sign">)</span>
+    IMPLICIT NONE
+    INTEGER<span class="sign">(</span>HID_T<span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> loc_id   <span class="sign">!</span> File or group identifier
+    CHARACTER<span class="sign">(</span>LEN<span class="sign">=</span><span class="sign">*</span><span class="sign">)</span><span class="sign">,</span> INTENT<span class="sign">(</span>IN<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> name   <span class="sign">!</span> Name of an object
+    INTEGER<span class="sign">,</span> INTENT<span class="sign">(</span>OUT<span class="sign">)</span> <span class="sign">:</span><span class="sign">:</span> hdferr         <span class="sign">!</span> Error code
+</pre>
+
+</div> <!-- content -->
+<div id="footer">
+<p>Generated from ./src/H5Gff.f90 on Sun Aug 14 2011 22:49:38
+</p>
+</div> <!-- footer -->
+</body>
+</html>
