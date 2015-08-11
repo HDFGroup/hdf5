@@ -39,26 +39,11 @@ if (BUILD_SHARED_LIBS)
   )
 endif (BUILD_SHARED_LIBS)
 
-# See if the F2008 intrinsic STORAGE_SIZE and C_SIZEOF are supported. If not then
-# fall back to F2003. If F2003 not supported then use F90 for the tests.
-
-set_source_files_properties (tf_F90.f90 tf_F03.f90 tf_F08.f90 tf.f90 PROPERTIES LANGUAGE Fortran)
-if (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
-  add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf_F08.f90 tf.f90)
-  if (BUILD_SHARED_LIBS)
-    add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf_F08.f90 tf.f90)
-  endif (BUILD_SHARED_LIBS)
-elseif (HDF5_ENABLE_F2003)
-  add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf_F03.f90 tf.f90)
-  if (BUILD_SHARED_LIBS)
-    add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf_F03.f90 tf.f90)
-  endif (BUILD_SHARED_LIBS)
-else (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
-  add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf_F90.f90 tf.f90) 
-  if (BUILD_SHARED_LIBS)
-    add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf_F90.f90 tf.f90) 
-  endif (BUILD_SHARED_LIBS)
-endif (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
+set_source_files_properties (tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90 PROPERTIES LANGUAGE Fortran)
+add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90)
+if (BUILD_SHARED_LIBS)
+   add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90)
+endif (BUILD_SHARED_LIBS)
 
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
@@ -106,6 +91,40 @@ if (BUILD_SHARED_LIBS)
     )
   endif (WIN32)
 endif (BUILD_SHARED_LIBS)
+
+#-----------------------------------------------------------------------------
+# Setup the Fortran auto-detection utilities
+# H5_test_buildiface.F90         used to generate various KIND test interfaces
+#-----------------------------------------------------------------------------
+
+add_executable (H5_test_buildiface
+      ${HDF5_F90_SRC_DIR}/test/H5_test_buildiface.F90
+  )
+
+if (WIN32 AND MSVC)
+  if (BUILD_SHARED_LIBS)
+    set_target_properties (H5_test_buildiface
+        PROPERTIES
+            COMPILE_FLAGS "/MT"
+    )
+  endif (BUILD_SHARED_LIBS)
+  set_target_properties (H5_test_buildiface
+      PROPERTIES
+          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+  )
+endif (WIN32 AND MSVC)
+set_target_properties (H5_test_buildiface PROPERTIES
+    LINKER_LANGUAGE Fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
+
+set (CMD $<TARGET_FILE:H5_test_buildiface>)
+add_custom_command (
+    OUTPUT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+    COMMAND ${CMD}
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+    DEPENDS H5_test_buildiface
+)
 
 #-----------------------------------------------------------------------------
 # Add Tests
@@ -234,62 +253,60 @@ if (BUILD_SHARED_LIBS)
 endif (BUILD_SHARED_LIBS)
 
 #-- Adding test for fortranlib_test_F03
-if (HDF5_ENABLE_F2003)
-  add_executable (fortranlib_test_F03
+add_executable (fortranlib_test_F03
+    fortranlib_test_F03.f90
+    tH5E_F03.f90
+    tH5F_F03.f90
+    tH5L_F03.f90
+    tH5O_F03.f90
+    tH5P_F03.f90
+    tH5T_F03.F90
+    tHDF5_F03.f90
+)
+TARGET_NAMING (fortranlib_test_F03 STATIC)
+TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03 STATIC " " " ")
+target_link_libraries (fortranlib_test_F03 
+    ${HDF5_F90_TEST_LIB_TARGET}
+    ${HDF5_F90_LIB_TARGET}
+    ${HDF5_LIB_TARGET}
+)
+if (WIN32 AND MSVC)
+  target_link_libraries (fortranlib_test_F03 "ws2_32.lib")
+endif (WIN32 AND MSVC)
+target_include_directories (fortranlib_test_F03 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+set_target_properties (fortranlib_test_F03 PROPERTIES
+    LINKER_LANGUAGE Fortran
+    FOLDER test/fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
+)
+if (BUILD_SHARED_LIBS)
+  add_executable (fortranlib_test_F03-shared
       fortranlib_test_F03.f90
       tH5E_F03.f90
       tH5F_F03.f90
       tH5L_F03.f90
       tH5O_F03.f90
       tH5P_F03.f90
-      tH5T_F03.f90
+      tH5T_F03.F90
       tHDF5_F03.f90
   )
-  TARGET_NAMING (fortranlib_test_F03 STATIC)
-  TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03 STATIC " " " ")
-  target_link_libraries (fortranlib_test_F03 
-      ${HDF5_F90_TEST_LIB_TARGET}
-      ${HDF5_F90_LIB_TARGET}
-      ${HDF5_LIB_TARGET}
+  TARGET_NAMING (fortranlib_test_F03-shared SHARED)
+  TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03-shared SHARED " " " ")
+  target_link_libraries (fortranlib_test_F03-shared 
+      ${HDF5_F90_TEST_LIBSH_TARGET}
+      ${HDF5_F90_LIBSH_TARGET}
+      ${HDF5_LIBSH_TARGET}
   )
   if (WIN32 AND MSVC)
-    target_link_libraries (fortranlib_test_F03 "ws2_32.lib")
+    target_link_libraries (fortranlib_test_F03-shared "ws2_32.lib")
   endif (WIN32 AND MSVC)
-  target_include_directories (fortranlib_test_F03 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
-  set_target_properties (fortranlib_test_F03 PROPERTIES
+  target_include_directories (fortranlib_test_F03-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  set_target_properties (fortranlib_test_F03-shared PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
-      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-  )
-  if (BUILD_SHARED_LIBS)
-    add_executable (fortranlib_test_F03-shared
-        fortranlib_test_F03.f90
-        tH5E_F03.f90
-        tH5F_F03.f90
-        tH5L_F03.f90
-        tH5O_F03.f90
-        tH5P_F03.f90
-        tH5T_F03.f90
-        tHDF5_F03.f90
-    )
-    TARGET_NAMING (fortranlib_test_F03-shared SHARED)
-    TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03-shared SHARED " " " ")
-    target_link_libraries (fortranlib_test_F03-shared 
-        ${HDF5_F90_TEST_LIBSH_TARGET}
-        ${HDF5_F90_LIBSH_TARGET}
-        ${HDF5_LIBSH_TARGET}
-    )
-    if (WIN32 AND MSVC)
-      target_link_libraries (fortranlib_test_F03-shared "ws2_32.lib")
-    endif (WIN32 AND MSVC)
-    target_include_directories (fortranlib_test_F03-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
-    set_target_properties (fortranlib_test_F03-shared PROPERTIES
-        LINKER_LANGUAGE Fortran
-        FOLDER test/fortran
-        Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-  )
-  endif (BUILD_SHARED_LIBS)
-endif (HDF5_ENABLE_F2003)
+      Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
+)
+endif (BUILD_SHARED_LIBS)
 
 #-- Adding test for fflush1
 add_executable (fflush1 fflush1.f90)

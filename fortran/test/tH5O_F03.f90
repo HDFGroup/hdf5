@@ -31,7 +31,7 @@
 MODULE visit_cb
 
   USE HDF5 
-  USE ISO_C_BINDING
+  USE, INTRINSIC :: ISO_C_BINDING
   
   IMPLICIT NONE
 
@@ -53,7 +53,7 @@ MODULE visit_cb
   !
   ! Object visit structs
   TYPE, bind(c) :: obj_visit_t
-     CHARACTER(LEN=1), DIMENSION(1:180) :: path   ! Path to object
+     CHARACTER(KIND=C_CHAR), DIMENSION(1:180) :: path   ! Path to object
      INTEGER :: type_obj ! type of object
   END TYPE obj_visit_t
 
