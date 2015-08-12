@@ -371,39 +371,45 @@ CONTAINS
 !  August 25, 2008
 !
 ! Fortran90 Interface:
-  INTEGER(HID_T) FUNCTION h5kind_to_type(kind, flag) RESULT(h5_type)
+  INTEGER(HID_T) FUNCTION h5kind_to_type(ikind, flag) RESULT(h5_type)
+    USE ISO_C_BINDING
     IMPLICIT NONE
-    INTEGER, INTENT(IN) :: kind
+    INTEGER, INTENT(IN) :: ikind
     INTEGER, INTENT(IN) :: flag
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+    Fortran_INTEGER_16=SELECTED_INT_KIND(15)
+#endif
+    
+
 !*****
     IF(flag.EQ.H5_INTEGER_KIND)THEN
-       IF(kind.EQ.Fortran_INTEGER_1)THEN
+       IF(ikind.EQ.Fortran_INTEGER_1)THEN
           h5_type = H5T_NATIVE_INTEGER_1
-       ELSE IF(kind.EQ.Fortran_INTEGER_2)THEN
+       ELSE IF(ikind.EQ.Fortran_INTEGER_2)THEN
           h5_type = H5T_NATIVE_INTEGER_2
-       ELSE IF(kind.EQ.Fortran_INTEGER_4)THEN
+       ELSE IF(ikind.EQ.Fortran_INTEGER_4)THEN
           h5_type = H5T_NATIVE_INTEGER_4
-       ELSE IF(kind.EQ.Fortran_INTEGER_8)THEN
+       ELSE IF(ikind.EQ.Fortran_INTEGER_8)THEN
           h5_type = H5T_NATIVE_INTEGER_8
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-       ELSE IF(kind.EQ.Fortran_INTEGER_16)THEN
+       ELSE IF(ikind.EQ.Fortran_INTEGER_16)THEN
           h5_type = H5T_NATIVE_INTEGER_16
 #endif
        ENDIF
     ELSE IF(flag.EQ.H5_REAL_KIND)THEN
-       IF(kind.EQ.Fortran_REAL_C_FLOAT)THEN
+       IF(ikind.EQ.KIND(1.0_C_FLOAT))THEN
           h5_type = H5T_NATIVE_REAL_C_FLOAT
-       ELSE IF(kind.EQ.Fortran_REAL_C_DOUBLE)THEN
+       ELSE IF(ikind.EQ.KIND(1.0_C_DOUBLE))THEN
           h5_type = H5T_NATIVE_REAL_C_DOUBLE
-#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-       ELSE IF(kind.EQ.Fortran_REAL_C_LONG_DOUBLE)THEN
-          h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
-#endif
 #if H5_PAC_FC_MAX_REAL_PRECISION > 28 
 #if H5_HAVE_FLOAT128 == 1
-       ELSE IF(kind.EQ.Fortran_REAL_C_FLOAT128)THEN
+       ELSE IF(ikind.EQ.KIND(1.0_C_LONG_DOUBLE))THEN
           h5_type = H5T_NATIVE_FLOAT_128
 #endif
+#endif
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+       ELSE IF(ikind.EQ.KIND(1.0_C_LONG_DOUBLE))THEN
+          h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
 #endif
        ELSE
           h5_type = -1
