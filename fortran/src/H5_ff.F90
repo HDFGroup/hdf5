@@ -377,6 +377,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: ikind
     INTEGER, INTENT(IN) :: flag
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+    INTEGER :: Fortran_INTEGER_16
     Fortran_INTEGER_16=SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
 #endif
     
