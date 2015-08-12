@@ -377,7 +377,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: ikind
     INTEGER, INTENT(IN) :: flag
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-    Fortran_INTEGER_16=SELECTED_INT_KIND(15)
+    Fortran_INTEGER_16=SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
 #endif
     
 
@@ -401,18 +401,19 @@ CONTAINS
           h5_type = H5T_NATIVE_REAL_C_FLOAT
        ELSE IF(ikind.EQ.KIND(1.0_C_DOUBLE))THEN
           h5_type = H5T_NATIVE_REAL_C_DOUBLE
-#if H5_PAC_FC_MAX_REAL_PRECISION > 28 
-#if H5_HAVE_FLOAT128 == 1
-       ELSE IF(ikind.EQ.KIND(1.0_C_LONG_DOUBLE))THEN
-          h5_type = H5T_NATIVE_FLOAT_128
-#endif
-#endif
 #if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
        ELSE IF(ikind.EQ.KIND(1.0_C_LONG_DOUBLE))THEN
           h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
 #endif
+#if H5_PAC_FC_MAX_REAL_PRECISION > 28 
+#if H5_HAVE_FLOAT128 == 1
+       ELSE
+          h5_type = H5T_NATIVE_FLOAT_128
+#endif
+#else
        ELSE
           h5_type = -1
+#endif
        ENDIF
     ENDIF
 
