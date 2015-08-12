@@ -663,12 +663,211 @@ out:
     return(-1);
 }
 
+    /* Test removing ids in callback for H5Iclear_type */
+
+/* There was a rare bug where, if an id free callback being called by
+ * H5I_clear_type() removed another id in that type, a segfault could occur.
+ * This test tests for that error (and freeing ids "out of order" within
+ * H5Iclear_type() in general). */
+/* Macro definitions */
+#define TEST_RCT_MAX_NOBJS 25
+#define TEST_RCT_MIN_NOBJS 5
+#define TEST_RCT_NITER 50
+
+/* Structure to hold the list of objects */
+typedef struct {
+    struct test_rct_obj_t *list; /* List of objects */
+    long nobjs;                 /* Number of objects in list */
+    long nobjs_rem;             /* Number of objects in list that have not been freed */
+} test_rct_list_t;
+
+/* Structure for an object */
+typedef struct test_rct_obj_t {
+    hid_t id;                   /* ID for this object */
+    int nfrees;                 /* Number of times this object has been freed */
+    hbool_t freeing;            /* Whether we are currently freeing this object directly (through H5Idec_ref()) */
+    test_rct_list_t *obj_list;  /* List of all objects */
+} test_rct_obj_t;
+
+/* Free callback */
+static herr_t test_rct_free(void *_obj) {
+    test_rct_obj_t *obj = (test_rct_obj_t *)_obj;
+    long rem_idx, i;
+    herr_t  ret;        /* return value */
+
+    /* Mark this object as freed */
+    obj->nfrees++;
+    obj->obj_list->nobjs_rem--;
+
+    /* Check freeing and nobjs_rem */
+    if(!obj->freeing && (obj->obj_list->nobjs_rem > 0)) {
+        /* Remove a random object from the list */
+        rem_idx = HDrandom() % obj->obj_list->nobjs_rem;
+
+        /* Scan the list, finding the rem_idx'th object that has not been
+         * freed */
+        for(i = 0; i < obj->obj_list->nobjs; i++)
+            if(obj->obj_list->list[i].nfrees == 0) {
+                if(rem_idx == 0)
+                    break;
+                else
+                    rem_idx--;
+            } /* end if */
+        if(i == obj->obj_list->nobjs) {
+            ERROR("invalid obj_list");
+            goto out;
+        } /* end if */
+        else {
+            /* Remove the object.  Mark as "freeing" so its own callback does
+             * not free another object. */
+            obj->obj_list->list[i].freeing = TRUE;
+            ret = H5Idec_ref(obj->obj_list->list[i].id);
+            CHECK(ret, FAIL, "H5Idec_ref");
+            if(ret == FAIL)
+                goto out;
+            obj->obj_list->list[i].freeing = FALSE;
+        } /* end else */
+    } /* end if */
+
+    /* Verify nobjs_rem is non-negative */
+    if(obj->obj_list->nobjs_rem < 0) {
+        ERROR("invalid nobjs_rem");
+        goto out;
+    } /* end if */
+
+    return 0;
+
+out:
+    return -1;
+} /* end test_rct_free() */
+
+/* Test function */
+static int test_remove_clear_type(void)
+{
+    H5I_type_t obj_type;
+    test_rct_list_t obj_list;
+    test_rct_obj_t list[TEST_RCT_MAX_NOBJS];
+    long i, j;
+    long nobjs_found;
+    hsize_t nmembers;
+    herr_t  ret;        /* return value */
+
+    /* Register type */
+    obj_type = H5Iregister_type((size_t)8, 0, test_rct_free);
+    CHECK(obj_type, H5I_BADID, "H5Iregister_type");
+    if(obj_type == H5I_BADID)
+        goto out;
+
+    /* Init obj_list.list */
+    obj_list.list = list;
+
+    for(i = 0; i < TEST_RCT_NITER; i++) {
+        /* Build object list */
+        obj_list.nobjs = obj_list.nobjs_rem = TEST_RCT_MIN_NOBJS + (HDrandom() % (long)(TEST_RCT_MAX_NOBJS - TEST_RCT_MIN_NOBJS + 1));
+        for(j = 0; j < obj_list.nobjs; j++) {
+            list[j].nfrees = 0;
+            list[j].freeing = FALSE;
+            list[j].obj_list = &obj_list;
+            list[j].id = H5Iregister(obj_type, &list[j]);
+            CHECK(list[j].id, FAIL, "H5Iregister");
+            if(list[j].id == FAIL)
+                goto out;
+            if(HDrandom() % 2) {
+                ret = H5Iinc_ref(list[j].id);
+                CHECK(ret, FAIL, "H5Iinc_ref");
+                if(ret == FAIL)
+                    goto out;
+            } /* end if */
+        } /* end for */
+
+        /* Clear the type */
+        ret = H5Iclear_type(obj_type, FALSE);
+        CHECK(ret, FAIL, "H5Iclear_type");
+        if(ret == FAIL)
+            goto out;
+
+        /* Verify list */
+        nobjs_found = 0;
+        for(j = 0; j < obj_list.nobjs; j++) {
+            if(list[j].nfrees == 0)
+                nobjs_found++;
+            else {
+                VERIFY(list[j].nfrees, (long)1, "list[j].nfrees");
+                if(list[j].nfrees != (long)1)
+                    goto out;
+            } /* end else */
+            VERIFY(list[j].freeing, FALSE, "list[j].freeing");
+            if(list[j].freeing != FALSE)
+                goto out;
+        } /* end for */
+
+        /* Verify number of objects */
+        VERIFY(obj_list.nobjs_rem, nobjs_found, "obj_list.nobjs_rem");
+        if(obj_list.nobjs_rem != nobjs_found)
+            goto out;
+        ret = H5Inmembers(obj_type, &nmembers);
+        CHECK(ret, FAIL, "H5Inmembers");
+        if(ret == FAIL)
+            goto out;
+        VERIFY(nmembers, (size_t)nobjs_found, "H5Inmembers");
+        if(nmembers != (size_t)nobjs_found)
+            goto out;
+
+        /* Clear the type with force set to TRUE */
+        ret = H5Iclear_type(obj_type, TRUE);
+        CHECK(ret, FAIL, "H5Iclear_type");
+        if(ret == FAIL)
+            goto out;
+
+        /* Verify list */
+        for(j = 0; j < obj_list.nobjs; j++) {
+            VERIFY(list[j].nfrees, (long)1, "list[j].nfrees");
+            if(list[j].nfrees != (long)1)
+                goto out;
+            VERIFY(list[j].freeing, FALSE, "list[j].freeing");
+            if(list[j].freeing != FALSE)
+                goto out;
+        } /* end for */
+
+        /* Verify number of objects is 0 */
+        VERIFY(obj_list.nobjs_rem, (long)0, "obj_list.nobjs_rem");
+        if(obj_list.nobjs_rem != (long)0)
+            goto out;
+        ret = H5Inmembers(obj_type, &nmembers);
+        CHECK(ret, FAIL, "H5Inmembers");
+        if(ret == FAIL)
+            goto out;
+        VERIFY(nmembers, (size_t)0, "H5Inmembers");
+        if(nmembers != (size_t)0)
+            goto out;
+    } /* end for */
+
+    /* Destroy type */
+    ret = H5Idestroy_type(obj_type);
+    CHECK(ret, FAIL, "H5Idestroy_type");
+    if(ret == FAIL)
+        goto out;
+
+    return 0;
+
+out:
+    /* Cleanup.  For simplicity, just destroy the types and ignore errors. */
+    H5E_BEGIN_TRY
+        H5Idestroy_type(obj_type);
+    H5E_END_TRY
+    return -1;
+} /* end test_remove_clear_type() */
+
 void test_ids(void)
 {
+    /* Set the random # seed */
+    HDsrandom((unsigned)HDtime(NULL));
+
 	if (basic_id_test() < 0) TestErrPrintf("Basic ID test failed\n");
 	if (id_predefined_test() < 0) TestErrPrintf("Predefined ID type test failed\n");
 	if (test_is_valid() < 0) TestErrPrintf("H5Iis_valid test failed\n");
 	if (test_get_type() < 0) TestErrPrintf("H5Iget_type test failed\n");
 	if (test_id_type_list() < 0) TestErrPrintf("ID type list test failed\n");
 	if (test_id_wrap() < 0) TestErrPrintf("ID wraparound test failed\n");
+	if (test_remove_clear_type() < 0) TestErrPrintf("ID remove during H5Iclear_type test failed\n");
 }

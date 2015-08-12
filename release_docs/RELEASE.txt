@@ -122,9 +122,15 @@ Bug Fixes since HDF5-1.8.15
 
     Configuration
     -------------
-    -
-    
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - Fix potential error in H5Iclear_type
+
+      If the ID type's close callback could close another ID of the same type,
+      H5Iclear_type could occasionally run into problems due to the inner
+      workings of the skip list package.  This could potentially cause an
+      error on library shutdown without calling H5Iclear_type directly.  This
+      issue has been fixed.
+
+      (NAF - 2015-08-12)
 
     Library
     -------
