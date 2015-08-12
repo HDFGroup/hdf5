@@ -3862,6 +3862,41 @@ test_unlim(unsigned config, hid_t fapl)
                 if(rbuf[i][j] != 0)
                     TEST_ERROR
 
+    /* Now test reopening virtual dataset without calling H5Dget_space, if
+     * REOPEN_VIRT flag set */
+    if(config & TEST_IO_REOPEN_VIRT) {
+        if(H5Dclose(vdset) < 0)
+            TEST_ERROR
+        vdset = -1;
+        if(H5Fclose(vfile) < 0)
+            TEST_ERROR
+        vfile = -1;
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR
+        if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        start[0] = 0;
+        start[1] = 0;
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++)
+                if(rbuf[i][j] != erbuf[i][j])
+                    TEST_ERROR
+    } /* end if */
+
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
     if(H5Dclose(vdset) < 0)
@@ -3933,6 +3968,46 @@ test_unlim(unsigned config, hid_t fapl)
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
         } /* end for */
+
+    /* Now test reopening virtual dataset without calling H5Dget_space, if
+     * REOPEN_VIRT flag set */
+    if(config & TEST_IO_REOPEN_VIRT) {
+        if(H5Dclose(vdset) < 0)
+            TEST_ERROR
+        vdset = -1;
+        if(H5Fclose(vfile) < 0)
+            TEST_ERROR
+        vfile = -1;
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR
+        if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        start[1] = 0;
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++) {
+                if(j >= (int)dims[1]) {
+                    if(rbuf[i][j] != 0)
+                        TEST_ERROR
+                } /* end if */
+                else
+                    if(rbuf[i][j] != erbuf[i][j])
+                        TEST_ERROR
+            } /* end for */
+    } /* end if */
 
     /* Close */
     if(!(config & TEST_IO_CLOSE_SRC)) {
@@ -8580,6 +8655,45 @@ test_printf(unsigned config, hid_t fapl)
                     TEST_ERROR
         } /* end for */
 
+    /* Now test reopening virtual dataset without calling H5Dget_space, if
+     * REOPEN_VIRT flag set */
+    if(config & TEST_IO_REOPEN_VIRT) {
+        if(H5Dclose(vdset) < 0)
+            TEST_ERROR
+        vdset = -1;
+        if(H5Fclose(vfile) < 0)
+            TEST_ERROR
+        vfile = -1;
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR
+        if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++) {
+                if(j >= (int)dims[1]) {
+                    if(rbuf[i][j] != 0)
+                        TEST_ERROR
+                } /* end if */
+                else
+                    if(rbuf[i][j] != erbuf[i][j])
+                        TEST_ERROR
+            } /* end for */
+    } /* end if */
+
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
      * as well if config option specified */
     if(H5Dclose(vdset) < 0)
@@ -8643,6 +8757,45 @@ test_printf(unsigned config, hid_t fapl)
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
         } /* end for */
+
+    /* Now test reopening virtual dataset without calling H5Dget_space, if
+     * REOPEN_VIRT flag set */
+    if(config & TEST_IO_REOPEN_VIRT) {
+        if(H5Dclose(vdset) < 0)
+            TEST_ERROR
+        vdset = -1;
+        if(H5Fclose(vfile) < 0)
+            TEST_ERROR
+        vfile = -1;
+        if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
+            TEST_ERROR
+        if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++) {
+                if(j >= (int)dims[1]) {
+                    if(rbuf[i][j] != 0)
+                        TEST_ERROR
+                } /* end if */
+                else
+                    if(rbuf[i][j] != erbuf[i][j])
+                        TEST_ERROR
+            } /* end for */
+    } /* end if */
 
     /* Reset dapl */
     if(H5Pset_virtual_view(dapl, H5D_VDS_LAST_AVAILABLE) < 0)
