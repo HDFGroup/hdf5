@@ -146,6 +146,144 @@ H5FL_DEFINE(H5O_storage_virtual_name_seg_t);
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D_virtual_check_mapping_pre
+ *
+ * Purpose:     Checks that the provided virtual and source selections are
+ *              legal for use as a VDS mapping, prior to creating the rest
+ *              of the mapping entry.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              August 12, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_virtual_check_mapping_pre(H5S_t *vspace, H5S_t *src_space,
+    H5O_virtual_space_status_t space_status)
+{
+    H5S_sel_type    select_type; /* Selection type */
+    hsize_t         nelmts_vs;  /* Number of elements in virtual selection */
+    hsize_t         nelmts_ss;  /* Number of elements in source selection */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check for point selections (currently unsupported) */
+    if(H5S_SEL_ERROR == (select_type = H5S_GET_SELECT_TYPE(vspace)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get selection type")
+    if(select_type == H5S_SEL_POINTS)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "point selections not currently supported with virtual datasets")
+    if(H5S_SEL_ERROR == (select_type = H5S_GET_SELECT_TYPE(src_space)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get selection type")
+    if(select_type == H5S_SEL_POINTS)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "point selections not currently supported with virtual datasets")
+
+    /* Get number of elements in spaces */
+    nelmts_vs = (hsize_t)H5S_GET_SELECT_NPOINTS(vspace);
+    nelmts_ss = (hsize_t)H5S_GET_SELECT_NPOINTS(src_space);
+
+    /* Check for unlimited vspace */
+    if(nelmts_vs == H5S_UNLIMITED) {
+        /* Check for unlimited src_space */
+        if(nelmts_ss == H5S_UNLIMITED) {
+            hsize_t nenu_vs;    /* Number of elements in the non-unlimited dimensions of vspace */
+            hsize_t nenu_ss;    /* Number of elements in the non-unlimited dimensions of src_space */
+
+            /* Non-printf unlimited selection.  Make sure both selections have
+             * the same number of elements in the non-unlimited dimension.  Note
+             * we can always check this even if the space status is invalid
+             * because unlimited selections are never dependent on the extent.
+             */
+            if(H5S_get_select_num_elem_non_unlim(vspace, &nenu_vs) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "can't get number of elements in non-unlimited dimension")
+            if(H5S_get_select_num_elem_non_unlim(src_space, &nenu_ss) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "can't get number of elements in non-unlimited dimension")
+            if(nenu_vs != nenu_ss)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "numbers of elemnts in the non-unlimited dimensions is different for source and virtual spaces")
+        } /* end if */
+        /* We will handle the printf case after parsing the source names */
+    } /* end if */
+    else if(space_status != H5O_VIRTUAL_STATUS_INVALID)
+        /* Limited selections.  Check number of points is the same. */
+        if(nelmts_vs != nelmts_ss)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "virtual and source space selections have different numbers of elements")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_virtual_check_mapping_pre() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_virtual_check_mapping_post
+ *
+ * Purpose:     Checks that the provided virtual dataset mapping entry is
+ *              legal, after the mapping is otherwise complete.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              August 12, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_virtual_check_mapping_post(H5O_storage_virtual_ent_t *ent)
+{
+    hsize_t         nelmts_vs;  /* Number of elements in virtual selection */
+    hsize_t         nelmts_ss;  /* Number of elements in source selection */
+    H5S_t           *tmp_space = NULL; /* Temporary dataspace */
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get number of elements in spaces */
+    nelmts_vs = (hsize_t)H5S_GET_SELECT_NPOINTS(ent->source_dset.virtual_select);
+    nelmts_ss = (hsize_t)H5S_GET_SELECT_NPOINTS(ent->source_select);
+
+    /* Check for printf selection */
+    if((nelmts_vs == H5S_UNLIMITED) && (nelmts_ss != H5S_UNLIMITED)) {
+        /* Make sure there at least one %b substitution in the source file or
+         * dataset name */
+        if((ent->psfn_nsubs == 0) && (ent->psdn_nsubs == 0))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unlimited virtual selection, limited source selection, and no printf specifiers in source names")
+
+        /* Make sure virtual space uses hyperslab selection */
+        if(H5S_GET_SELECT_TYPE(ent->source_dset.virtual_select) != H5S_SEL_HYPERSLABS)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "virtual selection with printf mapping must be hyperslab")
+
+        /* Check that the number of elements in one block in the virtual
+         * selection matches the total number of elements in the source
+         * selection, if the source space status is not invalid (virtual space
+         * status does not matter here because it is unlimited) */
+        if(ent->source_space_status != H5O_VIRTUAL_STATUS_INVALID) {
+            /* Get first block in virtual selection */
+            if(NULL == (tmp_space = H5S_hyper_get_unlim_block(ent->source_dset.virtual_select, (hsize_t)0)))
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get first block in virtual selection")
+
+            /* Check number of points */
+            nelmts_vs = (hsize_t)H5S_GET_SELECT_NPOINTS(tmp_space);
+            if(nelmts_vs != nelmts_ss)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "virtual (single block) and source space selections have different numbers of elements")
+        } /* end if */
+    } /* end if */
+    else
+        /* Make sure there are no printf substitutions */
+        if((ent->psfn_nsubs > 0) || (ent->psdn_nsubs > 0))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "printf specifier(s) in source name(s) without an unlimited virtual selection and limited source selection")
+
+done:
+    /* Free temporary space */
+    if(tmp_space)
+        if(H5S_close(tmp_space) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "can't close dataspace")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_virtual_check_mapping_post() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5D_virtual_update_min_dims
  *
  * Purpose:     Updates the virtual layout's "min_dims" field to take into

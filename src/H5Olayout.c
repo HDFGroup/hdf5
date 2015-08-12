@@ -299,11 +299,11 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                         heap_block_p += tmp_size;
 
                         /* Source selection */
-                        if(H5S_SELECT_DESERIALIZE(f, &(mesg->storage.u.virt.list[i].source_select), &heap_block_p) < 0)
+                        if(H5S_SELECT_DESERIALIZE(f, &mesg->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode source space selection")
 
                         /* Virtual selection */
-                        if(H5S_SELECT_DESERIALIZE(f, &(mesg->storage.u.virt.list[i].source_dset.virtual_select), &heap_block_p) < 0)
+                        if(H5S_SELECT_DESERIALIZE(f, &mesg->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode virtual space selection")
 
                         /* Parse source file and dataset names for "printf"
@@ -339,6 +339,14 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                             mesg->storage.u.virt.list[i].source_dset.clipped_source_select = mesg->storage.u.virt.list[i].source_select;
                             mesg->storage.u.virt.list[i].source_dset.clipped_virtual_select = mesg->storage.u.virt.list[i].source_dset.virtual_select;
                         } /* end if */
+
+                        /* Check mapping for validity (do both pre and post
+                         * checks here, since we had to allocate the entry list
+                         * before decoding the selections anyways) */
+                        if(H5D_virtual_check_mapping_pre(mesg->storage.u.virt.list[i].source_dset.virtual_select, mesg->storage.u.virt.list[i].source_select, H5O_VIRTUAL_STATUS_INVALID) < 0)
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid mapping selections")
+                         if(H5D_virtual_check_mapping_post(&mesg->storage.u.virt.list[i]) < 0)
+                            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid mapping entry")
 
                         /* Update min_dims */
                         if(H5D_virtual_update_min_dims(mesg, i) < 0)

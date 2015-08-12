@@ -180,6 +180,9 @@ H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
 H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
 
 /* Functions that operate on virtual storage */
+H5_DLL herr_t H5D_virtual_check_mapping_pre(H5S_t *vspace, H5S_t *src_space,
+    H5O_virtual_space_status_t space_status);
+H5_DLL herr_t H5D_virtual_check_mapping_post(H5O_storage_virtual_ent_t *ent);
 H5_DLL herr_t H5D_virtual_update_min_dims(H5O_layout_t *layout, size_t idx);
 H5_DLL herr_t H5D_virtual_parse_source_name(const char *source_name,
     H5O_storage_virtual_name_seg_t **parsed_name, size_t *static_strlen,
