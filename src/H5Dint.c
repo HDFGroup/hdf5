@@ -1827,7 +1827,12 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
                 break;
 
             case H5D_VIRTUAL:
-                /* No-op for now VDSINC */
+                /* No-op, as the raw data is stored elsewhere and the global
+                 * heap object containing the mapping information is created
+                 * when the layout message is encoded.  We may wish to move the
+                 * creation of the global heap object here at some point, but we
+                 * will have to make sure is it always created before the
+                 * dataset is closed. */
                 break;
 
             case H5D_LAYOUT_ERROR:
@@ -1950,7 +1955,7 @@ H5D__init_storage(const H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
             } /* end block */
 
         case H5D_VIRTUAL:
-            /* No-op for now VDSINC */
+            /* No-op, as the raw data is stored elsewhere */
 
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
@@ -2009,7 +2014,8 @@ H5D__get_storage_size(H5D_t *dset, hid_t dxpl_id, hsize_t *storage_size)
             break;
 
         case H5D_VIRTUAL:
-            /* Just set to 0 until private data is implemented VDSINC */
+            /* Just set to 0, as virtual datasets do not actually store raw data
+             */
             *storage_size = 0;
             break;
 

@@ -398,7 +398,8 @@ H5O__dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         if(H5D__chunk_bh_info(f, dxpl_id, &layout, &pline, &(bh_info->index_size)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
     } /* end if */
-    else if(layout.type == H5D_VIRTUAL && H5D__virtual_is_space_alloc(&layout.storage)) {
+    else if(layout.type == H5D_VIRTUAL
+            && (layout.storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF)) {
         size_t virtual_heap_size;
         /* Need to write a test for this.  No assert here for now because the
          * code is reached by h5_verify_cached_stabs() but it is not properly

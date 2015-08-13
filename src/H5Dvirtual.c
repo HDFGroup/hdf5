@@ -1933,8 +1933,12 @@ H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    /* Need to decide what to do here.  For now just return TRUE VDSINC */
-    ret_value = TRUE;//storage->u.virt.serial_list_hobjid.addr != HADDR_UNDEF;
+    /* Just return TRUE, since the global heap object containing the mappings is
+     * created when the layout message is encoded, and nothing else needs to be
+     * allocated for virtual datasets.  This also ensures that the library never
+     * assumes (falsely) that no data is present in the dataset, causing errors.
+     */
+    ret_value = TRUE;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_is_space_alloc() */
