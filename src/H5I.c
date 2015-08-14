@@ -99,6 +99,13 @@ typedef struct {
     hbool_t app_ref;                    /* Whether this is an appl. ref. call */
 } H5I_iterate_ud_t;
 
+/* User data for H5I__clear_type_cb */
+typedef struct {
+    H5I_id_type_t *type_ptr;    /* Pointer to the type being cleard */
+    hbool_t force;              /* Whether to always remove the id */
+    hbool_t app_ref;            /* Whether this is an appl. ref. call */
+} H5I_clear_type_ud_t;
+
 /*-------------------- Locally scoped variables -----------------------------*/
 
 /* Array of pointers to atomic types */
@@ -122,6 +129,7 @@ H5FL_DEFINE_STATIC(H5I_id_type_t);
 H5FL_DEFINE_STATIC(H5I_class_t);
 
 /*--------------------- Local function prototypes ---------------------------*/
+static htri_t H5I__clear_type_cb(void *_id, void *key, void *udata);
 static int H5I__destroy_type(H5I_type_t type);
 static void *H5I__remove_verify(hid_t id, H5I_type_t id_type);
 static void *H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id);
@@ -528,80 +536,98 @@ done:
 herr_t
 H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 {
-    H5I_id_type_t *type_ptr;	        /* ptr to the atomic type */
-    H5SL_node_t *curr_node;             /* Current skip list node ptr */
-    H5SL_node_t *next_node;             /* Next skip list node ptr */
-    int		ret_value = SUCCEED;    /* Return value */
+    H5I_clear_type_ud_t udata;          /* udata struct for callback */
+    int         ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     if(type <= H5I_BADID || type >= H5I_next_type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
 
-    type_ptr = H5I_id_type_list_g[type];
-    if(type_ptr == NULL || type_ptr->init_count <= 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
+    udata.type_ptr = H5I_id_type_list_g[type];
+    if(udata.type_ptr == NULL || udata.type_ptr->init_count <= 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
-    /*
-     * Call free method for all objects in type regardless of their reference
-     * counts. Ignore the return value from from the free method and remove
-     * object from type regardless if FORCE is non-zero.
-     */
-    for(curr_node = H5SL_first(type_ptr->ids); curr_node; curr_node = next_node) {
-        H5I_id_info_t *cur;         /* Current ID being worked with */
-        hbool_t    delete_node;     /* Flag to indicate node should be removed from linked list */
+    /* Finish constructing udata */
+    udata.force = force;
+    udata.app_ref = app_ref;
 
-        /* Get ID for this node */
-        if(NULL == (cur = (H5I_id_info_t *)H5SL_item(curr_node)))
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID info for node")
-
-        /*
-         * Do nothing to the object if the reference count is larger than
-         * one and forcing is off.
-         */
-        if(!force && (cur->count - (!app_ref * cur->app_count)) > 1)
-            delete_node = FALSE;
-        else {
-            /* Check for a 'free' function and call it, if it exists */
-            /* (Casting away const OK -QAK) */
-            if(type_ptr->cls->free_func && (type_ptr->cls->free_func)((void *)cur->obj_ptr) < 0) {
-                if(force) {
-#ifdef H5I_DEBUG
-                    if(H5DEBUG(I)) {
-                        fprintf(H5DEBUG(I), "H5I: free type=%d obj=0x%08lx "
-                            "failure ignored\n", (int)type,
-                            (unsigned long)(cur->obj_ptr));
-                    } /* end if */
-#endif /*H5I_DEBUG*/
-
-                    /* Indicate node should be removed from list */
-                    delete_node = TRUE;
-                } /* end if */
-                else {
-                    /* Indicate node should _NOT_ be remove from list */
-                    delete_node = FALSE;
-                } /* end else */
-            } /* end if */
-            else {
-                /* Indicate node should be removed from list */
-                delete_node = TRUE;
-            } /* end else */
-        } /* end else */
-
-        /* Get the next node in the list */
-        next_node = H5SL_next(curr_node);
-
-        /* Check if we should delete this node or not */
-        if(delete_node) {
-            /* Remove the node from the type */
-            if(NULL == H5I__remove_common(type_ptr, cur->id))
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, FAIL, "can't remove ID node")
-        } /* end if */
-    } /* end for */
+    /* Attempt to free all ids in the type */
+    if(H5SL_try_free_safe(udata.type_ptr->ids, H5I__clear_type_cb, &udata) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, FAIL, "can't free ids in type")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_clear_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5I__clear_type_cb
+ *
+ * Purpose:     Attempts to free the specified ID , calling the free
+ *              function for the object.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        negative
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, July 10, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
+{
+    H5I_id_info_t       *id = (H5I_id_info_t *)_id; /* Current ID being worked with */
+    H5I_clear_type_ud_t *udata = (H5I_clear_type_ud_t *)_udata; /* udata struct */
+    htri_t              ret_value = FALSE;    /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(id);
+    HDassert(udata);
+    HDassert(udata->type_ptr);
+
+    /*
+     * Do nothing to the object if the reference count is larger than
+     * one and forcing is off.
+     */
+    if(udata->force || (id->count - (!udata->app_ref * id->app_count)) <= 1) {
+        /* Check for a 'free' function and call it, if it exists */
+        /* (Casting away const OK -QAK) */
+        if(udata->type_ptr->cls->free_func && (udata->type_ptr->cls->free_func)((void *)id->obj_ptr) < 0) {
+            if(udata->force) {
+#ifdef H5I_DEBUG
+                if(H5DEBUG(I)) {
+                    fprintf(H5DEBUG(I), "H5I: free type=%d obj=0x%08lx "
+                            "failure ignored\n",
+                            (int)udata->type_ptr->cls->type_id,
+                            (unsigned long)(id->obj_ptr));
+                } /* end if */
+#endif /*H5I_DEBUG*/
+
+                /* Indicate node should be removed from list */
+                ret_value = TRUE;
+            } /* end if */
+        } /* end if */
+        else {
+            /* Indicate node should be removed from list */
+            ret_value = TRUE;
+        } /* end else */
+
+        /* Remove ID if requested */
+        if(ret_value) {
+            /* Free ID info */
+            id = H5FL_FREE(H5I_id_info_t, id);
+
+            /* Decrement the number of IDs in the type */
+            udata->type_ptr->id_count--;
+        } /* end if */
+    } /* end if */
+
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I__clear_type_cb() */
 
 
 /*-------------------------------------------------------------------------

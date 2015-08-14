@@ -1,6 +1,6 @@
 /****h* H5f90kit/H5f90kit
  * PURPOSE
- *   Routines from HDF4 to deal with C-FORTRAN issues:
+ *  Routines from HDF4 to deal with C-FORTRAN issues:
  *
  *   HD5f2cstring   -- convert a Fortran string to a C string
  *   HD5packFstring -- convert a C string into a Fortran string
@@ -31,16 +31,16 @@
 /****if* H5f90kit/HDf2cstring
  * NAME
  *   HD5f2cstring -- convert a Fortran string to a C string
- *   char * HDf2cstring(fdesc, len)
+ *  char * HDf2cstring(fdesc, len)
  * INPUTS
  *   _fcd  fdesc;    IN: Fortran string descriptor
- *   int  len;       IN: length of Fortran string
+ *  int  len;       IN: length of Fortran string
  * RETURNS
- *   Pointer to the C string if success, else NULL
+ *  Pointer to the C string if success, else NULL
  * PURPOSE
- *   Chop off trailing blanks off of a Fortran string and
- *   move it into a newly allocated C string.  It is up
- *   to the user to free this string.
+ *  Chop off trailing blanks off of a Fortran string and
+ *  move it into a newly allocated C string.  It is up
+ *  to the user to free this string.
  * SOURCE
  */
 char *
@@ -72,21 +72,21 @@ HD5f2cstring(_fcd fdesc, size_t len)
 /****if* H5f90kit/HD5packFstring
  * NAME
  *   HD5packFstring -- convert a C string into a Fortran string
- *   int HD5packFstring(src, dest, len)
+ *  int HD5packFstring(src, dest, len)
  * INPUTS
- *   char * src;         IN:  source string
- *   int   len;          IN:  length of string
+ *  char * src;         IN:  source string
+ *  int   len;          IN:  length of string
  * OUTPUTS
- *   char * dest;       OUT: destination
+ *  char * dest;       OUT: destination
  * RETURNS
  *   SUCCEED / FAIL
  * PURPOSE
- *   given a NULL terminated C string 'src' convert it to
- *   a space padded Fortran string 'dest' of length 'len'
+ *  given a NULL terminated C string 'src' convert it to
+ *  a space padded Fortran string 'dest' of length 'len'
  *
- *   This is very similar to HDc2fstr except that function does
- *   it in place and this one copies.  We should probably only
- *   support one of these.
+ *  This is very similar to HDc2fstr except that function does
+ *  it in place and this one copies.  We should probably only
+ *  support one of these.
  * SOURCE
  */
 void

@@ -217,7 +217,7 @@ H5HF_man_iter_start_offset(H5HF_hdr_t *hdr, hid_t dxpl_id,
         } /* end else */
 
         /* Load indirect block for this context location */
-        if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, iblock_nrows, iblock_parent, iblock_par_entry, FALSE, H5AC_WRITE, &did_protect)))
+        if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, iblock_nrows, iblock_parent, iblock_par_entry, FALSE, H5AC__NO_FLAGS_SET, &did_protect)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
         /* Make indirect block the context for the current location */

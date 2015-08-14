@@ -905,7 +905,7 @@ H5FD_family_query(const H5FD_t * _file, unsigned long *flags /* out */)
 
         /* Check for flags that are set by h5repart */
         if(file && file->repart_members)
-            *flags |= H5FD_FEAT_DIRTY_SBLK_LOAD; /* Mark the superblock dirty when it is loaded (so the family member sizes are rewritten) */
+            *flags |= H5FD_FEAT_DIRTY_DRVRINFO_LOAD; /* Mark the superblock dirty when it is loaded (so the family member sizes are rewritten) */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

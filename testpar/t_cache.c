@@ -29,9 +29,10 @@
 #include "H5Cpkg.h"
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"
+#include "H5MFprivate.h"
 
 
-#define BASE_ADDR               (haddr_t)512
+#define BASE_ADDR               (haddr_t)1024
 
 
 int     	nerrors = 0;
@@ -46,6 +47,14 @@ const char *FILENAME[NFILENAME]={"CacheTestDummy", NULL};
 #endif  /* !PATH_MAX */
 char    filenames[NFILENAME][PATH_MAX];
 hid_t   fapl;                           /* file access property list */
+haddr_t max_addr = 0;			/* used to store the end of
+					 * the address space used by
+					 * the data array (see below).
+					 */
+hbool_t callbacks_verbose = FALSE;	/* flag used to control whether
+					 * the callback functions are in
+					 * verbose mode.
+					 */
 
 
 int		world_mpi_size = -1;
@@ -129,11 +138,11 @@ int total_writes           = 0;
  *		processes, and thus cannot be marked as dirty unless they
  *		happen to overlap some collective operation.
  *
- *	cleared: Boolean flag that is set to true whenever the entry is
- *		dirty, and is cleared via a call to clear_datum().
+ *      cleared: Boolean flag that is set to true whenever the entry is
+ *              dirty, and is cleared via a call to datum_clear().
  *
- *	flushed: Boolean flag that is set to true whenever the entry is
- *		dirty, and is flushed via a call to flush_datum().
+ *      flushed: Boolean flag that is set to true whenever the entry is
+ *              dirty, and is flushed by the metadata cache.
  *
  *	reads:  Integer field used to maintain a count of the number of 
  *		times this entry has been read from the server since 
@@ -145,6 +154,12 @@ int total_writes           = 0;
  *
  *	index:	Index of this instance of datum in the data_index[] array
  *		discussed below.
+ *
+ *	aux_ptr: Pointer to the instance of H5AC_aux_t associated with the
+ *		instance of the metadata cache within which this entry
+ *		resides.  This field was added to allow us to pass this 
+ *		value to the notify callback from the serialize callback. 
+ *		It should be NULL when not in use.
  *
  *****************************************************************************/
 
@@ -165,6 +180,7 @@ struct datum
     int			reads;
     int			writes;
     int			index;
+    struct H5AC_aux_t * aux_ptr;
 };
 
 /*****************************************************************************
@@ -373,28 +389,65 @@ static hbool_t serve_rw_count_reset_request(struct mssg_t * mssg_ptr);
 
 /* call back functions & related data structures */
 
-static herr_t clear_datum(H5F_t * f, void *  thing, hbool_t dest);
-static herr_t destroy_datum(H5F_t H5_ATTR_UNUSED * f, void * thing);
-static herr_t flush_datum(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t dest, haddr_t addr,
-                   void *thing);
-static void * load_datum(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
-                  void H5_ATTR_UNUSED *udata);
-static herr_t size_datum(H5F_t H5_ATTR_UNUSED * f, void * thing, size_t * size_ptr);
+static herr_t datum_get_load_size(const void * udata_ptr,
+                                  size_t *image_len_ptr);
+
+static void * datum_deserialize(const void * image_ptr,
+                                size_t len,
+                                void * udata_ptr,
+                                hbool_t * dirty_ptr);
+
+static herr_t datum_image_len(void *thing,
+                              size_t *image_len_ptr,
+                              hbool_t *compressed_ptr,
+                              size_t *compressed_len_ptr);
+
+static herr_t datum_serialize(const H5F_t *f,
+                              void *image_ptr,
+                              size_t len,
+                              void *thing_ptr);
+
+static herr_t datum_notify(H5C_notify_action_t action, void *thing);
+
+static herr_t datum_free_icr(void * thing);
+
+static herr_t datum_clear(H5F_t * f, void *  thing, hbool_t about_to_destroy);
 
 #define DATUM_ENTRY_TYPE	H5AC_TEST_ID
 
 #define NUMBER_OF_ENTRY_TYPES	1
 
+
+/* Note the use of the H5AC__CLASS_SKIP_READS and H5AC__CLASS_SKIP_WRITES
+ * flags.  As a result of these flags, the metadata cache does no file I/O
+ * on metadata of the datum type.
+ *
+ * Instead, this test uses a server process to keep track of who has 
+ * written and read what, and to verify that there are no messages from
+ * the past / future.
+ *
+ * In the callbacks for the version 2 cache, this activity was hidden in 
+ * the load and flush callbacks.  However, now we handle this function in
+ * notify callbacks for the after load and after flush events.
+ *
+ *					     JRM -- 1/13/15
+ */
 const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
 {
   {
-    DATUM_ENTRY_TYPE,
-    (H5C_load_func_t)load_datum,
-    (H5C_flush_func_t)flush_datum,
-    (H5C_dest_func_t)destroy_datum,
-    (H5C_clear_func_t)clear_datum,
-    (H5C_notify_func_t)NULL,
-    (H5C_size_func_t)size_datum
+    /* id            */ DATUM_ENTRY_TYPE,
+    /* name          */ "datum",
+    /* mem_type      */ H5FD_MEM_DEFAULT,
+    /* flags         */ H5AC__CLASS_SKIP_READS | H5AC__CLASS_SKIP_WRITES,
+    /* get_load_size */ (H5AC_get_load_size_func_t)datum_get_load_size,
+    /* deserialize   */ (H5AC_deserialize_func_t)datum_deserialize,
+    /* image_len     */ (H5AC_image_len_func_t)datum_image_len,
+    /* pre_serialize */ (H5AC_pre_serialize_func_t)NULL,
+    /* serialize     */ (H5AC_serialize_func_t)datum_serialize,
+    /* notify        */ (H5AC_notify_func_t)datum_notify,
+    /* free_icr      */ (H5AC_free_icr_func_t)datum_free_icr,
+    /* clear         */ (H5AC_clear_func_t)datum_clear,
+    /* fsf_size      */ (H5AC_get_fsf_size_t)NULL,
   }
 };
 
@@ -787,6 +840,7 @@ init_data(void)
         data[i].reads         = 0;
         data[i].writes        = 0;
 	data[i].index         = i;
+	data[i].aux_ptr       = NULL;
 
         data_index[i]         = i;
 
@@ -795,6 +849,9 @@ init_data(void)
 
         j = (j + 1) % num_addr_offsets;
     }
+
+    /* save the end of the address space used by the data array */
+    max_addr = addr;
 
     return;
 
@@ -2264,300 +2321,27 @@ serve_rw_count_reset_request(struct mssg_t * mssg_ptr)
 
 
 /*-------------------------------------------------------------------------
- * Function:    clear_datum
+ * Function:	datum_get_load_size
  *
- * Purpose:     Mark the datum as clean and destroy it if requested.
- *		Do not write it to the server, or increment the version.
+ * Purpose:	Query the image size for an entry before deserializing it
  *
- * Return:      SUCCEED
+ * Return:	SUCCEED
  *
- * Programmer:  John Mainzer
- *              12/29/05
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-clear_datum(H5F_t * f,
-            void *  thing,
-            hbool_t dest)
-{
-    int idx;
-    struct datum * entry_ptr;
-
-    HDassert( thing );
-
-    entry_ptr = (struct datum *)thing;
-
-    idx = addr_to_datum_index(entry_ptr->base_addr);
-
-    HDassert( idx >= 0 );
-    HDassert( idx < NUM_DATA_ENTRIES );
-    HDassert( idx < virt_num_data_entries );
-    HDassert( &(data[idx]) == entry_ptr );
-
-    HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
-    HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
-	      ( entry_ptr->header.size == entry_ptr->local_len ) );
-
-    HDassert( entry_ptr->header.is_dirty == entry_ptr->dirty );
-
-    if ( entry_ptr->header.is_dirty ) {
-
-        entry_ptr->cleared = TRUE;
-    }
-
-    entry_ptr->header.is_dirty = FALSE;
-    entry_ptr->dirty = FALSE;
-
-    if ( dest ) {
-
-        destroy_datum(f, thing);
-
-    }
-
-    datum_clears++;
-
-    if ( entry_ptr->header.is_pinned ) {
-
-        datum_pinned_clears++;
-	HDassert( entry_ptr->global_pinned || entry_ptr->local_pinned );
-    }
-
-    return(SUCCEED);
-
-} /* clear_datum() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    destroy_datum()
- *
- * Purpose:     Destroy the entry.  At present, this means do nothing other
- *		than verify that the entry is clean.  In particular, do not
- *		write it to the server process.
- *
- * Return:      SUCCEED
- *
- * Programmer:  John Mainzer
- *              12/29/05
+ * Programmer:	Quincey Koziol
+ *              5/18/10
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-destroy_datum(H5F_t H5_ATTR_UNUSED * f,
-              void *         thing)
+datum_get_load_size(const void * udata_ptr,
+                  size_t *image_len_ptr)
 {
+    haddr_t addr = *(haddr_t *)udata_ptr;
     int idx;
     struct datum * entry_ptr;
 
-    HDassert( thing );
-
-    entry_ptr = (struct datum *)thing;
-
-    idx = addr_to_datum_index(entry_ptr->base_addr);
-
-    HDassert( idx >= 0 );
-    HDassert( idx < NUM_DATA_ENTRIES );
-    HDassert( idx < virt_num_data_entries );
-    HDassert( &(data[idx]) == entry_ptr );
-
-    HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
-    HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
-	      ( entry_ptr->header.size == entry_ptr->local_len ) );
-
-    HDassert( !(entry_ptr->dirty) );
-    HDassert( !(entry_ptr->header.is_dirty) );
-    HDassert( !(entry_ptr->global_pinned) );
-    HDassert( !(entry_ptr->local_pinned) );
-    HDassert( !(entry_ptr->header.is_pinned) );
-
-    datum_destroys++;
-
-    return(SUCCEED);
-
-} /* destroy_datum() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    flush_datum
- *
- * Purpose:     Flush the entry to the server process and mark it as clean.
- *		Then destroy the entry if requested.
- *
- * Return:      SUCCEED if successful, and FAIL otherwise.
- *
- * Programmer:  John Mainzer
- *              12/29/05
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-flush_datum(H5F_t *f,
-            hid_t H5_ATTR_UNUSED dxpl_id,
-            hbool_t dest,
-            haddr_t H5_ATTR_UNUSED addr,
-            void *thing)
-{
-    hbool_t was_dirty = FALSE;
-    herr_t ret_value = SUCCEED;
-    int idx;
-    struct datum * entry_ptr;
-    struct mssg_t mssg;
-    H5C_t * cache_ptr;
-    struct H5AC_aux_t * aux_ptr;
-
-    HDassert( thing );
-
-    entry_ptr = (struct datum *)thing;
-
-    HDassert( f );
-    HDassert( f->shared );
-    HDassert( f->shared->cache );
-  
-    cache_ptr = f->shared->cache;
-
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->aux_ptr ); 
-
-    aux_ptr = (H5AC_aux_t *)(f->shared->cache->aux_ptr);
-
-    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
-
-    idx = addr_to_datum_index(entry_ptr->base_addr);
-
-    HDassert( idx >= 0 );
-    HDassert( idx < NUM_DATA_ENTRIES );
-    HDassert( idx < virt_num_data_entries );
-    HDassert( &(data[idx]) == entry_ptr );
-
-    HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
-    HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
-              ( entry_ptr->header.size == entry_ptr->local_len ) );
-
-    HDassert( entry_ptr->header.is_dirty == entry_ptr->dirty );
-
-    if ( ( file_mpi_rank != 0 ) && 
-         ( entry_ptr->dirty ) &&
-         ( aux_ptr->metadata_write_strategy == 
-           H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY ) ) {
-
-        ret_value = FAIL;
-        HDfprintf(stdout,
-                  "%d:%s: Flushed dirty entry from non-zero file process.",
-                  world_mpi_rank, FUNC);
-    }
-
-    if ( ret_value == SUCCEED ) {
-
-        if ( entry_ptr->header.is_dirty ) {
-
-	    was_dirty = TRUE; /* so we will receive the ack if requested */
-
-            /* compose the message */
-            mssg.req       = WRITE_REQ_CODE;
-            mssg.src       = world_mpi_rank;
-            mssg.dest      = world_server_mpi_rank;
-            mssg.mssg_num  = -1; /* set by send function */
-            mssg.base_addr = entry_ptr->base_addr;
-            mssg.len       = entry_ptr->len;
-            mssg.ver       = entry_ptr->ver;
-            mssg.count     = 0;
-            mssg.magic     = MSSG_MAGIC;
-
-            if ( ! send_mssg(&mssg, FALSE) ) {
-
-                nerrors++;
-                ret_value = FAIL;
-                if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: send_mssg() failed.\n",
-                              world_mpi_rank, FUNC);
-                }
-            }
-            else
-            {
-                entry_ptr->header.is_dirty = FALSE;
-                entry_ptr->dirty = FALSE;
-                entry_ptr->flushed = TRUE;
-            }
-        }
-    }
-
-#if DO_WRITE_REQ_ACK
-
-    if ( ( ret_value == SUCCEED ) && ( was_dirty ) ) {
-
-        if ( ! recv_mssg(&mssg, WRITE_REQ_ACK_CODE) ) {
-
-            nerrors++;
-            ret_value = FAIL;
-            if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n",
-                          world_mpi_rank, FUNC);
-            }
-        } else if ( ( mssg.req != WRITE_REQ_ACK_CODE ) ||
-                    ( mssg.src != world_server_mpi_rank ) ||
-                    ( mssg.dest != world_mpi_rank ) ||
-                    ( mssg.base_addr != entry_ptr->base_addr ) ||
-                    ( mssg.len != entry_ptr->len ) ||
-                    ( mssg.ver != entry_ptr->ver ) ||
-                    ( mssg.magic != MSSG_MAGIC ) ) {
-
-            nerrors++;
-            ret_value = FAIL;
-            if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: Bad data in write req ack.\n",
-                          world_mpi_rank, FUNC);
-            }
-        }
-    }
-
-#endif /* DO_WRITE_REQ_ACK */
-
-    if ( ret_value == SUCCEED ) {
-
-        if ( dest ) {
-
-            ret_value = destroy_datum(f, thing);
-        }
-    }
-
-    datum_flushes++;
-
-    if ( entry_ptr->header.is_pinned ) {
-
-        datum_pinned_flushes++;
-        HDassert( entry_ptr->global_pinned || entry_ptr->local_pinned );
-    }
-
-    return(ret_value);
-
-} /* flush_datum() */
-
-/*-------------------------------------------------------------------------
- * Function:    load_datum
- *
- * Purpose:     Read the requested entry from the server and mark it as
- *              clean.
- *
- * Return:      SUCCEED if successful, FAIL otherwise.
- *
- * Programmer:  John Mainzer
- *              12/29/05
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static void *
-load_datum(H5F_t H5_ATTR_UNUSED *f,
-           hid_t H5_ATTR_UNUSED dxpl_id,
-           haddr_t addr,
-           void H5_ATTR_UNUSED *udata)
-{
-    hbool_t success = TRUE;
-    int idx;
-    struct datum * entry_ptr = NULL;
-    struct mssg_t mssg;
+    HDassert( udata_ptr );
+    HDassert( image_len_ptr );
 
     idx = addr_to_datum_index(addr);
 
@@ -2571,56 +2355,335 @@ load_datum(H5F_t H5_ATTR_UNUSED *f,
     HDassert( ! entry_ptr->global_pinned );
     HDassert( ! entry_ptr->local_pinned );
 
-    /* compose the read message */
-    mssg.req       = READ_REQ_CODE;
-    mssg.src       = world_mpi_rank;
-    mssg.dest      = world_server_mpi_rank;
-    mssg.mssg_num  = -1; /* set by send function */
-    mssg.base_addr = entry_ptr->base_addr;
-    mssg.len       = entry_ptr->len;
-    mssg.ver       = 0; /* bogus -- should be corrected by server */
-    mssg.count     = 0; /* not used */
-    mssg.magic     = MSSG_MAGIC;
+    if ( callbacks_verbose ) {
 
-    if ( ! send_mssg(&mssg, FALSE) ) {
-
-        nerrors++;
-        success = FALSE;
-        if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: send_mssg() failed.\n",
-                      world_mpi_rank, FUNC);
-        }
+        HDfprintf(stdout,
+	  "%d: get_load_size() idx = %d, addr = %ld, len = %d.\n",
+              world_mpi_rank, idx, (long)addr, (int)entry_ptr->local_len);
+	fflush(stdout);
     }
 
-    if ( success ) {
+    /* Set image length size */
+    *image_len_ptr = entry_ptr->local_len;
 
-        if ( ! recv_mssg(&mssg, READ_REQ_REPLY_CODE) ) {
+    return(SUCCEED);
+} /* get_load_size() */
 
-            nerrors++;
-            success = FALSE;
-            if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n",
-                          world_mpi_rank, FUNC);
-            }
-        }
+
+/*-------------------------------------------------------------------------
+ * Function:	datum_deserialize
+ *
+ * Purpose:	deserialize the entry.
+ *
+ * Return:	void * (pointer to the in core representation of the entry)
+ *
+ * Programmer:	John Mainzer
+ *              9/20/07
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+datum_deserialize(const void * image_ptr,
+                  H5_ATTR_UNUSED size_t len,
+                  void * udata_ptr,
+                  hbool_t * dirty_ptr)
+{
+    haddr_t addr = *(haddr_t *)udata_ptr;
+    hbool_t success = TRUE;
+    int idx;
+    struct datum * entry_ptr = NULL;
+
+    HDassert( image_ptr != NULL );
+
+    idx = addr_to_datum_index(addr);
+
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
+
+    entry_ptr = &(data[idx]);
+
+    HDassert( addr == entry_ptr->base_addr );
+    HDassert( ! entry_ptr->global_pinned );
+    HDassert( ! entry_ptr->local_pinned );
+
+    HDassert( dirty_ptr );
+
+    if ( callbacks_verbose ) {
+
+        HDfprintf(stdout,
+	  "%d: deserialize() idx = %d, addr = %ld, len = %d, is_dirty = %d.\n",
+	  world_mpi_rank, idx, (long)addr, (int)len,
+	  (int)(entry_ptr->header.is_dirty));
+	fflush(stdout);
     }
 
-    if ( success ) {
+    *dirty_ptr = FALSE;
 
-        if ( ( mssg.req != READ_REQ_REPLY_CODE ) ||
-             ( mssg.src != world_server_mpi_rank ) ||
-             ( mssg.dest != world_mpi_rank ) ||
-             ( mssg.base_addr != entry_ptr->base_addr ) ||
-             ( mssg.len != entry_ptr->len ) ||
-             ( mssg.ver < entry_ptr->ver ) ||
-             ( mssg.magic != MSSG_MAGIC ) ) {
+    if ( ! success ) {
 
-            nerrors++;
-            success = FALSE;
-            if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: Bad data in read req reply.\n",
-                          world_mpi_rank, FUNC);
+        entry_ptr = NULL;
+
+    }
+
+    return(entry_ptr);
+
+} /* deserialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	datum_image_len
+ *
+ * Purpose:	Return the real (and possibly reduced) length of the image.
+ * 		The helper functions verify that the correct version of
+ * 		deserialize is being called, and then call deserialize
+ * 		proper.
+ *
+ * Return:	SUCCEED
+ *
+ * Programmer:	John Mainzer
+ *              9/19/07
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+datum_image_len(void *thing, size_t *image_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+{
+    int idx;
+    struct datum * entry_ptr;
+
+    HDassert( thing );
+    HDassert( image_len );
+
+    entry_ptr = (struct datum *)thing;
+
+    idx = addr_to_datum_index(entry_ptr->base_addr);
+
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
+    HDassert( &(data[idx]) == entry_ptr );
+    HDassert( entry_ptr->local_len > 0 );
+    HDassert( entry_ptr->local_len <= entry_ptr->len );
+
+    if(callbacks_verbose) {
+        HDfprintf(stdout,
+		  "%d: image_len() idx = %d, addr = %ld, len = %d.\n",
+		  world_mpi_rank, idx, (long)(entry_ptr->base_addr),
+		  (int)(entry_ptr->local_len));
+	fflush(stdout);
+    }
+
+    HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
+
+    *image_len = entry_ptr->local_len;
+
+    return(SUCCEED);
+} /* datum_image_len() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	datum_serialize
+ *
+ * Purpose:	Serialize the supplied entry.
+ *
+ * Return:	SUCCEED if successful, FAIL otherwise.
+ *
+ * Programmer:	John Mainzer
+ *              10/30/07
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+datum_serialize(const H5F_t *f,
+                void *image_ptr,
+                size_t len,
+                void *thing_ptr)
+{
+    herr_t ret_value = SUCCEED;
+    int idx;
+    struct datum * entry_ptr;
+    H5C_t * cache_ptr;
+    struct H5AC_aux_t * aux_ptr;
+
+    HDassert( thing_ptr );
+    HDassert( image_ptr );
+
+    entry_ptr = (struct datum *)thing_ptr;
+
+    HDassert( f );
+    HDassert( f->shared );
+    HDassert( f->shared->cache );
+  
+    cache_ptr = f->shared->cache;
+
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( cache_ptr->aux_ptr ); 
+
+    aux_ptr = (H5AC_aux_t *)(f->shared->cache->aux_ptr);
+
+    HDassert( aux_ptr );
+    HDassert( aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
+    HDassert( entry_ptr->aux_ptr == NULL );
+
+    entry_ptr->aux_ptr = aux_ptr;
+
+    idx = addr_to_datum_index(entry_ptr->base_addr);
+
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
+    HDassert( &(data[idx]) == entry_ptr );
+
+    if ( callbacks_verbose ) {
+
+        HDfprintf(stdout,
+		  "%d: serialize() idx = %d, addr = %ld, len = %d.\n",
+		  world_mpi_rank, idx, (long)entry_ptr->header.addr, (int)len);
+	fflush(stdout);
+    }
+
+    HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
+    HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
+              ( entry_ptr->header.size == entry_ptr->local_len ) );
+
+    HDassert( entry_ptr->header.is_dirty == entry_ptr->dirty );
+
+    datum_flushes++;
+
+    if ( entry_ptr->header.is_pinned ) {
+
+        datum_pinned_flushes++;
+        HDassert( entry_ptr->global_pinned || entry_ptr->local_pinned );
+    }
+
+    return(ret_value);
+
+} /* datum_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	datum_notify
+ *
+ * Purpose:	Do the communication with the server we used to do in the 
+ *		flush and load callbacks in the version 2 cache.
+ *
+ * Return:	SUCCEED
+ *
+ * Programmer:	John Mainzer
+ *              1/12/15
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+datum_notify(H5C_notify_action_t action, void *thing)
+{
+    hbool_t was_dirty = FALSE;
+    herr_t ret_value = SUCCEED;
+    struct datum * entry_ptr;
+    struct H5AC_aux_t * aux_ptr;
+    struct mssg_t mssg;
+    int idx;
+
+    HDassert( thing );
+
+    entry_ptr = (struct datum *)thing;
+
+    idx = addr_to_datum_index(entry_ptr->base_addr);
+
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
+    HDassert( &(data[idx]) == entry_ptr );
+
+    if ( callbacks_verbose ) {
+
+        HDfprintf(stdout,
+                  "%d: notify() action = %d, idx = %d, addr = %ld.\n",
+                  world_mpi_rank, (int) action, idx, 
+                  (long)entry_ptr->header.addr);
+        fflush(stdout);
+    }
+
+    HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
+    HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
+              ( entry_ptr->header.size == entry_ptr->local_len ) );
+
+    switch ( action )
+    {
+        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = insert, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
             }
+            /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = load, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
+            }
+
+            /* compose the read message */
+            mssg.req       = READ_REQ_CODE;
+            mssg.src       = world_mpi_rank;
+            mssg.dest      = world_server_mpi_rank;
+            mssg.mssg_num  = -1; /* set by send function */
+            mssg.base_addr = entry_ptr->base_addr;
+            mssg.len       = entry_ptr->len;
+            mssg.ver       = 0; /* bogus -- should be corrected by server */
+            mssg.count     = 0; /* not used */
+            mssg.magic     = MSSG_MAGIC;
+
+            if ( ! send_mssg(&mssg, FALSE) ) {
+
+                nerrors++;
+                ret_value = FAIL;
+                if ( verbose ) {
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed.\n",
+                              world_mpi_rank, FUNC);
+                }
+            }
+
+            if ( ret_value == SUCCEED ) {
+
+                if ( ! recv_mssg(&mssg, READ_REQ_REPLY_CODE) ) {
+
+                    nerrors++;
+                    ret_value = FAIL;
+                    if ( verbose ) {
+                        HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n",
+                                  world_mpi_rank, FUNC);
+                    }
+                }
+            }
+
+            if ( ret_value == SUCCEED ) {
+
+                if ( ( mssg.req != READ_REQ_REPLY_CODE ) ||
+                     ( mssg.src != world_server_mpi_rank ) ||
+                     ( mssg.dest != world_mpi_rank ) ||
+                     ( mssg.base_addr != entry_ptr->base_addr ) ||
+                     ( mssg.len != entry_ptr->len ) ||
+                     ( mssg.ver < entry_ptr->ver ) ||
+                     ( mssg.magic != MSSG_MAGIC ) ) {
+
+                    nerrors++;
+                    ret_value = FAIL;
+                    if ( verbose ) {
+                        HDfprintf(stdout,
+                                  "%d:%s: Bad data in read req reply.\n",
+                                  world_mpi_rank, FUNC);
+                    }
+
 #if 0 /* This has been useful debugging code -- keep it for now. */
 	            if ( mssg.req != READ_REQ_REPLY_CODE ) {
 
@@ -2683,58 +2746,167 @@ load_datum(H5F_t H5_ATTR_UNUSED *f,
 
                 } else {
 
-            entry_ptr->ver = mssg.ver;
-            entry_ptr->header.is_dirty = FALSE;
-            entry_ptr->dirty = FALSE;
-        }
+                    entry_ptr->ver = mssg.ver;
+                    entry_ptr->dirty = FALSE;
+                    datum_loads++;
+                }
+            }
+            break;
+
+	case H5C_NOTIFY_ACTION_AFTER_FLUSH:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = flush, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
+            }
+
+            HDassert( entry_ptr->aux_ptr );
+            HDassert( entry_ptr->aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC );
+            aux_ptr = entry_ptr->aux_ptr;
+            entry_ptr->aux_ptr = NULL;
+
+	    HDassert(entry_ptr->header.is_dirty); /* JRM */
+
+            if ( ( file_mpi_rank != 0 ) && 
+                 ( entry_ptr->dirty ) &&
+                 ( aux_ptr->metadata_write_strategy == 
+                   H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY ) ) {
+
+                ret_value = FAIL;
+                HDfprintf(stdout,
+                     "%d:%s: Flushed dirty entry from non-zero file process.",
+                     world_mpi_rank, FUNC);
+            }
+
+            if ( ret_value == SUCCEED ) {
+
+                if ( entry_ptr->header.is_dirty ) {
+
+	            was_dirty = TRUE; /* so we will receive the ack 
+                                       * if requested 
+                                       */
+
+                    /* compose the message */
+                    mssg.req       = WRITE_REQ_CODE;
+                    mssg.src       = world_mpi_rank;
+                    mssg.dest      = world_server_mpi_rank;
+                    mssg.mssg_num  = -1; /* set by send function */
+                    mssg.base_addr = entry_ptr->base_addr;
+                    mssg.len       = entry_ptr->len;
+                    mssg.ver       = entry_ptr->ver;
+                    mssg.count     = 0;
+                    mssg.magic     = MSSG_MAGIC;
+
+                    if ( ! send_mssg(&mssg, FALSE) ) {
+
+                        nerrors++;
+                        ret_value = FAIL;
+                        if ( verbose ) {
+                            HDfprintf(stdout, "%d:%s: send_mssg() failed.\n",
+                                      world_mpi_rank, FUNC);
+                        }
+                    }
+                    else
+                    {
+                        entry_ptr->dirty = FALSE;
+			entry_ptr->flushed = TRUE;
+                    }
+                }
+            }
+
+#if DO_WRITE_REQ_ACK
+
+            if ( ( ret_value == SUCCEED ) && ( was_dirty ) ) {
+
+                if ( ! recv_mssg(&mssg, WRITE_REQ_ACK_CODE) ) {
+
+                    nerrors++;
+                    ret_value = FAIL;
+                    if ( verbose ) {
+                        HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n",
+                                  world_mpi_rank, FUNC);
+                    }
+                } else if ( ( mssg.req != WRITE_REQ_ACK_CODE ) ||
+                            ( mssg.src != world_server_mpi_rank ) ||
+                            ( mssg.dest != world_mpi_rank ) ||
+                            ( mssg.base_addr != entry_ptr->base_addr ) ||
+                            ( mssg.len != entry_ptr->len ) ||
+                            ( mssg.ver != entry_ptr->ver ) ||
+                            ( mssg.magic != MSSG_MAGIC ) ) {
+
+                    nerrors++;
+                    ret_value = FAIL;
+                    if ( verbose ) {
+                        HDfprintf(stdout, 
+                                  "%d:%s: Bad data in write req ack.\n",
+                                  world_mpi_rank, FUNC);
+                    }
+                }
+            }
+
+#endif /* DO_WRITE_REQ_ACK */
+
+            datum_flushes++;
+
+            if ( entry_ptr->header.is_pinned ) {
+
+                datum_pinned_flushes++;
+                HDassert(entry_ptr->global_pinned || entry_ptr->local_pinned);
+            }
+	    break;
+
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = evict, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
+            }
+
+            /* do nothing */
+            break;
+
+	default:
+            nerrors++;
+            ret_value = FAIL;
+            if ( verbose ) {
+                HDfprintf(stdout, "%d:%s: Unknown notify action.\n",
+                          world_mpi_rank, FUNC);
+            }
+	    break;
     }
 
-    if ( ! success ) {
+    return(ret_value);
 
-        entry_ptr = NULL;
+} /* datum_notify() */
 
-    }
-
-    datum_loads++;
-
-    return(entry_ptr);
-
-} /* load_datum() */
-
+
 /*-------------------------------------------------------------------------
- * Function:    size_datum
+ * Function:	datum_free_icr
  *
- * Purpose:     Get the size of the specified entry.  Just look at the
- *		local copy, as size can't change.
+ * Purpose:	Nominally, this callback is supposed to free the
+ * 		in core representation of the entry.
  *
- * Return:      SUCCEED
+ * 		In the context of this test bed, we use it to do
+ * 		do all the processing we used to do on a destroy.
  *
- * Programmer:  John Mainzer
- *              6/10/04
+ * Return:	SUCCEED
  *
- * Modifications:
- *
- * 		JRM -- 7/11/06
- * 		Modified function to return the local_len field instead
- * 		of the len field.  These two fields usually contain the
- * 		same value, but if the size of an entry is changed, we
- * 		store the altered size in local_len without changing
- * 		len.  Note that local_len must be positive, and may
- * 		not exceed len.
+ * Programmer:	John Mainzer
+ *              9/19/07
  *
  *-------------------------------------------------------------------------
  */
-
 static herr_t
-size_datum(H5F_t H5_ATTR_UNUSED *  f,
-           void *   thing,
-           size_t * size_ptr)
+datum_free_icr(void * thing)
 {
     int idx;
     struct datum * entry_ptr;
 
     HDassert( thing );
-    HDassert( size_ptr );
 
     entry_ptr = (struct datum *)thing;
 
@@ -2744,16 +2916,84 @@ size_datum(H5F_t H5_ATTR_UNUSED *  f,
     HDassert( idx < NUM_DATA_ENTRIES );
     HDassert( idx < virt_num_data_entries );
     HDassert( &(data[idx]) == entry_ptr );
-    HDassert( entry_ptr->local_len > 0 );
-    HDassert( entry_ptr->local_len <= entry_ptr->len );
+
+    if ( callbacks_verbose ) {
+
+        HDfprintf(stdout,
+	  "%d: free_icr() idx = %d, dirty = %d.\n",
+		  world_mpi_rank, idx, (int)(entry_ptr->dirty));
+	fflush(stdout);
+    }
 
     HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
+    HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
+              ( entry_ptr->header.size == entry_ptr->local_len ) );
 
-    *size_ptr = entry_ptr->local_len;
+    HDassert( !(entry_ptr->header.is_dirty) );
+    HDassert( !(entry_ptr->global_pinned) );
+    HDassert( !(entry_ptr->local_pinned) );
+    HDassert( !(entry_ptr->header.is_pinned) );
+
+    datum_destroys++;
+
+    return(SUCCEED);
+} /* datum_free_icr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    datum_clear
+ *
+ * Purpose:     Mark the datum as clean.
+ *
+ *              Do not write it to the server, or increment the version.
+ *
+ * Return:      SUCCEED
+ *
+ * Programmer:  John Mainzer
+ *              12/29/05
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+datum_clear(H5F_t H5_ATTR_UNUSED * f,
+            void *  thing,
+            hbool_t H5_ATTR_UNUSED about_to_destroy)
+{
+    int idx;
+    struct datum * entry_ptr;
+
+    HDassert( thing );
+
+    entry_ptr = (struct datum *)thing;
+
+    idx = addr_to_datum_index(entry_ptr->base_addr);
+
+    HDassert( idx >= 0 );
+    HDassert( idx < NUM_DATA_ENTRIES );
+    HDassert( idx < virt_num_data_entries );
+    HDassert( &(data[idx]) == entry_ptr );
+
+    HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
+    HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
+              ( entry_ptr->header.size == entry_ptr->local_len ) );
+
+    HDassert( ( entry_ptr->dirty ) ||
+              ( entry_ptr->header.is_dirty == entry_ptr->dirty ) );
+
+    entry_ptr->cleared = TRUE;
+    entry_ptr->dirty = FALSE;
+
+    datum_clears++;
+
+    if ( entry_ptr->header.is_pinned ) {
+
+        datum_pinned_clears++;
+        HDassert( entry_ptr->global_pinned || entry_ptr->local_pinned );
+    }
 
     return(SUCCEED);
 
-} /* size_datum() */
+} /* datum_clear() */
 
 
 /*****************************************************************************/
@@ -2791,6 +3031,8 @@ expunge_entry(H5F_t * file_ptr,
     HDassert( !(entry_ptr->locked) );
     HDassert( !(entry_ptr->global_pinned) );
     HDassert( !(entry_ptr->local_pinned) );
+
+    entry_ptr->dirty = FALSE;
 
     if ( nerrors == 0 ) {
 
@@ -3280,8 +3522,10 @@ lock_entry(H5F_t * file_ptr,
 	HDassert( ! (entry_ptr->locked) );
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5AC_protect(file_ptr, 
-                H5P_DATASET_XFER_DEFAULT, &(types[0]), entry_ptr->base_addr, 
-                NULL, H5AC_WRITE);
+                                        H5P_DATASET_XFER_DEFAULT,
+                                        &(types[0]), entry_ptr->base_addr,
+                                        &entry_ptr->base_addr, 
+                                        H5AC__NO_FLAGS_SET);
 
         if ( ( cache_entry_ptr != (void *)(&(entry_ptr->header)) ) ||
              ( entry_ptr->header.type != &(types[0]) ) ||
@@ -3801,6 +4045,7 @@ setup_cache_for_test(hid_t * fid_ptr,
     H5AC_cache_config_t test_config;
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;
+    haddr_t actual_base_addr;
 
     HDassert ( fid_ptr != NULL );
     HDassert ( file_ptr_ptr != NULL );
@@ -3950,12 +4195,60 @@ setup_cache_for_test(hid_t * fid_ptr,
         }
     }
 
+    /* allocate space for test entries -- do this before we set the 
+     * sync point done callback as it will dirty the superblock, requiring
+     * another flush.  If the sync point done callback is set, this will
+     * cause a spurious failure.
+     */
+    if ( success ) { /* allocate space for test entries */
+
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT,
+                                      (hsize_t)(max_addr + BASE_ADDR));
+
+        if ( actual_base_addr == HADDR_UNDEF ) {
+
+            success = FALSE;
+	    nerrors++;
+
+            if ( verbose ) {
+	        HDfprintf(stdout, "%d:%s: H5MF_alloc() failed.\n",
+                          world_mpi_rank, FUNC);
+            }
+
+        } else if ( actual_base_addr > BASE_ADDR ) {
+
+            /* If this happens, must increase BASE_ADDR so that the
+             * actual_base_addr is <= BASE_ADDR.  This should only happen
+             * if the size of the superblock is increase.
+             */
+            success = FALSE;
+	    nerrors++;
+
+            if ( verbose ) {
+	        HDfprintf(stdout, "%d:%s: actual_base_addr > BASE_ADDR.\n",
+                          world_mpi_rank, FUNC);
+            }
+        }
+    }
+
+
+    /* flush the file again -- space allocation dirtied superblock */
+    if ( success ) {
+
+        if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
+            nerrors++;
+            if ( verbose ) {
+	        HDfprintf(stdout, "%d:%s: second H5Fflush() failed.\n",
+                          world_mpi_rank, FUNC);
+            }
+        }
+    }
 
 #if DO_SYNC_AFTER_WRITE
 
     if ( success ) {
 
-	if ( H5AC_set_write_done_callback(cache_ptr, do_sync) != SUCCEED ) {
+	if ( H5AC__set_write_done_callback(cache_ptr, do_sync) != SUCCEED ) {
 
             nerrors++;
             if ( verbose ) {
@@ -3970,12 +4263,12 @@ setup_cache_for_test(hid_t * fid_ptr,
 
     if ( success ) {
 
-	if ( H5AC_set_sync_point_done_callback(cache_ptr, verify_writes) != SUCCEED ) {
+	if ( H5AC__set_sync_point_done_callback(cache_ptr, verify_writes) != SUCCEED ) {
 
             nerrors++;
             if ( verbose ) {
 	        HDfprintf(stdout,
-			  "%d:%s: H5AC_set_sync_point_done_callback failed.\n",
+			  "%d:%s: H5AC__set_sync_point_done_callback failed.\n",
                           world_mpi_rank, FUNC);
             }
 	}
@@ -4138,7 +4431,7 @@ setup_rand(void)
 {
     hbool_t use_predefined_seeds = FALSE;
     int num_predefined_seeds = 3;
-    unsigned predefined_seeds[3] = {33402, 33505, 33422};
+    unsigned predefined_seeds[3] = {18669, 89925, 12577};
     unsigned seed;
     struct timeval tv;
 
@@ -4703,7 +4996,7 @@ unlock_entry(H5F_t * file_ptr,
 
             nerrors++;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: error in H5C_unprotect().\n",
+                HDfprintf(stdout, "%d:%s: error in H5AC_unprotect().\n",
                           world_mpi_rank, FUNC);
             }
         } else {
@@ -6472,27 +6765,27 @@ trace_file_check(int metadata_write_strategy)
     {
       "### HDF5 metadata cache trace file version 1 ###\n",
       "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 2097152 0.300000 33554432 1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0 0\n",
-      "H5AC_insert_entry 0x200 25 0x0 2 0\n",
-      "H5AC_insert_entry 0x202 25 0x0 2 0\n",
-      "H5AC_insert_entry 0x204 25 0x0 4 0\n",
-      "H5AC_insert_entry 0x208 25 0x0 6 0\n",
-      "H5AC_protect 0x200 25 H5AC_WRITE 2 1\n",
-      "H5AC_mark_entry_dirty 0x200 0\n",
-      "H5AC_unprotect 0x200 25 0 0 0\n",
-      "H5AC_protect 0x202 25 H5AC_WRITE 2 1\n",
-      "H5AC_pin_protected_entry 0x202 0\n",
-      "H5AC_unprotect 0x202 25 0 0 0\n",
-      "H5AC_unpin_entry 0x202 0\n",
-      "H5AC_expunge_entry 0x202 25 0\n",
-      "H5AC_protect 0x204 25 H5AC_WRITE 4 1\n",
-      "H5AC_pin_protected_entry 0x204 0\n",
-      "H5AC_unprotect 0x204 25 0 0 0\n",
-      "H5AC_mark_entry_dirty 0x204 0 0 0\n",
-      "H5AC_resize_entry 0x204 2 0\n",
-      "H5AC_resize_entry 0x204 4 0\n",
-      "H5AC_unpin_entry 0x204 0\n",
-      "H5AC_move_entry 0x200 0x8c65 25 0\n",
-      "H5AC_move_entry 0x8c65 0x200 25 0\n",
+      "H5AC_insert_entry 0x400 27 0x0 2 0\n",
+      "H5AC_insert_entry 0x402 27 0x0 2 0\n",
+      "H5AC_insert_entry 0x404 27 0x0 4 0\n",
+      "H5AC_insert_entry 0x408 27 0x0 6 0\n",
+      "H5AC_protect 0x400 27 0x0 2 1\n",
+      "H5AC_mark_entry_dirty 0x400 0\n",
+      "H5AC_unprotect 0x400 27 0x0 0\n",
+      "H5AC_protect 0x402 27 0x0 2 1\n",
+      "H5AC_pin_protected_entry 0x402 0\n",
+      "H5AC_unprotect 0x402 27 0x0 0\n",
+      "H5AC_unpin_entry 0x402 0\n",
+      "H5AC_expunge_entry 0x402 27 0\n",
+      "H5AC_protect 0x404 27 0x0 4 1\n",
+      "H5AC_pin_protected_entry 0x404 0\n",
+      "H5AC_unprotect 0x404 27 0x0 0\n",
+      "H5AC_mark_entry_dirty 0x404 0\n",
+      "H5AC_resize_entry 0x404 2 0\n",
+      "H5AC_resize_entry 0x404 4 0\n",
+      "H5AC_unpin_entry 0x404 0\n",
+      "H5AC_move_entry 0x400 0x8e65 27 0\n",
+      "H5AC_move_entry 0x8e65 0x400 27 0\n",
       "H5AC_flush 0\n",
       NULL
     };
@@ -6500,27 +6793,27 @@ trace_file_check(int metadata_write_strategy)
     {
       "### HDF5 metadata cache trace file version 1 ###\n",
       "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 2097152 0.300000 33554432 1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 1 0\n",
-      "H5AC_insert_entry 0x200 25 0x0 2 0\n",
-      "H5AC_insert_entry 0x202 25 0x0 2 0\n",
-      "H5AC_insert_entry 0x204 25 0x0 4 0\n",
-      "H5AC_insert_entry 0x208 25 0x0 6 0\n",
-      "H5AC_protect 0x200 25 H5AC_WRITE 2 1\n",
-      "H5AC_mark_entry_dirty 0x200 0\n",
-      "H5AC_unprotect 0x200 25 0 0 0\n",
-      "H5AC_protect 0x202 25 H5AC_WRITE 2 1\n",
-      "H5AC_pin_protected_entry 0x202 0\n",
-      "H5AC_unprotect 0x202 25 0 0 0\n",
-      "H5AC_unpin_entry 0x202 0\n",
-      "H5AC_expunge_entry 0x202 25 0\n",
-      "H5AC_protect 0x204 25 H5AC_WRITE 4 1\n",
-      "H5AC_pin_protected_entry 0x204 0\n",
-      "H5AC_unprotect 0x204 25 0 0 0\n",
-      "H5AC_mark_entry_dirty 0x204 0 0 0\n",
-      "H5AC_resize_pinned_entry 0x204 2 0\n",
-      "H5AC_resize_pinned_entry 0x204 4 0\n",
-      "H5AC_unpin_entry 0x204 0\n",
-      "H5AC_move_entry 0x200 0x8c65 25 0\n",
-      "H5AC_move_entry 0x8c65 0x200 25 0\n",
+      "H5AC_insert_entry 0x400 27 0x0 2 0\n",
+      "H5AC_insert_entry 0x402 27 0x0 2 0\n",
+      "H5AC_insert_entry 0x404 27 0x0 4 0\n",
+      "H5AC_insert_entry 0x408 27 0x0 6 0\n",
+      "H5AC_protect 0x400 27 0x0 2 1\n",
+      "H5AC_mark_entry_dirty 0x400 0\n",
+      "H5AC_unprotect 0x400 27 0x0 0\n",
+      "H5AC_protect 0x402 27 0x0 2 1\n",
+      "H5AC_pin_protected_entry 0x402 0\n",
+      "H5AC_unprotect 0x402 27 0x0 0\n",
+      "H5AC_unpin_entry 0x402 0\n",
+      "H5AC_expunge_entry 0x402 27 0\n",
+      "H5AC_protect 0x404 27 0x0 4 1\n",
+      "H5AC_pin_protected_entry 0x404 0\n",
+      "H5AC_unprotect 0x404 27 0x0 0\n",
+      "H5AC_mark_entry_dirty 0x404 0\n",
+      "H5AC_resize_entry 0x404 2 0\n",
+      "H5AC_resize_entry 0x404 4 0\n",
+      "H5AC_unpin_entry 0x404 0\n",
+      "H5AC_move_entry 0x400 0x8e65 27 0\n",
+      "H5AC_move_entry 0x8e65 0x400 27 0\n",
       "H5AC_flush 0\n",
       NULL
     };

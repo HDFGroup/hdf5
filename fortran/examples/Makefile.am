@@ -46,12 +46,10 @@ INSTALL_FILES=h5_crtdat.f90 h5_rdwt.f90 \
 
 
 # Add attention tests for Fortran 2003 features
-if FORTRAN_2003_CONDITIONAL_F
-  EXAMPLE_PROG +=  rwdset_fortran2003 nested_derived_type \
-      compound_fortran2003 compound_complex_fortran2003
-  INSTALL_FILES +=  rwdset_fortran2003.f90 nested_derived_type.f90 \
-      compound_fortran2003.f90 compound_complex_fortran2003.f90
-endif
+EXAMPLE_PROG +=  rwdset_fortran2003 nested_derived_type \
+    compound_fortran2003 compound_complex_fortran2003
+INSTALL_FILES +=  rwdset_fortran2003.f90 nested_derived_type.f90 \
+    compound_fortran2003.f90 compound_complex_fortran2003.f90
 TEST_SCRIPT=testh5fc.sh
 TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 
@@ -103,12 +101,10 @@ refregexample: refregexample.f90
 mountexample: mountexample.f90
 compound: compound.f90
 ph5example: ph5example.f90
-if FORTRAN_2003_CONDITIONAL_F
 rwdset_fortran2003: rwdset_fortran2003.f90
 nested_derived_type: nested_derived_type.f90
 compound_fortran2003: compound_fortran2003.f90
 compound_complex_fortran2003: compound_complex_fortran2003.f90
-endif
 
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am

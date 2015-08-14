@@ -408,16 +408,25 @@ END_FUNC(PKG)   /* end H5FA__hdr_modified() */
 BEGIN_FUNC(PKG, ERR,
 H5FA_hdr_t *, NULL, NULL,
 H5FA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata,
-    H5AC_protect_t rw))
+    unsigned flags))
 
     /* Local variables */
+    H5FA_hdr_cache_ud_t udata;  /* User data for cache callbacks */
 
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_addr_defined(fa_addr));
 
+    /* only the H5AC__READ_ONLY_FLAG is permitted */
+    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+
+    /* Set up user data for cache callbacks */
+    udata.f = f;
+    udata.addr = fa_addr;
+    udata.ctx_udata = ctx_udata;
+
     /* Protect the header */
-    if(NULL == (ret_value = (H5FA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FARRAY_HDR, fa_addr, ctx_udata, rw)))
+    if(NULL == (ret_value = (H5FA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_FARRAY_HDR, fa_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array header, address = %llu", (unsigned long long)fa_addr)
 
 CATCH

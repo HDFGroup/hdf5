@@ -1,6 +1,6 @@
 /****h* H5Ef/H5Ef
  * PURPOSE
- *   This file contains C stubs for H5E Fortran APIs
+ *  This file contains C stubs for H5E Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -42,7 +42,7 @@
  * SOURCE
 */
 int_f
-nh5eclear_c(hid_t_f *estack_id )
+h5eclear_c(hid_t_f *estack_id )
 /******/
 {
   int_f ret_value = 0;
@@ -78,7 +78,7 @@ done:
  * SOURCE
 */
 int_f
-nh5eprint_c1(_fcd name, int_f* namelen)
+h5eprint_c1(_fcd name, int_f* namelen)
 /******/
 {
     FILE *file = NULL;
@@ -124,7 +124,7 @@ done:
  * SOURCE
 */
 int_f
-nh5eprint_c2(void)
+h5eprint_c2(void)
 /******/
 {
     int_f ret_value = 0;
@@ -159,7 +159,7 @@ done:
  * SOURCE
 */
 int_f
-nh5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
+h5eget_major_c(int_f* error_no, _fcd name, size_t_f* namelen)
 /******/
 {
     char *c_name = NULL;
@@ -207,7 +207,7 @@ done:
  * SOURCE
 */
 int_f
-nh5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
+h5eget_minor_c(int_f* error_no, _fcd name, size_t_f* namelen)
 /******/
 {
     char *c_name = NULL;
@@ -235,62 +235,25 @@ done:
     return ret_value;
 }
 
-/****if* H5Ef/h5eset_auto_c
+/****if* H5Ef/h5eset_auto2_c
  * NAME
- *  h5eset_auto_c
+ *  h5eset_auto2_c
  * PURPOSE
- *  Call H5Eset_auto to turn automatic error printing on or off.
+ *  Calls H5Eset_auto2
  * INPUTS
- *  printflag - flag to turn automatic error printing on or off.
- * OUTPUTS
- *
+ *  estack_id   - Error stack identifier.
+ *  func 	- Function to be called upon an error condition.
+ *  client_data - Data passed to the error function.
+ *   
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
- *  Elena Pourmal
- *  Friday, November 17, 2000
- * HISTORY
- *  Major bug fix: Function never disabled printing.
- * SOURCE
-*/
-int_f
-nh5eset_auto_c(int_f* printflag)
-/******/
-{
-    herr_t status = -1;
-    int_f ret_value = 0;
-
-    if(*printflag == 1)
-        status = H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t)H5Eprint2, stderr);
-    else if(*printflag == 0)
-        status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-    if(status < 0)
-        HGOTO_DONE(FAIL)
-
-done:
-    return ret_value;
-}
-
-
-/****if* H5Ef/h5eset_auto2_c
- * NAME
- *   h5eset_auto2_c
- * PURPOSE
- *   Calls H5Eset_auto2
- * INPUTS
- *   estack_id    - Error stack identifier.
- *   func 	 - Function to be called upon an error condition.
- *   client_data - Data passed to the error function.
- *   
- * RETURNS
- *   0 on success, -1 on failure
- * AUTHOR
  *   M. Scot Breitenfeld
- *   July 22, 2009
+ *  July 22, 2009
  * SOURCE
 */
 /* int_f */
-/* nh5eset_auto2_c(hid_t_f *estack_id, H5E_auto2_t *func, void *client_data) */
+/* h5eset_auto2_c(hid_t_f *estack_id, H5E_auto2_t *func, void *client_data) */
 /* /\******\/ */
 /* { */
 /*   int ret_val = -1; */
