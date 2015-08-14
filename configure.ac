@@ -33,8 +33,8 @@ AC_INIT([HDF5], [1.9.227], [help@hdfgroup.org])
 ## Requirement #1: Check if Perl is installed.
 ##
 AC_SUBST([PERL]) PERL=""
-AC_CHECK_PROG([PERL], [perl],, [$PATH])
-if test "x$PERL" = "xfalse"; then
+AC_CHECK_PROG([PERL], [perl], true, false, [$PATH])
+if test "x$PERL" != "xtrue"; then
    AC_MSG_ERROR([*** Perl is required for installing HDF5, but Perl could not be found!])
 fi
 
