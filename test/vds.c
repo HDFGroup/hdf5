@@ -3895,6 +3895,69 @@ test_unlim(unsigned config, hid_t fapl)
             for(j = 0; j < (int)mdims[1]; j++)
                 if(rbuf[i][j] != erbuf[i][j])
                     TEST_ERROR
+
+        /* Now try setting extent manually */
+        /* Shrink to 18 */
+        dims[1] = 18;
+        if(H5Dset_extent(vdset, dims) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        start[0] = 0;
+        start[1] = 0;
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++) {
+                if(j >= (int)dims[1]) {
+                    if(rbuf[i][j] != 0)
+                        TEST_ERROR
+                } /* end if */
+                else
+                    if(rbuf[i][j] != erbuf[i][j])
+                        TEST_ERROR
+            } /* end for */
+
+        /* Shrink to 15 */
+        dims[1] = 15;
+        if(H5Dset_extent(vdset, dims) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        start[0] = 0;
+        start[1] = 0;
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++) {
+                if(j >= (int)dims[1]) {
+                    if(rbuf[i][j] != 0)
+                        TEST_ERROR
+                } /* end if */
+                else
+                    if(rbuf[i][j] != erbuf[i][j])
+                        TEST_ERROR
+            } /* end for */
     } /* end if */
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
@@ -3912,12 +3975,6 @@ test_unlim(unsigned config, hid_t fapl)
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
-
-    /* Update erbuf to reflect new data that is no longer visible due to the
-     * change to H5D_VDS_FIRST_MISSING */
-    for(i = 5; i < 10; i++)
-        for(j = 15; j < 20; j++)
-            erbuf[i][j] = fill;
 
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
@@ -4007,6 +4064,63 @@ test_unlim(unsigned config, hid_t fapl)
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
             } /* end for */
+
+        /* Now try setting extent manually */
+        /* Grow to 18 */
+        dims[1] = 18;
+        if(H5Dset_extent(vdset, dims) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        start[0] = 0;
+        start[1] = 0;
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++) {
+                if(j >= (int)dims[1]) {
+                    if(rbuf[i][j] != 0)
+                        TEST_ERROR
+                } /* end if */
+                else
+                    if(rbuf[i][j] != erbuf[i][j])
+                        TEST_ERROR
+            } /* end for */
+
+        /* Grow to 20 */
+        dims[1] = 20;
+        if(H5Dset_extent(vdset, dims) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        start[0] = 0;
+        start[1] = 0;
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++)
+                if(rbuf[i][j] != erbuf[i][j])
+                    TEST_ERROR
     } /* end if */
 
     /* Close */
@@ -8692,6 +8806,65 @@ test_printf(unsigned config, hid_t fapl)
                     if(rbuf[i][j] != erbuf[i][j])
                         TEST_ERROR
             } /* end for */
+
+        /* Now try setting extent manually */
+        /* Shrink to 12 */
+        dims[1] = 12;
+        if(H5Dset_extent(vdset, dims) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++) {
+                if(j >= (int)dims[1]) {
+                    if(rbuf[i][j] != 0)
+                        TEST_ERROR
+                } /* end if */
+                else
+                    if(rbuf[i][j] != erbuf[i][j])
+                        TEST_ERROR
+            } /* end for */
+
+        /* Shrink to 10 */
+        dims[1] = 12;
+        if(H5Dset_extent(vdset, dims) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++) {
+                if(j >= (int)dims[1]) {
+                    if(rbuf[i][j] != 0)
+                        TEST_ERROR
+                } /* end if */
+                else
+                    if(rbuf[i][j] != erbuf[i][j])
+                        TEST_ERROR
+            } /* end for */
     } /* end if */
 
     /* Close VDS and reopen with view set to H5D_VDS_FIRST_MISSING, reopen file
@@ -8770,6 +8943,65 @@ test_printf(unsigned config, hid_t fapl)
         if((vfile = H5Fopen(vfilename, H5F_ACC_RDWR, fapl)) < 0)
             TEST_ERROR
         if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++) {
+                if(j >= (int)dims[1]) {
+                    if(rbuf[i][j] != 0)
+                        TEST_ERROR
+                } /* end if */
+                else
+                    if(rbuf[i][j] != erbuf[i][j])
+                        TEST_ERROR
+            } /* end for */
+
+        /* Now try setting extent manually */
+        /* Grow to 12 */
+        dims[1] = 12;
+        if(H5Dset_extent(vdset, dims) < 0)
+            TEST_ERROR
+
+        /* Read data through virtual dataset */
+        /* Reset rbuf */
+        HDmemset(rbuf[0], 0, sizeof(rbuf));
+
+        /* Select hyperslab in memory space */
+        if(H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, dims, NULL) < 0)
+            TEST_ERROR
+
+        /* Read data */
+        if(H5Dread(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, rbuf[0]) < 0)
+            TEST_ERROR
+
+        /* Verify read data */
+        for(i = 0; i < (int)mdims[0]; i++)
+            for(j = 0; j < (int)mdims[1]; j++) {
+                if(j >= (int)dims[1]) {
+                    if(rbuf[i][j] != 0)
+                        TEST_ERROR
+                } /* end if */
+                else
+                    if(rbuf[i][j] != erbuf[i][j])
+                        TEST_ERROR
+            } /* end for */
+
+        /* Grow to 15 */
+        dims[1] = 15;
+        if(H5Dset_extent(vdset, dims) < 0)
             TEST_ERROR
 
         /* Read data through virtual dataset */

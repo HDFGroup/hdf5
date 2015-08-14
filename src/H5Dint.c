@@ -2322,6 +2322,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 {
     hsize_t curr_dims[H5S_MAX_RANK];    /* Current dimension sizes */
     htri_t  changed;                    /* Whether the dataspace changed size */
+    size_t  u, v;                       /* Local index variable */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, dset->oloc.addr, FAIL)
@@ -2357,10 +2358,9 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
         hbool_t shrink = FALSE;         /* Flag to indicate a dimension has shrank */
         hbool_t expand = FALSE;         /* Flag to indicate a dimension has grown */
         hbool_t update_chunks = FALSE;  /* Flag to indicate chunk cache update is needed */
-        unsigned u;                     /* Local index variable */
 
         /* Determine if we are shrinking and/or expanding any dimensions */
-        for(u = 0; u < dset->shared->ndims; u++) {
+        for(u = 0; u < (size_t)dset->shared->ndims; u++) {
             /* Check for various status changes */
             if(size[u] < curr_dims[u])
                 shrink = TRUE;
@@ -2421,6 +2421,30 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
         } /* end if */
 
+        /* Operations for virtual datasets */
+        if(H5D_VIRTUAL == dset->shared->layout.type) {
+            /* Check that the dimensions of the VDS are large enough */
+            if(H5D_virtual_check_min_dims(dset) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "virtual dataset dimensions not large enough to contain all limited dimensions in all selections")
+
+            /* Patch the virtual selection dataspaces */
+            for(u = 0; u < dset->shared->layout.storage.u.virt.list_nused; u++) {
+                /* Patch extent */
+                if(H5S_set_extent(dset->shared->layout.storage.u.virt.list[u].source_dset.virtual_select, size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                dset->shared->layout.storage.u.virt.list[u].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
+
+                /* Patch sub-source datasets */
+                for(v = 0; v < dset->shared->layout.storage.u.virt.list[u].sub_dset_nalloc; v++)
+                    if(H5S_set_extent(dset->shared->layout.storage.u.virt.list[u].sub_dset[v].virtual_select, size) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+            } /* end for */
+
+            /* Mark virtual datasets as not fully initialized so internal
+             * selections are recalculated (at next I/O operation) */
+            dset->shared->layout.storage.u.virt.init = FALSE;
+        } /* end if */
+
         /* Allocate space for the new parts of the dataset, if appropriate */
         if(expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY)
             if(H5D__alloc_storage(dset, dxpl_id, H5D_ALLOC_EXTEND, FALSE, curr_dims) < 0)
@@ -2442,8 +2466,6 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
         if(H5D__mark(dset, dxpl_id, H5D_MARK_SPACE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */
-
-    /* Make this function work with virtual layout VDSINC */
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
