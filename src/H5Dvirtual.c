@@ -1114,8 +1114,6 @@ H5D__virtual_copy_parsed_name(H5O_storage_virtual_name_seg_t **dst,
             if(NULL == ((*p_dst)->name_segment = HDstrdup(p_src->name_segment)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to duplicate name segment")
         } /* end if */
-        else
-            (*p_dst)->name_segment = NULL;
 
         /* Advance pointers */
         p_src = p_src->next;
@@ -1463,9 +1461,16 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                         if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].sub_dset[j], dxpl_id) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
 
-                        /* Update first_missing */
-                        if(storage->list[i].sub_dset[j].dset)
+                        if(storage->list[i].sub_dset[j].dset) {
+                            /* Update first_missing */
                             first_missing = j + 1;
+
+                            /* Close source dataset so we don't have huge
+                             * numbers of datasets open */
+                            if(H5D_close(storage->list[i].sub_dset[j].dset) < 0)
+                                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
+                            storage->list[i].sub_dset[j].dset = NULL;
+                        } /* end if */
                     } /* end else */
                 } /* end for */
 

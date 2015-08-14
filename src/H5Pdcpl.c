@@ -1931,10 +1931,12 @@ done:
     if(adding_entry) {
         hbool_t free_list = FALSE;
 
-        /* Set chunk information in property list.  If we are adding a new layout,
-         * use H5P__set_layout so other fields are initialized properly.  If we are
-         * extending the layout, just use H5P_set directly so we don't mess with
-         * anything else. */
+        /* Set VDS layout information in property list.  If we are adding a new
+         * layout, use H5P__set_layout so other fields are initialized properly.
+         * If we are extending the layout, just use H5P_set directly so we don't
+         * mess with anything else.  Put this after the done: label because the
+         * original list may no longer be valid due to the use of realloc(), so
+         * we want to make sure the list is available if possible. */
         if(new_layout) {
             if(H5P__set_layout(plist, &layout) < 0) {
                 HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
