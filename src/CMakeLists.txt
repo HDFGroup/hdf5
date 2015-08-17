@@ -802,7 +802,7 @@ add_custom_command (
 )
 
 if (GENERATE_ERROR_HEADERS)
-  find_pacakge (Perl)
+  find_package (Perl)
   if (PERL_FOUND)
     add_custom_command (
         OUTPUT ${HDF5_BINARY_DIR}/H5Edefin.h
