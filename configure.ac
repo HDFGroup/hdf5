@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.227], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.228], [help@hdfgroup.org])
 
 ## PLACE CHECKS FOR REQUIRED PACKAGES NEEDED TO INSTALL HDF5 AT THE BEGINNING
 ## --------------------------------------------------------------------------
