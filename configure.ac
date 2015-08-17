@@ -28,16 +28,6 @@ AC_PREREQ([2.69])
 ##
 AC_INIT([HDF5], [1.9.228], [help@hdfgroup.org])
 
-## PLACE CHECKS FOR REQUIRED PACKAGES NEEDED TO INSTALL HDF5 AT THE BEGINNING
-## --------------------------------------------------------------------------
-## Requirement #1: Check if Perl is installed.
-##
-AC_SUBST([PERL]) PERL=""
-AC_CHECK_PROG([PERL], [perl], true, false, [$PATH])
-if test "x$PERL" != "xtrue"; then
-   AC_MSG_ERROR([*** Perl is required for installing HDF5, but Perl could not be found!])
-fi
-
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -576,9 +566,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
 
   dnl get the largest sizeof for REAL kinds
-
-  max_real_fortran_sizeof="`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -ne '/,(\d+)\}/; print $1'`"
-  max_real_fortran_kind="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -ne '/,(\d+)\}/; print $1'`"
+  max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -ne 's/.*,\([[0-9]]*\)\}/\1/p'`"
+  max_real_fortran_kind="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | sed -ne 's/.*,\([[0-9]]*\)\}/\1/p'`"
 
   dnl remove the invalid kind from the list
   if test "$ac_cv_sizeof___float128" != 0;then
@@ -587,17 +576,17 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
         Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
                   !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
       ])
-      PAC_FC_ALL_REAL_KINDS="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl  -pe 's/,\d+}/}/g;'`"
-      PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl  -pe 's/,\d+}/}/g;'`"
+      PAC_FC_ALL_REAL_KINDS="`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/,[[0-9]]\+}/}/g'`"
+      PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/,[[0-9]]\+}/}/g'`"
     fi
   fi
   AC_MSG_CHECKING([for Fortran interoperable KINDS with C])
   AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])	
 
   dnl count the number of real kinds
-  H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -e '$count = (<STDIN> =~ tr/,//);print $count+1'`"
-  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | perl -pe 's/{//g' | perl -pe 's/}//g' | perl -pe 's/ /,/g'`/)"
-  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo \"[$]PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -pe 's/{//g' | perl -pe 's/}//g'| perl -pe 's/ /,/g'`/)"
+  H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"[$]PAC_FC_ALL_REAL_KINDS\" |  tr -d -c ',\n' | awk '{ print length + 1; }'`"
+  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/{//g' | sed -e 's/}//g' | sed -e 's/ /,/g'`/)"
+  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/{//g' | sed -e 's/}//g'| sed -e 's/ /,/g'`/)"
 
   AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
   AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])

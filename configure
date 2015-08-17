@@ -841,7 +841,6 @@ am__isrc
 INSTALL_DATA
 INSTALL_SCRIPT
 INSTALL_PROGRAM
-PERL
 target_alias
 host_alias
 build_alias
@@ -3002,53 +3001,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-
-## PLACE CHECKS FOR REQUIRED PACKAGES NEEDED TO INSTALL HDF5 AT THE BEGINNING
-## --------------------------------------------------------------------------
-## Requirement #1: Check if Perl is installed.
-##
- PERL=""
-# Extract the first word of "perl", so it can be a program name with args.
-set dummy perl; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_PERL+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$PERL"; then
-  ac_cv_prog_PERL="$PERL" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_PERL="true"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_PERL" && ac_cv_prog_PERL="false"
-fi
-fi
-PERL=$ac_cv_prog_PERL
-if test -n "$PERL"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PERL" >&5
-$as_echo "$PERL" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-if test "x$PERL" != "xtrue"; then
-   as_fn_error $? "*** Perl is required for installing HDF5, but Perl could not be found!" "$LINENO" 5
-fi
 
 
 ac_config_headers="$ac_config_headers src/H5config.h"
@@ -6286,8 +6238,8 @@ else
   if ac_fn_c_try_run "$LINENO"; then :
 
             if test -s pac_Cconftest.out ; then
-	        LDBL_DIG="`perl -ne '$. == 1 && print && exit'  pac_Cconftest.out`"
-	        FLT128_DIG="`perl -ne '$. == 2 && print && exit' pac_Cconftest.out`"
+	        LDBL_DIG="`sed -n '1p' pac_Cconftest.out`"
+	        FLT128_DIG="`sed -n '2p' pac_Cconftest.out`"
             else
                 { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No output from test program!" >&5
 $as_echo "$as_me: WARNING: No output from test program!" >&2;}
@@ -7863,9 +7815,9 @@ if ac_fn_fc_try_run "$LINENO"; then :
     if test -s pac_fconftest.out ; then
 
 
-        pac_validIntKinds="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
-	pac_validRealKinds="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
-        PAC_FC_MAX_REAL_PRECISION="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
+        pac_validIntKinds="`sed -n '1p' pac_fconftest.out`"
+	pac_validRealKinds="`sed -n '2p' pac_fconftest.out`"
+        PAC_FC_MAX_REAL_PRECISION="`sed -n '3p' pac_fconftest.out`"
 
 cat >>confdefs.h <<_ACEOF
 #define PAC_FC_MAX_REAL_PRECISION $PAC_FC_MAX_REAL_PRECISION
@@ -7875,9 +7827,9 @@ _ACEOF
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
 
-	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `sed -n '4p' pac_fconftest.out`"
 	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
-	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `sed -n '5p' pac_fconftest.out`"
 	H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
 
 
@@ -7980,12 +7932,12 @@ else
   if ac_fn_fc_try_run "$LINENO"; then :
 
             if test -s pac_fconftest.out ; then
-                PAC_FORTRAN_NATIVE_INTEGER_KIND="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_KIND="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`perl -ne '$. == 6 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '1p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '2p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '3p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '4p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '5p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '6p' pac_fconftest.out`"
             else
                 { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No output from test program!" >&5
 $as_echo "$as_me: WARNING: No output from test program!" >&2;}
@@ -8086,9 +8038,9 @@ if ac_fn_fc_try_run "$LINENO"; then :
     if test -s pac_fconftest.out ; then
 
 
-        pac_validIntKinds="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
-	pac_validRealKinds="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
-        PAC_FC_MAX_REAL_PRECISION="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
+        pac_validIntKinds="`sed -n '1p' pac_fconftest.out`"
+	pac_validRealKinds="`sed -n '2p' pac_fconftest.out`"
+        PAC_FC_MAX_REAL_PRECISION="`sed -n '3p' pac_fconftest.out`"
 
 cat >>confdefs.h <<_ACEOF
 #define PAC_FC_MAX_REAL_PRECISION $PAC_FC_MAX_REAL_PRECISION
@@ -8098,9 +8050,9 @@ _ACEOF
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
 
-	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `sed -n '4p' pac_fconftest.out`"
 	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
-	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `sed -n '5p' pac_fconftest.out`"
 	H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
 
 
@@ -8176,7 +8128,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 pack_int_sizeof=""
 rm -f pac_fconftest.out
 
-for kind in `echo $pac_validIntKinds | perl -pe 's/,/ /g'`; do
+for kind in `echo $pac_validIntKinds | sed -e 's/,/ /g'`; do
   cat > conftest.$ac_ext <<_ACEOF
 
 
@@ -8218,7 +8170,7 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
 done
-PAC_FC_ALL_INTEGER_KINDS_SIZEOF="{`echo $pack_int_sizeof | perl -pe 's/,$//' | perl -pe 's/ //g'`}"
+PAC_FC_ALL_INTEGER_KINDS_SIZEOF="{`echo $pack_int_sizeof | sed -e 's/,$//' | sed -e 's/ //g'`}"
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_ALL_INTEGER_KINDS_SIZEOF" >&5
 $as_echo "$PAC_FC_ALL_INTEGER_KINDS_SIZEOF" >&6; }
 ac_ext=${ac_fc_srcext-f}
@@ -8238,7 +8190,7 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 pack_real_sizeof=""
 rm -f pac_fconftest.out
-for kind in `echo  $pac_validRealKinds| perl -pe 's/,/ /g'`; do
+for kind in `echo  $pac_validRealKinds | sed -e 's/,/ /g'`; do
   cat > conftest.$ac_ext <<_ACEOF
 
 
@@ -8280,7 +8232,7 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
 done
-PAC_FC_ALL_REAL_KINDS_SIZEOF="{`echo $pack_real_sizeof | perl -pe 's/,$//' | perl -pe 's/ //g'`}"
+PAC_FC_ALL_REAL_KINDS_SIZEOF="{`echo $pack_real_sizeof | sed -e 's/,$//' | sed -e 's/ //g'`}"
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_ALL_REAL_KINDS_SIZEOF" >&5
 $as_echo "$PAC_FC_ALL_REAL_KINDS_SIZEOF" >&6; }
 ac_ext=${ac_fc_srcext-f}
@@ -8437,9 +8389,8 @@ _ACEOF
 
 
 
-
-  max_real_fortran_sizeof="`echo \"$PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -ne '/,(\d+)\}/; print $1'`"
-  max_real_fortran_kind="`echo \"$PAC_FC_ALL_REAL_KINDS\" | perl -ne '/,(\d+)\}/; print $1'`"
+    max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -ne 's/.*,\([0-9]*\)\}/\1/p'`"
+  max_real_fortran_kind="`echo \"$PAC_FC_ALL_REAL_KINDS\" | sed -ne 's/.*,\([0-9]*\)\}/\1/p'`"
 
     if test "$ac_cv_sizeof___float128" != 0;then
     if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof"; then
@@ -8451,8 +8402,8 @@ $as_echo "$as_me: WARNING:
         Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
                   !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
       " >&2;}
-      PAC_FC_ALL_REAL_KINDS="`echo \"$PAC_FC_ALL_REAL_KINDS\" | perl  -pe 's/,\d+}/}/g;'`"
-      PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo \"$PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl  -pe 's/,\d+}/}/g;'`"
+      PAC_FC_ALL_REAL_KINDS="`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/,[0-9]\+}/}/g'`"
+      PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/,[0-9]\+}/}/g'`"
     fi
   fi
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Fortran interoperable KINDS with C" >&5
@@ -8460,9 +8411,9 @@ $as_echo_n "checking for Fortran interoperable KINDS with C... " >&6; }
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAC_FC_ALL_REAL_KINDS" >&5
 $as_echo "$PAC_FC_ALL_REAL_KINDS" >&6; }
 
-    H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"$PAC_FC_ALL_REAL_KINDS\" | perl -e '$count = (<STDIN> =~ tr/,//);print $count+1'`"
-  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo \"$PAC_FC_ALL_REAL_KINDS\" | perl -pe 's/{//g' | perl -pe 's/}//g' | perl -pe 's/ /,/g'`/)"
-  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo \"$PAC_FC_ALL_REAL_KINDS_SIZEOF\" | perl -pe 's/{//g' | perl -pe 's/}//g'| perl -pe 's/ /,/g'`/)"
+    H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"$PAC_FC_ALL_REAL_KINDS\" |  tr -d -c ',\n' | awk '{ print length + 1; }'`"
+  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/{//g' | sed -e 's/}//g' | sed -e 's/ /,/g'`/)"
+  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/{//g' | sed -e 's/}//g'| sed -e 's/ /,/g'`/)"
 
 
 cat >>confdefs.h <<_ACEOF
