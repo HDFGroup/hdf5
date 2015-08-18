@@ -8393,15 +8393,17 @@ _ACEOF
   max_real_fortran_kind="`echo \"$PAC_FC_ALL_REAL_KINDS\" | sed -ne 's/.*,\([0-9]*\)\}/\1/p'`"
 
     if test "$ac_cv_sizeof___float128" != 0;then
-    if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:
-        Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
-                  !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
-      " >&5
+    if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" &&
+       test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof" &&
+                            test "${ac_cv_sizeof_double}" != "$max_real_fortran_sizeof" ; then
+          { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING:
+           Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
+                     !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
+          " >&5
 $as_echo "$as_me: WARNING:
-        Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
-                  !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
-      " >&2;}
+           Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
+                     !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
+          " >&2;}
       PAC_FC_ALL_REAL_KINDS="`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/,[0-9]\+}/}/g'`"
       PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/,[0-9]\+}/}/g'`"
     fi

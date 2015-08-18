@@ -571,11 +571,16 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   dnl remove the invalid kind from the list
   if test "$ac_cv_sizeof___float128" != 0;then
-    if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof"; then
-      AC_MSG_WARN([
-        Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
-                  !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
-      ])
+    if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && 
+       test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof" &&
+       dnl account for the fact that the C compiler can have 16-byte __float128 and the Fortran compiler only has 8-byte doubles,
+       dnl so we don't want to remove the 8-byte Fortran doubles. This is sometimes the case if different C and Fortran vendors
+       dnl are used (for example gnu and pgi).
+       test "${ac_cv_sizeof_double}" != "$max_real_fortran_sizeof" ; then
+          AC_MSG_WARN([
+           Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
+                     !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
+          ])
       PAC_FC_ALL_REAL_KINDS="`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/,[[0-9]]\+}/}/g'`"
       PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/,[[0-9]]\+}/}/g'`"
     fi
