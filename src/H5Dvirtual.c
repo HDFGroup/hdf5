@@ -1534,10 +1534,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
     for(i = 0; i < (size_t)rank; i++) {
         if(new_dims[i] == HSIZE_UNDEF)
             new_dims[i] = curr_dims[i];
-        else if(new_dims[i] < storage->min_dims[i]) {
-            HDassert(0 && "Checking code coverage..."); //VDSINC
+        else if(new_dims[i] < storage->min_dims[i])
             new_dims[i] = storage->min_dims[i];
-        } //VDSINC
         if(new_dims[i] != curr_dims[i])
             changed = TRUE;
     } /* end for */
@@ -2264,10 +2262,8 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
 
                     /* If the source dataset is not open, mark the selected elements
                      * as zero so projected_mem_space is freed */
-                    if(!storage->list[i].source_dset.dset) {
-                        HDassert(0 && "Checking code coverage..."); //VDSINC
+                    if(!storage->list[i].source_dset.dset)
                         select_nelmts = (hssize_t)0;
-                    } //VDSINC
                 } /* end if */
 
                 /* If there are not elements selected in this mapping, free
@@ -2281,7 +2277,6 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                     *tot_nelmts += (hsize_t)select_nelmts;
             } /* end if */
             else {
-                HDassert(0 && "Checking code coverage..."); //VDSINC
                 /* If there is no clipped_dim_virtual, this must be an unlimited
                  * selection whose dataset was not found in the last call to
                  * H5Dget_space().  Do not attempt to open it as this might
