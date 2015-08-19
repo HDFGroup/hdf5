@@ -28,9 +28,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/file.h>
 
 #include "hdf5.h"
+
+#ifdef H5_HAVE_FLOCK
+/* Needed for lock type definitions (e.g., LOCK_EX) */
+#include <sys/file.h>
+#endif /* H5_HAVE_FLOCK */
 
 #ifdef H5_HAVE_UNISTD_H
 #include <unistd.h>
