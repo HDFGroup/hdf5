@@ -1219,7 +1219,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 accum.h5 \
 	flushrefresh_VERIFICATION_CHECKPOINT1 \
 	flushrefresh_VERIFICATION_CHECKPOINT2 \
 	flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 \
-	ohdr_swmr.h5 test_swmr*.h5
+	ohdr_swmr.h5 test_swmr*.h5 cache_logging.h5
 
 # Test scripts--
 #       testerror.sh: err_compat, error_test
