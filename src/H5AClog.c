@@ -109,7 +109,7 @@ H5AC__write_create_cache_log_msg(H5AC_t *cache)
     HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\n\
 \"create_time\":%lld,\n\
@@ -164,7 +164,7 @@ H5AC__write_destroy_cache_log_msg(H5AC_t *cache)
     HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 ],\n\
 \"close_time\":%lld,\n\
@@ -218,7 +218,7 @@ H5AC__write_evict_cache_log_msg(const H5AC_t *cache,
     HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -264,7 +264,7 @@ H5AC__write_expunge_entry_log_msg(const H5AC_t *cache,
     HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -311,7 +311,7 @@ H5AC__write_flush_cache_log_msg(const H5AC_t *cache,
     HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -360,7 +360,7 @@ H5AC__write_insert_entry_log_msg(const H5AC_t *cache,
 
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -411,7 +411,7 @@ H5AC__write_mark_dirty_entry_log_msg(const H5AC_t *cache,
     HDassert(entry);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -459,7 +459,7 @@ H5AC__write_move_entry_log_msg(const H5AC_t *cache,
     HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -509,7 +509,7 @@ H5AC__write_pin_entry_log_msg(const H5AC_t *cache,
     HDassert(entry);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -560,7 +560,7 @@ H5AC__write_create_fd_log_msg(const H5AC_t *cache,
     HDassert(child);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -618,7 +618,7 @@ H5AC__write_protect_entry_log_msg(const H5AC_t *cache,
         HDstrcpy(rw_s, "UNKNOWN");
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -669,7 +669,7 @@ H5AC__write_resize_entry_log_msg(const H5AC_t *cache,
     HDassert(entry);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -718,7 +718,7 @@ H5AC__write_unpin_entry_log_msg(const H5AC_t *cache,
     HDassert(entry);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -769,7 +769,7 @@ H5AC__write_destroy_fd_log_msg(const H5AC_t *cache,
     HDassert(child);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -820,7 +820,7 @@ H5AC__write_unprotect_entry_log_msg(const H5AC_t *cache,
     HDassert(entry);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
@@ -834,7 +834,7 @@ H5AC__write_unprotect_entry_log_msg(const H5AC_t *cache,
     , (long long)time(NULL), (unsigned long)entry->addr, 
       type_id, flags, (int)fxn_ret_value);
 
-    snprintf(msg, MSG_SIZE, " ");
+    HDsnprintf(msg, MSG_SIZE, " ");
 
     /* Write the log message to the file */
     if(H5C_write_log_message(cache, msg) < 0)
@@ -872,7 +872,7 @@ H5AC__write_set_cache_config_log_msg(const H5AC_t *cache,
     HDassert(config);
 
     /* Create the log message string */
-    snprintf(msg, MSG_SIZE, 
+    HDsnprintf(msg, MSG_SIZE, 
 "\
 {\
 \"timestamp\":%lld,\
