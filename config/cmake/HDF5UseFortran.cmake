@@ -351,14 +351,18 @@ set(FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
 
 # remove the invalid kind from the list
 if(NOT(${SIZEOF___FLOAT128} EQUAL 0))
-   if(NOT(${SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof}) AND NOT(${FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof}))
+   if(NOT(${SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof}) 
+     AND NOT(${FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof})
+     # account for the fact that the C compiler can have 16-byte __float128 and the fortran compiler only has 8-byte doubles,
+     # so we don't want to remove the 8-byte fortran doubles.
+     AND NOT(${PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF} EQUAL ${max_real_fortran_sizeof}))
      message(WARNING "
           Fortran REAL(KIND=${max_real_fortran_kind}) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
                                            !!! Fortran interfaces will not be generated for REAL(KIND=${max_real_fortran_kind}) !!!")
      string(REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS ${PAC_FC_ALL_REAL_KINDS})
      string(REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS_SIZEOF ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
      MATH (EXPR NUM_RKIND "${NUM_RKIND} - 1")
-   endif(NOT(${SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof}) AND NOT(${FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof}))
+   endif()
 endif(NOT(${SIZEOF___FLOAT128} EQUAL 0))
 
 set(H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
