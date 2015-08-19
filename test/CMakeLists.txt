@@ -206,6 +206,8 @@ set (H5_TESTS
     #cache
     #cache_api
     #cache_tagging
+    #cache_logging
+    #cork
     pool
     hyperslab
     istore
@@ -214,6 +216,7 @@ set (H5_TESTS
     dtypes
     dsets
     cmpd_dset
+    chunk_info
     filter_fail
     extend
     external
@@ -230,6 +233,7 @@ set (H5_TESTS
     app_ref
     enum
     set_extent
+    space_overflow
     #ttsafe
     getname
     vfd
@@ -253,6 +257,7 @@ set (H5_TESTS
     enc_dec_plist
     enc_dec_plist_with_endianess
     unregister
+    #swmr
 )
 
 foreach (test ${H5_TESTS})
