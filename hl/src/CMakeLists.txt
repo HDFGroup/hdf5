@@ -1,12 +1,6 @@
 cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_HL_SRC)
 
-#-----------------------------------------------------------------------------
-# Shared Libs
-#-----------------------------------------------------------------------------
-if (BUILD_SHARED_LIBS)
-  set (HL_BUILT_AS_DYNAMIC_LIB 1)
-endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
 # List Source files
@@ -33,15 +27,31 @@ set (HL_HEADERS
     ${HDF5_HL_SRC_SOURCE_DIR}/hdf5_hl.h
 )
 
-add_library (${HDF5_HL_LIB_TARGET} ${LIB_TYPE} ${HL_SRCS} ${HL_HEADERS})
-TARGET_C_PROPERTIES (${HDF5_HL_LIB_TARGET} ${LIB_TYPE} " " " ")
+add_library (${HDF5_HL_LIB_TARGET} STATIC ${HL_SRCS} ${HL_HEADERS})
+TARGET_C_PROPERTIES (${HDF5_HL_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
-H5_SET_LIB_OPTIONS (${HDF5_HL_LIB_TARGET} ${HDF5_HL_LIB_NAME} ${LIB_TYPE})
+H5_SET_LIB_OPTIONS (${HDF5_HL_LIB_TARGET} ${HDF5_HL_LIB_NAME} STATIC)
 set_target_properties (${HDF5_HL_LIB_TARGET} PROPERTIES
     FOLDER libraries/hl
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_LIB_TARGET}")
+set (install_targets ${HDF5_HL_LIB_TARGET})
+
+if (BUILD_SHARED_LIBS)
+  add_library (${HDF5_HL_LIBSH_TARGET} SHARED ${HL_SRCS} ${HL_HEADERS})
+  TARGET_C_PROPERTIES (${HDF5_HL_LIBSH_TARGET} SHARED " " " ")
+  target_link_libraries (${HDF5_HL_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  H5_SET_LIB_OPTIONS (${HDF5_HL_LIBSH_TARGET} ${HDF5_HL_LIB_NAME} SHARED)
+  set_target_properties (${HDF5_HL_LIBSH_TARGET} PROPERTIES
+      FOLDER libraries/hl
+      COMPILE_DEFINITIONS "H5_BUILT_AS_DYNAMIC_LIB"
+      INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+      INTERFACE_COMPILE_DEFINITIONS H5_BUILT_AS_DYNAMIC_LIB=1
+  )
+  set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_LIBSH_TARGET}")
+  set (install_targets ${install_targets} ${HDF5_HL_LIBSH_TARGET})
+endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install 
@@ -60,16 +70,17 @@ install (
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
-    INSTALL_TARGET_PDB (${HDF5_HL_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} hllibraries)
+    INSTALL_TARGET_PDB (${HDF5_HL_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hllibraries)
   endif (BUILD_SHARED_LIBS)
   
   install (
       TARGETS
-          ${HDF5_HL_LIB_TARGET}
+          ${install_targets}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
       LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hllibraries
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hllibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hllibraries
+      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT hllibraries
   )
 endif (HDF5_EXPORTED_TARGETS)

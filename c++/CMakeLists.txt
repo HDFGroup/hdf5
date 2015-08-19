@@ -7,15 +7,6 @@ PROJECT (HDF5_CPP)
 add_definitions (${HDF_EXTRA_C_FLAGS})
 
 #-----------------------------------------------------------------------------
-# Shared/Static Libs
-#-----------------------------------------------------------------------------
-if (BUILD_SHARED_LIBS)
-  set (CPP_BUILT_AS_DYNAMIC_LIB 1)
-else (BUILD_SHARED_LIBS)
-  set (CPP_BUILT_AS_STATIC_LIB 1)
-endif (BUILD_SHARED_LIBS)
-
-#-----------------------------------------------------------------------------
 # Generate configure file
 #-----------------------------------------------------------------------------
 configure_file (${HDF_RESOURCES_DIR}/H5cxx_config.h.in

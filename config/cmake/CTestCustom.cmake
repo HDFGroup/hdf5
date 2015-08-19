@@ -1,5 +1,5 @@
 set (CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS 3000)
-
+ 
 set (CTEST_CUSTOM_WARNING_EXCEPTION
     ${CTEST_CUSTOM_WARNING_EXCEPTION}
     "H5detect.c.[0-9]+.[ \t]*:[ \t]*warning C4090:"
@@ -16,10 +16,9 @@ set (CTEST_CUSTOM_WARNING_EXCEPTION
     "note: expanded from macro"
 #    "fpp:[ \t]*warning:[ \t]*cannot remove H5_DEBUG_API - not a predefined macro"
 )
-
+ 
 set (CTEST_CUSTOM_MEMCHECK_IGNORE
     ${CTEST_CUSTOM_MEMCHECK_IGNORE}
-    H5PLUGIN-SKIPPED
     H5TEST-flush1           #designed to fail
     H5TEST-flush2           #designed to need flush1
     H5TEST-error_test       #uses runTest.cmake
@@ -30,6 +29,7 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5TEST-clear-objects
     H5TEST-clear-cache-objects
     H5TEST-clear-cache_api-objects
+    H5TEST-clear-cache_tagging-objects
     H5TEST-clear-ttsafe-objects
     H5TEST-clear-err_compat-objects
     H5TEST-clear-error_test-objects
@@ -37,11 +37,7 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     PERFORM_h5perform-clear-objects
     HL_TOOLS-clear-objects
     HL_test-clear-objects
-    HL_FORTRAN_test-clear-objects
-    HL_ex-clear-objects
-    HL_CPP_ex_ptExampleFL-clear-objects
-    CPP_ex_tutr-clear-objects
-    f90_ex-clear-objects
+    HL_fortran_test-clear-objects
     ######### tools/h5copy #########
     H5COPY-clearall-objects
     ######### tools/h5diff #########
@@ -52,7 +48,6 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP-XML-clearall-objects
     ######### tools/h5import #########
     H5IMPORT-clear-objects
-    H5IMPORT-h5importtest-clear-objects
     ######### tools/h5jam #########
     H5JAM-SETUP-N_twithub_u10_c-clear-objects
     H5JAM-SETUP-N_twithub_u10_c
