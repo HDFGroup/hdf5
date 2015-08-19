@@ -362,7 +362,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
                 if(H5Fclose(file) < 0)
                     TEST_ERROR
                 file = -1;
-                if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+                if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
                     TEST_ERROR
             } /* end if */
 
@@ -375,10 +375,16 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
         if((*ex_dcpl = H5Dget_create_plist(dset)) < 0)
             TEST_ERROR
 
-        /* Close dataset and file */
+        /* Close dataset */
         if(H5Dclose(dset) < 0)
             TEST_ERROR
         dset = -1;
+
+        /* Delete dataset */
+        if(H5Ldelete(file, "vdset", H5P_DEFAULT) < 0)
+            TEST_ERROR
+
+        /* Close file */
         if(H5Fclose(file) < 0)
             TEST_ERROR
         file = -1;
@@ -894,7 +900,9 @@ test_api(test_api_config_t config, hid_t fapl)
     if(H5Pclose(ex_dcpl) < 0)
         TEST_ERROR
     ex_dcpl = -1;
+
 #else /* VDS_POINT_SELECTIONS */
+
     /*
      * Test 3: Verify point selections fail
      */
@@ -1030,6 +1038,40 @@ test_api(test_api_config_t config, hid_t fapl)
             TEST_ERROR
         vspace[i] = -1;
     } /* end for */
+    if(H5Pclose(ex_dcpl) < 0)
+        TEST_ERROR
+    ex_dcpl = -1;
+
+
+    /*
+     * Test 7: Empty VDS
+     */
+    /* Clear virtual layout in DCPL */
+    if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR
+
+    /* Create virtual dataspace */
+    if((vspace[0] = H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR
+
+    /* Select all (should not be necessary, but just to be sure) */
+    if(H5Sselect_all(vspace[0]) < 0)
+        TEST_ERROR
+
+    /* Get examination DCPL */
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+        TEST_ERROR
+
+    /* Test H5Pget_virtual_count */
+    if(H5Pget_virtual_count(ex_dcpl, &size_out) < 0)
+        TEST_ERROR
+    if(size_out != (size_t)0)
+        TEST_ERROR
+
+    /* Close */
+    if(H5Sclose(vspace[0]) < 0)
+        TEST_ERROR
+    vspace[0] = -1;
     if(H5Pclose(ex_dcpl) < 0)
         TEST_ERROR
     ex_dcpl = -1;

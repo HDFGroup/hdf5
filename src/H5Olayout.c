@@ -578,8 +578,6 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to insert virtual dataset heap block")
             } /* end if */
 
-            HDassert((mesg->storage.u.virt.list_nused > 0) && "checking code coverage...");//VDSINC
-
             /* Heap information */
             H5F_addr_encode(f, &p, mesg->storage.u.virt.serial_list_hobjid.addr);
             UINT32ENCODE(p, mesg->storage.u.virt.serial_list_hobjid.idx);
@@ -817,7 +815,6 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
             break;
 
         case H5D_VIRTUAL:       /* Virtual dataset */
-            HDassert(0 && "checking code coverage...");//VDSINC
             /* Free the file space virtual dataset */
             if(H5D__virtual_delete(f, dxpl_id, &mesg->storage) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")

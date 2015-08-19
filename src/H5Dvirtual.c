@@ -519,7 +519,6 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
         } /* end for */
     } /* end if */
     else {
-        HDassert(0 && "checking code coverage..."); //VDSINC
         /* Zero out other fields related to list, just to be sure */
         layout->storage.u.virt.list = NULL;
         layout->storage.u.virt.list_nalloc = 0;
@@ -704,15 +703,18 @@ H5D__virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage)
     HDassert(storage);
     HDassert(storage->type == H5D_VIRTUAL);
 
+    /* Check for global heap block */
+    if(storage->u.virt.serial_list_hobjid.addr != HADDR_UNDEF) {
 #ifdef NOT_YET
-    /* Unlink the global heap block */
-    if((heap_rc = H5HG_link(f, dxpl_id, (H5HG_t *)&(storage->u.virt.serial_list_hobjid), -1)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap refence count")
-    if(heap_rc == 0)
+        /* Unlink the global heap block */
+        if((heap_rc = H5HG_link(f, dxpl_id, (H5HG_t *)&(storage->u.virt.serial_list_hobjid), -1)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "unable to adjust global heap refence count")
+        if(heap_rc == 0)
 #endif /* NOT_YET */
-        /* Delete the global heap block */
-        if(H5HG_remove(f, dxpl_id, (H5HG_t *)&(storage->u.virt.serial_list_hobjid)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to remove heap object")
+            /* Delete the global heap block */
+            if(H5HG_remove(f, dxpl_id, (H5HG_t *)&(storage->u.virt.serial_list_hobjid)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to remove heap object")
+    } /* end if */
 
     /* Clear global heap ID in storage */
     storage->u.virt.serial_list_hobjid.addr = HADDR_UNDEF;
