@@ -15,24 +15,6 @@
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
 
-/* Defined if HDF5 was built with CMake AND build as a shared library */
-#cmakedefine H5_BUILT_AS_DYNAMIC_LIB @H5_BUILT_AS_DYNAMIC_LIB@
-
-/* Defined if HDF5 was built with CMake AND build as a static library */
-#cmakedefine H5_BUILT_AS_STATIC_LIB @H5_BUILT_AS_STATIC_LIB@
-
-/* Defined if HDF5 CPP  was built with CMake AND build as a shared library  */
-#cmakedefine H5_CPP_BUILT_AS_DYNAMIC_LIB @H5_CPP_BUILT_AS_DYNAMIC_LIB@
-
-/* Defined if HDF5 CPP  was built with CMake AND build as a static library  */
-#cmakedefine H5_CPP_BUILT_AS_STATIC_LIB @H5_CPP_BUILT_AS_STATIC_LIB@
-
-/* Defined if HDF5 HL was built with CMake AND build as a shared library */
-#cmakedefine H5_HL_BUILT_AS_DYNAMIC_LIB @H5_HL_BUILT_AS_DYNAMIC_LIB@
-
-/* Defined if HDF5 HL was built with CMake AND build as a static library */
-#cmakedefine H5_HL_BUILT_AS_STATIC_LIB @H5_HL_BUILT_AS_STATIC_LIB@
-
 /* Define if building universal (internal helper macro) */
 #cmakedefine H5_AC_APPLE_UNIVERSAL_BUILD @H5_AC_APPLE_UNIVERSAL_BUILD@
 
@@ -62,6 +44,18 @@
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #define @H5_FC_FUNC_@
+
+/* Define Fortran Maximum Real Decimal Precision */
+#cmakedefine H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
+
+/* Define C Maximum Real Decimal Precision */
+#cmakedefine H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
+
+/* Define if we have Fortran C_LONG_DOUBLE */
+#cmakedefine H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
+
+/* Determine if __float128 is available */
+#cmakedefine H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
 
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@

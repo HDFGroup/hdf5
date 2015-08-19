@@ -16,8 +16,8 @@ INCLUDE_DIRECTORIES (${HDF5_HL_SRC_DIR}/test)
 INCLUDE_DIRECTORIES (${HDF5_CPP_SRC_DIR}/src)
 
 add_executable (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
-TARGET_C_PROPERTIES (hl_ptableTest ${LIB_TYPE} " " " ")
-TARGET_NAMING (hl_ptableTest ${LIB_TYPE})
+TARGET_C_PROPERTIES (hl_ptableTest STATIC " " " ")
+TARGET_NAMING (hl_ptableTest STATIC)
 target_link_libraries (
     hl_ptableTest
     ${HDF5_LIB_TARGET}
