@@ -776,15 +776,23 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to get path for root group")
 
         /* Open the source dataset */
-        if(NULL == (source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl, dxpl_id)))
+        if(NULL == (source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl, dxpl_id))) {
             H5E_clear_stack(NULL); /* Quick hack until proper support for H5Dopen with missing file is implemented */
-        else
+
+            /* Dataset does not exist */
+            source_dset->dset_exists = FALSE;
+        } /* end if */
+        else {
+            /* Dataset exists */
+            source_dset->dset_exists = TRUE;
+
             /* Patch the source selection if necessary */
             if(virtual_ent->source_space_status != H5O_VIRTUAL_STATUS_CORRECT) {
                 if(H5S_extent_copy(virtual_ent->source_select, source_dset->dset->shared->space) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
                 virtual_ent->source_space_status = H5O_VIRTUAL_STATUS_CORRECT;
             } /* end if */
+        } /* end else */
     } /* end if */
 
 done:
@@ -1434,8 +1442,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                         } /* end else */
                     } /* end if */
 
-                    /* Check if the dataset is already open */
-                    if(storage->list[i].sub_dset[j].dset)
+                    /* Check if the dataset was already opened */
+                    if(storage->list[i].sub_dset[j].dset_exists)
                         first_missing = j + 1;
                     else {
                         /* Resolve file name */

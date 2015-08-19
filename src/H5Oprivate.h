@@ -426,6 +426,7 @@ typedef struct H5O_storage_virtual_srcdset_t {
     struct H5S_t *clipped_source_select; /* Clipped version of source_select  */
     struct H5S_t *clipped_virtual_select; /* Clipped version of virtual_select */
     struct H5D_t *dset;                 /* Source dataset                     */
+    hbool_t dset_exists;                /* Whether the dataset exists (was opened successfully) */
 
     /* Temporary - only used during I/O operation, NULL at all other times */
     struct H5S_t *projected_mem_space;  /* Selection within mem_space for this mapping */
