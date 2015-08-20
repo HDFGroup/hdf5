@@ -102,6 +102,7 @@ IDE_GENERATED_PROPERTIES ("H5CS" "${H5CS_HDRS}" "${H5CS_SRCS}" )
 set (H5D_SRCS
     ${HDF5_SRC_DIR}/H5D.c
     ${HDF5_SRC_DIR}/H5Dbtree.c
+    ${HDF5_SRC_DIR}/H5Dbtree2.c
     ${HDF5_SRC_DIR}/H5Dchunk.c
     ${HDF5_SRC_DIR}/H5Dcompact.c
     ${HDF5_SRC_DIR}/H5Dcontig.c
@@ -220,6 +221,7 @@ set (H5FD_SRCS
     ${HDF5_SRC_DIR}/H5FDsec2.c
     ${HDF5_SRC_DIR}/H5FDspace.c
     ${HDF5_SRC_DIR}/H5FDstdio.c
+    ${HDF5_SRC_DIR}/H5FDtest.c
     ${HDF5_SRC_DIR}/H5FDwindows.c
 )
 

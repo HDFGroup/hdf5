@@ -113,7 +113,7 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_EARRAY;
                     break;
 
-		case H5D_CHUNK_IDX_BT2:
+                case H5D_CHUNK_IDX_BT2:
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BT2;
                     break;
 

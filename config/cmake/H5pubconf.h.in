@@ -109,6 +109,9 @@
 /* Define if support for szip filter is enabled */
 #cmakedefine H5_HAVE_FILTER_SZIP @H5_HAVE_FILTER_SZIP@
 
+/* Define to 1 if you have the `flock' function. */
+#cmakedefine H5_HAVE_FLOCK @H5_HAVE_FLOCK@
+
 /* Define to 1 if you have the `fork' function. */
 #cmakedefine H5_HAVE_FORK @H5_HAVE_FORK@
 
@@ -310,6 +313,9 @@
 
 /* Define to 1 if you have the `system' function. */
 #cmakedefine H5_HAVE_SYSTEM @H5_HAVE_SYSTEM@
+
+/* Define to 1 if you have the <sys/file.h> header file. */
+#cmakedefine H5_HAVE_SYS_FILE_H @H5_HAVE_SYS_FILE_H@
 
 /* Define to 1 if you have the <sys/fpu.h> header file. */
 #cmakedefine H5_HAVE_SYS_FPU_H @H5_HAVE_SYS_FPU_H@

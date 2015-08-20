@@ -1815,23 +1815,15 @@ test_swmr_write_big(void)
     uint8_t *wbuf2, *rbuf;      /* Buffers for reading & writing */
     uint8_t wbuf[1024];			/* Buffer for reading & writing */
     unsigned u;                 /* Local index variable */
+#ifdef H5_HAVE_UNISTD_H
     pid_t pid;				    /* Process ID */
+#endif /* H5_HAVE_UNISTD_H */
     int status;				    /* Status returned from child process */
     H5F_io_info_t fio_info;     /* I/O info for operation */
     char *new_argv[] = {NULL};
     char *driver = NULL;        /* VFD string (from env variable) */
 
     TESTING("SWMR write of large metadata");
-
-    /* Skip this test if SWMR I/O is not supported for the VFD specified
-     * by the environment variable.
-     */
-    driver = HDgetenv("HDF5_DRIVER");
-    if(!H5FD_supports_swmr_test(driver)) {
-        SKIPPED();
-        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
-        return EXIT_SUCCESS;
-    }
 
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
@@ -1840,6 +1832,16 @@ test_swmr_write_big(void)
     return 0;
 
 #else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+
+   /* Skip this test if SWMR I/O is not supported for the VFD specified
+	* by the environment variable.
+	*/
+	driver = HDgetenv("HDF5_DRIVER");
+	if (!H5FD_supports_swmr_test(driver)) {
+		SKIPPED();
+		HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+		return EXIT_SUCCESS;
+	}
 
     /* File access property list */
     if((fapl = h5_fileaccess()) < 0)
