@@ -1428,7 +1428,6 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                         else {
                             H5O_storage_virtual_srcdset_t *tmp_sub_dset;
 
-                            HDassert(0 && "Checking code coverage..."); //VDSINC
                             /* Extend sub_dset */
                             if(NULL == (tmp_sub_dset = (H5O_storage_virtual_srcdset_t *)H5MM_realloc(storage->list[i].sub_dset, 2 * storage->list[i].sub_dset_nalloc * sizeof(H5O_storage_virtual_srcdset_t))))
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to extend sub dataset array")
@@ -2648,10 +2647,8 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
     /* Fail if there are unmapped parts of the selection as they would not be
      * written */
-    if(tot_nelmts != nelmts) {
-        HDassert(0 && "Checking code coverage..."); //VDSINC
+    if(tot_nelmts != nelmts)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "write requested to unmapped portion of virtual dataset")
-    } //VDSINC
 
     /* Iterate over mappings */
     for(i = 0; i < storage->list_nused; i++) {
@@ -2662,11 +2659,9 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
             /* Iterate over sub-source dsets */
             for(j = storage->list[i].sub_dset_io_start;
-                    j < storage->list[i].sub_dset_io_end; j++) {
-                HDassert(0 && "Checking code coverage..."); //VDSINC
+                    j < storage->list[i].sub_dset_io_end; j++)
                 if(H5D__virtual_write_one(io_info, type_info, file_space, &storage->list[i].sub_dset[j]) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset")
-            } //VDSINC
         } /* end if */
         else
             /* Write to source dataset */

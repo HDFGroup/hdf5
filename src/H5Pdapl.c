@@ -379,11 +379,9 @@ H5Pget_virtual_view(hid_t plist_id, H5D_vds_view_t *view)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_VDS_ERROR, "can't find object for ID")
 
     /* Get value from property list */
-    if(view) {
-        HDassert(0 && "Checking code coverage..."); //VDSINC
+    if(view)
         if(H5P_get(plist, H5D_ACS_VDS_VIEW_NAME, view) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_VDS_ERROR, "unable to get value")
-    } //VDSINC
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -525,11 +523,9 @@ H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_VDS_ERROR, "can't find object for ID")
 
     /* Get value from property list */
-    if(gap_size) {
-        HDassert(0 && "Checking code coverage..."); //VDSINC
+    if(gap_size)
         if(H5P_get(plist, H5D_ACS_VDS_PRINTF_GAP_NAME, gap_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_VDS_ERROR, "unable to get value")
-    } //VDSINC
 
 done:
     FUNC_LEAVE_API(ret_value)

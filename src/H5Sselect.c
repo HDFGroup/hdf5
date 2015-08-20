@@ -2350,7 +2350,6 @@ H5S_select_subtract(H5S_t *space, H5S_t *subtract_space)
             && (subtract_space->select.type->type != H5S_SEL_NONE)) {
         /* If subtract_space is using the all selection, set space to none */
         if(subtract_space->select.type->type == H5S_SEL_ALL) {
-            HDassert(0 && "Checking code coverage...");//VDSINC
             /* Change to "none" selection */
             if(H5S_select_none(space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")

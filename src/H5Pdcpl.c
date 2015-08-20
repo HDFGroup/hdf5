@@ -1868,7 +1868,6 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     } /* end if */
     else if(layout.storage.u.virt.list_nused
             == layout.storage.u.virt.list_nalloc) {
-        HDassert((layout.storage.u.virt.list_nused > 0) && "checking code coverage...");//VDSINC
         /* Double size of entry list.  Make sure to zero out new memory. */
         if(NULL == (layout.storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_realloc(layout.storage.u.virt.list, (size_t)2 * layout.storage.u.virt.list_nalloc * sizeof(H5O_storage_virtual_ent_t))))
             HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't reallocate virtual dataset mapping list")

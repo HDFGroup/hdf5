@@ -2056,7 +2056,6 @@ H5D__get_offset(const H5D_t *dset)
 
     switch(dset->shared->layout.type) {
         case H5D_VIRTUAL:
-            HDassert(0 && "checking code coverage...");//VDSINC
         case H5D_CHUNKED:
         case H5D_COMPACT:
             break;
