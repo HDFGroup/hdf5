@@ -872,7 +872,7 @@ herr_t
 H5Grefresh(hid_t group_id)
 {
     H5G_t * grp = NULL;
-    hid_t ret_value = SUCCEED; /* return value */
+    herr_t ret_value = SUCCEED; /* return value */
     
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", group_id);

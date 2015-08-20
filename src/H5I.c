@@ -808,7 +808,7 @@ H5I_register_with_id(H5I_type_t type, const void *object, hbool_t app_ref, hid_t
 {
     H5I_id_type_t	*type_ptr;	/*ptr to the type		*/
     H5I_id_info_t	*id_ptr;	/*ptr to the new ID information */
-    hid_t		ret_value = SUCCEED; /*return value		*/
+    herr_t		ret_value = SUCCEED; /*return value		*/
 
     FUNC_ENTER_NOAPI(FAIL)
 

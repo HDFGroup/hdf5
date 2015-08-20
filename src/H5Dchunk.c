@@ -4630,8 +4630,6 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     hsize_t                 max_mod_chunk_sc[H5O_LAYOUT_NDIMS]; /* Scaled offset of last chunk to modify in each dimension */
     hssize_t                max_fill_chunk_sc[H5O_LAYOUT_NDIMS]; /* Scaled offset of last chunk that might be filled in each dimension */
     hbool_t                 fill_dim[H5O_LAYOUT_NDIMS]; /* Whether the plane of edge chunks in this dimension needs to be filled */
-    hbool_t                 dims_outside_fill[H5O_LAYOUT_NDIMS]; /* Dimensions in chunk offset outside fill dimensions */
-    int                     ndims_outside_fill = 0; /* Number of dimensions in chunk offset outside fill dimensions */
     hsize_t                 min_partial_chunk_sc[H5O_LAYOUT_NDIMS]; /* Offset of first partial (or empty) chunk in each dimension */
     hbool_t                 new_unfilt_dim[H5O_LAYOUT_NDIMS]; /* Whether the plane of edge chunks in this dimension are newly unfiltered */
     hbool_t                 has_fill = FALSE;   /* Whether there are chunks that must be filled */
@@ -4656,7 +4654,6 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     uint32_t                elmts_per_chunk;    /* Elements in chunk */
     hbool_t                 disable_edge_filters = FALSE; /* Whether to disable filters on partial edge chunks */
     hbool_t                 new_unfilt_chunk = FALSE; /* Whether the chunk is newly unfiltered */
-    hbool_t                 carry;              /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
     unsigned                u;	                /* Local index variable */
     herr_t                  ret_value = SUCCEED;       /* Return value */
 
@@ -4833,7 +4830,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
                 } /* end if */
                 else
                     dims_outside_fill[u] = FALSE;
-	} /* end if */
+	    } /* end if */
 
         carry = FALSE;
         while(!carry) {
@@ -5287,7 +5284,6 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 {
     H5D_chunk_it_ud3_t      *udata = (H5D_chunk_it_ud3_t *)_udata;       /* User data for callback */
     H5D_chunk_ud_t          udata_dst;                  /* User data about new destination chunk */
-    hsize_t                 scaled[H5S_MAX_RANK];       /* Scaled coordinates of chunk */
     hbool_t                 is_vlen = FALSE;            /* Whether datatype is variable-length */
     hbool_t                 fix_ref = FALSE;            /* Whether to fix up references in the dest. file */
     hbool_t                 need_insert = FALSE;    /* Whether the chunk needs to be inserted into the index */

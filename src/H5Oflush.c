@@ -241,7 +241,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
     H5G_loc_t obj_loc;
     H5O_loc_t obj_oloc;
     H5G_name_t obj_path;
-    hid_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -285,7 +285,7 @@ H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t 
     H5O_t *oh = NULL;
     H5G_loc_t tmp_loc;
     hbool_t corked;
-    hid_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
     

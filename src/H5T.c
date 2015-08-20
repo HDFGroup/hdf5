@@ -5514,7 +5514,7 @@ herr_t
 H5Trefresh(hid_t type_id)
 {
     H5T_t * dt = NULL;
-    hid_t ret_value = SUCCEED; /* return value */
+    herr_t ret_value = SUCCEED; /* return value */
     
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", type_id);

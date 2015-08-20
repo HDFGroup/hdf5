@@ -1609,7 +1609,7 @@ H5FD_log_lock(H5FD_t *_file, hbool_t rw)
     HDassert(file);
 
     /* Determine the type of lock */
-    int lock = rw ? LOCK_EX : LOCK_SH;
+    lock = rw ? LOCK_EX : LOCK_SH;
 
     /* Place the lock with non-blocking */
     if(HDflock(file->fd, lock | LOCK_NB) < 0)
