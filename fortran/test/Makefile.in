@@ -14,6 +14,10 @@
 
 @SET_MAKE@
 
+# Makefile.am include fragment with Fortran helper rules and macros.
+
+# AM_FCCPPFLAGS, FCCPPFLAGS are currently not used.
+
 
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
@@ -80,6 +84,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(top_srcdir)/config/commence.am \
+	$(top_srcdir)/config/conclude_fc.am \
 	$(top_srcdir)/config/conclude.am $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/bin/mkinstalldirs \
 	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/test-driver
@@ -175,12 +180,6 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src -I$(top_builddir)/fortran
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
-PPFCCOMPILE = $(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_FCFLAGS) $(FCFLAGS)
-LTPPFCCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=FC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=compile $(FC) $(DEFS) \
-	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_FCFLAGS) $(FCFLAGS)
 AM_V_PPFC = $(am__v_PPFC_@AM_V@)
 am__v_PPFC_ = $(am__v_PPFC_@AM_DEFAULT_V@)
 am__v_PPFC_0 = @echo "  PPFC    " $@;
@@ -780,6 +779,8 @@ H5_test_buildiface_SOURCES = H5_test_buildiface.F90
 # The build of the H5_test_buildiface does depend on any libraries, so set it 
 # to nothing.
 H5_test_buildiface_LDADD = 
+PPFCCOMPILE = $(FC) $(FCDEFS) $(DEFAULT_INCLUDES)  $(FCINCLUDES) $(AM_FCCPPFLAGS) $(FCCPPFLAGS) $(AM_FCFLAGS) $(FCFLAGS)
+LTPPFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(PPFCCOMPILE)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -804,7 +805,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .F90 .c .f90 .lo .log .o .obj .sh .sh$(EXEEXT) .trs
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude_fc.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -825,7 +826,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
 	esac;
-$(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am:
+$(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude_fc.am $(top_srcdir)/config/conclude.am:
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
@@ -900,9 +901,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t.Plo@am__quote@
 
-.F90.o:
-	$(AM_V_PPFC)$(PPFCCOMPILE) -c -o $@ $<
-
 .F90.obj:
 	$(AM_V_PPFC)$(PPFCCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
@@ -929,9 +927,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-.f90.o:
-	$(AM_V_FC)$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) $<
 
 .f90.obj:
 	$(AM_V_FC)$(FCCOMPILE) -c -o $@ $(FCFLAGS_f90) `$(CYGPATH_W) '$<'`
@@ -1477,6 +1472,12 @@ tf_gen.F90: H5_test_buildiface$(EXEEXT)
 
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_
+
+# Treat all .f90 and .F90 files as preprocessed Fortran.
+.f90.o:
+	$(PPFCCOMPILE) -c -o $@ $(FCFLAGS) $<
+.F90.o:
+	$(PPFCCOMPILE) -c -o $@ $(FCFLAGS) $<
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

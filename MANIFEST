@@ -93,6 +93,7 @@
 ./config/cce-flags
 ./config/commence.am
 ./config/conclude.am
+./config/conclude_fc.am
 ./config/examples.am
 ./config/freebsd
 ./config/gnu-fflags
