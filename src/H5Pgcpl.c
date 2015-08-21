@@ -690,7 +690,7 @@ H5P__gcrt_link_info_dec(const void **_pp, void *_value)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
 
     /* Set property to default value */
-    *linfo = H5G_def_linfo_g;
+    memcpy(linfo, &H5G_def_linfo_g, sizeof(H5O_linfo_t));
 
     H5_DECODE_UNSIGNED(*pp, crt_order_flags)
 

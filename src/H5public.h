@@ -141,7 +141,20 @@ typedef int herr_t;
  * 	    printf("error determining whether data type is committed\n");
  *	}
  */
-typedef unsigned int hbool_t;
+#ifdef H5_HAVE_STDBOOL_H
+  #include <stdbool.h>
+#else /* H5_HAVE_STDBOOL_H */
+  #ifndef __cplusplus
+    #if defined(H5_SIZEOF_BOOL) && (H5_SIZEOF_BOOL != 0)
+      #define bool    _Bool
+    #else
+      #define bool    unsigned int
+    #endif
+    #define true    1
+    #define false   0
+  #endif /* __cplusplus */
+#endif /* H5_HAVE_STDBOOL_H */
+typedef bool hbool_t;
 typedef int htri_t;
 
 /* Define the ssize_t type if it not is defined */

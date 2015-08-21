@@ -850,7 +850,7 @@ H5T_init_interface(void)
     H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HERR_g,COPY,native_int,SET,sizeof(herr_t))
 
     /* hbool_t */
-    H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HBOOL_g,COPY,native_int,SET,sizeof(hbool_t))
+    H5T_INIT_TYPE(OFFSET,H5T_NATIVE_HBOOL_g,COPY,native_uint,SET,sizeof(hbool_t))
 
     /*------------------------------------------------------------
      * IEEE Types

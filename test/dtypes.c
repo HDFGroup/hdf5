@@ -6658,7 +6658,7 @@ test_delete_obj_named(hid_t fapl)
     hid_t attr = -1;            /* Attribute ID */
     hid_t dset = -1;            /* Dataset ID */
     hid_t fapl2 = -1;           /* File access property list ID */
-    hbool_t new_format;         /* Whether to use old or new format */
+    unsigned new_format;        /* Whether to use old or new format */
     char filename[1024], filename2[1024];
 
     TESTING("deleting objects that use named datatypes");
@@ -6753,7 +6753,7 @@ test_delete_obj_named_fileid(hid_t fapl)
     hid_t attr = -1;            /* Attribute ID */
     hid_t dset = -1;            /* Dataset ID */
     hid_t fapl2 = -1;           /* File access property list ID */
-    hbool_t new_format;         /* Whether to use old or new format */
+    unsigned new_format;        /* Whether to use old or new format */
     char filename[1024], filename2[1024];
 
     TESTING("deleting objects that use named datatypes");
