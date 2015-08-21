@@ -710,7 +710,7 @@ main(void)
 {
     char		filename[FILENAME_BUF_SIZE];
     hid_t		file, fapl, fapl2;
-    unsigned new_format;
+    hbool_t new_format;
     int mdc_nelmts;
     size_t rdcc_nelmts;
     size_t rdcc_nbytes;

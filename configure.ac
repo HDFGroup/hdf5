@@ -982,7 +982,6 @@ AC_CHECK_HEADERS([sys/socket.h sys/types.h])
 AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
-AC_CHECK_HEADERS([stdbool.h])
 
 ## Darwin
 AC_CHECK_HEADERS([mach/mach_time.h])
@@ -1189,17 +1188,6 @@ cat >>confdefs.h <<\EOF
 EOF
 AC_CHECK_SIZEOF([off_t], [4])
 AC_CHECK_SIZEOF([off64_t], [8])
-
-if test "X$C9x" = "Xyes"; then
-  cat >>confdefs.h <<\EOF
-#ifdef HAVE_STDBOOL_H
-#include <stdbool.h> /* for bool definition */
-#else
-#define bool _Bool
-#endif
-EOF
-AC_CHECK_SIZEOF([bool], [1])
-fi
 
 ## Checkpoint the cache
 AC_CACHE_SAVE

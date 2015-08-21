@@ -12318,7 +12318,7 @@ main(void)
         /* Tests that do not use attributes and do not need to be tested
          * multiple times for different attribute configurations */
         if(configuration < CONFIG_DENSE) {
-            unsigned reopen;
+            hbool_t reopen;
 
             nerrors += test_copy_named_datatype(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_named_datatype_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);

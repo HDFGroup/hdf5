@@ -5338,7 +5338,7 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
     hsize_t     nattrs;         /* Number of attributes on object */
     hsize_t     name_count;     /* # of records in name index */
     hsize_t     corder_count;   /* # of records in creation order index */
-    unsigned     reopen_file;            /* Whether to re-open the file before deleting group */
+    hbool_t     reopen_file;            /* Whether to re-open the file before deleting group */
     char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
 #ifdef LATER
     h5_stat_size_t empty_size;  /* Size of empty file */
@@ -5687,7 +5687,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     hsize_t     nattrs;         /* Number of attributes on object */
     hsize_t     name_count;     /* # of records in name index */
     hsize_t     corder_count;   /* # of records in creation order index */
-    unsigned     use_index;     /* Use index on creation order values */
+    hbool_t     use_index;      /* Use index on creation order values */
     char	attrname[NAME_BUF_SIZE];    /* Name of attribute */
     char        tmpname[NAME_BUF_SIZE];     /* Temporary attribute name */
     unsigned    curr_dset;      /* Current dataset to work on */
@@ -5899,7 +5899,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     hsize_t     corder_count;   /* # of records in creation order index */
     H5_index_t idx_type;        /* Type of index to operate on */
     H5_iter_order_t order;      /* Order within in the index */
-    unsigned     use_index;     /* Use index on creation order values */
+    hbool_t     use_index;      /* Use index on creation order values */
     char	attrname[NAME_BUF_SIZE];    /* Name of attribute */
     char        tmpname[NAME_BUF_SIZE];     /* Temporary attribute name */
     unsigned    curr_dset;      /* Current dataset to work on */
@@ -6842,7 +6842,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
     attr_iter_info_t iter_info; /* Iterator info */
     hbool_t     *visited = NULL;        /* Array of flags for visiting links */
     hsize_t     idx;            /* Start index for iteration */
-    unsigned     use_index;     /* Use index on creation order values */
+    hbool_t     use_index;      /* Use index on creation order values */
     const char *dsetname;       /* Name of dataset for attributes */
     char	attrname[NAME_BUF_SIZE];    /* Name of attribute */
     unsigned    curr_dset;      /* Current dataset to work on */
@@ -7203,7 +7203,7 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     hsize_t     corder_count;   /* # of records in creation order index */
     H5_index_t idx_type;        /* Type of index to operate on */
     H5_iter_order_t order;      /* Order within in the index */
-    unsigned     use_index;     /* Use index on creation order values */
+    hbool_t     use_index;      /* Use index on creation order values */
     char	attrname[NAME_BUF_SIZE];    /* Name of attribute */
     unsigned    curr_dset;      /* Current dataset to work on */
     unsigned    u;              /* Local index variable */
@@ -7549,7 +7549,7 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
     hsize_t     nattrs;         /* Number of attributes on object */
     hsize_t     name_count;     /* # of records in name index */
     hsize_t     corder_count;   /* # of records in creation order index */
-    unsigned    use_index;      /* Use index on creation order values */
+    hbool_t     use_index;      /* Use index on creation order values */
     const char *dsetname;       /* Name of dataset for attributes */
     char	attrname[NAME_BUF_SIZE];    /* Name of attribute */
     unsigned    curr_dset;      /* Current dataset to work on */
@@ -7804,7 +7804,7 @@ test_attr_create_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
     hsize_t     nattrs;         /* Number of attributes on object */
     hsize_t     name_count;     /* # of records in name index */
     hsize_t     corder_count;   /* # of records in creation order index */
-    unsigned    use_index;      /* Use index on creation order values */
+    hbool_t     use_index;      /* Use index on creation order values */
     const char *dsetname;       /* Name of dataset for attributes */
     char	attrname[NAME_BUF_SIZE];    /* Name of attribute */
     unsigned    curr_dset;      /* Current dataset to work on */
@@ -10568,8 +10568,8 @@ test_attr(void)
 {
     hid_t	fapl = (-1), fapl2 = (-1);    /* File access property lists */
     hid_t	fcpl = (-1), fcpl2 = (-1);    /* File creation property lists */
-    unsigned new_format;        /* Whether to use the new format or not */
-    unsigned use_shared;        /* Whether to use shared attributes or not */
+    hbool_t new_format;         /* Whether to use the new format or not */
+    hbool_t use_shared;         /* Whether to use shared attributes or not */
     herr_t ret;                 /* Generic return value */
 
     /* Output message about test being performed */

@@ -353,10 +353,10 @@
  * HDF Boolean type.
  */
 #ifndef FALSE
-  #define FALSE false
+#   define FALSE 0
 #endif
 #ifndef TRUE
-  #define TRUE true
+#   define TRUE 1
 #endif
 
 /*

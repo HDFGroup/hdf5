@@ -10714,7 +10714,7 @@ corder_delete(hid_t fapl)
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
     hsize_t     name_count;             /* # of records in name index */
     hsize_t     corder_count;           /* # of records in creation order index */
-    unsigned    reopen_file;            /* Whether to re-open the file before deleting group */
+    hbool_t     reopen_file;            /* Whether to re-open the file before deleting group */
     h5_stat_size_t       empty_size;             /* Size of empty file */
     h5_stat_size_t       file_size;              /* Size of file after operating on it */
     char        objname[NAME_BUF_SIZE]; /* Object name */
@@ -10995,8 +10995,8 @@ link_info_by_idx(hid_t fapl)
     hid_t	file_id = (-1); 	/* File ID */
     hid_t	group_id = (-1);	/* Group ID */
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
-    unsigned    hard_link;              /* Create hard or soft link? */
-    unsigned    use_index;              /* Use index on creation order values */
+    hbool_t     hard_link;              /* Create hard or soft link? */
+    hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
     H5L_info_t  linfo;                  /* Link info struct */
@@ -11178,7 +11178,7 @@ link_info_by_idx_old(hid_t fapl)
 {
     hid_t	file_id = (-1); 	/* File ID */
     hid_t	group_id = (-1), group_id2 = (-1);	/* Group IDs */
-    unsigned    hard_link;              /* Create hard or soft link? */
+    hbool_t     hard_link;              /* Create hard or soft link? */
     H5L_info_t  linfo;                  /* Link info struct */
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        valname[NAME_BUF_SIZE]; /* Link value name */
@@ -11347,7 +11347,7 @@ delete_by_idx(hid_t fapl)
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
     H5_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
-    unsigned    use_index;              /* Use index on creation order values */
+    hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
     H5L_info_t  linfo;                  /* Link info struct */
@@ -12180,7 +12180,7 @@ link_iterate(hid_t fapl)
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
     H5_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
-    unsigned    use_index;              /* Use index on creation order values */
+    hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
     char        objname[NAME_BUF_SIZE]; /* Object name */
@@ -12866,7 +12866,7 @@ open_by_idx(hid_t fapl)
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
     H5_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
-    unsigned    use_index;              /* Use index on creation order values */
+    hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
     H5O_info_t  oi;                     /* Buffer for querying object's info */
@@ -13302,7 +13302,7 @@ object_info(hid_t fapl)
     hid_t       space_id = (-1);        /* Dataspace ID (for attributes) */
     H5_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
-    unsigned    use_index;              /* Use index on creation order values */
+    hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
     H5O_info_t  oinfo;                  /* Buffer for querying object's info */
@@ -13698,7 +13698,7 @@ group_info(hid_t fapl)
     hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
     H5_index_t idx_type;               /* Type of index to operate on */
     H5_iter_order_t order;              /* Order within in the index */
-    unsigned    use_index;              /* Use index on creation order values */
+    hbool_t     use_index;              /* Use index on creation order values */
     unsigned    max_compact;            /* Maximum # of links to store in group compactly */
     unsigned    min_dense;              /* Minimum # of links to store in group "densely" */
     H5G_info_t  grp_info;               /* Buffer for querying object's info */
@@ -14509,8 +14509,8 @@ main(void)
 {
     hid_t	fapl, fapl2;    /* File access property lists */
     int	nerrors = 0;
-    unsigned new_format;    /* Whether to use the new format or not */
-    unsigned efc;           /* Whether to use the external file cache */
+    hbool_t new_format;     /* Whether to use the new format or not */
+    hbool_t efc;            /* Whether to use the external file cache */
     const char  *env_h5_drvr;      /* File Driver value from environment */
 
     env_h5_drvr = HDgetenv("HDF5_DRIVER");

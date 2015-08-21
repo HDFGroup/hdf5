@@ -7625,7 +7625,7 @@ main(void)
     bt2_test_param_t tparam;            /* Test parameters for v2 B-tree */
     hid_t	fapl = -1;              /* File access property list for data files */
     unsigned	nerrors = 0;            /* Cumulative error count */
-    unsigned    reopen;                 /* Whether to reopen B-tree during tests */
+    hbool_t     reopen;                 /* Whether to reopen B-tree during tests */
     int		ExpressMode;
     const char  *envval = NULL;
 

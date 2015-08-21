@@ -116,8 +116,8 @@ int main( void )
 {
     hid_t fapl;                 /* file access property list */
     hid_t fapl2;                /* file access property list w/latest format set */
-    unsigned new_format;         /* Whether to use the latest file format */
-    unsigned chunk_cache;        /* Whether to enable chunk caching */
+    hbool_t new_format;         /* Whether to use the latest file format */
+    hbool_t chunk_cache;        /* Whether to enable chunk caching */
     int	  nerrors = 0;
 
     /* Initialize random number seed */
