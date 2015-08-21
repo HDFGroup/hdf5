@@ -327,11 +327,12 @@ error:
 /* Helper function to get DCPL for examination depending on config */
 static int
 test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
-    hid_t *ex_dcpl, hid_t vspace, char *filename)
+    hid_t *ex_dcpl, hid_t vspace, char *filename, hsize_t exp_meta_size)
 {
     hid_t       file = -1;      /* File */
     hid_t       dset = -1;      /* Virtual dataset */
     void        *plist_buf = NULL; /* Serialized property list buffer */
+    H5O_info_t  oinfo;          /* Object info struct */
     htri_t      tri_ret;
 
     HDassert((config >= TEST_API_BASIC) && (config < TEST_API_NTESTS));
@@ -377,6 +378,24 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
 
         /* Test H5Dget_offset() (just returns HADDR_UNDEF) */
         if(HADDR_UNDEF != H5Dget_offset(dset))
+            TEST_ERROR
+
+        /* Test H5Oget_info returns correct metadata size */
+        if(H5Oget_info(dset, &oinfo) < 0)
+            TEST_ERROR
+        if(oinfo.meta_size.obj.index_size != (hsize_t)0)
+            TEST_ERROR
+        if(config == TEST_API_REOPEN_FILE) {
+            if(oinfo.meta_size.obj.heap_size != exp_meta_size) { printf("%llu\n", (long long unsigned)oinfo.meta_size.obj.heap_size);
+                TEST_ERROR }
+        } /* end if */
+        else
+            if((oinfo.meta_size.obj.heap_size != exp_meta_size)
+                    && (oinfo.meta_size.obj.heap_size != (hsize_t)0))
+                TEST_ERROR
+        if(oinfo.meta_size.attr.index_size != (hsize_t)0)
+            TEST_ERROR
+        if(oinfo.meta_size.attr.index_size != (hsize_t)0)
             TEST_ERROR
 
         /* Close dataset */
@@ -531,7 +550,7 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)68) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -602,7 +621,7 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)212) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -676,7 +695,7 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)0) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -745,7 +764,7 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)0) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -878,7 +897,7 @@ test_api(test_api_config_t config, hid_t fapl)
             TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)0) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -1009,7 +1028,7 @@ test_api(test_api_config_t config, hid_t fapl)
     } /* end if */
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)696) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -1063,7 +1082,7 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)0) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */

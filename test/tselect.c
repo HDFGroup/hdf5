@@ -13656,8 +13656,6 @@ test_hyper_unlim(void)
     VERIFY(count2[1], H5S_UNLIMITED, "H5Sget_select_bounds");
     VERIFY(count2[2], start[2] + (stride[2] * (count[2] - (hsize_t)1)) + block[2] - (hsize_t)1, "H5Sget_select_bounds");
 
-    //VDSINC write test saving unlim selection to file as region reference
-
     /* Close the dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
