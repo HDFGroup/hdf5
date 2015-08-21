@@ -316,7 +316,16 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_virtual_view
  *
- * Purpose:     VDSINC
+ * Purpose:     Takes the access property list for the virtual dataset,
+ *              dapl_id, and the flag, view, and sets the VDS view
+ *              according to the flag value.  The view will include all
+ *              data before the first missing mapped data found if the
+ *              flag is set to H5D_VDS_FIRST_MISSING or to include all
+ *              available mapped data if the flag is set to
+ *              H5D_VDS_LAST_AVAIALBLE.  Missing mapped data will be
+ *              filled with the fill value according to the VDS creation
+ *              property settings.  For VDS with unlimited mappings, the
+ *              view defines the extent.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -354,7 +363,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_virtual_view
  *
- * Purpose:     VDSINC
+ * Purpose:     Takes the access property list for the virtual dataset,
+ *              dapl_id, and gets the flag, view, set by the
+ *              H5Pset_virtual_view call.  The possible values of view are
+ *              H5D_VDS_FIRST_MISSING or H5D_VDS_LAST_AVAIALBLE. 
  *
  * Return:      Success:        H5D_VDS_FIRST_MISSING or
  *                              H5D_VDS_LAST_AVAILABLE
@@ -462,7 +474,22 @@ H5P__dacc_vds_view_dec(const void **_pp, void *_value)
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_virtual_printf_gap
  *
- * Purpose:     VDSINC
+ * Purpose:     Sets the access property list for the virtual dataset,
+ *              dapl_id, to instruct the library to stop looking for the
+ *              mapped data stored in the files and/or datasets with the
+ *              printf-style names after not finding gap_size files and/or
+ *              datasets.  The found source files and datasets will
+ *              determine the extent of the unlimited VDS with the printf
+ *              -style mappings.
+ *
+ *              For example, if regularly spaced blocks of VDS are mapped
+ *              to datasets with the names d-1, d-2, d-3, ..., d-N, ...,
+ *              and d-2 dataset is missing and gap_size is set to 0, then
+ *              VDS will contain only data found in d-1.  If d-2 and d-3
+ *              are missing and gap_size is set to 2, then VDS will
+ *              contain the data from d-1, d-3, ..., d-N, ....  The blocks
+ *              that are mapped to d-2 and d-3 will be filled according to
+ *              the VDS fill value setting.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -500,7 +527,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_virtual_printf_gap
  *
- * Purpose:     VDSINC
+ * Purpose:     Gets the maximum number of missing printf-style files
+ *              and/or datasets for determining the extent of the
+ *              unlimited VDS, gap_size, using the access property list
+ *              for the virtual dataset, dapl_id.  The default library
+ *              value for gap_size is 0.
  *
  * Return:      Non-negative on success/Negative on failure
  *

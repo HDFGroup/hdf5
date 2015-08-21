@@ -1785,7 +1785,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_virtual
  *
- * Purpose:     VDSINC
+ * Purpose:     Maps elements of the virtual dataset described by the
+ *              virtual dataspace identifier vspace_id to the elements of
+ *              the source dataset described by the source dataset
+ *              dataspace identifier src_space_id.  The source dataset is
+ *              identified by the name of the file where it is located,
+ *              src_file_name, and the name of the dataset, src_dset_name.
  *
  *              As a side effect, the layout method is changed to
  *              H5D_VIRTUAL.
@@ -1981,7 +1986,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_virtual_count
  *
- * Purpose:     VDSINC
+ * Purpose:     Gets the number of mappings for the virtual dataset that
+ *              has a creation property list specified by the dcpl_id
+ *              parameter.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2023,9 +2030,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_virtual_vspace
  *
- * Purpose:     VDSINC
+ * Purpose:     Takes the dataset creation property list for the virtual
+ *              dataset, dcpl_id, and the mapping index, index, and
+ *              returns a dataspace identifier for the selection within
+ *              the virtual dataset used in the mapping. 
  *
- * Return:      VDSINC
+ * Return:      Returns a dataspace identifier if successful; otherwise
+ *              returns a negative value.
  *
  * Programmer:  Neil Fortner
  *              Friday, February  13, 2015
@@ -2077,9 +2088,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_virtual_srcspace
  *
- * Purpose:     VDSINC
+ * Purpose:     Takes the dataset creation property list for the virtual
+ *              dataset, dcpl_id, and the mapping index, index, and
+ *              returns a dataspace identifier for the selection within
+ *              the source dataset used in the mapping. 
  *
- * Return:      VDSINC
+ * Return:      Returns a dataspace identifier if successful; otherwise
+ *              returns a negative value.
  *
  * Programmer:  Neil Fortner
  *              Saturday, February  14, 2015
@@ -2165,9 +2180,26 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_virtual_filename
  *
- * Purpose:     VDSINC
+ * Purpose:     Takes the dataset creation property list for the virtual
+ *              dataset, dcpl_id, and the mapping index, index, and
+ *              retrieves a name of a file for a source dataset used in
+ *              the mapping.
  *
- * Return:      VDSINC
+ *              Up to size characters of the filename are returned in
+ *              name; additional characters, if any, are not returned to
+ *              the user application.
+ *
+ *              If the length of the filename, which determines the
+ *              required value of size, is unknown, a preliminary call to
+ *              H5Pget_virtual_filename with the last two parameters set
+ *              to NULL can be made.  The return value of this call will
+ *              be the size in bytes of the filename.  That value, plus 1
+ *              for a NULL terminator, is then assigned to size for a
+ *              second H5Pget_virtual_filename call, which will retrieve
+ *              the actual filename. 
+ *
+ * Return:      Returns the length of the name if successful, otherwise
+ *              returns a negative value.
  *
  * Programmer:  Neil Fortner
  *              Saturday, February  14, 2015
@@ -2212,9 +2244,25 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_virtual_dsetname
  *
- * Purpose:     VDSINC
+ * Purpose:     Takes the dataset creation property list for the virtual
+ *              dataset, dcpl_id, and the mapping index, index, and
+ *              retrieves the name of a source dataset used in the mapping.
  *
- * Return:      VDSINC
+ *              Up to size characters of the name are returned in name;
+ *              additional characters, if any, are not returned to the
+ *              user application.
+ *
+ *              If the length of the filename, which determines the
+ *              required value of size, is unknown, a preliminary call to
+ *              H5Pget_virtual_dsetname with the last two parameters set
+ *              to NULL can be made.  The return value of this call will
+ *              be the size in bytes of the filename.  That value, plus 1
+ *              for a NULL terminator, is then assigned to size for a
+ *              second H5Pget_virtual_dsetname call, which will retrieve
+ *              the actual filename. 
+ *
+ * Return:      Returns the length of the name if successful, otherwise
+ *              returns a negative value.
  *
  * Programmer:  Neil Fortner
  *              Saturday, February  14, 2015
