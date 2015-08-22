@@ -585,6 +585,93 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF__huge_get_obj_off
+ *
+ * Purpose:	Get the offset of a 'huge' object in a fractal heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug  8 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
+    hsize_t *obj_off_p)
+{
+    haddr_t obj_addr;                   /* Object's address in the file */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
+    HDassert(id);
+    HDassert(obj_off_p);
+
+    /* Skip over the flag byte */
+    id++;
+
+    /* Check if 'huge' object ID encodes address & length directly */
+    if(hdr->huge_ids_direct) {
+        /* Retrieve the object's address (common) */
+        H5F_addr_decode(hdr->f, &id, &obj_addr);
+    } /* end if */
+    else {
+        /* Sanity check */
+        HDassert(H5F_addr_defined(hdr->huge_bt2_addr));
+
+        /* Check if v2 B-tree is open yet */
+        if(NULL == hdr->huge_bt2) {
+            /* Open existing v2 B-tree */
+            if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f)))
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for tracking 'huge' heap objects")
+        } /* end if */
+
+        if(hdr->filter_len > 0) {
+            H5HF_huge_bt2_filt_indir_rec_t found_rec;  /* Record found from tracking object */
+            H5HF_huge_bt2_filt_indir_rec_t search_rec; /* Record for searching for object */
+
+            /* Get ID for looking up 'huge' object in v2 B-tree */
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+
+            /* Look up object in v2 B-tree */
+            if(H5B2_find(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_filt_indir_found, &found_rec) != TRUE)
+                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
+
+            /* Retrieve the object's address & length */
+            obj_addr = found_rec.addr;
+        } /* end if */
+        else {
+            H5HF_huge_bt2_indir_rec_t found_rec;  /* Record found from tracking object */
+            H5HF_huge_bt2_indir_rec_t search_rec; /* Record for searching for object */
+
+            /* Get ID for looking up 'huge' object in v2 B-tree */
+            UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+
+            /* Look up object in v2 B-tree */
+            if(H5B2_find(hdr->huge_bt2, dxpl_id, &search_rec, H5HF_huge_bt2_indir_found, &found_rec) != TRUE)
+                HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
+
+            /* Retrieve the object's address & length */
+            obj_addr = found_rec.addr;
+        } /* end else */
+    } /* end else */
+
+    /* Set the value to return */
+    *obj_off_p = (hsize_t)obj_addr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF__huge_get_obj_off() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_huge_op_real
  *
  * Purpose:	Internal routine to perform an operation on a 'huge' object
