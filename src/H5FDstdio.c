@@ -1138,6 +1138,9 @@ H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
     /* Place the lock with non-blocking */
     if(flock(file->fd, lock | LOCK_NB) < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "flock failed", -1)
+    if(fflush(file->fp) < 0)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fflush failed", -1)
+
 #endif /* H5_HAVE_FLOCK */
 
     return 0;
@@ -1171,8 +1174,11 @@ H5FD_stdio_unlock(H5FD_t *_file)
 
     assert(file);
 
+    if(fflush(file->fp) < 0)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_WRITEERROR, "fflush failed", -1)
     if(flock(file->fd, LOCK_UN) < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FCNTL, "flock (unlock) failed", -1)
+
 #endif /* H5_HAVE_FLOCK */
 
     return 0;
