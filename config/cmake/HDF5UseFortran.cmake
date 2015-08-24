@@ -381,9 +381,7 @@ ENABLE_LANGUAGE (C)
 # The provided CMake C macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
-MACRO (C_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
-# MSB CHECK WHY THIS CHECK?
-#  if (NOT DEFINED ${RUN_RESULT_VAR}) 
+MACRO (C_RUN FUNCTION CODE RETURN)
     message (STATUS "Detecting C ${FUNCTION}")
     if (CMAKE_REQUIRED_LIBRARIES)
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
@@ -395,7 +393,7 @@ MACRO (C_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
         ${CODE}
     )
-    TRY_RUN (${RUN_RESULT_VAR} ${COMPILE_RESULT_VAR}
+    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
         CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
@@ -404,18 +402,14 @@ MACRO (C_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
 
     set(${RETURN} ${OUTPUT})
 	
-    #message ( "Test result1 ${RETURN} ")
-    #message ( "Test result3 ${RESULT} ")
-    #message ( "Test result2 ${CMAKE_MATCH_0} ")
-    #message ( "Test result4 ${CMAKE_MATCH_1} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #message ( "Test result ${COMPILE_RESULT_VAR} ")
+    #message ( "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #message ( "Test result ${RUN_RESULT_VAR} ")
+    #message ( "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
 
     if (${COMPILE_RESULT_VAR})
-      if (${RUN_RESULT_VAR} MATCHES 0)
+      if (${RUN_RESULT_VAR} MATCHES 1)
         set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION}")
         message (STATUS "Testing C ${FUNCTION} - OK")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
@@ -424,13 +418,14 @@ MACRO (C_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
         )
       else ()
         message (STATUS "Testing C ${FUNCTION} - Fail")
-        set (${RUN_RESULT_VAR} "" CACHE INTERNAL "Have C function ${FUNCTION}")
+        set (${RUN_RESULT_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION}")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
             "Determining if the C ${FUNCTION} exists failed with the following output:\n"
             "${OUTPUT}\n\n")
       endif ()
+    else ()
+        message (FATAL_ERROR "Compilation of C ${FUNCTION} - Failed")
     endif()
-#  endif (NOT DEFINED ${RUN_RESULT_VAR})
 ENDMACRO (C_RUN)
 
 set(PROG_SRC 
@@ -455,17 +450,14 @@ set(PROG_SRC
 #else
 #define C_LDBL_DIG LDBL_DIG
 #endif
-   void main() {
+   int main() {
        printf(\"%d\\\\n%d\\\\n\", C_LDBL_DIG, C_FLT128_DIG)\\\;
+       return 1\\\;
    }
      "
   )
 
-C_RUN("maximum decimal precision for C" ${PROG_SRC}
-  XX
-  YY
-  PROG_OUTPUT
-)
+C_RUN("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT)
 
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  long double decimal precision

@@ -36,6 +36,20 @@ set_target_properties (H5HL_buildiface PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
+if (BUILD_SHARED_LIBS)
+  if (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/\${BUILD_TYPE})
+  else (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  endif (WIN32)
+else (BUILD_SHARED_LIBS)
+  if (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
+  else (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  endif (WIN32)
+endif (BUILD_SHARED_LIBS)
+
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
@@ -44,6 +58,7 @@ INCLUDE_DIRECTORIES (
     ${HDF5_F90_SRC_DIR}/src
     ${HDF5_F90_BINARY_DIR}
     ${CMAKE_Fortran_MODULE_DIRECTORY}
+    ${MOD_BUILD_DIR}
 )
 
 #-----------------------------------------------------------------------------
@@ -169,19 +184,6 @@ endif (BUILD_SHARED_LIBS)
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 
-if (BUILD_SHARED_LIBS)
-  if (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/\${BUILD_TYPE})
-  else (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
-  endif (WIN32)
-else (BUILD_SHARED_LIBS)
-  if (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
-  else (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
-  endif (WIN32)
-endif (BUILD_SHARED_LIBS)
 
 set (mod_files
     ${MOD_BUILD_DIR}/h5ds.mod
