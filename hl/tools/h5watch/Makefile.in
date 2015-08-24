@@ -101,7 +101,8 @@ DIST_COMMON = $(top_srcdir)/config/commence.am \
 	$(srcdir)/testh5watch.sh.in $(top_srcdir)/bin/depcomp \
 	$(top_srcdir)/bin/test-driver
 bin_PROGRAMS = h5watch$(EXEEXT)
-noinst_PROGRAMS = h5watchgentest$(EXEEXT) extend_dset$(EXEEXT)
+noinst_PROGRAMS = swmr_check_compat_vfd$(EXEEXT) \
+	h5watchgentest$(EXEEXT) extend_dset$(EXEEXT)
 TESTS = $(TEST_SCRIPT)
 subdir = hl/tools/h5watch
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -115,25 +116,30 @@ CONFIG_CLEAN_FILES = testh5watch.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-am_extend_dset_OBJECTS = extend_dset.$(OBJEXT)
-extend_dset_OBJECTS = $(am_extend_dset_OBJECTS)
+extend_dset_SOURCES = extend_dset.c
+extend_dset_OBJECTS = extend_dset.$(OBJEXT)
 extend_dset_LDADD = $(LDADD)
 extend_dset_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-am_h5watch_OBJECTS = h5watch.$(OBJEXT)
-h5watch_OBJECTS = $(am_h5watch_OBJECTS)
+h5watch_SOURCES = h5watch.c
+h5watch_OBJECTS = h5watch.$(OBJEXT)
 h5watch_LDADD = $(LDADD)
 h5watch_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
 h5watch_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5watch_LDFLAGS) $(LDFLAGS) -o $@
-am_h5watchgentest_OBJECTS = h5watchgentest.$(OBJEXT)
-h5watchgentest_OBJECTS = $(am_h5watchgentest_OBJECTS)
+h5watchgentest_SOURCES = h5watchgentest.c
+h5watchgentest_OBJECTS = h5watchgentest.$(OBJEXT)
 h5watchgentest_LDADD = $(LDADD)
 h5watchgentest_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+swmr_check_compat_vfd_SOURCES = swmr_check_compat_vfd.c
+swmr_check_compat_vfd_OBJECTS = swmr_check_compat_vfd.$(OBJEXT)
+swmr_check_compat_vfd_LDADD = $(LDADD)
+swmr_check_compat_vfd_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) \
+	$(LIBHDF5)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -168,10 +174,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(extend_dset_SOURCES) $(h5watch_SOURCES) \
-	$(h5watchgentest_SOURCES)
-DIST_SOURCES = $(extend_dset_SOURCES) $(h5watch_SOURCES) \
-	$(h5watchgentest_SOURCES)
+SOURCES = extend_dset.c h5watch.c h5watchgentest.c \
+	swmr_check_compat_vfd.c
+DIST_SOURCES = extend_dset.c h5watch.c h5watchgentest.c \
+	swmr_check_compat_vfd.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -670,13 +676,10 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5
 # These are our main targets, the tools
 TEST_SCRIPT = testh5watch.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = h5watch$(EXEEXT)
+SCRIPT_DEPEND = swmr_check_compat_vfd$(EXEEXT) extend_dset$(EXEEXT) h5watch$(EXEEXT)
 
 # Add h5watch specific linker flags here
 h5watch_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
-h5watch_SOURCES = h5watch.c
-h5watchgentest_SOURCES = h5watchgentest.c
-extend_dset_SOURCES = extend_dset.c
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.
@@ -810,6 +813,10 @@ h5watchgentest$(EXEEXT): $(h5watchgentest_OBJECTS) $(h5watchgentest_DEPENDENCIES
 	@rm -f h5watchgentest$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(h5watchgentest_OBJECTS) $(h5watchgentest_LDADD) $(LIBS)
 
+swmr_check_compat_vfd$(EXEEXT): $(swmr_check_compat_vfd_OBJECTS) $(swmr_check_compat_vfd_DEPENDENCIES) $(EXTRA_swmr_check_compat_vfd_DEPENDENCIES) 
+	@rm -f swmr_check_compat_vfd$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(swmr_check_compat_vfd_OBJECTS) $(swmr_check_compat_vfd_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -819,6 +826,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extend_dset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5watch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5watchgentest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_check_compat_vfd.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
