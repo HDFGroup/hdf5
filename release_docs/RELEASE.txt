@@ -67,6 +67,10 @@ New Features
       keyword and a list of components. The imported libraries will
       include any interface specific settings and dependent libraries.
 
+      The default setting for BUILD_SHARED_LIBS has changed from OFF
+      to ON, which builds both static and shared libraries. The static
+      libraries are always built because of tools requirements.
+
       (ADB - 2015/08/24 HDFFV-5881)
 
     - Inline functions now correctly annotated w/ Autotools builds.
