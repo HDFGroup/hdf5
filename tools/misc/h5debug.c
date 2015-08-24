@@ -355,11 +355,11 @@ main(int argc, char *argv[])
 
                 /* Build array of chunk dimensions */
                 ndims = (unsigned)extra;
-                dim[0] = extra2;
+                dim[0] = (uint32_t)extra2;
                 if(ndims > 1)
-                    dim[1] = extra3;
+                    dim[1] = (uint32_t)extra3;
                 if(ndims > 2)
-                    dim[2] = extra4;
+                    dim[2] = (uint32_t)extra4;
 
                 /* Check for dimension error */
                 if(ndims > 3) {
@@ -502,14 +502,14 @@ main(int argc, char *argv[])
          */
 
         /* Check for enough valid parameters */
-        if(extra2 == 0) {
-            HDfprintf(stderr, "ERROR: Need list format version and number of messages in order to shared message list\n");
+        if(extra == 0) {
+            HDfprintf(stderr, "ERROR: Need shared message header address in order to shared message list\n");
             HDfprintf(stderr, "Shared message list usage:\n");
-            HDfprintf(stderr, "\th5debug <filename> <shared message list address> <list format version> <number of mesages in list>\n");
+            HDfprintf(stderr, "\th5debug <filename> <shared message list address> <shared message header address>\n");
             HDexit(4);
         } /* end if */
 
-        status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned) extra, (size_t) extra2);
+        status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (haddr_t)extra);
 
     } else if(!HDmemcmp(sig, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*

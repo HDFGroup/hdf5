@@ -34,6 +34,10 @@
 # We can't tell automake about example programs, because they need to be
 # built using h5cc (or h5fc, etc.) instead of the standard compilers.
 # This creates some extra work for us.
+
+# Makefile.am include fragment with Fortran helper rules and macros.
+
+# AM_FCCPPFLAGS, FCCPPFLAGS are currently not used.
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -100,6 +104,7 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/examples.am \
+	$(top_srcdir)/config/conclude_fc.am \
 	$(top_srcdir)/config/conclude.am $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/bin/mkinstalldirs \
 	$(srcdir)/run-hlfortran-ex.sh.in $(top_srcdir)/bin/test-driver
@@ -111,7 +116,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/H5config.h
+CONFIG_HEADER = $(top_builddir)/src/H5config.h \
+	$(top_builddir)/fortran/src/H5config_f.inc
 CONFIG_CLEAN_FILES = run-hlfortran-ex.sh
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
@@ -395,14 +401,21 @@ F9XMODEXT = @F9XMODEXT@
 F9XMODFLAG = @F9XMODFLAG@
 F9XSUFFIXFLAG = @F9XSUFFIXFLAG@
 FC = @FC@
-FC2003 = @FC2003@
 FCFLAGS = @FCFLAGS@
 FCFLAGS_f90 = @FCFLAGS_f90@
 FCLIBS = @FCLIBS@
 FC_VERSION = @FC_VERSION@
 FGREP = @FGREP@
+FORTRAN_C_LONG_DOUBLE_IS_UNIQUE = @FORTRAN_C_LONG_DOUBLE_IS_UNIQUE@
+FORTRAN_HAVE_C_LONG_DOUBLE = @FORTRAN_HAVE_C_LONG_DOUBLE@
+FORTRAN_SIZEOF_LONG_DOUBLE = @FORTRAN_SIZEOF_LONG_DOUBLE@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 GREP = @GREP@
+H5CONFIG_F_IKIND = @H5CONFIG_F_IKIND@
+H5CONFIG_F_NUM_IKIND = @H5CONFIG_F_NUM_IKIND@
+H5CONFIG_F_NUM_RKIND = @H5CONFIG_F_NUM_RKIND@
+H5CONFIG_F_RKIND = @H5CONFIG_F_RKIND@
+H5CONFIG_F_RKIND_SIZEOF = @H5CONFIG_F_RKIND_SIZEOF@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
@@ -412,13 +425,12 @@ H5_LDFLAGS = @H5_LDFLAGS@
 H5_VERSION = @H5_VERSION@
 HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
-HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
+HAVE_Fortran_INTEGER_SIZEOF_16 = @HAVE_Fortran_INTEGER_SIZEOF_16@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
-HDF_FORTRAN2003 = @HDF_FORTRAN2003@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
@@ -460,9 +472,20 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
+PAC_C_MAX_REAL_PRECISION = @PAC_C_MAX_REAL_PRECISION@
+PAC_FC_ALL_INTEGER_KINDS = @PAC_FC_ALL_INTEGER_KINDS@
+PAC_FC_ALL_INTEGER_KINDS_SIZEOF = @PAC_FC_ALL_INTEGER_KINDS_SIZEOF@
+PAC_FC_ALL_REAL_KINDS = @PAC_FC_ALL_REAL_KINDS@
+PAC_FC_ALL_REAL_KINDS_SIZEOF = @PAC_FC_ALL_REAL_KINDS_SIZEOF@
+PAC_FC_MAX_REAL_PRECISION = @PAC_FC_MAX_REAL_PRECISION@
+PAC_FORTRAN_NATIVE_DOUBLE_KIND = @PAC_FORTRAN_NATIVE_DOUBLE_KIND@
+PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF = @PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF@
+PAC_FORTRAN_NATIVE_INTEGER_KIND = @PAC_FORTRAN_NATIVE_INTEGER_KIND@
+PAC_FORTRAN_NATIVE_INTEGER_SIZEOF = @PAC_FORTRAN_NATIVE_INTEGER_SIZEOF@
+PAC_FORTRAN_NATIVE_REAL_KIND = @PAC_FORTRAN_NATIVE_REAL_KIND@
+PAC_FORTRAN_NATIVE_REAL_SIZEOF = @PAC_FORTRAN_NATIVE_REAL_SIZEOF@
 PARALLEL = @PARALLEL@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PERL = @PERL@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
 RUNPARALLEL = @RUNPARALLEL@
@@ -632,6 +655,8 @@ EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 # We need to tell automake what to clean
 MOSTLYCLEANFILES = *.raw *.meta *.o
 CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
+PPFCCOMPILE = $(FC) $(FCDEFS) $(DEFAULT_INCLUDES)  $(FCINCLUDES) $(AM_FCCPPFLAGS) $(FCCPPFLAGS) $(AM_FCFLAGS) $(FCFLAGS)
+LTPPFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(PPFCCOMPILE)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -655,8 +680,8 @@ TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chkexe_)
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .log .sh .sh$(EXEEXT) .trs
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/examples.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
+.SUFFIXES: .F90 .f90 .log .o .sh .sh$(EXEEXT) .trs
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/examples.am $(top_srcdir)/config/conclude_fc.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -677,7 +702,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
 	esac;
-$(top_srcdir)/config/commence.am $(top_srcdir)/config/examples.am $(top_srcdir)/config/conclude.am:
+$(top_srcdir)/config/commence.am $(top_srcdir)/config/examples.am $(top_srcdir)/config/conclude_fc.am $(top_srcdir)/config/conclude.am:
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
@@ -1086,6 +1111,12 @@ installcheck-local:
 	    (cd $(EXAMPLEDIR);                                                           \
 	     /bin/sh ./$(TEST_EXAMPLES_SCRIPT);)                                                   \
 	fi
+
+# Treat all .f90 and .F90 files as preprocessed Fortran.
+.f90.o:
+	$(PPFCCOMPILE) -c -o $@ $(FCFLAGS) $<
+.F90.o:
+	$(PPFCCOMPILE) -c -o $@ $(FCFLAGS) $<
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
