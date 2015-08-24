@@ -25,11 +25,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
 
-#ifdef H5_VMS
-#define TMPDIR          "[.tmp]"
-#else /* H5_VMS */
 #define TMPDIR          "tmp/"
-#endif /* H5_VMS */
 #define NAME_BUF_SIZE   1024
 
 const char *FILENAME[] = {
