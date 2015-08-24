@@ -36,6 +36,9 @@
 ! *****************************************
 MODULE test_my_hdf5_error_handler
 
+  USE HDF5
+  USE TH5_MISC
+  USE TH5_MISC_GEN
 
 CONTAINS
 
@@ -49,8 +52,6 @@ CONTAINS
 
     ! This error function handle works with only version 2 error stack
 
-    USE HDF5
-    USE ISO_C_BINDING
     IMPLICIT NONE
 
     ! estack_id is always passed from C as: H5E_DEFAULT
@@ -74,8 +75,6 @@ CONTAINS
 
     ! This error function handle works with only version 2 error stack
 
-    USE HDF5
-    USE ISO_C_BINDING
     IMPLICIT NONE
 
     ! estack_id is always passed from C as: H5E_DEFAULT
@@ -102,8 +101,6 @@ CONTAINS
 
 SUBROUTINE test_error(total_error)
 
-  USE HDF5 
-  USE TH5_MISC
   USE ISO_C_BINDING
   USE test_my_hdf5_error_handler
 
@@ -147,15 +144,15 @@ SUBROUTINE test_error(total_error)
 
   ! Create the erring dataset
   CALL h5dcreate_f(FAKE_ID,"a_dataset",H5T_NATIVE_INTEGER, space, dataset, error)
-  CALL VERIFY("h5dcreate_f", error, -1, total_error)
+  CALL verify("h5dcreate_f", error, -1, total_error)
 
-!!$    CALL VERIFY("H5Eset_auto_f",my_hdf5_error_handler_data(1),10, total_error)
-!!$    CALL VERIFY("H5Eset_auto_f",my_hdf5_error_handler_data(2),20, total_error)
+!!$    CALL verify("H5Eset_auto_f",my_hdf5_error_handler_data(1),10, total_error)
+!!$    CALL verify("H5Eset_auto_f",my_hdf5_error_handler_data(2),20, total_error)
 
 !!$  ! Test enabling and disabling default printing
 !!$
 !!$  CALL H5Eget_auto_f(H5E_DEFAULT_F, func1, f_ptr1, error)
-!!$  CALL VERIFY("H5Eget_auto_f", error, 0, total_error)
+!!$  CALL verify("H5Eget_auto_f", error, 0, total_error)
 
   !    PRINT*,c_associated(f_ptr1)
 
@@ -187,7 +184,7 @@ SUBROUTINE test_error(total_error)
   CALL H5Eset_auto_f(1, error, H5E_DEFAULT_F, func, f_ptr)
 
   CALL h5dcreate_f(FAKE_ID,"a_dataset",H5T_NATIVE_INTEGER, space, dataset, error)
-  CALL VERIFY("h5dcreate_f", error, -1, total_error)
+  CALL verify("h5dcreate_f", error, -1, total_error)
 
 
   ! turn on automatic printing with h5eprint_f which prints an error stack in the default manner.

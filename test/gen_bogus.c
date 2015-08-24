@@ -61,7 +61,7 @@ int main(void)
     if((did = H5Dcreate2(fid, "/Dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
     if(H5Dclose(did) < 0) goto error;
 
-    /* Set "fail if unknown" message flag for bogus message */
+    /* Set "fail if unknown and open for write" message flag for bogus message */
     bogus_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE;
     if(H5Pset(dcpl, H5O_BOGUS_MSG_FLAGS_NAME, &bogus_flags) < 0) goto error;
 
@@ -69,12 +69,20 @@ int main(void)
     if((did = H5Dcreate2(fid, "/Dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
     if(H5Dclose(did) < 0) goto error;
 
+    /* Set "fail if unknown always" message flag for bogus message */
+    bogus_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS;
+    if(H5Pset(dcpl, H5O_BOGUS_MSG_FLAGS_NAME, &bogus_flags) < 0) goto error;
+
+    /* Create third dataset, with "fail if unknown always" message flag */
+    if((did = H5Dcreate2(fid, "/Dataset3", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
+    if(H5Dclose(did) < 0) goto error;
+
     /* Set "mark if unknown" message flag for bogus message */
     bogus_flags = H5O_MSG_FLAG_MARK_IF_UNKNOWN;
     if(H5Pset(dcpl, H5O_BOGUS_MSG_FLAGS_NAME, &bogus_flags) < 0) goto error;
 
-    /* Create second dataset, with "mark if unknown" message flag */
-    if((did = H5Dcreate2(fid, "/Dataset3", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
+    /* Create fourth dataset, with "mark if unknown" message flag */
+    if((did = H5Dcreate2(fid, "/Dataset4", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
     if(H5Dclose(did) < 0) goto error;
 
     /* Close dataset creation property list */

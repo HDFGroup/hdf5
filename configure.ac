@@ -26,7 +26,8 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.223], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.229], [help@hdfgroup.org])
+
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -149,7 +150,6 @@ AC_MSG_RESULT([done])
 ## MPE: whether MPE option is enabled. Default no.
 ## STATIC_EXEC: whether static-exec is enabled. Default no.
 ## HDF_FORTRAN: whether Fortran is enabled. Default no.
-## HDF_FORTRAN2003: whether Fortran 2003 is enabled. Default no.
 ## FC: Fortran compiler.
 ## HDF_CXX: whether C++ is enabled. Default no.
 ## CXX: C++ compiler.
@@ -157,6 +157,7 @@ AC_MSG_RESULT([done])
 ## INSTRUMENT: whether INSTRUMENT is enabled. No default set here.
 ## CODESTACK: whether CODESTACK is enabled. Default no.
 ## HAVE_DMALLOC: whether system has dmalloc support. Default no.
+## HAVE_FLOAT128: whether system has Quad-Precision Math Library. Default no.
 ## DIRECT_VFD: whether DIRECT_VFD is enabled. Default no.
 ## THREADSAFE: whether THREADSAFE is enabled. Default no.
 ## STATIC_SHARED: whether static and/or shared libraries are requested.
@@ -168,9 +169,7 @@ AC_SUBST([EXTERNAL_FILTERS])
 AC_SUBST([MPE]) MPE=no
 AC_SUBST([STATIC_EXEC]) STATIC_EXEC=no
 AC_SUBST([HDF_FORTRAN]) HDF_FORTRAN=no
-AC_SUBST([HDF_FORTRAN2003]) HDF_FORTRAN2003=no
 AC_SUBST([FC]) HDF_FORTRAN=no
-AC_SUBST([FC2003]) HDF_FORTRAN2003=no
 AC_SUBST([HDF_CXX]) HDF_CXX=no
 AC_SUBST([CXX]) HDF_CXX=no
 AC_SUBST([HDF5_HL]) HDF5_HL=yes
@@ -183,6 +182,7 @@ AC_SUBST([STATIC_SHARED])
 AC_SUBST([enable_shared])
 AC_SUBST([enable_static])
 AC_SUBST([UNAME_INFO]) UNAME_INFO=`uname -a`
+AC_SUBST([PAC_C_MAX_REAL_PRECISION])
 
 ## ----------------------------------------------------------------------
 ## Some platforms have broken basename, and/or xargs programs. Check
@@ -347,13 +347,57 @@ case "X-$ALLOW_UNSUPPORTED" in
 esac
 
 ## ----------------------------------------------------------------------
+## Data types and their sizes.
+##
+AC_TYPE_OFF_T
+AC_CHECK_TYPE([size_t], [],
+        [AC_DEFINE_UNQUOTED([size_t], [unsigned long],
+                [Define to `unsigned long' if <sys/types.h> does not define.])])
+AC_CHECK_TYPE([ssize_t], [],
+        [AC_DEFINE_UNQUOTED([ssize_t], [long],
+                [Define to `long' if <sys/types.h> does not define.])])
+AC_CHECK_TYPE([ptrdiff_t], [],
+        [AC_DEFINE_UNQUOTED([ptrdiff_t], [long],
+                [Define to `long' if <sys/types.h> does not define.])])
+AC_C_BIGENDIAN
+AC_CHECK_SIZEOF([char], [1])
+AC_CHECK_SIZEOF([short], [2])
+AC_CHECK_SIZEOF([int], [4])
+AC_CHECK_SIZEOF([unsigned], [4])
+AC_CHECK_SIZEOF([long], [4])
+AC_CHECK_SIZEOF([long long], [8])
+AC_CHECK_SIZEOF([__int64], [8])
+AC_CHECK_SIZEOF([float], [4])
+AC_CHECK_SIZEOF([double], [8])
+AC_CHECK_SIZEOF([long double], [8])
+
+## Check for non-standard extenstion __FLOAT128
+HAVE_FLOAT128=0
+HAVE_QUADMATH=0
+FLT128_DIG=0
+LDBL_DIG=0
+
+AC_CHECK_SIZEOF([__float128])
+AC_CHECK_SIZEOF([_Quad])
+AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
+PAC_FC_LDBL_DIG
+
+if test "$ac_cv_sizeof___float128" != 0 && test "$FLT128_DIG" != 0 ; then
+  AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
+  PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
+else
+  PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
+fi
+AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
+AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
+## ----------------------------------------------------------------------
 ## Check if they would like the Fortran interface compiled
 ##
 AC_SUBST([HDF5_INTERFACES]) HDF5_INTERFACES=""
 AC_MSG_CHECKING([if Fortran interface enabled])
 AC_ARG_ENABLE([fortran],
               [AS_HELP_STRING([--enable-fortran],
-                              [Compile the Fortran 90/95 interface [default=no]])],
+                              [Compile the Fortran interface [default=no]])],
               [HDF_FORTRAN=$enableval])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
@@ -362,35 +406,16 @@ else
   echo "no"
 fi
 
-
-## ----------------------------------------------------------------------
-## Check if they would like the Fortran 2003 interface compiled
-##
-AC_MSG_CHECKING([if Fortran 2003 interface enabled])
-AC_ARG_ENABLE([fortran2003],
-              [AS_HELP_STRING([--enable-fortran2003],
-                              [Compile the Fortran 2003 interface, must also specify --enable-fortran [default=no]])],
-              [HDF_FORTRAN2003=$enableval])
-
-## ----------------------------------------------------------------------
-## Check to make sure --enable-fortran is present if --enable-fortran2003 
-## was specified
-
-if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xno"; then
-  echo "no"
-  AC_MSG_ERROR([--enable-fortran must be used with --enable-fortran2003])
-else
-  if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xyes"; then
-    echo "yes"
-  else
-    echo "no"
-  fi
-fi
-
 if test "X$HDF_FORTRAN" = "Xyes"; then
 
+## We will output an include file for Fortran, H5config_f.inc which 
+## contains various configure definitions used by the Fortran Library. 
+## Prepend H5_ to all macro names. This avoids name conflict between HDF5 macro 
+## names and those generated by another software package that uses the HDF5 library.
+  AC_CONFIG_HEADERS([fortran/src/H5config_f.inc], 
+    [cat fortran/src/H5config_f.inc | sed '1d;s%^/\* \(.*\) \*/%\1%;s/#define /#define H5_/;s/#undef /#undef H5_/' >fortran/src/H5config_f.inc.tmp; mv -f fortran/src/H5config_f.inc.tmp fortran/src/H5config_f.inc])
+
   AC_SUBST([FC]) HDF_FORTRAN=yes
-  AC_SUBST([HAVE_FORTRAN_2003])
 		
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
 
@@ -423,6 +448,14 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
+  ## Checking if the compiler supports the required Fortran 2003 features and
+  ## stopping if it does not.
+  PAC_PROG_FC_HAVE_F2003_REQUIREMENTS
+ 
+  if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
+    AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran])
+  fi
+
   ## --------------------------------------------------------------------
   ## Define wrappers for the C compiler to use Fortran function names
   ##
@@ -434,38 +467,141 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## See if the fortran compiler supports the intrinsic function "C_SIZEOF"
   PAC_PROG_FC_C_SIZEOF
-
+	
   ## See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
-  PAC_PROG_FC_STORAGE_SIZE	
+  PAC_PROG_FC_STORAGE_SIZE
 
-  ## Check to see if -r8 was specified to determine if we need to
-  ## compile the DOUBLE PRECISION interfaces.
-  PAC_PROG_FC_DEFAULT_REALisDBLE	
-
-  if test "X$HDF_FORTRAN2003" = "Xyes"; then
-
-    ## Checking if the compiler supports the required Fortran 2003 features and
-    ## disable Fortran 2003 if it does not.
-    PAC_PROG_FC_HAVE_F2003_REQUIREMENTS
- 
-    if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
-      AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
-    else
-      HAVE_FORTRAN_2003="yes"
+  ## Set the sizeof function for use later in the fortran tests
+  if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes";then
+    FC_SIZEOF_A="STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
+    FC_SIZEOF_B="STORAGE_SIZE(b, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
+    FC_SIZEOF_C="STORAGE_SIZE(c, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)"
+  else 
+    if test "X$HAVE_SIZEOF_FORTRAN" = "Xyes";then
+      FC_SIZEOF_A="SIZEOF(a)"
+      FC_SIZEOF_B="SIZEOF(b)"
+      FC_SIZEOF_C="SIZEOF(c)"
+    else	
+      ## If neither intrinsic functions SIZEOF or STORAGE_SIZE is available then stop configure with an error
+      AC_MSG_ERROR([Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE])
     fi
   fi
+
+  ## See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
+  PAC_PROG_FC_ISO_FORTRAN_ENV
+  ## Check KIND and size of native integer
+  PAC_FC_NATIVE_INTEGER
+ 
+  ## Find all available KINDs
+  PAC_FC_AVAIL_KINDS
+  ## Find all sizeofs for available KINDs
+  PAC_FC_SIZEOF_INT_KINDS
+  PAC_FC_SIZEOF_REAL_KINDS
+
+  AC_SUBST([PAC_FC_ALL_REAL_KINDS])
+  AC_SUBST([PAC_FC_MAX_REAL_PRECISION])
+  AC_SUBST([PAC_FC_ALL_INTEGER_KINDS])
+  AC_SUBST([PAC_FC_ALL_REAL_KINDS_SIZEOF])
+  AC_SUBST([PAC_FC_ALL_INTEGER_KINDS_SIZEOF])  
+  AC_SUBST([PAC_FORTRAN_NATIVE_INTEGER_KIND])
+  AC_SUBST([PAC_FORTRAN_NATIVE_INTEGER_SIZEOF])
+  AC_SUBST([PAC_FORTRAN_NATIVE_REAL_KIND])
+  AC_SUBST([PAC_FORTRAN_NATIVE_REAL_SIZEOF])
+  AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_KIND])
+  AC_SUBST([PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF])
+  AC_SUBST([HAVE_Fortran_INTEGER_SIZEOF_16])
+  AC_SUBST([FORTRAN_HAVE_C_LONG_DOUBLE])
+  AC_SUBST([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE])
+  AC_SUBST([FORTRAN_SIZEOF_LONG_DOUBLE])
+  AC_SUBST([H5CONFIG_F_NUM_RKIND])
+  AC_SUBST([H5CONFIG_F_RKIND])	
+  AC_SUBST([H5CONFIG_F_RKIND_SIZEOF])	
+  AC_SUBST([H5CONFIG_F_NUM_IKIND])
+  AC_SUBST([H5CONFIG_F_IKIND])	
+
+  ## Setting definition if there is a 16 byte fortran integer
+  if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then
+    HAVE_Fortran_INTEGER_SIZEOF_16="1" 	
+    AC_DEFINE([HAVE_Fortran_INTEGER_SIZEOF_16], [1], [Determine if INTEGER*16 is available])
+  else
+    HAVE_Fortran_INTEGER_SIZEOF_16="0"
+    AC_DEFINE([HAVE_Fortran_INTEGER_SIZEOF_16], [0], [Determine if INTEGER*16 is available])
+  fi
+
+  if test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_STORAGE_SIZE], [1], [Define if we have Fortran intrinsic STORAGE_SIZE])
+  fi
+
+  if  test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_C_SIZEOF], [1], [Define if we have Fortran intrinsic C_SIZEOF])
+  fi
+	
+  if  test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"; then
+    AC_DEFINE([FORTRAN_HAVE_SIZEOF], [1], [Define if we have Fortran intrinsic SIZEOF])
+  fi
+
+  ## See if C_LONG_DOUBLE is available
+  PAC_PROG_FC_HAVE_C_LONG_DOUBLE
+
+  FORTRAN_HAVE_C_LONG_DOUBLE="0" 
+  if test "X$HAVE_C_LONG_DOUBLE_FORTRAN" = "Xyes"; then
+    FORTRAN_HAVE_C_LONG_DOUBLE="1" 
+    AC_DEFINE([FORTRAN_HAVE_C_LONG_DOUBLE], [1], [Define if we have Fortran C_LONG_DOUBLE])
+  fi
+
+  ## Is C_LONG_DOUBLE different from C_DOUBLE
+  FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
+  if test "X$FORTRAN_HAVE_C_LONG_DOUBLE"; then
+    PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
+    if test "X$C_LONG_DOUBLE_IS_UNIQUE_FORTRAN" = "Xyes"; then
+      FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="1"
+      AC_DEFINE([FORTRAN_C_LONG_DOUBLE_IS_UNIQUE], [1], [Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE])
+    else
+      FORTRAN_C_LONG_DOUBLE_IS_UNIQUE="0"
+    fi
+  fi
+  
+  FORTRAN_SIZEOF_LONG_DOUBLE=${ac_cv_sizeof_long_double}
+  AC_DEFINE_UNQUOTED([FORTRAN_SIZEOF_LONG_DOUBLE], ["${ac_cv_sizeof_long_double}"], [Determine the size of C long double])
+
+
+  dnl get the largest sizeof for REAL kinds
+  max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -ne 's/.*,\([[0-9]]*\)\}/\1/p'`"
+  max_real_fortran_kind="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | sed -ne 's/.*,\([[0-9]]*\)\}/\1/p'`"
+
+  dnl remove the invalid kind from the list
+  if test "$ac_cv_sizeof___float128" != 0;then
+    if test "$ac_cv_sizeof___float128" != "$max_real_fortran_sizeof" && 
+       test "${ac_cv_sizeof_long_double}" != "$max_real_fortran_sizeof" &&
+       dnl account for the fact that the C compiler can have 16-byte __float128 and the Fortran compiler only has 8-byte doubles,
+       dnl so we don't want to remove the 8-byte Fortran doubles. This is sometimes the case if different C and Fortran vendors
+       dnl are used (for example gnu and pgi).
+       test "${ac_cv_sizeof_double}" != "$max_real_fortran_sizeof" ; then
+          AC_MSG_WARN([
+           Fortran REAL(KIND=$max_real_fortran_kind) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
+                     !!! Fortran interfaces will not be generated for REAL(KIND=$max_real_fortran_kind) !!!
+          ])
+      PAC_FC_ALL_REAL_KINDS="`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/,[[0-9]]\+}/}/g'`"
+      PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/,[[0-9]]\+}/}/g'`"
+    fi
+  fi
+  AC_MSG_CHECKING([for Fortran interoperable KINDS with C])
+  AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])	
+
+  dnl count the number of real kinds
+  H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `echo \"[$]PAC_FC_ALL_REAL_KINDS\" |  tr -d -c ',\n' | awk '{ print length + 1; }'`"
+  H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/{//g' | sed -e 's/}//g' | sed -e 's/ /,/g'`/)"
+  H5CONFIG_F_RKIND_SIZEOF="INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/{//g' | sed -e 's/}//g'| sed -e 's/ /,/g'`/)"
+
+  AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
+  AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
+  AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND_SIZEOF], $H5CONFIG_F_RKIND_SIZEOF, [Define valid Fortran REAL KINDs Sizeof])
+
+## Change back to the C language
+  AC_LANG_POP(Fortran)
 else
   FC="no"
 fi
-
-## Change back to the C language
-AC_LANG_POP(Fortran)
-
-AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF_FORTRAN" = "Xyes"])
-AM_CONDITIONAL([FORTRAN_HAVE_C_SIZEOF], [test "X$HAVE_C_SIZEOF_FORTRAN" = "Xyes"])
-AM_CONDITIONAL([FORTRAN_HAVE_STORAGE_SIZE], [test "X$HAVE_STORAGE_SIZE_FORTRAN" = "Xyes"])
-AM_CONDITIONAL([FORTRAN_2003_CONDITIONAL_F], [test "X$HAVE_FORTRAN_2003" = "Xyes"])
-AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Check if they would like the C++ interface compiled
@@ -530,25 +666,10 @@ if test "X$HDF5_HL" = "Xyes"; then
  HL="hl"
  AC_DEFINE([INCLUDE_HL], [1],
            [Define if HDF5's high-level library headers should be included in hdf5.h])
-
-  ## If Fortran's default real is double precision and HL is being built then configure
-  ## should fail due to bug HDFFV-889.
-  if test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"; then
-    AC_MSG_ERROR([Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use configure option --disable-hl.])
-  fi
 else
  echo "no"
 fi
 
-
-## ----------------------------------------------------------------------
-## Check if they have Perl installed on their system. We only need Perl
-## if they're using a GNU compiler.
-##
-AC_SUBST([PERL]) PERL=""
-if test "X$GCC" = "Xyes"; then
-  AC_CHECK_PROGS([PERL], [perl],, [$PATH])
-fi
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
@@ -975,7 +1096,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+##SCOT    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
@@ -1015,31 +1136,6 @@ AC_TRY_COMPILE([
 [struct stat64 sb;],
 [AC_CHECK_FUNCS([stat64 fstat64])],
 [AC_MSG_RESULT([skipping test for stat64() and fstat64()])])
-
-## ----------------------------------------------------------------------
-## Data types and their sizes.
-##
-AC_TYPE_OFF_T
-AC_CHECK_TYPE([size_t], [],
-        [AC_DEFINE_UNQUOTED([size_t], [unsigned long],
-                [Define to `unsigned long' if <sys/types.h> does not define.])])
-AC_CHECK_TYPE([ssize_t], [],
-        [AC_DEFINE_UNQUOTED([ssize_t], [long],
-                [Define to `long' if <sys/types.h> does not define.])])
-AC_CHECK_TYPE([ptrdiff_t], [],
-        [AC_DEFINE_UNQUOTED([ptrdiff_t], [long],
-                [Define to `long' if <sys/types.h> does not define.])])
-AC_C_BIGENDIAN
-AC_CHECK_SIZEOF([char], [1])
-AC_CHECK_SIZEOF([short], [2])
-AC_CHECK_SIZEOF([int], [4])
-AC_CHECK_SIZEOF([unsigned], [4])
-AC_CHECK_SIZEOF([long], [4])
-AC_CHECK_SIZEOF([long long], [8])
-AC_CHECK_SIZEOF([__int64], [8])
-AC_CHECK_SIZEOF([float], [4])
-AC_CHECK_SIZEOF([double], [8])
-AC_CHECK_SIZEOF([long double], [8])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
@@ -1804,18 +1900,18 @@ all_packages="ac,b,b2,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
 case "X-$DEBUG_PKG" in
   X-yes)
     DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
-    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
+##    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
     AC_MSG_RESULT([default ($DEBUG_PKG)])
     ;;
   X-all)
     DEBUG_PKG=$all_packages
-    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
+##    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
     AC_MSG_RESULT([all ($DEBUG_PKG)])
     ;;
   X-no|X-none)
     AC_MSG_RESULT([none])
     DEBUG_PKG=
-    H5_CPPFLAGS="$H5_CPPFLAGS -DNDEBUG"
+##    H5_CPPFLAGS="$H5_CPPFLAGS -DNDEBUG"
     ;;
   *)
     AC_MSG_RESULT([$DEBUG_PKG])
@@ -2269,6 +2365,27 @@ else
 fi
 
 ## ----------------------------------------------------------------------
+## Decide whether the data accuracy has higher priority during data
+## conversions.  If not, some hard conversions will still be prefered even
+## though the data may be wrong (for example, some compilers don't 
+## support denormalized floating values) to maximize speed.
+## 
+AC_MSG_CHECKING([whether data accuracy is guaranteed during data conversions])
+AC_ARG_ENABLE([dconv-accuracy],
+              [AS_HELP_STRING([--enable-dconv-accuracy],
+                              [if data accuracy is guaranteed during 
+                              data conversions [default=yes]])],
+              [DATA_ACCURACY=$enableval], [DATA_ACCURACY=yes])
+
+if test "$DATA_ACCURACY" = "yes"; then
+  AC_MSG_RESULT([yes])
+  AC_DEFINE([WANT_DATA_ACCURACY], [1],
+            [Data accuracy is prefered to speed during data conversions])
+else
+  AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
 ## Set the flag to indicate that the machine has window style pathname,
 ## that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
 ## (This flag should be _unset_ for all machines, except for Windows, where
@@ -2442,6 +2559,138 @@ fi
 if test ${hdf5_cv_long_to_ldouble_special} = "yes"; then
   AC_DEFINE([LONG_TO_LDOUBLE_SPECIAL], [1],
             [Define if your system can convert (unsigned) long to long double values with special algorithm.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine can accurately convert
+## 'long double' to '(unsigned) long long' values.  (This flag should
+## be set for all machines, except for Mac OS 10.4, SGI IRIX64 6.5 and
+## Powerpc Linux using XL compilers.
+## When the bit sequence of long double is 0x4351ccf385ebc8a0bfcc2a3c...,
+## the values of (unsigned)long long start to go wrong on these
+## two machines.  Adjusting it higher to 0x4351ccf385ebc8a0dfcc... or
+## 0x4351ccf385ebc8a0ffcc... will make the converted values wildly wrong.
+## This test detects this wrong behavior and disable the test.
+##
+AC_MSG_CHECKING([if correctly converting long double to (unsigned) long long values])
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_ldouble_to_llong_accurate=${hdf5_cv_ldouble_to_llong_accurate=no}
+else
+   AC_CACHE_VAL([hdf5_cv_ldouble_to_llong_accurate],
+        [AC_TRY_RUN([
+        int main(void)
+        {
+            long double         ld = 20041683600089727.779961L;
+            long long           ll;
+            unsigned long long  ull;
+            unsigned char       s[16];
+            int                 ret = 0;
+            
+            if(sizeof(long double) == 16) {
+                /*make sure the long double type is the same as the failing type 
+                 *which has 16 bytes in size and 11 bits of exponent.  If it is,
+                 *the bit sequence should be like below.  It's not 
+                 *a decent way to check but this info isn't available. */   
+                memcpy(s, &ld, 16);
+                if(s[0]==0x43 && s[1]==0x51 && s[2]==0xcc && s[3]==0xf3 &&
+                    s[4]==0x85 && s[5]==0xeb && s[6]==0xc8 && s[7]==0xa0 &&
+                    s[8]==0xbf && s[9]==0xcc && s[10]==0x2a && s[11]==0x3c) {
+
+                    /*slightly adjust the bit sequence (s[8]=0xdf).  The converted
+                     *values will go wild on Mac OS 10.4 and IRIX64 6.5.*/ 
+                    s[0]=0x43; s[1]=0x51; s[2]=0xcc; s[3]=0xf3;
+                    s[4]=0x85; s[5]=0xeb; s[6]=0xc8; s[7]=0xa0;
+                    s[8]=0xdf; s[9]=0xcc; s[10]=0x2a; s[11]=0x3c;
+                    s[12]=0x3d; s[13]=0x85; s[14]=0x56; s[15]=0x20;
+
+                    memcpy(&ld, s, 16);
+                    ll = (long long)ld;
+                    ull = (unsigned long long)ld;
+                    
+                    if(ll != 20041683600089728 || ull != 20041683600089728)
+                        ret = 1;
+                }    
+            }    
+    done:
+            exit(ret);
+        }
+        ], [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no],)])
+fi
+
+if test ${hdf5_cv_ldouble_to_llong_accurate} = "yes"; then
+  AC_DEFINE([LDOUBLE_TO_LLONG_ACCURATE], [1],
+            [Define if your system can convert long double to (unsigned) long long values correctly.])
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+
+## ----------------------------------------------------------------------
+## Set the flag to indicate that the machine can accurately convert
+## '(unsigned) long long' to 'long double' values.  (This flag should be
+## set for all machines, except for Mac OS 10.4 and Powerpc Linux using
+## XL compilers.
+## When the bit sequences are 003fff..., 007fff..., 00ffff..., 01ffff...,
+## ..., 7fffff..., the converted values are twice as big as they should be.
+##
+AC_MSG_CHECKING([if correctly converting (unsigned) long long to long double values])
+
+if test ${ac_cv_sizeof_long_double} = 0; then
+   hdf5_cv_llong_to_ldouble_correct=${hdf5_cv_llong_to_ldouble_correct=no}
+else
+   AC_CACHE_VAL([hdf5_cv_llong_to_ldouble_correct],
+        [AC_TRY_RUN([
+        int main(void)
+        {
+            long double         ld;
+            long long           ll;
+            unsigned long long  ull;
+            unsigned char       s[16];
+            int                 flag=0, ret=0;
+        
+            /*Determine if long double has 16 byte in size, 11 bit exponent, and
+             *the bias is 0x3ff */ 
+            if(sizeof(long double) == 16) { 
+                ld = 1.0L;
+                memcpy(s, &ld, 16);
+                if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
+                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00) 
+                    flag = 1; 
+            }
+             
+            if(flag==1 && sizeof(long long)==8) {
+                ll = 0x01ffffffffffffffLL;
+                ld = (long double)ll;
+                memcpy(s, &ld, 16);
+                /*Check if the bit sequence is as supposed to be*/
+                if(s[0]!=0x43 || s[1]!=0x7f || s[2]!=0xff || s[3]!=0xff ||
+                    s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
+                    s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
+                    ret = 1;
+            }        
+            if(flag==1 && sizeof(unsigned long long)==8) {
+                ull = 0x01ffffffffffffffULL;
+                ld = (long double)ull;
+                memcpy(s, &ld, 16);
+                if(s[0]!=0x43 || s[1]!=0x7f || s[2]!=0xff || s[3]!=0xff ||
+                    s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
+                    s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
+                    ret = 1;
+            }        
+    done:
+            exit(ret);
+        }
+        ], [hdf5_cv_llong_to_ldouble_correct=yes], [hdf5_cv_llong_to_ldouble_correct=no],)])
+fi
+
+if test ${hdf5_cv_llong_to_ldouble_correct} = "yes"; then
+  AC_DEFINE([LLONG_TO_LDOUBLE_CORRECT], [1],
+            [Define if your system can convert (unsigned) long long to long double values correctly.])
   AC_MSG_RESULT([yes])
 else
   AC_MSG_RESULT([no])
@@ -2887,6 +3136,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  fortran/Makefile
                  fortran/src/h5fc
                  fortran/src/Makefile
+                 fortran/src/H5fort_type_defines.h
                  fortran/test/Makefile
                  fortran/testpar/Makefile
                  fortran/examples/Makefile

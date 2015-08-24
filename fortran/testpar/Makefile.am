@@ -36,12 +36,6 @@ endif
 
 # These are our main targets
 TEST_PROG_PARA=parallel_test
-
-
-if FORTRAN_2003_CONDITIONAL_F
-   TEST_PROG_PARA += parallel_test_F03
-endif
-
 check_PROGRAMS=$(TEST_PROG_PARA)
 
 # Temporary files
@@ -50,14 +44,10 @@ CHECK_CLEANFILES+=parf[12].h5
 # Test source files
 parallel_test_SOURCES=ptest.f90 hyper.f90 mdset.f90
 
-if FORTRAN_2003_CONDITIONAL_F
-   parallel_test_F03_SOURCES =ptest_F03.f90 multidsetrw_F03.f90
-endif
-
 # The tests depend on several libraries.
 LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API=yes
 
-include $(top_srcdir)/config/conclude.am
+include $(top_srcdir)/config/conclude_fc.am

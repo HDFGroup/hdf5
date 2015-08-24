@@ -608,12 +608,12 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
     char		filename[FILENAME_LEN]; 	/* Filename to use */
     H5F_t		*f = NULL;              	/* Internal file object pointer */
     h5_stat_size_t      file_size, new_file_size;  	/* File size */
-    H5FD_mem_t 		type;
+    H5FD_mem_t  type;
     haddr_t		addr;
-    htri_t      	extended;
-    haddr_t 		ma_addr=HADDR_UNDEF, new_ma_addr=HADDR_UNDEF;
-    hsize_t 		ma_size=0, new_ma_size=0;
-    hbool_t             contig_addr_vfd;        /* Whether VFD used has a contigous address space */
+    htri_t      was_extended;
+    haddr_t 	ma_addr=HADDR_UNDEF, new_ma_addr=HADDR_UNDEF;
+    hsize_t 	ma_size=0, new_ma_size=0;
+    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contigous address space */
 
     TESTING("H5MF_try_extend() of file allocation: test 1");
 
@@ -685,9 +685,9 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* should succeed */
-        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr, (hsize_t)TEST_BLOCK_SIZE30, (hsize_t)TEST_BLOCK_SIZE50);
+        was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr, (hsize_t)TEST_BLOCK_SIZE30, (hsize_t)TEST_BLOCK_SIZE50);
 
-        if(extended <= 0)
+        if(was_extended <= 0)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
@@ -744,10 +744,10 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
         if(new_ma_addr != ma_addr)
             TEST_ERROR
 
-        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr, (hsize_t)(TEST_BLOCK_SIZE30-10), (hsize_t)(TEST_BLOCK_SIZE50));
+        was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr, (hsize_t)(TEST_BLOCK_SIZE30-10), (hsize_t)(TEST_BLOCK_SIZE50));
 
         /* should not succeed */
-        if(extended > 0)
+        if(was_extended > 0)
             TEST_ERROR
 
         /* nothing should be changed in meta_aggr */
@@ -1454,7 +1454,7 @@ test_mf_fs_extend(hid_t fapl)
     frspace_state_t 	state;          	/* State of free space*/
     H5MF_sect_ud_t 	udata;
     H5FS_section_info_t *node;
-    htri_t      	extended;
+    htri_t      	was_extended;
 
     TESTING("H5MF_try_extend() of free-space manager:test 1");
 
@@ -1548,10 +1548,10 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Try to extend the allocated block */
-    extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)TEST_BLOCK_ADDR70, (hsize_t)TEST_BLOCK_SIZE30, (hsize_t)TEST_BLOCK_SIZE50);
+    was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)TEST_BLOCK_ADDR70, (hsize_t)TEST_BLOCK_SIZE30, (hsize_t)TEST_BLOCK_SIZE50);
 
     /* should succeed */
-    if(extended <= 0)
+    if(was_extended <= 0)
 	TEST_ERROR
 
     /* Section B is removed from free-space manager */
@@ -1666,10 +1666,10 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Try to extend the allocated block */
-    extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)TEST_BLOCK_ADDR70, (hsize_t)TEST_BLOCK_SIZE30, (hsize_t)(TEST_BLOCK_SIZE50+10));
+    was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)TEST_BLOCK_ADDR70, (hsize_t)TEST_BLOCK_SIZE30, (hsize_t)(TEST_BLOCK_SIZE50+10));
 
     /* Should not be able to extend the allocated block */
-    if(extended)
+    if(was_extended)
 	TEST_ERROR
 
     /* free-space info should remain the same */
@@ -1779,10 +1779,10 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Try to extend the allocated block */
-    extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)TEST_BLOCK_ADDR70, (hsize_t)TEST_BLOCK_SIZE30, (hsize_t)(TEST_BLOCK_SIZE40));
+    was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)TEST_BLOCK_ADDR70, (hsize_t)TEST_BLOCK_SIZE30, (hsize_t)(TEST_BLOCK_SIZE40));
 
     /* Should succeed in extending the allocated block */
-    if(extended <=0)
+    if(was_extended <=0)
 	TEST_ERROR
 
     /* Should have 1 section of size=10 left in free-space manager */
@@ -1892,10 +1892,10 @@ test_mf_fs_extend(hid_t fapl)
         TEST_ERROR
 
     /* Try to extend the allocated block */
-    extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)TEST_BLOCK_ADDR70, (hsize_t)(TEST_BLOCK_SIZE30-10), (hsize_t)TEST_BLOCK_SIZE50);
+    was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)TEST_BLOCK_ADDR70, (hsize_t)(TEST_BLOCK_SIZE30-10), (hsize_t)TEST_BLOCK_SIZE50);
 
     /* Should not succeed in extending the allocated block */
-    if(extended)
+    if(was_extended)
 	TEST_ERROR
 
     /* Free-space info should be the same */
@@ -3241,7 +3241,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
     haddr_t		new_addr, addr, saddr;
     haddr_t 		ma_addr=HADDR_UNDEF, new_ma_addr=HADDR_UNDEF, sdata_addr=HADDR_UNDEF;
     hsize_t 		ma_size=0, new_ma_size=0, sdata_size=0;
-    htri_t      	extended;
+    htri_t      	was_extended;
     hbool_t             contig_addr_vfd;        /* Whether VFD used has a contigous address space */
 
     TESTING("H5MF_try_extend() of meta/sdata aggregator: test 1");
@@ -3286,10 +3286,10 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         new_addr = addr - 10;
 
         /* Try to extend the block by an amount < (% * aggr->alloc_size) */
-        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE50));
+        was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE50));
 
         /* should succeed */
-        if(!extended)
+        if(!was_extended)
             TEST_ERROR
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
@@ -3302,10 +3302,10 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE50);
 
         /* Try to extend the block by an amount > (% * aggr->alloc_size) but amount < aggr->alloc_size */
-        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE700));
+        was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE700));
 
         /* should succeed */
-        if(!extended)
+        if(!was_extended)
             TEST_ERROR
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
@@ -3318,10 +3318,10 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE700);
 
         /* Try to extend the block by an amount > (% * aggr->alloc_size) but amount > aggr->alloc_size */
-        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE2058));
+        was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE2058));
 
         /* should succeed */
-        if(!extended)
+        if(!was_extended)
             TEST_ERROR
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
@@ -3384,9 +3384,9 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         new_addr = addr - 10;
 
         /* should be able to fulfill request from the aggreqator itself */
-        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE50));
+        was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE50));
 
-        if(!extended)
+        if(!was_extended)
             TEST_ERROR
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
@@ -3454,9 +3454,9 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
         new_addr = addr - 10;
 
         /* unable to fulfill request from the aggreqator itself */
-        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE50));
+        was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE50));
 
-        if(extended)
+        if(was_extended)
             TEST_ERROR
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
@@ -3772,7 +3772,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     haddr_t		addr1, addr2;
     haddr_t 		ma_addr=HADDR_UNDEF;
     hsize_t 		ma_size=0;
-    htri_t 		extended;
+    htri_t 		was_extended;
     frspace_state_t 	state;
     hsize_t		alignment=0, mis_align=0, tmp=0, accum=0;
     hbool_t             have_alloc_vfd;        /* Whether VFD used has an 'alloc' callback */
@@ -3978,9 +3978,9 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* try to extend the block */
-        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr1, (hsize_t)TEST_BLOCK_SIZE50, (hsize_t)TEST_BLOCK_SIZE30);
+        was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr1, (hsize_t)TEST_BLOCK_SIZE50, (hsize_t)TEST_BLOCK_SIZE30);
 
-        if (extended <=0) TEST_ERROR
+        if (was_extended <=0) TEST_ERROR
 
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
@@ -4052,7 +4052,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     haddr_t		addr;
     frspace_state_t 	state;
     H5MF_sect_ud_t 	udata;
-    htri_t 		extended;
+    htri_t 		was_extended;
     hsize_t		alignment=0, tmp=0, mis_align=0;
     hbool_t             have_alloc_vfd;        /* Whether VFD used has an 'alloc' callback */
 
@@ -4197,9 +4197,9 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         TEST_ERROR
 
     /* try to extend the block */
-    extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr, (hsize_t)TEST_BLOCK_SIZE600, (hsize_t)TEST_BLOCK_SIZE200);
+    was_extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr, (hsize_t)TEST_BLOCK_SIZE600, (hsize_t)TEST_BLOCK_SIZE200);
 
-    if (extended <=0) TEST_ERROR
+    if (was_extended <=0) TEST_ERROR
 
     /* space should be decreased by 200, # of sections remain the same */
     state.tot_space -= TEST_BLOCK_SIZE200;

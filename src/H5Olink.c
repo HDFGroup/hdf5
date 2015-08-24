@@ -834,7 +834,7 @@ H5O_link_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Link Name Character Set:", (lnk->cset == H5T_CSET_ASCII ?
                 "ASCII" : (lnk->cset == H5T_CSET_UTF8 ? "UTF-8" : "Unknown")));
-    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s '%s'\n", indent, "", fwidth,
 	      "Link Name:", lnk->name);
 
     /* Display link-specific information */
@@ -845,7 +845,7 @@ H5O_link_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
             break;
 
         case H5L_TYPE_SOFT:
-            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s '%s'\n", indent, "", fwidth,
                       "Link Value:", lnk->u.soft.name);
             break;
 

@@ -10,8 +10,8 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 # Add the h5import executables
 # --------------------------------------------------------------------
 add_executable (h5import ${HDF5_TOOLS_H5IMPORT_SOURCE_DIR}/h5import.c)
-TARGET_NAMING (h5import ${LIB_TYPE})
-TARGET_C_PROPERTIES (h5import ${LIB_TYPE} " " " ")
+TARGET_NAMING (h5import STATIC)
+TARGET_C_PROPERTIES (h5import STATIC " " " ")
 target_link_libraries (h5import  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 #set_target_properties (h5import PROPERTIES COMPILE_DEFINITIONS H5DEBUGIMPORT)
 set_target_properties (h5import PROPERTIES FOLDER tools)
@@ -23,8 +23,8 @@ if (BUILD_TESTING)
   # Add the h5import executables
   # --------------------------------------------------------------------
   add_executable (h5importtest ${HDF5_TOOLS_H5IMPORT_SOURCE_DIR}/h5importtest.c)
-  TARGET_NAMING (h5importtest ${LIB_TYPE})
-  TARGET_C_PROPERTIES (h5importtest ${LIB_TYPE} " " " ")
+  TARGET_NAMING (h5importtest STATIC)
+  TARGET_C_PROPERTIES (h5importtest STATIC " " " ")
   target_link_libraries (h5importtest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (h5importtest PROPERTIES FOLDER tools)
 
@@ -47,8 +47,5 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5import
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        toolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

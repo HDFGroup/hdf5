@@ -992,16 +992,8 @@
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-if (BUILD_SHARED_LIBS)
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
-else (BUILD_SHARED_LIBS)
-  message (STATUS " **** Plugins libraries must be built as shared libraries **** ")
-  add_test (
-      NAME H5REPACK-plugin
-      COMMAND ${CMAKE_COMMAND} -E echo "SKIP H5PLUGIN TESTING"
-  )
-endif (BUILD_SHARED_LIBS)
 
   if (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver

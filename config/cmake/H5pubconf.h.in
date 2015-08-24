@@ -15,24 +15,6 @@
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
 
-/* Defined if HDF5 was built with CMake AND build as a shared library */
-#cmakedefine H5_BUILT_AS_DYNAMIC_LIB @H5_BUILT_AS_DYNAMIC_LIB@
-
-/* Defined if HDF5 was built with CMake AND build as a static library */
-#cmakedefine H5_BUILT_AS_STATIC_LIB @H5_BUILT_AS_STATIC_LIB@
-
-/* Defined if HDF5 CPP  was built with CMake AND build as a shared library  */
-#cmakedefine H5_CPP_BUILT_AS_DYNAMIC_LIB @H5_CPP_BUILT_AS_DYNAMIC_LIB@
-
-/* Defined if HDF5 CPP  was built with CMake AND build as a static library  */
-#cmakedefine H5_CPP_BUILT_AS_STATIC_LIB @H5_CPP_BUILT_AS_STATIC_LIB@
-
-/* Defined if HDF5 HL was built with CMake AND build as a shared library */
-#cmakedefine H5_HL_BUILT_AS_DYNAMIC_LIB @H5_HL_BUILT_AS_DYNAMIC_LIB@
-
-/* Defined if HDF5 HL was built with CMake AND build as a static library */
-#cmakedefine H5_HL_BUILT_AS_STATIC_LIB @H5_HL_BUILT_AS_STATIC_LIB@
-
 /* Define if building universal (internal helper macro) */
 #cmakedefine H5_AC_APPLE_UNIVERSAL_BUILD @H5_AC_APPLE_UNIVERSAL_BUILD@
 
@@ -62,6 +44,18 @@
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #define @H5_FC_FUNC_@
+
+/* Define Fortran Maximum Real Decimal Precision */
+#cmakedefine H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
+
+/* Define C Maximum Real Decimal Precision */
+#cmakedefine H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
+
+/* Define if we have Fortran C_LONG_DOUBLE */
+#cmakedefine H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
+
+/* Determine if __float128 is available */
+#cmakedefine H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
 
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
@@ -398,9 +392,17 @@
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #cmakedefine H5_INCLUDE_HL @H5_INCLUDE_HL@
 
+/* Define if your system can convert long double to (unsigned) long long
+   values correctly. */
+#cmakedefine H5_LDOUBLE_TO_LLONG_ACCURATE @H5_LDOUBLE_TO_LLONG_ACCURATE@
+
 /* Define if your system converts long double to (unsigned) long values with
    special algorithm. */
 #cmakedefine H5_LDOUBLE_TO_LONG_SPECIAL @H5_LDOUBLE_TO_LONG_SPECIAL@
+
+/* Define if your system can convert (unsigned) long long to long double
+   values correctly. */
+#cmakedefine H5_LLONG_TO_LDOUBLE_CORRECT @H5_LLONG_TO_LDOUBLE_CORRECT@
 
 /* Define if your system can convert (unsigned) long to long double values
    with special algorithm. */
@@ -605,6 +607,9 @@
 
 /* Version number of package */
 #define H5_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
+
+/* Data accuracy is prefered to speed during data conversions */
+#cmakedefine H5_WANT_DATA_ACCURACY @H5_WANT_DATA_ACCURACY@
 
 /* Check exception handling functions during data conversions */
 #cmakedefine H5_WANT_DCONV_EXCEPTION @H5_WANT_DCONV_EXCEPTION@

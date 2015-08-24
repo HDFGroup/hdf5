@@ -60,8 +60,6 @@
 /* Cache configuration settings */
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 #define H5C__H5C_T_MAGIC	0x005CAC0E
-#define H5C__MAX_NUM_TYPE_IDS	28
-#define H5C__PREFIX_LEN		32
 
 /****************************************************************************
  *
@@ -595,7 +593,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)        \
 {                                                                \
     (((cache_ptr)->clears)[(entry_ptr)->type->id])++;            \
-    if ( (entry_ptr)->is_pinned )                                \
+    if((entry_ptr)->is_pinned)                                   \
         (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++; \
     ((entry_ptr)->clears)++;                                     \
 }
@@ -709,9 +707,9 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)         \
 {                                                                 \
-    if ( (entry_ptr)->is_pinned )                                 \
-        (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++;  \
     (((cache_ptr)->clears)[(entry_ptr)->type->id])++;             \
+    if((entry_ptr)->is_pinned)                                    \
+        (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++;  \
 }
 
 #define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)         \
@@ -3769,7 +3767,8 @@ struct H5C_t {
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-
+H5_DLL herr_t H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id,
+    H5C_cache_entry_t *entry_ptr, unsigned flags, int64_t *entry_size_change_ptr);
 
 #endif /* _H5Cpkg_H */
 

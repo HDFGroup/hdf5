@@ -3357,7 +3357,7 @@ herr_t H5LTget_attribute_long( hid_t loc_id,
 *
 * Date: June 17, 2005
 *
-* Comments: This funstion was added to suuport INTEGER*8 Fortran types
+* Comments: This function was added to support INTEGER*8 Fortran types
 *
 * Modifications:
 *
