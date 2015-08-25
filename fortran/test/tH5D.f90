@@ -343,7 +343,7 @@ CONTAINS
     !Modify dataset creation properties, i.e. enable chunking
     !
     CALL h5pcreate_f(H5P_DATASET_CREATE_F, crp_list, error)
-    CALL check("h5pcreat_f",error,total_error)
+    CALL check("h5pcreate_f",error,total_error)
     
     CALL h5pset_chunk_f(crp_list, RANK, dims1, error)
     CALL check("h5pset_chunk_f",error,total_error)
@@ -508,5 +508,123 @@ CONTAINS
     
     RETURN
   END SUBROUTINE extenddsettest
+
+!
+! The following subroutine tests h5dget_offset_f functionality
+!
+
+  SUBROUTINE test_userblock_offset(cleanup, total_error)
+
+    USE ISO_C_BINDING
+
+    IMPLICIT NONE
+    LOGICAL, INTENT(IN) :: cleanup
+    INTEGER, INTENT(OUT) :: total_error
+    !
+    !the dataset is stored in file "offset.h5"
+    !
+    INTEGER, PARAMETER :: dset_dim1=2, dset_dim2=10
+    CHARACTER(LEN=6), PARAMETER :: filename = "offset"
+    CHARACTER(LEN=80) :: fix_filename
+
+    INTEGER(hid_t) :: file, fcpl, dataset, space
+    INTEGER :: i, j, n, ios
+    INTEGER(hsize_t), DIMENSION(1:2) ::	dims
+    INTEGER :: f
+    INTEGER(haddr_t) :: offset
+    INTEGER, DIMENSION(1:dset_dim1,1:dset_dim2), TARGET :: rdata, data_in
+    INTEGER :: error
+    TYPE(C_PTR) :: f_ptr
+    !
+    !Create a new file using default properties.
+    !
+    CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+    IF (error .NE. 0) THEN
+       WRITE(*,*) "Cannot modify filename"
+       STOP
+    ENDIF
+
+    CALL h5pcreate_f(H5P_FILE_CREATE_F, fcpl, error)
+    CALL check("h5pcreate_f",error,total_error)
+
+    ! Initialize the dataset
+    n = 0
+    DO i = 1, dset_dim1
+       DO j = 1, dset_dim2
+          n = n + 1
+          data_in(i,j) = n 
+       END DO
+    END DO
+    CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file, error, fcpl)
+    CALL check("h5fcreate_f",error,total_error)
+
+    ! Create the data space
+    dims(1:2) = (/dset_dim1,dset_dim2/)
+    
+    CALL h5screate_simple_f(2, dims, space, error)
+    CALL check("h5screate_simple_f",error,total_error)
+
+    ! Create the dataset
+    CALL h5dcreate_f(file, "dset1", H5T_NATIVE_INTEGER, space, dataset, error)
+    CALL check("h5dcreate_f", error, total_error)
+
+    ! Test dataset address.  Should be undefined.
+    CALL h5dget_offset_f(dataset, offset, error)
+    CALL VERIFY("h5dget_offset_f",offset, HADDR_UNDEF_F, total_error)
+
+    ! Write the data to the dataset
+    f_ptr = C_LOC(data_in(1,1))
+    CALL h5dwrite_f(dataset, H5T_NATIVE_INTEGER, f_ptr, error)
+    CALL check("h5dwrite_f", error, total_error)
+
+    ! Test dataset address in file. Open the same file as a C file, seek
+    ! the data position as H5Dget_offset points to, read the dataset, and
+    ! compare it with the data written in.
+    CALL h5dget_offset_f(dataset, offset, error)
+    CALL check("h5dget_offset_f", error, total_error)
+    IF(offset.EQ.HADDR_UNDEF_F)THEN
+       total_error = total_error + 1
+    ENDIF
+
+    CALL h5dclose_f(dataset, error)
+    CALL check("h5dclose_f", error, total_error)
+    CALL h5fclose_f(file, error)
+    CALL check("h5fclose_f", error, total_error)
+
+    IF(total_error.NE.0) RETURN
+
+    OPEN(10,FILE=fix_filename, ACCESS="STREAM", IOSTAT=ios)
+    IF(ios.NE.0)THEN
+       WRITE(*,'(A)') "Failed to open file "//TRIM(fix_filename)
+       total_error = total_error + 1
+       RETURN
+    ENDIF
+    ! The pos= specifier illustrates that positions are in bytes, 
+    ! starting from byte 1 (as opposed to C, where they start from byte 0)
+    READ(10, POS=offset+1, IOSTAT=ios) rdata
+    IF(ios.NE.0)THEN
+       WRITE(*,'(A)') "Failed to read data from stream I/O "
+       total_error = total_error + 1
+       CLOSE(10)
+       RETURN
+    ENDIF
+
+    ! Check that the values read are the same as the values written
+    DO i = 1, dset_dim1
+       DO j = 1, dset_dim2
+          CALL VERIFY("h5dget_offset_f",rdata(i,j), data_in(i,j), total_error)
+          IF(total_error.NE.0)THEN
+             WRITE(*,'(A)') "    Read different values than written."
+             WRITE(*,'(2(A,I0))') "    At index ",i,",",j
+             CLOSE(10)
+             RETURN
+          ENDIF
+       END DO
+    END DO
+
+    CLOSE(10)
+    
+  END SUBROUTINE test_userblock_offset
+
 END MODULE TH5D
 

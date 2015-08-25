@@ -93,6 +93,8 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL extenddsettest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Extendible dataset test', total_error)
+  CALL test_userblock_offset(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Dataset offset with user block', total_error)
 
 !     write(*,*)
 !     write(*,*) '========================================='
