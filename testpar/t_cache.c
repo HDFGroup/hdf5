@@ -7561,14 +7561,6 @@ main(int argc, char **argv)
                           world_mpi_rank, FUNC);
             }
         }
-        if ( H5Pset_coll_metadata_read(fapl, 1) < 0 ) {
-
-            nerrors++;
-            if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: H5Pset_coll_metadata_read() failed 1.\n",
-                          world_mpi_rank, FUNC);
-            }
-        }
     }
 
     setup_rand();
@@ -7599,18 +7591,6 @@ main(int argc, char **argv)
     smoke_check_2(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
     smoke_check_2(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
 #endif
-    /* MSC - smoke check 3 and 4 do independent reads, so we disable
-       the collective metadata read property here */
-    if ( world_mpi_rank != world_server_mpi_rank ) {
-        if ( H5Pset_coll_metadata_read(fapl, 0) < 0 ) {
-
-            nerrors++;
-            if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: H5Pset_coll_metadata_read() failed 1.\n",
-                          world_mpi_rank, FUNC);
-            }
-        }
-    }
 #if 1
     smoke_check_3(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
     smoke_check_3(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
@@ -7619,9 +7599,9 @@ main(int argc, char **argv)
     smoke_check_4(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
     smoke_check_4(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
 #endif
-    /* re-enable the collective metadata read property */
+    /* enable the collective metadata read property */
     if ( world_mpi_rank != world_server_mpi_rank ) {
-        if ( H5Pset_coll_metadata_read(fapl, 0) < 0 ) {
+        if ( H5Pset_coll_metadata_read(fapl, 1) < 0 ) {
 
             nerrors++;
             if ( verbose ) {

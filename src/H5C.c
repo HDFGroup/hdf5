@@ -966,6 +966,12 @@ H5C_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "Target entry is protected.")
     if(entry_ptr->is_pinned)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "Target entry is pinned.")
+#ifdef H5_HAVE_PARALLEL
+    if(entry_ptr->coll_access) {
+        entry_ptr->coll_access = FALSE;
+        H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
+    }
+#endif /* H5_HAVE_PARALLEL */
 
     /* If we get this far, call H5C__flush_single_entry() with the
      * H5C__FLUSH_INVALIDATE_FLAG and the H5C__FLUSH_CLEAR_ONLY_FLAG.
