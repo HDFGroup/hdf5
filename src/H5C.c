@@ -7756,7 +7756,9 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     else
         destroy_entry = destroy;
 
+#ifdef H5_HAVE_PARALLEL
     HDassert(FALSE == entry_ptr->coll_access);
+#endif
 
     /* we will write the entry to disk if it exists, is dirty, and if the 
      * clear only flag is not set.
@@ -9023,10 +9025,12 @@ H5C_make_space_in_cache(H5F_t *	f,
                     cache_ptr->entries_removed_counter = 0;
                     cache_ptr->last_entry_removed_ptr  = NULL;
 
+#ifdef H5_HAVE_PARALLEL
                     if(TRUE == entry_ptr->coll_access) {
                         entry_ptr->coll_access = FALSE;
                         H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
                     }
+#endif
 
                     if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__NO_FLAGS_SET, NULL, NULL) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
@@ -9045,10 +9049,12 @@ H5C_make_space_in_cache(H5F_t *	f,
                     cache_ptr->entries_scanned_to_make_space++;
 #endif /* H5C_COLLECT_CACHE_STATS */
 
+#ifdef H5_HAVE_PARALLEL
                     if(TRUE == entry_ptr->coll_access) {
                         entry_ptr->coll_access = FALSE;
                         H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
                     }
+#endif
 
                     if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL, NULL) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
