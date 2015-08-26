@@ -298,7 +298,7 @@ test_pmdset(size_t niter, unsigned flags)
 
                 /* Reopen datasets */
                 for(k = 0; k < ndsets; k++) {
-                    if((multi_info[k].dset_id = H5Dopen(file_id, dset_name[k], H5P_DEFAULT)) < 0)
+                    if((multi_info[k].dset_id = H5Dopen2(file_id, dset_name[k], H5P_DEFAULT)) < 0)
                         T_PMD_ERROR
                 } /* end for */
 
