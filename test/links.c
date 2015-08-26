@@ -31,7 +31,7 @@
 #define H5FD_TESTING
 
 #include "h5test.h"
-#include "H5srcdir.h"a
+#include "H5srcdir.h"
 #include "H5FDpkg.h"        /* File drivers         */
 #include "H5Gpkg.h"		    /* Groups 				*/
 #include "H5Iprivate.h"		/* IDs                  */
@@ -3958,7 +3958,8 @@ external_set_elink_fapl3(hbool_t new_format)
  *-------------------------------------------------------------------------
  */
 static int
-external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
+external_set_elink_acc_flags(const char H5_ATTR_UNUSED *env_h5_drvr,
+    hid_t fapl, hbool_t new_format)
 {
     hid_t       file1 = -1, file2 = -1, group = -1, subgroup = -1, gapl = -1;
     char        filename1[NAME_BUF_SIZE],
