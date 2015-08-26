@@ -1279,7 +1279,7 @@ static void size2_verify_plist1(hid_t plist)
     CHECK_I(ret, "H5Pget_fill_value");
 
     ret = memcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
-    VERIFY(ret, 0, memcmp);
+    VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype1_id);
     CHECK_I(ret, "H5Tclose");
@@ -1350,7 +1350,7 @@ static void size2_verify_plist2(hid_t plist)
     CHECK_I(ret, "H5Pget_fill_value");
 
     ret = HDmemcmp(&fill2, &fill2_correct, (size_t)DTYPE2_SIZE);
-    VERIFY(ret, 0, memcmp);
+    VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype2_id);
     CHECK_I(ret, "H5Tclose");
