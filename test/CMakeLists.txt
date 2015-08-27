@@ -326,7 +326,7 @@ if (BUILD_SHARED_LIBS)
   target_link_libraries (hyperslab-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (hyperslab-shared PROPERTIES FOLDER test)
   if (HDF5_ENABLE_THREADSAFE)
-    set_property (TARGET hyperslab-shared}
+    set_property (TARGET hyperslab-shared
         APPEND PROPERTY COMPILE_DEFINITIONS
             "H5_HAVE_THREADSAFE"
     )
