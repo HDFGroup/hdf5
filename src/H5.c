@@ -31,7 +31,6 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5SLprivate.h"        /* Skip lists                           */
 #include "H5Tprivate.h"         /* Datatypes                            */
-#include "H5TSprivate.h"        /* Thread safety                        */
 
 /****************/
 /* Local Macros */
