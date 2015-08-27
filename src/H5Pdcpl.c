@@ -1478,8 +1478,7 @@ done:
  *
  * Purpose:   Set the default layout information for the various types of
  *              dataset layouts
-
- 
+ *
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol

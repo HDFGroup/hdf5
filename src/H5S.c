@@ -1869,14 +1869,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5S_set_extent
  *
- * Purpose:     Modify the dimensions of a dataspace. Based on H5S_extend.
- *
- *              Note that this function does *not* clip unlimited
- *              selections, because it is not currently necessary to do
- *              that anywhere this function is called.  If this becomes
- *              necessary (if the selection could be unlimited and the
- *              clip size is not being handled separately), this function
- *              must be updated to (optionally) clip the selection.
+ * Purpose:     Modify the dimensions of a dataspace. Based on H5S_extend
  *
  * Return:      Success: Non-negative
  *              Failure: Negative
@@ -1958,13 +1951,6 @@ H5S_has_extent(const H5S_t *ds)
  * Function:    H5S_set_extent_real
  *
  * Purpose:     Modify the dimensions of a dataspace. Based on H5S_extend
- *
- *              Note that this function does *not* clip unlimited
- *              selections, because it is not currently necessary to do
- *              that anywhere this function is called.  If this becomes
- *              necessary (if the selection could be unlimited and the
- *              clip size is not being handled separately), this function
- *              must be updated to (optionally) clip the selection.
  *
  * Return:      Success: Non-negative
  *              Failure: Negative

@@ -1,4 +1,4 @@
-
+#
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -1233,7 +1233,6 @@
 ./tools/misc/vds/UC_5.h
 ./tools/misc/vds/UC_5_stride_gen.c
 ./tools/misc/vds/UC_common.h
-
 
 # h5stat sources
 ./tools/h5stat/Makefile.am
