@@ -22856,7 +22856,7 @@ $as_echo_n "checking whether make will build with undefined variables... " >&6; 
 
   cat >maketest <<EOF
 foo: \$(UNDEFINED) \$(UNDEFINED2)
-	echo \$(UNDEFINED3) works
+	@echo \$(UNDEFINED3) works
 EOF
 
   if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
@@ -27178,9 +27178,9 @@ fi
 ## Default to no if producton is enabled
 if test "X-$DEBUG_PKG" = X- ; then
     if test "$enable_production" = yes ; then
-  DEBUG_PKG=no
+	DEBUG_PKG=no
     else
-  DEBUG_PKG=yes
+	DEBUG_PKG=yes
     fi
 fi
 
@@ -27554,7 +27554,7 @@ int
 main ()
 {
  MPI_Init(0, (void *)0);
-          MPI_File_open(0, (void *)0, 0, 0, (void *)0);
+		      MPI_File_open(0, (void *)0, 0, 0, (void *)0);
   ;
   return 0;
 }
@@ -27565,7 +27565,7 @@ $as_echo "yes" >&6; }
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-        as_fn_error $? "unable to link a simple MPI-IO C program" "$LINENO" 5
+		    as_fn_error $? "unable to link a simple MPI-IO C program" "$LINENO" 5
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -30978,7 +30978,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile tools/perform/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/src/H5fort_type_defines.h fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
+ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpvds.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5ls/testh5lsvds.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/misc/vds/Makefile tools/h5stat/testh5stat.sh tools/h5stat/Makefile tools/perform/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/src/H5fort_type_defines.h fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
 
 
 cat >confcache <<\_ACEOF
