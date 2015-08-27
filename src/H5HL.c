@@ -763,7 +763,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
         size_t	need_more;      /* How much more space we need */
         size_t	new_dblk_size;  /* Final size of space allocated for heap data block */
         size_t	old_dblk_size;  /* Previous size of space allocated for heap data block */
-        htri_t	extended;       /* Whether the local heap's data segment on disk was extended */
+        htri_t  was_extended;   /* Whether the local heap's data segment on disk was extended */
 
         /* At least double the heap's size, making certain there's enough room
          * for the new object */
@@ -786,12 +786,12 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 	H5_CHECK_OVERFLOW(new_dblk_size, size_t, hsize_t);
 
         /* Extend current heap if possible */
-	extended = H5MF_try_extend(f, dxpl_id, H5FD_MEM_LHEAP, heap->dblk_addr, (hsize_t)(heap->dblk_size), (hsize_t)need_more);
-        if(extended < 0)
+	was_extended = H5MF_try_extend(f, dxpl_id, H5FD_MEM_LHEAP, heap->dblk_addr, (hsize_t)(heap->dblk_size), (hsize_t)need_more);
+        if(was_extended < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, UFAIL, "error trying to extend heap")
 
-	/* Check if we extended the heap data block in file */
-	if(extended == TRUE) {
+        /* Check if we extended the heap data block in file */
+        if(was_extended == TRUE) {
             /* Check for prefix & data block contiguous */
             if(heap->single_cache_obj) {
                 /* Resize prefix+data block */

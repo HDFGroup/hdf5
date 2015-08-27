@@ -23,13 +23,13 @@ PROGRAM main
   IMPLICIT NONE
 
 ! KIND parameters
-  INTEGER, PARAMETER :: int_k1 = SELECTED_INT_KIND(Fortran_INTEGER_1)  ! This should map to INTEGER*1 on most modern processors
-  INTEGER, PARAMETER :: int_k4 = SELECTED_INT_KIND(Fortran_INTEGER_2)  ! This should map to INTEGER*2 on most modern processors
-  INTEGER, PARAMETER :: int_k8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  ! This should map to INTEGER*4 on most modern processors
-  INTEGER, PARAMETER :: int_k16 = SELECTED_INT_KIND(Fortran_INTEGER_8) ! This should map to INTEGER*8 on most modern processors
+  INTEGER, PARAMETER :: int_k1 = SELECTED_INT_KIND(2)  ! This should map to INTEGER*1 on most modern processors
+  INTEGER, PARAMETER :: int_k4 = SELECTED_INT_KIND(4)  ! This should map to INTEGER*2 on most modern processors
+  INTEGER, PARAMETER :: int_k8 = SELECTED_INT_KIND(9)  ! This should map to INTEGER*4 on most modern processors
+  INTEGER, PARAMETER :: int_k16 = SELECTED_INT_KIND(18) ! This should map to INTEGER*8 on most modern processors
 
-  INTEGER, PARAMETER :: r_k4 = SELECTED_REAL_KIND(Fortran_REAL_4) ! This should map to REAL*4 on most modern processors
-  INTEGER, PARAMETER :: r_k8 = SELECTED_REAL_KIND(Fortran_REAL_8) ! This should map to REAL*8 on most modern processors
+  INTEGER, PARAMETER :: r_k4 = SELECTED_REAL_KIND(6,37) ! This should map to REAL*4 on most modern processors
+  INTEGER, PARAMETER :: r_k8 = SELECTED_REAL_KIND(15,307) ! This should map to REAL*8 on most modern processors
 
 ! FILES
 

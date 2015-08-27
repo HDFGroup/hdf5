@@ -30,15 +30,6 @@
 
 #include <zlib.h>
 
-#ifdef VMS
-#  define unlink        delete
-#endif  /* VMS */
-
-#ifdef RISCOS
-#  define unlink        remove
-#  define fileno(file)  file->__file
-#endif  /* RISCOS */
-
 #define ONE_KB              1024
 #define ONE_MB              (ONE_KB * ONE_KB)
 #define ONE_GB              (ONE_MB * ONE_KB)

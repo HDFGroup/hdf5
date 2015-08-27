@@ -36,13 +36,8 @@
 /* File for external link test.  Created with gen_udlinks.c */
 #define LINKED_FILE  "be_extlink2.h5"
 
-#ifdef H5_VMS
-#define TMPDIR          "[.tmp]"
-#define TMPDIR2         "[.tmp2]"
-#else /* H5_VMS */
 #define TMPDIR          "tmp/"
 #define TMPDIR2         "tmp2/"
-#endif /* H5_VMS */
 
 /* Symlinks for external link symlink test */
 #define SYMLINK1  TMPDIR "sym1.h5"
@@ -320,7 +315,7 @@ typedef struct {
  * Function:    fix_ext_filename
  *
  * Purpose:     Internal function to append path to file name.  It handles
- *              path name of Unix, Windows, and OpenVMS.
+ *              path name of Unix and Windows.
  *
  * Return:      void
  *
@@ -333,17 +328,8 @@ fix_ext_filename(char *path_name, char *cwd, const char *file_name)
 {
     HDstrcpy(path_name, cwd);
 
-#ifdef H5_VMS
-    if(file_name[0] == '[') {
-        char *tmp = file_name;
-        path_name[strlen(cwd)-1] = '\0';
-        HDstrcat(path_name, ++tmp);
-    } else
-        HDstrcat(path_name, file_name);
-#else
     HDstrcat(path_name, "/");
     HDstrcat(path_name, file_name);
-#endif
 }
 
 
@@ -2877,7 +2863,6 @@ external_link_abs_mainpath(hid_t fapl, hbool_t new_format)
      * set up name for main file:
      *	Linux: "/CWD/tmp/extlinks0"
      *  Window: "<cur drive>:/CWD/tmp/extlinks0"
-     *  OpenVMS: "<cur disk>$<partition>:[CWD.tmp]extlinks0"
      */
     fix_ext_filename(tmpname, cwdpath, FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
@@ -6943,7 +6928,6 @@ external_file_cache(hid_t fapl, hbool_t new_format)
     /* Verify that all files are now closed */
     H5F_sfile_assert_num(0);
 
-#ifndef H5_CANNOT_OPEN_TWICE
     /*
      * Test 5: 3 file cycle
      */
@@ -7045,7 +7029,6 @@ external_file_cache(hid_t fapl, hbool_t new_format)
 
     /* Verify that all files are now closed */
     H5F_sfile_assert_num(0);
-#endif /* H5_CANNOT_OPEN_TWICE */
 
     /* Close fapl */
     H5Pclose(my_fapl);
@@ -14580,15 +14563,11 @@ main(void)
                 printf("\n---Testing without external file cache---\n");
             } /* end else */
 
-#ifndef H5_CANNOT_OPEN_TWICE
             nerrors += external_link_root(my_fapl, new_format) < 0 ? 1 : 0;
-#endif /* H5_CANNOT_OPEN_TWICE */
             nerrors += external_link_path(my_fapl, new_format) < 0 ? 1 : 0;
-#ifndef H5_CANNOT_OPEN_TWICE
             nerrors += external_link_self(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_pingpong(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_toomany(my_fapl, new_format) < 0 ? 1 : 0;
-#endif /* H5_CANNOT_OPEN_TWICE */
             nerrors += external_link_dangling(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_recursive(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_query(my_fapl, new_format) < 0 ? 1 : 0;
@@ -14596,9 +14575,7 @@ main(void)
             nerrors += external_link_unlink_dense(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_move(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_ride(my_fapl, new_format) < 0 ? 1 : 0;
-#ifndef H5_CANNOT_OPEN_TWICE
             nerrors += external_link_closing(my_fapl, new_format) < 0 ? 1 : 0;
-#endif /* H5_CANNOT_OPEN_TWICE */
             nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
             nerrors += external_link_strong(my_fapl, new_format) < 0 ? 1 : 0;
 
@@ -14628,9 +14605,7 @@ main(void)
             nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
-#ifndef H5_CANNOT_OPEN_TWICE
             nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
-#endif /* H5_CANNOT_OPEN_TWICE */
         } /* end for */
 
         /* These tests assume that external links are a form of UD links,
@@ -14654,9 +14629,7 @@ main(void)
         nerrors += obj_visit_by_name(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += obj_visit_stop(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += link_filters(my_fapl, new_format) < 0 ? 1 : 0;
-#ifndef H5_CANNOT_OPEN_TWICE
         nerrors += obj_exists(my_fapl, new_format) < 0 ? 1 : 0;
-#endif /* H5_CANNOT_OPEN_TWICE */
 
         /* Keep this test last, it's testing files that are used above */
         /* do not do this for files used by external link tests */

@@ -515,7 +515,7 @@ test_reference_region(void)
     hsize_t	high[SPACE2_RANK];	/* Selection bounds */
     hdset_reg_ref_t      *wbuf,		/* buffer to write to disk */
                *rbuf;       /* buffer read from disk */
-    hdset_reg_ref_t  nvrbuf[3]={{0},{101},{1000000000}}; /* buffer with non-valid refs */
+    hdset_reg_ref_t  nvrbuf[3]={{0},{101},{255}}; /* buffer with non-valid refs */
     uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
                *drbuf;      /* Buffer for reading numeric data from disk */
     uint8_t    *tu8;        /* Temporary pointer to uint8 data */
@@ -762,7 +762,7 @@ test_reference_region(void)
     VERIFY(ret, 36, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_hyper_nblocks(sid2);
     VERIFY(ret, 1, "H5Sget_select_hyper_nblocks");
-    coords = HDmalloc(ret * SPACE2_RANK * sizeof(hsize_t) * 2); /* allocate space for the hyperslab blocks */
+    coords = (hsize_t *)HDmalloc(ret * SPACE2_RANK * sizeof(hsize_t) * 2); /* allocate space for the hyperslab blocks */
     ret = H5Sget_select_hyper_blocklist(sid2, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
     VERIFY(coords[0], 2, "Hyperslab Coordinates");
@@ -790,7 +790,7 @@ test_reference_region(void)
     VERIFY(ret, 10, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_elem_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_elem_npoints");
-    coords = HDmalloc(ret * SPACE2_RANK * sizeof(hsize_t)); /* allocate space for the element points */
+    coords = (hsize_t *)HDmalloc(ret * SPACE2_RANK * sizeof(hsize_t)); /* allocate space for the element points */
     ret = H5Sget_select_elem_pointlist(sid2, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
     VERIFY(coords[0], coord1[0][0], "Element Coordinates");
