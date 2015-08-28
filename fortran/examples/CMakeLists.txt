@@ -52,7 +52,7 @@ foreach (example ${examples})
       FOLDER examples/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
   )
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     add_executable (f90_ex_${example}-shared ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
     TARGET_NAMING (f90_ex_${example}-shared SHARED)
     TARGET_FORTRAN_PROPERTIES (f90_ex_${example}-shared SHARED " " " ")
@@ -66,7 +66,7 @@ foreach (example ${examples})
         FOLDER examples/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
     )
-  endif (BUILD_SHARED_LIBS)
+  endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 endforeach (example ${examples})
 
 if (HDF5_ENABLE_F2003)
@@ -84,7 +84,7 @@ if (HDF5_ENABLE_F2003)
         FOLDER examples/fortran03
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
     )
-    if (BUILD_SHARED_LIBS)
+    if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       add_executable (f03_ex_${example}-shared ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
       TARGET_NAMING (f03_ex_${example}-shared SHARED)
       TARGET_FORTRAN_PROPERTIES (f03_ex_${example}-shared SHARED " " " ")
@@ -98,7 +98,7 @@ if (HDF5_ENABLE_F2003)
           FOLDER examples/fortran03
           Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
       )
-    endif (BUILD_SHARED_LIBS)
+    endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   endforeach (example ${F2003_examples})
 endif (HDF5_ENABLE_F2003)
 
@@ -117,7 +117,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
       FOLDER examples/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
   )
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     add_executable (f90_ex_ph5example-shared ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
     TARGET_NAMING (f90_ex_ph5example-shared SHARED)
     TARGET_FORTRAN_PROPERTIES (f90_ex_ph5example-shared SHARED " " " ")
@@ -132,7 +132,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
         FOLDER examples/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
     )
-  endif (BUILD_SHARED_LIBS)
+  endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 endif (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 
 if (BUILD_TESTING)

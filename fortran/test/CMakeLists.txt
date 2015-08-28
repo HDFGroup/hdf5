@@ -22,7 +22,7 @@ set_target_properties (${HDF5_F90_C_TEST_LIB_TARGET} PROPERTIES
     LINKER_LANGUAGE C
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c)
   TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_F90_C_TEST_LIBSH_TARGET}
@@ -37,7 +37,7 @@ if (BUILD_SHARED_LIBS)
       INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
       INTERFACE_COMPILE_DEFINITIONS H5_BUILT_AS_DYNAMIC_LIB=1
   )
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 # See if the F2008 intrinsic STORAGE_SIZE and C_SIZEOF are supported. If not then
 # fall back to F2003. If F2003 not supported then use F90 for the tests.
@@ -45,19 +45,19 @@ endif (BUILD_SHARED_LIBS)
 set_source_files_properties (tf_F90.f90 tf_F03.f90 tf_F08.f90 tf.f90 PROPERTIES LANGUAGE Fortran)
 if (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
   add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf_F08.f90 tf.f90)
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf_F08.f90 tf.f90)
-  endif (BUILD_SHARED_LIBS)
+  endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 elseif (HDF5_ENABLE_F2003)
   add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf_F03.f90 tf.f90)
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf_F03.f90 tf.f90)
-  endif (BUILD_SHARED_LIBS)
+  endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 else (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
   add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf_F90.f90 tf.f90) 
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf_F90.f90 tf.f90) 
-  endif (BUILD_SHARED_LIBS)
+  endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 endif (FORTRAN_HAVE_STORAGE_SIZE AND FORTRAN_HAVE_C_SIZEOF)
 
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} STATIC " " " ")
@@ -79,7 +79,7 @@ if (WIN32)
         COMPILE_DEFINITIONS "HDF5F90_WINDOWS"
     )
 endif (WIN32)
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   set (SHARED_LINK_FLAGS " ")
   if (WIN32 AND MSVC)
     set (SHARED_LINK_FLAGS "/DLL")
@@ -105,7 +105,7 @@ if (BUILD_SHARED_LIBS)
         COMPILE_DEFINITIONS "BUILD_HDF5_TEST_DLL;HDF5F90_WINDOWS"
     )
   endif (WIN32)
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-----------------------------------------------------------------------------
 # Add Tests
@@ -145,7 +145,7 @@ set_target_properties (testhdf5_fortran PROPERTIES
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (testhdf5_fortran-shared
       fortranlib_test.f90
       tH5A.f90
@@ -179,7 +179,7 @@ if (BUILD_SHARED_LIBS)
         FOLDER test/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-- Adding test for testhdf5_fortran_1_8
 add_executable (testhdf5_fortran_1_8
@@ -206,7 +206,7 @@ set_target_properties (testhdf5_fortran_1_8 PROPERTIES
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (testhdf5_fortran_1_8-shared
       fortranlib_test_1_8.f90
       tH5O.f90
@@ -231,7 +231,7 @@ if (BUILD_SHARED_LIBS)
         FOLDER test/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-- Adding test for fortranlib_test_F03
 if (HDF5_ENABLE_F2003)
@@ -261,7 +261,7 @@ if (HDF5_ENABLE_F2003)
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
   )
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     add_executable (fortranlib_test_F03-shared
         fortranlib_test_F03.f90
         tH5E_F03.f90
@@ -288,7 +288,7 @@ if (HDF5_ENABLE_F2003)
         FOLDER test/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-  endif (BUILD_SHARED_LIBS)
+  endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 endif (HDF5_ENABLE_F2003)
 
 #-- Adding test for fflush1
@@ -309,7 +309,7 @@ set_target_properties (fflush1 PROPERTIES
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (fflush1-shared fflush1.f90)
   TARGET_NAMING (fflush1-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (fflush1-shared SHARED " " " ")
@@ -327,7 +327,7 @@ if (BUILD_SHARED_LIBS)
         FOLDER test/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-- Adding test for fflush2
 add_executable (fflush2 fflush2.f90)
@@ -347,7 +347,7 @@ set_target_properties (fflush2 PROPERTIES
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (fflush2-shared fflush2.f90)
   TARGET_NAMING (fflush2-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (fflush2-shared SHARED " " " ")
@@ -365,6 +365,6 @@ if (BUILD_SHARED_LIBS)
         FOLDER test/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 include (CMakeTests.cmake)
