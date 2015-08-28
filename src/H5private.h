@@ -737,7 +737,8 @@ typedef struct {
 #ifndef HDfclose
     #define HDfclose(F)    fclose(F)
 #endif /* HDfclose */
-/* fcntl() variable arguments */
+#ifdef H5_HAVE_FCNTL
+    #ifndef HDfcntl(F,C,...)    fcntl(F,C,__VA_ARGS__)
 #ifndef HDfdopen
     #define HDfdopen(N,S)    fdopen(N,S)
 #endif /* HDfdopen */
@@ -763,13 +764,19 @@ typedef struct {
     #define HDfileno(F)    fileno(F)
 #endif /* HDfileno */
 #ifndef HDflock
-    /* Flock is not present on all POSIX systems. When it is not present,
-     * do nothing (locking is advisory only).
+    /* NOTE: flock(2) is not present on all POSIX systems.
+     * If it is not present, we try a flock() equivalent based on
+     * fcntl(2), then fall back to a function that always fails if
+     * it is not present at all.
      */
-    #ifdef H5_HAVE_FLOCK
+    #if defined(H5_HAVE_FLOCK)
         #define HDflock(F,L)    flock(F,L)
+    #elif defined(H5_HAVE_FCNTL)
+        H5_DLL int Pflock(int fd, int operation);
+        #define HDflock(F,L)    Pflock(F,L)
     #else
-        #define HDflock(F,L)    0
+        H5_DLL int Nflock(int fd, int operation);
+        #define HDflock(F,L)    Nflock(F,L)
     #endif /* H5_HAVE_FLOCK */
 #endif /* HDflock */
 #ifndef HDfloor

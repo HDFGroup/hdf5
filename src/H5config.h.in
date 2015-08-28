@@ -182,9 +182,6 @@
 /* Define to 1 if you have the `z' library (-lz). */
 #undef HAVE_LIBZ
 
-/* Define to 1 if you have the `lockf' function. */
-#undef HAVE_LOCKF
-
 /* Define to 1 if you have the `longjmp' function. */
 #undef HAVE_LONGJMP
 

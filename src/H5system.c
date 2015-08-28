@@ -624,6 +624,70 @@ HDremove_all(const char *fname)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    Pflock
+ *
+ * Purpose:     Wrapper function for POSIX systems where flock(2) is not
+ *              available.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+/* NOTE: Compile this all the time on POSIX systems, even when flock(2) is
+ *       present so that it's less likely to become dead code.
+ */
+#ifdef H5_HAVE_FCNTL
+int
+Pflock(int fd, int operation) {
+    
+    struct flock    flk;
+    pid_t           pid;
+
+    /* Get the pid */
+    flk.l_pid = HDgetpid();
+
+    /* Set the lock type */
+    if(operation & LOCK_UN)
+        flk.l_type = F_UNLCK;
+    else if(operation & LOCK_SH)
+        flk.l_type = F_RDLCK;
+    else
+        flk.l_type = F_WRLCK;
+
+    /* Set the other flock struct values */
+    flk.l_whence = SEEK_SET;
+    flk.l_start = 0;
+    flk.l_len = 0;              /* to EOF */
+
+    /* Lock or unlock */
+    if(HDfcntl(fd, F_SETLK, flk) < 0)
+        return -1;
+
+    return 0;
+
+} /* end Pflock() */
+#endif /* H5_HAVE_FCNTL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    Nflock
+ *
+ * Purpose:     Wrapper function for systems where no file locking is
+ *              available.
+ *
+ * Return:      Failure:    -1 (always fails)
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Nflock(int fd, int operation) {
+    /* just fail */
+    return -1;
+} /* end Nflock() */
+
+
+/*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
  *
  * Purpose:  Wrapper function for gettimeofday on Windows systems
@@ -692,10 +756,35 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
  */
 int
 Wflock(int fd, int operation) {
-    /* Will eventually use LockFileEx and UnlockFileEx to do work */
-    /* No-op for now */
+
+    HANDLE          hFile;
+    DWORD           dwFlags = LOCKFILE_FAIL_IMMEDIATELY;
+    DWORD           dwReserved = 0;
+                    /* MAXDWORD for entire file */
+    DWORD           nNumberOfBytesToLockLow = MAXDWORD;
+    DWORD           nNumberOfBytesToLockHigh = MAXDWORD;
+                    /* Must initialize OVERLAPPED struct */
+    OVERLAPPED      overlapped = {0};
+
+    /* Get Windows HANDLE */
+    hFile = _get_osfhandle(fd);
+
+    /* Convert to Windows flags */
+    if(operation & LOCK_EX)
+        dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
+
+    /* Lock or unlock */
+    if(operation & LOCK_UN)
+        if(0 == UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow,
+                            nNumberOfBytesToLockHigh, &overlapped))
+            return -1;
+    else
+        if(0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow,
+                            nNumberOfBytesToLockHigh, &overlapped))
+            return -1;
+
     return 0;
-} /* Wflock() */
+} /* end Wflock() */
 
 #ifdef H5_HAVE_WINSOCK2_H
 #pragma comment(lib, "advapi32.lib")

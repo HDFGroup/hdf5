@@ -4093,12 +4093,6 @@ test_file_lock_concur(hid_t in_fapl)
     HDputs("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
-#elif !defined(H5_HAVE_FLOCK)
-
-    SKIPPED();
-    HDputs("    Test skipped due to a lack of flock() on this system.");
-    return 0;
-
 #else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
     if((fapl = H5Pcopy(in_fapl)) < 0)
@@ -4371,13 +4365,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
     HDputs("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
-#elif !defined(H5_HAVE_FLOCK)
-
-    SKIPPED();
-    HDputs("    Test skipped due to a lack of flock() on this system.");
-    return 0;
-
-#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+#elif !defined(H5_HAVE_#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
     if((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR
