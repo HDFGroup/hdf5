@@ -109,9 +109,7 @@ static void test_file_create()
 	file1 = new H5File (FILE1, H5F_ACC_EXCL);
 
 	// Try to create the same file with H5F_ACC_TRUNC. This should fail
-	// because file1 is the same file and is currently open. Skip it on
-	// OpenVMS because it creates another version of the file.
-#ifndef H5_HAVE_FILE_VERSIONS
+	// because file1 is the same file and is currently open.
 	try {
 	    H5File file2 (FILE1, H5F_ACC_TRUNC);  // should throw E
 
@@ -120,7 +118,6 @@ static void test_file_create()
 	}
 	catch( FileIException E ) // catch truncating existing file
 	{} // do nothing, FAIL expected
-#endif // H5_HAVE_FILE_VERSIONS
 
 	// Close file1
 	delete file1;
@@ -141,9 +138,7 @@ static void test_file_create()
 	file1 = new H5File (FILE1, H5F_ACC_TRUNC);
 
 	// Try to create first file again. This should fail because file1
-	// is the same file and is currently open. Skip it on OpenVMS because
-	// it creates another version of the file.
-#ifndef H5_HAVE_FILE_VERSIONS
+	// is the same file and is currently open.
     	try {
 	    H5File file2 (FILE1, H5F_ACC_TRUNC);   // should throw E
 
@@ -154,7 +149,7 @@ static void test_file_create()
 	{} // do nothing, FAIL expected
 
      	// Try with H5F_ACC_EXCL. This should fail too because the file already
-     	// exists. Skip it on OpenVMS because it creates another version of the file.
+     	// exists.
     	try {
 	    H5File file3 (FILE1, H5F_ACC_EXCL);  // should throw E
 
@@ -163,7 +158,6 @@ static void test_file_create()
     	}
 	catch( FileIException E ) // catching H5F_ACC_EXCL on existing file
 	{} // do nothing, FAIL expected
-#endif /*H5_HAVE_FILE_VERSIONS*/
 
     	// Get the file-creation template
 	FileCreatPropList tmpl1 = file1->getCreatePlist();

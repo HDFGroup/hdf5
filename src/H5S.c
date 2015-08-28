@@ -190,7 +190,7 @@ H5S_create(H5S_class_t type)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Create a new dataspace */
-    if(NULL == (new_ds = H5FL_MALLOC(H5S_t)))
+    if(NULL == (new_ds = H5FL_CALLOC(H5S_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Initialize default dataspace state */
