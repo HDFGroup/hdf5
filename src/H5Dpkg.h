@@ -408,6 +408,7 @@ typedef struct H5D_rdcdc_t {
  */
 typedef struct H5D_shared_t {
     size_t              fo_count;       /* Reference count */
+    hbool_t             closing;        /* Flag to indicate dataset is closing */
     hid_t               type_id;        /* ID for dataset's datatype    */
     H5T_t              *type;           /* Datatype for this dataset     */
     H5S_t              *space;          /* Dataspace of this dataset    */
