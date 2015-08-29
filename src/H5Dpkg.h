@@ -535,6 +535,8 @@ H5_DLL H5D_t *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space,
 H5_DLL H5D_t *H5D__create_named(const H5G_loc_t *loc, const char *name,
     hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id);
+H5_DLL H5D_t *H5D__open_name(const H5G_loc_t *loc, const char *name,
+    hid_t dapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5D__get_space_status(H5D_t *dset, H5D_space_status_t *allocation,
     hid_t dxpl_id);
 H5_DLL herr_t H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc,
@@ -604,7 +606,6 @@ H5_DLL herr_t H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage
     H5O_copy_t *cpy_info, hid_t dxpl_id);
 H5_DLL herr_t H5D__contig_delete(H5F_t *f, hid_t dxpl_id,
     const H5O_storage_t *store);
-
 
 /* Functions that operate on chunked dataset storage */
 H5_DLL htri_t H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr,

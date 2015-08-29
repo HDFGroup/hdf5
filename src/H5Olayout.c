@@ -190,7 +190,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
     } /* end if */
     else {
         /* Layout class */
-        mesg->type = (H5D_layout_t)*p++;
+        mesg->type = mesg->storage.type = (H5D_layout_t)*p++;
 
         /* Interpret the rest of the message according to the layout class */
         switch(mesg->type) {
@@ -686,7 +686,7 @@ H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
     FILE * stream, int indent, int fwidth)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    unsigned                    u;
+    size_t                  u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -709,7 +709,7 @@ H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
                       "Number of dimensions:",
                       (unsigned long)(mesg->u.chunk.ndims));
             HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Size:");
-            for(u = 0; u < mesg->u.chunk.ndims; u++)
+            for(u = 0; u < (size_t)mesg->u.chunk.ndims; u++)
                 HDfprintf(stream, "%s%lu", u ? ", " : "", (unsigned long)(mesg->u.chunk.dim[u]));
             HDfprintf(stream, "}\n");
 

@@ -1091,7 +1091,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations")
 
     /* Create the layout information for the new dataset */
-    if((new_dset->shared->layout.ops->construct)(file, new_dset) < 0)
+    if(new_dset->shared->layout.ops->construct && (new_dset->shared->layout.ops->construct)(file, new_dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to construct layout information")
 
     /* Update the dataset's object header info. */
@@ -1142,6 +1142,69 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__open_name
+ *
+ * Purpose:     Opens an existing dataset by name.
+ *
+ * Return:      Success:        Ptr to a new dataset.
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, March 6, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+H5D_t *
+H5D__open_name(const H5G_loc_t *loc, const char *name, hid_t dapl_id,
+    hid_t dxpl_id)
+{
+    H5D_t       *dset = NULL;
+    H5G_loc_t   dset_loc;               /* Object location of dataset */
+    H5G_name_t  path;                   /* Dataset group hier. path */
+    H5O_loc_t   oloc;                   /* Dataset object location */
+    H5O_type_t  obj_type;               /* Type of object at location */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
+    H5D_t       *ret_value;             /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    HDassert(loc);
+    HDassert(name);
+
+    /* Set up dataset location to fill in */
+    dset_loc.oloc = &oloc;
+    dset_loc.path = &path;
+    H5G_loc_reset(&dset_loc);
+
+    /* Find the dataset object */
+    if(H5G_loc_find(loc, name, &dset_loc, dapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found")
+    loc_found = TRUE;
+
+    /* Check that the object found is the correct type */
+    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get object type")
+    if(obj_type != H5O_TYPE_DATASET)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, NULL, "not a dataset")
+
+    /* Open the dataset */
+    if(NULL == (dset = H5D_open(&dset_loc, dapl_id, dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't open dataset")
+
+    /* Set return value */
+    ret_value = dset;
+
+done:
+    if(!ret_value)
+        if(loc_found && H5G_loc_free(&dset_loc) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "can't free location")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__open_name() */
 
 
 /*
@@ -2206,6 +2269,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 {
     hsize_t curr_dims[H5S_MAX_RANK];    /* Current dimension sizes */
     htri_t  changed;                    /* Whether the dataspace changed size */
+    size_t  u;                          /* Local index variable */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, dset->oloc.addr, FAIL)
@@ -2241,10 +2305,9 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
         hbool_t shrink = FALSE;         /* Flag to indicate a dimension has shrank */
         hbool_t expand = FALSE;         /* Flag to indicate a dimension has grown */
         hbool_t update_chunks = FALSE;  /* Flag to indicate chunk cache update is needed */
-        unsigned u;                     /* Local index variable */
 
         /* Determine if we are shrinking and/or expanding any dimensions */
-        for(u = 0; u < dset->shared->ndims; u++) {
+        for(u = 0; u < (size_t)dset->shared->ndims; u++) {
             /* Check for various status changes */
             if(size[u] < curr_dims[u])
                 shrink = TRUE;
@@ -2815,3 +2878,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_type() */
+
