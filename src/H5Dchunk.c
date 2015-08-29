@@ -2120,10 +2120,6 @@ H5D__chunk_flush(H5D_t *dset, hid_t dxpl_id)
     /* Sanity check */
     HDassert(dset);
 
-    /* Flush any data caught in sieve buffer */
-    if(H5D__flush_sieve_buf(dset, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush sieve buffer")
-
     /* Fill the DXPL cache values for later use */
     if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")

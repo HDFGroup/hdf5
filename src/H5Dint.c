@@ -1048,11 +1048,13 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         layout = &new_dset->shared->layout;
         if(H5P_get(dc_plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve layout")
-        if(pline->nused > 0 && H5D_CHUNKED != layout->type)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
         fill = &new_dset->shared->dcpl_cache.fill;
         if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, fill) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill value info")
+
+        /* Check that chunked layout is used if filters are enabled */
+        if(pline->nused > 0 && H5D_CHUNKED != layout->type)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
 
         /* Check if the alloc_time is the default and error out */
         if(fill->alloc_time == H5D_ALLOC_TIME_DEFAULT)
