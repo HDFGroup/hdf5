@@ -612,8 +612,6 @@ H5_DLL htri_t H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr,
     hbool_t write_op);
 H5_DLL herr_t H5D__chunk_create(const H5D_t *dset /*in,out*/, hid_t dxpl_id);
 H5_DLL herr_t H5D__chunk_set_info(const H5D_t *dset);
-H5_DLL herr_t H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
-    hid_t dapl_id);
 H5_DLL hbool_t H5D__chunk_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL herr_t H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *scaled, H5D_chunk_ud_t *udata);
