@@ -4365,7 +4365,7 @@ test_file_lock_swmr_concur(hid_t in_fapl)
     HDputs("    Test skipped due to fork or waitpid not defined.");
     return 0;
 
-#elif !defined(H5_HAVE_#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+#endif /* !(defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID)) */
 
     if((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR
@@ -5035,8 +5035,6 @@ error:
     } H5E_END_TRY;
 
     return -1;
-
-#endif
 
 } /* end test_file_lock_swmr_concur() */
 

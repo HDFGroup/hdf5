@@ -738,7 +738,10 @@ typedef struct {
     #define HDfclose(F)    fclose(F)
 #endif /* HDfclose */
 #ifdef H5_HAVE_FCNTL
-    #ifndef HDfcntl(F,C,...)    fcntl(F,C,__VA_ARGS__)
+    #ifndef HDfcntl
+        #define HDfcntl(F,C,...)    fcntl(F,C,__VA_ARGS__)
+    #endif /* HDfcntl */
+#endif /* H5_HAVE_FCNTL */
 #ifndef HDfdopen
     #define HDfdopen(N,S)    fdopen(N,S)
 #endif /* HDfdopen */
