@@ -39,7 +39,7 @@ if test "x$PERL" = "xfalse"; then
 fi
 
 AC_CONFIG_SRCDIR([src/H5.c])
-AC_CONFIG_HEADER([src/H5config.h])
+AC_CONFIG_HEADERS([src/H5config.h])
 
 AC_CONFIG_AUX_DIR([bin])
 AC_CONFIG_MACRO_DIR([m4])
