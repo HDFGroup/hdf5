@@ -340,6 +340,51 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5A_open
+ *
+ * Purpose: 	Open an attribute according to its name
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		August 29, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+H5A_t *
+H5A_open(const H5G_loc_t *loc, const char *attr_name, hid_t dxpl_id)
+{
+    H5A_t       *attr = NULL;           /* Attribute from object header */
+    H5A_t       *ret_value;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check args */
+    HDassert(loc);
+    HDassert(attr_name);
+
+    /* Read in attribute from object header */
+    if(NULL == (attr = H5O_attr_open_by_name(loc->oloc, attr_name, dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to load attribute info from object header for attribute: '%s'", attr_name)
+
+    /* Finish initializing attribute */
+    if(H5A__open_common(loc, attr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to initialize attribute")
+
+    /* Set return value */
+    ret_value = attr;
+
+done:
+    /* Cleanup on failure */
+    if(ret_value == NULL)
+        if(attr && H5A_close(attr) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A_open() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5A_open_by_idx
  *
  * Purpose: 	Open an attribute according to its index order
