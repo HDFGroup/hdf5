@@ -67,6 +67,9 @@ static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
 static herr_t H5D__init_storage(const H5D_t *dataset, hbool_t full_overwrite,
     hsize_t old_dim[], hid_t dxpl_id);
 
+/* TODO change H5D_open_index to H5D__open_index */
+static herr_t H5D_open_index(H5D_t *dset, hid_t xapl_id);
+static herr_t H5D_close_index(H5D_t *dset);
 static H5S_t *H5D__query(H5D_t *dset, const H5S_t *file_space, H5Q_t *query,
     hid_t xapl_id, hid_t xxpl_id);
 static H5S_t *H5D__query_singleton(H5D_t *dset, const H5S_t *file_space, H5Q_t *query,
@@ -1586,14 +1589,8 @@ H5D_close(H5D_t *dataset)
     dataset->shared->fo_count--;
     if(dataset->shared->fo_count == 0) {
         /* Close index object if index is closed */
-        if (dataset->shared->idx_handle) {
-            H5X_class_t *idx_class = dataset->shared->idx_class;
-
-            if (NULL == (idx_class->close))
-                HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback not defined");
-            if (FAIL == idx_class->close(dataset->shared->idx_handle))
-                HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
-        }
+        if (dataset->shared->idx_handle && (FAIL == H5D_close_index(dataset)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "cannot close index")
 
         /* Flush the dataset's information.  Continue to close even if it fails. */
         if(H5D__flush_real(dataset, H5AC_dxpl_id) < 0)
@@ -3174,6 +3171,82 @@ H5D_get_index(H5D_t *dset, unsigned max_count, H5X_class_t **idx_class,
 } /* end H5D_get_index() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D_open_index
+ *
+ * Purpose: Open index.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_open_index(H5D_t *dset, hid_t xapl_id)
+{
+    hid_t dset_id;
+    H5X_class_t *idx_class;
+    void *idx_handle = NULL;
+    size_t metadata_size;
+    void *metadata;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    dset_id = dset->shared->dset_id;
+    idx_class = dset->shared->idx_class;
+    metadata_size = dset->shared->idx_info.metadata_size;
+    metadata = dset->shared->idx_info.metadata;
+
+    if (NULL == H5I_object_verify(dset_id, H5I_DATASET))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if (NULL == metadata)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "no index metadata was found");
+    if (NULL == idx_class->open)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin open callback not defined");
+    if (NULL == (idx_handle = idx_class->open(dset_id, xapl_id, metadata_size, metadata)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
+
+    dset->shared->idx_handle = idx_handle;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_open_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_close_index
+ *
+ * Purpose: Close index.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_close_index(H5D_t *dset)
+{
+    H5X_class_t *idx_class;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    idx_class = dset->shared->idx_class;
+    if (NULL == (idx_class->close))
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback not defined");
+    if (FAIL == idx_class->close(dset->shared->idx_handle))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
+
+    dset->shared->idx_handle = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_close_index() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D_remove_index
  *
  * Purpose: Remove index.
@@ -3193,17 +3266,8 @@ H5D_remove_index(H5D_t *dset, unsigned H5_ATTR_UNUSED plugin_id)
     HDassert(dset);
 
     /* First close index if opened */
-    if (dset->shared->idx_handle) {
-        H5X_class_t *idx_class = dset->shared->idx_class;
-
-        if (NULL == (idx_class->close))
-            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback not defined");
-        if (FAIL == idx_class->close(dset->shared->idx_handle))
-            HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
-
-        dset->shared->idx_class = NULL;
-        dset->shared->idx_handle = NULL;
-    }
+    if (dset->shared->idx_handle && (FAIL == H5D_close_index(dset)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
 
     /* Remove idx_handle from dataset */
     if (H5O_msg_remove(&dset->oloc, H5O_IDXINFO_ID, H5O_ALL, TRUE, H5AC_dxpl_id) < 0)
@@ -3232,6 +3296,7 @@ herr_t H5D_get_index_size(H5D_t *dset, hsize_t *idx_size)
 {
     H5X_class_t *idx_class = NULL;
     hsize_t actual_size = 0;
+    hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT; /* TODO for now */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3239,12 +3304,13 @@ herr_t H5D_get_index_size(H5D_t *dset, hsize_t *idx_size)
     HDassert(dset);
     HDassert(idx_size);
 
-    if (!dset->shared->idx_handle)
-        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "no index attached to dataset");
-
     idx_class = dset->shared->idx_class;
+    if (!idx_class)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "index class not defined");
     if (NULL == (idx_class->get_size))
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin get size callback not defined");
+    if (!dset->shared->idx_handle && (FAIL == H5D_open_index(dset, xapl_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
     if (FAIL == idx_class->get_size(dset->shared->idx_handle, &actual_size))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "cannot get index size");
 
@@ -3356,6 +3422,9 @@ H5D__query_singleton(H5D_t *dset, const H5S_t *file_space, H5Q_t *query,
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, NULL, "index class not defined");
     if (NULL == idx_class->query)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, NULL, "plugin query callback not defined");
+    /* Open index if not opened yet */
+    if (!dset->shared->idx_handle && (FAIL == H5D_open_index(dset, xapl_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, NULL, "cannot open index");
     /* Call plugin query */
     if (FAIL == (space_id = idx_class->query(dset->shared->idx_handle, file_space_id, query->query_id, xxpl_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, NULL, "cannot query index");

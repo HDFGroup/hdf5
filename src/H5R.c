@@ -556,6 +556,9 @@ H5R_dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, H5R_type_t ref_type, 
                     H5D_close(dset);
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register dataset")
                 } /* end if */
+
+                /* TODO Keep ID of the dataset */
+//                dset->shared->dset_id = ret_value;
             } /* end case */
             break;
 

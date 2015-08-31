@@ -150,6 +150,9 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
 
+    /* Keep ID of the dataset */
+    dset->shared->dset_id = ret_value;
+
     /* Create index if told to */
     if(H5X_can_create(ret_value, dcpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "Index can't be created on this dataset")
@@ -238,6 +241,9 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register dataset")
 
+    /* Keep ID of the dataset */
+    dset->shared->dset_id = ret_value;
+
 done:
     /* Release the dataset's object header, if it was created */
     if(dset) {
@@ -310,21 +316,8 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
     if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "can't register dataset atom")
 
-    /* Open the index as well if present */
-    if (dset->shared->idx_class) {
-        H5X_class_t *idx_class = dset->shared->idx_class;
-        void *idx_handle = NULL;
-        hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT;
-        size_t metadata_size = dset->shared->idx_info.metadata_size;
-        void *metadata = dset->shared->idx_info.metadata;
-
-        if (NULL == idx_class->open)
-            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin open callback not defined");
-        if (NULL == (idx_handle = idx_class->open(ret_value, xapl_id,
-                metadata_size, metadata)))
-            HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
-        dset->shared->idx_handle = idx_handle;
-    }
+    /* Keep ID of the dataset */
+    dset->shared->dset_id = ret_value;
 
 done:
     if(ret_value < 0)

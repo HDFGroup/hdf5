@@ -409,6 +409,7 @@ typedef struct H5D_rdcdc_t {
  * there will be two IDs and two H5D_t structs, both sharing one H5D_shared_t.
  */
 typedef struct H5D_shared_t {
+    hid_t               dset_id;        /* ID of this dataset              */
     size_t              fo_count;       /* Reference count */
     hbool_t             closing;        /* Flag to indicate dataset is closing */
     hid_t               type_id;        /* ID for dataset's datatype    */
