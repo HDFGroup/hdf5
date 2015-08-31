@@ -774,6 +774,7 @@ ac_ct_CC
 LDFLAGS
 CFLAGS
 CC
+Fortran_COMPILER_ID
 PAC_C_MAX_REAL_PRECISION
 UNAME_INFO
 enable_static
@@ -3880,6 +3881,8 @@ $as_echo "done" >&6; }
 
  UNAME_INFO=`uname -a`
 
+
+Fortran_COMPILER_ID=none
 
 ## ----------------------------------------------------------------------
 ## Some platforms have broken basename, and/or xargs programs. Check
@@ -8261,6 +8264,11 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
+
+
+cat >>confdefs.h <<_ACEOF
+#define Fortran_COMPILER_ID $Fortran_COMPILER_ID
+_ACEOF
 
 
   ## Setting definition if there is a 16 byte fortran integer
