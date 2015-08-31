@@ -91,9 +91,9 @@ static herr_t
 H5X_dummy_post_update(void *idx_handle, const void *buf, hid_t dataspace_id,
         hid_t xxpl_id);
 
-static herr_t
-H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
-        hid_t *dataspace_id);
+static hid_t
+H5X_dummy_query(void *idx_handle, hid_t dataspace_id, hid_t query_id,
+        hid_t xxpl_id);
 
 static herr_t
 H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim,
@@ -466,7 +466,7 @@ H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned H5_ATTR_UNUSED 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Apply the query */
-    if (H5Qapply(udata->query_id, &result, type_id, elem) < 0)
+    if (H5Qapply_singleton(udata->query_id, &result, type_id, elem) < 0)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query to data element");
 
     /* Initialize count */
@@ -498,9 +498,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t H5_ATTR_UNUSED xxpl_id,
-        hid_t *dataspace_id)
+static hid_t
+H5X_dummy_query(void *idx_handle, hid_t H5_ATTR_UNUSED dataspace_id, hid_t query_id,
+        hid_t H5_ATTR_UNUSED xxpl_id)
 {
     H5X_dummy_t *dummy = (H5X_dummy_t *) idx_handle;
     H5X__dummy_query_data_t udata;
@@ -508,7 +508,7 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t H5_ATTR_UNUSED xxpl_id,
     size_t nelmts;
     size_t elmt_size = 0, buf_size = 0;
     void *buf = NULL;
-    herr_t ret_value = SUCCEED; /* Return value */
+    hid_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -548,9 +548,9 @@ H5X_dummy_query(void *idx_handle, hid_t query_id, hid_t H5_ATTR_UNUSED xxpl_id,
     if (H5Diterate(buf, type_id, space_id, H5X__dummy_get_query_data_cb, &udata) < 0)
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPUTE, FAIL, "failed to compute buffer size");
 
-    *dataspace_id = udata.space_query;
+    ret_value = udata.space_query;
     H5X_DUMMY_LOG_DEBUG("Created dataspace from index with %d elements",
-            (int) H5Sget_select_npoints(*dataspace_id));
+            (int) H5Sget_select_npoints(ret_value));
 
 done:
     H5MM_free(buf);

@@ -161,9 +161,9 @@ static herr_t
 H5X_fastbit_post_update(void *idx_handle, const void *buf, hid_t dataspace_id,
         hid_t xxpl_id);
 
-static herr_t
-H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
-        hid_t *dataspace_id);
+static hid_t
+H5X_fastbit_query(void *idx_handle, hid_t dataspace_id, hid_t query_id,
+        hid_t xxpl_id);
 
 static herr_t
 H5X_fastbit_refresh(void *idx_handle, size_t *metadata_size, void **metadata);
@@ -248,7 +248,7 @@ H5X__fastbit_init(hid_t dataset_id)
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get dataset name");
 
     H5X_FASTBIT_LOG_DEBUG("Dataset Name : %s", dataset_name);
-    sprintf(fastbit->column_name, dataset_name);
+    sprintf(fastbit->column_name, "%s", dataset_name);
 
     fastbit->idx_reconstructed = FALSE;
 
@@ -261,13 +261,13 @@ H5X__fastbit_init(hid_t dataset_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get dataspace from dataset");
     if (0 == (fastbit->dataset_ndims = (unsigned) H5Sget_simple_extent_ndims(space_id)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, NULL, "invalid number of dimensions");
-    if (NULL == (fastbit->dataset_dims = H5MM_malloc(fastbit->dataset_ndims * sizeof(hsize_t))))
+    if (NULL == (fastbit->dataset_dims = (hsize_t *) H5MM_malloc(fastbit->dataset_ndims * sizeof(hsize_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, NULL, "can't allocate dim array");
     if (FAIL == H5Sget_simple_extent_dims(space_id, fastbit->dataset_dims, NULL))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, NULL, "can't get dataspace dims");
 
     /* Useful for coordinate conversion */
-    if (NULL == (fastbit->dataset_down_dims = H5MM_malloc(fastbit->dataset_ndims * sizeof(hsize_t))))
+    if (NULL == (fastbit->dataset_down_dims = (hsize_t *) H5MM_malloc(fastbit->dataset_ndims * sizeof(hsize_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTALLOC, NULL, "can't allocate dim array");
     if (FAIL == H5VM_array_down(fastbit->dataset_ndims, fastbit->dataset_dims,
             fastbit->dataset_down_dims))
@@ -654,7 +654,7 @@ H5X__fastbit_serialize_metadata(H5X_fastbit_t *fastbit, void *buf,
 
     if (buf) {
         H5O_info_t dset_info;
-        char *buf_ptr = buf;
+        char *buf_ptr = (char *) buf;
 
         dset_info.addr = 0;
 
@@ -697,7 +697,7 @@ static herr_t
 H5X__fastbit_deserialize_metadata(H5X_fastbit_t *fastbit, void *buf)
 {
     haddr_t addr;
-    char *buf_ptr = buf;
+    char *buf_ptr = (char *) buf;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -780,11 +780,11 @@ H5X__fastbit_reconstruct_index(H5X_fastbit_t *fastbit)
     fastbit->nbitmaps = bitmap_array_size / sizeof(uint32_t);
 
     /* allocate buffer to hold data */
-    if (NULL == (fastbit->keys = H5MM_malloc(key_array_size)))
+    if (NULL == (fastbit->keys = (double *) H5MM_malloc(key_array_size)))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate keys");
-    if (NULL == (fastbit->offsets = H5MM_malloc(offset_array_size)))
+    if (NULL == (fastbit->offsets = (int64_t *) H5MM_malloc(offset_array_size)))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate offsets");
-    if (NULL == (fastbit->bitmaps = H5MM_malloc(bitmap_array_size)))
+    if (NULL == (fastbit->bitmaps = (uint32_t *) H5MM_malloc(bitmap_array_size)))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate offsets");
 
     /* Read FastBit keys */
@@ -856,7 +856,7 @@ static double
 H5X__fasbit_query_get_value_as_double(H5Q_t *query)
 {
     H5T_t *type = query->query.select.elem.data_elem.type;
-    double ret_value;
+    double ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -903,7 +903,7 @@ H5X__fastbit_evaluate_query(H5X_fastbit_t *fastbit, hid_t query_id,
     H5Q_t *query;
     double cv;
     FastBitSelectionHandle selection_handle = NULL;
-    FastBitCompareType compare_type = 0;
+    FastBitCompareType compare_type;
     int64_t nhits;
     uint64_t *hit_coords = NULL;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -942,7 +942,7 @@ H5X__fastbit_evaluate_query(H5X_fastbit_t *fastbit, hid_t query_id,
     if (0 > (nhits = fastbit_selection_evaluate(selection_handle)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPUTE, FAIL, "can't evaluate selection");
 
-    if (NULL == (hit_coords = H5MM_malloc(((size_t) nhits) * sizeof(uint64_t))))
+    if (NULL == (hit_coords = (uint64_t *) H5MM_malloc(((size_t) nhits) * sizeof(uint64_t))))
         HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, FAIL, "can't allocate hit coordinates");
 
     if (0 > fastbit_selection_get_coordinates(selection_handle, hit_coords,
@@ -1105,8 +1105,8 @@ done:
 static herr_t
 H5X_fastbit_remove(hid_t file_id, size_t metadata_size, void *metadata)
 {
-    hid_t keys_id, offsets_id, bitmaps_id;
-    char *buf_ptr = metadata;
+    hid_t keys_id = FAIL, offsets_id = FAIL, bitmaps_id = FAIL;
+    char *buf_ptr = (char *) metadata;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1299,15 +1299,15 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t H5_ATTR_UNUSED xxpl_id,
-        hid_t *dataspace_id)
+static hid_t
+H5X_fastbit_query(void *idx_handle, hid_t H5_ATTR_UNUSED dataspace_id,
+        hid_t query_id, hid_t H5_ATTR_UNUSED xxpl_id)
 {
     H5X_fastbit_t *fastbit = (H5X_fastbit_t *) idx_handle;
     hid_t space_id = FAIL, ret_space_id = FAIL;
     uint64_t *coords = NULL;
     uint64_t ncoords = 0;
-    herr_t ret_value = SUCCEED; /* Return value */
+    hid_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
     H5X_FASTBIT_LOG_DEBUG("Enter");
@@ -1335,7 +1335,7 @@ H5X_fastbit_query(void *idx_handle, hid_t query_id, hid_t H5_ATTR_UNUSED xxpl_id
     if (FAIL == H5X__fastbit_create_selection(fastbit, ret_space_id, coords, ncoords))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get query range");
 
-    *dataspace_id = ret_space_id;
+    ret_value = ret_space_id;
 
 done:
     H5MM_free(coords);

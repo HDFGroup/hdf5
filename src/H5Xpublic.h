@@ -54,6 +54,11 @@ typedef enum {
 } H5X_type_t;
 
 typedef struct {
+    hid_t field_datatype_id;
+    unsigned plugin_id;
+} H5X_info_t;
+
+typedef struct {
     unsigned version;     /* Version number of the index plugin class struct */
                           /* (Should always be set to H5X_CLASS_VERSION, which
                            *  may vary between releases of HDF5 library) */
@@ -62,8 +67,8 @@ typedef struct {
     H5X_type_t type;      /* Type of data indexed by this plugin */
 
     /* Callbacks, described above */
-    void * (*create)(hid_t dataset_id, hid_t xcpl_id, hid_t xapl_id,
-            size_t *metadata_size, void **metadata);
+    void * (*create)(hid_t dataset_id, hid_t xcpl_id /* TODO pass datatype id */,
+            hid_t xapl_id, size_t *metadata_size, void **metadata);
     herr_t (*remove)(hid_t file_id, size_t metadata_size, void *metadata);
     void *(*open)(hid_t dataset_id, hid_t xapl_id, size_t metadata_size,
             void *metadata);
@@ -71,8 +76,7 @@ typedef struct {
     herr_t (*pre_update)(void *idx_handle, hid_t dataspace_id, hid_t xxpl_id);
     herr_t (*post_update)(void *idx_handle, const void *buf, hid_t dataspace_id,
             hid_t xxpl_id);
-    herr_t (*query)(void *idx_handle, hid_t query_id, hid_t xxpl_id,
-            hid_t *dataspace_id);
+    hid_t  (*query)(void *idx_handle, hid_t dataspace_id, hid_t query_id, hid_t xxpl_id);
     herr_t (*refresh)(void *idx_handle, size_t *metadata_size, void **metadata);
     herr_t (*copy)(hid_t src_file_id, hid_t dest_file_id, hid_t xcpl_id,
             hid_t xapl_id, size_t src_metadata_size, void *src_metadata,
@@ -96,9 +100,10 @@ H5_DLL herr_t H5Xregister(const H5X_class_t *idx_class);
 H5_DLL herr_t H5Xunregister(unsigned plugin_id);
 
 H5_DLL herr_t H5Xcreate(hid_t scope_id, unsigned plugin_id, hid_t xcpl_id);
-H5_DLL herr_t H5Xremove(hid_t scope_id, unsigned plugin_id);
+H5_DLL herr_t H5Xremove(hid_t scope_id, unsigned n /* Index n to be removed */);
 
 H5_DLL herr_t H5Xget_count(hid_t scope_id, hsize_t *idx_count);
+H5_DLL herr_t H5Xget_info(hid_t scope_id, unsigned n, H5X_info_t *info);
 
 H5_DLL hsize_t H5Xget_size(hid_t scope_id);
 

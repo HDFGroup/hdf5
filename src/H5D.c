@@ -952,31 +952,44 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5Dquery(hid_t dset_id, hid_t query_id, hid_t *space_id)
+hid_t
+H5Dquery(hid_t dset_id, hid_t file_space_id, hid_t query_id, hid_t xapl_id)
 {
     H5D_t *dset = NULL;
-    herr_t ret_value = SUCCEED;
+    const H5S_t *file_space = NULL;
+    H5S_t *ret_space = NULL;
+    H5Q_t *query = NULL;
+    hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT; /* TODO for now */
+    hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*i", dset_id, query_id, space_id);
 
     /* Check arguments */
     if (NULL == (dset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-    if (NULL == H5I_object_verify(query_id, H5I_QUERY))
+    if (H5S_ALL != file_space_id) {
+        if (NULL == (file_space = (const H5S_t *) H5I_object_verify(file_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+
+        /* Check for valid selection */
+        if (H5S_SELECT_VALID(file_space) != TRUE)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent");
+    } /* end if */
+    if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query");
 
-    /* Call query routine of index plugin */
-    if (dset->shared->idx_class) {
-        H5X_class_t *idx_class = dset->shared->idx_class;
-        hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT;
+    /* Get the default index access property list if the user didn't provide one */
+    if (H5P_DEFAULT == xapl_id)
+        xapl_id = H5P_INDEX_ACCESS_DEFAULT;
+    else
+        if (TRUE != H5P_isa_class(xapl_id, H5P_INDEX_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not index access parms");
 
-        if (NULL == idx_class->query)
-            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin query callback not defined");
-        if (FAIL == H5D__query_index(dset, query_id, xxpl_id, space_id))
-            HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, FAIL, "cannot query index");
-    }
+    if (NULL == (ret_space = H5D_query(dset, file_space, query, xapl_id, xxpl_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, FAIL, "cannot query dataset");
+
+    if ((ret_value = H5I_register(H5I_DATASPACE, ret_space, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
 
 done:
     FUNC_LEAVE_API(ret_value)

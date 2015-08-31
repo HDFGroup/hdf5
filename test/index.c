@@ -230,7 +230,7 @@ test_query(hid_t file_id, const char *dataset_name)
 
     gettimeofday(&t1, NULL);
 
-    if (H5Dquery(dataset, query, &space) < 0) FAIL_STACK_ERROR;
+    if ((space = H5Dquery(dataset, H5S_ALL, query, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
 
     gettimeofday(&t2, NULL);
 
@@ -370,6 +370,8 @@ main(int argc, char **argv)
     if (H5Fclose(file) < 0) goto error;
 
     fapl = h5_fileaccess();
+    /* Check that no object is left open */
+    H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
     if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         goto error;
 

@@ -74,6 +74,8 @@ struct H5Q_select {
 
 /* Query */
 struct H5Q_t {
+    hid_t query_id; /* ID of this query, allows to conveniently pass the ID to
+                     * the indexing interface */
     unsigned ref_count; /* ref count */
     hbool_t is_combined;
     union {
@@ -102,7 +104,7 @@ H5_DLL herr_t H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc);
 H5_DLL H5Q_t *H5Q_decode(const unsigned char **buf);
 
 /* Apply query (convenience) */
-H5_DLL herr_t H5Q_apply(H5Q_t *query, hbool_t *result, ...);
+H5_DLL herr_t H5Q_apply_singleton(H5Q_t *query, hbool_t *result, ...);
 H5_DLL herr_t H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem);
 
 #endif /* _H5Qprivate_H */
