@@ -121,8 +121,9 @@ get_H5B2_class(const uint8_t *sig)
             cls = H5A_BT2_CORDER;
             break;
 
+        case H5B2_NUM_BTREE_ID:
         default:
-            HDfprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+            HDfprintf(stderr, "Unknown v2 B-tree subtype %u\n", (unsigned)(subtype));
             HDexit(4);
     } /* end switch */
 
@@ -156,8 +157,9 @@ get_H5EA_class(const uint8_t *sig)
             cls = H5EA_CLS_TEST;
             break;
 
+        case H5EA_NUM_CLS_ID:
         default:
-            HDfprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
+            HDfprintf(stderr, "Unknown extensible array class %u\n", (unsigned)(clsid));
             HDexit(4);
     } /* end switch */
 
@@ -191,8 +193,9 @@ get_H5FA_class(const uint8_t *sig)
             cls = H5FA_CLS_TEST;
             break;
 
+        case H5FA_NUM_CLS_ID: 
         default:
-            HDfprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
+            HDfprintf(stderr, "Unknown fixed array class %u\n", (unsigned)(clsid));
             HDexit(4);
     } /* end switch */
 
@@ -382,8 +385,9 @@ main(int argc, char *argv[])
                 status = H5D_btree_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims, dim);
                 break;
 
+            case H5B_NUM_BTREE_ID:
             default:
-                HDfprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+                HDfprintf(stderr, "Unknown v1 B-tree subtype %u\n", (unsigned)(subtype));
                 HDexit(4);
         }
 

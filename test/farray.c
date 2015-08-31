@@ -1554,11 +1554,11 @@ main(void)
     }
 
     /* Iterate over the testing parameters */
-    for(curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; curr_test++) {
+    for(curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; H5_INC_ENUM(farray_test_type_t, curr_test)) {
 
         /* Initialize the testing parameters */
-	HDmemset(&tparam, 0, sizeof(tparam));
-	tparam.nelmts = TEST_NELMTS;
+        HDmemset(&tparam, 0, sizeof(tparam));
+        tparam.nelmts = TEST_NELMTS;
 
         /* Set appropriate testing parameters for each test */
         switch(curr_test) {
@@ -1589,7 +1589,7 @@ main(void)
         nerrors += test_delete_open(fapl, &cparam, &tparam);
 
 	/* Iterate over the type of capacity tests */
-	for(curr_iter = FARRAY_ITER_FW; curr_iter < FARRAY_ITER_NITERS; curr_iter++) {
+	for(curr_iter = FARRAY_ITER_FW; curr_iter < FARRAY_ITER_NITERS; H5_INC_ENUM(farray_iter_type_t, curr_iter)) {
 
             /* Set appropriate parameters for each type of iteration */
             switch(curr_iter) {

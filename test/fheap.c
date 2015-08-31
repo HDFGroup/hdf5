@@ -16380,7 +16380,7 @@ main(void)
 
     /* Iterate over the testing parameters */
 #ifndef QAK
-    for(curr_test = FHEAP_TEST_NORMAL; curr_test < FHEAP_TEST_NTESTS; curr_test++) {
+    for(curr_test = FHEAP_TEST_NORMAL; curr_test < FHEAP_TEST_NTESTS; H5_INC_ENUM(fheap_test_type_t, curr_test)) {
 #else /* QAK */
 HDfprintf(stderr, "Uncomment test loop!\n");
 curr_test = FHEAP_TEST_NORMAL;
@@ -16430,7 +16430,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
 
 #ifndef QAK2
         /* Filling with different sized objects */
-        for(fill = FHEAP_TEST_FILL_LARGE; fill < FHEAP_TEST_FILL_N; fill++) {
+        for(fill = FHEAP_TEST_FILL_LARGE; fill < FHEAP_TEST_FILL_N; H5_INC_ENUM(fheap_test_fill_t, fill)) {
 #else /* QAK2 */
 HDfprintf(stderr, "Uncomment test loop!\n");
 fill = FHEAP_TEST_FILL_LARGE;
@@ -16542,9 +16542,9 @@ HDfprintf(stderr, "Uncomment tests!\n");
             fheap_test_del_drain_t drain_half;   /* Deletion draining */
 
             /* More complex removal patterns */
-            for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; del_dir++) {
+            for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
                 tparam.del_dir = del_dir;
-                for(drain_half = FHEAP_DEL_DRAIN_ALL; drain_half < FHEAP_DEL_DRAIN_N; drain_half++) {
+                for(drain_half = FHEAP_DEL_DRAIN_ALL; drain_half < FHEAP_DEL_DRAIN_N; H5_INC_ENUM(fheap_test_del_drain_t, drain_half)) {
                     tparam.drain_half = drain_half;
 #else /* QAK2 */
 HDfprintf(stderr, "Uncomment test loops!\n");
@@ -16683,7 +16683,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
             } /* end switch */
 
             /* Try several different methods of deleting objects */
-            for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; del_dir++) {
+            for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
                 tparam.del_dir = del_dir;
 
                 /* Test 'huge' object insert & delete */
@@ -16726,7 +16726,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
         {
         fheap_test_del_dir_t del_dir;   /* Deletion direction */
 
-        for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; del_dir++) {
+        for(del_dir = FHEAP_DEL_FORWARD; del_dir < FHEAP_DEL_NDIRS; H5_INC_ENUM(fheap_test_del_dir_t, del_dir)) {
             tparam.del_dir = del_dir;
 
             /* Controlled tests */

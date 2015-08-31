@@ -5919,9 +5919,9 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <= H5_INDEX_CRT_ORDER; H5_INC_ENUM(H5_index_t, idx_type)) {
         /* Loop over operating in different orders */
-        for(order = H5_ITER_INC; order <=H5_ITER_DEC; order++) {
+        for(order = H5_ITER_INC; order <= H5_ITER_DEC; H5_INC_ENUM(H5_iter_order_t, order)) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
@@ -6868,9 +6868,9 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
     iter_info.visited = visited;
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <= H5_INDEX_CRT_ORDER; H5_INC_ENUM(H5_index_t, idx_type)) {
         /* Loop over operating in different orders */
-        for(order = H5_ITER_INC; order <=H5_ITER_DEC; order++) {
+        for(order = H5_ITER_INC; order <= H5_ITER_DEC; H5_INC_ENUM(H5_iter_order_t, order)) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */
@@ -7223,9 +7223,9 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
 
     /* Loop over operating on different indices on link fields */
-    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
+    for(idx_type = H5_INDEX_NAME; idx_type <= H5_INDEX_CRT_ORDER; H5_INC_ENUM(H5_index_t, idx_type)) {
         /* Loop over operating in different orders */
-        for(order = H5_ITER_INC; order <=H5_ITER_DEC; order++) {
+        for(order = H5_ITER_INC; order <= H5_ITER_DEC; H5_INC_ENUM(H5_iter_order_t, order)) {
             /* Loop over using index for creation order value */
             for(use_index = FALSE; use_index <= TRUE; use_index++) {
                 /* Print appropriate test message */

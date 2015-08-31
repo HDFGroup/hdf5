@@ -977,6 +977,7 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
         case H5T_ORDER_ERROR:
         case H5T_ORDER_VAX:
+        case H5T_ORDER_MIXED:
         case H5T_ORDER_NONE:
         default:
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order")
@@ -1075,6 +1076,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
 
         case H5T_ORDER_ERROR:
         case H5T_ORDER_VAX:
+        case H5T_ORDER_MIXED:
         case H5T_ORDER_NONE:
         default:
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "bad H5T_NATIVE_INT endianness order")

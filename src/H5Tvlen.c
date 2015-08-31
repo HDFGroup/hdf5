@@ -113,7 +113,7 @@ H5Tvlen_create(hid_t base_id)
     H5TRACE1("i", "i", base_id);
 
     /* Check args */
-    if(NULL == (base = H5I_object_verify(base_id, H5I_DATATYPE)))
+    if(NULL == (base = (H5T_t *)H5I_object_verify(base_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
 
     /* Create up VL datatype */
@@ -288,6 +288,8 @@ H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                  */
                 break;
 
+            case H5T_LOC_MAXLOC:
+                /* MAXLOC is invalid */
             default:
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location")
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
@@ -716,11 +718,11 @@ H5T_vlen_str_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, co
 
     /* Use the user's memory allocation routine if one is defined */
     if(vl_alloc_info->alloc_func!=NULL) {
-        if(NULL==(t=(vl_alloc_info->alloc_func)((seq_len+1)*base_size,vl_alloc_info->alloc_info)))
+        if(NULL==(t = (char *)(vl_alloc_info->alloc_func)((seq_len+1)*base_size,vl_alloc_info->alloc_info)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data")
       } /* end if */
     else {  /* Default to system malloc */
-        if(NULL==(t=H5MM_malloc((seq_len+1)*base_size)))
+        if(NULL==(t = (char *)H5MM_malloc((seq_len+1)*base_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data")
       } /* end else */
 
@@ -1119,8 +1121,24 @@ H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, voi
             } /* end else */
             break;
 
-        default:
+        /* Don't do anything for simple types */
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
+        case H5T_ENUM:
             break;
+
+        /* Should never have these values */
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype class")
+            break;
+
     } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
 done:
@@ -1167,7 +1185,7 @@ H5T_vlen_reclaim(void *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim, const 
     HDassert(H5I_DATATYPE == H5I_get_type(type_id));
 
     /* Check args */
-    if(NULL == (dt = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Pull the free function and free info pointer out of the op_data and call the recurse datatype free function */

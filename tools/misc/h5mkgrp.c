@@ -181,7 +181,7 @@ parse_command_line(int argc, const char *argv[], param_t *parms)
 
     /* Allocate space for the group name pointers */
     parms->ngroups = (argc - opt_ind);
-    parms->groups = HDmalloc(parms->ngroups * sizeof(char *));
+    parms->groups = (char **)HDmalloc(parms->ngroups * sizeof(char *));
 
     /* Retrieve the group names */
     curr_group = 0;

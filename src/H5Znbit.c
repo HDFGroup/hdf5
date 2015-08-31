@@ -266,8 +266,22 @@ H5Z_calc_parms_array(const H5T_t *type)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype")
             break;
 
-        default: /* Other datatype class: nbit does no compression */
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
+        case H5T_ENUM:
+        case H5T_VLEN:
+            /* Other datatype classes: nbit does no compression */
             H5Z_calc_parms_nooptype();
+            break;
+
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            /* Badness */
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype")
             break;
     } /* end switch */
 
@@ -351,8 +365,22 @@ H5Z_calc_parms_compound(const H5T_t *type)
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype")
                 break;
 
-            default: /* Other datatype class: nbit does no compression */
+            case H5T_TIME:
+            case H5T_STRING:
+            case H5T_BITFIELD:
+            case H5T_OPAQUE:
+            case H5T_REFERENCE:
+            case H5T_ENUM:
+            case H5T_VLEN:
+                /* Other datatype classes: nbit does no compression */
                 H5Z_calc_parms_nooptype();
+                break;
+
+            case H5T_NO_CLASS:
+            case H5T_NCLASSES:
+            default:
+                /* Badness */
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype")
                 break;
         } /* end switch */
 
@@ -444,7 +472,7 @@ H5Z_set_parms_atomic(const H5T_t *type, unsigned cd_values[])
 
     /* Get datatype's size */
     if((dtype_size = H5T_get_size(type)) == 0)
-	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
+        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
 
     /* Set "local" parameter for datatype size */
     cd_values[cd_values_index++] = dtype_size;
@@ -463,6 +491,10 @@ H5Z_set_parms_atomic(const H5T_t *type, unsigned cd_values[])
             cd_values[cd_values_index++] = H5Z_NBIT_ORDER_BE;
             break;
 
+        case H5T_ORDER_VAX:
+        case H5T_ORDER_MIXED:
+        case H5T_ORDER_ERROR:
+        case H5T_ORDER_NONE:
         default:
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order")
     } /* end switch */
@@ -561,7 +593,7 @@ H5Z_set_parms_array(const H5T_t *type, unsigned cd_values[])
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
             break;
 
-        default: /* other datatype that nbit does no compression */
+        case H5T_VLEN:
             /* Check if base datatype is a variable-length string */
             if((is_vlstring = H5T_is_variable_str(dtype_base)) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot determine if datatype is a variable-length string")
@@ -572,6 +604,23 @@ H5Z_set_parms_array(const H5T_t *type, unsigned cd_values[])
 
             if(H5Z_set_parms_nooptype(dtype_base, cd_values) == FAIL)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+            break;
+
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
+        case H5T_ENUM:
+            if(H5Z_set_parms_nooptype(dtype_base, cd_values) == FAIL)
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+            break;
+
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            /* Badness */
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype")
             break;
     } /* end switch */
 
@@ -666,16 +715,16 @@ H5Z_set_parms_compound(const H5T_t *type, unsigned cd_values[])
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
                 break;
 
-            default: /* other datatype that nbit does no compression */
+            case H5T_VLEN:
                 /* Check if datatype is a variable-length string */
                 if((is_vlstring = H5T_is_variable_str(dtype_member)) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot determine if datatype is a variable-length string")
 
                 /* Because for some no-op datatype (VL datatype and VL string datatype), its
-		 * size can not be retrieved correctly by using function call H5T_get_size,
-		 * special handling is needed for getting the size. Here the difference between
+		         * size can not be retrieved correctly by using function call H5T_get_size,
+		         * special handling is needed for getting the size. Here the difference between
                  * adjacent member offset is used (if alignment is present, the result can be
-		 * larger, but it does not affect the nbit filter's correctness).
+		         * larger, but it does not affect the nbit filter's correctness).
                  */
                 if(dtype_member_class == H5T_VLEN || is_vlstring) {
                     /* Set datatype class code */
@@ -688,9 +737,25 @@ H5Z_set_parms_compound(const H5T_t *type, unsigned cd_values[])
 
                     /* Set "local" parameter for datatype size */
                     cd_values[cd_values_index++] = dtype_next_member_offset - dtype_member_offset;
-                } else
-                    if(H5Z_set_parms_nooptype(dtype_member, cd_values)==FAIL)
-                        HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                } 
+                break;
+
+            case H5T_TIME:
+            case H5T_STRING:
+            case H5T_BITFIELD:
+            case H5T_OPAQUE:
+            case H5T_REFERENCE:
+            case H5T_ENUM:
+                /* other datatype that nbit does no compression */
+                if(H5Z_set_parms_nooptype(dtype_member, cd_values) == FAIL)
+                    HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
+                break;
+
+            case H5T_NO_CLASS:
+            case H5T_NCLASSES:
+            default:
+                /* Badness */
+                HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit was passed bad datatype")
                 break;
         } /* end switch */
 
@@ -770,8 +835,22 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot compute parameters for datatype")
             break;
 
-        default: /* no need to calculate other datatypes at top level */
-             break;
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
+        case H5T_ENUM:
+        case H5T_VLEN:
+            /* No need to calculate other datatypes at top level */
+            break;
+
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            /* Badness */
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype")
+            break;
     } /* end switch */
 
     /* Check if the number of parameters exceed what cd_values[] can store */
@@ -826,8 +905,22 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
                 HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit cannot set parameters for datatype")
             break;
 
-        default: /* no need to set parameters for other datatypes at top level */
-             break;
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
+        case H5T_ENUM:
+        case H5T_VLEN:
+            /* No need to set parameters for other datatypes at top level */
+            break;
+
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            /* Badness */
+            HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "nbit received bad datatype")
+            break;
     } /* end switch */
 
     /* Check if calculation of parameters matches with setting of parameters */

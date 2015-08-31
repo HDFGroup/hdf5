@@ -1759,7 +1759,6 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
     size_t      cd_nelmts;      /* filter client number of values */
     size_t      cd_num;         /* filter client data counter */
     char        f_name[256];    /* filter/file name */
-    char        dset_name[256];    /* filter/file name */
     char        s[64];          /* temporary string buffer */
     off_t       f_offset;       /* offset in external file */
     hsize_t     f_size;         /* bytes used in external file */
@@ -1847,7 +1846,11 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                     h5tools_str_append(&buffer, "\n");
                 } /* end if */
                 break;
+
+            case H5D_LAYOUT_ERROR:
+            case H5D_NLAYOUTS:
             default:
+                HDassert(0);
                 break;
         }
         /* Print total raw storage size */

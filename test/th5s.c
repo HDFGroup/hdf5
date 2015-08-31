@@ -565,7 +565,7 @@ test_h5s_zero_dim(void)
                 wdata_real[i][j][k] = i + j + k;
 
     /* Test with different space allocation times */
-    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
 
         /* Make sure we can create the space with the dimension size 0 (starting from v1.8.7).
          * The dimension doesn't need to be unlimited. */
