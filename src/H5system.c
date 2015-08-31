@@ -642,10 +642,6 @@ int
 Pflock(int fd, int operation) {
     
     struct flock    flk;
-    pid_t           pid;
-
-    /* Get the pid */
-    flk.l_pid = HDgetpid();
 
     /* Set the lock type */
     if(operation & LOCK_UN)
@@ -659,6 +655,7 @@ Pflock(int fd, int operation) {
     flk.l_whence = SEEK_SET;
     flk.l_start = 0;
     flk.l_len = 0;              /* to EOF */
+    flk.l_pid = 0;              /* not used with set */
 
     /* Lock or unlock */
     if(HDfcntl(fd, F_SETLK, flk) < 0)
