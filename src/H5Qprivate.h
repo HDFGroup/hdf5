@@ -24,6 +24,8 @@
 
 /* Private headers needed by this file */
 #include "H5Tprivate.h"
+#include "H5Gprivate.h"
+#include "H5Oprivate.h"
 
 /**************************/
 /* Library Private Macros */
@@ -106,5 +108,6 @@ H5_DLL H5Q_t *H5Q_decode(const unsigned char **buf);
 /* Apply query (convenience) */
 H5_DLL herr_t H5Q_apply_singleton(H5Q_t *query, hbool_t *result, ...);
 H5_DLL herr_t H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem);
+H5_DLL H5G_t *H5Q_apply(H5O_loc_t *oloc, hid_t loc_id, H5Q_t *query, unsigned *result, hid_t vcpl_id);
 
 #endif /* _H5Qprivate_H */

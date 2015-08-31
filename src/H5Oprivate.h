@@ -861,5 +861,10 @@ H5_DLL herr_t H5O_pline_set_latest_version(H5O_pline_t *pline);
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);
 
+/* Visit */
+H5_DLL herr_t H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id,
+    hid_t dxpl_id);
+
 #endif /* _H5Oprivate_H */
 

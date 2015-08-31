@@ -33,6 +33,11 @@
 #include "H5MMprivate.h"    /* Memory management */
 #include "H5Pprivate.h"
 #include "H5FLprivate.h"    /* Free lists                           */
+#include "H5Dprivate.h"     /* Datasets */
+
+/* TODO for now */
+#define H5G_PACKAGE
+#include "H5Gpkg.h"
 
 /****************/
 /* Local Macros */
@@ -91,6 +96,11 @@ typedef enum H5Q_match_type_t { /* The different kinds of native types we can ma
     H5Q_NATIVE_FLOAT_MATCH_DOUBLE,
     H5Q_INVALID_MATCH_TYPE
 } H5Q_match_type_t;
+
+typedef struct {
+    H5Q_t *query;
+    unsigned *result;
+} H5Q_apply_arg_t;
 
 /********************/
 /* Local Prototypes */
@@ -1646,3 +1656,163 @@ H5Q_apply_link_name(H5Q_t *query, hbool_t *result, const char *name)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_apply_link_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Qapply
+ *
+ * Purpose: Apply a query and return the result. Parameters, which the
+ * query applies to, are determined by the type of the query.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Qapply(hid_t loc_id, hid_t query_id, unsigned *result, hid_t vcpl_id)
+{
+    H5Q_t *query = NULL;
+    H5G_loc_t loc;
+    H5G_t *ret_grp;
+    hid_t ret_value;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args and get the query objects */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+    if (!result)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for result");
+
+    /* Get the default view creation property list if the user didn't provide one */
+    /* TODO fix that */
+    if (H5P_DEFAULT == vcpl_id)
+        vcpl_id = H5P_INDEX_ACCESS_DEFAULT;
+    else
+        if (TRUE != H5P_isa_class(vcpl_id, H5P_INDEX_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not index access parms");
+
+    /* Apply query */
+    if (NULL == (ret_grp = H5Q_apply(loc.oloc, loc_id, query, result, vcpl_id)))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+
+    if ((ret_value = H5I_register(H5I_GROUP, ret_grp, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group");
+    printf("\nID: %d\n", ret_value);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Qapply() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q_apply_iterate
+ *
+ * Purpose: Private function for H5Qapply.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q_apply_iterate(hid_t oid, const char *name, const H5O_info_t *oinfo,
+        void *udata)
+{
+    H5G_loc_t loc;
+    H5Q_apply_arg_t *args = (H5Q_apply_arg_t *) udata;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5G_loc(oid, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+
+    if (oinfo->type == H5O_TYPE_GROUP) {
+        H5G_t *grp;
+
+        printf("\ngroup: %s\n", name);
+        printf("num attributes: %d\n", oinfo->num_attrs);
+//        if(NULL == (grp = (H5G_t *) H5I_object_verify(oid, H5I_GROUP)))
+//            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+    } else if (oinfo->type == H5O_TYPE_DATASET) {
+        H5D_t *dataset;
+        H5S_t *dataspace;
+        hid_t dset_id;
+
+        printf("\ndataset: %s\n", name);
+        printf("num attributes: %d\n", oinfo->num_attrs);
+        dset_id = H5O_open_name(&loc, name, H5P_LINK_ACCESS_DEFAULT, FALSE);
+        if (NULL == (dataset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+
+        if (NULL == (dataspace = H5D_query(dataset, NULL, args->query, H5P_INDEX_ACCESS_DEFAULT, H5P_INDEX_XFER_DEFAULT)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "can't query dataset");
+        H5D_close(dataset);
+        H5S_close(dataspace);
+        H5I_remove(dset_id);
+    }
+    else
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "unsupported object type");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q_apply_iterate */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q_apply
+ *
+ * Purpose: Private function for H5Qapply.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_t *
+H5Q_apply(H5O_loc_t *oloc, hid_t loc_id, H5Q_t *query, unsigned *result, hid_t vcpl_id)
+{
+    H5G_obj_create_t gcrt_info; /* Information for group creation */
+    H5Q_apply_arg_t args = { query, result };
+    H5G_t *ret_grp = NULL; /* New group created */
+    H5G_t *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(oloc);
+    HDassert(query);
+    HDassert(result);
+
+    /* TODO create H5G_create_anon routine */
+    /* Set up group creation info */
+    gcrt_info.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+    gcrt_info.cache_type = H5G_NOTHING_CACHED;
+    HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
+
+    /* Create the new group & get its ID */
+    if (NULL == (ret_grp = H5G__create(oloc->file, &gcrt_info, H5AC_dxpl_id)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group")
+
+    if ((H5O_visit(loc_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, H5Q_apply_iterate, &args, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "object visitation failed");
+
+    ret_value = ret_grp;
+done:
+    /* Release the group's object header, if it was created */
+    if (ret_grp) {
+        H5O_loc_t *grp_oloc;         /* Object location for group */
+
+        /* Get the new group's object location */
+        if(NULL == (grp_oloc = H5G_oloc(ret_grp)))
+            HDONE_ERROR(H5E_SYM, H5E_CANTGET, NULL, "unable to get object location of group");
+
+        /* Decrement refcount on group's object header in memory */
+        if(H5O_dec_rc_by_loc(grp_oloc, H5AC_dxpl_id) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "unable to decrement refcount on newly created object");
+    } /* end if */
+
+    /* Cleanup on failure */
+    if (NULL == ret_value)
+        if (ret_grp && H5G_close(ret_grp) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release group")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q_apply() */
