@@ -1548,7 +1548,7 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace size")
 
     /* Find out the size of buffer needed for selection */
-    if((sselect_size = H5S_SELECT_SERIAL_SIZE(f, obj)) < 0)
+    if((sselect_size = H5S_SELECT_SERIAL_SIZE(obj)) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, FAIL, "can't find dataspace selection size")
     H5_CHECKED_ASSIGN(select_size, size_t, sselect_size, hssize_t);
 
@@ -1575,7 +1575,7 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
         *p += extent_size;
 
         /* Encode the selection part of dataspace.  */
-        if(H5S_SELECT_SERIALIZE(f, obj, p) < 0)
+        if(H5S_SELECT_SERIALIZE(obj, p) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode select space")
     } /* end else */
 
@@ -1694,7 +1694,7 @@ H5S_decode(const unsigned char **p)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     /* Decode the select part of dataspace.  I believe this part always exists. */
-    if(H5S_SELECT_DESERIALIZE(f, &ds, p) < 0)
+    if(H5S_SELECT_DESERIALIZE(&ds, p) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode space selection")
 
     /* Set return value */

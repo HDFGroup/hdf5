@@ -57,11 +57,10 @@ static herr_t H5S_hyper_get_seq_list(const H5S_t *space, unsigned flags,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S_hyper_release(H5S_t *space);
 static htri_t H5S_hyper_is_valid(const H5S_t *space);
-static hssize_t H5S_hyper_serial_size(const H5F_t *f, const H5S_t *space);
-static herr_t H5S_hyper_serialize(const H5F_t *f, const H5S_t *space,
-    uint8_t **p);
-static herr_t H5S_hyper_deserialize(const H5F_t *f, H5S_t *space,
-    uint32_t version, uint8_t flags, const uint8_t **p);
+static hssize_t H5S_hyper_serial_size(const H5S_t *space);
+static herr_t H5S_hyper_serialize(const H5S_t *space, uint8_t **p);
+static herr_t H5S_hyper_deserialize(H5S_t *space, uint32_t version, uint8_t flags,
+    const uint8_t **p);
 static herr_t H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_hyper_offset(const H5S_t *space, hsize_t *offset);
 static int H5S_hyper_unlim_dim(const H5S_t *space);
@@ -1954,9 +1953,8 @@ done:
     Determine the number of bytes needed to store the serialized hyperslab
         selection information.
  USAGE
-    hssize_t H5S_hyper_serial_size(f, space)
-        H5F_t *f                IN: File pointer
-        H5S_t *space;           IN: Dataspace pointer to query
+    hssize_t H5S_hyper_serial_size(space)
+        H5S_t *space;             IN: Dataspace pointer to query
  RETURNS
     The number of bytes required on success, negative on an error.
  DESCRIPTION
@@ -1968,7 +1966,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S_hyper_serial_size(const H5F_t *f, const H5S_t *space)
+H5S_hyper_serial_size(const H5S_t *space)
 {
     unsigned u;                 /* Counter */
     hsize_t block_count;       /* block counter for regular hyperslabs */
@@ -1985,11 +1983,11 @@ H5S_hyper_serial_size(const H5F_t *f, const H5S_t *space)
         /* Size required is always:
          * <type (4 bytes)> + <version (4 bytes)> + <flags (1 byte)> +
          * <length (4 bytes)> + <rank (4 bytes)> +
-         * (4 * <rank> * <start/stride/count/block (sizeof_size bytes)>) =
-         * 17 + (4 * sizeof_size) bytes
+         * (4 (start/stride/count/block) * <rank> * <value (8 bytes)>) =
+         * 17 + (4 * rank * 8) bytes
          */
         ret_value = (hssize_t)17 + ((hssize_t)4 * (hssize_t)space->extent.rank
-                * (hssize_t)H5F_SIZEOF_SIZE(f));
+                * (hssize_t)8);
     else {
         /* Version 1 */
         /* Basic number of bytes required to serialize hyperslab selection:
@@ -2104,7 +2102,6 @@ done:
     Serialize the current selection into a user-provided buffer.
  USAGE
     herr_t H5S_hyper_serialize(space, p)
-        H5F_t *f                IN: File pointer
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
@@ -2120,7 +2117,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_serialize(const H5F_t *f, const H5S_t *space, uint8_t **p)
+H5S_hyper_serialize (const H5S_t *space, uint8_t **p)
 {
     const H5S_hyper_dim_t *diminfo;         /* Alias for dataspace's diminfo information */
     hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary hyperslab counts */
@@ -2172,10 +2169,10 @@ H5S_hyper_serialize(const H5F_t *f, const H5S_t *space, uint8_t **p)
         /* Iterate over dimensions */
         for(i = 0; i < space->extent.rank; i++) {
             /* Encode start/stride/block/count */
-            H5F_size_encode(f, p, space->select.sel_info.hslab->opt_diminfo[i].start);
-            H5F_size_encode(f, p, space->select.sel_info.hslab->opt_diminfo[i].stride);
-            H5F_size_encode(f, p, space->select.sel_info.hslab->opt_diminfo[i].count);
-            H5F_size_encode(f, p, space->select.sel_info.hslab->opt_diminfo[i].block);
+            UINT64ENCODE(*p, space->select.sel_info.hslab->opt_diminfo[i].start);
+            UINT64ENCODE(*p, space->select.sel_info.hslab->opt_diminfo[i].stride);
+            UINT64ENCODE(*p, space->select.sel_info.hslab->opt_diminfo[i].count);
+            UINT64ENCODE(*p, space->select.sel_info.hslab->opt_diminfo[i].block);
         } /* end for */
     } /* end if */
     /* Check for a "regular" hyperslab selection */
@@ -2296,7 +2293,6 @@ H5S_hyper_serialize(const H5F_t *f, const H5S_t *space, uint8_t **p)
     Deserialize the current selection from a user-provided buffer.
  USAGE
     herr_t H5S_hyper_deserialize(space, p)
-        H5F_t *f                IN: File pointer
         H5S_t *space;           IN/OUT: Dataspace pointer to place
                                 selection into
         uint32_t version        IN: Selection version
@@ -2315,8 +2311,8 @@ H5S_hyper_serialize(const H5F_t *f, const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_deserialize(const H5F_t *f, H5S_t *space,
-        uint32_t H5_ATTR_UNUSED version, uint8_t flags, const uint8_t **p)
+H5S_hyper_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t flags,
+    const uint8_t **p)
 {
     unsigned rank;           	/* rank of points */
     size_t num_elem=0;      	/* number of elements in selection */
@@ -2352,10 +2348,10 @@ H5S_hyper_deserialize(const H5F_t *f, H5S_t *space,
         /* Iterate over dimensions */
         for(i = 0; i < space->extent.rank; i++) {
             /* Decode start/stride/block/count */
-            H5F_size_decode(f, p, &start[i]);
-            H5F_size_decode(f, p, &stride[i]);
-            H5F_size_decode(f, p, &count[i]);
-            H5F_size_decode(f, p, &block[i]);
+            UINT64DECODE(*p, start[i]);
+            UINT64DECODE(*p, stride[i]);
+            UINT64DECODE(*p, count[i]);
+            UINT64DECODE(*p, block[i]);
         } /* end for */
 
         /* Select the hyperslab to the current selection */

@@ -299,11 +299,11 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                         heap_block_p += tmp_size;
 
                         /* Source selection */
-                        if(H5S_SELECT_DESERIALIZE(f, &mesg->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
+                        if(H5S_SELECT_DESERIALIZE(&mesg->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode source space selection")
 
                         /* Virtual selection */
-                        if(H5S_SELECT_DESERIALIZE(f, &mesg->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
+                        if(H5S_SELECT_DESERIALIZE(&mesg->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode virtual space selection")
 
                         /* Parse source file and dataset names for "printf"
@@ -524,12 +524,12 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
                     block_size += str_size[(2 * i) + 1];
 
                     /* Source selection */
-                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(f, mesg->storage.u.virt.list[i].source_select)) < 0)
+                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_select)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
                     block_size += (size_t)select_serial_size;
 
                     /* Virtual dataset selection */
-                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(f, mesg->storage.u.virt.list[i].source_dset.virtual_select)) < 0)
+                    if((select_serial_size = H5S_SELECT_SERIAL_SIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select)) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to check dataspace selection size")
                     block_size += (size_t)select_serial_size;
                 } /* end for */
@@ -561,11 +561,11 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
                     heap_block_p += str_size[(2 * i) + 1];
 
                     /* Source selection */
-                    if(H5S_SELECT_SERIALIZE(f, mesg->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
+                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_select, &heap_block_p) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize source selection")
 
                     /* Virtual selection */
-                    if(H5S_SELECT_SERIALIZE(f, mesg->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
+                    if(H5S_SELECT_SERIALIZE(mesg->storage.u.virt.list[i].source_dset.virtual_select, &heap_block_p) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to serialize virtual selection")
                 } /* end for */
 

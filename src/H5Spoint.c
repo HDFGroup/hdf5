@@ -40,11 +40,10 @@ static herr_t H5S_point_get_seq_list(const H5S_t *space, unsigned flags,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S_point_release(H5S_t *space);
 static htri_t H5S_point_is_valid(const H5S_t *space);
-static hssize_t H5S_point_serial_size(const H5F_t *f, const H5S_t *space);
-static herr_t H5S_point_serialize(const H5F_t *f, const H5S_t *space,
-    uint8_t **p);
-static herr_t H5S_point_deserialize(const H5F_t *f, H5S_t *space,
-    uint32_t version, uint8_t flags, const uint8_t **p);
+static hssize_t H5S_point_serial_size(const H5S_t *space);
+static herr_t H5S_point_serialize(const H5S_t *space, uint8_t **p);
+static herr_t H5S_point_deserialize(H5S_t *space, uint32_t version, uint8_t flags,
+    const uint8_t **p);
 static herr_t H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_point_offset(const H5S_t *space, hsize_t *off);
 static int H5S_point_unlim_dim(const H5S_t *space);
@@ -764,8 +763,7 @@ done:
     information.
  USAGE
     hssize_t H5S_point_serial_size(space)
-        H5F_t *f                IN: File pointer
-        H5S_t *space;           IN: Dataspace pointer to query
+        H5S_t *space;             IN: Dataspace pointer to query
  RETURNS
     The number of bytes required on success, negative on an error.
  DESCRIPTION
@@ -777,7 +775,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S_point_serial_size(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space)
+H5S_point_serial_size (const H5S_t *space)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
     hssize_t ret_value;         /* return value */
@@ -811,7 +809,6 @@ H5S_point_serial_size(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space)
     Serialize the current selection into a user-provided buffer.
  USAGE
     herr_t H5S_point_serialize(space, p)
-        H5F_t *f                IN: File pointer
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
@@ -827,8 +824,7 @@ H5S_point_serial_size(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_serialize(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space,
-        uint8_t **p)
+H5S_point_serialize (const H5S_t *space, uint8_t **p)
 {
     H5S_pnt_node_t *curr;   /* Point information nodes */
     uint8_t *lenp;          /* pointer to length location for later storage */
@@ -881,7 +877,6 @@ H5S_point_serialize(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space,
     Deserialize the current selection from a user-provided buffer.
  USAGE
     herr_t H5S_point_deserialize(space, p)
-        H5F_t *f                IN: File pointer
         H5S_t *space;           IN/OUT: Dataspace pointer to place
                                 selection into
         uint32_t version        IN: Selection version
@@ -900,8 +895,7 @@ H5S_point_serialize(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space,
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_deserialize(const H5F_t H5_ATTR_UNUSED *f, H5S_t *space,
-    uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED flags,
+H5S_point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED flags,
     const uint8_t **p)
 {
     H5S_seloper_t op=H5S_SELECT_SET;    /* Selection operation */

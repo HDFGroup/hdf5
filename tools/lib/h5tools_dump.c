@@ -2997,6 +2997,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     off_t            offset;         /* offset of external file     */
     char             f_name[256];    /* filter name */
     char             name[256];      /* external or virtual file name       */
+    char             dsetname[256];  /* virtual datset name       */
     hsize_t          chsize[64];     /* chunk size in elements */
     hsize_t          size;           /* size of external file   */
     hsize_t          storage_size;

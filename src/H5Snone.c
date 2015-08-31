@@ -39,11 +39,10 @@ static herr_t H5S_none_get_seq_list(const H5S_t *space, unsigned flags,
     size_t *nseq, size_t *nbytes, hsize_t *off, size_t *len);
 static herr_t H5S_none_release(H5S_t *space);
 static htri_t H5S_none_is_valid(const H5S_t *space);
-static hssize_t H5S_none_serial_size(const H5F_t *f, const H5S_t *space);
-static herr_t H5S_none_serialize(const H5F_t *f, const H5S_t *space,
-    uint8_t **p);
-static herr_t H5S_none_deserialize(const H5F_t *f, H5S_t *space,
-    uint32_t version, uint8_t flags, const uint8_t **p);
+static hssize_t H5S_none_serial_size(const H5S_t *space);
+static herr_t H5S_none_serialize(const H5S_t *space, uint8_t **p);
+static herr_t H5S_none_deserialize(H5S_t *space, uint32_t version, uint8_t flags,
+    const uint8_t **p);
 static herr_t H5S_none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_none_offset(const H5S_t *space, hsize_t *off);
 static int H5S_none_unlim_dim(const H5S_t *space);
@@ -436,9 +435,8 @@ H5S_none_is_valid(const H5S_t H5_ATTR_UNUSED *space)
     Determine the number of bytes needed to store the serialized "none"
         selection information.
  USAGE
-    hssize_t H5S_none_serial_size(f, space)
-        H5F_t *f                IN: File pointer
-        H5S_t *space;           IN: Dataspace pointer to query
+    hssize_t H5S_none_serial_size(space)
+        H5S_t *space;             IN: Dataspace pointer to query
  RETURNS
     The number of bytes required on success, negative on an error.
  DESCRIPTION
@@ -450,8 +448,7 @@ H5S_none_is_valid(const H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S_none_serial_size(const H5F_t H5_ATTR_UNUSED *f,
-        const H5S_t H5_ATTR_UNUSED *space)
+H5S_none_serial_size(const H5S_t H5_ATTR_UNUSED *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -471,8 +468,7 @@ H5S_none_serial_size(const H5F_t H5_ATTR_UNUSED *f,
  PURPOSE
     Serialize the current selection into a user-provided buffer.
  USAGE
-    herr_t H5S_none_serialize(f, space, p)
-        H5F_t *f                IN: File pointer
+    herr_t H5S_none_serialize(space, p)
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
@@ -488,7 +484,7 @@ H5S_none_serial_size(const H5F_t H5_ATTR_UNUSED *f,
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_none_serialize(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space, uint8_t **p)
+H5S_none_serialize(const H5S_t *space, uint8_t **p)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -510,8 +506,7 @@ H5S_none_serialize(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space, uint8_t **
  PURPOSE
     Deserialize the current selection from a user-provided buffer.
  USAGE
-    herr_t H5S_none_deserialize(f, space, version, flags, p)
-        H5F_t *f                IN: File pointer
+    herr_t H5S_none_deserialize(space, version, flags, p)
         H5S_t *space;           IN/OUT: Dataspace pointer to place
                                 selection into
         uint32_t version        IN: Selection version
@@ -530,8 +525,7 @@ H5S_none_serialize(const H5F_t H5_ATTR_UNUSED *f, const H5S_t *space, uint8_t **
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_none_deserialize(const H5F_t H5_ATTR_UNUSED *f, H5S_t *space,
-    uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED flags,
+H5S_none_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED flags,
     const uint8_t H5_ATTR_UNUSED **p)
 {
     herr_t ret_value = SUCCEED;  /* return value */
