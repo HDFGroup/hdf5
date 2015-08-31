@@ -481,16 +481,16 @@ run_test(iotype iot, parameters parms, struct options *opts)
 
     /* allocate space for tables minmax and that it is sufficient */
     /* to initialize all elements to zeros by calloc.             */
-    write_sys_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-    write_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-    write_gross_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-    write_raw_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_sys_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_gross_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+    write_raw_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
 
     if (!parms.h5_write_only) {
-        read_sys_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-        read_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-        read_gross_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-        read_raw_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_sys_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_gross_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_raw_mm_table = (minmax *)calloc((size_t)parms.num_iters , sizeof(minmax));
     }
 
     /* Do IO iteration times, collecting statistics each time */
@@ -1443,6 +1443,10 @@ void debug_start_stop_time(io_time_t *pt, timer_type t, int start_stop)
             case HDF5_RAW_READ_FIXED_DIMS:
                 msg = "Raw Read";
                 break;
+            case HDF5_FILE_READ_OPEN:
+            case HDF5_FILE_READ_CLOSE:
+            case HDF5_FILE_WRITE_OPEN:
+            case HDF5_FILE_WRITE_CLOSE:
             default:
                 msg = "Unknown Timer";
                 break;

@@ -632,24 +632,40 @@ H5O_layout_copy(const void *_mesg, void *_dest)
     /* copy */
     *dest = *mesg;
 
-    /* Deep copy the buffer for compact datasets also */
-    if(mesg->type == H5D_COMPACT && mesg->storage.u.compact.size > 0) {
-        /* Allocate memory for the raw data */
-        if(NULL == (dest->storage.u.compact.buf = H5MM_malloc(dest->storage.u.compact.size)))
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
+    /* Special actions for each type of layout */
+    switch(mesg->type) {
+        case H5D_COMPACT:
+            /* Deep copy the buffer for compact datasets also */
+            if(mesg->storage.u.compact.size > 0) {
+                /* Allocate memory for the raw data */
+                if(NULL == (dest->storage.u.compact.buf = H5MM_malloc(dest->storage.u.compact.size)))
+                    HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
 
-        /* Copy over the raw data */
-        HDmemcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf, dest->storage.u.compact.size);
-    } /* end if */
+                /* Copy over the raw data */
+                HDmemcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf, dest->storage.u.compact.size);
+            } /* end if */
+            break;
 
-    /* Reset the pointer of the chunked storage index but not the address */
-    if(dest->type == H5D_CHUNKED && dest->storage.u.chunk.ops)
-	H5D_chunk_idx_reset(&dest->storage.u.chunk, FALSE);
+        case H5D_CONTIGUOUS:
+            /* Nothing required */
+            break;
 
-    /* Deep copy the entry list for virtual datasets */
-    if(mesg->type == H5D_VIRTUAL)
-        if(H5D__virtual_copy_layout(dest) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy virtual layout")
+        case H5D_CHUNKED:
+            /* Reset the pointer of the chunked storage index but not the address */
+            if(dest->storage.u.chunk.ops)
+                H5D_chunk_idx_reset(&dest->storage.u.chunk, FALSE);
+            break;
+
+        case H5D_VIRTUAL:
+            if(H5D__virtual_copy_layout(dest) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy virtual layout")
+            break;
+
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
+        default:
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, NULL, "Invalid layout class")
+    } /* end switch */
 
     /* Set return value */
     ret_value = dest;

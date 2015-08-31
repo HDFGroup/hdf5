@@ -2496,6 +2496,8 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
 
         break;
 
+    case H5T_NO_CLASS:
+    case H5T_NCLASSES:
     default:
         h5tools_str_append(buffer, "unknown datatype");
         break;
@@ -2995,7 +2997,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     off_t            offset;         /* offset of external file     */
     char             f_name[256];    /* filter name */
     char             name[256];      /* external or virtual file name       */
-    char             dsetname[256];  /* virtual datset name       */
     hsize_t          chsize[64];     /* chunk size in elements */
     hsize_t          size;           /* size of external file   */
     hsize_t          storage_size;
@@ -3185,6 +3186,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 ctx->indent_level--;
             }
             break;
+
         case H5D_VIRTUAL:
             {
                 size_t vmaps;
@@ -3285,6 +3287,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                 }
             }
             break;
+
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
         default:
             h5tools_str_reset(&buffer);
             h5tools_str_append(&buffer, "%s", "Unknown layout");
@@ -3508,6 +3513,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         case H5D_FILL_TIME_IFSET:
             h5tools_str_append(&buffer, "%s", "H5D_FILL_TIME_IFSET");
             break;
+        case H5D_FILL_TIME_ERROR:
         default:
             HDassert(0);
             break;
@@ -3565,6 +3571,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         case H5D_ALLOC_TIME_LATE:
             h5tools_str_append(&buffer, "%s", "H5D_ALLOC_TIME_LATE");
             break;
+        case H5D_ALLOC_TIME_ERROR:
+        case H5D_ALLOC_TIME_DEFAULT:
         default:
             HDassert(0);
             break;

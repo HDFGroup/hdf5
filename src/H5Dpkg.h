@@ -408,6 +408,7 @@ typedef struct H5D_rdcdc_t {
  */
 typedef struct H5D_shared_t {
     size_t              fo_count;       /* Reference count */
+    hbool_t             closing;        /* Flag to indicate dataset is closing */
     hid_t               type_id;        /* ID for dataset's datatype    */
     H5T_t              *type;           /* Datatype for this dataset     */
     H5S_t              *space;          /* Dataspace of this dataset    */
@@ -616,8 +617,6 @@ H5_DLL htri_t H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr,
     hbool_t write_op);
 H5_DLL herr_t H5D__chunk_create(const H5D_t *dset /*in,out*/, hid_t dxpl_id);
 H5_DLL herr_t H5D__chunk_set_info(const H5D_t *dset);
-H5_DLL herr_t H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
-    hid_t dapl_id);
 H5_DLL hbool_t H5D__chunk_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL herr_t H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *scaled, H5D_chunk_ud_t *udata);

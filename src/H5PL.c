@@ -329,6 +329,8 @@ H5PL_load(H5PL_type_t type, int id)
         if((H5PL_plugin_g & H5PL_FILTER_PLUGIN) == 0)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin filter '%d' is not available", id)
         break;
+    case H5PL_TYPE_ERROR:
+    case H5PL_TYPE_NONE:
     default:
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin '%d' is not valid", id)
     }

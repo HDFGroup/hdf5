@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.229], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.230], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
@@ -183,6 +183,8 @@ AC_SUBST([enable_shared])
 AC_SUBST([enable_static])
 AC_SUBST([UNAME_INFO]) UNAME_INFO=`uname -a`
 AC_SUBST([PAC_C_MAX_REAL_PRECISION])
+AC_SUBST([Fortran_COMPILER_ID])
+Fortran_COMPILER_ID=none
 
 ## ----------------------------------------------------------------------
 ## Some platforms have broken basename, and/or xargs programs. Check
@@ -517,7 +519,8 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([H5CONFIG_F_RKIND])	
   AC_SUBST([H5CONFIG_F_RKIND_SIZEOF])	
   AC_SUBST([H5CONFIG_F_NUM_IKIND])
-  AC_SUBST([H5CONFIG_F_IKIND])	
+  AC_SUBST([H5CONFIG_F_IKIND])
+  AC_DEFINE_UNQUOTED([Fortran_COMPILER_ID], $Fortran_COMPILER_ID, [Define Fortran compiler ID])
 
   ## Setting definition if there is a 16 byte fortran integer
   if `echo $PAC_FC_ALL_INTEGER_KINDS_SIZEOF | grep '16' >/dev/null`; then

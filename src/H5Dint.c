@@ -1048,11 +1048,13 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         layout = &new_dset->shared->layout;
         if(H5P_get(dc_plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve layout")
-        if(pline->nused > 0 && H5D_CHUNKED != layout->type)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
         fill = &new_dset->shared->dcpl_cache.fill;
         if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, fill) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill value info")
+
+        /* Check that chunked layout is used if filters are enabled */
+        if(pline->nused > 0 && H5D_CHUNKED != layout->type)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
 
         /* Check if the alloc_time is the default and error out */
         if(fill->alloc_time == H5D_ALLOC_TIME_DEFAULT)
@@ -1491,7 +1493,7 @@ done:
 herr_t
 H5D_close(H5D_t *dataset)
 {
-    unsigned free_failed = FALSE;
+    hbool_t free_failed = FALSE;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1511,16 +1513,18 @@ H5D_close(H5D_t *dataset)
         if(H5D__flush_real(dataset, H5AC_dxpl_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
-        /* Free the data sieve buffer, if it's been allocated */
-        if(dataset->shared->cache.contig.sieve_buf) {
-            HDassert(dataset->shared->layout.type != H5D_COMPACT);      /* We should never have a sieve buffer for compact storage */
-
-            dataset->shared->cache.contig.sieve_buf = (unsigned char *)H5FL_BLK_FREE(sieve_buf,dataset->shared->cache.contig.sieve_buf);
-        } /* end if */
+        /* Set a flag to indicate the dataset is closing, before we start freeing things */
+        /* (Avoids problems with flushing datasets twice, when one is holding
+         *      the file open and it iterates through dataset to flush them -QAK)
+         */
+        dataset->shared->closing = TRUE;
 
         /* Free cached information for each kind of dataset */
         switch(dataset->shared->layout.type) {
             case H5D_CONTIGUOUS:
+                /* Free the data sieve buffer, if it's been allocated */
+                if(dataset->shared->cache.contig.sieve_buf)
+                    dataset->shared->cache.contig.sieve_buf = (unsigned char *)H5FL_BLK_FREE(sieve_buf,dataset->shared->cache.contig.sieve_buf);
                 break;
 
             case H5D_CHUNKED:
@@ -1591,6 +1595,14 @@ H5D_close(H5D_t *dataset)
 #endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
+        /*
+        * Release datatype, dataspace and creation property list -- there isn't
+        * much we can do if one of these fails, so we just continue.
+        */
+        free_failed = (H5I_dec_ref(dataset->shared->type_id) < 0) ||
+                          (H5S_close(dataset->shared->space) < 0) ||
+                          (H5I_dec_ref(dataset->shared->dcpl_id) < 0);
+
         /* Remove the dataset from the list of opened objects in the file */
         if(H5FO_top_decr(dataset->oloc.file, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
@@ -1601,13 +1613,6 @@ H5D_close(H5D_t *dataset)
         /* (This closes the file, if this is the last object open) */
         if(H5O_close(&(dataset->oloc)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
-
-        /*
-        * Release datatype, dataspace and creation property list -- there isn't
-        * much we can do if one of these fails, so we just continue.
-        */
-        free_failed = (unsigned)(H5I_dec_ref(dataset->shared->type_id) < 0 || H5S_close(dataset->shared->space) < 0 ||
-                          H5I_dec_ref(dataset->shared->dcpl_id) < 0);
 
         /*
          * Free memory.  Before freeing the memory set the file pointer to NULL.
@@ -2535,43 +2540,47 @@ H5D__flush_real(H5D_t *dataset, hid_t dxpl_id)
 
     /* Check args */
     HDassert(dataset);
+    HDassert(dataset->shared);
 
-    /* Check for metadata changes that will require updating the object's modification time */
-    if(dataset->shared->layout_dirty || dataset->shared->space_dirty) {
-        unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
+    /* Avoid flushing the dataset (again) if it's closing */
+    if(!dataset->shared->closing) {
+        /* Check for metadata changes that will require updating the object's modification time */
+        if(dataset->shared->layout_dirty || dataset->shared->space_dirty) {
+            unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
 
-        /* Pin the object header */
-        if(NULL == (oh = H5O_pin(&dataset->oloc, dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+            /* Pin the object header */
+            if(NULL == (oh = H5O_pin(&dataset->oloc, dxpl_id)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
-        /* Update the layout on disk, if it's been changed */
-        if(dataset->shared->layout_dirty) {
-            if(H5D__layout_oh_write(dataset, dxpl_id, oh, update_flags) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout/pline/efl info")
-            dataset->shared->layout_dirty = FALSE;
+            /* Update the layout on disk, if it's been changed */
+            if(dataset->shared->layout_dirty) {
+                if(H5D__layout_oh_write(dataset, dxpl_id, oh, update_flags) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout/pline/efl info")
+                dataset->shared->layout_dirty = FALSE;
 
-            /* Reset the "update the modification time" flag, so we only do it once */
-            update_flags = 0;
+                /* Reset the "update the modification time" flag, so we only do it once */
+                update_flags = 0;
+            } /* end if */
+
+            /* Update the dataspace on disk, if it's been changed */
+            if(dataset->shared->space_dirty) {
+                if(H5S_write(dataset->oloc.file, dxpl_id, oh, update_flags, dataset->shared->space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
+                dataset->shared->space_dirty = FALSE;
+
+                /* Reset the "update the modification time" flag, so we only do it once */
+                update_flags = 0;
+            } /* end if */
+
+            /* _Somebody_ should have update the modification time! */
+            HDassert(update_flags == 0);
         } /* end if */
 
-        /* Update the dataspace on disk, if it's been changed */
-        if(dataset->shared->space_dirty) {
-            if(H5S_write(dataset->oloc.file, dxpl_id, oh, update_flags, dataset->shared->space) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
-            dataset->shared->space_dirty = FALSE;
-
-            /* Reset the "update the modification time" flag, so we only do it once */
-            update_flags = 0;
-        } /* end if */
-
-        /* _Somebody_ should have update the modification time! */
-        HDassert(update_flags == 0);
+        /* Flush cached raw data for each kind of dataset layout */
+        if(dataset->shared->layout.ops->flush &&
+                (dataset->shared->layout.ops->flush)(dataset, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush raw data")
     } /* end if */
-
-    /* Flush cached raw data for each kind of dataset layout */
-    if(dataset->shared->layout.ops->flush &&
-            (dataset->shared->layout.ops->flush)(dataset, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush raw data")
 
 done:
     /* Release pointer to object header */

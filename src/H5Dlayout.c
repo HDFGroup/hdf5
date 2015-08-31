@@ -391,56 +391,9 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
     if(H5D_CHUNKED == dataset->shared->layout.type)
         dataset->shared->layout.u.chunk.ndims++;
 
-    if(H5D_CONTIGUOUS == dataset->shared->layout.type) {
-        hsize_t tmp_size;                   /* Temporary holder for raw data size */
-        size_t tmp_sieve_buf_size;          /* Temporary holder for sieve buffer size */
-
-        /* Compute the size of the contiguous storage for versions of the
-         * layout message less than version 3 because versions 1 & 2 would
-         * truncate the dimension sizes to 32-bits of information. - QAK 5/26/04
-         */
-        if(dataset->shared->layout.version < 3) {
-            hssize_t snelmts;                   /* Temporary holder for number of elements in dataspace */
-            hsize_t nelmts;                     /* Number of elements in dataspace */
-            size_t dt_size;                     /* Size of datatype */
-
-            /* Retrieve the number of elements in the dataspace */
-            if((snelmts = H5S_GET_EXTENT_NPOINTS(dataset->shared->space)) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
-            nelmts = (hsize_t)snelmts;
-
-            /* Get the datatype's size */
-            if(0 == (dt_size = H5T_GET_SIZE(dataset->shared->type)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
-
-            /* Compute the size of the dataset's contiguous storage */
-            tmp_size = nelmts * dt_size;
-
-            /* Check for overflow during multiplication */
-            if(nelmts != (tmp_size / dt_size))
-                HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
-
-            /* Assign the dataset's contiguous storage size */
-            dataset->shared->layout.storage.u.contig.size = tmp_size;
-        } /* end if */
-        else
-            tmp_size = dataset->shared->layout.storage.u.contig.size;
-
-        /* Get the sieve buffer size for the file */
-        tmp_sieve_buf_size = H5F_SIEVE_BUF_SIZE(dataset->oloc.file);
-
-        /* Adjust the sieve buffer size to the smaller one between the dataset size and the buffer size
-         * from the file access property.  (SLU - 2012/3/30) */
-        if(tmp_size < tmp_sieve_buf_size)
-            dataset->shared->cache.contig.sieve_buf_size = tmp_size;
-        else
-            dataset->shared->cache.contig.sieve_buf_size = tmp_sieve_buf_size;
-    } /* end if */
-
-    /* Initialize the layout information for the new dataset */
+    /* Initialize the layout information for the dataset */
     if(dataset->shared->layout.ops->init && (dataset->shared->layout.ops->init)(dataset->oloc.file, dxpl_id, dataset, dapl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize layout information")
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__layout_oh_read() */
