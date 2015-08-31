@@ -24,6 +24,9 @@ const char *FILENAME[] = {
     NULL
 };
 
+#define NTUPLES 256
+#define NCOMPONENTS 1
+
 static hid_t
 test_query_create(void)
 {
@@ -244,6 +247,164 @@ error:
     return -1;
 }
 
+static herr_t
+test_query_create_simple_file(const char *filename, hid_t fapl, unsigned idx_plugin)
+{
+    hid_t file = H5I_BADID, t1 = H5I_BADID, t2 = H5I_BADID, t3 = H5I_BADID;
+    hid_t t1_stamp = H5I_BADID, t2_stamp = H5I_BADID, t3_stamp = H5I_BADID;
+    hid_t temp1 = H5I_BADID, temp2 = H5I_BADID, temp3 = H5I_BADID;
+    hid_t pres1 = H5I_BADID, pres2 = H5I_BADID, pres3 = H5I_BADID;
+    hid_t filespace = H5I_BADID;
+    hid_t dcpl = H5P_DEFAULT;
+    hsize_t adim[1] = {1};
+    hsize_t dims[2] = {NTUPLES, NCOMPONENTS};
+    int rank = (NCOMPONENTS == 1) ? 1 : 2;
+    int i, j;
+    float *data = NULL;
+    double t1_stamp_val = 1.0f, t2_stamp_val = 2.0f, t3_stamp_val = 3.0f;
+
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create simple group and dataset */
+    if ((t1 = H5Gcreate(file, "Timestep1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if ((t2 = H5Gcreate(file, "Timestep2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if ((t3 = H5Gcreate(file, "Timestep3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Initialize the data. */
+    data = (float *) HDmalloc(sizeof(float) * NCOMPONENTS * NTUPLES);
+    for (i = 0; i < NTUPLES; i++) {
+        for (j = 0; j < NCOMPONENTS; j++) {
+            data[NCOMPONENTS * i + j] = (float) i;
+        }
+    }
+
+    /* Create dataspace for attributes */
+    if ((filespace = H5Screate_simple(1, adim, NULL)) < 0) FAIL_STACK_ERROR;
+
+    /* Create a couple of attributes */
+    if ((t1_stamp = H5Acreate(t1, "Time", H5T_NATIVE_DOUBLE, filespace, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if ((t2_stamp = H5Acreate(t2, "Time", H5T_NATIVE_DOUBLE, filespace, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if ((t3_stamp = H5Acreate(t3, "Time", H5T_NATIVE_DOUBLE, filespace, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Awrite(t1_stamp, H5T_NATIVE_DOUBLE, &t1_stamp_val) < 0) FAIL_STACK_ERROR;
+    if (H5Awrite(t2_stamp, H5T_NATIVE_DOUBLE, &t2_stamp_val) < 0) FAIL_STACK_ERROR;
+    if (H5Awrite(t3_stamp, H5T_NATIVE_DOUBLE, &t3_stamp_val) < 0) FAIL_STACK_ERROR;
+
+    if (H5Aclose(t1_stamp) < 0) FAIL_STACK_ERROR;
+    if (H5Aclose(t2_stamp) < 0) FAIL_STACK_ERROR;
+    if (H5Aclose(t3_stamp) < 0) FAIL_STACK_ERROR;
+    if (H5Sclose(filespace) < 0) FAIL_STACK_ERROR;
+
+    /* Create dataspace for datasets */
+    if ((filespace = H5Screate_simple(rank, dims, NULL)) < 0) FAIL_STACK_ERROR;
+
+    /* Create some datasets and use index if told to */
+    if (idx_plugin && ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)) FAIL_STACK_ERROR;
+    if (idx_plugin && (H5Pset_index_plugin(dcpl, idx_plugin)) < 0) FAIL_STACK_ERROR;
+    if ((temp1 = H5Dcreate(t1, "Temperature", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT,
+            dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+    if ((pres1 = H5Dcreate(t1, "Pressure", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT,
+            dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+    if ((temp2 = H5Dcreate(t2, "Temperature", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT,
+            dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+    if ((pres2 = H5Dcreate(t2, "Pressure", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT,
+            dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+    if ((temp3 = H5Dcreate(t3, "Temperature", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT,
+            dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+    if ((pres3 = H5Dcreate(t3, "Pressure", H5T_NATIVE_FLOAT, filespace, H5P_DEFAULT,
+            dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+    if (idx_plugin && (H5Pclose(dcpl) < 0)) FAIL_STACK_ERROR;
+
+    if (H5Dwrite(temp1, H5T_NATIVE_FLOAT, H5S_ALL, filespace, H5P_DEFAULT, data) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dwrite(pres1, H5T_NATIVE_FLOAT, H5S_ALL, filespace, H5P_DEFAULT, data) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dwrite(temp2, H5T_NATIVE_FLOAT, H5S_ALL, filespace, H5P_DEFAULT, data) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dwrite(pres2, H5T_NATIVE_FLOAT, H5S_ALL, filespace, H5P_DEFAULT, data) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dwrite(temp3, H5T_NATIVE_FLOAT, H5S_ALL, filespace, H5P_DEFAULT, data) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Dwrite(pres3, H5T_NATIVE_FLOAT, H5S_ALL, filespace, H5P_DEFAULT, data) < 0)
+        FAIL_STACK_ERROR;
+
+    if (H5Dclose(temp1) < 0) FAIL_STACK_ERROR;
+    if (H5Dclose(pres1) < 0) FAIL_STACK_ERROR;
+    if (H5Dclose(temp2) < 0) FAIL_STACK_ERROR;
+    if (H5Dclose(pres2) < 0) FAIL_STACK_ERROR;
+    if (H5Dclose(temp3) < 0) FAIL_STACK_ERROR;
+    if (H5Dclose(pres3) < 0) FAIL_STACK_ERROR;
+    if (H5Sclose(filespace) < 0) FAIL_STACK_ERROR;
+    HDfree(data);
+
+    if (H5Gclose(t1) < 0) FAIL_STACK_ERROR;
+    if (H5Gclose(t2) < 0) FAIL_STACK_ERROR;
+    if (H5Gclose(t3) < 0) FAIL_STACK_ERROR;
+
+    if (H5Fclose(file) < 0) FAIL_STACK_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(temp1);
+        H5Dclose(pres1);
+        H5Dclose(temp2);
+        H5Dclose(pres2);
+        H5Dclose(temp3);
+        H5Dclose(pres3);
+        H5Sclose(filespace);
+        HDfree(data);
+        H5Aclose(t1_stamp);
+        H5Aclose(t2_stamp);
+        H5Aclose(t3_stamp);
+        H5Gclose(t1);
+        H5Gclose(t2);
+        H5Gclose(t3);
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return -1;
+}
+
+static herr_t
+test_query_apply_view(const char *filename, hid_t fapl, hid_t query)
+{
+    hid_t file = H5I_BADID;
+    hid_t view = H5I_BADID;
+    unsigned result = 0;
+
+    if ((test_query_create_simple_file(filename, fapl, H5X_PLUGIN_DUMMY)) < 0) FAIL_STACK_ERROR;
+
+    /* TODO test works with H5F_ACC_RDONLY */
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR;
+
+    if ((view = H5Qapply(file, query, &result, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+    if (!result) {
+        printf("Result is: %u\n", result);
+    } else {
+        FAIL_STACK_ERROR;
+    }
+
+    if (H5Gclose(view) < 0) FAIL_STACK_ERROR;
+    if (H5Fclose(file) < 0) FAIL_STACK_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return -1;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -274,6 +435,11 @@ main(int argc, char **argv)
 
     if (test_query_encode(query) < 0) FAIL_STACK_ERROR;
 
+    PASSED();
+
+    TESTING("query apply view");
+
+    if (test_query_apply_view(filename, fapl, query) < 0) FAIL_STACK_ERROR;
 
     PASSED();
 
