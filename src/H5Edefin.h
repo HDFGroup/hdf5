@@ -194,6 +194,7 @@ hid_t H5E_CANTSELECT_g     = FAIL;      /* Can't select hyperslab */
 hid_t H5E_CANTNEXT_g       = FAIL;      /* Can't move to next iterator location */
 hid_t H5E_BADSELECT_g      = FAIL;      /* Invalid selection */
 hid_t H5E_CANTCOMPARE_g    = FAIL;      /* Can't compare objects */
+hid_t H5E_CANTAPPEND_g     = FAIL;      /* Can't append object */
 
 /* Argument errors */
 hid_t H5E_UNINITIALIZED_g  = FAIL;      /* Information is uinitialized */
