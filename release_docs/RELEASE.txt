@@ -171,8 +171,13 @@ Bug Fixes since HDF5-1.8.15
 
     Tools
     -----
-    -
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - Fix h5repack with UD filters
+
+      h5repack would throw a buffer overrun exception on Windows when
+      parsing a UD filter id of 5 digits. A local variable in the parse
+      routine was not of sufficient size.
+
+      (ADB - 2015/09/01 HDFFV-9515)
 
     Fortran API
     ------------
