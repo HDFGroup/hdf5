@@ -1868,29 +1868,29 @@ test_reference_attr(void)
     CHECK(ret, FAIL, "H5Dcreate2");
 
     /* Create reference to attribute */
-    ret = H5Rcreate_attr(&wbuf[0], fid, "/Group1/Dataset1", "Attr1");
-    CHECK(ret, FAIL, "H5Rcreate_attr");
+    ret = H5Rcreate(&wbuf[0], fid, "/Group1/Dataset1", H5R_ATTR, "Attr1");
+    CHECK(ret, FAIL, "H5Rcreate");
     ret = H5Rget_obj_type2(dataset, H5R_ATTR, &wbuf[0], &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type2");
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type2");
 
     /* Create reference to dataset */
-    ret = H5Rcreate_attr(&wbuf[1], fid, "/Group1/Dataset2", "Attr1");
-    CHECK(ret, FAIL, "H5Rcreate_attr");
+    ret = H5Rcreate(&wbuf[1], fid, "/Group1/Dataset2", H5R_ATTR, "Attr1");
+    CHECK(ret, FAIL, "H5Rcreate");
     ret = H5Rget_obj_type2(dataset, H5R_ATTR, &wbuf[1], &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type2");
     VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type2");
 
     /* Create reference to group */
-    ret = H5Rcreate_attr(&wbuf[2], fid, "/Group1", "Attr2");
-    CHECK(ret, FAIL, "H5Rcreate_attr");
+    ret = H5Rcreate(&wbuf[2], fid, "/Group1", H5R_ATTR, "Attr2");
+    CHECK(ret, FAIL, "H5Rcreate");
     ret = H5Rget_obj_type2(dataset, H5R_ATTR, &wbuf[2], &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type2");
     VERIFY(obj_type, H5O_TYPE_GROUP, "H5Rget_obj_type2");
 
     /* Create reference to named datatype */
-    ret = H5Rcreate_attr(&wbuf[3], fid, "/Group1/Datatype1", "Attr3");
-    CHECK(ret, FAIL, "H5Rcreate_attr");
+    ret = H5Rcreate(&wbuf[3], fid, "/Group1/Datatype1", H5R_ATTR, "Attr3");
+    CHECK(ret, FAIL, "H5Rcreate");
     ret = H5Rget_obj_type2(dataset, H5R_ATTR, &wbuf[3], &obj_type);
     CHECK(ret, FAIL, "H5Rget_obj_type2");
     VERIFY(obj_type, H5O_TYPE_NAMED_DATATYPE, "H5Rget_obj_type2");

@@ -51,8 +51,6 @@
 /* Local Prototypes */
 /********************/
 
-static herr_t H5R_create(void *ref, H5G_loc_t *loc, const char *name,
-    const char *attr_name, H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id);
 static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref);
 static ssize_t H5R_get_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id, hid_t id,
     H5R_type_t ref_type, const void *_ref, char *name, size_t size);
@@ -217,8 +215,11 @@ H5R_term_package(void)
         const char *attr_name;   IN: Name of attribute at location LOC_ID 
                                     pointed to
         H5R_type_t ref_type;    IN: Type of reference to create
-        H5S_t *space;       IN: Dataspace ID with selection, used for Dataset
+        Additional arguments:
+            H5S_t *space;       IN: Dataspace with selection, used for Dataset
                                     Region references.
+            const char *attr_name;   IN: Name of attribute pointed to, used for
+                                     Attribute references.
 
  RETURNS
     Non-negative on success/Negative on failure
@@ -233,15 +234,16 @@ H5R_term_package(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
-H5R_create(void *_ref, H5G_loc_t *loc, const char *name, const char *attr_name,
-    H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id)
+herr_t
+H5R_create(void *_ref, H5G_loc_t *loc, const char *name, hid_t dxpl_id,
+        H5R_type_t ref_type, ...)
 {
     H5G_loc_t	obj_loc;		/* Group hier. location of object */
     H5G_name_t  path;            	/* Object group hier. path */
     H5O_loc_t   oloc;            	/* Object object location */
     uint8_t     *buf = NULL;            /* Buffer to store serialized selection in */
     hbool_t     obj_found = FALSE;      /* Object location found */
+    va_list     ap;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -250,6 +252,8 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, const char *attr_name,
     HDassert(loc);
     HDassert(name);
     HDassert(ref_type > H5R_BADTYPE && ref_type < H5R_MAXTYPE);
+
+    va_start(ap, ref_type);
 
     /* Set up object location to fill in */
     obj_loc.oloc = &oloc;
@@ -278,6 +282,9 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, const char *attr_name,
             uint8_t *p;       /* Pointer to OID to store */
             hbool_t heapid_found;  /* Flag for non-zero heap ID found */
             unsigned u;        /* local index */
+            H5S_t *space = va_arg(ap, H5S_t *);
+
+            HDassert(space);
 
             /* Set up information for dataset region */
 
@@ -340,6 +347,9 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, const char *attr_name,
             uint8_t *p;         /* Pointer to OID to store */
             hbool_t heapid_found;  /* Flag for non-zero heap ID found */
             unsigned u;         /* local index */
+            const char *attr_name = va_arg(ap, const char *);
+
+            HDassert(attr_name);
 
             /* Set up information for attribute */
 
@@ -404,6 +414,8 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, const char *attr_name,
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
     } /* end switch */
 
+    va_end(ap);
+
 done:
     if(obj_found)
         H5G_loc_free(&obj_loc);
@@ -426,8 +438,11 @@ done:
         const char *name;   IN: Name of object at location LOC_ID of object
                                     pointed to
         H5R_type_t ref_type;    IN: Type of reference to create
-        hid_t space_id;     IN: Dataspace ID with selection, used for Dataset
+        Additional arguments:
+            hid_t space_id;     IN: Dataspace ID with selection, used for Dataset
                                     Region references.
+            const char *attr_name;   IN: Name of attribute pointed to, used for
+                                     Attribute references.
 
  RETURNS
     Non-negative on success/Negative on failure
@@ -442,14 +457,17 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id)
+H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, ...)
 {
     H5G_loc_t   loc;            /* File location */
     H5S_t      *space = NULL;   /* Pointer to dataspace containing region */
+    va_list     ap;
     herr_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "*xi*sRti", ref, loc_id, name, ref_type, space_id);
+    H5TRACE4("e", "*xi*sRt", ref, loc_id, name, ref_type);
+
+    va_start(ap, ref_type);
 
     /* Check args */
     if(ref == NULL)
@@ -458,72 +476,51 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
-    if(ref_type <= H5R_BADTYPE || ref_type >= H5R_MAXTYPE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
-    if(ref_type != H5R_OBJECT && ref_type != H5R_DATASET_REGION)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "reference type not supported")
-    if(space_id == (-1) && ref_type == H5R_DATASET_REGION)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "reference region dataspace id must be valid")
-    if(space_id != (-1) && (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE))))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-    /* Create reference */
-    if((ret_value = H5R_create(ref, &loc, name, NULL, ref_type, space, H5AC_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to create reference")
+    switch (ref_type) {
+        case H5R_OBJECT:
+            if((ret_value = H5R_create(ref, &loc, name, H5AC_dxpl_id, ref_type)) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to create reference")
+            break;
+        case H5R_DATASET_REGION:
+        {
+            hid_t space_id;
+
+            /* Get arguments */
+            space_id = va_arg(ap, hid_t);
+
+            if(space_id == H5I_BADID)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "reference region dataspace id must be valid")
+            if(space_id != H5I_BADID && (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE))))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+            if((ret_value = H5R_create(ref, &loc, name, H5AC_dxpl_id, ref_type, space)) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to create reference")
+        }
+            break;
+        case H5R_ATTR:
+        {
+            const char *attr_name;
+
+            /* Get arguments */
+            attr_name = va_arg(ap, const char *);
+
+            if(!attr_name || !*attr_name)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name given")
+            if((ret_value = H5R_create(ref, &loc, name, H5AC_dxpl_id, ref_type, attr_name)) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to create reference")
+        }
+            break;
+        case H5R_MAXTYPE:
+        case H5R_BADTYPE:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
+    }
+
+    va_end(ap);
 
 done:
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rcreate() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Rcreate_attr
- PURPOSE
-    Creates an attribute reference for the user
- USAGE
-    herr_t H5Rcreate_attr(ref, loc_id, name, attr_name)
-        void *ref;          OUT: Reference created
-        hid_t loc_id;       IN: Location ID used to locate object pointed to
-        const char *name;   IN: Name of object at location LOC_ID
-        const char *attr_name;   IN: Name of attribute pointed to
-
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Creates an attribute reference, in the space pointed to by REF.  The LOC_ID,
-    NAME and ATTR_NAME are used to locate the attribute pointed to.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-herr_t
-H5Rcreate_attr(void *ref, hid_t loc_id, const char *name, const char *attr_name)
-{
-    H5G_loc_t   loc;            /* File location */
-    herr_t      ret_value;      /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*xi*s*s", ref, loc_id, name, attr_name);
-
-    /* Check args */
-    if(ref == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
-    if(!attr_name || !*attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name given")
-
-    /* Create reference */
-    if((ret_value = H5R_create(ref, &loc, name, attr_name, H5R_ATTR, NULL, H5AC_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to create reference")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-}   /* end H5Rcreate_attr() */
 
 
 /*--------------------------------------------------------------------------
@@ -1169,7 +1166,11 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
             H5MM_xfree(buf);
         } /* end case */
         break;
-
+        case H5R_ATTR:
+        {
+            /* TODO */
+        }
+        break;
         case H5R_BADTYPE:
         case H5R_MAXTYPE:
         default:
