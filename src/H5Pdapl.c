@@ -368,9 +368,7 @@ done:
  *              H5Pset_virtual_view call.  The possible values of view are
  *              H5D_VDS_FIRST_MISSING or H5D_VDS_LAST_AVAIALBLE. 
  *
- * Return:      Success:        H5D_VDS_FIRST_MISSING or
- *                              H5D_VDS_LAST_AVAILABLE
- *              Failure:        H5D_VDS_ERROR
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
  *              May 4, 2015
@@ -388,12 +386,12 @@ H5Pget_virtual_view(hid_t plist_id, H5D_vds_view_t *view)
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_VDS_ERROR, "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get value from property list */
     if(view)
         if(H5P_get(plist, H5D_ACS_VDS_VIEW_NAME, view) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_VDS_ERROR, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -551,12 +549,12 @@ H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size)
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5D_VDS_ERROR, "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get value from property list */
     if(gap_size)
         if(H5P_get(plist, H5D_ACS_VDS_PRINTF_GAP_NAME, gap_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5D_VDS_ERROR, "unable to get value")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -808,7 +808,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_reset_source_dset
  *
- * Purpose:     Frees space reference by a source dataset struct.
+ * Purpose:     Frees space referenced by a source dataset struct.
  *
  * Return:      Non-negative on success/Negative on failure
  *

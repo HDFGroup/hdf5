@@ -34,6 +34,9 @@
 
 /* Local macros */
 
+/* Version # of encoded virtual dataset global heap blocks */
+#define H5O_LAYOUT_VDS_GH_ENC_VERS      0
+
 
 /* PRIVATE PROTOTYPES */
 static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
@@ -115,7 +118,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     mesg->version = *p++;
-    if(mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_3)
+    if(mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_4)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for layout message")
 
     if(mesg->version < H5O_LAYOUT_VERSION_3) {
@@ -243,6 +246,10 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                 break;
 
             case H5D_VIRTUAL:
+                /* Check version */
+                if(mesg->version < H5O_LAYOUT_VERSION_4)
+                    HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "invalid layout version with virtual layout")
+                
                 /* Heap information */
                 H5F_addr_decode(f, &p, &(mesg->storage.u.virt.serial_list_hobjid.addr));
                 UINT32DECODE(p, mesg->storage.u.virt.serial_list_hobjid.idx);
@@ -260,6 +267,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                 /* Decode heap block if it exists */
                 if(mesg->storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF) {
                     const uint8_t *heap_block_p;
+                    uint8_t heap_vers;
                     size_t block_size = 0;
                     size_t tmp_size;
                     hsize_t tmp_hsize;
@@ -272,6 +280,11 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                         HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "Unable to read global heap block")
 
                     heap_block_p = (const uint8_t *)heap_block;
+
+                    /* Decode the version number of the heap block encoding */
+                    heap_vers = (uint8_t)*heap_block_p++;
+                    if((uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS != heap_vers)
+                        HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad version # of encoded VDS heap information, expected %u, got %u", (unsigned)H5O_LAYOUT_VDS_GH_ENC_VERS, (unsigned)heap_vers)
 
                     /* Number of entries */
                     H5F_DECODE_LENGTH(f, heap_block_p, tmp_hsize)
@@ -445,7 +458,8 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     HDassert(p);
 
     /* Message version */
-    *p++ = (uint8_t)H5O_LAYOUT_VERSION_3;
+    *p++ = mesg->type == H5D_VIRTUAL ? (uint8_t)H5O_LAYOUT_VERSION_4
+            : (uint8_t)H5O_LAYOUT_VERSION_3;
 
     /* Layout class */
     *p++ = mesg->type;
@@ -505,8 +519,8 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
                 /*
                  * Calculate heap block size
                  */
-                /* Number of entries */
-                block_size = H5F_SIZEOF_SIZE(f);
+                /* Version and number of entries */
+                block_size = (size_t)1 + H5F_SIZEOF_SIZE(f);
 
                 /* Calculate size of each entry */
                 for(i = 0; i < mesg->storage.u.virt.list_nused; i++) {
@@ -545,6 +559,9 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
                  * Encode heap block
                  */
                 heap_block_p = heap_block;
+
+                /* Encode heap block encoding version */
+                *heap_block_p++ = (uint8_t)H5O_LAYOUT_VDS_GH_ENC_VERS;
 
                 /* Number of entries */
                 tmp_hsize = (hsize_t)mesg->storage.u.virt.list_nused;
