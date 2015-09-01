@@ -102,6 +102,12 @@ New Features
 
       (DER - 2015-05-02, HDFFV-1074)
 
+    - New public API call: H5is_library_threadsafe()
+
+      This API call indicates if the library was built with thread-
+      safety enabled.
+
+      (DER - 2015-09-01, HDFFV-9496)
 
     Parallel Library
     ----------------

@@ -1741,9 +1741,24 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
  *-------------------------------------------------------------------------
  */
 
-/* `S' is the name of a function which is being tested to check if its */
-/*      an API function */
-#define H5_IS_API(S) ('_'!=((const char *)S)[2] && '_'!=((const char *)S)[3] && (!((const char *)S)[4] || '_'!=((const char *)S)[4]))
+/* `S' is the name of a function which is being tested to check if it's
+ *  an API function.
+ *
+ *  BADNESS:
+ *      - Underscore at positions 2 or 3 (0-indexed string). Handles
+ *        H5_ and H5X_.
+ *      - Underscore at position 4 if position 3 is uppercase or a digit.
+ *        Handles H5XY_.
+ */
+#define H5_IS_API(S) (\
+    '_'!=((const char *)S)[2]       /* underscore at position 2     */  \
+    && '_'!=((const char *)S)[3]    /* underscore at position 3     */  \
+    && !(                                       /* NOT              */  \
+        ((const char *)S)[4]                    /* pos 4 exists     */  \
+        && (HDisupper(S[3]) || HDisdigit(S[3])) /* pos 3 dig | uc   */  \
+        && '_'==((const char *)S)[4]            /* pos 4 underscore */  \
+    )\
+)
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a public API function */
