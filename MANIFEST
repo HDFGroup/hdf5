@@ -113,7 +113,7 @@
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/powerpc-ibm-aix5.x
-./config/solaris2.x
+./config/solaris
 ./config/x86_64-pc-cygwin
 
 ./config/site-specific/BlankForm
