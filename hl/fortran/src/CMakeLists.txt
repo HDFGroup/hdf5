@@ -36,6 +36,20 @@ set_target_properties (H5HL_buildiface PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  if (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/\${BUILD_TYPE})
+  else (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  endif (WIN32)
+else (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  if (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
+  else (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  endif (WIN32)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
@@ -44,6 +58,7 @@ INCLUDE_DIRECTORIES (
     ${HDF5_F90_SRC_DIR}/src
     ${HDF5_F90_BINARY_DIR}
     ${CMAKE_Fortran_MODULE_DIRECTORY}
+    ${MOD_BUILD_DIR}
 )
 
 #-----------------------------------------------------------------------------
@@ -72,7 +87,7 @@ set_target_properties (${HDF5_HL_F90_C_LIB_TARGET} PROPERTIES
 )
 set (install_targets ${HDF5_HL_F90_C_LIB_TARGET})
 
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_library (${HDF5_HL_F90_C_LIBSH_TARGET} SHARED ${HDF5_HL_F90_C_SRCS} ${HDF5_HL_F90_HEADERS})
   TARGET_C_PROPERTIES (${HDF5_HL_F90_C_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_HL_F90_C_LIBSH_TARGET} ${HDF5_F90_C_LIBSH_TARGET} ${HDF5_HL_LIBSH_TARGET})
@@ -86,7 +101,7 @@ if (BUILD_SHARED_LIBS)
       INTERFACE_COMPILE_DEFINITIONS H5_BUILT_AS_DYNAMIC_LIB=1
   )
   set (install_targets ${install_targets} ${HDF5_HL_F90_C_LIBSH_TARGET})
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-----------------------------------------------------------------------------
 # Fortran Modules
@@ -134,13 +149,13 @@ set_target_properties (${HDF5_HL_F90_LIB_TARGET} PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
 if (WIN32)
-  set_property (TARGET ${HDF5_HL_F90_LIB_TARGET} 
+  set_property (TARGET ${HDF5_HL_F90_LIB_TARGET}
       APPEND PROPERTY COMPILE_DEFINITIONS "HDF5F90_WINDOWS"
   )
 endif (WIN32)
 set (install_targets ${install_targets} ${HDF5_HL_F90_LIB_TARGET})
 
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_library (${HDF5_HL_F90_LIBSH_TARGET} SHARED ${HDF5_HL_F90_F_SRCS})
   set (SHARED_LINK_FLAGS " ")
   if (WIN32 AND MSVC)
@@ -158,30 +173,17 @@ if (BUILD_SHARED_LIBS)
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
   if (WIN32)
-    set_property (TARGET ${HDF5_HL_F90_LIBSH_TARGET} 
+    set_property (TARGET ${HDF5_HL_F90_LIBSH_TARGET}
         APPEND PROPERTY COMPILE_DEFINITIONS "BUILD_HDF5_HL_DLL;HDF5F90_WINDOWS"
     )
   endif (WIN32)
   set (install_targets ${install_targets} ${HDF5_HL_F90_LIBSH_TARGET})
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 
-if (BUILD_SHARED_LIBS)
-  if (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/\${BUILD_TYPE})
-  else (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
-  endif (WIN32)
-else (BUILD_SHARED_LIBS)
-  if (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
-  else (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
-  endif (WIN32)
-endif (BUILD_SHARED_LIBS)
 
 set (mod_files
     ${MOD_BUILD_DIR}/h5ds.mod
@@ -205,10 +207,10 @@ install (
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
-  if (BUILD_SHARED_LIBS)
+  if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     INSTALL_TARGET_PDB (${HDF5_HL_F90_C_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hlfortlibraries)
     #INSTALL_TARGET_PDB (${HDF5_HL_F90_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hlfortlibraries)
-  endif (BUILD_SHARED_LIBS)
+  endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
   install (
       TARGETS

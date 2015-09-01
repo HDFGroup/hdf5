@@ -14,7 +14,7 @@ target_link_libraries (hl_f90_tstds ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_TAR
 target_include_directories (hl_f90_tstds PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
 set_target_properties (hl_f90_tstds PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties (hl_f90_tstds PROPERTIES FOLDER test/hl/fortran)
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (hl_f90_tstds-shared tstds.F90)
   TARGET_NAMING (hl_f90_tstds-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (hl_f90_tstds-shared SHARED " " " ")
@@ -25,7 +25,7 @@ if (BUILD_SHARED_LIBS)
         FOLDER test/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-- Adding test for hl_f90_tstlite
 add_executable (hl_f90_tstlite tstlite.F90)
@@ -35,7 +35,7 @@ target_link_libraries (hl_f90_tstlite ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_T
 target_include_directories (hl_f90_tstlite PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
 set_target_properties (hl_f90_tstlite PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties (hl_f90_tstlite PROPERTIES FOLDER test/hl/fortran)
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (hl_f90_tstlite-shared tstlite.F90)
   TARGET_NAMING (hl_f90_tstlite-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (hl_f90_tstlite-shared SHARED " " " ")
@@ -46,7 +46,7 @@ if (BUILD_SHARED_LIBS)
         FOLDER test/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-- Adding test for hl_f90_tstimage
 add_executable (hl_f90_tstimage tstimage.F90)
@@ -56,7 +56,7 @@ target_link_libraries (hl_f90_tstimage  ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB
 target_include_directories (hl_f90_tstimage PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
 set_target_properties (hl_f90_tstimage PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties (hl_f90_tstimage PROPERTIES FOLDER test/hl/fortran)
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (hl_f90_tstimage-shared tstimage.F90)
   TARGET_NAMING (hl_f90_tstimage-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (hl_f90_tstimage-shared SHARED " " " ")
@@ -67,7 +67,7 @@ if (BUILD_SHARED_LIBS)
         FOLDER test/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-- Adding test for hl_f90_tsttable
 add_executable (hl_f90_tsttable tsttable.F90)
@@ -77,7 +77,7 @@ target_link_libraries (hl_f90_tsttable ${HDF5_HL_F90_LIB_TARGET} ${HDF5_F90_LIB_
 target_include_directories (hl_f90_tsttable PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
 set_target_properties (hl_f90_tsttable PROPERTIES LINKER_LANGUAGE Fortran)
 set_target_properties (hl_f90_tsttable PROPERTIES FOLDER test/hl/fortran)
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (hl_f90_tsttable-shared tsttable.F90)
   TARGET_NAMING (hl_f90_tsttable-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (hl_f90_tsttable-shared SHARED " " " ")
@@ -88,6 +88,6 @@ if (BUILD_SHARED_LIBS)
         FOLDER test/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 include (CMakeTests.cmake)

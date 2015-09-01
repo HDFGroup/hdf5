@@ -94,6 +94,12 @@ PROGRAM fortranlibtest
   CALL extenddsettest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Extendible dataset test', total_error)
 
+! -- DISABLE TEST FOR PGI COMPILER DUE TO COMPILER BUG -- 8/2015 -- HDFFV-9498
+!#if H5_Fortran_COMPILER_ID!=PGI
+!  CALL test_userblock_offset(cleanup, ret_total_error)
+!  CALL write_test_status(ret_total_error, ' Dataset offset with user block', total_error)
+!#endif
+
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing DATASPACE Interface             '

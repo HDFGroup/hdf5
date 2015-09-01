@@ -384,17 +384,17 @@ AC_RUN_IFELSE([
      dnl    -- LINE 4 --  number of valid integer kinds
      dnl    -- LINE 5 --  number of valid real kinds
 
-        pac_validIntKinds="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
-	pac_validRealKinds="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
-        PAC_FC_MAX_REAL_PRECISION="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
+        pac_validIntKinds="`sed -n '1p' pac_fconftest.out`"
+	pac_validRealKinds="`sed -n '2p' pac_fconftest.out`"
+        PAC_FC_MAX_REAL_PRECISION="`sed -n '3p' pac_fconftest.out`"
         AC_DEFINE_UNQUOTED([PAC_FC_MAX_REAL_PRECISION], $PAC_FC_MAX_REAL_PRECISION, [Define Fortran Maximum Real Decimal Precision])
 
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
 
-	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `sed -n '4p' pac_fconftest.out`"
 	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
-	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
+	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `sed -n '5p' pac_fconftest.out`"
 	H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
 
 	AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
@@ -427,7 +427,7 @@ AC_LANG_PUSH([Fortran])
 pack_int_sizeof=""
 rm -f pac_fconftest.out
 
-for kind in `echo $pac_validIntKinds | perl -pe 's/,/ /g'`; do
+for kind in `echo $pac_validIntKinds | sed -e 's/,/ /g'`; do
   AC_LANG_CONFTEST([
       AC_LANG_SOURCE([
                 PROGRAM main
@@ -454,7 +454,7 @@ for kind in `echo $pac_validIntKinds | perl -pe 's/,/ /g'`; do
             pack_int_sizeof="$2"
         ])
 done
-PAC_FC_ALL_INTEGER_KINDS_SIZEOF="{`echo $pack_int_sizeof | perl -pe 's/,$//' | perl -pe 's/ //g'`}"
+PAC_FC_ALL_INTEGER_KINDS_SIZEOF="{`echo $pack_int_sizeof | sed -e 's/,$//' | sed -e 's/ //g'`}"
 AC_MSG_RESULT([$PAC_FC_ALL_INTEGER_KINDS_SIZEOF])
 AC_LANG_POP([Fortran])
 ])
@@ -465,7 +465,7 @@ AC_MSG_CHECKING([sizeof of available REAL KINDs])
 AC_LANG_PUSH([Fortran])
 pack_real_sizeof=""
 rm -f pac_fconftest.out
-for kind in `echo  $pac_validRealKinds| perl -pe 's/,/ /g'`; do
+for kind in `echo  $pac_validRealKinds | sed -e 's/,/ /g'`; do
   AC_LANG_CONFTEST([
       AC_LANG_SOURCE([
                 PROGRAM main
@@ -492,7 +492,7 @@ for kind in `echo  $pac_validRealKinds| perl -pe 's/,/ /g'`; do
             pack_real_sizeof="$2"
         ])
 done
-PAC_FC_ALL_REAL_KINDS_SIZEOF="{`echo $pack_real_sizeof | perl -pe 's/,$//' | perl -pe 's/ //g'`}"
+PAC_FC_ALL_REAL_KINDS_SIZEOF="{`echo $pack_real_sizeof | sed -e 's/,$//' | sed -e 's/ //g'`}"
 AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS_SIZEOF])
 AC_LANG_POP([Fortran])
 ])
@@ -524,12 +524,12 @@ rm -f pac_fconftest.out
         ])
         AC_RUN_IFELSE([],[
             if test -s pac_fconftest.out ; then
-                PAC_FORTRAN_NATIVE_INTEGER_KIND="`perl -ne '$. == 1 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`perl -ne '$. == 2 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_KIND="`perl -ne '$. == 3 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`perl -ne '$. == 4 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`perl -ne '$. == 5 && print && exit' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`perl -ne '$. == 6 && print && exit' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '1p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '2p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '3p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '4p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '5p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '6p' pac_fconftest.out`"
             else
                 AC_MSG_WARN([No output from test program!])
             fi
@@ -576,8 +576,8 @@ rm -f pac_Cconftest.out
         ])
         AC_RUN_IFELSE([],[
             if test -s pac_Cconftest.out ; then
-	        LDBL_DIG="`perl -ne '$. == 1 && print && exit'  pac_Cconftest.out`" 
-	        FLT128_DIG="`perl -ne '$. == 2 && print && exit' pac_Cconftest.out`"
+	        LDBL_DIG="`sed -n '1p' pac_Cconftest.out`" 
+	        FLT128_DIG="`sed -n '2p' pac_Cconftest.out`"
             else
                 AC_MSG_WARN([No output from test program!])
             fi

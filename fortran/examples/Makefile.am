@@ -107,4 +107,4 @@ compound_fortran2003: compound_fortran2003.f90
 compound_complex_fortran2003: compound_complex_fortran2003.f90
 
 include $(top_srcdir)/config/examples.am
-include $(top_srcdir)/config/conclude.am
+include $(top_srcdir)/config/conclude_fc.am

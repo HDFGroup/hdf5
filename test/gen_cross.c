@@ -22,6 +22,10 @@
  *  Run it on an OpenVMS, a little-endian, and a big-endian machine.  Change the
  *  output file names to vms_data.h5, le_data.h5, and be_data.h5, and put them
  *  under hdf5/test/ directory.
+ *
+ *  Note that we no longer support OpenVMS. The OpenVMS file will eventually
+ *  have to go away since we won't be able to re-create it but it's probably
+ *  worth keeping around for now.
  */
 
 #include <stdio.h>

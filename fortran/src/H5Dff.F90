@@ -1094,8 +1094,7 @@ CONTAINS
 
     offset = h5dget_offset(dset_id)
     
-    hdferr = 0
-    IF(offset .LT. 0) hdferr = -1
+    hdferr = 0 ! never returns a function error because C API never returns a function error.
 
   END SUBROUTINE h5dget_offset_f
 

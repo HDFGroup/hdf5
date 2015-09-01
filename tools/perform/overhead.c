@@ -224,7 +224,7 @@ test(fill_t fill_style, const double splits[],
     if ((fd=HDopen(FILE_NAME_1, O_RDONLY, 0666)) < 0) goto error;
 
     if(FILL_RANDOM==fill_style) 
-        had = calloc((size_t)cur_size[0], sizeof(int));
+        had = (int *)calloc((size_t)cur_size[0], sizeof(int));
     
     for (i=1; i<=cur_size[0]; i++) {
 

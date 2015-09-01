@@ -478,7 +478,7 @@ static herr_t
 H5P__dcrt_layout_dec(const void **_pp, void *value)
 {
     const H5O_layout_t *layout;         /* Storage layout */
-    H5O_layout_t chunk_layout;          /* Layout structure for chunk info */
+    H5O_layout_t tmp_layout;            /* Temporary local layout structure */
     H5D_layout_t type;                  /* Layout type */
     const uint8_t **pp = (const uint8_t **)_pp;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -518,15 +518,15 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                     unsigned u;             /* Local index variable */
 
                     /* Initialize to default values */
-                    chunk_layout = H5D_def_layout_chunk_g;
+                    tmp_layout = H5D_def_layout_chunk_g;
 
                     /* Set rank & dimensions */
-                    chunk_layout.u.chunk.ndims = (unsigned)ndims;
+                    tmp_layout.u.chunk.ndims = (unsigned)ndims;
                     for(u = 0; u < ndims; u++)
-                        UINT32DECODE(*pp, chunk_layout.u.chunk.dim[u])
+                        UINT32DECODE(*pp, tmp_layout.u.chunk.dim[u])
 
                     /* Point at the newly set up struct */
-                    layout = &chunk_layout;
+                    layout = &tmp_layout;
                 } /* end else */
             }
             break;
@@ -1185,8 +1185,10 @@ H5P__init_def_layout(void)
     FUNC_ENTER_STATIC_NOERR
 
     /* Initialize the default layout info for non-contigous layouts */
+    H5D_def_layout_compact_g.storage.type = H5D_COMPACT;
     H5D_def_layout_compact_g.storage.u.compact = def_store_compact;
     H5D_def_layout_chunk_g.u.chunk = def_layout_chunk;
+    H5D_def_layout_chunk_g.storage.type = H5D_CHUNKED;
     H5D_def_layout_chunk_g.storage.u.chunk = def_store_chunk;
 
     /* Note that we've initialized the default values */
