@@ -247,14 +247,8 @@ case $host_os in
   freebsd*)
     host_os_novers=freebsd
     ;;
-  osf4.*)
-    host_os_novers=osf4.x
-    ;;
-  osf5.*)
-    host_os_novers=osf5.x
-    ;;
-  solaris2.*)
-    host_os_novers=solaris2.x
+  solaris*)
+    host_os_novers=solaris
     ;;
   *)
     host_os_novers=$host_os
