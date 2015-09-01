@@ -366,28 +366,28 @@ echo
 # have no effect on files that don't have HDF5 API macros in them.
 echo
 echo "Running trace script:"
-bin/trace src/H5*.c || exit 1
+bin/trace.pl src/H5*.c || exit 1
 
 # Run make_err
 # make_err automatically generates the H5E headers that create error message
 # types for HDF5.
 echo
 echo "Running error generation script:"
-bin/make_err src/H5err.txt || exit 1
+bin/make_err.pl src/H5err.txt || exit 1
 
 # Run make_vers
 # make_vers automatically generates the public headers that define the API version
 # macros for HDF5.
 echo
 echo "Running API version generation script:"
-bin/make_vers src/H5vers.txt || exit 1
+bin/make_vers.pl src/H5vers.txt || exit 1
 
 # Run make_overflow
 # make_overflow automatically generates macros for detecting overflows for type
 # conversion.
 echo
 echo "Running overflow macro generation script:"
-bin/make_overflow src/H5overflow.txt || exit 1
+bin/make_overflow.pl src/H5overflow.txt || exit 1
 
 # Run flex and bison
 # automatically generates hl/src/H5LTanalyze.c and hl/src/H5LTparse.c

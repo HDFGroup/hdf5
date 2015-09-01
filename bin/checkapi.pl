@@ -16,7 +16,7 @@
 require 5.003;
 
 # Purpose: insures that API functions aren't called internally.
-# Usage:   checkapi H5*.c
+# Usage:   checkapi.pl H5*.c
 my $filename = "";
 my $lastname = "";
 

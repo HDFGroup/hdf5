@@ -466,10 +466,10 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    # commit source if errors encounter here.
 	    set -e
 	    cd ${CURRENT}
-	    RELEASE_VERSION="`perl bin/h5vers -v`"
+	    RELEASE_VERSION="`perl bin/h5vers.pl -v`"
 	    echo "Making snapshot release ($RELEASE_VERSION) to ${ReleaseDir}..."
 	    bin/release -d $ReleaseDir $METHODS
-	    perl bin/h5vers -i
+	    perl bin/h5vers.pl -i
 	    svn -q commit -m "Snapshot $RELEASE_VERSION"
 	)
 	errcode=$?
