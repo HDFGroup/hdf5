@@ -1,6 +1,19 @@
 cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5 C CXX)
 
+if (HDF5_BUILD_FORTRAN)
+  include (${CMAKE_ROOT}/Modules/CMakeDetermineFortranCompiler.cmake)
+  if (${CMAKE_Fortran_COMPILER_ID})
+    enable_language(Fortran)
+  endif ()
+
+# Building with PGI requires CMake 3.3 or greater  because previous versions 
+# of CMake add the wrong compiler flag for the PGI Fortran compiler.
+  if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "PGI" AND "${CMAKE_VERSION}" VERSION_LESS "3.3")
+    message (FATAL_ERROR " **** PGI FORTRAN REQUIRES CMAKE VERSION 3.3 OR GREATER **** ")
+  endif ()
+endif ()
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
 #
