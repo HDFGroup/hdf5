@@ -245,6 +245,7 @@
 ./fortran/test/tH5R.F90
 ./fortran/test/tH5S.F90
 ./fortran/test/tH5Sselect.F90
+./fortran/test/tH5T_F03.F90
 ./fortran/test/tH5T.F90
 ./fortran/test/tH5VL.F90
 ./fortran/test/tH5Z.F90
