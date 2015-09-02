@@ -132,23 +132,15 @@ fflush2_OBJECTS = $(am_fflush2_OBJECTS)
 fflush2_LDADD = $(LDADD)
 fflush2_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) \
 	$(LIBHDF5)
-am_fortranlib_test_OBJECTS = fortranlib_test-tH5F.$(OBJEXT) \
-	fortranlib_test-tH5D.$(OBJEXT) fortranlib_test-tH5R.$(OBJEXT) \
-	fortranlib_test-tH5S.$(OBJEXT) fortranlib_test-tH5T.$(OBJEXT) \
-	fortranlib_test-tH5VL.$(OBJEXT) fortranlib_test-tH5Z.$(OBJEXT) \
-	fortranlib_test-tH5Sselect.$(OBJEXT) \
-	fortranlib_test-tH5P.$(OBJEXT) fortranlib_test-tH5A.$(OBJEXT) \
-	fortranlib_test-tH5I.$(OBJEXT) fortranlib_test-tH5G.$(OBJEXT) \
-	fortranlib_test-tH5E.$(OBJEXT) fortranlib_test-tHDF5.$(OBJEXT) \
-	fortranlib_test-fortranlib_test.$(OBJEXT)
+am_fortranlib_test_OBJECTS = tH5F.$(OBJEXT) tH5D.$(OBJEXT) \
+	tH5R.$(OBJEXT) tH5S.$(OBJEXT) tH5T.$(OBJEXT) tH5VL.$(OBJEXT) \
+	tH5Z.$(OBJEXT) tH5Sselect.$(OBJEXT) tH5P.$(OBJEXT) \
+	tH5A.$(OBJEXT) tH5I.$(OBJEXT) tH5G.$(OBJEXT) tH5E.$(OBJEXT) \
+	tHDF5.$(OBJEXT) fortranlib_test.$(OBJEXT)
 fortranlib_test_OBJECTS = $(am_fortranlib_test_OBJECTS)
 fortranlib_test_LDADD = $(LDADD)
 fortranlib_test_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) \
 	$(LIBH5F) $(LIBHDF5)
-fortranlib_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=FC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(FCLD) \
-	$(fortranlib_test_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
-	-o $@
 am_fortranlib_test_1_8_OBJECTS = tH5O.$(OBJEXT) tH5A_1_8.$(OBJEXT) \
 	tH5G_1_8.$(OBJEXT) tH5MISC_1_8.$(OBJEXT) tHDF5_1_8.$(OBJEXT) \
 	fortranlib_test_1_8.$(OBJEXT)
@@ -741,11 +733,6 @@ noinst_LTLIBRARIES = libh5test_fortran.la
 # Our main targets, the tests themselves
 TEST_PROG = fortranlib_test fflush1 fflush2 fortranlib_test_1_8 fortranlib_test_F03
 libh5test_fortran_la_SOURCES = tf_gen.F90 tf.F90  t.c
-
-# Source files are used for both the library and fortranlib_test.
-# Automake will complain about this without the following workaround.
-fortranlib_test_FCFLAGS = $(AM_FCFLAGS)
-fortranlib_test_CFLAGS = $(AM_CFLAGS)
 fortranlib_test_SOURCES = tH5F.F90 tH5D.F90 tH5R.F90 tH5S.F90 tH5T.F90 tH5VL.F90 tH5Z.F90 \
         tH5Sselect.F90 tH5P.F90 tH5A.F90 tH5I.F90 tH5G.F90 tH5E.F90 tHDF5.F90 fortranlib_test.F90
 
@@ -877,7 +864,7 @@ fflush2$(EXEEXT): $(fflush2_OBJECTS) $(fflush2_DEPENDENCIES) $(EXTRA_fflush2_DEP
 
 fortranlib_test$(EXEEXT): $(fortranlib_test_OBJECTS) $(fortranlib_test_DEPENDENCIES) $(EXTRA_fortranlib_test_DEPENDENCIES) 
 	@rm -f fortranlib_test$(EXEEXT)
-	$(AM_V_FCLD)$(fortranlib_test_LINK) $(fortranlib_test_OBJECTS) $(fortranlib_test_LDADD) $(LIBS)
+	$(AM_V_FCLD)$(FCLINK) $(fortranlib_test_OBJECTS) $(fortranlib_test_LDADD) $(LIBS)
 
 fortranlib_test_1_8$(EXEEXT): $(fortranlib_test_1_8_OBJECTS) $(fortranlib_test_1_8_DEPENDENCIES) $(EXTRA_fortranlib_test_1_8_DEPENDENCIES) 
 	@rm -f fortranlib_test_1_8$(EXEEXT)
@@ -900,96 +887,6 @@ distclean-compile:
 
 .F90.lo:
 	$(AM_V_PPFC)$(LTPPFCCOMPILE) -c -o $@ $<
-
-fortranlib_test-tH5F.o: tH5F.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5F.o `test -f 'tH5F.F90' || echo '$(srcdir)/'`tH5F.F90
-
-fortranlib_test-tH5F.obj: tH5F.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5F.obj `if test -f 'tH5F.F90'; then $(CYGPATH_W) 'tH5F.F90'; else $(CYGPATH_W) '$(srcdir)/tH5F.F90'; fi`
-
-fortranlib_test-tH5D.o: tH5D.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5D.o `test -f 'tH5D.F90' || echo '$(srcdir)/'`tH5D.F90
-
-fortranlib_test-tH5D.obj: tH5D.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5D.obj `if test -f 'tH5D.F90'; then $(CYGPATH_W) 'tH5D.F90'; else $(CYGPATH_W) '$(srcdir)/tH5D.F90'; fi`
-
-fortranlib_test-tH5R.o: tH5R.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5R.o `test -f 'tH5R.F90' || echo '$(srcdir)/'`tH5R.F90
-
-fortranlib_test-tH5R.obj: tH5R.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5R.obj `if test -f 'tH5R.F90'; then $(CYGPATH_W) 'tH5R.F90'; else $(CYGPATH_W) '$(srcdir)/tH5R.F90'; fi`
-
-fortranlib_test-tH5S.o: tH5S.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5S.o `test -f 'tH5S.F90' || echo '$(srcdir)/'`tH5S.F90
-
-fortranlib_test-tH5S.obj: tH5S.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5S.obj `if test -f 'tH5S.F90'; then $(CYGPATH_W) 'tH5S.F90'; else $(CYGPATH_W) '$(srcdir)/tH5S.F90'; fi`
-
-fortranlib_test-tH5T.o: tH5T.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5T.o `test -f 'tH5T.F90' || echo '$(srcdir)/'`tH5T.F90
-
-fortranlib_test-tH5T.obj: tH5T.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5T.obj `if test -f 'tH5T.F90'; then $(CYGPATH_W) 'tH5T.F90'; else $(CYGPATH_W) '$(srcdir)/tH5T.F90'; fi`
-
-fortranlib_test-tH5VL.o: tH5VL.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5VL.o `test -f 'tH5VL.F90' || echo '$(srcdir)/'`tH5VL.F90
-
-fortranlib_test-tH5VL.obj: tH5VL.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5VL.obj `if test -f 'tH5VL.F90'; then $(CYGPATH_W) 'tH5VL.F90'; else $(CYGPATH_W) '$(srcdir)/tH5VL.F90'; fi`
-
-fortranlib_test-tH5Z.o: tH5Z.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5Z.o `test -f 'tH5Z.F90' || echo '$(srcdir)/'`tH5Z.F90
-
-fortranlib_test-tH5Z.obj: tH5Z.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5Z.obj `if test -f 'tH5Z.F90'; then $(CYGPATH_W) 'tH5Z.F90'; else $(CYGPATH_W) '$(srcdir)/tH5Z.F90'; fi`
-
-fortranlib_test-tH5Sselect.o: tH5Sselect.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5Sselect.o `test -f 'tH5Sselect.F90' || echo '$(srcdir)/'`tH5Sselect.F90
-
-fortranlib_test-tH5Sselect.obj: tH5Sselect.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5Sselect.obj `if test -f 'tH5Sselect.F90'; then $(CYGPATH_W) 'tH5Sselect.F90'; else $(CYGPATH_W) '$(srcdir)/tH5Sselect.F90'; fi`
-
-fortranlib_test-tH5P.o: tH5P.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5P.o `test -f 'tH5P.F90' || echo '$(srcdir)/'`tH5P.F90
-
-fortranlib_test-tH5P.obj: tH5P.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5P.obj `if test -f 'tH5P.F90'; then $(CYGPATH_W) 'tH5P.F90'; else $(CYGPATH_W) '$(srcdir)/tH5P.F90'; fi`
-
-fortranlib_test-tH5A.o: tH5A.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5A.o `test -f 'tH5A.F90' || echo '$(srcdir)/'`tH5A.F90
-
-fortranlib_test-tH5A.obj: tH5A.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5A.obj `if test -f 'tH5A.F90'; then $(CYGPATH_W) 'tH5A.F90'; else $(CYGPATH_W) '$(srcdir)/tH5A.F90'; fi`
-
-fortranlib_test-tH5I.o: tH5I.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5I.o `test -f 'tH5I.F90' || echo '$(srcdir)/'`tH5I.F90
-
-fortranlib_test-tH5I.obj: tH5I.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5I.obj `if test -f 'tH5I.F90'; then $(CYGPATH_W) 'tH5I.F90'; else $(CYGPATH_W) '$(srcdir)/tH5I.F90'; fi`
-
-fortranlib_test-tH5G.o: tH5G.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5G.o `test -f 'tH5G.F90' || echo '$(srcdir)/'`tH5G.F90
-
-fortranlib_test-tH5G.obj: tH5G.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5G.obj `if test -f 'tH5G.F90'; then $(CYGPATH_W) 'tH5G.F90'; else $(CYGPATH_W) '$(srcdir)/tH5G.F90'; fi`
-
-fortranlib_test-tH5E.o: tH5E.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5E.o `test -f 'tH5E.F90' || echo '$(srcdir)/'`tH5E.F90
-
-fortranlib_test-tH5E.obj: tH5E.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5E.obj `if test -f 'tH5E.F90'; then $(CYGPATH_W) 'tH5E.F90'; else $(CYGPATH_W) '$(srcdir)/tH5E.F90'; fi`
-
-fortranlib_test-tHDF5.o: tHDF5.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tHDF5.o `test -f 'tHDF5.F90' || echo '$(srcdir)/'`tHDF5.F90
-
-fortranlib_test-tHDF5.obj: tHDF5.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tHDF5.obj `if test -f 'tHDF5.F90'; then $(CYGPATH_W) 'tHDF5.F90'; else $(CYGPATH_W) '$(srcdir)/tHDF5.F90'; fi`
-
-fortranlib_test-fortranlib_test.o: fortranlib_test.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-fortranlib_test.o `test -f 'fortranlib_test.F90' || echo '$(srcdir)/'`fortranlib_test.F90
-
-fortranlib_test-fortranlib_test.obj: fortranlib_test.F90
-	$(AM_V_PPFC)$(FC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-fortranlib_test.obj `if test -f 'fortranlib_test.F90'; then $(CYGPATH_W) 'fortranlib_test.F90'; else $(CYGPATH_W) '$(srcdir)/fortranlib_test.F90'; fi`
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

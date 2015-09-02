@@ -43,11 +43,6 @@ check_PROGRAMS=$(TEST_PROG)
 
 libh5test_fortran_la_SOURCES = tf_gen.F90 tf.F90  t.c
 
-# Source files are used for both the library and fortranlib_test.
-# Automake will complain about this without the following workaround.
-fortranlib_test_FCFLAGS=$(AM_FCFLAGS)
-fortranlib_test_CFLAGS=$(AM_CFLAGS)
-
 fortranlib_test_SOURCES = tH5F.F90 tH5D.F90 tH5R.F90 tH5S.F90 tH5T.F90 tH5VL.F90 tH5Z.F90 \
         tH5Sselect.F90 tH5P.F90 tH5A.F90 tH5I.F90 tH5G.F90 tH5E.F90 tHDF5.F90 fortranlib_test.F90
 
