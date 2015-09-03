@@ -1271,17 +1271,20 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write/SWMR write (may use <h5clear file> to clear file consistency flags)")
 
             file->shared->sblock->status_flags |= H5F_SUPER_WRITE_ACCESS;
-
-            if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) { /* Remove the file lock for SWMR_WRITE */
+            if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE)
                 file->shared->sblock->status_flags |= H5F_SUPER_SWMR_WRITE_ACCESS;
-                if(H5FD_unlock(file->shared->lf) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to unlock the file")
-            }
+
             /* Flush the superblock */
             if(H5F_super_dirty(file) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, NULL, "unable to mark superblock as dirty")
             if(H5F_flush_tagged_metadata(file, (haddr_t)0, H5AC_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock")
+
+	    /* Remove the file lock for SWMR_WRITE */
+            if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE) { 
+                if(H5FD_unlock(file->shared->lf) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to unlock the file")
+            }
         } else { /* H5F_ACC_RDONLY */
             if(H5F_INTENT(file) & H5F_ACC_SWMR_READ) { /* Check consistency of status_flags */
                 if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS && !(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
