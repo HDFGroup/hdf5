@@ -1,19 +1,6 @@
 cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5 C CXX)
 
-if (HDF5_BUILD_FORTRAN)
-  include (${CMAKE_ROOT}/Modules/CMakeDetermineFortranCompiler.cmake)
-  if (${CMAKE_Fortran_COMPILER_ID})
-    enable_language(Fortran)
-  endif ()
-
-# Building with PGI requires CMake 3.3 or greater  because previous versions 
-# of CMake add the wrong compiler flag for the PGI Fortran compiler.
-  if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "PGI" AND "${CMAKE_VERSION}" VERSION_LESS "3.3")
-    message (FATAL_ERROR " **** PGI FORTRAN REQUIRES CMAKE VERSION 3.3 OR GREATER **** ")
-  endif ()
-endif ()
-
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
 #
@@ -638,11 +625,11 @@ if (BUILD_TESTING)
   option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")
   mark_as_advanced (HDF_TEST_EXPRESS)
 
-  include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
-  configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
-
   enable_testing ()
   include (CTest)
+
+  include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
+  configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
@@ -709,8 +696,18 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
       endif (NOT ALLOW_UNSUPPORTED)
     endif (BUILD_SHARED_LIBS AND APPLE)
     option (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" ON)
+
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
+
+    message (STATUS "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
+    # Building with PGI requires CMake 3.3 or greater  because previous versions
+    # of CMake add the wrong compiler flag for the PGI Fortran compiler.
+    if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "PGI" AND "${CMAKE_VERSION}" VERSION_LESS "3.3")
+      message (FATAL_ERROR " **** PGI FORTRAN REQUIRES CMAKE VERSION 3.3 OR GREATER **** ")
+    endif ()
+
     include (${HDF_RESOURCES_DIR}/HDF5UseFortran.cmake)
+
     if (HDF5_ENABLE_F2003)
       if (NOT FORTRAN_HAVE_ISO_C_BINDING)
         set (HDF5_ENABLE_F2003 OFF)
