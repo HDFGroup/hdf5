@@ -451,6 +451,7 @@ set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
 set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-testmeta PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
+set_tests_properties (H5TEST-objcopy PROPERTIES TIMEOUT 2400)
 
 if (BUILD_SHARED_LIBS)
   # Remove any output file left over from previous test run
@@ -541,6 +542,7 @@ if (BUILD_SHARED_LIBS)
   set_tests_properties (H5TEST-shared-fheap PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-testmeta PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-big PROPERTIES TIMEOUT 1800)
+  set_tests_properties (H5TEST-shared-objcopy PROPERTIES TIMEOUT 2400)
 endif (BUILD_SHARED_LIBS)
 
 ##############################################################################
