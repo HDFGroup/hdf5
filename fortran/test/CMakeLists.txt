@@ -7,6 +7,42 @@ PROJECT (HDF5_FORTRAN_TESTS C CXX Fortran)
 INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
 
 #-----------------------------------------------------------------------------
+# Setup the Fortran auto-detection utilities
+# H5_test_buildiface.F90         used to generate various KIND test interfaces
+#-----------------------------------------------------------------------------
+
+add_executable (H5_test_buildiface
+      ${HDF5_F90_SRC_DIR}/test/H5_test_buildiface.F90
+  )
+
+if (WIN32 AND MSVC)
+  if (BUILD_SHARED_LIBS)
+    set_target_properties (H5_test_buildiface
+        PROPERTIES
+            COMPILE_FLAGS "/MT"
+    )
+  endif (BUILD_SHARED_LIBS)
+  set_target_properties (H5_test_buildiface
+      PROPERTIES
+          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+  )
+endif (WIN32 AND MSVC)
+set_target_properties (H5_test_buildiface PROPERTIES
+    LINKER_LANGUAGE Fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
+
+if (NOT SKIP_HDF5_FORTRAN_SHARED)
+  if (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
+  else (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  endif (WIN32)
+endif (NOT SKIP_HDF5_FORTRAN_SHARED)
+
+INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${MOD_BUILD_DIR})
+
+#-----------------------------------------------------------------------------
 # Add Test Lib
 #-----------------------------------------------------------------------------
 add_library (${HDF5_F90_C_TEST_LIB_TARGET} STATIC t.c)
@@ -92,36 +128,16 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   endif (WIN32)
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
-#-----------------------------------------------------------------------------
-# Setup the Fortran auto-detection utilities
-# H5_test_buildiface.F90         used to generate various KIND test interfaces
-#-----------------------------------------------------------------------------
-
-add_executable (H5_test_buildiface
-      ${HDF5_F90_SRC_DIR}/test/H5_test_buildiface.F90
-  )
-
-if (WIN32 AND MSVC)
-  if (BUILD_SHARED_LIBS)
-    set_target_properties (H5_test_buildiface
-        PROPERTIES
-            COMPILE_FLAGS "/MT"
-    )
-  endif (BUILD_SHARED_LIBS)
-  set_target_properties (H5_test_buildiface
-      PROPERTIES
-          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
-  )
-endif (WIN32 AND MSVC)
-set_target_properties (H5_test_buildiface PROPERTIES
-    LINKER_LANGUAGE Fortran
-    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
-)
-
 set (CMD $<TARGET_FILE:H5_test_buildiface>)
-add_custom_command (
-    OUTPUT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+#add_custom_command (
+#    OUTPUT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+#    COMMAND ${CMD}
+#    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+#    DEPENDS H5_test_buildiface
+#)
+add_custom_target (H5testgen ALL
     COMMAND ${CMD}
+#v3.2    BYPRODUCT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5_test_buildiface
 )
