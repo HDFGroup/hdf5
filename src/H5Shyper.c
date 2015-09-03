@@ -1882,13 +1882,6 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
     HDassert(space);
     HDassert(space->select.sel_info.hslab->unlim_dim < 0);
 
-    /* Check for unlimited selection */
-    if((space->select.sel_info.hslab->unlim_dim >= 0)
-            && space->select.sel_info.hslab->app_diminfo[space->select.sel_info.hslab->unlim_dim].count == H5S_UNLIMITED) {
-        HDassert(space->select.sel_info.hslab->diminfo_valid);
-        HGOTO_DONE(H5S_UNLIMITED)
-    } /* end if */
-
     /* Check for a "regular" hyperslab selection */
     if(space->select.sel_info.hslab->diminfo_valid) {
         unsigned u;                 /* Local index variable */
