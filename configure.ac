@@ -28,7 +28,7 @@ AC_PREREQ([2.69])
 ##
 AC_INIT([HDF5], [1.8.16-snap15], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
-AC_CONFIG_HEADER([src/H5config.h])
+AC_CONFIG_HEADERS([src/H5config.h])
 
 AC_CONFIG_AUX_DIR([bin])
 AC_CONFIG_MACRO_DIR([m4])
@@ -85,12 +85,6 @@ AC_CONFIG_COMMANDS([pubconf], [
 ## configure is currently running by using the --host=foo flag.
 ## For machines on which HDF5 is often configured, it can be convenient
 ## to specify the name of the machine rather than its canonical type.
-case $host_alias in
-  redstorm)
-    host_alias=x86_64-redstorm-linux-gnu
-    ;;
-esac
-
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
 
@@ -244,14 +238,8 @@ case $host_os in
   freebsd*)
     host_os_novers=freebsd
     ;;
-  osf4.*)
-    host_os_novers=osf4.x
-    ;;
-  osf5.*)
-    host_os_novers=osf5.x
-    ;;
-  solaris2.*)
-    host_os_novers=solaris2.x
+  solaris*)
+    host_os_novers=solaris
     ;;
   *)
     host_os_novers=$host_os
@@ -828,12 +816,6 @@ esac
 AC_CHECK_LIB([m], [ceil])
 AC_CHECK_LIB([dl], [dlopen])
 
-if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
-  ## ...for Solaris
-  AC_CHECK_LIB([socket], [socket])
-  AC_CHECK_LIB([nsl], [xdr_int])
-fi
-
 ## ----------------------------------------------------------------------
 ## Check for system header files.
 ##
@@ -867,24 +849,6 @@ case "`uname`" in
     ;;
   *)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
-    ;;
-esac
-
-case "$host" in
-  alpha*-dec*-osf*)
-    ## The <sys/sysinfo.h> and <sys/proc.h> are needed on the DEC
-    ## Alpha to turn off UAC fixing. We do *not* attempt to
-    ## locate these files on other systems because there are too
-    ## many problems with including them.
-    AC_CHECK_HEADERS([sys/sysinfo.h sys/proc.h])
-    ;;
-  mips*-sgi*)
-    ## The <sys/fpu.h> is needed on the SGI machines to turn off
-    ## denormalized floating-point values going to zero.  We do *not*
-    ## attempt to locate these files on other systems because there
-    ## may be problems with including them.
-    AC_CHECK_HEADERS([sys/fpu.h])
-    AC_CHECK_FUNCS([get_fpc_csr])
     ;;
 esac
 

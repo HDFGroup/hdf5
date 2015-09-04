@@ -87,7 +87,30 @@ New Features
 
       (DER - 2015/08/13 HDFFV-9119, HDFFV-9421)
 
+    - Removed obsolete/unmaintained files from config/
 
+      Several files were removed from the config directory. These files
+      represent old operating systems, were no longer necessary, and/or
+      were no longer maintained. configure.ac was updated to reflect the
+      removed files.
+
+      Removed:
+
+        craynv
+        dec-flags
+        hpux11.23
+        ia64-linux-gnu
+        nec-superux14.1
+        sv1-cray
+        x86_64-redstorm-linux-gnu
+
+      As a part of this work, a few lines that deal with locating the
+      sys/fpu.h header on SGI machines and some OSF/1 configure lines
+      were also removed. The Solaris config was also renamed to not have
+      a version number since the version number was ignored by configure
+      as it applies to all Solaris versions.
+
+    (DER - 2015/09/04 HDFFV-9116)
 
     Library
     -------

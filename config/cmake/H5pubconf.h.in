@@ -184,14 +184,8 @@
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #cmakedefine H5_HAVE_LIBMPE @H5_HAVE_LIBMPE@
 
-/* Define to 1 if you have the `nsl' library (-lnsl). */
-#cmakedefine H5_HAVE_LIBNSL @H5_HAVE_LIBNSL@
-
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #cmakedefine H5_HAVE_LIBPTHREAD @H5_HAVE_LIBPTHREAD@
-
-/* Define to 1 if you have the `socket' library (-lsocket). */
-#cmakedefine H5_HAVE_LIBSOCKET @H5_HAVE_LIBSOCKET@
 
 /* Define to 1 if you have the `sz' library (-lsz). */
 #cmakedefine H5_HAVE_LIBSZ @H5_HAVE_LIBSZ@
