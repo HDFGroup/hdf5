@@ -75,10 +75,27 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   )
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
-set_source_files_properties (tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90 PROPERTIES LANGUAGE Fortran)
-add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90)
+set (HDF5_F90_TF_SRCS
+     # generated files
+     ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+)
+set_source_files_properties (
+    ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+    PROPERTIES GENERATED TRUE
+)
+set_source_files_properties (tf.F90 ${HDF5_F90_BINARY_DIR}/${HDF5_F90_TF_SRCS} PROPERTIES LANGUAGE Fortran)
+
+set (CMD $<TARGET_FILE:H5_test_buildiface>)
+add_custom_target (H5testgen ALL
+    COMMAND ${CMD}
+#v3.2    BYPRODUCT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+    DEPENDS H5_test_buildiface
+)
+
+add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf.F90 ${HDF5_F90_TF_SRCS})
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-   add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90)
+   add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf.F90 ${HDF5_F90_TF_SRCS})
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} STATIC " " " ")
@@ -127,20 +144,6 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     )
   endif (WIN32)
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-
-set (CMD $<TARGET_FILE:H5_test_buildiface>)
-#add_custom_command (
-#    OUTPUT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
-#    COMMAND ${CMD}
-#    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-#    DEPENDS H5_test_buildiface
-#)
-add_custom_target (H5testgen ALL
-    COMMAND ${CMD}
-#v3.2    BYPRODUCT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
-    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-    DEPENDS H5_test_buildiface
-)
 
 #-----------------------------------------------------------------------------
 # Add Tests
