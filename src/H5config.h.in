@@ -203,14 +203,8 @@
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #undef HAVE_LIBMPE
 
-/* Define to 1 if you have the `nsl' library (-lnsl). */
-#undef HAVE_LIBNSL
-
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
-
-/* Define to 1 if you have the `socket' library (-lsocket). */
-#undef HAVE_LIBSOCKET
 
 /* Define to 1 if you have the `sz' library (-lsz). */
 #undef HAVE_LIBSZ

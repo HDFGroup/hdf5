@@ -117,13 +117,8 @@ if (NOT WINDOWS)
   CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" gethostbyname ${HDF_PREFIX}_HAVE_LIBWSOCK32)
 endif (NOT WINDOWS)
 
+# UCB (BSD) compatibility library
 CHECK_LIBRARY_EXISTS_CONCAT ("ucb"    gethostname  ${HDF_PREFIX}_HAVE_LIBUCB)
-CHECK_LIBRARY_EXISTS_CONCAT ("socket" connect      ${HDF_PREFIX}_HAVE_LIBSOCKET)
-CHECK_LIBRARY_EXISTS ("c" gethostbyname "" NOT_NEED_LIBNSL)
-
-if (NOT NOT_NEED_LIBNSL)
-  CHECK_LIBRARY_EXISTS_CONCAT ("nsl"    gethostbyname  ${HDF_PREFIX}_HAVE_LIBNSL)
-endif (NOT NOT_NEED_LIBNSL)
 
 # For other tests to use the same libraries
 set (CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${LINK_LIBS})

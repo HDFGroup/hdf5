@@ -961,12 +961,6 @@ esac
 AC_CHECK_LIB([m], [ceil])
 AC_CHECK_LIB([dl], [dlopen])
 
-if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
-  ## ...for Solaris
-  AC_CHECK_LIB([socket], [socket])
-  AC_CHECK_LIB([nsl], [xdr_int])
-fi
-
 ## ----------------------------------------------------------------------
 ## Check for system header files.
 ##
