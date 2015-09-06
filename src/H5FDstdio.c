@@ -97,11 +97,7 @@ typedef struct H5FD_stdio_t {
      * Windows code further below.
      */
     dev_t           device;     /* file device number   */
-#ifdef H5_VMS
-    ino_t           inode[3];   /* file i-node number   */
-#else
     ino_t           inode;      /* file i-node number   */
-#endif /* H5_VMS */
 #else
     /* Files in windows are uniquely identified by the volume serial
      * number and the file index (both low and high parts).
@@ -448,13 +444,7 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADFILE, "unable to fstat file", NULL)
     } /* end if */
     file->device = sb.st_dev;
-#ifdef H5_VMS
-    file->inode[0] = sb.st_ino[0];
-    file->inode[1] = sb.st_ino[1];
-    file->inode[2] = sb.st_ino[2];
-#else /* H5_VMS */
     file->inode = sb.st_ino;
-#endif /* H5_VMS */
 #endif /* H5_HAVE_WIN32_API */
 
     return (H5FD_t*)file;
@@ -540,13 +530,8 @@ H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     if(memcmp(&(f1->device),&(f2->device),sizeof(dev_t)) < 0) return -1;
     if(memcmp(&(f1->device),&(f2->device),sizeof(dev_t)) > 0) return 1;
 #endif /* H5_DEV_T_IS_SCALAR */
-#ifdef H5_VMS
-    if(memcmp(&(f1->inode), &(f2->inode), 3 * sizeof(ino_t)) < 0) return -1;
-    if(memcmp(&(f1->inode), &(f2->inode), 3 * sizeof(ino_t)) > 0) return 1;
-#else /* H5_VMS */
     if(f1->inode < f2->inode) return -1;
     if(f1->inode > f2->inode) return 1;
-#endif /* H5_VMS */
 #endif /* H5_HAVE_WIN32_API */
 
     return 0;

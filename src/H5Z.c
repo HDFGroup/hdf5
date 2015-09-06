@@ -1323,7 +1323,6 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
              */
 	    if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
                 hbool_t issue_error = FALSE;
-#ifndef H5_VMS
 
                     const H5Z_class2_t    *filter_info;
 
@@ -1339,9 +1338,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                     } /* end if */
                     else
                         issue_error = TRUE;
-#else /*H5_VMS*/
-                issue_error = TRUE;
-#endif /*H5_VMS*/
+
                 /* Check for error */
                 if(issue_error) {
                     /* Print out the filter name to give more info.  But the name is optional for 

@@ -6046,28 +6046,6 @@ my_isnan(dtype_t type, void *val)
         }
     }
 
-#ifdef H5_VMS
-    /* For "float" and "double" on OpenVMS/Alpha, NaN is
-    * actually a valid value of maximal value.*/
-    if(!retval)
-    {
-        if (FLT_FLOAT==type)
-        {
-            float x;
-
-            HDmemcpy(&x, val, sizeof(float));
-            retval = (x==FLT_MAX || x==-FLT_MAX);
-        } else if (FLT_DOUBLE==type) {
-            double x;
-
-            HDmemcpy(&x, val, sizeof(double));
-            retval = (x==DBL_MAX || x==-DBL_MAX);
-        } else
-        {
-            return FALSE;
-        }
-    }
-#endif /*H5_VMS*/
 
     return retval;
 }

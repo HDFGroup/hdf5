@@ -4220,7 +4220,11 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
                     goto padding;
-#ifndef H5_VMS  /*Temporary solution to handle VAX special values*/
+                /* Temporary solution to handle VAX special values.
+                 * Note that even though we don't support VAX anymore, we
+                 * still need to handle legacy VAX files so this code must
+                 * remain in place.
+                 */
                 } else if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
                     /* NaN */
@@ -4245,7 +4249,6 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
                     goto padding;
-#endif /*H5_VMS*/
                 }
 
                 /*

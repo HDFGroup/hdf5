@@ -58,10 +58,9 @@ const char *FILENAME[] = {
 };
 
 /*
- * Count up or down depending on whether the machine is big endian, little
- * endian, or VAX (OpenVMS).  If local variable `endian' is H5T_ORDER_BE then
- * the result will be I, otherwise the result will be Z-(I+1).  VAX is printed
- * as little endian.
+ * Count up or down depending on whether the machine is big endian or little
+ * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
+ * be I, otherwise the result will be Z-(I+1).
  */
 #define ENDIAN(Z,I,E)	(H5T_ORDER_BE==E?(I):(Z)-((I)+1))
 
@@ -86,11 +85,6 @@ static int skip_overflow_tests_g = 0;
  */
 #if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
 #define HANDLE_SIGFPE
-#endif
-
-/* OpenVMS doesn't have this feature.  Make sure to disable it*/
-#ifdef H5_VMS
-#undef HANDLE_SIGFPE
 #endif
 
 /*
@@ -630,12 +624,7 @@ test_hard_query(void)
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
-    }
-
-
-#ifndef H5_VMS
-    /* Disable this test because the soft conversion functions (H5T__conv_i_f and H5T__conv_f_i) on
-       OpenVMS and are disabled - SLU 2013/8/26 */
+    } /* end if */
 
     /* Unregister the hard conversion from int to float.  Verify the conversion
      * is a soft conversion. */
@@ -644,8 +633,7 @@ test_hard_query(void)
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
-    }
-#endif
+    } /* end if */
 
     /* Register the hard conversion from int to float.  Verify the conversion
      * is a hard conversion. */
@@ -654,7 +642,7 @@ test_hard_query(void)
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
-    }
+    } /* end if */
 
     PASSED();
     reset_hdf5();
@@ -664,7 +652,7 @@ test_hard_query(void)
  error:
     reset_hdf5();
     return 1;
-}
+} /*  end test_hard_query() */
 
 
 /*-------------------------------------------------------------------------
@@ -2746,24 +2734,6 @@ my_isnan(dtype_t type, void *val)
 	    retval = 1;
     }
 
-#ifdef H5_VMS
-    /* For "float" and "double" on OpenVMS/Alpha, NaN is
-     * actually a valid value of maximal value.*/
-    if(!retval) {
-	if (FLT_FLOAT==type) {
-	    float x;
-	    HDmemcpy(&x, val, sizeof(float));
-            retval = (x==FLT_MAX || x==-FLT_MAX);
-	} else if (FLT_DOUBLE==type) {
- 	    double x;
-	    HDmemcpy(&x, val, sizeof(double));
-            retval = (x==DBL_MAX || x==-DBL_MAX);
-	} else {
-	    return 0;
-	}
-    }
-#endif /*H5_VMS*/
-
     return retval;
 }
 
@@ -2792,23 +2762,8 @@ my_isinf(int endian, unsigned char *val, size_t size,
 
     bits = (unsigned char*)HDcalloc((size_t)1, size);
 
-#ifdef H5_VMS
-    if(H5T_ORDER_VAX==endian) {
-        for (i = 0; i < size; i += 4) {
-            bits[i] = val[(size-2)-i];
-            bits[i+1] = val[(size-1)-i];
-
-            bits[(size-2)-i] = val[i];
-            bits[(size-1)-i] = val[i+1];
-        }
-    } else {
-        for (i=0; i<size; i++)
-            bits[size-(i+1)] = *(val + ENDIAN(size,i,endian));
-    }
-#else /*H5_VMS*/
     for (i=0; i<size; i++)
         bits[size-(i+1)] = *(val + ENDIAN(size, i, endian));
-#endif /*H5_VMS*/
 
     if(H5T__bit_find(bits, mpos, msize, H5T_BIT_LSB, 1) < 0 &&
             H5T__bit_find(bits, epos, esize, H5T_BIT_LSB, 0) < 0)
@@ -2866,9 +2821,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     int			underflow;		/*underflow occurred	*/
     int			overflow;		/*overflow occurred	*/
-#ifdef H5_VMS
-    int			maximal;		/*maximal value occurred, for VMS only.	*/
-#endif /* H5_VMS */
     int 		uflow=0;		/*underflow debug counters*/
     size_t		j, k;			/*counters		*/
     int			sendian;		/* source type endianess */
@@ -2919,9 +2871,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
      * The remainder of this function is executed only by the child if
      * HANDLE_SIGFPE is defined.
      */
-#ifndef H5_VMS
     HDsignal(SIGFPE,fpe_handler);
-#endif
 
     /* What are the names of the source and destination types */
     if (H5Tequal(src, H5T_NATIVE_FLOAT)) {
@@ -3019,33 +2969,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     switch (run_test) {
         case TEST_NOOP:
         case TEST_NORMAL:
-#ifdef H5_VMS
-            if(src_type == FLT_FLOAT) {
-                INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-            } else if(src_type == FLT_DOUBLE && dst_type == FLT_FLOAT) {
-                /*Temporary solution for VMS.  Cap double values between maximal and minimal
-                 *destination values because VMS return exception when overflows or underflows.
-                 *Same below.*/
-                INIT_FP_NORM(double, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-            } else if(src_type == FLT_DOUBLE) {
-                INIT_FP_NORM(double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
-            } else if(src_type == FLT_LDOUBLE && dst_type == FLT_FLOAT) {
-                INIT_FP_NORM(long double, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-            } else if(src_type == FLT_LDOUBLE && dst_type == FLT_DOUBLE) {
-                INIT_FP_NORM(long double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-            } else if(src_type == FLT_LDOUBLE) {
-                INIT_FP_NORM(long double, LDBL_MAX, LDBL_MIN, LDBL_MAX_10_EXP, LDBL_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-#endif
-            } else
-                goto error;
-#else /*H5_VMS*/
             if(src_type == FLT_FLOAT) {
                 INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
                         src_size, dst_size, buf, saved, nelmts);
@@ -3059,7 +2982,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 #endif
             } else
                 goto error;
-#endif /*H5_VMS*/
 
             break;
         case TEST_DENORM:
@@ -3135,9 +3057,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabs(*((double*)aligned)) < FLT_MIN;
                 overflow = HDfabs(*((double*)aligned)) > FLT_MAX;
-#ifdef H5_VMS
-                maximal = HDfabs(*((double*)aligned)) == FLT_MAX;
-#endif
             } else if (FLT_DOUBLE==dst_type) {
                 hw_d = *((double*)aligned);
                 hw = (unsigned char*)&hw_d;
@@ -3155,17 +3074,11 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabsl(*((long double*)aligned)) < FLT_MIN;
                 overflow = HDfabsl(*((long double*)aligned)) > FLT_MAX;
-#ifdef H5_VMS
-                maximal = HDfabs(*((long double*)aligned)) == FLT_MAX;
-#endif
             } else if (FLT_DOUBLE==dst_type) {
                 hw_d = *((long double*)aligned);
                 hw = (unsigned char*)&hw_d;
                 underflow = HDfabsl(*((long double*)aligned)) < DBL_MIN;
                 overflow = HDfabsl(*((long double*)aligned)) > DBL_MAX;
-#ifdef H5_VMS
-                maximal = HDfabs(*((long double*)aligned)) == DBL_MAX;
-#endif
             } else {
                 hw_ld = *((long double*)aligned);
                 hw = (unsigned char*)&hw_ld;
@@ -3200,17 +3113,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
         if (k==dst_size)
             continue; /*no error*/
 
-#ifdef H5_VMS
-        /* For "float" and "double" on OpenVMS/Alpha, NaN is
-         * a valid value of maximal value.*/
-        if (FLT_FLOAT==src_type &&
-                my_isnan(src_type, saved+j*sizeof(float))) {
-            continue;
-        } else if (FLT_DOUBLE==src_type &&
-                my_isnan(src_type, saved+j*sizeof(double))) {
-            continue;
-        }
-#endif /*H5_VMS*/
 
         /*
          * Assume same if both results are NaN.  There are many NaN bit
@@ -3268,11 +3170,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (overflow && my_isinf(dendian, buf+j*sizeof(float),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
-#ifdef H5_VMS
-                if (maximal && my_isinf(dendian, buf+j*sizeof(float),
-                        dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
-                    continue;	/* maximal value, no error */
-#endif /*H5_VMS*/
                 check_mant[0] = HDfrexpf(x, check_expo+0);
                 check_mant[1] = HDfrexpf(hw_f, check_expo+1);
             } else if (FLT_DOUBLE==dst_type) {
@@ -3284,11 +3181,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (overflow && my_isinf(dendian, buf+j*sizeof(double),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
-#ifdef H5_VMS
-                if (maximal && my_isinf(dendian, buf+j*sizeof(double),
-                        dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
-                    continue;	/* maximal value, no error */
-#endif /*H5_VMS*/
                 check_mant[0] = HDfrexp(x, check_expo+0);
                 check_mant[1] = HDfrexp(hw_d, check_expo+1);
 #if H5_SIZEOF_LONG_DOUBLE !=0 && (H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE)
@@ -4495,27 +4387,6 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         }
 #endif /*end H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS*/
 
-
-#ifdef H5_VMS
-        /* OpenVMS converts the value of zero in char or short to negative zero in 
-         * long double.  Make it warning instead of failure. SLU - 2013/9/10
-         */
-	if(dst_type == FLT_LDOUBLE) {
-            long double *ld= buf + j*dst_size;
-	    if(src_type == INT_SCHAR) {
-                char *c = saved + j*src_size;
-                if(*c == 0 && *ld == -0)
-		    H5_WARNING();
-                    goto printing;
-            } else if(src_type == INT_SHORT) {
-                short *s = saved + j*src_size;
-                if(*s == 0 && *ld == -0)
-		    H5_WARNING();
-                    goto printing;
-            }
-        }
-#endif /*H5_VMS*/
-
         /* Print errors */
         if (0==fails_this_test++) {
             if(run_test==TEST_NORMAL) {
@@ -5049,7 +4920,6 @@ run_fp_tests(const char *name)
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
 
-#ifndef H5_VMS
     /*Test denormalized values.  TEST_DENORM indicates denormalized values.*/
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
@@ -5069,7 +4939,6 @@ run_fp_tests(const char *name)
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
-#endif /*H5_VMS*/
 
 done:
     return nerrors;
@@ -5211,11 +5080,7 @@ run_fp_int_conv(const char *name)
 #ifdef H5_FP_TO_INTEGER_OVERFLOW_WORKS
     int         test_values;
 
-#ifdef H5_VMS
-    test_values = TEST_NORMAL;
-#else
     for(test_values = TEST_NORMAL; test_values <= TEST_SPECIAL; test_values++) {
-#endif /*H5_VMS*/
 
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_SCHAR);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_SCHAR);
@@ -5324,9 +5189,7 @@ run_fp_int_conv(const char *name)
 #endif /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
 #endif
 #endif
-#ifndef H5_VMS
     } /* end for */
-#endif /* H5_VMS */
 #else /* H5_FP_TO_INTEGER_OVERFLOW_WORKS */
 /* For Cray X1, the compiler generates floating exception when the
  * conversion overflows.  So disable all of the conversions from
@@ -5387,23 +5250,16 @@ main(void)
     /* Test H5Tcompiler_conv() for querying hard conversion. */
     nerrors += test_hard_query();
 
-#ifndef H5_VMS
-    /* Disable this test because the soft conversion functions (H5T__conv_i_f and H5T__conv_f_i) on
-       OpenVMS and are disabled - SLU 2013/8/26 */
-
     /* Test user-define, query functions and software conversion
      * for user-defined floating-point types */
     nerrors += test_derived_flt();
-#endif
 
     /* Test user-define, query functions and software conversion
      * for user-defined integer types */
     nerrors += test_derived_integer();
 
-#ifndef H5_VMS
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();
-#endif
 
     /* Test degenerate cases */
     nerrors += run_fp_tests("noop");
@@ -5437,16 +5293,11 @@ main(void)
     nerrors += test_conv_int_2();
     nerrors += run_integer_tests("soft");
 
-#ifndef H5_VMS
-    /* Disable these tests because the soft conversion functions (H5T__conv_i_f and H5T__conv_f_i) on
-       OpenVMS and are disabled - SLU 2013/8/26 */
-
     /* Test software float-integer conversion functions */
     nerrors += run_fp_int_conv("soft");
 
     /* Test software integer-float conversion functions */
     nerrors += run_int_fp_conv("soft");
-#endif
 
     reset_hdf5();
 
@@ -5458,3 +5309,4 @@ main(void)
     printf("All data type tests passed.\n");
     return 0;
 }
+

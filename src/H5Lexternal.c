@@ -125,8 +125,6 @@ H5L_getenv_prefix_name(char **env_prefix/*in,out*/)
  *
  * Programmer:	Vailin Choi, April 2, 2008
  *
- * Modification: Raymond Lu, 14 Jan. 2009
- *           Added support for OpenVMS pathname
 --------------------------------------------------------------------------*/
 static herr_t
 H5L_build_name(char *prefix, char *file_name, char **full_name/*out*/)
