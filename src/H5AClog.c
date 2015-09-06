@@ -596,7 +596,7 @@ done:
 herr_t
 H5AC__write_protect_entry_log_msg(const H5AC_t *cache,
                                   const H5AC_info_t *entry,
-                                  H5AC_protect_t rw,
+                                  unsigned flags,
                                   herr_t fxn_ret_value)
 {
     char msg[MSG_SIZE];
@@ -610,12 +610,10 @@ H5AC__write_protect_entry_log_msg(const H5AC_t *cache,
     HDassert(cache->magic == H5C__H5C_T_MAGIC);
     HDassert(entry);
 
-    if(H5AC_READ == rw)
+    if(H5AC__READ_ONLY_FLAG == flags)
         HDstrcpy(rw_s, "READ");
-    else if(H5AC_WRITE == rw)
+    else 
         HDstrcpy(rw_s, "WRITE");
-    else
-        HDstrcpy(rw_s, "UNKNOWN");
 
     /* Create the log message string */
     HDsnprintf(msg, MSG_SIZE, 

@@ -341,7 +341,7 @@ typedef struct H5HF_hdr_t {
     size_t      rc;             /* Reference count of heap's components using heap header */
     haddr_t     heap_addr;      /* Address of heap header in the file */
     size_t      heap_size;      /* Size of heap header in the file */
-    H5AC_protect_t mode;        /* Access mode for heap */
+    unsigned    mode;           /* Access mode for heap */
     H5F_t      *f;              /* Pointer to file for heap */
     size_t      file_rc;        /* Reference count of files using heap header */
     hbool_t     pending_delete; /* Heap is pending deletion */
@@ -425,6 +425,31 @@ typedef struct H5HF_direct_t {
     size_t      size;           /* Size of direct block                       */
     hsize_t     file_size;      /* Size of direct block in file (only valid when block's space is being freed) */
     uint8_t     *blk;           /* Pointer to buffer containing block data    */
+    uint8_t	*write_buf;	/* Pointer to buffer containing the block data */
+                                /* in form ready to copy to the metadata       */
+                                /* cache's image buffer.                       */
+                                /*                                             */
+                                /* This field is used by                       */
+                                /* H5HF_cache_dblock_pre_serialize() to pass   */
+                                /* the serialized image of the direct block to */
+                                /* H5HF_cache_dblock_serialize().  It should   */
+                                /* NULL at all other times.                    */
+                                /*                                             */
+                                /* If I/O filters are enabled, the pre-        */
+                                /* the pre-serialize function will allocate    */
+                                /* a buffer, copy the filtered version of the  */
+                                /* direct block image into it, and place the   */
+                                /* base address of the buffer in this field.   */
+                                /* The serialize function must discard this    */
+                                /* buffer after it copies the contents into    */
+                                /* the image buffer provided by the metadata   */
+                                /* cache.                                      */
+                                /*                                             */
+                                /* If I/O filters are not enabled, the         */
+                                /* write_buf field is simply set equal to the  */
+                                /* blk field by the pre-serialize function,    */
+                                /* and back to NULL by the serialize function. */
+    size_t	write_size;     /* size of the buffer pointed to by write_buf. */
 
     /* Stored values */
     hsize_t     block_off;      /* Offset of the block within the heap's address space */
@@ -520,6 +545,14 @@ typedef struct H5HF_dblock_cache_ud_t {
 				 * calls to it.
 				 */
     unsigned filter_mask;	/* Excluded filters for direct block */
+    uint8_t *dblk;		/* Pointer to the buffer containing the decompressed
+ 			         * direct block data obtained in verify_chksum callback.
+				 * It will be used later in deserialize callback.
+				 */
+    htri_t decompressed;	/* Indicate that the direct block has been
+ 				 * decompressed in verify_chksum callback.
+				 * It will be used later in deserialize callback.
+				 */
 } H5HF_dblock_cache_ud_t;
 
 
@@ -604,7 +637,7 @@ H5_DLL hsize_t H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start
 H5_DLL H5HF_hdr_t * H5HF_hdr_alloc(H5F_t *f);
 H5_DLL haddr_t H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam);
 H5_DLL H5HF_hdr_t *H5HF_hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    H5AC_protect_t rw);
+    unsigned flags);
 H5_DLL herr_t H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_finish_init_phase2(H5HF_hdr_t *hdr);
 H5_DLL herr_t H5HF_hdr_finish_init(H5HF_hdr_t *hdr);
@@ -645,7 +678,7 @@ H5_DLL herr_t H5HF_man_iblock_create(H5HF_hdr_t *hdr, hid_t dxpl_id,
 H5_DLL H5HF_indirect_t *H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t iblock_addr, unsigned iblock_nrows,
     H5HF_indirect_t *par_iblock, unsigned par_entry, hbool_t must_protect,
-    H5AC_protect_t rw, hbool_t *did_protect);
+    unsigned flags, hbool_t *did_protect);
 H5_DLL herr_t H5HF_man_iblock_unprotect(H5HF_indirect_t *iblock, hid_t dxpl_id,
     unsigned cache_flags, hbool_t did_protect);
 H5_DLL herr_t H5HF_man_iblock_attach(H5HF_indirect_t *iblock, unsigned entry,
@@ -671,10 +704,10 @@ H5_DLL herr_t H5HF_man_dblock_destroy(H5HF_hdr_t *hdr, hid_t dxpl_id,
 H5_DLL H5HF_direct_t *H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t dblock_addr, size_t dblock_size,
     H5HF_indirect_t *par_iblock, unsigned par_entry,
-    H5AC_protect_t rw);
+    unsigned flags);
 H5_DLL herr_t H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id,
     hsize_t obj_off, H5HF_indirect_t **par_iblock,
-    unsigned *par_entry, hbool_t *par_did_protect, H5AC_protect_t rw);
+    unsigned *par_entry, hbool_t *par_did_protect, unsigned flags);
 H5_DLL herr_t H5HF_man_dblock_delete(H5F_t *f, hid_t dxpl_id, haddr_t dblock_addr,
     hsize_t dblock_size);
 H5_DLL herr_t H5HF_man_dblock_dest(H5HF_direct_t *dblock);

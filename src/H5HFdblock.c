@@ -149,6 +149,9 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
 HDmemset(dblock->blk, 0, dblock->size);
 #endif /* H5_CLEAR_MEMORY */
 
+    dblock->write_buf = NULL;
+    dblock->write_size = 0;
+
     /* Allocate [temporary] space for the direct block on disk */
     if(H5F_USE_TMP_SPACE(hdr->f)) {
         if(HADDR_UNDEF == (dblock_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)dblock->size)))
@@ -308,9 +311,13 @@ H5HF_man_dblock_destroy(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_direct_t *dblock,
         } /* end if */
     } /* end else */
 
-    /* Indicate that the indirect block should be deleted & file space freed */
+    /* Indicate that the indirect block should be deleted */
     dblock->file_size = dblock_size;
-    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
+    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG;
+
+    /* If the dblock is in real file space, also tell the cache to free its file space */
+    if (!H5F_IS_TMP_ADDR(hdr->f, dblock_addr))
+        cache_flags |= H5AC__FREE_FILE_SPACE_FLAG;
 
 done:
     /* Unprotect the indirect block, with appropriate flags */
@@ -436,7 +443,7 @@ done:
 H5HF_direct_t *
 H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
     size_t dblock_size, H5HF_indirect_t *par_iblock, unsigned par_entry,
-    H5AC_protect_t rw)
+    unsigned flags)
 {
     H5HF_direct_t *dblock;      /* Direct block from cache */
     H5HF_dblock_cache_ud_t udata;	/* parent and other infor for deserializing direct block */
@@ -450,6 +457,9 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
     HDassert(hdr);
     HDassert(H5F_addr_defined(dblock_addr));
     HDassert(dblock_size > 0);
+
+    /* only H5AC__READ_ONLY_FLAG may appear in flags */
+    HDassert((flags & (~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up parent info */
     udata.par_info.hdr = hdr;
@@ -485,7 +495,7 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
     } /* end else */
 
     /* Protect the direct block */
-    if(NULL == (dblock = (H5HF_direct_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, &udata, rw)))
+    if(NULL == (dblock = (H5HF_direct_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, &udata, flags)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap direct block")
 
     /* Set the return value */
@@ -512,7 +522,7 @@ done:
 herr_t
 H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off,
     H5HF_indirect_t **ret_iblock, unsigned *ret_entry, hbool_t *ret_did_protect,
-    H5AC_protect_t rw)
+    unsigned flags)
 {
     haddr_t iblock_addr;            /* Indirect block's address */
     H5HF_indirect_t *iblock;        /* Pointer to indirect block */
@@ -531,6 +541,9 @@ H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off,
     HDassert(ret_iblock);
     HDassert(ret_did_protect);
 
+    /* only H5AC__READ_ONLY_FLAG may appear in flags */
+    HDassert((flags & (~H5AC__READ_ONLY_FLAG)) == 0);
+
     /* Look up row & column for object */
     if(H5HF_dtable_lookup(&hdr->man_dtable, obj_off, &row, &col) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of object")
@@ -539,7 +552,7 @@ H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off,
     iblock_addr = hdr->man_dtable.table_addr;
 
     /* Lock root indirect block */
-    if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, hdr->man_dtable.curr_root_rows, NULL, 0, FALSE, rw, &did_protect)))
+    if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, hdr->man_dtable.curr_root_rows, NULL, 0, FALSE, flags, &did_protect)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
     /* Check for indirect block row */
@@ -569,7 +582,7 @@ H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off,
         } /* end if */
 
         /* Lock child indirect block */
-        if(NULL == (new_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, nrows, iblock, entry, FALSE, rw, &new_did_protect)))
+        if(NULL == (new_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, nrows, iblock, entry, FALSE, flags, &new_did_protect)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
         /* Release the current indirect block */

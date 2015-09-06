@@ -128,8 +128,7 @@ static herr_t H5AC__receive_haddr_list(MPI_Comm mpi_comm, int *num_entries_ptr,
     haddr_t **haddr_buf_ptr_ptr);
 static herr_t H5AC__receive_candidate_list(const H5AC_t *cache_ptr,
     int *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
-static herr_t H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t primary_dxpl_id,
-    hid_t secondary_dxpl_id);
+static herr_t H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t dxpl_id);
 static herr_t H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, int num_candidates,
     haddr_t *candidates_list_ptr);
 static herr_t H5AC__rsp__dist_md_write__flush(H5F_t *f, hid_t dxpl_id);
@@ -202,11 +201,11 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "extensible array super blocks",
     "extensible array data blocks",
     "extensible array data block pages",
-    "chunk proxy",
     "fixed array headers",
     "fixed array data block",
     "fixed array data block pages",
     "superblock",
+    "driver info",
     "test entry"	/* for testing only -- not used for actual files */
 };
 
@@ -593,7 +592,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
 #endif /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */
-    if(H5C_dest(f, dxpl_id, H5AC_dxpl_id) < 0)
+    if(H5C_dest(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
     f->shared->cache = NULL;
 
@@ -646,7 +645,7 @@ H5AC_evict(H5F_t *f, hid_t dxpl_id)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
 
     /* Evict all entries in the cache except the pinned superblock entry */
-    if(H5C_evict(f, dxpl_id, H5AC_dxpl_id) < 0)
+    if(H5C_evict(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't evict cache")
 
 done:
@@ -693,8 +692,7 @@ H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
-    HDassert(type->clear);
-    HDassert(type->dest);
+    HDassert(type->serialize);
     HDassert(H5F_addr_defined(addr));
 
     /* Check if log messages are being emitted */
@@ -714,7 +712,7 @@ H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
 }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    if(H5C_expunge_entry(f, dxpl_id, H5AC_dxpl_id, type, addr, flags) < 0)
+    if(H5C_expunge_entry(f, dxpl_id, type, addr, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "H5C_expunge_entry() failed.")
 
 done:
@@ -792,7 +790,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
 
     /* Flush the cache */
     /* (Again, in parallel - writes out the superblock) */
-    if(H5C_flush_cache(f, dxpl_id, H5AC_dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+    if(H5C_flush_cache(f, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache.")
 
 done:
@@ -911,8 +909,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
-    HDassert(type->flush);
-    HDassert(type->size);
+    HDassert(type->serialize);
     HDassert(H5F_addr_defined(addr));
     HDassert(thing);
 
@@ -951,7 +948,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
 
     /* Insert entry into metadata cache */
-    if(H5C_insert_entry(f, dxpl_id, H5AC_dxpl_id, type, addr, thing, flags) < 0)
+    if(H5C_insert_entry(f, dxpl_id, type, addr, thing, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5C_insert_entry() failed")
 
 #if H5AC__TRACE_FILE_ENABLED
@@ -1318,7 +1315,7 @@ done:
  */
 void *
 H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
-    void *udata, H5AC_protect_t rw)
+    void *udata, unsigned flags)
 {
 #if H5AC__TRACE_FILE_ENABLED
     char                trace[128] = "";
@@ -1338,16 +1335,27 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
-    HDassert(type->flush);
-    HDassert(type->load);
+    HDassert(type->serialize);
     HDassert(H5F_addr_defined(addr));
 
     /* Check if log messages are being emitted */
     if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "unable to get logging status")
 
+    /* Check for unexpected flags -- H5C__FLUSH_COLLECTIVELY_FLAG
+     * only permitted in the parallel case.
+     */
+#ifdef H5_HAVE_PARALLEL
+    HDassert(0 == (flags & (unsigned)(~(H5C__READ_ONLY_FLAG | \
+                                        H5C__FLUSH_LAST_FLAG | \
+                                        H5C__FLUSH_COLLECTIVELY_FLAG))));
+#else /* H5_HAVE_PARALLEL */
+    HDassert(0 == (flags & (unsigned)(~(H5C__READ_ONLY_FLAG | \
+                                        H5C__FLUSH_LAST_FLAG))));
+#endif /* H5_HAVE_PARALLEL */
+
     /* Check for invalid access request */
-    if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR) && rw == H5AC_WRITE)
+    if((0 == (H5F_INTENT(f) & H5F_ACC_RDWR)) &&  (0 == (flags & H5C__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "no write intent on file")
 
     /* FIXME: (temporary)
@@ -1359,36 +1367,21 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "can't protect/write version 1 B-tree nodes under SWMR writes")
 
 #if H5AC__TRACE_FILE_ENABLED
-    /* For the protect call, only the addr and type id is really necessary
-     * in the trace file.  Include the size of the entry protected as a
-     * sanity check.  Also indicate whether the call was successful to
-     * catch occult errors.
+    /* For the protect call, only the addr, size, type id, and flags are 
+     * necessary in the trace file.  Also indicate whether the call was 
+     * successful to catch occult errors.
      */
-    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr))) {
-	const char * rw_string;
-
-        if (rw == H5AC_WRITE ) 
-	    rw_string = "H5AC_WRITE";
-	else if (rw == H5AC_READ )
-	    rw_string = "H5AC_READ";
-	else
-	    rw_string = "???";
-
-        sprintf(trace, "%s 0x%lx %d %s", FUNC, (unsigned long)addr,
-		(int)(type->id), rw_string);
-    }
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr(cache_ptr)))
+        sprintf(trace, "%s 0x%lx %d 0x%x", FUNC, (unsigned long)addr,
+		(int)(type->id), flags);
 #endif /* H5AC__TRACE_FILE_ENABLED */
-
-    if ( rw == H5AC_READ )
-	protect_flags |= H5C__READ_ONLY_FLAG;
 
 #if H5AC_DO_TAGGING_SANITY_CHECKS
     if (!f->shared->cache->ignore_tags && (H5AC_verify_tag(dxpl_id, type) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, NULL, "Bad tag value")
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
 
-    if(NULL == (thing = H5C_protect(f, dxpl_id, H5AC_dxpl_id, type, addr, udata, protect_flags)))
-
+    if(NULL == (thing = H5C_protect(f, dxpl_id, type, addr, udata, flags)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "H5C_protect() failed.")
 
 #if H5AC__TRACE_FILE_ENABLED
@@ -1411,7 +1404,7 @@ done:
         herr_t fake_ret_value = (NULL == ret_value) ? FAIL : SUCCEED;
 
         if(H5AC__write_protect_entry_log_msg(f->shared->cache, (H5AC_info_t *)thing,
-                                                 rw, fake_ret_value) < 0)
+                                                 flags, fake_ret_value) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "unable to emit log message")
     }
 
@@ -1694,8 +1687,8 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
-    HDassert(type->clear);
-    HDassert(type->flush);
+    HDassert(type->deserialize);
+    HDassert(type->image_len);
     HDassert(H5F_addr_defined(addr));
     HDassert(thing);
     HDassert( ((H5AC_info_t *)thing)->addr == addr );
@@ -1722,9 +1715,11 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
      *  the entry.
      */
     if(dirtied && !deleted) {
+        hbool_t		curr_compressed = FALSE; /* dummy for call */
         size_t		curr_size = 0;
+        size_t		curr_compressed_size = 0; /* dummy for call */
 
-        if((type->size)(f, thing, &curr_size) < 0)
+        if((type->image_len)(thing, &curr_size, &curr_compressed, &curr_compressed_size) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTGETSIZE, FAIL, "Can't get size of thing")
 
         if(((H5AC_info_t *)thing)->size != curr_size)
@@ -1743,7 +1738,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
-    if(H5C_unprotect(f, dxpl_id, H5AC_dxpl_id, type, addr, thing, flags) < 0)
+    if(H5C_unprotect(f, dxpl_id, type, addr, thing, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "H5C_unprotect() failed.")
 
 #ifdef H5_HAVE_PARALLEL
@@ -3699,7 +3694,7 @@ H5AC__propagate_and_apply_candidate_list(H5F_t  *f, hid_t dxpl_id)
         aux_ptr->write_permitted = TRUE;
 
         /* Apply the candidate list */
-        result = H5C_apply_candidate_list(f, dxpl_id, dxpl_id, cache_ptr, num_candidates,
+        result = H5C_apply_candidate_list(f, dxpl_id, cache_ptr, num_candidates,
             candidates_list_ptr, aux_ptr->mpi_rank, aux_ptr->mpi_size);
 
         /* Disable writes again */
@@ -3843,7 +3838,7 @@ H5AC__propagate_flushed_and_still_clean_entries_list(H5F_t  *f, hid_t dxpl_id)
         HDassert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
     } /* end if */
     else {
-        if(H5AC__receive_and_apply_clean_list(f, dxpl_id, H5AC_dxpl_id) < 0)
+        if(H5AC__receive_and_apply_clean_list(f, dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't receive and/or process clean slist broadcast.")
     } /* end else */
 
@@ -3947,7 +3942,7 @@ done:
  */
 #ifdef H5_HAVE_PARALLEL
 static herr_t
-H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id)
+H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t dxpl_id)
 {
     H5AC_t             * cache_ptr;
     H5AC_aux_t         * aux_ptr;
@@ -3973,7 +3968,7 @@ H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t primary_dxpl_id, hid_t second
 
     if(num_entries > 0)
         /* mark the indicated entries as clean */
-        if(H5C_mark_entries_as_clean(f, primary_dxpl_id, secondary_dxpl_id, (int32_t)num_entries, haddr_buf_ptr) < 0)
+        if(H5C_mark_entries_as_clean(f, dxpl_id, (int32_t)num_entries, haddr_buf_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't mark entries clean.")
 
     /* if it is defined, call the sync point done callback.  Note
@@ -4140,7 +4135,7 @@ H5AC__rsp__dist_md_write__flush(H5F_t *f, hid_t dxpl_id)
         aux_ptr->write_permitted = TRUE;
 
         /* Apply the candidate list */
-        result = H5C_apply_candidate_list(f, dxpl_id, dxpl_id, cache_ptr, num_entries,
+        result = H5C_apply_candidate_list(f, dxpl_id, cache_ptr, num_entries,
             haddr_buf_ptr, aux_ptr->mpi_rank, aux_ptr->mpi_size);
 
         /* Disable writes again */
@@ -4353,7 +4348,7 @@ H5AC__rsp__p0_only__flush(H5F_t *f, hid_t dxpl_id)
         aux_ptr->write_permitted = TRUE;
 
         /* Flush the cache */
-        result = H5C_flush_cache(f, dxpl_id, dxpl_id, H5AC__NO_FLAGS_SET);
+        result = H5C_flush_cache(f, dxpl_id, H5AC__NO_FLAGS_SET);
 
         /* Disable writes again */
         aux_ptr->write_permitted = FALSE;
@@ -4477,7 +4472,7 @@ H5AC__rsp__p0_only__flush_to_min_clean(H5F_t *f, hid_t dxpl_id)
             aux_ptr->write_permitted = TRUE;
 
             /* Flush the cache */
-            result = H5C_flush_to_min_clean(f, dxpl_id, H5AC_dxpl_id);
+            result = H5C_flush_to_min_clean(f, dxpl_id);
 
             /* Disable writes again */
             aux_ptr->write_permitted = FALSE;
@@ -4905,7 +4900,7 @@ H5AC_flush_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id)
     HDassert(f->shared);
 
     /* Call cache level function to flush metadata entries with specified tag */
-    if(H5C_flush_tagged_entries(f, dxpl_id, H5AC_dxpl_id, metadata_tag)<0)
+    if(H5C_flush_tagged_entries(f, dxpl_id, metadata_tag)<0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot flush metadata")
 
 done:
@@ -4941,7 +4936,7 @@ H5AC_evict_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id)
     HDassert(f->shared);
 
     /* Call cache level function to evict metadata entries with specified tag */
-    if(H5C_evict_tagged_entries(f, dxpl_id, H5AC_dxpl_id, metadata_tag)<0)
+    if(H5C_evict_tagged_entries(f, dxpl_id, metadata_tag)<0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot evict metadata")
 
 done:
@@ -5032,11 +5027,11 @@ H5AC_verify_tag(hid_t dxpl_id, const H5AC_class_t * type)
          * constraints are met. */
 
         /* Superblock */
-        if(type->id == H5AC_SUPERBLOCK_ID) {
+        if(type->id == H5AC_SUPERBLOCK_ID || type->id == H5AC_DRVRINFO_ID) {
             if(tag.value != H5AC__SUPERBLOCK_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock not tagged with H5AC__SUPERBLOCK_TAG")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock/driver-info not tagged with H5AC__SUPERBLOCK_TAG")
             if(tag.globality != H5C_GLOBALITY_MAJOR)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock globality not marked with H5C_GLOBALITY_MAJOR")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock/driver-info globality not marked with H5C_GLOBALITY_MAJOR")
         }
         else {
             if(tag.value == H5AC__SUPERBLOCK_TAG)

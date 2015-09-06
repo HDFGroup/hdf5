@@ -365,6 +365,9 @@ typedef struct H5O_common_cache_ud_t {
 typedef struct H5O_cache_ud_t {
     hbool_t made_attempt;               /* Whether the deserialize routine was already attempted */
     unsigned v1_pfx_nmesgs;             /* Number of messages from v1 prefix header */
+    uint8_t     version;                /* Version number obtained in get_load_size callback.
+					 * It will be used later in verify_chksum callback
+					 */ 
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_cache_ud_t;
 
@@ -396,6 +399,11 @@ struct H5O_proxy_t {
     H5O_t *oh;                          /* Object header */
 };
 
+/* Callback information for loading object header proxy */
+typedef struct H5O_proxy_cache_ud_t {
+    H5F_t *f;                           /* Pointer to file for object header/chunk */
+    H5O_t *oh;                          /* Object header for this chunk */
+} H5O_proxy_cache_ud_t;
 
 /* H5O object header inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];

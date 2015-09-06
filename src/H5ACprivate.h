@@ -76,11 +76,11 @@ typedef enum {
     H5AC_EARRAY_SBLOCK_ID, 		/* (20) extensible array super block	             */
     H5AC_EARRAY_DBLOCK_ID, 		/* (21) extensible array data block	             */
     H5AC_EARRAY_DBLK_PAGE_ID, 		/* (22) extensible array data block page           */
-    H5AC_CHUNK_PROXY_ID, 		/* (23) chunk proxy				     */
-    H5AC_FARRAY_HDR_ID,			/* (24) fixed array header		     	     */
-    H5AC_FARRAY_DBLOCK_ID, 		/* (25) fixed array data block	     	     */
-    H5AC_FARRAY_DBLK_PAGE_ID,		/* (26) fixed array data block page          	     */
-    H5AC_SUPERBLOCK_ID, 		/* (27) file superblock                            */
+    H5AC_FARRAY_HDR_ID,			/* (23) fixed array header		     	     */
+    H5AC_FARRAY_DBLOCK_ID, 		/* (24) fixed array data block	     	     */
+    H5AC_FARRAY_DBLK_PAGE_ID,		/* (25) fixed array data block page          	     */
+    H5AC_SUPERBLOCK_ID, 		/* (26) file superblock                            */
+    H5AC_DRVRINFO_ID,   		/* (27) driver info block (supplements superblock)*/
     H5AC_TEST_ID,			/* (28) test entry -- not used for actual files    */
     H5AC_NTYPES				/* Number of types, must be last              */
 } H5AC_type_t;
@@ -93,6 +93,17 @@ typedef enum {
  * times for debugging purposes.
  *
  * Hence the following, somewhat odd set of #defines.
+ *
+ * NOTE: test/cache plays games with the f->shared->cache, and thus 
+ *       setting H5AC_DUMP_STATS_ON_CLOSE will generate constant, 
+ *	 irrelevant data when run with that test program.  See 
+ * 	 comments on setup_cache() / takedown_cache() in test/cache_common.c.
+ *       for details.
+ *
+ *	 If you need to dump stats at file close in test/cache.c,
+ *	 use the dump_stats parameter to takedown_cache(), or call 
+ *	 H5C_stats() directly.
+ *					JRM -- 4/12/15
  */
 #if H5C_COLLECT_CACHE_STATS
 
@@ -121,33 +132,12 @@ typedef enum {
 /*
  * Class methods pertaining to caching.	 Each type of cached object will
  * have a constant variable with permanent life-span that describes how
- * to cache the object.	 That variable will be of type H5AC_class_t and
- * have the following required fields...
- *
- * LOAD:	Loads an object from disk to memory.  The function
- *		should allocate some data structure and return it.
- *
- * FLUSH:	Writes some data structure back to disk.  It would be
- *		wise for the data structure to include dirty flags to
- *		indicate whether it really needs to be written.	 This
- *		function is also responsible for freeing memory allocated
- *		by the LOAD method if the DEST argument is non-zero (by
- *              calling the DEST method).
- *
- * DEST:	Just frees memory allocated by the LOAD method.
- *
- * CLEAR:	Just marks object as non-dirty.
- *
- * NOTIFY:	Notify client that an action on an entry has taken/will take
- *              place
- *
- * SIZE:	Report the size (on disk) of the specified cache object.
- *		Note that the space allocated on disk may not be contiguous.
+ * to cache the object.
  */
 
-#define H5AC_CALLBACK__NO_FLAGS_SET             H5C_CALLBACK__NO_FLAGS_SET
-#define H5AC_CALLBACK__SIZE_CHANGED_FLAG	H5C_CALLBACK__SIZE_CHANGED_FLAG
-#define H5AC_CALLBACK__MOVED_FLAG             H5C_CALLBACK__MOVED_FLAG
+#define H5AC__SERIALIZE_RESIZED_FLAG	H5C__SERIALIZE_RESIZED_FLAG
+#define H5AC__SERIALIZE_MOVED_FLAG	H5C__SERIALIZE_MOVED_FLAG
+#define H5AC__SERIALIZE_COMPRESSED_FLAG	H5C__SERIALIZE_COMPRESSED_FLAG
 
 
 /* Cork actions: cork/uncork/get cork status of an object */
@@ -158,50 +148,40 @@ typedef enum {
 /* Aliases for 'notify action' type & values */
 typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC_NOTIFY_ACTION_AFTER_INSERT H5C_NOTIFY_ACTION_AFTER_INSERT
+#define H5AC_NOTIFY_ACTION_AFTER_LOAD   H5C_NOTIFY_ACTION_AFTER_LOAD
+#define H5AC_NOTIFY_ACTION_AFTER_FLUSH	H5C_NOTIFY_ACTION_AFTER_FLUSH
 #define H5AC_NOTIFY_ACTION_BEFORE_EVICT H5C_NOTIFY_ACTION_BEFORE_EVICT
 
-typedef H5C_load_func_t		H5AC_load_func_t;
-typedef H5C_flush_func_t	H5AC_flush_func_t;
-typedef H5C_dest_func_t		H5AC_dest_func_t;
-typedef H5C_clear_func_t	H5AC_clear_func_t;
-typedef H5C_notify_func_t	H5AC_notify_func_t;
-typedef H5C_size_func_t		H5AC_size_func_t;
+#define H5AC__CLASS_NO_FLAGS_SET 	H5C__CLASS_NO_FLAGS_SET
+#define H5AC__CLASS_SPECULATIVE_LOAD_FLAG H5C__CLASS_SPECULATIVE_LOAD_FLAG
+#define H5AC__CLASS_COMPRESSED_FLAG	H5C__CLASS_COMPRESSED_FLAG
+
+/* The following flags should only appear in test code */
+/* The H5AC__CLASS_SKIP_READS & H5AC__CLASS_SKIP_WRITES flags are used in H5Oproxy.c */
+#define H5AC__CLASS_NO_IO_FLAG		H5C__CLASS_NO_IO_FLAG
+#define H5AC__CLASS_SKIP_READS		H5C__CLASS_SKIP_READS
+#define H5AC__CLASS_SKIP_WRITES		H5C__CLASS_SKIP_WRITES
+
+typedef H5C_get_load_size_func_t	H5AC_get_load_size_func_t;
+typedef H5C_verify_chksum_func_t	H5AC_verify_chksum_func_t;
+typedef H5C_deserialize_func_t		H5AC_deserialize_func_t;
+typedef H5C_image_len_func_t		H5AC_image_len_func_t;
+
+#define H5AC__SERIALIZE_NO_FLAGS_SET    H5C__SERIALIZE_NO_FLAGS_SET
+#define H5AC__SERIALIZE_RESIZED_FLAG    H5C__SERIALIZE_RESIZED_FLAG
+#define H5AC__SERIALIZE_MOVED_FLAG      H5C__SERIALIZE_MOVED_FLAG
+
+typedef H5C_pre_serialize_func_t	H5AC_pre_serialize_func_t;
+typedef H5C_serialize_func_t		H5AC_serialize_func_t;
+typedef H5C_notify_func_t		H5AC_notify_func_t;
+typedef H5C_free_icr_func_t		H5AC_free_icr_func_t;
+typedef H5C_clear_func_t		H5AC_clear_func_t;
+typedef H5C_get_fsf_size_t		H5AC_get_fsf_size_t;
 
 typedef H5C_class_t			H5AC_class_t;
 
-
-/* The H5AC_NSLOTS #define is now obsolete, as the metadata cache no longer
- * uses slots.  However I am leaving it in for now to avoid modifying the
- * interface between the metadata cache and the rest of HDF.  It should
- * be removed when we get to dealing with the size_hint parameter in
- * H5AC_create().
- *						JRM - 5/20/04
- *
- * Old comment on H5AC_NSLOTS follows:
- *
- * A cache has a certain number of entries.  Objects are mapped into a
- * cache entry by hashing the object's file address.  Each file has its
- * own cache, an array of slots.
- */
-#define H5AC_NSLOTS     10330           /* The library "likes" this number... */
-
-
+/* Cache entry info */
 typedef H5C_cache_entry_t		H5AC_info_t;
-
-
-/*===----------------------------------------------------------------------===
- *                             Protect Types
- *===----------------------------------------------------------------------===
- *
- * These are for the wrapper functions to H5AC_protect. They specify what
- * type of operation you're planning on doing to the metadata. The
- * Flexible Parallel HDF5 locking can then act accordingly.
- */
-
-typedef enum H5AC_protect_t {
-    H5AC_WRITE,                 /* Protect object for writing                */
-    H5AC_READ                   /* Protect object for reading                */
-} H5AC_protect_t;
 
 
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
@@ -327,6 +307,7 @@ H5_DLLVAR hid_t H5AC_ind_dxpl_id;
 #define H5AC__FLUSH_CLEAR_ONLY_FLAG	  H5C__FLUSH_CLEAR_ONLY_FLAG
 #define H5AC__FLUSH_MARKED_ENTRIES_FLAG   H5C__FLUSH_MARKED_ENTRIES_FLAG
 #define H5AC__FLUSH_IGNORE_PROTECTED_FLAG H5C__FLUSH_IGNORE_PROTECTED_FLAG
+#define H5AC__READ_ONLY_FLAG		  H5C__READ_ONLY_FLAG
 #define H5AC__FREE_FILE_SPACE_FLAG	  H5C__FREE_FILE_SPACE_FLAG
 #define H5AC__TAKE_OWNERSHIP_FLAG         H5C__TAKE_OWNERSHIP_FLAG
 #define H5AC__FLUSH_LAST_FLAG		  H5C__FLUSH_LAST_FLAG
@@ -358,7 +339,7 @@ H5_DLL herr_t H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *typ
 H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
 H5_DLL herr_t H5AC_create_flush_dependency(void *parent_thing, void *child_thing);
 H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
-    haddr_t addr, void *udata, H5AC_protect_t rw);
+    haddr_t addr, void *udata, unsigned flags);
 H5_DLL herr_t H5AC_resize_entry(void *thing, size_t new_size);
 H5_DLL herr_t H5AC_unpin_entry(void *thing);
 H5_DLL herr_t H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing);
@@ -372,10 +353,6 @@ H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_evict(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id,
     const H5AC_class_t *type, haddr_t addr, unsigned flags);
-H5_DLL herr_t H5AC_set_sync_point_done_callback(H5C_t *cache_ptr,
-    void (*sync_point_done)(int num_writes, haddr_t *written_entries_tbl));
-H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
-                                           void (* write_done)(void));
 H5_DLL herr_t H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
     H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr,

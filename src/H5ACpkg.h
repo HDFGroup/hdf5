@@ -391,6 +391,12 @@ typedef struct H5AC_aux_t
                                     haddr_t * written_entries_tbl);
 } H5AC_aux_t; /* struct H5AC_aux_t */
 
+/* Package scoped functions */
+H5_DLL herr_t H5AC_set_sync_point_done_callback(H5C_t *cache_ptr,
+    void (*sync_point_done)(int num_writes, haddr_t *written_entries_tbl));
+H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
+    void (* write_done)(void));
+
 #endif /* H5_HAVE_PARALLEL */
 
 /******************************/
@@ -431,7 +437,7 @@ H5_DLL herr_t H5AC__write_create_fd_log_msg(const H5AC_t *cache,
                                             herr_t fxn_ret_value);
 H5_DLL herr_t H5AC__write_protect_entry_log_msg(const H5AC_t *cache,
                                                 const H5AC_info_t *entry,
-                                                H5AC_protect_t rw,
+                                                unsigned flags,
                                                 herr_t fxn_ret_value);
 H5_DLL herr_t H5AC__write_resize_entry_log_msg(const H5AC_t *cache,
                                                const H5AC_info_t *entry,

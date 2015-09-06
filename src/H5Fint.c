@@ -886,6 +886,14 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
 		}
             } /* end if */
 
+            /* if it exists, unpin the driver information block cache entry,
+             * since we're about to destroy the cache 
+             */
+            if(f->shared->drvinfo)
+                if(H5AC_unpin_entry(f->shared->drvinfo) < 0)
+                    /* Push error, but keep going*/
+                    HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin drvinfo")
+
             /* Unpin the superblock, since we're about to destroy the cache */
             if(H5AC_unpin_entry(f->shared->sblock) < 0)
                 /* Push error, but keep going*/

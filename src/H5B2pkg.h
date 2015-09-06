@@ -242,6 +242,7 @@ typedef enum H5B2_nodepos_t {
 typedef struct H5B2_hdr_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
     void *parent;               /* Flush dependency parent */
+    haddr_t addr;               /* Address of B-tree header in the file */
     void *ctx_udata;            /* User-data for protecting */
 } H5B2_hdr_cache_ud_t;
 
@@ -324,11 +325,11 @@ H5_DLL herr_t H5B2__hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id);
 
 /* Routines for operating on leaf nodes */
 H5B2_leaf_t *H5B2__protect_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, haddr_t addr,
-    void *parent, uint16_t nrec, H5AC_protect_t rw);
+    void *parent, uint16_t nrec, unsigned flags);
 
 /* Routines for operating on internal nodes */
 H5_DLL H5B2_internal_t *H5B2__protect_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t addr, void *parent, uint16_t nrec, uint16_t depth, H5AC_protect_t rw);
+    haddr_t addr, void *parent, uint16_t nrec, uint16_t depth, unsigned flags);
 
 /* Routines for allocating nodes */
 H5_DLL herr_t H5B2__split_root(H5B2_hdr_t *hdr, hid_t dxpl_id);
