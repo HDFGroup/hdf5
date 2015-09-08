@@ -10097,7 +10097,7 @@ H5C_load_entry(H5F_t *             f,
                                         /* known -- otherwise uncompressed.  */
                                         /* Zero indicates compression not    */
                                         /* enabled.                          */
-    void *              image = NULL;   /* Buffer for disk image */
+    uint8_t *           image = NULL;   /* Buffer for disk image */
     void *		thing = NULL;   /* Pointer to thing loaded */
     H5C_cache_entry_t *	entry;          /* Alias for thing loaded, as cache entry */
     size_t              len;            /* Size of image in file */
@@ -10210,7 +10210,7 @@ H5C_load_entry(H5F_t *             f,
                     "memory allocation failed for on disk image buffer.")
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
-    HDmemcpy(((uint8_t *)image) + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+    HDmemcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
     /* Get the on-disk entry image */
@@ -10284,14 +10284,13 @@ H5C_load_entry(H5F_t *             f,
 		    image = new_image;
 #if H5C_DO_MEMORY_SANITY_CHECKS
 
-		    HDmemcpy(((uint8_t *)image) + actual_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+		    HDmemcpy(image + actual_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 		    /* If the thing's image needs to be bigger for a speculatively
 		     * loaded thing, go get the on-disk image again (the extra portion).
 		     */
 		    if(actual_len > len) {
-
 			if(H5F_block_read(f, type->mem_type, addr+len, actual_len-len, dxpl_id, image+len) < 0)
 			    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image")
 		    }
