@@ -179,8 +179,14 @@ Bug Fixes since HDF5-1.8.15
 
     Library
     -------
-    -
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - Fix uninitialized memory in dataspace selection code
+
+      When creating a dataspace with H5Screate and setting the extent with
+      H5Sextent_copy, the selection offset was not initialized, potentially
+      causing invalid I/O.  There may be other cases where this happened.
+      MOdified library to always initialize the offset.
+
+      (NAF - 2015-09-08)
 
 
     Parallel Library
