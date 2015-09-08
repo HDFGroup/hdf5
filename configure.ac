@@ -85,6 +85,17 @@ AC_CONFIG_COMMANDS([pubconf], [
 ## configure is currently running by using the --host=foo flag.
 ## For machines on which HDF5 is often configured, it can be convenient
 ## to specify the name of the machine rather than its canonical type.
+##
+## There are currently no hosts, but if there were they would be
+## listed by hostname and the alias would point to a file in
+## the config directory:
+##
+##case $host_alias in
+##  <some host>)
+##    host_alias=<config file in config directory>
+##    ;;
+##esac
+
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
 
@@ -1488,7 +1499,7 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
-## to be done after any POSIX/BSD defines to ensure that the test gets
+## to be done after any POSIX defines to ensure that the test gets
 ## the correct POSIX level on linux.
 AC_CHECK_DECL([CLOCK_MONOTONIC],[have_clock_monotonic="yes"],[have_clock_monotonic="no"],[[#include <time.h>]])
 
