@@ -2258,10 +2258,6 @@ H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     if(H5S_extent_copy_real(&new_space->extent, &dst_space->extent, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy destination space extent")
 
-    /* Set offset to zeros */
-    (void)HDmemset(new_space->select.offset, 0, (size_t)new_space->extent.rank * sizeof(new_space->select.offset[0]));
-    new_space->select.offset_changed = FALSE;
-
     /* If the intersecting space is "all", the intersection must be equal to the
      * source space and the projection must be equal to the destination space */
     if(src_intersect_space->select.type->type == H5S_SEL_ALL) {

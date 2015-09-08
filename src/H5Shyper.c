@@ -10231,10 +10231,6 @@ H5S_hyper_get_unlim_block(const H5S_t *space, hsize_t block_index)
     if(H5S_extent_copy_real(&space_out->extent, &space->extent, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "unable to copy destination space extent")
 
-    /* Set offset to zeros */
-    (void)HDmemset(space_out->select.offset, 0, (size_t)space_out->extent.rank * sizeof(space_out->select.offset[0]));
-    space_out->select.offset_changed = FALSE;
-
     /* Select block as defined by start/stride/count/block computed above */
     if(H5S_select_hyperslab(space_out, H5S_SELECT_SET, start, stride, count, block) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "can't select hyperslab")
