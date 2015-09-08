@@ -3711,11 +3711,16 @@ ac_config_commands="$ac_config_commands pubconf"
 ## configure is currently running by using the --host=foo flag.
 ## For machines on which HDF5 is often configured, it can be convenient
 ## to specify the name of the machine rather than its canonical type.
-case $host_alias in
-  redstorm)
-    host_alias=x86_64-redstorm-linux-gnu
-    ;;
-esac
+##
+## There are currently no hosts, but if there were they would be
+## listed by hostname and the alias would point to a file in
+## the config directory:
+##
+##case $host_alias in
+##  <some host>)
+##    host_alias=<config file in config directory>
+##    ;;
+##esac
 
 # Make sure we can run config.sub.
 $SHELL "$ac_aux_dir/config.sub" sun4 >/dev/null 2>&1 ||
@@ -23384,57 +23389,6 @@ done
     ;;
 esac
 
-case "$host" in
-  alpha*-dec*-osf*)
-    ## The <sys/sysinfo.h> and <sys/proc.h> are needed on the DEC
-    ## Alpha to turn off UAC fixing. We do *not* attempt to
-    ## locate these files on other systems because there are too
-    ## many problems with including them.
-    for ac_header in sys/sysinfo.h sys/proc.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-    ;;
-  mips*-sgi*)
-    ## The <sys/fpu.h> is needed on the SGI machines to turn off
-    ## denormalized floating-point values going to zero.  We do *not*
-    ## attempt to locate these files on other systems because there
-    ## may be problems with including them.
-    for ac_header in sys/fpu.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "sys/fpu.h" "ac_cv_header_sys_fpu_h" "$ac_includes_default"
-if test "x$ac_cv_header_sys_fpu_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_SYS_FPU_H 1
-_ACEOF
-
-fi
-
-done
-
-    for ac_func in get_fpc_csr
-do :
-  ac_fn_c_check_func "$LINENO" "get_fpc_csr" "ac_cv_func_get_fpc_csr"
-if test "x$ac_cv_func_get_fpc_csr" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_GET_FPC_CSR 1
-_ACEOF
-
-fi
-done
-
-    ;;
-esac
-
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library
 ## is linked. We can use the -no-undefined flag to tell libtool that
@@ -26244,7 +26198,7 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
-## to be done after any POSIX/BSD defines to ensure that the test gets
+## to be done after any POSIX defines to ensure that the test gets
 ## the correct POSIX level on linux.
 ac_fn_c_check_decl "$LINENO" "CLOCK_MONOTONIC" "ac_cv_have_decl_CLOCK_MONOTONIC" "#include <time.h>
 "

@@ -86,11 +86,16 @@ AC_CONFIG_COMMANDS([pubconf], [
 ## configure is currently running by using the --host=foo flag.
 ## For machines on which HDF5 is often configured, it can be convenient
 ## to specify the name of the machine rather than its canonical type.
-case $host_alias in
-  redstorm)
-    host_alias=x86_64-redstorm-linux-gnu
-    ;;
-esac
+##
+## There are currently no hosts, but if there were they would be
+## listed by hostname and the alias would point to a file in
+## the config directory:
+##
+##case $host_alias in
+##  <some host>)
+##    host_alias=<config file in config directory>
+##    ;;
+##esac
 
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
@@ -997,24 +1002,6 @@ case "`uname`" in
     ;;
 esac
 
-case "$host" in
-  alpha*-dec*-osf*)
-    ## The <sys/sysinfo.h> and <sys/proc.h> are needed on the DEC
-    ## Alpha to turn off UAC fixing. We do *not* attempt to
-    ## locate these files on other systems because there are too
-    ## many problems with including them.
-    AC_CHECK_HEADERS([sys/sysinfo.h sys/proc.h])
-    ;;
-  mips*-sgi*)
-    ## The <sys/fpu.h> is needed on the SGI machines to turn off
-    ## denormalized floating-point values going to zero.  We do *not*
-    ## attempt to locate these files on other systems because there
-    ## may be problems with including them.
-    AC_CHECK_HEADERS([sys/fpu.h])
-    AC_CHECK_FUNCS([get_fpc_csr])
-    ;;
-esac
-
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library
 ## is linked. We can use the -no-undefined flag to tell libtool that
@@ -1665,7 +1652,7 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
-## to be done after any POSIX/BSD defines to ensure that the test gets
+## to be done after any POSIX defines to ensure that the test gets
 ## the correct POSIX level on linux.
 AC_CHECK_DECL([CLOCK_MONOTONIC],[have_clock_monotonic="yes"],[have_clock_monotonic="no"],[[#include <time.h>]])
 

@@ -172,9 +172,6 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #undef HAVE_GETTIMEOFDAY
 
-/* Define to 1 if you have the `get_fpc_csr' function. */
-#undef HAVE_GET_FPC_CSR
-
 /* Define if the compiler understands inline */
 #undef HAVE_INLINE
 
@@ -320,14 +317,8 @@
 /* Define to 1 if you have the `system' function. */
 #undef HAVE_SYSTEM
 
-/* Define to 1 if you have the <sys/fpu.h> header file. */
-#undef HAVE_SYS_FPU_H
-
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H
-
-/* Define to 1 if you have the <sys/proc.h> header file. */
-#undef HAVE_SYS_PROC_H
 
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #undef HAVE_SYS_RESOURCE_H
@@ -337,9 +328,6 @@
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
-
-/* Define to 1 if you have the <sys/sysinfo.h> header file. */
-#undef HAVE_SYS_SYSINFO_H
 
 /* Define to 1 if you have the <sys/timeb.h> header file. */
 #undef HAVE_SYS_TIMEB_H
