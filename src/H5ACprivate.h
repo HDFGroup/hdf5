@@ -132,6 +132,15 @@ typedef enum {
 #define H5AC__SERIALIZE_MOVED_FLAG	H5C__SERIALIZE_MOVED_FLAG
 #define H5AC__SERIALIZE_COMPRESSED_FLAG	H5C__SERIALIZE_COMPRESSED_FLAG
 
+/* Aliases for the "ring" type and values */
+typedef H5C_ring_t       H5AC_ring_t;
+#define H5AC_RING_INV    H5C_RING_UNDEFINED
+#define H5AC_RING_US     H5C_RING_USER
+#define H5AC_RING_FSM    H5C_RING_FSM
+#define H5AC_RING_SBE    H5C_RING_SBE
+#define H5AC_RING_SB     H5C_RING_SB
+#define H5AC_RING_NTYPES H5C_RING_NTYPES
+
 /* Aliases for 'notify action' type & values */
 typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC_NOTIFY_ACTION_AFTER_INSERT H5C_NOTIFY_ACTION_AFTER_INSERT
@@ -184,6 +193,8 @@ typedef H5C_t	H5AC_t;
 #define H5AC_METADATA_TAG_NAME           "H5AC_metadata_tag"
 #define H5AC_METADATA_TAG_SIZE           sizeof(haddr_t)
 #define H5AC_METADATA_TAG_DEF            H5AC__INVALID_TAG
+
+#define H5AC_RING_NAME  "H5AC_ring_type"
 
 /* Dataset transfer property list for flush calls */
 /* (Collective set, "block before metadata write" set and "library internal" set) */
@@ -350,9 +361,16 @@ H5_DLL herr_t H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr,
 H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_close_trace_file(H5AC_t *cache_ptr);
 H5_DLL herr_t H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name);
+
+/* Tag & Ring routines */
 H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag);
 H5_DLL herr_t H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag);
 H5_DLL herr_t H5AC_ignore_tags(const H5F_t *f);
+H5_DLL herr_t H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *ring);
+H5_DLL herr_t H5AC_set_ring(hid_t dxpl_id, H5AC_ring_t ring, H5P_genplist_t **dxpl,
+    H5AC_ring_t *orig_ring);
+H5_DLL herr_t H5AC_reset_ring(H5P_genplist_t *dxpl, H5AC_ring_t orig_ring);
+
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
