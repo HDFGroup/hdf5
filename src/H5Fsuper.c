@@ -222,7 +222,7 @@ H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hid_t dxpl_id,
 
         /* Decrement refcount on superblock extension's object header in memory */
         if(H5O_dec_rc_by_loc(ext_ptr, dxpl_id) < 0)
-           HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement refcount on superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to decrement refcount on superblock extension");
     } /* end if */
 
     /* Twiddle the number of open objects to avoid closing the file. */

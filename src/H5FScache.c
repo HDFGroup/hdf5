@@ -343,7 +343,7 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS__cache_hdf_pre_serialize
+ * Function:	H5FS__cache_hdr_pre_serialize
  *
  * Purpose:	The free space manager header contains the address, size, and 
  *		allocation size of the free space manager section info.  However,
