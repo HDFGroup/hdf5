@@ -1,26 +1,71 @@
 cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_HL_SRC)
 
+if (HDF5_GENERATE_HEADERS)
+  find_package (BISON)
+  if (BISON_FOUND)
+    find_package (FLEX)
+    if (FLEX_FOUND)
+      BISON_TARGET (H5LT_PARSER H5LTparse.y ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c COMPILE_FLAGS -d)
+      if (WIN32)
+        FLEX_TARGET (H5LT_SCANNER H5LTanalyze.l ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c COMPILE_FLAGS --wincompat)
+      else (WIN32)
+        FLEX_TARGET (H5LT_SCANNER H5LTanalyze.l ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c)
+      endif (WIN32)
+      ADD_FLEX_BISON_DEPENDENCY(H5LT_SCANNER H5LT_PARSER)
+
+      if (BISON_H5LT_PARSER_DEFINED AND FLEX_H5LT_SCANNER_DEFINED)
+        include_directories(${CMAKE_CURRENT_BINARY_DIR})
+        set (HL_SRCS
+            ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c
+            ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c
+        )
+        set (HL_HEADERS
+            ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.h
+        )
+        set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c GENERATED)
+        set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c GENERATED)
+        set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.h GENERATED)
+      else (BISON_H5LT_PARSER_DEFINED AND FLEX_H5LT_SCANNER_DEFINED)
+        message (STATUS "Error during generate of files")
+      endif (BISON_H5LT_PARSER_DEFINED AND FLEX_H5LT_SCANNER_DEFINED)
+    else (FLEX_FOUND)
+      message (STATUS "Cannot generate files - flex not found")
+    endif (FLEX_FOUND)
+  else (BISON_FOUND)
+    message (STATUS "Cannot generate files - bison not found")
+  endif (BISON_FOUND)
+else (HDF5_GENERATE_HEADERS)
+  set (HL_SRCS
+      ${HDF5_HL_SRC_SOURCE_DIR}/H5LTanalyze.c
+      ${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.c
+  )
+  set (HL_HEADERS
+      ${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.h
+  )
+endif (HDF5_GENERATE_HEADERS)
 
 #-----------------------------------------------------------------------------
 # List Source files
 #-----------------------------------------------------------------------------
 set (HL_SRCS
+    ${HL_SRCS}
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DO.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DS.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5IM.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5LT.c
-    ${HDF5_HL_SRC_SOURCE_DIR}/H5LTanalyze.c
-    ${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.c
+    #${HDF5_HL_SRC_SOURCE_DIR}/H5LTanalyze.c
+    #${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5PT.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5TB.c
 )
 
 set (HL_HEADERS
+    ${HL_HEADERS}
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DOpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DSpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5IMpublic.h
-    ${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.h
+    #${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5LTpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5PTpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5TBpublic.h
@@ -54,7 +99,7 @@ if (BUILD_SHARED_LIBS)
 endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
-# Add file(s) to CMake Install 
+# Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 install (
     FILES
@@ -72,7 +117,7 @@ if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_HL_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hllibraries)
   endif (BUILD_SHARED_LIBS)
-  
+
   install (
       TARGETS
           ${install_targets}
