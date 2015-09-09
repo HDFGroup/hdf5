@@ -219,7 +219,7 @@ endif (HDF5_TEST_VFD)
 add_test (
     NAME H5TEST-clear-testhdf5-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove 
+        -E remove
         coord.h5
         dtypes10.h5
         sys_file1
@@ -277,7 +277,7 @@ else (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (
         NAME H5TEST-shared-clear-testhdf5-objects
         COMMAND    ${CMAKE_COMMAND}
-            -E remove 
+            -E remove
             coord.h5
             dtypes10.h5
             sys_file1
@@ -407,7 +407,7 @@ if (BUILD_SHARED_LIBS)
   add_test (
       NAME H5TEST-shared-clear-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           dt_arith1.h5
           dt_arith2.h5
           dtransform.h5
@@ -481,7 +481,7 @@ if (BUILD_SHARED_LIBS)
       add_test (NAME H5TEST-shared-${test} COMMAND $<TARGET_FILE:${test}-shared>)
     endif (${test} STREQUAL "big" AND CYGWIN)
     set_tests_properties (H5TEST-shared-${test} PROPERTIES
-        DEPENDS H5TEST-shared-clear-objects 
+        DEPENDS H5TEST-shared-clear-objects
         ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
     )
@@ -665,7 +665,7 @@ if (BUILD_SHARED_LIBS)
   add_test (
       NAME H5TEST-shared-clear-cache_api-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           cache_api_test.h5
       WORKING_DIRECTORY
           ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
@@ -681,7 +681,7 @@ if (BUILD_SHARED_LIBS)
   add_test (
       NAME H5TEST-shared-clear-ttsafe-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           ttsafe_error.h5
           ttsafe_dcreate.h5
           ttsafe_cancel.h5
@@ -701,7 +701,7 @@ if (BUILD_SHARED_LIBS)
     add_test (
         NAME H5TEST-shared-clear-err_compat-objects
         COMMAND    ${CMAKE_COMMAND}
-            -E remove 
+            -E remove
             err_compat.txt
             err_compat.txt.err
         WORKING_DIRECTORY
@@ -728,7 +728,7 @@ if (BUILD_SHARED_LIBS)
   add_test (
       NAME H5TEST-shared-clear-error_test-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           error_test.txt
           error_test.txt.err
       WORKING_DIRECTORY
@@ -744,7 +744,7 @@ if (BUILD_SHARED_LIBS)
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST-shared"
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
-  set_tests_properties (H5TEST-shared-error_test PROPERTIES 
+  set_tests_properties (H5TEST-shared-error_test PROPERTIES
       DEPENDS H5TEST-shared-clear-error_test-objects
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5_PLUGIN_PRELOAD=::"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
@@ -756,7 +756,7 @@ if (BUILD_SHARED_LIBS)
       COMMAND    ${CMAKE_COMMAND}
           -E remove
           links_env.txt
-          links_env.txt.err 
+          links_env.txt.err
           extlinks_env0.h5
           extlinks_env1.h5
           tmp/extlinks_env1.h5
@@ -889,7 +889,7 @@ if (HDF5_TEST_VFD)
           )
           if (BUILD_SHARED_LIBS)
             add_test (
-                NAME VFD-${vfdname}-${test}-shared 
+                NAME VFD-${vfdname}-${test}-shared
                 COMMAND "${CMAKE_COMMAND}"
                     -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}-shared>"
                     -D "TEST_ARGS:STRING="
@@ -911,7 +911,7 @@ if (HDF5_TEST_VFD)
           )
           if (BUILD_SHARED_LIBS)
             add_test (
-                NAME VFD-${vfdname}-${test}-shared 
+                NAME VFD-${vfdname}-${test}-shared
                 COMMAND ${CMAKE_COMMAND} -E echo "SKIP VFD-${vfdname}-${vfdtest}-shared"
             )
           endif (BUILD_SHARED_LIBS)
@@ -934,7 +934,7 @@ if (HDF5_TEST_VFD)
         )
         if (BUILD_SHARED_LIBS)
           add_test (
-            NAME VFD-${vfdname}-${test}-shared 
+            NAME VFD-${vfdname}-${test}-shared
               COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}-shared>"
                 -D "TEST_ARGS:STRING="
@@ -963,12 +963,12 @@ if (HDF5_TEST_VFD)
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
       if (BUILD_SHARED_LIBS)
         add_test (
-            NAME VFD-${vfdname}-${vfdtest}-shared 
+            NAME VFD-${vfdname}-${vfdtest}-shared
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:${vfdtest}-shared>"
                 -D "TEST_ARGS:STRING="
@@ -979,7 +979,7 @@ if (HDF5_TEST_VFD)
                 -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
         set_tests_properties (VFD-${vfdname}-${vfdtest}-shared PROPERTIES
-            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared"
+            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}-shared
         )
         endif (BUILD_SHARED_LIBS)
@@ -992,15 +992,15 @@ if (HDF5_TEST_VFD)
         CHECK_VFD_TEST (${test} ${vfdname} ${resultcode})
       else (WIN32)
         add_test (
-          NAME VFD-${vfdname}-${test}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
-              -D "TEST_ARGS:STRING="
-              -D "TEST_VFD:STRING=${vfdname}"
-              -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_OUTPUT=${vfdname}-${test}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}"
-              -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
+            NAME VFD-${vfdname}-${test}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:${test}>"
+                -D "TEST_ARGS:STRING="
+                -D "TEST_VFD:STRING=${vfdname}"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_OUTPUT=${vfdname}-${test}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}"
+                -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
         set_tests_properties (VFD-${vfdname}-${test} PROPERTIES
             ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
@@ -1008,7 +1008,7 @@ if (HDF5_TEST_VFD)
         )
         if (BUILD_SHARED_LIBS)
           add_test (
-              NAME VFD-${vfdname}-${test}-shared 
+              NAME VFD-${vfdname}-${test}-shared
               COMMAND "${CMAKE_COMMAND}"
                   -D "TEST_PROGRAM=$<TARGET_FILE:${test}-shared>"
                   -D "TEST_ARGS:STRING="
@@ -1043,19 +1043,19 @@ if (HDF5_TEST_VFD)
     endif (BUILD_SHARED_LIBS)
     if (HDF5_TEST_FHEAP_VFD)
       add_test (
-        NAME VFD-${vfdname}-fheap
-        COMMAND "${CMAKE_COMMAND}"
-            -D "TEST_PROGRAM=$<TARGET_FILE:fheap>"
-            -D "TEST_ARGS:STRING="
-            -D "TEST_VFD:STRING=${vfdname}"
-            -D "TEST_EXPECT=${resultcode}"
-            -D "TEST_OUTPUT=${vfdname}-fheap"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}"
-            -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
+          NAME VFD-${vfdname}-fheap
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:fheap>"
+              -D "TEST_ARGS:STRING="
+              -D "TEST_VFD:STRING=${vfdname}"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_OUTPUT=${vfdname}-fheap"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}"
+              -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (VFD-${vfdname}-fheap PROPERTIES
           TIMEOUT 1800
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
       if (BUILD_SHARED_LIBS)
@@ -1072,7 +1072,7 @@ if (HDF5_TEST_VFD)
         )
         set_tests_properties (VFD-${vfdname}-fheap-shared PROPERTIES
           TIMEOUT 1800
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}-shared
       )
       endif (BUILD_SHARED_LIBS)

@@ -598,8 +598,23 @@ if (BUILD_TESTING)
       CACHE INTEGER
       "Timeout in seconds for each test (default 1200=20minutes)"
   )
+
+  option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
+  mark_as_advanced (HDF5_TEST_VFD)
+  if (HDF5_TEST_VFD)
+    option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
+    mark_as_advanced (HDF5_TEST_FHEAP_VFD)
+  endif (HDF5_TEST_VFD)
+
+  option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")
+  mark_as_advanced (HDF_TEST_EXPRESS)
+
+  include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
+  configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
+
   enable_testing ()
   include (CTest)
+
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
       add_subdirectory (${HDF5_SOURCE_DIR}/tools/lib ${PROJECT_BINARY_DIR}/tools/lib)
@@ -611,16 +626,6 @@ if (BUILD_TESTING)
       endif (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
     endif (H5_HAVE_PARALLEL)
   endif (NOT HDF5_EXTERNALLY_CONFIGURED)
-
-  option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
-  mark_as_advanced (HDF5_TEST_VFD)
-  if (HDF5_TEST_VFD)
-    option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
-    mark_as_advanced (HDF5_TEST_FHEAP_VFD)
-  endif (HDF5_TEST_VFD)
-
-  include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
-  configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 endif (BUILD_TESTING)
 
 #-----------------------------------------------------------------------------

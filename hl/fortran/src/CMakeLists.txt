@@ -1,6 +1,18 @@
 cmake_minimum_required (VERSION 3.1.0)
 PROJECT(HDF5_HL_F90_SRC C CXX Fortran)
 
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  if (WIN32)
+    set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/\${BUILD_TYPE})
+  else (WIN32)
+    set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  endif (WIN32)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (WIN32)
+  set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
+else (WIN32)
+  set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+endif (WIN32)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
@@ -9,6 +21,7 @@ INCLUDE_DIRECTORIES (
     ${HDF5_F90_SRC_DIR}/src
     ${HDF5_F90_BINARY_DIR}
     ${CMAKE_Fortran_MODULE_DIRECTORY}
+    ${MOD_BUILD_DIR}
 )
 
 #-----------------------------------------------------------------------------
@@ -76,7 +89,7 @@ set_target_properties (${HDF5_HL_F90_LIB_TARGET} PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
 if (WIN32)
-  set_property (TARGET ${HDF5_HL_F90_LIB_TARGET} 
+  set_property (TARGET ${HDF5_HL_F90_LIB_TARGET}
       APPEND PROPERTY COMPILE_DEFINITIONS "HDF5F90_WINDOWS"
   )
 endif (WIN32)
@@ -100,7 +113,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
   if (WIN32)
-    set_property (TARGET ${HDF5_HL_F90_LIBSH_TARGET} 
+    set_property (TARGET ${HDF5_HL_F90_LIBSH_TARGET}
         APPEND PROPERTY COMPILE_DEFINITIONS "BUILD_HDF5_HL_DLL;HDF5F90_WINDOWS"
     )
   endif (WIN32)
@@ -111,19 +124,6 @@ endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  if (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/\${BUILD_TYPE})
-  else (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
-  endif (WIN32)
-else (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  if (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
-  else (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
-  endif (WIN32)
-endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 set (mod_files
     ${MOD_BUILD_DIR}/h5ds.mod
@@ -136,10 +136,27 @@ install (
     FILES
         ${mod_files}
     DESTINATION
-        ${HDF5_INSTALL_INCLUDE_DIR}
+        ${HDF5_INSTALL_INCLUDE_DIR}/static
     COMPONENT
         fortheaders
 )
+
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  set (modsh_files
+      ${MODSH_BUILD_DIR}/h5ds.mod
+      ${MODSH_BUILD_DIR}/h5tb.mod
+      ${MODSH_BUILD_DIR}/h5lt.mod
+      ${MODSH_BUILD_DIR}/h5im.mod
+  )
+  install (
+      FILES
+          ${modsh_files}
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}/shared
+      COMPONENT
+          fortheaders
+  )
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects

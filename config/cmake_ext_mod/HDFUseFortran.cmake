@@ -12,7 +12,6 @@ FortranCInterface_HEADER (
     ${CMAKE_BINARY_DIR}/FCMangle.h
     MACRO_NAMESPACE "H5_FC_"
     SYMBOL_NAMESPACE "H5_FC_"
-#    SYMBOLS mysub mymod:my_sub
 )
 
 file (STRINGS ${CMAKE_BINARY_DIR}/FCMangle.h CONTENTS REGEX "H5_FC_GLOBAL\\(.*,.*\\) +(.*)")

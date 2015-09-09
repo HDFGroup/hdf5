@@ -44,6 +44,8 @@ set (HDF5_USE_16_API_DEFAULT OFF CACHE BOOL "Use the HDF5 1.6.x API by default" 
 
 set (HDF5_ENABLE_THREADSAFE OFF CACHE BOOL "(WINDOWS)Enable Threadsafety" FORCE)
 
+set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
+
 set (HDF5_PACKAGE_EXTLIBS OFF CACHE BOOL "(WINDOWS)CPACK - include external libraries" FORCE)
 
 set (HDF5_NO_PACKAGES OFF CACHE BOOL "CPACK - Disable packaging" FORCE)

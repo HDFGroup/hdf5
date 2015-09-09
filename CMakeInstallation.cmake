@@ -79,7 +79,7 @@ configure_package_config_file (
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   configure_file (
-      ${HDF_RESOURCES_DIR}/FindHDF5.cmake.in 
+      ${HDF_RESOURCES_DIR}/FindHDF5.cmake.in
       ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindHDF5${HDF_PACKAGE_EXT}.cmake @ONLY
   )
   install (
@@ -134,7 +134,7 @@ else (H5_WORDS_BIGENDIAN)
   set (BYTESEX little-endian)
 endif (H5_WORDS_BIGENDIAN)
 configure_file (
-    ${HDF_RESOURCES_DIR}/libhdf5.settings.cmake.in 
+    ${HDF_RESOURCES_DIR}/libhdf5.settings.cmake.in
     ${HDF5_BINARY_DIR}/libhdf5.settings @ONLY
 )
 install (
@@ -164,7 +164,7 @@ if (HDF5_PACK_EXAMPLES)
     install (
       DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples-0.1.1-Source
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
-      USE_SOURCE_PERMISSIONS 
+      USE_SOURCE_PERMISSIONS
       COMPONENT hdfdocuments
     )
     install (
@@ -280,13 +280,13 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   set (CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}/${CPACK_PACKAGE_NAME}/${CPACK_PACKAGE_VERSION}")
   set (CPACK_PACKAGE_ICON "${HDF_RESOURCES_EXT_DIR}/hdf.bmp")
 
-  set (CPACK_GENERATOR "TGZ") 
+  set (CPACK_GENERATOR "TGZ")
   if (WIN32)
-    set (CPACK_GENERATOR "ZIP") 
+    set (CPACK_GENERATOR "ZIP")
 
-    if (NSIS_EXECUTABLE)    
-      list (APPEND CPACK_GENERATOR "NSIS") 
-    endif (NSIS_EXECUTABLE)    
+    if (NSIS_EXECUTABLE)
+      list (APPEND CPACK_GENERATOR "NSIS")
+    endif (NSIS_EXECUTABLE)
     # Installers for 32- vs. 64-bit CMake:
     #  - Root install directory (displayed to end user at installer-run time)
     #  - "NSIS package/display name" (text used in the installer GUI)
@@ -309,10 +309,10 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set (CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_VENDOR}\\\\${CPACK_PACKAGE_NAME}\\\\${CPACK_PACKAGE_VERSION}")
     set (CPACK_NSIS_CONTACT "${HDF5_PACKAGE_BUGREPORT}")
     set (CPACK_NSIS_MODIFY_PATH ON)
-    
-    if (WIX_EXECUTABLE)    
-      list (APPEND CPACK_GENERATOR "WIX") 
-    endif (WIX_EXECUTABLE)    
+
+    if (WIX_EXECUTABLE)
+      list (APPEND CPACK_GENERATOR "WIX")
+    endif (WIX_EXECUTABLE)
 #WiX variables
     set (CPACK_WIX_UNINSTALL "1")
 # .. variable:: CPACK_WIX_LICENSE_RTF
@@ -357,7 +357,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
       set(CPACK_WIX_PATCH_FILE "${HDF_RESOURCES_DIR}/patch.xml")
     endif (BUILD_SHARED_LIBS)
   elseif (APPLE)
-    list (APPEND CPACK_GENERATOR "DragNDrop") 
+    list (APPEND CPACK_GENERATOR "DragNDrop")
     set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
     set (CPACK_PACKAGING_INSTALL_PREFIX "/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
     set (CPACK_PACKAGE_ICON "${HDF_RESOURCES_EXT_DIR}/hdf.icns")
@@ -391,14 +391,14 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
       )
     endif (HDF5_PACK_MACOSX_FRAMEWORK AND HDF5_BUILD_FRAMEWORKS)
   else (WIN32)
-    list (APPEND CPACK_GENERATOR "STGZ") 
+    list (APPEND CPACK_GENERATOR "STGZ")
     set (CPACK_PACKAGING_INSTALL_PREFIX "/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
     set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
 
     set (CPACK_DEBIAN_PACKAGE_SECTION "Libraries")
     set (CPACK_DEBIAN_PACKAGE_MAINTAINER "${HDF5_PACKAGE_BUGREPORT}")
 
-#    list (APPEND CPACK_GENERATOR "RPM") 
+#    list (APPEND CPACK_GENERATOR "RPM")
     set (CPACK_RPM_PACKAGE_RELEASE "1")
     set (CPACK_RPM_COMPONENT_INSTALL ON)
     set (CPACK_RPM_PACKAGE_RELOCATABLE ON)
@@ -406,7 +406,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     set (CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
     set (CPACK_RPM_PACKAGE_URL "${HDF5_PACKAGE_URL}")
     set (CPACK_RPM_PACKAGE_SUMMARY "HDF5 is a unique technology suite that makes possible the management of extremely large and complex data collections.")
-    set (CPACK_RPM_PACKAGE_DESCRIPTION 
+    set (CPACK_RPM_PACKAGE_DESCRIPTION
         "The HDF5 technology suite includes:
 
     * A versatile data model that can represent very complex data objects and a wide variety of metadata.
@@ -422,14 +422,14 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
 The HDF5 data model, file format, API, library, and tools are open and distributed without charge.
 "
     )
-    
+
     #-----------------------------------------------------------------------------
     # Configure the spec file for the install RPM
     #-----------------------------------------------------------------------------
 #    configure_file ("${HDF5_RESOURCES_DIR}/hdf5.spec.in" "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec" @ONLY IMMEDIATE)
 #    set (CPACK_RPM_USER_BINARY_SPECFILE "${CMAKE_CURRENT_BINARY_DIR}/${HDF5_PACKAGE_NAME}.spec")
   endif (WIN32)
-  
+
   # By default, do not warn when built on machines using only VS Express:
   if (NOT DEFINED CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
     set (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS ON)
@@ -437,7 +437,7 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
   include (InstallRequiredSystemLibraries)
 
   set (CPACK_INSTALL_CMAKE_PROJECTS "${HDF5_BINARY_DIR};HDF5;ALL;/")
-  
+
   if (HDF5_PACKAGE_EXTLIBS)
     if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
       if (ZLIB_FOUND AND ZLIB_USE_EXTERNAL)
@@ -523,7 +523,7 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
         INSTALL_TYPES Full Developer
     )
   endif (HDF5_BUILD_FORTRAN)
-  
+
   if (HDF5_BUILD_CPP_LIB)
     cpack_add_component (cpplibraries
         DISPLAY_NAME "HDF5 C++ Libraries"
@@ -602,5 +602,5 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
       )
     endif (HDF5_BUILD_FORTRAN)
   endif (HDF5_BUILD_HL_LIB)
-  
+
 endif (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
