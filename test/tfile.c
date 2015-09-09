@@ -115,7 +115,7 @@
 
 /* Declaration for test_get_obj_ids() */
 #define FILE7			"tfile7.h5"	/* Test file */
-#define NGROUPS			2
+#define N_GROUPS			2
 #define NDSETS			4
 
 /* Name of message file that is used by test_file_lock_concur() and test_file_lock_swmr_concur() */
@@ -975,7 +975,7 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
 static void
 test_get_obj_ids(void)
 {
-    hid_t    fid, gid[NGROUPS], dset[NDSETS];
+    hid_t    fid, gid[N_GROUPS], dset[NDSETS];
     hid_t    filespace;
     hsize_t  file_dims[F2_RANK] = {F2_DIM0, F2_DIM1};
     ssize_t  oid_count, ret_count;
@@ -992,8 +992,8 @@ test_get_obj_ids(void)
     filespace = H5Screate_simple(F2_RANK, file_dims,  NULL);
     CHECK(filespace, FAIL, "H5Screate_simple");
 
-    /* creates NGROUPS groups under the root group */
-    for(m = 0; m < NGROUPS; m++) {
+    /* creates N_GROUPS groups under the root group */
+    for(m = 0; m < N_GROUPS; m++) {
         sprintf(gname, "group%d", m);
         gid[m] = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(gid[m], FAIL, "H5Gcreate2");
@@ -1006,10 +1006,10 @@ test_get_obj_ids(void)
          CHECK(dset[n], FAIL, "H5Dcreate2");
     }
 
-    /* The number of opened objects should be NGROUPS + NDSETS + 1.  One is opened file. */
+    /* The number of opened objects should be N_GROUPS + NDSETS + 1.  One is opened file. */
     oid_count = H5Fget_obj_count(fid, H5F_OBJ_ALL);
     CHECK(oid_count, FAIL, "H5Fget_obj_count");
-    VERIFY(oid_count, (NGROUPS + NDSETS + 1), "H5Fget_obj_count");
+    VERIFY(oid_count, (N_GROUPS + NDSETS + 1), "H5Fget_obj_count");
 
     oid_list = (hid_t *)HDcalloc((size_t)oid_list_size, sizeof(hid_t));
     CHECK(oid_list, NULL, "HDcalloc");
@@ -1030,11 +1030,11 @@ test_get_obj_ids(void)
         }
     }
 
-    /* The number of opened objects should be NGROUPS + 1 + 1.  The first one is opened file. The second one
+    /* The number of opened objects should be N_GROUPS + 1 + 1.  The first one is opened file. The second one
      * is the dataset ID left open from the previous around of H5Fget_obj_ids */
     oid_count = H5Fget_obj_count(fid, H5F_OBJ_ALL);
     CHECK(oid_count, FAIL, "H5Fget_obj_count");
-    VERIFY(oid_count, NGROUPS + 2, "H5Fget_obj_count");
+    VERIFY(oid_count, N_GROUPS + 2, "H5Fget_obj_count");
 
     /* Get the IDs of the left opend objects */ 
     ret_count = H5Fget_obj_ids(fid, H5F_OBJ_ALL, (size_t)oid_list_size, oid_list);
