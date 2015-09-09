@@ -112,6 +112,13 @@ New Features
 
     (DER - 2015/09/04 HDFFV-9116)
 
+    - Removed the FP_TO_INTEGER_OVERFLOW_WORKS macro/defines from the library
+
+      This was for working around bugs in the Cray X1 compiler, which is no
+      longer supported.
+
+    (DER - 2015/09/09 HDFFV-9191) 
+
     Library
     -------
 

@@ -5077,7 +5077,6 @@ static int
 run_fp_int_conv(const char *name)
 {
     int		nerrors = 0;
-#ifdef H5_FP_TO_INTEGER_OVERFLOW_WORKS
     int         test_values;
 
     for(test_values = TEST_NORMAL; test_values <= TEST_SPECIAL; test_values++) {
@@ -5190,23 +5189,6 @@ run_fp_int_conv(const char *name)
 #endif
 #endif
     } /* end for */
-#else /* H5_FP_TO_INTEGER_OVERFLOW_WORKS */
-/* For Cray X1, the compiler generates floating exception when the
- * conversion overflows.  So disable all of the conversions from
- * floating-point numbers to integers.
- */
-    char		str[256];		/*string		*/
-
-    HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
-            name, "all floating-point numbers", "all integers");
-    printf("%-70s", str);
-    SKIPPED();
-#if H5_SIZEOF_LONG_DOUBLE!=0
-    HDputs("    Test skipped due to hardware conversion error.");
-#else
-    HDputs("    Test skipped due to disbaled long double.");
-#endif
-#endif /* H5_FP_TO_INTEGER_OVERFLOW_WORKS */
 
     return nerrors;
 }
