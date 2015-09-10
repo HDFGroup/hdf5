@@ -150,6 +150,13 @@ New Features
 
     (DER - 2015/09/09 HDFFV-9194)
 
+    - Removed _BSD_SOURCE and _DEFAULT_SOURCE from configure.ac
+
+      These are old BSD-compatibility symbols that are no longer needed by
+      the library.
+
+    (DER - 2015/09/10 HDFFV-9079)
+
     Library
     -------
 
