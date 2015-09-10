@@ -157,6 +157,14 @@ New Features
 
     (DER - 2015/09/10 HDFFV-9079)
 
+    - Removed HW_FP_TO_LLONG_NOT_WORKS symbol and associated code from the
+      library.
+
+      This was part of a work-around for the VS.NET 2003 compiler, which is
+      no longer supported.
+
+    (DER - 2015/09/10 HDFFV-9189)
+
     Library
     -------
 

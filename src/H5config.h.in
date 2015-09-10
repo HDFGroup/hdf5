@@ -350,10 +350,6 @@
 /* Define if the compiler understands __inline__ */
 #undef HAVE___INLINE__
 
-/* Define if your system can't handle converting floating-point values to long
-   long. */
-#undef HW_FP_TO_LLONG_NOT_WORKS
-
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #undef INCLUDE_HL
 
