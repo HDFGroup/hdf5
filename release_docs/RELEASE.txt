@@ -174,6 +174,15 @@ New Features
 
     (DER - 2015/09/10 HDFFV-9192)
 
+    - Removed LLONG_TO_LDOUBLE_CORRECT symbol and associated code from the
+      library.
+
+      This was a part of a work-around for Visual Studio 6, OS X 10.4,
+      IRIX 6.5, and very old versions of FreeBSD and 64-bit Solaris. None
+      of these platforms/compilers are currently supported.
+
+    (DER - 2015/09/10 HDFFV-9193)
+
     Library
     -------
 
