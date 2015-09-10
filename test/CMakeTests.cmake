@@ -731,7 +731,7 @@ if (BUILD_SHARED_LIBS)
         ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
     )
-    set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT 2400)
+    set_tests_properties (H5TEST-shared-cache PROPERTIES TIMEOUT 2400)
   endif (NOT CYGWIN)
 
   #-- Adding test for cache_api
