@@ -103,6 +103,7 @@ New Features
         nec-superux14.1
         sv1-cray
         x86_64-redstorm-linux-gnu
+        powerpc-ibm-aix5.x
 
       As a part of this work, a few lines that deal with locating the
       sys/fpu.h header on SGI machines and some OSF/1 configure lines
@@ -118,6 +119,20 @@ New Features
       longer supported.
 
     (DER - 2015/09/09 HDFFV-9191) 
+
+    - Removed the H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS and
+      H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS symbols and associated code.
+
+      H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS was a work-around on old 64-bit
+      SGI and Solaris systems.
+
+      H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS was a work-around for old PGI
+      compilers on Linux.
+
+      Neither of these were used in any current library code and only appeared
+      in the dt_arith test.
+
+    (DER - 2015/09/09 HDFFV-9187) 
 
     Library
     -------
