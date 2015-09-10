@@ -165,6 +165,15 @@ New Features
 
     (DER - 2015/09/10 HDFFV-9189)
 
+    - Removed LDOUBLE_TO_LLONG_ACCURATE symbol and associated code from the
+      library.
+
+      This was part of a work-around for VS.NET 2003, 64-bit IRIX 6.5,
+      OS X 10.4, and some versions of HP/UX, none of which are currently
+      supported.
+
+    (DER - 2015/09/10 HDFFV-9192)
+
     Library
     -------
 
