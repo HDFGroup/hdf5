@@ -33,18 +33,6 @@ endif (HDF5_METADATA_TRACE_FILE)
 MARK_AS_ADVANCED (HDF5_METADATA_TRACE_FILE)
 
 # ----------------------------------------------------------------------
-# Decide whether the data accuracy has higher priority during data
-# conversions.  If not, some hard conversions will still be prefered even
-# though the data may be wrong (for example, some compilers don't
-# support denormalized floating values) to maximize speed.
-#
-option (HDF5_WANT_DATA_ACCURACY "IF data accuracy is guaranteed during data conversions" ON)
-if (HDF5_WANT_DATA_ACCURACY)
-  set (H5_WANT_DATA_ACCURACY 1)
-endif (HDF5_WANT_DATA_ACCURACY)
-MARK_AS_ADVANCED (HDF5_WANT_DATA_ACCURACY)
-
-# ----------------------------------------------------------------------
 # Decide whether the presence of user's exception handling functions is
 # checked and data conversion exceptions are returned.  This is mainly
 # for the speed optimization of hard conversions.  Soft conversions can

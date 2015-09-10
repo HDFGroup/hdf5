@@ -143,6 +143,13 @@ New Features
 
     (DER - 2015/09/09 HDFFV-9188)
 
+    - Removed WANT_DATA_ACCURACY symbol and associated code from the
+      library.
+
+      This is no longer attached to any supported platforms.
+
+    (DER - 2015/09/09 HDFFV-9194)
+
     Library
     -------
 

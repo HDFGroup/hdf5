@@ -551,9 +551,6 @@
 /* Version number of package */
 #undef VERSION
 
-/* Data accuracy is prefered to speed during data conversions */
-#undef WANT_DATA_ACCURACY
-
 /* Check exception handling functions during data conversions */
 #undef WANT_DCONV_EXCEPTION
 
