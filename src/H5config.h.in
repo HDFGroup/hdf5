@@ -10,10 +10,6 @@
    writing. */
 #undef CLEAR_MEMORY
 
-/* Define if your system can handle converting denormalized floating-point
-   values. */
-#undef CONVERT_DENORMAL_FLOAT
-
 /* Define if C++ compiler recognizes offsetof */
 #undef CXX_HAVE_OFFSETOF
 

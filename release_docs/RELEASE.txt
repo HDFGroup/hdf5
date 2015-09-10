@@ -132,7 +132,16 @@ New Features
       Neither of these were used in any current library code and only appeared
       in the dt_arith test.
 
-    (DER - 2015/09/09 HDFFV-9187) 
+    (DER - 2015/09/09 HDFFV-9187)
+
+    - Removed CONVERT_DENORMAL_FLOAT symbol and associated code from the
+      library.
+
+      This was only set in configure files for Cray and NEC computers. These
+      config files no longer exist so there is no effect on currently
+      supported platforms.
+
+    (DER - 2015/09/09 HDFFV-9188)
 
     Library
     -------

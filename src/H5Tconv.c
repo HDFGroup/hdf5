@@ -7089,7 +7089,6 @@ H5T__conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		destination values are packed.
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_FP_FP
 herr_t
 H5T__conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7098,7 +7097,6 @@ H5T__conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     H5T_CONV_fF(FLOAT, DOUBLE, float, double, -, -);
 }
-#endif /* H5T_CONV_INTERNAL_FP_FP */
 
 
 /*-------------------------------------------------------------------------
@@ -7116,7 +7114,7 @@ H5T__conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_FP_LDOUBLE
+#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7125,7 +7123,7 @@ H5T__conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     H5T_CONV_fF(FLOAT, LDOUBLE, float, long double, -, -);
 }
-#endif /*H5T_CONV_INTERNAL_FP_LDOUBLE*/
+#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 
 /*-------------------------------------------------------------------------
@@ -7150,7 +7148,6 @@ H5T__conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *		destination values are packed.
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_FP_FP
 herr_t
 H5T__conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7159,7 +7156,6 @@ H5T__conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     H5T_CONV_Ff(DOUBLE, FLOAT, double, float, -FLT_MAX, FLT_MAX);
 }
-#endif /*H5T_CONV_INTERNAL_FP_FP*/
 
 
 /*-------------------------------------------------------------------------
@@ -7177,7 +7173,7 @@ H5T__conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_FP_LDOUBLE
+#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7186,7 +7182,7 @@ H5T__conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     H5T_CONV_fF(DOUBLE, LDOUBLE, double, long double, -, -);
 }
-#endif /*H5T_CONV_INTERNAL_FP_LDOUBLE*/
+#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 
 /*-------------------------------------------------------------------------
@@ -7204,7 +7200,7 @@ H5T__conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_FP_LDOUBLE
+#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7213,7 +7209,7 @@ H5T__conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     H5T_CONV_Ff(LDOUBLE, FLOAT, long double, float, -FLT_MAX, FLT_MAX);
 }
-#endif /* H5T_CONV_INTERNAL_FP_LDOUBLE */
+#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 
 /*-------------------------------------------------------------------------
@@ -7231,7 +7227,7 @@ H5T__conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *
  *-------------------------------------------------------------------------
  */
-#if H5T_CONV_INTERNAL_FP_LDOUBLE
+#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
@@ -7240,7 +7236,7 @@ H5T__conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 {
     H5T_CONV_Ff(LDOUBLE, DOUBLE, long double, double, -DBL_MAX, DBL_MAX);
 }
-#endif /*H5T_CONV_INTERNAL_FP_LDOUBLE*/
+#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 
 /*-------------------------------------------------------------------------
