@@ -3,7 +3,7 @@
 #
 #-------------------------------------------------------------------------------
 ENABLE_LANGUAGE (Fortran)
-  
+
 #-----------------------------------------------------------------------------
 # Detect name mangling convention used between Fortran and C
 #-----------------------------------------------------------------------------
@@ -12,7 +12,6 @@ FortranCInterface_HEADER (
     ${CMAKE_BINARY_DIR}/FCMangle.h
     MACRO_NAMESPACE "H5_FC_"
     SYMBOL_NAMESPACE "H5_FC_"
-    SYMBOLS mysub mymod:my_sub
 )
 
 file (STRINGS ${CMAKE_BINARY_DIR}/FCMangle.h CONTENTS REGEX "H5_FC_GLOBAL\\(.*,.*\\) +(.*)")
@@ -161,7 +160,7 @@ CHECK_FORTRAN_FEATURE(iso_c_binding
             IMPLICIT NONE
             TYPE(C_PTR) :: ptr
             TYPE(C_FUNPTR) :: funptr
-            INTEGER(C_INT64_T) :: c_int64_type 
+            INTEGER(C_INT64_T) :: c_int64_type
             CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
             ptr = C_LOC(ichr(1:1))
        END PROGRAM

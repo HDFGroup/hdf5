@@ -66,19 +66,18 @@ set_target_properties (H5_buildiface PROPERTIES
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   if (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/\${BUILD_TYPE})
+    set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/\${BUILD_TYPE})
   else (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
-  endif (WIN32)
-else (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  if (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
-  else (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+    set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
   endif (WIN32)
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (WIN32)
+  set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
+else (WIN32)
+  set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+endif (WIN32)
 
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY} ${MOD_BUILD_DIR})
+INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${CMAKE_Fortran_MODULE_DIRECTORY})
 
 #-----------------------------------------------------------------------------
 add_executable (H5match_types
@@ -292,10 +291,41 @@ install (
     FILES
         ${mod_files}
     DESTINATION
-        ${HDF5_INSTALL_INCLUDE_DIR}
+        ${HDF5_INSTALL_INCLUDE_DIR}/static
     COMPONENT
         fortheaders
 )
+
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  set (modsh_files
+      ${MODSH_BUILD_DIR}/h5fortran_types.mod
+      ${MODSH_BUILD_DIR}/hdf5.mod
+      ${MODSH_BUILD_DIR}/h5global.mod
+      ${MODSH_BUILD_DIR}/h5a.mod
+      ${MODSH_BUILD_DIR}/h5d.mod
+      ${MODSH_BUILD_DIR}/h5e.mod
+      ${MODSH_BUILD_DIR}/h5f.mod
+      ${MODSH_BUILD_DIR}/h5g.mod
+      ${MODSH_BUILD_DIR}/h5i.mod
+      ${MODSH_BUILD_DIR}/h5l.mod
+      ${MODSH_BUILD_DIR}/h5lib.mod
+      ${MODSH_BUILD_DIR}/h5o.mod
+      ${MODSH_BUILD_DIR}/h5p.mod
+      ${MODSH_BUILD_DIR}/h5r.mod
+      ${MODSH_BUILD_DIR}/h5s.mod
+      ${MODSH_BUILD_DIR}/h5t.mod
+      ${MODSH_BUILD_DIR}/h5z.mod
+      ${MODSH_BUILD_DIR}/h5_gen.mod
+  )
+  install (
+      FILES
+          ${modsh_files}
+      DESTINATION
+          ${HDF5_INSTALL_INCLUDE_DIR}/shared
+      COMPONENT
+          fortheaders
+  )
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects

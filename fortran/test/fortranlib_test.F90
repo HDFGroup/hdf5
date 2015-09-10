@@ -24,6 +24,8 @@
 !
 !*****
 
+!#include <H5config_f.inc>
+
 PROGRAM fortranlibtest
 
   USE HDF5
