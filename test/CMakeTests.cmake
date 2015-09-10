@@ -401,6 +401,7 @@ set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
 set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-testmeta PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
+set_tests_properties (H5TEST-objcopy PROPERTIES TIMEOUT 2400)
 
 if (BUILD_SHARED_LIBS)
   # Remove any output file left over from previous test run
@@ -491,6 +492,7 @@ if (BUILD_SHARED_LIBS)
   set_tests_properties (H5TEST-shared-fheap PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-testmeta PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-big PROPERTIES TIMEOUT 1800)
+  set_tests_properties (H5TEST-shared-objcopy PROPERTIES TIMEOUT 2400)
 endif (BUILD_SHARED_LIBS)
 
 ##############################################################################
@@ -511,9 +513,10 @@ add_test (
 add_test (NAME H5TEST-cache COMMAND $<TARGET_FILE:cache>)
 set_tests_properties (H5TEST-cache PROPERTIES
     DEPENDS H5TEST-clear-cache-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
+set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT 2400)
 
 #-- Adding test for cache_api
 add_test (
@@ -648,7 +651,7 @@ if (BUILD_SHARED_LIBS)
     add_test (
         NAME H5TEST-shared-clear-cache-objects
         COMMAND    ${CMAKE_COMMAND}
-            -E remove 
+            -E remove
             cache_test.h5
         WORKING_DIRECTORY
             ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
@@ -656,9 +659,10 @@ if (BUILD_SHARED_LIBS)
     add_test (NAME H5TEST-shared-cache COMMAND $<TARGET_FILE:cache-shared>)
     set_tests_properties (H5TEST-shared-cache PROPERTIES
         DEPENDS H5TEST-shared-clear-cache-objects
-        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
+        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
     )
+    set_tests_properties (H5TEST-shared-cache PROPERTIES TIMEOUT 2400)
   endif (NOT CYGWIN)
 
   #-- Adding test for cache_api
@@ -672,7 +676,7 @@ if (BUILD_SHARED_LIBS)
   )
   add_test (NAME H5TEST-shared-cache_api COMMAND $<TARGET_FILE:cache_api-shared>)
   set_tests_properties (H5TEST-shared-cache_api PROPERTIES
-      DEPENDS H5TEST-shared-clear-cache_api-objects 
+      DEPENDS H5TEST-shared-clear-cache_api-objects
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
   )
@@ -1060,7 +1064,7 @@ if (HDF5_TEST_VFD)
       )
       if (BUILD_SHARED_LIBS)
         add_test (
-            NAME VFD-${vfdname}-fheap-shared 
+            NAME VFD-${vfdname}-fheap-shared
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:fheap-shared>"
                 -D "TEST_ARGS:STRING="
