@@ -210,6 +210,13 @@ New Features
 
       (DER - 2015/09/10 HDFFV-9193)
 
+    - Removed the BAD_LOG2_CODE_GENERATED symbol and associated code from the
+      library.
+
+      This was an IRIX work-around.
+
+      (DER - 2015/09/11 HDFFV-9195)
+
     Library
     -------
 
