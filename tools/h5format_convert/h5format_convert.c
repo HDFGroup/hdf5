@@ -220,7 +220,7 @@ convert(hid_t fid, const char *dname)
     H5D_chunk_index_t idx_type;
 
     /* Open the dataset */
-    if((did = H5Dopen(fid, dname, H5P_DEFAULT)) < 0) {
+    if((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0) {
 	error_msg("unable to open dataset \"%s\"\n", dname);
 	h5tools_setstatus(EXIT_FAILURE);
 	goto error;

@@ -83,7 +83,6 @@ $SRC_H5FORMCONV_TESTFILES/h5fc_edge.h5
 "
 
 LIST_OTHER_TEST_FILES="
-$SRC_H5FORMCONV_TESTFILES/h5fc_version.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_help.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_nooption.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_nonexistfile.ddl
@@ -255,11 +254,9 @@ COPY_TESTFILES_TO_TESTDIR
 #
 #
 #
-# h5format_convert --version
 # h5format_convert --help
 # h5format_convert (no options)
 # h5format_convert nonexist.h5  (no options, file does not exist)
-TOOLTEST_OUT h5fc_version.ddl --version
 TOOLTEST_OUT h5fc_help.ddl --help
 TOOLTEST_OUT h5fc_nooption.ddl
 TOOLTEST_OUT h5fc_nonexistfile.ddl nonexist.h5

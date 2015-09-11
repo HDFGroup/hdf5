@@ -56,11 +56,11 @@
 static void
 gen_old(const char *fname)
 {
-    hid_t	fid;	            	/* file id */
-    hid_t	gid;	            	/* group id */
-    hid_t   	sid;	            	/* space id */
-    hid_t	dcpl;	    	    	/* dataset creation property id */
-    hid_t	did1, did2;	    	/* dataset id */
+    hid_t	fid = -1;	 	/* file id */
+    hid_t	gid = -1;	 	/* group id */
+    hid_t   	sid = -1;	 	/* space id */
+    hid_t	dcpl = -1;	 	/* dataset creation property id */
+    hid_t	did1 = -1, did2 = -1;	/* dataset id */
     hsize_t 	dims1[1] = {10};     	/* dataset dimension */
     hsize_t 	dims2[2] = {4, 6};     	/* dataset dimension */
     hsize_t 	c_dims[2] = {2, 3};    	/* chunk dimension */
@@ -163,12 +163,12 @@ error:
 static void
 gen_new(const char *fname)
 {
-    hid_t	fid;	            	/* file id */
-    hid_t	fapl;	            	/* file access property list */
-    hid_t	gid;	            	/* group id */
-    hid_t   	sid;       		/* space id */
-    hid_t	dcpl;	    	    	/* dataset creation property id */
-    hid_t	did1, did2;	    	/* dataset id */
+    hid_t	fid = -1;	 	/* file id */
+    hid_t	fapl = -1;	       	/* file access property list */
+    hid_t	gid = -1;	       	/* group id */
+    hid_t   	sid = -1;       	/* space id */
+    hid_t	dcpl = -1;	    	/* dataset creation property id */
+    hid_t	did1 = -1, did2 = -1;	/* dataset id */
     hsize_t 	dims2[2] = {4, 6};     	/* dataset dimension */
     hsize_t	max_dims[2];		/* maximum dataset dimension */
     hsize_t 	c_dims[2] = {2, 3};    	/* chunk dimension */
@@ -356,12 +356,12 @@ error:
 static void
 gen_all(const char *fname)
 {
-    hid_t	fid;	            	/* file id */
-    hid_t	fapl;	            	/* file access property list */
-    hid_t	gid;	            	/* group id */
-    hid_t   	sid;       		/* space id */
-    hid_t	dcpl;	    	    	/* dataset creation property id */
-    hid_t	did1, did2;	    	/* dataset id */
+    hid_t	fid = -1;		/* file id */
+    hid_t	fapl = -1;		/* file access property list */
+    hid_t	gid = -1;		/* group id */
+    hid_t   	sid = -1;       	/* space id */
+    hid_t	dcpl = -1;		/* dataset creation property id */
+    hid_t	did1 = -1, did2 = -1;	/* dataset id */
     hsize_t 	dims1[1] = {10};     	/* dataset dimension */
     hsize_t 	dims2[2] = {4, 6};     	/* dataset dimension */
     hsize_t	max_dims[2];		/* maximum dataset dimension */
@@ -538,11 +538,11 @@ error:
 static void
 gen_edge(const char *fname)
 {
-    hid_t	fid;	            	/* file id */
-    hid_t	fapl;	            	/* file access property list */
-    hid_t   	sid;       		/* dataspace id */
-    hid_t	dcpl;	    	    	/* dataset creation property id */
-    hid_t	did;	    		/* dataset id */
+    hid_t	fid = -1;	    	/* file id */
+    hid_t	fapl = -1;	       	/* file access property list */
+    hid_t   	sid = -1;       	/* dataspace id */
+    hid_t	dcpl = -1;	    	/* dataset creation property id */
+    hid_t	did = -1;		/* dataset id */
     hsize_t 	dims2[2] = {12, 6};	/* Dataset dimensions */
     hsize_t 	c_dims[2] = {5, 5};	/* Chunk dimensions */
     float 	buf[12][6];            	/* Buffer for writing data */

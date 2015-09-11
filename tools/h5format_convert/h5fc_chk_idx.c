@@ -68,7 +68,7 @@ main(int argc, char *argv[])
     }
 
     /* Open the dataset */
-    if((did = H5Dopen(fid, dname, H5P_DEFAULT)) < 0) {
+    if((did = H5Dopen2(fid, dname, H5P_DEFAULT)) < 0) {
 	HDfprintf(stderr, "h5fc_chk_idx: unable to open the dataset\n");
 	exit(EXIT_FAILURE);
     }
