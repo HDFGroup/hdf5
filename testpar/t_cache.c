@@ -4202,7 +4202,7 @@ setup_cache_for_test(hid_t * fid_ptr,
      */
     if ( success ) { /* allocate space for test entries */
 
-        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT,
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                                       (hsize_t)(max_addr + BASE_ADDR));
 
         if ( actual_base_addr == HADDR_UNDEF ) {

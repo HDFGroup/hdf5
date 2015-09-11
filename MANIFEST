@@ -112,8 +112,7 @@
 ./config/Makefile.am.blank
 ./config/pgi-fflags
 ./config/pgi-flags
-./config/powerpc-ibm-aix5.x
-./config/solaris2.x
+./config/solaris
 ./config/x86_64-pc-cygwin
 
 ./config/site-specific/BlankForm
@@ -886,7 +885,6 @@
 ./test/filter_fail.c
 ./test/flush1.c
 ./test/flush2.c
-# ====distribute this for now. See HDFFV-8236====
 ./test/gen_bad_ohdr.c
 ./test/gen_bad_compound.c
 ./test/gen_bogus.c
@@ -910,7 +908,6 @@
 ./test/gen_sizes_lheap.c
 ./test/gen_specmetaread.c
 ./test/gen_udlinks.c
-# ====end distribute this for now. See HDFFV-8236====
 ./test/getname.c
 ./test/gheap.c
 ./test/group_old.h5

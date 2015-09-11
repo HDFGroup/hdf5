@@ -38,45 +38,11 @@ MODULE H5LT_CONST
   USE hdf5
 
   INTERFACE h5ltmake_dataset_f
-     MODULE PROCEDURE h5ltmake_dataset_f_int1
-     MODULE PROCEDURE h5ltmake_dataset_f_int2
-     MODULE PROCEDURE h5ltmake_dataset_f_int3
-     MODULE PROCEDURE h5ltmake_dataset_f_int4
-     MODULE PROCEDURE h5ltmake_dataset_f_int5
-     MODULE PROCEDURE h5ltmake_dataset_f_int6
-     MODULE PROCEDURE h5ltmake_dataset_f_int7
      MODULE PROCEDURE h5ltmake_dataset_f_ptr
   END INTERFACE
 
   INTERFACE h5ltread_dataset_f
-     MODULE PROCEDURE h5ltread_dataset_f_int1
-     MODULE PROCEDURE h5ltread_dataset_f_int2
-     MODULE PROCEDURE h5ltread_dataset_f_int3
-     MODULE PROCEDURE h5ltread_dataset_f_int4
-     MODULE PROCEDURE h5ltread_dataset_f_int5
-     MODULE PROCEDURE h5ltread_dataset_f_int6
-     MODULE PROCEDURE h5ltread_dataset_f_int7
      MODULE PROCEDURE h5ltread_dataset_f_ptr
-  END INTERFACE
-
-  INTERFACE h5ltmake_dataset_int_f
-     MODULE PROCEDURE h5ltmake_dataset_int_f_1
-     MODULE PROCEDURE h5ltmake_dataset_int_f_2
-     MODULE PROCEDURE h5ltmake_dataset_int_f_3
-     MODULE PROCEDURE h5ltmake_dataset_int_f_4
-     MODULE PROCEDURE h5ltmake_dataset_int_f_5
-     MODULE PROCEDURE h5ltmake_dataset_int_f_6
-     MODULE PROCEDURE h5ltmake_dataset_int_f_7
-  END INTERFACE
-
-  INTERFACE h5ltread_dataset_int_f
-     MODULE PROCEDURE h5ltread_dataset_int_f_1
-     MODULE PROCEDURE h5ltread_dataset_int_f_2
-     MODULE PROCEDURE h5ltread_dataset_int_f_3
-     MODULE PROCEDURE h5ltread_dataset_int_f_4
-     MODULE PROCEDURE h5ltread_dataset_int_f_5
-     MODULE PROCEDURE h5ltread_dataset_int_f_6
-     MODULE PROCEDURE h5ltread_dataset_int_f_7
   END INTERFACE
 
   INTERFACE

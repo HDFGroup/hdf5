@@ -126,7 +126,7 @@ endif (NOT WINDOWS)
 #  Check if Direct I/O driver works
 #-----------------------------------------------------------------------------
 if (NOT WINDOWS)
-  option (HDF5_ENABLE_DIRECT_VFD "Build the Direct I/O Virtual File Driver" ON)
+  option (HDF5_ENABLE_DIRECT_VFD "Build the Direct I/O Virtual File Driver" OFF)
   if (HDF5_ENABLE_DIRECT_VFD)
     set (msg "Performing TEST_DIRECT_VFD_WORKS")
     set (MACRO_CHECK_FUNCTION_DEFINITIONS "-DTEST_DIRECT_VFD_WORKS -D_GNU_SOURCE ${CMAKE_REQUIRED_FLAGS}")

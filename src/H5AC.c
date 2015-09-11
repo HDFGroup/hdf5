@@ -2321,3 +2321,113 @@ H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5AC_retag_copied_metadata */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_get_entry_ring
+ *
+ * Purpose:     Given a file address, retrieve the ring for an entry at that
+ *              address.
+ *
+ * 		On error, the value of *ring is not modified.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              9/8/15
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *ring)
+{
+    herr_t      ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(ring);
+
+    /* Retrieve the ring value for the entry at address */
+    if(H5C_get_entry_ring(f, addr, ring) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "Can't retrieve ring for entry")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_get_entry_ring() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5AC_set_ring
+ *
+ * Purpose:        Routine to set the ring on a DXPL (for passing through
+ *                 to the metadata cache).
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Tuesday, September 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_set_ring(hid_t dxpl_id, H5AC_ring_t ring, H5P_genplist_t **dxpl,
+    H5AC_ring_t *orig_ring)
+{
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(dxpl);
+    HDassert(orig_ring);
+
+    /* Set the ring type in the DXPL */
+    if(NULL == ((*dxpl) = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if((H5P_get((*dxpl), H5AC_RING_NAME, orig_ring)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get original ring value")
+    if((H5P_set((*dxpl), H5AC_RING_NAME, &ring)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set ring value")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_set_ring() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5AC_reset_ring
+ *
+ * Purpose:        Routine to reset the original ring on a DXPL (after passing
+ *                 through to the metadata cache).
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Tuesday, September 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_reset_ring(H5P_genplist_t *dxpl, H5AC_ring_t orig_ring)
+{
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Reset the ring in the DXPL, if it's been changed */
+    if(orig_ring) {
+        /* Sanity check */
+        HDassert(dxpl);
+
+        if((H5P_set(dxpl, H5AC_RING_NAME, &orig_ring)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set property value")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_reset_ring() */
+
