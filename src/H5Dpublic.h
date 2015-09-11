@@ -159,6 +159,10 @@ H5_DLL herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
     size_t dst_buf_size, void *dst_buf, H5D_gather_func_t op, void *op_data);
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
 
+/* Internal API routines */
+H5_DLL herr_t H5Dformat_convert(hid_t dset_id);
+H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
+
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
  * Use of these symbols is deprecated.

@@ -95,7 +95,7 @@ const H5FA_class_t *const H5FA_client_class_g[] = {
 H5FL_DEFINE_STATIC(H5FA_t);
 
 /* Declare a PQ free list to manage the element */
-H5FL_BLK_DEFINE(native_elmt);
+H5FL_BLK_DEFINE(fa_native_elmt);
 
 
 
@@ -713,7 +713,7 @@ H5FA_iterate(H5FA_t *fa, hid_t dxpl_id, H5FA_operator_t op, void *udata))
     HDassert(udata);
 
     /* Allocate space for a native array element */
-    if(NULL == (elmt = H5FL_BLK_MALLOC(native_elmt, fa->hdr->cparam.cls->nat_elmt_size)))
+    if(NULL == (elmt = H5FL_BLK_MALLOC(fa_native_elmt, fa->hdr->cparam.cls->nat_elmt_size)))
         H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array element")
 
     /* Iterate over all elements in array */
@@ -734,7 +734,7 @@ H5FA_iterate(H5FA_t *fa, hid_t dxpl_id, H5FA_operator_t op, void *udata))
 CATCH
 
     if(elmt)
-        elmt = H5FL_BLK_FREE(native_elmt, elmt);
+        elmt = H5FL_BLK_FREE(fa_native_elmt, elmt);
 
 END_FUNC(PRIV)  /* end H5FA_iterate() */
 

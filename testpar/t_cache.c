@@ -389,8 +389,10 @@ static hbool_t serve_rw_count_reset_request(struct mssg_t * mssg_ptr);
 
 /* call back functions & related data structures */
 
-static herr_t datum_get_load_size(const void * udata_ptr,
-                                  size_t *image_len_ptr);
+static herr_t datum_get_load_size(const void *image_ptr, 
+				  const void *udata_ptr,
+                                  size_t *image_len_ptr,
+                                  size_t *actual_len_ptr);
 
 static void * datum_deserialize(const void * image_ptr,
                                 size_t len,
@@ -440,7 +442,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     /* mem_type      */ H5FD_MEM_DEFAULT,
     /* flags         */ H5AC__CLASS_SKIP_READS | H5AC__CLASS_SKIP_WRITES,
     /* get_load_size */ (H5AC_get_load_size_func_t)datum_get_load_size,
-    /* actual_len    */ NULL,
     /* verify_chksum */ NULL,
     /* deserialize   */ (H5AC_deserialize_func_t)datum_deserialize,
     /* image_len     */ (H5AC_image_len_func_t)datum_image_len,
@@ -2335,8 +2336,8 @@ serve_rw_count_reset_request(struct mssg_t * mssg_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-datum_get_load_size(const void * udata_ptr,
-                  size_t *image_len_ptr)
+datum_get_load_size(const void *image_ptr, const void *udata_ptr,
+                  size_t *image_len_ptr, size_t *actual_len_ptr)
 {
     haddr_t addr = *(haddr_t *)udata_ptr;
     int idx;

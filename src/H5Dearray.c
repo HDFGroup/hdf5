@@ -97,6 +97,9 @@ typedef struct H5D_earray_filt_elmt_t {
 static int H5D_earray_idx_iterate_cb(hsize_t idx, const void *_elmt, void *_udata);
 static int H5D_earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
+/* Extensible Array iterator callbacks */
+static int H5D_earray_idx_iterate_cb(hsize_t idx, const void *_elmt, void *_udata);
+
 /* Extensible array class callbacks for chunks w/o filters */
 static void *H5D_earray_crt_context(void *udata);
 static herr_t H5D_earray_dst_context(void *ctx);

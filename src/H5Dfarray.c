@@ -923,7 +923,7 @@ done:
  *
  * Modifications:
  *	Vailin Choi; June 2010
- *	Modified to handle extendible datdaset.
+ *	Modified to handle extensible datdaset.
  *	(fixed max. dim. setting but not H5S_UNLIMITED)
  *
  *-------------------------------------------------------------------------
@@ -1100,7 +1100,7 @@ done:
  *
  * Modifications:
  *	Vailin Choi; June 2010
- *	Modified to handle extendible datdaset.
+ *	Modified to handle extensible array dataset.
  *	(fixed max. dim. setting but not H5S_UNLIMITED)
  *
  *-------------------------------------------------------------------------
@@ -1180,7 +1180,7 @@ done:
  *
  * Modifications:
  *	Vailin Choi; June 2010
- *	Modified to handle extendible datdaset.
+ *	Modified to handle extensible array datdaset.
  *	(fixed max. dim. setting but not H5S_UNLIMITED)
  *
  *-------------------------------------------------------------------------
@@ -1320,7 +1320,7 @@ done:
  *
  * Modifications:
  *	Vailin Choi; June 2010
- *	Modified to handle extendible datdaset.
+ *	Modified to handle extensible array datdaset.
  *	(fixed max. dim. setting but not H5S_UNLIMITED)
  *
  *-------------------------------------------------------------------------

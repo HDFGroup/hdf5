@@ -1057,3 +1057,79 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Drefresh */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dformat_convert (Internal)
+ *
+ * Purpose:     Convert a dataset's chunk indexing type to version 1 B-tree
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Vailin Choi; Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dformat_convert(hid_t dset_id)
+{
+    H5D_t *dset;                /* Dataset to refresh */
+    herr_t ret_value = SUCCEED; /* return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", dset_id);
+
+    /* Check args */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Nothing to do if not a chunked dataset  */
+    if(dset->shared->layout.type != H5D_CHUNKED)
+	HGOTO_DONE(SUCCEED)
+
+    /* Nothing to do if the chunk indexing type is already version 1 B-tree */
+    if(dset->shared->layout.u.chunk.idx_type == H5D_CHUNK_IDX_BTREE)
+	HGOTO_DONE(SUCCEED)
+
+    /* Call private function to do the conversion */
+    if((H5D__format_convert(dset, H5AC_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to convert chunk indexing type for dataset")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Dformat_convert */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_chunk_index_type (Internal)
+ *
+ * Purpose:     Retrieve a dataset's chunk indexing type
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Vailin Choi; Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type)
+{
+    H5D_t *dset;                /* Dataset to refresh */
+    herr_t ret_value = SUCCEED; /* return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", did);
+
+    /* Check args */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Should be a chunked dataset */
+    if(dset->shared->layout.type != H5D_CHUNKED)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not chunked")
+
+    if(idx_type) /* Get the chunk indexing type */
+        *idx_type = dset->shared->layout.u.chunk.idx_type;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Dget_chunk_index_type() */

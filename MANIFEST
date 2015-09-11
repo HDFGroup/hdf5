@@ -1289,6 +1289,31 @@
 ./tools/h5diff/testh5diff.sh.in
 ./tools/h5diff/testph5diff.sh.in
 
+# h5format_convert sources
+./tools/h5format_convert/Makefile.am
+./tools/h5format_convert/Makefile.in
+./tools/h5format_convert/h5fc_chk_idx.c
+./tools/h5format_convert/h5fc_gentest.c
+./tools/h5format_convert/h5format_convert.c
+./tools/h5format_convert/testfiles/h5fc_v_n_all.ddl
+./tools/h5format_convert/testfiles/h5fc_v_bt1.ddl
+./tools/h5format_convert/testfiles/h5fc_v_non_chunked.ddl
+./tools/h5format_convert/testfiles/h5fc_d_file.ddl
+./tools/h5format_convert/testfiles/h5fc_v_ndata_bt1.ddl
+./tools/h5format_convert/testfiles/h5fc_dname.ddl
+./tools/h5format_convert/testfiles/h5fc_version.ddl
+./tools/h5format_convert/testfiles/h5fc_nonexistdset_file.ddl
+./tools/h5format_convert/testfiles/h5fc_help.ddl
+./tools/h5format_convert/testfiles/h5fc_v_all.ddl
+./tools/h5format_convert/testfiles/h5fc_nooption.ddl
+./tools/h5format_convert/testfiles/h5fc_v_n_1d.ddl
+./tools/h5format_convert/testfiles/h5fc_nonexistfile.ddl
+./tools/h5format_convert/testfiles/h5fc_old.h5
+./tools/h5format_convert/testfiles/h5fc_new.h5
+./tools/h5format_convert/testfiles/h5fc_all.h5
+./tools/h5format_convert/testfiles/h5fc_edge.h5
+./tools/h5format_convert/testh5fc.sh.in
+
 # h5repack sources
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in

@@ -2678,6 +2678,109 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__format_convert
+ *
+ * Purpose:     To convert a dataset's chunk indexing type to version 1 btree
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:  Vailin Choi; Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__format_convert(H5D_t *dataset, hid_t dxpl_id)
+{
+    H5O_t *oh = NULL;                   	/* Pointer to dataset's object header */
+    H5D_chk_idx_info_t new_idx_info;    	/* Index info for the new layout */
+    H5D_chk_idx_info_t idx_info;        	/* Index info for the current layout */
+    H5O_layout_t        newlayout;		/* The new layout */
+    unsigned update_flags = H5O_UPDATE_TIME; 	/* Modification time flag */
+    herr_t ret_value = SUCCEED;         	/* Return value */
+
+    FUNC_ENTER_PACKAGE_TAG(dxpl_id, dataset->oloc.addr, FAIL)
+
+    /* Check args */
+    HDassert(dataset);
+
+    /* Set up the current index info */
+    idx_info.f = dataset->oloc.file;
+    idx_info.dxpl_id = dxpl_id;
+    idx_info.pline = &dataset->shared->dcpl_cache.pline;
+    idx_info.layout = &dataset->shared->layout.u.chunk;
+    idx_info.storage = &dataset->shared->layout.storage.u.chunk;
+
+    /* Copy the current layout info to the new layout */
+    HDmemcpy(&newlayout, &dataset->shared->layout, sizeof(H5O_layout_t));
+
+    /* Set up info for version 1 B-tree in the new layout */
+    newlayout.version = H5O_LAYOUT_VERSION_3;
+    newlayout.storage.u.chunk.idx_type = H5D_CHUNK_IDX_BTREE;
+    newlayout.storage.u.chunk.idx_addr = HADDR_UNDEF;
+    newlayout.storage.u.chunk.ops = H5D_COPS_BTREE;
+    newlayout.storage.u.chunk.u.btree.shared = NULL;
+
+    /* Set up the index info to version 1 B-tree */
+    new_idx_info.f = dataset->oloc.file;
+    new_idx_info.dxpl_id = dxpl_id;
+    new_idx_info.pline = &dataset->shared->dcpl_cache.pline;
+    new_idx_info.layout = &newlayout.u.chunk;
+    new_idx_info.storage = &newlayout.storage.u.chunk;
+
+    /* Initialize version 1 B-tree */
+    if(newlayout.storage.u.chunk.ops->init && 
+      (newlayout.storage.u.chunk.ops->init)(&new_idx_info, dataset->shared->space, dataset->oloc.addr) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
+    
+    /* If the current chunk index exists */
+    if(H5F_addr_defined(dataset->shared->layout.storage.u.chunk.idx_addr)) {
+
+	/* Create version 1 B-tree chunk index */
+	if((newlayout.storage.u.chunk.ops->create)(&new_idx_info) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create chunk index")
+
+	/* Iterate over the chunks in the current index and insert the chunk addresses 
+	 * into the version 1 B-tree chunk index */
+	if(H5D__chunk_format_convert(dataset, &idx_info, &new_idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk index to chunk info")
+    }
+
+    /* Release the old (i.e. current) chunk index */
+    if(dataset->shared->layout.storage.u.chunk.ops->dest &&
+       (dataset->shared->layout.storage.u.chunk.ops->dest)(&idx_info) < 0)
+      HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
+
+    /* Delete the "storage" and "layout" messages */
+    if(H5O_msg_remove(&dataset->oloc, H5O_STORAGE_ID, H5O_ALL, TRUE, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete storage message")
+    if(H5O_msg_remove(&dataset->oloc, H5O_LAYOUT_ID, H5O_ALL, TRUE, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete layout message")
+
+    HDmemcpy(&dataset->shared->layout, &newlayout, sizeof(H5O_layout_t));
+
+    if(NULL == (oh = H5O_pin(&dataset->oloc, dxpl_id)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+
+    /* Append the new layout message to the object header */
+    if(H5O_msg_append_oh(dataset->oloc.file, dxpl_id, oh, H5O_LAYOUT_ID, 0, 0, &newlayout) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update old fill value header message")
+
+    /* Update the layout on disk, if it's been changed */
+    if(H5D__layout_oh_write(dataset, dxpl_id, oh, update_flags) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout/pline/efl info")
+
+done:
+    /* Release pointer to object header */
+    if(oh != NULL)
+        if(H5O_unpin(oh) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+} /* end H5D__format_convert() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__mark
  *
  * Purpose:     Mark some aspect of a dataset as dirty

@@ -1037,8 +1037,8 @@ END_FUNC(PRIV)  /* end H5EA_delete() */
 /*-------------------------------------------------------------------------
  * Function:    H5EA_iterate
  *
- * Purpose:     Iterate over the elements of an extensible array
- *              (copied and modified from FA_iterate() in H5FA.c)
+ * Purpose:	Iterate over the elements of an extensible array
+ *		(copied and modified from FA_iterate() in H5FA.c)
  *
  * Return:      SUCCEED/FAIL
  *

@@ -359,7 +359,6 @@ gen_idx_file(const char *fname)
     hid_t	did, did2;	    /* dataset id */
     hsize_t 	dims[1] = {10};     /* dataset dimension */
     hsize_t 	c_dims[1] = {2};    /* chunk dimension */
-    herr_t  	status;             /* return status */
     int		i;		    /* local index variable */
     int     	buf[10];            /* data buffer */
 

@@ -165,6 +165,13 @@ typedef struct H5D_chunk_it_ud4_t {
     uint32_t            *chunk_dim;             /* Chunk dimensions */
 } H5D_chunk_it_ud4_t;
 
+/* Callback info for iteration to format convert chunks */
+typedef struct H5D_chunk_it_ud5_t {
+    H5D_chk_idx_info_t  *new_idx_info;          /* Dest. chunk index info object */
+    unsigned            dset_ndims;             /* Number of dimensions in dataset */
+    hsize_t       	*dset_dims;             /* Dataset dimensions */
+} H5D_chunk_it_ud5_t;
+
 /* Callback info for nonexistent readvv operation */
 typedef struct H5D_chunk_readvv_ud_t {
     unsigned char *rbuf;        /* Read buffer to initialize */
@@ -211,6 +218,9 @@ static ssize_t
 H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
+
+/* format convert cb */
+static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* Helper routines */
 static herr_t H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
@@ -6338,3 +6348,135 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
 done: 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_file_alloc() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_format_convert_cb
+ *
+ * Purpose:     Callback routine to insert chunk address into v1 B-tree
+ *              chunk index.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi; Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
+{
+    H5D_chunk_it_ud5_t *udata = (H5D_chunk_it_ud5_t *)_udata;	/* User data */
+    H5D_chk_idx_info_t *new_idx_info;  	/* The new chunk index information */
+    H5D_chunk_ud_t  insert_udata;	/* Chunk information to be inserted */
+    haddr_t chunk_addr;			/* Chunk address */
+    size_t nbytes;			/* Chunk size */
+    void *buf = NULL;			/* Pointer to buffer of chunk data */
+    int  ret_value = H5_ITER_CONT;   	/* Return value */
+
+    FUNC_ENTER_STATIC
+
+    new_idx_info = udata->new_idx_info;
+    H5_CHECKED_ASSIGN(nbytes, size_t, chunk_rec->nbytes, uint32_t);
+    chunk_addr = chunk_rec->chunk_addr;
+
+    if(new_idx_info->pline->nused &&
+      (new_idx_info->layout->flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) &&
+      (H5D__chunk_is_partial_edge_chunk(chunk_rec->scaled, udata->dset_ndims, udata->dset_dims, 
+					 new_idx_info->layout->dim)) ) {
+	/* This is a partial non-filtered edge chunk */
+	/* Convert the chunk to a filtered edge chunk for v1 B-tree chunk index */
+
+	unsigned filter_mask = chunk_rec->filter_mask;
+	H5Z_cb_t  cb_struct;        	/* Filter failure callback struct */
+	size_t read_size = nbytes;	/* Bytes to read */
+
+	HDassert(read_size == new_idx_info->layout->size);
+
+	cb_struct.func = NULL; /* no callback function when failed */
+
+	/* Allocate buffer for chunk data */
+	if(NULL == (buf = H5MM_malloc(read_size)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
+
+	/* Read the non-filtered edge chunk */
+	if(H5F_block_read(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, read_size, new_idx_info->dxpl_id, buf) < 0)
+	    HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
+
+	/* Pass the chunk through the pipeline */
+	if(H5Z_pipeline(new_idx_info->pline, 0, &filter_mask, H5Z_NO_EDC, cb_struct, &nbytes, 
+			&read_size, &buf) < 0)
+	    HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
+
+#if H5_SIZEOF_SIZE_T > 4
+	    /* Check for the chunk expanding too much to encode in a 32-bit value */
+	if(nbytes > ((size_t)0xffffffff))
+	    HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, H5_ITER_ERROR, "chunk too large for 32-bit length")
+#endif /* H5_SIZEOF_SIZE_T > 4 */
+
+	/* Allocate space for the filtered chunk */
+	if((chunk_addr = H5MF_alloc(new_idx_info->f, H5FD_MEM_DRAW, new_idx_info->dxpl_id, (hsize_t)nbytes)) == HADDR_UNDEF)
+	    HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, H5_ITER_ERROR, "file allocation failed for filtered chunk")
+	HDassert(H5F_addr_defined(chunk_addr));
+
+	/* Write the filtered chunk to disk */
+	if(H5F_block_write(new_idx_info->f, H5FD_MEM_DRAW, chunk_addr, nbytes, 
+		           new_idx_info->dxpl_id, buf) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write raw data to file")
+    }
+
+    /* Set up chunk information for insertion to chunk index */
+    insert_udata.chunk_block.offset = chunk_addr;
+    insert_udata.chunk_block.length = nbytes;
+    insert_udata.filter_mask = chunk_rec->filter_mask;
+    insert_udata.common.scaled = chunk_rec->scaled;
+    insert_udata.common.layout = new_idx_info->layout;
+    insert_udata.common.storage = new_idx_info->storage;
+
+    /* Insert chunk into the v1 B-tree chunk index */
+    if((new_idx_info->storage->ops->insert_addr)(new_idx_info, &insert_udata) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert chunk addr into index")
+
+done:
+    if(buf)
+        H5MM_xfree(buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__chunk_format_convert_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_format_convert
+ *
+ * Purpose:     Iterate over the chunks for the current chunk index and insert the
+ *		the chunk addresses into v1 B-tree chunk index via callback.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx_info_t *new_idx_info)
+{
+    H5D_chunk_it_ud5_t udata;		/* User data */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check args */
+    HDassert(dset);
+
+    /* Set up user data */
+    udata.new_idx_info = new_idx_info;
+    udata.dset_ndims = dset->shared->ndims;
+    udata.dset_dims = dset->shared->curr_dims;
+
+    /*  terate over the chunks in the current index and insert the chunk addresses into version 1 B-tree index */
+    if((dset->shared->layout.storage.u.chunk.ops->iterate)(idx_info, H5D__chunk_format_convert_cb, &udata) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk index to chunk info")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_format_convert() */
