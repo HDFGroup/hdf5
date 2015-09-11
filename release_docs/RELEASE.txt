@@ -57,6 +57,33 @@ New Features
 
     Configuration
     -------------
+    - The thread-safety + high-level library combination has been marked
+      as "unsupported" in the Autotools
+
+      The global lock used by the thread-safety feature has never been
+      raised to the high-level library level, making it possible that
+      library state could change if a context switch were to occur in
+      a high-level library call. Because of this, the combination of
+      thread-safety and high-level library is officially unsupported by
+      The HDF Group.
+
+      In the past, although this combination has never been supported, this
+      was not enforced by the build systems. These changes will cause an
+      Autotools configure step to fail if --enable-threadsafe and
+      --enable-hl are combined unless additional options are specified.
+      Since the high-level library is built by default, this means that
+      these extra configuration options will need to be used any time
+      --enable-threadsafe is selected.
+
+      To build with --enable-threadsafe, either:
+
+      1) Use --disable-hl to disable the high-level library (recommended)
+
+      2) Use --enable-unsupported to build the high-level library with
+         the thread-safety feature.
+
+      (DER - 2015/09/10 HDFFV-8719)
+
     - Using CMake now builds both static and shared libraries.
 
       The CMake files have been updated to build both static and shared
@@ -111,7 +138,7 @@ New Features
       a version number since the version number was ignored by configure
       as it applies to all Solaris versions.
 
-    (DER - 2015/09/04 HDFFV-9116)
+      (DER - 2015/09/04 HDFFV-9116)
 
     - Removed the FP_TO_INTEGER_OVERFLOW_WORKS macro/defines from the library
 
@@ -132,7 +159,7 @@ New Features
       Neither of these were used in any current library code and only appeared
       in the dt_arith test.
 
-    (DER - 2015/09/09 HDFFV-9187)
+      (DER - 2015/09/09 HDFFV-9187)
 
     - Removed CONVERT_DENORMAL_FLOAT symbol and associated code from the
       library.
@@ -141,21 +168,21 @@ New Features
       config files no longer exist so there is no effect on currently
       supported platforms.
 
-    (DER - 2015/09/09 HDFFV-9188)
+      (DER - 2015/09/09 HDFFV-9188)
 
     - Removed WANT_DATA_ACCURACY symbol and associated code from the
       library.
 
       This is no longer attached to any supported platforms.
 
-    (DER - 2015/09/09 HDFFV-9194)
+      (DER - 2015/09/09 HDFFV-9194)
 
     - Removed _BSD_SOURCE and _DEFAULT_SOURCE from configure.ac
 
       These are old BSD-compatibility symbols that are no longer needed by
       the library.
 
-    (DER - 2015/09/10 HDFFV-9079)
+      (DER - 2015/09/10 HDFFV-9079)
 
     - Removed HW_FP_TO_LLONG_NOT_WORKS symbol and associated code from the
       library.
@@ -163,7 +190,7 @@ New Features
       This was part of a work-around for the VS.NET 2003 compiler, which is
       no longer supported.
 
-    (DER - 2015/09/10 HDFFV-9189)
+      (DER - 2015/09/10 HDFFV-9189)
 
     - Removed LDOUBLE_TO_LLONG_ACCURATE symbol and associated code from the
       library.
@@ -172,7 +199,7 @@ New Features
       OS X 10.4, and some versions of HP/UX, none of which are currently
       supported.
 
-    (DER - 2015/09/10 HDFFV-9192)
+      (DER - 2015/09/10 HDFFV-9192)
 
     - Removed LLONG_TO_LDOUBLE_CORRECT symbol and associated code from the
       library.
@@ -181,7 +208,7 @@ New Features
       IRIX 6.5, and very old versions of FreeBSD and 64-bit Solaris. None
       of these platforms/compilers are currently supported.
 
-    (DER - 2015/09/10 HDFFV-9193)
+      (DER - 2015/09/10 HDFFV-9193)
 
     Library
     -------
@@ -238,6 +265,11 @@ Bug Fixes since HDF5-1.8.15
 
     Configuration
     -------------
+
+    - None
+
+    Library
+    -------
     - Fix potential error in H5Iclear_type
 
       If the ID type's close callback could close another ID of the same type,
@@ -248,8 +280,6 @@ Bug Fixes since HDF5-1.8.15
 
       (NAF - 2015-08-12)
 
-    Library
-    -------
     - Fix uninitialized memory in dataspace selection code
 
       When creating a dataspace with H5Screate and setting the extent with
