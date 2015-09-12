@@ -28,7 +28,7 @@ AC_PREREQ([2.69])
 ##
 AC_INIT([HDF5], [1.9.222-swmr1], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
-AC_CONFIG_HEADER([src/H5config.h])
+AC_CONFIG_HEADERS([src/H5config.h])
 
 AC_CONFIG_AUX_DIR([bin])
 AC_CONFIG_MACRO_DIR([m4])
@@ -85,11 +85,16 @@ AC_CONFIG_COMMANDS([pubconf], [
 ## configure is currently running by using the --host=foo flag.
 ## For machines on which HDF5 is often configured, it can be convenient
 ## to specify the name of the machine rather than its canonical type.
-case $host_alias in
-  redstorm)
-    host_alias=x86_64-redstorm-linux-gnu
-    ;;
-esac
+##
+## There are currently no hosts, but if there were they would be
+## listed by hostname and the alias would point to a file in
+## the config directory:
+##
+##case $host_alias in
+##  <some host>)
+##    host_alias=<config file in config directory>
+##    ;;
+##esac
 
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
@@ -244,14 +249,8 @@ case $host_os in
   freebsd*)
     host_os_novers=freebsd
     ;;
-  osf4.*)
-    host_os_novers=osf4.x
-    ;;
-  osf5.*)
-    host_os_novers=osf5.x
-    ;;
-  solaris2.*)
-    host_os_novers=solaris2.x
+  solaris*)
+    host_os_novers=solaris
     ;;
   *)
     host_os_novers=$host_os
@@ -843,12 +842,6 @@ esac
 AC_CHECK_LIB([m], [ceil])
 AC_CHECK_LIB([dl], [dlopen])
 
-if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
-  ## ...for Solaris
-  AC_CHECK_LIB([socket], [socket])
-  AC_CHECK_LIB([nsl], [xdr_int])
-fi
-
 ## ----------------------------------------------------------------------
 ## Check for system header files.
 ##
@@ -882,24 +875,6 @@ case "`uname`" in
     ;;
   *)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
-    ;;
-esac
-
-case "$host" in
-  alpha*-dec*-osf*)
-    ## The <sys/sysinfo.h> and <sys/proc.h> are needed on the DEC
-    ## Alpha to turn off UAC fixing. We do *not* attempt to
-    ## locate these files on other systems because there are too
-    ## many problems with including them.
-    AC_CHECK_HEADERS([sys/sysinfo.h sys/proc.h])
-    ;;
-  mips*-sgi*)
-    ## The <sys/fpu.h> is needed on the SGI machines to turn off
-    ## denormalized floating-point values going to zero.  We do *not*
-    ## attempt to locate these files on other systems because there
-    ## may be problems with including them.
-    AC_CHECK_HEADERS([sys/fpu.h])
-    AC_CHECK_FUNCS([get_fpc_csr])
     ;;
 esac
 
@@ -980,21 +955,6 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
-
-    ## Also add BSD support on Linux systems, so <features.h> defines
-    ## __USE_BSD, which is required to get the prototype for strdup
-    ## defined correctly in <string.h> and snprintf & vsnprintf defined
-    ## correctly in <stdio.h>
-    ## Linking to the bsd-compat library is required as per the gcc manual:
-    ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    ## however, we do not do this since it breaks the big test on some 
-    ## older platforms.
-    H5_CPPFLAGS="-D_BSD_SOURCE $H5_CPPFLAGS"
-
-    ## _BSD_SOURCE is deprecated as of glibc 2.20, in favor of _DEFAULT_SOURCE.
-    ## To avoid warnings, we define _DEFAULT_SOURCE in addition to _BSD_SOURCE,
-    ## which should work for all versions of glibc.
-    H5_CPPFLAGS="-D_DEFAULT_SOURCE $H5_CPPFLAGS"
     ;;
 esac
 
@@ -1432,14 +1392,24 @@ AC_CACHE_SAVE
 AC_MSG_CHECKING([for thread safe support])
 AC_ARG_ENABLE([threadsafe],
               [AS_HELP_STRING([--enable-threadsafe],
-                              [Enable thread-safe capability. This will disable the high-level library.
-                              You can override this behavior by specifying --enable-hl and --enable-unsupported.
+                              [Enable thread-safe capability. Not compatible with the high-level library, Fortran, or C++ wrappers.
                               [default=no]])],
               [THREADSAFE=$enableval])
 
 ## NOTE: The high-level, C++, and Fortran interfaces are not compatible
 ## with the thread-safety option because the lock is not hoisted
 ## into the higher-level API calls.
+
+## --enable-threadsafe is incompatible with --enable-hl unless
+## --enable-unsupported has been specified on the configure line.
+##
+## Note that the high-level library is enabled by default so most
+## users will have to add --disable-hl to the configure options.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF5_HL}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([The thread-safe library is incompatible with the high-level library. --disable-hl can be used to prevent building the high-level library (recommended). Alternatively, --enable-unsupported will allow building the high-level library, though this configuration is not supported by The HDF Group.])
+  fi
+fi
 
 ## The --enable-threadsafe flag is not compatible with --enable-cxx.
 ## If the user tried to specify both flags, throw an error, unless
@@ -1583,7 +1553,7 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
-## to be done after any POSIX/BSD defines to ensure that the test gets
+## to be done after any POSIX defines to ensure that the test gets
 ## the correct POSIX level on linux.
 AC_CHECK_DECL([CLOCK_MONOTONIC],[have_clock_monotonic="yes"],[have_clock_monotonic="no"],[[#include <time.h>]])
 
@@ -1691,7 +1661,27 @@ AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
 ## Check compiler characteristics
 ##
 AC_C_CONST
-AC_C_INLINE
+
+AC_MSG_CHECKING([if the compiler understands  __inline__])
+AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([[static __inline__ void f(void){return;};]])],
+    [AC_DEFINE([HAVE___INLINE__], [1], [Define if the compiler understands __inline__]) AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])]
+)
+
+AC_MSG_CHECKING([if the compiler understands __inline])
+AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([[static __inline void f(void){return;};]])],
+    [AC_DEFINE([HAVE___INLINE], [1], [Define if the compiler understands __inline]) AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])]
+)
+
+AC_MSG_CHECKING([if the compiler understands inline])
+AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([[static inline void f(void){return;};]])],
+    [AC_DEFINE([HAVE_INLINE], [1], [Define if the compiler understands inline]) AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])]
+)
 
 AC_MSG_CHECKING([for __attribute__ extension])
 AC_TRY_COMPILE(,[int __attribute__((unused)) x],
@@ -3064,16 +3054,6 @@ fi
 if test "X$HDF_CXX" = "Xyes"; then
   chmod 755 c++/src/h5c++
 fi
-
-## We don't want inline defined for C++ compilers
-## Don't worry about the C++ ifdef wrappers in the H5pubconf file, since
-## 'H5_inline' isn't a C++ keyword.
-cat >> src/H5config.h <<EOF
-
-#if defined(__cplusplus) && defined(inline)
-#undef inline
-#endif
-EOF
 
 ## HDF5 configure code created by autotools with gcc 4.9.2 is adding problematic
 ## linker flags:  -l with no library name; -l <libname>, specifically gfortran or m.

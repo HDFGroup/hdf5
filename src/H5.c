@@ -21,17 +21,16 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5Dprivate.h"		/* Datasets				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free lists                           */
-#include "H5Lprivate.h"		/* Links		  		*/
+#include "H5private.h"          /* Generic Functions                    */
+#include "H5ACprivate.h"        /* Metadata cache                       */
+#include "H5Dprivate.h"         /* Datasets                             */
+#include "H5Eprivate.h"         /* Error handling                       */
+#include "H5FLprivate.h"        /* Free lists                           */
+#include "H5Lprivate.h"         /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Tprivate.h"		/* Datatypes				*/
+#include "H5Pprivate.h"         /* Property lists                       */
 #include "H5SLprivate.h"        /* Skip lists                           */
-
+#include "H5Tprivate.h"         /* Datatypes                            */
 
 /****************/
 /* Local Macros */
@@ -968,6 +967,36 @@ H5free_memory(void *mem)
     FUNC_LEAVE_API(SUCCEED)
 
 } /* end H5free_memory() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5is_library_threadsafe
+ *
+ * Purpose:	    Checks to see if the library was built with thread-safety
+ *              enabled.
+ *
+ * Return:	    SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5is_library_threadsafe(hbool_t *is_ts)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE1("e", "*b", is_ts);
+
+    HDassert(is_ts);
+ 
+#ifdef H5_HAVE_THREADSAFE
+    *is_ts = TRUE;
+#else /* H5_HAVE_THREADSAFE */
+    *is_ts = FALSE;
+#endif /* H5_HAVE_THREADSAFE */
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5is_library_threadsafe() */
 
 
 #if defined(H5_HAVE_THREADSAFE) && defined(H5_BUILT_AS_DYNAMIC_LIB) \

@@ -190,11 +190,22 @@
 
 #endif /*H5_HAVE_WIN32_API*/
 
-/* H5_inline */
-#ifndef H5_inline
-#define H5_inline
-#endif /* H5_inline */
-
+/* Various ways that inline functions can be declared */
+#if defined(H5_HAVE___INLINE__)
+    /* GNU (alternative form) */
+    #define H5_INLINE __inline__
+#elif defined(H5_HAVE___INLINE)
+    /* Visual Studio */
+    #define H5_INLINE __inline
+#elif defined(H5_HAVE_INLINE)
+    /* GNU, C++
+     * Use "inline" as a last resort on the off-chance that there will
+     * be C++ problems.
+     */
+    #define H5_INLINE inline
+#else
+    #define H5_INLINE
+#endif /* inline choices */
 
 #ifndef F_OK
 #   define F_OK  00
@@ -1777,9 +1788,24 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
  *-------------------------------------------------------------------------
  */
 
-/* `S' is the name of a function which is being tested to check if its */
-/*      an API function */
-#define H5_IS_API(S) ('_'!=((const char *)S)[2] && '_'!=((const char *)S)[3] && (!((const char *)S)[4] || '_'!=((const char *)S)[4]))
+/* `S' is the name of a function which is being tested to check if it's
+ *  an API function.
+ *
+ *  BADNESS:
+ *      - Underscore at positions 2 or 3 (0-indexed string). Handles
+ *        H5_ and H5X_.
+ *      - Underscore at position 4 if position 3 is uppercase or a digit.
+ *        Handles H5XY_.
+ */
+#define H5_IS_API(S) (\
+    '_'!=((const char *)S)[2]       /* underscore at position 2     */  \
+    && '_'!=((const char *)S)[3]    /* underscore at position 3     */  \
+    && !(                                       /* NOT              */  \
+        ((const char *)S)[4]                    /* pos 4 exists     */  \
+        && (HDisupper(S[3]) || HDisdigit(S[3])) /* pos 3 dig | uc   */  \
+        && '_'==((const char *)S)[4]            /* pos 4 underscore */  \
+    )\
+)
 
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a public API function */

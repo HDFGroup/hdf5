@@ -160,9 +160,6 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #cmakedefine H5_HAVE_GETTIMEOFDAY @H5_HAVE_GETTIMEOFDAY@
 
-/* Define to 1 if you have the `get_fpc_csr' function. */
-#cmakedefine H5_HAVE_GET_FPC_CSR @H5_HAVE_GET_FPC_CSR@
-
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
@@ -188,14 +185,8 @@
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #cmakedefine H5_HAVE_LIBMPE @H5_HAVE_LIBMPE@
 
-/* Define to 1 if you have the `nsl' library (-lnsl). */
-#cmakedefine H5_HAVE_LIBNSL @H5_HAVE_LIBNSL@
-
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #cmakedefine H5_HAVE_LIBPTHREAD @H5_HAVE_LIBPTHREAD@
-
-/* Define to 1 if you have the `socket' library (-lsocket). */
-#cmakedefine H5_HAVE_LIBSOCKET @H5_HAVE_LIBSOCKET@
 
 /* Define to 1 if you have the `sz' library (-lsz). */
 #cmakedefine H5_HAVE_LIBSZ @H5_HAVE_LIBSZ@
@@ -314,17 +305,8 @@
 /* Define to 1 if you have the `system' function. */
 #cmakedefine H5_HAVE_SYSTEM @H5_HAVE_SYSTEM@
 
-/* Define to 1 if you have the <sys/file.h> header file. */
-#cmakedefine H5_HAVE_SYS_FILE_H @H5_HAVE_SYS_FILE_H@
-
-/* Define to 1 if you have the <sys/fpu.h> header file. */
-#cmakedefine H5_HAVE_SYS_FPU_H @H5_HAVE_SYS_FPU_H@
-
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #cmakedefine H5_HAVE_SYS_IOCTL_H @H5_HAVE_SYS_IOCTL_H@
-
-/* Define to 1 if you have the <sys/proc.h> header file. */
-#cmakedefine H5_HAVE_SYS_PROC_H @H5_HAVE_SYS_PROC_H@
 
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #cmakedefine H5_HAVE_SYS_RESOURCE_H @H5_HAVE_SYS_RESOURCE_H@
@@ -334,9 +316,6 @@
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #cmakedefine H5_HAVE_SYS_STAT_H @H5_HAVE_SYS_STAT_H@
-
-/* Define to 1 if you have the <sys/sysinfo.h> header file. */
-#cmakedefine H5_HAVE_SYS_SYSINFO_H @H5_HAVE_SYS_SYSINFO_H@
 
 /* Define to 1 if you have the <sys/timeb.h> header file. */
 #cmakedefine H5_HAVE_SYS_TIMEB_H @H5_HAVE_SYS_TIMEB_H@

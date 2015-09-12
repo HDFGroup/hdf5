@@ -317,7 +317,7 @@ if ($RELEASE) {
 # Update the c++/src/cpp_doc_config file
 if ($CPP_DOC_CONFIG) {
   my $data = read_file($CPP_DOC_CONFIG);
-  my $version_string = sprintf("HDF5 version %d.%d.%d%s %s",
+  my $version_string = sprintf("\"%d.%d.%d%s %s\"",
                                @newver[0,1,2],
                                $newver[3] eq "" ? "" : "-".$newver[3],
                                "currently under development");
