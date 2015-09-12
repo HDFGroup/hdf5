@@ -875,11 +875,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             else
                                 tempchar = (tempchar >> packed_data_offset) & packed_data_mask;
                         }
-    #ifdef H5_VMS
-                        h5tools_str_append(str, OPT(info->fmt_schar, "%hd"), tempchar);
-    #else
                         h5tools_str_append(str, OPT(info->fmt_schar, "%hhd"), tempchar);
-    #endif
                     }
                 } /* end if (sizeof(char) == nsize) */
                 else if (sizeof(int) == nsize) {

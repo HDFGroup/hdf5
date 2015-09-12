@@ -83,11 +83,7 @@ typedef struct H5FD_direct_t {
      * identify a file.
      */
     dev_t  device;      /*file device number    */
-#ifdef H5_VMS
-    ino_t  inode[3];    /*file i-node number    */
-#else
     ino_t  inode;      /*file i-node number    */
-#endif /*H5_VMS*/
 #else
     /*
      * On H5_HAVE_WIN32_API the low-order word of a unique identifier associated with the
@@ -529,13 +525,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     file->fileindexlo = fileinfo.nFileIndexLow;
 #else
     file->device = sb.st_dev;
-#ifdef H5_VMS
-    file->inode[0] = sb.st_ino[0];
-    file->inode[1] = sb.st_ino[1];
-    file->inode[2] = sb.st_ino[2];
-#else
     file->inode = sb.st_ino;
-#endif /*H5_VMS*/
 #endif /*H5_HAVE_WIN32_API*/
     file->fa.mboundary = fa->mboundary;
     file->fa.fbsize = fa->fbsize;
@@ -677,13 +667,8 @@ H5FD_direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t))>0) HGOTO_DONE(1)
 #endif /* H5_DEV_T_IS_SCALAR */
 
-#ifndef H5_VMS
     if (f1->inode < f2->inode) HGOTO_DONE(-1)
     if (f1->inode > f2->inode) HGOTO_DONE(1)
-#else
-    if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))<0) HGOTO_DONE(-1)
-    if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))>0) HGOTO_DONE(1)
-#endif /*H5_VMS*/
 
 #endif
 

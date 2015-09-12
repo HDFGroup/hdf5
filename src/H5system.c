@@ -582,45 +582,8 @@ void HDsrand(unsigned int seed)
 {
     g_seed = seed;
 }
-#endif
+#endif /* H5_HAVE_RAND_R */
 
-
-/*-------------------------------------------------------------------------
- * Function:  HDremove_all
- *
- * Purpose:  Wrapper function for remove on VMS systems
- *
- *     This function deletes all versions of a file
- *
- * Return:  Success:        0;
- *
- *    Failure:  -1
- *
- * Programmer:  Elena Pourmal
- *              March 22, 2006
- *
- *-------------------------------------------------------------------------
- */
-#ifdef H5_VMS
-int
-HDremove_all(const char *fname)
-{
-    int ret_value = -1;
-    size_t fname_len;
-    char *_fname;
-
-    fname_len = HDstrlen(fname) + 3;    /* to accomodate ";*" and null terminator */
-    _fname = (char *)H5MM_malloc(fname_len);
-    if(_fname) {
-        HDsnprintf(_fname, fname_len, "%s;*", fname);
-        /* Do not use HDremove; function becomes recursive (see H5private.h file)*/
-        remove(_fname);
-        H5MM_xfree(_fname);
-        ret_value = 0;
-    }
-    return ret_value;
-}
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -872,8 +835,6 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
     /*
      * Unix: name[0] is a "/"
      * Windows: name[0-2] is "<drive letter>:\" or "<drive-letter>:/"
-     * OpenVMS: <disk name>$<partition>:[path]<file name>
-     *     i.g. SYS$SYSUSERS:[LU.HDF5.SRC]H5system.c
      */
     if(H5_CHECK_ABSOLUTE(name)) {
         if(NULL == (full_path = (char *)H5MM_strdup(name)))
@@ -894,7 +855,6 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
          * Windows: name[0-1] is "<drive-letter>:"
          *   Get current working directory on the drive specified in NAME
          * Unix: does not apply
-         * OpenVMS: does not apply
          */
         if(H5_CHECK_ABS_DRIVE(name)) {
             drive = name[0] - 'A' + 1;
@@ -905,14 +865,13 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
         * Windows: name[0] is a '/' or '\'
         *  Get current drive
         * Unix: does not apply
-        * OpenVMS: does not apply
         */
         else if(H5_CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
             HDsnprintf(cwdpath, MAX_PATH_LEN, "%c:%c", (drive + 'A' - 1), name[0]);
             retcwd = cwdpath;
             HDstrncpy(new_name, &name[1], name_len);
         }
-        /* totally relative for Unix, Windows, and OpenVMS: get current working directory  */
+        /* totally relative for Unix and Windows: get current working directory  */
         else {
             retcwd = HDgetcwd(cwdpath, MAX_PATH_LEN);
             HDstrncpy(new_name, name, name_len);
@@ -931,26 +890,9 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
                 HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             HDstrncpy(full_path, cwdpath, cwdlen + 1);
-#ifdef H5_VMS
-            /* If the file name contains relative path, cut off the beginning bracket.  Also cut off the
-             * ending bracket of CWDPATH to combine the full path name. i.g.
-             *     cwdpath = SYS$SYSUSERS:[LU.HDF5.TEST]
-             *     new_name = [.tmp]extlinks.h5
-             *     full_path = SYS$SYSUSERS:[LU.HDF5.TEST.tmp]extlinks.h5
-             */
-            if(new_name[0] == '[') {
-                char *tmp = new_name;
-
-                full_path[cwdlen - 1] = '\0';
-                HDstrncat(full_path, ++tmp, HDstrlen(tmp));
-            } /* end if */
-            else
-                HDstrncat(full_path, new_name, HDstrlen(new_name));
-#else
             if(!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
                 HDstrncat(full_path, H5_DIR_SEPS, HDstrlen(H5_DIR_SEPS));
             HDstrncat(full_path, new_name, HDstrlen(new_name));
-#endif
         } /* end if */
     } /* end else */
 

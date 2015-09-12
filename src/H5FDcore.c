@@ -65,11 +65,7 @@ typedef struct H5FD_core_t {
      * identify a file.
      */
     dev_t       device;                 /*file device number            */
-#ifdef H5_VMS
-    ino_t       inode[3];               /*file i-node number            */
-#else
     ino_t       inode;                  /*file i-node number            */
-#endif /*H5_VMS*/
 #else
     /* Files in windows are uniquely identified by the volume serial
      * number and the file index (both low and high parts).
@@ -744,14 +740,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         file->dwVolumeSerialNumber = fileinfo.dwVolumeSerialNumber;
 #else /* H5_HAVE_WIN32_API */
         file->device = sb.st_dev;
-#ifdef H5_VMS
-        file->inode[0] = sb.st_ino[0];
-        file->inode[1] = sb.st_ino[1];
-        file->inode[2] = sb.st_ino[2];
-#else
         file->inode = sb.st_ino;
-#endif /* H5_VMS */
-
 #endif /* H5_HAVE_WIN32_API */
     } /* end if */
 
@@ -984,13 +973,8 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
         if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t))>0) HGOTO_DONE(1)
 #endif /* H5_DEV_T_IS_SCALAR */
 
-#ifndef H5_VMS
         if (f1->inode < f2->inode) HGOTO_DONE(-1)
         if (f1->inode > f2->inode) HGOTO_DONE(1)
-#else
-        if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))<0) HGOTO_DONE(-1)
-        if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))>0) HGOTO_DONE(1)
-#endif /* H5_VMS */
 
 #endif /*H5_HAVE_WIN32_API*/
     } /* end if */
@@ -1526,12 +1510,6 @@ H5FD_core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
                 if(0 == bError)
                     HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #else /* H5_HAVE_WIN32_API */
-#ifdef H5_VMS
-                /* Reset seek offset to the beginning of the file, so that the file isn't
-                 * re-extended later.  This may happen on Open VMS. */
-                if(-1 == HDlseek(file->fd, (HDoff_t)0, SEEK_SET))
-                    HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
-#endif /* H5_VMS */
                 if(-1 == HDftruncate(file->fd, (HDoff_t)new_eof))
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* H5_HAVE_WIN32_API */

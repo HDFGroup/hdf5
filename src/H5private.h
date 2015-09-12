@@ -295,12 +295,23 @@
 /*
  * Does the compiler support the __attribute__(()) syntax?  It's no
  * big deal if we don't.
+ *
+ * Note that Solaris Studio supports attribute, but does not support the
+ * attributes we use.
  */
 #ifdef __cplusplus
-#   define __attribute__(X)  /*void*/
+#   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
+#   define H5_ATTR_UNUSED    /*void*/
+#   define H5_ATTR_NORETURN  /*void*/
 #else /* __cplusplus */
-#ifndef H5_HAVE_ATTRIBUTE
-#   define __attribute__(X)  /*void*/
+#if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
+#   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
+#   define H5_ATTR_UNUSED    __attribute__((unused))
+#   define H5_ATTR_NORETURN  __attribute__((noreturn))
+#else
+#   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
+#   define H5_ATTR_UNUSED    /*void*/
+#   define H5_ATTR_NORETURN  /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -1169,22 +1180,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDrealpath
     #define HDrealpath(F1,F2)    realpath(F1,F2)
 #endif /* HDrealloc */
-#ifdef H5_VMS
-    #ifdef __cplusplus
-        extern "C" {
-    #endif /* __cplusplus */
-    int HDremove_all(const char * fname);
-    #ifdef __cplusplus
-        }
-    #endif /* __cplusplus */
-    #ifndef HDremove
-        #define HDremove(S)     HDremove_all(S)
-    #endif /* HDremove */
-#else /* H5_VMS */
-    #ifndef HDremove
-        #define HDremove(S)    remove(S)
-    #endif /* HDremove */
-#endif /*H5_VMS*/
+#ifndef HDremove
+    #define HDremove(S)    remove(S)
+#endif /* HDremove */
 #ifndef HDrename
     #define HDrename(OLD,NEW)  rename(OLD,NEW)
 #endif /* HDrename */
@@ -1604,19 +1602,7 @@ extern char *strdup(const char *s);
         (ptr = slash);                                  \
 }
 
-#elif defined(H5_HAVE_VMS_PATH)
-
-/* OpenVMS pathname: <disk name>$<partition>:[path]<file name>
- *     i.g. SYS$SYSUSERS:[LU.HDF5.SRC]H5system.c */
-#define H5_DIR_SEPC                     ']'
-#define H5_DIR_SEPS                     "]"
-#define H5_CHECK_DELIMITER(SS)             (SS == H5_DIR_SEPC)
-#define H5_CHECK_ABSOLUTE(NAME)            (HDstrrchr(NAME, ':') && HDstrrchr(NAME, '['))
-#define H5_CHECK_ABS_DRIVE(NAME)           (0)
-#define H5_CHECK_ABS_PATH(NAME)            (0)
-#define H5_GET_LAST_DELIMITER(NAME, ptr)   ptr = HDstrrchr(NAME, H5_DIR_SEPC);
-
-#else
+#else /* H5_HAVE_WINDOW_PATH */
 
 #define H5_DIR_SEPC             '/'
 #define H5_DIR_SEPS             "/"
@@ -1626,7 +1612,7 @@ extern char *strdup(const char *s);
 #define H5_CHECK_ABS_PATH(NAME)    (0)
 #define H5_GET_LAST_DELIMITER(NAME, ptr)   ptr = HDstrrchr(NAME, H5_DIR_SEPC);
 
-#endif
+#endif /* H5_HAVE_WINDOW_PATH */
 
 #define   H5_COLON_SEPC  ':'
 
