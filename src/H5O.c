@@ -44,6 +44,9 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"		/* Links				*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#ifdef H5O_ENABLE_BOGUS
+#include "H5MMprivate.h"	/* Memory management			*/
+#endif /* H5O_ENABLE_BOGUS */
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5SMprivate.h"        /* Shared object header messages        */
 
@@ -197,10 +200,10 @@ H5O_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* H5O interface sanity checks */
-    HDassert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
-    HDassert(sizeof(H5O_fheap_id_t) == H5O_FHEAP_ID_LEN);
+    HDcompile_assert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
+    HDcompile_assert(sizeof(H5O_fheap_id_t) == H5O_FHEAP_ID_LEN);
 
-    HDassert(H5O_UNKNOWN_ID < H5O_MSG_TYPES);
+    HDcompile_assert(H5O_UNKNOWN_ID < H5O_MSG_TYPES);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_init_interface() */

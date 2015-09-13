@@ -793,7 +793,9 @@ main(void)
         PASSED();
 
 
-        /* Test reading datasets with undefined object header messages */
+        /* Test reading datasets with undefined object header messages
+         * and the various "fail/mark if unknown" object header message flags
+         */
         HDputs("Accessing objects with unknown header messages:");
         {
             hid_t file2;                    /* File ID for 'bogus' object file */
@@ -815,7 +817,7 @@ main(void)
 
             PASSED();
 
-            TESTING("object with unknown header message & 'fail if unknown and open for write' flag set");
+            TESTING("object in r/o file with unknown header message & 'fail if unknown and open for write' flag set");
 
             /* Open the dataset with the unknown header message, and "fail if unknown and open for write" flag */
             if((dset = H5Dopen2(file2, "/Dataset2", H5P_DEFAULT)) < 0)
@@ -825,10 +827,23 @@ main(void)
 
             PASSED();
 
+            TESTING("object in r/o file with unknown header message & 'fail if unknown always' flag set");
+
+            /* Attempt to open the dataset with the unknown header message, and "fail if unknown always" flag */
+            H5E_BEGIN_TRY {
+                dset = H5Dopen2(file2, "/Dataset3", H5P_DEFAULT);
+            } H5E_END_TRY;
+            if(dset >= 0) {
+                H5Dclose(dset);
+                TEST_ERROR
+            } /* end if */
+
+            PASSED();
+
             TESTING("object with unknown header message & 'mark if unknown' flag set");
 
             /* Copy object with "mark if unknown" flag on message into file that can be modified */
-            if(H5Ocopy(file2, "/Dataset3", file, "/Dataset3", H5P_DEFAULT, H5P_DEFAULT) < 0)
+            if(H5Ocopy(file2, "/Dataset4", file, "/Dataset4", H5P_DEFAULT, H5P_DEFAULT) < 0)
                 TEST_ERROR
 
             /* Close the file we created (to flush changes to file) */
@@ -840,7 +855,7 @@ main(void)
                 TEST_ERROR
 
             /* Open the dataset with the "mark if unknown" message */
-            if((dset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
+            if((dset = H5Dopen2(file, "/Dataset4", H5P_DEFAULT)) < 0)
                 TEST_ERROR
 
             /* Check that the "unknown" message was _NOT_ marked */
@@ -860,7 +875,7 @@ main(void)
                 TEST_ERROR
 
             /* Open the dataset with the "mark if unknown" message */
-            if((dset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
+            if((dset = H5Dopen2(file, "/Dataset4", H5P_DEFAULT)) < 0)
                 TEST_ERROR
 
             /* Create data space */
@@ -892,7 +907,7 @@ main(void)
                 TEST_ERROR
 
             /* Re-open the dataset with the "mark if unknown" message */
-            if((dset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
+            if((dset = H5Dopen2(file, "/Dataset4", H5P_DEFAULT)) < 0)
                 TEST_ERROR
 
             /* Check that the "unknown" message was marked */
@@ -915,9 +930,24 @@ main(void)
             if((file2 = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
                 TEST_ERROR
 
+            TESTING("object in r/w file with unknown header message & 'fail if unknown and open for write' flag set");
+
             /* Attempt to open the dataset with the unknown header message, and "fail if unknown and open for write" flag */
             H5E_BEGIN_TRY {
                 dset = H5Dopen2(file2, "/Dataset2", H5P_DEFAULT);
+            } H5E_END_TRY;
+            if(dset >= 0) {
+                H5Dclose(dset);
+                TEST_ERROR
+            } /* end if */
+
+            PASSED();
+
+            TESTING("object in r/w file with unknown header message & 'fail if unknown always' flag set");
+
+            /* Attempt to open the dataset with the unknown header message, and "fail if unknown always" flag */
+            H5E_BEGIN_TRY {
+                dset = H5Dopen2(file2, "/Dataset3", H5P_DEFAULT);
             } H5E_END_TRY;
             if(dset >= 0) {
                 H5Dclose(dset);
