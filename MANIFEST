@@ -39,24 +39,24 @@
 ./bin/COPYING
 ./bin/bbrelease         _DO_NOT_DISTRIBUTE_
 ./bin/buildhdf5
-./bin/checkapi.pl        _DO_NOT_DISTRIBUTE_
-./bin/checkposix.pl      _DO_NOT_DISTRIBUTE_
+./bin/checkapi        _DO_NOT_DISTRIBUTE_
+./bin/checkposix      _DO_NOT_DISTRIBUTE_
 ./bin/chkconfigure      _DO_NOT_DISTRIBUTE_
 ./bin/chkcopyright      _DO_NOT_DISTRIBUTE_
 ./bin/chkmanifest
 ./bin/cmakehdf5
-./bin/debug-ohdr.pl      _DO_NOT_DISTRIBUTE_
-./bin/dependencies.pl
+./bin/debug-ohdr      _DO_NOT_DISTRIBUTE_
+./bin/dependencies
 ./bin/deploy
-./bin/distdep.pl
-./bin/errors.pl              _DO_NOT_DISTRIBUTE_
+./bin/distdep
+./bin/errors              _DO_NOT_DISTRIBUTE_
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
-./bin/h5vers.pl
-./bin/iostats.pl
+./bin/h5vers
+./bin/iostats
 ./bin/locate_sw
-./bin/make_err.pl
-./bin/make_overflow.pl
-./bin/make_vers.pl
+./bin/make_err
+./bin/make_overflow
+./bin/make_vers
 ./bin/makehelp
 ./bin/mkdirs
 ./bin/newer
@@ -67,7 +67,7 @@
 ./bin/snapshot
 ./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
-./bin/trace.pl
+./bin/trace
 ./bin/yodconfigure
 
 ./config/COPYING
@@ -97,7 +97,7 @@
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/powerpc-ibm-aix5.x
-./config/solaris
+./config/solaris2
 ./config/x86_64-pc-cygwin
 
 ./config/site-specific/BlankForm

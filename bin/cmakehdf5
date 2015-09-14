@@ -248,7 +248,7 @@ if [ ! -d $srcdir ]; then
 fi
 
 # figure out version information
-vers=bin/h5vers.pl
+vers=bin/h5vers
 if [ ! -x $srcdir/$vers ]; then
     echo $srcdir/$vers not found or not executable. Aborted.
     exit 1

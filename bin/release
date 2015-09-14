@@ -159,7 +159,7 @@ fi
 
 # Defaults
 DEST=releases
-VERS=`perl bin/h5vers.pl`
+VERS=`perl bin/h5vers`
 VERS_OLD=
 test "$VERS" || exit 1
 verbose=yes
@@ -178,7 +178,7 @@ RESTORE_VERSION()
 	echo restoring version information back to $VERS_OLD
 	rm -f config/lt_vers.am
 	cp $tmpdir/lt_vers.am config/lt_vers.am
-	bin/h5vers.pl -s $VERS_OLD
+	bin/h5vers -s $VERS_OLD
 	VERS_OLD=
     fi
 }
@@ -240,7 +240,7 @@ if [ X$pmode = Xyes ]; then
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-of$today
     echo Private release of $VERS
-    bin/h5vers.pl -s $VERS
+    bin/h5vers -s $VERS
 fi
 
 # Store hdf5-$VERS ("hdf5-1.7.51", e.g.) to a variable to avoid typos

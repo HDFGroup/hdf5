@@ -30,7 +30,7 @@ use strict;
 # by appending a tilde `~' to the name.
 
 ### Usage:
-# h5vers.pl [OPTIONS] [FILE]
+# h5vers [OPTIONS] [FILE]
 
 # Without options this program only displays the current version and
 # doesn't modify any files or create backups.  The default is to print
