@@ -296,6 +296,9 @@ H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
     HDassert(pp);
     HDassert(*pp);
     HDassert(dt_list);
+
+    /* Start off with NULL (default value) */
+    *dt_list = NULL;
     
     /* Decode the string sequence */
     len = HDstrlen(*(const char **)pp);
@@ -440,6 +443,9 @@ H5P__ocpy_merge_comm_dt_list_cmp(const void *_dt_list1, const void *_dt_list2,
     /* Walk through the lists, comparing each path.  For the lists to be the
      * same, the paths must be in the same order. */
     while(dt_list1 && dt_list2) {
+        HDassert(dt_list1->path);
+        HDassert(dt_list2->path);
+
         /* Compare paths */
         ret_value = HDstrcmp(dt_list1->path, dt_list2->path);
         if(ret_value != 0) HGOTO_DONE(ret_value)
@@ -602,6 +608,8 @@ H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
     /* Check parameters */
     if(!path)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no path specified")
+    if(path[0] == '\0')
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path is empty string")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
