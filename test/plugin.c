@@ -768,6 +768,9 @@ main(void)
     if(H5Pclose(fapl2) < 0) TEST_ERROR
     if(H5Pclose(fapl) < 0) TEST_ERROR
    
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     puts("\nTesting reading data with with dynamic plugin filters:");
 
     /* Close the library so that all loaded plugin libraries are unloaded */
@@ -783,6 +786,9 @@ main(void)
 
     /* Open the groups with filters */
     nerrors += (test_groups_with_filters(file) < 0	? 1 : 0);
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
 
     /* Close the library so that all loaded plugin libraries are unloaded */
     h5_reset();
