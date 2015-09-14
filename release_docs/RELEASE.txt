@@ -170,13 +170,6 @@ New Features
 
       (DER - 2015/09/09 HDFFV-9188)
 
-    - Removed WANT_DATA_ACCURACY symbol and associated code from the
-      library.
-
-      This is no longer attached to any supported platforms.
-
-      (DER - 2015/09/09 HDFFV-9194)
-
     - Removed _BSD_SOURCE and _DEFAULT_SOURCE from configure.ac
 
       These are old BSD-compatibility symbols that are no longer needed by
@@ -191,24 +184,6 @@ New Features
       no longer supported.
 
       (DER - 2015/09/10 HDFFV-9189)
-
-    - Removed LDOUBLE_TO_LLONG_ACCURATE symbol and associated code from the
-      library.
-
-      This was part of a work-around for VS.NET 2003, 64-bit IRIX 6.5,
-      OS X 10.4, and some versions of HP/UX, none of which are currently
-      supported.
-
-      (DER - 2015/09/10 HDFFV-9192)
-
-    - Removed LLONG_TO_LDOUBLE_CORRECT symbol and associated code from the
-      library.
-
-      This was a part of a work-around for Visual Studio 6, OS X 10.4,
-      IRIX 6.5, and very old versions of FreeBSD and 64-bit Solaris. None
-      of these platforms/compilers are currently supported.
-
-      (DER - 2015/09/10 HDFFV-9193)
 
     - Removed the BAD_LOG2_CODE_GENERATED symbol and associated code from the
       library.
