@@ -2713,8 +2713,8 @@ test_misc16(void)
     /* (Note that these are supposed to stress the code, so are a little weird) */
     HDmemcpy(wdata[0], "1234567", MISC16_STR_SIZE);
     HDmemcpy(wdata[1], "1234567\0", MISC16_STR_SIZE);
-    HDmemcpy(wdata[1], "12345678", MISC16_STR_SIZE);
-    HDmemcpy(wdata[1], "\0\0\0\0\0\0\0\0", MISC16_STR_SIZE);
+    HDmemcpy(wdata[2], "12345678", MISC16_STR_SIZE);
+    HDmemcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC16_STR_SIZE);
 
     /* Create the file */
     file = H5Fcreate(MISC16_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2749,11 +2749,11 @@ test_misc16(void)
     /* Compare data read in */
     for(i = 0; i < MISC16_SPACE_DIM; i++) {
         if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
-            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            TestErrPrintf("Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(unsigned)__LINE__, (int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
         if(HDstrcmp(wdata[i], rdata[i]) != 0 ) {
-            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+            TestErrPrintf("Line %u: VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(unsigned)__LINE__, (int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
     } /* end for */
@@ -2798,8 +2798,8 @@ test_misc17(void)
     /* (Note that these are supposed to stress the code, so are a little weird) */
     HDmemcpy(wdata[0], "1234567", MISC17_SPACE_DIM2);
     HDmemcpy(wdata[1], "1234567\0", MISC17_SPACE_DIM2);
-    HDmemcpy(wdata[1], "12345678", MISC17_SPACE_DIM2);
-    HDmemcpy(wdata[1], "\0\0\0\0\0\0\0\0", MISC17_SPACE_DIM2);
+    HDmemcpy(wdata[2], "12345678", MISC17_SPACE_DIM2);
+    HDmemcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC17_SPACE_DIM2);
 
     /* Create the file */
     file = H5Fcreate(MISC17_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2831,11 +2831,11 @@ test_misc17(void)
     /* Compare data in the way of strings. */
     for(i = 0; i < MISC17_SPACE_DIM1; i++) {
         if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
-            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            TestErrPrintf("Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(unsigned)__LINE__, (int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
         if(HDstrcmp(wdata[i], rdata[i]) != 0 ) {
-            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+            TestErrPrintf("Line %u: VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(unsigned)__LINE__, (int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
     } /* end for */
