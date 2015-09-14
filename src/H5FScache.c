@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
+#include "H5FSmodule.h"         /* This source code file is part of the H5FS module */
+
 
 /***********/
 /* Headers */
@@ -40,6 +41,7 @@
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
+
 
 /****************/
 /* Local Macros */
@@ -210,7 +212,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned            nclasses;       /* Number of section classes */
-    H5FS_t		*ret_value;     /* Return value */
+    H5FS_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -343,7 +345,7 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS__cache_hdf_pre_serialize
+ * Function:	H5FS__cache_hdr_pre_serialize
  *
  * Purpose:	The free space manager header contains the address, size, and 
  *		allocation size of the free space manager section info.  However,
@@ -376,6 +378,8 @@ H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
     unsigned *flags)
 {
     H5FS_t 	*fspace = (H5FS_t *)_thing;     /* Pointer to the object */
+    H5P_genplist_t *dxpl = NULL;                /* DXPL for setting ring */
+    H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
     herr_t     	 ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
@@ -391,6 +395,16 @@ H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
     HDassert(flags);
 
     if(fspace->sinfo) {
+        H5AC_ring_t ring;
+
+        /* Retrieve the ring type for the header */
+        if(H5AC_get_entry_ring(f, addr, &ring) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "unable to get property value");
+
+        /* Set the ring type for the section info in the DXPL */
+        if(H5AC_set_ring(dxpl_id, ring, &dxpl, &orig_ring) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTSET, FAIL, "unable to set ring value")
+
         /* This implies that the header "owns" the section info.  
          *
          * Unfortunately, the comments in the code are not clear as to 
@@ -596,6 +610,10 @@ H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
     *flags = 0;
 
 done:
+    /* Reset the ring in the DXPL */
+    if(H5AC_reset_ring(dxpl, orig_ring) < 0)
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTSET, FAIL, "unable to set property value")
+
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5FS__cache_hdr_pre_serialize() */
 
@@ -824,8 +842,8 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
     size_t                  old_sect_size;  /* Old section size */
     const uint8_t          *image = (const uint8_t *)_image;    /* Pointer into raw data buffer */
     uint32_t                stored_chksum;  /* Stored metadata checksum  */
-    uint32_t                computed_chksum; /* Computed metadata checksum */
-    void *                  ret_value;      /* Return value */
+    uint32_t                computed_chksum;    /* Computed metadata checksum */
+    void *                  ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
 

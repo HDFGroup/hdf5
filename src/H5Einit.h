@@ -745,6 +745,11 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't compare objects"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTCOMPARE_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTAPPEND_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Can't append object"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTAPPEND_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Argument errors */
 assert(H5E_UNINITIALIZED_g==(-1));

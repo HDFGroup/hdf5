@@ -237,3 +237,4 @@ void cleanup_error(void)
 }
 
 #endif /*H5_HAVE_THREADSAFE*/
+

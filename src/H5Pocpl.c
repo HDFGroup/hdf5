@@ -27,8 +27,9 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 
 
 /***********/
@@ -1639,6 +1640,9 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         /* Add the filter to the I/O pipeline */
         if(H5Z_append(pline, filter.id, filter.flags, filter.cd_nelmts, filter.cd_values) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline")
+
+        /* Free cd_values, if it was allocated */
+        filter.cd_values = (unsigned *)H5MM_xfree(filter.cd_values);
     } /* end for */
 
 done: 

@@ -34,8 +34,7 @@
  *
  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5FD_family_init_interface
+#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -147,10 +146,9 @@ static const H5FD_class_t H5FD_family_g = {
 
 /*--------------------------------------------------------------------------
 NAME
-   H5FD_family_init_interface -- Initialize interface-specific information
+   H5FD__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5FD_family_init_interface()
-
+    herr_t H5FD__init_package()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -159,18 +157,18 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5FD_family_init_interface(void)
+H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(H5FD_family_init() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize family VFD")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_family_init_interface() */
+} /* H5FD__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -368,7 +366,7 @@ H5FD_family_fapl_get(H5FD_t *_file)
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     H5FD_family_fapl_t	*fa = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
-    void *ret_value;       /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -414,7 +412,7 @@ H5FD_family_fapl_copy(const void *_old_fa)
     const H5FD_family_fapl_t *old_fa = (const H5FD_family_fapl_t*)_old_fa;
     H5FD_family_fapl_t *new_fa = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
-    void *ret_value;       /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1042,7 +1040,7 @@ H5FD_family_get_eof(const H5FD_t *_file, H5FD_mem_t type)
     const H5FD_family_t	*file = (const H5FD_family_t*)_file;
     haddr_t		eof=0;
     int			i;      /* Local index variable */
-    haddr_t ret_value;   /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1096,7 +1094,7 @@ H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
     H5P_genplist_t      *plist;
     hsize_t             offset;
     int                 memb;
-    herr_t              ret_value;
+    herr_t              ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

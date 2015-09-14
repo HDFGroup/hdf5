@@ -21,7 +21,7 @@
  *		the H5D package.  Source files outside the H5D package should
  *		include H5Dprivate.h instead.
  */
-#ifndef H5D_PACKAGE
+#if !(defined H5D_FRIEND || defined H5D_MODULE)
 #error "Do not include this file outside the H5D package!"
 #endif
 
@@ -408,6 +408,7 @@ typedef struct H5D_rdcdc_t {
  */
 typedef struct H5D_shared_t {
     size_t              fo_count;       /* Reference count */
+    hbool_t             closing;        /* Flag to indicate dataset is closing */
     hid_t               type_id;        /* ID for dataset's datatype    */
     H5T_t              *type;           /* Datatype for this dataset     */
     H5S_t              *space;          /* Dataspace of this dataset    */
@@ -528,12 +529,12 @@ H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
 /* Package Private Prototypes */
 /******************************/
 
-H5_DLL herr_t H5D__term_pub_interface(void);
-H5_DLL herr_t H5D__term_deprec_interface(void);
 H5_DLL H5D_t *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space,
     hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id);
 H5_DLL H5D_t *H5D__create_named(const H5G_loc_t *loc, const char *name,
     hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
+    hid_t dapl_id, hid_t dxpl_id);
+H5_DLL H5D_t *H5D__open_name(const H5G_loc_t *loc, const char *name,
     hid_t dapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5D__get_space_status(H5D_t *dset, H5D_space_status_t *allocation,
     hid_t dxpl_id);
@@ -608,14 +609,11 @@ H5_DLL herr_t H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage
 H5_DLL herr_t H5D__contig_delete(H5F_t *f, hid_t dxpl_id,
     const H5O_storage_t *store);
 
-
 /* Functions that operate on chunked dataset storage */
 H5_DLL htri_t H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr,
     hbool_t write_op);
 H5_DLL herr_t H5D__chunk_create(const H5D_t *dset /*in,out*/, hid_t dxpl_id);
 H5_DLL herr_t H5D__chunk_set_info(const H5D_t *dset);
-H5_DLL herr_t H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
-    hid_t dapl_id);
 H5_DLL hbool_t H5D__chunk_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL herr_t H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *scaled, H5D_chunk_ud_t *udata);

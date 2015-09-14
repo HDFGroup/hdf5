@@ -261,13 +261,13 @@ main (int argc, char *argv[])
     src_is_family = strcmp (src_name, src_gen_name);
 
     if ((src=HDopen(src_name, O_RDONLY,0))<0) {
-	perror (src_name);
-	exit (EXIT_FAILURE);
+        perror (src_name);
+        exit (EXIT_FAILURE);
     }
 
     if (HDfstat(src, &sb)<0) {
-	perror ("fstat");
-	exit (EXIT_FAILURE);
+        perror ("fstat");
+        exit (EXIT_FAILURE);
     }
     src_size = src_act_size = sb.st_size;
     if (verbose) fprintf (stderr, "< %s\n", src_name);
@@ -290,7 +290,7 @@ main (int argc, char *argv[])
     if (argno<argc) usage (prog_name);
 
     /* Now the real work, split the file */
-    buf = HDmalloc (blk_size);
+    buf = (char *)HDmalloc(blk_size);
     while (src_offset<src_size) {
 
 	/* Read a block.  The amount to read is the minimum of:

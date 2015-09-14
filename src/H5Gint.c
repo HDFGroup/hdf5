@@ -28,10 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5G_init_int_interface
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/
@@ -120,34 +117,6 @@ H5FL_DEFINE(H5_obj_t);
 
 
 
-/*--------------------------------------------------------------------------
-NAME
-   H5G_init_int_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5G_init_int_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5G__init() currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5G_init_int_interface(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Funnel all work to H5G__init() */
-    if(H5G__init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "interface initialization failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5G_init_int_interface() */
-
-
 /*-------------------------------------------------------------------------
  * Function:	H5G__create_named
  *
@@ -168,7 +137,7 @@ H5G__create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id,
 {
     H5O_obj_create_t ocrt_info;         /* Information for object creation */
     H5G_obj_create_t gcrt_info;         /* Information for group creation */
-    H5G_t	   *ret_value;          /* Return value */
+    H5G_t *ret_value = NULL;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -226,7 +195,7 @@ H5G__create(H5F_t *file, H5G_obj_create_t *gcrt_info, hid_t dxpl_id)
 {
     H5G_t	*grp = NULL;	/*new group			*/
     unsigned    oloc_init = 0;  /* Flag to indicate that the group object location was created successfully */
-    H5G_t	*ret_value;	/* Return value */
+    H5G_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -303,7 +272,7 @@ H5G__open_name(const H5G_loc_t *loc, const char *name, hid_t gapl_id,
     H5O_loc_t   grp_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     H5O_type_t  obj_type;               /* Type of object at location */
-    H5G_t      *ret_value;              /* Return value */
+    H5G_t *ret_value = NULL;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -364,7 +333,7 @@ H5G_open(const H5G_loc_t *loc, hid_t dxpl_id)
 {
     H5G_t           *grp = NULL;        /* Group opened */
     H5G_shared_t    *shared_fo;         /* Shared group object */
-    H5G_t           *ret_value;         /* Return value */
+    H5G_t *ret_value = NULL;            /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -814,7 +783,7 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name,
     hid_t gid = -1;             /* ID of group to iterate over */
     H5G_t *grp = NULL;          /* Pointer to group data structure to iterate over */
     H5G_iter_appcall_ud_t udata; /* User data for callback */
-    herr_t ret_value;           /* Return value */
+    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1081,7 +1050,7 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
     H5G_t      *grp = NULL;         /* Group opened */
     H5G_loc_t	start_loc;          /* Location of starting group */
     unsigned    rc;		    /* Reference count of object    */
-    herr_t      ret_value;          /* Return value */
+    herr_t ret_value = FAIL;        /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));

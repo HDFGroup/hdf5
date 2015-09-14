@@ -20,7 +20,7 @@
  * Purpose:	"All" selection data space I/O functions.
  */
 
-#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+#include "H5Smodule.h"          /* This source code file is part of the H5S module */
 
 
 #include "H5private.h"		/* Generic Functions			*/

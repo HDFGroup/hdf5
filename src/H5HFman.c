@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
+
 
 /***********/
 /* Headers */
@@ -253,6 +254,41 @@ H5HF_man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_man_get_obj_len() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HF__man_get_obj_off
+ *
+ * Purpose:     Get the offset of a managed heap object
+ *
+ * Return:      SUCCEED (Can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug 20 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5HF__man_get_obj_off(const H5HF_hdr_t *hdr, const uint8_t *id, hsize_t *obj_off_p)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(id);
+    HDassert(obj_off_p);
+    
+    /* Skip over the flag byte */
+    id++;
+
+    /* Skip over object offset */
+    UINT64DECODE_VAR(id, *obj_off_p, hdr->heap_off_size);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5HF__man_get_obj_off() */
 
 
 /*-------------------------------------------------------------------------

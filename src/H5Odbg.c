@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 /***********/
 /* Headers */
@@ -247,8 +248,8 @@ H5O_assert(const H5O_t *oh)
 herr_t
 H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth)
 {
-    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
-    herr_t      ret_value;       /* Return value */
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    herr_t      ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -454,12 +455,15 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	if(oh->mesg[i].flags) {
             hbool_t flag_printed = FALSE;
 
-            if(oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) {
-                HDfprintf(stream, "<S");
-                flag_printed = TRUE;
-            } /* end if */
+            /* Sanity check that all flags in format are covered below */
+            HDcompile_assert(H5O_MSG_FLAG_BITS == (H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE|H5O_MSG_FLAG_MARK_IF_UNKNOWN|H5O_MSG_FLAG_WAS_UNKNOWN|H5O_MSG_FLAG_SHAREABLE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS));
+
             if(oh->mesg[i].flags & H5O_MSG_FLAG_CONSTANT) {
                 HDfprintf(stream, "%sC", (flag_printed ? ", " : "<"));
+                flag_printed = TRUE;
+            } /* end if */
+            if(oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) {
+                HDfprintf(stream, "%sS", (flag_printed ? ", " : "<"));
                 flag_printed = TRUE;
             } /* end if */
             if(oh->mesg[i].flags & H5O_MSG_FLAG_DONTSHARE) {
@@ -467,7 +471,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
                 flag_printed = TRUE;
             } /* end if */
             if(oh->mesg[i].flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_AND_OPEN_FOR_WRITE) {
-                HDfprintf(stream, "%sFIU", (flag_printed ? ", " : "<"));
+                HDfprintf(stream, "%sFIUW", (flag_printed ? ", " : "<"));
                 flag_printed = TRUE;
             } /* end if */
             if(oh->mesg[i].flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN) {
@@ -477,6 +481,14 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
             if(oh->mesg[i].flags & H5O_MSG_FLAG_WAS_UNKNOWN) {
                 HDassert(oh->mesg[i].flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN);
                 HDfprintf(stream, "%sWU", (flag_printed ? ", " : "<"));
+                flag_printed = TRUE;
+            } /* end if */
+            if(oh->mesg[i].flags & H5O_MSG_FLAG_SHAREABLE) {
+                HDfprintf(stream, "%sSA", (flag_printed ? ", " : "<"));
+                flag_printed = TRUE;
+            } /* end if */
+            if(oh->mesg[i].flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS) {
+                HDfprintf(stream, "%sFIUA", (flag_printed ? ", " : "<"));
                 flag_printed = TRUE;
             } /* end if */
             if(!flag_printed)

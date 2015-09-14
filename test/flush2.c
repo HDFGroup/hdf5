@@ -107,7 +107,7 @@ error:
 static int
 check_file(char* filename, hid_t fapl, int flag)
 {
-    hid_t	file, groups, grp;
+    hid_t	file = -1, groups = -1;
     char	name[1024];
     int		i;
 
@@ -117,6 +117,7 @@ check_file(char* filename, hid_t fapl, int flag)
     /* Open some groups */
     if((groups = H5Gopen2(file, "some_groups", H5P_DEFAULT)) < 0) goto error;
     for(i = 0; i < 100; i++) {
+        hid_t	grp;
 	sprintf(name, "grp%02u", (unsigned)i);
 	if((grp = H5Gopen2(groups, name, H5P_DEFAULT)) < 0) goto error;
 	if(H5Gclose(grp) < 0) goto error;
@@ -132,6 +133,11 @@ check_file(char* filename, hid_t fapl, int flag)
     return 0;
 
 error:
+    H5E_BEGIN_TRY {
+        H5Gclose(groups);
+        H5Fclose(file);
+    } H5E_END_TRY;
+
     return 1;
 } /* end check_file() */
 
@@ -184,16 +190,13 @@ main(void)
     h5_fixname(FILENAME[1], fapl, name, sizeof name);
     if(check_file(name, fapl, FALSE))
         PASSED()
-    else
-    {
+    else {
 #if defined H5_HAVE_WIN32_API && !defined (hdf5_EXPORTS)
-    SKIPPED();
-    puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
-#elif defined H5_VMS
-    SKIPPED();
+        SKIPPED();
+        puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
-    H5_FAILED()
-    goto error;
+        H5_FAILED()
+        goto error;
 #endif
     }
     H5Eset_auto2(H5E_DEFAULT, func, NULL);
@@ -207,19 +210,16 @@ main(void)
     h5_fixname(FILENAME[2], fapl, name, sizeof name);
     if(check_file(name, fapl, TRUE))
         PASSED()
-    else
-    {
+    else {
 #if defined H5_HAVE_WIN32_API && !defined (hdf5_EXPORTS)
-    SKIPPED();
-    puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
-#elif defined H5_VMS
-    SKIPPED();
+        SKIPPED();
+        puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
-    H5_FAILED()
-    goto error;
+        H5_FAILED()
+        goto error;
 #endif
-
     }
+
     H5Eset_auto2(H5E_DEFAULT, func, NULL);
 
     h5_cleanup(FILENAME, fapl);

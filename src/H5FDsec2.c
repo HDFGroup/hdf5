@@ -25,8 +25,7 @@
  *          application to the same file).
  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC  H5FD_sec2_init_interface
+#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
 
 #include "H5private.h"      /* Generic Functions        */
@@ -69,11 +68,7 @@ typedef struct H5FD_sec2_t {
      * Windows code further below.
      */
     dev_t           device;     /* file device number   */
-#ifdef H5_VMS
-    ino_t           inode[3];   /* file i-node number   */
-#else
     ino_t           inode;      /* file i-node number   */
-#endif /* H5_VMS */
 #else
     /* Files in windows are uniquely identified by the volume serial
      * number and the file index (both low and high parts).
@@ -183,7 +178,7 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_sec2_init_interface
+ * Function:    H5FD__init_package
  *
  * Purpose:     Initializes any interface-specific data or routines.
  *
@@ -192,18 +187,18 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_sec2_init_interface(void)
+H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(H5FD_sec2_init() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize sec2 VFD")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_sec2_init_interface() */
+} /* H5FD__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -223,7 +218,7 @@ done:
 hid_t
 H5FD_sec2_init(void)
 {
-    hid_t ret_value;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;          /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -320,7 +315,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
     h5_stat_t       sb;
-    H5FD_t          *ret_value;             /* Return value             */
+    H5FD_t          *ret_value = NULL;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -374,13 +369,7 @@ H5FD_sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file->dwVolumeSerialNumber = fileinfo.dwVolumeSerialNumber;
 #else /* H5_HAVE_WIN32_API */
     file->device = sb.st_dev;
-#ifdef H5_VMS
-    file->inode[0] = sb.st_ino[0];
-    file->inode[1] = sb.st_ino[1];
-    file->inode[2] = sb.st_ino[2];
-#else /* H5_VMS */
     file->inode = sb.st_ino;
-#endif /* H5_VMS */
 #endif /* H5_HAVE_WIN32_API */
 
     /* Retain a copy of the name used to open the file, for possible error reporting */
@@ -501,13 +490,8 @@ H5FD_sec2_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t)) < 0) HGOTO_DONE(-1)
     if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t)) > 0) HGOTO_DONE(1)
 #endif /* H5_DEV_T_IS_SCALAR */
-#ifdef H5_VMS
-    if(HDmemcmp(&(f1->inode), &(f2->inode), 3 * sizeof(ino_t)) < 0) HGOTO_DONE(-1)
-    if(HDmemcmp(&(f1->inode), &(f2->inode), 3 * sizeof(ino_t)) > 0) HGOTO_DONE(1)
-#else /* H5_VMS */
     if(f1->inode < f2->inode) HGOTO_DONE(-1)
     if(f1->inode > f2->inode) HGOTO_DONE(1)
-#endif /* H5_VMS */
 #endif /* H5_HAVE_WIN32_API */
 
 done:
@@ -901,12 +885,6 @@ H5FD_sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
         if(0 == bError)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #else /* H5_HAVE_WIN32_API */
-#ifdef H5_VMS
-        /* Reset seek offset to the beginning of the file, so that the file isn't
-         * re-extended later.  This may happen on Open VMS. */
-        if(-1 == HDlseek(file->fd, (HDoff_t)0, SEEK_SET))
-            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
-#endif
         if(-1 == HDftruncate(file->fd, (HDoff_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* H5_HAVE_WIN32_API */
@@ -922,3 +900,4 @@ H5FD_sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_sec2_truncate() */
+

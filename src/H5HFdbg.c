@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
 #define H5HF_DEBUGGING          /* Need access to fractal heap debugging routines */
 
 /***********/
@@ -97,6 +97,80 @@ static herr_t H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream,
 /*******************/
 /* Local Variables */
 /*******************/
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_id_print
+ *
+ * Purpose:	Prints a fractal heap ID.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug 20 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_id_print(H5HF_t *fh, hid_t dxpl_id, const void *_id, FILE *stream, int indent, int fwidth)
+{
+    const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
+    uint8_t id_flags;                   /* Heap ID flag bits */
+    hsize_t obj_off;                    /* Offset of object */
+    size_t obj_len;                     /* Length of object */
+    char id_type;                       /* Character for the type of heap ID */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fh);
+    HDassert(id);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+
+    /* Get the ID flags */
+    id_flags = *id;
+
+    /* Check for correct heap ID version */
+    if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+
+    /* Check type of object in heap */
+    if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
+        id_type = 'M';
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
+        id_type = 'H';
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
+        id_type = 'T';
+    } /* end if */
+    else {
+HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+    } /* end else */
+
+    /* Get the length of the heap object */
+    if(H5HF_get_obj_len(fh, dxpl_id, id, &obj_len) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve heap ID length")
+
+    /* Get the offset of the heap object */
+    if(H5HF_get_obj_off(fh, dxpl_id, id, &obj_off) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve heap ID length")
+
+    /* Display the heap ID */
+    HDfprintf(stream, "%*s%-*s (%c, %Hu, %Zu)\n", indent, "", fwidth,
+	      "Heap ID info: (type, offset, length)",
+              id_type, obj_off, obj_len);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_id_print() */
 
 
 /*-------------------------------------------------------------------------

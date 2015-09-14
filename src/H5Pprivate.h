@@ -34,13 +34,13 @@
 #define H5P_STRCRT_CHAR_ENCODING_NAME  "character_encoding"     /* Character set encoding for string */
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
-#ifdef H5P_PACKAGE
+#ifdef H5P_MODULE
 #define H5P_PLIST_ID(P)     ((P)->plist_id)
 #define H5P_CLASS(P)        ((P)->pclass)
-#else /* H5F_PACKAGE */
+#else /* H5P_MODULE */
 #define H5P_PLIST_ID(P)     (H5P_get_plist_id(P))
 #define H5P_CLASS(P)        (H5P_get_class(P))
-#endif /* H5P_PACKAGE */
+#endif /* H5P_MODULE */
 
 
 /****************************/

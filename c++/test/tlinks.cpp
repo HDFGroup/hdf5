@@ -47,7 +47,7 @@
  * This file needs to access private information from the H5G package.
  * This file also needs to access the group testing code.
  */
-//#define H5G_PACKAGE
+//#define H5G_FRIEND
 //#define H5G_TESTING
 
 //#include "h5test.h"
@@ -58,60 +58,6 @@
 /* File for external link test.  Created with gen_udlinks.c */
 #define LINKED_FILE  "be_extlink2.h5"
 
-#ifdef H5_VMS
-#if 0
-const char *FILENAME[] = {
-    "links0",
-    "links1",
-    "links2",
-    "links3",
-    "links4a", /* 4 */
-    "links4b", /* 5 */
-    "links4c", /* 6 */
-    "links4d", /* 7 */
-    "links5",  /* 8 */
-    "links6",  /* 9 */
-    "links7",  /* 10 */
-    "links8",  /* 11 */
-    "extlinks0",	/* 12: main files */
-    "[.tmp]extlinks0",	/* 13: */
-    "extlinks1",	/* 14: target files */
-    "[.tmp]extlinks1",	/* 15: */
-    "extlinks2",	/* 16: */
-    "[.tmp]extlinks2",	/* 17: */
-    "extlinks3",	/* 18: */
-    "[.tmp]extlinks3",	/* 19: */
-    "extlinks4",	/* 20: */
-    "[.tmp]extlinks4",	/* 21: */
-    "extlinks5",	/* 22: */
-    "[.tmp]extlinks6",	/* 23: */
-    "extlinks7",	/* 24: */
-    "[.tmp]extlinks7",	/* 25: */
-    "[.tmp]extlinks8",	/* 26: */
-    "extlinks9",	/* 27: */
-    "[.tmp]extlinks9",	/* 28: */
-    "extlinks10",	/* 29: */ /* TESTS for windows */
-    "[.tmp]extlinks10",	/* 30: */
-    "[.tmp]extlinks11",	/* 31: */
-    "[.tmp]extlinks12",	/* 32: */
-    "extlinks13",	/* 33: */
-    "[.tmp]extlinks13",	/* 34: */
-    "[.tmp]extlinks14",	/* 35: */
-    "[.tmp]extlinks15",	/* 36: */
-    "extlinks16A",	/* 37: */ /* TESTS for H5P_set_elink_fapl */
-    "extlinks16B",	/* 38: */
-    "extlinks17",	/* 39: */
-    "extlinks18A",	/* 40: */
-    "extlinks18B",	/* 41: */
-    "extlinks19A",	/* 42: */
-    "extlinks19B",	/* 43: */
-    "extlinks20",	/* 44: */
-    NULL
-};
-#endif // 0
-
-#define TMPDIR          "[.tmp]"
-#else
 #if 0
 const char *FILENAME[] = {
     "links0",
@@ -165,7 +111,6 @@ const char *FILENAME[] = {
 #endif // 0
 
 #define TMPDIR          "tmp"
-#endif
 
 #define FAMILY_SIZE	1024
 #define CORE_INCREMENT  1024
@@ -574,16 +519,12 @@ void test_links()
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         nerrors += test_deprec(my_fapl, new_format);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-#ifndef H5_CANNOT_OPEN_TWICE
         nerrors += external_link_root(my_fapl, new_format) < 0 ? 1 : 0;
-#endif /* H5_CANNOT_OPEN_TWICE */
         nerrors += external_link_path(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_mult(my_fapl, new_format) < 0 ? 1 : 0;
-#ifndef H5_CANNOT_OPEN_TWICE
         nerrors += external_link_self(envval, my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_pingpong(envval, my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_toomany(my_fapl, new_format) < 0 ? 1 : 0;
-#endif /* H5_CANNOT_OPEN_TWICE */
         nerrors += external_link_dangling(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_recursive(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_query(my_fapl, new_format) < 0 ? 1 : 0;
@@ -591,9 +532,7 @@ void test_links()
         nerrors += external_link_unlink_dense(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_move(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_ride(my_fapl, new_format) < 0 ? 1 : 0;
-#ifndef H5_CANNOT_OPEN_TWICE
         nerrors += external_link_closing(envval, my_fapl, new_format) < 0 ? 1 : 0;
-#endif /* H5_CANNOT_OPEN_TWICE */
         nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
         nerrors += external_link_strong(my_fapl, new_format) < 0 ? 1 : 0;
 
@@ -683,7 +622,7 @@ void test_links()
 	/* Close 2nd FAPL */
 	H5Pclose(fapl2_id);
 
-	h5_cleanup(FILENAME, fapl_id);
+	h5_clean_files(FILENAME, fapl_id);
 
 	/* Test that external links can be used after a library reset.  MUST be
 	* called last so the reset doesn't interfere with the property lists.  This

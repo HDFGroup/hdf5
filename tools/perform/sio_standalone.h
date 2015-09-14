@@ -322,18 +322,7 @@ H5_DLL int HDrand(void);
 #define HDread(F,M,Z)           read(F,M,Z)
 #define HDreaddir(D)            readdir(D)
 #define HDrealloc(M,Z)          realloc(M,Z)
-#ifdef H5_VMS
-#ifdef __cplusplus
-extern "C" {
-#endif
-int HDremove_all(const char * fname);
-#ifdef __cplusplus
-}
-#endif
-#define HDremove(S)             HDremove_all(S)
-#else
 #define HDremove(S)             remove(S)
-#endif /*H5_VMS*/
 #define HDrename(OLD,NEW)       rename(OLD,NEW)
 #define HDrewind(F)             rewind(F)
 #define HDrewinddir(D)          rewinddir(D)

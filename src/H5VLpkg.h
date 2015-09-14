@@ -21,7 +21,7 @@
  *		the H5VL package.  Source files outside the H5VL package should
  *		include H5VLprivate.h instead.
  */
-#ifndef H5VL_PACKAGE
+#if !(defined H5VL_FRIEND || defined H5VL_MODULE)
 #error "Do not include this file outside the H5VL package!"
 #endif
 

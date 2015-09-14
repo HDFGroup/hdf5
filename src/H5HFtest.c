@@ -24,8 +24,9 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
 #define H5HF_TESTING		/*suppress warning about H5HF testing funcs*/
+
 
 /***********/
 /* Headers */
@@ -244,7 +245,7 @@ done:
 unsigned
 H5HF_get_max_root_rows(const H5HF_t *fh)
 {
-    unsigned	ret_value;              /* Return value */
+    unsigned	ret_value = 0;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -275,7 +276,7 @@ H5HF_get_max_root_rows(const H5HF_t *fh)
 unsigned
 H5HF_get_dtable_width_test(const H5HF_t *fh)
 {
-    unsigned	ret_value;              /* Return value */
+    unsigned	ret_value = 0;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -306,7 +307,7 @@ H5HF_get_dtable_width_test(const H5HF_t *fh)
 unsigned
 H5HF_get_dtable_max_drows_test(const H5HF_t *fh)
 {
-    unsigned	ret_value;              /* Return value */
+    unsigned	ret_value = 0;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -341,7 +342,7 @@ H5HF_get_dtable_max_drows_test(const H5HF_t *fh)
 unsigned
 H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos)
 {
-    unsigned	ret_value;              /* Return value */
+    unsigned	ret_value = 0;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -374,7 +375,7 @@ H5HF_get_iblock_max_drows_test(const H5HF_t *fh, unsigned pos)
 hsize_t
 H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row)
 {
-    hsize_t	ret_value;              /* Return value */
+    hsize_t	ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -406,7 +407,7 @@ H5HF_get_dblock_size_test(const H5HF_t *fh, unsigned row)
 hsize_t
 H5HF_get_dblock_free_test(const H5HF_t *fh, unsigned row)
 {
-    hsize_t	ret_value;              /* Return value */
+    hsize_t	ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

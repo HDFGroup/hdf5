@@ -44,7 +44,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -192,6 +192,8 @@ typedef struct H5D_chunk_coll_info_t {
 
 /* Chunked layout operation callbacks */
 static herr_t H5D__chunk_construct(H5F_t *f, H5D_t *dset);
+static herr_t H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
+    hid_t dapl_id);
 static herr_t H5D__chunk_io_init(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
@@ -585,7 +587,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset, hid_t dapl_id)
 {
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
@@ -593,7 +595,7 @@ H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset, hid_t dapl_id)
     H5P_genplist_t *dapl;               /* Data access property list object pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -681,7 +683,7 @@ done:
 hbool_t
 H5D__chunk_is_space_alloc(const H5O_storage_t *storage)
 {
-    hbool_t ret_value;                  /* Return value */
+    hbool_t ret_value = FALSE;          /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2118,10 +2120,6 @@ H5D__chunk_flush(H5D_t *dset, hid_t dxpl_id)
     /* Sanity check */
     HDassert(dset);
 
-    /* Flush any data caught in sieve buffer */
-    if(H5D__flush_sieve_buf(dset, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush sieve buffer")
-
     /* Fill the DXPL cache values for later use */
     if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
@@ -2403,7 +2401,7 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 {
     hsize_t val;        /* Intermediate value */
     unsigned ndims = shared->ndims;      /* Rank of dataset */
-    unsigned ret;       /* Value to return */
+    unsigned ret = 0;   /* Value to return */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2896,7 +2894,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     H5D_rdcc_ent_t	*ent;		        /*cache entry		*/
     size_t		chunk_size;		/*size of a chunk	*/
     void		*chunk = NULL;		/*the file chunk	*/
-    void		*ret_value;	        /*return value		*/
+    void		*ret_value = NULL;	/* Return value         */
 
     FUNC_ENTER_PACKAGE
 
@@ -5366,7 +5364,7 @@ H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_chunk_readvv_ud_t udata;        /* User data for H5VM_opvv() operator */
-    ssize_t ret_value;                  /* Return value */
+    ssize_t ret_value = -1;             /* Return value */
 
     FUNC_ENTER_STATIC
 

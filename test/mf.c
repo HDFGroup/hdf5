@@ -24,13 +24,13 @@
 
 #include "h5test.h"
 
-#define H5MF_PACKAGE
+#define H5MF_FRIEND		/*suppress error about including H5MFpkg	  */
 #include "H5MFpkg.h"
 
-#define H5FS_PACKAGE
+#define H5FS_FRIEND		/*suppress error about including H5FSpkg	  */
 #include "H5FSpkg.h"
 
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"
 
@@ -6843,7 +6843,7 @@ test_mf_fs_drivers(hid_t fapl)
 	ret += test_mf_fs_gone(fapl_new, fcpl);
 	ret += test_mf_fs_persist(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
 
 	/* STDIO */
@@ -6857,7 +6857,7 @@ test_mf_fs_drivers(hid_t fapl)
 	ret += test_mf_fs_gone(fapl_new, fcpl);
 	ret += test_mf_fs_persist(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
 	/* CORE */
 	HDputs("Testing free-space managers with core driver");
@@ -6871,7 +6871,7 @@ test_mf_fs_drivers(hid_t fapl)
 	ret += test_mf_fs_gone(fapl_new, fcpl);
 	ret += test_mf_fs_persist(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
 	/* FAMILY */
 	HDputs("Testing free-space managers with family driver");
@@ -6883,7 +6883,7 @@ test_mf_fs_drivers(hid_t fapl)
 
 	ret += test_mf_fs_persist(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
 	/* SPLIT */
 	HDputs("Testing free-space managers with split driver");
@@ -6896,7 +6896,7 @@ test_mf_fs_drivers(hid_t fapl)
 	ret += test_mf_fs_persist(fapl_new, fcpl);
 	ret += test_mf_fs_split(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
 	/* MULTI */
 	HDputs("Testing free-space managers with multi driver");
@@ -6910,7 +6910,7 @@ test_mf_fs_drivers(hid_t fapl)
 
 	ret += test_mf_fs_multi(fapl_new, fcpl);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
     } /* end for new_format */
 
@@ -7262,7 +7262,7 @@ test_filespace_drivers(hid_t fapl)
 	ret += test_filespace_strategy_threshold(fapl_new);
 	ret += test_filespace_gone(fapl_new);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
 	/* STDIO */
 	HDputs("Testing file space management with stdio driver");
@@ -7275,7 +7275,7 @@ test_filespace_drivers(hid_t fapl)
 	ret += test_filespace_strategy_threshold(fapl_new);
 	ret += test_filespace_gone(fapl_new);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
 	/* CORE */
 	HDputs("Testing file space management with core driver");
@@ -7289,7 +7289,7 @@ test_filespace_drivers(hid_t fapl)
 	ret += test_filespace_strategy_threshold(fapl_new);
 	ret += test_filespace_gone(fapl_new);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
 	/* FAMILY */
 	HDputs("Testing file space managers with family driver");
@@ -7302,7 +7302,7 @@ test_filespace_drivers(hid_t fapl)
 	ret += test_filespace_strategy_threshold(fapl_new);
 	ret += test_filespace_gone(fapl_new);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
 
 	/* SPLIT */
@@ -7316,7 +7316,7 @@ test_filespace_drivers(hid_t fapl)
 	ret += test_filespace_strategy_threshold(fapl_new);
 	ret += test_filespace_gone(fapl_new);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
 	/* MULTI */
 	HDputs("Testing file space managers with multi driver");
@@ -7331,7 +7331,7 @@ test_filespace_drivers(hid_t fapl)
 	ret += test_filespace_strategy_threshold(fapl_new);
 	ret += test_filespace_gone(fapl_new);
 
-	h5_cleanup(FILENAME, fapl_new);
+	h5_clean_files(FILENAME, fapl_new);
 
     } /* end for new_format */
 
@@ -7455,6 +7455,8 @@ main(void)
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
     if(env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
+
+    h5_reset();
 
     fapl = h5_fileaccess();
 

@@ -169,6 +169,10 @@ set_time(io_time_t *pt, timer_type t, int start_stop)
 		pt->total_time[HDF5_FILE_READ_CLOSE] += pt->mpi_timer[t] - pt->mpi_timer[HDF5_FINE_READ_FIXED_DIMS];
 	}
 	break;
+#else
+    case MPI_CLOCK:
+	    HDfprintf(stderr, "MPI clock set in serial library\n");
+	    return NULL;
 #endif /* H5_HAVE_PARALLEL */
     case SYS_CLOCK:
             if (start_stop == TSTART) {
@@ -197,11 +201,11 @@ set_time(io_time_t *pt, timer_type t, int start_stop)
 
             }
 	break;
+
     default:
-	HDfprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
-	return (NULL);
-	break;
-    }
+	    HDfprintf(stderr, "Unknown time clock type (%d)\n", pt->type);
+	    return NULL;
+    } /* end switch */
 
 #if 0
     /* this does not belong here. Need fix in h5perf code when set_time() is called. -AKC- */

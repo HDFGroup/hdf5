@@ -27,11 +27,9 @@
 /* Module Setup */
 /****************/
 
-#define H5VL_PACKAGE		/*suppress error about including H5VLpkg  */
-#define H5I_PACKAGE		/*suppress error about including H5Ipkg  */
+#define H5I_FRIEND	        /*suppress error about including H5Ipkg	  */
+#include "H5VLmodule.h"         /* This source code file is part of the H5VL module */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5VL_int_init_interface
 
 /***********/
 /* Headers */
@@ -86,28 +84,6 @@ H5FL_DEFINE(H5VL_t);
 
 /* Declare a free list to manage the H5VL_object_t struct */
 H5FL_DEFINE(H5VL_object_t);
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5VL_int_init_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5VL_int_init_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5VL_init_iterface currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5VL_int_init_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5VL_init())
-} /* H5VL_int_init_interface() */
 
 
 /*-------------------------------------------------------------------------

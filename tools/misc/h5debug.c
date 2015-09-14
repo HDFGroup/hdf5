@@ -23,19 +23,19 @@
  *
  *-------------------------------------------------------------------------
  */
-#define H5A_PACKAGE     /*suppress error about including H5Apkg  */
-#define H5B2_PACKAGE    /*suppress error about including H5B2pkg */
-#define H5B2_TESTING    /*suppress warning about H5B2 testing funcs*/
-#define H5D_PACKAGE     /*suppress error about including H5Dpkg  */
-#define H5EA_PACKAGE    /*suppress error about including H5EApkg */
-#define H5EA_TESTING    /*suppress warning about H5EA testing funcs*/
-#define H5FA_PACKAGE    /*suppress error about including H5FApkg */
-#define H5FA_TESTING    /*suppress warning about H5FA testing funcs*/
-#define H5F_PACKAGE     /*suppress error about including H5Fpkg  */
-#define H5G_PACKAGE     /*suppress error about including H5Gpkg  */
-#define H5HF_PACKAGE    /*suppress error about including H5HFpkg */
-#define H5O_PACKAGE     /*suppress error about including H5Opkg  */
-#define H5SM_PACKAGE    /*suppress error about including H5SMpkg */
+#define H5A_FRIEND		/*suppress error about including H5Apkg  */
+#define H5B2_FRIEND		/*suppress error about including H5B2pkg */
+#define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
+#define H5D_FRIEND		/*suppress error about including H5Dpkg  */
+#define H5EA_FRIEND		/*suppress error about including H5EApkg */
+#define H5EA_TESTING		/*suppress warning about H5EA testing funcs*/
+#define H5FA_FRIEND		/*suppress error about including H5FApkg */
+#define H5FA_TESTING		/*suppress warning about H5FA testing funcs*/
+#define H5F_FRIEND		/*suppress error about including H5Fpkg  */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg  */
+#define H5HF_FRIEND		/*suppress error about including H5HFpkg */
+#define H5O_FRIEND		/*suppress error about including H5Opkg  */
+#define H5SM_FRIEND		/*suppress error about including H5SMpkg */
 
 #include "H5private.h"  /* Generic Functions    */
 #include "H5Apkg.h"     /* Attributes           */
@@ -121,8 +121,9 @@ get_H5B2_class(const uint8_t *sig)
             cls = H5A_BT2_CORDER;
             break;
 
+        case H5B2_NUM_BTREE_ID:
         default:
-            HDfprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+            HDfprintf(stderr, "Unknown v2 B-tree subtype %u\n", (unsigned)(subtype));
             HDexit(4);
     } /* end switch */
 
@@ -156,8 +157,9 @@ get_H5EA_class(const uint8_t *sig)
             cls = H5EA_CLS_TEST;
             break;
 
+        case H5EA_NUM_CLS_ID:
         default:
-            HDfprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
+            HDfprintf(stderr, "Unknown extensible array class %u\n", (unsigned)(clsid));
             HDexit(4);
     } /* end switch */
 
@@ -191,8 +193,9 @@ get_H5FA_class(const uint8_t *sig)
             cls = H5FA_CLS_TEST;
             break;
 
+        case H5FA_NUM_CLS_ID: 
         default:
-            HDfprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
+            HDfprintf(stderr, "Unknown fixed array class %u\n", (unsigned)(clsid));
             HDexit(4);
     } /* end switch */
 
@@ -355,11 +358,11 @@ main(int argc, char *argv[])
 
                 /* Build array of chunk dimensions */
                 ndims = (unsigned)extra;
-                dim[0] = extra2;
+                dim[0] = (uint32_t)extra2;
                 if(ndims > 1)
-                    dim[1] = extra3;
+                    dim[1] = (uint32_t)extra3;
                 if(ndims > 2)
-                    dim[2] = extra4;
+                    dim[2] = (uint32_t)extra4;
 
                 /* Check for dimension error */
                 if(ndims > 3) {
@@ -382,8 +385,9 @@ main(int argc, char *argv[])
                 status = H5D_btree_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims, dim);
                 break;
 
+            case H5B_NUM_BTREE_ID:
             default:
-                HDfprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+                HDfprintf(stderr, "Unknown v1 B-tree subtype %u\n", (unsigned)(subtype));
                 HDexit(4);
         }
 
@@ -502,14 +506,14 @@ main(int argc, char *argv[])
          */
 
         /* Check for enough valid parameters */
-        if(extra2 == 0) {
-            HDfprintf(stderr, "ERROR: Need list format version and number of messages in order to shared message list\n");
+        if(extra == 0) {
+            HDfprintf(stderr, "ERROR: Need shared message header address in order to shared message list\n");
             HDfprintf(stderr, "Shared message list usage:\n");
-            HDfprintf(stderr, "\th5debug <filename> <shared message list address> <list format version> <number of mesages in list>\n");
+            HDfprintf(stderr, "\th5debug <filename> <shared message list address> <shared message header address>\n");
             HDexit(4);
         } /* end if */
 
-        status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned) extra, (size_t) extra2);
+        status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (haddr_t)extra);
 
     } else if(!HDmemcmp(sig, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*

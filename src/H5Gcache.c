@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/
@@ -178,7 +178,7 @@ H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata,
     H5F_t                  *f = (H5F_t *)_udata;        /* User data for callback */
     H5G_node_t             *sym = NULL; /* Symbol table node created */
     const uint8_t          *image = (const uint8_t *)_image;    /* Pointer to image to deserialize */
-    void *                  ret_value;  /* Return value */
+    void                   *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
 

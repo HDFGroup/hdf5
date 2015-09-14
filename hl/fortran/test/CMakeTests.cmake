@@ -9,7 +9,7 @@
 add_test (
     NAME HL_FORTRAN_test-clear-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove 
+        -E remove
         dsetf1.h5
         dsetf2.h5
         dsetf3.h5
@@ -32,11 +32,11 @@ set_tests_properties (HL_FORTRAN_f90_tstimage PROPERTIES DEPENDS HL_FORTRAN_test
 add_test (NAME HL_FORTRAN_f90_tsttable COMMAND $<TARGET_FILE:hl_f90_tsttable>)
 set_tests_properties (HL_FORTRAN_f90_tsttable PROPERTIES DEPENDS HL_FORTRAN_test-clear-objects)
 
-if (BUILD_SHARED_LIBS)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_test (
       NAME HL_FORTRAN_test-shared-clear-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           dsetf1.h5
           dsetf2.h5
           dsetf3.h5
@@ -61,4 +61,4 @@ if (BUILD_SHARED_LIBS)
 
   add_test (NAME HL_FORTRAN_f90_tsttable-shared COMMAND $<TARGET_FILE:hl_f90_tsttable-shared>)
   set_tests_properties (HL_FORTRAN_f90_tsttable-shared PROPERTIES DEPENDS HL_FORTRAN_test-shared-clear-objects)
-endif (BUILD_SHARED_LIBS)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)

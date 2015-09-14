@@ -28,10 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5E_PACKAGE		/*suppress error about including H5Epkg   */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5E_init_int_interface
+#include "H5Emodule.h"          /* This source code file is part of the H5E module */
 
 
 /***********/
@@ -117,27 +114,6 @@ int	H5E_mpi_error_str_len;
 
 
 
-/*--------------------------------------------------------------------------
-NAME
-   H5E_init_int_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5E_init_int_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5E_init() currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5E_init_int_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5E_init())
-} /* H5E_init_int_interface() */
-
-
 /*-------------------------------------------------------------------------
  * Function:	H5E_get_msg
  *
@@ -154,7 +130,7 @@ H5E_init_int_interface(void)
 ssize_t
 H5E_get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
 {
-    ssize_t       len;          /* Length of error message */
+    ssize_t       len = -1;     /* Length of error message */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

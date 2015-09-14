@@ -27,7 +27,8 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 
 
 /***********/
@@ -282,5 +283,5 @@ H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, doub
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_chunk_cache */
 

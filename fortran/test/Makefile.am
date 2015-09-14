@@ -36,60 +36,25 @@ else
    AM_LDFLAGS+=-static
 endif
 
-# Check if the compiler supports the Fortran 2003 standard
-# which should include the intrinsic module iso_c_binding
-if FORTRAN_2003_CONDITIONAL_F
-   ff_PREFIX = F03
-else
-   ff_PREFIX = F90
-endif
-
 # Our main targets, the tests themselves
-TEST_PROG=fortranlib_test fflush1 fflush2 fortranlib_test_1_8
-
-if FORTRAN_2003_CONDITIONAL_F
-   TEST_PROG += fortranlib_test_F03
-endif
+TEST_PROG=fortranlib_test fflush1 fflush2 fortranlib_test_1_8 fortranlib_test_F03
 
 check_PROGRAMS=$(TEST_PROG)
 
-if FORTRAN_HAVE_STORAGE_SIZE
-if FORTRAN_HAVE_C_SIZEOF
-    libh5test_fortran_la_SOURCES = tf_F08.f90
-else
-    libh5test_fortran_la_SOURCES = tf_F03.f90
-endif
-else
-if FORTRAN_2003_CONDITIONAL_F
-  libh5test_fortran_la_SOURCES = tf_F03.f90
-else
-  libh5test_fortran_la_SOURCES = tf_F90.f90
-endif
-endif
+libh5test_fortran_la_SOURCES = tf_gen.F90 tf.F90  t.c
 
-# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
-# compiled first
-libh5test_fortran_la_SOURCES += tf.f90 t.c
+fortranlib_test_SOURCES = tH5F.F90 tH5D.F90 tH5R.F90 tH5S.F90 tH5T.F90 tH5VL.F90 tH5Z.F90 \
+        tH5Sselect.F90 tH5P.F90 tH5A.F90 tH5I.F90 tH5G.F90 tH5E.F90 tHDF5.F90 fortranlib_test.F90
 
-# Source files are used for both the library and fortranlib_test.
-# Automake will complain about this without the following workaround.
-fortranlib_test_FCFLAGS=$(AM_FCFLAGS)
-fortranlib_test_CFLAGS=$(AM_CFLAGS)
+fortranlib_test_1_8_SOURCES = tH5O.F90 tH5A_1_8.F90 tH5G_1_8.F90 tH5MISC_1_8.F90 tHDF5_1_8.F90 \
+        fortranlib_test_1_8.F90
 
-fortranlib_test_SOURCES = tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
-        tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tHDF5.f90 fortranlib_test.f90
-
-fortranlib_test_1_8_SOURCES = tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90 tH5MISC_1_8.f90 tHDF5_1_8.f90\
-        fortranlib_test_1_8.f90
-
-if FORTRAN_2003_CONDITIONAL_F
-   fortranlib_test_F03_SOURCES = tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 \
-        tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90 tHDF5_F03.f90 fortranlib_test_F03.f90
-endif
+fortranlib_test_F03_SOURCES = tH5E_F03.F90 tH5F_F03.F90 tH5L_F03.F90 \
+        tH5O_F03.F90 tH5P_F03.F90 tH5T_F03.F90 tHDF5_F03.F90 fortranlib_test_F03.F90
 
 
-fflush1_SOURCES=fflush1.f90
-fflush2_SOURCES=fflush2.f90
+fflush1_SOURCES=fflush1.F90
+fflush2_SOURCES=fflush2.F90
 
 # The tests depend on both fortran libraries and both main libraries.
 LDADD=libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
@@ -106,15 +71,34 @@ maintainer-clean-local: clean-local
 distclean-local: clean-local
 clean-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(RM) *.$(F9XMODEXT);                                         \
+	  $(RM) *.$(F9XMODEXT) tf_gen.F90;                                         \
 	fi
 
 # Mark this directory as part of the Fortran API (this affects output
 # from tests in conclude.am)
 FORTRAN_API=yes
 
+# helper program we need to build.
+noinst_PROGRAMS = H5_test_buildiface
+
+# H5_test_buildiface.F90 generates all the test APIs that have a KIND type associated
+# with them.
+
+tf_gen.F90: H5_test_buildiface$(EXEEXT)
+	$(RUNSERIAL) ./H5_test_buildiface$(EXEEXT)
+
+# H5_test_buildiface.F90 is included in the distribution, and Automake knows
+# how to compile a fortran program given its sources.
+
+H5_test_buildiface_SOURCES = H5_test_buildiface.F90
+
+# The build of the H5_test_buildiface does depend on any libraries, so set it 
+# to nothing.
+
+H5_test_buildiface_LDADD = 
+
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_
 
 
-include $(top_srcdir)/config/conclude.am
+include $(top_srcdir)/config/conclude_fc.am

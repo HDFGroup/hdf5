@@ -17,10 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5F_init_interface
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
 
 
 /***********/
@@ -104,30 +101,6 @@ H5FL_DEFINE(H5F_t);
 
 /* Declare a free list to manage the H5F_file_t struct */
 H5FL_DEFINE(H5F_file_t);
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_init_interface
- *
- * Purpose:	Initialize interface-specific information.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Friday, November 20, 1998
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F_init_interface(void)
-{
-    herr_t ret_value = SUCCEED;                 /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -551,7 +524,7 @@ H5F_is_hdf5(const char *name, hid_t fapl_id)
 {
     H5F_t	*file = NULL;           /* Low-level file struct */
     haddr_t     sig_addr;               /* Addess of hdf5 file signature */
-    htri_t	ret_value;              /* Return value */
+    htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -605,7 +578,7 @@ done:
 static H5F_t *
 H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
-    H5F_t	*f = NULL, *ret_value;
+    H5F_t	*f = NULL, *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -979,7 +952,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     H5FD_class_t       *drvr;               /*file driver class info        */
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
-    H5F_t              *ret_value;          /*actual return value           */
+    H5F_t              *ret_value = NULL;   /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1521,7 +1494,7 @@ done:
 hid_t
 H5F_get_id(H5F_t *file, hbool_t app_ref)
 {
-    hid_t       ret_value;
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2045,7 +2018,7 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
 {
     H5FD_t     *fd_ptr;                 /* file driver */
     haddr_t     eoa;                    /* End of file address */
-    ssize_t     ret_value;              /* Return value */
+    ssize_t     ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

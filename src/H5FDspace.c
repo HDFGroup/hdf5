@@ -28,10 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5FD_PACKAGE		/*suppress error about including H5FDpkg  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5FD_space_init_interface
+#include "H5FDmodule.h"         /* This source code file is part of the H5FD module */
 
 
 /***********/
@@ -86,28 +83,6 @@ H5FL_DEFINE(H5FD_free_t);
 
 
 
-/*--------------------------------------------------------------------------
-NAME
-   H5FD_space_init_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5FD_space_init_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5FD_init_iterface currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5FD_space_init_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5FD_init())
-} /* H5FD_space_init_interface() */
-
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_extend
  *
@@ -129,7 +104,7 @@ H5FD_extend(H5FD_t *file, H5FD_mem_t type, hbool_t new_block, hsize_t size, hadd
     hsize_t orig_size = size;   /* Original allocation size */
     haddr_t eoa;                /* Address of end-of-allocated space */
     hsize_t extra;        	/* Extra space to allocate, to align request */
-    haddr_t ret_value;          /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -197,7 +172,7 @@ done:
 haddr_t
 H5FD_alloc_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, hsize_t size, haddr_t *frag_addr, hsize_t *frag_size)
 {
-    haddr_t     ret_value;              /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5FD_ALLOC_DEBUG
@@ -253,7 +228,7 @@ haddr_t
 H5FD_alloc(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, H5F_t *f, hsize_t size,
     haddr_t *frag_addr, hsize_t *frag_size)
 {
-    haddr_t     ret_value;              /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 

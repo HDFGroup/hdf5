@@ -17,10 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5F__init_pub_interface
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
 
 
 /***********/
@@ -59,6 +56,9 @@
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -85,22 +85,21 @@ static const H5I_class_t H5I_FILE_CLS[1] = {{
 
 /*--------------------------------------------------------------------------
 NAME
-   H5F__init_pub_interface -- Initialize interface-specific information
+   H5F__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5F__init_pub_interface()
+    herr_t H5F__init_package()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5F_init() currently).
+    Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t
-H5F__init_pub_interface(void)
+herr_t
+H5F__init_package(void)
 {
-    herr_t          ret_value                = SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Initialize the atom group for the file IDs.
@@ -108,40 +107,13 @@ H5F__init_pub_interface(void)
     if(H5I_register_type(H5I_FILE_CLS) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
-    ret_value = H5F_init();
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__init_pub_interface() */
+} /* H5F__init_package() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_init
- *
- * Purpose:	Initialize the interface from some other layer.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, December 16, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_init(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_init() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_term_interface
+ * Function:	H5F_term_package
  *
  * Purpose:	Terminate this interface: free all memory and reset global
  *		variables to their initial values.  Release all ID groups
@@ -159,13 +131,13 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5F_term_interface(void)
+H5F_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5_PKG_INIT_VAR) {
 	if(H5I_nmembers(H5I_FILE) > 0) {
             (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
             n++; /*H5I*/
@@ -174,20 +146,17 @@ H5F_term_interface(void)
             /* Make certain we've cleaned up all the shared file objects */
             H5F_sfile_assert_num(0);
 
-            /* Close deprecated interface */
-            n += H5F__term_deprec_interface();
-
             /* Destroy the file object id group */
-	    (void)H5I_dec_type_ref(H5I_FILE);
-            n++; /*H5I*/
+	    n += (H5I_dec_type_ref(H5I_FILE) > 0);
 
 	    /* Mark closed */
-	    H5_interface_initialize_g = 0;
+            if(0 == n)
+                H5_PKG_INIT_VAR = FALSE;
 	} /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5F_term_interface() */
+} /* end H5F_term_package() */
 
 
 /*-------------------------------------------------------------------------

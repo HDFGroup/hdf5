@@ -308,7 +308,7 @@ create_textfile(const char *name, size_t size)
 
     fd = HDcreat(name,0777);
     HDassert(fd >= 0);
-    buf = HDcalloc(size, (size_t)1);
+    buf = (char *)HDcalloc(size, (size_t)1);
     HDassert(buf);
 
     /* fill buf with pattern */

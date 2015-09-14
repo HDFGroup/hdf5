@@ -13,10 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5F_init_fake_interface
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
 
 
 /* Packages needed by this file... */
@@ -25,28 +22,6 @@
 #include "H5Fpkg.h"             /* File access				*/
 
 /* PRIVATE PROTOTYPES */
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5F_init_fake_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5F_init_fake_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5F_init() currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5F_init_fake_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5F_init())
-} /* H5F_init_fake_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -70,7 +45,7 @@ H5F_t *
 H5F_fake_alloc(uint8_t sizeof_size)
 {
     H5F_t *f = NULL;            /* Pointer to fake file struct */
-    H5F_t *ret_value;           /* Return value */
+    H5F_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

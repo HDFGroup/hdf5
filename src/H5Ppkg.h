@@ -21,7 +21,7 @@
  *		the H5P package.  Source files outside the H5P package should
  *		include H5Pprivate.h instead.
  */
-#ifndef H5P_PACKAGE
+#if !(defined H5P_FRIEND || defined H5P_MODULE)
 #error "Do not include this file outside the H5P package!"
 #endif
 
@@ -158,8 +158,6 @@ struct H5Z_filter_info_t;
 /******************************/
 
 /* Private functions, not part of the publicly documented API */
-H5_DLL herr_t H5P__term_pub_interface(void);
-H5_DLL herr_t H5P__term_deprec_interface(void);
 H5_DLL H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
     const char *name, H5P_plist_type_t type,
     H5P_cls_create_func_t cls_create, void *create_data,

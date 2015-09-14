@@ -127,7 +127,7 @@ endif (NOT WINDOWS)
 #  Check if Direct I/O driver works
 #-----------------------------------------------------------------------------
 if (NOT WINDOWS)
-  option (HDF5_ENABLE_DIRECT_VFD "Build the Direct I/O Virtual File Driver" ON)
+  option (HDF5_ENABLE_DIRECT_VFD "Build the Direct I/O Virtual File Driver" OFF)
   if (HDF5_ENABLE_DIRECT_VFD)
     set (msg "Performing TEST_DIRECT_VFD_WORKS")
     set (MACRO_CHECK_FUNCTION_DEFINITIONS "-DTEST_DIRECT_VFD_WORKS -D_GNU_SOURCE ${CMAKE_REQUIRED_FLAGS}")
@@ -159,6 +159,17 @@ if (NOT WINDOWS)
   endif (HDF5_ENABLE_DIRECT_VFD)
 endif (NOT WINDOWS)
 
+#-----------------------------------------------------------------------------
+# Check if C has __float128 extension
+#-----------------------------------------------------------------------------
+
+CHECK_TYPE_SIZE("__float128" SIZEOF___FLOAT128)
+if(${HAVE_SIZEOF___FLOAT128})
+  SET(H5_HAVE_FLOAT128 1)
+else (${HAVE_SIZEOF___FLOAT128})
+  SET(H5_HAVE_FLOAT128 0)
+  SET(SIZEOF___FLOAT128 0)
+endif(${HAVE_SIZEOF___FLOAT128})
 
 #-----------------------------------------------------------------------------
 # Macro to determine the various conversion capabilities

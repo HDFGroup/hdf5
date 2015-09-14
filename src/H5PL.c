@@ -16,8 +16,7 @@
 /* Module Setup */
 /****************/
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5PL__init_interface
+#include "H5PLmodule.h"          /* This source code file is part of the H5PL module */
 
 
 /***********/
@@ -53,7 +52,6 @@
  * If you do not do this, people will be unable to incorporate our
  * source code into their own CMake builds if they define UNICODE.
  */
-
 #ifdef H5_HAVE_WIN32_API
 
 #define H5PL_PATH_SEPARATOR     ";"
@@ -104,6 +102,7 @@ typedef const void *(*H5PL_get_plugin_info_t)(void);
 /* Special symbol to indicate no plugin loading */
 #define H5PL_NO_PLUGIN          "::"
 
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -131,6 +130,9 @@ static herr_t H5PL__close(H5PL_HANDLE handle);
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 
 /*****************************/
@@ -160,36 +162,106 @@ static hbool_t          H5PL_path_found_g = FALSE;
 /* Enable all plugin libraries */
 static unsigned int     H5PL_plugin_g = H5PL_ALL_PLUGIN;
 
+
 
 /*--------------------------------------------------------------------------
 NAME
-   H5PL__init_interface -- Initialize interface-specific information
+   H5PL__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5PL__init_interface()
+    herr_t H5PL__init_package()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t
-H5PL__init_interface(void)
+herr_t
+H5PL__init_package(void)
 {
     char        *preload_path;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Retrieve pathnames from HDF5_PLUGIN_PRELOAD if the user sets it
      * to tell the library to load plugin libraries without search.
      */
-    if(NULL != (preload_path = HDgetenv("HDF5_PLUGIN_PRELOAD"))) {
+    if(NULL != (preload_path = HDgetenv("HDF5_PLUGIN_PRELOAD")))
         /* Special symbal "::" means no plugin during data reading. */
         if(!HDstrcmp(preload_path, H5PL_NO_PLUGIN))
             H5PL_plugin_g = 0;
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5PL__init_interface() */
+} /* end H5PL__init_package() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL_term_package
+ *
+ * Purpose:     Terminate the H5PL interface: release all memory, reset all
+ *              global variables to initial values. This only happens if all
+ *              types have been destroyed from other interfaces.
+ *
+ * Return:      Success:    Positive if any action was taken that might
+ *                          affect some other interface; zero otherwise.
+ *              Failure:    Negative.
+ *
+ * Programmer:  Raymond Lu
+ *              20 February 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5PL_term_package(void)
+{
+    int  n = 0;
+    
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5_PKG_INIT_VAR) {
+        size_t u;       /* Local index variable */
+
+        /* Close opened dynamic libraries */
+        if(H5PL_filter_table_g) {
+            for(u = 0; u < H5PL_filter_table_used_g; u++)
+                H5PL__close((H5PL_filter_table_g[u]).handle);
+
+  	    /* Free the table of dynamic libraries */
+	    H5PL_filter_table_g = (H5PL_table_t *)H5MM_xfree(H5PL_filter_table_g);
+	    H5PL_filter_table_used_g = H5PL_filter_table_alloc_g = 0;
+            n++;
+        }
+
+	/* Close opened dynamic vol libraries */
+        if(H5PL_vol_table_g) {
+            for(u = 0; u < H5PL_vol_table_used_g; u++) {
+                H5PL__close((H5PL_vol_table_g[u]).handle);
+                HDfree(H5PL_vol_table_g[u].pl_name);
+            }
+
+    	    /* Free the table of dynamic vol libraries */
+	    H5PL_vol_table_g = (H5PL_table_t *)H5MM_xfree(H5PL_vol_table_g);
+	    H5PL_vol_table_used_g = H5PL_vol_table_alloc_g = 0;
+            n++;
+        }
+
+        /* Free the table of search paths */
+        if(H5PL_num_paths_g > 0) {
+            for(u = 0; u < H5PL_num_paths_g; u++)
+                if(H5PL_path_table_g[u])
+                    H5PL_path_table_g[u] = (char *)H5MM_xfree(H5PL_path_table_g[u]);
+            H5PL_num_paths_g = 0;
+            H5PL_path_found_g = FALSE;
+
+            n++;
+        } /* end if */
+
+        /* Mark the interface as uninitialized */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5PL_term_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -216,21 +288,24 @@ H5PLset_loading_state(unsigned int plugin_type)
 {
     char *preload_path;
     herr_t ret_value = SUCCEED; /* Return value */
+
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "Iu", plugin_type);
+
     /* change the bit value of the requested plugin type(s) */
     H5PL_plugin_g = plugin_type;
+
     /* check if special ENV variable is set and disable all plugin types */
-    if(NULL != (preload_path = HDgetenv("HDF5_PLUGIN_PRELOAD"))) {
+    if(NULL != (preload_path = HDgetenv("HDF5_PLUGIN_PRELOAD")))
         /* Special symbol "::" means no plugin during data reading. */
         if(!HDstrcmp(preload_path, H5PL_NO_PLUGIN))
             H5PL_plugin_g = 0;
-    }
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5PLset_loading_state() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5PLget_loading_state
  *
@@ -247,75 +322,16 @@ herr_t
 H5PLget_loading_state(unsigned int *plugin_type)
 {
     herr_t ret_value = SUCCEED; /* Return value */
+
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "*Iu", plugin_type);
 
     if(plugin_type)
         *plugin_type = H5PL_plugin_g;
-    done:
+
+done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5PLget_loading_state() */
-
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5PL_term_interface
- *
- * Purpose:     Terminate the H5PL interface: release all memory, reset all
- *              global variables to initial values. This only happens if all
- *              types have been destroyed from other interfaces.
- *
- * Return:      Success:    Positive if any action was taken that might
- *                          affect some other interface; zero otherwise.
- *
- *              Failure:    Negative.
- *
- * Programmer:  Raymond Lu
- *              20 February 2013
- *
- *-------------------------------------------------------------------------
- */
-int
-H5PL_term_interface(void)
-{
-    int  i = 0;
-    
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if(H5_interface_initialize_g) {
-        size_t u;       /* Local index variable */
-
-        /* Close opened dynamic libraries */
-        for(u = 0; u < H5PL_filter_table_used_g; u++)
-            H5PL__close((H5PL_filter_table_g[u]).handle);
-
-	/* Close opened dynamic vol libraries */
-        for(u = 0; u < H5PL_vol_table_used_g; u++) {
-            H5PL__close((H5PL_vol_table_g[u]).handle);
-            HDfree(H5PL_vol_table_g[u].pl_name);
-        }
-
-	/* Free the table of dynamic libraries */
-	H5PL_filter_table_g = (H5PL_table_t *)H5MM_xfree(H5PL_filter_table_g);
-	H5PL_filter_table_used_g = H5PL_filter_table_alloc_g = 0;
-
-	/* Free the table of dynamic vol libraries */
-	H5PL_vol_table_g = (H5PL_table_t *)H5MM_xfree(H5PL_vol_table_g);
-	H5PL_vol_table_used_g = H5PL_vol_table_alloc_g = 0;
-
-        /* Free the table of search paths */
-        for(u = 0; u < H5PL_num_paths_g; u++)
-            if(H5PL_path_table_g[u])
-                H5PL_path_table_g[u] = (char *)H5MM_xfree(H5PL_path_table_g[u]);
-        H5PL_num_paths_g = 0;
-        H5PL_path_found_g = FALSE;
-
-        H5_interface_initialize_g = 0;
-        i = 1;
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(i)
-} /* end H5PL_term_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -342,17 +358,19 @@ H5PL_load(H5PL_type_t type, int id, const char *name)
     FUNC_ENTER_NOAPI(NULL)
 
     switch (type) {
-    case H5PL_TYPE_FILTER:
-        if((H5PL_plugin_g & H5PL_FILTER_PLUGIN) == 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin filter '%d' is not available", id)
-        break;
-    case H5PL_TYPE_VOL:
-        if((H5PL_plugin_g & H5PL_VOL_PLUGIN) == 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin filter '%d' is not available", id)
-        break;
-    default:
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin '%d' is not valid", id)
-    }
+        case H5PL_TYPE_FILTER:
+            if((H5PL_plugin_g & H5PL_FILTER_PLUGIN) == 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin filter '%d' is not available", id)
+            break;
+        case H5PL_TYPE_VOL:
+            if((H5PL_plugin_g & H5PL_VOL_PLUGIN) == 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin filter '%d' is not available", id)
+            break;
+        case H5PL_TYPE_ERROR:
+        case H5PL_TYPE_NONE:
+        default:
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "required dynamically loaded plugin '%d' is not valid", id)
+    } /* end switch */
 
     /* Initialize the location paths for dynamic libraries, if they aren't
      * already set up.
@@ -828,3 +846,4 @@ H5PL__close(H5PL_HANDLE handle)
    
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5PL__close() */
+

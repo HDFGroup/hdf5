@@ -21,7 +21,7 @@
  *		the H5F package.  Source files outside the H5F package should
  *		include H5Fprivate.h instead.
  */
-#ifndef H5F_PACKAGE
+#if !(defined H5F_FRIEND || defined H5F_MODULE)
 #error "Do not include this file outside the H5F package!"
 #endif
 
@@ -364,8 +364,6 @@ H5_DLLVAR const H5AC_class_t H5AC_DRVRINFO[1];
 /******************************/
 
 /* General routines */
-H5_DLL herr_t H5F_init(void);
-H5_DLL herr_t H5F__term_deprec_interface(void);
 H5_DLL H5F_t *H5F_reopen(H5F_t *f);
 H5_DLL herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing);
 H5_DLL htri_t H5F_is_hdf5(const char *name, hid_t fapl_id);

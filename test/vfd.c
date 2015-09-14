@@ -80,14 +80,16 @@ const char *FILENAME[] = {
 static herr_t
 test_sec2(void)
 {
-  hid_t        file            = -1;
-  hid_t        fapl            = -1;
-  hid_t        access_fapl     = -1;
+    hid_t        file            = -1;
+    hid_t        fapl            = -1;
+    hid_t        access_fapl     = -1;
     char         filename[1024];
     int          *fhandle        = NULL;
     hsize_t      file_size       = 0;
 
     TESTING("SEC2 file driver");
+
+    h5_reset();
 
     /* Set property list and file name for SEC2 driver. */
     fapl = h5_fileaccess();
@@ -145,6 +147,235 @@ error:
     return -1;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_core
+ *
+ * Purpose:     Tests the file handle interface for CORE driver
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Raymond Lu
+ *              Tuesday, Sept 24, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_core(void)
+{
+    hid_t       file=(-1), fapl, access_fapl = -1;
+    char        filename[1024];
+    void        *fhandle=NULL;
+    hsize_t     file_size;
+    hbool_t     use_write_tracking;
+    size_t      write_tracking_page_size;
+    int    *points = NULL, *check = NULL, *p1, *p2;
+    hid_t  dset1=-1, space1=-1;
+    hsize_t  dims1[2];
+    int    i, j, n;
+
+    TESTING("CORE file driver");
+
+    h5_reset();
+
+    /* Set property list and file name for CORE driver */
+    fapl = h5_fileaccess();
+    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR;
+    if(H5Pset_core_write_tracking(fapl, TRUE, CORE_PAGE_SIZE) < 0)
+        TEST_ERROR;
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve the access property list... */
+    if ((access_fapl = H5Fget_access_plist(file)) < 0)
+        TEST_ERROR;
+
+    /* Check that the driver is correct */
+    if(H5FD_CORE != H5Pget_driver(access_fapl))
+        TEST_ERROR;
+
+    /* Check that the backing store write tracking info was saved */
+    if(H5Pget_core_write_tracking(fapl, &use_write_tracking, &write_tracking_page_size) < 0)
+        TEST_ERROR;
+    if(TRUE != use_write_tracking)
+        TEST_ERROR;
+    if(CORE_PAGE_SIZE != write_tracking_page_size)
+        TEST_ERROR;
+
+    /* ...and close the property list */
+    if (H5Pclose(access_fapl) < 0)
+        TEST_ERROR;
+
+    if(H5Fget_vfd_handle(file, H5P_DEFAULT, &fhandle) < 0)
+        TEST_ERROR;
+    if(fhandle==NULL)
+    {
+        printf("fhandle==NULL\n");
+               TEST_ERROR;
+    }
+
+    /* Check file size API */
+    if(H5Fget_filesize(file, &file_size) < 0)
+        TEST_ERROR;
+
+    /* There is no garantee the size of metadata in file is constant.
+     * Just try to check if it's reasonable.  Why is this 4KB?
+     */
+    if(file_size<2*KB || file_size>6*KB)
+        TEST_ERROR;
+
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+
+    /* Open the file with backing store off for read and write.
+     * Changes won't be saved in file. */
+    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, FALSE) < 0)
+        TEST_ERROR;
+
+    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Allocate memory for data set. */
+    if(NULL == (points = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (check = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+        TEST_ERROR;
+
+    /* Initialize the dset1 */
+    p1 = points;
+    for(i = n = 0; i < DSET1_DIM1; i++)
+        for(j = 0; j < DSET1_DIM2; j++)
+            *p1++ = n++;
+
+    /* Create the data space1 */
+    dims1[0] = DSET1_DIM1;
+    dims1[1] = DSET1_DIM2;
+    if((space1 = H5Screate_simple(2, dims1, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create the dset1 */
+    if((dset1 = H5Dcreate2(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dset1 */
+    if(H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset1) < 0)
+        TEST_ERROR;
+
+    if((dset1 = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Read the data back from dset1 */
+    if(H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    p1 = points;
+    p2 = check;
+    for(i = 0; i < DSET1_DIM1; i++)
+        for(j = 0; j < DSET1_DIM2; j++)
+            if(*p1++ != *p2++) {
+                H5_FAILED();
+                printf("    Read different values than written in data set 1.\n");
+                printf("    At index %d,%d\n", i, j);
+                TEST_ERROR;
+            } /* end if */
+
+    if(H5Dclose(dset1) < 0)
+        TEST_ERROR;
+
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Open the file with backing store on for read and write.
+     * Changes will be saved in file. */
+    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR;
+
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create the dset1 */
+    if((dset1 = H5Dcreate2(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dset1 */
+    if(H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset1) < 0)
+        TEST_ERROR;
+
+    if((dset1 = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Reallocate memory for reading buffer. */
+    HDassert(check);
+    HDfree(check);
+    if(NULL == (check = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+        TEST_ERROR;
+
+    /* Read the data back from dset1 */
+    if(H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    p1 = points;
+    p2 = check;
+    for(i = 0; i < DSET1_DIM1; i++)
+        for(j = 0; j < DSET1_DIM2; j++)
+            if(*p1++ != *p2++) {
+                H5_FAILED();
+                printf("    Read different values than written in data set 1.\n");
+                printf("    At index %d,%d\n", i, j);
+                TEST_ERROR;
+            } /* end if */
+
+    /* Check file size API */
+    if(H5Fget_filesize(file, &file_size) < 0)
+        TEST_ERROR;
+
+    /* There is no garantee the size of metadata in file is constant.
+     * Just try to check if it's reasonable. */
+    if(file_size<64*KB || file_size>256*KB)
+        TEST_ERROR;
+
+    if(H5Sclose(space1) < 0)
+        TEST_ERROR;
+    if(H5Dclose(dset1) < 0)
+        TEST_ERROR;
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+    HDassert(points);
+    HDfree(points);
+    HDassert(check);
+    HDfree(check);
+
+    h5_cleanup(FILENAME, fapl);
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Fclose(file);
+    } H5E_END_TRY;
+
+    if(points)
+        HDfree(points);
+    if(check)
+        HDfree(check);
+
+    return -1;
+}
 
 
 /*-------------------------------------------------------------------------
@@ -186,6 +417,8 @@ test_direct(void)
     return 0;
 #else /*H5_HAVE_DIRECT*/
 
+    h5_reset();
+
     /* Set property list and file name for Direct driver.  Set memory alignment boundary
      * and file block size to 512 which is the minimum for Linux 2.6. */
     fapl = h5_fileaccess();
@@ -218,6 +451,10 @@ test_direct(void)
 
     /* Check that the driver is correct */
     if(H5FD_DIRECT != H5Pget_driver(access_fapl))
+        TEST_ERROR;
+
+    /* ...and close the property list */
+    if (H5Pclose(access_fapl) < 0)
         TEST_ERROR;
 
     /* Check file handle API */
@@ -333,14 +570,6 @@ test_direct(void)
     HDassert(check);
     HDfree(check);
 
-    /* Verify that the file is an HDF5 file */
-    if(H5Fis_accessible(filename, access_fapl) != TRUE)
-        TEST_ERROR;
-
-    /* ...and close the property list */
-    if(H5Pclose(access_fapl) < 0)
-        TEST_ERROR;
-
     h5_cleanup(FILENAME, fapl);
     PASSED();
     return 0;
@@ -362,245 +591,6 @@ error:
 
     return -1;
 #endif /*H5_HAVE_DIRECT*/
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:    test_core
- *
- * Purpose:     Tests the file handle interface for CORE driver
- *
- * Return:      Success:        0
- *              Failure:        -1
- *
- * Programmer:  Raymond Lu
- *              Tuesday, Sept 24, 2002
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-test_core(void)
-{
-    hid_t       file=(-1), fapl, access_fapl = -1;
-    char        filename[1024];
-    void        *fhandle=NULL;
-    hsize_t     file_size;
-    hbool_t     use_write_tracking;
-    size_t      write_tracking_page_size;
-    int    *points = NULL, *check = NULL, *p1, *p2;
-    hid_t  dset1=-1, space1=-1;
-    hsize_t  dims1[2];
-    int    i, j, n;
-
-    TESTING("CORE file driver");
-
-    /* Set property list and file name for CORE driver */
-    fapl = h5_fileaccess();
-    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
-        TEST_ERROR;
-    if(H5Pset_core_write_tracking(fapl, TRUE, CORE_PAGE_SIZE) < 0)
-        TEST_ERROR;
-    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR;
-
-    /* Retrieve the access property list... */
-    if ((access_fapl = H5Fget_access_plist(file)) < 0)
-        TEST_ERROR;
-
-    /* Check that the driver is correct */
-    if(H5FD_CORE != H5Pget_driver(access_fapl))
-        TEST_ERROR;
-
-    /* Check that the backing store write tracking info was saved */
-    if(H5Pget_core_write_tracking(fapl, &use_write_tracking, &write_tracking_page_size) < 0)
-        TEST_ERROR;
-    if(TRUE != use_write_tracking)
-        TEST_ERROR;
-    if(CORE_PAGE_SIZE != write_tracking_page_size)
-        TEST_ERROR;
-
-    /* ...and close the property list */
-    if (H5Pclose(access_fapl) < 0)
-        TEST_ERROR;
-
-    if(H5Fget_vfd_handle(file, H5P_DEFAULT, &fhandle) < 0)
-        TEST_ERROR;
-    if(fhandle==NULL)
-    {
-        printf("fhandle==NULL\n");
-               TEST_ERROR;
-    }
-
-    /* Check file size API */
-    if(H5Fget_filesize(file, &file_size) < 0)
-        TEST_ERROR;
-
-    /* There is no garantee the size of metadata in file is constant.
-     * Just try to check if it's reasonable.  Why is this 4KB?
-     */
-    if(file_size<2*KB || file_size>6*KB)
-        TEST_ERROR;
-
-    if(H5Fclose(file) < 0)
-        TEST_ERROR;
-
-    /* Verify that the file is an HDF5 file */
-    if(H5Fis_accessible(filename, fapl) != TRUE)
-       TEST_ERROR;
-
-    /* Open the file with backing store off for read and write.
-     * Changes won't be saved in file. */
-    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, FALSE) < 0)
-        TEST_ERROR;
-
-    /* Verify that the file is an HDF5 file */
-    if(H5Fis_accessible(filename, fapl) != TRUE)
-        TEST_ERROR;
-
-    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        TEST_ERROR;
-
-    /* Allocate memory for data set. */
-    if(NULL == (points = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
-        TEST_ERROR;
-    if(NULL == (check = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
-        TEST_ERROR;
-
-    /* Initialize the dset1 */
-    p1 = points;
-    for(i = n = 0; i < DSET1_DIM1; i++)
-        for(j = 0; j < DSET1_DIM2; j++)
-            *p1++ = n++;
-
-    /* Create the data space1 */
-    dims1[0] = DSET1_DIM1;
-    dims1[1] = DSET1_DIM2;
-    if((space1 = H5Screate_simple(2, dims1, NULL)) < 0)
-        TEST_ERROR;
-
-    /* Create the dset1 */
-    if((dset1 = H5Dcreate2(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-
-    /* Write the data to the dset1 */
-    if(H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
-        TEST_ERROR;
-
-    if(H5Dclose(dset1) < 0)
-        TEST_ERROR;
-
-    if((dset1 = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-
-    /* Read the data back from dset1 */
-    if(H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0)
-        TEST_ERROR;
-
-    /* Check that the values read are the same as the values written */
-    p1 = points;
-    p2 = check;
-    for(i = 0; i < DSET1_DIM1; i++)
-        for(j = 0; j < DSET1_DIM2; j++)
-            if(*p1++ != *p2++) {
-                H5_FAILED();
-                printf("    Read different values than written in data set 1.\n");
-                printf("    At index %d,%d\n", i, j);
-                TEST_ERROR;
-            } /* end if */
-
-    if(H5Dclose(dset1) < 0)
-        TEST_ERROR;
-
-    if(H5Fclose(file) < 0)
-        TEST_ERROR;
-
-    /* Verify that the file is an HDF5 file */
-    if(H5Fis_accessible(filename, fapl) != TRUE)
-        TEST_ERROR;
-
-    /* Open the file with backing store on for read and write.
-     * Changes will be saved in file. */
-    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
-        TEST_ERROR;
-
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        TEST_ERROR;
-
-    /* Create the dset1 */
-    if((dset1 = H5Dcreate2(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-
-    /* Write the data to the dset1 */
-    if(H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
-        TEST_ERROR;
-
-    if(H5Dclose(dset1) < 0)
-        TEST_ERROR;
-
-    if((dset1 = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-
-    /* Reallocate memory for reading buffer. */
-    HDassert(check);
-    HDfree(check);
-    if(NULL == (check = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
-        TEST_ERROR;
-
-    /* Read the data back from dset1 */
-    if(H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0)
-        TEST_ERROR;
-
-    /* Check that the values read are the same as the values written */
-    p1 = points;
-    p2 = check;
-    for(i = 0; i < DSET1_DIM1; i++)
-        for(j = 0; j < DSET1_DIM2; j++)
-            if(*p1++ != *p2++) {
-                H5_FAILED();
-                printf("    Read different values than written in data set 1.\n");
-                printf("    At index %d,%d\n", i, j);
-                TEST_ERROR;
-            } /* end if */
-
-    /* Check file size API */
-    if(H5Fget_filesize(file, &file_size) < 0)
-        TEST_ERROR;
-
-    /* There is no garantee the size of metadata in file is constant.
-     * Just try to check if it's reasonable. */
-    if(file_size<64*KB || file_size>256*KB)
-        TEST_ERROR;
-
-    if(H5Sclose(space1) < 0)
-        TEST_ERROR;
-    if(H5Dclose(dset1) < 0)
-        TEST_ERROR;
-    if(H5Fclose(file) < 0)
-        TEST_ERROR;
-    HDassert(points);
-    HDfree(points);
-    HDassert(check);
-    HDfree(check);
-
-    h5_cleanup(FILENAME, fapl);
-
-    PASSED();
-    return 0;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Pclose(fapl);
-        H5Fclose(file);
-    } H5E_END_TRY;
-
-    if(points)
-        HDfree(points);
-    if(check)
-        HDfree(check);
-
-    return -1;
 }
 
 
@@ -722,6 +712,8 @@ test_family(void)
     hsize_t     file_size;
 
     TESTING("FAMILY file driver");
+
+    h5_reset();
 
     /* Set property list and file name for FAMILY driver */
     fapl = h5_fileaccess();
@@ -888,6 +880,8 @@ test_family_compat(void)
 
     TESTING("FAMILY file driver backward compatibility");
 
+    h5_reset();
+
     /* Set property list and file name for FAMILY driver */
     fapl = h5_fileaccess();
 
@@ -1032,6 +1026,9 @@ test_multi(void)
     int         buf[MULTI_SIZE][MULTI_SIZE];
 
     TESTING("MULTI file driver");
+
+    h5_reset();
+
     /* Set file access property list for MULTI driver */
     fapl = h5_fileaccess();
 
@@ -1248,6 +1245,8 @@ test_multi_compat(void)
 
     TESTING("MULTI file driver backward compatibility");
 
+    h5_reset();
+
     /* Set file access property list for MULTI driver */
     fapl = h5_fileaccess();
 
@@ -1407,6 +1406,8 @@ test_log(void)
 
     TESTING("LOG file driver");
 
+    h5_reset();
+
     /* Set property list and file name for log driver. */
     fapl = h5_fileaccess();
     if(H5Pset_fapl_log(fapl, LOG_FILENAME, flags, buf_size) < 0)
@@ -1489,6 +1490,8 @@ test_stdio(void)
     hsize_t      file_size       = 0;
 
     TESTING("STDIO file driver");
+
+    h5_reset();
 
     /* Set property list and file name for STDIO driver. */
     fapl = h5_fileaccess();
@@ -1584,6 +1587,8 @@ test_windows(void)
 
 #else /* H5_HAVE_WINDOWS */
 
+    h5_reset();
+
     /* Set property list and file name for WINDOWS driver. */
     fapl = h5_fileaccess();
     if(H5Pset_fapl_windows(fapl) < 0)
@@ -1662,25 +1667,23 @@ main(void)
 {
     int nerrors = 0;
 
-    h5_reset();
-
     printf("Testing basic Virtual File Driver functionality.\n");
 
     nerrors += test_sec2() < 0           ? 1 : 0;
     nerrors += test_core() < 0           ? 1 : 0;
+    nerrors += test_direct() < 0         ? 1 : 0;
     nerrors += test_family() < 0         ? 1 : 0;
     nerrors += test_family_compat() < 0  ? 1 : 0;
     nerrors += test_multi() < 0          ? 1 : 0;
     nerrors += test_multi_compat() < 0   ? 1 : 0;
-    nerrors += test_direct() < 0         ? 1 : 0;
     nerrors += test_log() < 0            ? 1 : 0;
     nerrors += test_stdio() < 0          ? 1 : 0;
     nerrors += test_windows() < 0        ? 1 : 0;
 
     if(nerrors) {
-  printf("***** %d Virtual File Driver TEST%s FAILED! *****\n",
-    nerrors, nerrors > 1 ? "S" : "");
-  return 1;
+        printf("***** %d Virtual File Driver TEST%s FAILED! *****\n",
+            nerrors, nerrors > 1 ? "S" : "");
+        return 1;
     }
 
     printf("All Virtual File Driver tests passed.\n");

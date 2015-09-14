@@ -1,6 +1,6 @@
 /****h* H5Of/H5Of
  * PURPOSE
- *   This file contains C stubs for H5O Fortran APIs
+ *  This file contains C stubs for H5O Fortran APIs
  *
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -109,12 +109,12 @@ fill_h5o_info_t_f(H5O_info_t Oinfo, H5O_info_t_f *object_info) {
  * PURPOSE
  *  Calls H5Olink
  * INPUTS
- *      object_id        - Object to be linked.
- *      new_loc_id       - File or group identifier specifying location at which object is to be linked.
- *      name             - Name of link to be created, relative to new_loc_id.
- *      namelen          - Length of buffer for link to be created.
- *      lcpl_id          - Link creation property list identifier.
- *      lapl_id          - Link access property list identifier.
+ *  object_id        - Object to be linked.
+ *  new_loc_id       - File or group identifier specifying location at which object is to be linked.
+ *  name             - Name of link to be created, relative to new_loc_id.
+ *  namelen          - Length of buffer for link to be created.
+ *  lcpl_id          - Link creation property list identifier.
+ *  lapl_id          - Link access property list identifier.
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -123,7 +123,7 @@ fill_h5o_info_t_f(H5O_info_t Oinfo, H5O_info_t_f *object_info) {
  * SOURCE
 */
 int_f
-nh5olink_c (hid_t_f *object_id, hid_t_f *new_loc_id, _fcd name, size_t_f *namelen,
+h5olink_c (hid_t_f *object_id, hid_t_f *new_loc_id, _fcd name, size_t_f *namelen,
             hid_t_f *lcpl_id, hid_t_f *lapl_id)
 /******/
 {
@@ -169,7 +169,7 @@ nh5olink_c (hid_t_f *object_id, hid_t_f *new_loc_id, _fcd name, size_t_f *namele
  * SOURCE
 */
 int_f
-nh5oopen_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid_t_f *obj_id)
+h5oopen_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid_t_f *obj_id)
 /******/
 {
   char *c_name = NULL;          /* Buffer to hold C string */
@@ -194,20 +194,20 @@ nh5oopen_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid
 }
 /****if* H5Of/h5oclose_c
  * NAME
- *   h5oclose_c
+ *  h5oclose_c
  * PURPOSE
- *   Call H5Oclose
+ *  Call H5Oclose
  * INPUTS
- *   object_id   - Object identifier  
+ *  object_id   - Object identifier  
  * RETURNS
- *   0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *   M. Scot Breitenfeld
- *   December 17, 2008
+ *  December 17, 2008
  * SOURCE
 */
 int_f
-nh5oclose_c ( hid_t_f *object_id )
+h5oclose_c ( hid_t_f *object_id )
 /******/
 {
   int_f ret_value=0;          /* Return value */
@@ -225,15 +225,15 @@ nh5oclose_c ( hid_t_f *object_id )
  * PURPOSE
  *  Calls H5Ovisit
  * INPUTS
- *    object_id - Identifier specifying subject group
- *   index_type - Type of index which determines the order
- *        order - Order within index
- *          idx - Iteration position at which to start
- *           op - Callback function passing data regarding the link to the calling application
- *      op_data - User-defined pointer to data required by the application for its processing of the link
+ *  object_id - Identifier specifying subject group
+ *  index_type - Type of index which determines the order
+ *  order - Order within index
+ *  idx - Iteration position at which to start
+ *  op - Callback function passing data regarding the link to the calling application
+ *  op_data - User-defined pointer to data required by the application for its processing of the link
  *
  * OUTPUTS
- *          idx - Position at which an interrupted iteration may be restarted
+ *  idx - Position at which an interrupted iteration may be restarted
  *
  * RETURNS
  *     >0 on success, 0< on failure
@@ -266,20 +266,20 @@ h5ovisit_c(hid_t_f *group_id, int_f *index_type, int_f *order, H5O_iterate_t op,
  *  Calls H5open_by_addr
  * INPUTS
  *  loc_id  - File or group identifier
- *    addr  - Object’s address in the file
+ *  addr  - Object’s address in the file
  *
  * OUTPUTS
  *  obj_id  - Dataset identifier      
  *
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  M. Scot Breitenfeld
  *  September 14, 2009
  * SOURCE
 */
 int_f
-nh5oopen_by_addr_c (hid_t_f *loc_id, haddr_t_f *addr, hid_t_f *obj_id)
+h5oopen_by_addr_c (hid_t_f *loc_id, haddr_t_f *addr, hid_t_f *obj_id)
 /******/
 {
   int_f ret_value = 0;          /* Return value */
@@ -458,7 +458,7 @@ h5oget_info_c (hid_t_f *object_id, H5O_info_t_f *object_info)
  * SOURCE
 */
 int_f
-nh5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
+h5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
 	    hid_t_f *dst_loc_id, _fcd dst_name, size_t_f *dst_name_len, 
 	    hid_t_f *ocpypl_id, hid_t_f *lcpl_id )
 /******/
@@ -499,15 +499,15 @@ nh5ocopy_c (hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len,
  * PURPOSE
  *  Calls H5Ovisit_by_name
  * INPUTS
- *    object_id - Identifier specifying subject group
- *   index_type - Type of index which determines the order
- *        order - Order within index
- *          idx - Iteration position at which to start
- *           op - Callback function passing data regarding the link to the calling application
- *      op_data - User-defined pointer to data required by the application for its processing of the link
+ *  object_id - Identifier specifying subject group
+ *  index_type - Type of index which determines the order
+ *  order - Order within index
+ *  idx - Iteration position at which to start
+ *  op - Callback function passing data regarding the link to the calling application
+ *  op_data - User-defined pointer to data required by the application for its processing of the link
  *
  * OUTPUTS
- *          idx - Position at which an interrupted iteration may be restarted
+ *  idx - Position at which an interrupted iteration may be restarted
  *
  * RETURNS
  *  >0 on success, 0< on failure
@@ -560,7 +560,7 @@ h5ovisit_by_name_c(hid_t_f *loc_id,  _fcd object_name, size_t_f *namelen, int_f 
  * SOURCE
 */
 int_f
-nh5odecr_refcount_c (hid_t_f *object_id)
+h5odecr_refcount_c (hid_t_f *object_id)
 /******/
 {
   int_f ret_value = 0;  /* Return value */
@@ -594,7 +594,7 @@ nh5odecr_refcount_c (hid_t_f *object_id)
  * SOURCE
 */
 int_f
-nh5oexists_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id)
+h5oexists_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id)
 /******/
 {
   char *c_name = NULL;          /* Buffer to hold C string */
@@ -633,7 +633,7 @@ nh5oexists_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *la
  * SOURCE
 */
 int_f
-nh5oincr_refcount_c (hid_t_f *object_id)
+h5oincr_refcount_c (hid_t_f *object_id)
 /******/
 {
   int_f ret_value = 0;  /* Return value */
@@ -665,7 +665,7 @@ nh5oincr_refcount_c (hid_t_f *object_id)
  * SOURCE
 */
 int_f
-nh5oset_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentlen)
+h5oset_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentlen)
 /******/
 {
   char *c_comment = NULL;   /* Buffer to hold C string */
@@ -697,7 +697,7 @@ nh5oset_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentlen)
  * INPUTS
  *  object_id  - Identifier of the target object.
  *  name       - Name of the object whose comment is to be set or reset, 
- *               specified as a path relative to loc_id. 
+ *  specified as a path relative to loc_id. 
  *  namelen    - Length of the name.
  *  comment    - The new comment.
  *  commentlen - Length of the comment.
@@ -710,7 +710,7 @@ nh5oset_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentlen)
  * SOURCE
 */
 int_f
-nh5oset_comment_by_name_c (hid_t_f *object_id, _fcd name, size_t_f *namelen,  _fcd comment, size_t_f *commentlen, hid_t_f *lapl_id)
+h5oset_comment_by_name_c (hid_t_f *object_id, _fcd name, size_t_f *namelen,  _fcd comment, size_t_f *commentlen, hid_t_f *lapl_id)
 /******/
 {
   char *c_comment = NULL;   /* Buffer to hold C string */
@@ -755,7 +755,7 @@ nh5oset_comment_by_name_c (hid_t_f *object_id, _fcd name, size_t_f *namelen,  _f
  *  n             - Object to open.
  *  lapl_id       - Link access property list.
  * OUTPUTS
- *   obj_id       - An object identifier for the opened object.
+ *  obj_id       - An object identifier for the opened object.
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -764,7 +764,7 @@ nh5oset_comment_by_name_c (hid_t_f *object_id, _fcd name, size_t_f *namelen,  _f
  * SOURCE
 */
 int_f
-nh5oopen_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *group_namelen, 
+h5oopen_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *group_namelen, 
 		       int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *obj_id, hid_t_f *lapl_id)
 /******/
 {
@@ -813,7 +813,7 @@ nh5oopen_by_idx_c (hid_t_f *loc_id, _fcd  group_name, size_t_f *group_namelen,
  * SOURCE
 */
 int_f
-nh5oget_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentsize,  hssize_t_f *bufsize)
+h5oget_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentsize,  hssize_t_f *bufsize)
 /******/
 {
   char *c_comment = NULL;  /* Buffer to hold C string */
@@ -869,7 +869,7 @@ nh5oget_comment_c (hid_t_f *object_id, _fcd comment, size_t_f *commentsize,  hss
  * SOURCE
 */
 int_f
-nh5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *name_size, 
+h5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *name_size, 
 			   _fcd comment, size_t_f *commentsize, size_t_f *bufsize, hid_t_f *lapl_id)
 /******/
 {

@@ -22,10 +22,7 @@
 /* Module Setup */
 /****************/
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5P_init_interface
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 
 
 /***********/
@@ -96,7 +93,7 @@ static int H5P_cmp_prop(const H5P_genprop_t *prop1, const H5P_genprop_t *prop2);
 
 /*
  * Predefined property list classes. These are initialized at runtime by
- * H5P_init_interface() in this source file.
+ * H5P__init_package() in this source file.
  */
 hid_t H5P_CLS_ROOT_ID_g                         = FAIL;
 H5P_genclass_t *H5P_CLS_ROOT_g                  = NULL;
@@ -135,7 +132,7 @@ H5P_genclass_t *H5P_CLS_STRING_CREATE_g         = NULL;
 
 /*
  * Predefined property lists for each predefined class. These are initialized
- * at runtime by H5P_init_interface() in this source file.
+ * at runtime by H5P__init_package() in this source file.
  */
 hid_t H5P_LST_FILE_CREATE_ID_g          = FAIL;
 hid_t H5P_LST_FILE_ACCESS_ID_g          = FAIL;
@@ -312,88 +309,16 @@ static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
 
 
 
-/*--------------------------------------------------------------------------
- NAME
-    H5P_do_prop_cb1
- PURPOSE
-    Internal routine to call a property list callback routine and update
-    the property list accordingly.
- USAGE
-    herr_t H5P_do_prop_cb1(slist,prop,cb)
-        H5SL_t *slist;          IN/OUT: Skip list to hold changed properties
-        H5P_genprop_t *prop;    IN: Property to call callback for
-        H5P_prp_cb1_t *cb;      IN: Callback routine to call
- RETURNS
-    Returns non-negative on success, negative on failure.
- DESCRIPTION
-        Calls the callback routine passed in.  If the callback routine changes
-    the property value, then the property is duplicated and added to skip list.
-
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static herr_t
-H5P_do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
-{
-    void *tmp_value=NULL;       /* Temporary value buffer */
-    H5P_genprop_t *pcopy=NULL;  /* Copy of property to insert into skip list */
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Allocate space for a temporary copy of the property value */
-    if(NULL == (tmp_value = H5MM_malloc(prop->size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for temporary property value")
-    HDmemcpy(tmp_value,prop->value,prop->size);
-
-    /* Call "type 1" callback ('create', 'copy' or 'close') */
-    if(cb(prop->name,prop->size,tmp_value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,"Property callback failed")
-
-    /* Check if the property value changed */
-    if((prop->cmp)(tmp_value,prop->value,prop->size)) {
-        /* Make a copy of the class's property */
-        if((pcopy=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST)) == NULL)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property")
-
-        /* Copy the changed value into the new property */
-        HDmemcpy(pcopy->value,tmp_value,prop->size);
-
-        /* Insert the changed property into the property list */
-        if(H5P_add_prop(slist,pcopy) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into skip list")
-    } /* end if */
-
-done:
-    /* Release the temporary value buffer */
-    if(tmp_value!=NULL)
-        H5MM_xfree(tmp_value);
-
-    /* Cleanup on failure */
-    if(ret_value<0) {
-        if(pcopy!=NULL)
-            H5P_free_prop(pcopy);
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_do_prop_cb1() */
-
-
 /*-------------------------------------------------------------------------
  * Function:	H5P_init
  *
  * Purpose:	Initialize the interface from some other layer.
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
  *              Saturday, March 4, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -412,22 +337,22 @@ done:
 
 /*--------------------------------------------------------------------------
 NAME
-   H5P_init_interface -- Initialize interface-specific information
+   H5P__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5P_init_interface()
+    herr_t H5P__init_package()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
 --------------------------------------------------------------------------*/
-static herr_t
-H5P_init_interface(void)
+herr_t
+H5P__init_package(void)
 {
     size_t tot_init;                    /* Total # of classes initialized */
     size_t pass_init;                   /* # of classes initialized in each pass */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /*
      * Initialize the Generic Property class & object groups.
@@ -490,16 +415,16 @@ H5P_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_init_interface() */
+} /* end H5P__init_package() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_term_interface
+    H5P_term_package
  PURPOSE
     Terminate various H5P objects
  USAGE
-    void H5P_term_interface()
+    void H5P_term_package()
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -511,13 +436,13 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5P_term_interface(void)
+H5P_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5_PKG_INIT_VAR) {
         int64_t	nlist, nclass;
 
         /* Destroy HDF5 library property classes & lists */
@@ -597,25 +522,87 @@ H5P_term_interface(void)
 
             n++; /*H5I*/
         } else {
-            /* Close public interface */
-            n += H5P__term_pub_interface();
-
-            /* Close deprecated interface */
-            n += H5P__term_deprec_interface();
-
             /* Destroy the property list and class id groups */
-            (void)H5I_dec_type_ref(H5I_GENPROP_LST);
-            n++; /*H5I*/
-            (void)H5I_dec_type_ref(H5I_GENPROP_CLS);
-            n++; /*H5I*/
+            n += (H5I_dec_type_ref(H5I_GENPROP_LST) > 0);
+            n += (H5I_dec_type_ref(H5I_GENPROP_CLS) > 0);
 
             /* Mark closed */
-            H5_interface_initialize_g = 0;
+            if(0 == n)
+                H5_PKG_INIT_VAR = FALSE;
         } /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5P_term_interface() */
+} /* end H5P_term_package() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_do_prop_cb1
+ PURPOSE
+    Internal routine to call a property list callback routine and update
+    the property list accordingly.
+ USAGE
+    herr_t H5P_do_prop_cb1(slist,prop,cb)
+        H5SL_t *slist;          IN/OUT: Skip list to hold changed properties
+        H5P_genprop_t *prop;    IN: Property to call callback for
+        H5P_prp_cb1_t *cb;      IN: Callback routine to call
+ RETURNS
+    Returns non-negative on success, negative on failure.
+ DESCRIPTION
+        Calls the callback routine passed in.  If the callback routine changes
+    the property value, then the property is duplicated and added to skip list.
+
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static herr_t
+H5P_do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
+{
+    void *tmp_value=NULL;       /* Temporary value buffer */
+    H5P_genprop_t *pcopy=NULL;  /* Copy of property to insert into skip list */
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Allocate space for a temporary copy of the property value */
+    if(NULL == (tmp_value = H5MM_malloc(prop->size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for temporary property value")
+    HDmemcpy(tmp_value,prop->value,prop->size);
+
+    /* Call "type 1" callback ('create', 'copy' or 'close') */
+    if(cb(prop->name,prop->size,tmp_value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,"Property callback failed")
+
+    /* Check if the property value changed */
+    if((prop->cmp)(tmp_value,prop->value,prop->size)) {
+        /* Make a copy of the class's property */
+        if((pcopy=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST)) == NULL)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property")
+
+        /* Copy the changed value into the new property */
+        HDmemcpy(pcopy->value,tmp_value,prop->size);
+
+        /* Insert the changed property into the property list */
+        if(H5P_add_prop(slist,pcopy) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into skip list")
+    } /* end if */
+
+done:
+    /* Release the temporary value buffer */
+    if(tmp_value!=NULL)
+        H5MM_xfree(tmp_value);
+
+    /* Cleanup on failure */
+    if(ret_value<0) {
+        if(pcopy!=NULL)
+            H5P_free_prop(pcopy);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_do_prop_cb1() */
 
 
 /*--------------------------------------------------------------------------
@@ -934,7 +921,7 @@ static H5P_genprop_t *
 H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
 {
     H5P_genprop_t *prop = NULL;      /* Pointer to new property copied */
-    H5P_genprop_t *ret_value;        /* Return value */
+    H5P_genprop_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1050,8 +1037,8 @@ H5P_create_prop(const char *name, size_t size, H5P_prop_within_t type,
     H5P_prp_copy_func_t prp_copy, H5P_prp_compare_func_t prp_cmp,
     H5P_prp_close_func_t prp_close)
 {
-    H5P_genprop_t *prop = NULL;        /* Pointer to new property copied */
-    H5P_genprop_t *ret_value;        /* Return value */
+    H5P_genprop_t *prop = NULL;      /* Pointer to new property copied */
+    H5P_genprop_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1171,7 +1158,7 @@ done:
 H5P_genprop_t *
 H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name)
 {
-    H5P_genprop_t *ret_value;   /* Property pointer return value */
+    H5P_genprop_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1231,7 +1218,7 @@ done:
 static H5P_genprop_t *
 H5P_find_prop_pclass(H5P_genclass_t *pclass, const char *name)
 {
-    H5P_genprop_t *ret_value;   /* Property pointer return value */
+    H5P_genprop_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1541,8 +1528,8 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, H5P_plist_type_t t
     H5P_cls_copy_func_t cls_copy, void *copy_data,
     H5P_cls_close_func_t cls_close, void *close_data)
 {
-    H5P_genclass_t *pclass=NULL;   /* Property list class created */
-    H5P_genclass_t *ret_value;     /* return value */
+    H5P_genclass_t *pclass = NULL;      /* Property list class created */
+    H5P_genclass_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1636,10 +1623,10 @@ static H5P_genplist_t *
 H5P_create(H5P_genclass_t *pclass)
 {
     H5P_genclass_t *tclass;         /* Temporary class pointer */
-    H5P_genplist_t *plist=NULL;     /* New property list created */
+    H5P_genplist_t *plist = NULL;   /* New property list created */
     H5P_genprop_t *tmp;             /* Temporary pointer to parent class properties */
-    H5SL_t *seen=NULL;              /* Skip list to hold names of properties already seen */
-    H5P_genplist_t *ret_value;      /* Return value */
+    H5SL_t *seen = NULL;            /* Skip list to hold names of properties already seen */
+    H5P_genplist_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1775,10 +1762,10 @@ done:
 hid_t
 H5P_create_id(H5P_genclass_t *pclass, hbool_t app_ref)
 {
-    H5P_genclass_t *tclass;         /* Temporary class pointer */
-    H5P_genplist_t *plist = NULL;   /* Property list created */
-    hid_t plist_id = FAIL;      /* Property list ID */
-    hid_t ret_value;            /* return value */
+    H5P_genclass_t *tclass;             /* Temporary class pointer */
+    H5P_genplist_t *plist = NULL;       /* Property list created */
+    hid_t plist_id = FAIL;              /* Property list ID */
+    hid_t ret_value = H5I_INVALID_HID;  /* return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -3383,7 +3370,7 @@ done:
 htri_t
 H5P_class_isa(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2)
 {
-    htri_t ret_value;
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -3436,7 +3423,7 @@ H5P_isa_class(hid_t plist_id, hid_t pclass_id)
 {
     H5P_genplist_t	*plist;         /* Property list to query */
     H5P_genclass_t	*pclass;        /* Property list class */
-    htri_t ret_value;                   /* return value */
+    htri_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -3486,7 +3473,7 @@ done:
 H5P_genplist_t *
 H5P_object_verify(hid_t plist_id, hid_t pclass_id)
 {
-    H5P_genplist_t *ret_value;                   /* return value */
+    H5P_genplist_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -4759,7 +4746,7 @@ done:
 char *
 H5P_get_class_name(H5P_genclass_t *pclass)
 {
-    char *ret_value;      /* return value */
+    char *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -4797,7 +4784,7 @@ done:
 char *
 H5P_get_class_path(H5P_genclass_t *pclass)
 {
-    char *ret_value;    /* return value */
+    char *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -4863,7 +4850,7 @@ H5P_open_class_path(const char *path)
     char *delimit;              /* Pointer to path delimiter during traversal */
     H5P_genclass_t *curr_class; /* Pointer to class during path traversal */
     H5P_check_class_t check_info;   /* Structure to hold the information for checking duplicate names */
-    H5P_genclass_t *ret_value;  /* Return value */
+    H5P_genclass_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -4943,7 +4930,7 @@ done:
 H5P_genclass_t *
 H5P_get_class_parent(const H5P_genclass_t *pclass)
 {
-    H5P_genclass_t *ret_value;      /* return value */
+    H5P_genclass_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -5010,7 +4997,7 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 {
     H5P_genclass_t *pclass;     /* Class of property list to create */
     hid_t class_id;             /* ID of class to create */
-    hid_t ret_value;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 

@@ -22,7 +22,7 @@
  * This file needs to access private datatypes from the H5FA package.
  * This file also needs to access the fixed array testing code.
  */
-#define H5FA_PACKAGE
+#define H5FA_FRIEND		/*suppress error about including H5FApkg	  */
 #define H5FA_TESTING
 #include "H5FApkg.h"		/* Fixed Arrays			*/
 
@@ -30,7 +30,7 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"		/* File access	 			*/
 
@@ -1562,11 +1562,11 @@ main(void)
     }
 
     /* Iterate over the testing parameters */
-    for(curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; curr_test++) {
+    for(curr_test = FARRAY_TEST_NORMAL; curr_test < FARRAY_TEST_NTESTS; H5_INC_ENUM(farray_test_type_t, curr_test)) {
 
         /* Initialize the testing parameters */
-	HDmemset(&tparam, 0, sizeof(tparam));
-	tparam.nelmts = TEST_NELMTS;
+        HDmemset(&tparam, 0, sizeof(tparam));
+        tparam.nelmts = TEST_NELMTS;
 
         /* Set appropriate testing parameters for each test */
         switch(curr_test) {
@@ -1597,7 +1597,7 @@ main(void)
         nerrors += test_delete_open(fapl, &cparam, &tparam);
 
 	/* Iterate over the type of capacity tests */
-	for(curr_iter = FARRAY_ITER_FW; curr_iter < FARRAY_ITER_NITERS; curr_iter++) {
+	for(curr_iter = FARRAY_ITER_FW; curr_iter < FARRAY_ITER_NITERS; H5_INC_ENUM(farray_iter_type_t, curr_iter)) {
 
             /* Set appropriate parameters for each type of iteration */
             switch(curr_iter) {

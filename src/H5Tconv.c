@@ -21,7 +21,8 @@
 /* Module Setup */
 /****************/
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
+#include "H5Tmodule.h"          /* This source code file is part of the H5T module */
+
 
 /***********/
 /* Headers */
@@ -2111,7 +2112,7 @@ done:
 H5T_subset_info_t *
 H5T__conv_struct_subset(const H5T_cdata_t *cdata)
 {
-    H5T_conv_struct_t	*priv;
+    H5T_conv_struct_t	*priv = NULL;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2925,7 +2926,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     /* Use O(log N) lookup */
                     unsigned lt = 0;
                     unsigned rt = src->shared->u.enumer.nmembs;
-                    unsigned md;
+                    unsigned md = 0;
                     int cmp;
 
                     while(lt < rt) {
@@ -4255,7 +4256,11 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
                     goto padding;
-#ifndef H5_VMS  /*Temporary solution to handle VAX special values*/
+                /* Temporary solution to handle VAX special values.
+                 * Note that even though we don't support VAX anymore, we
+                 * still need to handle legacy VAX files so this code must
+                 * remain in place.
+                 */
                 } else if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
                     /* NaN */
@@ -4280,7 +4285,6 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
 
                     goto padding;
-#endif /*H5_VMS*/
                 }
 
                 /*

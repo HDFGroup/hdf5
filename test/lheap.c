@@ -29,7 +29,7 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"		/* File access	 			*/
 
@@ -187,11 +187,7 @@ main(void)
     {
         const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
         hid_t dset = -1;
-#ifdef H5_VMS
-        file = H5Fopen(TESTFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
-#else
         file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
-#endif
         if(file >= 0){
             if((dset = H5Dopen2(file, "/Dataset1", H5P_DEFAULT)) < 0)
                 TEST_ERROR

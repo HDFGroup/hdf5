@@ -19,8 +19,9 @@
  * Purpose:     Messages related to data layout.
  */
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
@@ -101,7 +102,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
 {
     H5O_layout_t           *mesg = NULL;
     unsigned               u;
-    void                   *ret_value;          /* Return value */
+    void                   *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -190,7 +191,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
     } /* end if */
     else {
         /* Layout class */
-        mesg->type = (H5D_layout_t)*p++;
+        mesg->type = mesg->storage.type = (H5D_layout_t)*p++;
 
         /* Interpret the rest of the message according to the layout class */
         switch(mesg->type) {
@@ -375,7 +376,7 @@ H5O_layout_copy(const void *_mesg, void *_dest)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     H5O_layout_t           *dest = (H5O_layout_t *) _dest;
-    void                   *ret_value;          /* Return value */
+    void                   *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -389,19 +390,35 @@ H5O_layout_copy(const void *_mesg, void *_dest)
     /* copy */
     *dest = *mesg;
 
-    /* Deep copy the buffer for compact datasets also */
-    if(mesg->type == H5D_COMPACT && mesg->storage.u.compact.size > 0) {
-        /* Allocate memory for the raw data */
-        if(NULL == (dest->storage.u.compact.buf = H5MM_malloc(dest->storage.u.compact.size)))
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
+    /* Special actions for each type of layout */
+    switch(mesg->type) {
+        case H5D_COMPACT:
+            /* Deep copy the buffer for compact datasets also */
+            if(mesg->storage.u.compact.size > 0) {
+                /* Allocate memory for the raw data */
+                if(NULL == (dest->storage.u.compact.buf = H5MM_malloc(dest->storage.u.compact.size)))
+                    HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
 
-        /* Copy over the raw data */
-        HDmemcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf, dest->storage.u.compact.size);
-    } /* end if */
+                /* Copy over the raw data */
+                HDmemcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf, dest->storage.u.compact.size);
+            } /* end if */
+            break;
 
-    /* Reset the pointer of the chunked storage index but not the address */
-    if(dest->type == H5D_CHUNKED && dest->storage.u.chunk.ops)
-	H5D_chunk_idx_reset(&dest->storage.u.chunk, FALSE);
+        case H5D_CONTIGUOUS:
+            /* Nothing required */
+            break;
+
+        case H5D_CHUNKED:
+            /* Reset the pointer of the chunked storage index but not the address */
+            if(dest->storage.u.chunk.ops)
+                H5D_chunk_idx_reset(&dest->storage.u.chunk, FALSE);
+            break;
+
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
+        default:
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, NULL, "Invalid layout class")
+    } /* end switch */
 
     /* Set return value */
     ret_value = dest;
@@ -435,7 +452,7 @@ static size_t
 H5O_layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    size_t                  ret_value;
+    size_t                  ret_value = 0;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -593,8 +610,8 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     H5O_layout_t       *layout_src = (H5O_layout_t *) mesg_src;
     H5O_layout_t       *layout_dst = NULL;
-    hbool_t             copied = FALSE;                         /* Whether the data was copied */
-    void               *ret_value;                              /* Return value */
+    hbool_t             copied = FALSE;         /* Whether the data was copied */
+    void               *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -686,7 +703,7 @@ H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
     FILE * stream, int indent, int fwidth)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    unsigned                    u;
+    size_t                  u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -709,7 +726,7 @@ H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
                       "Number of dimensions:",
                       (unsigned long)(mesg->u.chunk.ndims));
             HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Size:");
-            for(u = 0; u < mesg->u.chunk.ndims; u++)
+            for(u = 0; u < (size_t)mesg->u.chunk.ndims; u++)
                 HDfprintf(stream, "%s%lu", u ? ", " : "", (unsigned long)(mesg->u.chunk.dim[u]));
             HDfprintf(stream, "}\n");
 
