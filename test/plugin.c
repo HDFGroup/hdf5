@@ -26,7 +26,7 @@
 /*
  * This file needs to access private datatypes from the H5Z package.
  */
-#define H5Z_PACKAGE
+#define H5Z_FRIEND
 #include "H5Zpkg.h"
 
 /* Filters for HDF5 internal test */

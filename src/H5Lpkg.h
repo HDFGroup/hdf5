@@ -21,7 +21,7 @@
  *              only within the H5L package. Source files outside the
  *              H5L package should include H5Lprivate.h instead.
  */
-#ifndef H5L_PACKAGE
+#if !(defined H5L_FRIEND || defined H5L_MODULE)
 #error "Do not include this file outside the H5L package!"
 #endif
 

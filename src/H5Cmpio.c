@@ -29,8 +29,8 @@
 /* Module Setup */
 /****************/
 
-#define H5C_PACKAGE		/*suppress error about including H5Cpkg   */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#include "H5Cmodule.h"          /* This source code file is part of the H5C module */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 
 
 /***********/

@@ -20,7 +20,7 @@
  * Purpose:	Hyperslab selection data space I/O functions.
  */
 
-#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+#include "H5Smodule.h"          /* This source code file is part of the H5S module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -1093,7 +1093,7 @@ H5S_hyper_iter_release (H5S_sel_iter_t *iter)
 static H5S_hyper_span_t *
 H5S_hyper_new_span(hsize_t low, hsize_t high, H5S_hyper_span_info_t *down, H5S_hyper_span_t *next)
 {
-    H5S_hyper_span_t *ret_value;
+    H5S_hyper_span_t *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1288,7 +1288,7 @@ H5S_hyper_copy_span_helper (H5S_hyper_span_info_t *spans)
     H5S_hyper_span_t *new_span;     /* Temporary hyperslab span */
     H5S_hyper_span_t *prev_span;    /* Previous hyperslab span */
     H5S_hyper_span_info_t *new_down;    /* New down span tree */
-    H5S_hyper_span_info_t *ret_value;
+    H5S_hyper_span_info_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1374,7 +1374,7 @@ done:
 static H5S_hyper_span_info_t *
 H5S_hyper_copy_span(H5S_hyper_span_info_t *spans)
 {
-    H5S_hyper_span_info_t *ret_value;
+    H5S_hyper_span_info_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1753,9 +1753,9 @@ static htri_t
 H5S_hyper_is_valid (const H5S_t *space)
 {
     unsigned u;                    /* Counter */
-    htri_t ret_value=TRUE;      /* return value */
+    htri_t ret_value = TRUE;      /* return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
 
@@ -1858,7 +1858,7 @@ H5S_hyper_span_nblocks(H5S_hyper_span_info_t *spans)
 static hsize_t
 H5S_get_select_hyper_nblocks(H5S_t *space)
 {
-    hsize_t ret_value;         /* return value */
+    hsize_t ret_value = 0;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1940,9 +1940,9 @@ done:
 static hssize_t
 H5S_hyper_serial_size(const H5S_t *space)
 {
-    unsigned u;                 /* Counter */
     hsize_t block_count;       /* block counter for regular hyperslabs */
-    hssize_t ret_value;         /* return value */
+    unsigned u;                /* Counter */
+    hssize_t ret_value = -1;   /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -2890,7 +2890,7 @@ H5S_hyper_is_contiguous(const H5S_t *space)
     unsigned u;                     /* index variable */
     htri_t ret_value = FALSE;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
 
@@ -3045,6 +3045,7 @@ H5S_hyper_is_contiguous(const H5S_t *space)
             ret_value=TRUE;
     } /* end else */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_hyper_is_contiguous() */
 
@@ -3075,7 +3076,7 @@ H5S_hyper_is_single(const H5S_t *space)
     unsigned u;                     /* index variable */
     htri_t ret_value=TRUE;         /* return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
 
@@ -3140,7 +3141,7 @@ done:
 static htri_t
 H5S_hyper_is_regular(const H5S_t *space)
 {
-    htri_t ret_value;  /* return value */
+    htri_t ret_value = FAIL;    /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -5259,7 +5260,7 @@ H5S_hyper_merge_spans_helper (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
     H5S_hyper_span_t *span_b;           /* Pointer to current span 'b' working on */
     H5S_hyper_span_t *prev_span_merge;  /* Pointer to previous merged span */
     unsigned recover_a, recover_b;         /* Flags to indicate when to recover temporary spans */
-    H5S_hyper_span_info_t *ret_value;
+    H5S_hyper_span_info_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -5627,7 +5628,7 @@ static hsize_t
 H5S_hyper_spans_nelem (H5S_hyper_span_info_t *spans)
 {
     H5S_hyper_span_t *span;     /* Hyperslab span */
-    hsize_t ret_value;
+    hsize_t ret_value = 0;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -5689,7 +5690,7 @@ H5S_hyper_make_spans(unsigned rank, const hsize_t *start, const hsize_t *stride,
     hsize_t                stride_iter;     /* Iterator over the stride values */
     int                    i;               /* Counters */
     unsigned               u;               /* Counters */
-    H5S_hyper_span_info_t *ret_value;       /* Return value */
+    H5S_hyper_span_info_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -8720,7 +8721,7 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned H5_ATTR_UNUSED flags, H5S_se
     size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
-    herr_t ret_value;      /* return value */
+    herr_t ret_value = FAIL;    /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
+#include "H5B2module.h"         /* This source code file is part of the H5B2 module */
+
 
 /***********/
 /* Headers */

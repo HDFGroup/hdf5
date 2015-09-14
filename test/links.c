@@ -24,7 +24,7 @@
  * This file needs to access private information from the H5G package.
  * This file also needs to access the group testing code.
  */
-#define H5G_PACKAGE
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 #define H5G_TESTING
 
 #include "h5test.h"

@@ -17,10 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5S_init_interface
+#include "H5Smodule.h"          /* This source code file is part of the H5S module */
 
 
 /***********/
@@ -63,6 +60,9 @@ static H5S_t *H5S_decode(const unsigned char *buf);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -80,7 +80,7 @@ H5FL_DEFINE(H5S_extent_t);
 H5FL_DEFINE(H5S_t);
 
 /* Declare a free list to manage the array's of hsize_t's */
-H5FL_ARR_DEFINE(hsize_t,H5S_MAX_RANK);
+H5FL_ARR_DEFINE(hsize_t, H5S_MAX_RANK);
 
 /* Dataspace ID class */
 static const H5I_class_t H5I_DATASPACE_CLS[1] = {{
@@ -90,47 +90,52 @@ static const H5I_class_t H5I_DATASPACE_CLS[1] = {{
     (H5I_free_t)H5S_close	/* Callback routine for closing objects of this class */
 }};
 
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5S_top_package_initialize_s = FALSE;
+
 
 
 /*--------------------------------------------------------------------------
 NAME
-   H5S_init_interface -- Initialize interface-specific information
+   H5S__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5S_init_interface()
-
+    herr_t H5S__init_package()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
     Initializes any interface-specific data or routines.
-
 --------------------------------------------------------------------------*/
-static herr_t
-H5S_init_interface(void)
+herr_t
+H5S__init_package(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Initialize the atom group for the file IDs */
     if(H5I_register_type(H5I_DATASPACE_CLS) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
+    /* Mark "top" of interface as initialized, too */
+    H5S_top_package_initialize_s = TRUE;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_init_interface() */
+} /* end H5S__init_package() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_term_interface
+    H5S_top_term_package
  PURPOSE
     Terminate various H5S objects
  USAGE
-    void H5S_term_interface()
+    void H5S_top_term_package()
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
-    Release the atom group and any other resources allocated.
+    Release IDs for the atom group, deferring full interface shutdown
+    until later (in H5S_term_package).
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
      Can't report errors...
@@ -138,29 +143,69 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5S_term_interface(void)
+H5S_top_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5S_top_package_initialize_s) {
 	if(H5I_nmembers(H5I_DATASPACE) > 0) {
 	    (void)H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
-        else {
-            /* Destroy the dataspace object id group */
-	    (void)H5I_dec_type_ref(H5I_DATASPACE);
-            n++; /*H5I*/
 
-	    /* Shut down interface */
-	    H5_interface_initialize_g = 0;
-	} /* end else */
+	/* Mark "top" of interface as closed */
+        if(0 == n)
+            H5S_top_package_initialize_s = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5S_term_interface() */
+} /* end H5S_top_term_package() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_term_package
+ PURPOSE
+    Terminate various H5S objects
+ USAGE
+    void H5S_term_package()
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Release the atom group and any other resources allocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+
+     Finishes shutting down the interface, after H5S_top_term_package()
+     is called
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int
+H5S_term_package(void)
+{
+    int	n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_DATASPACE));
+        HDassert(FALSE == H5S_top_package_initialize_s);
+
+        /* Destroy the dataspace object id group */
+        n += (H5I_dec_type_ref(H5I_DATASPACE) > 0);
+
+	/* Mark interface as closed */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5S_term_package() */
 
 
 /*--------------------------------------------------------------------------
@@ -185,7 +230,7 @@ H5S_t *
 H5S_create(H5S_class_t type)
 {
     H5S_t *new_ds = NULL;    /* New dataspace created */
-    H5S_t *ret_value;           /* Return value */
+    H5S_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -588,8 +633,8 @@ done:
 H5S_t *
 H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max)
 {
-    H5S_t		   *dst = NULL;
-    H5S_t		   *ret_value;   /* Return value */
+    H5S_t	*dst = NULL;
+    H5S_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -640,7 +685,7 @@ done:
 hssize_t
 H5S_get_simple_extent_npoints(const H5S_t *ds)
 {
-    hssize_t    ret_value;
+    hssize_t    ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI(-1)
 
@@ -716,8 +761,8 @@ done:
 hsize_t
 H5S_get_npoints_max(const H5S_t *ds)
 {
-    hsize_t	    ret_value;
     unsigned	    u;
+    hsize_t	    ret_value = 0;      /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 
@@ -821,7 +866,7 @@ done:
 int
 H5S_get_simple_extent_ndims(const H5S_t *ds)
 {
-    int	ret_value;      /* Return value */
+    int	ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -906,8 +951,8 @@ done:
 int
 H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t max_dims[])
 {
-    int	i;              /* Local index variable */
-    int	ret_value;      /* Return value */
+    int	i;                      /* Local index variable */
+    int	ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -965,7 +1010,7 @@ done:
 int
 H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
 {
-    int	ret_value;      /* Return value */
+    int	ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1073,8 +1118,8 @@ done:
 H5S_t *
 H5S_read(const H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5S_t	   *ds = NULL;          /* Dataspace to return */
-    H5S_t	   *ret_value;          /* Return value */
+    H5S_t	*ds = NULL;             /* Dataspace to return */
+    H5S_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1121,7 +1166,7 @@ done:
 static htri_t
 H5S_is_simple(const H5S_t *sdim)
 {
-    htri_t		    ret_value;
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1426,7 +1471,7 @@ H5S_t *
 H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
 		  const hsize_t maxdims[/*rank*/])
 {
-    H5S_t	*ret_value;     /* Return value */
+    H5S_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1623,7 +1668,7 @@ H5S_decode(const unsigned char *buf)
     size_t      extent_size;            /* size of the extent message*/
     H5F_t       *f = NULL;              /* Fake file structure*/
     uint8_t     sizeof_size;            /* 'Size of sizes' for file */
-    H5S_t       *ret_value;
+    H5S_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1705,7 +1750,7 @@ done:
 H5S_class_t
 H5S_get_simple_extent_type(const H5S_t *space)
 {
-    H5S_class_t	ret_value;
+    H5S_class_t	ret_value = H5S_NO_CLASS;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_NO_CLASS)
 
@@ -1903,7 +1948,7 @@ done:
 hbool_t
 H5S_has_extent(const H5S_t *ds)
 {
-    hbool_t ret_value;
+    hbool_t ret_value = FALSE;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

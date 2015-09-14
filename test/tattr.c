@@ -29,7 +29,7 @@
  * This file needs to access private information from the H5O package.
  * This file also needs to access the object header testing code.
  */
-#define H5O_PACKAGE
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
 #define H5O_TESTING
 #include "H5Opkg.h"		/* Object headers 			*/
 
@@ -37,7 +37,7 @@
  * This file needs to access private information from the H5A package.
  * This file also needs to access the attribute testing code.
  */
-#define H5A_PACKAGE
+#define H5A_FRIEND		/*suppress error about including H5Apkg	  */
 #define H5A_TESTING
 #include "H5Apkg.h"		/* Attributes	 			*/
 
@@ -45,7 +45,7 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"		/* File access	 			*/
 

@@ -27,8 +27,8 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 
 
 /***********/
@@ -43,7 +43,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 #include "H5Tprivate.h"		/* Datatypes 				*/
-#include "H5Zpkg.h"		/* Data filters				*/
+#include "H5Zprivate.h"		/* Data filters				*/
 
 
 /****************/

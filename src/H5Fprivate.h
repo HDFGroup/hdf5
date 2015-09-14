@@ -270,7 +270,7 @@
                                  ((O1) >= (O2) && (O1) < ((O2) + (L2))))
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
-#ifdef H5F_PACKAGE
+#ifdef H5F_MODULE
 #define H5F_INTENT(F)           ((F)->shared->flags)
 #define H5F_OPEN_NAME(F)        ((F)->open_name)
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)
@@ -312,7 +312,7 @@
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (((F)->shared->grp_btree_shared = (RC)) ? SUCCEED : FAIL)
 #define H5F_USE_TMP_SPACE(F)    ((F)->shared->use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->tmp_addr, (ADDR)))
-#else /* H5F_PACKAGE */
+#else /* H5F_MODULE */
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_OPEN_NAME(F)        (H5F_get_open_name(F))
 #define H5F_ACTUAL_NAME(F)      (H5F_get_actual_name(F))
@@ -354,7 +354,7 @@
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (H5F_set_grp_btree_shared((F), (RC)))
 #define H5F_USE_TMP_SPACE(F)    (H5F_use_tmp_space(F))
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_is_tmp_addr((F), (ADDR)))
-#endif /* H5F_PACKAGE */
+#endif /* H5F_MODULE */
 
 
 /* Macros to encode/decode offset/length's for storing in the file */

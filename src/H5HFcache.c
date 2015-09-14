@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
 
 
 /***********/
@@ -401,7 +401,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     uint8_t             heap_flags;     /* Status flags for heap */
-    void *              ret_value;      /* Return value */
+    void *              ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -905,7 +905,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t len, void *_udata,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned            u;              /* Local index variable */
-    void *              ret_value;      /* Return value */
+    void *              ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1590,7 +1590,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
     H5HF_direct_t       *dblock = NULL; /* Direct block info */
     const uint8_t       *image;         /* Pointer into raw data buffer */
     haddr_t             heap_addr;      /* Address of heap header in the file */
-    void *              ret_value;      /* Return value */
+    void *              ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_STATIC
 

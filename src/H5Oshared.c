@@ -30,7 +30,7 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
 
 
 /***********/
@@ -313,7 +313,7 @@ H5O_shared_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned *ioflags,
 {
     H5O_shared_t sh_mesg;       /* Shared message info */
     unsigned version;           /* Shared message version */
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -477,7 +477,7 @@ H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src)
 size_t
 H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg)
 {
-    size_t ret_value;           /* Return value */
+    size_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

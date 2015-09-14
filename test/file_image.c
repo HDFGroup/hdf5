@@ -643,7 +643,7 @@ test_core(void)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Release resources */
-    h5_cleanup(FILENAME, fapl); 
+    h5_clean_files(FILENAME, fapl); 
     HDfree(udata);
     HDfree(file_image);
     HDremove(copied_filename);
@@ -890,8 +890,8 @@ test_get_file_image(const char * test_banner,
     VERIFY(err == SUCCEED, "H5Pclose(core_fapl_id) failed.");
 
     /* tidy up */
-    result = h5_cleanup(FILENAME2, fapl);
-    VERIFY(result != 0, "h5_cleanup() failed.");
+    result = h5_clean_files(FILENAME2, fapl);
+    VERIFY(result != 0, "h5_clean_files() failed.");
 
     /* discard the image buffer if it exists */
     if(image_ptr != NULL) 
@@ -1039,8 +1039,8 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(file_id) failed.");
 
     /* tidy up */
-    result = h5_cleanup(FILENAME2, fapl_id);
-    VERIFY(result != 0, "h5_cleanup(1) failed.");
+    result = h5_clean_files(FILENAME2, fapl_id);
+    VERIFY(result != 0, "h5_clean_files(1) failed.");
 
     /* discard the image buffer if it exists */
     if(image_ptr != NULL) 
@@ -1145,8 +1145,8 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
     /* tidy up */
-    result = h5_cleanup(FILENAME2, fapl_id);
-    VERIFY(result != 0, "h5_cleanup(2 failed.");
+    result = h5_clean_files(FILENAME2, fapl_id);
+    VERIFY(result != 0, "h5_clean_files(2 failed.");
 
     /************************** Test #3 **********************************/
     /* set up a split file driver test file, and try to get its image 
@@ -1208,8 +1208,8 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
     /* tidy up */
-    result = h5_cleanup(FILENAME2, fapl_id);
-    VERIFY(result != 0, "h5_cleanup(2 failed.");
+    result = h5_clean_files(FILENAME2, fapl_id);
+    VERIFY(result != 0, "h5_clean_files(2 failed.");
 
     /************************** Test #4 **********************************/
     /* set up a family file driver test file, and try to get its image 
@@ -1269,8 +1269,8 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
     /* tidy up */
-    result = h5_cleanup(FILENAME2, fapl_id);
-    VERIFY(result != 0, "h5_cleanup(2 failed.");
+    result = h5_clean_files(FILENAME2, fapl_id);
+    VERIFY(result != 0, "h5_clean_files(2 failed.");
     
     PASSED();
 
@@ -1340,6 +1340,8 @@ main(void)
 
     errors += test_get_file_image_error_rejection();
 
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
 
     if(errors) { 
         printf("***** %d File Image TEST%s FAILED! *****\n", 

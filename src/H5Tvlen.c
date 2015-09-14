@@ -18,10 +18,7 @@
  *      datatypes in the H5T interface.
  */
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5T_init_vlen_interface
+#include "H5Tmodule.h"          /* This source code file is part of the H5T module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -64,27 +61,6 @@ static H5T_vlen_alloc_info_t H5T_vlen_def_vl_alloc_info ={
     H5D_VLEN_FREE_INFO
 };
 
-
-/*--------------------------------------------------------------------------
-NAME
-   H5T_init_vlen_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5T_init_vlen_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5T_init_iterface currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5T_init_vlen_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5T_init())
-} /* H5T_init_vlen_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -147,8 +123,8 @@ done:
 H5T_t *
 H5T__vlen_create(const H5T_t *base)
 {
-    H5T_t	*dt = NULL;		/*new VL datatype	*/
-    H5T_t	*ret_value;	/*return value			*/
+    H5T_t	*dt = NULL;		/* New VL datatype */
+    H5T_t	*ret_value = NULL;	/* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -781,7 +757,7 @@ static ssize_t
 H5T_vlen_disk_getlen(const void *_vl)
 {
     const uint8_t *vl=(const uint8_t *)_vl; /* Pointer to the disk VL information */
-    size_t	seq_len;        /* Sequence length */
+    size_t	seq_len = 0;    /* Sequence length */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

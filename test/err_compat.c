@@ -500,7 +500,7 @@ main(void)
     }
 
     if(H5Fclose(file) < 0) TEST_ERROR ;
-    h5_cleanup(FILENAME, fapl);
+    h5_clean_files(FILENAME, fapl);
 
     printf("All error API tests passed.\n");
     return 0;
@@ -510,3 +510,4 @@ main(void)
     return 1;
 }
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+

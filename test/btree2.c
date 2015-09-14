@@ -22,7 +22,7 @@
  * This file needs to access private datatypes from the H5B2 package.
  * This file also needs to access the v2 B-tree testing code.
  */
-#define H5B2_PACKAGE
+#define H5B2_FRIEND		/*suppress error about including H5B2pkg	  */
 #define H5B2_TESTING
 #include "H5B2pkg.h"
 

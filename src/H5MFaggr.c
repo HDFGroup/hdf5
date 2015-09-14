@@ -25,8 +25,8 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5MF_PACKAGE		/*suppress error about including H5MFpkg  */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#include "H5MFmodule.h"         /* This source code file is part of the H5MF module */
 
 
 /***********/
@@ -97,7 +97,7 @@ static herr_t H5MF_aggr_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
 haddr_t
 H5MF_aggr_vfd_alloc(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, hsize_t size)
 {
-    haddr_t	ret_value;              /* Return value */
+    haddr_t     ret_value = HADDR_UNDEF;        /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
@@ -158,7 +158,7 @@ H5MF_aggr_alloc(H5F_t *f, hid_t dxpl_id, H5F_blk_aggr_t *aggr,
     haddr_t	eoa_frag_addr = HADDR_UNDEF;    /* Address of fragment at EOA */
     hsize_t	eoa_frag_size = 0;      /* Size of fragment at EOA */
     haddr_t	eoa = HADDR_UNDEF;      /* Initial EOA for the file */
-    haddr_t 	ret_value;              /* Return value */
+    haddr_t     ret_value = HADDR_UNDEF;        /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_AGGR_DEBUG
@@ -871,7 +871,7 @@ H5MF_aggrs_try_shrink_eoa(H5F_t *f, hid_t dxpl_id)
 {
     htri_t ma_status;        /* Whether the metadata aggregator can shrink the EOA */
     htri_t sda_status;       /* Whether the small data aggregator can shrink the EOA */
-    htri_t ret_value;        /* Return value */
+    htri_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

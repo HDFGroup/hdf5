@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+#include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -542,7 +542,7 @@ static void *
 H5Z_xform_parse(const char *expression, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_token tok;
-    void* ret_value;
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -581,7 +581,7 @@ static H5Z_node *
 H5Z_parse_expression(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_node *expr;
-    H5Z_node *ret_value;        /* Return value */
+    H5Z_node *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -675,7 +675,7 @@ static H5Z_node *
 H5Z_parse_term(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_node *term = NULL;
-    H5Z_node *ret_value;
+    H5Z_node *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -775,7 +775,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_node 	*factor=NULL;
     H5Z_node 	*new_node;
-    H5Z_node    *ret_value;
+    H5Z_node    *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -917,7 +917,7 @@ done:
 static H5Z_node *
 H5Z_new_node(H5Z_token_type type)
 {
-    H5Z_node *ret_value;
+    H5Z_node *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1477,10 +1477,10 @@ H5Z_do_op(H5Z_node* tree)
 H5Z_data_xform_t *
 H5Z_xform_create(const char *expr)
 {
-    H5Z_data_xform_t *data_xform_prop=NULL;
-    H5Z_data_xform_t *ret_value;
+    H5Z_data_xform_t *data_xform_prop = NULL;
     unsigned int i;
     unsigned int count = 0;
+    H5Z_data_xform_t *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1696,7 +1696,7 @@ done:
 hbool_t
 H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
 {
-    hbool_t ret_value;
+    hbool_t ret_value = FALSE;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

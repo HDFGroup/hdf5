@@ -20,8 +20,8 @@
  * Purpose:     Tests the "ID to name" functionality
  */
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
-#define H5I_PACKAGE		/*suppress error about including H5Ipkg	  */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
+#define H5I_FRIEND		/*suppress error about including H5Ipkg	  */
 
 /* Define these macros to indicate that the testing APIs should be available */
 #define H5G_TESTING

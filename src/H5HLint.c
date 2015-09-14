@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HL_PACKAGE		/* Suppress error about including H5HLpkg */
+#include "H5HLmodule.h"         /* This source code file is part of the H5HL module */
 
 
 /***********/
@@ -102,7 +102,7 @@ H5HL_t *
 H5HL_new(size_t sizeof_size, size_t sizeof_addr, size_t prfx_size)
 {
     H5HL_t *heap = NULL;        /* New local heap */
-    H5HL_t *ret_value;          /* Return value */
+    H5HL_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -129,7 +129,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_inc_rc
+ * Function:	H5HL__inc_rc
  *
  * Purpose:	Increment ref. count on heap
  *
@@ -143,9 +143,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_inc_rc(H5HL_t *heap)
+H5HL__inc_rc(H5HL_t *heap)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check arguments */
     HDassert(heap);
@@ -154,11 +154,11 @@ H5HL_inc_rc(H5HL_t *heap)
     heap->rc++;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HL_inc_rc() */
+} /* end H5HL__inc_rc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_dec_rc
+ * Function:	H5HL__dec_rc
  *
  * Purpose:	Decrement ref. count on heap
  *
@@ -172,9 +172,9 @@ H5HL_inc_rc(H5HL_t *heap)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_dec_rc(H5HL_t *heap)
+H5HL__dec_rc(H5HL_t *heap)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check arguments */
     HDassert(heap);
@@ -187,7 +187,7 @@ H5HL_dec_rc(H5HL_t *heap)
         H5HL_dest(heap);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HL_dec_rc() */
+} /* end H5HL__dec_rc() */
 
 
 /*-------------------------------------------------------------------------
@@ -250,7 +250,7 @@ H5HL_prfx_t *
 H5HL_prfx_new(H5HL_t *heap)
 {
     H5HL_prfx_t *prfx = NULL;       /* New local heap prefix */
-    H5HL_prfx_t *ret_value;         /* Return value */
+    H5HL_prfx_t *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -262,7 +262,7 @@ H5HL_prfx_new(H5HL_t *heap)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Increment ref. count on heap data structure */
-    if(H5HL_inc_rc(heap) < 0)
+    if(H5HL__inc_rc(heap) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment heap ref. count")
 
     /* Link the heap & the prefix */
@@ -307,7 +307,7 @@ H5HL_prfx_dest(H5HL_prfx_t *prfx)
         prfx->heap->prfx = NULL;
 
         /* Decrement ref. count on heap data structure */
-        if(H5HL_dec_rc(prfx->heap) < 0)
+        if(H5HL__dec_rc(prfx->heap) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement heap ref. count")
 
         /* Unlink heap from prefix */
@@ -340,7 +340,7 @@ H5HL_dblk_t *
 H5HL_dblk_new(H5HL_t *heap)
 {
     H5HL_dblk_t *dblk = NULL;       /* New local heap data block */
-    H5HL_dblk_t *ret_value;         /* Return value */
+    H5HL_dblk_t *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -352,7 +352,7 @@ H5HL_dblk_new(H5HL_t *heap)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Increment ref. count on heap data structure */
-    if(H5HL_inc_rc(heap) < 0)
+    if(H5HL__inc_rc(heap) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment heap ref. count")
 
     /* Link the heap & the data block */
@@ -401,7 +401,7 @@ H5HL_dblk_dest(H5HL_dblk_t *dblk)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "can't unpin local heap prefix")
 
         /* Decrement ref. count on heap data structure */
-        if(H5HL_dec_rc(dblk->heap) < 0)
+        if(H5HL__dec_rc(dblk->heap) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement heap ref. count")
 
         /* Unlink heap from data block */

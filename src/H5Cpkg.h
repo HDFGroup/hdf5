@@ -28,7 +28,7 @@
  *		reason why this file was created.
  */
 
-#ifndef H5C_PACKAGE
+#if !(defined H5C_FRIEND || defined H5C_MODULE)
 #error "Do not include this file outside the H5C package!"
 #endif
 

@@ -22,7 +22,7 @@
  * This file needs to access private datatypes from the H5FA package.
  * This file also needs to access the fixed array testing code.
  */
-#define H5FA_PACKAGE
+#define H5FA_FRIEND		/*suppress error about including H5FApkg	  */
 #define H5FA_TESTING
 #include "H5FApkg.h"		/* Fixed Arrays			*/
 

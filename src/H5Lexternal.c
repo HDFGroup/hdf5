@@ -13,12 +13,17 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
-#define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
+/****************/
+/* Module Setup */
+/****************/
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5L_init_extern_interface
+#define H5G_FRIEND		/*suppress error about including H5Gpkg   */
+#include "H5Lmodule.h"          /* This source code file is part of the H5L module */
 
+
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Eprivate.h"         /* Error handling                       */
@@ -29,13 +34,52 @@
 #include "H5Opublic.h"          /* File objects                         */
 #include "H5Pprivate.h"         /* Property lists                       */
 
+
+/****************/
+/* Local Macros */
+/****************/
+
+/* Version of external link format */
+#define H5L_EXT_VERSION         0
+
+/* Valid flags for external links */
+#define H5L_EXT_FLAGS_ALL       0
+
+/* Size of local link name buffer for traversing external links */
+#define H5L_EXT_TRAVERSE_BUF_SIZE       256
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
 static hid_t H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
     const void *udata, size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id);
 static ssize_t H5L_extern_query(const char H5_ATTR_UNUSED * link_name, const void *udata,
     size_t udata_size, void * buf /*out*/, size_t buf_size);
 
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 /* Default External Link link class */
-const H5L_class_t H5L_EXTERN_LINK_CLASS[1] = {{
+static const H5L_class_t H5L_EXTERN_LINK_CLASS[1] = {{
     H5L_LINK_CLASS_T_VERS,      /* H5L_class_t version            */
     H5L_TYPE_EXTERNAL,		/* Link type id number            */
     "external",                 /* Link name for debugging        */
@@ -47,40 +91,8 @@ const H5L_class_t H5L_EXTERN_LINK_CLASS[1] = {{
     H5L_extern_query            /* Query callback                 */
 }};
 
-/* Version of external link format */
-#define H5L_EXT_VERSION         0
-
-/* Valid flags for external links */
-#define H5L_EXT_FLAGS_ALL       0
-
-/* Size of local link name buffer for traversing external links */
-#define H5L_EXT_TRAVERSE_BUF_SIZE       256
 
 
-/*--------------------------------------------------------------------------
-NAME
-   H5L_init_extern_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5L_init_extern_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5L_init() currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5L_init_extern_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5L_init())
-} /* H5L_init_extern_interface() */
-
-
-
 /*--------------------------------------------------------------------------
  * Function: H5L_getenv_prefix_name --
  *
@@ -210,7 +222,7 @@ H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
     char        *actual_file_name = NULL; /* Parent file's actual name */
     H5P_genplist_t  *fa_plist;          /* File access property list pointer */
     H5F_close_degree_t 	fc_degree = H5F_CLOSE_WEAK;  /* File close degree for target file */
-    hid_t       ret_value;              /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -279,7 +291,7 @@ H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
         /* Check if we need to allocate larger buffer */
         if((size_t)group_name_len > sizeof(local_group_name)) {
             if(NULL == (parent_group_name = (char *)H5MM_malloc((size_t)group_name_len)))
-                HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, FAIL, "can't allocate buffer to hold group name, group_name_len = %Zu", group_name_len)
+                HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, FAIL, "can't allocate buffer to hold group name, group_name_len = %zu", group_name_len)
         } /* end if */
         else
             parent_group_name = local_group_name;

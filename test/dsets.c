@@ -26,7 +26,7 @@
 /*
  * This file needs to access private information from the H5Z package.
  */
-#define H5Z_PACKAGE
+#define H5Z_FRIEND
 
 
 #include "h5test.h"

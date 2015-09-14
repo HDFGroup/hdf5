@@ -26,8 +26,7 @@
  *              With custom modifications...
  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5FD_log_init_interface
+#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
 
 #include "H5private.h"      /* Generic Functions    */
@@ -221,7 +220,7 @@ H5FL_DEFINE_STATIC(H5FD_log_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_log_init_interface
+ * Function:    H5FD__init_package
  *
  * Purpose:     Initializes any interface-specific data or routines.
  *
@@ -230,18 +229,18 @@ H5FL_DEFINE_STATIC(H5FD_log_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_log_init_interface(void)
+H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(H5FD_log_init() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize log VFD")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_log_init_interface() */
+} /* H5FD__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -261,7 +260,7 @@ done:
 hid_t
 H5FD_log_init(void)
 {
-    hid_t ret_value;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -361,7 +360,7 @@ static void *
 H5FD_log_fapl_get(H5FD_t *_file)
 {
     H5FD_log_t  *file = (H5FD_log_t *)_file;
-    void        *ret_value;                     /* Return value */
+    void        *ret_value = NULL;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -390,7 +389,7 @@ H5FD_log_fapl_copy(const void *_old_fa)
 {
     const H5FD_log_fapl_t   *old_fa = (const H5FD_log_fapl_t*)_old_fa;
     H5FD_log_fapl_t         *new_fa = NULL;     /* New FAPL info */
-    void                    *ret_value;         /* Return value */
+    void                    *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -483,7 +482,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     struct timeval stat_timeval_diff;
 #endif /* H5_HAVE_GETTIMEOFDAY */
     h5_stat_t       sb;
-    H5FD_t          *ret_value;     /* Return value */
+    H5FD_t          *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -922,7 +921,7 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hsi
 {
     H5FD_log_t	*file = (H5FD_log_t *)_file;
     haddr_t addr;
-    haddr_t ret_value;          /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

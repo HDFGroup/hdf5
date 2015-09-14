@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/
@@ -166,7 +166,7 @@ H5G_normalize(const char *name)
     char *norm;         /* Pointer to the normalized string */
     size_t	s,d;    /* Positions within the strings */
     unsigned    last_slash;     /* Flag to indicate last character was a slash */
-    char *ret_value;    /* Return value */
+    char *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -297,7 +297,7 @@ H5G_build_fullpath(const char *prefix, const char *name)
     size_t path_len;            /* Length of the path */
     size_t name_len;            /* Length of the name */
     unsigned need_sep;          /* Flag to indicate if separator is needed */
-    H5RS_str_t *ret_value;      /* Return value */
+    H5RS_str_t *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -354,7 +354,7 @@ H5RS_str_t *
 H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
 {
     const char *prefix;         /* Pointer to raw string for path */
-    H5RS_str_t *ret_value;
+    H5RS_str_t *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -565,7 +565,7 @@ H5G_get_name(const H5G_loc_t *loc, char *name/*out*/, size_t size,
     hbool_t *cached, hid_t lapl_id, hid_t dxpl_id)
 {
     ssize_t len = 0;            /* Length of object's name */
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value = -1;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1292,7 +1292,7 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
     H5G_loc_t root_loc;         /* Root group's location */
     hbool_t found_obj = FALSE;  /* If we found the object */
     herr_t status;              /* Status from iteration */
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value = -1;     /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));

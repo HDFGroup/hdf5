@@ -28,7 +28,7 @@
  * This file needs to access private information from the H5S package.
  * This file also needs to access the dataspace testing code.
  */
-#define H5S_PACKAGE
+#define H5S_FRIEND		/*suppress error about including H5Spkg	  */
 #define H5S_TESTING
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
@@ -36,7 +36,7 @@
  * This file needs to access private information from the H5P package.
  * This file also needs to access the property list testing code.
  */
-#define H5P_PACKAGE
+#define H5P_FRIEND		/*suppress error about including H5Ppkg	  */
 #define H5P_TESTING
 #include "H5Ppkg.h"		/* Property Lists 			*/
 
