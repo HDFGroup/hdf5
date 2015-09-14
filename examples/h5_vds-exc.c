@@ -100,20 +100,25 @@ main (void)
 
    /* 
     * Build the mappings for A, C and E source datasets.
-    *
+    * Unlimited hyperslab selection is the same in the source datasets.
+    * Unlimited hyperslab selections in the virtual dataset have different offsets.
     */
+   status = H5Sselect_hyperslab (ksrc_space, H5S_SELECT_SET, start, NULL, count, block);
    for (i = 0; i < 3; i++) {
       start[1] = (hsize_t)((k+n)*i);
       status = H5Sselect_hyperslab (space, H5S_SELECT_SET, start, NULL, count, block);
       status = H5Pset_virtual (dcpl, space, SRC_FILE[2*i], SRC_DATASET[2*i], ksrc_space);
    }
 
-   /* Reinitialize block[1] */
+   /* Reinitialize start[1] and block[1] to build the second set of mappings. */
+   start[1] = 0;
    block[1] = n;
    /* 
     * Build the mappings for B, D and F source datasets.
-    *
+    * Unlimited hyperslab selection is the same in the source datasets.
+    * Unlimited hyperslab selections in the virtual dataset have different offsets.
     */
+   status = H5Sselect_hyperslab (nsrc_space, H5S_SELECT_SET, start, NULL, count, block);
    for (i = 0; i < 3; i++) {
       start[1] = (hsize_t)(k+(k+n)*i);
       status = H5Sselect_hyperslab (space, H5S_SELECT_SET, start, NULL, count, block);
@@ -191,10 +196,16 @@ main (void)
           printf("         Source dataset name %s\n", dsetname);
 
       /* Get selection in the source dataset */
-          printf("         Selection in the source dataset ");
+          printf("         Selection in the source dataset \n");
           src_space = H5Pget_virtual_srcspace (dcpl, (size_t)i);
-          if(H5Sget_select_type(src_space) == H5S_SEL_ALL) {
-                  printf("H5S_ALL \n");
+          if (H5Sget_select_type(src_space) == H5S_SEL_HYPERSLABS) { 
+              if (H5Sis_regular_hyperslab(vspace)) {
+                   status = H5Sget_regular_hyperslab (src_space, start_out, stride_out, count_out, block_out);
+                   printf("         start  = [%llu, %llu, %llu] \n", (unsigned long long)start_out[0], (unsigned long long)start_out[1], (unsigned long long)start_out[2]);
+                   printf("         stride = [%llu, %llu, %llu] \n", (unsigned long long)stride_out[0], (unsigned long long)stride_out[1], (unsigned long long)stride_out[2]);
+                   printf("         count  = [%llu, %llu, %llu] \n", (unsigned long long)count_out[0], (unsigned long long)count_out[1], (unsigned long long)count_out[2]);
+                   printf("         block  = [%llu, %llu, %llu] \n", (unsigned long long)block_out[0], (unsigned long long)block_out[1], (unsigned long long)block_out[2]);
+               }
           }
           H5Sclose(vspace);
           H5Sclose(src_space);
