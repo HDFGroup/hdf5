@@ -102,9 +102,8 @@ DIST_COMMON = $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/lt_vers.am \
 	$(top_srcdir)/config/conclude.am $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(srcdir)/H5config.h.in \
-	$(top_srcdir)/bin/mkinstalldirs $(srcdir)/libhdf5.settings.in \
-	$(top_srcdir)/bin/depcomp $(include_HEADERS) \
-	$(top_srcdir)/bin/test-driver COPYING
+	$(srcdir)/libhdf5.settings.in $(top_srcdir)/bin/depcomp \
+	$(include_HEADERS) $(top_srcdir)/bin/test-driver COPYING
 noinst_PROGRAMS = H5detect$(EXEEXT) H5make_libsettings$(EXEEXT)
 TESTS =
 subdir = src
@@ -113,7 +112,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 	$(top_srcdir)/m4/aclocal_fc.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
+mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = H5config.h $(top_builddir)/fortran/src/H5config_f.inc
 CONFIG_CLEAN_FILES = libhdf5.settings
 CONFIG_CLEAN_VPATH_FILES =
@@ -200,7 +199,7 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Topaque.lo H5Torder.lo H5Tpad.lo H5Tprecis.lo H5Tstrpad.lo \
 	H5Tvisit.lo H5Tvlen.lo H5TS.lo H5VM.lo H5WB.lo H5Z.lo \
 	H5Zdeflate.lo H5Zfletcher32.lo H5Znbit.lo H5Zshuffle.lo \
-	H5Zszip.lo H5Zscaleoffset.lo H5Ztrans.lo
+	H5Zscaleoffset.lo H5Zszip.lo H5Ztrans.lo
 libhdf5_la_OBJECTS = $(am_libhdf5_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -468,7 +467,6 @@ AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
-AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -824,8 +822,8 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Topaque.c \
         H5Torder.c \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c H5VM.c H5WB.c H5Z.c  \
-        H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zszip.c  \
-        H5Zscaleoffset.c H5Ztrans.c
+        H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c \
+        H5Zscaleoffset.c H5Zszip.c H5Ztrans.c
 
 
 # Public headers

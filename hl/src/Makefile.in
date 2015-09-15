@@ -99,9 +99,8 @@ host_triplet = @host@
 DIST_COMMON = $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/lt_vers.am \
 	$(top_srcdir)/config/conclude.am $(srcdir)/Makefile.in \
-	$(srcdir)/Makefile.am $(top_srcdir)/bin/mkinstalldirs \
-	$(top_srcdir)/bin/depcomp $(include_HEADERS) \
-	$(top_srcdir)/bin/test-driver COPYING
+	$(srcdir)/Makefile.am $(top_srcdir)/bin/depcomp \
+	$(include_HEADERS) $(top_srcdir)/bin/test-driver COPYING
 TESTS =
 subdir = hl/src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -109,7 +108,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 	$(top_srcdir)/m4/aclocal_fc.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
+mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/H5config.h \
 	$(top_builddir)/fortran/src/H5config_f.inc
 CONFIG_CLEAN_FILES =
@@ -406,7 +405,6 @@ AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
-AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@

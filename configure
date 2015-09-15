@@ -678,7 +678,6 @@ BUILD_SHARED_SZIP_CONDITIONAL_TRUE
 LL_PATH
 USE_FILTER_SZIP
 USE_FILTER_DEFLATE
-AM_MAKEFLAGS
 LT_STATIC_EXEC
 USE_PLUGINS_CONDITIONAL_FALSE
 USE_PLUGINS_CONDITIONAL_TRUE
@@ -1560,8 +1559,8 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-silent-rules   less verbose build output (undo: "make V=1")
   --disable-silent-rules  verbose build output (undo: "make V=0")
-  --enable-maintainer-mode
-                          enable make rules and dependencies not useful (and
+  --disable-maintainer-mode
+                          disable make rules and dependencies not useful (and
                           sometimes confusing) to the casual installer
   --enable-dependency-tracking
                           do not reject slow dependency extractors
@@ -3658,15 +3657,16 @@ AM_BACKSLASH='\'
 
 
 ## AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
-## for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE
-## is *not* included here, these files will be rebuilt if out of date.
-## This is a problem because if users try to build on a machine with
+## for Makefiles, configure, src/H5config.h, etc. If AM_MAINTAINER_MODE
+## is enabled, these files will be rebuilt if out of date. This is a
+## problem because if users try to build on a machine with
 ## the wrong versions of autoconf and automake, these files will be
 ## rebuilt with the wrong versions and bad things can happen.
 ## Also, CVS doesn't preserve dependencies between timestamps, so
 ## Makefiles will often think rebuilding needs to occur when it doesn't.
-## Developers should './configure --enable-maintainer-mode' to turn on
-## rebuild rules.
+##
+## By default, it is enabled. Users can configure with
+## --disable-maintainer-mode to prevent running the autotools.
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
 $as_echo_n "checking whether to enable maintainer-specific portions of Makefiles... " >&6; }
@@ -3674,7 +3674,7 @@ $as_echo_n "checking whether to enable maintainer-specific portions of Makefiles
 if test "${enable_maintainer_mode+set}" = set; then :
   enableval=$enable_maintainer_mode; USE_MAINTAINER_MODE=$enableval
 else
-  USE_MAINTAINER_MODE=no
+  USE_MAINTAINER_MODE=yes
 fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $USE_MAINTAINER_MODE" >&5
@@ -22768,8 +22768,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
 ## ----------------------------------------------------------------------
 ## Check if we should install only statically linked executables.
 ##   This check needs to occur after libtool is initialized because
@@ -22847,35 +22845,6 @@ $as_echo "error" >&6; }
     as_fn_error $? "\'$enableval\' is not a valid rpath type" "$LINENO" 5
     ;;
 esac
-
-## ----------------------------------------------------------------------
-## pmake will throw an error if variables are undefined in a Makefile.
-## These errors can be changed to warnings using the -V flag.
-##
- AM_MAKEFLAGS=""
-
-## Don't run test if MAKE is defined but is the empty string
-if test -n "${MAKE-make}"; then
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether make will build with undefined variables" >&5
-$as_echo_n "checking whether make will build with undefined variables... " >&6; }
-
-  cat >maketest <<EOF
-foo: \$(UNDEFINED) \$(UNDEFINED2)
-	@echo \$(UNDEFINED3) works
-EOF
-
-  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no, setting -V flag" >&5
-$as_echo "no, setting -V flag" >&6; }
-    AM_MAKEFLAGS="\-V"
-  fi
-
-  rm maketest
-fi
 
 ## ----------------------------------------------------------------------
 ## Production flags?  Save the value in $CONFIG_MODE so we have it for
@@ -27853,10 +27822,9 @@ fi
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
-
-## Check these regardless. If the checks are moved inside the main
-## direct VFD block, the output is nested.
-
+## ----------------------------------------------------------------------
+## Check if Direct I/O driver is enabled by --enable-direct-vfd
+##
 if ${hdf5_cv_direct_io+:} false; then :
   $as_echo_n "(cached) " >&6
 else
