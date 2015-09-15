@@ -49,7 +49,7 @@ macro (H5_GEN_PERL_FILES)
         OUTPUT ${HDF5_BINARY_DIR}/H5Edefin.h
         PRE_BUILD
         COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_err.pl ${HDF5_SOURCE_DIR}/src/H5err.txt
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SOURCE_DIR}/src/H5err.txt
         DEPENDS ${HDF5_SOURCE_DIR}/src/H5err.txt
         COMMENT " Creating err header"
     )
@@ -58,7 +58,7 @@ macro (H5_GEN_PERL_FILES)
         OUTPUT ${HDF5_BINARY_DIR}/H5version.h
         PRE_BUILD
         COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_vers.pl ${HDF5_SOURCE_DIR}/src/H5vers.txt
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_vers  ${HDF5_SOURCE_DIR}/src/H5vers.txt
         DEPENDS ${HDF5_SOURCE_DIR}/src/H5vers.txt
        COMMENT " Creating API version macro"
     )
@@ -67,7 +67,7 @@ macro (H5_GEN_PERL_FILES)
         OUTPUT ${HDF5_BINARY_DIR}/H5overflow.h
         PRE_BUILD
         COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_overflow.pl ${HDF5_SOURCE_DIR}/src/H5overflow.txt
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_overflow  ${HDF5_SOURCE_DIR}/src/H5overflow.txt
         DEPENDS ${HDF5_SOURCE_DIR}/src/H5overflow.txt
         COMMENT " Creating Assignment overflow macro"
     )
