@@ -213,7 +213,7 @@
      of shorts. It then proceeds like use case 1.8 by forking off a reader
      process.  The original process continues as the writer process that
      writes 1 plane at a time, updating parts of the chunks involved. The
-     reader reads 1 plane at a time, retriving data from partial chunks.
+     reader reads 1 plane at a time, retrieving data from partial chunks.
 
      The other possible options will work just like the two use cases.
 
