@@ -808,7 +808,7 @@ if (HDF5_GENERATE_HEADERS)
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5Edefin.h ${CMAKE_CURRENT_BINARY_DIR}/H5Einit.h ${CMAKE_CURRENT_BINARY_DIR}/H5Epubgen.h ${CMAKE_CURRENT_BINARY_DIR}/H5Eterm.h
         PRE_BUILD
         COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_err.pl ${HDF5_SOURCE_DIR}/src/H5err.txt ${CMAKE_CURRENT_BINARY_DIR}
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SOURCE_DIR}/src/H5err.txt ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS ${HDF5_SOURCE_DIR}/src/H5err.txt
         COMMENT " Creating err header"
     )
@@ -817,7 +817,7 @@ if (HDF5_GENERATE_HEADERS)
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5version.h
         PRE_BUILD
         COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_vers.pl ${HDF5_SOURCE_DIR}/src/H5vers.txt ${CMAKE_CURRENT_BINARY_DIR}
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_vers ${HDF5_SOURCE_DIR}/src/H5vers.txt ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS ${HDF5_SOURCE_DIR}/src/H5vers.txt
        COMMENT " Creating API version macro"
     )
@@ -826,7 +826,7 @@ if (HDF5_GENERATE_HEADERS)
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5overflow.h
         PRE_BUILD
         COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_overflow.pl ${HDF5_SOURCE_DIR}/src/H5overflow.txt ${CMAKE_CURRENT_BINARY_DIR}
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_overflow ${HDF5_SOURCE_DIR}/src/H5overflow.txt ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS ${HDF5_SOURCE_DIR}/src/H5overflow.txt
         COMMENT " Creating Assignment overflow macro"
     )
