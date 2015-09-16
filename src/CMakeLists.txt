@@ -805,34 +805,34 @@ if (HDF5_GENERATE_HEADERS)
   find_package (Perl)
   if (PERL_FOUND)
     add_custom_command (
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5Edefin.h ${CMAKE_CURRENT_BINARY_DIR}/H5Einit.h ${CMAKE_CURRENT_BINARY_DIR}/H5Epubgen.h ${CMAKE_CURRENT_BINARY_DIR}/H5Eterm.h
+        OUTPUT ${HDF5_SRC_DIR}/H5Edefin.h ${HDF5_SRC_DIR}/H5Einit.h ${HDF5_SRC_DIR}/H5Epubgen.h ${HDF5_SRC_DIR}/H5Eterm.h
         PRE_BUILD
         COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SOURCE_DIR}/src/H5err.txt ${CMAKE_CURRENT_BINARY_DIR}
-        DEPENDS ${HDF5_SOURCE_DIR}/src/H5err.txt
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SRC_DIR}/H5err.txt
+        DEPENDS ${HDF5_SRC_DIR}/H5err.txt
         COMMENT " Creating err header"
     )
 
     add_custom_command (
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5version.h
+        OUTPUT ${HDF5_SRC_DIR}/H5version.h
         PRE_BUILD
         COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_vers ${HDF5_SOURCE_DIR}/src/H5vers.txt ${CMAKE_CURRENT_BINARY_DIR}
-        DEPENDS ${HDF5_SOURCE_DIR}/src/H5vers.txt
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_vers ${HDF5_SRC_DIR}/H5vers.txt
+        DEPENDS ${HDF5_SRC_DIR}/H5vers.txt
        COMMENT " Creating API version macro"
     )
 
     add_custom_command (
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5overflow.h
+        OUTPUT ${HDF5_SRC_DIR}/H5overflow.h
         PRE_BUILD
         COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_overflow ${HDF5_SOURCE_DIR}/src/H5overflow.txt ${CMAKE_CURRENT_BINARY_DIR}
-        DEPENDS ${HDF5_SOURCE_DIR}/src/H5overflow.txt
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_overflow ${HDF5_SRC_DIR}/H5overflow.txt
+        DEPENDS ${HDF5_SRC_DIR}/H5overflow.txt
         COMMENT " Creating Assignment overflow macro"
     )
 
     add_custom_target(run_perl_scripts ALL
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/H5Edefin.h ${CMAKE_CURRENT_BINARY_DIR}/H5version.h ${CMAKE_CURRENT_BINARY_DIR}/H5overflow.h
+        DEPENDS ${HDF5_SRC_DIR}/H5Edefin.h ${HDF5_SRC_DIR}/H5version.h ${HDF5_SRC_DIR}/H5overflow.h
     )
   else (PERL_FOUND)
     message (STATUS "Cannot generate headers - perl not found")
@@ -845,22 +845,12 @@ endif (HDF5_GENERATE_HEADERS)
 set (common_SRCS ${common_SRCS} ${HDF5_BINARY_DIR}/H5Tinit.c)
 set (common_SRCS ${common_SRCS} ${HDF5_BINARY_DIR}/H5lib_settings.c)
 
-if (HDF5_GENERATE_HEADERS)
-  set (common_SRCS ${common_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/H5Edefin.h)
-  set (common_SRCS ${common_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/H5Einit.h)
-  set (common_SRCS ${common_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/H5Epubgen.h)
-  set (common_SRCS ${common_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/H5Eterm.h)
-  set (common_SRCS ${common_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/H5version.h)
-  set (common_SRCS ${common_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/H5overflow.h)
-  include_directories(${CMAKE_CURRENT_BINARY_DIR})
-else (HDF5_GENERATE_HEADERS)
-  set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5Edefin.h)
-  set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5Einit.h)
-  set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5Epubgen.h)
-  set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5Eterm.h)
-  set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5version.h)
-  set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5overflow.h)
-endif (HDF5_GENERATE_HEADERS)
+set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5Edefin.h)
+set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5Einit.h)
+set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5Epubgen.h)
+set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5Eterm.h)
+set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5version.h)
+set (common_SRCS ${common_SRCS} ${HDF5_SRC_DIR}/H5overflow.h)
 
 add_library (${HDF5_LIB_TARGET} STATIC ${common_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS})
 TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} STATIC " " " ")
