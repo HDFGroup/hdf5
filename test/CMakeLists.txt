@@ -257,7 +257,7 @@ set (H5_TESTS
     #links_env
     file_image
     enc_dec_plist
-    enc_dec_plist_with_endianess
+    enc_dec_plist_cross_platform
     unregister
 )
 
