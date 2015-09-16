@@ -90,6 +90,12 @@ typedef struct {
     }                                   \
 }
 
+/* Define structure to hold driver ID & info for FAPLs */
+typedef struct {
+    hid_t driver_id;            /* Driver's ID */
+    const void *driver_info;    /* Driver info, for open callbacks */
+} H5FD_driver_prop_t;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -111,8 +117,7 @@ H5_DLL hsize_t H5FD_sb_size(H5FD_t *file);
 H5_DLL herr_t H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf);
 H5_DLL herr_t H5FD_sb_load(H5FD_t *file, const char *name, const uint8_t *buf);
 H5_DLL void *H5FD_fapl_get(H5FD_t *file);
-H5_DLL herr_t H5FD_fapl_open(struct H5P_genplist_t *plist, hid_t driver_id, const void *driver_info);
-H5_DLL herr_t H5FD_fapl_close(hid_t driver_id, void *fapl);
+H5_DLL herr_t H5FD_fapl_close(hid_t driver_id, const void *fapl);
 H5_DLL hid_t H5FD_register(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id,
 		  haddr_t maxaddr);

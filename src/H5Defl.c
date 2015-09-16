@@ -100,6 +100,7 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
     H5D__efl_readvv,
     H5D__efl_writevv,
     NULL,
+    NULL,
     NULL
 }};
 

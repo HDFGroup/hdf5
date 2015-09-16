@@ -4413,7 +4413,9 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 
     /* Sanity check */
     HDassert(src);
+    HDassert(src->shared);
     HDassert(dst);
+    HDassert(dst->shared);
 
     /*
      * Make sure the first entry in the table is the no-op conversion path.

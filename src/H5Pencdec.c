@@ -768,7 +768,7 @@ H5P__decode(const void *buf)
             HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "no decode callback for property: '%s'", name)
 
         /* Set the value for the property */
-        if(H5P_set(plist, name, value_buf) < 0)
+        if(H5P_poke(plist, name, value_buf) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value for property: '%s'", name)
     } /* end while */
 
