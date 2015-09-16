@@ -487,6 +487,8 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     return 0;
 
 error:
+    if(tconv_buf)
+        HDfree (tconv_buf);
     return -1;
 }
 
