@@ -2126,7 +2126,7 @@ H5FD_mpio_communicator(const H5FD_t *_file)
     HDassert(H5FD_MPIO==file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->comm)
-}
+} /* end H5FD_mpio_communicator() */
 
 #endif /* H5_HAVE_PARALLEL */
 
