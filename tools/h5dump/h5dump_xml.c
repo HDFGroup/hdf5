@@ -2968,9 +2968,9 @@ static int
 xml_print_refs(hid_t did, int source)
 {
     herr_t      e;
-    hid_t       type;
-    hid_t       space;
-    hssize_t    ssiz;
+    hid_t       type    = -1;
+    hid_t       space   = -1;
+    hssize_t    ssiz    = -1;
     hsize_t     i;
     size_t      tsiz;
     hobj_ref_t *refbuf = NULL;
@@ -3125,11 +3125,11 @@ static int
 xml_print_strs(hid_t did, int source)
 {
     herr_t      e;
-    hid_t       type;
-    hid_t       space;
-    hssize_t    ssiz;
+    hid_t       type    = -1;
+    hid_t       space   = -1;
+    hssize_t    ssiz    = -1;
     htri_t      is_vlstr = FALSE;
-    size_t      tsiz;
+    size_t      tsiz    = 0;
     size_t      i;
     size_t      str_size = 0;
     char       *bp = NULL;
