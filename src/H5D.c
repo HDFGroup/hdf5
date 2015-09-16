@@ -350,6 +350,10 @@ H5Dclose(hid_t dset_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
+    /* Check args */
+    if(NULL == H5I_object_verify(dset_id, H5I_DATASET))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
      * reaches zero.  
