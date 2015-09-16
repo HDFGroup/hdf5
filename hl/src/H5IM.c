@@ -255,12 +255,12 @@ herr_t H5IMget_image_info( hid_t loc_id,
                           char *interlace,
                           hssize_t *npals )
 {
-    hid_t       did;
-    hid_t       sid;
+    hid_t       did                     = -1;
+    hid_t       sid                     = -1;
     hsize_t     dims[IMAGE24_RANK];
-    hid_t       aid;
-    hid_t       asid;
-    hid_t       atid;
+    hid_t       aid                     = -1;
+    hid_t       asid                    = -1;
+    hid_t       atid                    = -1;
     H5T_class_t aclass;
     int         has_pal;
     int         has_attr;
@@ -396,10 +396,14 @@ herr_t H5IMget_image_info( hid_t loc_id,
     return 0;
 
 out:
-    H5Dclose( did );
-    H5Aclose( aid );
-    H5Sclose( asid );
-    H5Tclose( atid );
+    if(did > 0)
+        H5Dclose( did );
+    if(aid > 0)
+        H5Aclose( aid );
+    if(asid > 0)
+        H5Sclose( asid );
+    if(atid > 0)
+        H5Tclose( atid );
     return -1;
 
 }
