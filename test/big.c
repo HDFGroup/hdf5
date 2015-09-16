@@ -120,7 +120,7 @@ static hsize_t values_used[WRT_N];
 static hsize_t
 randll(hsize_t limit, int current_index)
 {
-    hsize_t	acc;
+    hsize_t	acc = 0;
     int 	overlap = 1;
     int 	i;
     int 	tries = 0;
