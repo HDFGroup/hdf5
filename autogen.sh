@@ -324,7 +324,7 @@ echo
 if test -e "${LIBTOOL_DIR}/../share/aclocal" ; then
     aclocal_include="-I ${LIBTOOL_DIR}/../share/aclocal"
 fi
-aclocal_cmd="${HDF5_ACLOCAL} --force ${aclocal_include}"
+aclocal_cmd="${HDF5_ACLOCAL} --force -I m4 ${aclocal_include}"
 echo ${aclocal_cmd}
 if [ "$verbose" = true ] ; then
     ${HDF5_ACLOCAL} --version

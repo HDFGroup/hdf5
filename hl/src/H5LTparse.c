@@ -12,6 +12,7 @@
 #pragma GCC diagnostic ignored "-Wunused-function"                
 #pragma GCC diagnostic ignored "-Wunused-macros"                  
 #pragma GCC diagnostic ignored "-Wunused-parameter"               
+#pragma GCC diagnostic ignored "-Wredundant-decls"                
 #elif defined __SUNPRO_CC                                         
 #pragma disable_warn                                              
 #elif defined _MSC_VER                                            
