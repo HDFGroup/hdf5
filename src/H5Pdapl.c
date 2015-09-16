@@ -50,13 +50,13 @@
 /* Definitions for size of raw data chunk cache(slots) */
 #define H5D_ACS_DATA_CACHE_NUM_SLOTS_SIZE       sizeof(size_t)
 #define H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF        H5D_CHUNK_CACHE_NSLOTS_DEFAULT
-#define H5D_ACS_DATA_CACHE_NUM_SLOTS_ENC        H5P__encode_size_t
-#define H5D_ACS_DATA_CACHE_NUM_SLOTS_DEC        H5P__decode_size_t
+#define H5D_ACS_DATA_CACHE_NUM_SLOTS_ENC        H5P__encode_chunk_cache_nslots
+#define H5D_ACS_DATA_CACHE_NUM_SLOTS_DEC        H5P__decode_chunk_cache_nslots
 /* Definition for size of raw data chunk cache(bytes) */
 #define H5D_ACS_DATA_CACHE_BYTE_SIZE_SIZE       sizeof(size_t)
 #define H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF        H5D_CHUNK_CACHE_NBYTES_DEFAULT
-#define H5D_ACS_DATA_CACHE_BYTE_SIZE_ENC        H5P__encode_size_t
-#define H5D_ACS_DATA_CACHE_BYTE_SIZE_DEC        H5P__decode_size_t
+#define H5D_ACS_DATA_CACHE_BYTE_SIZE_ENC        H5P__encode_chunk_cache_nbytes
+#define H5D_ACS_DATA_CACHE_BYTE_SIZE_DEC        H5P__decode_chunk_cache_nbytes
 /* Definition for preemption read chunks first */
 #define H5D_ACS_PREEMPT_READ_CHUNKS_SIZE        sizeof(double)
 #define H5D_ACS_PREEMPT_READ_CHUNKS_DEF         H5D_CHUNK_CACHE_W0_DEFAULT
@@ -79,6 +79,12 @@
 
 /* Property class callbacks */
 static herr_t H5P__dacc_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P__encode_chunk_cache_nslots(const void *value, void **_pp,
+    size_t *size);
+static herr_t H5P__decode_chunk_cache_nslots(const void **_pp, void *_value);
+static herr_t H5P__encode_chunk_cache_nbytes(const void *value, void **_pp,
+    size_t *size);
+static herr_t H5P__decode_chunk_cache_nbytes(const void **_pp, void *_value);
 
 
 /*********************/
@@ -284,4 +290,224 @@ H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, doub
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_chunk_cache */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__encode_chunk_cache_nslots
+ *
+ * Purpose:        Encode the rdcc_nslots parameter to a serialized
+ *                 property list.  Similar to H5P__encode_size_t except
+ *                 the value of 255 for the enc_size field is reserved to
+ *                 indicate H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF, in which
+ *                 nothing further is encoded.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *
+ * Programmer:     Neil Fortner
+ *                 Wednesday, January 23, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
+{
+    uint64_t enc_value;     /* Property value to encode */
+    uint8_t **pp = (uint8_t **)_pp;
+    unsigned enc_size;      /* Size of encoded property */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+    HDassert(size);
+
+    /* Determine if this is the default value, in which case only encode
+     * enc_size (as 255).  Also set size needed for encoding. */
+    if(*(const size_t *)value == H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF) {
+        enc_size = 0;
+        *size += 1;
+    } /* end if */
+    else {
+        enc_value = (uint64_t)*(const size_t *)value;
+        enc_size = H5VM_limit_enc_size(enc_value);
+        HDassert(enc_size > 0);
+        *size += (1 + enc_size);
+    } /* end else */
+
+    HDassert(enc_size < 256);
+
+    if(NULL != *pp) {
+        /* Encode the size */
+        *(*pp)++ = (uint8_t)enc_size;
+
+        /* Encode the value if necessary */
+        if(enc_size != 0) {
+            UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+        } /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__encode_chunk_cache_nslots() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__decode_chunk_cache_nslots
+ *
+ * Purpose:        Decode the rdcc_nslots parameter from a serialized
+ *                 property list.  Similar to H5P__decode_size_t except
+ *                 the value of 255 for the enc_size field is reserved to
+ *                 indicate H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF, in which
+ *                 nothing further needs to be decoded.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *
+ * Programmer:     Neil Fortner
+ *                 Wednesday, January 23, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__decode_chunk_cache_nslots(const void **_pp, void *_value)
+{
+    size_t *value = (size_t *)_value;   /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
+    uint64_t enc_value;                 /* Decoded property value */
+    unsigned enc_size;                  /* Size of encoded property */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(value);
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+
+    /* Determine if enc_size indicates that this is the default value, in which
+     * case set value to H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF and return */
+    if(enc_size == 0)
+        *value = H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF;
+    else {
+        /* Decode the value */
+        UINT64DECODE_VAR(*pp, enc_value, enc_size);
+        H5_CHECKED_ASSIGN(*value, uint64_t, enc_value, size_t);
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__decode_chunk_cache_nslots() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__encode_chunk_cache_nbytes
+ *
+ * Purpose:        Encode the rdcc_nbytes parameter to a serialized
+ *                 property list.  Similar to H5P__encode_size_t except
+ *                 the value of 255 for the enc_size field is reserved to
+ *                 indicate H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF, in which
+ *                 nothing further is encoded.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *
+ * Programmer:     Neil Fortner
+ *                 Wednesday, January 23, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
+{
+    uint64_t enc_value;     /* Property value to encode */
+    uint8_t **pp = (uint8_t **)_pp;
+    unsigned enc_size;      /* Size of encoded property */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+    HDassert(size);
+
+    /* Determine if this is the default value, in which case only encode
+     * enc_size (as 255).  Also set size needed for encoding. */
+    if(*(const size_t *)value == H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF) {
+        enc_size = 0;
+        *size += 1;
+    } /* end if */
+    else {
+        enc_value = (uint64_t)*(const size_t *)value;
+        enc_size = H5VM_limit_enc_size(enc_value);
+        HDassert(enc_size > 0);
+        *size += (1 + enc_size);
+    } /* end else */
+
+    HDassert(enc_size < 256);
+
+    if(NULL != *pp) {
+        /* Encode the size */
+        *(*pp)++ = (uint8_t)enc_size;
+
+        /* Encode the value if necessary */
+        if(enc_size != 0) {
+            UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+        } /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__encode_chunk_cache_nbytes() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__decode_chunk_cache_nbytes
+ *
+ * Purpose:        Decode the rdcc_nbytes parameter from a serialized
+ *                 property list.  Similar to H5P__decode_size_t except
+ *                 the value of 255 for the enc_size field is reserved to
+ *                 indicate H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF, in which
+ *                 nothing further needs to be decoded.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *
+ * Programmer:     Neil Fortner
+ *                 Wednesday, January 23, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__decode_chunk_cache_nbytes(const void **_pp, void *_value)
+{
+    size_t *value = (size_t *)_value;   /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
+    uint64_t enc_value;                 /* Decoded property value */
+    unsigned enc_size;                  /* Size of encoded property */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(value);
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+
+    /* Determine if enc_size indicates that this is the default value, in which
+     * case set value to H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF and return */
+    if(enc_size == 0)
+        *value = H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF;
+    else {
+        /* Decode the value */
+        UINT64DECODE_VAR(*pp, enc_value, enc_size);
+        H5_CHECKED_ASSIGN(*value, uint64_t, enc_value, size_t);
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__decode_chunk_cache_nbytes() */
 

@@ -25,7 +25,7 @@
 #include "H5private.h"
 #include "hdf5.h"
 
-static int encode_plist(hid_t plist_id, int little_endian, const char *filename_le, const char *filename_be);
+static int encode_plist(hid_t plist_id, int little_endian, int word_length, const char *filename_prefix);
 
 int
 main(void)
@@ -54,6 +54,7 @@ main(void)
     unsigned min_dense;
     const char* c_to_f = "x+32";
     int little_endian;
+    int word_length;
     H5AC_cache_config_t my_cache_config = {
         H5AC__CURR_CACHE_CONFIG_VERSION,
         1 /*TRUE*/,
@@ -99,12 +100,20 @@ main(void)
             little_endian = 0;
     }
 
+    /* check word length */
+    {
+        word_length = 8 * sizeof(void *);
+    }
+
     /* Explicitly initialize the library, since we are including the private header file */
     H5open();
 
     /******* ENCODE/DECODE DCPLS *****/
     if((dcpl1 = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         assert(dcpl1 > 0);
+
+    if((ret = encode_plist(dcpl1, little_endian, word_length, "testfiles/plist_files/def_dcpl_")) < 0)
+        assert(ret > 0);
 
     if((ret = H5Pset_chunk(dcpl1, 1, &chunk_size)) < 0)
         assert(ret > 0);
@@ -131,7 +140,7 @@ main(void)
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
         assert(ret > 0);
 
-    if((ret = encode_plist(dcpl1, little_endian, "testfiles/plist_files/dcpl_le", "testfiles/plist_files/dcpl_be")) < 0)
+    if((ret = encode_plist(dcpl1, little_endian, word_length, "testfiles/plist_files/dcpl_")) < 0)
         assert(ret > 0);
         
     /* release resource */
@@ -143,10 +152,13 @@ main(void)
     if((dapl1 = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
         assert(dapl1 > 0);
 
+    if((ret = encode_plist(dapl1, little_endian, word_length, "testfiles/plist_files/def_dapl_")) < 0)
+        assert(ret > 0);
+        
     if((ret = H5Pset_chunk_cache(dapl1, nslots, nbytes, w0)) < 0)
         assert(ret > 0);
 
-    if((ret = encode_plist(dapl1, little_endian, "testfiles/plist_files/dapl_le", "testfiles/plist_files/dapl_be")) < 0)
+    if((ret = encode_plist(dapl1, little_endian, word_length, "testfiles/plist_files/dapl_")) < 0)
         assert(ret > 0);
         
     /* release resource */
@@ -156,6 +168,10 @@ main(void)
     /******* ENCODE/DECODE DXPLS *****/
     if((dxpl1 = H5Pcreate(H5P_DATASET_XFER)) < 0)
         assert(dxpl1 > 0);
+
+    if((ret = encode_plist(dxpl1, little_endian, word_length, "testfiles/plist_files/def_dxpl_")) < 0)
+        assert(ret > 0);
+
     if((ret = H5Pset_btree_ratios(dxpl1, 0.2f, 0.6f, 0.2f)) < 0)
         assert(ret > 0);
     if((ret = H5Pset_hyper_vector_size(dxpl1, 5)) < 0)
@@ -177,7 +193,7 @@ main(void)
     if((ret = H5Pset_data_transform(dxpl1, c_to_f)) < 0)
         assert(ret > 0);
 
-    if((ret = encode_plist(dxpl1, little_endian, "testfiles/plist_files/dxpl_le", "testfiles/plist_files/dxpl_be")) < 0)
+    if((ret = encode_plist(dxpl1, little_endian, word_length, "testfiles/plist_files/dxpl_")) < 0)
         assert(ret > 0);
         
     /* release resource */
@@ -188,6 +204,9 @@ main(void)
     /******* ENCODE/DECODE GCPLS *****/
     if((gcpl1 = H5Pcreate(H5P_GROUP_CREATE)) < 0)
         assert(gcpl1 > 0);
+
+    if((ret = encode_plist(gcpl1, little_endian, word_length, "testfiles/plist_files/def_gcpl_")) < 0)
+        assert(ret > 0);
 
     if((ret = H5Pset_local_heap_size_hint(gcpl1, 256)) < 0)
          assert(ret > 0);
@@ -205,7 +224,7 @@ main(void)
     if((ret = H5Pset_link_creation_order(gcpl1, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED))) < 0)
          assert(ret > 0);
 
-    if((ret = encode_plist(gcpl1, little_endian, "testfiles/plist_files/gcpl_le", "testfiles/plist_files/gcpl_be")) < 0)
+    if((ret = encode_plist(gcpl1, little_endian, word_length, "testfiles/plist_files/gcpl_")) < 0)
         assert(ret > 0);
         
     /* release resource */
@@ -216,10 +235,13 @@ main(void)
     if((lcpl1 = H5Pcreate(H5P_LINK_CREATE)) < 0)
         assert(lcpl1 > 0);
 
+    if((ret = encode_plist(lcpl1, little_endian, word_length, "testfiles/plist_files/def_lcpl_")) < 0)
+        assert(ret > 0);
+
     if((ret = H5Pset_create_intermediate_group(lcpl1, 1 /*TRUE*/)) < 0)
         assert(ret > 0);
 
-    if((ret = encode_plist(lcpl1, little_endian, "testfiles/plist_files/lcpl_le", "testfiles/plist_files/lcpl_be")) < 0)
+    if((ret = encode_plist(lcpl1, little_endian, word_length, "testfiles/plist_files/lcpl_")) < 0)
         assert(ret > 0);
         
     /* release resource */
@@ -230,6 +252,9 @@ main(void)
     if((ocpypl1 = H5Pcreate(H5P_OBJECT_COPY)) < 0)
         assert(ocpypl1 > 0);
 
+    if((ret = encode_plist(ocpypl1, little_endian, word_length, "testfiles/plist_files/def_ocpypl_")) < 0)
+        assert(ret > 0);
+
     ret = H5Pset_copy_object(ocpypl1, H5O_COPY_EXPAND_EXT_LINK_FLAG);
     assert(ret >= 0);
 
@@ -239,7 +264,7 @@ main(void)
     ret = H5Padd_merge_committed_dtype_path(ocpypl1, "bar");
     assert(ret >= 0);
 
-    if((ret = encode_plist(ocpypl1, little_endian, "testfiles/plist_files/ocpypl_le", "testfiles/plist_files/ocpypl_be")) < 0)
+    if((ret = encode_plist(ocpypl1, little_endian, word_length, "testfiles/plist_files/ocpypl_")) < 0)
         assert(ret > 0);
         
     /* release resource */
@@ -250,6 +275,9 @@ main(void)
     if((ocpl1 = H5Pcreate(H5P_OBJECT_CREATE)) < 0)
         assert(ocpl1 > 0);
 
+    if((ret = encode_plist(ocpl1, little_endian, word_length, "testfiles/plist_files/def_ocpl_")) < 0)
+        assert(ret > 0);
+
     if((ret = H5Pset_attr_creation_order(ocpl1, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED))) < 0)
          assert(ret > 0);
 
@@ -259,7 +287,7 @@ main(void)
     if((ret = H5Pset_filter (ocpl1, H5Z_FILTER_FLETCHER32, 0, (size_t)0, NULL)) < 0)
         assert(ret > 0);
 
-    if((ret = encode_plist(ocpl1, little_endian, "testfiles/plist_files/ocpl_le", "testfiles/plist_files/ocpl_be")) < 0)
+    if((ret = encode_plist(ocpl1, little_endian, word_length, "testfiles/plist_files/ocpl_")) < 0)
         assert(ret > 0);
 
     /* release resource */
@@ -269,6 +297,9 @@ main(void)
     /******* ENCODE/DECODE LAPLS *****/
     if((lapl1 = H5Pcreate(H5P_LINK_ACCESS)) < 0)
         assert(lapl1 > 0);
+
+    if((ret = encode_plist(lapl1, little_endian, word_length, "testfiles/plist_files/def_lapl_")) < 0)
+        assert(ret > 0);
 
     if((ret = H5Pset_nlinks(lapl1, (size_t)134)) < 0)
         assert(ret > 0);
@@ -292,7 +323,7 @@ main(void)
     if((ret = H5Pclose(fapl1)) < 0)
         assert(ret > 0);
 
-    if((ret = encode_plist(lapl1, little_endian, "testfiles/plist_files/lapl_le", "testfiles/plist_files/lapl_be")) < 0)
+    if((ret = encode_plist(lapl1, little_endian, word_length, "testfiles/plist_files/lapl_")) < 0)
         assert(ret > 0);
 
     /* release resource */
@@ -302,6 +333,9 @@ main(void)
     /******* ENCODE/DECODE FAPLS *****/
     if((fapl1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         assert(fapl1 > 0);
+
+    if((ret = encode_plist(fapl1, little_endian, word_length, "testfiles/plist_files/def_fapl_")) < 0)
+        assert(ret > 0);
 
     if((ret = H5Pset_family_offset(fapl1, 1024)) < 0)
         assert(ret > 0);
@@ -330,7 +364,7 @@ main(void)
     if((ret = H5Pset_core_write_tracking(fapl1, TRUE, (size_t)(1024 * 1024))) < 0)
         assert(ret > 0);
 
-    if((ret = encode_plist(fapl1, little_endian, "testfiles/plist_files/fapl_le", "testfiles/plist_files/fapl_be")) < 0)
+    if((ret = encode_plist(fapl1, little_endian, word_length, "testfiles/plist_files/fapl_")) < 0)
         assert(ret > 0);
 
     /* release resource */
@@ -340,6 +374,9 @@ main(void)
     /******* ENCODE/DECODE FCPLS *****/
     if((fcpl1 = H5Pcreate(H5P_FILE_CREATE)) < 0)
         assert(fcpl1 > 0);
+
+    if((ret = encode_plist(fcpl1, little_endian, word_length, "testfiles/plist_files/def_fcpl_")) < 0)
+        assert(ret > 0);
 
     if((ret = H5Pset_userblock(fcpl1, 1024) < 0))
          assert(ret > 0);
@@ -362,7 +399,7 @@ main(void)
     if((ret = H5Pset_sizes(fcpl1, 8, 4) < 0))
          assert(ret > 0);
 
-    if((ret = encode_plist(fcpl1, little_endian, "testfiles/plist_files/fcpl_le", "testfiles/plist_files/fcpl_be")) < 0)
+    if((ret = encode_plist(fcpl1, little_endian, word_length, "testfiles/plist_files/fcpl_")) < 0)
         assert(ret > 0);
 
     /* release resource */
@@ -373,10 +410,13 @@ main(void)
     strcpl1 = H5Pcreate(H5P_STRING_CREATE);
     assert(strcpl1 > 0);
 
+    ret = encode_plist(strcpl1, little_endian, word_length, "testfiles/plist_files/def_strcpl_");
+    assert(ret > 0);
+
     ret = H5Pset_char_encoding(strcpl1, H5T_CSET_UTF8);
     assert(ret >= 0);
 
-    ret = encode_plist(strcpl1, little_endian, "testfiles/plist_files/strcpl_le", "testfiles/plist_files/strcpl_be");
+    ret = encode_plist(strcpl1, little_endian, word_length, "testfiles/plist_files/strcpl_");
     assert(ret > 0);
 
     /* release resource */
@@ -387,10 +427,13 @@ main(void)
     acpl1 = H5Pcreate(H5P_ATTRIBUTE_CREATE);
     assert(acpl1 > 0);
 
+    ret = encode_plist(acpl1, little_endian, word_length, "testfiles/plist_files/def_acpl_");
+    assert(ret > 0);
+
     ret = H5Pset_char_encoding(acpl1, H5T_CSET_UTF8);
     assert(ret >= 0);
 
-    ret = encode_plist(acpl1, little_endian, "testfiles/plist_files/acpl_le", "testfiles/plist_files/acpl_be");
+    ret = encode_plist(acpl1, little_endian, word_length, "testfiles/plist_files/acpl_");
     assert(ret > 0);
 
     /* release resource */
@@ -401,13 +444,18 @@ main(void)
 }
 
 static int
-encode_plist(hid_t plist_id, int little_endian, const char *filename_le, const char *filename_be)
+encode_plist(hid_t plist_id, int little_endian, int word_length, const char *filename_prefix)
 {
     int fd = 0; /* file descriptor */
     herr_t ret = 0;
     void *temp_buf = NULL;
     size_t temp_size = 0;
     ssize_t write_size;
+    char filename[1024];
+
+    /* Generate filename */
+    if((ret = HDsnprintf(filename, sizeof(filename), "%s%d%s", filename_prefix, word_length, little_endian ? "le" : "be")) < 0)
+        assert(ret > 0);
 
     /* first call to encode returns only the size of the buffer needed */
     if((ret = H5Pencode(plist_id, NULL, &temp_size)) < 0)
@@ -419,10 +467,7 @@ encode_plist(hid_t plist_id, int little_endian, const char *filename_le, const c
     if((ret = H5Pencode(plist_id, temp_buf, &temp_size)) < 0)
         assert(ret > 0);
 
-    if(little_endian)
-        fd = HDopen(filename_le, O_RDWR | O_CREAT | O_TRUNC, 0666);
-    else
-        fd = HDopen(filename_be, O_RDWR | O_CREAT | O_TRUNC, 0666);
+    fd = HDopen(filename, O_RDWR | O_CREAT | O_TRUNC, 0666);
     assert(fd > 0);
 
     write_size = HDwrite(fd, temp_buf, temp_size);

@@ -639,7 +639,7 @@ H5P__fill_value_enc(const void *value, void **_pp, size_t *size)
     herr_t ret_value = SUCCEED;         /* Return value */
     uint8_t **pp = (uint8_t **)_pp;
     uint64_t enc_value;
-    unsigned enc_size;
+    unsigned enc_size = 0;
 
     FUNC_ENTER_STATIC
 
