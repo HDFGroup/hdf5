@@ -275,8 +275,8 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	} /* end if */
     }
 
-    if(H5D__pre_write(dset, direct_write, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0) 
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
+    if(H5D_write(dset, direct_write, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
     /* Call index post_update if available */
     if (dset->shared->idx_class) {
@@ -311,6 +311,33 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_write
+ *
+ * Purpose: Private function for H5Dwrite.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id,
+         const H5S_t *mem_space, const H5S_t *file_space,
+         hid_t dxpl_id, const void *buf)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    HDassert(dset);
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(FAIL == H5D__pre_write(dset, direct_write, mem_type_id, mem_space, file_space, dxpl_id, buf))
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------
