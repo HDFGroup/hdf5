@@ -198,6 +198,7 @@ typedef struct H5G_entry_t H5G_entry_t;
 H5_DLL struct H5O_loc_t *H5G_oloc(H5G_t *grp);
 H5_DLL H5G_name_t * H5G_nameof(H5G_t *grp);
 H5_DLL H5F_t *H5G_fileof(H5G_t *grp);
+H5_DLL H5G_t *H5G_create_anon(const H5G_loc_t *loc, hid_t gcpl_id, hid_t gapl_id);
 H5_DLL H5G_t *H5G_open(const H5G_loc_t *loc, hid_t dxpl_id);
 H5_DLL herr_t H5G_close(H5G_t *grp);
 H5_DLL herr_t H5G_get_shared_count(H5G_t *grp);

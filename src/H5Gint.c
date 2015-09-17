@@ -311,6 +311,43 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__open_name() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5G_create_anon
+ *
+ * Purpose: Creates a new group relative to LOC_ID, giving it the
+ *              specified creation property list GCPL_ID and access
+ *              property list GAPL_ID.
+ *
+ * Return:  Success:    Ptr to a new group.
+ *
+ *      Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_t *
+H5G_create_anon(const H5G_loc_t *loc, hid_t gcpl_id, hid_t gapl_id)
+{
+    H5G_obj_create_t gcrt_info;         /* Information for group creation */
+    H5G_t      *ret_value = NULL;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    HDassert(loc);
+
+    /* Set up group creation info */
+    gcrt_info.gcpl_id = gcpl_id;
+    gcrt_info.cache_type = H5G_NOTHING_CACHED;
+    HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
+
+    /* Create the new group & get its ID */
+    if(NULL == (ret_value = H5G__create(loc->oloc->file, &gcrt_info, H5AC_dxpl_id)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_create_anon() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_open

@@ -377,7 +377,6 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 {
     H5G_loc_t	    loc;
     H5G_t	   *grp = NULL;
-    H5G_obj_create_t gcrt_info;         /* Information for group creation */
     hid_t	    ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -401,13 +400,8 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
         if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
-    /* Set up group creation info */
-    gcrt_info.gcpl_id = gcpl_id;
-    gcrt_info.cache_type = H5G_NOTHING_CACHED;
-    HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
-
     /* Create the new group & get its ID */
-    if(NULL == (grp = H5G__create(loc.oloc->file, &gcrt_info, H5AC_dxpl_id)))
+    if(NULL == (grp = H5G_create_anon(&loc, gcpl_id, gapl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
     if((ret_value = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
