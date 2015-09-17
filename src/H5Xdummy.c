@@ -466,7 +466,7 @@ H5X__dummy_get_query_data_cb(void *elem, hid_t type_id, unsigned H5_ATTR_UNUSED 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Apply the query */
-    if (H5Qapply_singleton(udata->query_id, &result, type_id, elem) < 0)
+    if (H5Qapply_atom(udata->query_id, &result, type_id, elem) < 0)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query to data element");
 
     /* Initialize count */

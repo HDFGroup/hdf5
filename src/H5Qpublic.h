@@ -26,7 +26,13 @@
 /*****************/
 /* Public Macros */
 /*****************/
+#define H5Q_REF_REG   (H5CHECK 0x100u)   /* region references are present */
+#define H5Q_REF_OBJ   (H5CHECK 0x010u)   /* object references are present */
+#define H5Q_REF_ATTR  (H5CHECK 0x001u)   /* attribute references are present */
 
+#define H5Q_VIEW_REF_REG_NAME   "Reg_refs"  /* region references */
+#define H5Q_VIEW_REF_OBJ_NAME   "Obj_refs"  /* object references */
+#define H5Q_VIEW_REF_ATTR_NAME  "Attr_refs" /* attribute references */
 
 /*******************/
 /* Public Typedefs */
@@ -80,13 +86,8 @@ H5_DLL herr_t H5Qget_combine_op(hid_t query_id, H5Q_combine_op_t *op_type);
 H5_DLL herr_t H5Qencode(hid_t query_id, void *buf, size_t *nalloc);
 H5_DLL hid_t H5Qdecode(const void *buf);
 
-/* Apply query (convenience) */
-H5_DLL herr_t H5Qapply_singleton(hid_t query_id, hbool_t *result, ...);
-
-/* Apply on combine query of data elements */
-H5_DLL herr_t H5Qapply_combine(hid_t query_id, hbool_t *result, hid_t type_id, const void *value);
-
-/* Apply query and create view */
+/* Apply query */
+H5_DLL herr_t H5Qapply_atom(hid_t query_id, hbool_t *result, ...);
 H5_DLL hid_t H5Qapply(hid_t loc_id, hid_t query_id, unsigned *result, hid_t vcpl_id);
 
 #ifdef __cplusplus

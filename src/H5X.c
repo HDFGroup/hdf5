@@ -392,7 +392,7 @@ H5X_can_create(hid_t dset_id, hid_t dcpl_id)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(dset_id != H5I_BADID);
+    HDassert(dset_id != FAIL);
     HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
 
     /* Check if the property list is non-default */
@@ -480,7 +480,7 @@ H5X_create(hid_t dset_id, unsigned plugin_id, hid_t xcpl_id)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(dset_id != H5I_BADID);
+    HDassert(dset_id != FAIL);
     HDassert(plugin_id <= H5X_PLUGIN_MAX);
 
     /* Is the plugin already registered */
@@ -565,7 +565,7 @@ H5X_remove(hid_t dset_id, unsigned plugin_id)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(dset_id != H5I_BADID);
+    HDassert(dset_id != FAIL);
     HDassert(plugin_id <= H5X_PLUGIN_MAX);
 
     if (NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))

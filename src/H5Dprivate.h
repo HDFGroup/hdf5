@@ -185,7 +185,7 @@ H5_DLL herr_t H5D_get_index(H5D_t *dset, unsigned max_count,
         unsigned *actual_count);
 H5_DLL herr_t H5D_remove_index(H5D_t *dset, unsigned plugin_id);
 H5_DLL herr_t H5D_get_index_size(H5D_t *dset, hsize_t *idx_size);
-H5_DLL H5S_t *H5D_query(H5D_t *dset, const H5S_t *file_space, H5Q_t *query,
+H5_DLL H5S_t *H5D_query(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query,
         hid_t xapl_id, hid_t xxpl_id);
 
 /* Functions that operate on vlen data */

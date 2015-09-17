@@ -48,6 +48,12 @@ typedef struct {
     hid_t dxpl_id;              /* DXPL for I/O operations */
 } H5D_flush_ud_t;
 
+/* Struct for holding callback info during H5D_query operation */
+typedef struct H5D_query_iter_arg_t {
+    const H5Q_t *query;
+    H5S_t *space;
+} H5D_query_iter_arg_t;
+
 
 /********************/
 /* Local Prototypes */
@@ -70,11 +76,14 @@ static herr_t H5D__init_storage(const H5D_t *dataset, hbool_t full_overwrite,
 /* TODO change H5D_open_index to H5D__open_index */
 static herr_t H5D_open_index(H5D_t *dset, hid_t xapl_id);
 static herr_t H5D_close_index(H5D_t *dset);
-static H5S_t *H5D__query(H5D_t *dset, const H5S_t *file_space, H5Q_t *query,
+static H5S_t *H5D__query(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query,
     hid_t xapl_id, hid_t xxpl_id);
-static H5S_t *H5D__query_singleton(H5D_t *dset, const H5S_t *file_space, H5Q_t *query,
+static H5S_t *H5D__query_singleton(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query,
     hid_t xapl_id, hid_t xxpl_id);
-static H5S_t *H5D__query_combined(H5D_t *dset, const H5S_t *file_space, H5Q_t *query,
+static H5S_t *H5D__query_force(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query);
+static herr_t H5D__query_force_iterate(void *elem, const H5T_t *type, unsigned ndim,
+    const hsize_t *point, void *op_data);
+static H5S_t *H5D__query_combined(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query,
     hid_t xapl_id, hid_t xxpl_id);
 
 
@@ -3332,7 +3341,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_t *
-H5D_query(H5D_t *dset, const H5S_t *file_space, H5Q_t *query, hid_t xapl_id,
+H5D_query(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query, hid_t xapl_id,
         hid_t xxpl_id)
 {
     H5S_t *ret_value = NULL;
@@ -3363,11 +3372,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5S_t *
-H5D__query(H5D_t *dset, const H5S_t *file_space, H5Q_t *query, hid_t xapl_id,
+H5D__query(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query, hid_t xapl_id,
         hid_t xxpl_id)
 {
     H5Q_combine_op_t combine_op;
-    H5S_t *(*query_func)(H5D_t *dset, const H5S_t *file_space, H5Q_t *query, hid_t xapl_id, hid_t xxpl_id);
+    H5S_t *(*query_func)(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query, hid_t xapl_id, hid_t xxpl_id);
     H5S_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3379,6 +3388,8 @@ H5D__query(H5D_t *dset, const H5S_t *file_space, H5Q_t *query, hid_t xapl_id,
     if (FAIL == H5Q_get_combine_op(query, &combine_op))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, NULL, "unable to get combine operator");
 
+    /* TODO might want to fix that to give the combined query to the plugin,
+     * add something to check whether the plugin supports it or not */
     query_func = (combine_op == H5Q_SINGLETON) ? H5D__query_singleton : H5D__query_combined;
     if (NULL == (ret_value = query_func(dset, file_space, query, xapl_id, xxpl_id)))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, NULL, "unable to get combine operator");
@@ -3399,7 +3410,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5S_t *
-H5D__query_singleton(H5D_t *dset, const H5S_t *file_space, H5Q_t *query,
+H5D__query_singleton(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query,
         hid_t xapl_id, hid_t xxpl_id)
 {
     H5X_class_t *idx_class;
@@ -3415,21 +3426,29 @@ H5D__query_singleton(H5D_t *dset, const H5S_t *file_space, H5Q_t *query,
 
     idx_class = dset->shared->idx_class;
 
-    if (file_space && (FAIL == (file_space_id = H5I_register(H5I_DATASPACE, file_space, FALSE))))
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register dataspace");
+    if (idx_class) {
+        /* Index associated to dataset so use it */
+        if (NULL == idx_class->query)
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, NULL, "plugin query callback not defined");
 
-    if (!idx_class)
-        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, NULL, "index class not defined");
-    if (NULL == idx_class->query)
-        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, NULL, "plugin query callback not defined");
-    /* Open index if not opened yet */
-    if (!dset->shared->idx_handle && (FAIL == H5D_open_index(dset, xapl_id)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, NULL, "cannot open index");
-    /* Call plugin query */
-    if (FAIL == (space_id = idx_class->query(dset->shared->idx_handle, file_space_id, query->query_id, xxpl_id)))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, NULL, "cannot query index");
-    if (NULL == (ret_value = (H5S_t *) H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace");
+        /* Open index if not opened yet */
+        if (!dset->shared->idx_handle && (FAIL == H5D_open_index(dset, xapl_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, NULL, "cannot open index");
+
+        /* Create ID for file_space */
+        if (file_space && (FAIL == (file_space_id = H5I_register(H5I_DATASPACE, file_space, FALSE))))
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register dataspace");
+
+        /* Call plugin query */
+        if (FAIL == (space_id = idx_class->query(dset->shared->idx_handle, file_space_id, query->query_id, xxpl_id)))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, NULL, "cannot query index");
+        if (NULL == (ret_value = (H5S_t *) H5I_object_verify(space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace");
+    } else {
+        /* Do a brute force selection */
+        if (NULL == (ret_value = H5D__query_force(dset, file_space, query)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOMPARE, NULL, "cannot compare data elements");
+    }
 
     /* Check for valid selection */
     if (H5S_SELECT_VALID(ret_value) != TRUE)
@@ -3445,6 +3464,121 @@ done:
 } /* end H5D__query_singleton */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__query_force
+ *
+ * Purpose: Returns a dataspace selection of dataset elements that match
+ *          the query by iterating over all the elements of the selection.
+ *          This is used when no index is available for the dataset.
+ *
+ * Return:  Success:    The dataspace selection
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5S_t *
+H5D__query_force(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query)
+{
+    size_t n_elmts, elmt_size, buf_size;
+    void *buf = NULL;
+    H5D_query_iter_arg_t iter_args;
+    H5S_sel_iter_op_t iter_op;  /* Operator for iteration */
+    const H5S_t *space = NULL;
+    H5S_t *selection = NULL;
+    H5S_t *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+    /* file_space can be NULL */
+    HDassert(query);
+
+    /* Use file_space if provided */
+    space = (file_space) ? file_space : dset->shared->space;
+
+    /* Get dataset info */
+    if (0 == (n_elmts = (size_t) H5S_get_select_npoints(space)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, NULL, "invalid number of elements");
+    if (0 == (elmt_size = H5T_get_size(dset->shared->type)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "invalid size of element");
+
+    /* Allocate buffer to hold data */
+    buf_size = n_elmts * elmt_size;
+    if(NULL == (buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_INDEX, H5E_NOSPACE, NULL, "can't allocate read buffer");
+
+    /* Read data */
+    if (FAIL == H5D__read(dset, dset->shared->type_id, NULL, space, H5P_DATASET_XFER_DEFAULT, buf))
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, NULL, "can't read data");
+
+    if(NULL == (selection = H5S_copy(space, FALSE, TRUE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to copy dataspace")
+    if(FAIL == H5S_select_none(selection))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to reset selection");
+
+    iter_args.space = selection;
+    iter_args.query = query;
+
+    iter_op.op_type = H5S_SEL_ITER_OP_LIB;
+    iter_op.u.lib_op = H5D__query_force_iterate;
+
+    if (FAIL == H5S_select_iterate(buf, dset->shared->type, space, &iter_op, &iter_args))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, NULL, "unable to compare attribute elements");
+
+    ret_value = selection;
+
+done:
+    if ((NULL == ret_value) && (FAIL == H5S_close(selection)))
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "cannot free dataspace");
+    H5MM_free(buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__query_force */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__query_force_iterate
+ *
+ * Purpose: Compare element values and add them to the selection if they
+ *          match the query.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__query_force_iterate(void *elem, const H5T_t *type, unsigned H5_ATTR_UNUSED ndim,
+        const hsize_t *point, void *op_data)
+{
+    H5D_query_iter_arg_t *args = (H5D_query_iter_arg_t *) op_data;
+    herr_t ret_value = SUCCEED; /* Return value */
+    hsize_t count[H5S_MAX_RANK + 1];
+    hbool_t result;
+    int i;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(elem);
+    HDassert(type);
+    HDassert(point);
+    HDassert(args);
+
+    /* Apply the query */
+    if (FAIL == H5Q_apply_atom(args->query, &result, type, elem))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query to data element");
+
+    /* Initialize count */
+    for (i = 0; i < H5S_MAX_RANK; i++)
+        count[i] = 1;
+
+    /* If element satisfies query, add it to the selection */
+    if (result && (FAIL == H5S_select_hyperslab(args->space, H5S_SELECT_OR, point, NULL, count, NULL)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "unable to add point to selection");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__query_force_iterate */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__query_combined
  *
  * Purpose: Returns a dataspace selection of dataset elements that match
@@ -3456,7 +3590,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5S_t *
-H5D__query_combined(H5D_t *dset, const H5S_t *file_space, H5Q_t *query,
+H5D__query_combined(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query,
         hid_t xapl_id, hid_t xxpl_id)
 {
     H5Q_t *sub_query1 = NULL, *sub_query2 = NULL;

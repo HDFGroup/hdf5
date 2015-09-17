@@ -97,17 +97,16 @@ H5_DLL herr_t H5Q_init(void);
 H5_DLL H5Q_t *H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...);
 H5_DLL herr_t H5Q_close(H5Q_t *query);
 H5_DLL H5Q_t *H5Q_combine(H5Q_t *query1, H5Q_combine_op_t combine_op, H5Q_t *query2);
-H5_DLL herr_t H5Q_get_type(H5Q_t *query, H5Q_type_t *query_type);
-H5_DLL herr_t H5Q_get_match_op(H5Q_t *query, H5Q_match_op_t *match_op);
-H5_DLL herr_t H5Q_get_components(H5Q_t *query, H5Q_t **sub_query1, H5Q_t **sub_query2);
-H5_DLL herr_t H5Q_get_combine_op(H5Q_t *query, H5Q_combine_op_t *op_type);
+H5_DLL herr_t H5Q_get_type(const H5Q_t *query, H5Q_type_t *query_type);
+H5_DLL herr_t H5Q_get_match_op(const H5Q_t *query, H5Q_match_op_t *match_op);
+H5_DLL herr_t H5Q_get_components(const H5Q_t *query, H5Q_t **sub_query1, H5Q_t **sub_query2);
+H5_DLL herr_t H5Q_get_combine_op(const H5Q_t *query, H5Q_combine_op_t *op_type);
 
-H5_DLL herr_t H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc);
+H5_DLL herr_t H5Q_encode(const H5Q_t *query, unsigned char *buf, size_t *nalloc);
 H5_DLL H5Q_t *H5Q_decode(const unsigned char **buf);
 
-/* Apply query (convenience) */
-H5_DLL herr_t H5Q_apply_singleton(H5Q_t *query, hbool_t *result, ...);
-H5_DLL herr_t H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem);
-H5_DLL H5G_t *H5Q_apply(H5O_loc_t *oloc, hid_t loc_id, H5Q_t *query, unsigned *result, hid_t vcpl_id);
+/* Apply query */
+H5_DLL herr_t H5Q_apply_atom(const H5Q_t *query, hbool_t *result, ...);
+H5_DLL H5G_t *H5Q_apply(const H5G_loc_t *loc, hid_t loc_id, const H5Q_t *query, unsigned *result, hid_t vcpl_id);
 
 #endif /* _H5Qprivate_H */

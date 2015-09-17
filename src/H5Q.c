@@ -32,32 +32,26 @@
 #include "H5Iprivate.h"     /* IDs */
 #include "H5MMprivate.h"    /* Memory management */
 #include "H5Pprivate.h"
-#include "H5FLprivate.h"    /* Free lists                           */
+#include "H5FLprivate.h"    /* Free lists */
 #include "H5Dprivate.h"     /* Datasets */
+#include "H5Rprivate.h"     /* References */
+#include "H5Aprivate.h"     /* Attributes */
 
-/* TODO for now */
-#define H5G_PACKAGE
-#include "H5Gpkg.h"
 
 /****************/
 /* Local Macros */
 /****************/
-#define H5Q_TYPE_SEQ \
-    ((H5T_NATIVE_CHAR)(char))\
-    ((H5T_NATIVE_SHORT)(short)) \
-    ((H5T_NATIVE_INT)(int)) \
-    ((H5T_NATIVE_LONG)(long)) \
-    ((H5T_NATIVE_LLONG)(long long)) \
-    ((H5T_NATIVE_FLOAT)(float)) \
-    ((H5T_NATIVE_DOUBLE)(double))
-
 #define H5Q_APPLY_MATCH_OP(result, op, x, y) \
     switch (op) { \
         case H5Q_MATCH_EQUAL: \
+            H5_GCC_DIAG_OFF(float-equal) \
             result = (x == y); \
+            H5_GCC_DIAG_ON(float-equal) \
             break; \
         case H5Q_MATCH_NOT_EQUAL: \
+            H5_GCC_DIAG_OFF(float-equal) \
             result = (x != y); \
+            H5_GCC_DIAG_ON(float-equal) \
             break; \
         case H5Q_MATCH_LESS_THAN: \
             result = (x < y); \
@@ -83,6 +77,108 @@
     (0 == H5T_cmp(type1, native_type, FALSE)) || \
     (0 == H5T_cmp(type2, native_type, FALSE))
 
+/*
+ * Singly-linked Tail queue declarations. (from sys/queue.h)
+ */
+#define H5Q_QUEUE_HEAD(name, type)                                          \
+struct name {                                                               \
+    struct type *stqh_first;    /* first element */                         \
+    struct type **stqh_last;    /* addr of last next element */             \
+    size_t n_elem;              /* number of elements */                    \
+}
+
+#define H5Q_QUEUE_HEAD_INITIALIZER(head)                                    \
+    { NULL, &(head).stqh_first, 0 }
+
+#define H5Q_QUEUE_ENTRY(type)                                               \
+struct {                                                                    \
+    struct type *stqe_next; /* next element */                              \
+}
+
+/*
+ * Singly-linked Tail queue functions.
+ */
+#define H5Q_QUEUE_INIT(head) do {                                           \
+    (head)->stqh_first = NULL;                                              \
+    (head)->stqh_last = &(head)->stqh_first;                                \
+    (head)->n_elem = 0;                                                     \
+} while (/*CONSTCOND*/0)
+
+#define H5Q_QUEUE_INSERT_HEAD(head, elm, field) do {                        \
+    if (((elm)->field.stqe_next = (head)->stqh_first) == NULL)              \
+        (head)->stqh_last = &(elm)->field.stqe_next;                        \
+    (head)->stqh_first = (elm);                                             \
+    (head)->n_elem++;                                                       \
+} while (/*CONSTCOND*/0)
+
+#define H5Q_QUEUE_INSERT_TAIL(head, elm, field) do {                        \
+    (elm)->field.stqe_next = NULL;                                          \
+    *(head)->stqh_last = (elm);                                             \
+    (head)->stqh_last = &(elm)->field.stqe_next;                            \
+    (head)->n_elem++;                                                       \
+} while (/*CONSTCOND*/0)
+
+#define H5Q_QUEUE_REMOVE_HEAD(head, field) do {                             \
+    if (((head)->stqh_first = (head)->stqh_first->field.stqe_next) == NULL) { \
+        (head)->stqh_last = &(head)->stqh_first;                            \
+        (head)->n_elem--;                                                   \
+    }                                                                       \
+} while (/*CONSTCOND*/0)
+
+#define H5Q_QUEUE_REMOVE(head, elm, type, field) do {                       \
+    if ((head)->stqh_first == (elm)) {                                      \
+        H5Q_QUEUE_REMOVE_HEAD((head), field);                               \
+    } else {                                                                \
+        struct type *curelm = (head)->stqh_first;                           \
+        while (curelm->field.stqe_next != (elm))                            \
+            curelm = curelm->field.stqe_next;                               \
+        if ((curelm->field.stqe_next =                                      \
+            curelm->field.stqe_next->field.stqe_next) == NULL)              \
+                (head)->stqh_last = &(curelm)->field.stqe_next;             \
+        (head)->n_elem--;                                                   \
+    }                                                                       \
+} while (/*CONSTCOND*/0)
+
+#define H5Q_QUEUE_FOREACH(var, head, field)                                 \
+    for ((var) = ((head)->stqh_first);                                      \
+        (var);                                                              \
+        (var) = ((var)->field.stqe_next))
+
+#define H5Q_QUEUE_CONCAT(head1, head2) do {                                 \
+    if (!H5Q_QUEUE_EMPTY((head2))) {                                        \
+        *(head1)->stqh_last = (head2)->stqh_first;                          \
+        (head1)->stqh_last = (head2)->stqh_last;                            \
+        (head1)->n_elem += (head2)->n_elem;                                 \
+        H5Q_QUEUE_INIT((head2));                                            \
+    }                                                                       \
+} while (/*CONSTCOND*/0)
+
+/*
+ * Singly-linked Tail queue access methods.
+ */
+#define H5Q_QUEUE_EMPTY(head)       ((head)->stqh_first == NULL)
+#define H5Q_QUEUE_FIRST(head)       ((head)->stqh_first)
+#define H5Q_QUEUE_NEXT(elm, field)  ((elm)->field.stqe_next)
+
+#define H5Q_VIEW_INITIALIZER(view) \
+    {H5Q_QUEUE_HEAD_INITIALIZER(view.reg_refs), H5Q_QUEUE_HEAD_INITIALIZER(view.obj_refs), H5Q_QUEUE_HEAD_INITIALIZER(view.attr_refs)}
+
+#define H5Q_VIEW_REF_NTYPES      3          /* number of reference types */
+
+//#define H5Q_DEBUG
+
+#ifdef H5Q_DEBUG
+#define H5Q_LOG_DEBUG(...) do {                                 \
+      fprintf(stdout, " # %s(): ", __func__);                   \
+      fprintf(stdout, __VA_ARGS__);                             \
+      fprintf(stdout, "\n");                                    \
+      fflush(stdout);                                           \
+  } while (0)
+#else
+#define H5Q_LOG_DEBUG(...) do { \
+  } while (0)
+#endif
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -97,23 +193,82 @@ typedef enum H5Q_match_type_t { /* The different kinds of native types we can ma
     H5Q_INVALID_MATCH_TYPE
 } H5Q_match_type_t;
 
+typedef struct H5Q_ref_entry_t H5Q_ref_entry_t;
+
+struct H5Q_ref_entry_t {
+    union {
+        hdset_reg_ref_t reg;
+        hobj_ref_t obj;
+        hattr_ref_t attr;
+    } ref;
+    H5R_type_t ref_type; /* TODO maybe not necessary */
+    H5Q_QUEUE_ENTRY(H5Q_ref_entry_t) entry;
+};
+
+typedef H5Q_QUEUE_HEAD(H5Q_ref_head_t, H5Q_ref_entry_t) H5Q_ref_head_t;
+
 typedef struct {
-    H5Q_t *query;
+    H5Q_ref_head_t reg_refs;
+    H5Q_ref_head_t obj_refs;
+    H5Q_ref_head_t attr_refs;
+} H5Q_view_t;
+
+typedef struct {
+    const H5Q_t *query;
     unsigned *result;
+    H5Q_view_t *view;
 } H5Q_apply_arg_t;
+
+typedef struct {
+    H5G_loc_t *loc;
+    const char *loc_name;
+    H5G_loc_t *obj_loc;
+    H5Q_apply_arg_t *apply_args;
+} H5Q_apply_attr_arg_t;
+
+typedef struct {
+    const H5Q_t *query;
+    hbool_t *result;
+} H5Q_apply_attr_elem_arg_t;
 
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type,
-        const void *elem);
-static herr_t H5Q_apply_attr_name(H5Q_t *query, hbool_t *result,
-        const char *name);
-static herr_t H5Q_apply_link_name(H5Q_t *query, hbool_t *result,
-        const char *name);
+static herr_t H5Q__apply_atom(const H5Q_t *query, hbool_t *result, va_list ap);
+static herr_t H5Q__apply_data_elem(const H5Q_t *query, hbool_t *result,
+    const H5T_t *type, const void *elem);
+static H5T_t *H5Q__promote_type(const H5T_t *type1, const H5T_t *type2,
+    H5Q_match_type_t *match_type);
+static herr_t H5Q__apply_attr_name(const H5Q_t *query, hbool_t *result,
+    const char *name);
+static herr_t H5Q__apply_link_name(const H5Q_t *query, hbool_t *result,
+    const char *name);
+
+static herr_t H5Q__apply_iterate(hid_t oid, const char *name,
+    const H5O_info_t *oinfo, void *udata);
+static herr_t H5Q__apply_object(hid_t oid, const char *name,
+    const H5O_info_t *oinfo, void *udata);
+static herr_t H5Q__apply_object_link(H5G_loc_t *loc, const char *name,
+    const H5O_info_t *oinfo, void *udata);
+static herr_t H5Q__apply_object_data(H5G_loc_t *loc, const char *name,
+    const H5O_info_t *oinfo, void *udata);
+static herr_t H5Q__apply_object_attr(H5G_loc_t *loc, const char *name,
+    const H5O_info_t *oinfo, void *udata);
+static herr_t H5Q__apply_object_attr_iterate(H5A_t *attr, void *udata);
+static herr_t H5Q__apply_object_attr_name(H5A_t *attr, void *udata);
+static herr_t H5Q__apply_object_attr_value(H5A_t *attr, void *udata);
+static herr_t H5Q__apply_object_attr_value_iterate(void *elem, const H5T_t *type,
+    unsigned H5_ATTR_UNUSED ndim, const hsize_t H5_ATTR_UNUSED *point, void *udata);
+
+static herr_t H5Q__view_append(H5Q_view_t *view, H5R_type_t ref_type, void *ref);
+static herr_t H5Q__view_combine(H5Q_combine_op_t combine_op, H5Q_view_t *view1, H5Q_view_t *view2,
+    unsigned result1, unsigned result2, H5Q_view_t *view, unsigned *result);
+static herr_t H5Q__view_write(H5G_t *grp, H5Q_view_t *view);
+static herr_t H5Q__view_free(H5Q_view_t *view);
+
 
 static H5_inline void
-H5Q_encode_memcpy(unsigned char **buf_ptr, size_t *nalloc, const void *data,
+H5Q__encode_memcpy(unsigned char **buf_ptr, size_t *nalloc, const void *data,
         size_t data_size)
 {
     if (*buf_ptr != NULL) {
@@ -124,7 +279,7 @@ H5Q_encode_memcpy(unsigned char **buf_ptr, size_t *nalloc, const void *data,
 }
 
 static H5_inline void
-H5Q_decode_memcpy(void *data, size_t data_size, const unsigned char **buf_ptr)
+H5Q__decode_memcpy(void *data, size_t data_size, const unsigned char **buf_ptr)
 {
     if (*buf_ptr != NULL) {
         HDmemcpy(data, *buf_ptr, data_size);
@@ -197,7 +352,7 @@ H5Q_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the QUERY IDs */
-    if (H5I_register_type(H5I_QUERY_CLS) < 0)
+    if (FAIL == H5I_register_type(H5I_QUERY_CLS))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
 done:
@@ -322,14 +477,14 @@ H5Qcreate(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
         break;
     }
 
-    va_end(ap);
-
     /* Register the new query object to get an ID for it */
-    if ((query->query_id = H5I_register(H5I_QUERY, query, TRUE)) < 0)
+    if (FAIL == (query->query_id = H5I_register(H5I_QUERY, query, TRUE)))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "can't register query handle");
     ret_value = query->query_id;
 
 done:
+    va_end(ap);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Qcreate() */
 
@@ -412,14 +567,14 @@ H5Q_create(H5Q_type_t query_type, H5Q_match_op_t match_op, ...)
             break;
     } /* end switch */
 
-    va_end(ap);
-
     /* set return value */
     ret_value = query;
 
 done:
     if (!ret_value && query)
         query = H5FL_FREE(H5Q_t, query);
+
+    va_end(ap);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_create() */
@@ -446,7 +601,7 @@ H5Qclose(hid_t query_id)
     if (NULL == H5I_object_verify(query_id, H5I_QUERY))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
 
-    if (H5I_dec_app_ref(query_id) < 0)
+    if (FAIL == H5I_dec_app_ref(query_id))
     	HGOTO_ERROR(H5E_QUERY, H5E_CANTDEC, FAIL, "unable to decrement ref count on query");
 
 done:
@@ -547,7 +702,7 @@ H5Qcombine(hid_t query1_id, H5Q_combine_op_t combine_op, hid_t query2_id)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTCREATE, FAIL, "unable to combine query objects");
 
     /* Register the new query object to get an ID for it */
-    if ((query->query_id = H5I_register(H5I_QUERY, query, TRUE)) < 0)
+    if (FAIL == (query->query_id = H5I_register(H5I_QUERY, query, TRUE)))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "can't register query handle");
     ret_value = query->query_id;
 
@@ -656,7 +811,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Q_get_type(H5Q_t *query, H5Q_type_t *query_type)
+H5Q_get_type(const H5Q_t *query, H5Q_type_t *query_type)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -720,7 +875,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Q_get_match_op(H5Q_t *query, H5Q_match_op_t *match_op)
+H5Q_get_match_op(const H5Q_t *query, H5Q_match_op_t *match_op)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -756,6 +911,7 @@ herr_t
 H5Qget_components(hid_t query_id, hid_t *sub_query1_id, hid_t *sub_query2_id)
 {
     H5Q_t *query = NULL, *sub_query1 = NULL, *sub_query2 = NULL;
+    hid_t _sub_query1_id, _sub_query2_id;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -772,10 +928,13 @@ H5Qget_components(hid_t query_id, hid_t *sub_query1_id, hid_t *sub_query2_id)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get components");
 
     /* Register the type and return the ID */
-    if ((*sub_query1_id = H5I_register(H5I_QUERY, sub_query1, TRUE)) < 0)
+    if (FAIL == (_sub_query1_id = H5I_register(H5I_QUERY, sub_query1, TRUE)))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "unable to register query");
-    if ((*sub_query2_id = H5I_register(H5I_QUERY, sub_query2, TRUE)) < 0)
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "unable to register query")
+    if (FAIL == (_sub_query2_id = H5I_register(H5I_QUERY, sub_query2, TRUE)))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "unable to register query");
+
+    *sub_query1_id = _sub_query1_id;
+    *sub_query2_id = _sub_query2_id;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -791,7 +950,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Q_get_components(H5Q_t *query, H5Q_t **sub_query1, H5Q_t **sub_query2)
+H5Q_get_components(const H5Q_t *query, H5Q_t **sub_query1, H5Q_t **sub_query2)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -862,7 +1021,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Q_get_combine_op(H5Q_t *query, H5Q_combine_op_t *op_type)
+H5Q_get_combine_op(const H5Q_t *query, H5Q_combine_op_t *op_type)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -904,7 +1063,7 @@ H5Qencode(hid_t query_id, void *buf, size_t *nalloc)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer size");
 
     /* Encode the query */
-    if ((ret_value = H5Q_encode(query, (unsigned char *)buf, nalloc)) < 0)
+    if (FAIL == (ret_value = H5Q_encode(query, (unsigned char *)buf, nalloc)))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't encode query");
 
 done:
@@ -921,7 +1080,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
+H5Q_encode(const H5Q_t *query, unsigned char *buf, size_t *nalloc)
 {
     size_t buf_size = 0;
     herr_t ret_value = SUCCEED;
@@ -932,12 +1091,12 @@ H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
     HDassert(query);
     HDassert(nalloc);
 
-    H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->is_combined, sizeof(hbool_t));
+    H5Q__encode_memcpy(&buf_ptr, &buf_size, &query->is_combined, sizeof(hbool_t));
     if (query->is_combined) {
         size_t l_buf_size = 0, r_buf_size = 0;
 
-        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.combine.type, sizeof(H5Q_type_t));
-        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.combine.op, sizeof(H5Q_combine_op_t));
+        H5Q__encode_memcpy(&buf_ptr, &buf_size, &query->query.combine.type, sizeof(H5Q_type_t));
+        H5Q__encode_memcpy(&buf_ptr, &buf_size, &query->query.combine.op, sizeof(H5Q_combine_op_t));
         H5Q_encode(query->query.combine.l_query, buf_ptr, &l_buf_size);
         buf_size += l_buf_size;
         if (buf_ptr) buf_ptr += l_buf_size;
@@ -945,8 +1104,8 @@ H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
         buf_size += r_buf_size;
         if (buf_ptr) buf_ptr += r_buf_size;
     } else {
-        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.select.type, sizeof(H5Q_type_t));
-        H5Q_encode_memcpy(&buf_ptr, &buf_size, &query->query.select.match_op, sizeof(H5Q_match_op_t));
+        H5Q__encode_memcpy(&buf_ptr, &buf_size, &query->query.select.type, sizeof(H5Q_type_t));
+        H5Q__encode_memcpy(&buf_ptr, &buf_size, &query->query.select.match_op, sizeof(H5Q_match_op_t));
         switch (query->query.select.type) {
             case H5Q_TYPE_DATA_ELEM:
             case H5Q_TYPE_ATTR_VALUE:
@@ -958,13 +1117,13 @@ H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
 
                 if (FAIL == H5T_encode(type, NULL, &type_id_nalloc))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't get encoding size for datatype");
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, &type_id_nalloc, sizeof(size_t));
+                H5Q__encode_memcpy(&buf_ptr, &buf_size, &type_id_nalloc, sizeof(size_t));
                 if (FAIL == H5T_encode(type, buf_ptr, &type_id_nalloc))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTENCODE, FAIL, "can't encode datatype");
                 buf_size += type_id_nalloc;
                 if (buf_ptr) buf_ptr += type_id_nalloc;
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, &type_size, sizeof(size_t));
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, value_buf, type_size);
+                H5Q__encode_memcpy(&buf_ptr, &buf_size, &type_size, sizeof(size_t));
+                H5Q__encode_memcpy(&buf_ptr, &buf_size, value_buf, type_size);
             }
                 break;
             case H5Q_TYPE_ATTR_NAME:
@@ -972,8 +1131,8 @@ H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
                 size_t name_len = HDstrlen(query->query.select.elem.attr_name.name) + 1;
                 char *name = query->query.select.elem.attr_name.name;
 
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, &name_len, sizeof(size_t));
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, name, name_len);
+                H5Q__encode_memcpy(&buf_ptr, &buf_size, &name_len, sizeof(size_t));
+                H5Q__encode_memcpy(&buf_ptr, &buf_size, name, name_len);
             }
                 break;
             case H5Q_TYPE_LINK_NAME:
@@ -981,8 +1140,8 @@ H5Q_encode(H5Q_t *query, unsigned char *buf, size_t *nalloc)
                 size_t name_len = HDstrlen(query->query.select.elem.link_name.name) + 1;
                 char *name = query->query.select.elem.attr_name.name;
 
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, &name_len, sizeof(size_t));
-                H5Q_encode_memcpy(&buf_ptr, &buf_size, name, name_len);
+                H5Q__encode_memcpy(&buf_ptr, &buf_size, &name_len, sizeof(size_t));
+                H5Q__encode_memcpy(&buf_ptr, &buf_size, name, name_len);
             }
                 break;
             case H5Q_TYPE_MISC:
@@ -1028,7 +1187,7 @@ H5Qdecode(const void *buf)
         HGOTO_ERROR(H5E_QUERY, H5E_CANTDECODE, FAIL, "can't decode object");
 
     /* Register the type and return the ID */
-    if ((query->query_id = H5I_register(H5I_QUERY, query, TRUE)) < 0)
+    if (FAIL == (query->query_id = H5I_register(H5I_QUERY, query, TRUE)))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTREGISTER, FAIL, "unable to register query");
     ret_value = query->query_id;
 
@@ -1064,15 +1223,15 @@ H5Q_decode(const unsigned char **buf_ptr)
     query->query_id = H5I_UNINIT;
     query->ref_count = 1;
 
-    H5Q_decode_memcpy(&query->is_combined, sizeof(hbool_t), buf_ptr);
+    H5Q__decode_memcpy(&query->is_combined, sizeof(hbool_t), buf_ptr);
     if (query->is_combined) {
-        H5Q_decode_memcpy(&query->query.combine.type, sizeof(H5Q_type_t), buf_ptr);
-        H5Q_decode_memcpy(&query->query.combine.op, sizeof(H5Q_combine_op_t), buf_ptr);
+        H5Q__decode_memcpy(&query->query.combine.type, sizeof(H5Q_type_t), buf_ptr);
+        H5Q__decode_memcpy(&query->query.combine.op, sizeof(H5Q_combine_op_t), buf_ptr);
         query->query.combine.l_query = H5Q_decode(buf_ptr);
         query->query.combine.r_query = H5Q_decode(buf_ptr);
     } else {
-        H5Q_decode_memcpy(&query->query.select.type, sizeof(H5Q_type_t), buf_ptr);
-        H5Q_decode_memcpy(&query->query.select.match_op, sizeof(H5Q_match_op_t), buf_ptr);
+        H5Q__decode_memcpy(&query->query.select.type, sizeof(H5Q_type_t), buf_ptr);
+        H5Q__decode_memcpy(&query->query.select.match_op, sizeof(H5Q_match_op_t), buf_ptr);
         switch (query->query.select.type) {
             case H5Q_TYPE_DATA_ELEM:
             case H5Q_TYPE_ATTR_VALUE:
@@ -1082,19 +1241,19 @@ H5Q_decode(const unsigned char **buf_ptr)
                 size_t type_size = 0;
                 void *value_buf;
 
-                H5Q_decode_memcpy(&type_id_nalloc, sizeof(size_t), buf_ptr);
+                H5Q__decode_memcpy(&type_id_nalloc, sizeof(size_t), buf_ptr);
                 if (NULL == (type = H5T_decode(*buf_ptr)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode datatype");
                 query->query.select.elem.data_elem.type = type;
                 *buf_ptr += type_id_nalloc;
 
-                H5Q_decode_memcpy(&type_size, sizeof(size_t), buf_ptr);
+                H5Q__decode_memcpy(&type_size, sizeof(size_t), buf_ptr);
                 if (!type_size)
                     HGOTO_ERROR(H5E_QUERY, H5E_BADVALUE, NULL, "NULL type size");
                 query->query.select.elem.data_elem.type_size = type_size;
                 if (NULL == (value_buf = H5MM_malloc(type_size)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL, "can't allocate value buffer");
-                H5Q_decode_memcpy(value_buf, type_size, buf_ptr);
+                H5Q__decode_memcpy(value_buf, type_size, buf_ptr);
                 query->query.select.elem.data_elem.value = value_buf;
             }
             break;
@@ -1103,13 +1262,13 @@ H5Q_decode(const unsigned char **buf_ptr)
                 size_t name_len = 0;
                 char *name;
                 
-                H5Q_decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
+                H5Q__decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
                 if (!name_len)
                     HGOTO_ERROR(H5E_QUERY, H5E_BADVALUE, NULL, "NULL name len");
                 if (NULL == (name = (char *)H5MM_malloc(name_len)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
                             "can't allocate value buffer");
-                H5Q_decode_memcpy(name, name_len, buf_ptr);
+                H5Q__decode_memcpy(name, name_len, buf_ptr);
                 query->query.select.elem.attr_name.name = name;
             }
             break;
@@ -1118,13 +1277,13 @@ H5Q_decode(const unsigned char **buf_ptr)
                 size_t name_len = 0;
                 char *name;
 
-                H5Q_decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
+                H5Q__decode_memcpy(&name_len, sizeof(size_t), buf_ptr);
                 if (!name_len)
                     HGOTO_ERROR(H5E_QUERY, H5E_BADVALUE, NULL, "NULL name len");
                 if (NULL == (name = (char *)H5MM_malloc(name_len)))
                     HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, NULL,
                             "can't allocate value buffer");
-                H5Q_decode_memcpy(name, name_len, buf_ptr);
+                H5Q__decode_memcpy(name, name_len, buf_ptr);
                 query->query.select.elem.link_name.name = name;
             }
             break;
@@ -1142,19 +1301,19 @@ done:
 } /* end H5Q_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Qapply_singleton
+ * Function:    H5Qapply_atom
  *
  * Purpose: Apply a query and return the result. Parameters, which the
  * query applies to, are determined by the type of the query.
- * It is an error to apply H5Qapply_singleton to a combined query object (one
- * which was created with H5Qcombine).
+ * It is an error to apply H5Qapply_atom to a combined query object of
+ * different types.
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Qapply_singleton(hid_t query_id, hbool_t *result, ...)
+H5Qapply_atom(hid_t query_id, hbool_t *result, ...)
 {
     H5Q_t *query = NULL;
     H5T_t *native_type = NULL;
@@ -1170,8 +1329,8 @@ H5Qapply_singleton(hid_t query_id, hbool_t *result, ...)
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
 
-    if (query->is_combined)
-        HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "cannot apply to combined query");
+    if (query->is_combined && (query->query.combine.type == H5Q_TYPE_MISC))
+        HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "cannot apply to misc combined query");
 
     va_start(ap, result);
 
@@ -1196,7 +1355,7 @@ H5Qapply_singleton(hid_t query_id, hbool_t *result, ...)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type");
 
             /* Apply query */
-            if (FAIL == (ret_value = H5Q_apply_singleton(query, result, native_type, value)))
+            if (FAIL == (ret_value = H5Q_apply_atom(query, result, native_type, value)))
                 HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
         }
         break;
@@ -1208,7 +1367,7 @@ H5Qapply_singleton(hid_t query_id, hbool_t *result, ...)
             attr_name = va_arg(ap, const char *);
 
             /* Apply query */
-            if (FAIL == (ret_value = H5Q_apply_singleton(query, result, attr_name)))
+            if (FAIL == (ret_value = H5Q_apply_atom(query, result, attr_name)))
                 HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
         }
         break;
@@ -1220,7 +1379,7 @@ H5Qapply_singleton(hid_t query_id, hbool_t *result, ...)
             link_name = va_arg(ap, const char *);
 
             /* Apply query */
-            if (FAIL == (ret_value = H5Q_apply_singleton(query, result, link_name)))
+            if (FAIL == (ret_value = H5Q_apply_atom(query, result, link_name)))
                 HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
         }
         break;
@@ -1238,111 +1397,19 @@ done:
     if (native_type)
         H5T_close(native_type);
     FUNC_LEAVE_API(ret_value)
-} /* end H5Qapply() */
+} /* end H5Qapply_atom() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Qapply_combine
+ * Function:    H5Q_apply_atom
  *
- * Purpose: Apply a query and return the result. Parameters, which the
- * query applies to, are determined by the type of the query.
+ * Purpose: Private function for H5Qapply_atom.
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Qapply_combine(hid_t query_id, hbool_t *result, hid_t type_id, const void *value)
-{
-    H5Q_t *query = NULL;
-    H5T_t *type = NULL, *native_type = NULL;
-    herr_t ret_value;
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*bi*x", query_id, result, type_id, value);
-
-    /* Check args and get the query objects */
-    if (!result)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for result");
-    if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
-
-    /* Get type */
-    if (NULL == (type = (H5T_t *) H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
-
-    /* Only use native type */
-    if (NULL == (native_type = H5T_get_native_type(type, H5T_DIR_DEFAULT, NULL, NULL, NULL)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot retrieve native type");
-
-    /* Apply query */
-    if (FAIL == (ret_value = H5Q_apply_combine(query, result, native_type, value)))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
-
-done:
-    if (native_type)
-        H5T_close(native_type);
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Qapply_combine() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Q_apply_combine
- *
- * Purpose: Private function for H5Qapply_combine.
- *
- * Return:  Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Q_apply_combine(H5Q_t *query, hbool_t *result, H5T_t *type, const void *elem)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(query);
-    HDassert(result);
-
-    if (query->is_combined) {
-        hbool_t result1, result2;
-
-        if (FAIL == H5Q_apply_combine(query->query.combine.l_query, &result1, type, elem))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
-        if (FAIL == H5Q_apply_combine(query->query.combine.r_query, &result2, type, elem))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
-
-         switch (query->query.combine.op) {
-             case H5Q_COMBINE_AND:
-                 *result = result1 && result2;
-                 break;
-             case H5Q_COMBINE_OR:
-                 *result = result1 || result2;
-                 break;
-             case H5Q_SINGLETON:
-             default:
-                 HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized combine op")
-                 break;
-         }
-    } else {
-        if (FAIL == (ret_value = H5Q_apply_singleton(query, result, type, elem)))
-            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_apply_combine() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Q_apply_singleton
- *
- * Purpose: Private function for H5Qapply_singleton.
- *
- * Return:  Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Q_apply_singleton(H5Q_t *query, hbool_t *result, ...)
+H5Q_apply_atom(const H5Q_t *query, hbool_t *result, ...)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     va_list ap;
@@ -1351,136 +1418,120 @@ H5Q_apply_singleton(H5Q_t *query, hbool_t *result, ...)
 
     HDassert(query);
     HDassert(result);
-    HDassert(query->is_combined == FALSE);
 
     va_start(ap, result);
 
-    switch (query->query.select.type) {
-        case H5Q_TYPE_DATA_ELEM:
-        case H5Q_TYPE_ATTR_VALUE:
-        {
-            H5T_t *type = va_arg(ap, H5T_t*);
-            const void *elem = va_arg(ap, const void *);
+    if (FAIL == H5Q__apply_atom(query, result, ap))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query")
 
-            if (FAIL == (ret_value = H5Q_apply_data_elem(query, result, type, elem)))
-                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply data element query");
-            break;
-        }
-        case H5Q_TYPE_ATTR_NAME:
-        {
-            const char *attr_name = va_arg(ap, const char *);
-
-            if (FAIL == (ret_value = H5Q_apply_attr_name(query, result, attr_name)))
-                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply attribute name query");
-            break;
-        }
-        case H5Q_TYPE_LINK_NAME:
-        {
-            const char *link_name = va_arg(ap, const char *);
-
-            if (FAIL == (ret_value = H5Q_apply_link_name(query, result, link_name)))
-                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply link name query");
-            break;
-        }
-        case H5Q_TYPE_MISC:
-        default:
-            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
-            break;
-    }
-
+done:
     va_end(ap);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_apply() */
+} /* end H5Q_apply_atom() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Q_promote_type
+ * Function:    H5Q__apply_atom
  *
- * Purpose: Private function for H5Qapply (promote data element type
- *          so that data element and query element can be compared).
- *
- * Return:  Success:    Pointer to promoted native type
- *          Failure:    NULL
- *
- *-------------------------------------------------------------------------
- */
-static H5T_t *
-H5Q_promote_type(H5T_t *type1, H5T_t *type2, H5Q_match_type_t *match_type)
-{
-    H5T_t *ret_value; /* Return value */
-    H5T_class_t type1_class, type2_class, promoted_type_class;
-    H5T_t *promoted_type;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Get class of types */
-    if (H5T_NO_CLASS == (type1_class = H5T_get_class(type1, FALSE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
-    if (H5T_NO_CLASS == (type2_class = H5T_get_class(type2, FALSE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
-
-     if ((type1_class == H5T_FLOAT) || (type2_class == H5T_FLOAT)) {
-         promoted_type_class = H5T_FLOAT;
-     } else {
-         promoted_type_class = H5T_INTEGER;
-     }
-
-    switch (promoted_type_class) {
-         case H5T_INTEGER:
-             if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_LLONG_g))) {
-                 *match_type = H5Q_NATIVE_INT_MATCH_LLONG;
-                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_LLONG_g);
-             } else if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_LONG_g))) {
-                 *match_type = H5Q_NATIVE_INT_MATCH_LONG;
-                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_LONG_g);
-             } else if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_INT_g))) {
-                 *match_type = H5Q_NATIVE_INT_MATCH_INT;
-                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_INT_g);
-             } else if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_SHORT_g))) {
-                 *match_type = H5Q_NATIVE_INT_MATCH_SHORT;
-                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_SHORT_g);
-             } else if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g))) {
-                 *match_type = H5Q_NATIVE_INT_MATCH_CHAR;
-                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g);
-             } else {
-                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid type");
-             }
-             break;
-         case H5T_FLOAT:
-             if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_g))) {
-                 *match_type = H5Q_NATIVE_FLOAT_MATCH_DOUBLE;
-                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_g);
-             } else if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g))) {
-                 *match_type = H5Q_NATIVE_FLOAT_MATCH_FLOAT;
-                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g);
-             } else {
-                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid type");
-             }
-             break;
-         default:
-             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
-             break;
-     }
-
-    ret_value = promoted_type;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_promote_type() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5Q_apply_data_elem
- *
- * Purpose: Private function for H5Qapply_singleton (data element).
+ * Purpose: Private function for H5Q_apply_atom.
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *value)
+H5Q__apply_atom(const H5Q_t *query, hbool_t *result, va_list ap)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+    va_list aq;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(query);
+    HDassert(result);
+    HDassert(query->is_combined == FALSE);
+
+    va_copy(aq, ap);
+
+    if (query->is_combined) {
+        hbool_t result1, result2;
+
+        if (FAIL == H5Q__apply_atom(query->query.combine.l_query, &result1, ap))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+        if (FAIL == H5Q__apply_atom(query->query.combine.r_query, &result2, ap))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+
+        switch (query->query.combine.op) {
+            case H5Q_COMBINE_AND:
+                *result = result1 && result2;
+                break;
+            case H5Q_COMBINE_OR:
+                *result = result1 || result2;
+                break;
+            case H5Q_SINGLETON:
+            default:
+                HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized combine op");
+                break;
+        }
+    } else {
+        switch (query->query.select.type) {
+            case H5Q_TYPE_DATA_ELEM:
+            case H5Q_TYPE_ATTR_VALUE:
+            {
+                H5T_t *type = va_arg(aq, H5T_t*);
+                const void *elem = va_arg(aq, const void *);
+
+                HDassert(type);
+                HDassert(elem);
+
+                if (FAIL == (ret_value = H5Q__apply_data_elem(query, result, type, elem)))
+                    HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply data element query");
+                break;
+            }
+            case H5Q_TYPE_ATTR_NAME:
+            {
+                const char *attr_name = va_arg(aq, const char *);
+
+                HDassert(attr_name);
+
+                if (FAIL == (ret_value = H5Q__apply_attr_name(query, result, attr_name)))
+                    HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply attribute name query");
+                break;
+            }
+            case H5Q_TYPE_LINK_NAME:
+            {
+                const char *link_name = va_arg(aq, const char *);
+
+                HDassert(link_name);
+
+                if (FAIL == (ret_value = H5Q__apply_link_name(query, result, link_name)))
+                    HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply link name query");
+                break;
+            }
+            case H5Q_TYPE_MISC:
+            default:
+                HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
+                break;
+        }
+    }
+
+done:
+    va_end(aq);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__apply_atom() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_data_elem
+ *
+ * Purpose: Private function for H5Q__apply_atom (data element).
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_data_elem(const H5Q_t *query, hbool_t *result, const H5T_t *type, const void *value)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     void *value_buf = NULL, *query_value_buf = NULL;
@@ -1508,7 +1559,7 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
     query_op = query->query.select.match_op;
 
     /* Promote type to compare elements with query */
-    promoted_type = H5Q_promote_type(type, query_type, &match_type);
+    promoted_type = H5Q__promote_type(type, query_type, &match_type);
     if (0 == (promoted_type_size = H5T_get_size(promoted_type)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid size");
 
@@ -1523,11 +1574,11 @@ H5Q_apply_data_elem(H5Q_t *query, hbool_t *result, H5T_t *type, const void *valu
     HDmemcpy(query_value_buf, query->query.select.elem.data_elem.value, query_type_size);
 
     /* Create temporary IDs for H5T_convert */
-    if ((type_id = H5I_register(H5I_DATATYPE, type, FALSE)) < 0)
+    if (FAIL == (type_id = H5I_register(H5I_DATATYPE, type, FALSE)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
-    if ((query_type_id = H5I_register(H5I_DATATYPE, query_type, FALSE)) < 0)
+    if (FAIL == (query_type_id = H5I_register(H5I_DATATYPE, query_type, FALSE)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
-    if ((promoted_type_id = H5I_register(H5I_DATATYPE, promoted_type, FALSE)) < 0)
+    if (FAIL == (promoted_type_id = H5I_register(H5I_DATATYPE, promoted_type, FALSE)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
 
     /* Find the conversion function */
@@ -1585,19 +1636,105 @@ done:
         HGOTO_ERROR(H5E_ATOM, H5E_CANTFREE, FAIL, "problem freeing id");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_apply_data_elem() */
+} /* end H5Q__apply_data_elem() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Q_apply_attr_name
+ * Function:    H5Q__promote_type
  *
- * Purpose: Private function for H5Qapply_singleton (attribute name).
+ * Purpose: Private function for H5Q__apply_data_elem (promote data element type
+ *          so that data element and query element can be compared).
+ *
+ * Return:  Success:    Pointer to promoted native type
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5T_t *
+H5Q__promote_type(const H5T_t *type1, const H5T_t *type2, H5Q_match_type_t *match_type)
+{
+    H5T_t *ret_value; /* Return value */
+    H5T_class_t type1_class, type2_class, promoted_type_class;
+    H5T_t *promoted_type;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get class of types */
+    if (H5T_NO_CLASS == (type1_class = H5T_get_class(type1, FALSE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
+    if (H5T_NO_CLASS == (type2_class = H5T_get_class(type2, FALSE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
+
+     if ((type1_class == H5T_FLOAT) || (type2_class == H5T_FLOAT)) {
+         promoted_type_class = H5T_FLOAT;
+     } else {
+         promoted_type_class = H5T_INTEGER;
+     }
+
+    switch (promoted_type_class) {
+         case H5T_INTEGER:
+             if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_LLONG_g))) {
+                 *match_type = H5Q_NATIVE_INT_MATCH_LLONG;
+                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_LLONG_g);
+             } else if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_LONG_g))) {
+                 *match_type = H5Q_NATIVE_INT_MATCH_LONG;
+                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_LONG_g);
+             } else if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_INT_g))) {
+                 *match_type = H5Q_NATIVE_INT_MATCH_INT;
+                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_INT_g);
+             } else if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_SHORT_g))) {
+                 *match_type = H5Q_NATIVE_INT_MATCH_SHORT;
+                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_SHORT_g);
+             } else if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g))) {
+                 *match_type = H5Q_NATIVE_INT_MATCH_CHAR;
+                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g);
+             } else {
+                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid type");
+             }
+             break;
+         case H5T_FLOAT:
+             if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_g))) {
+                 *match_type = H5Q_NATIVE_FLOAT_MATCH_DOUBLE;
+                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_DOUBLE_g);
+             } else if (H5Q_CMP_TYPE(type1, type2, (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g))) {
+                 *match_type = H5Q_NATIVE_FLOAT_MATCH_FLOAT;
+                 promoted_type = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g);
+             } else {
+                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid type");
+             }
+             break;
+         case H5T_NO_CLASS:
+         case H5T_TIME:
+         case H5T_STRING:
+         case H5T_BITFIELD:
+         case H5T_OPAQUE:
+         case H5T_COMPOUND:
+         case H5T_REFERENCE:
+         case H5T_ENUM:
+         case H5T_VLEN:
+         case H5T_ARRAY:
+         case H5T_NCLASSES:
+         default:
+             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a valid class");
+             break;
+     }
+
+    ret_value = promoted_type;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__promote_type() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_attr_name
+ *
+ * Purpose: Private function for H5Q__apply_atom (attribute name).
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Q_apply_attr_name(H5Q_t *query, hbool_t *result, const char *name)
+H5Q__apply_attr_name(const H5Q_t *query, hbool_t *result, const char *name)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1605,34 +1742,27 @@ H5Q_apply_attr_name(H5Q_t *query, hbool_t *result, const char *name)
 
     HDassert(query);
     HDassert(query->query.select.type == H5Q_TYPE_ATTR_NAME);
+    HDassert(result);
+    HDassert(name);
 
-    if(query->query.select.match_op == H5Q_MATCH_EQUAL) {
-        if(name)
-            *result = (0 == HDstrcmp(name, query->query.select.elem.attr_name.name));
-        else
-            *result = FALSE;
-    }
-    else {
-        if(name)
-            *result = (0 != HDstrcmp(name, query->query.select.elem.attr_name.name));
-        else
-            *result = TRUE;
-    }
+    *result = (query->query.select.match_op == H5Q_MATCH_EQUAL) ?
+            (0 == HDstrcmp(name, query->query.select.elem.attr_name.name)) :
+            (0 != HDstrcmp(name, query->query.select.elem.attr_name.name));
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_apply_attr_name() */
+} /* end H5Q__apply_attr_name() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5Q_apply_link_name
+ * Function:    H5Q__apply_link_name
  *
- * Purpose: Private function for H5Qapply_singleton (link name).
+ * Purpose: Private function for H5Q__apply_atom (link name).
  *
  * Return:  Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Q_apply_link_name(H5Q_t *query, hbool_t *result, const char *name)
+H5Q__apply_link_name(const H5Q_t *query, hbool_t *result, const char *name)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1640,22 +1770,15 @@ H5Q_apply_link_name(H5Q_t *query, hbool_t *result, const char *name)
 
     HDassert(query);
     HDassert(query->query.select.type == H5Q_TYPE_LINK_NAME);
+    HDassert(result);
+    HDassert(name);
 
-    if(query->query.select.match_op == H5Q_MATCH_EQUAL) {
-        if(name)
-            *result = (0 == HDstrcmp(name, query->query.select.elem.link_name.name));
-        else
-            *result = FALSE;
-    }
-    else {
-        if(name)
-            *result = (0 != HDstrcmp(name, query->query.select.elem.link_name.name));
-        else
-            *result = TRUE;
-    }
+    *result = (query->query.select.match_op == H5Q_MATCH_EQUAL) ?
+            (0 == HDstrcmp(name, query->query.select.elem.link_name.name)) :
+            (0 != HDstrcmp(name, query->query.select.elem.link_name.name));
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_apply_link_name() */
+} /* end H5Q__apply_link_name() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Qapply
@@ -1678,7 +1801,7 @@ H5Qapply(hid_t loc_id, hid_t query_id, unsigned *result, hid_t vcpl_id)
     FUNC_ENTER_API(FAIL)
 
     /* Check args and get the query objects */
-    if(H5G_loc(loc_id, &loc) < 0)
+    if (FAIL == H5G_loc(loc_id, &loc))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
     if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
@@ -1694,69 +1817,15 @@ H5Qapply(hid_t loc_id, hid_t query_id, unsigned *result, hid_t vcpl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not index access parms");
 
     /* Apply query */
-    if (NULL == (ret_grp = H5Q_apply(loc.oloc, loc_id, query, result, vcpl_id)))
+    if (NULL == (ret_grp = H5Q_apply(&loc, loc_id, query, result, vcpl_id)))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
 
-    if ((ret_value = H5I_register(H5I_GROUP, ret_grp, TRUE)) < 0)
+    if (FAIL == (ret_value = H5I_register(H5I_GROUP, ret_grp, TRUE)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group");
-    printf("\nID: %d\n", ret_value);
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Qapply() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5Q_apply_iterate
- *
- * Purpose: Private function for H5Qapply.
- *
- * Return:  Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5Q_apply_iterate(hid_t oid, const char *name, const H5O_info_t *oinfo,
-        void *udata)
-{
-    H5G_loc_t loc;
-    H5Q_apply_arg_t *args = (H5Q_apply_arg_t *) udata;
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    if(H5G_loc(oid, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
-
-    if (oinfo->type == H5O_TYPE_GROUP) {
-        H5G_t *grp;
-
-        printf("\ngroup: %s\n", name);
-        printf("num attributes: %d\n", oinfo->num_attrs);
-//        if(NULL == (grp = (H5G_t *) H5I_object_verify(oid, H5I_GROUP)))
-//            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
-    } else if (oinfo->type == H5O_TYPE_DATASET) {
-        H5D_t *dataset;
-        H5S_t *dataspace;
-        hid_t dset_id;
-
-        printf("\ndataset: %s\n", name);
-        printf("num attributes: %d\n", oinfo->num_attrs);
-        dset_id = H5O_open_name(&loc, name, H5P_LINK_ACCESS_DEFAULT, FALSE);
-        if (NULL == (dataset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
-
-        if (NULL == (dataspace = H5D_query(dataset, NULL, args->query, H5P_INDEX_ACCESS_DEFAULT, H5P_INDEX_XFER_DEFAULT)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "can't query dataset");
-        H5D_close(dataset);
-        H5S_close(dataspace);
-        H5I_remove(dset_id);
-    }
-    else
-        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "unsupported object type");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_apply_iterate */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Q_apply
@@ -1768,51 +1837,808 @@ done:
  *-------------------------------------------------------------------------
  */
 H5G_t *
-H5Q_apply(H5O_loc_t *oloc, hid_t loc_id, H5Q_t *query, unsigned *result, hid_t vcpl_id)
+H5Q_apply(const H5G_loc_t *loc, hid_t loc_id, const H5Q_t *query, unsigned *result,
+        hid_t H5_ATTR_UNUSED vcpl_id)
 {
-    H5G_obj_create_t gcrt_info; /* Information for group creation */
-    H5Q_apply_arg_t args = { query, result };
+    H5Q_apply_arg_t args;
+    H5Q_view_t view = H5Q_VIEW_INITIALIZER(view); /* Resulting view */
     H5G_t *ret_grp = NULL; /* New group created */
     H5G_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(oloc);
+    HDassert(loc);
     HDassert(query);
     HDassert(result);
 
-    /* TODO create H5G_create_anon routine */
-    /* Set up group creation info */
-    gcrt_info.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
-    gcrt_info.cache_type = H5G_NOTHING_CACHED;
-    HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
+    /* First check and optimize query */
+    /* TODO */
 
     /* Create the new group & get its ID */
-    if (NULL == (ret_grp = H5G__create(oloc->file, &gcrt_info, H5AC_dxpl_id)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group")
+    if (NULL == (ret_grp = H5G_create_anon(loc, H5P_GROUP_CREATE_DEFAULT, H5P_GROUP_ACCESS_DEFAULT)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group");
 
-    if ((H5O_visit(loc_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, H5Q_apply_iterate, &args, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    /* Create new view and init args */
+    args.query = query;
+    args.result = result;
+    args.view = &view;
+
+    if (FAIL == H5O_visit(loc_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, H5Q__apply_iterate,
+            &args, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id))
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "object visitation failed");
 
+    if (!H5Q_QUEUE_EMPTY(&view.reg_refs))
+        H5Q_LOG_DEBUG("Number of reg refs: %zu\n", view.reg_refs.n_elem);
+    if (!H5Q_QUEUE_EMPTY(&view.obj_refs))
+        H5Q_LOG_DEBUG("Number of obj refs: %zu\n", view.obj_refs.n_elem);
+    if (!H5Q_QUEUE_EMPTY(&view.attr_refs))
+        H5Q_LOG_DEBUG("Number of attr refs: %zu\n", view.attr_refs.n_elem);
+
+    /* Write view */
+    if (FAIL == H5Q__view_write(ret_grp, &view))
+        HGOTO_ERROR(H5E_QUERY, H5E_WRITEERROR, NULL, "can't write view");
+
     ret_value = ret_grp;
+
 done:
     /* Release the group's object header, if it was created */
     if (ret_grp) {
         H5O_loc_t *grp_oloc;         /* Object location for group */
 
         /* Get the new group's object location */
-        if(NULL == (grp_oloc = H5G_oloc(ret_grp)))
+        if (NULL == (grp_oloc = H5G_oloc(ret_grp)))
             HDONE_ERROR(H5E_SYM, H5E_CANTGET, NULL, "unable to get object location of group");
 
         /* Decrement refcount on group's object header in memory */
-        if(H5O_dec_rc_by_loc(grp_oloc, H5AC_dxpl_id) < 0)
+        if (FAIL == H5O_dec_rc_by_loc(grp_oloc, H5AC_dxpl_id))
             HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "unable to decrement refcount on newly created object");
     } /* end if */
 
     /* Cleanup on failure */
     if (NULL == ret_value)
-        if (ret_grp && H5G_close(ret_grp) < 0)
+        if (ret_grp && (FAIL == H5G_close(ret_grp)))
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release group")
 
+    H5Q__view_free(&view);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_apply() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_iterate
+ *
+ * Purpose: Private function for H5Q_apply.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_iterate(hid_t oid, const char *name, const H5O_info_t *oinfo, void *op_data)
+{
+    H5Q_apply_arg_t *args = (H5Q_apply_arg_t *) op_data;
+    H5Q_type_t query_type;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(args->query);
+    HDassert(args->result);
+    HDassert(args->view);
+
+    if (FAIL == H5Q_get_type(args->query, &query_type))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get query type");
+
+    if (query_type != H5Q_TYPE_MISC) {
+        if (FAIL == H5Q__apply_object(oid, name, oinfo, args))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to compare query");
+    } else {
+        H5Q_combine_op_t op_type;
+        H5Q_apply_arg_t args1, args2;
+        H5Q_view_t view1 = H5Q_VIEW_INITIALIZER(view1), view2 = H5Q_VIEW_INITIALIZER(view2);
+        unsigned result1 = 0, result2 = 0;
+
+        if (FAIL == H5Q_get_combine_op(args->query, &op_type))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get combine op");
+
+        args1.query = args->query->query.combine.l_query;
+        args1.result = &result1;
+        args1.view = &view1;
+
+        args2.query = args->query->query.combine.r_query;
+        args2.result = &result2;
+        args2.view = &view2;
+
+        if (FAIL == H5Q__apply_iterate(oid, name, oinfo, &args1))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+        if (FAIL == H5Q__apply_iterate(oid, name, oinfo, &args2))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+
+        if (FAIL == H5Q__view_combine(op_type, &view1, &view2, result1, result2,
+                args->view, args->result))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTMERGE, FAIL, "unable to merge results");
+
+        if (result1) H5Q__view_free(&view1);
+        if (result2) H5Q__view_free(&view2);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__apply_iterate */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_object
+ *
+ * Purpose: Private function for H5Q__apply_iterate.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_object(hid_t oid, const char *name, const H5O_info_t *oinfo,
+        void *udata)
+{
+    H5G_loc_t loc;
+    H5Q_apply_arg_t *args = (H5Q_apply_arg_t *) udata;
+    H5Q_type_t query_type;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(name);
+    HDassert(oinfo);
+    HDassert(args);
+
+    if (FAIL == H5G_loc(oid, &loc))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+
+    if (FAIL == H5Q_get_type(args->query, &query_type))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get query type");
+
+    switch (query_type) {
+        /* If query on a link name, just compare the name of the object */
+        case H5Q_TYPE_LINK_NAME:
+            if (FAIL == H5Q__apply_object_link(&loc, name, oinfo, udata))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "can't apply link query to object");
+            break;
+        case H5Q_TYPE_DATA_ELEM:
+            if (FAIL == H5Q__apply_object_data(&loc, name, oinfo, udata))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "can't apply data query to object");
+            break;
+        case H5Q_TYPE_ATTR_NAME:
+        case H5Q_TYPE_ATTR_VALUE:
+            if (FAIL == H5Q__apply_object_attr(&loc, name, oinfo, udata))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "can't apply data query to object");
+            break;
+        case H5Q_TYPE_MISC:
+        default:
+            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
+            break;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__apply_object */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_object_link
+ *
+ * Purpose: Private function for H5Q__apply_object.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_object_link(H5G_loc_t *loc, const char *name, const H5O_info_t *oinfo,
+        void *udata)
+{
+    hobj_ref_t ref_buf;
+    hbool_t result;
+    H5Q_apply_arg_t *args = (H5Q_apply_arg_t *) udata;
+    const char *link_name = NULL;
+    const char *trimmed_path = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(loc);
+    HDassert(name);
+    HDassert(oinfo);
+    HDassert(args);
+
+    trimmed_path = HDstrrchr(name, '/');
+    link_name = (trimmed_path) ? ++trimmed_path : name;
+
+    if ((oinfo->type != H5O_TYPE_GROUP) && (oinfo->type != H5O_TYPE_DATASET))
+        HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized object type");
+
+    if (FAIL == H5Q_apply_atom(args->query, &result, link_name))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "can't compare link name");
+
+    if (!result) HGOTO_DONE(SUCCEED);
+
+    *(args->result) = H5Q_REF_OBJ;
+
+    H5Q_LOG_DEBUG("Match link name: %s (%s)\n", link_name, name);
+
+    /* Keep object reference */
+    if (FAIL == H5R_create(&ref_buf, loc, name, H5AC_dxpl_id, H5R_OBJECT))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create region reference");
+    if (FAIL == H5Q__view_append(args->view, H5R_DATASET_REGION, &ref_buf))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append region reference to view");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__apply_object_link */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_object_data
+ *
+ * Purpose: Private function for H5Q__apply_object.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_object_data(H5G_loc_t *loc, const char *name, const H5O_info_t *oinfo,
+        void *udata)
+{
+    hdset_reg_ref_t ref_buf;
+    H5Q_apply_arg_t *args = (H5Q_apply_arg_t *) udata;
+    hid_t obj_id = FAIL;
+    H5S_t *dataspace = NULL;
+    H5D_t *dataset = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(loc);
+    HDassert(name);
+    HDassert(oinfo);
+    HDassert(args);
+
+    /* No data */
+    if (oinfo->type == H5O_TYPE_GROUP)
+        HGOTO_DONE(SUCCEED);
+
+    if (oinfo->type != H5O_TYPE_DATASET)
+        HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized object type");
+
+    /* If query on a dataset, open the object and use H5D_query */
+    if (FAIL == (obj_id = H5O_open_name(loc, name, H5P_LINK_ACCESS_DEFAULT, FALSE)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open object");
+
+    if (NULL == (dataset = (H5D_t *) H5I_object_verify(obj_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+
+    /* Query dataset */
+    if (NULL == (dataspace = H5D_query(dataset, NULL, args->query, H5P_INDEX_ACCESS_DEFAULT, H5P_INDEX_XFER_DEFAULT)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "can't query dataset");
+
+    /* No element matched the query */
+    if (H5S_SEL_NONE == H5S_get_select_type(dataspace))
+        HGOTO_DONE(SUCCEED);
+
+    *(args->result) = H5Q_REF_REG;
+
+    /* Keep dataset region reference */
+    if (FAIL == H5R_create(&ref_buf, loc, name, H5AC_dxpl_id, H5R_DATASET_REGION, dataspace))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create region reference");
+    if (FAIL == H5Q__view_append(args->view, H5R_DATASET_REGION, &ref_buf))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append region reference to view");
+
+done:
+    if (dataspace) H5S_close(dataspace);
+    if ((obj_id != FAIL) && (FAIL == H5I_dec_app_ref(obj_id)))
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__apply_object_data */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_object_attr
+ *
+ * Purpose: Private function for H5Q__apply_object.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_object_attr(H5G_loc_t *loc, const char *name, const H5O_info_t *oinfo,
+        void *udata)
+{
+    H5Q_apply_attr_arg_t attr_args;
+    H5A_attr_iter_op_t attr_op; /* Attribute operator */
+    H5Q_apply_arg_t *args = (H5Q_apply_arg_t *) udata;
+    hid_t obj_id = FAIL;
+    H5G_loc_t obj_loc;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(loc);
+    HDassert(name);
+    HDassert(oinfo);
+    HDassert(args);
+
+    /* Build attribute operator info */
+    attr_args.loc = loc;
+    attr_args.loc_name = name;
+    attr_args.apply_args = args;
+    attr_op.op_type = H5A_ATTR_OP_LIB;
+    attr_op.u.lib_op = (H5A_lib_iterate_t) H5Q__apply_object_attr_iterate;
+
+    if (FAIL == (obj_id = H5O_open_name(loc, name, H5P_LINK_ACCESS_DEFAULT, FALSE)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open object");
+
+    /* Keep location of object */
+    if (FAIL == H5G_loc(obj_id, &obj_loc))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    attr_args.obj_loc = &obj_loc;
+
+    /* Iterate over attributes */
+    if (FAIL == (ret_value = H5O_attr_iterate(obj_id, H5AC_ind_dxpl_id,
+            H5_INDEX_NAME, H5_ITER_NATIVE, 0, NULL, &attr_op, &attr_args)))
+        HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error iterating over attributes");
+
+done:
+    if ((obj_id != FAIL) && (FAIL == H5I_dec_app_ref(obj_id)))
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__apply_object_attr */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_object_attr_iterate
+ *
+ * Purpose: Private function for H5Q__apply_iterate.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_object_attr_iterate(H5A_t *attr, void *udata)
+{
+    H5Q_apply_attr_arg_t *args = (H5Q_apply_attr_arg_t *) udata;
+    H5Q_type_t query_type;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(attr);
+    HDassert(args);
+
+    if (FAIL == H5Q_get_type(args->apply_args->query, &query_type))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get query type");
+
+    switch (query_type) {
+        /* If query on an attribute name, just compare the name of the object */
+        case H5Q_TYPE_ATTR_NAME:
+            if (FAIL == H5Q__apply_object_attr_name(attr, udata))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "can't apply attr name query to object");
+            break;
+        case H5Q_TYPE_ATTR_VALUE:
+            if (FAIL == H5Q__apply_object_attr_value(attr, udata))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "can't apply attr name query to object");
+            break;
+        case H5Q_TYPE_LINK_NAME:
+        case H5Q_TYPE_DATA_ELEM:
+        case H5Q_TYPE_MISC:
+        default:
+            HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
+            break;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__apply_object_attr_iterate */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_object_attr_name
+ *
+ * Purpose: Private function for H5Q__apply_object_attr_iterate.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_object_attr_name(H5A_t *attr, void *udata)
+{
+    H5Q_apply_attr_arg_t *args = (H5Q_apply_attr_arg_t *) udata;
+    char *name = NULL;
+    size_t name_len;
+    hattr_ref_t ref_buf;
+    hbool_t result = FALSE;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(attr);
+    HDassert(args);
+
+    /* Get attribute name */
+    if (0 == (name_len = (size_t) H5A_get_name(attr, 0, NULL)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get size of attribute name");
+    if (NULL == (name = (char *) H5MM_malloc(name_len + 1)))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate buffer for attribute name");
+    if (0 == H5A_get_name(attr, name_len + 1, name))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
+
+    if (FAIL == H5Q_apply_atom(args->apply_args->query, &result, (const char *) name))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "can't compare attr name");
+
+    if (!result) HGOTO_DONE(SUCCEED);
+
+    *(args->apply_args->result) = H5Q_REF_ATTR;
+
+    H5Q_LOG_DEBUG("Match attribute name: %s\n", (const char *) name);
+
+    /* Keep object reference */
+    if (FAIL == H5R_create(&ref_buf, args->loc, args->loc_name, H5AC_dxpl_id, H5R_ATTR, (const char *) name))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create region reference");
+    if (FAIL == H5Q__view_append(args->apply_args->view, H5R_ATTR, &ref_buf))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append region reference to view");
+
+done:
+    H5MM_free(name);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__apply_object_attr_name */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_object_attr_value
+ *
+ * Purpose: Private function for H5Q__apply_object_attr_iterate.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_object_attr_value(H5A_t *iter_attr, void *udata)
+{
+    H5Q_apply_attr_arg_t *args = (H5Q_apply_attr_arg_t *) udata;
+    char *name = NULL;
+    size_t name_len;
+    void *buf = NULL;
+    size_t buf_size;
+    H5A_t *attr = NULL;
+    H5T_t *dt = NULL;
+    H5S_t *space = NULL;
+    size_t nelmts, elmt_size;
+    H5S_sel_iter_op_t iter_op;  /* Operator for iteration */
+    H5Q_apply_attr_elem_arg_t iter_args;
+    hattr_ref_t ref_buf;
+    hbool_t result = FALSE;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(iter_attr);
+    HDassert(args);
+
+    /* TODO there may be another way of doing that but the attribute must be
+     * opened cleanly and the attribute given is not open
+     */
+
+    /* Get attribute name */
+    if (0 == (name_len = (size_t) H5A_get_name(iter_attr, 0, NULL)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get size of attribute name");
+    if (NULL == (name = (char *) H5MM_malloc(name_len + 1)))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate buffer for attribute name");
+    if (0 == H5A_get_name(iter_attr, name_len + 1, (char *) name))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
+
+    /* Finish opening attribute */
+    if (NULL == (attr = H5A_open(args->obj_loc, (const char *) name, H5AC_ind_dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute");
+
+    /* Get attribute info */
+    if (NULL == (dt = H5A_get_type(attr)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get attribute datatype");
+    if (NULL == (space = H5A_get_space(attr)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get attribute dataspace");
+    if (0 == (nelmts = (size_t) H5S_get_select_npoints(space)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid number of elements");
+    if (0 == (elmt_size = H5T_get_size(dt)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid size of element");
+
+    /* Allocate buffer to hold data */
+    buf_size = nelmts * elmt_size;
+    if (NULL == (buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, FAIL, "can't allocate read buffer");
+
+    /* Read data */
+    if (FAIL == H5A_read(attr, dt, buf, H5AC_ind_dxpl_id))
+        HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute");
+
+    iter_args.query = args->apply_args->query;
+    iter_args.result = &result;
+
+    iter_op.op_type = H5S_SEL_ITER_OP_LIB;
+    iter_op.u.lib_op = H5Q__apply_object_attr_value_iterate;
+
+    /* Iterate over attribute elements to compare values */
+    if (FAIL == H5S_select_iterate(buf, dt, space, &iter_op, &iter_args))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOMPARE, FAIL, "unable to compare attribute elements");
+
+    if (!result) HGOTO_DONE(SUCCEED);
+
+    *(args->apply_args->result) = H5Q_REF_ATTR;
+
+    H5Q_LOG_DEBUG("Match value of attribute name: %s\n", (const char *) name);
+
+    /* Keep object reference */
+    if (FAIL == H5R_create(&ref_buf, args->loc, args->loc_name, H5AC_dxpl_id, H5R_ATTR, (const char *) name))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create region reference");
+    if (FAIL == H5Q__view_append(args->apply_args->view, H5R_ATTR, &ref_buf))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append region reference to view");
+
+done:
+    H5MM_free(name);
+    H5MM_free(buf);
+    if (attr) H5A_close(attr);
+    if (dt) H5T_close(dt);
+    if (space) H5S_close(space);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__apply_object_attr_value */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_object_attr_value_iterate
+ *
+ * Purpose: Private function for H5Q__apply_iterate.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_object_attr_value_iterate(void *elem, const H5T_t *type,
+        unsigned H5_ATTR_UNUSED ndim, const hsize_t H5_ATTR_UNUSED *point, void *udata)
+{
+    H5Q_apply_attr_elem_arg_t *args = (H5Q_apply_attr_elem_arg_t *) udata;
+    hbool_t result;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(elem);
+    HDassert(type);
+
+    /* Apply the query */
+    if (FAIL == H5Q_apply_atom(args->query, &result, type, elem))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query to data element");
+
+    *(args->result) |= result;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__apply_object_attr_value_iterate */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__view_append
+ *
+ * Purpose: Private function for H5Q__apply_iterate.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__view_append(H5Q_view_t *view, H5R_type_t ref_type, void *ref)
+{
+    H5Q_ref_entry_t *ref_entry;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(view);
+    HDassert(ref);
+
+    if (NULL == (ref_entry = (H5Q_ref_entry_t *) H5MM_calloc(sizeof(H5Q_ref_entry_t))))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate ref entry");
+    ref_entry->ref_type = ref_type;
+
+    switch (ref_type) {
+        case H5R_ATTR:
+            HDmemcpy(&ref_entry->ref.attr, ref, sizeof(hattr_ref_t));
+            H5Q_QUEUE_INSERT_TAIL(&view->attr_refs, ref_entry, entry);
+            break;
+        case H5R_DATASET_REGION:
+            HDmemcpy(&ref_entry->ref.reg, ref, sizeof(hdset_reg_ref_t));
+            H5Q_QUEUE_INSERT_TAIL(&view->reg_refs, ref_entry, entry);
+            break;
+        case H5R_OBJECT:
+            HDmemcpy(&ref_entry->ref.obj, ref, sizeof(hobj_ref_t));
+            H5Q_QUEUE_INSERT_TAIL(&view->obj_refs, ref_entry, entry);
+            break;
+        case H5R_BADTYPE:
+        case H5R_MAXTYPE:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid ref type");
+    }
+
+done:
+    if (FAIL == ret_value) H5MM_free(ref_entry);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__view_append */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__view_combine
+ *
+ * Purpose: Private function for H5Q__apply_iterate.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__view_combine(H5Q_combine_op_t combine_op, H5Q_view_t *view1, H5Q_view_t *view2,
+        unsigned result1, unsigned result2, H5Q_view_t *view, unsigned *result)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(view);
+    HDassert(result);
+
+    if ((combine_op == H5Q_COMBINE_AND) && ((result1 && result2))) {
+        unsigned combine_result = (result1 > result2) ? result1 : result2;
+
+        H5Q_LOG_DEBUG("Result 1 (%x), result 2 (%x), combined result (%x)\n",
+                result1, result2, combine_result);
+
+        *result = combine_result;
+
+        switch (combine_result) {
+            case H5Q_REF_REG:
+            {
+                /* Combined results are on the same object (here, dataset),
+                 * therefore at this point only result1 or resul2 has a region
+                 * reference */
+                if (result1 & H5Q_REF_REG)
+                    H5Q_QUEUE_CONCAT(&view->reg_refs, &view1->reg_refs);
+                if (result2 & H5Q_REF_REG)
+                    H5Q_QUEUE_CONCAT(&view->reg_refs, &view2->reg_refs);
+            }
+                break;
+            case H5Q_REF_OBJ:
+                break;
+            case H5Q_REF_ATTR:
+                /* TODO attribute AND attribute what does it mean ? */
+                break;
+            default:
+                HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
+                break;
+        }
+    } else if ((combine_op == H5Q_COMBINE_OR) && ((result1 || result2))) {
+        unsigned combine_result = result1 | result2;
+
+        H5Q_LOG_DEBUG("Result 1 (%x), result 2 (%x), combined result (%x)\n",
+                result1, result2, combine_result);
+
+        *result = combine_result;
+
+        /* Combine reg references */
+        H5Q_QUEUE_CONCAT(&view->reg_refs, &view1->reg_refs);
+        H5Q_QUEUE_CONCAT(&view->reg_refs, &view2->reg_refs);
+
+        /* Combine obj references */
+        H5Q_QUEUE_CONCAT(&view->obj_refs, &view1->obj_refs);
+        H5Q_QUEUE_CONCAT(&view->obj_refs, &view2->obj_refs);
+
+        /* Combine attr references */
+        H5Q_QUEUE_CONCAT(&view->attr_refs, &view1->attr_refs);
+        H5Q_QUEUE_CONCAT(&view->attr_refs, &view2->attr_refs);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__view_combine */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__view_write
+ *
+ * Purpose: Private function for H5Q_apply.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__view_write(H5G_t *grp, H5Q_view_t *view)
+{
+    H5G_loc_t loc;
+    H5D_t *dset = NULL;
+    H5S_t *space = NULL;
+    H5Q_ref_head_t *refs[H5Q_VIEW_REF_NTYPES] = { &view->reg_refs, &view->obj_refs,
+            &view->attr_refs };
+    const char *dset_name[H5Q_VIEW_REF_NTYPES] = { H5Q_VIEW_REF_REG_NAME,
+            H5Q_VIEW_REF_OBJ_NAME, H5Q_VIEW_REF_ATTR_NAME };
+    hid_t ref_types[H5Q_VIEW_REF_NTYPES] = { H5T_STD_REF_DSETREG,
+            H5T_STD_REF_OBJ, H5T_STD_REF_ATTR };
+    herr_t ret_value = SUCCEED; /* Return value */
+    int i;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(grp);
+
+    /* Get location of group */
+    loc.oloc = H5G_oloc(grp);
+    loc.path = H5G_nameof(grp);
+
+    /* Write region references if any */
+    for (i = 0; i < H5Q_VIEW_REF_NTYPES; i++) {
+        H5Q_ref_entry_t *ref_entry = NULL;
+        hsize_t n_elem = refs[i]->n_elem;
+
+        if (!n_elem)
+            break;
+
+        /* Create dataspace */
+        if (NULL == (space = H5S_create_simple(1, &n_elem, NULL)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace");
+
+        /* Create the new dataset & get its ID */
+        if (NULL == (dset = H5D_create_named(&loc, dset_name[i], ref_types[i],
+                space, H5P_LINK_CREATE_DEFAULT, H5P_DATASET_CREATE_DEFAULT,
+                H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create dataset");
+
+        H5Q_QUEUE_FOREACH(ref_entry, refs[i], entry) {
+            if (FAIL == H5D_write(dset, FALSE, ref_types[i], NULL, space,
+                    H5P_DATASET_XFER_DEFAULT, &ref_entry->ref))
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write dataset");
+        }
+
+        if (FAIL == H5D_close(dset))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close dataset");
+        dset = NULL;
+        if (FAIL == H5S_close(space))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLOSEOBJ, FAIL, "unable to close dataspace");
+        space = NULL;
+    }
+
+done:
+    if (dset) H5D_close(dset);
+    if (space) H5S_close(space);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__view_write */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__view_free
+ *
+ * Purpose: Private function for H5Q_apply.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__view_free(H5Q_view_t *view)
+{
+    H5Q_ref_head_t *refs[H5Q_VIEW_REF_NTYPES] = { &view->reg_refs, &view->obj_refs,
+            &view->attr_refs };
+    herr_t ret_value = SUCCEED; /* Return value */
+    int i;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    for (i = 0; i < H5Q_VIEW_REF_NTYPES; i++) {
+        while (!H5Q_QUEUE_EMPTY(refs[i])) {
+            H5Q_ref_entry_t *ref_entry = H5Q_QUEUE_FIRST(refs[i]);
+            H5Q_QUEUE_REMOVE_HEAD(refs[i], entry);
+            H5MM_free(ref_entry);
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q__view_free */
