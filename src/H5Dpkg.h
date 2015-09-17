@@ -539,9 +539,6 @@ H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
 
 H5_DLL H5D_t *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space,
     hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id);
-H5_DLL H5D_t *H5D__create_named(const H5G_loc_t *loc, const char *name,
-    hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
-    hid_t dapl_id, hid_t dxpl_id);
 H5_DLL H5D_t *H5D__open_name(const H5G_loc_t *loc, const char *name,
     hid_t dapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5D__get_space_status(H5D_t *dset, H5D_space_status_t *allocation,
