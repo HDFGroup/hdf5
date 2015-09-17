@@ -81,6 +81,7 @@ H5_DLL H5G_name_t *H5A_nameof(H5A_t *attr);
 H5_DLL H5T_t *H5A_type(const H5A_t *attr);
 H5_DLL H5T_t *H5A_get_type(H5A_t *attr);
 H5_DLL H5S_t *H5A_get_space(H5A_t *attr);
+H5_DLL ssize_t H5A_get_name(H5A_t *attr, size_t buf_size, char *buf);
 H5_DLL herr_t H5A_close(H5A_t *attr);
 H5_DLL herr_t H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc,
     hid_t dxpl_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
@@ -88,6 +89,8 @@ H5_DLL herr_t H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc,
 H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, hid_t dxpl_id, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t skip, hsize_t *last_attr,
     const H5A_attr_iter_op_t *op, void *op_data);
+H5_DLL herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
+H5_DLL herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
 
 #endif /* _H5Aprivate_H */
 

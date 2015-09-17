@@ -609,7 +609,7 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
     /* Go write the actual data to the attribute */
-    if((ret_value = H5A__write(attr, mem_type, buf, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5A_write(attr, mem_type, buf, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
 done:
@@ -652,7 +652,7 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
 
     /* Go write the actual data to the attribute */
-    if((ret_value = H5A__read(attr, mem_type, buf, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5A_read(attr, mem_type, buf, H5AC_ind_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
 
 done:
@@ -833,7 +833,7 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
 
     /* Call private function in turn */
-    if(0 > (ret_value = H5A__get_name(my_attr, buf_size, buf)))
+    if(0 > (ret_value = H5A_get_name(my_attr, buf_size, buf)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
 
 done:

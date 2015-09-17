@@ -515,11 +515,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5A__read
+    H5A_read
  PURPOSE
     Actually read in data from an attribute
  USAGE
-    herr_t H5A__read (attr, mem_type, buf)
+    herr_t H5A_read (attr, mem_type, buf)
         H5A_t *attr;         IN: Attribute to read
         const H5T_t *mem_type;     IN: Memory datatype of buffer
         void *buf;           IN: Buffer for data to read
@@ -530,7 +530,7 @@ done:
     This function reads a complete attribute from disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
+H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 {
     uint8_t		*tconv_buf = NULL;	/* datatype conv buffer*/
     uint8_t		*bkg_buf = NULL;	/* background buffer */
@@ -613,16 +613,16 @@ done:
 	bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A__read() */
+} /* H5A_read() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5A__write
+    H5A_write
  PURPOSE
     Actually write out data to an attribute
  USAGE
-    herr_t H5A__write (attr, mem_type, buf)
+    herr_t H5A_write (attr, mem_type, buf)
         H5A_t *attr;         IN: Attribute to write
         const H5T_t *mem_type;     IN: Memory datatype of buffer
         const void *buf;           IN: Buffer of data to write
@@ -633,7 +633,7 @@ done:
     This function writes a complete attribute to disk.
 --------------------------------------------------------------------------*/
 herr_t
-H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
+H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 {
     uint8_t		*tconv_buf = NULL;	/* datatype conv buffer */
     hbool_t             tconv_owned = FALSE;    /* Whether the datatype conv buffer is owned by attribute */
@@ -727,12 +727,12 @@ done:
         bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* H5A__write() */
+} /* H5A_write() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5A__get_name
+    H5A_get_name
  PURPOSE
     Private function for H5Aget_name.  Gets a copy of the name for an
     attribute
@@ -747,7 +747,7 @@ done:
     properly terminate the string.
 --------------------------------------------------------------------------*/
 ssize_t
-H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
+H5A_get_name(H5A_t *attr, size_t buf_size, char *buf)
 {
     size_t              copy_len, nbytes;
     ssize_t		ret_value = -1;         /* Return value */
@@ -773,7 +773,7 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
     ret_value = (ssize_t)nbytes;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A__get_name() */
+} /* H5A_get_name() */
 
 
 /*-------------------------------------------------------------------------
