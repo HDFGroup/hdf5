@@ -1281,6 +1281,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "%ld (file driver)", (long)obj);
                                 break;
 
+                            case H5I_QUERY:
+                                fprintf(out, "%ld (query)", (long)obj);
+                                break;
+
                             case H5I_GENPROP_CLS:
                                 fprintf(out, "%ld (genprop class)", (long)obj);
                                 break;
@@ -1460,6 +1464,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                 case H5I_VFL:
                                     fprintf(out, "H5I_VFL");
+                                    break;
+
+                                case H5I_QUERY:
+                                    fprintf(out, "H5I_QUERY");
                                     break;
 
                                 case H5I_GENPROP_CLS:
@@ -1779,8 +1787,14 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 case H5Q_TYPE_ATTR_NAME:
                                     fprintf(out, "H5Q_TYPE_ATTR_NAME");
                                     break;
+                                case H5Q_TYPE_ATTR_VALUE:
+                                    fprintf(out, "H5Q_TYPE_ATTR_VALUE");
+                                    break;
                                 case H5Q_TYPE_LINK_NAME:
                                     fprintf(out, "H5Q_TYPE_LINK_NAME");
+                                    break;
+                                case H5Q_TYPE_MISC:
+                                    fprintf(out, "H5Q_TYPE_MISC");
                                     break;
                                 default:
                                     fprintf(out, "BADTYPE(%d)", qtype);
@@ -1833,6 +1847,9 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                                 case H5Q_COMBINE_OR:
                                     fprintf(out, "H5Q_COMBINE_OR");
+                                    break;
+                                case H5Q_SINGLETON:
+                                    fprintf(out, "H5Q_SINGLETON");
                                     break;
                                 default:
                                     fprintf(out, "BADTYPE(%d)", qcomb);

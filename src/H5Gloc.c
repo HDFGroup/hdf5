@@ -248,6 +248,7 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_VFL:
+        case H5I_QUERY:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object ID")

@@ -839,6 +839,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_QUERY:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
