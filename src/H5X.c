@@ -65,7 +65,7 @@ static size_t       H5X_table_used_g = 0;
 static H5X_class_t *H5X_table_g = NULL;
 
 
-static H5_inline hbool_t
+static H5_INLINE hbool_t
 H5X__registered(unsigned plugin_id, size_t *index)
 {
     size_t plugin_index;

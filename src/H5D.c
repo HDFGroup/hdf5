@@ -960,6 +960,7 @@ H5Dquery(hid_t dset_id, hid_t file_space_id, hid_t query_id, hid_t xapl_id)
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("i", "iiii", dset_id, file_space_id, query_id, xapl_id);
 
     /* Check arguments */
     if (NULL == (dset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))

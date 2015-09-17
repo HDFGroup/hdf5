@@ -266,7 +266,7 @@ static herr_t H5Q__view_write(H5G_t *grp, H5Q_view_t *view);
 static herr_t H5Q__view_free(H5Q_view_t *view);
 
 
-static H5_inline void
+static H5_INLINE void
 H5Q__encode_memcpy(unsigned char **buf_ptr, size_t *nalloc, const void *data,
         size_t data_size)
 {
@@ -277,7 +277,7 @@ H5Q__encode_memcpy(unsigned char **buf_ptr, size_t *nalloc, const void *data,
     *nalloc += data_size;
 }
 
-static H5_inline void
+static H5_INLINE void
 H5Q__decode_memcpy(void *data, size_t data_size, const unsigned char **buf_ptr)
 {
     if (*buf_ptr != NULL) {
@@ -1843,6 +1843,7 @@ H5Qapply(hid_t loc_id, hid_t query_id, unsigned *result, hid_t vcpl_id)
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("i", "ii*Iui", loc_id, query_id, result, vcpl_id);
 
     /* Check args and get the query objects */
     if (FAIL == H5G_loc(loc_id, &loc))
