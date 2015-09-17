@@ -1888,6 +1888,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     fprintf(out, "H5R_DATASET_REGION");
                                     break;
 
+                                case H5R_ATTR:
+                                    fprintf(out, "H5R_ATTR");
+                                    break;
+
                                 case H5R_MAXTYPE:
                                     fprintf(out, "H5R_MAXTYPE");
                                     break;
