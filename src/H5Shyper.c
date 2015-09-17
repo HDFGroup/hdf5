@@ -6576,7 +6576,7 @@ H5S_hyper_rebuild(H5S_t *space)
     unsigned rank;              /* Dataspace rank */
     htri_t ret_value = TRUE;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
     HDassert(space);

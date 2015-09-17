@@ -20,8 +20,7 @@
 /* Module Setup */
 /****************/
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5Q_init_interface
+#include "H5Qmodule.h"      /* This source code file is part of the H5Q module */
 
 /***********/
 /* Headers */
@@ -291,6 +290,9 @@ H5Q__decode_memcpy(void *data, size_t data_size, const unsigned char **buf_ptr)
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -309,6 +311,9 @@ static const H5I_class_t H5I_QUERY_CLS[1] = {{
     0,                     /* Number of reserved IDs for this type */
     (H5I_free_t)H5Q_close  /* Free function for object's of this type */
 }};
+
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5Q_top_package_initialize_s = FALSE;
 
 /*-------------------------------------------------------------------------
  * Function:    H5Q_init
@@ -334,9 +339,9 @@ done:
 
 /*--------------------------------------------------------------------------
 NAME
-   H5Q_init_interface -- Initialize interface-specific information
+   H5Q__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5Q_init_interface()
+    herr_t H5Q__init_package()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -344,28 +349,69 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t
-H5Q_init_interface(void)
+herr_t
+H5Q__init_package(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Initialize the atom group for the QUERY IDs */
     if (FAIL == H5I_register_type(H5I_QUERY_CLS))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
+    /* Mark "top" of interface as initialized, too */
+    H5Q_top_package_initialize_s = TRUE;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_init_interface() */
+} /* end H5Q__init_package() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Q_term_interface
+    H5Q_top_term_package
  PURPOSE
     Terminate various H5Q objects
  USAGE
-    void H5Q_term_interface()
+    void H5Q_top_term_package()
+ RETURNS
+ DESCRIPTION
+    Release IDs for the atom group, deferring full interface shutdown
+    until later (in H5Q_term_package).
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int
+H5Q_top_term_package(void)
+{
+    int n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5Q_top_package_initialize_s) {
+        if(H5I_nmembers(H5I_QUERY) > 0) {
+            (void)H5I_clear_type(H5I_QUERY, FALSE, FALSE);
+            n++; /*H5I*/
+        } /* end if */
+
+        /* Mark closed */
+        if(0 == n)
+            H5Q_top_package_initialize_s = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* H5Q_top_term_package() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Q_term_package
+ PURPOSE
+    Terminate various H5Q objects
+ USAGE
+    void H5Q_term_package()
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -377,28 +423,26 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5Q_term_interface(void)
+H5Q_term_package(void)
 {
     int n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_interface_initialize_g) {
-        if ((n = (int) H5I_nmembers(H5I_QUERY))) {
-            H5I_clear_type(H5I_QUERY, FALSE, FALSE);
-        } /* end if */
-        else {
-            /* Free data types */
-            H5I_dec_type_ref(H5I_QUERY);
+    if(H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_QUERY));
 
-            /* Shut down interface */
-            H5_interface_initialize_g = 0;
-            n = 1; /* H5I */
-        } /* end else */
+        /* Destroy the query object id group */
+        n += (H5I_dec_type_ref(H5I_QUERY) > 0);
+
+        /* Mark closed */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5Q_term_interface() */
+} /* end H5Q_term_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Qcreate
@@ -1652,7 +1696,7 @@ done:
 static H5T_t *
 H5Q__promote_type(const H5T_t *type1, const H5T_t *type2, H5Q_match_type_t *match_type)
 {
-    H5T_t *ret_value; /* Return value */
+    H5T_t *ret_value = NULL; /* Return value */
     H5T_class_t type1_class, type2_class, promoted_type_class;
     H5T_t *promoted_type;
 

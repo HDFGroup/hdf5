@@ -20,20 +20,17 @@
 /* Module Setup */
 /****************/
 
-#define H5X_PACKAGE /* Suppress error about including H5Xpkg */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5X_init_interface
+#include "H5Xmodule.h"      /* This source code file is part of the H5X module */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions */
-#include "H5Eprivate.h"		/* Error handling */
-#include "H5Iprivate.h"		/* IDs */
-#include "H5MMprivate.h"	/* Memory management */
-#include "H5Pprivate.h"     /* Property lists */
+#include "H5private.h"      /* Generic Functions */
 #include "H5Xpkg.h"         /* Index plugins */
+#include "H5Eprivate.h"     /* Error handling */
+#include "H5Iprivate.h"     /* IDs */
+#include "H5MMprivate.h"    /* Memory management */
+#include "H5Pprivate.h"     /* Property lists */
 #include "H5Dprivate.h"     /* Datasets */
 #include "H5Oprivate.h"
 
@@ -52,6 +49,9 @@
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -107,9 +107,9 @@ done:
 
 /*--------------------------------------------------------------------------
 NAME
-   H5X_init_interface -- Initialize interface-specific information
+   H5X__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5X_init_interface()
+    herr_t H5X__init_package()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -117,8 +117,8 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t
-H5X_init_interface(void)
+herr_t
+H5X__init_package(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -137,15 +137,15 @@ H5X_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5X_init_interface() */
+} /* end H5X__init_package() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5X_term_interface
+    H5X_term_package
  PURPOSE
     Terminate various H5X objects
  USAGE
-    void H5X_term_interface()
+    void H5X_term_package()
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -157,23 +157,27 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5X_term_interface(void)
+H5X_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_interface_initialize_g) {
-        /* Free the table of filters */
-        H5X_table_g = (H5X_class_t *) H5MM_xfree(H5X_table_g);
-        H5X_table_used_g = H5X_table_alloc_g = 0;
+    if(H5_PKG_INIT_VAR) {
+        /* Free the table of index plugins */
+        if (H5X_table_g) {
+            H5X_table_g = (H5X_class_t *) H5MM_xfree(H5X_table_g);
+            H5X_table_used_g = H5X_table_alloc_g = 0;
+            n++;
+        } /* end if */
 
-        /* Shut down interface */
-        H5_interface_initialize_g = 0;
+        /* Mark the interface as uninitialized */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5X_term_interface() */
+} /* end H5X_term_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5X_registered
@@ -568,7 +572,7 @@ H5X_remove(hid_t dset_id, unsigned plugin_id)
     HDassert(dset_id != FAIL);
     HDassert(plugin_id <= H5X_PLUGIN_MAX);
 
-    if (NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
+    if (NULL == (dset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Remove idx_handle from dataset */
@@ -629,7 +633,7 @@ H5X_get_count(hid_t dset_id, hsize_t *idx_count)
     HDassert(dset_id != H5I_BADID);
     HDassert(idx_count);
 
-    if (NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
+    if (NULL == (dset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     if (FAIL == H5D_get_index(dset, 1, NULL, NULL, NULL, &actual_count))
@@ -689,7 +693,7 @@ H5X_get_size(hid_t dset_id, hsize_t *idx_size)
     HDassert(dset_id != H5I_BADID);
     HDassert(idx_size);
 
-    if (NULL == (dset = H5I_object_verify(dset_id, H5I_DATASET)))
+    if (NULL == (dset = (H5D_t *) H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     if (FAIL == H5D_get_index_size(dset, &actual_size))
