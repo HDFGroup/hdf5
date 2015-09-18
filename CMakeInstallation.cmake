@@ -149,7 +149,7 @@ install (
 option (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
 if (HDF5_PACK_EXAMPLES)
   configure_file (
-      ${HDF_RESOURCES_DIR}/HDF518_Examples.cmake.in 
+      ${HDF_RESOURCES_DIR}/HDF518_Examples.cmake.in
       ${HDF5_BINARY_DIR}/HDF518_Examples.cmake @ONLY
   )
   install (
@@ -162,7 +162,7 @@ if (HDF5_PACK_EXAMPLES)
         COMMAND ${CMAKE_COMMAND} -E tar xzf ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
     )
     install (
-      DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples-0.1.1-Source
+      DIRECTORY ${HDF5_BINARY_DIR}/HDF5Examples
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       USE_SOURCE_PERMISSIONS
       COMPONENT hdfdocuments
