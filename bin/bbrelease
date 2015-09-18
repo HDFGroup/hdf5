@@ -304,6 +304,7 @@ fi
 # Create a manifest that contains only files for distribution.
 MANIFEST=$tmpdir/H5_MANIFEST
 grep '^\.' MANIFEST | grep -v _DO_NOT_DISTRIBUTE_ >$MANIFEST
+echo "./autogen.sh" >>$MANIFEST
 
 # Prepare the source tree for a release.
 #ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1
