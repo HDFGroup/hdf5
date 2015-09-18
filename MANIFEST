@@ -567,6 +567,7 @@
 ./src/H5Apublic.h
 ./src/H5AC.c
 ./src/H5AClog.c
+./src/H5ACmpio.c
 ./src/H5ACpkg.h
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
@@ -587,6 +588,7 @@
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
+./src/H5Cmpio.c
 ./src/H5Cpkg.h
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h

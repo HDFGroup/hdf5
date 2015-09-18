@@ -572,7 +572,7 @@ H5F__cache_superblock_image_len(const void *_thing, size_t *image_len, hbool_t *
     *image_len = (size_t)H5F_SUPERBLOCK_SIZE(sblock);
 
     /* Set *compressed_ptr to FALSE unconditionally */
-    *compressed_ptr;
+    *compressed_ptr = FALSE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5F__cache_superblock_image_len() */

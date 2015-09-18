@@ -41,8 +41,20 @@
 
 /* Get needed headers */
 #include "H5Cprivate.h"         /* Cache                                */
+#include "H5FLprivate.h"        /* Free Lists                           */
 #include "H5SLprivate.h"        /* Skip lists */
 
+/*****************************/
+/* Package Private Variables */
+/*****************************/
+
+/* Declare extern the free list to manage the H5AC_aux_t struct */
+H5FL_EXTERN(H5AC_aux_t);
+
+
+/**************************/
+/* Package Private Macros */
+/**************************/
 
 #define H5AC_DEBUG_DIRTY_BYTES_CREATION	0
 
@@ -392,9 +404,18 @@ typedef struct H5AC_aux_t
 } H5AC_aux_t; /* struct H5AC_aux_t */
 
 /* Package scoped functions */
-H5_DLL herr_t H5AC_set_sync_point_done_callback(H5C_t *cache_ptr,
+H5_DLL herr_t H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr);
+H5_DLL herr_t H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr);
+H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr,
+    hbool_t was_dirty, unsigned flags);
+H5_DLL herr_t H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr);
+H5_DLL herr_t H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr,
+    haddr_t new_addr);
+H5_DLL herr_t H5AC__flush_entries(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5AC__run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op);
+H5_DLL herr_t H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
     void (*sync_point_done)(int num_writes, haddr_t *written_entries_tbl));
-H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
+H5_DLL herr_t H5AC__set_write_done_callback(H5C_t * cache_ptr,
     void (* write_done)(void));
 
 #endif /* H5_HAVE_PARALLEL */

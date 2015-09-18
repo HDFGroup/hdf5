@@ -229,6 +229,7 @@
  * 	H5C__FLUSH_CLEAR_ONLY_FLAG
  * 	H5C__FLUSH_MARKED_ENTRIES_FLAG
  *      H5C__TAKE_OWNERSHIP_FLAG
+ *      H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG
  */
 #define H5C__NO_FLAGS_SET			0x0000
 #define H5C__SET_FLUSH_MARKER_FLAG		0x0001
@@ -241,11 +242,12 @@
 #define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0080
 #define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0100
 #define H5C__READ_ONLY_FLAG			0x0200
-#define H5C__FREE_FILE_SPACE_FLAG		0x0800
-#define H5C__TAKE_OWNERSHIP_FLAG		0x1000
-#define H5C__FLUSH_LAST_FLAG			0x2000
-#define H5C__FLUSH_COLLECTIVELY_FLAG		0x4000
-#define H5C__EVICT_ALLOW_LAST_PINS_FLAG         0x8000
+#define H5C__FREE_FILE_SPACE_FLAG		0x0400
+#define H5C__TAKE_OWNERSHIP_FLAG		0x0800
+#define H5C__FLUSH_LAST_FLAG			0x1000
+#define H5C__FLUSH_COLLECTIVELY_FLAG		0x2000
+#define H5C__EVICT_ALLOW_LAST_PINS_FLAG         0x4000
+#define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG     0x8000
 
 /* Definitions for cache "tag" property */
 #define H5C_TAG_NAME           "H5C_tag"
@@ -2000,8 +2002,6 @@ H5_DLL FILE *H5C_get_trace_file_ptr(const H5C_t *cache_ptr);
 H5_DLL FILE *H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr);
 H5_DLL herr_t H5C_insert_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
     haddr_t addr, void *thing, unsigned int flags);
-H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, int32_t ce_array_len,
-    haddr_t *ce_array_ptr);
 H5_DLL herr_t H5C_mark_entry_dirty(void *thing);
 H5_DLL herr_t H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type,
     haddr_t old_addr, haddr_t new_addr);
@@ -2036,6 +2036,8 @@ H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
     int mpi_rank, int mpi_size);
 H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, int32_t ce_array_len,
+    haddr_t *ce_array_ptr);
 #endif /* H5_HAVE_PARALLEL */
 
 #ifndef NDEBUG	/* debugging functions */
