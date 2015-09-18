@@ -46,7 +46,6 @@ fi
 cacheinit=$srcdir/config/cmake/cacheinit.cmake
 build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=OFF	# C++ interface default off
 build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=OFF	# Fortran interface default off
-enable_f2003=-DHDF5_ENABLE_F2003:BOOL=OFF	# Fortran2003 interface default off
 build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
 build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
 build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
@@ -76,8 +75,6 @@ Usage: $progname [<options>]
   where options are:
   --enable-fortran | --disable-fortran:
     enable or disable fortran API. Default is off.
-  --enable-fortran2003 | --disable-fortran2003:
-    enable or disable fortran2003 API. Default is off.
   --enable-cxx | --disable-cxx:
     enable or disable c++ API. Default is off.
   --enable-hl | --disable-hl:
@@ -88,9 +85,11 @@ Usage: $progname [<options>]
     enable or disable building tools. Default is on.
   --enable-testing | --disable-testing:
     enable or disable building tests. Default is on.
-  --with-zlib | --without-zlib:
+  --with-zlib | --with-zlib=<libpath> | --without-zlib:
     Use zlib library for external deflate I/O filter. Default is on.
   --help: shows details help page
+
+  <libpath>: the file path to the library, expect <libpath>/lib and <libpath>/include.
 EOF
 }
 
@@ -182,12 +181,6 @@ while [ $# -gt 0 ]; do
 	--disable-fortran)
 	    build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=OFF
 	    ;;
-	--enable-fortran2003)
-	    enable_f2003=-DHDF5_ENABLE_F2003:BOOL=ON
-	    ;;
-	--disable-fortran2003)
-	    enable_f2003=-DHDF5_ENABLE_F2003:BOOL=OFF
-	    ;;
 	--enable-cxx)
 	    build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=ON
 	    ;;
@@ -220,6 +213,10 @@ while [ $# -gt 0 ]; do
 	    ;;
 	--with-zlib)
 	    with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
+	    ;;
+	--with-zlib=*)
+	    xarg=`echo $1 | cut -d= -f2-`
+	    with_zlib="-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON -DZLIB_ROOT=$xarg"
 	    ;;
 	--without-zlib)
 	    with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF
@@ -265,7 +262,6 @@ STEP "Configure..." "cmake \
     -C $cacheinit \
     $build_cpp_lib \
     $build_fortran \
-    $enable_f2003 \
     $build_hl_lib \
     $shared_lib \
     $build_testing \
