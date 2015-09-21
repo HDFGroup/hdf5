@@ -41,7 +41,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE             /* Suppress error about including H5Dpkg */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -1156,12 +1156,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void
+herr_t
 H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_seg)
 {
     H5O_storage_virtual_name_seg_t *next_seg;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Walk name segments, freeing them */
     while(name_seg) {
@@ -1171,7 +1172,8 @@ H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_seg)
         name_seg = next_seg;
     } /* end while */
 
-    FUNC_LEAVE_NOAPI_VOID
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_free_parsed_name() */
 
 

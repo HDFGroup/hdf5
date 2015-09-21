@@ -19,8 +19,9 @@
  * Purpose:     Messages related to data layout.
  */
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
@@ -105,7 +106,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
     H5O_layout_t           *mesg = NULL;
     uint8_t                *heap_block = NULL;
     unsigned               u;
-    void                   *ret_value;          /* Return value */
+    void                   *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -635,7 +636,7 @@ H5O_layout_copy(const void *_mesg, void *_dest)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     H5O_layout_t           *dest = (H5O_layout_t *) _dest;
-    void                   *ret_value;          /* Return value */
+    void                   *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -654,6 +655,9 @@ H5O_layout_copy(const void *_mesg, void *_dest)
         case H5D_COMPACT:
             /* Deep copy the buffer for compact datasets also */
             if(mesg->storage.u.compact.size > 0) {
+                /* Sanity check */
+                HDassert(mesg->storage.u.compact.buf);
+
                 /* Allocate memory for the raw data */
                 if(NULL == (dest->storage.u.compact.buf = H5MM_malloc(dest->storage.u.compact.size)))
                     HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
@@ -716,7 +720,7 @@ static size_t
 H5O_layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
-    size_t                  ret_value;
+    size_t                  ret_value = 0;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -886,8 +890,8 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     H5O_layout_t       *layout_src = (H5O_layout_t *) mesg_src;
     H5O_layout_t       *layout_dst = NULL;
-    hbool_t             copied = FALSE;                         /* Whether the data was copied */
-    void               *ret_value;                              /* Return value */
+    hbool_t             copied = FALSE;         /* Whether the data was copied */
+    void               *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

@@ -28,7 +28,7 @@
  *		reason why this file was created.
  */
 
-#ifndef H5C_PACKAGE
+#if !(defined H5C_FRIEND || defined H5C_MODULE)
 #error "Do not include this file outside the H5C package!"
 #endif
 
@@ -836,7 +836,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__HASH_MASK		((size_t)(H5C__HASH_TABLE_LEN - 1) << 3)
 
-#define H5C__HASH_FCN(x)	(int)(((x) & H5C__HASH_MASK) >> 3)
+#define H5C__HASH_FCN(x)	(int)((unsigned)((x) & H5C__HASH_MASK) >> 3)
 
 #if H5C_DO_SANITY_CHECKS
 

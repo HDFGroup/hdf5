@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5B_PACKAGE		/*suppress error about including H5Bpkg  */
+#include "H5Bmodule.h"          /* This source code file is part of the H5B module */
 
 
 /***********/
@@ -151,7 +151,7 @@ H5B__deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void *_udata,
     const uint8_t *image = (const uint8_t *)_image;     /* Pointer into image buffer */
     uint8_t *native;            /* Pointer to native keys */
     unsigned u;                 /* Local index variable */
-    H5B_t *ret_value;           /* Return value */
+    H5B_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_STATIC
 

@@ -29,7 +29,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HL_PACKAGE		/* Suppress error about including H5HLpkg */
+#include "H5HLmodule.h"         /* This source code file is part of the H5HL module */
 
 
 /***********/
@@ -70,6 +70,9 @@ static herr_t H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap);
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Declare a free list to manage the H5HL_free_t struct */
 H5FL_DEFINE(H5HL_free_t);
@@ -115,7 +118,7 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
 {
     H5HL_t	*heap = NULL;           /* Heap created */
     H5HL_prfx_t *prfx = NULL;           /* Heap prefix */
-    hsize_t	total_size;		/* Total heap size on disk	*/
+    hsize_t	total_size = 0;		/* Total heap size on disk */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -446,10 +449,10 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, unsigned flags)
     H5HL_cache_prfx_ud_t prfx_udata; /* User data for protecting local heap prefix */
     H5HL_prfx_t *prfx = NULL;   /* Local heap prefix */
     H5HL_dblk_t *dblk = NULL;   /* Local heap data block */
-    H5HL_t *heap;               /* Heap data structure */
+    H5HL_t *heap = NULL;        /* Heap data structure */
     unsigned prfx_cache_flags = H5AC__NO_FLAGS_SET;         /* Cache flags for unprotecting prefix entry */
     unsigned dblk_cache_flags = H5AC__NO_FLAGS_SET;         /* Cache flags for unprotecting data block entry */
-    H5HL_t *ret_value;          /* Return value */
+    H5HL_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -511,11 +514,11 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, unsigned flags)
 
 done:
     /* Release the prefix from the cache, now pinned */
-    if(prfx && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, prfx_cache_flags) < 0)
+    if(prfx && heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, prfx_cache_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release local heap prefix")
 
     /* Release the data block from the cache, now pinned */
-    if(dblk && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_DBLK, heap->dblk_addr, dblk, dblk_cache_flags) < 0)
+    if(dblk && heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_DBLK, heap->dblk_addr, dblk, dblk_cache_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release local heap data block")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -700,7 +703,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
     size_t	offset = 0;
     size_t	need_size;
     hbool_t	found;
-    size_t	ret_value;      /* Return value */
+    size_t	ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI(UFAIL)
 
@@ -1062,7 +1065,7 @@ done:
 herr_t
 H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
-    H5HL_t	*heap;                  /* Local heap to delete */
+    H5HL_t	*heap = NULL;           /* Local heap to delete */
     H5HL_cache_prfx_ud_t prfx_udata;    /* User data for protecting local heap prefix */
     H5HL_prfx_t *prfx = NULL;           /* Local heap prefix */
     H5HL_dblk_t *dblk = NULL;           /* Local heap data block */
@@ -1114,11 +1117,11 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 
 done:
     /* Release the data block from the cache, now deleted */
-    if(dblk && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_DBLK, heap->dblk_addr, dblk, cache_flags) < 0)
+    if(dblk && heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_DBLK, heap->dblk_addr, dblk, cache_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release local heap data block")
 
     /* Release the prefix from the cache, now deleted */
-    if(prfx && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, cache_flags) < 0)
+    if(prfx && heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, cache_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release local heap prefix")
 
     FUNC_LEAVE_NOAPI(ret_value)

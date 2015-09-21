@@ -21,7 +21,7 @@
  *		the H5B package.  Source files outside the H5B package should
  *		include H5Bprivate.h instead.
  */
-#ifndef H5B_PACKAGE
+#if !(defined H5B_FRIEND || defined H5B_MODULE)
 #error "Do not include this file outside the H5B package!"
 #endif
 

@@ -821,7 +821,7 @@ main(int argc, char **argv)
     if (H5Sclose(space) < 0) goto error;
     if (H5Sclose(small_space) < 0) goto error;
 
-    h5_cleanup(FILENAME, fapl);
+    h5_clean_files(FILENAME, fapl);
 
 #ifdef H5_HAVE_PARALLEL
     if(facc_type == FACC_MPIO)

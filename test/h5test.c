@@ -28,7 +28,7 @@
 #include "H5srcdir.h"
 
 /* Necessary for h5_verify_cached_stabs() */
-#define H5G_PACKAGE
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 #define H5G_TESTING
 #include "H5Gpkg.h"
 
@@ -91,6 +91,9 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  */
 static const char *multi_letters = "msbrglo";
 
+/* Previous error reporting function */
+static H5E_auto2_t err_func = NULL;
+
 static herr_t h5_errors(hid_t estack, void *client_data);
 static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
                               char *fullname, size_t size, hbool_t nest_printf);
@@ -122,7 +125,7 @@ h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
 
 
 /*-------------------------------------------------------------------------
- * Function:  h5_cleanup_files
+ * Function:  h5_clean_files
  *
  * Purpose:  Cleanup temporary test files (always).
  *    base_name contains the list of test file names.
@@ -131,13 +134,11 @@ h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
  *
  * Programmer:  Neil Fortner
  *              June 1, 2015
- * Original:    Albert Cheng
- *              May 28, 1998
  *
  *-------------------------------------------------------------------------
  */
 void
-h5_cleanup_files(const char *base_name[], hid_t fapl)
+h5_clean_files(const char *base_name[], hid_t fapl)
 {
     int i;
 
@@ -184,8 +185,11 @@ h5_cleanup_files(const char *base_name[], hid_t fapl)
         }
     } /* end for */
 
+    /* Close the FAPL used to access the file */
+    H5Pclose(fapl);
+
     return;
-} /* end h5_cleanup_files() */
+} /* end h5_clean_files() */
 
 
 /*-------------------------------------------------------------------------
@@ -208,14 +212,38 @@ h5_cleanup(const char *base_name[], hid_t fapl)
     int    retval = 0;
 
     if(GetTestCleanup()) {
-        /* Clean up files in base_name */
-        h5_cleanup_files(base_name, fapl);
+        /* Clean up files in base_name, and the FAPL */
+        h5_clean_files(base_name, fapl);
 
         retval = 1;
     } /* end if */
 
-    H5Pclose(fapl);
+    /* Restore the original error reporting routine */
+    h5_restore_err();
+
     return retval;
+} /* end h5_cleanup() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_restore_err
+ *
+ * Purpose:     Restore the default error handler.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  Quincey Koziol
+ *              Sept 10, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5_restore_err(void)
+{
+    /* Restore the original error reporting routine */
+    HDassert(err_func != NULL);
+    H5Eset_auto2(H5E_DEFAULT, err_func, NULL);
+    err_func = NULL;
 }
 
 
@@ -237,6 +265,10 @@ h5_reset(void)
     HDfflush(stdout);
     HDfflush(stderr);
     H5close();
+
+    /* Save current error stack reporting routine and redirect to our local one */
+    HDassert(err_func == NULL);
+    H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
 
 /*
@@ -258,12 +290,12 @@ h5_reset(void)
      */
     sprintf(filename, "/tmp/h5emit-%05d.h5", HDgetpid());
     H5E_BEGIN_TRY {
-  hid_t file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
-             H5P_DEFAULT);
-  hid_t grp = H5Gcreate2(file, "emit", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Gclose(grp);
-  H5Fclose(file);
-  HDunlink(filename);
+        hid_t file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
+                 H5P_DEFAULT);
+        hid_t grp = H5Gcreate2(file, "emit", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        H5Gclose(grp);
+        H5Fclose(file);
+        HDunlink(filename);
     } H5E_END_TRY;
 }
 #endif /* OLD_WAY */

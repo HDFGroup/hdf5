@@ -44,7 +44,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -205,6 +205,7 @@ static herr_t H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *ty
     H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_flush(H5D_t *dset, hid_t dxpl_id);
 static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
+static herr_t H5D__chunk_dest(H5D_t *dset, hid_t dxpl_id);
 
 /* "Nonexistent" layout operation callback */
 static ssize_t
@@ -268,7 +269,8 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     NULL,
     NULL,
     H5D__chunk_flush,
-    H5D__chunk_io_term
+    H5D__chunk_io_term,
+    H5D__chunk_dest
 }};
 
 
@@ -289,6 +291,7 @@ const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
     NULL,
 #endif /* H5_HAVE_PARALLEL */
     H5D__nonexistent_readvv,
+    NULL,
     NULL,
     NULL,
     NULL
@@ -683,7 +686,7 @@ done:
 hbool_t
 H5D__chunk_is_space_alloc(const H5O_storage_t *storage)
 {
-    hbool_t ret_value;                  /* Return value */
+    hbool_t ret_value = FALSE;          /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2190,6 +2193,72 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D__chunk_dest
+ *
+ * Purpose:	Destroy the entire chunk cache by flushing dirty entries,
+ *		preempting all entries, and freeing the cache itself.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Thursday, May 21, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__chunk_dest(H5D_t *dset, hid_t dxpl_id)
+{
+    H5D_chk_idx_info_t idx_info;        /* Chunked index info */
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    H5D_rdcc_t	*rdcc = &(dset->shared->cache.chunk);   /* Dataset's chunk cache */
+    H5D_rdcc_ent_t	*ent = NULL, *next = NULL;      /* Pointer to current & next cache entries */
+    int		nerrors = 0;            /* Accumulated count of errors */
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
+
+    /* Sanity check */
+    HDassert(dset);
+
+    /* Fill the DXPL cache values for later use */
+    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+        nerrors++;
+
+    /* Flush all the cached chunks */
+    for(ent = rdcc->head; ent; ent = next) {
+	next = ent->next;
+	if(H5D__chunk_cache_evict(dset, dxpl_id, dxpl_cache, ent, TRUE) < 0)
+	    nerrors++;
+    } /* end for */
+    
+    /* Continue even if there are failures. */
+    if(nerrors)
+	HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
+
+    /* Release cache structures */
+    if(rdcc->slot)
+        rdcc->slot = H5FL_SEQ_FREE(H5D_rdcc_ent_ptr_t, rdcc->slot);
+    HDmemset(rdcc, 0, sizeof(H5D_rdcc_t));
+
+    /* Compose chunked index info struct */
+    idx_info.f = dset->oloc.file;
+    idx_info.dxpl_id = dxpl_id;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    /* Free any index structures */
+    if(dset->shared->layout.storage.u.chunk.ops->dest &&
+            (dset->shared->layout.storage.u.chunk.ops->dest)(&idx_info) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
+
+done:
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+} /* end H5D__chunk_dest() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_chunk_idx_reset
  *
  * Purpose:	Reset index information
@@ -2401,7 +2470,7 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 {
     hsize_t val;        /* Intermediate value */
     unsigned ndims = shared->ndims;      /* Rank of dataset */
-    unsigned ret;       /* Value to return */
+    unsigned ret = 0;   /* Value to return */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2894,7 +2963,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     H5D_rdcc_ent_t	*ent;		        /*cache entry		*/
     size_t		chunk_size;		/*size of a chunk	*/
     void		*chunk = NULL;		/*the file chunk	*/
-    void		*ret_value;	        /*return value		*/
+    void		*ret_value = NULL;	/* Return value         */
 
     FUNC_ENTER_PACKAGE
 
@@ -5158,72 +5227,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_dump_index() */
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__chunk_dest
- *
- * Purpose:	Destroy the entire chunk cache by flushing dirty entries,
- *		preempting all entries, and freeing the cache itself.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, May 21, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__chunk_dest(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
-{
-    H5D_chk_idx_info_t idx_info;        /* Chunked index info */
-    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
-    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
-    H5D_rdcc_t	*rdcc = &(dset->shared->cache.chunk);   /* Dataset's chunk cache */
-    H5D_rdcc_ent_t	*ent = NULL, *next = NULL;      /* Pointer to current & next cache entries */
-    int		nerrors = 0;            /* Accumulated count of errors */
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_PACKAGE_TAG(dxpl_id, dset->oloc.addr, FAIL)
-
-    HDassert(f);
-    HDassert(dset);
-
-    /* Fill the DXPL cache values for later use */
-    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
-
-    /* Flush all the cached chunks */
-    for(ent = rdcc->head; ent; ent = next) {
-	next = ent->next;
-	if(H5D__chunk_cache_evict(dset, dxpl_id, dxpl_cache, ent, TRUE) < 0)
-	    nerrors++;
-    } /* end for */
-    
-    /* Continue even if there are failures. */
-    if(nerrors)
-	HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
-
-    /* Release cache structures */
-    if(rdcc->slot)
-        rdcc->slot = H5FL_SEQ_FREE(H5D_rdcc_ent_ptr_t, rdcc->slot);
-    HDmemset(rdcc, 0, sizeof(H5D_rdcc_t));
-
-    /* Compose chunked index info struct */
-    idx_info.f = f;
-    idx_info.dxpl_id = dxpl_id;
-    idx_info.pline = &dset->shared->dcpl_cache.pline;
-    idx_info.layout = &dset->shared->layout.u.chunk;
-    idx_info.storage = &dset->shared->layout.storage.u.chunk;
-
-    /* Free any index structures */
-    if(dset->shared->layout.storage.u.chunk.ops->dest &&
-            (dset->shared->layout.storage.u.chunk.ops->dest)(&idx_info) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
-
-done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* end H5D__chunk_dest() */
-
 #ifdef H5D_CHUNK_DEBUG
 
 /*-------------------------------------------------------------------------
@@ -5364,7 +5367,7 @@ H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_chunk_readvv_ud_t udata;        /* User data for H5VM_opvv() operator */
-    ssize_t ret_value;                  /* Return value */
+    ssize_t ret_value = -1;             /* Return value */
 
     FUNC_ENTER_STATIC
 

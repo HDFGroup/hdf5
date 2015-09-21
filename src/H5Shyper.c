@@ -20,7 +20,7 @@
  * Purpose:	Hyperslab selection data space I/O functions.
  */
 
-#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+#include "H5Smodule.h"          /* This source code file is part of the H5S module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -63,7 +63,7 @@ static herr_t H5S_hyper_deserialize(H5S_t *space, uint32_t version, uint8_t flag
     const uint8_t **p);
 static herr_t H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_hyper_offset(const H5S_t *space, hsize_t *offset);
-static int H5S_hyper_unlim_dim(const H5S_t *space);
+static int H5S__hyper_unlim_dim(const H5S_t *space);
 static herr_t H5S_hyper_num_elem_non_unlim(const H5S_t *space,
     hsize_t *num_elem_non_unlim);
 static htri_t H5S_hyper_is_contiguous(const H5S_t *space);
@@ -102,7 +102,7 @@ const H5S_select_class_t H5S_sel_hyper[1] = {{
     H5S_hyper_deserialize,
     H5S_hyper_bounds,
     H5S_hyper_offset,
-    H5S_hyper_unlim_dim,
+    H5S__hyper_unlim_dim,
     H5S_hyper_num_elem_non_unlim,
     H5S_hyper_is_contiguous,
     H5S_hyper_is_single,
@@ -1104,7 +1104,7 @@ H5S_hyper_iter_release (H5S_sel_iter_t *iter)
 static H5S_hyper_span_t *
 H5S_hyper_new_span(hsize_t low, hsize_t high, H5S_hyper_span_info_t *down, H5S_hyper_span_t *next)
 {
-    H5S_hyper_span_t *ret_value;
+    H5S_hyper_span_t *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1299,7 +1299,7 @@ H5S_hyper_copy_span_helper (H5S_hyper_span_info_t *spans)
     H5S_hyper_span_t *new_span;     /* Temporary hyperslab span */
     H5S_hyper_span_t *prev_span;    /* Previous hyperslab span */
     H5S_hyper_span_info_t *new_down;    /* New down span tree */
-    H5S_hyper_span_info_t *ret_value;
+    H5S_hyper_span_info_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1385,7 +1385,7 @@ done:
 static H5S_hyper_span_info_t *
 H5S_hyper_copy_span(H5S_hyper_span_info_t *spans)
 {
-    H5S_hyper_span_info_t *ret_value;
+    H5S_hyper_span_info_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1766,9 +1766,9 @@ static htri_t
 H5S_hyper_is_valid (const H5S_t *space)
 {
     unsigned u;                    /* Counter */
-    htri_t ret_value=TRUE;      /* return value */
+    htri_t ret_value = TRUE;      /* return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
 
@@ -1875,7 +1875,7 @@ H5S_hyper_span_nblocks(H5S_hyper_span_info_t *spans)
 static hsize_t
 H5S_get_select_hyper_nblocks(H5S_t *space)
 {
-    hsize_t ret_value;         /* return value */
+    hsize_t ret_value = 0;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1961,9 +1961,9 @@ done:
 static hssize_t
 H5S_hyper_serial_size(const H5S_t *space)
 {
-    unsigned u;                 /* Counter */
     hsize_t block_count;       /* block counter for regular hyperslabs */
-    hssize_t ret_value;         /* return value */
+    unsigned u;                /* Counter */
+    hssize_t ret_value = -1;   /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -2972,11 +2972,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5S_hyper_unlim_dim
+    H5S__hyper_unlim_dim
  PURPOSE
     Return unlimited dimension of selection, or -1 if none
  USAGE
-    int H5S_hyper_unlim_dim(space)
+    int H5S__hyper_unlim_dim(space)
         H5S_t *space;           IN: Dataspace pointer to check
  RETURNS
     Unlimited dimension of selection, or -1 if none (never fails).
@@ -2989,12 +2989,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static int
-H5S_hyper_unlim_dim(const H5S_t *space)
+H5S__hyper_unlim_dim(const H5S_t *space)
 {
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
-    FUNC_LEAVE_NOAPI(space->select.sel_info.hslab->unlim_dim)
-} /* end H5S_hyper_get_unlim_dim() */
+    FUNC_LEAVE_NOAPI(space->select.sel_info.hslab->unlim_dim);
+} /* end H5S__hyper_unlim_dim() */
 
 
 /*--------------------------------------------------------------------------
@@ -3065,7 +3065,7 @@ H5S_hyper_is_contiguous(const H5S_t *space)
     unsigned u;                     /* index variable */
     htri_t ret_value = FALSE;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
 
@@ -3220,6 +3220,7 @@ H5S_hyper_is_contiguous(const H5S_t *space)
             ret_value=TRUE;
     } /* end else */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_hyper_is_contiguous() */
 
@@ -3250,7 +3251,7 @@ H5S_hyper_is_single(const H5S_t *space)
     unsigned u;                     /* index variable */
     htri_t ret_value=TRUE;         /* return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(space);
 
@@ -3315,7 +3316,7 @@ done:
 static htri_t
 H5S_hyper_is_regular(const H5S_t *space)
 {
-    htri_t ret_value;  /* return value */
+    htri_t ret_value = FAIL;    /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -5442,7 +5443,7 @@ H5S_hyper_merge_spans_helper (H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
     H5S_hyper_span_t *span_b;           /* Pointer to current span 'b' working on */
     H5S_hyper_span_t *prev_span_merge;  /* Pointer to previous merged span */
     unsigned recover_a, recover_b;         /* Flags to indicate when to recover temporary spans */
-    H5S_hyper_span_info_t *ret_value;
+    H5S_hyper_span_info_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -5810,7 +5811,7 @@ static hsize_t
 H5S_hyper_spans_nelem (H5S_hyper_span_info_t *spans)
 {
     H5S_hyper_span_t *span;     /* Hyperslab span */
-    hsize_t ret_value;
+    hsize_t ret_value = 0;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -5872,7 +5873,7 @@ H5S_hyper_make_spans(unsigned rank, const hsize_t *start, const hsize_t *stride,
     hsize_t                stride_iter;     /* Iterator over the stride values */
     int                    i;               /* Counters */
     unsigned               u;               /* Counters */
-    H5S_hyper_span_info_t *ret_value;       /* Return value */
+    H5S_hyper_span_info_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -9097,7 +9098,7 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned H5_ATTR_UNUSED flags, H5S_se
     size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
 {
-    herr_t ret_value;      /* return value */
+    herr_t ret_value = FAIL;    /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -9966,7 +9967,7 @@ H5S__hyper_get_clip_extent_real(const H5S_t *clip_space, hsize_t num_slices,
     const H5S_hyper_dim_t *diminfo; /* Convenience pointer to opt_unlim_diminfo in unlimited dimension */
     hsize_t count;
     hsize_t rem_slices;
-    hsize_t ret_value;          /* Return value */
+    hsize_t ret_value = 0;      /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -10046,9 +10047,9 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
     hbool_t incl_trail)
 {
     hsize_t num_slices;         /* Number of slices in unlimited dimension */
-    hsize_t ret_value;          /* Return value */
+    hsize_t ret_value = 0;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(0)
 
     /* Check parameters */
     HDassert(clip_space);
@@ -10072,6 +10073,7 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space,
     /* Call "real" get_clip_extent function */
     ret_value = H5S__hyper_get_clip_extent_real(clip_space, num_slices, incl_trail);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_clip_extent() */
 
@@ -10114,9 +10116,9 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space,
     hsize_t count;              /* Temporary count */
     hsize_t block;              /* Temporary block */
     hsize_t num_slices;         /* Number of slices in unlimited dimension */
-    hsize_t ret_value;          /* Return value */
+    hsize_t ret_value = 0;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(0)
 
     /* Check parameters */
     HDassert(clip_space);
@@ -10161,6 +10163,7 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space,
     /* Call "real" get_clip_extent function */
     ret_value = H5S__hyper_get_clip_extent_real(clip_space, num_slices, incl_trail);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_clip_extent_match() */
 
@@ -10278,9 +10281,9 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size,
 {
     H5S_hyper_sel_t *hslab;     /* Convenience pointer to hyperslab info */
     H5S_hyper_dim_t *diminfo;   /* Convenience pointer to opt_diminfo in unlimited dimension */
-    hsize_t ret_value;
+    hsize_t ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(0)
 
     /* Check parameters */
     HDassert(space);
@@ -10311,6 +10314,7 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size,
         } /* end if */
     } /* end else */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_first_inc_block */
 

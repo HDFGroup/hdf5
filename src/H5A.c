@@ -17,11 +17,8 @@
 /* Module Setup */
 /****************/
 
-#define H5A_PACKAGE		/*suppress error about including H5Apkg	*/
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	*/
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5A__init_interface
+#include "H5Amodule.h"          /* This source code file is part of the H5A module */
+#define H5O_FRIEND		/*suppress error about including H5Opkg	*/
 
 
 /***********/
@@ -36,6 +33,7 @@
 #include "H5Opkg.h"		/* Object headers			*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
+
 
 /****************/
 /* Local Macros */
@@ -68,6 +66,9 @@ typedef struct H5A_iter_cb1 {
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -95,39 +96,16 @@ static const H5I_class_t H5I_ATTR_CLS[1] = {{
     (H5I_free_t)H5A_close       /* Callback routine for closing objects of this class */
 }};
 
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5A_top_package_initialize_s = FALSE;
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5A_init
- *
- * Purpose:	Initialize the interface from some other package.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, November 27, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5A_init(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_init() */
 
 
 /*--------------------------------------------------------------------------
 NAME
-   H5A__init_interface -- Initialize interface-specific information
+   H5A__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5A__init_interface()
+    herr_t H5A__init_package()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -135,12 +113,12 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t
-H5A__init_interface(void)
+herr_t
+H5A__init_package(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Create attribute ID type.
@@ -148,21 +126,25 @@ H5A__init_interface(void)
     if(H5I_register_type(H5I_ATTR_CLS) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
+    /* Mark "top" of interface as initialized, too */
+    H5A_top_package_initialize_s = TRUE;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A__init_interface() */
+} /* end H5A__init_package() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5A_term_interface
+    H5A_top_term_package
  PURPOSE
     Terminate various H5A objects
  USAGE
-    void H5A_term_interface()
+    void H5A_top_term_package()
  RETURNS
  DESCRIPTION
-    Release any other resources allocated.
+    Release IDs for the atom group, deferring full interface shutdown
+    until later (in H5A_term_package).
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
      Can't report errors...
@@ -170,32 +152,68 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5A_term_interface(void)
+H5A_top_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5A_top_package_initialize_s) {
 	if(H5I_nmembers(H5I_ATTR) > 0) {
 	    (void)H5I_clear_type(H5I_ATTR, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
-        else {
-            /* Close deprecated interface */
-            n += H5A__term_deprec_interface();
 
-	    /* Destroy the attribute object id group */
-	    (void)H5I_dec_type_ref(H5I_ATTR);
-            n++; /*H5I*/
-
-	    /* Mark closed */
-	    H5_interface_initialize_g = 0;
-	} /* end else */
+        /* Mark closed */
+        if(0 == n)
+            H5A_top_package_initialize_s = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* H5A_term_interface() */
+} /* H5A_top_term_package() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5A_term_package
+ PURPOSE
+    Terminate various H5A objects
+ USAGE
+    void H5A_term_package()
+ RETURNS
+ DESCRIPTION
+    Release any other resources allocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+
+     Finishes shutting down the interface, after H5A_top_term_package()
+     is called
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int
+H5A_term_package(void)
+{
+    int	n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_ATTR));
+        HDassert(FALSE == H5A_top_package_initialize_s);
+
+        /* Destroy the attribute object id group */
+        n += (H5I_dec_type_ref(H5I_ATTR) > 0);
+
+        /* Mark closed */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* H5A_term_package() */
 
 
 /*--------------------------------------------------------------------------

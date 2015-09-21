@@ -24,9 +24,10 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
-#define H5L_PACKAGE		/*suppress error about including H5Lpkg	  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg   */
+#define H5L_FRIEND		/*suppress error about including H5Lpkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -124,7 +125,7 @@ H5O_link_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *op
     H5O_link_t          *lnk = NULL;    /* Pointer to link message */
     size_t              len = 0;        /* Length of a string in the message */
     unsigned char       link_flags;     /* Flags for encoding link info */
-    void                *ret_value;     /* Return value */
+    void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -411,7 +412,7 @@ H5O_link_copy(const void *_mesg, void *_dest)
 {
     const H5O_link_t    *lnk = (const H5O_link_t *) _mesg;
     H5O_link_t          *dest = (H5O_link_t *) _dest;
-    void                *ret_value;     /* Return value */
+    void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -478,9 +479,9 @@ static size_t
 H5O_link_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;
-    uint64_t name_len;    /* Length of name */
-    size_t name_size;   /* Size of encoded name length */
-    size_t ret_value;   /* Return value */
+    uint64_t name_len;          /* Length of name */
+    size_t name_size;           /* Size of encoded name length */
+    size_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -727,7 +728,7 @@ H5O_link_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t H5_AT
     H5O_copy_t H5_ATTR_UNUSED *cpy_info, void H5_ATTR_UNUSED *udata, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     H5O_link_t  *link_src = (H5O_link_t *)native_src;
-    void        *ret_value;          /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

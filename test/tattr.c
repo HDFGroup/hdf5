@@ -29,7 +29,7 @@
  * This file needs to access private information from the H5O package.
  * This file also needs to access the object header testing code.
  */
-#define H5O_PACKAGE
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
 #define H5O_TESTING
 #include "H5Opkg.h"		/* Object headers 			*/
 
@@ -37,7 +37,7 @@
  * This file needs to access private information from the H5A package.
  * This file also needs to access the attribute testing code.
  */
-#define H5A_PACKAGE
+#define H5A_FRIEND		/*suppress error about including H5Apkg	  */
 #define H5A_TESTING
 #include "H5Apkg.h"		/* Attributes	 			*/
 
@@ -45,7 +45,7 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"		/* File access	 			*/
 
@@ -846,7 +846,7 @@ test_attr_compound_read(hid_t fapl)
     t_class = H5Tget_class(field);
     VERIFY(t_class, H5T_INTEGER, "H5Tget_class");
     order = H5Tget_order(field);
-    VERIFY(order, H5Tget_order(H5T_NATIVE_INT), "H5Tget_order");
+    VERIFY_TYPE(order, H5Tget_order(H5T_NATIVE_INT), H5T_order_t, "%d", "H5Tget_order");
     size = H5Tget_size(field);
     VERIFY(size, H5Tget_size(H5T_NATIVE_INT), "H5Tget_size");
     H5Tclose(field);
@@ -855,7 +855,7 @@ test_attr_compound_read(hid_t fapl)
     t_class = H5Tget_class(field);
     VERIFY(t_class, H5T_FLOAT, "H5Tget_class");
     order = H5Tget_order(field);
-    VERIFY(order, H5Tget_order(H5T_NATIVE_DOUBLE), "H5Tget_order");
+    VERIFY_TYPE(order, H5Tget_order(H5T_NATIVE_DOUBLE), H5T_order_t, "%d", "H5Tget_order");
     size = H5Tget_size(field);
     VERIFY(size, H5Tget_size(H5T_NATIVE_DOUBLE), "H5Tget_size");
     H5Tclose(field);
@@ -864,7 +864,7 @@ test_attr_compound_read(hid_t fapl)
     t_class = H5Tget_class(field);
     VERIFY(t_class, H5T_INTEGER, "H5Tget_class");
     order = H5Tget_order(field);
-    VERIFY(order, H5Tget_order(H5T_NATIVE_SCHAR), "H5Tget_order");
+    VERIFY_TYPE(order, H5Tget_order(H5T_NATIVE_SCHAR), H5T_order_t, "%d", "H5Tget_order");
     size = H5Tget_size(field);
     VERIFY(size, H5Tget_size(H5T_NATIVE_SCHAR), "H5Tget_size");
     H5Tclose(field);
@@ -1229,7 +1229,7 @@ test_attr_mult_read(hid_t fapl)
     t_class = H5Tget_class(type);
     VERIFY(t_class, H5T_INTEGER, "H5Tget_class");
     order = H5Tget_order(type);
-    VERIFY(order, H5Tget_order(H5T_NATIVE_INT), "H5Tget_order");
+    VERIFY_TYPE(order, H5Tget_order(H5T_NATIVE_INT), H5T_order_t, "%d", "H5Tget_order");
     size = H5Tget_size(type);
     VERIFY(size, H5Tget_size(H5T_NATIVE_INT), "H5Tget_size");
     H5Tclose(type);
@@ -1284,7 +1284,7 @@ test_attr_mult_read(hid_t fapl)
     t_class = H5Tget_class(type);
     VERIFY(t_class, H5T_INTEGER, "H5Tget_class");
     order = H5Tget_order(type);
-    VERIFY(order, H5Tget_order(H5T_NATIVE_INT), "H5Tget_order");
+    VERIFY_TYPE(order, H5Tget_order(H5T_NATIVE_INT), H5T_order_t, "%d", "H5Tget_order");
     size = H5Tget_size(type);
     VERIFY(size, H5Tget_size(H5T_NATIVE_INT), "H5Tget_size");
     H5Tclose(type);
@@ -1342,7 +1342,7 @@ test_attr_mult_read(hid_t fapl)
     t_class = H5Tget_class(type);
     VERIFY(t_class, H5T_FLOAT, "H5Tget_class");
     order = H5Tget_order(type);
-    VERIFY(order, H5Tget_order(H5T_NATIVE_DOUBLE), "H5Tget_order");
+    VERIFY_TYPE(order, H5Tget_order(H5T_NATIVE_DOUBLE), H5T_order_t, "%d", "H5Tget_order");
     size = H5Tget_size(type);
     VERIFY(size, H5Tget_size(H5T_NATIVE_DOUBLE), "H5Tget_size");
     H5Tclose(type);

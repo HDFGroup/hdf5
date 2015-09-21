@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+#include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -255,8 +255,14 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else                                                                                                                \
     {                                                                                                                   \
         ret_value->type = (TYPE);                                                                                       \
-        ret_value->lchild = (H5Z_node*) H5Z_xform_copy_tree(tree->lchild, dat_val_pointers, new_dat_val_pointers);      \
-        ret_value->rchild = (H5Z_node*) H5Z_xform_copy_tree(tree->rchild, dat_val_pointers, new_dat_val_pointers);      \
+        if(tree->lchild)												\
+            ret_value->lchild = (H5Z_node*) H5Z_xform_copy_tree(tree->lchild, dat_val_pointers, new_dat_val_pointers);  \
+        else														\
+            ret_value->lchild = NULL;											\
+        if(tree->rchild)												\
+            ret_value->rchild = (H5Z_node*) H5Z_xform_copy_tree(tree->rchild, dat_val_pointers, new_dat_val_pointers);  \
+        else														\
+            ret_value->rchild = NULL;											\
     }                                                                                                                   \
 }
 
@@ -542,7 +548,7 @@ static void *
 H5Z_xform_parse(const char *expression, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_token tok;
-    void* ret_value;
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -581,7 +587,7 @@ static H5Z_node *
 H5Z_parse_expression(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_node *expr;
-    H5Z_node *ret_value;        /* Return value */
+    H5Z_node *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -675,7 +681,7 @@ static H5Z_node *
 H5Z_parse_term(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_node *term = NULL;
-    H5Z_node *ret_value;
+    H5Z_node *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -775,7 +781,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_node 	*factor=NULL;
     H5Z_node 	*new_node;
-    H5Z_node    *ret_value;
+    H5Z_node    *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -787,7 +793,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 
             if (!factor)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
-                sscanf(current->tok_begin, "%ld", &factor->value.int_val);
+            sscanf(current->tok_begin, "%ld", &factor->value.int_val);
             break;
 
         case H5Z_XFORM_FLOAT:
@@ -795,7 +801,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 
             if (!factor)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
-                sscanf(current->tok_begin, "%lf", &factor->value.float_val);
+            sscanf(current->tok_begin, "%lf", &factor->value.float_val);
             break;
 
         case H5Z_XFORM_SYMBOL:
@@ -804,7 +810,7 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
             if (!factor)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
 
-                factor->value.dat_val = &(dat_val_pointers->ptr_dat_val[dat_val_pointers->num_ptrs]);
+            factor->value.dat_val = &(dat_val_pointers->ptr_dat_val[dat_val_pointers->num_ptrs]);
             dat_val_pointers->num_ptrs++;
             break;
 
@@ -814,11 +820,11 @@ H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
             if (!factor)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Unable to allocate new node")
 
-                current = H5Z_get_token(current);
+            current = H5Z_get_token(current);
 
             if (current->tok_type != H5Z_XFORM_RPAREN) {
-            H5Z_xform_destroy_parse_tree(factor);
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Syntax error in data transform expression")
+                H5Z_xform_destroy_parse_tree(factor);
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Syntax error in data transform expression")
             }
             break;
 
@@ -917,7 +923,7 @@ done:
 static H5Z_node *
 H5Z_new_node(H5Z_token_type type)
 {
-    H5Z_node *ret_value;
+    H5Z_node *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1296,14 +1302,11 @@ H5Z_xform_copy_tree(H5Z_node* tree, H5Z_datval_ptrs* dat_val_pointers, H5Z_datva
         H5Z_XFORM_DO_OP4(H5Z_XFORM_MINUS)
     else if(tree->type == H5Z_XFORM_DIVIDE)
         H5Z_XFORM_DO_OP4(H5Z_XFORM_DIVIDE)
-
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Error in parse tree while trying to copy")
 
-
-
-            done:
-            FUNC_LEAVE_NOAPI(ret_value)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -1477,10 +1480,10 @@ H5Z_do_op(H5Z_node* tree)
 H5Z_data_xform_t *
 H5Z_xform_create(const char *expr)
 {
-    H5Z_data_xform_t *data_xform_prop=NULL;
-    H5Z_data_xform_t *ret_value;
+    H5Z_data_xform_t *data_xform_prop = NULL;
     unsigned int i;
     unsigned int count = 0;
+    H5Z_data_xform_t *ret_value = NULL;         /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1513,7 +1516,7 @@ H5Z_xform_create(const char *expr)
      * of the data we have for polynomial transforms */
     data_xform_prop->dat_val_pointers->num_ptrs = 0;
 
-     /* we generate the parse tree right here and store a poitner to its root in the property. */
+     /* we generate the parse tree right here and store a pointer to its root in the property. */
     if((data_xform_prop->parse_root = (H5Z_node *)H5Z_xform_parse(expr, data_xform_prop->dat_val_pointers))==NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to generate parse tree from expression")
 
@@ -1609,8 +1612,6 @@ H5Z_xform_destroy(H5Z_data_xform_t *data_xform_prop)
  *      after the top-level copy has been performed and this routine finishes
  *      the "deep" part of the copy.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1696,7 +1697,7 @@ done:
 hbool_t
 H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
 {
-    hbool_t ret_value;
+    hbool_t ret_value = FALSE;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

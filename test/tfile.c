@@ -32,7 +32,7 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"		/* File access	 			*/
 
@@ -2796,6 +2796,10 @@ test_free_sections(hid_t fapl, char *fname)
     file = H5Fcreate(fname, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(file, FAIL, "H5Fcreate");
 
+    /* Close the FCPL */
+    ret = H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
     /* Create dataspace for datasets */
     dspace = H5Screate(H5S_SCALAR);
     CHECK(dspace, FAIL, "H5Screate");
@@ -2920,9 +2924,6 @@ test_free_sections(hid_t fapl, char *fname)
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
-    ret = H5Pclose(fcpl);
-    CHECK(fcpl, FAIL, "H5Pclose");
-
     HDfree(saved_sect_info);
 
 } /* end test_free_sections() */
@@ -2960,7 +2961,7 @@ test_filespace_sects(void)
     test_free_sections(fapl_sec2, filename);
 
     /* close fapl_sec2 and remove the file */
-    h5_cleanup(FILENAME, fapl_sec2);
+    h5_clean_files(FILENAME, fapl_sec2);
 
 
     /* SPLIT */
@@ -2979,7 +2980,7 @@ test_filespace_sects(void)
     test_free_sections(fapl_split, filename);
 
     /* close fapl and remove the file */
-    h5_cleanup(FILENAME, fapl_split);
+    h5_clean_files(FILENAME, fapl_split);
 
 
     /* STDIO */
@@ -2998,7 +2999,8 @@ test_filespace_sects(void)
     test_free_sections(fapl_stdio, filename);
 
     /* close fapl and remove the file */
-    h5_cleanup(FILENAME, fapl_stdio);
+    h5_clean_files(FILENAME, fapl_stdio);
+
 
     /* CORE */
     MESSAGE(5, ("Testing File free space information for a core file\n"));
@@ -3016,7 +3018,7 @@ test_filespace_sects(void)
     test_free_sections(fapl_core, filename);
 
     /* close fapl_ and remove the file */
-    h5_cleanup(FILENAME, fapl_core);
+    h5_clean_files(FILENAME, fapl_core);
 
 
     /* FAMILY */
@@ -3035,7 +3037,7 @@ test_filespace_sects(void)
     test_free_sections(fapl_family, filename);
 
     /* close fapl and remove the file */
-    h5_cleanup(FILENAME, fapl_family);
+    h5_clean_files(FILENAME, fapl_family);
 
 } /* end test_filespace_sects() */
 
@@ -3155,7 +3157,7 @@ test_filespace_info(void)
             } /* end for file space strategy type */
         } /* end for free space threshold */
 
-        h5_cleanup(FILESPACE_NAME, my_fapl);
+        h5_clean_files(FILESPACE_NAME, my_fapl);
 
     } /* end for new/old format */
 

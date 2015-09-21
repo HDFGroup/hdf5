@@ -23,19 +23,19 @@
  *
  *-------------------------------------------------------------------------
  */
-#define H5A_PACKAGE     /*suppress error about including H5Apkg  */
-#define H5B2_PACKAGE    /*suppress error about including H5B2pkg */
-#define H5B2_TESTING    /*suppress warning about H5B2 testing funcs*/
-#define H5D_PACKAGE     /*suppress error about including H5Dpkg  */
-#define H5EA_PACKAGE    /*suppress error about including H5EApkg */
-#define H5EA_TESTING    /*suppress warning about H5EA testing funcs*/
-#define H5FA_PACKAGE    /*suppress error about including H5FApkg */
-#define H5FA_TESTING    /*suppress warning about H5FA testing funcs*/
-#define H5F_PACKAGE     /*suppress error about including H5Fpkg  */
-#define H5G_PACKAGE     /*suppress error about including H5Gpkg  */
-#define H5HF_PACKAGE    /*suppress error about including H5HFpkg */
-#define H5O_PACKAGE     /*suppress error about including H5Opkg  */
-#define H5SM_PACKAGE    /*suppress error about including H5SMpkg */
+#define H5A_FRIEND		/*suppress error about including H5Apkg  */
+#define H5B2_FRIEND		/*suppress error about including H5B2pkg */
+#define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
+#define H5D_FRIEND		/*suppress error about including H5Dpkg  */
+#define H5EA_FRIEND		/*suppress error about including H5EApkg */
+#define H5EA_TESTING		/*suppress warning about H5EA testing funcs*/
+#define H5FA_FRIEND		/*suppress error about including H5FApkg */
+#define H5FA_TESTING		/*suppress warning about H5FA testing funcs*/
+#define H5F_FRIEND		/*suppress error about including H5Fpkg  */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg  */
+#define H5HF_FRIEND		/*suppress error about including H5HFpkg */
+#define H5O_FRIEND		/*suppress error about including H5Opkg  */
+#define H5SM_FRIEND		/*suppress error about including H5SMpkg */
 
 #include "H5private.h"  /* Generic Functions    */
 #include "H5Apkg.h"     /* Attributes           */

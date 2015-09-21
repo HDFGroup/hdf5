@@ -28,8 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5A_PACKAGE		/*suppress error about including H5Apkg  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Amodule.h"          /* This source code file is part of the H5A module */
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
 
 
 /***********/
@@ -142,11 +142,11 @@ H5A_t *
 H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     const H5S_t *space, hid_t acpl_id, hid_t dxpl_id)
 {
-    H5A_t	*attr = NULL;   /* Attribute created */
-    hssize_t	snelmts;	/* elements in attribute */
-    size_t	nelmts;		/* elements in attribute */
-    htri_t      tri_ret;        /* htri_t return value */
-    H5A_t	*ret_value;     /* Return value */
+    H5A_t	*attr = NULL;           /* Attribute created */
+    hssize_t	snelmts;	        /* elements in attribute */
+    size_t	nelmts;		        /* elements in attribute */
+    htri_t      exists;                 /* Whether attribute exists */
+    H5A_t	*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->oloc->addr, NULL)
 
@@ -161,9 +161,9 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
      *  name, but it's going to be hard to unwind all the special cases on
      *  failure, so just check first, for now - QAK)
      */
-    if((tri_ret = H5O_attr_exists(loc->oloc, name, H5AC_ind_dxpl_id)) < 0)
+    if((exists = H5O_attr_exists(loc->oloc, name, H5AC_ind_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "error checking attributes")
-    else if(tri_ret > 0)
+    else if(exists > 0)
         HGOTO_ERROR(H5E_ATTR, H5E_ALREADYEXISTS, NULL, "attribute already exists")
 
     /* Check if the dataspace has an extent set (or is NULL) */
@@ -360,7 +360,7 @@ H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     H5A_t       *attr = NULL;           /* Attribute from object header */
-    H5A_t       *ret_value;             /* Return value */
+    H5A_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -424,7 +424,7 @@ H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_na
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     H5A_t       *attr = NULL;           /* Attribute from object header */
-    H5A_t       *ret_value;             /* Return value */
+    H5A_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -705,7 +705,7 @@ ssize_t
 H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
 {
     size_t              copy_len, nbytes;
-    ssize_t		ret_value;
+    ssize_t		ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -849,7 +849,8 @@ H5A_get_create_plist(H5A_t* attr)
     H5P_genplist_t      *plist;              /* Default property list */
     hid_t               new_plist_id;        /* ID of ACPL to return */
     H5P_genplist_t      *new_plist;          /* ACPL to return */
-    hid_t               ret_value;
+    hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
+
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(H5P_LST_ATTRIBUTE_CREATE_ID_g)))
@@ -888,7 +889,9 @@ done:
 herr_t
 H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo)
 {
-    FUNC_ENTER_NOAPI_NOERR
+    herr_t ret_value = SUCCEED;           /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(attr);
@@ -906,7 +909,8 @@ H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo)
         ainfo->corder = attr->shared->crt_idx;
     } /* end else */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__get_info() */
 
 
@@ -1099,15 +1103,16 @@ done:
 H5O_loc_t *
 H5A_oloc(H5A_t *attr)
 {
-    H5O_loc_t *ret_value;   /* Return value */
+    H5O_loc_t *ret_value = NULL;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert(attr);
 
     /* Set return value */
     ret_value = &(attr->oloc);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_oloc() */
 
@@ -1130,15 +1135,16 @@ H5A_oloc(H5A_t *attr)
 H5G_name_t *
 H5A_nameof(H5A_t *attr)
 {
-    H5G_name_t *ret_value;   /* Return value */
+    H5G_name_t *ret_value = NULL;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert(attr);
 
     /* Set return value */
-    ret_value=&(attr->path);
+    ret_value = &(attr->path);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_nameof() */
 
@@ -1159,15 +1165,16 @@ H5A_nameof(H5A_t *attr)
 H5T_t *
 H5A_type(const H5A_t *attr)
 {
-    H5T_t *ret_value;   /* Return value */
+    H5T_t *ret_value = NULL;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(NULL)
 
     HDassert(attr);
 
     /* Set return value */
     ret_value = attr->shared->dt;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_type() */
 
@@ -1193,7 +1200,7 @@ H5A_exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
-    htri_t	ret_value;              /* Return value */
+    htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1552,7 +1559,7 @@ H5A__attr_cmp_name_dec(const void *attr1, const void *attr2)
 static int
 H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2)
 {
-    int ret_value;              /* Return value */
+    int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1587,7 +1594,7 @@ H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2)
 static int
 H5A__attr_cmp_corder_dec(const void *attr1, const void *attr2)
 {
-    int ret_value;              /* Return value */
+    int ret_value = 0;              /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1790,8 +1797,8 @@ done:
 htri_t
 H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
 {
-    H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
-    htri_t ret_value;   /* Return value */
+    H5B2_t *bt2_name = NULL;    /* v2 B-tree handle for name index */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, oh->cache_info.addr, FAIL)
 
@@ -1857,8 +1864,9 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
 {
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
     hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check arguments */
     HDassert(f);
@@ -1888,7 +1896,8 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
     else
         attr->shared->version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_set_version() */
 
 
@@ -1925,8 +1934,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     void       *buf = NULL;             /* Buffer for copying data */
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
     hid_t       buf_sid = -1;           /* ID for buffer dataspace */
-
-    H5A_t       *ret_value;             /* Return value */
+    H5A_t      *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

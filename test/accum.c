@@ -17,7 +17,7 @@
  */
 #include "h5test.h"
 
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #include "H5Fpkg.h"
 #include "H5FDprivate.h"
 #include "H5Iprivate.h"

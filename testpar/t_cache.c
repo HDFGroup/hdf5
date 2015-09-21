@@ -21,9 +21,9 @@
 #include "h5test.h"
 #include "testpar.h"
 
-#define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
-#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
-#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
+#define H5AC_FRIEND		/*suppress error about including H5ACpkg  */
+#define H5C_FRIEND		/*suppress error about including H5Cpkg   */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg   */
 
 #include "H5ACpkg.h"
 #include "H5Cpkg.h"

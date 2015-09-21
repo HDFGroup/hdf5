@@ -13,9 +13,9 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5A_PACKAGE             /*prevent warning from including H5Apkg   */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
-#define H5S_PACKAGE	        /*suppress error about including H5Spkg	  */
+#define H5A_FRIEND		/*suppress error about including H5Apkg   */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+#define H5S_FRIEND	        /*suppress error about including H5Spkg	  */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -129,7 +129,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned H5_ATTR_UNUSED
     H5S_extent_t	*extent;	/*extent dimensionality information  */
     size_t		name_len;   	/*attribute name length */
     unsigned            flags = 0;      /* Attribute flags */
-    H5A_t		*ret_value;     /* Return value */
+    H5A_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -380,7 +380,7 @@ done:
 static void *
 H5O_attr_copy(const void *_src, void *_dst)
 {
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -495,10 +495,6 @@ H5O_attr_reset(void H5_ATTR_UNUSED *_mesg)
  *
  * Programmer:	Quincey Koziol
  *              Thursday, November 18, 2004
- *
- * Modification:Raymond Lu
- *              4 June 2008
- *              Let this function call H5A_close in turn.
  *
  *-------------------------------------------------------------------------
  */
@@ -652,7 +648,7 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t H5_ATTR_UNUSED *mesg_t
     void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
     H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata, hid_t dxpl_id)
 {
-    void        *ret_value;             /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

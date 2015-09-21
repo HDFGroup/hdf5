@@ -21,7 +21,7 @@
  *		the H5D package.  Source files outside the H5D package should
  *		include H5Dprivate.h instead.
  */
-#ifndef H5D_PACKAGE
+#if !(defined H5D_FRIEND || defined H5D_MODULE)
 #error "Do not include this file outside the H5D package!"
 #endif
 
@@ -121,6 +121,7 @@ typedef ssize_t (*H5D_layout_writevv_func_t)(const struct H5D_io_info_t *io_info
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 typedef herr_t (*H5D_layout_flush_func_t)(H5D_t *dataset, hid_t dxpl_id);
 typedef herr_t (*H5D_layout_io_term_func_t)(const struct H5D_chunk_map_t *cm);
+typedef herr_t (*H5D_layout_dest_func_t)(H5D_t *dataset, hid_t dxpl_id);
 
 /* Typedef for grouping layout I/O routines */
 typedef struct H5D_layout_ops_t {
@@ -138,6 +139,7 @@ typedef struct H5D_layout_ops_t {
     H5D_layout_writevv_func_t writevv;  /* Low-level I/O routine for writing data */
     H5D_layout_flush_func_t flush;      /* Low-level I/O routine for flushing raw data */
     H5D_layout_io_term_func_t io_term;  /* I/O shutdown routine */
+    H5D_layout_dest_func_t dest;        /* Destroy layout info */
 } H5D_layout_ops_t;
 
 /* Function pointers for either multiple or single block I/O access */
@@ -530,8 +532,6 @@ H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
 /* Package Private Prototypes */
 /******************************/
 
-H5_DLL herr_t H5D__term_pub_interface(void);
-H5_DLL herr_t H5D__term_deprec_interface(void);
 H5_DLL H5D_t *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space,
     hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id);
 H5_DLL H5D_t *H5D__create_named(const H5G_loc_t *loc, const char *name,
@@ -641,7 +641,6 @@ H5_DLL herr_t H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
 H5_DLL herr_t H5D__chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     const H5O_pline_t *pline, hsize_t *btree_size);
 H5_DLL herr_t H5D__chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream);
-H5_DLL herr_t H5D__chunk_dest(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
 H5_DLL herr_t H5D__chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5O_storage_t *store);
 H5_DLL herr_t H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, 

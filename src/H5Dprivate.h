@@ -189,8 +189,7 @@ H5_DLL herr_t H5D_virtual_update_min_dims(H5O_layout_t *layout, size_t idx);
 H5_DLL herr_t H5D_virtual_parse_source_name(const char *source_name,
     H5O_storage_virtual_name_seg_t **parsed_name, size_t *static_strlen,
     size_t *nsubs);
-H5_DLL void H5D_virtual_free_parsed_name(
-    H5O_storage_virtual_name_seg_t *name_seg);
+H5_DLL herr_t H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_seg);
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,

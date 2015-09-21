@@ -28,8 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 
 
 /***********/
@@ -199,7 +199,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata,
     unsigned            super_vers;     /* Superblock version */
     uint8_t             sizeof_addr;    /* Size of offsets in the file (in bytes) */
     uint8_t             sizeof_size;    /* Size of lengths in the file (in bytes) */
-    H5F_super_t         *ret_value;     /* Return value */
+    H5F_super_t         *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -824,7 +824,7 @@ H5F__cache_drvrinfo_deserialize(const void *_image, size_t len, void *_udata,
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     char                drv_name[9];    /* Name of driver */
     unsigned            drv_vers;       /* Version of driver info block */
-    H5O_drvinfo_t       *ret_value;     /* Return value */
+    H5O_drvinfo_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 

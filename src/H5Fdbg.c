@@ -19,8 +19,8 @@
  * Purpose:	File object debugging functions.
  */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg   */
 
 
 #include "H5private.h"		/* Generic Functions			*/

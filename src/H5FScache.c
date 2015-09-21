@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
+#include "H5FSmodule.h"         /* This source code file is part of the H5FS module */
+
 
 /***********/
 /* Headers */
@@ -40,6 +41,7 @@
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
+
 
 /****************/
 /* Local Macros */
@@ -210,7 +212,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned            nclasses;       /* Number of section classes */
-    H5FS_t		*ret_value;     /* Return value */
+    H5FS_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -840,8 +842,8 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
     size_t                  old_sect_size;  /* Old section size */
     const uint8_t          *image = (const uint8_t *)_image;    /* Pointer into raw data buffer */
     uint32_t                stored_chksum;  /* Stored metadata checksum  */
-    uint32_t                computed_chksum; /* Computed metadata checksum */
-    void *                  ret_value;      /* Return value */
+    uint32_t                computed_chksum;    /* Computed metadata checksum */
+    void *                  ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
 

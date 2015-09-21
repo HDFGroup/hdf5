@@ -309,7 +309,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_api
+ * Function:    test_api_get_ex_dcpl
  *
  * Purpose:     Tests API functions related to virtual datasets.
  *
@@ -7536,7 +7536,8 @@ test_printf(unsigned config, hid_t fapl)
          * Test 3: 1 Source dataset mapping, 10x5 blocks, printf source file
          */
         /* Clean up files so the source files do not exist yet */
-        h5_cleanup_files(FILENAME, fapl);
+        H5Iinc_ref(fapl);       /* Prevent FAPL from being closed */
+        h5_clean_files(FILENAME, fapl);
 
         /* Clear virtual layout in DCPL */
         if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
@@ -7846,7 +7847,8 @@ test_printf(unsigned config, hid_t fapl)
          * source dset, extra %%s in source dataset name
          */
         /* Clean up files so the source files do not exist yet */
-        h5_cleanup_files(FILENAME, fapl);
+        H5Iinc_ref(fapl);       /* Prevent FAPL from being closed */
+        h5_clean_files(FILENAME, fapl);
 
         /* Clear virtual layout in DCPL */
         if(H5Pset_layout(dcpl, H5D_VIRTUAL) < 0)
@@ -11087,7 +11089,7 @@ error:
     } H5E_END_TRY;
 
      return 1;
-} /* end test_printf() */
+} /* end test_all() */
 
 
 /*-------------------------------------------------------------------------
@@ -11135,7 +11137,7 @@ main(void)
     if(nerrors)
         goto error;
     printf("All virtual dataset tests passed.\n");
-//    h5_cleanup(FILENAME, fapl);
+    h5_cleanup(FILENAME, fapl);
 
     return 0;
 

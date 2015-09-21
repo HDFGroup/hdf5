@@ -4,11 +4,15 @@
 # EXTERNAL cache entries
 ########################
 
+set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
+
 set (BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libraries" FORCE)
 
 set (BUILD_TESTING ON CACHE BOOL "Build HDF5 Unit Testing" FORCE)
 
 set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
+
+set (HDF5_GENERATE_HEADERS ON CACHE BOOL "Rebuild Generated Files" FORCE)
 
 set (HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build HDF5 C++ Library" FORCE)
 

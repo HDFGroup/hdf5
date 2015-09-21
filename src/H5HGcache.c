@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HG_PACKAGE		/*suppress error about including H5HGpkg  */
+#include "H5HGmodule.h"         /* This source code file is part of the H5HG module */
 
 
 /***********/
@@ -161,7 +161,7 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata,
     H5F_t       *f = (H5F_t *)_udata;   /* File pointer -- obtained from user data */
     H5HG_heap_t *heap = NULL;   /* New global heap */
     uint8_t     *image;         /* Pointer to image to decode */
-    void        *ret_value;     /* Return value */
+    void        *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 

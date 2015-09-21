@@ -1405,56 +1405,5 @@ usage(const char *prog)
         printf("      HDF5_PREFIX      Data file prefix\n");
         printf("\n");
         fflush(stdout);
-}
-
-void debug_start_stop_time(io_time_t *pt, timer_type t, int start_stop)
-{
-        if (sio_debug_level >= 4) {
-            const char *msg;
-
-            switch (t) {
-            case HDF5_FILE_OPENCLOSE:
-                msg = "File Open/Close";
-                break;
-            case HDF5_DATASET_CREATE:
-                msg = "Dataset Create";
-                break;
-            case HDF5_MPI_WRITE:
-                msg = "MPI Write";
-                break;
-            case HDF5_MPI_READ:
-                msg = "MPI Read";
-                break;
-            case HDF5_FINE_WRITE_FIXED_DIMS:
-                msg = "Fine Write";
-                break;
-            case HDF5_FINE_READ_FIXED_DIMS:
-                msg = "Fine Read";
-                break;
-            case HDF5_GROSS_WRITE_FIXED_DIMS:
-                msg = "Gross Write";
-                break;
-            case HDF5_GROSS_READ_FIXED_DIMS:
-                msg = "Gross Read";
-                break;
-            case HDF5_RAW_WRITE_FIXED_DIMS:
-                msg = "Raw Write";
-                break;
-            case HDF5_RAW_READ_FIXED_DIMS:
-                msg = "Raw Read";
-                break;
-            case HDF5_FILE_READ_OPEN:
-            case HDF5_FILE_READ_CLOSE:
-            case HDF5_FILE_WRITE_OPEN:
-            case HDF5_FILE_WRITE_CLOSE:
-            default:
-                msg = "Unknown Timer";
-                break;
-            }
-
-            fprintf(output, "    %s %s: %.2f\n", msg,
-                    (start_stop == TSTART ? "Start" : "Stop"),
-                    pt->total_time[t]);
-        }
-} /* debug_start_stop_time */
+} /* end usage() */
 
