@@ -50,7 +50,8 @@ build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
 build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
 build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
 with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT=ON	# enable zlib filter default on
-with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT=OFF	# enables zlib filter default off
+with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT=OFF	# enables szip filter default off
+szlib_path=""					# szip lib path default off
 shared_lib=-DBUILD_SHARED_LIBS:BOOL=ON		# enables shared lib; default on
 
 
@@ -87,6 +88,8 @@ Usage: $progname [<options>]
     enable or disable building tests. Default is on.
   --with-zlib | --with-zlib=<libpath> | --without-zlib:
     Use zlib library for external deflate I/O filter. Default is on.
+  --with-szlib | --with-szlib=<libpath> | --without-szlib:
+    Use szlib library for external deflate I/O filter. Default is on.
   --help: shows details help page
 
   <libpath>: the file path to the library, expect <libpath>/lib and <libpath>/include.
@@ -221,6 +224,19 @@ while [ $# -gt 0 ]; do
 	--without-zlib)
 	    with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF
 	    ;;
+	--with-szlib)
+	    with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON
+	    szlib_path=""	# szlib is in default paths
+	    ;;
+	--with-szlib=*)
+	    xarg=`echo $1 | cut -d= -f2-`
+	    with_szlib="-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON"
+	    szlib_path="SZIP_INSTALL=$xarg"
+	    ;;
+	--without-szlib)
+	    with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF
+	    szlib_path=""	# reset the path
+	    ;;
 	--help)
 	    # print the detail help page and exit
 	    HELP
@@ -258,7 +274,9 @@ fi
 echo Running Cmake for HDF5-${version} ...  
 #      4. Configure the C library, tools and tests with this command:
 #         If successful, append the configure summary to the configure logfile.
-STEP "Configure..." "cmake \
+STEP "Configure..." \
+   "env ${szlib_path} \
+    cmake \
     -C $cacheinit \
     $build_cpp_lib \
     $build_fortran \
