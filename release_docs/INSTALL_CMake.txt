@@ -33,6 +33,10 @@ CMake version
       The HDF5 1.8."X" product requires a minimum CMake version 3.1.0,
       where "X" is the current HDF5 release version.
 
+Note:
+   To change the install prefix from the platform defaults initialize
+   the CMake variable, CMAKE_INSTALL_PREFIX.
+
 
 ========================================================================
 II. Quick Step Building HDF5 Libraries with CMake Script Mode
