@@ -2543,7 +2543,6 @@
 ./config/cmake/HDFCompilerFlags.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5UseFortran.cmake
-./config/cmake/HDF5_Examples.cmake.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml
@@ -2577,6 +2576,7 @@
 ./config/cmake/UserMacros/Windows_MT.cmake
 
 # CMake-specific Examples Files
+./config/cmake/HDF5_Examples.cmake.in
 ./config/cmake/HDF518_Examples.cmake.in
 ./release_docs/USING_CMake_Examples.txt
 

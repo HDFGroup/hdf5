@@ -620,9 +620,9 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
      * free chunk.  If the heap must expand, we double its size.
      */
     if(found == FALSE) {
-        size_t  need_more;      /* How much more space we need */
-        size_t  new_dblk_size;  /* Final size of space allocated for heap data block */
-        size_t  old_dblk_size;  /* Previous size of space allocated for heap data block */
+        size_t	need_more;      /* How much more space we need */
+        size_t	new_dblk_size;  /* Final size of space allocated for heap data block */
+        size_t	old_dblk_size;  /* Previous size of space allocated for heap data block */
         htri_t  was_extended;   /* Whether the local heap's data segment on disk was extended */
 
         /* At least double the heap's size, making certain there's enough room
