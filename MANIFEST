@@ -1277,7 +1277,6 @@
 ./tools/misc/testfiles/h5mkgrp_version.txt.in
 ./tools/misc/h5perf_gentest.c
 ./tools/misc/vds/Makefile.am
-./tools/misc/vds/Makefile.in
 ./tools/misc/vds/UC_1.h
 ./tools/misc/vds/UC_1_one_dim_gen.c
 ./tools/misc/vds/UC_2.h
