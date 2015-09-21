@@ -45,6 +45,7 @@ IDE_GENERATED_PROPERTIES ("H5A" "${H5A_HDRS}" "${H5A_SRCS}" )
 set (H5AC_SRCS
     ${HDF5_SRC_DIR}/H5AC.c
     ${HDF5_SRC_DIR}/H5AClog.c
+    ${HDF5_SRC_DIR}/H5ACmpio.c
 )
 
 set (H5AC_HDRS
@@ -83,6 +84,7 @@ IDE_GENERATED_PROPERTIES ("H5B2" "${H5B2_HDRS}" "${H5B2_SRCS}" )
 
 set (H5C_SRCS
     ${HDF5_SRC_DIR}/H5C.c
+    ${HDF5_SRC_DIR}/H5Cmpio.c
 )
 set (H5C_HDRS
     ${HDF5_SRC_DIR}/H5Cpkg.h
