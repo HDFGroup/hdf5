@@ -26,6 +26,35 @@ if (HDF5_GENERATE_HEADERS)
         set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c GENERATED)
         set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c GENERATED)
         set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.h GENERATED)
+
+        add_custom_command (
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.timestamp
+            COMMAND "${CMAKE_COMMAND}"
+                -D "FILE_PARSE=H5LTparse.c"
+                -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"
+            COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.timestamp
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+        add_custom_command (
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.timestamp
+            COMMAND "${CMAKE_COMMAND}"
+                -D "FILE_ANALYZE=H5LTanalyze.c"
+                -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"
+            COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.timestamp
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+        add_custom_target (process_gen_H5LT DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.timestamp ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.timestamp)
+
+#        add_custom_target (process_gen_H5LT
+#            COMMAND "${CMAKE_COMMAND}"
+#              -D "FILE_PARSE=${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c"
+#              -D "FILE_ANALYSE=${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c"
+#              -P "${HDF5_RESOURCE_DIR}/HDF5_Process_Flex_Files.cmake"
+#              DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c"
+#              COMMENT "Prepending pragma statements"
+#        )
       else (BISON_H5LT_PARSER_DEFINED AND FLEX_H5LT_SCANNER_DEFINED)
         message (STATUS "Error during generate of files")
       endif (BISON_H5LT_PARSER_DEFINED AND FLEX_H5LT_SCANNER_DEFINED)
@@ -82,6 +111,11 @@ set_target_properties (${HDF5_HL_LIB_TARGET} PROPERTIES
 )
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_LIB_TARGET}")
 set (install_targets ${HDF5_HL_LIB_TARGET})
+if (HDF5_GENERATE_HEADERS)
+  add_dependencies(${HDF5_HL_LIB_TARGET} process_gen_H5LT)
+else (HDF5_GENERATE_HEADERS)
+  add_dependencies(${HDF5_HL_LIB_TARGET} "${HDF5_HL_SRC_SOURCE_DIR}/H5LTanalyze.c;${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.c")
+endif (HDF5_GENERATE_HEADERS)
 
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_HL_LIBSH_TARGET} SHARED ${HL_SRCS} ${HL_HEADERS})
@@ -96,6 +130,11 @@ if (BUILD_SHARED_LIBS)
   )
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_LIBSH_TARGET}")
   set (install_targets ${install_targets} ${HDF5_HL_LIBSH_TARGET})
+  if (HDF5_GENERATE_HEADERS)
+    add_dependencies(${HDF5_HL_LIBSH_TARGET} process_gen_H5LT)
+  else (HDF5_GENERATE_HEADERS)
+    add_dependencies(${HDF5_HL_LIBSH_TARGET} "${HDF5_HL_SRC_SOURCE_DIR}/H5LTanalyze.c;${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.c")
+  endif (HDF5_GENERATE_HEADERS)
 endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
