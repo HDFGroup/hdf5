@@ -38,16 +38,17 @@
 
 MODULE TH5F_F03
 
+  USE HDF5
+  USE TH5_MISC 
+  USE TH5_MISC_GEN 
+  USE ISO_C_BINDING
+
 CONTAINS
 
 SUBROUTINE test_get_file_image(total_error)
   !
   !  Tests the wrapper for h5fget_file_image
   !
-  USE HDF5
-  USE TH5_MISC 
-  USE ISO_C_BINDING
-
   IMPLICIT NONE
 
   INTEGER, INTENT(INOUT) :: total_error ! returns error
@@ -128,8 +129,8 @@ SUBROUTINE test_get_file_image(total_error)
   itmp_a = 1
   CALL h5fget_file_image_f(file_id, f_ptr, itmp_a, error, image_size)
   CALL check("h5fget_file_image_f",error, total_error)
-  CALL VERIFY("h5fget_file_image_f", INT(itmp_a), 1, total_error) ! Routine should not change the value
-  CALL VERIFY("h5fget_file_image_f", file_sz, INT(image_size), total_error)
+  CALL verify("h5fget_file_image_f", INT(itmp_a), 1, total_error) ! Routine should not change the value
+  CALL verify("h5fget_file_image_f", file_sz, INT(image_size), total_error)
 
   ! Allocate a buffer of the appropriate size 
   ALLOCATE(image_ptr(1:image_size))

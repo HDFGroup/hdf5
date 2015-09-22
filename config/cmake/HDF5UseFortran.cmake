@@ -227,9 +227,9 @@ message ( "   ........MAX DECIMAL PRECISION ${H5_PAC_FC_MAX_REAL_PRECISION}")
 # **********
 # INTEGERS
 # **********
-string(REGEX REPLACE "," ";" VAR_KIND "${pac_validIntKinds}")
+string(REGEX REPLACE "," ";" VAR "${pac_validIntKinds}")
 
-foreach( KIND ${VAR_KIND} )
+foreach( KIND ${VAR} )
   set(PROG_SRC 
     "
         PROGRAM main
@@ -262,14 +262,14 @@ message("...FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
 # **********
 # REALS
 # **********
-string(REGEX REPLACE "," ";" VAR_KIND "${pac_validRealKinds}")
+string(REGEX REPLACE "," ";" VAR "${pac_validRealKinds}")
 
 #find the maximum kind of the real
-list(LENGTH VAR_KIND LEN_VAR_KIND)
-MATH (EXPR _LEN "${LEN_VAR_KIND} - 1")
-list(GET VAR_KIND ${_LEN} max_real_fortran_kind)
+list(LENGTH VAR LEN_VAR)
+MATH (EXPR _LEN "${LEN_VAR}-1")
+list(GET VAR ${_LEN} max_real_fortran_kind)
 
-foreach( KIND ${VAR_KIND} )
+foreach( KIND ${VAR} )
   set(PROG_SRC 
     "
         PROGRAM main
@@ -299,12 +299,14 @@ set(H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = 
 
 message("...FOUND SIZEOF for REAL KINDs \{${pack_real_sizeof}\}")
 
-#find the maximum kind of the real
-list(LENGTH VAR_KIND LEN_VAR_KIND)
-MATH (EXPR _LEN "${LEN_VAR_KIND} - 1")
-list(GET VAR_KIND ${_LEN} max_real_fortran_sizeof)
-
 set(PAC_FC_ALL_REAL_KINDS_SIZEOF "\{${pack_real_sizeof}\}")
+
+#find the maximum kind of the real
+string(REGEX REPLACE "," ";" VAR "${pack_real_sizeof}")
+list(LENGTH VAR LEN_VAR)
+MATH (EXPR _LEN "${LEN_VAR}-1")
+list(GET VAR ${_LEN} max_real_fortran_sizeof)
+
 #-----------------------------------------------------------------------------
 # Find sizeof of native kinds
 #-----------------------------------------------------------------------------
@@ -351,14 +353,18 @@ set(FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
 
 # remove the invalid kind from the list
 if(NOT(${SIZEOF___FLOAT128} EQUAL 0))
-   if(NOT(${SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof}) AND NOT(${FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof}))
+   if(NOT(${SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof}) 
+     AND NOT(${FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof})
+     # account for the fact that the C compiler can have 16-byte __float128 and the fortran compiler only has 8-byte doubles,
+     # so we don't want to remove the 8-byte fortran doubles.
+     AND NOT(${PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF} EQUAL ${max_real_fortran_sizeof}))
      message(WARNING "
           Fortran REAL(KIND=${max_real_fortran_kind}) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
                                            !!! Fortran interfaces will not be generated for REAL(KIND=${max_real_fortran_kind}) !!!")
      string(REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS ${PAC_FC_ALL_REAL_KINDS})
      string(REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS_SIZEOF ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
      MATH (EXPR NUM_RKIND "${NUM_RKIND} - 1")
-   endif(NOT(${SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof}) AND NOT(${FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof}))
+   endif()
 endif(NOT(${SIZEOF___FLOAT128} EQUAL 0))
 
 set(H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
@@ -377,9 +383,7 @@ ENABLE_LANGUAGE (C)
 # The provided CMake C macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
-MACRO (C_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
-# MSB CHECK WHY THIS CHECK?
-#  if (NOT DEFINED ${RUN_RESULT_VAR}) 
+MACRO (C_RUN FUNCTION CODE RETURN)
     message (STATUS "Detecting C ${FUNCTION}")
     if (CMAKE_REQUIRED_LIBRARIES)
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
@@ -391,7 +395,7 @@ MACRO (C_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
         ${CODE}
     )
-    TRY_RUN (${RUN_RESULT_VAR} ${COMPILE_RESULT_VAR}
+    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
         CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
@@ -400,18 +404,14 @@ MACRO (C_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
 
     set(${RETURN} ${OUTPUT})
 	
-    #message ( "Test result1 ${RETURN} ")
-    #message ( "Test result3 ${RESULT} ")
-    #message ( "Test result2 ${CMAKE_MATCH_0} ")
-    #message ( "Test result4 ${CMAKE_MATCH_1} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #message ( "Test result ${COMPILE_RESULT_VAR} ")
+    #message ( "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #message ( "Test result ${RUN_RESULT_VAR} ")
+    #message ( "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
 
     if (${COMPILE_RESULT_VAR})
-      if (${RUN_RESULT_VAR} MATCHES 0)
+      if (${RUN_RESULT_VAR} MATCHES 1)
         set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION}")
         message (STATUS "Testing C ${FUNCTION} - OK")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
@@ -420,13 +420,14 @@ MACRO (C_RUN FUNCTION CODE RUN_RESULT_VAR COMPILE_RESULT_VAR RETURN)
         )
       else ()
         message (STATUS "Testing C ${FUNCTION} - Fail")
-        set (${RUN_RESULT_VAR} "" CACHE INTERNAL "Have C function ${FUNCTION}")
+        set (${RUN_RESULT_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION}")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
             "Determining if the C ${FUNCTION} exists failed with the following output:\n"
             "${OUTPUT}\n\n")
       endif ()
+    else ()
+        message (FATAL_ERROR "Compilation of C ${FUNCTION} - Failed")
     endif()
-#  endif (NOT DEFINED ${RUN_RESULT_VAR})
 ENDMACRO (C_RUN)
 
 set(PROG_SRC 
@@ -451,17 +452,14 @@ set(PROG_SRC
 #else
 #define C_LDBL_DIG LDBL_DIG
 #endif
-   void main() {
+   int main() {
        printf(\"%d\\\\n%d\\\\n\", C_LDBL_DIG, C_FLT128_DIG)\\\;
+       return 1\\\;
    }
      "
   )
 
-C_RUN("maximum decimal precision for C" ${PROG_SRC}
-  XX
-  YY
-  PROG_OUTPUT
-)
+C_RUN("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT)
 
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  long double decimal precision
