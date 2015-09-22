@@ -106,4 +106,4 @@ H5_test_buildiface_LDADD =
 fflush2.chkexe_: fflush1.chkexe_
 
 
-include $(top_srcdir)/config/conclude.am
+include $(top_srcdir)/config/conclude_fc.am

@@ -102,4 +102,4 @@ H5IMff.lo:          $(srcdir)/H5IMff.F90
 H5TBff.lo:          $(srcdir)/H5TBff.F90
 H5LTff_gen.lo:      H5LTff.lo H5LTff_gen.F90
 H5TBff_gen.lo:      H5TBff.lo H5LTff_gen.F90 H5TBff_gen.F90
-include $(top_srcdir)/config/conclude.am
+include $(top_srcdir)/config/conclude_fc.am

@@ -28,7 +28,6 @@ set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
 # so this one is used for a sizeof test.
 #-----------------------------------------------------------------------------
 MACRO (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
-  if (NOT DEFINED ${VARIABLE})
     message (STATUS "Testing Fortran ${FUNCTION}")
     if (CMAKE_REQUIRED_LIBRARIES)
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
@@ -40,7 +39,7 @@ MACRO (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f90
         "${CODE}"
     )
-    TRY_COMPILE (${VARIABLE}
+    TRY_COMPILE (RESULT_VAR
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f90
         CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
@@ -51,21 +50,21 @@ MACRO (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
 #    message ( "Test result ${OUTPUT}")
 #    message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
 
-    if (${VARIABLE})
+    if (${RESULT_VAR})
       set (${VARIABLE} 1 CACHE INTERNAL "Have Fortran function ${FUNCTION}")
       message (STATUS "Testing Fortran ${FUNCTION} - OK")
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
           "Determining if the Fortran ${FUNCTION} exists passed with the following output:\n"
           "${OUTPUT}\n\n"
       )
-    else (${VARIABLE})
+    else ()
       message (STATUS "Testing Fortran ${FUNCTION} - Fail")
-      set (${VARIABLE} "" CACHE INTERNAL "Have Fortran function ${FUNCTION}")
+      set (${VARIABLE} 0 CACHE INTERNAL "Have Fortran function ${FUNCTION}")
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Determining if the Fortran ${FUNCTION} exists failed with the following output:\n"
           "${OUTPUT}\n\n")
-    endif (${VARIABLE})
-  endif (NOT DEFINED ${VARIABLE})
+    endif ()
+
 ENDMACRO (CHECK_FORTRAN_FEATURE)
 
 #-----------------------------------------------------------------------------
@@ -77,6 +76,7 @@ ENDMACRO (CHECK_FORTRAN_FEATURE)
 #-----------------------------------------------------------------------------
 
 # Check for Non-standard extension intrinsic function SIZEOF
+set(FORTRAN_HAVE_SIZEOF FALSE)
 CHECK_FORTRAN_FEATURE(sizeof
   "
        PROGRAM main
@@ -87,6 +87,7 @@ CHECK_FORTRAN_FEATURE(sizeof
 )
 
 # Check for F2008 standard intrinsic function C_SIZEOF
+set(FORTRAN_HAVE_C_SIZEOF FALSE)
 CHECK_FORTRAN_FEATURE(c_sizeof
   "
        PROGRAM main
@@ -112,6 +113,7 @@ CHECK_FORTRAN_FEATURE(storage_size
 )
 
 # Check for F2008 standard intrinsic module "ISO_FORTRAN_ENV"
+set(HAVE_ISO_FORTRAN_ENV FALSE)
 CHECK_FORTRAN_FEATURE(ISO_FORTRAN_ENV
   "
        PROGRAM main
@@ -121,6 +123,7 @@ CHECK_FORTRAN_FEATURE(ISO_FORTRAN_ENV
   HAVE_ISO_FORTRAN_ENV
 )
 
+set(FORTRAN_DEFAULT_REAL_NOT_DOUBLE FALSE)
 CHECK_FORTRAN_FEATURE(RealIsNotDouble
   "
        MODULE type_mod
@@ -150,6 +153,7 @@ CHECK_FORTRAN_FEATURE(RealIsNotDouble
 #-----------------------------------------------------------------------------
 # Checks if the ISO_C_BINDING module meets all the requirements
 #-----------------------------------------------------------------------------
+set(FORTRAN_HAVE_ISO_C_BINDING FALSE)
 CHECK_FORTRAN_FEATURE(iso_c_binding
   "
        PROGRAM main

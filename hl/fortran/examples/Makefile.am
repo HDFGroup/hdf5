@@ -64,4 +64,4 @@ EXAMPLETOPDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples/hl
 # and fortran libraries above.
 
 include $(top_srcdir)/config/examples.am
-include $(top_srcdir)/config/conclude.am
+include $(top_srcdir)/config/conclude_fc.am

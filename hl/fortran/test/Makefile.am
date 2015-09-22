@@ -51,4 +51,4 @@ CHECK_CLEANFILES+=dsetf[1-5].h5 f1img.h5 f1tab.h5 tstds.h5
 # from tests in conclude.am)
 FORTRAN_API=yes
 
-include $(top_srcdir)/config/conclude.am
+include $(top_srcdir)/config/conclude_fc.am

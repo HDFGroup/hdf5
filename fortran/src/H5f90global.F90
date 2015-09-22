@@ -316,6 +316,18 @@ MODULE H5GLOBAL
   EQUIVALENCE(H5generic_flags(7), H5_ITER_DEC_F)
   EQUIVALENCE(H5generic_flags(8), H5_ITER_NATIVE_F)
   EQUIVALENCE(H5generic_flags(9), H5_ITER_N_F)
+
+  INTEGER, PARAMETER :: H5generic_haddr_FLAGS_LEN = 1
+  INTEGER(HADDR_T) :: H5generic_haddr_flags(H5generic_haddr_FLAGS_LEN)
+  !DEC$if defined(BUILD_HDF5_DLL)
+  !DEC$ATTRIBUTES DLLEXPORT :: /H5generic_haddr_FLAGS/
+  !DEC$endif
+  COMMON /H5generic_haddr_FLAGS/ H5generic_haddr_flags
+
+  INTEGER(HADDR_T) :: HADDR_UNDEF_F
+
+  EQUIVALENCE(H5generic_haddr_flags(1), HADDR_UNDEF_F)
+
   !
   ! H5G flags declaration
   !
