@@ -1111,7 +1111,6 @@
 ./tools/h5dump/testh5dumpxml.sh.in
 ./tools/h5dump/binread.c
 
-
 ./tools/h5import/Makefile.am
 ./tools/h5import/Makefile.in
 ./tools/h5import/h5import.h
