@@ -713,7 +713,7 @@ H5S_get_select_offset(const H5S_t *space, hsize_t *offset)
 int
 H5S_get_select_unlim_dim(const H5S_t *space)
 {
-    herr_t ret_value;        /* return value */
+    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

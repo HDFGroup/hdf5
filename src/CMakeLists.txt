@@ -777,6 +777,8 @@ set (H5_GENERATED_HEADERS
     ${HDF5_SRC_DIR}/H5overflow.h
 )
 
+option (HDF5_GENERATE_HEADERS "Rebuild Generated Files" ON)
+mark_as_advanced (HDF5_GENERATE_HEADERS)
 if (HDF5_GENERATE_HEADERS)
   find_package (Perl)
   if (PERL_FOUND)
@@ -827,7 +829,11 @@ TARGET_C_PROPERTIES (H5detect STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
 endif (MSVC OR MINGW)
-add_dependencies(H5detect generate_precompiled)
+if (HDF5_GENERATE_HEADERS)
+  add_dependencies(H5detect generate_precompiled)
+else (HDF5_GENERATE_HEADERS)
+  add_dependencies(H5detect "${HDF5_SRC_DIR}/H5version.h;${HDF5_SRC_DIR}/H5overflow.h")
+endif (HDF5_GENERATE_HEADERS)
 
 set (CMD $<TARGET_FILE:H5detect>)
 add_custom_command (
@@ -842,7 +848,11 @@ TARGET_C_PROPERTIES (H5make_libsettings STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
 endif (MSVC OR MINGW)
-add_dependencies(H5make_libsettings generate_precompiled)
+if (HDF5_GENERATE_HEADERS)
+  add_dependencies(H5detect generate_precompiled)
+else (HDF5_GENERATE_HEADERS)
+  add_dependencies(H5make_libsettings "${HDF5_SRC_DIR}/H5version.h;${HDF5_SRC_DIR}/H5overflow.h")
+endif (HDF5_GENERATE_HEADERS)
 
 set (CMD $<TARGET_FILE:H5make_libsettings>)
 add_custom_command (
