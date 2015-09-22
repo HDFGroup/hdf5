@@ -48,6 +48,9 @@
 /* Determine the size of C long double */
 #undef FORTRAN_SIZEOF_LONG_DOUBLE
 
+/* Define Fortran compiler ID */
+#undef Fortran_COMPILER_ID
+
 /* Define valid Fortran INTEGER KINDs */
 #undef H5CONFIG_F_IKIND
 

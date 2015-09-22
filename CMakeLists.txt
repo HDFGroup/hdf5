@@ -614,8 +614,23 @@ if (BUILD_TESTING)
       CACHE INTEGER
       "Timeout in seconds for each test (default 1200=20minutes)"
   )
+
+  option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
+  mark_as_advanced (HDF5_TEST_VFD)
+  if (HDF5_TEST_VFD)
+    option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
+    mark_as_advanced (HDF5_TEST_FHEAP_VFD)
+  endif (HDF5_TEST_VFD)
+
+  option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")
+  mark_as_advanced (HDF_TEST_EXPRESS)
+
   enable_testing ()
   include (CTest)
+
+  include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
+  configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
+
   if (NOT HDF5_EXTERNALLY_CONFIGURED)
     if (EXISTS "${HDF5_SOURCE_DIR}/test" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/test")
       add_subdirectory (${HDF5_SOURCE_DIR}/tools/lib ${PROJECT_BINARY_DIR}/tools/lib)
@@ -627,16 +642,6 @@ if (BUILD_TESTING)
       endif (EXISTS "${HDF5_SOURCE_DIR}/testpar" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/testpar")
     endif (H5_HAVE_PARALLEL)
   endif (NOT HDF5_EXTERNALLY_CONFIGURED)
-
-  option (HDF5_TEST_VFD "Execute tests with different VFDs" OFF)
-  mark_as_advanced (HDF5_TEST_VFD)
-  if (HDF5_TEST_VFD)
-    option (HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON)
-    mark_as_advanced (HDF5_TEST_FHEAP_VFD)
-  endif (HDF5_TEST_VFD)
-
-  include (${HDF5_SOURCE_DIR}/CTestConfig.cmake)
-  configure_file (${HDF_RESOURCES_DIR}/CTestCustom.cmake ${HDF5_BINARY_DIR}/CTestCustom.ctest @ONLY)
 endif (BUILD_TESTING)
 
 #-----------------------------------------------------------------------------
@@ -691,8 +696,18 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
       endif (NOT ALLOW_UNSUPPORTED)
     endif (BUILD_SHARED_LIBS AND APPLE)
     option (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" ON)
+
     include (${HDF_RESOURCES_EXT_DIR}/HDFUseFortran.cmake)
+
+    message (STATUS "Fortran compiler ID is ${CMAKE_Fortran_COMPILER_ID}")
+    # Building with PGI requires CMake 3.3 or greater  because previous versions
+    # of CMake add the wrong compiler flag for the PGI Fortran compiler.
+    if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "PGI" AND "${CMAKE_VERSION}" VERSION_LESS "3.3")
+      message (FATAL_ERROR " **** PGI FORTRAN REQUIRES CMAKE VERSION 3.3 OR GREATER **** ")
+    endif ()
+
     include (${HDF_RESOURCES_DIR}/HDF5UseFortran.cmake)
+
     if (HDF5_ENABLE_F2003)
       if (NOT FORTRAN_HAVE_ISO_C_BINDING)
         set (HDF5_ENABLE_F2003 OFF)
