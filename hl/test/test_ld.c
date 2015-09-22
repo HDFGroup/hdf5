@@ -269,24 +269,22 @@ test_LD_dims_params(const char *file)
     hid_t did=-1;		/* dataset identifier */
     hsize_t one_cur_dims[1];	/* current dimension sizes for 1-dimensonal dataset */
     hsize_t two_cur_dims[2];	/* current dimension sizes for 2-dimensional dataset */
+    hid_t invalid_id = -1;
     herr_t ret;			/* return value */
 
     const char *filename = H5_get_srcdir_filename(file);
 
     TESTING("H5LDget_dset_dims");
 
-    /* Make a copy of the test file */
-    COPY_FILE(filename, COPY_FILENAME)
-
     /* Open the copied file */
-    if((fid = H5Fopen(COPY_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
 	FAIL_STACK_ERROR
 
     /* 
      * 1. Verify failure with negative dataset id
      */
     H5E_BEGIN_TRY {
-	ret = H5LDget_dset_dims(-1, one_cur_dims);
+	ret = H5LDget_dset_dims(invalid_id, one_cur_dims);
     } H5E_END_TRY;
     VERIFY_EQUAL(ret, FAIL)
 
@@ -351,9 +349,6 @@ test_LD_dims_params(const char *file)
     /* Close the file */
     if(H5Fclose(fid) < 0)
 	FAIL_STACK_ERROR
-
-    /* Remove the copied file */
-    HDremove(COPY_FILENAME);
 
     PASSED();
     return 0;
@@ -545,6 +540,7 @@ test_LD_size(const char *file)
     hid_t fid=-1;	/* file identifier */
     hid_t did=-1;	/* dataset identifier */
     hid_t dtid=-1;	/* dataset's datatype identifier */
+    hid_t invalid_id=-1;
     hid_t memb0_tid=-1;	/* type identifier for a member in the compound type */
     hid_t memb1_tid=-1;	/* type identifier for a member in the compound type */
     hid_t memb2_tid=-1;	/* type identifier for a member in the compound type */
@@ -559,14 +555,14 @@ test_LD_size(const char *file)
     TESTING("H5LDget_dset_type_size");
 
     /* Open the file */
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
 	FAIL_STACK_ERROR
 
     /* 
      * Verify failure with an invalid dataset id
      */
     H5E_BEGIN_TRY {
-	dsize = H5LDget_dset_type_size(-1, NULL);
+	dsize = H5LDget_dset_type_size(invalid_id, NULL);
     } H5E_END_TRY;
     VERIFY_EQUAL(dsize, 0)
 
@@ -805,9 +801,6 @@ test_LD_size(const char *file)
 
     H5Fclose(fid);
 
-    /* Remove the copied file */
-    HDremove(COPY_FILENAME);
-
     PASSED();
     return 0;
 
@@ -853,6 +846,7 @@ test_LD_elmts_invalid(const char *file)
     hid_t fid=-1;		/* file identifier */
     hid_t did=-1;		/* dataset identifier */
     hid_t sid=-1;		/* dataspace identifier */
+    hid_t invalid_id=-1;
     int ret;			/* return value */
     hsize_t cur_dims[2];	/* current dimension sizes of the dataset */
     hsize_t prev_dims[2];	/* previous dimension sizes of the dataset */
@@ -864,11 +858,8 @@ test_LD_elmts_invalid(const char *file)
 
     TESTING("H5LDget_dset_elmts on invalid conditions");
 
-    /* Copied the test file */
-    COPY_FILE(filename, COPY_FILENAME)
-
     /* Open the copied file */
-    if((fid = H5Fopen(COPY_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
 	FAIL_STACK_ERROR
 
     /* 
@@ -926,7 +917,7 @@ test_LD_elmts_invalid(const char *file)
 
     /* Verify failure from case #1: an invalid dataset id */
     H5E_BEGIN_TRY {
-	ret = H5LDget_dset_elmts(-1, prev_dims, cur_dims, NULL, tbuf);
+	ret = H5LDget_dset_elmts(invalid_id, prev_dims, cur_dims, NULL, tbuf);
     } H5E_END_TRY;
     VERIFY_EQUAL(ret, FAIL)
 
@@ -950,9 +941,6 @@ test_LD_elmts_invalid(const char *file)
 
     /* Close the file */
     H5Fclose(fid);
-
-    /* Remove the copied file */
-    HDremove(COPY_FILENAME);
 
     PASSED();
     return 0;
