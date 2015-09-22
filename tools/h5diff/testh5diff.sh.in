@@ -331,10 +331,10 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+              $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
-                
+
                     # Comment out this to CREATE expected file
                     exit $EXIT_FAILURE
                 fi
@@ -442,9 +442,9 @@ TOOLTEST() {
     cp $actual_err $actual_err_sav
     STDERR_FILTER $actual_err
     cat $actual_err >> $actual
-    # don't add exit code check in pmode, as it causes failure. (exit code 
+    # don't add exit code check in pmode, as it causes failure. (exit code
     # is from mpirun not tool)
-    # if any problem occurs relate to an exit code, it will be caught in 
+    # if any problem occurs relate to an exit code, it will be caught in
     # serial mode, so the test is fullfilled.
     if test $h5haveexitcode = 'yes' -a -z "$pmode"; then
       echo "EXIT CODE: $EXIT_CODE" >> $actual
@@ -462,7 +462,7 @@ TOOLTEST() {
         nerrors="`expr $nerrors + 1`"
         test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     else
-	    # parallel mode output are often of different ordering from serial
+        # parallel mode output are often of different ordering from serial
         # output.  If the sorted expected and actual files compare the same,
         # it is safe to assume the actual output match the expected file.
         expect_sorted=expect_sorted
@@ -493,24 +493,24 @@ TOOLTEST() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	    rm -f $actual $actual_err $actual_sav $actual_err_sav
-    	rm -f $actual_sorted $expect_sorted
+      rm -f $actual $actual_err $actual_sav $actual_err_sav
+      rm -f $actual_sorted $expect_sorted
     fi
 }
 
 
 # Print a "SKIP" message
 SKIP() {
-	 TESTING $H5DIFF $@
-	  echo  " -SKIP-"
+   TESTING $H5DIFF $@
+    echo  " -SKIP-"
 }
 
 
 
 ##############################################################################
-# The tests 
+# The tests
 # To avoid the printing of the complete full path of the test file, that hides
-# all the other parameters for long paths, the printing of the command line 
+# all the other parameters for long paths, the printing of the command line
 # is done first in
 # TESTING with the name only of the test file $TOOL, not its full path $TESTFILE
 ##############################################################################
@@ -525,13 +525,13 @@ COPY_TESTFILES_TO_TESTDIR
 TOOLTEST h5diff_10.txt -h
 
 # 1.1 normal mode
-TOOLTEST h5diff_11.txt  h5diff_basic1.h5 h5diff_basic2.h5 
+TOOLTEST h5diff_11.txt  h5diff_basic1.h5 h5diff_basic2.h5
 
 # 1.2 normal mode with objects
 TOOLTEST h5diff_12.txt  h5diff_basic1.h5 h5diff_basic2.h5  g1/dset1 g1/dset2
 
 # 1.3 report mode
-TOOLTEST h5diff_13.txt -r h5diff_basic1.h5 h5diff_basic2.h5 
+TOOLTEST h5diff_13.txt -r h5diff_basic1.h5 h5diff_basic2.h5
 
 # 1.4 report  mode with objects
 TOOLTEST h5diff_14.txt  -r h5diff_basic1.h5 h5diff_basic2.h5 g1/dset1 g1/dset2
@@ -549,7 +549,7 @@ TOOLTEST h5diff_16_2.txt --verbose --relative=0.02 h5diff_basic1.h5 h5diff_basic
 TOOLTEST h5diff_16_3.txt -v -p 0.02 h5diff_basic1.h5 h5diff_basic1.h5 g1/dset9 g1/dset10
 
 # 1.7 verbose mode
-TOOLTEST h5diff_17.txt -v h5diff_basic1.h5 h5diff_basic2.h5   
+TOOLTEST h5diff_17.txt -v h5diff_basic1.h5 h5diff_basic2.h5
 
 # 1.7 test 32-bit INFINITY
 TOOLTEST h5diff_171.txt -v h5diff_basic1.h5 h5diff_basic1.h5 /g1/fp19 /g1/fp19_COPY
@@ -557,8 +557,8 @@ TOOLTEST h5diff_171.txt -v h5diff_basic1.h5 h5diff_basic1.h5 /g1/fp19 /g1/fp19_C
 # 1.7 test 64-bit INFINITY
 TOOLTEST h5diff_172.txt -v h5diff_basic1.h5 h5diff_basic1.h5 /g1/fp20 /g1/fp20_COPY
 
-# 1.8 quiet mode 
-TOOLTEST h5diff_18.txt -q h5diff_basic1.h5 h5diff_basic2.h5 
+# 1.8 quiet mode
+TOOLTEST h5diff_18.txt -q h5diff_basic1.h5 h5diff_basic2.h5
 
 # 1.8 -v and -q
 TOOLTEST h5diff_18_1.txt -v -q h5diff_basic1.h5 h5diff_basic2.h5
@@ -588,7 +588,7 @@ TOOLTEST h5diff_23.txt -v h5diff_types.h5 h5diff_types.h5 g1 g1
 TOOLTEST h5diff_24.txt -v h5diff_types.h5 h5diff_types.h5 t1 t1
 
 # 2.5
-TOOLTEST h5diff_25.txt -v h5diff_types.h5 h5diff_types.h5 l1 l1 
+TOOLTEST h5diff_25.txt -v h5diff_types.h5 h5diff_types.h5 l1 l1
 
 # 2.6
 TOOLTEST h5diff_26.txt -v h5diff_types.h5 h5diff_types.h5 g1 g2
@@ -642,7 +642,7 @@ TOOLTEST h5diff_57.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset7a dset7b
 # 5.8 (region reference)
 TOOLTEST h5diff_58.txt -v h5diff_dset1.h5 h5diff_dset2.h5 refreg
 
-# test for both dset and attr with same type but with different size 
+# test for both dset and attr with same type but with different size
 # ( HDDFV-7942 )
 TOOLTEST h5diff_59.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset11a dset11b
 
@@ -652,14 +652,14 @@ TOOLTEST h5diff_59.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset11a dset11b
 
 
 # 6.0: Check if the command line number of arguments is less than 3
-TOOLTEST h5diff_600.txt h5diff_basic1.h5 
+TOOLTEST h5diff_600.txt h5diff_basic1.h5
 
-# 6.1: Check if non-exist object name is specified 
+# 6.1: Check if non-exist object name is specified
 TOOLTEST h5diff_601.txt h5diff_basic1.h5 h5diff_basic1.h5 nono_obj
 
 
 # ##############################################################################
-# # -d 
+# # -d
 # ##############################################################################
 
 
@@ -678,7 +678,7 @@ TOOLTEST h5diff_606.txt -d 0x1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dse
 # 6.7: string
 TOOLTEST h5diff_607.txt -d "1" h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4
 
-# 6.8: use system epsilon 
+# 6.8: use system epsilon
 TOOLTEST h5diff_608.txt --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5  g1/dset3 g1/dset4
 
 # 6.9: number larger than biggest difference
@@ -762,7 +762,7 @@ TOOLTEST h5diff_631.txt -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h
 # ##############################################################################
 # 7.  attributes
 # ##############################################################################
-TOOLTEST h5diff_70.txt -v h5diff_attr1.h5 h5diff_attr2.h5 
+TOOLTEST h5diff_70.txt -v h5diff_attr1.h5 h5diff_attr2.h5
 # temporary test to verify HDF5-8625
 TOOLTEST h5diff_tmp1.txt tmptest2.he5 tmptest.he5
 # temporary test to verify HDF5-8639
@@ -772,10 +772,10 @@ TOOLTEST h5diff_tmp2.txt tmpSingleSiteBethe.output.h5 tmpSingleSiteBethe.referen
 #  attrs with verbose option level
 # ##################################################
 
-TOOLTEST h5diff_700.txt -v1 h5diff_attr1.h5 h5diff_attr2.h5 
-TOOLTEST h5diff_701.txt -v2 h5diff_attr1.h5 h5diff_attr2.h5 
-TOOLTEST h5diff_702.txt --verbose=1 h5diff_attr1.h5 h5diff_attr2.h5 
-TOOLTEST h5diff_703.txt --verbose=2 h5diff_attr1.h5 h5diff_attr2.h5 
+TOOLTEST h5diff_700.txt -v1 h5diff_attr1.h5 h5diff_attr2.h5
+TOOLTEST h5diff_701.txt -v2 h5diff_attr1.h5 h5diff_attr2.h5
+TOOLTEST h5diff_702.txt --verbose=1 h5diff_attr1.h5 h5diff_attr2.h5
+TOOLTEST h5diff_703.txt --verbose=2 h5diff_attr1.h5 h5diff_attr2.h5
 
 # same attr number , all same attr name
 TOOLTEST h5diff_704.txt -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g
@@ -789,7 +789,7 @@ TOOLTEST h5diff_706.txt -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /nty
 # different attr number , same attr name (intersected)
 TOOLTEST h5diff_707.txt -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g2
 
-# different attr number , all different attr name 
+# different attr number , all different attr name
 TOOLTEST h5diff_708.txt -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5 /g3
 
 # when no attributes exist in both objects
@@ -801,32 +801,32 @@ TOOLTEST h5diff_710.txt -v2 h5diff_attr_v_level1.h5 h5diff_attr_v_level2.h5
 # ##############################################################################
 # 8.  all dataset datatypes
 # ##############################################################################
-TOOLTEST h5diff_80.txt -v h5diff_dset1.h5 h5diff_dset2.h5 
+TOOLTEST h5diff_80.txt -v h5diff_dset1.h5 h5diff_dset2.h5
 
 # 9. compare a file with itself
 TOOLTEST h5diff_90.txt -v h5diff_basic2.h5 h5diff_basic2.h5
 
 # 10. read by hyperslab, print indexes
-TOOLTEST h5diff_100.txt -v h5diff_hyper1.h5 h5diff_hyper2.h5 
+TOOLTEST h5diff_100.txt -v h5diff_hyper1.h5 h5diff_hyper2.h5
 
 # 11. floating point comparison
 # double value
-TOOLTEST h5diff_101.txt -v h5diff_basic1.h5 h5diff_basic1.h5 g1/d1  g1/d2 
+TOOLTEST h5diff_101.txt -v h5diff_basic1.h5 h5diff_basic1.h5 g1/d1  g1/d2
 
 # float value
-TOOLTEST h5diff_102.txt -v h5diff_basic1.h5 h5diff_basic1.h5 g1/fp1 g1/fp2 
+TOOLTEST h5diff_102.txt -v h5diff_basic1.h5 h5diff_basic1.h5 g1/fp1 g1/fp2
 
-# with --use-system-epsilon for double value 
-TOOLTEST h5diff_103.txt -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/d1  g1/d2 
+# with --use-system-epsilon for double value
+TOOLTEST h5diff_103.txt -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/d1  g1/d2
 
 # with --use-system-epsilon for float value
-TOOLTEST h5diff_104.txt -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/fp1 g1/fp2 
+TOOLTEST h5diff_104.txt -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/fp1 g1/fp2
 
 
 # not comparable -c flag
-TOOLTEST h5diff_200.txt h5diff_basic2.h5 h5diff_basic2.h5 g2/dset1  g2/dset2 
+TOOLTEST h5diff_200.txt h5diff_basic2.h5 h5diff_basic2.h5 g2/dset1  g2/dset2
 
-TOOLTEST h5diff_201.txt -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset1  g2/dset2 
+TOOLTEST h5diff_201.txt -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset1  g2/dset2
 
 TOOLTEST h5diff_202.txt -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset2  g2/dset3
 
@@ -842,9 +842,9 @@ TOOLTEST h5diff_206.txt -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset7  g2/dset8
 TOOLTEST h5diff_207.txt -c h5diff_basic2.h5 h5diff_basic2.h5 g2/dset8  g2/dset9
 
 # not comparable in dataspace of zero dimension size
-TOOLTEST h5diff_208.txt -c h5diff_dset_zero_dim_size1.h5 h5diff_dset_zero_dim_size2.h5 
+TOOLTEST h5diff_208.txt -c h5diff_dset_zero_dim_size1.h5 h5diff_dset_zero_dim_size2.h5
 
-# non-comparable dataset with comparable attribute, and other comparable datasets. 
+# non-comparable dataset with comparable attribute, and other comparable datasets.
 # Also test non-compatible attributes with different type, dimention, rank.
 # All the comparables should display differences.
 TOOLTEST h5diff_220.txt -c non_comparables1.h5 non_comparables2.h5 /g1
@@ -862,7 +862,7 @@ TOOLTEST h5diff_222.txt -c non_comparables1.h5 non_comparables2.h5
 TOOLTEST h5diff_223.txt -c non_comparables1.h5 non_comparables2.h5 /diffobjtypes
 # swap files
 TOOLTEST h5diff_224.txt -c non_comparables2.h5 non_comparables1.h5 /diffobjtypes
-    
+
 # ##############################################################################
 # # Links compare without --follow-symlinks nor --no-dangling-links
 # ##############################################################################
@@ -958,28 +958,28 @@ TOOLTEST h5diff_425.txt --follow-symlinks -v h5diff_ext2softlink_src.h5 h5diff_e
 TOOLTEST h5diff_450.txt  --follow-symlinks -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5
 
 # dangling links --follow-symlinks and --no-dangling-links (FILE to FILE)
-TOOLTEST h5diff_451.txt  --follow-symlinks -v --no-dangling-links  h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 
+TOOLTEST h5diff_451.txt  --follow-symlinks -v --no-dangling-links  h5diff_danglelinks1.h5 h5diff_danglelinks2.h5
 
 # try --no-dangling-links without --follow-symlinks options
 TOOLTEST h5diff_452.txt  --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5
 
 # dangling link found for soft links (FILE to FILE)
-TOOLTEST h5diff_453.txt  --follow-symlinks -v --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5  
+TOOLTEST h5diff_453.txt  --follow-symlinks -v --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5
 
 # dangling link found for soft links (obj to obj)
-TOOLTEST h5diff_454.txt  --follow-symlinks -v --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_dset2 /softlink_noexist 
+TOOLTEST h5diff_454.txt  --follow-symlinks -v --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_dset2 /softlink_noexist
 
 # dangling link found for soft links (obj to obj) Both dangle links
-TOOLTEST h5diff_455.txt  --follow-symlinks -v --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_noexist /softlink_noexist 
+TOOLTEST h5diff_455.txt  --follow-symlinks -v --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_noexist /softlink_noexist
 
 # dangling link found for ext links (FILE to FILE)
-TOOLTEST h5diff_456.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 
+TOOLTEST h5diff_456.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5
 
 # dangling link found for ext links (obj to obj). target file exist
-TOOLTEST h5diff_457.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset1 /ext_link_noexist1 
+TOOLTEST h5diff_457.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset1 /ext_link_noexist1
 
 # dangling link found for ext links (obj to obj). target file NOT exist
-TOOLTEST h5diff_458.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset1 /ext_link_noexist2  
+TOOLTEST h5diff_458.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset1 /ext_link_noexist2
 
 # dangling link found for ext links (obj to obj). Both dangle links
 TOOLTEST h5diff_459.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_noexist1 /ext_link_noexist2
@@ -993,14 +993,14 @@ TOOLTEST h5diff_466.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_dangl
 # soft link  vs. soft dangling
 TOOLTEST h5diff_467.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link2
 # ext dangling vs. ext dangling
-TOOLTEST h5diff_468.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4 
+TOOLTEST h5diff_468.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4
 # ext link vs. ext dangling
 TOOLTEST h5diff_469.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2
 
 #----------------------------------------
-# dangling links without follow symlink 
+# dangling links without follow symlink
 # (HDFFV-7998)
-# test - soft dangle links (same and different paths), 
+# test - soft dangle links (same and different paths),
 #      - external dangle links (same and different paths)
 TOOLTEST h5diff_471.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5
 TOOLTEST h5diff_472.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1
@@ -1011,7 +1011,7 @@ TOOLTEST h5diff_475.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_li
 # ##############################################################################
 # # test for group diff recursivly
 # ##############################################################################
-# root 
+# root
 TOOLTEST h5diff_500.txt -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 / /
 TOOLTEST h5diff_501.txt -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 / /
 
@@ -1045,7 +1045,7 @@ TOOLTEST h5diff_513.txt -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_
 TOOLTEST h5diff_514.txt -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp10 /slink_grp11
 
 ###############################################################################
-# Test for group recursive diff via multi-linked external links 
+# Test for group recursive diff via multi-linked external links
 # With follow-symlinks, file h5diff_grp_recurse_ext1.h5 and h5diff_grp_recurse_ext2-1.h5 should
 # be same with the external links.
 ###############################################################################
@@ -1068,7 +1068,7 @@ TOOLTEST h5diff_480.txt -v --exclude-path /group1/dset3 h5diff_exclude1-1.h5 h5d
 TOOLTEST h5diff_481.txt -v h5diff_exclude1-1.h5 h5diff_exclude1-2.h5
 
 #
-# Different structure, different names. 
+# Different structure, different names.
 #
 # Exclude all the different objects. Expect return - same
 TOOLTEST h5diff_482.txt -v --exclude-path "/group1" --exclude-path "/dset1" h5diff_exclude2-1.h5 h5diff_exclude2-2.h5
@@ -1099,9 +1099,9 @@ TOOLTEST h5diff_530.txt -v  h5diff_comp_vl_strs.h5 h5diff_comp_vl_strs.h5 /group
 TOOLTEST h5diff_540.txt -v compounds_array_vlen1.h5 compounds_array_vlen2.h5
 
 # ##############################################################################
-# # Test mutually exclusive options 
+# # Test mutually exclusive options
 # ##############################################################################
-# Test with -d , -p and --use-system-epsilon. 
+# Test with -d , -p and --use-system-epsilon.
 TOOLTEST h5diff_640.txt -v -d 5 -p 0.05 --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
 TOOLTEST h5diff_641.txt -v -d 5 -p 0.05 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
 TOOLTEST h5diff_642.txt -v -p 0.05 -d 5 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4

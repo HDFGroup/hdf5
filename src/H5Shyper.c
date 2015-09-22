@@ -1994,7 +1994,8 @@ H5S_hyper_serial_size(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_serialize_helper (const H5S_hyper_span_info_t *spans, hsize_t *start, hsize_t *end, hsize_t rank, uint8_t **p)
+H5S_hyper_serialize_helper (const H5S_hyper_span_info_t *spans,
+        hsize_t *start, hsize_t *end, hsize_t rank, uint8_t **p)
 {
     H5S_hyper_span_t *curr;     /* Pointer to current hyperslab span */
     hsize_t u;                  /* Index variable */
@@ -2091,7 +2092,7 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t **p)
     HDassert(space);
 
     /* Store the preamble information */
-    UINT32ENCODE(*p, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
+    UINT32ENCODE(*p, (uint32_t)H5S_GET_SELECT_TYPE(space)); /* Store the type of selection */
     UINT32ENCODE(*p, (uint32_t)1);  /* Store the version number */
     UINT32ENCODE(*p, (uint32_t)0);  /* Store the un-used padding */
     lenp = *p;           /* keep the pointer to the length location for later */
@@ -2235,7 +2236,7 @@ H5S_hyper_serialize (const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_hyper_deserialize (H5S_t *space, const uint8_t **p)
+H5S_hyper_deserialize(H5S_t *space, const uint8_t **p)
 {
     unsigned rank;           	/* rank of points */
     size_t num_elem=0;      	/* number of elements in selection */
@@ -3194,13 +3195,15 @@ H5S_hyper_release(H5S_t *space)
     space->select.num_elem = 0;
 
     /* Release irregular hyperslab information */
-    if(space->select.sel_info.hslab->span_lst != NULL) {
-        if(H5S_hyper_free_span_info(space->select.sel_info.hslab->span_lst) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "failed to release hyperslab spans")
-    } /* end if */
+    if(space->select.sel_info.hslab) {
+        if(space->select.sel_info.hslab->span_lst != NULL) {
+            if(H5S_hyper_free_span_info(space->select.sel_info.hslab->span_lst) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "failed to release hyperslab spans")
+        } /* end if */
 
-    /* Release space for the hyperslab selection information */
-    space->select.sel_info.hslab = H5FL_FREE(H5S_hyper_sel_t, space->select.sel_info.hslab);
+        /* Release space for the hyperslab selection information */
+        space->select.sel_info.hslab = H5FL_FREE(H5S_hyper_sel_t, space->select.sel_info.hslab);
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7134,12 +7137,12 @@ H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op,
             if(H5S_hyper_generate_spans(space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree")
 
+        /* Indicate that the regular dimensions are no longer valid */
+        space->select.sel_info.hslab->diminfo_valid = FALSE;
+
         /* Add in the new hyperslab information */
         if(H5S_generate_hyperslab (space, op, start, opt_stride, opt_count, opt_block)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't generate hyperslabs")
-
-        /* Indicate that the regular dimensions are no longer valid */
-        space->select.sel_info.hslab->diminfo_valid=FALSE;
     } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation")

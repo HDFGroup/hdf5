@@ -450,7 +450,7 @@ H5S_select_valid(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_deserialize (H5S_t **space, const uint8_t **p)
+H5S_select_deserialize(H5S_t **space, const uint8_t **p)
 {
     H5S_t *tmp_space = NULL;    /* Pointer to actual dataspace to use, either
                                  *space or a newly allocated one */

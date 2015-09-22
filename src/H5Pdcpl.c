@@ -280,6 +280,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static herr_t
 H5P__dcrt_layout_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     size_t H5_ATTR_UNUSED size, void *value)
