@@ -171,7 +171,7 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-              $CP -f $tstfile $TESTDIR
+    	        $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
 
@@ -469,11 +469,11 @@ TOOLTEST1()
     )
     RET=$?
     if [ $RET != 0 ] ; then
-  echo "*FAILED*"
-  nerrors="`expr $nerrors + 1`"
+	echo "*FAILED*"
+	nerrors="`expr $nerrors + 1`"
     else
-  echo " PASSED"
-  DIFFTEST $infile $outfile
+	echo " PASSED"
+	DIFFTEST $infile $outfile
     fi
     rm -f $outfile
 }
@@ -500,11 +500,11 @@ TOOLTESTV()
     ) >$actual 2>$actual_err
     RET=$?
     if [ $RET != 0 ] ; then
-  echo "*FAILED*"
-  nerrors="`expr $nerrors + 1`"
+	echo "*FAILED*"
+	nerrors="`expr $nerrors + 1`"
     else
-  echo " PASSED"
-  DIFFTEST $infile $outfile
+	echo " PASSED"
+	DIFFTEST $infile $outfile
     fi
 
     # display output compare
@@ -634,11 +634,11 @@ TOOLTEST_META()
     # verify sizes.
     MESSAGE "Verify the sizes of both output files ($size1 vs $size2)"
     if [ $size1 -lt $size2 ]; then
-      # pass
-  echo " PASSED"
+    	# pass
+	echo " PASSED"
     else
-  #fail
-  echo "*FAILED*"
+	#fail
+	echo "*FAILED*"
         nerrors="`expr $nerrors + 1`"
     fi
 

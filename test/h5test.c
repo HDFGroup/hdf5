@@ -123,7 +123,7 @@ h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
     return 0;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  h5_clean_files
  *
@@ -191,7 +191,7 @@ h5_clean_files(const char *base_name[], hid_t fapl)
     return;
 } /* end h5_clean_files() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:  h5_cleanup
  *

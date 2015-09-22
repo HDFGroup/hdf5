@@ -1893,7 +1893,6 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
     else
         ret_value = H5S_hyper_span_nblocks(space->select.sel_info.hslab->span_lst);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_get_select_hyper_nblocks() */
 

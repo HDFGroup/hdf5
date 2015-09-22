@@ -457,7 +457,7 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p)
     uint32_t sel_type;          /* Pointer to the selection type */
     uint32_t version;           /* Version number */
     uint8_t flags = 0;          /* Flags */
-    herr_t ret_value = FAIL;    /* return value */
+    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

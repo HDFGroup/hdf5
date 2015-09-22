@@ -1759,7 +1759,6 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
     size_t      cd_nelmts;      /* filter client number of values */
     size_t      cd_num;         /* filter client data counter */
     char        f_name[256];    /* filter/file name */
-    char        dset_name[256];    /* filter/file name */
     char        s[64];          /* temporary string buffer */
     off_t       f_offset;       /* offset in external file */
     hsize_t     f_size;         /* bytes used in external file */
@@ -1850,6 +1849,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
 
             case H5D_VIRTUAL:
                 {
+                    char dset_name[256];        /* Dataset name */
                     size_t vmaps;
 
                     H5Pget_virtual_count(dcpl, &vmaps);
