@@ -10,7 +10,7 @@ set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 #set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
 
 # handle input parameters to script.
-#INSTALLDIR - HDF4 root folder
+#INSTALLDIR - HDF5 root folder
 #CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF4Examples
 #STATICLIBRARIES - Default is YES
