@@ -2,19 +2,46 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 ###############################################################################################################
 # This script will build and run the examples from a compressed file
 # Execute from a command line:
-#     ctest -S HDF518_Examples.cmake,HDF5Examples-0.1.1-Source -C Release -VV -O test.log
+#     ctest -S HDF518_Examples.cmake,CTEST_SOURCE_NAME=HDF5Examples -C Release -VV -O test.log
 ###############################################################################################################
 
-set(INSTALLDIR "@CMAKE_INSTALL_PREFIX@")
 set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
-set(STATICLIBRARIES "@H5_ENABLE_STATIC_LIB@")
-set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
 set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
-set(CTEST_BUILD_CONFIGURATION "Release")
-#set(NO_MAC_FORTRAN "true")
 #set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
-set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_ENABLE_F2003:BOOL=ON")
-#set(CTEST_USE_TAR_SOURCE "${CTEST_SCRIPT_ARG}")
+
+# handle input parameters to script.
+#INSTALLDIR - HDF5-1.8 root folder
+#CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
+#CTEST_SOURCE_NAME - name of source folder; HDF4Examples
+#STATICLIBRARIES - Default is YES
+#TAR_SOURCE - name of tarfile
+#NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac)
+if(DEFINED CTEST_SCRIPT_ARG)
+    # transform ctest script arguments of the form
+    # script.ctest,var1=value1,var2=value2
+    # to variables with the respective names set to the respective values
+    string(REPLACE "," ";" script_args "${CTEST_SCRIPT_ARG}")
+    foreach(current_var ${script_args})
+        if ("${current_var}" MATCHES "^([^=]+)=(.+)$")
+            set("${CMAKE_MATCH_1}" "${CMAKE_MATCH_2}")
+        endif()
+    endforeach()
+endif()
+if(NOT DEFINED INSTALLDIR)
+    set(INSTALLDIR "@CMAKE_INSTALL_PREFIX@")
+endif()
+if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
+    set(CTEST_BUILD_CONFIGURATION "Release")
+endif()
+if(NOT DEFINED CTEST_SOURCE_NAME)
+    set(CTEST_SOURCE_NAME "HDF5Examples")
+endif()
+if(NOT DEFINED STATICLIBRARIES)
+    set(STATICLIBRARIES "YES")
+endif()
+#if(NOT DEFINED TAR_SOURCE)
+#  set(CTEST_USE_TAR_SOURCE "HDF5Examples-1.2.1-Source")
+#endif()
 
 ###############################################################################################################
 #     Adjust the following SET Commands as needed
