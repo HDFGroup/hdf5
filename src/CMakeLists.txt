@@ -588,6 +588,7 @@ set (H5T_SRCS
     ${HDF5_SRC_DIR}/H5Torder.c
     ${HDF5_SRC_DIR}/H5Tpad.c
     ${HDF5_SRC_DIR}/H5Tprecis.c
+    ${HDF5_SRC_DIR}/H5Tref.c
     ${HDF5_SRC_DIR}/H5Tstrpad.c
     ${HDF5_SRC_DIR}/H5Tvisit.c
     ${HDF5_SRC_DIR}/H5Tvlen.c

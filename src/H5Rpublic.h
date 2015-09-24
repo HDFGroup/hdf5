@@ -31,6 +31,7 @@ typedef enum {
     H5R_BADTYPE     =   (-1),   /*invalid Reference Type                     */
     H5R_OBJECT,                 /*Object reference                           */
     H5R_DATASET_REGION,         /*Dataset Region Reference                   */
+    H5R_REGION,                 /*Revised Dataset Region Reference           */
     H5R_ATTR,                   /*Attribute Reference                        */
     H5R_MAXTYPE                 /*highest type (Invalid as true type)	     */
 } H5R_type_t;
@@ -51,6 +52,14 @@ typedef haddr_t hobj_ref_t; /* Needs to be large enough to store largest haddr_t
 /* Dataset Region reference structure for user's code */
 typedef unsigned char hdset_reg_ref_t[H5R_DSET_REG_REF_BUF_SIZE];/* Buffer to store heap ID and index */
 /* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) plus an int */
+
+/* Variable length region reference struct in memory */
+typedef struct hreg_ref_t {
+    size_t buf_size;/* Size of serialized region reference */
+    void *buf;      /* Pointer to serialized region reference */
+} hreg_ref_t;
+
+#define H5R_REG_REF_INITIALIZER { 0, NULL }
 
 #define H5R_ATTR_REF_BUF_SIZE    (2 * (sizeof(haddr_t) + 4))
 /* Attribute reference structure for user's code */

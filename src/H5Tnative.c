@@ -234,7 +234,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                     ref_size = sizeof(hobj_ref_t);
                 } /* end if */
                 else {
-                    /* Decide if the datatype is a dataset region or attribute reference. */
+                    /* Decide if the datatype is a dataset region reference. */
                     if(NULL == (dt = (H5T_t *)H5I_object(H5T_STD_REF_DSETREG_g)))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
                     not_equal = H5T_cmp(ret_value, dt, FALSE);
@@ -245,8 +245,20 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                         ref_size = sizeof(hdset_reg_ref_t);
                     } /* end if */
                     else {
-                        align = H5T_HATTRREF_COMP_ALIGN_g;
-                        ref_size = sizeof(hattr_ref_t);
+                        /* Decide if the datatype is a dataset region reference. */
+                        if(NULL == (dt = (H5T_t *)H5I_object(H5T_STD_REF_REG_g)))
+                            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+                        not_equal = H5T_cmp(ret_value, dt, FALSE);
+
+                        /* Update size, offset and compound alignment for parent. */
+                        if(!not_equal) {
+                            align = H5T_HREGREF_COMP_ALIGN_g;
+                            ref_size = sizeof(hreg_ref_t);
+                        } /* end if */
+                        else {
+                            align = H5T_HATTRREF_COMP_ALIGN_g;
+                            ref_size = sizeof(hattr_ref_t);
+                        } /* end else */
                     } /* end else */
                 } /* end else */
 

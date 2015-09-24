@@ -1025,6 +1025,9 @@ H5FL_BLK_DEFINE_STATIC(vlen_seq);
 /* Declare a free list to manage pieces of array data */
 H5FL_BLK_DEFINE_STATIC(array_seq);
 
+/* Declare a free list to manage pieces of reference data */
+H5FL_BLK_DEFINE_STATIC(ref_seq);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5T__conv_noop
@@ -3559,6 +3562,132 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__conv_array() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T__conv_ref
+ *
+ * Purpose: Converts between region reference datatypes in memory and on disk.
+ *      This is a soft conversion function.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+    size_t buf_stride, size_t bkg_stride, void *buf, void *bkg, hid_t dxpl_id)
+{
+    H5T_t   *src = NULL;        /* source datatype                      */
+    H5T_t   *dst = NULL;        /* destination datatype                 */
+    uint8_t *s = NULL;          /* source buffer                        */
+    uint8_t *d = NULL;          /* destination buffer                   */
+    uint8_t *b = NULL;          /* background buffer                    */
+    ssize_t s_stride, d_stride; /* src and dst strides                  */
+    ssize_t b_stride;           /* bkg stride                           */
+    void    *conv_buf = NULL;   /* temporary conversion buffer          */
+    size_t  conv_buf_size = 0;  /* size of conversion buffer in bytes   */
+    size_t  elmtno;             /* element number counter               */
+    herr_t ret_value = SUCCEED; /* return value                         */
+
+    FUNC_ENTER_PACKAGE
+
+    switch(cdata->command) {
+        case H5T_CONV_INIT:
+            /*
+             * First, determine if this conversion function applies to the
+             * conversion path SRC_ID-->DST_ID.  If not, return failure;
+             * otherwise initialize the `priv' field of `cdata' with
+             * information that remains (almost) constant for this
+             * conversion path.
+             */
+            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a datatype")
+            if(H5T_REFERENCE != src->shared->type)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_REFERENCE datatype")
+            if(H5T_REFERENCE != dst->shared->type)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a H5T_REFERENCE datatype")
+
+            /* Reference types don't need a background buffer */
+            cdata->need_bkg = H5T_BKG_NO;
+            break;
+
+        case H5T_CONV_FREE:
+            break;
+
+        case H5T_CONV_CONV:
+        {
+            /*
+             * Conversion.
+             */
+            if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+            /* Initialize source & destination strides */
+            if(buf_stride) {
+                HDassert(buf_stride >= src->shared->size);
+                HDassert(buf_stride >= dst->shared->size);
+                H5_CHECK_OVERFLOW(buf_stride, size_t, ssize_t);
+                s_stride = d_stride = (ssize_t)buf_stride;
+            } /* end if */
+            else {
+                H5_CHECK_OVERFLOW(src->shared->size, size_t, ssize_t);
+                H5_CHECK_OVERFLOW(dst->shared->size, size_t, ssize_t);
+                s_stride = (ssize_t)src->shared->size;
+                d_stride = (ssize_t)dst->shared->size;
+            } /* end else */
+            if(bkg) {
+                if(bkg_stride)
+                    b_stride = (ssize_t)bkg_stride;
+                else
+                    b_stride = d_stride;
+            } /* end if */
+            else
+                b_stride = 0;
+
+            /* Single forward pass over all data */
+            s = d = (uint8_t *)buf;
+            b = (uint8_t *)bkg;
+
+            for(elmtno = 0; elmtno < nelmts; elmtno++) {
+                size_t buf_size;
+
+                /* Get size of references */
+                if(0 == (buf_size = (*(src->shared->u.atomic.u.r.getsize))(s)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "incorrect length")
+
+                /* Check if conversion buffer is large enough, resize if necessary. */
+                conv_buf_size = buf_size;
+                if(NULL == (conv_buf = H5FL_BLK_REALLOC(ref_seq, conv_buf, conv_buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                HDmemset(conv_buf, 0, conv_buf_size);
+
+                /* Read reference */
+                if((*(src->shared->u.atomic.u.r.read))(src->shared->u.atomic.u.r.f, dxpl_id, s, conv_buf, buf_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "can't read reference data")
+
+                /* Write reference to destination location */
+                if((*(dst->shared->u.atomic.u.r.write))(dst->shared->u.atomic.u.r.f, dxpl_id, d, conv_buf, b, buf_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_WRITEERROR, FAIL, "can't write reference data")
+
+                /* Advance pointers */
+                s += s_stride;
+                d += d_stride;
+                b += b_stride;
+            } /* end for */
+        } /* end case */
+            break;
+
+        default:    /* Some other command we don't know about yet.*/
+            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command")
+    }   /* end switch */
+
+done:
+    /* Release the conversion buffer (always allocated, except on errors) */
+    if(conv_buf)
+        conv_buf = H5FL_BLK_FREE(ref_seq, conv_buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T__conv_ref() */
 
 
 /*-------------------------------------------------------------------------

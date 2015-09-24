@@ -164,6 +164,13 @@ struct H5T_path_t {
     H5T_cdata_t	cdata;			/*data for this function	     */
 };
 
+/* Reference function pointers */
+typedef size_t (*H5T_ref_getsizefunc_t)(const void *_ref);
+typedef herr_t (*H5T_ref_readfunc_t)(H5F_t *f, hid_t dxpl_id, void *_ref,
+        void *buf, size_t buf_size);
+typedef herr_t (*H5T_ref_writefunc_t)(H5F_t *f, hid_t dxpl_id, void *_ref,
+        void *buf, void *_bg, size_t buf_size);
+
 typedef struct H5T_atomic_t {
     H5T_order_t		order;	/*byte order				     */
     size_t		prec;	/*precision in bits			     */
@@ -192,8 +199,12 @@ typedef struct H5T_atomic_t {
 	} s;			/*string types				     */
 
 	struct {
-	    H5R_type_t	rtype;	/*type of reference stored		     */
-            H5T_loc_t   loc;    /* Location of data in buffer		     */
+	    H5R_type_t  rtype;  /*type of reference stored                   */
+	    H5T_loc_t   loc;    /*location of data in buffer                 */
+	    H5F_t      *f;      /*file ID (if data is on disk)               */
+	    H5T_ref_getsizefunc_t getsize; /*function to get reference size (bytes)  */
+	    H5T_ref_readfunc_t read;       /*function to read reference into buffer  */
+	    H5T_ref_writefunc_t write;     /*function to write reference from buffer */
 	} r;			/*reference types			     */
     } u;
 } H5T_atomic_t;
@@ -356,6 +367,7 @@ H5_DLLVAR size_t H5T_POINTER_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_HVL_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_HOBJREF_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_HDSETREGREF_COMP_ALIGN_g;
+H5_DLLVAR size_t H5T_HREGREF_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_HATTRREF_COMP_ALIGN_g;
 
 /*
@@ -471,6 +483,10 @@ H5_DLL herr_t H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                             size_t bkg_stride, void *buf, void *bkg,
                             hid_t dset_xfer_plist);
 H5_DLL herr_t H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, size_t buf_stride,
+                            size_t bkg_stride, void *buf, void *bkg,
+                            hid_t dset_xfer_plist);
+H5_DLL herr_t H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    size_t nelmts, size_t buf_stride,
                             size_t bkg_stride, void *buf, void *bkg,
                             hid_t dset_xfer_plist);
@@ -1301,6 +1317,9 @@ H5_DLL htri_t H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 H5_DLL H5T_t *H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */]);
 H5_DLL int    H5T__get_array_ndims(const H5T_t *dt);
 H5_DLL int    H5T__get_array_dims(const H5T_t *dt, hsize_t dims[]);
+
+/* Reference functions */
+H5_DLL htri_t H5T__ref_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 
 /* Compound functions */
 H5_DLL herr_t H5T__insert(H5T_t *parent, const char *name, size_t offset,
