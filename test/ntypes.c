@@ -2148,7 +2148,7 @@ test_refer_dtype(hid_t file)
         TEST_ERROR;
 
     /* Create reference to named datatype */
-    if(H5Rcreate(wbuf, file, "/Group1/Datatype1", H5R_OBJECT, (hid_t)-1) < 0)
+    if(H5Rcreate(wbuf, H5R_OBJECT, file, "/Group1/Datatype1") < 0)
         TEST_ERROR;
     if(H5Rget_obj_type2(dataset, H5R_OBJECT, wbuf, &obj_type) < 0)
         TEST_ERROR;
@@ -2329,7 +2329,7 @@ test_refer_dtype2(hid_t file)
         TEST_ERROR;
 
     /* Store first dataset region */
-    if(H5Rcreate(&wbuf, file, "/Dataset2", H5R_DATASET_REGION, sid2) < 0)
+    if(H5Rcreate(&wbuf, H5R_DATASET_REGION, file, "/Dataset2", sid2) < 0)
         TEST_ERROR;
     if(H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &wbuf, &obj_type) < 0)
         TEST_ERROR;

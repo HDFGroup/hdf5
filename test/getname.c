@@ -2542,30 +2542,30 @@ test_obj_ref(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create reference to dataset */
-    if(H5Rcreate(&wbuf[0], fid1, "/Dataset3", H5R_OBJECT, (hid_t)-1) < 0)
+    if(H5Rcreate(&wbuf[0], H5R_OBJECT, fid1, "/Dataset3") < 0)
         FAIL_STACK_ERROR
 
     /* Create reference to dataset */
-    if(H5Rcreate(&wbuf[1], fid1, "/Group1/Dataset2", H5R_OBJECT, (hid_t)-1) < 0)
+    if(H5Rcreate(&wbuf[1], H5R_OBJECT, fid1, "/Group1/Dataset2") < 0)
         FAIL_STACK_ERROR
 
     /* Create reference to group */
-    if(H5Rcreate(&wbuf[2], fid1, "/Group1", H5R_OBJECT, (hid_t)-1) < 0)
+    if(H5Rcreate(&wbuf[2], H5R_OBJECT, fid1, "/Group1") < 0)
         FAIL_STACK_ERROR
 
     /* Create reference to named datatype */
-    if(H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, (hid_t)-1) < 0)
+    if(H5Rcreate(&wbuf[3], H5R_OBJECT, fid1, "/Group1/Datatype1") < 0)
         FAIL_STACK_ERROR
 
-    if(H5Rcreate(&wbuf[4], fid1, "/Group1/Group2/Dataset4", H5R_OBJECT, (hid_t)-1) < 0)
+    if(H5Rcreate(&wbuf[4], H5R_OBJECT, fid1, "/Group1/Group2/Dataset4") < 0)
         FAIL_STACK_ERROR
-    if(H5Rcreate(&wbuf[5], fid1, "/Group1/Group2", H5R_OBJECT, (hid_t)-1) < 0)
+    if(H5Rcreate(&wbuf[5], H5R_OBJECT, fid1, "/Group1/Group2") < 0)
         FAIL_STACK_ERROR
-    if(H5Rcreate(&wbuf[6], fid1, "/Group1/Group2/Link/Dataset5", H5R_OBJECT, (hid_t)-1) < 0)
+    if(H5Rcreate(&wbuf[6], H5R_OBJECT, fid1, "/Group1/Group2/Link/Dataset5") < 0)
         FAIL_STACK_ERROR
 
     /* Create reference to root group */
-    if(H5Rcreate(&wbuf[7], fid1, "/", H5R_OBJECT, (hid_t)-1) < 0)
+    if(H5Rcreate(&wbuf[7], H5R_OBJECT, fid1, "/") < 0)
         FAIL_STACK_ERROR
 
     /* Write selection to disk */
@@ -2784,7 +2784,7 @@ test_reg_ref(hid_t fapl)
     count[1] = 3;
     if(H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
 	TEST_ERROR
-    if(H5Rcreate(&ref[0], file_id, REFREG_DSETNAMEV, H5R_DATASET_REGION, space_id) < 0)
+    if(H5Rcreate(&ref[0], H5R_DATASET_REGION, file_id, REFREG_DSETNAMEV, space_id) < 0)
 	TEST_ERROR
 
     /* Create a reference to elements selection */
@@ -2792,7 +2792,7 @@ test_reg_ref(hid_t fapl)
 	TEST_ERROR
     if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord) < 0)
 	TEST_ERROR
-    if(H5Rcreate(&ref[1], file_id, REFREG_DSETNAMEV, H5R_DATASET_REGION, space_id) < 0)
+    if(H5Rcreate(&ref[1], H5R_DATASET_REGION, file_id, REFREG_DSETNAMEV, space_id) < 0)
 	TEST_ERROR
 
     /* Write dataset with the references */

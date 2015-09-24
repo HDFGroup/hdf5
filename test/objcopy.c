@@ -269,8 +269,8 @@ attach_ref_attr(hid_t file_id, hid_t loc_id)
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data2) < 0) TEST_ERROR
 
     /* create an attribute with two object references */
-    if(H5Rcreate(&ref[0], file_id, dsetname1, H5R_OBJECT, (hid_t)-1) < 0) TEST_ERROR
-    if(H5Rcreate(&ref[1], file_id, dsetname2, H5R_OBJECT, (hid_t)-1) < 0) TEST_ERROR
+    if(H5Rcreate(&ref[0], H5R_OBJECT, file_id, dsetname1) < 0) TEST_ERROR
+    if(H5Rcreate(&ref[1], H5R_OBJECT, file_id, dsetname2) < 0) TEST_ERROR
     if((aid = H5Acreate2(loc_id, "obj_ref_attr", H5T_STD_REF_OBJ, sid_ref, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Awrite(aid, H5T_STD_REF_OBJ, ref) < 0) TEST_ERROR
 
@@ -336,12 +336,12 @@ attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
 
     /* create reg_ref of block selection */
     if(H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0) TEST_ERROR
-    if(H5Rcreate(&ref[0], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
+    if(H5Rcreate(&ref[0], H5R_DATASET_REGION, file_id, dsetnamev, space_id) < 0) TEST_ERROR
 
     /* create reg_ref of point selection */
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
     if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord) < 0) TEST_ERROR
-    if(H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
+    if(H5Rcreate(&ref[1], H5R_DATASET_REGION, file_id, dsetnamev, space_id) < 0) TEST_ERROR
 
     /* create reg_ref attribute */
     if((aid = H5Acreate2(loc_id, "reg_ref_attr", H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -421,10 +421,10 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     count[0] = 2;
     count[1] = 3;
     if(H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0) TEST_ERROR
-    if(H5Rcreate(&ref[0], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
+    if(H5Rcreate(&ref[0], H5R_DATASET_REGION, file_id, dsetnamev, space_id) < 0) TEST_ERROR
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
     if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord) < 0) TEST_ERROR
-    if(H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
+    if(H5Rcreate(&ref[1], H5R_DATASET_REGION, file_id, dsetnamev, space_id) < 0) TEST_ERROR
     if(H5Dwrite(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref) < 0) TEST_ERROR
     if(H5Dclose(dsetr_id) < 0) TEST_ERROR
 
@@ -8041,11 +8041,11 @@ test_copy_null_ref(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
             sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create references */
-    if(H5Rcreate(&obj_buf[0], did1, ".", H5R_OBJECT, (hid_t)-1) < 0) TEST_ERROR
-    if(H5Rcreate(&obj_buf[1], did2, ".", H5R_OBJECT, (hid_t)-1) < 0) TEST_ERROR
-    if(H5Rcreate(&reg_buf[0], did1, ".", H5R_DATASET_REGION, sid) < 0)
+    if(H5Rcreate(&obj_buf[0], H5R_OBJECT, did1, ".") < 0) TEST_ERROR
+    if(H5Rcreate(&obj_buf[1], H5R_OBJECT, did2, ".") < 0) TEST_ERROR
+    if(H5Rcreate(&reg_buf[0], H5R_DATASET_REGION, did1, ".", sid) < 0)
         TEST_ERROR
-    if(H5Rcreate(&reg_buf[1], did2, ".", H5R_DATASET_REGION, sid) < 0)
+    if(H5Rcreate(&reg_buf[1], H5R_DATASET_REGION, did2, ".", sid) < 0)
         TEST_ERROR
 
     /* Write data into file */

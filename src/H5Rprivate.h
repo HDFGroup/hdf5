@@ -28,8 +28,7 @@
 /* Internal data structures */
 
 /* Private functions */
-H5_DLL herr_t H5R_create(void *ref, H5G_loc_t *loc, const char *name,
-        hid_t dxpl_id, H5R_type_t ref_type, ...);
+H5_DLL herr_t H5R_create(void *ref, H5R_type_t ref_type, ...);
 
 #endif  /* _H5Rprivate_H */
 

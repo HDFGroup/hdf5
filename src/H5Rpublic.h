@@ -64,7 +64,7 @@ extern "C" {
 #endif
 
 /* Functions in H5R.c */
-H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, ...);
+H5_DLL herr_t H5Rcreate(void *ref, H5R_type_t ref_type, ...);
 H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *ref);
 H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
 H5_DLL herr_t H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *_ref,
