@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 ###############################################################################################################
-# This script will build and run the examples from a compressed file
+# This script will build and run the examples from a folder
 # Execute from a command line:
-#     ctest -S HDF5_Examples.cmake,CTEST_SOURCE_NAME=HDF5Examples -C Release -V -O test.log
+#     ctest -S HDF5_Examples.cmake,OPTION=VALUE -C Release -V -O test.log
 ###############################################################################################################
 
 set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
@@ -70,7 +70,7 @@ endif(WIN32)
 # For any comments please contact cdashhelp@hdfgroup.org
 #
 ###############################################################################################################
- 
+
 #-----------------------------------------------------------------------------
 # MAC machines need special option
 #-----------------------------------------------------------------------------
@@ -81,7 +81,7 @@ if(APPLE)
   set(ENV{CC} "${XCODE_CC}")
   set(ENV{CXX} "${XCODE_CXX}")
   if(NOT NO_MAC_FORTRAN)
-    # Shared fortran is not supported, build static 
+    # Shared fortran is not supported, build static
     set(BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
   else(NOT NO_MAC_FORTRAN)
     set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
