@@ -819,6 +819,11 @@ if (HDF5_GENERATE_HEADERS)
   endif (PERL_FOUND)
 endif (HDF5_GENERATE_HEADERS)
 
+set (H5_PUBLIC_GENERATED_HEADERS
+    ${HDF5_SRC_DIR}/H5version.h
+    ${HDF5_SRC_DIR}/H5overflow.h
+)
+
 #-----------------------------------------------------------------------------
 # Setup the H5Detect utility which generates H5Tinit with platform
 # specific type checks inside
@@ -831,7 +836,7 @@ endif (MSVC OR MINGW)
 if (HDF5_GENERATE_HEADERS)
   add_dependencies(H5detect generate_precompiled)
 else (HDF5_GENERATE_HEADERS)
-  add_dependencies(H5detect "${HDF5_SRC_DIR}/H5version.h;${HDF5_SRC_DIR}/H5overflow.h")
+  add_dependencies(H5detect "${H5_PUBLIC_GENERATED_HEADERS}")
 endif (HDF5_GENERATE_HEADERS)
 
 set (CMD $<TARGET_FILE:H5detect>)
@@ -850,7 +855,7 @@ endif (MSVC OR MINGW)
 if (HDF5_GENERATE_HEADERS)
   add_dependencies(H5detect generate_precompiled)
 else (HDF5_GENERATE_HEADERS)
-  add_dependencies(H5make_libsettings "${HDF5_SRC_DIR}/H5version.h;${HDF5_SRC_DIR}/H5overflow.h")
+  add_dependencies(H5make_libsettings "${H5_PUBLIC_GENERATED_HEADERS}")
 endif (HDF5_GENERATE_HEADERS)
 
 set (CMD $<TARGET_FILE:H5make_libsettings>)
@@ -899,7 +904,7 @@ endif (HDF5_ENABLE_DEBUG_APIS)
 set (install_targets ${HDF5_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
-  add_library (${HDF5_LIBSH_TARGET} SHARED ${common_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS})
+  add_library (${HDF5_LIBSH_TARGET} SHARED ${common_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
   TARGET_C_PROPERTIES (${HDF5_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_LIBSH_TARGET} ${LINK_SHARED_LIBS})
   if (NOT WIN32)
@@ -944,6 +949,7 @@ if (NOT HDF5_INSTALL_NO_DEVELOPMENT)
   install (
       FILES
           ${H5_PUBLIC_HEADERS}
+          ${H5_PUBLIC_GENERATED_HEADERS}
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
