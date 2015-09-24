@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 ###############################################################################################################
-# This script will build and run the examples from a compressed file
+# This script will build and run the examples from a folder
 # Execute from a command line:
-#     ctest -S HDF518_Examples.cmake,CTEST_SOURCE_NAME=HDF5Examples -C Release -VV -O test.log
+#     ctest -S HDF518_Examples.cmake,OPTION=VALUE -C Release -VV -O test.log
 ###############################################################################################################
 
 set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
@@ -14,7 +14,6 @@ set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 #CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF4Examples
 #STATICLIBRARIES - Default is YES
-#TAR_SOURCE - name of tarfile
 #NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac)
 if(DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
@@ -39,6 +38,8 @@ endif()
 if(NOT DEFINED STATICLIBRARIES)
     set(STATICLIBRARIES "YES")
 endif()
+
+#TAR_SOURCE - name of tarfile
 #if(NOT DEFINED TAR_SOURCE)
 #  set(CTEST_USE_TAR_SOURCE "HDF5Examples-1.2.1-Source")
 #endif()
