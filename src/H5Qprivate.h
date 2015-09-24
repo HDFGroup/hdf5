@@ -36,43 +36,43 @@
 /****************************/
 
 /* Data element */
-struct H5Q_data_elem {
+typedef struct H5Q_data_elem_t {
     H5T_t *type; /* type */
     size_t type_size; /* type size */
     void  *value; /* value */
-};
+} H5Q_data_elem_t;
 
 /* Attribute name */
-struct H5Q_attr_name {
+typedef struct H5Q_attr_name_t {
     char *name; /* name */
-};
+} H5Q_attr_name_t;
 
 /* Link name */
-struct H5Q_link_name {
+typedef struct H5Q_link_name_t {
     char *name; /* name */
-};
+} H5Q_link_name_t;
 
 /* Query */
 typedef struct H5Q_t H5Q_t;
 
 /* Combine query */
-struct H5Q_combine {
+typedef struct H5Q_combine_t {
     H5Q_type_t type; /* type */
     H5Q_combine_op_t op; /* op */
     H5Q_t *l_query; /* left op query */
     H5Q_t *r_query; /* right op query */
-};
+} H5Q_combine_t;
 
 /* Select query */
-struct H5Q_select {
+typedef struct H5Q_select_t {
     H5Q_type_t type; /* type */
     H5Q_match_op_t match_op; /* match op */
     union {
-        struct H5Q_data_elem data_elem;
-        struct H5Q_attr_name attr_name;
-        struct H5Q_link_name link_name;
+        H5Q_data_elem_t data_elem;
+        H5Q_attr_name_t attr_name;
+        H5Q_link_name_t link_name;
     } elem;
-};
+} H5Q_select_t;
 
 /* Query */
 struct H5Q_t {
@@ -81,8 +81,8 @@ struct H5Q_t {
     unsigned ref_count; /* ref count */
     hbool_t is_combined;
     union {
-        struct H5Q_select select;
-        struct H5Q_combine combine;
+        H5Q_select_t select;
+        H5Q_combine_t combine;
     } query;
 };
 
