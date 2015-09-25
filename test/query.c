@@ -406,7 +406,7 @@ error:
 }
 
 static herr_t
-test_query_read_region(hid_t view)
+test_query_read_region(hid_t file, hid_t view)
 {
     hid_t refs = H5I_BADID, ref_type = H5I_BADID, ref_space = H5I_BADID;
     size_t n_refs, ref_size, ref_buf_size;
@@ -433,8 +433,8 @@ test_query_read_region(hid_t view)
     if (H5Tclose(ref_type) < 0) FAIL_STACK_ERROR;
     if (H5Dclose(refs) < 0) FAIL_STACK_ERROR;
 
-    if ((dset = H5Rdereference(view, H5P_DEFAULT, H5R_DATASET_REGION, ref_buf)) < 0) FAIL_STACK_ERROR;
-    if ((space = H5Rget_region(view, H5R_DATASET_REGION, ref_buf)) < 0) FAIL_STACK_ERROR;
+    if ((dset = H5Rdereference(file, H5P_DEFAULT, H5R_REGION, ref_buf)) < 0) FAIL_STACK_ERROR;
+    if ((space = H5Rget_region(file, H5R_REGION, ref_buf)) < 0) FAIL_STACK_ERROR;
     if ((type = H5Dget_type(dset)) < 0) FAIL_STACK_ERROR;
 
     HDfree(ref_buf);
@@ -507,7 +507,7 @@ test_query_apply_view(const char *filename, hid_t fapl)
     if (result & H5Q_REF_ATTR) FAIL_STACK_ERROR;
     if (result & H5Q_REF_OBJ) FAIL_STACK_ERROR;
     if (result & H5Q_REF_REG)
-        if (test_query_read_region(view) < 0) FAIL_STACK_ERROR;
+        if (test_query_read_region(file, view) < 0) FAIL_STACK_ERROR;
 
     printf("\n---\n...");
 
