@@ -100,6 +100,9 @@
 /* Define if library information should be embedded in the executables */
 #cmakedefine H5_HAVE_EMBEDDED_LIBINFO @H5_HAVE_EMBEDDED_LIBINFO@
 
+/* Define to 1 if you have the `fcntl' function. */
+#cmakedefine H5_HAVE_FCNTL @H5_HAVE_FCNTL@
+
 /* Define to 1 if you have the <features.h> header file. */
 #cmakedefine H5_HAVE_FEATURES_H @H5_HAVE_FEATURES_H@
 
