@@ -2251,14 +2251,15 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     /* Finish adding entry */
     virtual_layout.storage.u.virt.list_nused++;
 
+done:
     /* Set VDS layout information in property list */
+    /* (Even on faliure, so there's not a mangled layout struct in the list) */
     if(H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &virtual_layout) < 0) {
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
         if(old_list != virtual_layout.storage.u.virt.list)
             free_list = TRUE;
     } /* end if */
 
-done:
     /* Check if the entry has been partly allocated but not added to the
      * property list or not included in list_nused */
     if(ret_value < 0) {
