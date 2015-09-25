@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 #
 # Copyright by The HDF Group.                                              
 # All rights reserved.                                                     
@@ -60,7 +60,7 @@
 #
 # This script takes two potential options:
 #
-# -p, --production
+# -p
 #
 # When this is selected, the autotools versions are set to the paths
 # and versions used by The HDF Group to produce the released versions
@@ -70,7 +70,7 @@
 # to have recent versions of the autotools this option will probably
 # be removed.
 #
-# -v, --verbose
+# -v
 #
 # This emits some extra information, mainly tool versions.
 
@@ -89,33 +89,19 @@ verbose=false
 optspec=":hpv-"
 while getopts "$optspec" optchar; do
     case "${optchar}" in
-    -)
-        case "${OPTARG}" in
-            production)
-                echo "Setting production mode..."
-                echo
-                production=true
-                ;;
-            verbose)
-                echo "Setting verbosity: high"
-                echo
-                verbose=true
-                ;;
-            *)
-                if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
-                    echo "Unknown option --${OPTARG}" >&2
-                fi
-                ;;
-        esac;;
     h)
-        echo "usage: $0 [-p|--production]"
+        echo "usage: $0 [OPTIONS]"
+        echo
+        echo "      -h      Print this help message."
         echo
         echo "      -p      Used by THG to ensure that particular versions"
         echo "              of the autotools are used and hard-codes"
         echo "              autotools paths to THG machines. Not for"
         echo "              non-HDF-Group users!"
         echo
-        echo "  NOTE: Each autotool can be set via an environment variable."
+        echo "      -v      Show more verbose output."
+        echo
+        echo "  NOTE: Each tool can be set via an environment variable."
         echo "        These are documented inside this autogen.sh script."
         echo
         exit 0
