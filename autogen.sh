@@ -396,15 +396,37 @@ bin/make_overflow src/H5overflow.txt || exit 1
 # to install a later version of bison. See the OS X note at the top
 # of this script.
 echo
-echo "Running flex/bison:"
-cd hl/src
+echo "Generating H5LT parser code (requires yacc/bison):"
 echo "Generate hl/src/H5LTparse.c from hl/src/H5LTparse.y"
+# HDF5_BISON is set via the environment or 'which bison', above
+if test -z ${HDF5_BISON}; then
+    echo
+    echo "*************************"
+    echo " ERROR - bison not found"
+    echo "*************************"
+    echo "bison is required to generate parser code in H5LT"
+    echo
+    exit 127
+fi
+cd hl/src
 if [ "$verbose" = true ] ; then
     ${HDF5_BISON} --version
 fi
 ${HDF5_BISON} -pH5LTyy -o H5LTparse.c -d H5LTparse.y
 
+echo
+echo "Generating H5LT lexer code (requires lex/flex):"
 echo "Generate hl/src/H5LTanalyze.c from hl/src/H5LTanalyze.l"
+# HDF5_FLEX is set via the environment or 'which flex', above
+if test -z ${HDF5_FLEX}; then
+    echo
+    echo "************************"
+    echo " ERROR - flex not found"
+    echo "************************"
+    echo "flex is required to generate lexer code in H5LT"
+    echo
+    exit 127
+fi
 if [ "$verbose" = true ] ; then
     ${HDF5_FLEX} --version
 fi
