@@ -104,8 +104,6 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
 	      "Symbol table leaf node 1/2 rank:", f->shared->sblock->sym_leaf_k);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Symbol table internal node 1/2 rank:", f->shared->sblock->btree_k[H5B_SNODE_ID]);
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Indexed storage internal node 1/2 rank:", f->shared->sblock->btree_k[H5B_CHUNK_ID]);
     HDfprintf(stream, "%*s%-*s 0x%02x\n", indent, "", fwidth,
 	      "File status flags:", (unsigned)(f->shared->sblock->status_flags));
     HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,

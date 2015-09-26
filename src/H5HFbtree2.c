@@ -70,6 +70,7 @@ typedef struct H5HF_huge_bt2_ctx_t {
 
 static void *H5HF_huge_bt2_crt_context(void *udata);
 static herr_t H5HF_huge_bt2_dst_context(void *ctx);
+static void *H5HF_huge_bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 static herr_t H5HF_huge_bt2_indir_store(void *native, const void *udata);
 static herr_t H5HF_huge_bt2_indir_compare(const void *rec1, const void *rec2);
@@ -77,7 +78,8 @@ static herr_t H5HF_huge_bt2_indir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF_huge_bt2_indir_decode(const uint8_t *raw, void *native,
     void *ctx);
-static herr_t H5HF_huge_bt2_indir_debug(FILE *stream, int indent, int fwidth, const void *record);
+static herr_t H5HF_huge_bt2_indir_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
+    int indent, int fwidth, const void *record, const void *_udata);
 
 static herr_t H5HF_huge_bt2_filt_indir_store(void *native, const void *udata);
 static herr_t H5HF_huge_bt2_filt_indir_compare(const void *rec1, const void *rec2);
@@ -85,7 +87,8 @@ static herr_t H5HF_huge_bt2_filt_indir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF_huge_bt2_filt_indir_decode(const uint8_t *raw, void *native,
     void *ctx);
-static herr_t H5HF_huge_bt2_filt_indir_debug(FILE *stream, int indent, int fwidth, const void *record);
+static herr_t H5HF_huge_bt2_filt_indir_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
+    int indent, int fwidth, const void *record, const void *_udata);
 
 static herr_t H5HF_huge_bt2_dir_store(void *native, const void *udata);
 static herr_t H5HF_huge_bt2_dir_compare(const void *rec1, const void *rec2);
@@ -93,7 +96,8 @@ static herr_t H5HF_huge_bt2_dir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF_huge_bt2_dir_decode(const uint8_t *raw, void *native,
     void *ctx);
-static herr_t H5HF_huge_bt2_dir_debug(FILE *stream, int indent, int fwidth, const void *record);
+static herr_t H5HF_huge_bt2_dir_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
+    int indent, int fwidth, const void *record, const void *_udata);
 
 static herr_t H5HF_huge_bt2_filt_dir_store(void *native, const void *udata);
 static herr_t H5HF_huge_bt2_filt_dir_compare(const void *rec1, const void *rec2);
@@ -101,7 +105,8 @@ static herr_t H5HF_huge_bt2_filt_dir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF_huge_bt2_filt_dir_decode(const uint8_t *raw, void *native,
     void *ctx);
-static herr_t H5HF_huge_bt2_filt_dir_debug(FILE *stream, int indent, int fwidth, const void *record);
+static herr_t H5HF_huge_bt2_filt_dir_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
+    int indent, int fwidth, const void *record, const void *_udata);
 
 /*********************/
 /* Package Variables */
@@ -117,7 +122,9 @@ const H5B2_class_t H5HF_HUGE_BT2_INDIR[1]={{ /* B-tree class information */
     H5HF_huge_bt2_indir_compare,            /* Record comparison callback */
     H5HF_huge_bt2_indir_encode,             /* Record encoding callback */
     H5HF_huge_bt2_indir_decode,             /* Record decoding callback */
-    H5HF_huge_bt2_indir_debug               /* Record debugging callback */
+    H5HF_huge_bt2_indir_debug,              /* Record debugging callback */
+    H5HF_huge_bt2_crt_dbg_context,          /* Create debugging context */
+    H5HF_huge_bt2_dst_context               /* Destroy debugging context */
 }};
 
 /* v2 B-tree class for indirectly accessed, filtered 'huge' objects */
@@ -131,7 +138,9 @@ const H5B2_class_t H5HF_HUGE_BT2_FILT_INDIR[1]={{ /* B-tree class information */
     H5HF_huge_bt2_filt_indir_compare,       /* Record comparison callback */
     H5HF_huge_bt2_filt_indir_encode,        /* Record encoding callback */
     H5HF_huge_bt2_filt_indir_decode,        /* Record decoding callback */
-    H5HF_huge_bt2_filt_indir_debug          /* Record debugging callback */
+    H5HF_huge_bt2_filt_indir_debug,         /* Record debugging callback */
+    H5HF_huge_bt2_crt_dbg_context,          /* Create debugging context */
+    H5HF_huge_bt2_dst_context               /* Destroy debugging context */
 }};
 
 /* v2 B-tree class for directly accessed 'huge' objects */
@@ -145,7 +154,9 @@ const H5B2_class_t H5HF_HUGE_BT2_DIR[1]={{  /* B-tree class information */
     H5HF_huge_bt2_dir_compare,              /* Record comparison callback */
     H5HF_huge_bt2_dir_encode,               /* Record encoding callback */
     H5HF_huge_bt2_dir_decode,               /* Record decoding callback */
-    H5HF_huge_bt2_dir_debug                 /* Record debugging callback */
+    H5HF_huge_bt2_dir_debug,                /* Record debugging callback */
+    H5HF_huge_bt2_crt_dbg_context,          /* Create debugging context */
+    H5HF_huge_bt2_dst_context               /* Destroy debugging context */
 }};
 
 /* v2 B-tree class for directly accessed, filtered 'huge' objects */
@@ -159,7 +170,9 @@ const H5B2_class_t H5HF_HUGE_BT2_FILT_DIR[1]={{ /* B-tree class information */
     H5HF_huge_bt2_filt_dir_compare,         /* Record comparison callback */
     H5HF_huge_bt2_filt_dir_encode,          /* Record encoding callback */
     H5HF_huge_bt2_filt_dir_decode,          /* Record decoding callback */
-    H5HF_huge_bt2_filt_dir_debug            /* Record debugging callback */
+    H5HF_huge_bt2_filt_dir_debug,           /* Record debugging callback */
+    H5HF_huge_bt2_crt_dbg_context,          /* Create debugging context */
+    H5HF_huge_bt2_dst_context               /* Destroy debugging context */
 }};
 
 /*****************************/
@@ -249,6 +262,46 @@ H5HF_huge_bt2_dst_context(void *_ctx)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_huge_bt2_dst_context() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_huge_bt2_crt_dbg_context
+ *
+ * Purpose:	Create context for debugging callback
+ *
+ * Return:	Success:	non-NULL
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, December 1, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5HF_huge_bt2_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr)
+{
+    H5HF_huge_bt2_ctx_t *ctx;   /* Callback context structure */
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(f);
+
+    /* Allocate callback context */
+    if(NULL == (ctx = H5FL_MALLOC(H5HF_huge_bt2_ctx_t)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate callback context")
+
+    /* Determine the size of addresses & lengths in the file */
+    ctx->sizeof_addr = H5F_SIZEOF_ADDR(f);
+    ctx->sizeof_size = H5F_SIZEOF_SIZE(f);
+
+    /* Set return value */
+    ret_value = ctx;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5HF_huge_bt2_crt_dbg_context() */
 
 
 /*-------------------------------------------------------------------------
@@ -452,7 +505,9 @@ H5HF_huge_bt2_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_huge_bt2_indir_debug(FILE *stream, int indent, int fwidth, const void *_nrecord)
+H5HF_huge_bt2_indir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    int indent, int fwidth, const void *_nrecord,
+    const void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_huge_bt2_indir_rec_t *nrecord = (const H5HF_huge_bt2_indir_rec_t *)_nrecord;
 
@@ -672,7 +727,9 @@ H5HF_huge_bt2_filt_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_huge_bt2_filt_indir_debug(FILE *stream, int indent, int fwidth, const void *_nrecord)
+H5HF_huge_bt2_filt_indir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    int indent, int fwidth, const void *_nrecord,
+    const void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_huge_bt2_filt_indir_rec_t *nrecord = (const H5HF_huge_bt2_filt_indir_rec_t *)_nrecord;
 
@@ -863,7 +920,9 @@ H5HF_huge_bt2_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_huge_bt2_dir_debug(FILE *stream, int indent, int fwidth, const void *_nrecord)
+H5HF_huge_bt2_dir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    int indent, int fwidth, const void *_nrecord,
+    const void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_huge_bt2_dir_rec_t *nrecord = (const H5HF_huge_bt2_dir_rec_t *)_nrecord;
 
@@ -1090,7 +1149,8 @@ H5HF_huge_bt2_filt_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_huge_bt2_filt_dir_debug(FILE *stream, int indent, int fwidth, const void *_nrecord)
+H5HF_huge_bt2_filt_dir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    int indent, int fwidth, const void *_nrecord, const void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_huge_bt2_filt_dir_rec_t *nrecord = (const H5HF_huge_bt2_filt_dir_rec_t *)_nrecord;
 

@@ -67,7 +67,9 @@ static herr_t H5B2__test_store(void *nrecord, const void *udata);
 static herr_t H5B2__test_compare(const void *rec1, const void *rec2);
 static herr_t H5B2__test_encode(uint8_t *raw, const void *nrecord, void *ctx);
 static herr_t H5B2__test_decode(const uint8_t *raw, void *nrecord, void *ctx);
-static herr_t H5B2__test_debug(FILE *stream, int indent, int fwidth, const void *record);
+static herr_t H5B2__test_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
+    int indent, int fwidth, const void *record, const void *_udata);
+static void *H5B2__test_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 
 /*********************/
@@ -84,7 +86,9 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2__test_compare,          /* Record comparison callback */
     H5B2__test_encode,           /* Record encoding callback */
     H5B2__test_decode,           /* Record decoding callback */
-    H5B2__test_debug             /* Record debugging callback */
+    H5B2__test_debug,            /* Record debugging callback */
+    H5B2__test_crt_dbg_context,  /* Create debugging context */
+    H5B2__test_dst_context       /* Destroy debugging context */
 }};
 
 
@@ -291,17 +295,58 @@ H5B2__test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__test_debug(FILE *stream, int indent, int fwidth, const void *record)
+H5B2__test_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    int indent, int fwidth, const void *record,
+    const void H5_ATTR_UNUSED *_udata)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(record);
+    HDassert (record);
 
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Record:",
         *(const hsize_t *)record);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__test_debug() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2__test_crt_dbg_context
+ *
+ * Purpose:	Create context for debugging callback
+ *
+ * Return:	Success:	non-NULL
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, December 1, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5B2__test_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr)
+{
+    H5B2_test_ctx_t *ctx;       /* Callback context structure */
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(f);
+
+    /* Allocate callback context */
+    if(NULL == (ctx = H5FL_MALLOC(H5B2_test_ctx_t)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate callback context")
+
+    /* Determine the size of addresses & lengths in the file */
+    ctx->sizeof_size = H5F_SIZEOF_SIZE(f);
+
+    /* Set return value */
+    ret_value = ctx;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2__test_crt_dbg_context() */
 
 
 /*-------------------------------------------------------------------------
