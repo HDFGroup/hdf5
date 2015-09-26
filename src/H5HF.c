@@ -451,13 +451,75 @@ H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *_id, size_t *obj_len_p)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'tiny' object's length")
     } /* end if */
     else {
-        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_get_obj_len() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_get_obj_off
+ *
+ * Purpose:	Get the offset of an entry in a fractal heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug 20 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_get_obj_off(H5HF_t *fh, hid_t dxpl_id, const void *_id, hsize_t *obj_off_p)
+{
+    const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
+    uint8_t id_flags;                   /* Heap ID flag bits */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fh);
+    HDassert(id);
+    HDassert(obj_off_p);
+
+    /* Get the ID flags */
+    id_flags = *id;
+
+    /* Check for correct heap ID version */
+    if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+
+    /* Set the shared heap header's file context for this operation */
+    fh->hdr->f = fh->f;
+
+    /* Check type of object in heap */
+    if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
+        H5HF__man_get_obj_off(fh->hdr, id, obj_off_p);
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
+        /* Huge objects are located directly in the file */
+        if(H5HF__huge_get_obj_off(fh->hdr, dxpl_id, id, obj_off_p) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'huge' object's offset")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
+        /* Tiny objects are not stored in the heap */
+        *obj_off_p = (hsize_t)0;
+    } /* end if */
+    else {
+HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_get_obj_off() */
 
 
 /*-------------------------------------------------------------------------

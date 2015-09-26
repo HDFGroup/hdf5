@@ -83,8 +83,7 @@ static herr_t H5G_dense_btree2_corder_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5G_dense_btree2_corder_decode(const uint8_t *raw, void *native,
     void *ctx);
-static herr_t H5G_dense_btree2_corder_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
-    int indent, int fwidth, const void *record, const void *_udata);
+static herr_t H5G_dense_btree2_corder_debug(FILE *stream, int indent, int fwidth, const void *record);
 
 /* v2 B-tree driver callbacks for 'name' index */
 static herr_t H5G_dense_btree2_name_store(void *native, const void *udata);
@@ -93,8 +92,7 @@ static herr_t H5G_dense_btree2_name_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5G_dense_btree2_name_decode(const uint8_t *raw, void *native,
     void *ctx);
-static herr_t H5G_dense_btree2_name_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
-    int indent, int fwidth, const void *record, const void *_udata);
+static herr_t H5G_dense_btree2_name_debug(FILE *stream, int indent, int fwidth, const void *record);
 
 /* Fractal heap function callbacks */
 static herr_t H5G_dense_fh_name_cmp(const void *obj, size_t obj_len, void *op_data);
@@ -114,9 +112,7 @@ const H5B2_class_t H5G_BT2_NAME[1]={{   /* B-tree class information */
     H5G_dense_btree2_name_compare,      /* Record comparison callback */
     H5G_dense_btree2_name_encode,       /* Record encoding callback */
     H5G_dense_btree2_name_decode,       /* Record decoding callback */
-    H5G_dense_btree2_name_debug,        /* Record debugging callback */
-    NULL,                               /* Create debugging context */
-    NULL                                /* Destroy debugging context */
+    H5G_dense_btree2_name_debug         /* Record debugging callback */
 }};
 
 /* v2 B-tree class for indexing 'creation order' field of links */
@@ -130,9 +126,7 @@ const H5B2_class_t H5G_BT2_CORDER[1]={{ /* B-tree class information */
     H5G_dense_btree2_corder_compare,    /* Record comparison callback */
     H5G_dense_btree2_corder_encode,     /* Record encoding callback */
     H5G_dense_btree2_corder_decode,     /* Record decoding callback */
-    H5G_dense_btree2_corder_debug,      /* Record debugging callback */
-    NULL,                               /* Create debugging context */
-    NULL                                /* Destroy debugging context */
+    H5G_dense_btree2_corder_debug       /* Record debugging callback */
 }};
 
 /*****************************/
@@ -362,9 +356,7 @@ H5G_dense_btree2_name_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR_UN
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_dense_btree2_name_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    int indent, int fwidth, const void *_nrecord,
-    const void H5_ATTR_UNUSED *_udata)
+H5G_dense_btree2_name_debug(FILE *stream, int indent, int fwidth, const void *_nrecord)
 {
     const H5G_dense_bt2_name_rec_t *nrecord = (const H5G_dense_bt2_name_rec_t *)_nrecord;
     unsigned u;                 /* Local index variable */
@@ -528,9 +520,7 @@ H5G_dense_btree2_corder_decode(const uint8_t *raw, void *_nrecord, void H5_ATTR_
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_dense_btree2_corder_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    int indent, int fwidth, const void *_nrecord,
-    const void H5_ATTR_UNUSED *_udata)
+H5G_dense_btree2_corder_debug(FILE *stream, int indent, int fwidth, const void *_nrecord)
 {
     const H5G_dense_bt2_corder_rec_t *nrecord = (const H5G_dense_bt2_corder_rec_t *)_nrecord;
     unsigned u;                 /* Local index variable */
