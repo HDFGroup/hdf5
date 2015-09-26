@@ -1578,11 +1578,12 @@ done:
 static herr_t
 H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
 {
+    H5F_t       *f = NULL;      /* Fake file structure*/
+    unsigned char *pp = (*p);   /* Local pointer for decoding */
     size_t      extent_size;    /* Size of serialized dataspace extent */
     hssize_t    sselect_size;   /* Signed size of serialized dataspace selection */
     size_t      select_size;    /* Size of serialized dataspace selection */
-    H5F_t       *f = NULL;      /* Fake file structure*/
-    herr_t      ret_value = SUCCEED;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1601,27 +1602,28 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
 
     /* Verify the size of buffer.  If it's not big enough, simply return the
      * right size without filling the buffer. */
-    if(!*p || *nalloc < (extent_size + select_size + 1 + 1 + 1 + 4))
+    if(!pp || *nalloc < (extent_size + select_size + 1 + 1 + 1 + 4))
         *nalloc = extent_size + select_size + 1 + 1 + 1 + 4;
     else {
         /* Encode the type of the information */
-        *(*p)++ = H5O_SDSPACE_ID;
+        *pp++ = H5O_SDSPACE_ID;
 
         /* Encode the version of the dataspace information */
-        *(*p)++ = H5S_ENCODE_VERSION;
+        *pp++ = H5S_ENCODE_VERSION;
 
         /* Encode the "size of size" information */
-        *(*p)++ = (unsigned char)H5F_SIZEOF_SIZE(f);
+        *pp++ = (unsigned char)H5F_SIZEOF_SIZE(f);
 
         /* Encode size of extent information. Pointer is actually moved in this macro. */
-        UINT32ENCODE(*p, extent_size);
+        UINT32ENCODE(pp, extent_size);
 
         /* Encode the extent part of dataspace */
-        if(H5O_msg_encode(f, H5O_SDSPACE_ID, TRUE, *p, obj) < 0)
+        if(H5O_msg_encode(f, H5O_SDSPACE_ID, TRUE, pp, obj) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode extent space")
-        *p += extent_size;
+        pp += extent_size;
 
         /* Encode the selection part of dataspace.  */
+        *p = pp;
         if(H5S_SELECT_SERIALIZE(obj, p) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode select space")
     } /* end else */
@@ -1694,38 +1696,39 @@ done:
 static H5S_t*
 H5S_decode(const unsigned char **p)
 {
-    H5S_t       *ds;
-    H5S_extent_t *extent;
-    size_t      extent_size;            /* size of the extent message*/
     H5F_t       *f = NULL;              /* Fake file structure*/
+    H5S_t       *ds;                    /* Decoded dataspace */
+    H5S_extent_t *extent;               /* Entent of decoded dataspace */
+    const unsigned char *pp = (*p);     /* Local pointer for decoding */
+    size_t      extent_size;            /* size of the extent message*/
     uint8_t     sizeof_size;            /* 'Size of sizes' for file */
     H5S_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Decode the type of the information */
-    if(*(*p)++ != H5O_SDSPACE_ID)
+    if(*pp++ != H5O_SDSPACE_ID)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_BADMESG, NULL, "not an encoded dataspace")
 
     /* Decode the version of the dataspace information */
-    if(*(*p)++ != H5S_ENCODE_VERSION)
+    if(*pp++ != H5S_ENCODE_VERSION)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_VERSION, NULL, "unknown version of encoded dataspace")
 
     /* Decode the "size of size" information */
-    sizeof_size = *(*p)++;
+    sizeof_size = *pp++;
 
     /* Allocate "fake" file structure */
     if(NULL == (f = H5F_fake_alloc(sizeof_size)))
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, NULL, "can't allocate fake file struct")
 
     /* Decode size of extent information */
-    UINT32DECODE(*p, extent_size);
+    UINT32DECODE(pp, extent_size);
 
     /* Decode the extent part of dataspace */
     /* (pass mostly bogus file pointer and bogus DXPL) */
-    if((extent = (H5S_extent_t *)H5O_msg_decode(f, H5P_DEFAULT, NULL, H5O_SDSPACE_ID, *p))==NULL)
+    if((extent = (H5S_extent_t *)H5O_msg_decode(f, H5P_DEFAULT, NULL, H5O_SDSPACE_ID, pp))==NULL)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object")
-    *p += extent_size;
+    pp += extent_size;
 
     /* Copy the extent into dataspace structure */
     if((ds = H5FL_CALLOC(H5S_t))==NULL)
@@ -1741,6 +1744,7 @@ H5S_decode(const unsigned char **p)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     /* Decode the select part of dataspace.  I believe this part always exists. */
+    *p = pp;
     if(H5S_SELECT_DESERIALIZE(&ds, p) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode space selection")
 
