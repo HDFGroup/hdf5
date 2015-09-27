@@ -527,7 +527,7 @@ H5S_none_serialize(const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_none_deserialize(H5S_t *space, const uint8_t H5_ATTR_UNUSED **p)
+H5S_none_deserialize(H5S_t *space, const uint8_t **p)
 {
     herr_t ret_value = SUCCEED;  /* return value */
 
