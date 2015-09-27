@@ -541,6 +541,9 @@ H5S_none_deserialize(H5S_t *space, const uint8_t H5_ATTR_UNUSED **p)
     if(H5S_select_none(space) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
+    /* Advance decoding pointer */
+    (*p) += 16;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_none_deserialize() */
