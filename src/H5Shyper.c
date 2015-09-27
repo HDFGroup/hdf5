@@ -2021,7 +2021,7 @@ H5S_hyper_serialize_helper(const H5S_hyper_span_info_t *spans,
 
             /* Recurse down to the next dimension */
             *p = pp;
-            H5S_hyper_serialize_helper(curr->down, start, end, rank = 1, p);
+            H5S_hyper_serialize_helper(curr->down, start, end, rank + 1, p);
         } /* end if */
         else {
             /* Encode all the previous dimensions starting & ending points */
