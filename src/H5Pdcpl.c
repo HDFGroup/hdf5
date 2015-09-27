@@ -2133,6 +2133,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     H5S_t *src_space;               /* Source dataset space selection */
     H5O_storage_virtual_ent_t *old_list = NULL; /* List pointer previously on property list */
     H5O_storage_virtual_ent_t *ent = NULL; /* Convenience pointer to new VDS entry */
+    hbool_t retrieved_layout = FALSE;   /* Whether the layout has been retrieved */
     hbool_t adding_entry = FALSE;   /* Whether we are in the middle of adding an entry */
     hbool_t free_list = FALSE;      /* Whether to free the list of virtual entries */
     herr_t ret_value = SUCCEED;     /* Return value */
@@ -2171,6 +2172,7 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     /* Get the current layout */
     if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &virtual_layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get layout")
+    retrieved_layout = TRUE;
 
     /* If the layout was not already virtual, Start with default virtual layout.
      * Otherwise, add the mapping to the current list. */
@@ -2254,10 +2256,12 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
 done:
     /* Set VDS layout information in property list */
     /* (Even on faliure, so there's not a mangled layout struct in the list) */
-    if(H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &virtual_layout) < 0) {
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
-        if(old_list != virtual_layout.storage.u.virt.list)
-            free_list = TRUE;
+    if(retrieved_layout) {
+        if(H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &virtual_layout) < 0) {
+            HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
+            if(old_list != virtual_layout.storage.u.virt.list)
+                free_list = TRUE;
+        } /* end if */
     } /* end if */
 
     /* Check if the entry has been partly allocated but not added to the
