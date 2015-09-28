@@ -426,6 +426,7 @@ ${HDF5_FLEX} --nounistd -PH5LTyy -o H5LTanalyze.c H5LTanalyze.l
 # I propose to not use flex to generate this function, but for now I am 
 # adding a perl command to find and replace this function declaration in
 # H5LTparse.c.
+perl -0777 -pi -e 's/int yyparse/hid_t yyparse/igs' H5LTparse.c
 perl -0777 -pi -e 's/int\nyyparse/hid_t\nyyparse/igs' H5LTparse.c
 perl -0777 -pi -e 's/int H5LTyyparse/hid_t H5LTyyparse/igs' H5LTparse.c
 
