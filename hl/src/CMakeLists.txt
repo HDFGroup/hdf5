@@ -28,14 +28,14 @@ if (HDF5_GENERATE_HEADERS)
         set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.h GENERATED)
 
         add_custom_command (
-            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.timestamp
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c.timestamp
             COMMAND "${CMAKE_COMMAND}"
                 -D "FILE_PARSE=H5LTparse.c"
                 -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
         add_custom_command (
-            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.timestamp
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c.timestamp
             COMMAND "${CMAKE_COMMAND}"
                 -D "FILE_ANALYZE=H5LTanalyze.c"
                 -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"

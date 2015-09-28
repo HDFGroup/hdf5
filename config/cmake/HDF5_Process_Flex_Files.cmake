@@ -47,8 +47,9 @@ if (FILE_PARSE)
     ")
     file (APPEND ${FILE_PARSE} "${TEST_STREAM}")
     message (STATUS "processing pragma in ${FILE_PARSE}")
-    EXECUTE_PROCESS (
-        COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${FILE_PARSE}.timestamp
+    execute_process (
+        COMMAND ${CMAKE_COMMAND} -E touch ${FILE_PARSE}.timestamp
+        DEPENDS "${FILE_PARSE}"
     )
 endif (FILE_PARSE)
 
@@ -82,7 +83,8 @@ if (FILE_ANALYZE)
     ")
     file (APPEND ${FILE_ANALYZE} "${TEST_STREAM}")
     message (STATUS "processing pragma in ${FILE_ANALYZE}")
-    EXECUTE_PROCESS (
-        COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/${FILE_ANALYZE}.timestamp
+    execute_process (
+        COMMAND ${CMAKE_COMMAND} -E touch ${FILE_ANALYZE}.timestamp
+        DEPENDS "${FILE_ANALYZE}"
     )
 endif (FILE_ANALYZE)
