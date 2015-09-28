@@ -12,6 +12,7 @@ if (FILE_PARSE)
   # adding a perl command to find and replace this function declaration in
   # H5LTparse.c.
     file (READ ${FILE_PARSE} TEST_STREAM)
+    string (REGEX REPLACE "int yyparse" "hid_t yyparse" TEST_STREAM "${TEST_STREAM}")
     string (REGEX REPLACE "int\nyyparse" "hid_t\nyyparse" TEST_STREAM "${TEST_STREAM}")
     string (REGEX REPLACE "int H5LTyyparse" "hid_t H5LTyyparse" TEST_STREAM "${TEST_STREAM}")
     file (WRITE ${FILE_PARSE} "${TEST_STREAM}")
