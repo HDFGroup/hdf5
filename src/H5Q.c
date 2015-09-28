@@ -2148,9 +2148,9 @@ H5Q__apply_object_link(H5G_loc_t *loc, const char *name, const H5O_info_t *oinfo
 
     /* Keep object reference */
     if (FAIL == H5R_create(&ref_buf, H5R_OBJECT, loc, name, H5AC_dxpl_id))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create region reference");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create object reference");
     if (FAIL == H5Q__view_append(args->view, H5R_OBJECT, &ref_buf))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append region reference to view");
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append object reference to view");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2209,13 +2209,14 @@ H5Q__apply_object_data(H5G_loc_t *loc, const char *name, const H5O_info_t *oinfo
 
     /* Keep dataset region reference */
     if (FAIL == H5R_create(&ref_buf, H5R_REGION, loc, name, H5AC_dxpl_id, dataspace))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't get buffer size for region reference");
-    if (NULL == (ref_buf.buf = H5MM_malloc(ref_buf.buf_size)))
-        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, FAIL, "can't allocate region reference buffer");
-    if (FAIL == H5R_create(&ref_buf, H5R_REGION, loc, name, H5AC_dxpl_id, dataspace))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create region reference");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get buffer size for region reference");
 
     H5Q_LOG_DEBUG("Region reference size: %zu\n", ref_buf.buf_size);
+    if (NULL == (ref_buf.buf = H5MM_malloc(ref_buf.buf_size)))
+        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, FAIL, "can't allocate region reference buffer");
+
+    if (FAIL == H5R_create(&ref_buf, H5R_REGION, loc, name, H5AC_dxpl_id, dataspace))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create region reference");
     if (FAIL == H5Q__view_append(args->view, H5R_REGION, &ref_buf))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append region reference to view");
 
@@ -2340,7 +2341,7 @@ H5Q__apply_object_attr_name(H5A_t *attr, void *udata)
     H5Q_apply_attr_arg_t *args = (H5Q_apply_attr_arg_t *) udata;
     char *name = NULL;
     size_t name_len;
-    hattr_ref_t ref_buf;
+    hattr_ref_t ref_buf = H5R_ATTR_REF_INITIALIZER;
     hbool_t result = FALSE;
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2366,11 +2367,18 @@ H5Q__apply_object_attr_name(H5A_t *attr, void *udata)
 
     H5Q_LOG_DEBUG("Match attribute name: %s\n", (const char *) name);
 
-    /* Keep object reference */
+    /* Keep attribute reference */
     if (FAIL == H5R_create(&ref_buf, H5R_ATTR, args->loc, args->loc_name, H5AC_dxpl_id, (const char *) name))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create region reference");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get buffer size for attribute reference");
+
+    H5Q_LOG_DEBUG("Attribute reference size: %zu\n", ref_buf.buf_size);
+    if (NULL == (ref_buf.buf = H5MM_malloc(ref_buf.buf_size)))
+        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, FAIL, "can't allocate attribute reference buffer");
+
+    if (FAIL == H5R_create(&ref_buf, H5R_ATTR, args->loc, args->loc_name, H5AC_dxpl_id, (const char *) name))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create attribute reference");
     if (FAIL == H5Q__view_append(args->apply_args->view, H5R_ATTR, &ref_buf))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append region reference to view");
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append attribute reference to view");
 
 done:
     H5MM_free(name);
@@ -2401,7 +2409,7 @@ H5Q__apply_object_attr_value(H5A_t *iter_attr, void *udata)
     size_t nelmts, elmt_size;
     H5S_sel_iter_op_t iter_op;  /* Operator for iteration */
     H5Q_apply_attr_elem_arg_t iter_args;
-    hattr_ref_t ref_buf;
+    hattr_ref_t ref_buf = H5R_ATTR_REF_INITIALIZER;
     hbool_t result = FALSE;
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2461,11 +2469,18 @@ H5Q__apply_object_attr_value(H5A_t *iter_attr, void *udata)
 
     H5Q_LOG_DEBUG("Match value of attribute name: %s\n", (const char *) name);
 
-    /* Keep object reference */
+    /* Keep attribute reference */
     if (FAIL == H5R_create(&ref_buf, H5R_ATTR, args->loc, args->loc_name, H5AC_dxpl_id, (const char *) name))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create region reference");
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get buffer size for attribute reference");
+
+    H5Q_LOG_DEBUG("Attribute reference size: %zu\n", ref_buf.buf_size);
+    if (NULL == (ref_buf.buf = H5MM_malloc(ref_buf.buf_size)))
+        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, FAIL, "can't allocate attribute reference buffer");
+
+    if (FAIL == H5R_create(&ref_buf, H5R_ATTR, args->loc, args->loc_name, H5AC_dxpl_id, (const char *) name))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create attribute reference");
     if (FAIL == H5Q__view_append(args->apply_args->view, H5R_ATTR, &ref_buf))
-        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append region reference to view");
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append attribute reference to view");
 
 done:
     H5MM_free(name);
@@ -2589,44 +2604,48 @@ H5Q__view_combine(H5Q_combine_op_t combine_op, H5Q_view_t *view1, H5Q_view_t *vi
 
         switch (combine_result) {
             case H5Q_REF_REG:
-            {
                 /* Combined results are on the same object (here, dataset),
-                 * therefore at this point only result1 or resul2 has a region
+                 * therefore at this point only result1 or result2 has a region
                  * reference */
                 if (result1 & H5Q_REF_REG)
                     H5Q_QUEUE_CONCAT(&view->reg_refs, &view1->reg_refs);
-                if (result2 & H5Q_REF_REG)
+                else if (result2 & H5Q_REF_REG)
                     H5Q_QUEUE_CONCAT(&view->reg_refs, &view2->reg_refs);
-            }
                 break;
             case H5Q_REF_OBJ:
+                if (result1 & H5Q_REF_OBJ)
+                    H5Q_QUEUE_CONCAT(&view->obj_refs, &view1->obj_refs);
+                else if (result2 & H5Q_REF_OBJ)
+                    H5Q_QUEUE_CONCAT(&view->obj_refs, &view2->obj_refs);
                 break;
             case H5Q_REF_ATTR:
-                /* TODO attribute AND attribute what does it mean ? */
+                /* TODO check that references are equal and keep refs equal, discard others*/
+                if (result1 & H5Q_REF_ATTR)
+                    H5Q_QUEUE_CONCAT(&view->attr_refs, &view1->attr_refs);
+                else if (result2 & H5Q_REF_ATTR)
+                    H5Q_QUEUE_CONCAT(&view->attr_refs, &view2->attr_refs);
                 break;
             default:
                 HGOTO_ERROR(H5E_QUERY, H5E_BADTYPE, FAIL, "unsupported/unrecognized query type");
                 break;
         }
     } else if ((combine_op == H5Q_COMBINE_OR) && ((result1 || result2))) {
+        H5Q_ref_head_t *refs[H5Q_VIEW_REF_NTYPES] = { &view->reg_refs, &view->obj_refs, &view->attr_refs };
+        H5Q_ref_head_t *refs1[H5Q_VIEW_REF_NTYPES] = { &view1->reg_refs, &view1->obj_refs, &view1->attr_refs };
+        H5Q_ref_head_t *refs2[H5Q_VIEW_REF_NTYPES] = { &view2->reg_refs, &view2->obj_refs, &view2->attr_refs };
         unsigned combine_result = result1 | result2;
+        int i;
 
         H5Q_LOG_DEBUG("Result 1 (%x), result 2 (%x), combined result (%x)\n",
                 result1, result2, combine_result);
 
         *result = combine_result;
 
-        /* Combine reg references */
-        H5Q_QUEUE_CONCAT(&view->reg_refs, &view1->reg_refs);
-        H5Q_QUEUE_CONCAT(&view->reg_refs, &view2->reg_refs);
-
-        /* Combine obj references */
-        H5Q_QUEUE_CONCAT(&view->obj_refs, &view1->obj_refs);
-        H5Q_QUEUE_CONCAT(&view->obj_refs, &view2->obj_refs);
-
-        /* Combine attr references */
-        H5Q_QUEUE_CONCAT(&view->attr_refs, &view1->attr_refs);
-        H5Q_QUEUE_CONCAT(&view->attr_refs, &view2->attr_refs);
+        /* Simply concatenate results from sub-views */
+        for (i = 0; i < H5Q_VIEW_REF_NTYPES; i++) {
+            H5Q_QUEUE_CONCAT(refs[i], refs1[i]);
+            H5Q_QUEUE_CONCAT(refs[i], refs2[i]);
+        }
     }
 
 done:
@@ -2673,13 +2692,14 @@ H5Q__view_write(H5G_t *grp, H5Q_view_t *view)
         hsize_t start = 0;
 
         if (!n_elem)
-            break;
+            continue;
 
         /* Create dataspace */
         if (NULL == (space = H5S_create_simple(1, &n_elem, NULL)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace");
 
         /* Create the new dataset & get its ID */
+        H5Q_LOG_DEBUG("Create reference dataset: %s", dset_name[i]);
         if (NULL == (dset = H5D_create_named(&loc, dset_name[i], ref_types[i],
                 space, H5P_LINK_CREATE_DEFAULT, H5P_DATASET_CREATE_DEFAULT,
                 H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id)))
@@ -2743,6 +2763,10 @@ H5Q__view_free(H5Q_view_t *view)
         while (!H5Q_QUEUE_EMPTY(refs[i])) {
             H5Q_ref_entry_t *ref_entry = H5Q_QUEUE_FIRST(refs[i]);
             H5Q_QUEUE_REMOVE_HEAD(refs[i], entry);
+            if (ref_entry->ref_type == H5R_REGION)
+                H5MM_free(ref_entry->ref.reg.buf);
+            if (ref_entry->ref_type == H5R_ATTR)
+                H5MM_free(ref_entry->ref.attr.buf);
             H5MM_free(ref_entry);
         }
     }
