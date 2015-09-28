@@ -94,10 +94,9 @@ while getopts "$optspec" optchar; do
         echo
         echo "      -h      Print this help message."
         echo
-        echo "      -p      Used by THG to ensure that particular versions"
-        echo "              of the autotools are used and hard-codes"
-        echo "              autotools paths to THG machines. Not for"
-        echo "              non-HDF-Group users!"
+        echo "      -p      Used by THG to use hard-codes autotools"
+        echo "              paths on THG machines. Not for non-HDF-Group"
+        echo "              users!"
         echo
         echo "      -v      Show more verbose output."
         echo
@@ -107,7 +106,7 @@ while getopts "$optspec" optchar; do
         exit 0
         ;;
     p)
-        echo "Setting production mode..."
+        echo "Setting THG production mode..."
         echo
         production=true
         ;;
@@ -128,92 +127,33 @@ if [ "$production" = true ] ; then
 
     # Production mode
     #
-    # Hard-code canonical HDF Group tool locations and ensure
-    # version numbers are correct.
-
-    # Production versions of the tools
-    AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.69"
-    AUTOMAKE_VERSION="automake (GNU automake) 1.14.1"
-    AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.69"
-    ACLOCAL_VERSION="aclocal (GNU automake) 1.14.1"
-    LIBTOOL_VERSION="(GNU libtool) 2.4.2"
-    M4_VERSION="m4 (GNU M4) 1.4.17"
-    BISON_VERSION="bison (GNU Bison) 2.7"
-    FLEX_VERSION="flex 2.5.37"
+    # Hard-code canonical HDF Group tool locations.
 
     # If paths to tools are not specified, assume they are
-    # located in /mnt/hdf/packages and set paths accordingly.
+    # located in /usr/hdf/bin/AUTOTOOLS and set paths accordingly.
     if test -z ${HDF5_AUTOCONF}; then
-        HDF5_AUTOCONF=/mnt/hdf/packages/autoconf/autoconf-2.69/bin/autoconf
+        HDF5_AUTOCONF=/usr/hdf/bin/AUTOTOOLS/autoconf
     fi
     if test -z ${HDF5_AUTOMAKE}; then
-        HDF5_AUTOMAKE=/mnt/hdf/packages/automake/automake-1.14.1/bin/automake-1.14
+        HDF5_AUTOMAKE=/usr/hdf/bin/AUTOTOOLS/automake
     fi
     if test -z ${HDF5_AUTOHEADER}; then
-        HDF5_AUTOHEADER=/mnt/hdf/packages/autoconf/autoconf-2.69/bin/autoheader
+        HDF5_AUTOHEADER=/usr/hdf/bin/AUTOTOOLS/autoheader
     fi
     if test -z ${HDF5_ACLOCAL}; then
-        HDF5_ACLOCAL=/mnt/hdf/packages/automake/automake-1.14.1/bin/aclocal-1.14
+        HDF5_ACLOCAL=/usr/hdf/bin/AUTOTOOLS/aclocal
     fi
     if test -z ${HDF5_LIBTOOL}; then
-        HDF5_LIBTOOL=/mnt/hdf/packages/libtool/libtool-2.4.2/bin/libtool
+        HDF5_LIBTOOL=/usr/hdf/bin/AUTOTOOLS/libtool
     fi
     if test -z ${HDF5_M4}; then
-        HDF5_M4=/mnt/hdf/packages/m4/m4-1.4.17/bin/m4
+        HDF5_M4=/usr/hdf/bin/AUTOTOOLS/m4
     fi
     if test -z ${HDF5_BISON}; then
-        HDF5_BISON=/usr/hdf/bin/bison
+        HDF5_BISON=/usr/hdf/bin/AUTOTOOLS/bison
     fi
     if test -z ${HDF5_FLEX}; then
-        HDF5_FLEX=/usr/hdf/bin/flex
-    fi
-
-    # Check version numbers of all autotools against the "correct" versions
-    AC_VERS=`${HDF5_AUTOCONF} --version 2>&1 | grep "^${AUTOCONF_VERSION}"`
-    if test -z "${AC_VERS}"; then
-        echo "${HDF5_AUTOCONF} version is not ${AUTOCONF_VERSION}"
-        ${HDF5_AUTOCONF} --version
-        exit 1
-    fi
-    AM_VERS=`${HDF5_AUTOMAKE} --version 2>&1 | grep "^${AUTOMAKE_VERSION}"`
-    if test -z "${AM_VERS}"; then
-       echo "${HDF5_AUTOMAKE} version is not ${AUTOMAKE_VERSION}"
-       ${HDF5_AUTOMAKE} --version
-       exit 1
-    fi
-    AH_VERS=`${HDF5_AUTOHEADER} --version 2>&1 | grep "^${AUTOHEADER_VERSION}"`
-    if test -z "${AH_VERS}"; then
-        echo "${HDF5_AUTOHEADER} version is not ${AUTOHEADER_VERSION}"
-        ${HDF5_AUTOHEADER} --version
-        exit 1
-    fi
-    AL_VERS=`${HDF5_ACLOCAL} --version 2>&1 | grep "^${ACLOCAL_VERSION}"`
-    if test -z "${AL_VERS}"; then
-        echo "${HDF5_ACLOCAL} version is not ${ACLOCAL_VERSION}"
-        ${HDF5_ACLOCAL} --version
-        exit 1
-    fi
-    LT_VERS=`${HDF5_LIBTOOL} --version 2>&1 | grep "${LIBTOOL_VERSION}"`
-    if test -z "${LT_VERS}"; then
-        echo "${HDF5_LIBTOOL} version is not ${LIBTOOL_VERSION}"
-        ${HDF5_LIBTOOL} --version
-        exit 1
-    fi
-    M4_VERS=`${HDF5_M4} --version 2>&1 | grep "${M4_VERSION}"`
-    if test -z "${M4_VERS}"; then
-        echo "${HDF5_M4} version is not ${M4_VERSION}"
-        ${HDF5_M4} --version
-        exit 1
-    fi
-    BI_VERS=`${HDF5_BISON} --version 2>&1 | grep "^${BISON_VERSION}"`
-    if test -z "${BI_VERS}"; then
-       echo "${HDF5_BISON} version is not ${BISON_VERSION}"
-       exit 1
-    fi
-    FL_VERS=`${HDF5_FLEX} --version 2>&1 | grep "^${FLEX_VERSION}"`
-    if test -z "${FL_VERS}"; then
-       echo "${HDF5_FLEX} version is not ${FLEX_VERSION}"
-       exit 1
+        HDF5_FLEX=/usr/hdf/bin/AUTOTOOLS/flex
     fi
 
 else
