@@ -819,11 +819,6 @@ if (HDF5_GENERATE_HEADERS)
   endif (PERL_FOUND)
 endif (HDF5_GENERATE_HEADERS)
 
-set (H5_PUBLIC_GENERATED_HEADERS
-    ${HDF5_SRC_DIR}/H5version.h
-    ${HDF5_SRC_DIR}/H5overflow.h
-)
-
 #-----------------------------------------------------------------------------
 # Setup the H5Detect utility which generates H5Tinit with platform
 # specific type checks inside
@@ -836,7 +831,7 @@ endif (MSVC OR MINGW)
 if (HDF5_GENERATE_HEADERS)
   add_dependencies(H5detect generate_precompiled)
 else (HDF5_GENERATE_HEADERS)
-  add_dependencies(H5detect "${H5_PUBLIC_GENERATED_HEADERS}")
+  add_dependencies(H5detect "${H5_GENERATED_HEADERS}")
 endif (HDF5_GENERATE_HEADERS)
 
 set (CMD $<TARGET_FILE:H5detect>)
@@ -855,7 +850,7 @@ endif (MSVC OR MINGW)
 if (HDF5_GENERATE_HEADERS)
   add_dependencies(H5detect generate_precompiled)
 else (HDF5_GENERATE_HEADERS)
-  add_dependencies(H5make_libsettings "${H5_PUBLIC_GENERATED_HEADERS}")
+  add_dependencies(H5make_libsettings "${H5_GENERATED_HEADERS}")
 endif (HDF5_GENERATE_HEADERS)
 
 set (CMD $<TARGET_FILE:H5make_libsettings>)
