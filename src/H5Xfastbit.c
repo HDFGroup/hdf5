@@ -89,7 +89,7 @@ typedef struct H5X_fastbit_t {
     uint64_t nbitmaps;
     uint32_t *bitmaps;
 
-    char column_name[64];
+    char column_name[H5X_FASTBIT_MAX_NAME];
 
     hbool_t idx_reconstructed;
 } H5X_fastbit_t;
@@ -108,6 +108,9 @@ H5X__fastbit_init(hid_t dataset_id);
 
 static herr_t
 H5X__fastbit_term(H5X_fastbit_t *fastbit);
+
+static unsigned int
+H5X__fastbit_hash_string(const char *string);
 
 static enum FastBitDataType
 H5X__fastbit_convert_type(hid_t type);
@@ -248,7 +251,7 @@ H5X__fastbit_init(hid_t dataset_id)
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get dataset name");
 
     H5X_FASTBIT_LOG_DEBUG("Dataset Name : %s", dataset_name);
-    sprintf(fastbit->column_name, "%s", dataset_name);
+    sprintf(fastbit->column_name, "array%u", H5X__fastbit_hash_string(dataset_name));
 
     fastbit->idx_reconstructed = FALSE;
 
@@ -347,6 +350,34 @@ H5X__fastbit_term(H5X_fastbit_t *fastbit)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5X__fastbit_term() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5X__fastbit_hash_string
+ *
+ * Purpose: Hash string to create unique ID to register FastBit array.
+ *
+ * Return:  ID of hashed string
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned int
+H5X__fastbit_hash_string(const char *string)
+{
+    /* This is the djb2 string hash function */
+    unsigned int ret_value = 5381;
+    const unsigned char *p;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    p = (const unsigned char *) string;
+
+    while (*p != '\0') {
+        ret_value = (ret_value << 5) + ret_value + *p;
+        ++p;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5X__fastbit_hash_string */
 
 /*-------------------------------------------------------------------------
  * Function:    H5X__fastbit_convert_type
