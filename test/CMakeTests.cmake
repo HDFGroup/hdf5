@@ -20,6 +20,7 @@ if (HDF5_TEST_VFD)
       sec2
       stdio
       core
+      core_paged
       split
       multi
       family
