@@ -53,18 +53,20 @@ typedef haddr_t hobj_ref_t; /* Needs to be large enough to store largest haddr_t
 typedef unsigned char hdset_reg_ref_t[H5R_DSET_REG_REF_BUF_SIZE];/* Buffer to store heap ID and index */
 /* Needs to be large enough to store largest haddr_t in a worst case machine (ie. 8 bytes currently) plus an int */
 
-/* Variable length region reference struct in memory */
-typedef struct hreg_ref_t {
+/* Variable length reference struct in memory */
+struct href_var {
     size_t buf_size;/* Size of serialized region reference */
     void *buf;      /* Pointer to serialized region reference */
-} hreg_ref_t;
+};
+
+typedef struct href_var hreg_ref_t;
 
 #define H5R_REG_REF_INITIALIZER { 0, NULL }
 
-#define H5R_ATTR_REF_BUF_SIZE    (2 * (sizeof(haddr_t) + 4))
-/* Attribute reference structure for user's code */
-typedef unsigned char hattr_ref_t[H5R_ATTR_REF_BUF_SIZE];/* Buffer to store two heap IDs and indices */
-/* Needs to be large enough to store 2x the largest haddr_t in a worst case machine (ie. 8 bytes currently) plus an int */
+/* Attribute reference structure for user's code (variable length) */
+typedef struct href_var hattr_ref_t;
+
+#define H5R_ATTR_REF_INITIALIZER { 0, NULL }
 
 /* Publicly visible data structures */
 

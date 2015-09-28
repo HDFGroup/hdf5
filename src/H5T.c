@@ -239,9 +239,11 @@
     dt->shared->u.atomic.u.r.loc = H5T_LOC_BADLOC;              \
 }
 
-#define H5T_INIT_TYPE_ATTRREF_CORE {					      \
-    H5T_INIT_TYPE_REF_COMMON						      \
-    dt->shared->u.atomic.u.r.rtype = H5R_ATTR;				      \
+#define H5T_INIT_TYPE_ATTRREF_CORE {                            \
+    H5T_INIT_TYPE_REF_COMMON                                    \
+    dt->shared->force_conv = TRUE;                              \
+    dt->shared->u.atomic.u.r.rtype = H5R_ATTR;                  \
+    dt->shared->u.atomic.u.r.loc = H5T_LOC_BADLOC;              \
 }
 
 /* Define the code templates for the "SIZE_TMPL" in the H5T_INIT_TYPE macro */
@@ -736,6 +738,7 @@ H5T__init_package(void)
     H5T_t	*array=NULL;            /* Datatype structure for array objects */
     H5T_t	*objref=NULL;           /* Datatype structure for object reference objects */
     H5T_t	*regref=NULL;           /* Datatype structure for region reference objects */
+    H5T_t	*attrref=NULL;          /* Datatype structure for attribute reference objects */
     hsize_t     dim[1]={1};             /* Dimension info for array datatype */
     herr_t	status;
     unsigned    copied_dtype=1;         /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
@@ -998,11 +1001,15 @@ H5T__init_package(void)
     H5T_INIT_TYPE(REGREF, H5T_STD_REF_REG_g, ALLOC, -, NOSET, -)
     /* TODO put that in the macro */
     if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
     regref = dt;    /* Keep type for later */
 
     /* Attribute reference (i.e. object and attribute names in file) */
-    H5T_INIT_TYPE(ATTRREF, H5T_STD_REF_ATTR_g, ALLOC, -, SET, H5R_ATTR_REF_BUF_SIZE)
+    H5T_INIT_TYPE(ATTRREF, H5T_STD_REF_ATTR_g, ALLOC, -, NOSET, -)
+    /* TODO put that in the macro */
+    if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
+    attrref = dt;    /* Keep type for later */
 
     /*
      * Register conversion functions beginning with the most general and
@@ -1039,6 +1046,7 @@ H5T__init_package(void)
     status |= H5T_register(H5T_PERS_SOFT, "array", array, array, H5T__conv_array, H5AC_ind_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_SOFT, "objref", objref, objref, H5T__conv_order_opt, H5AC_ind_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_SOFT, "regref", regref, regref, H5T__conv_ref, H5AC_ind_dxpl_id, FALSE);
+    status |= H5T_register(H5T_PERS_SOFT, "attrref", attrref, attrref, H5T__conv_ref, H5AC_ind_dxpl_id, FALSE);
 
     /*
      * Native conversions should be listed last since we can use hardware to
@@ -4355,8 +4363,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                             break;
 
                         case H5R_REGION:
-                    /* Does this need more to distinguish it? -QAK 8/25/15 */
-                            /*void */
+                            if (dt1->shared->u.atomic.u.r.loc < dt2->shared->u.atomic.u.r.loc)
+                                HGOTO_DONE(-1);
+                            if (dt1->shared->u.atomic.u.r.loc > dt2->shared->u.atomic.u.r.loc)
+                                HGOTO_DONE(1);
                             break;
 
                        case H5R_ATTR:
@@ -5289,7 +5299,8 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                         ret_value=TRUE;
                     } /* end if */
                 } /* end if */
-                if(dt->shared->u.atomic.u.r.rtype == H5R_REGION) {
+                if((dt->shared->u.atomic.u.r.rtype == H5R_REGION) ||
+                        (dt->shared->u.atomic.u.r.rtype == H5R_ATTR)) {
                     /* Mark this reference */
                     if((changed = H5T__ref_set_loc(dt, f, loc)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set reference location");

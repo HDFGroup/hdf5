@@ -3566,7 +3566,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_ref
  *
- * Purpose: Converts between region reference datatypes in memory and on disk.
+ * Purpose: Converts between reference datatypes in memory and on disk.
  *      This is a soft conversion function.
  *
  * Return:  Non-negative on success/Negative on failure
@@ -3621,6 +3621,8 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              */
             if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+            if (src->shared->u.atomic.u.r.rtype == H5R_OBJECT) break;
 
             /* Initialize source & destination strides */
             if(buf_stride) {

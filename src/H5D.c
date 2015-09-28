@@ -738,6 +738,49 @@ done:
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Diterate() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Dref_reclaim
+ *
+ * Purpose: Frees the buffers allocated for storing variable-length reference
+ *      in memory.  Only frees the VL data in the selection defined in the
+ *      dataspace.  The dataset transfer property list is required to find the
+ *      correct allocation/free methods for the VL data in the buffer.
+ *
+ * Return:  Non-negative on success, negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dref_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
+{
+    H5S_t *space;               /* Dataspace for iteration */
+    herr_t ret_value;           /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "iii*x", type_id, space_id, plist_id, buf);
+
+    /* Check args */
+    if(H5I_DATATYPE != H5I_get_type(type_id) || buf == NULL)
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
+    if(!(H5S_has_extent(space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == plist_id)
+        plist_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Call internal routine */
+    ret_value = H5D_ref_reclaim(type_id, space, plist_id, buf);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* end H5Dref_reclaim() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Dvlen_reclaim

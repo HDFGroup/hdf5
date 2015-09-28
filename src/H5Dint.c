@@ -2184,6 +2184,47 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__get_offset() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5D_ref_reclaim
+ *
+ * Purpose: Frees the buffers allocated for storing variable-length reference
+ *      in memory.  Only frees the VL data in the selection defined in the
+ *      dataspace.  The dataset transfer property list is required to find the
+ *      correct allocation/free methods for the VL data in the buffer.
+ *
+ * Return:  Non-negative on success, negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_ref_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id, void *buf)
+{
+    H5T_t *type;                /* Datatype */
+    H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
+    herr_t ret_value = FAIL;            /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check args */
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
+    HDassert(space);
+    HDassert(H5P_isa_class(plist_id, H5P_DATASET_XFER));
+    HDassert(buf);
+
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
+
+    /* Call H5S_select_iterate with args, etc. */
+    dset_op.op_type = H5S_SEL_ITER_OP_APP;
+    dset_op.u.app_op.op = H5T_ref_reclaim;
+    dset_op.u.app_op.type_id = type_id;
+
+    ret_value = H5S_select_iterate(buf, type, space, &dset_op, NULL);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5D_ref_reclaim() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_vlen_reclaim
