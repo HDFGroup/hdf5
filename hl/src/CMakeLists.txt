@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_HL_SRC)
 
 if (HDF5_GENERATE_HEADERS)
+  file (MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/genLT")
   find_package (BISON)
   if (BISON_FOUND)
     find_package (FLEX)
