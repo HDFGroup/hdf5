@@ -2013,7 +2013,7 @@ test_reference(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_reference_compat();    /* Test operations with old API routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-    test_reference_attr();       /* Test basic H5R attribute reference code */
+    /* test_reference_attr(); */       /* Test basic H5R attribute reference code */
 
 }   /* test_reference() */
 
