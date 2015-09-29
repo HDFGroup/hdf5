@@ -18,25 +18,25 @@ if (HDF5_GENERATE_HEADERS)
         include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
         add_custom_command (
-            OUTPUT H5LTparse.c H5LTparse.h
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.h
             COMMAND "${CMAKE_COMMAND}"
                 -D "GEN_DIR=genLT"
                 -D "FILE_PARSE=H5LTparse"
                 -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"
-            DEPENDS "genLT/H5LTparse.c"
+            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/genLT/H5LTparse.c"
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
         add_custom_command (
-            OUTPUT H5LTanalyze.c
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c
             COMMAND "${CMAKE_COMMAND}"
                 -D "GEN_DIR=genLT"
                 -D "FILE_ANALYZE=H5LTanalyze.c"
                 -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"
-            DEPENDS "genLT/H5LTanalyze.c"
+            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/genLT/H5LTanalyze.c"
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
         add_custom_target (process_gen_H5LT
-            DEPENDS H5LTparse.c  H5LTanalyze.c
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
 
