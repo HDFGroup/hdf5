@@ -32,7 +32,7 @@ if (HDF5_GENERATE_HEADERS)
             COMMAND "${CMAKE_COMMAND}"
                 -D "FILE_PARSE=H5LTparse.c"
                 -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"
-            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.h"
+            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c"
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
         add_custom_command (
