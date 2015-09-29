@@ -516,25 +516,19 @@ H5S_all_serial_size (const H5S_t H5_ATTR_UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_all_serialize(const H5S_t *space, uint8_t **p)
+H5S_all_serialize (const H5S_t *space, uint8_t **p)
 {
-    uint8_t *pp = (*p);         /* Local pointer for decoding */
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check args */
     HDassert(space);
     HDassert(p);
-    HDassert(pp);
+    HDassert(*p);
 
     /* Store the preamble information */
-    UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(pp, (uint32_t)1);  /* Store the version number */
-    UINT32ENCODE(pp, (uint32_t)0);  /* Store the un-used padding */
-    UINT32ENCODE(pp, (uint32_t)0);  /* Store the additional information length */
-
-    /* Update encoding pointer */
-    *p = pp;
+    UINT32ENCODE(*p, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
+    UINT32ENCODE(*p, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(*p, (uint32_t)0);  /* Store the un-used padding */
+    UINT32ENCODE(*p, (uint32_t)0);  /* Store the additional information length */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5S_all_serialize() */

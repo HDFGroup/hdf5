@@ -826,32 +826,28 @@ H5S_point_serial_size (const H5S_t *space)
 static herr_t
 H5S_point_serialize (const H5S_t *space, uint8_t **p)
 {
-    H5S_pnt_node_t *curr;       /* Point information nodes */
-    uint8_t *pp = (*p);         /* Local pointer for decoding */
-    uint8_t *lenp;              /* pointer to length location for later storage */
-    uint32_t len=0;             /* number of bytes used */
-    unsigned u;                 /* local counting variable */
+    H5S_pnt_node_t *curr;   /* Point information nodes */
+    uint8_t *lenp;          /* pointer to length location for later storage */
+    uint32_t len=0;         /* number of bytes used */
+    unsigned u;                /* local counting variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Check args */
     HDassert(space);
-    HDassert(p);
-    HDassert(pp);
 
     /* Store the preamble information */
-    UINT32ENCODE(pp, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
-    UINT32ENCODE(pp, (uint32_t)1);  /* Store the version number */
-    UINT32ENCODE(pp, (uint32_t)0);  /* Store the un-used padding */
-    lenp = pp;          /* Keep the pointer to the length location for later */
-    pp += 4;            /* Skip over space for length */
+    UINT32ENCODE(*p, (uint32_t)H5S_GET_SELECT_TYPE(space));  /* Store the type of selection */
+    UINT32ENCODE(*p, (uint32_t)1);  /* Store the version number */
+    UINT32ENCODE(*p, (uint32_t)0);  /* Store the un-used padding */
+    lenp=*p;           /* keep the pointer to the length location for later */
+    *p+=4;             /* skip over space for length */
 
     /* Encode number of dimensions */
-    UINT32ENCODE(pp, (uint32_t)space->extent.rank);
+    UINT32ENCODE(*p, (uint32_t)space->extent.rank);
     len+=4;
 
     /* Encode number of elements */
-    UINT32ENCODE(pp, (uint32_t)space->select.num_elem);
+    UINT32ENCODE(*p, (uint32_t)space->select.num_elem);
     len+=4;
 
     /* Encode each point in selection */
@@ -862,16 +858,13 @@ H5S_point_serialize (const H5S_t *space, uint8_t **p)
 
         /* Encode each point */
         for(u=0; u<space->extent.rank; u++)
-            UINT32ENCODE(pp, (uint32_t)curr->pnt[u]);
+            UINT32ENCODE(*p, (uint32_t)curr->pnt[u]);
 
         curr=curr->next;
     } /* end while */
 
     /* Encode length */
     UINT32ENCODE(lenp, (uint32_t)len);  /* Store the length of the extra information */
-
-    /* Update encoding pointer */
-    *p = pp;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5S_point_serialize() */
@@ -905,25 +898,24 @@ static herr_t
 H5S_point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED flags,
     const uint8_t **p)
 {
-    H5S_seloper_t op = H5S_SELECT_SET;  /* Selection operation */
-    hsize_t *coord = NULL, *tcoord;     /* Pointer to array of elements */
-    const uint8_t *pp = (*p);   /* Local pointer for decoding */
-    size_t num_elem = 0;        /* Number of elements in selection */
-    unsigned rank;              /* Rank of points */
+    H5S_seloper_t op=H5S_SELECT_SET;    /* Selection operation */
+    unsigned rank;          /* Rank of points */
+    size_t num_elem=0;      /* Number of elements in selection */
+    hsize_t *coord=NULL, *tcoord;   /* Pointer to array of elements */
     unsigned i, j;              /* local counting variables */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(space);
     HDassert(p);
-    HDassert(pp);
+    HDassert(*p);
 
     /* Deserialize points to select */
     /* (The header and rank have already beed decoded) */
     rank = space->extent.rank;  /* Retrieve rank from space */
-    UINT32DECODE(pp, num_elem); /* decode the number of points */
+    UINT32DECODE(*p, num_elem); /* decode the number of points */
 
     /* Allocate space for the coordinates */
     if(NULL == (coord = (hsize_t *)H5MM_malloc(num_elem * rank * sizeof(hsize_t))))
@@ -932,14 +924,11 @@ H5S_point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_
     /* Retrieve the coordinates from the buffer */
     for(tcoord = coord, i = 0; i < num_elem; i++)
         for(j = 0; j < (unsigned)rank; j++, tcoord++)
-            UINT32DECODE(pp, *tcoord);
+            UINT32DECODE(*p, *tcoord);
 
     /* Select points */
     if(H5S_select_elements(space, op, num_elem, (const hsize_t *)coord) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
-
-    /* Update decoding pointer */
-    *p = pp;
 
 done:
     /* Free the coordinate array if necessary */

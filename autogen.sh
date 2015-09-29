@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 #
 # Copyright by The HDF Group.                                              
 # All rights reserved.                                                     
@@ -60,7 +60,7 @@
 #
 # This script takes two potential options:
 #
-# -p
+# -p, --production
 #
 # When this is selected, the autotools versions are set to the paths
 # and versions used by The HDF Group to produce the released versions
@@ -70,7 +70,7 @@
 # to have recent versions of the autotools this option will probably
 # be removed.
 #
-# -v
+# -v, --verbose
 #
 # This emits some extra information, mainly tool versions.
 
@@ -89,19 +89,33 @@ verbose=false
 optspec=":hpv-"
 while getopts "$optspec" optchar; do
     case "${optchar}" in
+    -)
+        case "${OPTARG}" in
+            production)
+                echo "Setting production mode..."
+                echo
+                production=true
+                ;;
+            verbose)
+                echo "Setting verbosity: high"
+                echo
+                verbose=true
+                ;;
+            *)
+                if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
+                    echo "Unknown option --${OPTARG}" >&2
+                fi
+                ;;
+        esac;;
     h)
-        echo "usage: $0 [OPTIONS]"
-        echo
-        echo "      -h      Print this help message."
+        echo "usage: $0 [-p|--production]"
         echo
         echo "      -p      Used by THG to ensure that particular versions"
         echo "              of the autotools are used and hard-codes"
         echo "              autotools paths to THG machines. Not for"
         echo "              non-HDF-Group users!"
         echo
-        echo "      -v      Show more verbose output."
-        echo
-        echo "  NOTE: Each tool can be set via an environment variable."
+        echo "  NOTE: Each autotool can be set via an environment variable."
         echo "        These are documented inside this autogen.sh script."
         echo
         exit 0
@@ -382,37 +396,15 @@ bin/make_overflow src/H5overflow.txt || exit 1
 # to install a later version of bison. See the OS X note at the top
 # of this script.
 echo
-echo "Generating H5LT parser code (requires yacc/bison):"
-echo "Generate hl/src/H5LTparse.c from hl/src/H5LTparse.y"
-# HDF5_BISON is set via the environment or 'which bison', above
-if test -z ${HDF5_BISON}; then
-    echo
-    echo "*************************"
-    echo " ERROR - bison not found"
-    echo "*************************"
-    echo "bison is required to generate parser code in H5LT"
-    echo
-    exit 127
-fi
+echo "Running flex/bison:"
 cd hl/src
+echo "Generate hl/src/H5LTparse.c from hl/src/H5LTparse.y"
 if [ "$verbose" = true ] ; then
     ${HDF5_BISON} --version
 fi
 ${HDF5_BISON} -pH5LTyy -o H5LTparse.c -d H5LTparse.y
 
-echo
-echo "Generating H5LT lexer code (requires lex/flex):"
 echo "Generate hl/src/H5LTanalyze.c from hl/src/H5LTanalyze.l"
-# HDF5_FLEX is set via the environment or 'which flex', above
-if test -z ${HDF5_FLEX}; then
-    echo
-    echo "************************"
-    echo " ERROR - flex not found"
-    echo "************************"
-    echo "flex is required to generate lexer code in H5LT"
-    echo
-    exit 127
-fi
 if [ "$verbose" = true ] ; then
     ${HDF5_FLEX} --version
 fi
