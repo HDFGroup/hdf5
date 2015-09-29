@@ -634,7 +634,7 @@ main(void)
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 #ifdef H5_HAVE_FASTBIT
-    h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
+    h5_fixname(FILENAME[1], fapl, filename_fastbit, sizeof(filename_fastbit));
 #endif
     /* Check that no object is left open */
     H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
