@@ -2,20 +2,45 @@ cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_HL_SRC)
 
 if (HDF5_GENERATE_HEADERS)
+  file (MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/genLT")
   find_package (BISON)
   if (BISON_FOUND)
     find_package (FLEX)
     if (FLEX_FOUND)
-      BISON_TARGET (H5LT_PARSER H5LTparse.y ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c COMPILE_FLAGS "-d -pH5LTyy")
+      BISON_TARGET (H5LT_PARSER H5LTparse.y ${CMAKE_CURRENT_BINARY_DIR}/genLT/H5LTparse.c COMPILE_FLAGS "-d -pH5LTyy")
       if (WIN32)
-        FLEX_TARGET (H5LT_SCANNER H5LTanalyze.l ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c COMPILE_FLAGS "--wincompat --nounistd -PH5LTyy")
+        FLEX_TARGET (H5LT_SCANNER H5LTanalyze.l ${CMAKE_CURRENT_BINARY_DIR}/genLT/H5LTanalyze.c COMPILE_FLAGS "--wincompat --nounistd -PH5LTyy")
       else (WIN32)
-        FLEX_TARGET (H5LT_SCANNER H5LTanalyze.l ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c COMPILE_FLAGS "--nounistd -PH5LTyy")
+        FLEX_TARGET (H5LT_SCANNER H5LTanalyze.l ${CMAKE_CURRENT_BINARY_DIR}/genLT/H5LTanalyze.c COMPILE_FLAGS "--nounistd -PH5LTyy")
       endif (WIN32)
       ADD_FLEX_BISON_DEPENDENCY(H5LT_SCANNER H5LT_PARSER)
 
       if (BISON_H5LT_PARSER_DEFINED AND FLEX_H5LT_SCANNER_DEFINED)
         include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+        add_custom_command (
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.h
+            COMMAND "${CMAKE_COMMAND}"
+                -D "GEN_DIR=genLT"
+                -D "FILE_PARSE=H5LTparse"
+                -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"
+            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/genLT/H5LTparse.c"
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+        add_custom_command (
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c
+            COMMAND "${CMAKE_COMMAND}"
+                -D "GEN_DIR=genLT"
+                -D "FILE_ANALYZE=H5LTanalyze.c"
+                -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"
+            DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/genLT/H5LTanalyze.c"
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+        add_custom_target (process_gen_H5LT
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+
         set (HL_SRCS
             ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c
             ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c
@@ -23,38 +48,6 @@ if (HDF5_GENERATE_HEADERS)
         set (HL_HEADERS
             ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.h
         )
-        set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c GENERATED)
-        set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c GENERATED)
-        set_source_files_properties (${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.h GENERATED)
-
-        add_custom_command (
-            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.timestamp
-            COMMAND "${CMAKE_COMMAND}"
-                -D "FILE_PARSE=H5LTparse.c"
-                -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"
-            COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.timestamp
-            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        )
-        add_custom_command (
-            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.timestamp
-            COMMAND "${CMAKE_COMMAND}"
-                -D "FILE_ANALYZE=H5LTanalyze.c"
-                -P "${HDF_RESOURCES_DIR}/HDF5_Process_Flex_Files.cmake"
-            COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.timestamp
-            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        )
-        add_custom_target (process_gen_H5LT DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.timestamp ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.timestamp)
-
-#        add_custom_target (process_gen_H5LT
-#            COMMAND "${CMAKE_COMMAND}"
-#              -D "FILE_PARSE=${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c"
-#              -D "FILE_ANALYSE=${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c"
-#              -P "${HDF5_RESOURCE_DIR}/HDF5_Process_Flex_Files.cmake"
-#              DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/H5LTparse.c ${CMAKE_CURRENT_BINARY_DIR}/H5LTanalyze.c"
-#              COMMENT "Prepending pragma statements"
-#        )
       else (BISON_H5LT_PARSER_DEFINED AND FLEX_H5LT_SCANNER_DEFINED)
         message (STATUS "Error during generate of files")
       endif (BISON_H5LT_PARSER_DEFINED AND FLEX_H5LT_SCANNER_DEFINED)

@@ -1,6 +1,6 @@
 # post process flex/bison files
 
-message (STATUS "File: ${FILE_PARSE} ${FILE_ANALYZE}")
+message (STATUS "File: ${GEN_DIR} ${FILE_PARSE} ${FILE_ANALYZE}")
 
 if (FILE_PARSE)
   # fix H5LTparse.c to declare H5LTyyparse return type as an hid_t
@@ -11,18 +11,19 @@ if (FILE_PARSE)
   # I propose to not use flex to generate this function, but for now I am
   # adding a perl command to find and replace this function declaration in
   # H5LTparse.c.
-    file (READ ${FILE_PARSE} TEST_STREAM)
+    file (READ ${GEN_DIR}/${FILE_PARSE}.c TEST_STREAM)
+    string (REGEX REPLACE "int yyparse" "hid_t yyparse" TEST_STREAM "${TEST_STREAM}")
     string (REGEX REPLACE "int\nyyparse" "hid_t\nyyparse" TEST_STREAM "${TEST_STREAM}")
     string (REGEX REPLACE "int H5LTyyparse" "hid_t H5LTyyparse" TEST_STREAM "${TEST_STREAM}")
-    file (WRITE ${FILE_PARSE} "${TEST_STREAM}")
+    file (WRITE ${FILE_PARSE}.c "${TEST_STREAM}")
     message (STATUS "replacing signature in H5LTparse.c")
 
   # Add code that disables warnings in the flex/bison-generated code.
   #
   # Note that the GCC pragmas did not exist until gcc 4.2. Earlier versions
   # will simply ignore them, but we want to avoid those warnings.
-    file (READ ${FILE_PARSE} TEST_STREAM)
-    file (WRITE ${FILE_PARSE} "
+    file (READ ${FILE_PARSE}.c TEST_STREAM)
+    file (WRITE ${FILE_PARSE}.c "
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >=2\n
 #pragma GCC diagnostic ignored \"-Wconversion\"\n
 #pragma GCC diagnostic ignored \"-Wimplicit-function-declaration\"\n
@@ -44,8 +45,10 @@ if (FILE_PARSE)
 #pragma warning(push, 1)\n
 #endif\n
     ")
-    file (APPEND ${FILE_PARSE} "${TEST_STREAM}")
-    message (STATUS "processing pragma in ${FILE_PARSE}")
+    file (APPEND ${FILE_PARSE}.c "${TEST_STREAM}")
+    message (STATUS "processed pragma in ${FILE_PARSE}")
+    file (READ ${GEN_DIR}/${FILE_PARSE}.h TEST_STREAM)
+    file (WRITE ${FILE_PARSE}.h "${TEST_STREAM}")
 endif (FILE_PARSE)
 
 if (FILE_ANALYZE)
@@ -53,7 +56,7 @@ if (FILE_ANALYZE)
   #
   # Note that the GCC pragmas did not exist until gcc 4.2. Earlier versions
   # will simply ignore them, but we want to avoid those warnings.
-    file (READ ${FILE_ANALYZE} TEST_STREAM)
+    file (READ ${GEN_DIR}/${FILE_ANALYZE} TEST_STREAM)
     file (WRITE ${FILE_ANALYZE} "
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >=2\n
 #pragma GCC diagnostic ignored \"-Wconversion\"\n
@@ -77,5 +80,5 @@ if (FILE_ANALYZE)
 #endif\n
     ")
     file (APPEND ${FILE_ANALYZE} "${TEST_STREAM}")
-    message (STATUS "processing pragma in ${FILE_ANALYZE}")
+    message (STATUS "processed pragma in ${FILE_ANALYZE}")
 endif (FILE_ANALYZE)
