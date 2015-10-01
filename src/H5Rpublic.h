@@ -55,8 +55,8 @@ typedef unsigned char hdset_reg_ref_t[H5R_DSET_REG_REF_BUF_SIZE];/* Buffer to st
 
 /* Variable length reference struct in memory */
 struct href_var {
-    size_t buf_size;/* Size of serialized region reference */
-    void *buf;      /* Pointer to serialized region reference */
+    size_t buf_size;/* Size of serialized reference */
+    void *buf;      /* Pointer to serialized reference */
 };
 
 typedef struct href_var hreg_ref_t;
