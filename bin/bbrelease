@@ -156,7 +156,15 @@ tar2zip()
 
 # This command must be run at the top level of the hdf5 source directory.
 # Verify this requirement.
-if [ ! \( -f configure -a -f bin/release \) ]; then
+# Since we are running bbrelease to create an HDF5 source tarfile for buildbot
+# testing with source that is not for release, there is not a file named
+# "configure" but there will be one named "configure.ac".  The "configure"
+# file will be created when autogen.sh runs. There probably will always
+# be a bin/release file, but just in case it is removed, we can check for 
+# this script, bbrelease, in the bin directory.  The bin/release script should
+# continue to check for "configure" because it should be present in release 
+# source.
+if [ ! \( -f configure.ac -a -f bin/bbrelease \) ]; then
     echo "$0 must be run at the top level of the hdf5 source directory"
     exit 1
 fi
@@ -260,8 +268,8 @@ if [ X$revmode = Xyes ]; then
     # Copy old version of config/lt_vers.am, since it's hard to
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
-    branch=`svn info | grep URL: | awk -F/ '{print $NF}'`
-    revision=`svn info | grep "Last Changed Rev:" | awk '{print $4}'`
+    branch=`svn info | grep ^URL: | awk -F/ '{print $NF}'`
+    revision=`svn info | grep "Revision:" | awk '{print $2}'`
     # Set version information to m.n.r-r$revision.
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-r$revision
@@ -296,6 +304,7 @@ fi
 # Create a manifest that contains only files for distribution.
 MANIFEST=$tmpdir/H5_MANIFEST
 grep '^\.' MANIFEST | grep -v _DO_NOT_DISTRIBUTE_ >$MANIFEST
+echo "./autogen.sh" >>$MANIFEST
 
 # Prepare the source tree for a release.
 #ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1

@@ -82,3 +82,6 @@
 
 ! valid INTEGER KINDs (need to have a matching C counter-part)
 #define H5_H5CONFIG_F_IKIND @H5CONFIG_F_IKIND@
+
+! Fortran compiler id
+#define H5_Fortran_COMPILER_ID @Fortran_COMPILER_ID@

@@ -25,7 +25,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE             /*suppress error about including H5Dpkg   */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -70,6 +70,7 @@ static ssize_t H5D__compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
 static herr_t H5D__compact_flush(H5D_t *dset, hid_t dxpl_id);
+static herr_t H5D__compact_dest(H5D_t *dset, hid_t dxpl_id);
 
 
 /*********************/
@@ -91,7 +92,8 @@ const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
     H5D__compact_readvv,
     H5D__compact_writevv,
     H5D__compact_flush,
-    NULL
+    NULL,
+    H5D__compact_dest
 }};
 
 
@@ -285,7 +287,7 @@ H5D__compact_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[])
 {
-    ssize_t ret_value;                  /* Return value */
+    ssize_t ret_value = -1;     /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -328,7 +330,7 @@ H5D__compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[])
 {
-    ssize_t ret_value;                  /* Return value */
+    ssize_t ret_value = -1;             /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -381,6 +383,33 @@ H5D__compact_flush(H5D_t *dset, hid_t dxpl_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__compact_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__compact_dest
+ *
+ * Purpose:	Free the compact buffer
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, Sept 3, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__compact_dest(H5D_t *dset, hid_t H5_ATTR_UNUSED dxpl_id)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(dset);
+
+    /* Free the buffer for the raw data for compact datasets */
+    dset->shared->layout.storage.u.compact.buf = H5MM_xfree(dset->shared->layout.storage.u.compact.buf);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D__compact_dest() */
 
 
 /*-------------------------------------------------------------------------

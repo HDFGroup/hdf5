@@ -27,14 +27,15 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 
 
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"    /* Cache */
+#include "H5ACprivate.h"        /* Cache                                */
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -152,6 +153,8 @@
 /* Definitions for data transform property */
 #define H5D_XFER_XFORM_SIZE         sizeof(void *)
 #define H5D_XFER_XFORM_DEF          NULL
+#define H5D_XFER_XFORM_SET          H5P__dxfr_xform_set
+#define H5D_XFER_XFORM_GET          H5P__dxfr_xform_get
 #define H5D_XFER_XFORM_ENC          H5P__dxfr_xform_enc
 #define H5D_XFER_XFORM_DEC          H5P__dxfr_xform_dec
 #define H5D_XFER_XFORM_DEL          H5P__dxfr_xform_del
@@ -167,6 +170,11 @@
 #define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_DEF		NULL
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_SIZE	sizeof(uint32_t)
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF	0
+/* Ring type - private property */
+#define H5AC_XFER_RING_SIZE      sizeof(unsigned)
+#define H5AC_XFER_RING_DEF       H5AC_RING_US
+#define H5AC_XFER_RING_ENC       H5P__encode_unsigned
+#define H5AC_XFER_RING_DEC       H5P__decode_unsigned
 
 /******************/
 /* Local Typedefs */
@@ -198,6 +206,8 @@ static herr_t H5P__dxfr_mpio_chunk_opt_hard_enc(const void *value, void **pp, si
 static herr_t H5P__dxfr_mpio_chunk_opt_hard_dec(const void **pp, void *value);
 static herr_t H5P__dxfr_edc_enc(const void *value, void **pp, size_t *size);
 static herr_t H5P__dxfr_edc_dec(const void **pp, void *value);
+static herr_t H5P__dxfr_xform_set(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__dxfr_xform_get(hid_t prop_id, const char* name, size_t size, void* value);
 static herr_t H5P__dxfr_xform_enc(const void *value, void **pp, size_t *size);
 static herr_t H5P__dxfr_xform_dec(const void **pp, void *value);
 static herr_t H5P__dxfr_xform_del(hid_t prop_id, const char* name, size_t size, void* value);
@@ -271,6 +281,7 @@ static const hbool_t H5D_def_direct_chunk_flag_g = H5D_XFER_DIRECT_CHUNK_WRITE_F
 static const uint32_t H5D_def_direct_chunk_filters_g = H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_DEF;	/* Default value for the filters of direct chunk write */
 static const hsize_t *H5D_def_direct_chunk_offset_g = H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_DEF; 	/* Default value for the offset of direct chunk write */
 static const uint32_t H5D_def_direct_chunk_datasize_g = H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF; /* Default value for the datasize of direct chunk write */
+static const H5AC_ring_t H5D_ring_g = H5AC_XFER_RING_DEF; /* Default value for the cache entry ring type */
 
 
 /*-------------------------------------------------------------------------
@@ -437,7 +448,7 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the data transform property */
     if(H5P_register_real(pclass, H5D_XFER_XFORM_NAME, H5D_XFER_XFORM_SIZE, &H5D_def_xfer_xform_g,
-            NULL, NULL, NULL, H5D_XFER_XFORM_ENC, H5D_XFER_XFORM_DEC, 
+            NULL, H5D_XFER_XFORM_SET, H5D_XFER_XFORM_GET, H5D_XFER_XFORM_ENC, H5D_XFER_XFORM_DEC, 
             H5D_XFER_XFORM_DEL, H5D_XFER_XFORM_COPY, H5D_XFER_XFORM_CMP, H5D_XFER_XFORM_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -463,6 +474,12 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if(H5P_register_real(pclass, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_SIZE, &H5D_def_direct_chunk_datasize_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the data transform property */
+    if(H5P_register_real(pclass, H5AC_RING_NAME, H5AC_XFER_RING_SIZE, &H5D_ring_g,
+            NULL, NULL, NULL, H5AC_XFER_RING_ENC, H5AC_XFER_RING_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -636,6 +653,72 @@ H5P__dxfr_btree_split_ratio_dec(const void **_pp, void *_value)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dxfr_btree_split_ratio_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dxfr_xform_set
+ *
+ * Purpose:     Copies a data transform property when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, Sept 1, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dxfr_xform_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of data transform */
+    if(H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the data transform info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__dxfr_xform_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dxfr_xform_get
+ *
+ * Purpose:     Copies a data transform property when it's retrieved for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, Sept 1, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dxfr_xform_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of data transform */
+    if(H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the data transform info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__dxfr_xform_get() */
 
 
 /*-------------------------------------------------------------------------
@@ -815,10 +898,12 @@ H5P__dxfr_xform_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size
 
     FUNC_ENTER_STATIC
 
+    /* Sanity check */
     HDassert(value);
 
+    /* Make copy of data transform */
     if(H5Z_xform_copy((H5Z_data_xform_t **)value) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "error copying the data transform info")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "error copying the data transform info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -941,7 +1026,7 @@ H5Pset_data_transform(hid_t plist_id, const char *expression)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* See if a data transform is already set, and free it if it is */
-    if(H5P_get(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) < 0)
+    if(H5P_peek(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data transform expression")
 
     /* Destroy previous data transform property */
@@ -952,15 +1037,14 @@ H5Pset_data_transform(hid_t plist_id, const char *expression)
     if(NULL == (data_xform_prop = H5Z_xform_create(expression)))
         HGOTO_ERROR(H5E_PLINE, H5E_NOSPACE, FAIL, "unable to create data transform info")
 
-    /* Update property list */
-    if(H5P_set(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) < 0)
+    /* Update property list (takes ownership of transform) */
+    if(H5P_poke(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting data transform expression")
 
 done:
-    if(ret_value <  0) {
+    if(ret_value < 0)
         if(data_xform_prop && H5Z_xform_destroy(data_xform_prop) <  0)
             HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "unable to release data transform expression")
-    } /* end if */
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_data_transform() */
@@ -1004,7 +1088,7 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    if(H5P_get(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) < 0)
+    if(H5P_peek(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data transform expression")
 
     if(NULL == data_xform_prop)
@@ -1014,6 +1098,7 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
     if(NULL == (pexp = H5Z_xform_extract_xform_str(data_xform_prop)))
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression")
 
+    /* Copy into application buffer */
     len = HDstrlen(pexp);
     if(expression) {
 	HDstrncpy(expression, pexp, MIN(len + 1, size));
@@ -1024,11 +1109,6 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
     ret_value = (ssize_t)len;
 
 done:
-    if(ret_value < 0) {
-	if(data_xform_prop && H5Z_xform_destroy(data_xform_prop) < 0)
-            HDONE_ERROR(H5E_PLINE, H5E_CLOSEERROR, FAIL, "unable to release data transform expression")
-    } /* end if */
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_data_transform() */
 

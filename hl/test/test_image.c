@@ -540,7 +540,7 @@ static int test_generate(void)
 {
     hid_t    fid;
     hsize_t  pal_dims[2] = { 256, 3 };
-    float    *data;
+    float    *data = NULL;
     int      imax, jmax, kmax;
     int      n_elements;
     float    valex, xmin, xmax, value;

@@ -105,16 +105,17 @@ CONTAINS
             i_H5S_hsize_flags, &
             i_H5T_flags, &
             i_H5Z_flags, &
-            i_H5generic_flags) &
+            i_H5generic_flags, &
+            i_H5generic_haddr_flags) &
             BIND(C,NAME='h5init_flags_c')
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
+         IMPORT :: HID_T, SIZE_T, HSIZE_T, HADDR_T
          IMPORT :: H5D_FLAGS_LEN, H5D_SIZE_FLAGS_LEN, &
               H5E_FLAGS_LEN, H5E_HID_FLAGS_LEN, &
               H5F_FLAGS_LEN, H5G_FLAGS_LEN, H5FD_FLAGS_LEN, &
               H5FD_HID_FLAGS_LEN, H5I_FLAGS_LEN, H5L_FLAGS_LEN, &
               H5O_FLAGS_LEN, H5P_FLAGS_LEN, H5P_FLAGS_INT_LEN, &
               H5R_FLAGS_LEN, H5S_FLAGS_LEN, H5S_HSIZE_FLAGS_LEN, &
-              H5T_FLAGS_LEN, H5Z_FLAGS_LEN, H5generic_FLAGS_LEN
+              H5T_FLAGS_LEN, H5Z_FLAGS_LEN, H5generic_FLAGS_LEN, H5generic_haddr_FLAGS_LEN
          IMPLICIT NONE
          INTEGER i_H5D_flags(H5D_FLAGS_LEN)
          INTEGER(SIZE_T) i_H5D_size_flags(H5D_SIZE_FLAGS_LEN)
@@ -135,6 +136,7 @@ CONTAINS
          INTEGER i_H5T_flags(H5T_FLAGS_LEN)
          INTEGER i_H5Z_flags(H5Z_FLAGS_LEN)
          INTEGER i_H5generic_flags(H5generic_FLAGS_LEN)
+         INTEGER(HADDR_T) i_H5generic_haddr_flags(H5generic_haddr_FLAGS_LEN)
        END FUNCTION h5init_flags_c
     END INTERFACE
     INTERFACE
@@ -164,7 +166,8 @@ CONTAINS
          H5S_hsize_flags, &
          H5T_flags, &
          H5Z_flags, &
-         H5generic_flags)
+         H5generic_flags,&
+         H5generic_haddr_flags)
     error_3 = h5init1_flags_c(H5LIB_flags )
     error = error_1 + error_2 + error_3
   END SUBROUTINE h5open_f

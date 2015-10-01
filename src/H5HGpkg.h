@@ -21,7 +21,7 @@
  *              only within the H5HG package. Source files outside the
  *              H5HG package should include H5HGprivate.h instead.
  */
-#ifndef H5HG_PACKAGE
+#if !(defined H5HG_FRIEND || defined H5HG_MODULE)
 #error "Do not include this file outside the H5HG package!"
 #endif
 

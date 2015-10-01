@@ -27,7 +27,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE /* suppress error about including H5Dpkg */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -343,9 +343,27 @@ H5D__piece_io(const hid_t file_id, const size_t count, H5D_io_info_t *io_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     /* Check the optional property list on what to do with collective chunk IO. */
-    chunk_opt_mode = (H5FD_mpio_chunk_opt_t)H5P_peek_unsigned(dx_plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME);
+    if(H5P_get(dx_plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, &chunk_opt_mode) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't get chunk optimization option")
     if(H5FD_MPIO_CHUNK_ONE_IO == chunk_opt_mode)
         io_option = H5D_ONE_LINK_CHUNK_IO;      /*no opt*/
+
+/* MSC - From merge.. remove probably */
+#if 0
+        if(H5D__mpio_get_sum_chunk(io_info, fm, &sum_chunk) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL, "unable to obtain the total chunk number of all processes");
+        if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
+
+        /* Get the chunk optimization option */
+        if(H5P_get(dx_plist, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, &one_link_chunk_io_threshold) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't get chunk optimization option")
+
+        /* step 1: choose an IO option */
+        /* If the average number of chunk per process is greater than a threshold, we will do one link chunked IO. */
+        if((unsigned)sum_chunk / mpi_size >= one_link_chunk_io_threshold)
+            io_option = H5D_ONE_LINK_CHUNK_IO_MORE_OPT;
+#endif
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     {
@@ -882,3 +900,152 @@ done:
 
 #endif /* H5_HAVE_PARALLEL */
 
+/* MSC - From merge.. remove probably */
+#if 0
+    FUNC_ENTER_STATIC
+
+    /* Assign the rank 0 to the root */
+    root              = 0;
+    comm              = io_info->comm;
+
+    /* Obtain the number of process and the current rank of the process */
+    if((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank")
+    if((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
+
+    /* Setup parameters */
+    H5_CHECKED_ASSIGN(total_chunks, int, fm->layout->u.chunk.nchunks, hsize_t);
+    if(H5P_get(dx_plist, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, &percent_nproc_per_chunk) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't get percent nproc per chunk")
+    /* if ratio is 0, perform collective io */
+    if(0 == percent_nproc_per_chunk) {
+        if(H5D__chunk_addrmap(io_info, chunk_addr) < 0)
+           HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address");
+        for(ic = 0; ic < total_chunks; ic++)
+           assign_io_mode[ic] = H5D_CHUNK_IO_MODE_COL;
+
+        HGOTO_DONE(SUCCEED)
+    } /* end if */
+    threshold_nproc_per_chunk = mpi_size * percent_nproc_per_chunk/100;
+
+    /* Allocate memory */
+    io_mode_info      = (uint8_t *)H5MM_calloc(total_chunks);
+    mergebuf          = H5MM_malloc((sizeof(haddr_t) + 1) * total_chunks);
+    tempbuf           = mergebuf + total_chunks;
+    if(mpi_rank == root)
+        recv_io_mode_info = (uint8_t *)H5MM_malloc(total_chunks * mpi_size);
+    mem_cleanup       = TRUE;
+
+    /* Obtain the regularity and selection information for all chunks in this process. */
+    chunk_node        = H5SL_first(fm->sel_chunks);
+    while(chunk_node) {
+        chunk_info    = H5SL_item(chunk_node);
+
+            io_mode_info[chunk_info->index] = H5D_CHUNK_SELECT_REG; /* this chunk is selected and is "regular" */
+        chunk_node = H5SL_next(chunk_node);
+    } /* end while */
+
+    /* Gather all the information */
+    if(MPI_SUCCESS != (mpi_code = MPI_Gather(io_mode_info, total_chunks, MPI_BYTE, recv_io_mode_info, total_chunks, MPI_BYTE, root, comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Gather failed", mpi_code)
+
+    /* Calculate the mode for IO(collective, independent or none) at root process */
+    if(mpi_rank == root) {
+        int               nproc;
+        int*              nproc_per_chunk;
+
+        /* pre-computing: calculate number of processes and
+            regularity of the selection occupied in each chunk */
+        nproc_per_chunk = (int*)H5MM_calloc(total_chunks * sizeof(int));
+
+        /* calculating the chunk address */
+        if(H5D__chunk_addrmap(io_info, chunk_addr) < 0) {
+            HDfree(nproc_per_chunk);
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
+        } /* end if */
+
+        /* checking for number of process per chunk and regularity of the selection*/
+        for(nproc = 0; nproc < mpi_size; nproc++) {
+            uint8_t *tmp_recv_io_mode_info = recv_io_mode_info + (nproc * total_chunks);
+
+            /* Calculate the number of process per chunk and adding irregular selection option */
+            for(ic = 0; ic < total_chunks; ic++, tmp_recv_io_mode_info++) {
+                if(*tmp_recv_io_mode_info != 0) {
+                    nproc_per_chunk[ic]++;
+                } /* end if */
+            } /* end for */
+        } /* end for */
+
+        /* Calculating MPIO mode for each chunk (collective, independent, none) */
+        for(ic = 0; ic < total_chunks; ic++) {
+            if(nproc_per_chunk[ic] > MAX(1, threshold_nproc_per_chunk)) {
+                assign_io_mode[ic] = H5D_CHUNK_IO_MODE_COL;
+            } /* end if */
+        } /* end for */
+
+
+        /* merge buffer io_mode info and chunk addr into one */
+        HDmemcpy(mergebuf, assign_io_mode, total_chunks);
+        HDmemcpy(tempbuf, chunk_addr, sizeof(haddr_t) * total_chunks);
+
+        HDfree(nproc_per_chunk);
+    } /* end if */
+
+    /* Broadcasting the MPI_IO option info. and chunk address info. */
+    if(MPI_SUCCESS != (mpi_code = MPI_Bcast(mergebuf, ((sizeof(haddr_t) + 1) * total_chunks), MPI_BYTE, root, comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_BCast failed", mpi_code)
+
+    HDmemcpy(assign_io_mode, mergebuf, total_chunks);
+    HDmemcpy(chunk_addr, tempbuf, sizeof(haddr_t) * total_chunks);
+
+#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+{
+    H5P_genplist_t    *plist;           /* Property list pointer */
+
+    /* Get the dataset transfer property list */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(io_info->dxpl_id)))
+        HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+
+    check_prop = H5P_exist_plist(plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME);
+    if(check_prop > 0) {
+        for(ic = 0; ic < total_chunks; ic++) {
+            if(assign_io_mode[ic] == H5D_CHUNK_IO_MODE_COL) {
+                new_value = 0;
+                if(H5P_set(plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, &new_value) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value")
+                break;
+            } /* end if */
+        } /* end for */
+    } /* end if */
+
+    check_prop = H5P_exist_plist(plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME);
+    if(check_prop > 0) {
+        int temp_count = 0;
+
+        for(ic = 0; ic < total_chunks; ic++) {
+            if(assign_io_mode[ic] == H5D_CHUNK_IO_MODE_COL) {
+                temp_count++;
+                break;
+            } /* end if */
+        } /* end for */
+        if(temp_count == 0) {
+            new_value = 0;
+            if(H5P_set(plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, &new_value) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value")
+        } /* end if */
+    } /* end if */
+}
+#endif
+
+done:
+    if(mem_cleanup) {
+        HDfree(io_mode_info);
+        HDfree(mergebuf);
+        if(mpi_rank == root)
+            HDfree(recv_io_mode_info);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__obtain_mpio_mode() */
+#endif

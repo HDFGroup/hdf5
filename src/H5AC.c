@@ -31,11 +31,9 @@
 /* Module Setup */
 /****************/
 
-#define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#include "H5ACmodule.h"         /* This source code file is part of the H5AC module */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5AC_init_interface
 
 /***********/
 /* Headers */
@@ -73,6 +71,9 @@ static herr_t H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr,
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 
 /*****************************/
@@ -135,7 +136,6 @@ static const char *H5AC_entry_type_names[H5AC_NTYPES] =
  * Purpose:	Initialize the interface from some other layer.
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
@@ -146,7 +146,7 @@ static const char *H5AC_entry_type_names[H5AC_NTYPES] =
 herr_t
 H5AC_init(void)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
     /* FUNC_ENTER() does all the work */
@@ -157,7 +157,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5AC_init_interface
+ * Function:	H5AC__init_package
  *
  * Purpose:	Initialize interface-specific information
  *
@@ -168,8 +168,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5AC_init_interface(void)
+herr_t
+H5AC__init_package(void)
 {
 #ifdef H5_HAVE_PARALLEL
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
@@ -177,7 +177,7 @@ H5AC_init_interface(void)
 #endif /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5_HAVE_PARALLEL
     /* Sanity check */
@@ -224,17 +224,16 @@ H5AC_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_init_interface() */
+} /* end H5AC__init_package() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5AC_term_interface
+ * Function:	H5AC_term_package
  *
  * Purpose:	Terminate this interface.
  *
  * Return:	Success:	Positive if anything was done that might
  *				affect other interfaces; zero otherwise.
- *
  * 		Failure:	Negative.
  *
  * Programmer:	Quincey Koziol
@@ -243,13 +242,13 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5AC_term_interface(void)
+H5AC_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5_PKG_INIT_VAR) {
 #ifdef H5_HAVE_PARALLEL
         if(H5AC_dxpl_id > 0 || H5AC_ind_dxpl_id > 0) {
             /* Indicate more work to do */
@@ -258,30 +257,20 @@ H5AC_term_interface(void)
             /* Close H5AC dxpl */
             if(H5I_dec_ref(H5AC_dxpl_id) < 0 || H5I_dec_ref(H5AC_ind_dxpl_id) < 0)
                 H5E_clear_stack(NULL); /*ignore error*/
-            else {
-                /* Reset static IDs */
-                H5AC_dxpl_id = (-1);
-                H5AC_ind_dxpl_id = (-1);
-
-                /* Reset interface initialization flag */
-                H5_interface_initialize_g = 0;
-            } /* end else */
         } /* end if */
-        else {
 #endif /* H5_HAVE_PARALLEL */
-            /* Reset static IDs */
-            H5AC_dxpl_id = (-1);
-            H5AC_ind_dxpl_id = (-1);
-#ifdef H5_HAVE_PARALLEL
-        } /* end else */
-#endif /* H5_HAVE_PARALLEL */
+            
+        /* Reset static IDs */
+        H5AC_dxpl_id = (-1);
+        H5AC_ind_dxpl_id = (-1);
 
         /* Reset interface initialization flag */
-        H5_interface_initialize_g = 0;
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5AC_term_interface() */
+} /* end H5AC_term_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -1066,7 +1055,7 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     size_t		trace_entry_size = 0;
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
-    void *		ret_value;      /* Return value */
+    void *		ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -2320,4 +2309,114 @@ H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5AC_retag_copied_metadata */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_get_entry_ring
+ *
+ * Purpose:     Given a file address, retrieve the ring for an entry at that
+ *              address.
+ *
+ * 		On error, the value of *ring is not modified.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              9/8/15
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *ring)
+{
+    herr_t      ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(ring);
+
+    /* Retrieve the ring value for the entry at address */
+    if(H5C_get_entry_ring(f, addr, ring) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "Can't retrieve ring for entry")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_get_entry_ring() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5AC_set_ring
+ *
+ * Purpose:        Routine to set the ring on a DXPL (for passing through
+ *                 to the metadata cache).
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Tuesday, September 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_set_ring(hid_t dxpl_id, H5AC_ring_t ring, H5P_genplist_t **dxpl,
+    H5AC_ring_t *orig_ring)
+{
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(dxpl);
+    HDassert(orig_ring);
+
+    /* Set the ring type in the DXPL */
+    if(NULL == ((*dxpl) = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if((H5P_get((*dxpl), H5AC_RING_NAME, orig_ring)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get original ring value")
+    if((H5P_set((*dxpl), H5AC_RING_NAME, &ring)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set ring value")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_set_ring() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5AC_reset_ring
+ *
+ * Purpose:        Routine to reset the original ring on a DXPL (after passing
+ *                 through to the metadata cache).
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Tuesday, September 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_reset_ring(H5P_genplist_t *dxpl, H5AC_ring_t orig_ring)
+{
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Reset the ring in the DXPL, if it's been changed */
+    if(orig_ring) {
+        /* Sanity check */
+        HDassert(dxpl);
+
+        if((H5P_set(dxpl, H5AC_RING_NAME, &orig_ring)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set property value")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_reset_ring() */
 

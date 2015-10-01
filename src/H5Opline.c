@@ -20,8 +20,9 @@
  * Purpose:	Data filter pipeline message.
  */
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+#define H5Z_FRIEND		/*suppress error about including H5Zpkg	  */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
@@ -116,7 +117,7 @@ H5O_pline_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
     H5Z_filter_info_t   *filter;                /* Filter to decode */
     size_t		name_length;            /* Length of filter name */
     size_t		i;                      /* Local index variable */
-    void		*ret_value;             /* Return value */
+    void		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -344,7 +345,7 @@ H5O_pline_copy(const void *_src, void *_dst/*out*/)
     const H5O_pline_t	*src = (const H5O_pline_t *)_src;       /* Source pipeline message */
     H5O_pline_t		*dst = (H5O_pline_t *)_dst;             /* Destination pipeline message */
     size_t		i;                      /* Local index variable */
-    H5O_pline_t		*ret_value;             /* Return value */
+    H5O_pline_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -434,7 +435,7 @@ H5O_pline_size(const H5F_t H5_ATTR_UNUSED *f, const void *mesg)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t*)mesg;      /* Pipeline message */
     size_t i;                   /* Local index variable */
-    size_t ret_value;           /* Return value */
+    size_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

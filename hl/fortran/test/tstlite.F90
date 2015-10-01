@@ -19,7 +19,7 @@
 #include <H5config_f.inc>
 
 PROGRAM lite_test
-
+  
   CALL test_dataset1D()
   CALL test_dataset2D()
   CALL test_dataset3D()
@@ -38,149 +38,148 @@ END PROGRAM lite_test
 !-------------------------------------------------------------------------
 
 SUBROUTINE test_dataset1D()
+  
+  USE, INTRINSIC :: ISO_C_BINDING
+  USE H5LT ! module of H5LT
+  USE HDF5 ! module of HDF5 library
+  
+  IMPLICIT NONE
+  
+  INTEGER, PARAMETER :: DIM1 = 4                       ! Dimension of array
+  CHARACTER(len=9), PARAMETER :: filename = "dsetf1.h5"! File name
+  CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
+  CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"   ! Dataset name
+  CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"   ! Dataset name
+  INTEGER(HID_T) :: file_id                            ! File identifier
+  INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/DIM1/)    ! Dataset dimensions
+  INTEGER        :: rank = 1                           ! Dataset rank
+  INTEGER, DIMENSION(DIM1) :: buf1                     ! Data buffer
+  INTEGER, DIMENSION(DIM1) :: bufr1                    ! Data buffer
+  REAL, DIMENSION(DIM1)    :: buf2                     ! Data buffer
+  REAL, DIMENSION(DIM1)    :: bufr2                    ! Data buffer
+  DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: buf3    ! Data buffer
+  DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: bufr3   ! Data buffer
+  INTEGER        :: errcode                            ! Error flag
+  INTEGER        :: i                                  ! general purpose integer
+  TYPE(C_PTR) :: f_ptr
+  integer(HID_T) :: mytype
 
-USE, INTRINSIC :: ISO_C_BINDING
-USE H5LT ! module of H5LT
-USE HDF5 ! module of HDF5 library
+  CALL test_begin(' Make/Read datasets (1D)        ')
 
-IMPLICIT NONE
+  !
+  ! Initialize the data array.
+  !
+  DO i = 1, DIM1
+     buf1(i) = i
+     buf2(i) = i
+     buf3(i) = i
+  END DO
 
-INTEGER, PARAMETER :: DIM1 = 4;                      ! Dimension of array
-CHARACTER(len=9), PARAMETER :: filename = "dsetf1.h5"! File name
-CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
-CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"   ! Dataset name
-CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"   ! Dataset name
-INTEGER(HID_T) :: file_id                            ! File identifier
-INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/DIM1/)    ! Dataset dimensions
-INTEGER        :: rank = 1                           ! Dataset rank
-INTEGER, DIMENSION(DIM1) :: buf1                     ! Data buffer
-INTEGER, DIMENSION(DIM1) :: bufr1                    ! Data buffer
-REAL, DIMENSION(DIM1)    :: buf2                     ! Data buffer
-REAL, DIMENSION(DIM1)    :: bufr2                    ! Data buffer
-DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: buf3    ! Data buffer
-DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: bufr3   ! Data buffer
-INTEGER        :: errcode                            ! Error flag
-INTEGER        :: i                                  ! general purpose integer
-TYPE(C_PTR) :: f_ptr
-integer(HID_T) :: mytype
+  !
+  ! Initialize FORTRAN predefined datatypes.
+  !
+  CALL h5open_f(errcode)
 
-CALL test_begin(' Make/Read datasets (1D)        ')
+  !
+  ! Create a new file using default properties.
+  !
+  CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
 
-!
-! Initialize the data array.
-!
-DO i = 1, DIM1
-  buf1(i) = i;
-  buf2(i) = i;
-  buf3(i) = i;
-END DO
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_INTEGER
+  !-------------------------------------------------------------------------
 
-!
-! Initialize FORTRAN predefined datatypes.
-!
-CALL h5open_f(errcode)
+  !
+  ! write dataset.
+  !
+  CALL h5ltmake_dataset_f(file_id, dsetname1, rank, dims, H5T_NATIVE_INTEGER, buf1, errcode)
+  !
+  ! read dataset.
+  !
+  CALL h5ltread_dataset_f(file_id, dsetname1, H5T_NATIVE_INTEGER, bufr1, dims, errcode)
 
-!
-! Create a new file using default properties.
-!
-CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, DIM1
+     IF ( buf1(i) .NE. bufr1(i) ) THEN
+        PRINT *, 'read buffer differs from write buffer (I)'
+        PRINT *,  bufr1(i), ' and ',   buf1(i)
+        STOP
+     ENDIF
+  END DO
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_INTEGER
-!-------------------------------------------------------------------------
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_REAL
+  !-------------------------------------------------------------------------
 
-!
-! write dataset.
-!
-CALL h5ltmake_dataset_f(file_id, dsetname1, rank, dims, H5T_NATIVE_INTEGER, buf1, errcode)
+  !
+  ! write dataset.
+  !
+  CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims, H5T_NATIVE_REAL, buf2, errcode)
 
-!
-! read dataset.
-!
-CALL h5ltread_dataset_f(file_id, dsetname1, H5T_NATIVE_INTEGER, bufr1, dims, errcode)
+  !
+  ! read dataset.
+  !
+  CALL h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_REAL, bufr2, dims, errcode)
 
-!
-! compare read and write buffers.
-!
-DO i = 1, DIM1
- IF ( buf1(i) .NE. bufr1(i) ) THEN
-   PRINT *, 'read buffer differs from write buffer (I)'
-   PRINT *,  bufr1(i), ' and ',   buf1(i)
-   STOP
-  ENDIF
-END DO
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, DIM1
+     IF ( buf2(i) .NE. bufr2(i) ) THEN
+        PRINT *, 'read buffer differs from write buffer (R)'
+        PRINT *,  bufr2(i), ' and ',   buf2(i)
+        STOP
+     ENDIF
+  END DO
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_REAL
-!-------------------------------------------------------------------------
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_DOUBLE
+  !-------------------------------------------------------------------------
 
-!
-! write dataset.
-!
-CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims, H5T_NATIVE_REAL, buf2, errcode)
+  !
+  ! write dataset.
+  !
+  f_ptr = C_LOC(buf3(1))
+  mytype = h5kind_to_type(KIND(buf3(1)), H5_REAL_KIND)
+  CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, &
+       mytype, f_ptr, errcode)
+  !CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_DOUBLE, buf3, errcode)
+  ! h5kind_to_type(KIND(buf3(1)), H5_REAL_KIND)
+  !
+  ! read dataset.
+  !
+  f_ptr = C_LOC(bufr3(1))
+  CALL h5ltread_dataset_f(file_id, dsetname3, &
+       h5kind_to_type(KIND(bufr3(1)), H5_REAL_KIND), f_ptr, errcode)
+  !CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_DOUBLE, bufr3, dims, errcode)
 
-!
-! read dataset.
-!
-CALL h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_REAL, bufr2, dims, errcode)
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, DIM1
+     IF ( buf3(i) .NE. bufr3(i) ) THEN
+        PRINT *, 'read buffer differs from write buffer (D)'
+        PRINT *,  bufr3(i), ' and ',   buf3(i)
+        STOP
+     ENDIF
+  END DO
 
-!
-! compare read and write buffers.
-!
-DO i = 1, DIM1
- IF ( buf2(i) .NE. bufr2(i) ) THEN
-   PRINT *, 'read buffer differs from write buffer (R)'
-   PRINT *,  bufr2(i), ' and ',   buf2(i)
-   STOP
-  ENDIF
-END DO
+  !
+  ! Close the file.
+  !
+  CALL h5fclose_f(file_id, errcode)
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_DOUBLE
-!-------------------------------------------------------------------------
+  !
+  ! Close FORTRAN predefined datatypes.
+  !
+  CALL h5close_f(errcode)
 
-!
-! write dataset.
-!
-f_ptr = C_LOC(buf3(1))
-mytype = h5kind_to_type(KIND(buf3(1)), H5_REAL_KIND)
-CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, &
-     mytype, f_ptr, errcode)
-!CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_DOUBLE, buf3, errcode)
-! h5kind_to_type(KIND(buf3(1)), H5_REAL_KIND)
-!
-! read dataset.
-!
-f_ptr = C_LOC(bufr3(1))
-CALL h5ltread_dataset_f(file_id, dsetname3, &
-     h5kind_to_type(KIND(bufr3(1)), H5_REAL_KIND), f_ptr, errcode)
-!CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_DOUBLE, bufr3, dims, errcode)
-
-!
-! compare read and write buffers.
-!
-DO i = 1, DIM1
- IF ( buf3(i) .NE. bufr3(i) ) THEN
-   PRINT *, 'read buffer differs from write buffer (D)'
-   PRINT *,  bufr3(i), ' and ',   buf3(i)
-   STOP
-  ENDIF
-END DO
-
-!
-! Close the file.
-!
-CALL h5fclose_f(file_id, errcode)
-
-!
-! Close FORTRAN predefined datatypes.
-!
-CALL h5close_f(errcode)
-
-CALL passed()
-!
-! end function.
-!
+  CALL passed()
+  !
+  ! end function.
+  !
 END SUBROUTINE test_dataset1D
 
 !-------------------------------------------------------------------------
@@ -189,194 +188,193 @@ END SUBROUTINE test_dataset1D
 
 SUBROUTINE test_dataset2D()
 
-USE, INTRINSIC :: ISO_C_BINDING
-USE H5LT ! module of H5LT
-USE HDF5 ! module of HDF5 library
+  USE, INTRINSIC :: ISO_C_BINDING
+  USE H5LT ! module of H5LT
+  USE HDF5 ! module of HDF5 library
 
-IMPLICIT NONE
-
-
-INTEGER(HSIZE_T), PARAMETER :: DIM1 = 4;             ! columns
-INTEGER(HSIZE_T), PARAMETER :: DIM2 = 6;             ! rows
-CHARACTER(len=9), PARAMETER :: filename = "dsetf2.h5"! File name
-CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
-CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"   ! Dataset name
-CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"   ! Dataset name
-CHARACTER(LEN=5), PARAMETER :: dsetname4 = "dset4"   ! Dataset name
-INTEGER(HID_T) :: file_id                            ! File identifier
-INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/4,6/)     ! Dataset dimensions
-INTEGER        :: rank = 2                           ! Dataset rank
-INTEGER, DIMENSION(DIM1*DIM2) :: buf                 ! Data buffer
-INTEGER, DIMENSION(DIM1*DIM2) :: bufr                ! Data buffer
-INTEGER, DIMENSION(DIM1,DIM2) :: buf2                ! Data buffer
-INTEGER, DIMENSION(DIM1,DIM2) :: buf2r               ! Data buffer
-REAL, DIMENSION(DIM1,DIM2), TARGET    :: buf3                ! Data buffer
-REAL, DIMENSION(DIM1,DIM2), TARGET    :: buf3r               ! Data buffer
-DOUBLE PRECISION, DIMENSION(DIM1,DIM2), TARGET :: buf4       ! Data buffer
-DOUBLE PRECISION, DIMENSION(DIM1,DIM2), TARGET :: buf4r      ! Data buffer
-INTEGER        :: errcode                            ! Error flag
-INTEGER(HSIZE_T) :: i, j, n                            ! general purpose integers
-TYPE(C_PTR) :: f_ptr
-
-CALL test_begin(' Make/Read datasets (2D)        ')
+  IMPLICIT NONE
 
 
-!
-! Initialize the data arrays.
-!
-n=1
-DO i = 1, DIM1*DIM2
-   buf(i) = INT(n)
-   n = n + 1
-END DO
+  INTEGER(HSIZE_T), PARAMETER :: DIM1 = 4              ! columns
+  INTEGER(HSIZE_T), PARAMETER :: DIM2 = 6              ! rows
+  CHARACTER(len=9), PARAMETER :: filename = "dsetf2.h5"! File name
+  CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
+  CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"   ! Dataset name
+  CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"   ! Dataset name
+  CHARACTER(LEN=5), PARAMETER :: dsetname4 = "dset4"   ! Dataset name
+  INTEGER(HID_T) :: file_id                            ! File identifier
+  INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/4,6/)     ! Dataset dimensions
+  INTEGER        :: rank = 2                           ! Dataset rank
+  INTEGER, DIMENSION(DIM1*DIM2) :: buf                 ! Data buffer
+  INTEGER, DIMENSION(DIM1*DIM2) :: bufr                ! Data buffer
+  INTEGER, DIMENSION(DIM1,DIM2) :: buf2                ! Data buffer
+  INTEGER, DIMENSION(DIM1,DIM2) :: buf2r               ! Data buffer
+  REAL, DIMENSION(DIM1,DIM2), TARGET    :: buf3                ! Data buffer
+  REAL, DIMENSION(DIM1,DIM2), TARGET    :: buf3r               ! Data buffer
+  DOUBLE PRECISION, DIMENSION(DIM1,DIM2), TARGET :: buf4       ! Data buffer
+  DOUBLE PRECISION, DIMENSION(DIM1,DIM2), TARGET :: buf4r      ! Data buffer
+  INTEGER        :: errcode                            ! Error flag
+  INTEGER(HSIZE_T) :: i, j, n                            ! general purpose integers
+  TYPE(C_PTR) :: f_ptr
 
-DO i = 1, dims(1)
- DO j = 1, dims(2)
-  buf2(i,j) = INT((i-1)*dims(2) + j)
-  buf3(i,j) = INT((i-1)*dims(2) + j)
-  buf4(i,j) = INT((i-1)*dims(2) + j)
- END DO
-END DO
+  CALL test_begin(' Make/Read datasets (2D)        ')
 
 
-!
-! Initialize FORTRAN predefined datatypes.
-!
-CALL h5open_f(errcode)
+  !
+  ! Initialize the data arrays.
+  !
+  n=1
+  DO i = 1, DIM1*DIM2
+     buf(i) = INT(n)
+     n = n + 1
+  END DO
 
-!
-! Create a new file using default properties.
-!
-CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        buf2(i,j) = INT((i-1)*dims(2) + j)
+        buf3(i,j) = INT((i-1)*dims(2) + j)
+        buf4(i,j) = INT((i-1)*dims(2) + j)
+     END DO
+  END DO
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_INT 1D buffer
-!-------------------------------------------------------------------------
+  !
+  ! Initialize FORTRAN predefined datatypes.
+  !
+  CALL h5open_f(errcode)
 
-!
-! write dataset.
-!
-CALL h5ltmake_dataset_f(file_id, dsetname1, rank, dims, H5T_NATIVE_INTEGER, buf, errcode)
+  !
+  ! Create a new file using default properties.
+  !
+  CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
 
-!
-! read dataset.
-!
-CALL h5ltread_dataset_f(file_id, dsetname1, H5T_NATIVE_INTEGER, bufr, dims, errcode)
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_INT 1D buffer
+  !-------------------------------------------------------------------------
 
-!
-! compare read and write buffers.
-!
-DO i = 1, DIM1*DIM2
-  IF ( buf(i) .NE. bufr(i) ) THEN
-    PRINT *, 'read buffer differs from write buffer'
-    PRINT *,  bufr(i), ' and ',   buf(i)
-    STOP
-  ENDIF
-END DO
+  !
+  ! write dataset.
+  !
+  CALL h5ltmake_dataset_f(file_id, dsetname1, rank, dims, H5T_NATIVE_INTEGER, buf, errcode)
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_INT 2D buffer
-!-------------------------------------------------------------------------
+  !
+  ! read dataset.
+  !
+  CALL h5ltread_dataset_f(file_id, dsetname1, H5T_NATIVE_INTEGER, bufr, dims, errcode)
 
-!
-! write dataset.
-!
-CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims, H5T_NATIVE_INTEGER, buf2, errcode)
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, DIM1*DIM2
+     IF ( buf(i) .NE. bufr(i) ) THEN
+        PRINT *, 'read buffer differs from write buffer'
+        PRINT *,  bufr(i), ' and ',   buf(i)
+        STOP
+     ENDIF
+  END DO
 
-!
-! read dataset.
-!
-CALL h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_INTEGER, buf2r, dims, errcode)
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_INT 2D buffer
+  !-------------------------------------------------------------------------
 
-!
-! compare read and write buffers.
-!
-DO i = 1, dims(1)
- DO j = 1, dims(2)
-  IF ( buf2(i,j) .NE. buf2r(i,j) ) THEN
-    PRINT *, 'read buffer differs from write buffer'
-    PRINT *,  buf2r(i,j), ' and ',   buf2(i,j)
-    STOP
-  ENDIF
- END DO
-END DO
+  !
+  ! write dataset.
+  !
+  CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims, H5T_NATIVE_INTEGER, buf2, errcode)
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_REAL
-!-------------------------------------------------------------------------
+  !
+  ! read dataset.
+  !
+  CALL h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_INTEGER, buf2r, dims, errcode)
 
-!
-! write dataset.
-!
-f_ptr = C_LOC(buf3(1,1))
-CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_REAL, f_ptr, errcode)
-!CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_REAL, buf3, errcode)
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        IF ( buf2(i,j) .NE. buf2r(i,j) ) THEN
+           PRINT *, 'read buffer differs from write buffer'
+           PRINT *,  buf2r(i,j), ' and ',   buf2(i,j)
+           STOP
+        ENDIF
+     END DO
+  END DO
 
-!
-! read dataset.
-!
-f_ptr = C_LOC(buf3r(1,1))
-CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, f_ptr, errcode)
-!CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, buf3r, dims, errcode)
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_REAL
+  !-------------------------------------------------------------------------
 
-!
-! compare read and write buffers.
-!
-DO i = 1, dims(1)
- DO j = 1, dims(2)
-  IF ( buf3(i,j) .NE. buf3r(i,j) ) THEN
-    PRINT *, 'read buffer differs from write buffer'
-    PRINT *,  buf3r(i,j), ' and ',   buf3(i,j)
-    STOP
-  ENDIF
- END DO
-END DO
+  !
+  ! write dataset.
+  !
+  f_ptr = C_LOC(buf3(1,1))
+  CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_REAL, f_ptr, errcode)
+  !CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_REAL, buf3, errcode)
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_DOUBLE
-!-------------------------------------------------------------------------
+  !
+  ! read dataset.
+  !
+  f_ptr = C_LOC(buf3r(1,1))
+  CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, f_ptr, errcode)
+  !CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, buf3r, dims, errcode)
 
-!
-! write dataset.
-!
-f_ptr = C_LOC(buf4(1,1))
-CALL h5ltmake_dataset_f(file_id, dsetname4, rank, dims, H5T_NATIVE_DOUBLE, f_ptr, errcode)
-!CALL h5ltmake_dataset_f(file_id, dsetname4, rank, dims, H5T_NATIVE_DOUBLE, buf4, errcode)
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        IF ( buf3(i,j) .NE. buf3r(i,j) ) THEN
+           PRINT *, 'read buffer differs from write buffer'
+           PRINT *,  buf3r(i,j), ' and ',   buf3(i,j)
+           STOP
+        ENDIF
+     END DO
+  END DO
 
-!
-! read dataset.
-f_ptr = C_LOC(buf4r(1,1))
-CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, f_ptr, errcode)
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_DOUBLE
+  !-------------------------------------------------------------------------
 
-!CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, buf4r, dims, errcode)
+  !
+  ! write dataset.
+  !
+  f_ptr = C_LOC(buf4(1,1))
+  CALL h5ltmake_dataset_f(file_id, dsetname4, rank, dims, H5T_NATIVE_DOUBLE, f_ptr, errcode)
+  !CALL h5ltmake_dataset_f(file_id, dsetname4, rank, dims, H5T_NATIVE_DOUBLE, buf4, errcode)
 
-!
-! compare read and write buffers.
-!
-DO i = 1, dims(1)
- DO j = 1, dims(2)
-  IF ( buf4(i,j) .NE. buf4r(i,j) ) THEN
-    PRINT *, 'read buffer differs from write buffer'
-    PRINT *,  buf4r(i,j), ' and ',   buf4(i,j)
-    STOP
-  ENDIF
- END DO
-END DO
+  !
+  ! read dataset.
+  f_ptr = C_LOC(buf4r(1,1))
+  CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, f_ptr, errcode)
 
-!
-! Close the file.
-!
-CALL h5fclose_f(file_id, errcode)
+  !CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, buf4r, dims, errcode)
 
-!
-! Close FORTRAN predefined datatypes.
-!
-CALL h5close_f(errcode)
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        IF ( buf4(i,j) .NE. buf4r(i,j) ) THEN
+           PRINT *, 'read buffer differs from write buffer'
+           PRINT *,  buf4r(i,j), ' and ',   buf4(i,j)
+           STOP
+        ENDIF
+     END DO
+  END DO
 
-CALL passed()
-!
-! end function.
-!
+  !
+  ! Close the file.
+  !
+  CALL h5fclose_f(file_id, errcode)
+
+  !
+  ! Close FORTRAN predefined datatypes.
+  !
+  CALL h5close_f(errcode)
+
+  CALL passed()
+  !
+  ! end function.
+  !
 END SUBROUTINE test_dataset2D
 
 
@@ -386,215 +384,313 @@ END SUBROUTINE test_dataset2D
 
 
 SUBROUTINE test_dataset3D()
-USE, INTRINSIC :: ISO_C_BINDING
-USE H5LT ! module of H5LT
-USE HDF5 ! module of HDF5 library
+  USE, INTRINSIC :: ISO_C_BINDING
+  USE H5LT ! module of H5LT
+  USE HDF5 ! module of HDF5 library
 
-IMPLICIT NONE
+  IMPLICIT NONE
 
-INTEGER, PARAMETER :: DIM1 = 6                             ! columns
-INTEGER, PARAMETER :: DIM2 = 4                             ! rows
-INTEGER, PARAMETER :: DIM3 = 2                             ! layers
-CHARACTER(len=9), PARAMETER :: filename = "dsetf3.h5"       ! File name
-CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"          ! Dataset name
-CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"          ! Dataset name
-CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"          ! Dataset name
-CHARACTER(LEN=5), PARAMETER :: dsetname4 = "dset4"          ! Dataset name
-INTEGER(HID_T) :: file_id                                   ! File identifier
-INTEGER(HSIZE_T), DIMENSION(3) :: dims = (/DIM1,DIM2,DIM3/) ! Dataset dimensions
-INTEGER(HSIZE_T), DIMENSION(3) :: dimsr                     ! Dataset dimensions
-INTEGER, DIMENSION(DIM1*DIM2*DIM3) :: buf                   ! Data buffer
-INTEGER, DIMENSION(DIM1*DIM2*DIM3) :: bufr                  ! Data buffer
-INTEGER, DIMENSION(DIM1,DIM2,DIM3) :: buf2                  ! Data buffer
-INTEGER, DIMENSION(DIM1,DIM2,DIM3) :: buf2r                 ! Data buffer
-REAL, DIMENSION(DIM1,DIM2,DIM3), TARGET    :: buf3                  ! Data buffer
-REAL, DIMENSION(DIM1,DIM2,DIM3), TARGET    :: buf3r                 ! Data buffer
-DOUBLE PRECISION, DIMENSION(DIM1,DIM2,DIM3), TARGET :: buf4         ! Data buffer
-DOUBLE PRECISION, DIMENSION(DIM1,DIM2,DIM3), TARGET :: buf4r        ! Data buffer
-INTEGER        :: rank = 3                                  ! Dataset rank
-INTEGER        :: errcode                                   ! Error flag
-INTEGER(HSIZE_T) :: i, j, k, n                                ! general purpose integers
-INTEGER          :: type_class
-INTEGER(SIZE_T)  :: type_size
-TYPE(C_PTR) :: f_ptr
-CALL test_begin(' Make/Read datasets (3D)        ')
+  INTEGER, PARAMETER :: DIM1 = 6                             ! columns
+  INTEGER, PARAMETER :: DIM2 = 4                             ! rows
+  INTEGER, PARAMETER :: DIM3 = 2                             ! layers
+  CHARACTER(len=9), PARAMETER :: filename = "dsetf3.h5"       ! File name
+  CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"          ! Dataset name
+  CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"          ! Dataset name
+  CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"          ! Dataset name
+  CHARACTER(LEN=5), PARAMETER :: dsetname4 = "dset4"          ! Dataset name
+  INTEGER(HID_T) :: file_id                                   ! File identifier
+  INTEGER(HSIZE_T), DIMENSION(3) :: dims = (/DIM1,DIM2,DIM3/) ! Dataset dimensions
+  INTEGER(HSIZE_T), DIMENSION(3) :: dimsr                     ! Dataset dimensions
+  INTEGER, DIMENSION(DIM1*DIM2*DIM3) :: buf                   ! Data buffer
+  INTEGER, DIMENSION(DIM1*DIM2*DIM3) :: bufr                  ! Data buffer
+  INTEGER, DIMENSION(DIM1,DIM2,DIM3) :: buf2                  ! Data buffer
+  INTEGER, DIMENSION(DIM1,DIM2,DIM3) :: buf2r                 ! Data buffer
+  REAL, DIMENSION(DIM1,DIM2,DIM3), TARGET    :: buf3                  ! Data buffer
+  REAL, DIMENSION(DIM1,DIM2,DIM3), TARGET    :: buf3r                 ! Data buffer
+  DOUBLE PRECISION, DIMENSION(DIM1,DIM2,DIM3), TARGET :: buf4         ! Data buffer
+  DOUBLE PRECISION, DIMENSION(DIM1,DIM2,DIM3), TARGET :: buf4r        ! Data buffer
+  INTEGER        :: rank = 3                                  ! Dataset rank
+  INTEGER        :: errcode                                   ! Error flag
+  INTEGER(HSIZE_T) :: i, j, k, n                                ! general purpose integers
+  INTEGER          :: type_class
+  INTEGER(SIZE_T)  :: type_size
+  TYPE(C_PTR) :: f_ptr
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+  INTEGER, PARAMETER :: int_kind_32 = SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
+  INTEGER(int_kind_32), DIMENSION(DIM1,DIM2,DIM3), TARGET :: dset_data_i32, data_out_i32
+  INTEGER(HID_T) :: dset_id32     ! Dataset identifier
+  CHARACTER(LEN=7), PARAMETER :: dsetname16a = "dset16a"     ! Dataset name
+  CHARACTER(LEN=7), PARAMETER :: dsetname16b = "dset16b"     ! Dataset name
+  CHARACTER(LEN=7), PARAMETER :: dsetname16c = "dset16c"     ! Dataset name
+  INTEGER(HID_T) :: type_id
+#endif
+
+  CALL test_begin(' Make/Read datasets (3D)        ')
 
 
-!
-! Initialize the data array.
-!
-n=1
-DO i = 1, DIM1*DIM2*DIM3
-   buf(i) = INT(n)
-   n = n + 1
-END DO
+  !
+  ! Initialize the data array.
+  !
+  n=1
+  DO i = 1, DIM1*DIM2*DIM3
+     buf(i) = INT(n)
+     n = n + 1
+  END DO
 
-n = 1
-DO i = 1, dims(1)
-   DO j = 1, dims(2)
-      DO k = 1, dims(3)
-         buf2(i,j,k) = INT(n)
-         buf3(i,j,k) = INT(n)
-         buf4(i,j,k) = INT(n)
-         n = n + 1
-      END DO
-   END DO
-END DO
+  n = 1
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        DO k = 1, dims(3)
+           buf2(i,j,k) = INT(n)
+           buf3(i,j,k) = INT(n)
+           buf4(i,j,k) = INT(n)
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+           dset_data_i32(i,j,k) = HUGE(1_int_kind_32)-INT(n,int_kind_32)
+#endif
+           n = n + 1
+        END DO
+     END DO
+  END DO
 
-!
-! Initialize FORTRAN predefined datatypes.
-!
-CALL h5open_f(errcode)
+  !
+  ! Initialize FORTRAN predefined datatypes.
+  !
+  CALL h5open_f(errcode)
 
-!
-! Create a new file using default properties.
-!
-CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
+  !
+  ! Create a new file using default properties.
+  !
+  CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, errcode)
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_INT 1D buffer
-!-------------------------------------------------------------------------
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_INT 1D buffer
+  !-------------------------------------------------------------------------
 
-!
-! write dataset.
-!
-CALL h5ltmake_dataset_f(file_id, dsetname1, rank, dims, H5T_NATIVE_INTEGER, buf, errcode)
+  !
+  ! write dataset.
+  !
+  CALL h5ltmake_dataset_f(file_id, dsetname1, rank, dims, H5T_NATIVE_INTEGER, buf, errcode)
 
-!
-! read dataset.
-!
-CALL h5ltread_dataset_f(file_id, dsetname1, H5T_NATIVE_INTEGER, bufr, dims, errcode)
+  !
+  ! read dataset.
+  !
+  CALL h5ltread_dataset_f(file_id, dsetname1, H5T_NATIVE_INTEGER, bufr, dims, errcode)
 
-!
-! compare read and write buffers.
-!
-DO i = 1, DIM1*DIM2*DIM3
-  IF ( buf(i) .NE. bufr(i) ) THEN
-    PRINT *, 'read buffer differs from write buffer'
-    PRINT *,  bufr(i), ' and ',   buf(i)
-    STOP
-  ENDIF
-END DO
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, DIM1*DIM2*DIM3
+     IF ( buf(i) .NE. bufr(i) ) THEN
+        PRINT *, 'read buffer differs from write buffer'
+        PRINT *,  bufr(i), ' and ',   buf(i)
+        STOP
+     ENDIF
+  END DO
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_INT 3D buffer
-!-------------------------------------------------------------------------
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_INT 3D buffer
+  !-------------------------------------------------------------------------
 
-!
-! write dataset.
-!
-CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims, H5T_NATIVE_INTEGER, buf2, errcode)
+  !
+  ! write dataset.
+  !
+  CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims, H5T_NATIVE_INTEGER, buf2, errcode)
 
-!
-! read dataset.
-!
-CALL h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_INTEGER, buf2r, dims, errcode)
+  !
+  ! read dataset.
+  !
+  CALL h5ltread_dataset_f(file_id, dsetname2, H5T_NATIVE_INTEGER, buf2r, dims, errcode)
 
-!
-! compare read and write buffers.
-!
-DO i = 1, dims(1)
- DO j = 1, dims(2)
- DO k = 1, dims(3)
-  IF ( buf2(i,j,k) .NE. buf2r(i,j,k) ) THEN
-    PRINT *, 'read buffer differs from write buffer'
-    PRINT *,  buf2r(i,j,k), ' and ',   buf2(i,j,k)
-    STOP
-  ENDIF
- END DO
- END DO
-END DO
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        DO k = 1, dims(3)
+           IF ( buf2(i,j,k) .NE. buf2r(i,j,k) ) THEN
+              PRINT *, 'read buffer differs from write buffer'
+              PRINT *,  buf2r(i,j,k), ' and ',   buf2(i,j,k)
+              STOP
+           ENDIF
+        END DO
+     END DO
+  END DO
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_REAL
-!-------------------------------------------------------------------------
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_REAL
+  !-------------------------------------------------------------------------
 
-!
-! write dataset.
-!
-f_ptr = C_LOC(buf3(1,1,1))
-CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_REAL, f_ptr, errcode)
-!CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_REAL, buf3, errcode)
+  !
+  ! write dataset.
+  !
+  f_ptr = C_LOC(buf3(1,1,1))
+  CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_REAL, f_ptr, errcode)
+  !CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims, H5T_NATIVE_REAL, buf3, errcode)
 
-!
-! read dataset.
-!
-f_ptr = C_LOC(buf3r(1,1,1))
-CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, f_ptr, errcode)
-!CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, buf3r, dims, errcode)
+  !
+  ! read dataset.
+  !
+  f_ptr = C_LOC(buf3r(1,1,1))
+  CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, f_ptr, errcode)
+  !CALL h5ltread_dataset_f(file_id, dsetname3, H5T_NATIVE_REAL, buf3r, dims, errcode)
 
-!
-! compare read and write buffers.
-!
-DO i = 1, dims(1)
- DO j = 1, dims(2)
- DO k = 1, dims(3)
-  IF ( buf3(i,j,k) .NE. buf3r(i,j,k) ) THEN
-    PRINT *, 'read buffer differs from write buffer'
-    PRINT *,  buf3r(i,j,k), ' and ',   buf3(i,j,k)
-    STOP
-  ENDIF
- END DO
- END DO
-END DO
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        DO k = 1, dims(3)
+           IF ( buf3(i,j,k) .NE. buf3r(i,j,k) ) THEN
+              PRINT *, 'read buffer differs from write buffer'
+              PRINT *,  buf3r(i,j,k), ' and ',   buf3(i,j,k)
+              STOP
+           ENDIF
+        END DO
+     END DO
+  END DO
 
-!-------------------------------------------------------------------------
-! H5T_NATIVE_DOUBLE
-!-------------------------------------------------------------------------
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_DOUBLE
+  !-------------------------------------------------------------------------
 
-!
-! write dataset.
-!
-f_ptr = C_LOC(buf4(1,1,1))
-CALL h5ltmake_dataset_f(file_id, dsetname4, rank, dims, H5T_NATIVE_DOUBLE, f_ptr, errcode)
+  !
+  ! write dataset.
+  !
+  f_ptr = C_LOC(buf4(1,1,1))
+  CALL h5ltmake_dataset_f(file_id, dsetname4, rank, dims, H5T_NATIVE_DOUBLE, f_ptr, errcode)
 
-!
-! read dataset.
-!
-f_ptr = C_LOC(buf4r(1,1,1))
-CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, f_ptr, errcode)
+  !
+  ! read dataset.
+  !
+  f_ptr = C_LOC(buf4r(1,1,1))
+  CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, f_ptr, errcode)
 
-!
-! compare read and write buffers.
-!
-DO i = 1, dims(1)
- DO j = 1, dims(2)
- DO k = 1, dims(3)
-  IF ( buf4(i,j,k) .NE. buf4r(i,j,k) ) THEN
-    PRINT *, 'read buffer differs from write buffer'
-    PRINT *,  buf4r(i,j,k), ' and ',   buf4(i,j,k)
-    STOP
-  ENDIF
- END DO
- END DO
-END DO
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        DO k = 1, dims(3)
+           IF ( buf4(i,j,k) .NE. buf4r(i,j,k) ) THEN
+              PRINT *, 'read buffer differs from write buffer'
+              PRINT *,  buf4r(i,j,k), ' and ',   buf4(i,j,k)
+              STOP
+           ENDIF
+        END DO
+     END DO
+  END DO
 
-CALL h5ltget_dataset_info_f(file_id,dsetname4,dimsr,type_class,type_size,errcode )
+  CALL h5ltget_dataset_info_f(file_id,dsetname4,dimsr,type_class,type_size,errcode )
 
-!
-! compare dimensions
-!
-DO i = 1, rank
- IF ( dimsr(i) .NE. dims(i) ) THEN
-   PRINT *, 'dimensions differ '
-   STOP
-  ENDIF
-END DO
+  !
+  ! compare dimensions
+  !
+  DO i = 1, rank
+     IF ( dimsr(i) .NE. dims(i) ) THEN
+        PRINT *, 'dimensions differ '
+        STOP
+     ENDIF
+  END DO
 
-!
-! Close the file.
-!
-CALL h5fclose_f(file_id, errcode)
+  !-------------------------------------------------------------------------
+  ! CHECKING NON-NATIVE INTEGER TYPES
+  !-------------------------------------------------------------------------
 
-!
-! Close FORTRAN predefined datatypes.
-!
-CALL h5close_f(errcode)
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+  ! (A) CHECKING INTEGER*16
+  !
+  !    (i.a) write dataset using F2003 interface
+  !
+  type_id = H5kind_to_type(KIND(dset_data_i32(1,1,1)), H5_INTEGER_KIND)
+  f_ptr = C_LOC(dset_data_i32(1,1,1))
+  CALL h5ltmake_dataset_f(file_id, dsetname16a, rank, dims, type_id, f_ptr, errcode)
+  !
+  !    (i.b) read dataset using F2003 interface
+  !
+  f_ptr = C_LOC(data_out_i32(1,1,1))
+  CALL h5ltread_dataset_f(file_id, dsetname16a, type_id, f_ptr, errcode)
 
-CALL passed()
-!
-! end function.
-!
+  !
+  !        compare read and write buffers.
+  !
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        DO k = 1, dims(3)
+           IF ( dset_data_i32(i,j,k) .NE. data_out_i32(i,j,k) ) THEN
+              PRINT *, 'read buffer differs from write buffer'
+              PRINT *,  dset_data_i32(i,j,k), ' and ', data_out_i32(i,j,k) 
+              STOP
+           ENDIF
+        END DO
+     END DO
+  ENDDO
+
+  !
+  !    (ii.a) write dataset using F90 interface
+  !
+  type_id = H5kind_to_type(KIND(dset_data_i32(1,1,1)), H5_INTEGER_KIND)
+  CALL h5ltmake_dataset_f(file_id, dsetname16b, rank, dims, type_id, dset_data_i32, errcode)
+  !
+  !    (ii.b) read dataset using F90 interface
+  !
+  CALL h5ltread_dataset_f(file_id, dsetname16b, type_id, data_out_i32, dims, errcode)
+
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        DO k = 1, dims(3)
+           IF ( dset_data_i32(i,j,k) .NE. data_out_i32(i,j,k) ) THEN
+              PRINT *, 'read buffer differs from write buffer'
+              PRINT *,  dset_data_i32(i,j,k), ' and ', data_out_i32(i,j,k) 
+              STOP
+           ENDIF
+        END DO
+     END DO
+  ENDDO
+
+  !
+  !     (iii.a) write dataset using F90 H5LTmake_dataset_int_f interface
+  !
+  CALL h5ltmake_dataset_int_f(file_id, dsetname16c, rank, dims, dset_data_i32, errcode)
+
+  !
+  !     (iii.b) read dataset using F90 H5LTmake_dataset_int_f interface
+  !
+  CALL h5ltread_dataset_int_f(file_id, dsetname16c, data_out_i32, dims, errcode)
+
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        DO k = 1, dims(3)
+           IF ( dset_data_i32(i,j,k) .NE. data_out_i32(i,j,k) ) THEN
+              PRINT *, 'read buffer differs from write buffer'
+              PRINT *,  dset_data_i32(i,j,k), ' and ', data_out_i32(i,j,k) 
+              STOP
+           ENDIF
+        END DO
+     END DO
+  ENDDO
+
+#endif
+
+  !
+  ! Close the file.
+  !
+  CALL h5fclose_f(file_id, errcode)
+
+  !
+  ! Close FORTRAN predefined datatypes.
+  !
+  CALL h5close_f(errcode)
+
+  CALL passed()
+  !
+  ! end function.
+  !
 END SUBROUTINE test_dataset3D
 
 !-------------------------------------------------------------------------
@@ -623,6 +719,7 @@ SUBROUTINE test_datasetND(rank)
   CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"          ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"          ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname4 = "dset4"          ! Dataset name
+  CHARACTER(LEN=5), PARAMETER :: dsetname5 = "dset5"          ! Dataset name
   INTEGER(HID_T) :: file_id                                   ! File identifier
   INTEGER(HSIZE_T), DIMENSION(7) :: dims
   INTEGER(HSIZE_T), DIMENSION(7) :: dimsr                       ! Dataset dimensions
@@ -650,29 +747,41 @@ SUBROUTINE test_datasetND(rank)
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:,:,:,:), TARGET :: dbufr_6        ! Data buffer
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:), TARGET :: dbuf_7       ! Data buffer
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:), TARGET :: dbufr_7      ! Data buffer
-  INTEGER        :: errcode                                   ! Error flag
-  INTEGER(HSIZE_T)        :: i, j, k, l, m, n, o, nn                   ! general purpose integers
+  CHARACTER(LEN=5), ALLOCATABLE, DIMENSION(:,:,:,:), TARGET :: cbuf_4            ! Data buffer
+  CHARACTER(LEN=5), ALLOCATABLE, DIMENSION(:,:,:,:), TARGET :: cbufr_4           ! Data buffer
+  CHARACTER(LEN=5), ALLOCATABLE, DIMENSION(:,:,:,:,:), TARGET :: cbuf_5          ! Data buffer
+  CHARACTER(LEN=5), ALLOCATABLE, DIMENSION(:,:,:,:,:), TARGET :: cbufr_5         ! Data buffer
+  CHARACTER(LEN=5), ALLOCATABLE, DIMENSION(:,:,:,:,:,:), TARGET :: cbuf_6        ! Data buffer
+  CHARACTER(LEN=5), ALLOCATABLE, DIMENSION(:,:,:,:,:,:), TARGET :: cbufr_6       ! Data buffer
+  CHARACTER(LEN=5), ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:), TARGET :: cbuf_7      ! Data buffer
+  CHARACTER(LEN=5), ALLOCATABLE, DIMENSION(:,:,:,:,:,:,:), TARGET :: cbufr_7     ! Data buffer
+  INTEGER        :: errcode                            ! Error flag
+  INTEGER(HSIZE_T) :: i, j, k, l, m, n, o, nn   ! general purpose integers
   INTEGER          :: type_class
   INTEGER(SIZE_T)  :: type_size
   CHARACTER(LEN=1) :: ichr1
+  CHARACTER(LEN=3) :: ichr3
   TYPE(C_PTR) :: f_ptr
+  INTEGER(HID_T) :: type_id
 
   WRITE(ichr1,'(I1.1)') rank
   CALL test_begin(' Make/Read datasets ('//ichr1//'D)        ')
-!
-! Initialize the data array.
-!
+  !
+  ! Initialize the data array.
+  !
   IF(rank.EQ.4)THEN
-     
+
      ALLOCATE(ibuf_4 (1:DIM1,1:DIM2,1:DIM3,1:DIM4))
      ALLOCATE(ibufr_4(1:DIM1,1:DIM2,1:DIM3,1:DIM4))
      ALLOCATE(rbuf_4 (1:DIM1,1:DIM2,1:DIM3,1:DIM4))
      ALLOCATE(rbufr_4(1:DIM1,1:DIM2,1:DIM3,1:DIM4))
      ALLOCATE(dbuf_4 (1:DIM1,1:DIM2,1:DIM3,1:DIM4))
      ALLOCATE(dbufr_4(1:DIM1,1:DIM2,1:DIM3,1:DIM4))
+     ALLOCATE(cbuf_4 (1:DIM1,1:DIM2,1:DIM3,1:DIM4))
+     ALLOCATE(cbufr_4(1:DIM1,1:DIM2,1:DIM3,1:DIM4))
 
      dims(1:7) = (/DIM1,DIM2,DIM3,DIM4,0,0,0/)
-     
+
      nn = 1
      DO i = 1, DIM1
         DO j = 1, DIM2
@@ -681,12 +790,14 @@ SUBROUTINE test_datasetND(rank)
                  ibuf_4(i,j,k,l) = INT(nn)
                  rbuf_4(i,j,k,l) = INT(nn)
                  dbuf_4(i,j,k,l) = INT(nn)
+                 WRITE(cbuf_4(i,j,k,l),'(I5.5)') nn
                  nn = nn + 1
               END DO
            END DO
         END DO
+
      ENDDO
-     
+
   ELSE IF(rank.EQ.5)THEN
 
      ALLOCATE(ibuf_5 (1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5))
@@ -695,9 +806,11 @@ SUBROUTINE test_datasetND(rank)
      ALLOCATE(rbufr_5(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5))
      ALLOCATE(dbuf_5 (1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5))
      ALLOCATE(dbufr_5(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5))
+     ALLOCATE(cbuf_5 (1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5))
+     ALLOCATE(cbufr_5(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5))
 
      dims(1:7) = (/DIM1,DIM2,DIM3,DIM4,DIM5,0,0/)
-     
+
      nn = 1
      DO i = 1, DIM1
         DO j = 1, DIM2
@@ -707,6 +820,7 @@ SUBROUTINE test_datasetND(rank)
                     ibuf_5(i,j,k,l,m) = INT(nn)
                     rbuf_5(i,j,k,l,m) = INT(nn)
                     dbuf_5(i,j,k,l,m) = INT(nn)
+                    WRITE(cbuf_5(i,j,k,l,m),'(I5.5)') nn
                     nn = nn + 1
                  END DO
               END DO
@@ -722,9 +836,11 @@ SUBROUTINE test_datasetND(rank)
      ALLOCATE(rbufr_6(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6))
      ALLOCATE(dbuf_6 (1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6))
      ALLOCATE(dbufr_6(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6))
+     ALLOCATE(cbuf_6 (1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6))
+     ALLOCATE(cbufr_6(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6))
 
      dims(1:7) = (/DIM1,DIM2,DIM3,DIM4,DIM5,DIM6,0/)
-     
+
      nn = 1
      DO i = 1, DIM1
         DO j = 1, DIM2
@@ -735,6 +851,7 @@ SUBROUTINE test_datasetND(rank)
                        ibuf_6(i,j,k,l,m,n) = INT(nn)
                        rbuf_6(i,j,k,l,m,n) = INT(nn)
                        dbuf_6(i,j,k,l,m,n) = INT(nn)
+                       WRITE(cbuf_6(i,j,k,l,m,n),'(I5.5)') nn
                        nn = nn + 1
                     END DO
                  END DO
@@ -742,18 +859,20 @@ SUBROUTINE test_datasetND(rank)
            ENDDO
         ENDDO
      ENDDO
-     
+
   ELSE IF(rank.EQ.7)THEN
-     
+
      ALLOCATE(ibuf_7 (1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6,1:DIM7))
      ALLOCATE(ibufr_7(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6,1:DIM7))
      ALLOCATE(rbuf_7 (1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6,1:DIM7))
      ALLOCATE(rbufr_7(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6,1:DIM7))
      ALLOCATE(dbuf_7 (1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6,1:DIM7))
      ALLOCATE(dbufr_7(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6,1:DIM7))
+     ALLOCATE(cbuf_7 (1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6,1:DIM7))
+     ALLOCATE(cbufr_7(1:DIM1,1:DIM2,1:DIM3,1:DIM4,1:DIM5,1:DIM6,1:DIM7))
 
      dims(1:7) = (/DIM1,DIM2,DIM3,DIM4,DIM5,DIM6,DIM7/)
-     
+
      nn = 1
      DO i = 1, DIM1
         DO j = 1, DIM2
@@ -765,6 +884,7 @@ SUBROUTINE test_datasetND(rank)
                           ibuf_7(i,j,k,l,m,n,o) = INT(nn)
                           rbuf_7(i,j,k,l,m,n,o) = INT(nn)
                           dbuf_7(i,j,k,l,m,n,o) = INT(nn)
+                          WRITE(cbuf_7(i,j,k,l,m,n,o),'(I5.5)') nn
                           nn = nn + 1
                        END DO
                     END DO
@@ -803,7 +923,7 @@ SUBROUTINE test_datasetND(rank)
   ELSE IF(rank.EQ.7)THEN
      CALL h5ltmake_dataset_f(file_id, dsetname2, rank, dims(1:rank), H5T_NATIVE_INTEGER, ibuf_7, errcode)
   ENDIF
-     
+
 
   !
   ! read dataset.
@@ -874,7 +994,7 @@ SUBROUTINE test_datasetND(rank)
   IF(rank.EQ.4)THEN
      f_ptr = C_LOC(rbuf_4(1,1,1,1))
      CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims(1:rank), H5T_NATIVE_REAL, f_ptr, errcode)
-    ! CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims(1:rank), H5T_NATIVE_REAL, rbuf_4, errcode)
+     ! CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims(1:rank), H5T_NATIVE_REAL, rbuf_4, errcode)
   ELSE IF(rank.EQ.5)THEN
      f_ptr = C_LOC(rbuf_5(1,1,1,1,1))
      CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims(1:rank), H5T_NATIVE_REAL, f_ptr, errcode)
@@ -887,7 +1007,7 @@ SUBROUTINE test_datasetND(rank)
      CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims(1:rank), H5T_NATIVE_REAL, f_ptr, errcode)
      !CALL h5ltmake_dataset_f(file_id, dsetname3, rank, dims(1:rank), H5T_NATIVE_REAL, rbuf_7, errcode)
   ENDIF
-     
+
 
   !
   ! read dataset.
@@ -972,7 +1092,6 @@ SUBROUTINE test_datasetND(rank)
      f_ptr = C_LOC(dbuf_7(1,1,1,1,1,1,1))
      CALL h5ltmake_dataset_f(file_id, dsetname4, rank, dims(1:rank), H5T_NATIVE_DOUBLE, f_ptr, errcode)
   ENDIF
-     
 
   !
   ! read dataset.
@@ -1037,7 +1156,96 @@ SUBROUTINE test_datasetND(rank)
      ENDDO
   ENDDO
 
+  !-------------------------------------------------------------------------
+  ! H5T_NATIVE_CHARACTER ND buffer
+  !-------------------------------------------------------------------------
+
+  CALL H5Tcopy_f(H5T_FORTRAN_S1, type_id, errcode)
+  CALL H5Tset_size_f(type_id, 5_SIZE_T, errcode)
+  !
+  ! write dataset.
+  !
+  IF(rank.EQ.4)THEN
+     f_ptr = C_LOC(cbuf_4(1,1,1,1)(1:1))
+     CALL h5ltmake_dataset_f(file_id, dsetname5, rank, dims(1:rank), type_id, f_ptr, errcode)
+  ELSE IF(rank.EQ.5)THEN
+     f_ptr = C_LOC(cbuf_5(1,1,1,1,1)(1:1))
+     CALL h5ltmake_dataset_f(file_id, dsetname5, rank, dims(1:rank), type_id, f_ptr, errcode)
+  ELSE IF(rank.EQ.6)THEN
+     f_ptr = C_LOC(cbuf_6(1,1,1,1,1,1)(1:1))
+     CALL h5ltmake_dataset_f(file_id, dsetname5, rank, dims(1:rank), type_id, f_ptr, errcode)
+  ELSE IF(rank.EQ.7)THEN
+     f_ptr = C_LOC(cbuf_7(1,1,1,1,1,1,1)(1:1))
+     CALL h5ltmake_dataset_f(file_id, dsetname5, rank, dims(1:rank), type_id, f_ptr, errcode)
+  ENDIF
+
+  !
+  ! read dataset.
+  !
+  IF(rank.EQ.4)THEN
+     f_ptr = C_LOC(cbufr_4(1,1,1,1)(1:1))
+     CALL h5ltread_dataset_f(file_id, dsetname5, type_id, f_ptr, errcode)
+  ELSE IF(rank.EQ.5)THEN
+     f_ptr = C_LOC(cbufr_5(1,1,1,1,1)(1:1))
+     CALL h5ltread_dataset_f(file_id, dsetname5, type_id, f_ptr, errcode)
+  ELSE IF(rank.EQ.6)THEN
+     f_ptr = C_LOC(cbufr_6(1,1,1,1,1,1)(1:1))
+     CALL h5ltread_dataset_f(file_id, dsetname5, type_id, f_ptr, errcode)
+  ELSE IF(rank.EQ.7)THEN
+     f_ptr = C_LOC(cbufr_7(1,1,1,1,1,1,1)(1:1))
+     CALL h5ltread_dataset_f(file_id, dsetname5, type_id, f_ptr, errcode)
+  ENDIF
+
+
+  !
+  ! compare read and write buffers.
+  !
+  DO i = 1, dims(1)
+     DO j = 1, dims(2)
+        DO k = 1, dims(3)
+           DO l = 1, dims(4)
+              IF(rank.EQ.4)THEN
+                 IF ( cbuf_4(i,j,k,l) .NE. cbufr_4(i,j,k,l) ) THEN
+                    PRINT *, 'read buffer differs from write buffer (character)'
+                    PRINT *,  cbuf_4(i,j,k,l), ' and ', cbufr_4(i,j,k,l)
+                    STOP
+                 ENDIF
+              ENDIF
+              DO m = 1, dims(5)
+                 IF(rank.EQ.5)THEN
+                    IF ( cbuf_5(i,j,k,l,m) .NE. cbufr_5(i,j,k,l,m) ) THEN
+                       PRINT *, 'read buffer differs from write buffer (character)'
+                       PRINT *,  cbuf_5(i,j,k,l,m), ' and ', cbufr_5(i,j,k,l,m)
+                       STOP
+                    ENDIF
+                 ENDIF
+                 DO n = 1, dims(6)
+                    IF(rank.EQ.6)THEN
+                       IF ( cbuf_6(i,j,k,l,m,n) .NE. cbufr_6(i,j,k,l,m,n) ) THEN
+                          PRINT *, 'read buffer differs from write buffer (character)'
+                          PRINT *,  cbuf_6(i,j,k,l,m,n), ' and ', cbufr_6(i,j,k,l,m,n)
+                          STOP
+                       ENDIF
+                    ENDIF
+                    DO o = 1, dims(7)
+                       IF(rank.EQ.7)THEN
+                          IF ( cbuf_7(i,j,k,l,m,n,o) .NE. cbufr_7(i,j,k,l,m,n,o) ) THEN
+                             PRINT *, 'read buffer differs from write buffer (character)'
+                             PRINT *,  cbuf_7(i,j,k,l,m,n,o), ' and ', cbufr_7(i,j,k,l,m,n,o)
+                             STOP
+                          ENDIF
+                       ENDIF
+                    ENDDO
+                 ENDDO
+              ENDDO
+           ENDDO
+        ENDDO
+     ENDDO
+  ENDDO
+
   CALL h5ltget_dataset_info_f(file_id,dsetname4,dimsr,type_class,type_size,errcode )
+
+  CALL h5tclose_f(type_id,errcode)
 
   !
   ! compare dimensions
@@ -1062,13 +1270,13 @@ SUBROUTINE test_datasetND(rank)
   ! DEALLOCATE RESOURCES
 
   IF(rank.EQ.4)THEN
-     DEALLOCATE(ibuf_4, ibufr_4, rbuf_4, rbufr_4, dbuf_4, dbufr_4)
+     DEALLOCATE(ibuf_4, ibufr_4, rbuf_4, rbufr_4, dbuf_4, dbufr_4, cbuf_4, cbufr_4)
   ELSE IF(rank.EQ.5)THEN
-     DEALLOCATE(ibuf_5, ibufr_5, rbuf_5, rbufr_5, dbuf_5, dbufr_5)
+     DEALLOCATE(ibuf_5, ibufr_5, rbuf_5, rbufr_5, dbuf_5, dbufr_5, cbuf_5, cbufr_5)
   ELSE IF(rank.EQ.6)THEN
-     DEALLOCATE(ibuf_6, ibufr_6, rbuf_6, rbufr_6, dbuf_6, dbufr_6)
+     DEALLOCATE(ibuf_6, ibufr_6, rbuf_6, rbufr_6, dbuf_6, dbufr_6, cbuf_6, cbufr_6)
   ELSE IF(rank.EQ.7)THEN
-     DEALLOCATE(ibuf_7, ibufr_7, rbuf_7, rbufr_7, dbuf_7, dbufr_7)
+     DEALLOCATE(ibuf_7, ibufr_7, rbuf_7, rbufr_7, dbuf_7, dbufr_7, cbuf_7, cbufr_7)
   ENDIF
 
   CALL passed()
@@ -1076,7 +1284,6 @@ SUBROUTINE test_datasetND(rank)
   ! end function.
   !
 END SUBROUTINE test_datasetND
-
 
 
 !-------------------------------------------------------------------------
@@ -1094,7 +1301,7 @@ SUBROUTINE test_datasets()
   CHARACTER(len=9), PARAMETER :: filename = "dsetf4.h5"! File name
   INTEGER(HID_T) :: file_id                            ! File identifier
   INTEGER        :: errcode                            ! Error flag
-  INTEGER, PARAMETER :: DIM1 = 10                     ! Dimension of array
+  INTEGER, PARAMETER :: DIM1 = 10                      ! Dimension of array
   CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"   ! Dataset name
@@ -1108,10 +1315,10 @@ SUBROUTINE test_datasets()
   CHARACTER(LEN=8)            :: buf1r                 ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: buf2            ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: bufr2           ! Data buffer
-  REAL, DIMENSION(DIM1), TARGET             :: buf3            ! Data buffer
-  REAL, DIMENSION(DIM1) , TARGET            :: bufr3           ! Data buffer
-  DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: buf4            ! Data buffer
-  DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: bufr4           ! Data buffer
+  REAL, DIMENSION(DIM1), TARGET             :: buf3    ! Data buffer
+  REAL, DIMENSION(DIM1) , TARGET            :: bufr3   ! Data buffer
+  DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: buf4    ! Data buffer
+  DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: bufr4   ! Data buffer
   INTEGER          :: i, n                             ! general purpose integer
   INTEGER          :: has                              ! general purpose integer
   INTEGER          :: type_class
@@ -1289,7 +1496,7 @@ SUBROUTINE test_datasets()
   IF(errcode.LT.0.OR..NOT.path_valid)THEN
      PRINT *, 'error in h5ltpath_valid_f'
      STOP
-  ENDIF 
+  ENDIF
 
   ! Should fail, dataset does not exist
   CALL h5ltpath_valid_f(file_id, "/"//dsetname2//"junk", .TRUE., path_valid, errcode)
@@ -1306,14 +1513,14 @@ SUBROUTINE test_datasets()
 
   ! Create a dangling soft link
   CALL h5lcreate_soft_f("/G2", file_id, "/G3", errcode)
-  
+
   ! Should pass, does not check for dangled link
   CALL h5ltpath_valid_f(file_id, "/G3", .FALSE., path_valid, errcode)
   IF(.NOT.path_valid)THEN
      PRINT *, 'error in h5ltpath_valid_f'
      STOP
   ENDIF
-     
+
   ! Should fail, dangled link
   CALL h5ltpath_valid_f(file_id, "/G2", .TRUE., path_valid, errcode)
   IF(path_valid)THEN
@@ -1336,7 +1543,6 @@ SUBROUTINE test_datasets()
      STOP
   ENDIF
 
-
   !-------------------------------------------------------------------------
   ! test h5ltfind_dataset_f function
   !-------------------------------------------------------------------------
@@ -1351,7 +1557,6 @@ SUBROUTINE test_datasets()
   !-------------------------------------------------------------------------
   ! test h5ltget_dataset_info_f function
   !-------------------------------------------------------------------------
-
 
   CALL h5ltget_dataset_info_f(file_id,dsetname4,dimsr,type_class,type_size,errcode )
 
@@ -1402,7 +1607,7 @@ SUBROUTINE test_attributes()
   CHARACTER(len=9), PARAMETER :: filename = "dsetf5.h5"! File name
   CHARACTER(len=9), PARAMETER :: filename1 ="tattr.h5" ! C written attribute file
   INTEGER(HID_T) :: file_id                            ! File identifier
-!  INTEGER(HID_T) :: file_id1
+  !  INTEGER(HID_T) :: file_id1
   INTEGER, PARAMETER :: DIM1 = 10                     ! Dimension of array
   CHARACTER(LEN=5), PARAMETER :: attrname1 = "attr1"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname2 = "attr2"   ! Attribute name
@@ -1413,8 +1618,8 @@ SUBROUTINE test_attributes()
   CHARACTER(LEN=16), PARAMETER :: buf_c = "string attribute"
   CHARACTER(LEN=8)                  :: bufr1           ! Data buffer
   CHARACTER(LEN=10)                 :: bufr1_lg        ! Data buffer
-!  CHARACTER(LEN=16)                 :: bufr_c          ! Data buffer
-!  CHARACTER(LEN=18)                 :: bufr_c_lg       ! Data buffer
+  !  CHARACTER(LEN=16)                 :: bufr_c          ! Data buffer
+  !  CHARACTER(LEN=18)                 :: bufr_c_lg       ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: buf2            ! Data buffer
   INTEGER, DIMENSION(DIM1)          :: bufr2           ! Data buffer
   REAL, DIMENSION(DIM1), target     :: buf3            ! Data buffer
@@ -1547,41 +1752,41 @@ SUBROUTINE test_attributes()
 
   IF(SizeOf_buf_type.LT.16)THEN ! MSB can't handle 16 byte reals
 
-  CALL test_begin(' Set/Get attributes double      ')
+     CALL test_begin(' Set/Get attributes double      ')
 
-  !
-  ! write attribute.
-  !
-  f_ptr = C_LOC(buf4(1))
-  CALL h5ltset_attribute_f(file_id,dsetname1,attrname4,f_ptr,"real", SizeOf_buf_type, size, errcode)
+     !
+     ! write attribute.
+     !
+     f_ptr = C_LOC(buf4(1))
+     CALL h5ltset_attribute_f(file_id,dsetname1,attrname4,f_ptr,"real", SizeOf_buf_type, size, errcode)
 
-!  CALL h5ltset_attribute_double_f(file_id,dsetname1,attrname4,buf4, size, errcode)
+     !  CALL h5ltset_attribute_double_f(file_id,dsetname1,attrname4,buf4, size, errcode)
 
-  !
-  ! read attribute.
-  !
+     !
+     ! read attribute.
+     !
 
 #ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
-  SizeOf_buf_type = STORAGE_SIZE(bufr4(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
+     SizeOf_buf_type = STORAGE_SIZE(bufr4(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
-  SizeOf_buf_type = SIZEOF(bufr4(1))
+     SizeOf_buf_type = SIZEOF(bufr4(1))
 #endif
 
-  f_ptr = C_LOC(bufr4(1))
-  CALL h5ltget_attribute_f(file_id,dsetname1,attrname4,f_ptr,"REAL",SizeOf_buf_type,errcode)
+     f_ptr = C_LOC(bufr4(1))
+     CALL h5ltget_attribute_f(file_id,dsetname1,attrname4,f_ptr,"REAL",SizeOf_buf_type,errcode)
 
-  !
-  ! compare read and write buffers.
-  !
-  DO i = 1, DIM1
-     IF ( buf4(i) .NE. bufr4(i) ) THEN
-        PRINT *, 'read buffer differs from write buffer'
-        PRINT *,  bufr4(i), ' and ',   buf4(i)
-        STOP
-     ENDIF
-  END DO
+     !
+     ! compare read and write buffers.
+     !
+     DO i = 1, DIM1
+        IF ( buf4(i) .NE. bufr4(i) ) THEN
+           PRINT *, 'read buffer differs from write buffer'
+           PRINT *,  bufr4(i), ' and ',   buf4(i)
+           STOP
+        ENDIF
+     END DO
 
-  CALL passed()
+     CALL passed()
 
   ENDIF
 

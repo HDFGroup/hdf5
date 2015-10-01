@@ -32,7 +32,7 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"		/* File access	 			*/
 
@@ -181,19 +181,15 @@ test_file_create(void)
      * try to create the same file with H5F_ACC_TRUNC. This should fail
      * because fid1 is the same file and is currently open.
      */
-#ifndef H5_HAVE_FILE_VERSIONS
     fid2 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     VERIFY(fid2, FAIL, "H5Fcreate");
-#endif /*H5_DONT_HAVE_FILE_VERSIONS*/
 
     /* Close all files */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
 
-#ifndef H5_HAVE_FILE_VERSIONS
     ret = H5Fclose(fid2);
     VERIFY(ret, FAIL, "H5Fclose"); /*file should not have been open */
-#endif /*H5_HAVE_FILE_VERSIONS*/
 
     /*
      * Try again with H5F_ACC_EXCL. This should fail because the file already
@@ -206,7 +202,6 @@ test_file_create(void)
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
-#ifndef H5_HAVE_FILE_VERSIONS
     /*
      * Try to truncate first file again. This should fail because fid1 is the
      * same file and is currently open.
@@ -220,7 +215,6 @@ test_file_create(void)
      */
     fid2 = H5Fcreate(FILE1, H5F_ACC_EXCL, H5P_DEFAULT, H5P_DEFAULT);
     VERIFY(fid2, FAIL, "H5Fcreate");
-#endif /*H5_HAVE_FILE_VERSIONS*/
 
     /* Get the file-creation template */
     tmpl1 = H5Fget_create_plist(fid1);
@@ -833,7 +827,9 @@ test_file_close(void)
             ret = H5Gclose(group_id3);
             CHECK(ret, FAIL, "H5Gclose");
 	    break;
-        default:
+
+    case H5F_CLOSE_DEFAULT:
+    default:
             CHECK(fc_degree, H5F_CLOSE_DEFAULT, "H5Pget_fclose_degree");
             break;
     }
@@ -1320,6 +1316,19 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
                         VERIFY(oid_list[i], did, "H5Fget_obj_ids");
                         break;
 
+                    case H5I_UNINIT:
+                    case H5I_BADID:
+                    case H5I_DATATYPE:
+                    case H5I_DATASPACE:
+                    case H5I_ATTR:
+                    case H5I_REFERENCE:
+                    case H5I_VFL:
+                    case H5I_GENPROP_CLS:
+                    case H5I_GENPROP_LST:
+                    case H5I_ERROR_CLASS:
+                    case H5I_ERROR_MSG:
+                    case H5I_ERROR_STACK:
+                    case H5I_NTYPES:
                     default:
                         ERROR("H5Fget_obj_ids");
                 } /* end switch */
@@ -1370,7 +1379,6 @@ test_file_perm(void)
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
 
-#ifndef H5_CANNOT_OPEN_TWICE
     /* Open the file (with read-only permission) */
     filero = H5Fopen(FILE2, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(filero, FAIL, "H5Fopen");
@@ -1387,7 +1395,6 @@ test_file_perm(void)
 
     ret = H5Fclose(filero);
     CHECK(ret, FAIL, "H5Fclose");
-#endif /*H5_CANNOT_OPEN_TWICE*/
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
@@ -2364,7 +2371,7 @@ test_rw_noupdate(void)
     /* Check That Timestamps Are Equal */
     if(diff > 0.0F) {
         /* Output message about test being performed */
-        MESSAGE(1, ("Testing to verify that nothing is written if nothing is changed: This test is skipped on this system because the modification time from stat is the same as the last access time (We know OpenVMS behaves in this way).\n"));
+        MESSAGE(1, ("Testing to verify that nothing is written if nothing is changed: This test is skipped on this system because the modification time from stat is the same as the last access time.\n"));
     } /* end if */
     else {
         hid_t file_id;      /* HDF5 File ID */
@@ -2789,6 +2796,10 @@ test_free_sections(hid_t fapl, char *fname)
     file = H5Fcreate(fname, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(file, FAIL, "H5Fcreate");
 
+    /* Close the FCPL */
+    ret = H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
     /* Create dataspace for datasets */
     dspace = H5Screate(H5S_SCALAR);
     CHECK(dspace, FAIL, "H5Screate");
@@ -2913,9 +2924,6 @@ test_free_sections(hid_t fapl, char *fname)
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
-    ret = H5Pclose(fcpl);
-    CHECK(fcpl, FAIL, "H5Pclose");
-
     HDfree(saved_sect_info);
 
 } /* end test_free_sections() */
@@ -2953,7 +2961,7 @@ test_filespace_sects(void)
     test_free_sections(fapl_sec2, filename);
 
     /* close fapl_sec2 and remove the file */
-    h5_cleanup(FILENAME, fapl_sec2);
+    h5_clean_files(FILENAME, fapl_sec2);
 
 
     /* SPLIT */
@@ -2972,7 +2980,7 @@ test_filespace_sects(void)
     test_free_sections(fapl_split, filename);
 
     /* close fapl and remove the file */
-    h5_cleanup(FILENAME, fapl_split);
+    h5_clean_files(FILENAME, fapl_split);
 
 
     /* STDIO */
@@ -2991,7 +2999,8 @@ test_filespace_sects(void)
     test_free_sections(fapl_stdio, filename);
 
     /* close fapl and remove the file */
-    h5_cleanup(FILENAME, fapl_stdio);
+    h5_clean_files(FILENAME, fapl_stdio);
+
 
     /* CORE */
     MESSAGE(5, ("Testing File free space information for a core file\n"));
@@ -3009,7 +3018,7 @@ test_filespace_sects(void)
     test_free_sections(fapl_core, filename);
 
     /* close fapl_ and remove the file */
-    h5_cleanup(FILENAME, fapl_core);
+    h5_clean_files(FILENAME, fapl_core);
 
 
     /* FAMILY */
@@ -3028,7 +3037,7 @@ test_filespace_sects(void)
     test_free_sections(fapl_family, filename);
 
     /* close fapl and remove the file */
-    h5_cleanup(FILENAME, fapl_family);
+    h5_clean_files(FILENAME, fapl_family);
 
 } /* end test_filespace_sects() */
 
@@ -3087,67 +3096,68 @@ test_filespace_info(void)
             my_fapl = fapl;
         } /* end else */
 
-	/* Test with different sized free space section threshold */
-	for(fs_size = 0; fs_size <= TEST_THRESHOLD10; fs_size++) {
+        /* Test with different sized free space section threshold */
+        for(fs_size = 0; fs_size <= TEST_THRESHOLD10; fs_size++) {
 
-	    /* Test with different file space handling strategies */
-	    for(fs_type = 0; fs_type < H5F_FILE_SPACE_NTYPES; H5_INC_ENUM(H5F_file_space_type_t, fs_type)) {
+            /* Test with different file space handling strategies */
+            for(fs_type = H5F_FILE_SPACE_DEFAULT; fs_type < H5F_FILE_SPACE_NTYPES; H5_INC_ENUM(H5F_file_space_type_t, fs_type)) {
 
-		/* Get a copy of the default file creation property */
-		fcpl1 = H5Pcopy(fcpl);
-		CHECK(fcpl1, FAIL, "H5Pcopy");
+                /* Get a copy of the default file creation property */
+                fcpl1 = H5Pcopy(fcpl);
+                CHECK(fcpl1, FAIL, "H5Pcopy");
 
-		/* Set file space strategy and free space section threshold */
-		ret = H5Pset_file_space(fcpl1, fs_type, fs_size);
-		CHECK(ret, FAIL, "H5Pget_file_space");
+                /* Set file space strategy and free space section threshold */
+                ret = H5Pset_file_space(fcpl1, fs_type, fs_size);
+                CHECK(ret, FAIL, "H5Pget_file_space");
 
-		/* Get the file space info from the creation property */
-		ret = H5Pget_file_space(fcpl1, &strategy, &threshold);
-		CHECK(ret, FAIL, "H5Pget_file_space");
+                /* Get the file space info from the creation property */
+                ret = H5Pget_file_space(fcpl1, &strategy, &threshold);
+                CHECK(ret, FAIL, "H5Pget_file_space");
 
-		/* A 0 value for strategy retains existing strategy in use */
-		VERIFY(strategy, (H5F_file_space_type_t)(fs_type ? fs_type : def_type), "H5Pget_file_space");
-		/* A 0 value for threshold retains existing threshold in use */
-		VERIFY(threshold, (hsize_t)(fs_size ? fs_size : def_size), "H5Pget_file_space");
+                /* A 0 value for strategy retains existing strategy in use */
+                VERIFY(strategy, (H5F_file_space_type_t)(fs_type ? fs_type : def_type), "H5Pget_file_space");
+                /* A 0 value for threshold retains existing threshold in use */
+                VERIFY(threshold, (hsize_t)(fs_size ? fs_size : def_size), "H5Pget_file_space");
 
-		/* Create the file with the specified file space info */
-		fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl1, my_fapl);
-		CHECK(ret, FAIL, "H5Fcreate");
+                /* Create the file with the specified file space info */
+                fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl1, my_fapl);
+                CHECK(ret, FAIL, "H5Fcreate");
 
-		/* Close the file */
-		ret = H5Fclose(fid1);
-		CHECK(ret, FAIL, "H5Fclose");
+                /* Close the file */
+                ret = H5Fclose(fid1);
+                CHECK(ret, FAIL, "H5Fclose");
 
-		/* Re-open the file */
-		fid2 = H5Fopen(filename, H5F_ACC_RDWR, my_fapl);
-		CHECK(ret, FAIL, "H5Fopen");
+                /* Re-open the file */
+                fid2 = H5Fopen(filename, H5F_ACC_RDWR, my_fapl);
+                CHECK(ret, FAIL, "H5Fopen");
 
-		/* Get the file's creation property */
-		fcpl2 = H5Fget_create_plist(fid2);
-		CHECK(fcpl2, FAIL, "H5Fget_create_plist");
+                /* Get the file's creation property */
+                fcpl2 = H5Fget_create_plist(fid2);
+                CHECK(fcpl2, FAIL, "H5Fget_create_plist");
 
-		strategy = threshold = 0;
+                strategy = H5F_FILE_SPACE_DEFAULT;
+                threshold = 0;
 
-		/* Get the file space info from the creation property list */
-		ret = H5Pget_file_space(fcpl2, &strategy, &threshold);
-		CHECK(ret, FAIL, "H5Pget_file_space");
+                /* Get the file space info from the creation property list */
+                ret = H5Pget_file_space(fcpl2, &strategy, &threshold);
+                CHECK(ret, FAIL, "H5Pget_file_space");
 
-		VERIFY(strategy, (H5F_file_space_type_t)(fs_type ? fs_type : def_type), "H5Pget_file_space");
-		VERIFY(threshold, (hsize_t)(fs_size ? fs_size : def_size), "H5Pget_file_space");
+                VERIFY(strategy, (H5F_file_space_type_t)(fs_type ? fs_type : def_type), "H5Pget_file_space");
+                VERIFY(threshold, (hsize_t)(fs_size ? fs_size : def_size), "H5Pget_file_space");
 
-		/* Close the file */
-		ret = H5Fclose(fid2);
-		CHECK(ret, FAIL, "H5Fclose");
+                /* Close the file */
+                ret = H5Fclose(fid2);
+                CHECK(ret, FAIL, "H5Fclose");
 
-		/* Release file-creation template */
-		ret = H5Pclose(fcpl1);
-		CHECK(ret, FAIL, "H5Pclose");
-		ret = H5Pclose(fcpl2);
-		CHECK(ret, FAIL, "H5Pclose");
-	    } /* end for file space strategy type */
-	} /* end for free space threshold */
+                /* Release file-creation template */
+                ret = H5Pclose(fcpl1);
+                CHECK(ret, FAIL, "H5Pclose");
+                ret = H5Pclose(fcpl2);
+                CHECK(ret, FAIL, "H5Pclose");
+            } /* end for file space strategy type */
+        } /* end for free space threshold */
 
-	h5_cleanup(FILESPACE_NAME, my_fapl);
+        h5_clean_files(FILESPACE_NAME, my_fapl);
 
     } /* end for new/old format */
 
@@ -3660,16 +3670,12 @@ test_file(void)
     test_file_freespace();      /* Test file free space information */
     test_file_ishdf5();         /* Test detecting HDF5 files correctly */
     test_file_open_dot();       /* Test opening objects with "." for a name */
-#ifndef H5_CANNOT_OPEN_TWICE
     test_file_open_overlap();   /* Test opening files in an overlapping manner */
-#endif /*H5_CANNOT_OPEN_TWICE*/
     test_file_getname();        /* Test basic H5Fget_name() functionality */
-#ifndef H5_CANNOT_OPEN_TWICE
     test_file_double_root_open();       /* Test opening root group from two files works properly */
     test_file_double_group_open();      /* Test opening same group from two files works properly */
     test_file_double_dataset_open();    /* Test opening same dataset from two files works properly */
     test_file_double_datatype_open();   /* Test opening same named datatype from two files works properly */
-#endif /*H5_CANNOT_OPEN_TWICE*/
     test_userblock_file_size(); /* Tests that files created with a userblock have the correct size */
     test_cached_stab_info();    /* Tests that files are created with cached stab info in the superblock */
     test_rw_noupdate();         /* Test to ensure that RW permissions don't write the file unless dirtied */

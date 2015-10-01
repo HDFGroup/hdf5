@@ -23,9 +23,6 @@
 H5_FCDLL char * HD5f2cstring (_fcd fdesc, size_t len);
 H5_FCDLL void HD5packFstring(char *src, char *dest, size_t len);
 
-#ifdef H5_VMS
-#define H5_FC_FUNC_(name, NAME) NAME
-#endif /*H5_VMS*/
 
 /*
  * Storage struct used by H5Dread_multi and H5Dwrite_multi, 
@@ -218,6 +215,8 @@ H5_FCDLL int_f h5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f 
 
 H5_FCDLL int_f h5awrite_f_c(hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf);
 H5_FCDLL int_f h5aread_f_c(hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf);
+H5_FCDLL int_f h5acreate_c(hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *type_id,
+                        hid_t_f *space_id, hid_t_f *crt_prp, hid_t_f *aapl, hid_t_f *attr_id);
 H5_FCDLL int_f h5adelete_c(hid_t_f *obj_id, _fcd name, size_t_f *namelen);
 H5_FCDLL int_f h5aget_num_attrs_c(hid_t_f *obj_id, int_f *attr_num);
 H5_FCDLL int_f h5aget_name_c(hid_t_f *attr_id, size_t_f *size, _fcd buf);
@@ -546,10 +545,11 @@ H5_FCDLL int_f h5close_c(void);
 H5_FCDLL int_f h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes);
 H5_FCDLL int_f h5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *floatinglen, hid_t_f *integertypes, int_f *integerlen);
 H5_FCDLL int_f h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int_f *h5f_flags,
-			       int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
-			       int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
-			       hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
-			       hsize_t_f *h5s_hsize_flags, int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags);
+			      int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
+			      int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
+			      hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
+			      hsize_t_f *h5s_hsize_flags, int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags,
+                              haddr_t_f *h5_haddr_generic_flags);
 H5_FCDLL int_f h5init1_flags_c(int_f *h5lib_flags);
 H5_FCDLL int_f h5get_libversion_c(int_f *majnum, int_f *minnum, int_f *relnum);
 H5_FCDLL int_f h5check_version_c(int_f *majnum, int_f *minnum, int_f *relnum);

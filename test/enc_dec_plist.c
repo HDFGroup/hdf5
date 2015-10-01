@@ -122,9 +122,17 @@ main(void)
 	printf("Encode/Decode DCPLs\n");
 
     /******* ENCODE/DECODE DCPLS *****/
-    TESTING("DCPL Encoding/Decoding");
+    TESTING("Default DCPL Encoding/Decoding");
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(dcpl) < 0)
+        FAIL_PUTS_ERROR("Default DCPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("DCPL Encoding/Decoding");
 
     if((H5Pset_chunk(dcpl, 2, chunk_size)) < 0)
         FAIL_STACK_ERROR
@@ -161,9 +169,17 @@ main(void)
 
 
     /******* ENCODE/DECODE DAPLS *****/
-    TESTING("DAPL Encoding/Decoding");
+    TESTING("Default DAPL Encoding/Decoding");
     if((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(dapl) < 0)
+        FAIL_PUTS_ERROR("Default DAPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("DAPL Encoding/Decoding");
 
     if((H5Pset_chunk_cache(dapl, nslots, nbytes, w0)) < 0)
         FAIL_STACK_ERROR
@@ -180,9 +196,17 @@ main(void)
 
 
     /******* ENCODE/DECODE OCPLS *****/
-    TESTING("OCPL Encoding/Decoding");
+    TESTING("Default OCPL Encoding/Decoding");
     if((ocpl = H5Pcreate(H5P_OBJECT_CREATE)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(ocpl) < 0)
+        FAIL_PUTS_ERROR("Default OCPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("OCPL Encoding/Decoding");
 
     if((H5Pset_attr_creation_order(ocpl, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED))) < 0)
          FAIL_STACK_ERROR
@@ -205,9 +229,18 @@ main(void)
 
 
     /******* ENCODE/DECODE DXPLS *****/
-    TESTING("DXPL Encoding/Decoding");
+    TESTING("Default DXPL Encoding/Decoding");
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(dxpl) < 0)
+        FAIL_PUTS_ERROR("Default DXPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("DXPL Encoding/Decoding");
+
     if((H5Pset_btree_ratios(dxpl, 0.2f, 0.6f, 0.2f)) < 0)
         FAIL_STACK_ERROR
     if((H5Pset_hyper_vector_size(dxpl, 5)) < 0)
@@ -239,9 +272,17 @@ main(void)
 
 
     /******* ENCODE/DECODE GCPLS *****/
-    TESTING("GCPL Encoding/Decoding");
+    TESTING("Default GCPL Encoding/Decoding");
     if((gcpl = H5Pcreate(H5P_GROUP_CREATE)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(gcpl) < 0)
+        FAIL_PUTS_ERROR("Default GCPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("GCPL Encoding/Decoding");
 
     if((H5Pset_local_heap_size_hint(gcpl, 256)) < 0)
          FAIL_STACK_ERROR
@@ -271,9 +312,17 @@ main(void)
 
 
     /******* ENCODE/DECODE LCPLS *****/
-    TESTING("LCPL Encoding/Decoding");
+    TESTING("Default LCPL Encoding/Decoding");
     if((lcpl = H5Pcreate(H5P_LINK_CREATE)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(lcpl) < 0)
+        FAIL_PUTS_ERROR("Default LCPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("LCPL Encoding/Decoding");
 
     if((H5Pset_create_intermediate_group(lcpl, TRUE)) < 0)
         FAIL_STACK_ERROR
@@ -290,9 +339,17 @@ main(void)
 
 
     /******* ENCODE/DECODE LAPLS *****/
-    TESTING("LAPL Encoding/Decoding");
+    TESTING("Default LAPL Encoding/Decoding");
     if((lapl = H5Pcreate(H5P_LINK_ACCESS)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(lapl) < 0)
+        FAIL_PUTS_ERROR("Default LAPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("LAPL Encoding/Decoding");
 
     if((H5Pset_nlinks(lapl, (size_t)134)) < 0)
         FAIL_STACK_ERROR
@@ -328,9 +385,17 @@ main(void)
 
 
     /******* ENCODE/DECODE OCPYPLS *****/
-    TESTING("OCPYPL Encoding/Decoding");
+    TESTING("Default OCPYPL Encoding/Decoding");
     if((ocpypl = H5Pcreate(H5P_OBJECT_COPY)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(ocpypl) < 0)
+        FAIL_PUTS_ERROR("Default OCPYPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("OCPYPL Encoding/Decoding");
 
     if((H5Pset_copy_object(ocpypl, H5O_COPY_EXPAND_EXT_LINK_FLAG)) < 0)
         FAIL_STACK_ERROR
@@ -352,9 +417,17 @@ main(void)
 
 
     /******* ENCODE/DECODE FAPLS *****/
-    TESTING("FAPL Encoding/Decoding");
+    TESTING("Default FAPL Encoding/Decoding");
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(fapl) < 0)
+        FAIL_PUTS_ERROR("Default FAPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("FAPL Encoding/Decoding");
 
     if((H5Pset_family_offset(fapl, 1024)) < 0)
         FAIL_STACK_ERROR
@@ -395,10 +468,18 @@ main(void)
 
 
     /******* ENCODE/DECODE FCPLS *****/
-    TESTING("FCPL Encoding/Decoding");
+    TESTING("Default FCPL Encoding/Decoding");
 
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(fcpl) < 0)
+        FAIL_PUTS_ERROR("Default FCPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("FCPL Encoding/Decoding");
 
     if((H5Pset_userblock(fcpl, 1024) < 0))
          FAIL_STACK_ERROR
@@ -433,10 +514,18 @@ main(void)
 
 
     /******* ENCODE/DECODE STRCPLS *****/
-    TESTING("STRCPL Encoding/Decoding");
+    TESTING("Default STRCPL Encoding/Decoding");
 
     if((strcpl = H5Pcreate(H5P_STRING_CREATE)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(strcpl) < 0)
+        FAIL_PUTS_ERROR("Default STRCPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("STRCPL Encoding/Decoding");
 
     if((H5Pset_char_encoding(strcpl, H5T_CSET_UTF8) < 0))
          FAIL_STACK_ERROR
@@ -453,10 +542,18 @@ main(void)
 
 
     /******* ENCODE/DECODE ACPLS *****/
-    TESTING("ACPL Encoding/Decoding");
+    TESTING("Default ACPL Encoding/Decoding");
 
     if((acpl = H5Pcreate(H5P_ATTRIBUTE_CREATE)) < 0)
         FAIL_STACK_ERROR
+
+    /* Test encoding & decoding default property list */
+    if(test_encode_decode(acpl) < 0)
+        FAIL_PUTS_ERROR("Default ACPL encoding/decoding failed\n")
+
+    PASSED();
+
+    TESTING("ACPL Encoding/Decoding");
 
     if((H5Pset_char_encoding(acpl, H5T_CSET_UTF8) < 0))
          FAIL_STACK_ERROR

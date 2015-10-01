@@ -44,15 +44,15 @@ typedef struct H5HG_heap_t H5HG_heap_t;
 #define H5HG_MAXSIZE	65536
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
-#ifdef H5HG_PACKAGE
+#ifdef H5HG_MODULE
 #define H5HG_ADDR(H)            ((H)->addr)
 #define H5HG_SIZE(H)            ((H)->size)
 #define H5HG_FREE_SIZE(H)       ((H)->obj[0].size)
-#else /* H5HG_PACKAGE */
+#else /* H5HG_MODULE */
 #define H5HG_ADDR(H)            (H5HG_get_addr(H))
 #define H5HG_SIZE(H)            (H5HG_get_size(H))
 #define H5HG_FREE_SIZE(H)       (H5HG_get_free_size(H))
-#endif /* H5HG_PACKAGE */
+#endif /* H5HG_MODULE */
 
 
 /* Main global heap routines */

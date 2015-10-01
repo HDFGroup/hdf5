@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 /***********/
 /* Headers */
@@ -515,7 +516,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     uint8_t     *old_image;     /* Old address of chunk's image in memory */
     size_t      old_size;       /* Old size of chunk */
     htri_t      was_extended;   /* If chunk can be extended */
-    size_t      extend_msg;     /* Index of null message to extend */
+    size_t      extend_msg = 0; /* Index of null message to extend */
     hbool_t     extended_msg = FALSE;   /* Whether an existing message was extended */
     uint8_t     new_size_flags = 0;     /* New chunk #0 size flags */
     hbool_t     adjust_size_flags = FALSE;      /* Whether to adjust the chunk #0 size flags */
@@ -1458,7 +1459,7 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     hbool_t curr_chk_dirtied = FALSE;  /* Flags for unprotecting curr chunk */
     hbool_t packed_msg;                 /* Flag to indicate that messages were packed */
     hbool_t did_packing = FALSE;        /* Whether any messages were packed */
-    htri_t ret_value; 	                /* Return value */
+    htri_t ret_value = FAIL; 	        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1742,7 +1743,7 @@ H5O_merge_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     hbool_t merged_msg;                 /* Flag to indicate that messages were merged */
     hbool_t did_merging = FALSE;        /* Whether any messages were merged */
-    htri_t ret_value; 	                /* Return value */
+    htri_t ret_value = FAIL; 	        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1877,7 +1878,7 @@ H5O_remove_empty_chunks(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     hbool_t deleted_chunk;              /* Whether to a chunk was deleted */
     hbool_t did_deleting = FALSE;       /* Whether any chunks were deleted */
-    htri_t ret_value; 	                /* Return value */
+    htri_t ret_value = FAIL; 	        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

@@ -18,7 +18,7 @@
    same shape by H5Sselect_shape_same().
  */
 
-#define H5S_PACKAGE             /*suppress error about including H5Spkg   */
+#define H5S_FRIEND             /*suppress error about including H5Spkg   */
 
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5S_TESTING
@@ -5117,7 +5117,7 @@ int main(int argc, char **argv)
         TestSummary();
 
     /* Clean up test files */
-    h5_cleanup(FILENAME, fapl);
+    h5_clean_files(FILENAME, fapl);
 
     nerrors += GetTestNumErrs();
 
@@ -5142,3 +5142,4 @@ int main(int argc, char **argv)
     /* cannot just return (nerrors) because exit code is limited to 1byte */
     return(nerrors!=0);
 }
+

@@ -79,10 +79,7 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5G_init_interface
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/
@@ -120,6 +117,9 @@
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -138,36 +138,13 @@ static const H5I_class_t H5I_GROUP_CLS[1] = {{
     (H5I_free_t)H5G_close	/* Callback routine for closing objects of this class */
 }};
 
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5G_top_package_initialize_s = FALSE;
+
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G__init
- *
- * Purpose:	Initialize the interface from some other package.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Saturday, November 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G__init(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G__init() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_init_interface
+ * Function:	H5G__init_package
  *
  * Purpose:	Initializes the H5G interface.
  *
@@ -177,7 +154,7 @@ done:
  *		Monday, January	 5, 1998
  *
  * Notes:       The group creation properties are registered in the property
- *              list interface initialization routine (H5P_init_interface)
+ *              list interface initialization routine (H5P_init_package)
  *              so that the file creation property class can inherit from it
  *              correctly. (Which allows the file creation property list to
  *              control the group creation properties of the root group of
@@ -185,30 +162,71 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5G_init_interface(void)
+herr_t
+H5G__init_package(void)
 {
     herr_t          ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Initialize the atom group for the group IDs */
     if(H5I_register_type(H5I_GROUP_CLS) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
+    /* Mark "top" of interface as initialized, too */
+    H5G_top_package_initialize_s = TRUE;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_init_interface() */
+} /* end H5G__init_package() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_term_interface
+ * Function:	H5G_top_term_package
  *
- * Purpose:	Terminates the H5G interface
+ * Purpose:	Close the "top" of the interface, releasing IDs, etc.
  *
  * Return:	Success:	Positive if anything is done that might
  *				affect other interfaces; zero otherwise.
+ * 		Failure:	Negative.
  *
+ * Programmer:	Quincey Koziol
+ *		Sunday, September	13, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5G_top_term_package(void)
+{
+    int	n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5G_top_package_initialize_s) {
+        if(H5I_nmembers(H5I_GROUP) > 0) {
+            (void)H5I_clear_type(H5I_GROUP, FALSE, FALSE);
+            n++; /*H5I*/
+        } /* end if */
+
+        /* Mark closed */
+        if(0 == n)
+            H5G_top_package_initialize_s = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5G_top_term_package() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_term_package
+ *
+ * Purpose:	Terminates the H5G interface
+ *
+ * Note:	Finishes shutting down the interface, after
+ *		H5G_top_term_package() is called
+ *
+ * Return:	Success:	Positive if anything is done that might
+ *				affect other interfaces; zero otherwise.
  * 		Failure:	Negative.
  *
  * Programmer:	Robb Matzke
@@ -217,32 +235,27 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5G_term_interface(void)
+H5G_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
-        if(H5I_nmembers(H5I_GROUP) > 0) {
-            (void)H5I_clear_type(H5I_GROUP, FALSE, FALSE);
-            n++; /*H5I*/
-        } /* end if */
-        else {
-            /* Close deprecated interface */
-            n += H5G__term_deprec_interface();
+    if(H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_GROUP));
+        HDassert(FALSE == H5G_top_package_initialize_s);
 
-            /* Destroy the group object id group */
-            (void)H5I_dec_type_ref(H5I_GROUP);
-            n++; /*H5I*/
+        /* Destroy the group object id group */
+        n += (H5I_dec_type_ref(H5I_GROUP) > 0);
 
-            /* Mark closed */
-            H5_interface_initialize_g = 0;
-        } /* end else */
+        /* Mark closed */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5G_term_interface() */
+} /* end H5G_term_package() */
 
 
 /*-------------------------------------------------------------------------

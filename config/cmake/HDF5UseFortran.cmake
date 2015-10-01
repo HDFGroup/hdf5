@@ -227,9 +227,9 @@ message ( "   ........MAX DECIMAL PRECISION ${H5_PAC_FC_MAX_REAL_PRECISION}")
 # **********
 # INTEGERS
 # **********
-string(REGEX REPLACE "," ";" VAR_KIND "${pac_validIntKinds}")
+string(REGEX REPLACE "," ";" VAR "${pac_validIntKinds}")
 
-foreach( KIND ${VAR_KIND} )
+foreach( KIND ${VAR} )
   set(PROG_SRC 
     "
         PROGRAM main
@@ -262,14 +262,14 @@ message("...FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
 # **********
 # REALS
 # **********
-string(REGEX REPLACE "," ";" VAR_KIND "${pac_validRealKinds}")
+string(REGEX REPLACE "," ";" VAR "${pac_validRealKinds}")
 
 #find the maximum kind of the real
-list(LENGTH VAR_KIND LEN_VAR_KIND)
-MATH (EXPR _LEN "${LEN_VAR_KIND} - 1")
-list(GET VAR_KIND ${_LEN} max_real_fortran_kind)
+list(LENGTH VAR LEN_VAR)
+MATH (EXPR _LEN "${LEN_VAR}-1")
+list(GET VAR ${_LEN} max_real_fortran_kind)
 
-foreach( KIND ${VAR_KIND} )
+foreach( KIND ${VAR} )
   set(PROG_SRC 
     "
         PROGRAM main
@@ -299,12 +299,14 @@ set(H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = 
 
 message("...FOUND SIZEOF for REAL KINDs \{${pack_real_sizeof}\}")
 
-#find the maximum kind of the real
-list(LENGTH VAR_KIND LEN_VAR_KIND)
-MATH (EXPR _LEN "${LEN_VAR_KIND} - 1")
-list(GET VAR_KIND ${_LEN} max_real_fortran_sizeof)
-
 set(PAC_FC_ALL_REAL_KINDS_SIZEOF "\{${pack_real_sizeof}\}")
+
+#find the maximum kind of the real
+string(REGEX REPLACE "," ";" VAR "${pack_real_sizeof}")
+list(LENGTH VAR LEN_VAR)
+MATH (EXPR _LEN "${LEN_VAR}-1")
+list(GET VAR ${_LEN} max_real_fortran_sizeof)
+
 #-----------------------------------------------------------------------------
 # Find sizeof of native kinds
 #-----------------------------------------------------------------------------

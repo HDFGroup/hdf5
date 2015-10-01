@@ -58,6 +58,12 @@ if (BUILD_SHARED_LIBS)
       INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
       INTERFACE_COMPILE_DEFINITIONS H5_BUILT_AS_DYNAMIC_LIB=1
   )
+  if (HDF5_ENABLE_THREADSAFE)
+    set_property (TARGET ${HDF5_TEST_LIBSH_TARGET}
+        APPEND PROPERTY COMPILE_DEFINITIONS
+            "H5_HAVE_THREADSAFE"
+    )
+  endif (HDF5_ENABLE_THREADSAFE)
 endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
@@ -103,7 +109,7 @@ endif (BUILD_SHARED_LIBS)
         TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different 
+        ARGS       -E copy_if_different
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/testdir1/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
     )
@@ -134,7 +140,7 @@ endif (BUILD_SHARED_LIBS)
         TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different 
+        ARGS       -E copy_if_different
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/testdir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
     )
@@ -207,7 +213,7 @@ set (H5_TESTS
     #cache_api
     #cache_tagging
     pool
-    hyperslab
+    #hyperslab
     istore
     bittests
     dt_arith
@@ -252,7 +258,7 @@ set (H5_TESTS
     #links_env
     file_image
     enc_dec_plist
-    enc_dec_plist_with_endianess
+    enc_dec_plist_cross_platform
     unregister
 )
 
@@ -308,6 +314,26 @@ if (BUILD_SHARED_LIBS)
   set_target_properties (cache_tagging-shared PROPERTIES FOLDER test)
 endif (BUILD_SHARED_LIBS)
 
+#-- Adding test for hyperslab
+add_executable (hyperslab ${HDF5_TEST_SOURCE_DIR}/hyperslab.c)
+TARGET_NAMING (hyperslab STATIC)
+TARGET_C_PROPERTIES (hyperslab STATIC " " " ")
+target_link_libraries (hyperslab ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (hyperslab PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (hyperslab-shared ${HDF5_TEST_SOURCE_DIR}/hyperslab.c)
+  TARGET_NAMING (hyperslab-shared SHARED)
+  TARGET_C_PROPERTIES (hyperslab-shared SHARED " " " ")
+  target_link_libraries (hyperslab-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (hyperslab-shared PROPERTIES FOLDER test)
+  if (HDF5_ENABLE_THREADSAFE)
+    set_property (TARGET hyperslab-shared
+        APPEND PROPERTY COMPILE_DEFINITIONS
+            "H5_HAVE_THREADSAFE"
+    )
+  endif (HDF5_ENABLE_THREADSAFE)
+endif (BUILD_SHARED_LIBS)
+
 #-- Adding test for ttsafe
 add_executable (ttsafe
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
@@ -332,6 +358,12 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (ttsafe-shared SHARED " " " ")
   target_link_libraries (ttsafe-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (ttsafe-shared PROPERTIES FOLDER test)
+  if (HDF5_ENABLE_THREADSAFE)
+    set_property (TARGET ttsafe-shared
+        APPEND PROPERTY COMPILE_DEFINITIONS
+            "H5_HAVE_THREADSAFE"
+    )
+  endif (HDF5_ENABLE_THREADSAFE)
 endif (BUILD_SHARED_LIBS)
 
 #-- Adding test for err_compat
@@ -380,7 +412,7 @@ endif (BUILD_SHARED_LIBS)
 
 #-- Adding test for libinfo
 set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
-file (WRITE ${GREP_RUNNER} 
+file (WRITE ${GREP_RUNNER}
   "file (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
 if (\${TEST_RESULT} STREQUAL \"0\")
   message (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")

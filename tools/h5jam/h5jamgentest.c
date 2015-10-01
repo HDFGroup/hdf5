@@ -89,12 +89,6 @@ typedef struct s1_t {
 } s1_t;
 
 
-/* 1-D array datatype */
-#define ARRAY1_RANK 1
-
-/* 2-D array datatype */
-#define ARRAY3_DIM2 3
-
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t UD_traverse(const char H5_ATTR_UNUSED * link_name, hid_t H5_ATTR_UNUSED cur_group,
     const void H5_ATTR_UNUSED * udata, size_t H5_ATTR_UNUSED udata_size, hid_t H5_ATTR_UNUSED lapl_id)
@@ -308,7 +302,7 @@ create_textfile(const char *name, size_t size)
 
     fd = HDcreat(name,0777);
     HDassert(fd >= 0);
-    buf = HDcalloc(size, (size_t)1);
+    buf = (char *)HDcalloc(size, (size_t)1);
     HDassert(buf);
 
     /* fill buf with pattern */

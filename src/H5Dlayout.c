@@ -17,7 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -133,7 +133,7 @@ done:
 size_t
 H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include_compact_data)
 {
-    size_t                  ret_value;
+    size_t      ret_value = 0;          /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -273,7 +273,6 @@ H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
             } /* end if */
 
             /* Store EFL file name offset */
-            HDassert(0 == efl->slot[u].name_offset);
             efl->slot[u].name_offset = offset;
         } /* end for */
 
@@ -295,12 +294,11 @@ H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
 
 done:
     /* Error cleanup */
-    if(ret_value < 0) {
-        if(dset->shared->layout.type == H5D_CHUNKED && layout_init) {
-            if(H5D__chunk_dest(file, dxpl_id, dset) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
-        } /* end if */
-    } /* end if */
+    if(ret_value < 0)
+        if(layout_init)
+            /* Destroy any cached layout information for the dataset */
+            if(dset->shared->layout.ops->dest && (dset->shared->layout.ops->dest)(dset, dxpl_id) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D__layout_oh_create() */
@@ -372,6 +370,10 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
     /* Sanity check that the layout operations are set up */
     HDassert(dataset->shared->layout.ops);
 
+    /* Initialize the layout information for the dataset */
+    if(dataset->shared->layout.ops->init && (dataset->shared->layout.ops->init)(dataset->oloc.file, dxpl_id, dataset, dapl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize layout information")
+
     /* Adjust chunk dimensions to omit datatype size (in last dimension) for creation property */
     if(H5D_CHUNKED == dataset->shared->layout.type)
         dataset->shared->layout.u.chunk.ndims--;
@@ -381,69 +383,6 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
     /* Adjust chunk dimensions back again (*sigh*) */
     if(H5D_CHUNKED == dataset->shared->layout.type)
         dataset->shared->layout.u.chunk.ndims++;
-
-    switch(dataset->shared->layout.type) {
-        case H5D_CONTIGUOUS:
-        {
-            hsize_t tmp_size;                   /* Temporary holder for raw data size */
-            size_t tmp_sieve_buf_size;          /* Temporary holder for sieve buffer size */
-
-            /* Compute the size of the contiguous storage for versions of the
-             * layout message less than version 3 because versions 1 & 2 would
-             * truncate the dimension sizes to 32-bits of information. - QAK 5/26/04
-             */
-            if(dataset->shared->layout.version < 3) {
-                hssize_t snelmts;                   /* Temporary holder for number of elements in dataspace */
-                hsize_t nelmts;                     /* Number of elements in dataspace */
-                size_t dt_size;                     /* Size of datatype */
-
-                /* Retrieve the number of elements in the dataspace */
-                if((snelmts = H5S_GET_EXTENT_NPOINTS(dataset->shared->space)) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
-                nelmts = (hsize_t)snelmts;
-
-                /* Get the datatype's size */
-                if(0 == (dt_size = H5T_GET_SIZE(dataset->shared->type)))
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
-
-                /* Compute the size of the dataset's contiguous storage */
-                tmp_size = nelmts * dt_size;
-
-                /* Check for overflow during multiplication */
-                if(nelmts != (tmp_size / dt_size))
-                    HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
-
-                /* Assign the dataset's contiguous storage size */
-                dataset->shared->layout.storage.u.contig.size = tmp_size;
-            } else
-                tmp_size = dataset->shared->layout.storage.u.contig.size;
-
-	    /* Get the sieve buffer size for the file */
-	    tmp_sieve_buf_size = H5F_SIEVE_BUF_SIZE(dataset->oloc.file);
-
-	    /* Adjust the sieve buffer size to the smaller one between the dataset size and the buffer size
-	     * from the file access property.  (SLU - 2012/3/30) */
-	    if(tmp_size < tmp_sieve_buf_size)
-		dataset->shared->cache.contig.sieve_buf_size = tmp_size;
-	    else
-		dataset->shared->cache.contig.sieve_buf_size = tmp_sieve_buf_size;
-        }
-            break;
-
-        case H5D_CHUNKED:
-            /* Initialize the chunk cache for the dataset */
-            if(H5D__chunk_init(dataset->oloc.file, dxpl_id, dataset, dapl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize chunk cache")
-            break;
-
-        case H5D_COMPACT:
-            break;
-
-        case H5D_LAYOUT_ERROR:
-        case H5D_NLAYOUTS:
-        default:
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown storage method")
-    } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

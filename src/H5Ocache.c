@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
 
 
 /***********/
@@ -636,13 +636,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_clear(const H5F_t *f, void *_thing, hbool_t about_to_destroy)
+#ifdef H5_HAVE_PARALLEL
+H5O__cache_clear(const H5F_t *f, void *_thing, hbool_t H5_ATTR_UNUSED about_to_destroy)
+#else
+H5O__cache_clear(const H5F_t H5_ATTR_UNUSED *f, void *_thing, hbool_t H5_ATTR_UNUSED about_to_destroy)
+#endif /* H5_HAVE_PARALLEL */
 { 
     H5O_t      *oh = (H5O_t *)_thing;   /* Object header to reset */
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
+#ifdef H5_HAVE_PARALLEL
     FUNC_ENTER_STATIC
+#else
+    FUNC_ENTER_STATIC_NOERR
+#endif /* H5_HAVE_PARALLEL */
 
     /* Check arguments */
     HDassert(oh);
@@ -673,7 +681,9 @@ H5O__cache_clear(const H5F_t *f, void *_thing, hbool_t about_to_destroy)
     oh->ndecode_dirtied = 0;
 #endif /* NDEBUG */
 
+#ifdef H5_HAVE_PARALLEL
 done:
+#endif /* H5_HAVE_PARALLEL */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_clear() */
 
@@ -731,9 +741,9 @@ static void *
 H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata,
     hbool_t *dirty)
 {
-    H5O_chunk_proxy_t  *chk_proxy = NULL;     /* Chunk proxy object */
+    H5O_chunk_proxy_t  *chk_proxy = NULL;       /* Chunk proxy object */
     H5O_chk_cache_ud_t *udata = (H5O_chk_cache_ud_t *)_udata;   /* User data for callback */
-    void *              ret_value;      /* Return value */
+    void		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -942,14 +952,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
+#ifdef H5_HAVE_PARALLEL
 H5O__cache_chk_clear(const H5F_t *f, void *_thing, hbool_t about_to_destroy)
+#else
+H5O__cache_chk_clear(const H5F_t H5_ATTR_UNUSED *f, void *_thing, hbool_t H5_ATTR_UNUSED about_to_destroy)
+#endif /* H5_HAVE_PARALLEL */
 { 
     H5O_chunk_proxy_t  *chk_proxy = (H5O_chunk_proxy_t *)_thing;        /* Object header chunk to reset */
     H5O_t              *oh;                     /* Object header for chunk */
     unsigned            u;                      /* Local index variable */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
+#ifdef H5_HAVE_PARALLEL
     FUNC_ENTER_STATIC
+#else
+    FUNC_ENTER_STATIC_NOERR
+#endif /* H5_HAVE_PARALLEL */
 
     /* Check arguments */
     HDassert(chk_proxy);
@@ -971,7 +989,9 @@ H5O__cache_chk_clear(const H5F_t *f, void *_thing, hbool_t about_to_destroy)
         if(chk_proxy->oh->mesg[u].chunkno == chk_proxy->chunkno)
             chk_proxy->oh->mesg[u].dirty = FALSE;
 
+#ifdef H5_HAVE_PARALLEL
 done:
+#endif /* H5_HAVE_PARALLEL */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_chk_clear() */
 

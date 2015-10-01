@@ -19,7 +19,7 @@
  * Purpose:	Generic Property Testing Functions
  */
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 #define H5P_TESTING		/*suppress warning about H5P testing funcs*/
 
 
@@ -60,8 +60,8 @@
 char *
 H5P_get_class_path_test(hid_t pclass_id)
 {
-    H5P_genclass_t	*pclass;    /* Property class to query */
-    char *ret_value;       /* return value */
+    H5P_genclass_t	*pclass;        /* Property class to query */
+    char *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -101,8 +101,8 @@ done:
 hid_t
 H5P_open_class_path_test(const char *path)
 {
-    H5P_genclass_t *pclass=NULL;/* Property class to query */
-    hid_t ret_value;            /* Return value */
+    H5P_genclass_t *pclass = NULL;      /* Property class to query */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -156,7 +156,7 @@ H5P_reset_external_file_test(hid_t dcpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
 
     /* get external file list */
-    if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+    if(H5P_peek(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
 
     /* Clean up any values set for the external file-list */
@@ -164,7 +164,7 @@ H5P_reset_external_file_test(hid_t dcpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release external file list info")
 
     /* set external file list */
-    if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
+    if(H5P_poke(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
 
 done:

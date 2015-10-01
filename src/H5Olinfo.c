@@ -24,9 +24,10 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
-#define H5L_PACKAGE		/*suppress error about including H5Lpkg	  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg   */
+#define H5L_FRIEND		/*suppress error about including H5Lpkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -119,7 +120,7 @@ H5O_linfo_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *o
 {
     H5O_linfo_t	*linfo = NULL;  /* Link info */
     unsigned char index_flags;  /* Flags for encoding link index info */
-    void        *ret_value;     /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -249,7 +250,7 @@ H5O_linfo_copy(const void *_mesg, void *_dest)
 {
     const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
     H5O_linfo_t         *dest = (H5O_linfo_t *) _dest;
-    void                *ret_value;     /* Return value */
+    void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -289,7 +290,7 @@ static size_t
 H5O_linfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_linfo_t   *linfo = (const H5O_linfo_t *)_mesg;
-    size_t ret_value;   /* Return value */
+    size_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -383,10 +384,10 @@ H5O_linfo_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t *fil
     hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
     H5O_copy_t *cpy_info, void *_udata, hid_t dxpl_id)
 {
-    H5O_linfo_t          *linfo_src = (H5O_linfo_t *) native_src;
-    H5O_linfo_t          *linfo_dst = NULL;
+    H5O_linfo_t         *linfo_src = (H5O_linfo_t *) native_src;
+    H5O_linfo_t         *linfo_dst = NULL;
     H5G_copy_file_ud_t *udata = (H5G_copy_file_ud_t *) _udata;
-    void                 *ret_value;          /* Return value */
+    void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__COPIED_TAG, NULL)
 

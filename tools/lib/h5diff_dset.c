@@ -687,31 +687,30 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
     HDassert(tclass1==tclass2);
     switch (tclass1)
     {
-    case H5T_INTEGER:
-    case H5T_FLOAT:
-    case H5T_COMPOUND:
-    case H5T_STRING:
-    case H5T_ARRAY:
-    case H5T_BITFIELD:
-    case H5T_OPAQUE:
-    case H5T_ENUM:
-    case H5T_VLEN:
-    case H5T_REFERENCE:
+        case H5T_TIME:
+            if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name) {
+                parallel_print("Not comparable: <%s> and <%s> are of class %s\n",
+                    obj1_name,obj2_name,get_class(tclass2) );
+            } /* end if */
+            can_compare = 0;
+            options->not_cmp = 1;
+            return can_compare;
 
-        break;
-
-    default: /*H5T_TIME */
-
-
-        if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
-        {
-            parallel_print("Not comparable: <%s> and <%s> are of class %s\n",
-                obj1_name,obj2_name,get_class(tclass2) );
-        }
-        can_compare = 0;
-        options->not_cmp = 1;
-        return can_compare;
-    }
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_COMPOUND:
+        case H5T_STRING:
+        case H5T_ARRAY:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_ENUM:
+        case H5T_VLEN:
+        case H5T_REFERENCE:
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            break;
+    } /* end switch */
 
     /*-------------------------------------------------------------------------
     * check for equal file datatype; warning only

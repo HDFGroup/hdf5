@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5SM_PACKAGE		/*suppress error about including H5SMpkg	  */
+#include "H5SMmodule.h"         /* This source code file is part of the H5SM module */
 
 
 /***********/
@@ -186,7 +186,7 @@ H5SM__cache_table_deserialize(const void *_image, size_t len, void *_udata,
     uint32_t                stored_chksum;      /* Stored metadata checksum value */
     uint32_t                computed_chksum;    /* Computed metadata checksum value */
     size_t                  u;                  /* Counter variable for index headers */
-    void *                  ret_value;          /* Return value */
+    void                   *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -510,7 +510,7 @@ H5SM__cache_list_deserialize(const void *_image, size_t len, void *_udata,
     uint32_t              stored_chksum;   /* Stored metadata checksum value */
     uint32_t              computed_chksum; /* Computed metadata checksum value */
     size_t                u;               /* Counter variable for messages in list */
-    void *                ret_value;       /* Return value */
+    void                 *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
 

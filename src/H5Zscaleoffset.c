@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+#include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
@@ -746,7 +746,7 @@ static enum H5Z_scaleoffset_t
 H5Z_scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dtype_sign)
 {
     enum H5Z_scaleoffset_t type = t_bad; /* integer type */
-    enum H5Z_scaleoffset_t ret_value;             /* return value */
+    enum H5Z_scaleoffset_t ret_value = t_bad;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -977,6 +977,7 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
         case H5T_ORDER_ERROR:
         case H5T_ORDER_VAX:
+        case H5T_ORDER_MIXED:
         case H5T_ORDER_NONE:
         default:
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype endianness order")
@@ -1075,6 +1076,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
 
         case H5T_ORDER_ERROR:
         case H5T_ORDER_VAX:
+        case H5T_ORDER_MIXED:
         case H5T_ORDER_NONE:
         default:
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "bad H5T_NATIVE_INT endianness order")

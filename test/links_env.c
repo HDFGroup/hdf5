@@ -17,7 +17,7 @@
  * Purpose:	Tests hard, soft (symbolic) & external links.
  */
 
-#define H5G_PACKAGE
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 #define H5G_TESTING
 
 #include "h5test.h"
@@ -25,11 +25,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
 
-#ifdef H5_VMS
-#define TMPDIR          "[.tmp]"
-#else /* H5_VMS */
 #define TMPDIR          "tmp/"
-#endif /* H5_VMS */
 #define NAME_BUF_SIZE   1024
 
 const char *FILENAME[] = {

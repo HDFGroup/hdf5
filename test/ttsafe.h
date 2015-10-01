@@ -20,8 +20,6 @@
 #ifndef TTSAFE_H
 #define TTSAFE_H
 
-#include <string.h>
-
 /*
  * Include required headers.  This file tests internal library functions,
  * so we include the private headers here.
@@ -31,16 +29,13 @@
 #include "H5Eprivate.h"
 #include "testhdf5.h"
 
-#ifdef H5_HAVE_THREADSAFE
-/* Include pthread library for threadsafe tests */
-#ifdef H5_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif /* H5_HAVE_PTHREAD_H */
 
 /* Prototypes for the support routines */
 extern char*            gen_name(int);
 
 /* Prototypes for the test routines */
+void                    tts_is_threadsafe(void);
+#ifdef H5_HAVE_THREADSAFE
 void                    tts_dcreate(void);
 void                    tts_error(void);
 void                    tts_cancel(void);
@@ -54,3 +49,4 @@ void                    cleanup_acreate(void);
 
 #endif /* H5_HAVE_THREADSAFE */
 #endif /* TTSAFE_H */
+

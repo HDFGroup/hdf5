@@ -21,7 +21,7 @@
  */
 #include "h5test.h"
 
-#define H5T_PACKAGE
+#define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 #include "H5Tpkg.h"
 
 #define NTESTS	100000
