@@ -18,8 +18,8 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 INCLUDE_DIRECTORIES (${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5)
 
 add_executable (gif2h5 ${GIF2H5_SRCS})
-TARGET_NAMING (gif2h5 ${LIB_TYPE})
-TARGET_C_PROPERTIES (gif2h5 ${LIB_TYPE} " " " ")
+TARGET_NAMING (gif2h5 STATIC)
+TARGET_C_PROPERTIES (gif2h5 STATIC " " " ")
 target_link_libraries (gif2h5 ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (gif2h5 PROPERTIES FOLDER tools/hl)
 
@@ -29,8 +29,8 @@ set (hdf2gif_SRCS
     ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/hdfgifwr.c
 )
 add_executable (h52gif ${hdf2gif_SRCS})
-TARGET_NAMING (h52gif ${LIB_TYPE})
-TARGET_C_PROPERTIES (h52gif ${LIB_TYPE} " " " ")
+TARGET_NAMING (h52gif STATIC)
+TARGET_C_PROPERTIES (h52gif STATIC " " " ")
 target_link_libraries (h52gif ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (h52gif PROPERTIES FOLDER tools/hl)
 
@@ -40,7 +40,7 @@ if (BUILD_TESTING)
   #  used in the CMake Build system as we rely on the test files that are
   #  shipped with HDF5 source archives
   # --------------------------------------------------------------------
-  if (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+  if (HDF5_BUILD_GENERATORS)
       add_executable (hl_h52gifgentest ${HDF5_HL_TOOLS_SOURCE_DIR}/gif2h5/h52gifgentst.c)
       TARGET_NAMING (hl_h52gifgentest STATIC)
       TARGET_C_PROPERTIES (hl_h52gifgentest STATIC " " " ")
@@ -48,7 +48,7 @@ if (BUILD_TESTING)
       set_target_properties (hl_h52gifgentest PROPERTIES FOLDER generator/tools/hl)
     
 #      add_test (NAME hl_h52gifgentest COMMAND $<TARGET_FILE:hl_h52gifgentest>)
-  endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+  endif (HDF5_BUILD_GENERATORS)
 
   include (CMakeTests.cmake)
 endif (BUILD_TESTING)
@@ -60,8 +60,5 @@ install (
     TARGETS
         gif2h5
         h52gif
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        hltoolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hltoolsapplications
 )

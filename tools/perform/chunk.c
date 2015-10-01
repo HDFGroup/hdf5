@@ -33,8 +33,8 @@
 #   include <string.h>
 #endif
 
-
-#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus
+/* Solaris Studio defines attribute, but for the attributes we need */
+#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus || defined(__SUNPRO_C)
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define H5_ATTR_UNUSED /*void*/
@@ -163,7 +163,7 @@ create_dataset (void)
     assert(dset>=0);
 
     /* The data */
-    buf = calloc(1, SQUARE (DS_SIZE*CH_SIZE));
+    buf = (signed char *)calloc(1, SQUARE (DS_SIZE*CH_SIZE));
     H5Dwrite(dset, H5T_NATIVE_SCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
     free(buf);
 
@@ -194,7 +194,7 @@ static double
 test_rowmaj (int op, size_t cache_size, size_t io_size)
 {
     hid_t	file, dset, mem_space, file_space;
-    signed char	*buf = calloc (1, (size_t)(SQUARE(io_size)));
+    signed char	*buf = (signed char *)calloc (1, (size_t)(SQUARE(io_size)));
     hsize_t	i, j, hs_size[2];
     hsize_t	hs_offset[2];
     int		mdc_nelmts;
@@ -273,7 +273,7 @@ test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
     hsize_t	i, hs_size[2];
     hsize_t	nio = 0;
     hsize_t	hs_offset[2];
-    signed char	*buf = calloc (1, (size_t)(SQUARE (io_size)));
+    signed char	*buf = (signed char *)calloc(1, (size_t)(SQUARE (io_size)));
     int		mdc_nelmts;
     size_t	rdcc_nelmts;
     double	w0;

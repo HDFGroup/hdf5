@@ -452,24 +452,13 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, August  9, 1999
  *
- * Modifications:
- *
- *              Quincey Koziol - 2002/06/17
- *              Removed 'disp' parameter, read & write routines will use
- *              the address of the dataset in MPI_File_set_view() calls, as
- *              necessary.
- *
- *              Quincey Koziol - 2002/06/17
- *              Changed to set temporary properties in a dxpl, instead of
- *              flags in the file struct, which will make this more threadsafe.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5FD_mpi_setup_collective(hid_t dxpl_id, MPI_Datatype *btype, MPI_Datatype *ftype)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

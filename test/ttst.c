@@ -95,13 +95,13 @@ test_tst_init(void)
     } /* end for */
 
     /* Allocate space for the array of unique words */
-    uniq_words=HDmalloc(sizeof(char *)*num_uniq_words);
+    uniq_words = (char **)HDmalloc(sizeof(char *)*num_uniq_words);
 
     /* Allocate space for the array of randomized order unique words also */
-    rand_uniq_words=HDmalloc(sizeof(char *)*num_uniq_words);
+    rand_uniq_words = (char **)HDmalloc(sizeof(char *)*num_uniq_words);
 
     /* Allocate space for the array of sorted order unique words also */
-    sort_uniq_words=HDmalloc(sizeof(char *)*num_uniq_words);
+    sort_uniq_words = (char **)HDmalloc(sizeof(char *)*num_uniq_words);
 
     /* Insert unique words from test set into unique word set */
     w=0;

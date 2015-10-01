@@ -28,7 +28,8 @@
 *
 *********************************************************************/
 
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+
 #include "hdf5.h"
 #include "testhdf5.h"
 #include "H5Iprivate.h"
@@ -92,6 +93,8 @@ test_fcreate_with_at(hid_t fcpl, hid_t fapl, H5F_avoid_truncate_t at, hbool_t eo
     H5F_t * f = NULL;               /* Internal File Pointer */
     char filename[1024]; /* File Name */
     H5O_loc_t ext_loc;
+    H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
+    H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
     
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME, fapl, filename, (size_t)1024);
@@ -112,6 +115,9 @@ test_fcreate_with_at(hid_t fcpl, hid_t fapl, H5F_avoid_truncate_t at, hbool_t eo
         /* Open the superblock extension, if it exists. */
         if(H5F_super_ext_open(f, f->shared->sblock->ext_addr, &ext_loc) < 0) FAIL_STACK_ERROR;
 
+        /* Set the ring type in the DXPL */
+        if(H5AC_set_ring(H5AC_dxpl_id, H5AC_RING_SBE, &dxpl, &orig_ring) < 0)
+            FAIL_STACK_ERROR;
         msg_exists = H5O_msg_exists(&ext_loc, H5O_EOA_ID, H5AC_dxpl_id);
         if(msg_exists == TRUE) {
             if(eoa!=TRUE) TEST_ERROR;
@@ -133,6 +139,10 @@ test_fcreate_with_at(hid_t fcpl, hid_t fapl, H5F_avoid_truncate_t at, hbool_t eo
 
     /* remove file */
     HDremove(filename);
+
+    /* Reset the ring in the DXPL */
+    if(H5AC_reset_ring(dxpl, orig_ring) < 0)
+        FAIL_STACK_ERROR;
 
     return SUCCEED;
 
@@ -693,6 +703,12 @@ static int
 check_message(hid_t fid, unsigned value)
 {
     H5F_t *f;
+    H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
+    H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
+
+    /* Set the ring type in the DXPL */
+    if(H5AC_set_ring(H5AC_dxpl_id, H5AC_RING_SBE, &dxpl, &orig_ring) < 0)
+        TEST_ERROR;
 
     /* Get internal file pointer */
     if ((f = (H5F_t *)H5I_object(fid)) == NULL) {
@@ -736,6 +752,9 @@ check_message(hid_t fid, unsigned value)
         TEST_ERROR;
     }
 
+    /* Reset the ring in the DXPL */
+    if(H5AC_reset_ring(dxpl, orig_ring) < 0)
+        TEST_ERROR;
     return SUCCEED;
 
 error:

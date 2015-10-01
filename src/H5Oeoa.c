@@ -19,7 +19,7 @@
  * Purpose:     The EOA message.
  */
 
-#define H5O_PACKAGE /* Suppress error about including H5Opkg */
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"   /* Generic Functions */
 #include "H5Eprivate.h"  /* Error Handling    */

@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 /***********/
 /* Headers */
@@ -530,7 +531,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Object header to use */
-    void *ret_value;                    /* Return value */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, NULL)
 
@@ -717,7 +718,7 @@ void *
 H5O_msg_free(unsigned type_id, void *mesg)
 {
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
-    void * ret_value;                   /* Return value */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -814,7 +815,7 @@ void *
 H5O_msg_copy(unsigned type_id, const void *mesg, void *dst)
 {
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
-    void	*ret_value;             /* Return value */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -854,7 +855,7 @@ H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     H5O_t *oh = NULL;           /* Object header to operate on */
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     unsigned msg_count;         /* Message count */
-    int	ret_value;              /* Return value */
+    int	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -901,7 +902,7 @@ unsigned
 H5O_msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type)
 {
     unsigned u;                 /* Local index variable */
-    unsigned ret_value;         /* Return value */
+    unsigned ret_value = 0;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -940,7 +941,7 @@ htri_t
 H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;             /* Object header for location */
-    htri_t      ret_value;              /* Return value */
+    htri_t      ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, FAIL)
 
@@ -1031,8 +1032,8 @@ H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj
     hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
-    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
-    herr_t      ret_value;              /* Return value */
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    herr_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1083,8 +1084,8 @@ H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
     H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
-    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
-    herr_t      ret_value;              /* Return value */
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    herr_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1275,7 +1276,7 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
 {
     H5O_t *oh = NULL;               /* Pointer to actual object header */
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
-    herr_t ret_value;               /* Return value */
+    herr_t ret_value = FAIL;        /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1424,7 +1425,7 @@ H5O_msg_raw_size(const H5F_t *f, unsigned type_id, hbool_t disable_shared,
     const void *mesg)
 {
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
-    size_t ret_value;                   /* Return value */
+    size_t ret_value = 0;               /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 
@@ -1469,7 +1470,7 @@ H5O_msg_size_f(const H5F_t *f, hid_t ocpl_id, unsigned type_id,
     const H5O_msg_class_t *type; /* Actual H5O class type for the ID */
     H5P_genplist_t *ocpl;       /* Object Creation Property list */
     uint8_t oh_flags;           /* Object header status flags */
-    size_t ret_value;           /* Return value */
+    size_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 
@@ -1531,7 +1532,7 @@ H5O_msg_size_oh(const H5F_t *f, const H5O_t *oh, unsigned type_id,
     const void *mesg, size_t extra_raw)
 {
     const H5O_msg_class_t *type; /* Actual H5O class type for the ID */
-    size_t ret_value;           /* Return value */
+    size_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 
@@ -1582,7 +1583,7 @@ htri_t
 H5O_msg_can_share(unsigned type_id, const void *mesg)
 {
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
-    htri_t ret_value;
+    htri_t ret_value = FAIL;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1629,7 +1630,7 @@ htri_t
 H5O_msg_can_share_in_ohdr(unsigned type_id)
 {
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
-    htri_t ret_value;
+    htri_t ret_value = FAIL;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1667,7 +1668,7 @@ htri_t
 H5O_msg_is_shared(unsigned type_id, const void *mesg)
 {
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
-    htri_t ret_value;
+    htri_t ret_value = FAIL;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1881,8 +1882,8 @@ H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
     const unsigned char *buf)
 {
     const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
-    void *ret_value;                    /* Return value */
     unsigned ioflags = 0;               /* Flags for decode routine */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1924,7 +1925,7 @@ H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
     void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
     unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id)
 {
-    void        *ret_value;
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2112,7 +2113,7 @@ H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
     const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
     herr_t ret_value = SUCCEED;                    /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* check args */
     HDassert(f);
@@ -2341,7 +2342,7 @@ H5O_msg_get_chunkno(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     H5O_mesg_t *idx_msg;                /* Pointer to message to modify */
     unsigned idx;                       /* Index of message to modify */
-    int ret_value;                      /* Return value */
+    int ret_value = -1;                 /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

@@ -62,7 +62,7 @@ static void
 H5TS_key_destructor(void *key_val)
 {
     /* Use HDfree here instead of H5MM_xfree(), to avoid calling the H5CS routines */
-    if(key_val!=NULL)
+    if(key_val != NULL)
         HDfree(key_val);
 }
 
@@ -91,7 +91,8 @@ H5TS_key_destructor(void *key_val)
 void
 H5TS_pthread_first_thread_init(void)
 {
-    H5_g.H5_libinit_g = FALSE;
+    H5_g.H5_libinit_g = FALSE;  /* Library hasn't been initialized */
+    H5_g.H5_libterm_g = FALSE;  /* Library isn't being shutdown */
 
 #ifdef H5_HAVE_WIN32_API
 # ifdef PTW32_STATIC_LIB

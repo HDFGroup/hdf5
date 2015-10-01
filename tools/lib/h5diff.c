@@ -594,8 +594,8 @@ hsize_t h5diff(const char *fname1,
     trav_info_t  *info1_grp = NULL;
     trav_info_t  *info2_grp = NULL;
     /* local pointer */
-    trav_info_t  *info1_lp;
-    trav_info_t  *info2_lp;
+    trav_info_t  *info1_lp = NULL;
+    trav_info_t  *info2_lp = NULL;
     /* link info from specified object */
     H5L_info_t src_linfo1;
     H5L_info_t src_linfo2;

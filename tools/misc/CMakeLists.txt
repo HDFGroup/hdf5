@@ -11,20 +11,20 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 # --------------------------------------------------------------------
 #-- Misc Executables
 add_executable (h5debug ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5debug.c)
-TARGET_NAMING (h5debug ${LIB_TYPE})
-TARGET_C_PROPERTIES (h5debug ${LIB_TYPE} " " " ")
+TARGET_NAMING (h5debug STATIC)
+TARGET_C_PROPERTIES (h5debug STATIC " " " ")
 target_link_libraries (h5debug ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (h5debug PROPERTIES FOLDER tools)
 
 add_executable (h5repart ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5repart.c)
-TARGET_NAMING (h5repart ${LIB_TYPE})
-TARGET_C_PROPERTIES (h5repart ${LIB_TYPE} " " " ")
+TARGET_NAMING (h5repart STATIC)
+TARGET_C_PROPERTIES (h5repart STATIC " " " ")
 target_link_libraries (h5repart ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (h5repart PROPERTIES FOLDER tools)
 
 add_executable (h5mkgrp ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5mkgrp.c)
-TARGET_NAMING (h5mkgrp ${LIB_TYPE})
-TARGET_C_PROPERTIES (h5mkgrp ${LIB_TYPE} " " " ")
+TARGET_NAMING (h5mkgrp STATIC)
+TARGET_C_PROPERTIES (h5mkgrp STATIC " " " ")
 target_link_libraries (h5mkgrp  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5mkgrp PROPERTIES FOLDER tools)
 
@@ -52,7 +52,7 @@ if (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Add the misc test executables
   # --------------------------------------------------------------------
-  if (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+  if (HDF5_BUILD_GENERATORS)
     add_executable (h5repart_gentest ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5repart_gentest.c)
     TARGET_NAMING (h5repart_gentest STATIC)
     TARGET_C_PROPERTIES (h5repart_gentest STATIC " " " ")
@@ -60,16 +60,16 @@ if (BUILD_TESTING)
     set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
     #add_test (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
     add_executable (h5extend_gentest ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5extend_gentest.c)
-    TARGET_NAMING (h5extend_gentest ${LIB_TYPE})
-    TARGET_C_PROPERTIES (h5extend_gentest " " " ")
+    TARGET_NAMING (h5extend_gentest STATIC)
+    TARGET_C_PROPERTIES (h5extend_gentest STATIC " " " ")
     target_link_libraries (h5extend_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5extend_gentest PROPERTIES FOLDER generator/tools)
     #add_test (NAME h5extend_gentest COMMAND $<TARGET_FILE:h5extend_gentest>)
-  endif (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
+  endif (HDF5_BUILD_GENERATORS)
 
   add_executable (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)
-  TARGET_NAMING (h5repart_test ${LIB_TYPE})
-  TARGET_C_PROPERTIES (h5repart_test ${LIB_TYPE} " " " ")
+  TARGET_NAMING (h5repart_test STATIC)
+  TARGET_C_PROPERTIES (h5repart_test STATIC " " " ")
   target_link_libraries (h5repart_test ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (h5repart_test PROPERTIES FOLDER tools)
 
@@ -100,8 +100,5 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5debug h5repart h5mkgrp h5extend
-    RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}
-    COMPONENT
-        toolsapplications
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

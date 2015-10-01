@@ -47,7 +47,7 @@
 
 /* Alignment test stuff */
 #ifdef TEST_ALIGNMENT
-#define H5T_PACKAGE
+#define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 #include "H5Tpkg.h"
 #endif
 #define SET_ALIGNMENT(TYPE,VAL) \
@@ -769,11 +769,20 @@ test_compound_2(void)
     CHECK_NMEMBS(nmembs , st, dt)
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return 0;
 
- error:
+error:
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return 1;
 }
 
@@ -888,11 +897,19 @@ test_compound_3(void)
     CHECK_NMEMBS(nmembs, st, dt)
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
     return 0;
 
- error:
+error:
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return 1;
 }
 
@@ -1015,11 +1032,19 @@ test_compound_4(void)
     CHECK_NMEMBS(nmembs, st, dt)
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
     return 0;
 
- error:
+error:
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return 1;
 }
 
@@ -1226,11 +1251,19 @@ test_compound_6(void)
     CHECK_NMEMBS(nmembs, st, dt)
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
     return 0;
 
- error:
+error:
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return 1;
 }
 
@@ -1365,11 +1398,19 @@ test_compound_7(void)
     } /* end if */
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
     return 0;
 
- error:
+error:
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return 1;
 }
 
@@ -3233,11 +3274,7 @@ test_compound_18(void)
 
     /* Open Generated File */
     /* (generated with gen_bad_compound.c) */
-#ifdef H5_VMS
-    if((file = H5Fopen(TESTFILE, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-#else
     if((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-#endif
 
     /* Try to open the datatype */
     H5E_BEGIN_TRY {
@@ -4233,6 +4270,10 @@ test_conv_str_1(void)
     HDfree(buf);
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
     return 0;
 
@@ -4245,7 +4286,11 @@ error:
     if(buf)
         HDfree(buf);
 
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return 1;
 }
 
@@ -4308,7 +4353,11 @@ error:
     if(buf)
         HDfree(buf);
 
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return ret_value;
 }
 
@@ -4422,7 +4471,11 @@ error:
     if(tag)
         H5free_memory(tag); /* Technically allocated by API call */
 
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return ret_value;  /* Number of errors */
 }
 
@@ -4494,7 +4547,11 @@ error:
     if(buf)
         HDfree(buf);
 
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return ret_value;
 }
 
@@ -4661,13 +4718,22 @@ test_conv_bitfield(void)
     H5Tclose(st);
     H5Tclose(dt);
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
     return 0;
 
- error:
+error:
     H5Tclose(st);
     H5Tclose(dt);
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return 1;
 }
 
@@ -4785,14 +4851,18 @@ test_bitfield_funcs(void)
 
     retval = 0;
 
- error:
-
+error:
     if (retval == -1) retval = 1;
     H5free_memory(tag);
     H5Tclose(ntype);
     H5Tclose(type);
     if (retval == 0) PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     return retval;
 }
 
@@ -7297,6 +7367,7 @@ main(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(fapl);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+
     h5_cleanup(FILENAME, fapl); /*must happen before first reset*/
     reset_hdf5();
 

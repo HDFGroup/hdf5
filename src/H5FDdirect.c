@@ -22,12 +22,8 @@
  *    buffer.  The main system support this feature is Linux.
  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC  H5FD_direct_init_interface
+#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
-/* For system function posix_memalign - Commented it out because copper isn't able to compile
- * this file. */
-/* #define _XOPEN_SOURCE 600 */
 
 #include "H5private.h"    /* Generic Functions      */
 #include "H5Eprivate.h"    /* Error handling        */
@@ -83,11 +79,7 @@ typedef struct H5FD_direct_t {
      * identify a file.
      */
     dev_t  device;      /*file device number    */
-#ifdef H5_VMS
-    ino_t  inode[3];    /*file i-node number    */
-#else
     ino_t  inode;      /*file i-node number    */
-#endif /*H5_VMS*/
 #else
     /*
      * On H5_HAVE_WIN32_API the low-order word of a unique identifier associated with the
@@ -187,10 +179,9 @@ H5FL_DEFINE_STATIC(H5FD_direct_t);
 
 /*--------------------------------------------------------------------------
 NAME
-   H5FD_direct_init_interface -- Initialize interface-specific information
+   H5FD__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5FD_direct_init_interface()
-
+    herr_t H5FD__init_package()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -199,18 +190,18 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5FD_direct_init_interface(void)
+H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(H5FD_direct_init() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize direct VFD")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_direct_init_interface() */
+} /* H5FD__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -241,7 +232,7 @@ H5FD_direct_init(void)
         H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g,sizeof(H5FD_class_t),FALSE);
 
     /* Set return value */
-    ret_value=H5FD_DIRECT_g;
+    ret_value = H5FD_DIRECT_g;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -284,8 +275,6 @@ H5FD_direct_term(void)
  * Programmer:  Raymond Lu
  *    Wednesday, 20 September 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -302,17 +291,17 @@ H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbu
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     if(boundary != 0)
-      fa.mboundary = boundary;
+        fa.mboundary = boundary;
     else
-  fa.mboundary = MBOUNDARY_DEF;
+        fa.mboundary = MBOUNDARY_DEF;
     if(block_size != 0)
-      fa.fbsize = block_size;
+        fa.fbsize = block_size;
     else
-  fa.fbsize = FBSIZE_DEF;
+        fa.fbsize = FBSIZE_DEF;
     if(cbuf_size != 0)
-      fa.cbsize = cbuf_size;
+        fa.cbsize = cbuf_size;
     else
-  fa.cbsize = CBSIZE_DEF;
+        fa.cbsize = CBSIZE_DEF;
 
     /* Set the default to be true for data alignment */
     fa.must_align = TRUE;
@@ -321,7 +310,7 @@ H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbu
     if(fa.cbsize % fa.fbsize != 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "copy buffer size must be a multiple of block size")
 
-    ret_value= H5P_set_driver(plist, H5FD_DIRECT, &fa);
+    ret_value = H5P_set_driver(plist, H5FD_DIRECT, &fa);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -341,37 +330,35 @@ done:
  * Programmer:  Raymond Lu
  *              Wednesday, October 18, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary/*out*/, size_t *block_size/*out*/,
     size_t *cbuf_size/*out*/)
 {
-    H5FD_direct_fapl_t  *fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    const H5FD_direct_fapl_t  *fa;
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "ixxx", fapl_id, boundary, block_size, cbuf_size);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
-    if (H5FD_DIRECT!=H5P_get_driver(plist))
+    if(H5FD_DIRECT != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
-    if (NULL==(fa=H5P_get_driver_info(plist)))
+    if(NULL == (fa = H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
-    if (boundary)
+    if(boundary)
         *boundary = fa->mboundary;
-    if (block_size)
-  *block_size = fa->fbsize;
+    if(block_size)
+        *block_size = fa->fbsize;
     if (cbuf_size)
-  *cbuf_size = fa->cbsize;
+        *cbuf_size = fa->cbsize;
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_fapl_direct() */
 
 
 /*-------------------------------------------------------------------------
@@ -512,7 +499,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     /* Get the driver specific information */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(NULL == (fa = (H5FD_direct_fapl_t *)H5P_get_driver_info(plist)))
+    if(NULL == (fa = (H5FD_direct_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
 
     file->fd = fd;
@@ -526,13 +513,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     file->fileindexlo = fileinfo.nFileIndexLow;
 #else
     file->device = sb.st_dev;
-#ifdef H5_VMS
-    file->inode[0] = sb.st_ino[0];
-    file->inode[1] = sb.st_ino[1];
-    file->inode[2] = sb.st_ino[2];
-#else
     file->inode = sb.st_ino;
-#endif /*H5_VMS*/
 #endif /*H5_HAVE_WIN32_API*/
     file->fa.mboundary = fa->mboundary;
     file->fa.fbsize = fa->fbsize;
@@ -674,13 +655,8 @@ H5FD_direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     if(HDmemcmp(&(f1->device),&(f2->device),sizeof(dev_t))>0) HGOTO_DONE(1)
 #endif /* H5_DEV_T_IS_SCALAR */
 
-#ifndef H5_VMS
     if (f1->inode < f2->inode) HGOTO_DONE(-1)
     if (f1->inode > f2->inode) HGOTO_DONE(1)
-#else
-    if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))<0) HGOTO_DONE(-1)
-    if(HDmemcmp(&(f1->inode),&(f2->inode),3*sizeof(ino_t))>0) HGOTO_DONE(1)
-#endif /*H5_VMS*/
 
 #endif
 

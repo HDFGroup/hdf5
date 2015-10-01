@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 /***********/
 /* Headers */
@@ -514,8 +515,8 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     size_t      aligned_size = H5O_ALIGN_OH(oh, size);
     uint8_t     *old_image;     /* Old address of chunk's image in memory */
     size_t      old_size;       /* Old size of chunk */
-    htri_t      extended;       /* If chunk can be extended */
-    size_t      extend_msg;     /* Index of null message to extend */
+    htri_t      was_extended;   /* If chunk can be extended */
+    size_t      extend_msg = 0; /* Index of null message to extend */
     hbool_t     extended_msg = FALSE;   /* Whether an existing message was extended */
     uint8_t     new_size_flags = 0;     /* New chunk #0 size flags */
     hbool_t     adjust_size_flags = FALSE;      /* Whether to adjust the chunk #0 size flags */
@@ -592,11 +593,11 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
 
     /* Determine whether the chunk can be extended */
-    extended = H5MF_try_extend(f, dxpl_id, H5FD_MEM_OHDR, oh->chunk[chunkno].addr,
+    was_extended = H5MF_try_extend(f, dxpl_id, H5FD_MEM_OHDR, oh->chunk[chunkno].addr,
                                  (hsize_t)(oh->chunk[chunkno].size), (hsize_t)(delta + extra_prfx_size));
-    if(extended < 0) /* error */
+    if(was_extended < 0) /* error */
         HGOTO_ERROR(H5E_OHDR, H5E_CANTEXTEND, FAIL, "can't tell if we can extend chunk")
-    else if(extended == FALSE)     /* can't extend -- we are done */
+    else if(was_extended == FALSE)     /* can't extend -- we are done */
         HGOTO_DONE(FALSE)
 
     /* Adjust object header prefix flags */
@@ -1458,7 +1459,7 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     hbool_t curr_chk_dirtied = FALSE;  /* Flags for unprotecting curr chunk */
     hbool_t packed_msg;                 /* Flag to indicate that messages were packed */
     hbool_t did_packing = FALSE;        /* Whether any messages were packed */
-    htri_t ret_value; 	                /* Return value */
+    htri_t ret_value = FAIL; 	        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1742,7 +1743,7 @@ H5O_merge_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     hbool_t merged_msg;                 /* Flag to indicate that messages were merged */
     hbool_t did_merging = FALSE;        /* Whether any messages were merged */
-    htri_t ret_value; 	                /* Return value */
+    htri_t ret_value = FAIL; 	        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1877,7 +1878,7 @@ H5O_remove_empty_chunks(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     hbool_t deleted_chunk;              /* Whether to a chunk was deleted */
     hbool_t did_deleting = FALSE;       /* Whether any chunks were deleted */
-    htri_t ret_value; 	                /* Return value */
+    htri_t ret_value = FAIL; 	        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

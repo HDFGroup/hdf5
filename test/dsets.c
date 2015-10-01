@@ -26,7 +26,7 @@
 /*
  * This file needs to access private information from the H5Z package.
  */
-#define H5Z_PACKAGE
+#define H5Z_FRIEND
 
 
 #include "h5test.h"
@@ -389,11 +389,11 @@ static herr_t
 test_simple_io(const char *env_h5_drvr, hid_t fapl)
 {
     char                filename[FILENAME_BUF_SIZE];
-    hid_t		file, dataset, space, xfer;
+    hid_t		file = -1, dataset = -1, space = -1, xfer = -1;
     int			i, j, n;
     hsize_t		dims[2];
     void		*tconv_buf = NULL;
-    int                 f;
+    int                 f = -1;
     haddr_t             offset;
     int                 rdata[DSET_DIM1][DSET_DIM2];
 
@@ -425,6 +425,8 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         /* Create the dataset */
         if((dataset = H5Dcreate2(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
                                  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
+        if(H5Sclose(space) < 0) TEST_ERROR
+        space = -1;
 
         /* Test dataset address.  Should be undefined. */
         if(H5Dget_offset(dataset) != HADDR_UNDEF) goto error;
@@ -455,8 +457,11 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         }
 
         if(H5Pclose (xfer) < 0) goto error;
+            xfer = -1;
         if(H5Dclose(dataset) < 0) goto error;
+            dataset = -1;
         if(H5Fclose(file) < 0) goto error;
+            file = -1;
 
         f = HDopen(filename, O_RDONLY, 0);
         HDlseek(f, (off_t)offset, SEEK_SET);
@@ -475,8 +480,9 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
         }
 
         HDclose(f);
+        f = -1;
 
-        HDfree (tconv_buf);
+        HDfree(tconv_buf);
         PASSED();
     } /* end if */
     else {
@@ -487,6 +493,18 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     return 0;
 
 error:
+    if(space > 0)
+        if(H5Sclose(space) < 0) TEST_ERROR
+    if(xfer > 0)
+        if(H5Pclose(xfer) < 0) TEST_ERROR
+    if(dataset > 0)
+        if(H5Dclose(dataset) < 0) TEST_ERROR
+    if(file > 0)
+        if(H5Fclose(file) < 0) TEST_ERROR
+    if(f > 0)
+        HDclose(f);
+    if(tconv_buf)
+        HDfree(tconv_buf);
     return -1;
 }
 
@@ -509,10 +527,10 @@ static herr_t
 test_userblock_offset(const char *env_h5_drvr, hid_t fapl)
 {
     char                filename[FILENAME_BUF_SIZE];
-    hid_t		file, fcpl, dataset, space;
+    hid_t		file = -1, fcpl = -1, dataset = -1, space = -1;
     int			i, j;
     hsize_t		dims[2];
-    int                   f;
+    int                 f = -1;
     haddr_t             offset;
     int                 rdata[DSET_DIM1][DSET_DIM2];
 
@@ -527,6 +545,8 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl)
 
         if((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
             goto error;
+        if(H5Pclose(fcpl) < 0) TEST_ERROR
+        fcpl = -1;
 
         /* Create the data space */
         dims[0] = DSET_DIM1;
@@ -536,6 +556,8 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl)
         /* Create the dataset */
         if((dataset = H5Dcreate2(file, DSET_USERBLOCK_IO_NAME, H5T_NATIVE_INT, space,
                                  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
+        if(H5Sclose(space) < 0) TEST_ERROR
+        space = -1;
 
         /* Write the data to the dataset */
         if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
@@ -547,7 +569,9 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl)
         if((offset = H5Dget_offset(dataset)) == HADDR_UNDEF) goto error;
 
         if(H5Dclose(dataset) < 0) goto error;
+        dataset = -1;
         if(H5Fclose(file) < 0) goto error;
+        file = -1;
 
         f = HDopen(filename, O_RDONLY, 0);
         HDlseek(f, (off_t)offset, SEEK_SET);
@@ -566,6 +590,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl)
         }
 
         HDclose(f);
+        f = -1;
 
         PASSED();
     } /* end if */
@@ -577,6 +602,16 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl)
     return 0;
 
 error:
+    if(space > 0)
+        if(H5Sclose(space) < 0) TEST_ERROR
+    if(fcpl > 0)
+        if(H5Pclose(fcpl) < 0) TEST_ERROR
+    if(dataset > 0)
+        if(H5Dclose(dataset) < 0) TEST_ERROR
+    if(file > 0)
+        if(H5Fclose(file) < 0) TEST_ERROR
+    if(f > 0)
+        HDclose(f);
     return -1;
 }
 
@@ -1017,15 +1052,15 @@ test_conv_buffer(hid_t fid)
 
     /* Populate the data members */
     for(j = 0; j < DIM1; j++)
-	for(k = 0; k < DIM2; k++)
-	    for(l = 0; l < DIM3; l++)
-		cf->a[j][k][l] = 10*(j+1) + l + k;
+        for(k = 0; k < DIM2; k++)
+            for(l = 0; l < DIM3; l++)
+                cf->a[j][k][l] = 10*(j+1) + l + k;
 
     for(j = 0; j < DIM2; j++)
-	cf->b[j] = (float)(100.0f*(j+1) + 0.01f*j);
+        cf->b[j] = 100.0f * (float)(j+1) + 0.01f * (float)j;
 
     for(j = 0; j < DIM3; j++)
-	cf->c[j] = 100.0f*(j+1) + 0.02f*j;
+        cf->c[j] = 100.0f * (float)(j+1) + 0.02f * (float)j;
 
 
   /* Create data space */
@@ -1102,7 +1137,7 @@ test_conv_buffer(hid_t fid)
   HDfree(cf);
   HDfree(cfrR);
   puts(" PASSED");
-  return(0);
+  return 0;
 
 error:
   return -1;
@@ -2692,7 +2727,8 @@ test_nbit_int(hid_t file)
     int                 new_data[2][5];
     unsigned int        mask;
     size_t              precision, offset;
-    size_t             i, j;
+    double              power;
+    size_t              i, j;
 
     puts("Testing nbit filter");
     TESTING("    nbit int (setup)");
@@ -2725,8 +2761,8 @@ test_nbit_int(hid_t file)
     /* Initialize data, assuming size of long long >= size of int */
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[i][j] = (int)(((long long)HDrandom() %
-                           (long long)HDpow(2.0f, (double)(precision - 1))) << offset);
+        power = HDpow(2.0f, (double)(precision - 1));
+        orig_data[i][j] = (int)(((long long)HDrandom() % (long long)power) << offset);
 
         /* even-numbered values are negtive */
         if((i*size[1]+j+1)%2 == 0)
@@ -3052,7 +3088,8 @@ test_nbit_array(hid_t file)
     unsigned int        orig_data[2][5][3][2];
     unsigned int        new_data[2][5][3][2];
     size_t              precision, offset;
-    size_t             i, j, m, n;
+    double              power;
+    size_t              i, j, m, n;
 
     TESTING("    nbit array (setup)");
 
@@ -3091,9 +3128,11 @@ test_nbit_array(hid_t file)
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++)
         for(m = 0; m < (size_t)adims[0]; m++)
-          for(n = 0; n < (size_t)adims[1]; n++)
+          for(n = 0; n < (size_t)adims[1]; n++) {
+            power = HDpow(2.0F, (double)precision);
             orig_data[i][j][m][n] = (unsigned int)(((long long)HDrandom() %
-                                     (long long)HDpow(2.0F, (double)precision)) << offset);
+                                     (long long)power) << offset);
+          } /* end for */
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -3192,7 +3231,8 @@ test_nbit_compound(hid_t file)
     atomic              orig_data[2][5];
     atomic              new_data[2][5];
     unsigned int        i_mask, s_mask, c_mask;
-    size_t             i, j;
+    double              power;
+    size_t              i, j;
 
 
     TESTING("    nbit compound (setup)");
@@ -3251,12 +3291,12 @@ test_nbit_compound(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[i][j].i = (int)(((long long)HDrandom() %
-                             (long long)HDpow(2.0F, (double)(precision[0]-1))) << offset[0]);
-        orig_data[i][j].c = (char)(((long long)HDrandom() %
-                             (long long)HDpow(2.0F, (double)(precision[1]-1))) << offset[1]);
-        orig_data[i][j].s = (short)(((long long)HDrandom() %
-                             (long long)HDpow(2.0F, (double)(precision[2]-1))) << offset[2]);
+        power = HDpow(2.0F, (double)(precision[0]-1));
+        orig_data[i][j].i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
+        power = HDpow(2.0F, (double)(precision[1]-1));
+        orig_data[i][j].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+        power = HDpow(2.0F, (double)(precision[2]-1));
+        orig_data[i][j].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
         orig_data[i][j].f = float_val[i][j];
 
         /* some even-numbered integer values are negtive */
@@ -3386,7 +3426,8 @@ test_nbit_compound_2(hid_t file)
     complex             orig_data[2][5];
     complex             new_data[2][5];
     unsigned int        i_mask, s_mask, c_mask, b_mask;
-    size_t             i, j, m, n, b_failed, d_failed;
+    double              power;
+    size_t              i, j, m, n, b_failed, d_failed;
 
 
     TESTING("    nbit compound complex (setup)");
@@ -3477,33 +3518,34 @@ test_nbit_compound_2(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[i][j].a.i = (int)(((long long)HDrandom() %
-                               (long long)HDpow(2.0F, (double)(precision[0]-1))) << offset[0]);
-        orig_data[i][j].a.c = (char)(((long long)HDrandom() %
-                               (long long)HDpow(2.0F, (double)(precision[1]-1))) << offset[1]);
-        orig_data[i][j].a.s = (short)(-((long long)HDrandom() %
-                               (long long)HDpow(2.0F, (double)(precision[2]-1))) << offset[2]);
+        power = HDpow(2.0F, (double)(precision[0]-1));
+        orig_data[i][j].a.i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
+        power = HDpow(2.0F, (double)(precision[1]-1));
+        orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+        power = HDpow(2.0F, (double)(precision[2]-1));
+        orig_data[i][j].a.s = (short)(-((long long)HDrandom() % (long long)power) << offset[2]);
         orig_data[i][j].a.f = float_val[i][j];
 
-        orig_data[i][j].v = (unsigned int)(((long long)HDrandom() %
-                             (long long)HDpow(2.0F, (double)precision[3])) << offset[3]);
-
-        for(m = 0; m < (size_t)array_dims[0]; m++)
-          for(n = 0; n < (size_t)array_dims[1]; n++)
-            orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() %
-                                       (long long)HDpow(2.0F, (double)(precision[4]-1))) << offset[4]);
+        power = HDpow(2.0F, (double)precision[3]);
+        orig_data[i][j].v = (unsigned int)(((long long)HDrandom() % (long long)power) << offset[3]);
 
         for(m = 0; m < (size_t)array_dims[0]; m++)
           for(n = 0; n < (size_t)array_dims[1]; n++) {
-            orig_data[i][j].d[m][n].i = (int)(-((long long)HDrandom() %
-                                         (long long)HDpow(2.0F, (double)(precision[0]-1))) << offset[0]);
-            orig_data[i][j].d[m][n].c = (char)(((long long)HDrandom() %
-                                         (long long)HDpow(2.0F, (double)(precision[1]-1))) << offset[1]);
-            orig_data[i][j].d[m][n].s = (short)(((long long)HDrandom() %
-                                         (long long)HDpow(2.0F, (double)(precision[2]-1))) << offset[2]);
+            power = HDpow(2.0F, (double)(precision[4]-1));
+            orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() % (long long)power) << offset[4]);
+          } /* end for */
+
+        for(m = 0; m < (size_t)array_dims[0]; m++)
+          for(n = 0; n < (size_t)array_dims[1]; n++) {
+            power = HDpow(2.0F, (double)(precision[0]-1));
+            orig_data[i][j].d[m][n].i = (int)(-((long long)HDrandom() % (long long)power) << offset[0]);
+            power = HDpow(2.0F, (double)(precision[1]-1));
+            orig_data[i][j].d[m][n].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+            power = HDpow(2.0F, (double)(precision[2]-1));
+            orig_data[i][j].d[m][n].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
             orig_data[i][j].d[m][n].f = float_val[i][j];
-          }
-      }
+          } /* end for */
+      } /* end for */
 
     PASSED();
 
@@ -3648,7 +3690,8 @@ test_nbit_compound_3(hid_t file)
     const hsize_t       chunk_size[1] = {5};
     atomic              orig_data[5];
     atomic              new_data[5];
-    size_t             i, k, j;
+    double              power;
+    size_t              i, k, j;
 
 
     TESTING("    nbit compound with no-op type (setup)");
@@ -3695,8 +3738,9 @@ test_nbit_compound_3(hid_t file)
 
     /* Initialize data */
     for(i = 0; i < (size_t)size[0]; i++) {
+        power = HDpow(2.0F, 17.0F - 1.0F);
         HDmemset(&orig_data[i], 0, sizeof(orig_data[i]));
-        orig_data[i].i = HDrandom() % (long)HDpow(2.0F, 17.0F - 1.0F);
+        orig_data[i].i = HDrandom() % (long)power;
         HDstrcpy(orig_data[i].str, "fixed-length C string");
         orig_data[i].vl_str = HDstrdup("variable-length C string");
 
@@ -3815,6 +3859,7 @@ test_nbit_int_size(hid_t file)
     hsize_t dims[2], chunk_size[2];
     hsize_t dset_size = 0;
     int     orig_data[DSET_DIM1][DSET_DIM2];
+    double  power;
     int     i, j;
     size_t  precision, offset;
 
@@ -3865,8 +3910,10 @@ test_nbit_int_size(hid_t file)
    * corresponding to the memory datatype's precision and offset.
    */
    for (i=0; i < DSET_DIM1; i++)
-       for (j=0; j < DSET_DIM2; j++)
-           orig_data[i][j] = rand() % (int)pow((double)2, (double)(precision-1)) << offset;
+       for (j=0; j < DSET_DIM2; j++) {
+           power = HDpow(2.0F, (double)(precision-1));
+           orig_data[i][j] = HDrandom() % (int)power << offset;
+       } /* end for */
 
 
    /* Describe the dataspace. */
@@ -7567,7 +7614,7 @@ test_chunk_expand(hid_t fapl)
         if(TRUE != H5Zfilter_avail(H5Z_FILTER_EXPAND)) FAIL_STACK_ERROR
 
         /* Loop over storage allocation time */
-        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
             /* Create file */
             if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 

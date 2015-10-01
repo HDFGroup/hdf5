@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
+#include "H5B2module.h"         /* This source code file is part of the H5B2 module */
 
 
 /***********/
@@ -216,7 +216,7 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
-    H5B2_hdr_t		*ret_value;     /* Return value */
+    H5B2_hdr_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -490,7 +490,7 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
-    H5B2_internal_t	*ret_value;     /* Return value */
+    H5B2_internal_t	*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -798,7 +798,7 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
-    H5B2_leaf_t		*ret_value;     /* Return value */
+    H5B2_leaf_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 

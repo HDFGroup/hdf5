@@ -845,7 +845,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     if(datatype==H5T_INTEGER) {
         /*check for overflow*/
         HDassert((nelmts * sizeof(int)) == (hsize_t)((size_t)(nelmts * sizeof(int))));
-        buf = HDmalloc((size_t)(nelmts * sizeof(int)));
+        buf = (int *)HDmalloc((size_t)(nelmts * sizeof(int)));
 
         if(H5Dread(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
             goto error;

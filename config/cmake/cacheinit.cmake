@@ -4,15 +4,11 @@
 # EXTERNAL cache entries
 ########################
 
-set (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries" FORCE)
-
-set (BUILD_TESTING ON CACHE BOOL "Build HDF5 Unit Testing" FORCE)
+set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
 
 set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
 
 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
-
-set (HDF5_ENABLE_F2003 ON CACHE BOOL "Enable FORTRAN 2003 Standard" FORCE)
 
 set (HDF5_BUILD_GENERATORS OFF CACHE BOOL "Build Test Generators" FORCE)
 
@@ -49,6 +45,8 @@ set (HDF5_USE_16_API_DEFAULT OFF CACHE BOOL "Use the HDF5 1.6.x API by default" 
 set (HDF5_USE_18_API_DEFAULT OFF CACHE BOOL "Use the HDF5 1.8.x API by default" FORCE)
 
 set (HDF5_ENABLE_THREADSAFE OFF CACHE BOOL "(WINDOWS)Enable Threadsafety" FORCE)
+
+set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
 
 set (HDF5_PACKAGE_EXTLIBS OFF CACHE BOOL "(WINDOWS)CPACK - include external libraries" FORCE)
 

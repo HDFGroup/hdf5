@@ -26,7 +26,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -331,7 +331,7 @@ H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key)
     H5D_btree_key_t	*lt_key = (H5D_btree_key_t *) _lt_key;
     H5D_btree_key_t	*rt_key = (H5D_btree_key_t *) _rt_key;
     H5D_chunk_common_ud_t	*udata = (H5D_chunk_common_ud_t *) _udata;
-    int		ret_value;
+    int ret_value = -1;         /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -553,7 +553,7 @@ H5D__btree_insert(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, void *_l
     H5D_chunk_ud_t	*udata = (H5D_chunk_ud_t *) _udata;
     int		cmp;
     unsigned		u;
-    H5B_ins_t		ret_value;
+    H5B_ins_t		ret_value = H5B_INS_ERROR;      /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -969,7 +969,7 @@ done:
 static hbool_t
 H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
-    hbool_t ret_value;          /* Return value */
+    hbool_t ret_value = FALSE;          /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1085,7 +1085,7 @@ H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     H5D_btree_it_ud_t	*udata = (H5D_btree_it_ud_t *)_udata; /* User data */
     const H5D_btree_key_t	*lt_key = (const H5D_btree_key_t *)_lt_key; /* B-tree key for chunk */
     H5D_chunk_rec_t chunk_rec;  /* Generic chunk record for callback */
-    int ret_value;              /* Return value */
+    int ret_value = -1;         /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1127,7 +1127,7 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata)
 {
     H5D_btree_it_ud_t	udata;  /* User data for B-tree iterator callback */
-    int ret_value;              /* Return value */
+    int ret_value = -1;         /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 

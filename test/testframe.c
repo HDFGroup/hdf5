@@ -213,6 +213,7 @@ void TestInfo(const char *ProgName)
  */
 void TestParseCmdLine(int argc, char *argv[])
 {
+    hbool_t skipped_all = FALSE;
     int ret_code;
 
     while (argv++, --argc > 0){
@@ -248,14 +249,20 @@ void TestParseCmdLine(int argc, char *argv[])
 	}
 	else if (((HDstrcmp(*argv, "-only") == 0) ||
 				    (HDstrcmp(*argv, "-o") == 0))) {
-	    if (argc > 0){
+	    if(argc > 0) {
 		int Loop;
+
 		--argc; ++argv;
+
 		/* Skip all tests, then activate only one. */
-		for (Loop = 0; Loop < Index; Loop++)
-		    Test[Loop].SkipFlag = 1;
+                if(!skipped_all) {
+                    for(Loop = 0; Loop < Index; Loop++)
+                        Test[Loop].SkipFlag = 1;
+                    skipped_all = TRUE;
+                } /* end if */
 		SetTest(*argv, ONLYTEST);
-	    }else{
+	    } /* end if */
+            else {
 		TestUsage();
 		exit(EXIT_FAILURE);
 	    }
@@ -548,6 +555,7 @@ TestErrPrintf(const char *format, ...)
 void SetTest(const char *testname, int action)
 {
     int Loop;
+
     switch (action){
 	case SKIPTEST:
 	    for (Loop = 0; Loop < Index; Loop++)
@@ -569,17 +577,12 @@ void SetTest(const char *testname, int action)
 	    break;
 	case ONLYTEST:
 	    for (Loop = 0; Loop < Index; Loop++) {
-		if (HDstrcmp(testname, Test[Loop].Name) != 0)
-		    Test[Loop].SkipFlag = 1;
-		else {
+		if (HDstrcmp(testname, Test[Loop].Name) == 0) {
 		    /* Found it. Set it to run. Break to skip the rest. */
 		    Test[Loop].SkipFlag = 0;
 		    break;
 		}
 	    }
-	    /* skip the rest */
-	    while (++Loop < Index)
-		Test[Loop].SkipFlag = 1;
 	    break;
 	default:
 	    /* error */

@@ -3061,7 +3061,7 @@ setup_cache(size_t max_cache_size,
 
     if ( pass ) { /* allocate space for test entries */
 
-        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT,
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DATASET_XFER_DEFAULT,
 			              (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
 
 	if ( actual_base_addr == HADDR_UNDEF ) {
@@ -3171,7 +3171,7 @@ takedown_cache(H5F_t * file_ptr,
                 HDassert ( file_ptr );
             }
 
-            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, saved_actual_base_addr,
+            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5P_DATASET_XFER_DEFAULT, saved_actual_base_addr,
                                           (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
             saved_actual_base_addr = HADDR_UNDEF;
         }

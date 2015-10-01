@@ -45,7 +45,7 @@
 
 /* Alignment test stuff */
 #ifdef TEST_ALIGNMENT
-#define H5T_PACKAGE
+#define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 #include "H5Tpkg.h"
 #endif
 #define SET_ALIGNMENT(TYPE,VAL) \
@@ -58,10 +58,9 @@ const char *FILENAME[] = {
 };
 
 /*
- * Count up or down depending on whether the machine is big endian, little
- * endian, or VAX (OpenVMS).  If local variable `endian' is H5T_ORDER_BE then
- * the result will be I, otherwise the result will be Z-(I+1).  VAX is printed
- * as little endian.
+ * Count up or down depending on whether the machine is big endian or little
+ * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
+ * be I, otherwise the result will be Z-(I+1).
  */
 #define ENDIAN(Z,I,E)	(H5T_ORDER_BE==E?(I):(Z)-((I)+1))
 
@@ -86,11 +85,6 @@ static int skip_overflow_tests_g = 0;
  */
 #if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
 #define HANDLE_SIGFPE
-#endif
-
-/* OpenVMS doesn't have this feature.  Make sure to disable it*/
-#ifdef H5_VMS
-#undef HANDLE_SIGFPE
 #endif
 
 /*
@@ -651,11 +645,18 @@ test_hard_query(void)
     }
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
 
     return 0;
 
- error:
+error:
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
     return 1;
 }
@@ -877,7 +878,11 @@ error:
     if(saved_buf2)
         HDfree(saved_buf2);
 
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5(); /*print statistics*/
+
     return MAX((int)fails_this_test, 1);
 }
 
@@ -1296,6 +1301,10 @@ test_derived_flt(void)
     } /* end if */
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
 
     return 0;
@@ -1311,7 +1320,12 @@ test_derived_flt(void)
         H5Pclose (dxpl_id);
         H5Fclose (file);
     } H5E_END_TRY;
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5(); /*print statistics*/
+
     return MAX((int)fails_this_test, 1);
 }
 
@@ -1598,6 +1612,10 @@ test_derived_integer(void)
     HDfree(saved_buf);
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
 
     return 0;
@@ -1612,7 +1630,12 @@ test_derived_integer(void)
         H5Pclose (dxpl_id);
         H5Fclose (file);
     } H5E_END_TRY;
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5(); /*print statistics*/
+
     return MAX((int)fails_this_test, 1);
 }
 
@@ -2607,7 +2630,12 @@ done:
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
     HDfflush(stdout);
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
+
     return (int)fails_all_tests;
 
 error:
@@ -2615,7 +2643,12 @@ error:
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
     HDfflush(stdout);
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
+
     return MAX((int)fails_all_tests, 1);
 }
 
@@ -2740,24 +2773,6 @@ my_isnan(dtype_t type, void *val)
 	    retval = 1;
     }
 
-#ifdef H5_VMS
-    /* For "float" and "double" on OpenVMS/Alpha, NaN is
-     * actually a valid value of maximal value.*/
-    if(!retval) {
-	if (FLT_FLOAT==type) {
-	    float x;
-	    HDmemcpy(&x, val, sizeof(float));
-            retval = (x==FLT_MAX || x==-FLT_MAX);
-	} else if (FLT_DOUBLE==type) {
- 	    double x;
-	    HDmemcpy(&x, val, sizeof(double));
-            retval = (x==DBL_MAX || x==-DBL_MAX);
-	} else {
-	    return 0;
-	}
-    }
-#endif /*H5_VMS*/
-
     return retval;
 }
 
@@ -2786,23 +2801,8 @@ my_isinf(int endian, unsigned char *val, size_t size,
 
     bits = (unsigned char*)HDcalloc((size_t)1, size);
 
-#ifdef H5_VMS
-    if(H5T_ORDER_VAX==endian) {
-        for (i = 0; i < size; i += 4) {
-            bits[i] = val[(size-2)-i];
-            bits[i+1] = val[(size-1)-i];
-
-            bits[(size-2)-i] = val[i];
-            bits[(size-1)-i] = val[i+1];
-        }
-    } else {
-        for (i=0; i<size; i++)
-            bits[size-(i+1)] = *(val + ENDIAN(size,i,endian));
-    }
-#else /*H5_VMS*/
     for (i=0; i<size; i++)
         bits[size-(i+1)] = *(val + ENDIAN(size, i, endian));
-#endif /*H5_VMS*/
 
     if(H5T__bit_find(bits, mpos, msize, H5T_BIT_LSB, 1) < 0 &&
             H5T__bit_find(bits, epos, esize, H5T_BIT_LSB, 0) < 0)
@@ -2859,10 +2859,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 #endif
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     int			underflow;		/*underflow occurred	*/
-    int			overflow;		/*overflow occurred	*/
-#ifdef H5_VMS
-    int			maximal;		/*maximal value occurred, for VMS only.	*/
-#endif /* H5_VMS */
+    int			overflow = 0;	/*overflow occurred	*/
     int 		uflow=0;		/*underflow debug counters*/
     size_t		j, k;			/*counters		*/
     int			sendian;		/* source type endianess */
@@ -2913,9 +2910,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
      * The remainder of this function is executed only by the child if
      * HANDLE_SIGFPE is defined.
      */
-#ifndef H5_VMS
     HDsignal(SIGFPE,fpe_handler);
-#endif
 
     /* What are the names of the source and destination types */
     if (H5Tequal(src, H5T_NATIVE_FLOAT)) {
@@ -3013,33 +3008,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
     switch (run_test) {
         case TEST_NOOP:
         case TEST_NORMAL:
-#ifdef H5_VMS
-            if(src_type == FLT_FLOAT) {
-                INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-            } else if(src_type == FLT_DOUBLE && dst_type == FLT_FLOAT) {
-                /*Temporary solution for VMS.  Cap double values between maximal and minimal
-                 *destination values because VMS return exception when overflows or underflows.
-                 *Same below.*/
-                INIT_FP_NORM(double, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-            } else if(src_type == FLT_DOUBLE) {
-                INIT_FP_NORM(double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
-            } else if(src_type == FLT_LDOUBLE && dst_type == FLT_FLOAT) {
-                INIT_FP_NORM(long double, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-            } else if(src_type == FLT_LDOUBLE && dst_type == FLT_DOUBLE) {
-                INIT_FP_NORM(long double, DBL_MAX, DBL_MIN, DBL_MAX_10_EXP, DBL_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-            } else if(src_type == FLT_LDOUBLE) {
-                INIT_FP_NORM(long double, LDBL_MAX, LDBL_MIN, LDBL_MAX_10_EXP, LDBL_MIN_10_EXP,
-                        src_size, dst_size, buf, saved, nelmts);
-#endif
-            } else
-                goto error;
-#else /*H5_VMS*/
             if(src_type == FLT_FLOAT) {
                 INIT_FP_NORM(float, FLT_MAX, FLT_MIN, FLT_MAX_10_EXP, FLT_MIN_10_EXP,
                         src_size, dst_size, buf, saved, nelmts);
@@ -3053,7 +3021,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 #endif
             } else
                 goto error;
-#endif /*H5_VMS*/
 
             break;
         case TEST_DENORM:
@@ -3129,9 +3096,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabs(*((double*)aligned)) < FLT_MIN;
                 overflow = HDfabs(*((double*)aligned)) > FLT_MAX;
-#ifdef H5_VMS
-                maximal = HDfabs(*((double*)aligned)) == FLT_MAX;
-#endif
             } else if (FLT_DOUBLE==dst_type) {
                 hw_d = *((double*)aligned);
                 hw = (unsigned char*)&hw_d;
@@ -3149,17 +3113,11 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabsl(*((long double*)aligned)) < FLT_MIN;
                 overflow = HDfabsl(*((long double*)aligned)) > FLT_MAX;
-#ifdef H5_VMS
-                maximal = HDfabs(*((long double*)aligned)) == FLT_MAX;
-#endif
             } else if (FLT_DOUBLE==dst_type) {
                 hw_d = *((long double*)aligned);
                 hw = (unsigned char*)&hw_d;
                 underflow = HDfabsl(*((long double*)aligned)) < DBL_MIN;
                 overflow = HDfabsl(*((long double*)aligned)) > DBL_MAX;
-#ifdef H5_VMS
-                maximal = HDfabs(*((long double*)aligned)) == DBL_MAX;
-#endif
             } else {
                 hw_ld = *((long double*)aligned);
                 hw = (unsigned char*)&hw_ld;
@@ -3194,17 +3152,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
         if (k==dst_size)
             continue; /*no error*/
 
-#ifdef H5_VMS
-        /* For "float" and "double" on OpenVMS/Alpha, NaN is
-         * a valid value of maximal value.*/
-        if (FLT_FLOAT==src_type &&
-                my_isnan(src_type, saved+j*sizeof(float))) {
-            continue;
-        } else if (FLT_DOUBLE==src_type &&
-                my_isnan(src_type, saved+j*sizeof(double))) {
-            continue;
-        }
-#endif /*H5_VMS*/
 
         /*
          * Assume same if both results are NaN.  There are many NaN bit
@@ -3262,11 +3209,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (overflow && my_isinf(dendian, buf+j*sizeof(float),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
-#ifdef H5_VMS
-                if (maximal && my_isinf(dendian, buf+j*sizeof(float),
-                        dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
-                    continue;	/* maximal value, no error */
-#endif /*H5_VMS*/
                 check_mant[0] = HDfrexpf(x, check_expo+0);
                 check_mant[1] = HDfrexpf(hw_f, check_expo+1);
             } else if (FLT_DOUBLE==dst_type) {
@@ -3278,11 +3220,6 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 if (overflow && my_isinf(dendian, buf+j*sizeof(double),
                         dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
                     continue;	/* all overflowed, no error */
-#ifdef H5_VMS
-                if (maximal && my_isinf(dendian, buf+j*sizeof(double),
-                        dst_size, dst_mpos, dst_msize, dst_epos, dst_esize))
-                    continue;	/* maximal value, no error */
-#endif /*H5_VMS*/
                 check_mant[0] = HDfrexp(x, check_expo+0);
                 check_mant[1] = HDfrexp(hw_d, check_expo+1);
 #if H5_SIZEOF_LONG_DOUBLE !=0 && (H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE)
@@ -3409,6 +3346,9 @@ done:
     HDassert(0 && "Should not reach this point!");
     return 1;
 #else
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
 
     /* If the source is normalized values, treat the failures as error;
@@ -3432,7 +3372,11 @@ error:
     HDassert(0 && "Should not reach this point!");
     return 1;
 #else
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     if(run_test==TEST_NOOP || run_test==TEST_NORMAL)
         return MAX((int)fails_all_tests, 1);
     else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
@@ -4606,6 +4550,9 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
     HDfflush(stdout);
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
 
     /* If the source is normalized floating values, treat the failures as error;
@@ -4620,6 +4567,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
     HDfflush(stdout);
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
 
     if(run_test==TEST_NORMAL)
@@ -4924,7 +4875,6 @@ run_fp_tests(const char *name)
     nerrors += test_conv_flt_1(name, TEST_NORMAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
 
-#ifndef H5_VMS
     /*Test denormalized values.  TEST_DENORM indicates denormalized values.*/
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_FLOAT, H5T_NATIVE_DOUBLE);
     nerrors += test_conv_flt_1(name, TEST_DENORM, H5T_NATIVE_DOUBLE, H5T_NATIVE_FLOAT);
@@ -4944,7 +4894,6 @@ run_fp_tests(const char *name)
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1(name, TEST_SPECIAL, H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
-#endif /*H5_VMS*/
 
 done:
     return nerrors;
@@ -5032,8 +4981,32 @@ run_int_fp_conv(const char *name)
 #endif
 #endif /* H5_SIZEOF_LONG!=H5_SIZEOF_INT */
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
+#if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
+#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
+    {
+        char		str[256];		/*hello string		*/
+
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
+                name, "long long", "long double");
+        printf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to compiler error in handling conversion.");
+    }
+#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
+#if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULLONG, H5T_NATIVE_LDOUBLE);
+#else /* H5_LLONG_TO_LDOUBLE_CORRECT */
+    {
+        char		str[256];		/*hello string		*/
+
+        HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
+                name, "unsigned long long", "long double");
+        printf("%-70s", str);
+        SKIPPED();
+        HDputs("    Test skipped due to compiler not handling conversion.");
+    }
+#endif /* H5_LLONG_TO_LDOUBLE_CORRECT */
 #endif
 #endif
 
@@ -5061,11 +5034,7 @@ run_fp_int_conv(const char *name)
     int		nerrors = 0;
     int         test_values;
 
-#ifdef H5_VMS
-    test_values = TEST_NORMAL;
-#else
     for(test_values = TEST_NORMAL; test_values <= TEST_SPECIAL; test_values++) {
-#endif /*H5_VMS*/
 
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_FLOAT, H5T_NATIVE_SCHAR);
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_SCHAR);
@@ -5134,13 +5103,43 @@ run_fp_int_conv(const char *name)
 #endif /*H5_SIZEOF_LONG!=H5_SIZEOF_INT && H5_SIZEOF_LONG_DOUBLE!=0 */
 
 #if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG && H5_SIZEOF_LONG_DOUBLE!=0
+#ifdef H5_LDOUBLE_TO_LLONG_ACCURATE
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LLONG);
+#else /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+        {
+            char		str[256];		/*string		*/
+
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
+                    name, "long double", "long long");
+            printf("%-70s", str);
+            SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
+            HDputs("    Test skipped due to hardware conversion error.");
+#else
+            HDputs("    Test skipped due to disabled long double.");
+#endif
+        }
+#endif /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+#if defined(H5_LDOUBLE_TO_LLONG_ACCURATE)
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULLONG);
+#else /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+        {
+            char		str[256];		/*string		*/
+
+            HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions",
+                    name, "long double", "unsigned long long");
+            printf("%-70s", str);
+            SKIPPED();
+#if H5_SIZEOF_LONG_DOUBLE!=0
+            HDputs("    Test skipped due to hardware conversion error.");
+#else
+            HDputs("    Test skipped due to disabled long double.");
+#endif
+        }
+#endif /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
 #endif
 #endif
-#ifndef H5_VMS
     } /* end for */
-#endif /* H5_VMS */
 
     return nerrors;
 }
@@ -5192,10 +5191,8 @@ main(void)
      * for user-defined integer types */
     nerrors += test_derived_integer();
 
-#ifndef H5_VMS
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();
-#endif
 
     /* Test degenerate cases */
     nerrors += run_fp_tests("noop");
@@ -5220,6 +5217,10 @@ main(void)
      *----------------------------------------------------------------------
      */
     without_hardware_g = TRUE;
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
 
     /* Test software floating-point conversion functions */
@@ -5235,7 +5236,13 @@ main(void)
     /* Test software integer-float conversion functions */
     nerrors += run_int_fp_conv("soft");
 
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
 
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
@@ -5245,3 +5252,4 @@ main(void)
     printf("All data type tests passed.\n");
     return 0;
 }
+

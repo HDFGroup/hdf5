@@ -46,7 +46,8 @@
 #   include <io.h>
 #endif
 
-#ifndef H5_HAVE_ATTRIBUTE
+/* Solaris Studio defines attribute, but for the attributes we need */
+#if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus || defined(__SUNPRO_C)
 #   undef __attribute__
 #   define __attribute__(X) /*void*/
 #   define H5_ATTR_UNUSED /*void*/
@@ -223,7 +224,7 @@ test(fill_t fill_style, const double splits[],
     if ((fd=HDopen(FILE_NAME_1, O_RDONLY, 0666)) < 0) goto error;
 
     if(FILL_RANDOM==fill_style) 
-        had = calloc((size_t)cur_size[0], sizeof(int));
+        had = (int *)calloc((size_t)cur_size[0], sizeof(int));
     
     for (i=1; i<=cur_size[0]; i++) {
 

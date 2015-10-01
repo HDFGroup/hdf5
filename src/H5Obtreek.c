@@ -21,7 +21,8 @@
  *              information in the superblock extension.
  */
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -83,7 +84,7 @@ H5O_btreek_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_btreek_t	*mesg;          /* Native message */
-    void                *ret_value;     /* Return value */
+    void		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -165,7 +166,7 @@ H5O_btreek_copy(const void *_mesg, void *_dest)
 {
     const H5O_btreek_t	*mesg = (const H5O_btreek_t *)_mesg;
     H5O_btreek_t	*dest = (H5O_btreek_t *)_dest;
-    void		*ret_value;
+    void		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

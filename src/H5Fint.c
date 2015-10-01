@@ -17,10 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5F_init_interface
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
 
 
 /***********/
@@ -103,30 +100,6 @@ H5FL_DEFINE(H5F_file_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_init_interface
- *
- * Purpose:	Initialize interface-specific information.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Friday, November 20, 1998
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F_init_interface(void)
-{
-    herr_t ret_value = SUCCEED;                 /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_init_interface() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_get_access_plist
  *
  * Purpose:	Returns a copy of the file access property list of the
@@ -154,9 +127,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 {
     H5P_genplist_t *new_plist;              /* New property list */
     H5P_genplist_t *old_plist;              /* Old property list */
-    void		*driver_info=NULL;
-    unsigned            efc_size = 0;
-    hid_t		ret_value = SUCCEED;
+    H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
+    hbool_t driver_prop_copied = FALSE;     /* Whether the driver property has been set up */
+    unsigned    efc_size = 0;
+    hid_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -199,32 +173,26 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set elink file cache size")
 
-    /*
-     * Since we're resetting the driver ID and info, close them if they
-     * exist in this new property list.
-     */
-    if(H5P_facc_close(ret_value, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free the old driver information")
+    /* Prepare the driver property */
+    driver_prop.driver_id = f->shared->lf->driver_id;
+    driver_prop.driver_info = H5FD_fapl_get(f->shared->lf);
+    driver_prop_copied = TRUE;
 
-    /* Increment the reference count on the driver ID and insert it into the property list */
-    if(H5I_inc_ref(f->shared->lf->driver_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
-    if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID")
-
-    /* Set the driver "info" in the property list */
-    driver_info = H5FD_fapl_get(f->shared->lf);
-    if(driver_info != NULL && H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver info")
+    /* Set the driver property */
+    if(H5P_set(new_plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID & info")
 
     /* Set the file close degree appropriately */
-    if(f->shared->fc_degree == H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->lf->cls->fc_degree)) < 0) {
+    if(f->shared->fc_degree == H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->lf->cls->fc_degree)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
-    } else if(f->shared->fc_degree != H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->fc_degree)) < 0) {
+    else if(f->shared->fc_degree != H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->fc_degree)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
-    }
 
 done:
+    /* Release the copy of the driver info, if it was set up */
+    if(driver_prop_copied && H5FD_fapl_close(driver_prop.driver_id, driver_prop.driver_info) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close copy of driver info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_access_plist() */
 
@@ -533,7 +501,7 @@ H5F_is_hdf5(const char *name)
 {
     H5FD_t	*file = NULL;           /* Low-level file struct */
     haddr_t     sig_addr;               /* Addess of hdf5 file signature */
-    htri_t	ret_value;              /* Return value */
+    htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -581,7 +549,7 @@ done:
 H5F_t *
 H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
-    H5F_t	*f = NULL, *ret_value;
+    H5F_t	*f = NULL, *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -957,7 +925,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     H5FD_class_t       *drvr;               /*file driver class info        */
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
-    H5F_t              *ret_value;          /*actual return value           */
+    H5F_t              *ret_value = NULL;   /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1470,7 +1438,7 @@ done:
 hid_t
 H5F_get_id(H5F_t *file, hbool_t app_ref)
 {
-    hid_t       ret_value;
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1994,7 +1962,7 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
 {
     H5FD_t     *fd_ptr;                 /* file driver */
     haddr_t     eoa;                    /* End of file address */
-    ssize_t     ret_value;              /* Return value */
+    ssize_t     ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

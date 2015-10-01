@@ -22,7 +22,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -99,6 +99,7 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
 #endif /* H5_HAVE_PARALLEL */
     H5D__efl_readvv,
     H5D__efl_writevv,
+    NULL,
     NULL,
     NULL
 }};
@@ -455,7 +456,7 @@ H5D__efl_readvv(const H5D_io_info_t *io_info,
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_efl_readvv_ud_t udata;  /* User data for H5VM_opvv() operator */
-    ssize_t ret_value;          /* Return value (Total size of sequence in bytes) */
+    ssize_t ret_value = -1;     /* Return value (Total size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
 
@@ -535,7 +536,7 @@ H5D__efl_writevv(const H5D_io_info_t *io_info,
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_efl_writevv_ud_t udata;  /* User data for H5VM_opvv() operator */
-    ssize_t ret_value;          /* Return value (Total size of sequence in bytes) */
+    ssize_t ret_value = -1;      /* Return value (Total size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
 

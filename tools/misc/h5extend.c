@@ -28,7 +28,7 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 #include "H5Iprivate.h"
-#define H5F_PACKAGE 
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #include "H5Fpkg.h"
 
 /* Name of tool */

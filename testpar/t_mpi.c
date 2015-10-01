@@ -1235,7 +1235,7 @@ finish:
     /* turn off alarm */
     ALARM_OFF;
 
-    h5_cleanup(FILENAME, fapl);
+    h5_clean_files(FILENAME, fapl);
     H5close();
 
     /* MPI_Finalize must be called AFTER H5close which may use MPI calls */

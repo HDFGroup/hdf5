@@ -21,9 +21,9 @@
 #include "h5test.h"
 #include "testpar.h"
 
-#define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
-#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
-#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
+#define H5AC_FRIEND		/*suppress error about including H5ACpkg  */
+#define H5C_FRIEND		/*suppress error about including H5Cpkg   */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg   */
 
 #include "H5ACpkg.h"
 #include "H5Cpkg.h"
@@ -4208,7 +4208,7 @@ setup_cache_for_test(hid_t * fid_ptr,
      */
     if ( success ) { /* allocate space for test entries */
 
-        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT,
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DATASET_XFER_DEFAULT,
                                       (hsize_t)(max_addr + BASE_ADDR));
 
         if ( actual_base_addr == HADDR_UNDEF ) {

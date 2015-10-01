@@ -109,11 +109,11 @@ typedef struct H5O_t H5O_t;
 #define H5O_CPY_MCDT_SEARCH_CB_NAME 	 "committed dtype list search" /* Callback function when the search for a matching committed datatype is complete */
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
-#ifdef H5O_PACKAGE
+#ifdef H5O_MODULE
 #define H5O_OH_GET_ADDR(O)    ((O)->chunk[0].addr)
-#else /* H5O_PACKAGE */
+#else /* H5O_MODULE */
 #define H5O_OH_GET_ADDR(O)    (H5O_get_oh_addr(O))
-#endif /* H5O_PACKAGE */
+#endif /* H5O_MODULE */
 
 /* Set the fields in a shared message structure */
 #define H5O_UPDATE_SHARED(SH_MESG, SH_TYPE, F, MSG_TYPE, CRT_IDX, OH_ADDR)    \

@@ -22,8 +22,8 @@ set (H5_HDRS
     ${HDF5_SRC_DIR}/hdf5.h
     ${HDF5_SRC_DIR}/H5api_adpt.h
     ${HDF5_SRC_DIR}/H5public.h
-    ${HDF5_SRC_DIR}/H5version.h
-    ${HDF5_SRC_DIR}/H5overflow.h
+    #${HDF5_SRC_DIR}/H5version.h
+    #${HDF5_SRC_DIR}/H5overflow.h
 )
 IDE_GENERATED_PROPERTIES ("H5" "${H5_HDRS}" "${H5_SRCS}" )
 
@@ -44,6 +44,7 @@ IDE_GENERATED_PROPERTIES ("H5A" "${H5A_HDRS}" "${H5A_SRCS}" )
 
 set (H5AC_SRCS
     ${HDF5_SRC_DIR}/H5AC.c
+    ${HDF5_SRC_DIR}/H5ACmpio.c
 )
 
 set (H5AC_HDRS
@@ -82,6 +83,7 @@ IDE_GENERATED_PROPERTIES ("H5B2" "${H5B2_HDRS}" "${H5B2_SRCS}" )
 
 set (H5C_SRCS
     ${HDF5_SRC_DIR}/H5C.c
+    ${HDF5_SRC_DIR}/H5Cmpio.c
 )
 set (H5C_HDRS
     ${HDF5_SRC_DIR}/H5Cpkg.h
@@ -131,12 +133,12 @@ set (H5E_SRCS
 )
 
 set (H5E_HDRS
-    ${HDF5_SRC_DIR}/H5Edefin.h
-    ${HDF5_SRC_DIR}/H5Einit.h
+    #${HDF5_SRC_DIR}/H5Edefin.h
+    #${HDF5_SRC_DIR}/H5Einit.h
     ${HDF5_SRC_DIR}/H5Epkg.h
-    ${HDF5_SRC_DIR}/H5Epubgen.h
+    #${HDF5_SRC_DIR}/H5Epubgen.h
     ${HDF5_SRC_DIR}/H5Epublic.h
-    ${HDF5_SRC_DIR}/H5Eterm.h
+    #${HDF5_SRC_DIR}/H5Eterm.h
 )
 IDE_GENERATED_PROPERTIES ("H5E" "${H5E_HDRS}" "${H5E_SRCS}" )
 
@@ -720,7 +722,6 @@ set (H5_PUBLIC_HEADERS
     ${H5Z_HDRS}
 )
 
-
 set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5private.h
     ${HDF5_SRC_DIR}/H5Aprivate.h
@@ -767,6 +768,55 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5win32defs.h
 )
 
+set (H5_GENERATED_HEADERS
+    ${HDF5_SRC_DIR}/H5Edefin.h
+    ${HDF5_SRC_DIR}/H5Einit.h
+    ${HDF5_SRC_DIR}/H5Epubgen.h
+    ${HDF5_SRC_DIR}/H5Eterm.h
+    ${HDF5_SRC_DIR}/H5version.h
+    ${HDF5_SRC_DIR}/H5overflow.h
+)
+
+option (HDF5_GENERATE_HEADERS "Rebuild Generated Files" ON)
+mark_as_advanced (HDF5_GENERATE_HEADERS)
+if (HDF5_GENERATE_HEADERS)
+  find_package (Perl)
+  if (PERL_FOUND)
+    add_custom_command (
+        OUTPUT ${HDF5_SRC_DIR}/H5Edefin.h ${HDF5_SRC_DIR}/H5Einit.h ${HDF5_SRC_DIR}/H5Epubgen.h ${HDF5_SRC_DIR}/H5Eterm.h
+        PRE_BUILD
+        COMMAND ${PERL_EXECUTABLE}
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SRC_DIR}/H5err.txt
+        DEPENDS ${HDF5_SRC_DIR}/H5err.txt
+        COMMENT " Creating err header"
+    )
+
+    add_custom_command (
+        OUTPUT ${HDF5_SRC_DIR}/H5version.h
+        PRE_BUILD
+        COMMAND ${PERL_EXECUTABLE}
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_vers ${HDF5_SRC_DIR}/H5vers.txt
+        DEPENDS ${HDF5_SRC_DIR}/H5vers.txt
+       COMMENT " Creating API version macro"
+    )
+
+    add_custom_command (
+        OUTPUT ${HDF5_SRC_DIR}/H5overflow.h
+        PRE_BUILD
+        COMMAND ${PERL_EXECUTABLE}
+        ARGS ${HDF5_SOURCE_DIR}/bin/make_overflow ${HDF5_SRC_DIR}/H5overflow.txt
+        DEPENDS ${HDF5_SRC_DIR}/H5overflow.txt
+        COMMENT " Creating Assignment overflow macro"
+    )
+
+    add_custom_target(run_perl_scripts ALL
+        DEPENDS ${HDF5_SRC_DIR}/H5Edefin.h ${HDF5_SRC_DIR}/H5Einit.h ${HDF5_SRC_DIR}/H5Epubgen.h ${HDF5_SRC_DIR}/H5Eterm.h ${HDF5_SRC_DIR}/H5version.h ${HDF5_SRC_DIR}/H5overflow.h
+    )
+  else (PERL_FOUND)
+    message (STATUS "Cannot generate headers - perl not found")
+  endif (PERL_FOUND)
+endif (HDF5_GENERATE_HEADERS)
+
 #-----------------------------------------------------------------------------
 # Setup the H5Detect utility which generates H5Tinit with platform
 # specific type checks inside
@@ -776,6 +826,11 @@ TARGET_C_PROPERTIES (H5detect STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
 endif (MSVC OR MINGW)
+if (HDF5_GENERATE_HEADERS)
+  add_dependencies(H5detect run_perl_scripts)
+else (HDF5_GENERATE_HEADERS)
+  add_dependencies(H5detect "${H5_GENERATED_HEADERS}")
+endif (HDF5_GENERATE_HEADERS)
 
 set (CMD $<TARGET_FILE:H5detect>)
 add_custom_command (
@@ -790,6 +845,11 @@ TARGET_C_PROPERTIES (H5make_libsettings STATIC " " " ")
 if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
 endif (MSVC OR MINGW)
+if (HDF5_GENERATE_HEADERS)
+  add_dependencies(H5make_libsettings run_perl_scripts)
+else (HDF5_GENERATE_HEADERS)
+  add_dependencies(H5make_libsettings "${H5_GENERATED_HEADERS}")
+endif (HDF5_GENERATE_HEADERS)
 
 set (CMD $<TARGET_FILE:H5make_libsettings>)
 add_custom_command (
@@ -800,60 +860,14 @@ add_custom_command (
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
 )
 
-if (GENERATE_ERROR_HEADERS)
-  find_pacakge (Perl)
-  if (PERL_FOUND)
-    add_custom_command (
-        OUTPUT ${HDF5_BINARY_DIR}/H5Edefin.h
-        PRE_BUILD
-        COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SOURCE_DIR}/src/H5err.txt
-        DEPENDS ${HDF5_SOURCE_DIR}/src/H5err.txt
-        COMMENT " Creating err header"
-    )
-
-    add_custom_command (
-        OUTPUT ${HDF5_BINARY_DIR}/H5version.h
-        PRE_BUILD
-        COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_vers ${HDF5_SOURCE_DIR}/src/H5vers.txt
-        DEPENDS ${HDF5_SOURCE_DIR}/src/H5vers.txt
-       COMMENT " Creating API version macro"
-    )
-
-    add_custom_command (
-        OUTPUT ${HDF5_BINARY_DIR}/H5overflow.h
-        PRE_BUILD
-        COMMAND ${PERL_EXECUTABLE}
-        ARGS ${HDF5_SOURCE_DIR}/bin/make_overflow ${HDF5_SOURCE_DIR}/src/H5overflow.txt
-        DEPENDS ${HDF5_SOURCE_DIR}/src/H5overflow.txt
-        COMMENT " Creating Assignment overflow macro"
-    )
-
-    add_custom_target(run_perl_scripts ALL
-        DEPENDS ${HDF5_BINARY_DIR}/H5Edefin.h ${HDF5_BINARY_DIR}/H5version.h ${HDF5_BINARY_DIR}/H5overflow.h
-    )
-  else (PERL_FOUND)
-    message (STATUS "Cannot generate headers - perl not found")
-  endif (PERL_FOUND)
-endif (GENERATE_ERROR_HEADERS)
-
 #-----------------------------------------------------------------------------
 # Add H5Tinit source to build - generated by H5Detect/CMake at configure time
 #-----------------------------------------------------------------------------
 set (common_SRCS ${common_SRCS} ${HDF5_BINARY_DIR}/H5Tinit.c)
-set_source_files_properties (${HDF5_BINARY_DIR}/H5Tinit.c GENERATED)
 set (common_SRCS ${common_SRCS} ${HDF5_BINARY_DIR}/H5lib_settings.c)
-set_source_files_properties (${HDF5_BINARY_DIR}/H5lib_settings.c GENERATED)
-set (common_SRCS ${common_SRCS} ${HDF5_BINARY_DIR}/H5Edefin.h)
-set_source_files_properties (${HDF5_BINARY_DIR}/H5Edefin.h GENERATED)
-set (common_SRCS ${common_SRCS} ${HDF5_BINARY_DIR}/H5version.h)
-set_source_files_properties (${HDF5_BINARY_DIR}/H5version.h GENERATED)
-set (common_SRCS ${common_SRCS} ${HDF5_BINARY_DIR}/H5overflow.h)
-set_source_files_properties (${HDF5_BINARY_DIR}/H5overflow.h GENERATED)
 
-add_library (${HDF5_LIB_TARGET} ${LIB_TYPE} ${common_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS})
-TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} ${LIB_TYPE} " " " ")
+add_library (${HDF5_LIB_TARGET} STATIC ${common_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
+TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_LIB_TARGET} ${LINK_LIBS})
 if (NOT WIN32)
   target_link_libraries (${HDF5_LIB_TARGET} dl)
@@ -862,11 +876,16 @@ if (H5_HAVE_PARALLEL AND MPI_C_FOUND)
   target_link_libraries (${HDF5_LIB_TARGET} ${MPI_C_LIBRARIES})
 endif (H5_HAVE_PARALLEL AND MPI_C_FOUND)
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT ${HDF5_LIB_TARGET})
-H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET} ${HDF5_LIB_NAME} ${LIB_TYPE})
+H5_SET_LIB_OPTIONS (${HDF5_LIB_TARGET} ${HDF5_LIB_NAME} STATIC)
 set_target_properties (${HDF5_LIB_TARGET} PROPERTIES
     FOLDER libraries
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
+if (HDF5_GENERATE_HEADERS)
+  add_dependencies(${HDF5_LIB_TARGET} run_perl_scripts)
+else (HDF5_GENERATE_HEADERS)
+  add_dependencies(${HDF5_LIB_TARGET} "${HDF5_SRC_DIR}/H5Edefin.h;${HDF5_SRC_DIR}/H5Einit.h;${HDF5_SRC_DIR}/H5Epubgen.h;${HDF5_SRC_DIR}/H5Eterm.h")
+endif (HDF5_GENERATE_HEADERS)
 
 option (HDF5_ENABLE_DEBUG_APIS "Turn on debugging in all packages" OFF)
 if (HDF5_ENABLE_DEBUG_APIS)
@@ -875,6 +894,46 @@ if (HDF5_ENABLE_DEBUG_APIS)
           "H5Z_DEBUG;H5VM_DEBUG;H5T_DEBUG;H5S_DEBUG;H5P_DEBUG;H5O_DEBUG;H5MM_DEBUG;H5MF_DEBUG;H5I_DEBUG;H5HL_DEBUG;H5HG_DEBUG;H5G_DEBUG;H5F_DEBUG;H5E_DEBUG;H5D_DEBUG;H5B_DEBUG;H5AC_DEBUG"
   )
 endif (HDF5_ENABLE_DEBUG_APIS)
+set (install_targets ${HDF5_LIB_TARGET})
+
+if (BUILD_SHARED_LIBS)
+  add_library (${HDF5_LIBSH_TARGET} SHARED ${common_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
+  TARGET_C_PROPERTIES (${HDF5_LIBSH_TARGET} SHARED " " " ")
+  target_link_libraries (${HDF5_LIBSH_TARGET} ${LINK_SHARED_LIBS})
+  if (NOT WIN32)
+    target_link_libraries (${HDF5_LIBSH_TARGET} dl)
+  endif (NOT WIN32)
+  if (H5_HAVE_PARALLEL AND MPI_C_FOUND)
+    target_link_libraries (${HDF5_LIBSH_TARGET} ${MPI_C_LIBRARIES})
+  endif (H5_HAVE_PARALLEL AND MPI_C_FOUND)
+  set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_LIBSH_TARGET}")
+  H5_SET_LIB_OPTIONS (${HDF5_LIBSH_TARGET} ${HDF5_LIB_NAME} SHARED)
+  set_target_properties (${HDF5_LIBSH_TARGET} PROPERTIES
+      FOLDER libraries
+      COMPILE_DEFINITIONS "H5_BUILT_AS_DYNAMIC_LIB"
+      INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+      INTERFACE_COMPILE_DEFINITIONS H5_BUILT_AS_DYNAMIC_LIB=1
+  )
+  if (HDF5_GENERATE_HEADERS)
+    add_dependencies(${HDF5_LIBSH_TARGET} run_perl_scripts)
+  else (HDF5_GENERATE_HEADERS)
+    add_dependencies(${HDF5_LIBSH_TARGET} "${HDF5_SRC_DIR}/H5Edefin.h;${HDF5_SRC_DIR}/H5Einit.h;${HDF5_SRC_DIR}/H5Epubgen.h;${HDF5_SRC_DIR}/H5Eterm.h")
+  endif (HDF5_GENERATE_HEADERS)
+  if (HDF5_ENABLE_THREADSAFE)
+    set_property (TARGET ${HDF5_LIBSH_TARGET}
+        APPEND PROPERTY COMPILE_DEFINITIONS
+            "H5_HAVE_THREADSAFE"
+    )
+  endif (HDF5_ENABLE_THREADSAFE)
+
+  if (HDF5_ENABLE_DEBUG_APIS)
+    set_property (TARGET ${HDF5_LIBSH_TARGET}
+        APPEND PROPERTY COMPILE_DEFINITIONS
+            "H5Z_DEBUG;H5VM_DEBUG;H5T_DEBUG;H5S_DEBUG;H5P_DEBUG;H5O_DEBUG;H5MM_DEBUG;H5MF_DEBUG;H5I_DEBUG;H5HL_DEBUG;H5HG_DEBUG;H5G_DEBUG;H5F_DEBUG;H5E_DEBUG;H5D_DEBUG;H5B_DEBUG;H5AC_DEBUG"
+    )
+  endif (HDF5_ENABLE_DEBUG_APIS)
+  set (install_targets ${install_targets} ${HDF5_LIBSH_TARGET})
+endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
@@ -883,6 +942,7 @@ if (NOT HDF5_INSTALL_NO_DEVELOPMENT)
   install (
       FILES
           ${H5_PUBLIC_HEADERS}
+          ${H5_GENERATED_HEADERS}
       DESTINATION
           ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
@@ -895,16 +955,17 @@ endif (NOT HDF5_INSTALL_NO_DEVELOPMENT)
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
-    INSTALL_TARGET_PDB (${HDF5_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} libraries)
+    INSTALL_TARGET_PDB (${HDF5_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} libraries)
   endif (BUILD_SHARED_LIBS)
-  
+
   install (
       TARGETS
-          ${HDF5_LIB_TARGET}
+          ${install_targets}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
       LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT libraries
+      FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT libraries
   )
 endif (HDF5_EXPORTED_TARGETS)
