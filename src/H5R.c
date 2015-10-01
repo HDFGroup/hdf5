@@ -1287,8 +1287,10 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
             copy_len = MIN(attr_name_len, size - 1);
 
             /* Get the attribute name */
-            HDmemcpy(name, p, copy_len);
-            name[copy_len] = '\0';
+            if (name) {
+                HDmemcpy(name, p, copy_len);
+                name[copy_len] = '\0';
+            }
             ret_value = (ssize_t)copy_len;
         } /* end case */
         break;
