@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+#include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
 
 #include "H5private.h"		/* Generic Functions			*/

@@ -22,8 +22,8 @@
 #ifndef _CACHE_COMMON_H
 #define _CACHE_COMMON_H
 
-#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
-#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
+#define H5C_FRIEND		/*suppress error about including H5Cpkg   */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 
 /* Include library header files */
 #include "H5ACprivate.h"
@@ -360,7 +360,6 @@ typedef struct test_entry_t
  */
 
 #define H5C__HASH_MASK          ((size_t)(H5C__HASH_TABLE_LEN - 1) << 3)
-#define H5C__HASH_FCN(x)        (int)(((x) & H5C__HASH_MASK) >> 3)
 
 #define H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)          \
 if ( ( (cache_ptr) == NULL ) ||                              \

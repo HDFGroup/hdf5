@@ -28,10 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5O_init_interface
 
 /***********/
 /* Headers */
@@ -93,6 +91,9 @@ static const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Header message ID to class mapping */
 
@@ -178,7 +179,7 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_init_interface
+ * Function:	H5O__init_package
  *
  * Purpose:	Initialize information specific to H5O interface.
  *
@@ -187,16 +188,12 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
  * Programmer:	Quincey Koziol
  *              Thursday, January 18, 2007
  *
- * Changes:     JRM -- 12/12/07
- *              Added santity check verifying that H5O_msg_class_g
- *              is big enough.
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O_init_interface(void)
+herr_t
+H5O__init_package(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* H5O interface sanity checks */
     HDcompile_assert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
@@ -205,7 +202,7 @@ H5O_init_interface(void)
     HDcompile_assert(H5O_UNKNOWN_ID < H5O_MSG_TYPES);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_init_interface() */
+} /* end H5O__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -247,7 +244,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 
     /* Open the object */
     if((ret_value = H5O_open_name(&loc, name, lapl_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -313,18 +310,18 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     /* Find the object's location, according to the order in the index */
     if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "group not found")
     loc_found = TRUE;
 
     /* Open the object */
     if((ret_value = H5O_open_by_loc(&obj_loc, lapl_id, dxpl_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
     /* Release the object location if we failed after copying it */
     if(ret_value < 0 && loc_found)
         if(H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_idx() */
@@ -394,7 +391,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 
     /* Open the object */
     if((ret_value = H5O_open_by_loc(&obj_loc, lapl_id, H5AC_ind_dxpl_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
 
@@ -458,7 +455,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
 
     /* Link to the object */
     if(H5L_link(&new_loc, new_name, &obj_loc, lcpl_id, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -619,7 +616,7 @@ H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
 
     /* Retrieve the object's information */
     if(H5G_loc_info(&loc, ".", TRUE, oinfo/*out*/, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -663,7 +660,7 @@ H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lap
 
     /* Retrieve the object's information */
     if(H5G_loc_info(&loc, name, TRUE, oinfo/*out*/, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -723,17 +720,17 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     /* Find the object's location, according to the order in the index */
     if(H5G_loc_find_by_idx(&loc, group_name, idx_type, order, n, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "group not found")
     loc_found = TRUE;
 
     /* Retrieve the object's information */
     if(H5O_get_info(obj_loc.oloc, H5AC_ind_dxpl_id, TRUE, oinfo) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve object info")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object info")
 
 done:
     /* Release the object location */
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_idx() */
@@ -771,7 +768,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
 
     /* (Re)set the object's comment */
     if(H5G_loc_set_comment(&loc, ".", comment, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -818,7 +815,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
 
     /* (Re)set the object's comment */
     if(H5G_loc_set_comment(&loc, name, comment, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -856,7 +853,7 @@ H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize)
 
     /* Retrieve the object's comment */
     if((ret_value = H5G_loc_get_comment(&loc, ".", comment/*out*/, bufsize, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -902,7 +899,7 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t buf
 
     /* Retrieve the object's comment */
     if((ret_value = H5G_loc_get_comment(&loc, name, comment/*out*/, bufsize, lapl_id, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -960,7 +957,7 @@ H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
 
     /* Call internal object visitation routine */
     if((ret_value = H5O_visit(obj_id, ".", idx_type, order, op, op_data, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visitation failed")
+	HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1026,7 +1023,7 @@ H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 
     /* Call internal object visitation routine */
     if((ret_value = H5O_visit(loc_id, obj_name, idx_type, order, op, op_data, lapl_id, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visitation failed")
+	HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1370,17 +1367,17 @@ H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id, hbool_t app_ref)
 
     /* Find the object's location */
     if(H5G_loc_find(loc, name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
     loc_found = TRUE;
 
     /* Open the object */
     if((ret_value = H5O_open_by_loc(&obj_loc, lapl_id, dxpl_id, app_ref)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
     if(ret_value < 0 && loc_found)
         if(H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open_name() */
@@ -1403,7 +1400,7 @@ hid_t
 H5O_open_by_loc(const H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
     const H5O_obj_class_t *obj_class;   /* Class of object for location */
-    hid_t      ret_value;               /* Return value */
+    hid_t               ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1499,7 +1496,7 @@ int
 H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, hbool_t *deleted)
 {
     haddr_t addr = H5O_OH_GET_ADDR(oh);     /* Object header address */
-    int	ret_value;                      /* Return value */
+    int	ret_value = -1;                     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1615,7 +1612,7 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
     hbool_t deleted = FALSE;            /* Whether the object was deleted */
-    int	ret_value;                      /* Return value */
+    int	ret_value = -1;                 /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, FAIL)
 
@@ -1666,7 +1663,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, unsigned prot_flags)
     H5O_cache_ud_t udata;       /* User data for protecting object header */
     H5O_cont_msgs_t cont_msg_info;      /* Continuation message info */
     unsigned file_intent;       /* R/W intent on file */
-    H5O_t *ret_value;           /* Return value */
+    H5O_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, loc->addr, NULL)
 
@@ -1885,8 +1882,8 @@ done:
 H5O_t *
 H5O_pin(const H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5O_t       *oh = NULL;     /* Object header */
-    H5O_t       *ret_value;     /* Return value */
+    H5O_t       *oh = NULL;             /* Object header */
+    H5O_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -2380,7 +2377,7 @@ const H5O_obj_class_t *
 H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;                     /* Object header for location */
-    const H5O_obj_class_t *ret_value;           /* Return value */
+    const H5O_obj_class_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->addr, NULL)
 
@@ -2417,7 +2414,7 @@ static const H5O_obj_class_t *
 H5O_obj_class_real(H5O_t *oh)
 {
     size_t	i;                      /* Local index variable */
-    const H5O_obj_class_t *ret_value;   /* Return value */
+    const H5O_obj_class_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -2459,7 +2456,7 @@ done:
 H5O_loc_t *
 H5O_get_loc(hid_t object_id)
 {
-    H5O_loc_t   *ret_value;     /* Return value */
+    H5O_loc_t   *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -3279,7 +3276,7 @@ H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     H5O_info_t  oinfo;          /* Object info struct */
     hid_t       obj_id = (-1);  /* ID of object */
-    herr_t      ret_value;      /* Return value */
+    herr_t      ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

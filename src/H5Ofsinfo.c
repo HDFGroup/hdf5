@@ -24,7 +24,8 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5O_PACKAGE		/* suppress error about including H5Opkg	*/
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions	*/
 #include "H5Eprivate.h"		/* Error handling	*/
@@ -89,7 +90,7 @@ H5O_fsinfo_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
 {
     H5O_fsinfo_t	*fsinfo = NULL; /* free-space manager info */
     H5FD_mem_t 		type;		/* Memory type for iteration */
-    void        	*ret_value;  	/* Return value */
+    void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -183,9 +184,9 @@ H5O_fsinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
 static void *
 H5O_fsinfo_copy(const void *_mesg, void *_dest)
 {
-    const H5O_fsinfo_t   *fsinfo = (const H5O_fsinfo_t *)_mesg;
-    H5O_fsinfo_t         *dest = (H5O_fsinfo_t *) _dest;
-    void                *ret_value;     /* Return value */
+    const H5O_fsinfo_t  *fsinfo = (const H5O_fsinfo_t *)_mesg;
+    H5O_fsinfo_t        *dest = (H5O_fsinfo_t *) _dest;
+    void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -224,7 +225,7 @@ H5O_fsinfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const voi
 {
     const H5O_fsinfo_t   *fsinfo = (const H5O_fsinfo_t *)_mesg;
     size_t fs_addr_size = 0;
-    size_t ret_value;   /* Return value */
+    size_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

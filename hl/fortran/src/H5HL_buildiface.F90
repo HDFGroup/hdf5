@@ -83,13 +83,13 @@ PROGRAM H5HL_buildiface
             /)
 ! pointer to the buffer
   CHARACTER(LEN=37), DIMENSION(1:8), PARAMETER :: f_ptr_line=(/ &
-       '    f_ptr = C_LOC(buf)               ', &
-       '    f_ptr = C_LOC(buf(1))            ', &
-       '    f_ptr = C_LOC(buf(1,1))          ', &
-       '    f_ptr = C_LOC(buf(1,1,1))        ', &
-       '    f_ptr = C_LOC(buf(1,1,1,1))      ', &
-       '    f_ptr = C_LOC(buf(1,1,1,1,1))    ', &
-       '    f_ptr = C_LOC(buf(1,1,1,1,1,1))  ', &
+       '    f_ptr = C_LOC(buf               )', &
+       '    f_ptr = C_LOC(buf(1)            )', &
+       '    f_ptr = C_LOC(buf(1,1)          )', &
+       '    f_ptr = C_LOC(buf(1,1,1)        )', &
+       '    f_ptr = C_LOC(buf(1,1,1,1)      )', &
+       '    f_ptr = C_LOC(buf(1,1,1,1,1)    )', &
+       '    f_ptr = C_LOC(buf(1,1,1,1,1,1)  )', &
        '    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))' &
             /)
 
@@ -154,6 +154,13 @@ PROGRAM H5HL_buildiface
         WRITE(11,'(A)') "     MODULE PROCEDURE h5ltmake_dataset_real_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO
+  DO i = 1, num_ikinds
+     j = ikind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5ltmake_dataset_integer_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
   WRITE(11,'(A)') "  END INTERFACE"
 
 !  h5ltread_dataset_f
@@ -163,6 +170,35 @@ PROGRAM H5HL_buildiface
      WRITE(chr2,'(I2)') j
      DO k = 1, 8
         WRITE(11,'(A)') "     MODULE PROCEDURE h5ltread_dataset_real_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  DO i = 1, num_ikinds
+     j = ikind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5ltread_dataset_integer_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+! h5ltread_dataset_int_f
+  WRITE(11,'(A)') "  INTERFACE h5ltread_dataset_int_f"
+  DO i = 1, num_ikinds
+     j = ikind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5ltread_dataset_int_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
+     ENDDO
+  END DO
+  WRITE(11,'(A)') "  END INTERFACE"
+
+!  h5ltmake_dataset_int_f
+  WRITE(11,'(A)') "  INTERFACE h5ltmake_dataset_int_f"
+  DO i = 1, num_ikinds
+     j = ikind(i)
+     WRITE(chr2,'(I2)') j
+     DO k = 1, 8
+        WRITE(11,'(A)') "     MODULE PROCEDURE h5ltmake_dataset_int_kind_"//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(k)
      ENDDO
   END DO
   WRITE(11,'(A)') "  END INTERFACE"
@@ -346,7 +382,6 @@ PROGRAM H5HL_buildiface
      k = rkind(i)
      WRITE(chr2,'(I2)') k
      DO j = 1, 8
-
 ! DLL definitions for windows
         WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
         WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltmake_dataset_double_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
@@ -399,6 +434,134 @@ PROGRAM H5HL_buildiface
         WRITE(11,'(A)') '    namelen = LEN(dset_name)'
         WRITE(11,'(A)') '    errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,H5T_NATIVE_DOUBLE,f_ptr)'
         WRITE(11,'(A)') '  END SUBROUTINE h5ltread_dataset_double_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+     ENDDO
+  ENDDO
+
+! h5ltmake_dataset_f
+  DO i = 1, num_ikinds
+     k = ikind(i)
+     WRITE(chr2,'(I2)') k
+     DO j = 1, 8
+
+! DLL definitions for windows
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
+        WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltmake_dataset_integer_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+        WRITE(11,'(A)') '!DEC$endif'
+
+! Subroutine API
+        WRITE(11,'(A)') '  SUBROUTINE h5ltmake_dataset_integer_kind_'//TRIM(ADJUSTL(chr2))&
+             &//'_rank'//chr_rank(j)//'(loc_id,dset_name,rank,dims,type_id,buf,errcode)'
+        WRITE(11,'(A)') '    IMPLICIT NONE'
+        WRITE(11,'(A)') '    INTEGER(hid_t)  , INTENT(IN) :: loc_id'
+        WRITE(11,'(A)') '    CHARACTER(LEN=*), INTENT(IN) :: dset_name'
+        WRITE(11,'(A)') '    INTEGER,          INTENT(IN) :: rank'
+        WRITE(11,'(A)') '    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims'
+        WRITE(11,'(A)') '    INTEGER(hid_t),   INTENT(in) :: type_id'
+        WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER :: errcode '
+        WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
+        
+        WRITE(11,'(A)') f_ptr_line(j)
+        WRITE(11,'(A)') '    namelen = LEN(dset_name)'
+        WRITE(11,'(A)') '    errcode = h5ltmake_dataset_c(loc_id, namelen, dset_name, rank, dims, type_id, f_ptr)'
+        WRITE(11,'(A)') '  END SUBROUTINE h5ltmake_dataset_integer_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+     ENDDO
+  ENDDO
+
+! h5ltmake_dataset_int_f
+  DO i = 1, num_ikinds
+     k = ikind(i)
+     WRITE(chr2,'(I2)') k
+     DO j = 1, 8
+
+! DLL definitions for windows
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
+        WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltmake_dataset_int_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+        WRITE(11,'(A)') '!DEC$endif'
+
+! Subroutine API
+        WRITE(11,'(A)') '  SUBROUTINE h5ltmake_dataset_int_kind_'//TRIM(ADJUSTL(chr2))&
+             &//'_rank'//chr_rank(j)//'(loc_id,dset_name,rank,dims,buf,errcode)'
+        WRITE(11,'(A)') '    IMPLICIT NONE'
+        WRITE(11,'(A)') '    INTEGER(hid_t)  , INTENT(IN) :: loc_id'
+        WRITE(11,'(A)') '    CHARACTER(LEN=*), INTENT(IN) :: dset_name'
+        WRITE(11,'(A)') '    INTEGER,          INTENT(IN) :: rank'
+        WRITE(11,'(A)') '    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims'
+        WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER :: errcode '
+        WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
+        WRITE(11,'(A)') '    INTEGER(hid_t) :: type_id'
+        
+        WRITE(11,'(A)') f_ptr_line(j)
+        WRITE(11,'(A)') '    namelen = LEN(dset_name)'
+        WRITE(11,'(A)') '    type_id = h5kind_to_type(KIND('//f_ptr_line(j)(19:36)//'), H5_INTEGER_KIND)'
+        WRITE(11,'(A)') '    errcode = h5ltmake_dataset_c(loc_id, namelen, dset_name, rank, dims, type_id, f_ptr)'
+        WRITE(11,'(A)') '  END SUBROUTINE h5ltmake_dataset_int_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+     ENDDO
+  ENDDO
+
+! h5ltread_dataset_f
+  DO i = 1, num_ikinds
+     k = ikind(i)
+     WRITE(chr2,'(I2)') k
+     DO j = 1, 8
+
+! DLL definitions for windows
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
+        WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltread_dataset_integer_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+        WRITE(11,'(A)') '!DEC$endif'
+
+! Subroutine API
+        WRITE(11,'(A)') '  SUBROUTINE h5ltread_dataset_integer_kind_'//TRIM(ADJUSTL(chr2))&
+             &//'_rank'//chr_rank(j)//'(loc_id,dset_name, type_id, buf,dims,errcode)'
+        WRITE(11,'(A)') '    IMPLICIT NONE'
+        WRITE(11,'(A)') '    INTEGER(hid_t)  , INTENT(IN) :: loc_id'
+        WRITE(11,'(A)') '    CHARACTER(LEN=*), INTENT(IN) :: dset_name'
+        WRITE(11,'(A)') '    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims'
+        WRITE(11,'(A)') '    INTEGER(hid_t),   INTENT(in) :: type_id'
+        WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER :: errcode '
+        WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
+
+        WRITE(11,'(A)') f_ptr_line(j)
+        WRITE(11,'(A)') '    namelen = LEN(dset_name)'
+        WRITE(11,'(A)') '    errcode = h5ltread_dataset_c(loc_id, namelen, dset_name, type_id, f_ptr)'
+        WRITE(11,'(A)') '  END SUBROUTINE h5ltread_dataset_integer_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+     ENDDO
+  ENDDO
+
+! h5ltread_dataset_int_f
+  DO i = 1, num_ikinds
+     k = ikind(i)
+     WRITE(chr2,'(I2)') k
+     DO j = 1, 8
+
+! DLL definitions for windows
+        WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_HL_DLL)'
+        WRITE(11,'(A)') '!DEC$attributes dllexport :: h5ltread_dataset_int_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
+        WRITE(11,'(A)') '!DEC$endif'
+
+! Subroutine API
+        WRITE(11,'(A)') '  SUBROUTINE h5ltread_dataset_int_kind_'//TRIM(ADJUSTL(chr2))&
+             &//'_rank'//chr_rank(j)//'(loc_id,dset_name, buf,dims,errcode)'
+        WRITE(11,'(A)') '    IMPLICIT NONE'
+        WRITE(11,'(A)') '    INTEGER(hid_t)  , INTENT(IN) :: loc_id'
+        WRITE(11,'(A)') '    CHARACTER(LEN=*), INTENT(IN) :: dset_name'
+        WRITE(11,'(A)') '    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims'
+        WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER :: errcode '
+        WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
+        WRITE(11,'(A)') '    INTEGER(size_t) :: namelen'
+        WRITE(11,'(A)') '    INTEGER(hid_t) :: type_id'
+
+        WRITE(11,'(A)') f_ptr_line(j)
+        WRITE(11,'(A)') '    namelen = LEN(dset_name)'
+        WRITE(11,'(A)') '    type_id = h5kind_to_type(KIND('//f_ptr_line(j)(19:36)//'), H5_INTEGER_KIND)'
+        WRITE(11,'(A)') '    errcode = h5ltread_dataset_c(loc_id, namelen, dset_name, type_id, f_ptr)'
+        WRITE(11,'(A)') '  END SUBROUTINE h5ltread_dataset_int_kind_'//TRIM(ADJUSTL(chr2))//'_rank'//chr_rank(j)
      ENDDO
   ENDDO
 

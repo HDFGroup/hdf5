@@ -69,6 +69,7 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
 
     # General
     FC_BASENAME=pgf90
+    Fortran_COMPILER_ID=PGI
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
     # Uncomment the following to add something specific for FCFLAGS.

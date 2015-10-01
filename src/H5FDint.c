@@ -28,10 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5FD_PACKAGE		/*suppress error about including H5FDpkg  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5FD_int_init_interface
+#include "H5FDmodule.h"         /* This source code file is part of the H5FD module */
 
 
 /***********/
@@ -78,28 +75,6 @@
 /* Local Variables */
 /*******************/
 
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5FD_int_init_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5FD_int_init_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5FD_init_iterface currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5FD_int_init_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5FD_init())
-} /* H5FD_int_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -325,7 +300,7 @@ done:
 haddr_t
 H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type)
 {
-    haddr_t	ret_value;
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
@@ -367,7 +342,7 @@ done:
 haddr_t
 H5FD_get_eof(const H5FD_t *file, H5FD_mem_t type)
 {
-    haddr_t	ret_value;
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 

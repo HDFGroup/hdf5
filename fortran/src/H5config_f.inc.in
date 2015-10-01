@@ -57,3 +57,6 @@
 ! valid INTEGER KINDs (need to have a matching C counter-part)
 #undef H5CONFIG_F_IKIND
 
+! Fortran compiler name
+#undef Fortran_COMPILER_ID
+

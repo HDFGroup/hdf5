@@ -149,8 +149,6 @@ int main(void)
 {
   int FoundIntSize[10];
   int FoundIntSizeKind[10];
-  int FoundRealSize[10];
-  int FoundRealSizeKind[10];
   int i, j,flag;
   char chrA[32],chrB[32];
 
@@ -382,16 +380,8 @@ int main(void)
 /* it a value of the next larger one, but if the next         */
 /* higher one is not available we assigned it the next lowest */
 
-  FoundRealSize[0] = -1;
-  FoundRealSize[1] = -1;
-  FoundRealSize[2] = -1;
-  FoundRealSize[3] = -1;
-  FoundRealSize[4] = -1;
-  
   for(i=0;i<H5_FORTRAN_NUM_REAL_KINDS;i++) {
     if (RealKinds[i] > 0) {
-      FoundRealSize[i] = (int)RealKinds[i];
-      FoundRealSizeKind[i] = (int)RealKinds_SizeOf[i];	
       sprintf(chrA, "Fortran_REAL_%s", Real_C_TYPES[i]);
       sprintf(chrB, "real_%s_f", Real_C_TYPES[i]);
       writeToFiles("float",chrA, chrB, RealKinds[i], RealKinds_SizeOf[i]);

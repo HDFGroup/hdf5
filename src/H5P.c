@@ -22,10 +22,7 @@
 /* Module Setup */
 /****************/
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5P__init_pub_interface
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 
 
 /***********/
@@ -62,6 +59,9 @@ typedef struct {
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -71,51 +71,6 @@ typedef struct {
 /*******************/
 /* Local Variables */
 /*******************/
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5P__init_pub_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5P__init_pub_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5P_init() currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5P__init_pub_interface(void)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    FUNC_LEAVE_NOAPI(H5P_init())
-} /* H5P__init_pub_interface() */
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5P__term_pub_interface -- Terminate interface
-USAGE
-    herr_t H5P__term_pub_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Terminates interface.  (Just resets H5_interface_initialize_g
-    currently).
-
---------------------------------------------------------------------------*/
-herr_t
-H5P__term_pub_interface(void)
-{
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Mark closed */
-    H5_interface_initialize_g = 0;
-
-    FUNC_LEAVE_NOAPI(0)
-} /* H5P__term_pub_interface() */
 
 
 /*--------------------------------------------------------------------------
@@ -1395,7 +1350,7 @@ H5Premove(hid_t plist_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
 
     /* Create the new property list class */
-    if((ret_value = H5P_remove(plist_id,plist,name)) < 0)
+    if((ret_value = H5P_remove(plist, name)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
 
 done:

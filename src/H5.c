@@ -74,6 +74,7 @@ hbool_t H5_api_entered_g = FALSE;
 H5_api_t H5_g;
 #else
 hbool_t H5_libinit_g = FALSE;   /* Library hasn't been initialized */
+hbool_t H5_libterm_g = FALSE;   /* Library isn't being shutdown */
 #endif
 
 #ifdef H5_HAVE_MPE
@@ -261,6 +262,9 @@ H5_term_library(void)
     if(!(H5_INIT_GLOBAL))
 	goto done;
 
+    /* Indicate that the library is being shut down */
+    H5_TERM_GLOBAL = TRUE;
+
     /* Check if we should display error output */
     (void)H5Eget_auto2(H5E_DEFAULT, &func, NULL);
 
@@ -270,7 +274,7 @@ H5_term_library(void)
      * way that would necessitate some cleanup work in the other interface.
      */
 #define DOWN(F)								      \
-    (((n = H5##F##_term_interface()) && (at + 8) < sizeof loop)?	      \
+    (((n = H5##F##_term_package()) && (at + 8) < sizeof loop)?	      \
      (sprintf(loop + at, "%s%s", (at ? "," : ""), #F),			      \
       at += HDstrlen(loop + at),					      \
       n):                                                                     \
@@ -281,19 +285,45 @@ H5_term_library(void)
 
     do {
 	pending = 0;
+
         /* Try to organize these so the "higher" level components get shut
          * down before "lower" level components that they might rely on. -QAK
          */
-	pending += DOWN(R);
-	pending += DOWN(D);
 	pending += DOWN(L);
-	pending += DOWN(G);
-	pending += DOWN(A);
-	pending += DOWN(S);
-	pending += DOWN(T);
+
+        /* Close the "top" of various interfaces (IDs, etc) but don't shut
+         *  down the whole interface yet, so that the object header messages
+         *  get serialized correctly for entries in the metadata cache and the
+         *  symbol table entry in the superblock gets serialized correctly, etc.
+         *  all of which is performed in the 'F' shutdown.
+         */
+        pending += DOWN(A_top);
+        pending += DOWN(D_top);
+        pending += DOWN(G_top);
+	pending += DOWN(R_top);
+        pending += DOWN(S_top);
+        pending += DOWN(T_top);
+
         /* Don't shut down the file code until objects in files are shut down */
         if(pending == 0)
             pending += DOWN(F);
+
+        /* Wait to shut down the "bottom" of various interfaces until the
+         *      files are closed, so pieces of the file can be serialized
+         *      correctly.
+         */
+        if(pending == 0) {
+            /* Shut down the "bottom" of the attribute, dataset, group,
+             *  reference, dataspace, and datatype interfaces, fully closing
+             *  out the interfaces now.
+             */
+            pending += DOWN(A);
+            pending += DOWN(D);
+            pending += DOWN(G);
+            pending += DOWN(R);
+            pending += DOWN(S);
+            pending += DOWN(T);
+        } /* end if */
 
         /* Don't shut down "low-level" components until "high-level" components
          * have successfully shut down.  This prevents property lists and IDs
@@ -303,8 +333,8 @@ H5_term_library(void)
         if(pending == 0) {
             pending += DOWN(AC);
             pending += DOWN(Z);
-            pending += DOWN(FD);
             pending += DOWN(P);
+            pending += DOWN(FD);
             pending += DOWN(PL);
             /* Don't shut down the error code until other APIs which use it are shut down */
             if(pending == 0)
@@ -318,7 +348,7 @@ H5_term_library(void)
             /* Don't shut down the free list code until _everything_ else is down */
             if(pending == 0)
                 pending += DOWN(FL);
-        }
+        } /* end if */
     } while(pending && ntries++ < 100);
 
     if(pending) {
@@ -362,12 +392,17 @@ H5_term_library(void)
         (void)H5MM_free(tmp_open_stream);
     } /* end while */
 
+    /* Reset flag indicating that the library is being shut down */
+    H5_TERM_GLOBAL = FALSE;
+
     /* Mark library as closed */
     H5_INIT_GLOBAL = FALSE;
+
 done:
 #ifdef H5_HAVE_THREADSAFE
     H5_API_UNLOCK
 #endif /* H5_HAVE_THREADSAFE */
+
     return;
 } /* end H5_term_library() */
 

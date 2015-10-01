@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 /***********/
 /* Headers */
@@ -247,8 +248,8 @@ H5O_assert(const H5O_t *oh)
 herr_t
 H5O_debug_id(unsigned type_id, H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth)
 {
-    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
-    herr_t      ret_value;       /* Return value */
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    herr_t      ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

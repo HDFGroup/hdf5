@@ -144,7 +144,7 @@ case "$cc_vendor-$cc_version" in
 # Closer to the gcc 5.2 release, we should check for additional flags to
 # include and break it out into it's own section, like the other versions
 # below. -QAK
-  gcc-5.1*)
+  gcc-5*)
     # Append warning flags
     # Don't use the '-Wtraditional' flag, we're way past having K&R C code
     # H5_CFLAGS="$H5_CFLAGS -Wtraditional"

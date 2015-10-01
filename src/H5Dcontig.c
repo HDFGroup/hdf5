@@ -27,7 +27,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -96,6 +96,8 @@ typedef struct H5D_contig_writevv_ud_t {
 
 /* Layout operation callbacks */
 static herr_t H5D__contig_construct(H5F_t *f, H5D_t *dset);
+static herr_t H5D__contig_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
+    hid_t dapl_id);
 static herr_t H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *cm);
@@ -119,7 +121,7 @@ static herr_t H5D__contig_write_one(H5D_io_info_t *io_info, hsize_t offset,
 /* Contiguous storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D__contig_construct,
-    NULL,
+    H5D__contig_init,
     H5D__contig_is_space_alloc,
     H5D__contig_io_init,
     H5D__contig_read,
@@ -131,6 +133,7 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D__contig_readvv,
     H5D__contig_writevv,
     H5D__contig_flush,
+    NULL,
     NULL
 }};
 
@@ -451,6 +454,79 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D__contig_init
+ *
+ * Purpose:	Initialize the contiguous info for a dataset.  This is
+ *		called when the dataset is initialized.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, August 28, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__contig_init(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    const H5D_t *dset, hid_t H5_ATTR_UNUSED dapl_id)
+{
+    hsize_t tmp_size;                   /* Temporary holder for raw data size */
+    size_t tmp_sieve_buf_size;          /* Temporary holder for sieve buffer size */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(dset);
+
+    /* Compute the size of the contiguous storage for versions of the
+     * layout message less than version 3 because versions 1 & 2 would
+     * truncate the dimension sizes to 32-bits of information. - QAK 5/26/04
+     */
+    if(dset->shared->layout.version < 3) {
+        hssize_t snelmts;                   /* Temporary holder for number of elements in dataspace */
+        hsize_t nelmts;                     /* Number of elements in dataspace */
+        size_t dt_size;                     /* Size of datatype */
+
+        /* Retrieve the number of elements in the dataspace */
+        if((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
+        nelmts = (hsize_t)snelmts;
+
+        /* Get the datatype's size */
+        if(0 == (dt_size = H5T_GET_SIZE(dset->shared->type)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
+
+        /* Compute the size of the dataset's contiguous storage */
+        tmp_size = nelmts * dt_size;
+
+        /* Check for overflow during multiplication */
+        if(nelmts != (tmp_size / dt_size))
+            HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
+
+        /* Assign the dataset's contiguous storage size */
+        dset->shared->layout.storage.u.contig.size = tmp_size;
+    } /* end if */
+    else
+        tmp_size = dset->shared->layout.storage.u.contig.size;
+
+    /* Get the sieve buffer size for the file */
+    tmp_sieve_buf_size = H5F_SIEVE_BUF_SIZE(dset->oloc.file);
+
+    /* Adjust the sieve buffer size to the smaller one between the dataset size and the buffer size
+     * from the file access property.  (SLU - 2012/3/30) */
+    if(tmp_size < tmp_sieve_buf_size)
+        dset->shared->cache.contig.sieve_buf_size = tmp_size;
+    else
+        dset->shared->cache.contig.sieve_buf_size = tmp_sieve_buf_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__contig_init() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__contig_is_space_alloc
  *
  * Purpose:	Query if space is allocated for layout
@@ -465,7 +541,7 @@ done:
 hbool_t
 H5D__contig_is_space_alloc(const H5O_storage_t *storage)
 {
-    hbool_t ret_value;                  /* Return value */
+    hbool_t ret_value = FALSE;          /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -843,7 +919,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value = -1;     /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1170,7 +1246,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    ssize_t ret_value;          /* Return value (Size of sequence in bytes) */
+    ssize_t ret_value = -1;             /* Return value (Size of sequence in bytes) */
 
     FUNC_ENTER_STATIC
 

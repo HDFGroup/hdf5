@@ -21,7 +21,7 @@
  *
  */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 
 
 #include "H5Eprivate.h"		/* Error handling		  	*/

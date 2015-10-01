@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
 
 
 /***********/
@@ -401,7 +401,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     uint8_t             heap_flags;     /* Status flags for heap */
-    void *              ret_value;      /* Return value */
+    void *              ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -905,7 +905,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t len, void *_udata,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned            u;              /* Local index variable */
-    void *              ret_value;      /* Return value */
+    void *              ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1590,7 +1590,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
     H5HF_direct_t       *dblock = NULL; /* Direct block info */
     const uint8_t       *image;         /* Pointer into raw data buffer */
     haddr_t             heap_addr;      /* Address of heap header in the file */
-    void *              ret_value;      /* Return value */
+    void *              ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1924,7 +1924,7 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
     H5HF_hdr_t          *hdr;           /* Shared fractal heap information */
     H5HF_direct_t       *dblock = (H5HF_direct_t *)_thing;      /* Direct block info */
     H5HF_indirect_t 	*par_iblock;    /* Parent indirect block */
-    unsigned		 par_entry;     /* Entry in parent indirect block */
+    unsigned		 par_entry = 0;     /* Entry in parent indirect block */
     void 		*write_buf;     /* Pointer to buffer to write out */
     size_t 		 write_size;    /* Size of buffer to write out */
     uint8_t 		*image;         /* Pointer into raw data buffer */
@@ -2224,6 +2224,7 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
             else { /* the direct block's parent is an indirect block */
                 /* Sanity check */
                 HDassert(par_iblock);
+                HDassert(par_iblock->ents);
                 HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, addr));
 
                 /* Allocate 'normal' space for the direct block */

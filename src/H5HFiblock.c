@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
+
 
 /***********/
 /* Headers */
@@ -1171,7 +1172,7 @@ H5HF_man_iblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t iblock_addr,
     H5HF_parent_t par_info;             /* Parent info for loading block */
     H5HF_indirect_t *iblock = NULL;     /* Indirect block from cache */
     hbool_t should_protect = FALSE;     /* Whether we should protect the indirect block or not */
-    H5HF_indirect_t *ret_value;         /* Return value */
+    H5HF_indirect_t *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

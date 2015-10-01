@@ -17,8 +17,8 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg 	  */
-#define H5SM_PACKAGE		/*suppress error about including H5SMpkg	  */
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
+#include "H5SMmodule.h"         /* This source code file is part of the H5SM module */
 
 
 /***********/
@@ -97,7 +97,7 @@ H5SM_bt2_crt_context(void *_f)
 {
     H5F_t *f = (H5F_t *)_f;     /* User data for building callback context */
     H5SM_bt2_ctx_t *ctx;        /* Callback context structure */
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

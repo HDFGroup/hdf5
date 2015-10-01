@@ -22,8 +22,9 @@
 /* Module Setup */
 /****************/
 
-#define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
+#include "H5FSmodule.h"         /* This source code file is part of the H5FS module */
 #define H5FS_TESTING		/*suppress warning about H5FS testing funcs */
+
 
 /***********/
 /* Headers */
@@ -31,6 +32,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FSpkg.h"		/* Free-space manager			*/
+
 
 /****************/
 /* Local Macros */

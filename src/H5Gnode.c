@@ -31,7 +31,7 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/
@@ -404,7 +404,7 @@ H5G_node_cmp2(void *_lt_key, void *_udata, void *_rt_key)
     H5G_node_key_t	   *rt_key = (H5G_node_key_t *) _rt_key;
     const char		   *s1, *s2;
     const char		   *base;           /* Base of heap */
-    int		           ret_value;
+    int		           ret_value = -1;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

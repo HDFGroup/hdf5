@@ -13,8 +13,9 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
-#define H5T_PACKAGE		/*prevent warning from including H5Tpkg   */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+#define H5T_FRIEND		/*prevent warning from including H5Tpkg   */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
@@ -35,7 +36,7 @@ static void *H5O_dtype_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 static void *H5O_dtype_copy(const void *_mesg, void *_dest);
 static size_t H5O_dtype_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_dtype_reset(void *_mesg);
-static herr_t H5O_dtype_free(void *_mesg);
+static herr_t H5O__dtype_free(void *_mesg);
 static herr_t H5O_dtype_set_share(void *_mesg, const H5O_shared_t *sh);
 static htri_t H5O_dtype_can_share(const void *_mesg);
 static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
@@ -101,7 +102,7 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
     H5O_dtype_copy,		/* copy the native value	*/
     H5O_dtype_shared_size,	/* size of raw message		*/
     H5O_dtype_reset,		/* reset method			*/
-    H5O_dtype_free,		/* free method			*/
+    H5O__dtype_free,		/* free method			*/
     H5O_dtype_shared_delete,	/* file delete method		*/
     H5O_dtype_shared_link,	/* link method			*/
     H5O_dtype_set_share,	/* set share method		*/
@@ -1093,7 +1094,7 @@ H5O_dtype_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *o
     unsigned *ioflags/*in,out*/, const uint8_t *p)
 {
     H5T_t	*dt = NULL;
-    void        *ret_value;     /* Return value */
+    void        *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1175,9 +1176,9 @@ done:
 static void *
 H5O_dtype_copy(const void *_src, void *_dst)
 {
-    const H5T_t		   *src = (const H5T_t *) _src;
-    H5T_t		   *dst;
-    void 		   *ret_value;  /* Return value */
+    const H5T_t	*src = (const H5T_t *) _src;
+    H5T_t	*dst;
+    void        *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1224,7 +1225,7 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
 {
     const H5T_t	*dt = (const H5T_t *)_mesg;
     unsigned	u;                      /* Local index variable */
-    size_t	ret_value;
+    size_t	ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1369,31 +1370,34 @@ H5O_dtype_reset(void *_mesg)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_dtype_free
+ * Function:	H5O__dtype_free
  *
- * Purpose:	Free's the message
+ * Purpose:	Frees the message
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Thursday, March 30, 2000
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_free(void *mesg)
+H5O__dtype_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;         /* Return value */
 
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
     HDassert(mesg);
 
-    ((H5T_t *) mesg)->shared = H5FL_FREE(H5T_shared_t, ((H5T_t *) mesg)->shared);
-    mesg = H5FL_FREE(H5T_t, mesg);
+    /* Release the datatype */
+    if(H5T_close((H5T_t *)mesg) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free datatype")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_dtype_free() */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O__dtype_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1562,7 +1566,7 @@ H5O_dtype_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const H5O_msg_class_t *mesg_
     H5O_copy_t H5_ATTR_UNUSED *cpy_info, void H5_ATTR_UNUSED *udata, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     H5T_t *dst_mesg;            /* Destination datatype */
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

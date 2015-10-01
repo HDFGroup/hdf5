@@ -22,12 +22,7 @@
 /* Module Setup */
 /****************/
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
-
-#ifdef NOT_YET
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5P_init_encdec_interface
-#endif /* NOT_YET */
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 
 
 /***********/
@@ -81,29 +76,6 @@ typedef struct {
 /* Local Variables */
 /*******************/
 
-
-#ifdef NOT_YET
-
-/*--------------------------------------------------------------------------
-NAME
-   H5P_init_encdec_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5P_init_encdec_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5P_init() currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5P_init_encdec_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5P_init())
-} /* H5P_init_encdec_interface() */
-#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
@@ -737,7 +709,7 @@ H5P__decode(const void *buf)
     hid_t plist_id = -1;        /* ID of new property list */
     size_t value_buf_size = 0;  /* Size of current value buffer */
     uint8_t vers;               /* Version of encoded property list */
-    hid_t ret_value;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -796,7 +768,7 @@ H5P__decode(const void *buf)
             HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "no decode callback for property: '%s'", name)
 
         /* Set the value for the property */
-        if(H5P_set(plist, name, value_buf) < 0)
+        if(H5P_poke(plist, name, value_buf) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value for property: '%s'", name)
     } /* end while */
 

@@ -24,7 +24,7 @@
  * This file needs to access private information from the H5G package.
  * This file also needs to access the group testing code.
  */
-#define H5G_PACKAGE
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 #define H5G_TESTING
 
 #include "h5test.h"
@@ -3883,11 +3883,8 @@ external_set_elink_fapl3(hbool_t new_format)
     if(H5Pget(lapl_id, "external link fapl", &out_fapl) < 0) TEST_ERROR
     if(H5Pclose(lapl_id) < 0) TEST_ERROR
 
-    /* Try closing out_fapl should fail since H5Pclose(lapl_id) should also close its fapl */
-    H5E_BEGIN_TRY {
-        ret = H5Pclose(out_fapl);
-    } H5E_END_TRY;
-    if(ret != FAIL) TEST_ERROR
+    /* Try closing out_fapl, should succeed since H5Pget() should clone its fapl */
+    if(H5Pclose(out_fapl) < 0) TEST_ERROR
 
     /* Verify that the driver for the copied link's fapl is the "core" driver */
     if((l_fapl = H5Pget_elink_fapl(new_lapl_id)) < 0) TEST_ERROR
@@ -3897,11 +3894,8 @@ external_set_elink_fapl3(hbool_t new_format)
     if(H5Pget(new_lapl_id, "external link fapl", &out_fapl) < 0) TEST_ERROR
     if(H5Premove(new_lapl_id, "external link fapl") < 0) TEST_ERROR
 
-    /* Try closing out_fapl should fail since the property is removed from new_lapl_id */
-    H5E_BEGIN_TRY {
-        ret = H5Pclose(out_fapl);
-    } H5E_END_TRY;
-    if(ret != FAIL) TEST_ERROR
+    /* Try closing out_fapl, should succeed since H5Pget() should clone its fapl */
+    if(H5Pclose(out_fapl) < 0) TEST_ERROR
 
     if(H5Pclose(l_fapl) < 0) TEST_ERROR
     if(H5Pclose(new_lapl_id) < 0) TEST_ERROR
@@ -6240,7 +6234,7 @@ error:
 static int
 external_link_strong(hid_t fapl, hbool_t new_format)
 {
-    hid_t       my_fapl;                        /* File access property list */
+    hid_t       my_fapl = (-1);                 /* File access property list */
     hid_t       fid1 = (-1), fid2 = (-1);       /* File ID */
     hid_t       gid1 = (-1), gid2 = (-1);       /* Group IDs */
     char        objname[NAME_BUF_SIZE];         /* Object name */
@@ -6289,11 +6283,15 @@ external_link_strong(hid_t fapl, hbool_t new_format)
     if(H5Gclose(gid2) < 0) TEST_ERROR
     if(H5Fclose(fid2) < 0) TEST_ERROR
 
+    /* Close fapl */
+    if(H5Pclose(my_fapl) < 0) TEST_ERROR
+
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(my_fapl);
         H5Gclose(fapl);
         H5Gclose(gid2);
         H5Gclose(gid1);

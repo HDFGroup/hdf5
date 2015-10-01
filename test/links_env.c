@@ -17,7 +17,7 @@
  * Purpose:	Tests hard, soft (symbolic) & external links.
  */
 
-#define H5G_PACKAGE
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 #define H5G_TESTING
 
 #include "h5test.h"

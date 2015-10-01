@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
 
 
 /***********/
@@ -261,7 +261,7 @@ static hsize_t
 H5HF_huge_new_id(H5HF_hdr_t *hdr)
 {
     hsize_t new_id;             /* New object's ID */
-    hsize_t ret_value;          /* Return value */
+    hsize_t ret_value = 0;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

@@ -21,7 +21,7 @@
  *		the H5MP package.  Source files outside the H5MP package should
  *		include H5MPprivate.h instead.
  */
-#ifndef H5MP_PACKAGE
+#if !(defined H5MP_FRIEND || defined H5MP_MODULE)
 #error "Do not include this file outside the H5MP package!"
 #endif
 

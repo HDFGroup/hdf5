@@ -20,6 +20,7 @@ if (HDF5_TEST_VFD)
       sec2
       stdio
       core
+      core_paged
       split
       multi
       family
@@ -139,47 +140,83 @@ endif (HDF5_TEST_VFD)
 # Copy test files from test/testfiles/plist_files dir to test dir
 # --------------------------------------------------------------------
 set (HDF5_REFERENCE_PLIST_FILES
-    acpl_be
-    acpl_le
-    dapl_be
-    dapl_le
-    dcpl_be
-    dcpl_le
-    dxpl_be
-    dxpl_le
-    fapl_be
-    fapl_le
-    fcpl_be
-    fcpl_le
-    gcpl_be
-    gcpl_le
-    lapl_be
-    lapl_le
-    lcpl_be
-    lcpl_le
-    ocpl_be
-    ocpl_le
-    ocpypl_be
-    ocpypl_le
-    strcpl_be
-    strcpl_le
+    acpl_32be
+    acpl_32le
+    acpl_64be
+    acpl_64le
+    dapl_32be
+    dapl_32le
+    dapl_64be
+    dapl_64le
+    dcpl_32be
+    dcpl_32le
+    dcpl_64be
+    dcpl_64le
+    dxpl_32be
+    dxpl_32le
+    dxpl_64be
+    dxpl_64le
+    fapl_32be
+    fapl_32le
+    fapl_64be
+    fapl_64le
+    fcpl_32be
+    fcpl_32le
+    fcpl_64be
+    fcpl_64le
+    gcpl_32be
+    gcpl_32le
+    gcpl_64be
+    gcpl_64le
+    lapl_32be
+    lapl_32le
+    lapl_64be
+    lapl_64le
+    lcpl_32be
+    lcpl_32le
+    lcpl_64be
+    lcpl_64le
+    ocpl_32be
+    ocpl_32le
+    ocpl_64be
+    ocpl_64le
+    ocpypl_32be
+    ocpypl_32le
+    ocpypl_64be
+    ocpypl_64le
+    strcpl_32be
+    strcpl_32le
+    strcpl_64be
+    strcpl_64le
 )
 
 foreach (plistfile ${HDF5_REFERENCE_PLIST_FILES})
-  set (dest "${PROJECT_BINARY_DIR}/H5TEST/testfiles/plist_files/${plistfile}")
+  set (dest "${PROJECT_BINARY_DIR}/H5TEST/testfiles/plist_files")
   add_custom_command (
       TARGET     ${HDF5_TEST_LIB_TARGET}
       POST_BUILD
       COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/${plistfile} ${dest}
+      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/${plistfile} ${dest}/${plistfile}
+  )
+  add_custom_command (
+      TARGET     ${HDF5_TEST_LIB_TARGET}
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/def_${plistfile} ${dest}/def_${plistfile}
   )
   if (BUILD_SHARED_LIBS)
-    set (dest "${PROJECT_BINARY_DIR}/H5TEST-shared/testfiles/plist_files/${plistfile}")
+    set (dest "${PROJECT_BINARY_DIR}/H5TEST-shared/testfiles/plist_files")
     add_custom_command (
         TARGET     ${HDF5_TEST_LIBSH_TARGET}
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/${plistfile} ${dest}
+        ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/${plistfile} ${dest}/${plistfile}
+    )
+    add_custom_command (
+        TARGET     ${HDF5_TEST_LIBSH_TARGET}
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/def_${plistfile} ${dest}/def_${plistfile}
     )
   endif (BUILD_SHARED_LIBS)
 endforeach (plistfile ${HDF5_REFERENCE_PLIST_FILES})
@@ -451,6 +488,7 @@ set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
 set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-testmeta PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
+set_tests_properties (H5TEST-objcopy PROPERTIES TIMEOUT 2400)
 
 if (BUILD_SHARED_LIBS)
   # Remove any output file left over from previous test run
@@ -541,6 +579,7 @@ if (BUILD_SHARED_LIBS)
   set_tests_properties (H5TEST-shared-fheap PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-testmeta PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-big PROPERTIES TIMEOUT 1800)
+  set_tests_properties (H5TEST-shared-objcopy PROPERTIES TIMEOUT 2400)
 endif (BUILD_SHARED_LIBS)
 
 ##############################################################################
@@ -562,9 +601,10 @@ if (NOT CYGWIN)
   add_test (NAME H5TEST-cache COMMAND $<TARGET_FILE:cache>)
   set_tests_properties (H5TEST-cache PROPERTIES
       DEPENDS H5TEST-clear-cache-objects
-      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=2"
+      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
+  set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT 2400)
 endif (NOT CYGWIN)
 
 #-- Adding test for cache_api
@@ -725,9 +765,10 @@ if (BUILD_SHARED_LIBS)
     add_test (NAME H5TEST-shared-cache COMMAND $<TARGET_FILE:cache-shared>)
     set_tests_properties (H5TEST-shared-cache PROPERTIES
         DEPENDS H5TEST-shared-clear-cache-objects
-        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5TestExpress=2"
+        ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
     )
+    set_tests_properties (H5TEST-shared-cache PROPERTIES TIMEOUT 2400)
   endif (NOT CYGWIN)
 
   #-- Adding test for cache_api
@@ -1052,7 +1093,7 @@ if (HDF5_TEST_VFD)
               -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (VFD-${vfdname}-${vfdtest} PROPERTIES
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=2"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
       if (BUILD_SHARED_LIBS)
@@ -1068,7 +1109,7 @@ if (HDF5_TEST_VFD)
                 -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
         )
         set_tests_properties (VFD-${vfdname}-${vfdtest}-shared PROPERTIES
-            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared;HDF5TestExpress=2"
+            ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}-shared
         )
         endif (BUILD_SHARED_LIBS)
@@ -1117,10 +1158,16 @@ if (HDF5_TEST_VFD)
     set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES DEPENDS VFD-${vfdname}-flush1)
     set_tests_properties (VFD-${vfdname}-flush1 PROPERTIES TIMEOUT 10)
     set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES TIMEOUT 10)
+    if (NOT CYGWIN)
+      set_tests_properties (VFD-${vfdname}-cache PROPERTIES TIMEOUT 1800)
+    endif (NOT CYGWIN)
     if (BUILD_SHARED_LIBS)
       set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES DEPENDS VFD-${vfdname}-flush1-shared)
       set_tests_properties (VFD-${vfdname}-flush1-shared PROPERTIES TIMEOUT 10)
       set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES TIMEOUT 10)
+      if (NOT CYGWIN)
+        set_tests_properties (VFD-${vfdname}-cache-shared PROPERTIES TIMEOUT 1800)
+      endif (NOT CYGWIN)
     endif (BUILD_SHARED_LIBS)
     if (HDF5_TEST_FHEAP_VFD)
       add_test (
@@ -1136,7 +1183,7 @@ if (HDF5_TEST_VFD)
       )
       set_tests_properties (VFD-${vfdname}-fheap PROPERTIES
           TIMEOUT 1800
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=2"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}
       )
       if (BUILD_SHARED_LIBS)
@@ -1153,7 +1200,7 @@ if (HDF5_TEST_VFD)
         )
         set_tests_properties (VFD-${vfdname}-fheap-shared PROPERTIES
           TIMEOUT 1800
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared;HDF5TestExpress=2"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${vfdname}-shared;HDF5TestExpress=${HDF_TEST_EXPRESS}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${vfdname}-shared
       )
       endif (BUILD_SHARED_LIBS)

@@ -298,7 +298,7 @@ h5ltset_attribute_c(hid_t_f *loc_id,
 		         void *buf, char *dtype, size_t_f *sizeof_val)
 {
     int     ret_value = -1;
-    herr_t  ret;
+    herr_t  ret = SUCCEED;
     hid_t   c_loc_id;
     char    *c_name = NULL;
     char    *c_attrname = NULL;
@@ -394,7 +394,7 @@ h5ltget_attribute_c(hid_t_f *loc_id,
 		         void *buf, char *dtype, size_t_f *sizeof_val)
 {
     int     ret_value = -1;
-    herr_t  ret;
+    herr_t  ret = SUCCEED;
     hid_t   c_loc_id;
     char    *c_name = NULL;
     char    *c_attrname = NULL;

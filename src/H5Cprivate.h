@@ -1115,6 +1115,60 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
 
 /****************************************************************************
  *
+ * H5C_ring_t & associated #defines
+ *
+ * The metadata cache uses the concept of rings to order the flushes of 
+ * classes of entries.  In this arrangement, each entry in the cache is 
+ * assigned to a ring, and on flush, the members of the outermost ring 
+ * are flushed first, followed by the next outermost, and so on with the
+ * members of the innermost ring being flushed last.  
+ *
+ * Note that flush dependencies are used to order flushes within rings.  
+ *
+ * Note also that at the conceptual level, rings are argueably superfluous,
+ * as a similar effect could be obtained via the flush dependency mechanism.  
+ * However, this would require all entries in the cache to participate in a 
+ * flush dependency -- with the implied setup and takedown overhead and 
+ * added complexity.  Further, the flush ordering between rings need only 
+ * be enforced on flush operations, and thus the use of flush dependencies 
+ * instead would apply unecessary constraints on flushes under normal 
+ * operating circumstances.
+ *
+ * As of this writing, all metadata entries pretaining to data sets and 
+ * groups must be flushed first, and are thus assigned to the outermost 
+ * ring.  
+ *
+ * Free space managers managing file space must be flushed next,
+ * and are assigned to the second outermost ring.
+ *
+ * The object header and associated chunks used to implement superblock 
+ * extension messages must be flushed next, and are thus assigned to 
+ * the third outermost ring.
+ *
+ * The superblock proper must be flushed last, and is thus assigned to 
+ * the innermost ring.
+ *
+ * The H5C_ring_t and the associated #defines below are used to define
+ * the rings.  Each entry must be assigned to the appropriate ring on 
+ * insertion or protect.
+ *
+ * Note that H5C_ring_t was originally an enumerated type.  It was 
+ * converted to an integer and a set of #defines for convenience in 
+ * debugging.
+ */
+
+#define H5C_RING_UNDEFINED	0 /* shouldn't appear in the cache */
+#define H5C_RING_USER		1 /* outermost ring */
+#define H5C_RING_FSM		2
+#define H5C_RING_SBE		4 /* temporarily merged with H5C_RING_SB */
+#define H5C_RING_SB		4 /* innermost ring */
+#define H5C_RING_NTYPES		5 
+
+typedef int H5C_ring_t;
+
+
+/****************************************************************************
+ *
  * structure H5C_cache_entry_t
  *
  * Instances of the H5C_cache_entry_t structure are used to store cache
@@ -1376,6 +1430,25 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
  * 		is in the process of being flushed and destroyed.
  *
  *
+ * Fields supporting rings for flush ordering:
+ *
+ * All entries in the metadata cache are assigned to a ring.  On cache 
+ * flush, all entries in the outermost ring are flushed first, followed
+ * by all members of the next outermost ring, and so on until the 
+ * innermost ring is flushed.  Note that this ordering is ONLY applied 
+ * in flush and serialize calls.  Rings are ignored during normal operations
+ * in which entries are flushed as directed by the replacement policy.
+ *
+ * See the header comment on H5C_ring_t above for further details.
+ *
+ * Note that flush dependencies (see below) are used to order flushes
+ * within rings.  Unlike rings, flush dependencies are applied to ALL
+ * writes, not just those triggered by flush or serialize calls.
+ *
+ * ring:	Instance of H5C_ring_t indicating the ring to which this
+ *		entry is assigned.
+ *
+ *
  * Fields supporting the 'flush dependency' feature:
  *
  * Entries in the cache may have a 'flush dependency' on another entry in the
@@ -1544,6 +1617,9 @@ typedef struct H5C_cache_entry_t {
 #endif /* H5_HAVE_PARALLEL */
     hbool_t			flush_in_progress;
     hbool_t			destroy_in_progress;
+
+    /* fields supporting rings for purposes of flush ordering */
+    H5C_ring_t                  ring;
 
     /* fields supporting the 'flush dependency' feature: */
     struct H5C_cache_entry_t  *	flush_dep_parent;
@@ -1921,6 +1997,7 @@ H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr,
     unsigned int tests);
 H5_DLL herr_t H5C_ignore_tags(H5C_t *cache_ptr);
 H5_DLL void H5C_retag_copied_metadata(H5C_t *cache_ptr, haddr_t metadata_tag);
+H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,

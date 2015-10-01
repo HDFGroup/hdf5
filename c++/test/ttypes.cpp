@@ -57,7 +57,7 @@
 
 /* Alignment test stuff */
 #ifdef TEST_ALIGNMENT
-#define H5T_PACKAGE
+#define H5T_FRIEND
 #include "H5Tpkg.h"
 #endif
 #define SET_ALIGNMENT(TYPE,VAL) \

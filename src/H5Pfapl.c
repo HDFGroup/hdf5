@@ -27,7 +27,8 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 
 
 /***********/
@@ -110,12 +111,16 @@
 #define H5F_ACS_GARBG_COLCT_REF_DEF             0
 #define H5F_ACS_GARBG_COLCT_REF_ENC             H5P__encode_unsigned
 #define H5F_ACS_GARBG_COLCT_REF_DEC             H5P__decode_unsigned
-/* Definition for file driver ID */
-#define H5F_ACS_FILE_DRV_ID_SIZE                sizeof(hid_t)
-#define H5F_ACS_FILE_DRV_ID_DEF                 H5_DEFAULT_VFD
-/* Definition for file driver info */
-#define H5F_ACS_FILE_DRV_INFO_SIZE              sizeof(void*)
-#define H5F_ACS_FILE_DRV_INFO_DEF               NULL
+/* Definition for file driver ID & info*/
+#define H5F_ACS_FILE_DRV_SIZE                   sizeof(H5FD_driver_prop_t)
+#define H5F_ACS_FILE_DRV_DEF                    {H5_DEFAULT_VFD, NULL}
+#define H5F_ACS_FILE_DRV_CRT                    H5P__facc_file_driver_create
+#define H5F_ACS_FILE_DRV_SET                    H5P__facc_file_driver_set
+#define H5F_ACS_FILE_DRV_GET                    H5P__facc_file_driver_get
+#define H5F_ACS_FILE_DRV_DEL                    H5P__facc_file_driver_del
+#define H5F_ACS_FILE_DRV_COPY                   H5P__facc_file_driver_copy
+#define H5F_ACS_FILE_DRV_CMP                    H5P__facc_file_driver_cmp
+#define H5F_ACS_FILE_DRV_CLOSE                  H5P__facc_file_driver_close
 /* Definition for file close degree */
 #define H5F_CLOSE_DEGREE_SIZE		        sizeof(H5F_close_degree_t)
 #define H5F_CLOSE_DEGREE_DEF		        H5F_CLOSE_DEFAULT
@@ -157,9 +162,12 @@
 /* Definition of pointer to initial file image info */
 #define H5F_ACS_FILE_IMAGE_INFO_SIZE            sizeof(H5FD_file_image_info_t)
 #define H5F_ACS_FILE_IMAGE_INFO_DEF             H5FD_DEFAULT_FILE_IMAGE_INFO
-#define H5F_ACS_FILE_IMAGE_INFO_DEL             H5P_file_image_info_del
-#define H5F_ACS_FILE_IMAGE_INFO_COPY            H5P_file_image_info_copy
-#define H5F_ACS_FILE_IMAGE_INFO_CLOSE           H5P_file_image_info_close
+#define H5F_ACS_FILE_IMAGE_INFO_SET             H5P__facc_file_image_info_set
+#define H5F_ACS_FILE_IMAGE_INFO_GET             H5P__facc_file_image_info_get
+#define H5F_ACS_FILE_IMAGE_INFO_DEL             H5P__facc_file_image_info_del
+#define H5F_ACS_FILE_IMAGE_INFO_COPY            H5P__facc_file_image_info_copy
+#define H5F_ACS_FILE_IMAGE_INFO_CMP             H5P__facc_file_image_info_cmp
+#define H5F_ACS_FILE_IMAGE_INFO_CLOSE           H5P__facc_file_image_info_close
 /* Definition of core VFD write tracking flag */
 #define H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE   sizeof(hbool_t)
 #define H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF    FALSE
@@ -192,14 +200,26 @@
 /********************/
 
 /* Property class callbacks */
-static herr_t H5P_facc_reg_prop(H5P_genclass_t *pclass);
-static herr_t H5P_facc_create(hid_t fapl_id, void *copy_data);
-static herr_t H5P_facc_copy(hid_t new_plist_t, hid_t old_plist_t, void *copy_data);
+static herr_t H5P__facc_reg_prop(H5P_genclass_t *pclass);
+
+/* File driver ID & info property callbacks */
+static herr_t H5P__facc_file_driver_create(const char *name, size_t size, void *value);
+static herr_t H5P__facc_file_driver_set(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_file_driver_get(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_file_driver_del(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_file_driver_copy(const char *name, size_t size, void *value);
+static int H5P__facc_file_driver_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__facc_file_driver_close(const char *name, size_t size, void *value);
 
 /* File image info property callbacks */
-static herr_t H5P_file_image_info_del(hid_t prop_id, const char *name, size_t size, void *value);
-static herr_t H5P_file_image_info_copy(const char *name, size_t size, void *value);
-static herr_t H5P_file_image_info_close(const char *name, size_t size, void *value);
+static herr_t H5P__file_image_info_copy(void *value);
+static herr_t H5P__file_image_info_free(void *value);
+static herr_t H5P__facc_file_image_info_set(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_file_image_info_get(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_file_image_info_del(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_file_image_info_copy(const char *name, size_t size, void *value);
+static int H5P__facc_file_image_info_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__facc_file_image_info_close(const char *name, size_t size, void *value);
 
 /* encode & decode callbacks */
 static herr_t H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size);
@@ -224,13 +244,13 @@ const H5P_libclass_t H5P_CLS_FACC[1] = {{
     &H5P_CLS_FILE_ACCESS_g,	/* Pointer to class             */
     &H5P_CLS_FILE_ACCESS_ID_g,	/* Pointer to class ID          */
     &H5P_LST_FILE_ACCESS_ID_g,	/* Pointer to default property list ID */
-    H5P_facc_reg_prop,		/* Default property registration routine */
+    H5P__facc_reg_prop,		/* Default property registration routine */
 
-    H5P_facc_create,		/* Class creation callback      */
+    NULL,			/* Class creation callback      */
     NULL,		        /* Class creation callback info */
-    H5P_facc_copy,		/* Class copy callback          */
+    NULL,			/* Class copy callback          */
     NULL,		        /* Class copy callback info     */
-    H5P_facc_close,		/* Class close callback         */
+    NULL,			/* Class close callback         */
     NULL 		        /* Class close callback info    */
 }};
 
@@ -255,7 +275,6 @@ static const hsize_t H5F_def_meta_block_size_g = H5F_ACS_META_BLOCK_SIZE_DEF;   
 static const size_t H5F_def_sieve_buf_size_g = H5F_ACS_SIEVE_BUF_SIZE_DEF;         /* Default raw data I/O sieve buffer size */
 static const hsize_t H5F_def_sdata_block_size_g = H5F_ACS_SDATA_BLOCK_SIZE_DEF;    /* Default small data allocation block size */
 static const unsigned H5F_def_gc_ref_g = H5F_ACS_GARBG_COLCT_REF_DEF;              /* Default garbage collection for references setting */
-static const void *H5F_def_driver_info_g = H5F_ACS_FILE_DRV_INFO_DEF;              /* Default VFL driver info */
 static const H5F_close_degree_t H5F_def_close_degree_g = H5F_CLOSE_DEGREE_DEF;     /* Default file close degree */
 static const hsize_t H5F_def_family_offset_g = H5F_ACS_FAMILY_OFFSET_DEF;          /* Default offset for family VFD */
 static const hsize_t H5F_def_family_newsize_g = H5F_ACS_FAMILY_NEWSIZE_DEF;        /* Default size of new files for family VFD */
@@ -269,9 +288,10 @@ static const hbool_t H5F_def_core_write_tracking_flag_g = H5F_ACS_CORE_WRITE_TRA
 static const size_t H5F_def_core_write_tracking_page_size_g = H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF;     /* Default core VFD write tracking page size */
 static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
 
+
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_facc_reg_prop
+ * Function:    H5P__facc_reg_prop
  *
  * Purpose:     Register the file access property list class's properties
  *
@@ -282,12 +302,12 @@ static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_facc_reg_prop(H5P_genclass_t *pclass)
+H5P__facc_reg_prop(H5P_genclass_t *pclass)
 {
-    const hid_t def_driver_id = H5F_ACS_FILE_DRV_ID_DEF;        /* Default VFL driver ID (initialized from a variable) */
+    const H5FD_driver_prop_t def_driver_prop = H5F_ACS_FILE_DRV_DEF;           /* Default VFL driver ID & info (initialized from a variable) */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Register the initial metadata cache resize configuration */
     if(H5P_register_real(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &H5F_def_mdc_initCacheCfg_g, 
@@ -349,16 +369,11 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the file driver ID */
+    /* Register the file driver ID & info */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5F_ACS_FILE_DRV_ID_NAME, H5F_ACS_FILE_DRV_ID_SIZE, &def_driver_id, 
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the file driver info */
-    /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5F_ACS_FILE_DRV_INFO_NAME, H5F_ACS_FILE_DRV_INFO_SIZE, &H5F_def_driver_info_g, 
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_FILE_DRV_NAME, H5F_ACS_FILE_DRV_SIZE, &def_driver_prop, 
+            H5F_ACS_FILE_DRV_CRT, H5F_ACS_FILE_DRV_SET, H5F_ACS_FILE_DRV_GET, NULL, NULL,
+            H5F_ACS_FILE_DRV_DEL, H5F_ACS_FILE_DRV_COPY, H5F_ACS_FILE_DRV_CMP, H5F_ACS_FILE_DRV_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file close degree */
@@ -413,8 +428,8 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     /* Register the initial file image info */
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if(H5P_register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE, &H5F_def_file_image_info_g, 
-            NULL, NULL, NULL, NULL, NULL, 
-            H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, NULL, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
+            NULL, H5F_ACS_FILE_IMAGE_INFO_SET, H5F_ACS_FILE_IMAGE_INFO_GET, NULL, NULL,
+            H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, H5F_ACS_FILE_IMAGE_INFO_CMP, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the core VFD backing store write tracking flag */
@@ -438,159 +453,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_facc_reg_prop() */
-
-
-/*----------------------------------------------------------------------------
- * Function:	H5P_facc_create
- *
- * Purpose:	Callback routine which is called whenever a file access
- *		property list is closed.  This routine performs any generic
- * 		initialization needed on the properties the library put into
- * 		the list.
- *
- * Return:	Success:		Non-negative
- * 		Failure:		Negative
- *
- * Programmer:	Raymond Lu
- *		Tuesday, Oct 23, 2001
- *
- *----------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static herr_t
-H5P_facc_create(hid_t fapl_id, void H5_ATTR_UNUSED *copy_data)
-{
-    hid_t          driver_id;
-    H5P_genplist_t *plist;              /* Property list */
-    herr_t         ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check argument */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-    /* Retrieve driver ID property */
-    if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
-
-    if(driver_id > 0) {
-        void *driver_info;
-
-        /* Retrieve driver info property */
-        if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver info")
-
-        /* Set the driver for the property list */
-        if(H5FD_fapl_open(plist, driver_id, driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_facc_create() */
-
-
-/*--------------------------------------------------------------------------
- * Function:	H5P_facc_copy
- *
- * Purpose:	Callback routine which is called whenever a file access
- * 		property list is copied.  This routine performs any generic
- * 	 	copy needed on the properties.
- *
- * Return:	Success:	Non-negative
- * 		Failure:	Negative
- *
- * Programmer:	Raymond Lu
- *		Tuesday, Oct 23, 2001
- *
- *--------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static herr_t
-H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void H5_ATTR_UNUSED *copy_data)
-{
-    hid_t          driver_id;
-    H5P_genplist_t *src_plist;              /* Source property list */
-    herr_t         ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Get driver ID from source property list */
-    if(NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    if(H5P_get(src_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
-
-    if(driver_id > 0) {
-        H5P_genplist_t *dst_plist;              /* Destination property list */
-        void *driver_info;
-
-        /* Get driver info from source property list */
-        if(H5P_get(src_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver info")
-
-        /* Set the driver for the destination property list */
-        if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-        if(H5FD_fapl_open(dst_plist, driver_id, driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_facc_copy() */
-
-
-/*--------------------------------------------------------------------------
- * Function:	H5P_facc_close
- *
- * Purpose:	Callback routine which is called whenever a file access
- *		property list is closed.  This routine performs any generic
- *		cleanup needed on the properties.
- *
- * Return:	Success:	Non-negative
- * 		Failure:	Negative
- *
- * Programmer:	Raymond Lu
- *		Tuesday, Oct 23, 2001
- *
- *---------------------------------------------------------------------------
- */
-/* ARGSUSED */
-herr_t
-H5P_facc_close(hid_t fapl_id, void H5_ATTR_UNUSED *close_data)
-{
-    hid_t      driver_id;
-    H5P_genplist_t *plist;              /* Property list */
-    herr_t     ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Check argument */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-    /* Get driver ID property */
-    if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-        HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
-
-    if(driver_id > 0) {
-        void *driver_info;
-
-        /* Get driver info property */
-        if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
-
-        /* Close the driver for the property list */
-        if(H5FD_fapl_close(driver_id, driver_info) < 0)
-            HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_facc_close() */
+} /* end H5P__facc_reg_prop() */
 
 
 /*-------------------------------------------------------------------------
@@ -714,9 +577,7 @@ done:
 herr_t
 H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_driver_info)
 {
-    hid_t driver_id;            /* VFL driver ID */
-    void *driver_info;          /* VFL driver info */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -724,19 +585,15 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
 
     if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        /* Get the current driver information */
-        if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
-        if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get driver info")
+        H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
 
-        /* Close the driver for the property list */
-        if(H5FD_fapl_close(driver_id, driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset driver")
+        /* Prepare the driver property */
+        driver_prop.driver_id = new_driver_id;
+        driver_prop.driver_info = new_driver_info;
 
-        /* Set the driver for the property list */
-        if(H5FD_fapl_open(plist, new_driver_id, new_driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
+        /* Set the driver ID & info property */
+        if(H5P_set(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver ID & info")
     } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
@@ -790,7 +647,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_get_driver
+ * Function:	H5P_peek_driver
  *
  * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
  *		be a file access property list.
@@ -808,7 +665,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5P_get_driver(H5P_genplist_t *plist)
+H5P_peek_driver(H5P_genplist_t *plist)
 {
     hid_t ret_value = FAIL;     /* Return value */
 
@@ -816,18 +673,21 @@ H5P_get_driver(H5P_genplist_t *plist)
 
     /* Get the current driver ID */
     if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &ret_value) < 0)
+        H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
+
+        if(H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
+        ret_value = driver_prop.driver_id;
     } /* end if */
     else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list")
 
     if(H5FD_VFD_DEFAULT == ret_value)
         ret_value = H5_DEFAULT_VFD;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_get_driver() */
+} /* end H5P_peek_driver() */
 
 
 /*-------------------------------------------------------------------------
@@ -835,6 +695,8 @@ done:
  *
  * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
  *		be a file access property list.
+ *
+ * Note:	The ID returned should not be closed.
  *
  * Return:	Success:	A low-level driver ID which is the same ID
  *				used when the driver was set for the property
@@ -861,7 +723,7 @@ H5Pget_driver(hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get the driver */
-    if((ret_value = H5P_get_driver(plist)) < 0)
+    if((ret_value = H5P_peek_driver(plist)) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver")
 
 done:
@@ -870,7 +732,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_get_driver_info
+ * Function:	H5P_peek_driver_info
  *
  * Purpose:	Returns a pointer directly to the file driver-specific
  *		information of a file access.
@@ -888,8 +750,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
-H5P_get_driver_info(H5P_genplist_t *plist)
+const void *
+H5P_peek_driver_info(H5P_genplist_t *plist)
 {
     void *ret_value = NULL;     /* Return value */
 
@@ -897,15 +759,18 @@ H5P_get_driver_info(H5P_genplist_t *plist)
 
     /* Get the current driver info */
     if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &ret_value) < 0)
+        H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
+
+        if(H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
+        ret_value = (void *)driver_prop.driver_info;
     } /* end if */
     else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a file access property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_get_driver_info() */
+} /* end H5P_peek_driver_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -940,12 +805,371 @@ H5Pget_driver_info(hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
     /* Get the driver info */
-    if(NULL == (ret_value = H5P_get_driver_info(plist)))
+    if(NULL == (ret_value = (void *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_driver_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__file_driver_copy
+ *
+ * Purpose:     Copy file driver ID & info.
+ *
+ * Note:        This is an "in-place" copy, since this routine gets called
+ *              after the top-level copy has been performed and this routine
+ *		finishes the "deep" part of the copy.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, Sept 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__file_driver_copy(void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    if(value) {
+        H5FD_driver_prop_t *info = (H5FD_driver_prop_t *)value; /* Driver ID & info struct */
+
+        /* Copy the driver & info, if there is one */
+        if(info->driver_id > 0) {
+            /* Increment the reference count on driver and copy driver info */
+            if(H5I_inc_ref(info->driver_id, FALSE) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
+
+            /* Copy driver info, if it exists */
+            if(info->driver_info) {
+                H5FD_class_t *driver;       /* Pointer to driver */
+                void *new_pl;        /* Copy of driver info */
+
+                /* Retrieve the driver for the ID */
+                if(NULL == (driver = (H5FD_class_t *)H5I_object(info->driver_id)))
+                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a driver ID")
+
+                /* Allow the driver to copy or do it ourselves */
+                if(driver->fapl_copy) {
+                    if(NULL == (new_pl = (driver->fapl_copy)(info->driver_info)))
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "driver info copy failed")
+                } /* end if */
+                else if(driver->fapl_size > 0) {
+                    if(NULL == (new_pl = H5MM_malloc(driver->fapl_size)))
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "driver info allocation failed")
+                    HDmemcpy(new_pl, info->driver_info, driver->fapl_size);
+                } /* end else-if */
+                else
+                    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "no way to copy driver info")
+
+                /* Set the driver info for the copy */
+                info->driver_info = new_pl;
+            } /* end if */
+        } /* end if */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__file_driver_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__file_driver_free
+ *
+ * Purpose:     Free file driver ID & info.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, Sept 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__file_driver_free(void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    if(value) {
+        H5FD_driver_prop_t *info = (H5FD_driver_prop_t *)value; /* Driver ID & info struct */
+
+        /* Copy the driver & info, if there is one */
+        if(info->driver_id > 0) {
+            if(info->driver_info) {
+                H5FD_class_t *driver;       /* Pointer to driver */
+
+                /* Retrieve the driver for the ID */
+                if(NULL == (driver = (H5FD_class_t *)H5I_object(info->driver_id)))
+                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a driver ID")
+
+                /* Allow driver to free info or do it ourselves */
+                if(driver->fapl_free) {
+                    if((driver->fapl_free)((void *)info->driver_info) < 0)      /* Casting away const OK -QAK */
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "driver info free request failed")
+                } /* end if */
+                else
+                    H5MM_xfree((void *)info->driver_info);      /* Casting away const OK -QAK */
+            } /* end if */
+
+            /* Decrement reference count for driver */
+            if(H5I_dec_ref(info->driver_id) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement reference count for driver ID")
+        } /* end if */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__file_driver_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_driver_create
+ *
+ * Purpose:     Create callback for the file driver ID & info property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, September 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_file_driver_create(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Make copy of file driver */
+    if(H5P__file_driver_copy(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file driver")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_driver_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_driver_set
+ *
+ * Purpose:     Copies a file driver property when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, Sept 7, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_file_driver_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of file driver ID & info */
+    if(H5P__file_driver_copy(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file driver")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_driver_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_driver_get
+ *
+ * Purpose:     Copies a file driver property when it's retrieved from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, Sept 7, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_file_driver_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of file driver */
+    if(H5P__file_driver_copy(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file driver")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_driver_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_driver_del
+ *
+ * Purpose:     Frees memory used to store the driver ID & info property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, September 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_file_driver_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Free the file driver ID & info */
+    if(H5P__file_driver_free(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release file driver")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_driver_del() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_driver_copy
+ *
+ * Purpose:     Copy callback for the file driver ID & info property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, September 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_file_driver_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Make copy of file driver */
+    if(H5P__file_driver_copy(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file driver")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_driver_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_file_driver_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the file driver ID & info
+ *                 property in the file access property list is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                      VALUE2 are equal.
+ *
+ * Programmer:     Quincey Koziol
+ *                 Monday, September 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__facc_file_driver_cmp(const void *_info1, const void *_info2,
+    size_t H5_ATTR_UNUSED size)
+{
+    const H5FD_driver_prop_t *info1 = (const H5FD_driver_prop_t *)_info1, /* Create local aliases for values */
+        *info2 = (const H5FD_driver_prop_t *)_info2;
+    H5FD_class_t *cls1, *cls2;  /* Driver class for each property */
+    int cmp_value;              /* Value from comparison */
+    herr_t ret_value = 0;       /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(info1);
+    HDassert(info2);
+    HDassert(size == sizeof(H5FD_driver_prop_t));
+
+    /* Compare drivers */
+    if(NULL == (cls1 = H5FD_get_class(info1->driver_id)))
+        HGOTO_DONE(-1)
+    if(NULL == (cls2 = H5FD_get_class(info2->driver_id)))
+        HGOTO_DONE(1)
+    if(cls1->name == NULL && cls2->name != NULL) HGOTO_DONE(-1);
+    if(cls1->name != NULL && cls2->name == NULL) HGOTO_DONE(1);
+    if(0 != (cmp_value = HDstrcmp(cls1->name, cls2->name)))
+        HGOTO_DONE(cmp_value);
+
+    /* Compare driver infos */
+    if(cls1->fapl_size < cls2->fapl_size) HGOTO_DONE(-1)
+    if(cls1->fapl_size > cls2->fapl_size) HGOTO_DONE(1)
+    HDassert(cls1->fapl_size == cls2->fapl_size);
+    if(info1->driver_info == NULL && info2->driver_info != NULL) HGOTO_DONE(-1);
+    if(info1->driver_info != NULL && info2->driver_info == NULL) HGOTO_DONE(1);
+    if(info1->driver_info) {
+        HDassert(cls1->fapl_size > 0);
+        if(0 != (cmp_value = HDmemcmp(info1->driver_info, info2->driver_info, cls1->fapl_size)))
+            HGOTO_DONE(cmp_value);
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_driver_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_driver_close
+ *
+ * Purpose:     Close callback for the file driver ID & info property.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, September 8, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_file_driver_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Free the file driver */
+    if(H5P__file_driver_free(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release file driver")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_driver_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -2021,7 +2245,7 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
         
     /* Get old image info */
-    if(H5P_get(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
+    if(H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get old file image pointer")
         
     /* Release previous buffer, if it exists */
@@ -2062,7 +2286,7 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
     image_info.size = buf_len;
 
     /* Set values */
-    if(H5P_set(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
+    if(H5P_poke(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file image info")
 
 done:
@@ -2114,7 +2338,7 @@ H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if(H5P_get(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
+    if(H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file image info")
 
     /* verify file image field consistancy */
@@ -2190,7 +2414,7 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get old info */
-    if(H5P_get(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
+    if(H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get old file image info")
 
     /* verify file image field consistancy */
@@ -2228,7 +2452,7 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     } /* end if */
 
     /* Set values */
-    if(H5P_set(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
+    if(H5P_poke(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file image info")
 
 done:
@@ -2266,7 +2490,7 @@ H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get old info */
-    if(H5P_get(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
+    if(H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file image info")
 
     /* verify file image field consistancy */
@@ -2293,80 +2517,30 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5P_file_image_info_del
+ * Function:    H5P__file_image_info_copy
  *
- * Purpose:     Delete callback for the file image info property, called
- *              when the property is deleted from the plist. The buffer
- *              and udata may need to be freed, possibly using their 
- *              respective callbacks so the default free won't work.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P_file_image_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
-{
-    H5FD_file_image_info_t info;        /* Image info struct */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    if(value) {
-        info = *(H5FD_file_image_info_t *)value;
-
-        /* verify file image field consistancy */
-        HDassert(((info.buffer != NULL) && (info.size > 0)) || 
-                 ((info.buffer == NULL) && (info.size == 0)));
-
-        if(info.buffer && info.size > 0) {
-            /* Free buffer */
-            if(info.callbacks.image_free) {
-                if(info.callbacks.image_free(info.buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE, info.callbacks.udata) < 0)
-		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "image_free callback failed")
-            } /* end if */
-            else
-                HDfree(info.buffer);
-        } /* end if */
-
-        /* Free udata if it exists */
-        if(info.callbacks.udata) {
-            if(NULL == info.callbacks.udata_free)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "udata_free not defined")
-
-            if(info.callbacks.udata_free(info.callbacks.udata) < 0)
-	        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "udata_free callback failed")
-        } /* end if */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_file_image_info_del() */
-
-
-/*-------------------------------------------------------------------------
- * Function: H5P_file_image_info_copy
- *
- * Purpose:     Copy callback for the file image info property. The buffer
+ * Purpose:     Copy file image info. The buffer
  *              and udata may need to be copied, possibly using their 
  *              respective callbacks so the default copy won't work.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Note:        This is an "in-place" copy, since this routine gets called
+ *              after the top-level copy has been performed and this routine
+ *		finishes the "deep" part of the copy.
  *
- * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, Sept 1, 2015
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_file_image_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__file_image_info_copy(void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(value) {
         H5FD_file_image_info_t *info;   /* Image info struct */
@@ -2387,19 +2561,18 @@ H5P_file_image_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED 
             if(info->callbacks.image_malloc) {
                 if(NULL == (info->buffer = info->callbacks.image_malloc(info->size,
                         H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, info->callbacks.udata)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "image malloc callback failed")
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "image malloc callback failed")
             } /* end if */
             else {
                 if(NULL == (info->buffer = H5MM_malloc(info->size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory block")
             } /* end else */
             
             /* Copy data to new buffer */
             if(info->callbacks.image_memcpy) {
                 if(info->buffer != info->callbacks.image_memcpy(info->buffer, old_buffer, 
-			info->size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, 
-			info->callbacks.udata))
-		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
+			info->size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, info->callbacks.udata))
+		    HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
             } /* end if */
 	    else
                 HDmemcpy(info->buffer, old_buffer, info->size);
@@ -2410,20 +2583,260 @@ H5P_file_image_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED 
             void *old_udata = info->callbacks.udata;
 
             if(NULL == info->callbacks.udata_copy)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "udata_copy not defined")
+                HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "udata_copy not defined")
 
             info->callbacks.udata = info->callbacks.udata_copy(old_udata);
         } /* end if */
-
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_file_image_info_copy() */
+} /* end H5P__file_image_info_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function: H5P_file_image_info_close
+ * Function:    H5P__file_image_info_free
+ *
+ * Purpose:     Free file image info.  The buffer and udata may need to be
+ *		freed, possibly using their respective callbacks, so the
+ *		default free won't work.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, Sept 2, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__file_image_info_free(void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    if(value) {
+        H5FD_file_image_info_t *info;        /* Image info struct */
+
+        info = (H5FD_file_image_info_t *)value;
+             
+        /* Verify file image field consistancy */
+        HDassert(((info->buffer != NULL) && (info->size > 0)) || 
+                 ((info->buffer == NULL) && (info->size == 0)));
+
+        /* Free buffer */
+        if(info->buffer != NULL && info->size > 0) { 
+            if(info->callbacks.image_free) {
+                if((*info->callbacks.image_free)(info->buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE, info->callbacks.udata) < 0)
+		    HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "image_free callback failed")
+            } /* end if */
+            else
+                H5MM_xfree(info->buffer);
+        } /* end if */
+
+        /* Free udata if it exists */
+        if(info->callbacks.udata) {
+            if(NULL == info->callbacks.udata_free)
+                HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "udata_free not defined")
+            if((*info->callbacks.udata_free)(info->callbacks.udata) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "udata_free callback failed")
+        } /* end if */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__file_image_info_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_image_info_set
+ *
+ * Purpose:     Copies a file image property when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, Sept 1, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_file_image_info_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of file image info */
+    if(H5P__file_image_info_copy(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file image info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_image_info_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_image_info_get
+ *
+ * Purpose:     Copies a file image property when it's retrieved from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, Sept 1, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_file_image_info_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of file image info */
+    if(H5P__file_image_info_copy(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file image info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_image_info_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_image_info_del
+ *
+ * Purpose:     Delete callback for the file image info property, called
+ *              when the property is deleted from the plist. The buffer
+ *              and udata may need to be freed, possibly using their 
+ *              respective callbacks so the default free won't work.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Jacob Gruber
+ *              Thurday, August 11, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_file_image_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Free the file image info */
+    if(H5P__file_image_info_free(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release file image info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_image_info_del() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_image_info_copy
+ *
+ * Purpose:     Copy callback for the file image info property. The buffer
+ *              and udata may need to be copied, possibly using their 
+ *              respective callbacks so the default copy won't work.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Jacob Gruber
+ *              Thurday, August 11, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_file_image_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Make copy of file image info */
+    if(H5P__file_image_info_copy(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file image info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_image_info_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_file_image_info_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the file image info
+ *                 property in the file access property list is compared.
+ *
+ * Return:         positive if VALUE1 is greater than VALUE2, negative if
+ *                      VALUE2 is greater than VALUE1 and zero if VALUE1 and
+ *                      VALUE2 are equal.
+ *
+ * Programmer:     Quincey Koziol
+ *                 Thursday, September 3, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__facc_file_image_info_cmp(const void *_info1, const void *_info2,
+    size_t H5_ATTR_UNUSED size)
+{
+    const H5FD_file_image_info_t *info1 = (const H5FD_file_image_info_t *)_info1, /* Create local aliases for values */
+        *info2 = (const H5FD_file_image_info_t *)_info2;
+    herr_t ret_value = 0;       /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(info1);
+    HDassert(info2);
+    HDassert(size == sizeof(H5FD_file_image_info_t));
+
+    /* Check for different buffer sizes */
+    if(info1->size < info2->size) HGOTO_DONE(-1)
+    if(info1->size > info2->size) HGOTO_DONE(1)
+
+    /* Check for different callbacks */
+    /* (Order in memory is fairly meaningless, so just check for equality) */
+    if(info1->callbacks.image_malloc != info2->callbacks.image_malloc) HGOTO_DONE(1)
+    if(info1->callbacks.image_memcpy != info2->callbacks.image_memcpy) HGOTO_DONE(-1)
+    if(info1->callbacks.image_realloc != info2->callbacks.image_realloc) HGOTO_DONE(1)
+    if(info1->callbacks.image_free != info2->callbacks.image_free) HGOTO_DONE(-1)
+    if(info1->callbacks.udata_copy != info2->callbacks.udata_copy) HGOTO_DONE(1)
+    if(info1->callbacks.udata_free != info2->callbacks.udata_free) HGOTO_DONE(-1)
+
+    /* Check for different udata */
+    /* (Don't know how big it is, so can't check contents) */
+    if(info1->callbacks.udata < info2->callbacks.udata) HGOTO_DONE(-1)
+    if(info1->callbacks.udata > info2->callbacks.udata) HGOTO_DONE(1)
+
+    /* Check buffer contents (instead of buffer pointers) */
+    if(info1->buffer != NULL && info2->buffer == NULL) HGOTO_DONE(-1)
+    if(info1->buffer == NULL && info2->buffer != NULL) HGOTO_DONE(1)
+    if(info1->buffer != NULL && info2->buffer != NULL)
+        ret_value = HDmemcmp(info1->buffer, info2->buffer, size);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_file_image_info_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_file_image_info_close
  *
  * Purpose:     Close callback for the file image info property. The buffer
  *              and udata may need to be freed, possibly using their 
@@ -2437,40 +2850,19 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_file_image_info_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_file_image_info_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
-    if(value) {
-        H5FD_file_image_info_t *info;        /* Image info struct */
-
-        info = (H5FD_file_image_info_t *)value;
-             
-        if(info->buffer != NULL && info->size > 0) { 
-            /* Free buffer */
-            if(info->callbacks.image_free) {
-                if(info->callbacks.image_free(info->buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
-                        info->callbacks.udata) < 0)
-		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "image_free callback failed")
-            } /* end if */
-            else
-                H5MM_xfree(info->buffer);
-        } /* end if */
-
-        /* Free udata if it exists */
-        if(info->callbacks.udata) {
-            if(NULL == info->callbacks.udata_free)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "udata_free not defined")
-            if(info->callbacks.udata_free(info->callbacks.udata) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "udata_free callback failed")
-        } /* end if */
-    } /* end if */
+    /* Free the file image info */
+    if(H5P__file_image_info_free(value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release file image info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_file_image_info_close() */
+} /* end H5P__facc_file_image_info_close() */
 
 
 /*-------------------------------------------------------------------------

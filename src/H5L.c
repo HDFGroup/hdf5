@@ -17,10 +17,8 @@
 /* Module Setup */
 /****************/
 
-#define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
+#include "H5Lmodule.h"          /* This source code file is part of the H5L module */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5L_init_interface
 
 /***********/
 /* Headers */
@@ -191,6 +189,9 @@ static herr_t H5L_get_name_by_idx_cb(H5G_loc_t *grp_loc/*in*/,
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -235,7 +236,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_init_interface
+ * Function:	H5L__init_package
  *
  * Purpose:	Initialize information specific to H5L interface.
  *
@@ -246,12 +247,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5L_init_interface(void)
+herr_t
+H5L__init_package(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Initialize user-defined link classes */
     if(H5L_register_external() < 0)
@@ -259,13 +260,13 @@ H5L_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5L_init_interface() */
+} /* end H5L_init_package() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_term_interface
+ * Function:	H5L_term_package
  *
- * Purpose:	Terminate any resources allocated in H5L_init_interface.
+ * Purpose:	Terminate any resources allocated in H5L__init_package.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -275,21 +276,27 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5L_term_interface(void)
+H5L_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Free the table of link types */
-    H5L_table_g = (H5L_class_t *)H5MM_xfree(H5L_table_g);
-    H5L_table_used_g = H5L_table_alloc_g = 0;
+    if(H5_PKG_INIT_VAR) {
+        /* Free the table of link types */
+        if(H5L_table_g) {
+            H5L_table_g = (H5L_class_t *)H5MM_xfree(H5L_table_g);
+            H5L_table_used_g = H5L_table_alloc_g = 0;
+            n++;
+        } /* end if */
 
-    /* Mark the interface as uninitialized */
-    H5_interface_initialize_g = 0;
+        /* Mark the interface as uninitialized */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* H5L_term_interface() */
+} /* H5L_term_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -2792,7 +2799,7 @@ static htri_t
 H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 {
     hbool_t exists = FALSE;     /* Whether the link exists in the group */
-    htri_t ret_value;           /* Return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2949,7 +2956,7 @@ done:
 hid_t
 H5L_get_default_lcpl(void)
 {
-    hid_t ret_value;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;          /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

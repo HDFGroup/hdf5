@@ -389,10 +389,10 @@ table_list_add(hid_t oid, unsigned long file_no)
 
     /* Allocate space if necessary */
     if(table_list.nused == table_list.nalloc) {
-        void        *tmp_ptr;
+        h5dump_table_items_t    *tmp_ptr;
 
         table_list.nalloc = MAX(1, table_list.nalloc * 2);
-        if(NULL == (tmp_ptr = HDrealloc(table_list.tables, table_list.nalloc * sizeof(table_list.tables[0]))))
+        if(NULL == (tmp_ptr = (h5dump_table_items_t *)HDrealloc(table_list.tables, table_list.nalloc * sizeof(table_list.tables[0]))))
             return -1;
         table_list.tables = tmp_ptr;
     } /* end if */

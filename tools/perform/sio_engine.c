@@ -181,7 +181,7 @@ do_sio(parameters param)
     }
 
     /* Allocate transfer buffer */
-    if ((buffer = malloc(linear_buf_size)) == NULL){
+    if ((buffer = (char *)malloc(linear_buf_size)) == NULL){
         HDfprintf(stderr, "malloc for transfer buffer size (%zu) failed\n", linear_buf_size);
         GOTOERROR(FAIL);
     }

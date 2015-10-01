@@ -116,7 +116,7 @@ typedef struct H5S_sel_iter_t {
 } H5S_sel_iter_t;
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
-#ifdef H5S_PACKAGE
+#ifdef H5S_MODULE
 #define H5S_GET_EXTENT_TYPE(S)          ((S)->extent.type)
 #define H5S_GET_EXTENT_NDIMS(S)         ((S)->extent.rank)
 #define H5S_GET_EXTENT_NPOINTS(S)       ((S)->extent.nelem)
@@ -142,7 +142,7 @@ typedef struct H5S_sel_iter_t {
 #define H5S_SELECT_ITER_NEXT(ITER,NELEM)((*(ITER)->type->iter_next)(ITER,NELEM))
 #define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        ((*(ITER)->type->iter_next_block)(ITER))
 #define H5S_SELECT_ITER_RELEASE(ITER)   ((*(ITER)->type->iter_release)(ITER))
-#else /* H5S_PACKAGE */
+#else /* H5S_MODULE */
 #define H5S_GET_EXTENT_TYPE(S)          (H5S_get_simple_extent_type(S))
 #define H5S_GET_EXTENT_NDIMS(S)         (H5S_get_simple_extent_ndims(S))
 #define H5S_GET_EXTENT_NPOINTS(S)       (H5S_get_simple_extent_npoints(S))
@@ -168,7 +168,7 @@ typedef struct H5S_sel_iter_t {
 #define H5S_SELECT_ITER_NEXT(ITER,NELEM)(H5S_select_iter_next(ITER,NELEM))
 #define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        (H5S_select_iter_next_block(ITER))
 #define H5S_SELECT_ITER_RELEASE(ITER)   (H5S_select_iter_release(ITER))
-#endif /* H5S_PACKAGE */
+#endif /* H5S_MODULE */
 /* Handle these two callbacks in a special way, since they have prologs that need to be executed */
 #define H5S_SELECT_COPY(DST,SRC,SHARE)  (H5S_select_copy(DST,SRC,SHARE))
 #define H5S_SELECT_DESERIALIZE(S,BUF)   (H5S_select_deserialize(S,BUF))
@@ -190,6 +190,8 @@ H5_DLL herr_t H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, H5S_t *ds);
 H5_DLL H5S_t *H5S_read(const struct H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL htri_t H5S_set_extent(H5S_t *space, const hsize_t *size);
 H5_DLL herr_t H5S_set_extent_real(H5S_t *space, const hsize_t *size);
+H5_DLL herr_t H5S_set_extent_simple(H5S_t *space, unsigned rank,
+    const hsize_t *dims, const hsize_t *max);
 H5_DLL H5S_t *H5S_create(H5S_class_t type);
 H5_DLL H5S_t *H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
     const hsize_t maxdims[/*rank*/]);
@@ -204,6 +206,7 @@ H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 H5_DLL hsize_t H5S_extent_nelem(const H5S_extent_t *ext);
 H5_DLL int H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t max_dims[]);
 H5_DLL htri_t H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2);
+H5_DLL herr_t H5S_extent_copy(H5S_t *dst, const H5S_t *src);
 
 /* Operations on selections */
 H5_DLL herr_t H5S_select_deserialize(H5S_t **space, const uint8_t **p);

@@ -26,7 +26,7 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
 
 
 /* Packages needed by this file... */
@@ -92,7 +92,7 @@ H5F_efc_t *
 H5F_efc_create(unsigned max_nfiles)
 {
     H5F_efc_t   *efc = NULL;            /* EFC object */
-    H5F_efc_t   *ret_value;             /* Return value */
+    H5F_efc_t   *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -162,8 +162,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
     if(!efc) {
-        if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id,
-                                         dxpl_id)))
+        if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id, dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
 
         /* Increment the number of open objects to prevent the file from being
@@ -235,8 +234,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
             } /* end if */
             else {
                 /* Cannot cache file, just open file and return */
-                if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id,
-                                                 dxpl_id)))
+                if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id, dxpl_id)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
 
                 /* Increment the number of open objects to prevent the file from
@@ -257,8 +255,7 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Open the file */
-        if(NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id,
-                                         dxpl_id)))
+        if(NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id, dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
         open_file = TRUE;
 

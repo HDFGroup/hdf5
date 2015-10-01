@@ -28,7 +28,7 @@
  * This file needs to access private information from the H5S package.
  * This file also needs to access the dataspace testing code.
  */
-#define H5S_PACKAGE
+#define H5S_FRIEND		/*suppress error about including H5Spkg	  */
 #define H5S_TESTING
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
@@ -36,7 +36,7 @@
  * This file needs to access private information from the H5P package.
  * This file also needs to access the property list testing code.
  */
-#define H5P_PACKAGE
+#define H5P_FRIEND		/*suppress error about including H5Ppkg	  */
 #define H5P_TESTING
 #include "H5Ppkg.h"		/* Property Lists 			*/
 
@@ -1247,10 +1247,6 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
         }
 
         /* Remove external file information from the dcpls */
-        /* Remove default property causes memory leak
-        if(H5Premove(dcpl, H5D_CRT_EXT_FILE_LIST_NAME) < 0) TEST_ERROR
-        if(H5Premove(dcpl2, H5D_CRT_EXT_FILE_LIST_NAME) < 0) TEST_ERROR
-        */
 
         /* reset external file information from the dcpls */
         if (H5P_reset_external_file_test(dcpl) < 0) TEST_ERROR

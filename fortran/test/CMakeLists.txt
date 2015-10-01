@@ -7,6 +7,42 @@ PROJECT (HDF5_FORTRAN_TESTS C CXX Fortran)
 INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
 
 #-----------------------------------------------------------------------------
+# Setup the Fortran auto-detection utilities
+# H5_test_buildiface.F90         used to generate various KIND test interfaces
+#-----------------------------------------------------------------------------
+
+add_executable (H5_test_buildiface
+      ${HDF5_F90_SRC_DIR}/test/H5_test_buildiface.F90
+  )
+
+if (WIN32 AND MSVC)
+  if (BUILD_SHARED_LIBS)
+    set_target_properties (H5_test_buildiface
+        PROPERTIES
+            COMPILE_FLAGS "/MT"
+    )
+  endif (BUILD_SHARED_LIBS)
+  set_target_properties (H5_test_buildiface
+      PROPERTIES
+          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+  )
+endif (WIN32 AND MSVC)
+set_target_properties (H5_test_buildiface PROPERTIES
+    LINKER_LANGUAGE Fortran
+    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+)
+
+if (NOT SKIP_HDF5_FORTRAN_SHARED)
+  if (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
+  else (WIN32)
+    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  endif (WIN32)
+endif (NOT SKIP_HDF5_FORTRAN_SHARED)
+
+INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${MOD_BUILD_DIR})
+
+#-----------------------------------------------------------------------------
 # Add Test Lib
 #-----------------------------------------------------------------------------
 add_library (${HDF5_F90_C_TEST_LIB_TARGET} STATIC t.c)
@@ -39,10 +75,27 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   )
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
-set_source_files_properties (tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90 PROPERTIES LANGUAGE Fortran)
-add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90)
+set (HDF5_F90_TF_SRCS
+     # generated files
+     ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+)
+set_source_files_properties (
+    ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+    PROPERTIES GENERATED TRUE
+)
+set_source_files_properties (tf.F90 ${HDF5_F90_BINARY_DIR}/${HDF5_F90_TF_SRCS} PROPERTIES LANGUAGE Fortran)
+
+set (CMD $<TARGET_FILE:H5_test_buildiface>)
+add_custom_target (H5testgen ALL
+    COMMAND ${CMD}
+#v3.2    BYPRODUCT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+    DEPENDS H5_test_buildiface
+)
+
+add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf.F90 ${HDF5_F90_TF_SRCS})
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-   add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf.F90 ${HDF5_F90_BINARY_DIR}/tf_gen.F90)
+   add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf.F90 ${HDF5_F90_TF_SRCS})
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} STATIC " " " ")
@@ -93,60 +146,26 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-----------------------------------------------------------------------------
-# Setup the Fortran auto-detection utilities
-# H5_test_buildiface.F90         used to generate various KIND test interfaces
-#-----------------------------------------------------------------------------
-
-add_executable (H5_test_buildiface
-      ${HDF5_F90_SRC_DIR}/test/H5_test_buildiface.F90
-  )
-
-if (WIN32 AND MSVC)
-  if (BUILD_SHARED_LIBS)
-    set_target_properties (H5_test_buildiface
-        PROPERTIES
-            COMPILE_FLAGS "/MT"
-    )
-  endif (BUILD_SHARED_LIBS)
-  set_target_properties (H5_test_buildiface
-      PROPERTIES
-          LINK_FLAGS "/SUBSYSTEM:CONSOLE"
-  )
-endif (WIN32 AND MSVC)
-set_target_properties (H5_test_buildiface PROPERTIES
-    LINKER_LANGUAGE Fortran
-    Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
-)
-
-set (CMD $<TARGET_FILE:H5_test_buildiface>)
-add_custom_command (
-    OUTPUT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
-    COMMAND ${CMD}
-    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-    DEPENDS H5_test_buildiface
-)
-
-#-----------------------------------------------------------------------------
 # Add Tests
 #-----------------------------------------------------------------------------
 
 #-- Adding test for testhdf5_fortran
 add_executable (testhdf5_fortran
-    fortranlib_test.f90
-    tH5A.f90
-    tH5D.f90
-    tH5E.f90
-    tH5F.f90
-    tH5G.f90
-    tH5I.f90
-    tH5P.f90
-    tH5R.f90
-    tH5S.f90
-    tH5Sselect.f90
-    tH5T.f90
-    tH5VL.f90
-    tH5Z.f90
-    tHDF5.f90
+    fortranlib_test.F90
+    tH5A.F90
+    tH5D.F90
+    tH5E.F90
+    tH5F.F90
+    tH5G.F90
+    tH5I.F90
+    tH5P.F90
+    tH5R.F90
+    tH5S.F90
+    tH5Sselect.F90
+    tH5T.F90
+    tH5VL.F90
+    tH5Z.F90
+    tHDF5.F90
 )
 TARGET_NAMING (testhdf5_fortran STATIC)
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran STATIC " " " ")
@@ -164,23 +183,25 @@ set_target_properties (testhdf5_fortran PROPERTIES
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
+add_dependencies (testhdf5_fortran ${HDF5_F90_TEST_LIB_TARGET})
+
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (testhdf5_fortran-shared
-      fortranlib_test.f90
-      tH5A.f90
-      tH5D.f90
-      tH5E.f90
-      tH5F.f90
-      tH5G.f90
-      tH5I.f90
-      tH5P.f90
-      tH5R.f90
-      tH5S.f90
-      tH5Sselect.f90
-      tH5T.f90
-      tH5VL.f90
-      tH5Z.f90
-      tHDF5.f90
+      fortranlib_test.F90
+      tH5A.F90
+      tH5D.F90
+      tH5E.F90
+      tH5F.F90
+      tH5G.F90
+      tH5I.F90
+      tH5P.F90
+      tH5R.F90
+      tH5S.F90
+      tH5Sselect.F90
+      tH5T.F90
+      tH5VL.F90
+      tH5Z.F90
+      tHDF5.F90
   )
   TARGET_NAMING (testhdf5_fortran-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (testhdf5_fortran-shared SHARED " " " ")
@@ -198,16 +219,17 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
         FOLDER test/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
+  add_dependencies (testhdf5_fortran-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-- Adding test for testhdf5_fortran_1_8
 add_executable (testhdf5_fortran_1_8
-    fortranlib_test_1_8.f90
-    tH5O.f90
-    tH5A_1_8.f90
-    tH5G_1_8.f90
-    tH5MISC_1_8.f90
-    tHDF5_1_8.f90
+    fortranlib_test_1_8.F90
+    tH5O.F90
+    tH5A_1_8.F90
+    tH5G_1_8.F90
+    tH5MISC_1_8.F90
+    tHDF5_1_8.F90
 )
 TARGET_NAMING (testhdf5_fortran_1_8 STATIC)
 TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8 STATIC " " " ")
@@ -225,14 +247,16 @@ set_target_properties (testhdf5_fortran_1_8 PROPERTIES
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
+add_dependencies (testhdf5_fortran_1_8 ${HDF5_F90_TEST_LIB_TARGET})
+
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (testhdf5_fortran_1_8-shared
-      fortranlib_test_1_8.f90
-      tH5O.f90
-      tH5A_1_8.f90
-      tH5G_1_8.f90
-      tH5MISC_1_8.f90
-      tHDF5_1_8.f90
+      fortranlib_test_1_8.F90
+      tH5O.F90
+      tH5A_1_8.F90
+      tH5G_1_8.F90
+      tH5MISC_1_8.F90
+      tHDF5_1_8.F90
   )
   TARGET_NAMING (testhdf5_fortran_1_8-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (testhdf5_fortran_1_8-shared SHARED " " " ")
@@ -250,18 +274,19 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
         FOLDER test/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
+  add_dependencies (testhdf5_fortran_1_8-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-- Adding test for fortranlib_test_F03
 add_executable (fortranlib_test_F03
-    fortranlib_test_F03.f90
-    tH5E_F03.f90
-    tH5F_F03.f90
-    tH5L_F03.f90
-    tH5O_F03.f90
-    tH5P_F03.f90
+    fortranlib_test_F03.F90
+    tH5E_F03.F90
+    tH5F_F03.F90
+    tH5L_F03.F90
+    tH5O_F03.F90
+    tH5P_F03.F90
     tH5T_F03.F90
-    tHDF5_F03.f90
+    tHDF5_F03.F90
 )
 TARGET_NAMING (fortranlib_test_F03 STATIC)
 TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03 STATIC " " " ")
@@ -279,16 +304,18 @@ set_target_properties (fortranlib_test_F03 PROPERTIES
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
+add_dependencies (fortranlib_test_F03 ${HDF5_F90_TEST_LIB_TARGET})
+
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_executable (fortranlib_test_F03-shared
-      fortranlib_test_F03.f90
-      tH5E_F03.f90
-      tH5F_F03.f90
-      tH5L_F03.f90
-      tH5O_F03.f90
-      tH5P_F03.f90
+      fortranlib_test_F03.F90
+      tH5E_F03.F90
+      tH5F_F03.F90
+      tH5L_F03.F90
+      tH5O_F03.F90
+      tH5P_F03.F90
       tH5T_F03.F90
-      tHDF5_F03.f90
+      tHDF5_F03.F90
   )
   TARGET_NAMING (fortranlib_test_F03-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (fortranlib_test_F03-shared SHARED " " " ")
@@ -305,11 +332,12 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
       Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-)
+  )
+  add_dependencies (fortranlib_test_F03-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-- Adding test for fflush1
-add_executable (fflush1 fflush1.f90)
+add_executable (fflush1 fflush1.F90)
 TARGET_NAMING (fflush1 STATIC)
 TARGET_FORTRAN_PROPERTIES (fflush1 STATIC " " " ")
 target_link_libraries (fflush1
@@ -326,8 +354,10 @@ set_target_properties (fflush1 PROPERTIES
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
+add_dependencies (fflush1 ${HDF5_F90_TEST_LIB_TARGET})
+
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  add_executable (fflush1-shared fflush1.f90)
+  add_executable (fflush1-shared fflush1.F90)
   TARGET_NAMING (fflush1-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (fflush1-shared SHARED " " " ")
   target_link_libraries (fflush1-shared
@@ -344,10 +374,11 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
         FOLDER test/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
+  add_dependencies (fflush1-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-- Adding test for fflush2
-add_executable (fflush2 fflush2.f90)
+add_executable (fflush2 fflush2.F90)
 TARGET_NAMING (fflush2 STATIC)
 TARGET_FORTRAN_PROPERTIES (fflush2 STATIC " " " ")
 target_link_libraries (fflush2
@@ -364,8 +395,10 @@ set_target_properties (fflush2 PROPERTIES
     FOLDER test/fortran
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/static
 )
+add_dependencies (fflush2 ${HDF5_F90_TEST_LIB_TARGET})
+
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  add_executable (fflush2-shared fflush2.f90)
+  add_executable (fflush2-shared fflush2.F90)
   TARGET_NAMING (fflush2-shared SHARED)
   TARGET_FORTRAN_PROPERTIES (fflush2-shared SHARED " " " ")
   target_link_libraries (fflush2-shared
@@ -382,6 +415,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
         FOLDER test/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
+  add_dependencies (fflush2-shared ${HDF5_F90_TEST_LIBSH_TARGET})
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 include (CMakeTests.cmake)

@@ -101,11 +101,11 @@
                                                 }
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
-#ifdef H5G_PACKAGE
+#ifdef H5G_MODULE
 #define H5G_MOUNTED(G)              ((G)->shared->mounted)
-#else /* H5G_PACKAGE */
+#else /* H5G_MODULE */
 #define H5G_MOUNTED(G)              (H5G_mounted(G))
-#endif /* H5G_PACKAGE */
+#endif /* H5G_MODULE */
 
 /*
  * During name lookups (see H5G_traverse()) we sometimes want information about
