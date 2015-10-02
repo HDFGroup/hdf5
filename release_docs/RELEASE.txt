@@ -227,8 +227,7 @@ New Features
 
     Fortran API
     -----------
-    -
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - None
 
 
     C++ API
@@ -293,8 +292,7 @@ Bug Fixes since HDF5-1.8.15
 
     Fortran API
     ------------
-    -
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - None
 
 
     C++ API
@@ -303,14 +301,12 @@ Bug Fixes since HDF5-1.8.15
 
     High-Level APIs:
     ------
-    -
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - None
 
 
     Fortran High-Level APIs:
     ------------------------
-    -
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - None
 
 
     Testing
