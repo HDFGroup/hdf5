@@ -198,8 +198,6 @@ H5_DLL herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_
 H5_DLL ssize_t H5A_get_name(H5A_t *attr, size_t buf_size, char *buf);
 H5_DLL H5A_t *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr);
 H5_DLL herr_t H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo);
-H5_DLL hid_t H5A_get_type(H5A_t *attr);
-H5_DLL hid_t H5A_get_space(H5A_t *attr);
 H5_DLL hid_t H5A_get_create_plist(H5A_t* attr);
 H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);
