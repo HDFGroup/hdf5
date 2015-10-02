@@ -231,9 +231,9 @@ static herr_t H5D__create_chunk_map_single(H5D_chunk_map_t *fm,
 static herr_t H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
 static herr_t H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
-static herr_t H5D__chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
+static herr_t H5D__chunk_file_cb(void *elem, const H5T_t *type, unsigned ndims,
     const hsize_t *coords, void *fm);
-static herr_t H5D__chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
+static herr_t H5D__chunk_mem_cb(void *elem, const H5T_t *type, unsigned ndims,
     const hsize_t *coords, void *fm);
 static unsigned H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled);
 static herr_t H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
@@ -722,7 +722,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     H5S_t *tmp_mspace = NULL;   /* Temporary memory dataspace */
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
     htri_t file_space_normalized = FALSE;   /* File dataspace was normalized */
-    hid_t f_tid = (-1);           /* Temporary copy of file datatype for iteration */
+    H5T_t *file_type = NULL;    /* Temporary copy of file datatype for iteration */
     hbool_t iter_init = FALSE;  /* Selection iteration info has been initialized */
     unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
     int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
@@ -875,11 +875,12 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
             } /* end while */
         } /* end if */
         else {
+            H5S_sel_iter_op_t iter_op;  /* Operator for iteration */
             H5D_chunk_file_iter_ud_t udata;     /* User data for iteration */
 
             /* Create temporary datatypes for selection iteration */
-            if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL), FALSE)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
+            if(NULL == (file_type = H5T_copy(dataset->shared->type, H5T_COPY_ALL)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy file datatype")
 
             /* Initialize the user data */
             udata.fm = fm;
@@ -887,8 +888,11 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
             udata.io_info = io_info;
 #endif /* H5_HAVE_PARALLEL */
 
+            iter_op.op_type = H5S_SEL_ITER_OP_LIB;
+            iter_op.u.lib_op = H5D__chunk_file_cb;
+
             /* Spaces might not be the same shape, iterate over the file selection directly */
-            if(H5S_select_iterate(&bogus, f_tid, file_space, H5D__chunk_file_cb, &udata) < 0)
+            if(H5S_select_iterate(&bogus, file_type, file_space, &iter_op, &udata) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
 
             /* Reset "last chunk" info */
@@ -908,6 +912,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections")
         } /* end if */
         else {
+            H5S_sel_iter_op_t iter_op;  /* Operator for iteration */
             size_t elmt_size;           /* Memory datatype size */
 
             /* Make a copy of equivalent memory space */
@@ -922,9 +927,9 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
             fm->mchunk_tmpl = tmp_mspace;
 
             /* Create temporary datatypes for selection iteration */
-            if(f_tid < 0) {
-                if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL), FALSE)) < 0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
+            if(!file_type) {
+                if(NULL == (file_type = H5T_copy(dataset->shared->type, H5T_COPY_ALL)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy file datatype")
             } /* end if */
 
             /* Create selection iterator for memory selection */
@@ -934,8 +939,11 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
             iter_init = TRUE;	/* Selection iteration info has been initialized */
 
+            iter_op.op_type = H5S_SEL_ITER_OP_LIB;
+            iter_op.u.lib_op = H5D__chunk_mem_cb;
+
             /* Spaces aren't the same shape, iterate over the memory selection directly */
-            if(H5S_select_iterate(&bogus, f_tid, file_space, H5D__chunk_mem_cb, fm) < 0)
+            if(H5S_select_iterate(&bogus, file_type, file_space, &iter_op, fm) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections")
 
             /* Clean up hyperslab stuff, if necessary */
@@ -978,8 +986,8 @@ done:
 
     if(iter_init && H5S_SELECT_ITER_RELEASE(&(fm->mem_iter)) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
-    if(f_tid != (-1) && H5I_dec_ref(f_tid) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+    if(file_type && (H5T_close(file_type) < 0))
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Can't free temporary datatype")
     if(file_space_normalized) {
         /* (Casting away const OK -QAK) */
         if(H5S_hyper_denormalize_offset((H5S_t *)file_space, old_offset) < 0)
@@ -1525,7 +1533,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_file_cb(void H5_ATTR_UNUSED *elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_udata)
+H5D__chunk_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, unsigned ndims, const hsize_t *coords, void *_udata)
 {
     H5D_chunk_file_iter_ud_t *udata = (H5D_chunk_file_iter_ud_t *)_udata;       /* User data for operation */
     H5D_chunk_map_t      *fm = udata->fm;       /* File<->memory chunk mapping info */
@@ -1642,7 +1650,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5D__chunk_mem_cb(void H5_ATTR_UNUSED *elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_fm)
+H5D__chunk_mem_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, unsigned ndims, const hsize_t *coords, void *_fm)
 {
     H5D_chunk_map_t      *fm = (H5D_chunk_map_t *)_fm;  /* File<->memory chunk mapping info */
     H5D_chunk_info_t *chunk_info;               /* Chunk information for current chunk */
