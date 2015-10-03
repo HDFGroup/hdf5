@@ -1268,7 +1268,7 @@ CommonFG::~CommonFG() {}
 //--------------------------------------------------------------------------
 void f_DataType_setId(DataType* dtype, hid_t new_id)
 {
-    dtype->id = new_id;
+    dtype->p_setId(new_id);
 }
 
 //--------------------------------------------------------------------------
@@ -1283,7 +1283,7 @@ void f_DataType_setId(DataType* dtype, hid_t new_id)
 //--------------------------------------------------------------------------
 void f_DataSet_setId(DataSet* dset, hid_t new_id)
 {
-    dset->id = new_id;
+    dset->p_setId(new_id);
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
