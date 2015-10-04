@@ -144,6 +144,9 @@ H5_init_library(void)
 
             if(MPI_SUCCESS != (mpi_code = MPI_Comm_set_attr(MPI_COMM_SELF, key_val, NULL)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Comm_set_attr failed", mpi_code)
+
+            if(MPI_SUCCESS != (mpi_code = MPI_Comm_free_keyval(&key_val)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Comm_free_keyval failed", mpi_code)
         }
     }
 #endif /*H5_HAVE_PARALLEL*/
