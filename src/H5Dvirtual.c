@@ -615,12 +615,16 @@ H5D__virtual_reset_layout(H5O_layout_t *layout)
     (void)HDmemset(layout->storage.u.virt.min_dims, 0, sizeof(layout->storage.u.virt.min_dims));
 
     /* Close access property lists */
-    if(layout->storage.u.virt.source_fapl >= 0)
+    if(layout->storage.u.virt.source_fapl >= 0) {
         if(H5I_dec_ref(layout->storage.u.virt.source_fapl) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close source fapl")
-    if(layout->storage.u.virt.source_dapl >= 0)
+        layout->storage.u.virt.source_fapl = -1;
+    } /* end if */
+    if(layout->storage.u.virt.source_dapl >= 0) {
         if(H5I_dec_ref(layout->storage.u.virt.source_dapl) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close source dapl")
+        layout->storage.u.virt.source_dapl = -1;
+    } /* end if */
 
     /* The list is no longer initialized */
     layout->storage.u.virt.init = FALSE;
@@ -2013,12 +2017,14 @@ H5D__virtual_init(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5D_t *dset,
         storage->printf_gap = (hsize_t)0;
 
     /* Retrieve VDS file FAPL to layout */
-    if((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fapl")
+    if(storage->source_fapl <= 0)
+        if((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fapl")
 
     /* Copy DAPL to layout */
-    if((storage->source_dapl = H5P_copy_plist(dapl, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dapl")
+    if(storage->source_dapl <= 0)
+        if((storage->source_dapl = H5P_copy_plist(dapl, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dapl")
 
     /* Mark layout as not fully initialized (must be done prior to I/O for
      * unlimited/printf selections) */
