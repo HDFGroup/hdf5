@@ -25,10 +25,63 @@
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// This DOXYGEN_SHOULD_SKIP_THIS block is a work-around approach to control
+// the order of creation and deletion of the global constants.  See Design Notes
+// in "H5PredType.cpp" for information.
+
+// Initialize a pointer for the constant
+FileAccPropList* FileAccPropList::DEFAULT_ = 0;
+
 //--------------------------------------------------------------------------
-///\brief	Constant for default property
+// Function:    FileAccPropList::getConstant
+//              Creates a FileAccPropList object representing the HDF5 constant
+//              H5P_FILE_ACCESS, pointed to by FileAccPropList::DEFAULT_
+// exception    H5::PropListIException
+// Description
+//              If FileAccPropList::DEFAULT_ already points to an allocated
+//              object, throw a PropListIException.  This scenario should not
+//              happen.
+// Programmer   Binh-Minh Ribler - 2015
 //--------------------------------------------------------------------------
-const FileAccPropList FileAccPropList::DEFAULT;
+FileAccPropList* FileAccPropList::getConstant()
+{
+    // Tell the C library not to clean up, H5Library::termH5cpp will call
+    // H5close - more dependency if use H5Library::dontAtExit()
+    if (!IdComponent::H5dontAtexit_called)
+    {
+        (void) H5dont_atexit();
+        IdComponent::H5dontAtexit_called = true;
+    }
+
+    // If the constant pointer is not allocated, allocate it. Otherwise,
+    // throw because it shouldn't be.
+    if (DEFAULT_ == 0)
+        DEFAULT_ = new FileAccPropList(H5P_FILE_ACCESS);
+    else
+        throw PropListIException("FileAccPropList::getConstant", "FileAccPropList::getConstant is being invoked on an allocated DEFAULT_");
+    return(DEFAULT_);
+}
+
+//--------------------------------------------------------------------------
+// Function:    FileAccPropList::deleteConstants
+// Purpose:     Deletes the constant object that FileAccPropList::DEFAULT_
+//              points to.
+// exception    H5::PropListIException
+// Programmer   Binh-Minh Ribler - 2015
+//--------------------------------------------------------------------------
+void FileAccPropList::deleteConstants()
+{
+    if (DEFAULT_ != 0)
+        delete DEFAULT_;
+}
+
+//--------------------------------------------------------------------------
+// Purpose:	Constant for default property
+//--------------------------------------------------------------------------
+const FileAccPropList& FileAccPropList::DEFAULT = *getConstant();
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	Default Constructor
