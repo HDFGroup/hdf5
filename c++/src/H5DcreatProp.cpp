@@ -28,10 +28,63 @@
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// This DOXYGEN_SHOULD_SKIP_THIS block is a work-around approach to control
+// the order of creation and deletion of the global constants.  See Design Notes
+// in "H5PredType.cpp" for information.
+
+// Initialize a pointer for the constant
+DSetCreatPropList* DSetCreatPropList::DEFAULT_ = 0;
+
 //--------------------------------------------------------------------------
-///\brief	Constant for dataset creation default property
+// Function:    DSetCreatPropList::getConstant
+// Purpose:     Creates a DSetCreatPropList object representing the HDF5
+//              constant H5P_DATASET_CREATE, pointed to by
+//		DSetCreatPropList::DEFAULT_
+// exception    H5::PropListIException
+// Description
+//              If DSetCreatPropList::DEFAULT_ already points to an allocated
+//              object, throw a PropListIException.  This scenario should
+//              not happen.
+// Programmer   Binh-Minh Ribler - 2015
 //--------------------------------------------------------------------------
-const DSetCreatPropList DSetCreatPropList::DEFAULT;
+DSetCreatPropList* DSetCreatPropList::getConstant()
+{
+    // Tell the C library not to clean up, H5Library::termH5cpp will call
+    // H5close - more dependency if use H5Library::dontAtExit()
+    if (!IdComponent::H5dontAtexit_called)
+    {
+        (void) H5dont_atexit();
+        IdComponent::H5dontAtexit_called = true;
+    }
+
+    // If the constant pointer is not allocated, allocate it. Otherwise,
+    // throw because it shouldn't be.
+    if (DEFAULT_ == 0)
+        DEFAULT_ = new DSetCreatPropList(H5P_DATASET_CREATE);
+    else
+        throw PropListIException("DSetCreatPropList::getConstant", "DSetCreatPropList::getConstant is being invoked on an allocated DEFAULT_");
+    return(DEFAULT_);
+}
+
+//--------------------------------------------------------------------------
+// Function:    DSetCreatPropList::deleteConstants
+// Purpose:     Deletes the constant object that DSetCreatPropList::DEFAULT_
+//              points to.
+// Programmer   Binh-Minh Ribler - 2015
+//--------------------------------------------------------------------------
+void DSetCreatPropList::deleteConstants()
+{
+    if (DEFAULT_ != 0)
+        delete DEFAULT_;
+}
+
+//--------------------------------------------------------------------------
+// Purpose	Constant for dataset creation default property
+//--------------------------------------------------------------------------
+const DSetCreatPropList& DSetCreatPropList::DEFAULT = *getConstant();
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList default constructor

@@ -760,23 +760,17 @@ void DataType::close()
 //		- Added the use of H5CPP_EXITED to terminate the HDF5 library
 //		  and elimiate previous memory leaks.  See comments in the
 //		  header file "H5PredType.h" for details. - BMR, Mar 30, 2012
+//		- Major re-implementation of the global constants was done
+//		  to avoid relying on the order of the creation and deletion
+//		  of the global constants.  Hence, H5CPP_EXITED was removed.
+//		  See Design Notes in "H5PredType.cpp" for details.
+//		  - BMR, Sep 30, 2015
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {
     try
     {
-	/* If this is the object AtExit, terminate the HDF5 library.  This is
-	   to eliminate memory leaks due to the library being re-initiated
-	   (after the program has ended) and not re-terminated. */
-	if (id == H5CPP_EXITED)
-	{
-	    herr_t ret_value = H5close();
-	    if (ret_value == FAIL)
-		throw DataTypeIException(inMemFunc("~DataType - "), "H5close failed");
-	}
-	// Close the HDF5 datatype
-	else
-	    close();
+	close();
     }
     catch (Exception close_error) {
 	cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;
