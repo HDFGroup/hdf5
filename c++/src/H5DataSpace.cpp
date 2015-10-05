@@ -33,10 +33,60 @@ namespace H5 {
 #endif  // H5_NO_STD
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// This DOXYGEN_SHOULD_SKIP_THIS block is a work-around approach to control
+// the order of creation and deletion of the global constants.  See Design Notes
+// in "H5PredType.cpp" for information.
+
+// Initialize a pointer for the constant
+DataSpace* DataSpace::ALL_ = 0;
+
 //--------------------------------------------------------------------------
-///\brief	Constant for default dataspace.
+// Function:	DataSpace::getConstant
+//		Creates a DataSpace object representing the HDF5 constant
+//		H5S_ALL, pointed to by DataSpace::ALL_
+// Exception	H5::DataSpaceIException
+// Description
+//		If DataSpace::ALL_ already points to an allocated object, throw
+//		a DataSpaceIException.  This scenario should not happen.
+// Programmer	Binh-Minh Ribler - 2015
 //--------------------------------------------------------------------------
-const DataSpace DataSpace::ALL( H5S_ALL );
+DataSpace* DataSpace::getConstant()
+{
+    // Tell the C library not to clean up, H5Library::termH5cpp will call
+    // H5close - more dependency if use H5Library::dontAtExit()
+    if (!IdComponent::H5dontAtexit_called)
+    {
+        (void) H5dont_atexit();
+        IdComponent::H5dontAtexit_called = true;
+    }
+
+    // If the constant pointer is not allocated, allocate it. Otherwise,
+    // throw because it shouldn't be.
+    if (ALL_ == 0)
+        ALL_ = new DataSpace(H5S_ALL);
+    else
+        throw DataSpaceIException("DataSpace::getConstant", "DataSpace::getConstant is being invoked on an allocated ALL_");
+    return(ALL_);
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataSpace::deleteConstants
+// Purpose:     Deletes the constant object that DataSpace::ALL_ points to
+// Programmer   Binh-Minh Ribler - 2015
+//--------------------------------------------------------------------------
+void DataSpace::deleteConstants()
+{
+    if (ALL_ != 0)
+        delete ALL_;
+}
+
+//--------------------------------------------------------------------------
+// Purpose	Constant for default dataspace.
+//--------------------------------------------------------------------------
+const DataSpace& DataSpace::ALL = *getConstant();
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace constructor

@@ -22,24 +22,67 @@
 #include "H5DxferProp.h"
 #include "H5private.h"		// for HDmemset
 
-#include <iostream>
-
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
-
-
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// This DOXYGEN_SHOULD_SKIP_THIS block is a work-around approach to control
+// the order of creation and deletion of the global constants.  See Design Notes
+// in "H5PredType.cpp" for information.
+
+// Initialize a pointer for the constant
+DSetMemXferPropList* DSetMemXferPropList::DEFAULT_ = 0;
+
 //--------------------------------------------------------------------------
-///\brief	Constant for default dataset memory and transfer property list.
+// Function:    DSetMemXferPropList::getConstant
+//              Creates a DSetMemXferPropList object representing the HDF5
+//              constant H5P_DATASET_XFER, pointed to by
+//		DSetMemXferPropList::DEFAULT_
+// exception    H5::PropListIException
+// Description
+//              If DSetMemXferPropList::DEFAULT_ already points to an allocated
+//              object, throw a PropListIException.  This scenario should not
+//              happen.
+// Programmer   Binh-Minh Ribler - 2015
 //--------------------------------------------------------------------------
-const DSetMemXferPropList DSetMemXferPropList::DEFAULT;
+DSetMemXferPropList* DSetMemXferPropList::getConstant()
+{
+    // Tell the C library not to clean up, H5Library::termH5cpp will call
+    // H5close - more dependency if use H5Library::dontAtExit()
+    if (!IdComponent::H5dontAtexit_called)
+    {
+        (void) H5dont_atexit();
+        IdComponent::H5dontAtexit_called = true;
+    }
+
+    // If the constant pointer is not allocated, allocate it. Otherwise,
+    // throw because it shouldn't be.
+    if (DEFAULT_ == 0)
+        DEFAULT_ = new DSetMemXferPropList(H5P_DATASET_XFER);
+    else
+        throw PropListIException("DSetMemXferPropList::getConstant", "DSetMemXferPropList::getConstant is being invoked on an allocated DEFAULT_");
+    return(DEFAULT_);
+}
+
+//--------------------------------------------------------------------------
+// Function:    DSetMemXferPropList::deleteConstants
+// Purpose:     Deletes the constant object that DSetMemXferPropList::DEFAULT_
+//              points to.
+// Programmer   Binh-Minh Ribler - 2015
+//--------------------------------------------------------------------------
+void DSetMemXferPropList::deleteConstants()
+{
+    if (DEFAULT_ != 0)
+        delete DEFAULT_;
+}
+
+//--------------------------------------------------------------------------
+// Purpose	Constant for default dataset memory and transfer property list.
+//--------------------------------------------------------------------------
+const DSetMemXferPropList& DSetMemXferPropList::DEFAULT = *getConstant();
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function	DSetMemXferPropList default constructor
