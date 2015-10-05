@@ -455,9 +455,6 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             /* number of entries */
             *size += (size_t)8;
 
-            /* NULL pointer to pass to H5S_encode */
-            tmp_p = NULL;
-
             /* Iterate over entries */
             for(u = 0; u < layout->storage.u.virt.list_nused; u++) {
                 /* Source file name */
@@ -470,12 +467,14 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
 
                 /* Source selection */
                 tmp_size = (size_t)0;
+                tmp_p = NULL;
                 if(H5S_encode(layout->storage.u.virt.list[u].source_select, &tmp_p, &tmp_size) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
                 *size += tmp_size;
 
                 /* Virtual dataset selection */
                 tmp_size = (size_t)0;
+                tmp_p = NULL;
                 if(H5S_encode(layout->storage.u.virt.list[u].source_dset.virtual_select, &tmp_p, &tmp_size) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize virtual selection")
                 *size += tmp_size;
