@@ -4999,7 +4999,7 @@ unlock_entry(H5F_t * file_ptr,
 
             nerrors++;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: error in H5C_unprotect().\n",
+                HDfprintf(stdout, "%d:%s: error in H5AC_unprotect().\n",
                           world_mpi_rank, FUNC);
             }
         } else {

@@ -4230,7 +4230,7 @@ unprotect_entry(H5F_t * file_ptr,
         } /* end if */
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                &(types[type]), entry_ptr->addr, (void *)entry_ptr, flags);
+                    entry_ptr->addr, (void *)entry_ptr, flags);
 
         if ( ( result < 0 ) ||
              ( ( entry_ptr->header.is_protected ) &&

@@ -14208,8 +14208,7 @@ check_resize_entry(void)
         } else {
 
             result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                               &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr,
-                               (void *)entry_ptr, H5C__DIRTIED_FLAG);
+                       entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if ( result < 0 ) {
 
@@ -14294,8 +14293,7 @@ check_resize_entry(void)
         } else {
 
             result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                               &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr,
-                               (void *)entry_ptr, H5C__DIRTIED_FLAG);
+                       entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if ( result < 0 ) {
 
@@ -14655,8 +14653,7 @@ check_resize_entry(void)
         } else {
 
             result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                               &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr,
-                               (void *)entry_ptr, H5C__DIRTIED_FLAG);
+                       entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if ( result < 0 ) {
 
@@ -14743,8 +14740,7 @@ check_resize_entry(void)
         } else {
 
             result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
-                               &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr,
-                               (void *)entry_ptr, H5C__DIRTIED_FLAG);
+                       entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if ( result < 0 ) {
 
@@ -16247,8 +16243,7 @@ check_double_pin_err(void)
     if ( pass ) {
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			        &(types[0]), entry_ptr->addr,
-				(void *)entry_ptr, H5C__PIN_ENTRY_FLAG);
+                    entry_ptr->addr, (void *)entry_ptr, H5C__PIN_ENTRY_FLAG);
 
         if ( result > 0 ) {
 
@@ -16332,8 +16327,7 @@ check_double_unpin_err(void)
     if ( pass ) {
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			        &(types[0]), entry_ptr->addr,
-				(void *)entry_ptr, H5C__UNPIN_ENTRY_FLAG);
+                    entry_ptr->addr, (void *)entry_ptr, H5C__UNPIN_ENTRY_FLAG);
 
         if ( result > 0 ) {
 
@@ -16613,8 +16607,7 @@ check_double_unprotect_err(void)
     if ( pass ) {
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			        &(types[0]), entry_ptr->addr,
-				(void *)entry_ptr, H5C__NO_FLAGS_SET);
+                    entry_ptr->addr, (void *)entry_ptr, H5C__NO_FLAGS_SET);
 
         if ( result > 0 ) {
 
@@ -16990,8 +16983,7 @@ check_unprotect_ro_dirty_err(void)
     if ( pass ) {
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			        &(types[0]), entry_ptr->addr,
-				(void *)entry_ptr, H5C__DIRTIED_FLAG);
+                    entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
         if ( result >= 0 ) {
 
@@ -17034,8 +17026,7 @@ check_unprotect_ro_dirty_err(void)
     if ( pass ) {
 
         result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
-			        &(types[0]), entry_ptr->addr,
-				(void *)entry_ptr, H5C__DIRTIED_FLAG);
+                    entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
         if ( result > 0 ) {
 

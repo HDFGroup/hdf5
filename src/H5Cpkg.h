@@ -586,7 +586,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)        \
 {                                                                \
     (((cache_ptr)->clears)[(entry_ptr)->type->id])++;            \
-    if ( (entry_ptr)->is_pinned )                                \
+    if((entry_ptr)->is_pinned)                                   \
         (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++; \
     ((entry_ptr)->clears)++;                                     \
 }
@@ -594,7 +594,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 #define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)         \
 {                                                                 \
     (((cache_ptr)->flushes)[(entry_ptr)->type->id])++;            \
-    if ( (entry_ptr)->is_pinned )                                 \
+    if((entry_ptr)->is_pinned)                                    \
         (((cache_ptr)->pinned_flushes)[(entry_ptr)->type->id])++; \
     ((entry_ptr)->flushes)++;                                     \
 }
@@ -700,9 +700,9 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 
 #define H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)         \
 {                                                                 \
-    if ( (entry_ptr)->is_pinned )                                 \
-        (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++;  \
     (((cache_ptr)->clears)[(entry_ptr)->type->id])++;             \
+    if((entry_ptr)->is_pinned)                                    \
+        (((cache_ptr)->pinned_clears)[(entry_ptr)->type->id])++;  \
 }
 
 #define H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)         \

@@ -175,9 +175,8 @@ static herr_t H5C_mark_tagged_entries_cork(H5C_t *cache_ptr,
                                            haddr_t obj_addr,
                                            hbool_t val);
 
-static herr_t H5C_flush_marked_entries(H5F_t * f,
-                                       hid_t dxpl_id,
-                                       H5C_t * cache_ptr);
+static herr_t H5C_flush_marked_entries(H5F_t * f, 
+                                       hid_t dxpl_id);
 
 static herr_t H5C__mark_flush_dep_dirty(H5C_cache_entry_t * entry);
 
@@ -5150,7 +5149,6 @@ done:
 herr_t
 H5C_unprotect(H5F_t *		  f,
               hid_t		  dxpl_id,
-              const H5C_class_t * type,
               haddr_t		  addr,
               void *		  thing,
               unsigned int        flags)
@@ -5188,7 +5186,6 @@ H5C_unprotect(H5F_t *		  f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( type );
     HDassert( H5F_addr_defined(addr) );
     HDassert( thing );
     HDassert( ! ( pin_entry && unpin_entry ) );
@@ -5199,7 +5196,6 @@ H5C_unprotect(H5F_t *		  f,
     entry_ptr = (H5C_cache_entry_t *)thing;
 
     HDassert( entry_ptr->addr == addr );
-    HDassert( entry_ptr->type == type );
 
     /* also set the dirtied variable if the dirtied field is set in
      * the entry.
@@ -8270,13 +8266,13 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
         /* only log a clear if the entry was dirty */
         if(was_dirty) {
             H5C__UPDATE_STATS_FOR_CLEAR(cache_ptr, entry_ptr)
-	}
+	    } /* end if */
     } else if(write_entry) {
         HDassert(was_dirty);
 
         /* only log a flush if we actually wrote to disk */
         H5C__UPDATE_STATS_FOR_FLUSH(cache_ptr, entry_ptr)
-    }
+    } /* end else if */
 
     if(destroy) {
         if(take_ownership)
@@ -8285,7 +8281,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
             HDassert(destroy_entry);
 
         H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr, take_ownership)
-    }
+    } /* end if */
 
     /* If the entry's type has a 'notify' callback and the entry is about
      * to be removed from the cache, send a 'before eviction' notice while
@@ -10116,7 +10112,7 @@ H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag)
     /* If we stop evicting entries and pinned entries still need evicted, 
        then we have a problem. */
     if (pinned_entries_need_evicted) {
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Pinned entries still need evicted?!");
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Pinned entries still need evicted?!");
     } /* end if */
 
 done:
@@ -10199,15 +10195,14 @@ H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag, hbool_t mark_clean)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_marked_entries(H5F_t * f, hid_t dxpl_id, H5C_t * cache_ptr)
+H5C_flush_marked_entries(H5F_t * f, hid_t dxpl_id)
 { 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Assertions */
-    HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(f != NULL);
 
     /* Flush all marked entries */
     if(H5C_flush_cache(f, dxpl_id, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
@@ -10249,11 +10244,11 @@ H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag)
 
     /* Mark all entries with specified tag */
     if(H5C_mark_tagged_entries(cache_ptr, tag, FALSE) < 0 )
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
 
     /* Flush all marked entries */
-    if(H5C_flush_marked_entries(f, dxpl_id, cache_ptr) < 0)
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries")
+    if(H5C_flush_marked_entries(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
