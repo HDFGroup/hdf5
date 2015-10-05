@@ -1988,6 +1988,34 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_get_aux_ptr
+ *
+ * Purpose:     Get the aux_ptr field from the cache.
+ *
+ *              This field will either be NULL (when accessing a file serially)
+ *              or contains a pointer to the auxiliary info for parallel I/O.
+ *
+ * Return:      NULL/non-NULL (can't fail)
+ *
+ * Programmer:  Quincey Koziol
+ *              6/29/15
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5C_get_aux_ptr(const H5C_t *cache_ptr)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Check arguments */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    FUNC_LEAVE_NOAPI(cache_ptr->aux_ptr)
+} /* H5C_get_aux_ptr() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_get_trace_file_ptr
  *
  * Purpose:     Get the trace_file_ptr field from the cache.
