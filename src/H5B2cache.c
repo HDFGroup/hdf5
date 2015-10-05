@@ -446,7 +446,7 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     UINT32ENCODE(image, metadata_chksum);
 
     /* Sanity check */
-    HDassert((size_t)(image - (uint8_t *)_image) <= len);
+    HDassert((size_t)(image - (uint8_t *)_image) == len);
 
     /* Clear shadowed node lists, as the header has been flushed and all
      * nodes must be shadowed again (if doing SWMR writes).  Note that this
@@ -878,6 +878,11 @@ H5B2__cache_int_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     /* Sanity check */
     HDassert((size_t)(image - (uint8_t *)_image) <= len);
 
+#ifdef H5_CLEAR_MEMORY
+    /* Clear rest of internal node */
+    HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+#endif /* H5_CLEAR_MEMORY */
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__cache_int_serialize() */
@@ -1283,6 +1288,11 @@ H5B2__cache_leaf_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED l
 
     /* Sanity check */
     HDassert((size_t)(image - (uint8_t *)_image) <= len);
+
+#ifdef H5_CLEAR_MEMORY
+    /* Clear rest of leaf node */
+    HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
+#endif /* H5_CLEAR_MEMORY */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

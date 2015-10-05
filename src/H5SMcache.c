@@ -766,12 +766,12 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t len,
     computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (uint8_t *)_image), 0);
     UINT32ENCODE(image, computed_chksum);
 
+    /* sanity check */
+    HDassert((size_t)(image - (uint8_t *)_image) <= list->header->list_size);
+
 #ifdef H5_CLEAR_MEMORY
     HDmemset(image, 0, (list->header->list_size - (size_t)(image - (uint8_t *)_image)));
 #endif /* H5_CLEAR_MEMORY */
-
-    /* sanity check */
-    HDassert((size_t)(image - (uint8_t *)_image) <= list->header->list_size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
