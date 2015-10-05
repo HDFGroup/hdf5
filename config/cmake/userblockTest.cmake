@@ -1,4 +1,4 @@
-# runTest.cmake executes a command and captures the output in a file. File is then compared
+# userblockTest.cmake executes a command and captures the output in a file. File is then compared
 # against a reference file. Exit status of command can also be compared.
 
 # arguments checking
@@ -48,7 +48,7 @@ if (TEST_CHECKUB STREQUAL "YES")
         WORKING_DIRECTORY ${TEST_FOLDER}
         RESULT_VARIABLE TEST_RESULT
         OUTPUT_FILE ${TEST_HFILE}.len.txt
-        OUTPUT_VARIABLE TEST_ERROR
+        OUTPUT_VARIABLE TEST_OUT
         ERROR_VARIABLE TEST_ERROR
     )
     if (NOT ${TEST_RESULT} STREQUAL "0")
@@ -56,9 +56,9 @@ if (TEST_CHECKUB STREQUAL "YES")
     endif (NOT ${TEST_RESULT} STREQUAL "0")
     file (READ ${TEST_HFILE}.len.txt TEST_O_STRING_LEN)
   endif (TEST_OFILE)
-   
+
   MATH( EXPR TEST_STRING_SIZE "${TEST_U_STRING_LEN} + ${TEST_O_STRING_LEN}" )
- 
+
   if (NOT TEST_O_STRING_LEN STREQUAL "0")
     #$JAM_BIN/getub -c $s2 $origfile > $cmpfile
     EXECUTE_PROCESS (
@@ -66,13 +66,13 @@ if (TEST_CHECKUB STREQUAL "YES")
         WORKING_DIRECTORY ${TEST_FOLDER}
         RESULT_VARIABLE TEST_RESULT
         OUTPUT_FILE ${TEST_HFILE}-ub.cmp
-        OUTPUT_VARIABLE TEST_ERROR
+        OUTPUT_VARIABLE TEST_OUT
         ERROR_VARIABLE TEST_ERROR
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     #cat $ufile >> $cmpfile
     file (STRINGS ${TEST_UFILE} TEST_STREAM NEWLINE_CONSUME)
-    file (APPEND ${TEST_HFILE}-ub.cmp "${TEST_STREAM}") 
+    file (APPEND ${TEST_HFILE}-ub.cmp "${TEST_STREAM}")
   else (NOT TEST_O_STRING_LEN STREQUAL "0")
     file (STRINGS ${TEST_UFILE} TEST_STREAM NEWLINE_CONSUME)
     file (WRITE ${TEST_HFILE}-ub.cmp ${TEST_STREAM})
@@ -84,7 +84,7 @@ if (TEST_CHECKUB STREQUAL "YES")
       WORKING_DIRECTORY ${TEST_FOLDER}
       RESULT_VARIABLE TEST_RESULT
       OUTPUT_FILE ${TEST_HFILE}.cmp
-      OUTPUT_VARIABLE TEST_ERROR
+      OUTPUT_VARIABLE TEST_OUT
       ERROR_VARIABLE TEST_ERROR
       OUTPUT_STRIP_TRAILING_WHITESPACE
   )
@@ -107,7 +107,7 @@ else (TEST_CHECKUB STREQUAL "YES")
         COMMAND ${TEST_PROGRAM} ${TEST_HFILE}
         WORKING_DIRECTORY ${TEST_FOLDER}
         RESULT_VARIABLE TEST_H_STRING_LEN
-        OUTPUT_VARIABLE TEST_ERROR
+        OUTPUT_VARIABLE TEST_OUT
         ERROR_VARIABLE TEST_ERROR
     )
   if (NOT TEST_H_STRING_LEN STREQUAL "0")
