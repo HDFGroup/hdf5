@@ -1461,6 +1461,10 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
                     fill_prop->alloc_time = H5D_ALLOC_TIME_INCR;
                     break;
 
+                case H5D_VIRTUAL:
+                    fill_prop->alloc_time = H5D_ALLOC_TIME_INCR;
+                    break;
+
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
@@ -1475,7 +1479,8 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     alloc_time_state = 0;
     if((dataset->shared->layout.type == H5D_COMPACT && fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
             || (dataset->shared->layout.type == H5D_CONTIGUOUS && fill_prop->alloc_time == H5D_ALLOC_TIME_LATE)
-            || (dataset->shared->layout.type == H5D_CHUNKED && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR))
+            || (dataset->shared->layout.type == H5D_CHUNKED && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR)
+            || (dataset->shared->layout.type == H5D_VIRTUAL && fill_prop->alloc_time == H5D_ALLOC_TIME_INCR))
         alloc_time_state = 1;
 
     /* Set revised fill value properties, if they are different from the defaults */
@@ -1600,6 +1605,34 @@ H5D_close(H5D_t *dataset)
             case H5D_COMPACT:
                 /* Nothing special to do (info freed in the layout destroy) */
                 break;
+
+            case H5D_VIRTUAL:
+            {
+                size_t i, j;
+
+                HDassert(dataset->shared->layout.storage.u.virt.list || (dataset->shared->layout.storage.u.virt.list_nused == 0));
+
+                /* Close source datasets */
+                for(i = 0; i < dataset->shared->layout.storage.u.virt.list_nused; i++) {
+                    /* Close source dataset */
+                    if(dataset->shared->layout.storage.u.virt.list[i].source_dset.dset) {
+                        HDassert(dataset->shared->layout.storage.u.virt.list[i].source_dset.dset != dataset);
+                        if(H5D_close(dataset->shared->layout.storage.u.virt.list[i].source_dset.dset) < 0)
+                            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
+                        dataset->shared->layout.storage.u.virt.list[i].source_dset.dset = NULL;
+                    } /* end if */
+
+                    /* Close sub datasets */
+                    for(j = 0; j < dataset->shared->layout.storage.u.virt.list[i].sub_dset_nused; j++)
+                        if(dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset) {
+                            HDassert(dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset != dataset);
+                            if(H5D_close(dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset) < 0)
+                                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
+                            dataset->shared->layout.storage.u.virt.list[i].sub_dset[j].dset = NULL;
+                        } /* end if */
+                } /* end for */
+            } /* end block */
+            break;
 
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
@@ -1857,6 +1890,15 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
                 } /* end if */
                 break;
 
+            case H5D_VIRTUAL:
+                /* No-op, as the raw data is stored elsewhere and the global
+                 * heap object containing the mapping information is created
+                 * when the layout message is encoded.  We may wish to move the
+                 * creation of the global heap object here at some point, but we
+                 * will have to make sure is it always created before the
+                 * dataset is closed. */
+                break;
+
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
             default:
@@ -1976,6 +2018,9 @@ H5D__init_storage(const H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
                 break;
             } /* end block */
 
+        case H5D_VIRTUAL:
+            /* No-op, as the raw data is stored elsewhere */
+
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
@@ -2032,6 +2077,12 @@ H5D__get_storage_size(H5D_t *dset, hid_t dxpl_id, hsize_t *storage_size)
             *storage_size = dset->shared->layout.storage.u.compact.size;
             break;
 
+        case H5D_VIRTUAL:
+            /* Just set to 0, as virtual datasets do not actually store raw data
+             */
+            *storage_size = 0;
+            break;
+
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
@@ -2068,6 +2119,7 @@ H5D__get_offset(const H5D_t *dset)
     HDassert(dset);
 
     switch(dset->shared->layout.type) {
+        case H5D_VIRTUAL:
         case H5D_CHUNKED:
         case H5D_COMPACT:
             break;
@@ -2307,7 +2359,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 {
     hsize_t curr_dims[H5S_MAX_RANK];    /* Current dimension sizes */
     htri_t  changed;                    /* Whether the dataspace changed size */
-    size_t  u;                          /* Local index variable */
+    size_t  u, v;                       /* Local index variable */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, dset->oloc.addr, FAIL)
@@ -2404,6 +2456,30 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
                 /* Update the chunk cache indices */
                 if(H5D__chunk_update_cache(dset, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
+        } /* end if */
+
+        /* Operations for virtual datasets */
+        if(H5D_VIRTUAL == dset->shared->layout.type) {
+            /* Check that the dimensions of the VDS are large enough */
+            if(H5D_virtual_check_min_dims(dset) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "virtual dataset dimensions not large enough to contain all limited dimensions in all selections")
+
+            /* Patch the virtual selection dataspaces */
+            for(u = 0; u < dset->shared->layout.storage.u.virt.list_nused; u++) {
+                /* Patch extent */
+                if(H5S_set_extent(dset->shared->layout.storage.u.virt.list[u].source_dset.virtual_select, size) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+                dset->shared->layout.storage.u.virt.list[u].virtual_space_status = H5O_VIRTUAL_STATUS_CORRECT;
+
+                /* Patch sub-source datasets */
+                for(v = 0; v < dset->shared->layout.storage.u.virt.list[u].sub_dset_nalloc; v++)
+                    if(H5S_set_extent(dset->shared->layout.storage.u.virt.list[u].sub_dset[v].virtual_select, size) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+            } /* end for */
+
+            /* Mark virtual datasets as not fully initialized so internal
+             * selections are recalculated (at next I/O operation) */
+            dset->shared->layout.storage.u.virt.init = FALSE;
         } /* end if */
 
         /* Allocate space for the new parts of the dataset, if appropriate */
@@ -2731,6 +2807,11 @@ H5D_get_create_plist(H5D_t *dset)
             copied_layout.storage.u.chunk.ops = NULL;
             break;
 
+        case H5D_VIRTUAL:
+            copied_layout.storage.u.virt.serial_list_hobjid.addr = HADDR_UNDEF;
+            copied_layout.storage.u.virt.serial_list_hobjid.idx = 0;
+            break;
+
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
@@ -2912,6 +2993,11 @@ H5D_get_space(H5D_t *dset)
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* If the layout is virtual, update the extent */
+    if(dset->shared->layout.type == H5D_VIRTUAL)
+        if(H5D__virtual_set_extent_unlim(dset, H5AC_ind_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update virtual dataset extent")
 
     /* Read the data space message and return a data space object */
     if(NULL == (space = H5S_copy(dset->shared->space, FALSE, TRUE)))

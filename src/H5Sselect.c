@@ -455,6 +455,8 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p)
     H5S_t *tmp_space = NULL;    /* Pointer to actual dataspace to use, either
                                  *space or a newly allocated one */
     uint32_t sel_type;          /* Pointer to the selection type */
+    uint32_t version;           /* Version number */
+    uint8_t flags = 0;          /* Flags */
     herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -472,8 +474,23 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p)
     /* Decode selection type */
     UINT32DECODE(*p, sel_type);
 
-    /* Skip over the remainder of the header */
-    *p += 12;
+    /* Decode version */
+    UINT32DECODE(*p, version);
+
+    if(version >= (uint32_t)2) {
+        /* Decode flags */
+        flags = *(*p)++;
+
+        /* Check for unknown flags */
+        if(flags & ~H5S_SELECT_FLAG_BITS)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "unknown flag for selection")
+
+        /* Skip over the remainder of the header */
+        *p += 4;
+    } /* end if */
+    else
+        /* Skip over the remainder of the header */
+        *p += 8;
 
     /* Decode and check or patch rank for point and hyperslab selections */
     if((sel_type == H5S_SEL_POINTS) || (sel_type == H5S_SEL_HYPERSLABS)) {
@@ -499,19 +516,19 @@ H5S_select_deserialize(H5S_t **space, const uint8_t **p)
     /* Make routine for selection type */
     switch(sel_type) {
         case H5S_SEL_POINTS:         /* Sequence of points selected */
-            ret_value = (*H5S_sel_point->deserialize)(tmp_space, p);
+            ret_value = (*H5S_sel_point->deserialize)(tmp_space, version, flags, p);
             break;
 
         case H5S_SEL_HYPERSLABS:     /* Hyperslab selection defined */
-            ret_value = (*H5S_sel_hyper->deserialize)(tmp_space, p);
+            ret_value = (*H5S_sel_hyper->deserialize)(tmp_space, version, flags, p);
             break;
 
         case H5S_SEL_ALL:            /* Entire extent selected */
-            ret_value = (*H5S_sel_all->deserialize)(tmp_space, p);
+            ret_value = (*H5S_sel_all->deserialize)(tmp_space, version, flags, p);
             break;
 
         case H5S_SEL_NONE:           /* Nothing selected */
-            ret_value = (*H5S_sel_none->deserialize)(tmp_space, p);
+            ret_value = (*H5S_sel_none->deserialize)(tmp_space, version, flags, p);
             break;
 
         default:
@@ -669,6 +686,89 @@ H5S_get_select_offset(const H5S_t *space, hsize_t *offset)
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_get_select_offset() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_unlim_dim
+ PURPOSE
+    Gets the unlimited dimension in the selection, or -1 if there is no
+    unlimited dimension.
+ USAGE
+    int H5S_get_select_unlim_dim(space)
+        const H5S_t *space;     IN: Dataspace pointer of selection to query
+ RETURNS
+    Unlimited dimension in the selection, or -1 if there is no unlimited
+    dimension (never fails)
+ DESCRIPTION
+    Gets the unlimited dimension in the selection, or -1 if there is no
+    unlimited dimension.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+        Currently only implemented for hyperslab selections, all others
+        simply return -1.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int
+H5S_get_select_unlim_dim(const H5S_t *space)
+{
+    herr_t ret_value = FAIL;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(space);
+
+    ret_value = (*space->select.type->unlim_dim)(space);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5S_get_select_unlim_dim() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_get_select_num_elem_non_unlim
+ PURPOSE
+    Gets the number of elements in the non-unlimited dimensions
+ USAGE
+    herr_t H5S_get_select_num_elem_non_unlim(space,num_elem_non_unlim)
+        H5S_t *space;           IN: Dataspace pointer to check
+        hsize_t *num_elem_non_unlim; OUT: Number of elements in the non-unlimited dimensions
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Returns the number of elements in a slice through the non-unlimited
+    dimensions of the selection.  Fails if the selection has no unlimited
+    dimension.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_get_select_num_elem_non_unlim(const H5S_t *space,
+    hsize_t *num_elem_non_unlim)
+{
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check args */
+    HDassert(space);
+    HDassert(num_elem_non_unlim);
+
+    /* Check for selection callback */
+    if(!space->select.type->num_elem_non_unlim)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "selection type has no num_elem_non_unlim callback")
+
+    /* Make selection callback */
+    if((*space->select.type->num_elem_non_unlim)(space, num_elem_non_unlim) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements in non-unlimited dimension")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5S_get_select_unlim_dim() */
 
 
 /*--------------------------------------------------------------------------
@@ -2113,4 +2213,190 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_fill() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_project_intersection
+
+ PURPOSE
+    Projects the intersection of of the selections of src_space and
+    src_intersect_space within the selection of src_space as a selection
+    within the selection of dst_space
+
+ USAGE
+    herr_t H5S_select_project_intersection(src_space,dst_space,src_intersect_space,proj_space)
+        H5S_t *src_space;       IN: Selection that is mapped to dst_space, and intersected with src_intersect_space
+        H5S_t *dst_space;       IN: Selection that is mapped to src_space, and which contains the result
+        H5S_t *src_intersect_space; IN: Selection whose intersection with src_space is projected to dst_space to obtain the result
+        H5S_t *proj_space;      OUT: Will contain the result (intersection of src_intersect_space and src_space projected from src_space to dst_space) after the operation
+
+ RETURNS
+    Non-negative on success/Negative on failure.
+
+ DESCRIPTION
+    Projects the intersection of of the selections of src_space and
+    src_intersect_space within the selection of src_space as a selection
+    within the selection of dst_space.  The result is placed in the
+    selection of proj_space.
+    
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
+    const H5S_t *src_intersect_space, H5S_t **new_space_ptr)
+{
+    H5S_t *new_space = NULL;           /* New dataspace constructed */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(src_space);
+    HDassert(dst_space);
+    HDassert(src_intersect_space);
+    HDassert(new_space_ptr);
+
+    /* Create new space, using dst extent.  Start with "all" selection. */
+    if(NULL == (new_space = H5S_create(H5S_SIMPLE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create output dataspace")
+    if(H5S_extent_copy_real(&new_space->extent, &dst_space->extent, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy destination space extent")
+
+    /* If the intersecting space is "all", the intersection must be equal to the
+     * source space and the projection must be equal to the destination space */
+    if(src_intersect_space->select.type->type == H5S_SEL_ALL) {
+        /* Copy the destination selection. */
+        if(H5S_select_copy(new_space, dst_space, FALSE) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy destination space selection")
+    } /* end if */
+    /* If any of the spaces are "none", the projection must also be "none" */
+    else if((src_intersect_space->select.type->type == H5S_SEL_NONE)
+            || (src_space->select.type->type == H5S_SEL_NONE)
+            || (dst_space->select.type->type == H5S_SEL_NONE)) {
+        /* Change to "none" selection */
+        if(H5S_select_none(new_space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+    } /* end if */
+    /* If any of the spaces use point selection, fall back to general algorithm
+     */
+    else if((src_intersect_space->select.type->type == H5S_SEL_POINTS)
+            || (src_space->select.type->type == H5S_SEL_POINTS)
+            || (dst_space->select.type->type == H5S_SEL_POINTS))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "point selections not currently supported")
+    else {
+        HDassert(src_intersect_space->select.type->type == H5S_SEL_HYPERSLABS);
+        /* Intersecting space is hyperslab selection.  Call the hyperslab
+         * routine to project to another hyperslab selection. */
+        if(H5S__hyper_project_intersection(src_space, dst_space, src_intersect_space, new_space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't project hyperslab ondot destination selection")
+    } /* end else */
+
+    /* load the address of the new space into *new_space_ptr */
+    *new_space_ptr = new_space;
+
+done:
+    /* Cleanup on error */
+    if(ret_value < 0) {
+        if(new_space && H5S_close(new_space) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5S_select_project_intersection() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_select_subtract
+
+ PURPOSE
+    Subtract one selection from another
+
+ USAGE
+    herr_t H5S_select_subtract(space,subtract_space)
+        H5S_t *space;           IN/OUT: Selection to be operated on
+        H5S_t *subtract_space;  IN: Selection that will be subtracted from space
+
+ RETURNS
+    Non-negative on success/Negative on failure.
+
+ DESCRIPTION
+    Removes any and all portions of space that are also present in
+    subtract_space.  In essence, performs an A_NOT_B operation with the
+    two selections.
+    
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_subtract(H5S_t *space, H5S_t *subtract_space)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(space);
+    HDassert(subtract_space);
+
+    /* If either space is using the none selection, then we do not need to do
+     * anything */
+    if((space->select.type->type != H5S_SEL_NONE)
+            && (subtract_space->select.type->type != H5S_SEL_NONE)) {
+        /* If subtract_space is using the all selection, set space to none */
+        if(subtract_space->select.type->type == H5S_SEL_ALL) {
+            /* Change to "none" selection */
+            if(H5S_select_none(space) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+        } /* end if */
+        else {
+            /* Check for point selection in subtract_space, convert to
+             * hyperslab */
+            if(subtract_space->select.type->type == H5S_SEL_POINTS)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "point selections not currently supported")
+
+            /* Check for point or all selection in space, convert to hyperslab
+             */
+            if(space->select.type->type == H5S_SEL_ALL) {
+                /* Convert current "all" selection to "real" hyperslab selection */
+                /* Then allow operation to proceed */
+                hsize_t tmp_start[H5O_LAYOUT_NDIMS];    /* Temporary start information */
+                hsize_t tmp_stride[H5O_LAYOUT_NDIMS];   /* Temporary stride information */
+                hsize_t tmp_count[H5O_LAYOUT_NDIMS];    /* Temporary count information */
+                hsize_t tmp_block[H5O_LAYOUT_NDIMS];    /* Temporary block information */
+                unsigned i;                             /* Local index variable */
+
+                /* Fill in temporary information for the dimensions */
+                for(i = 0; i < space->extent.rank; i++) {
+                    tmp_start[i] = 0;
+                    tmp_stride[i] = 1;
+                    tmp_count[i] = 1;
+                    tmp_block[i] = space->extent.size[i];
+                } /* end for */
+
+                /* Convert to hyperslab selection */
+                if(H5S_select_hyperslab(space, H5S_SELECT_SET, tmp_start, tmp_stride, tmp_count, tmp_block) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't convert selection")
+            } /* end if */
+            else if(space->select.type->type == H5S_SEL_POINTS)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "point selections not currently supported")
+
+            HDassert(space->select.type->type == H5S_SEL_HYPERSLABS);
+            HDassert(subtract_space->select.type->type == H5S_SEL_HYPERSLABS);
+
+            /* Both spaces are now hyperslabs, perform the operation */
+            if(H5S__hyper_subtract(space, subtract_space) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't subtract hyperslab")
+        } /* end else */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5S_select_subtract() */
 

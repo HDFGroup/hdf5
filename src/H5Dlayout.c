@@ -104,6 +104,10 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
             dataset->shared->layout.ops = H5D_LOPS_COMPACT;
             break;
 
+        case H5D_VIRTUAL:
+            dataset->shared->layout.ops = H5D_LOPS_VIRTUAL;
+            break;
+
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
         default:
@@ -167,6 +171,11 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
 
             /* B-tree address */
             ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+            break;
+
+        case H5D_VIRTUAL:
+            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of global heap */
+            ret_value += 4;                     /* Global heap index */
             break;
 
         case H5D_LAYOUT_ERROR:
