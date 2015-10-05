@@ -366,7 +366,6 @@ typedef struct test_entry_t
  */
 
 #define H5C__HASH_MASK          ((size_t)(H5C__HASH_TABLE_LEN - 1) << 3)
-#define H5C__HASH_FCN(x)        (int)(((x) & H5C__HASH_MASK) >> 3)
 
 #define H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)          \
 if ( ( (cache_ptr) == NULL ) ||                              \

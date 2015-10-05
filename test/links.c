@@ -6321,7 +6321,7 @@ error:
 static int
 external_link_strong(hid_t fapl, hbool_t new_format)
 {
-    hid_t       my_fapl;                        /* File access property list */
+    hid_t       my_fapl = (-1);                 /* File access property list */
     hid_t       fid1 = (-1), fid2 = (-1);       /* File ID */
     hid_t       gid1 = (-1), gid2 = (-1);       /* Group IDs */
     char        objname[NAME_BUF_SIZE];         /* Object name */
@@ -6370,11 +6370,15 @@ external_link_strong(hid_t fapl, hbool_t new_format)
     if(H5Gclose(gid2) < 0) TEST_ERROR
     if(H5Fclose(fid2) < 0) TEST_ERROR
 
+    /* Close fapl */
+    if(H5Pclose(my_fapl) < 0) TEST_ERROR
+
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(my_fapl);
         H5Gclose(fapl);
         H5Gclose(gid2);
         H5Gclose(gid1);
