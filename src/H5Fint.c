@@ -131,10 +131,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 {
     H5P_genplist_t *new_plist;              /* New property list */
     H5P_genplist_t *old_plist;              /* Old property list */
-    void		*driver_info=NULL;
-    unsigned            efc_size = 0;
-    hid_t               driver_id;
-    hid_t		ret_value = SUCCEED;
+    H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
+    hbool_t driver_prop_copied = FALSE;     /* Whether the driver property has been set up */
+    unsigned    efc_size = 0;
+    hid_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -177,43 +177,26 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set elink file cache size")
 
-    /*
-     * Since we're resetting the driver ID and info, close them if they
-     * exist in this new property list.
-     */
-    /* Get driver ID property */
-    if(H5P_get(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-        HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
+    /* Prepare the driver property */
+    driver_prop.driver_id = f->shared->lf->driver_id;
+    driver_prop.driver_info = H5FD_fapl_get(f->shared->lf);
+    driver_prop_copied = TRUE;
 
-    if(driver_id > 0) {
-        /* Get driver info property */
-        if(H5P_get(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
-
-        /* Close the driver for the property list */
-        if(H5FD_fapl_close(driver_id, driver_info) < 0)
-            HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
-    } /* end if */
-
-    /* Increment the reference count on the driver ID and insert it into the property list */
-    if(H5I_inc_ref(f->shared->lf->driver_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
-    if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID")
-
-    /* Set the driver "info" in the property list */
-    driver_info = H5FD_fapl_get(f->shared->lf);
-    if(driver_info != NULL && H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver info")
+    /* Set the driver property */
+    if(H5P_set(new_plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID & info")
 
     /* Set the file close degree appropriately */
-    if(f->shared->fc_degree == H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->lf->cls->fc_degree)) < 0) {
+    if(f->shared->fc_degree == H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->lf->cls->fc_degree)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
-    } else if(f->shared->fc_degree != H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->fc_degree)) < 0) {
+    else if(f->shared->fc_degree != H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->fc_degree)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
-    }
 
 done:
+    /* Release the copy of the driver info, if it was set up */
+    if(driver_prop_copied && H5FD_fapl_close(driver_prop.driver_id, driver_prop.driver_info) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close copy of driver info")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_access_plist() */
 

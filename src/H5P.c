@@ -1350,7 +1350,7 @@ H5Premove(hid_t plist_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
 
     /* Create the new property list class */
-    if((ret_value = H5P_remove(plist_id,plist,name)) < 0)
+    if((ret_value = H5P_remove(plist, name)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property");
 
 done:

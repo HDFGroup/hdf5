@@ -176,6 +176,7 @@ H5_GCC_DIAG_ON(long-long)
 #else
 #   error "nothing appropriate for hsize_t"
 #endif
+#define HSIZE_UNDEF             ((hsize_t)(hssize_t)(-1))
 
 /*
  * File addresses have their own types.

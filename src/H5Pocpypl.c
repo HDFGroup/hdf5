@@ -54,10 +54,13 @@
 #define H5O_CPY_OPTION_ENC			H5P__encode_unsigned
 #define H5O_CPY_OPTION_DEC			H5P__decode_unsigned
 /* Definitions for merge committed dtype list */
-#define H5O_CPY_MERGE_COMM_DT_LIST_SIZE        sizeof(char *)
+#define H5O_CPY_MERGE_COMM_DT_LIST_SIZE        sizeof(H5O_copy_dtype_merge_list_t *)
 #define H5O_CPY_MERGE_COMM_DT_LIST_DEF         NULL
+#define H5O_CPY_MERGE_COMM_DT_LIST_SET         H5P__ocpy_merge_comm_dt_list_set
+#define H5O_CPY_MERGE_COMM_DT_LIST_GET         H5P__ocpy_merge_comm_dt_list_get
 #define H5O_CPY_MERGE_COMM_DT_LIST_ENC         H5P__ocpy_merge_comm_dt_list_enc
 #define H5O_CPY_MERGE_COMM_DT_LIST_DEC         H5P__ocpy_merge_comm_dt_list_dec
+#define H5O_CPY_MERGE_COMM_DT_LIST_DEL         H5P__ocpy_merge_comm_dt_list_del
 #define H5O_CPY_MERGE_COMM_DT_LIST_COPY        H5P__ocpy_merge_comm_dt_list_copy
 #define H5O_CPY_MERGE_COMM_DT_LIST_CMP         H5P__ocpy_merge_comm_dt_list_cmp
 #define H5O_CPY_MERGE_COMM_DT_LIST_CLOSE       H5P__ocpy_merge_comm_dt_list_close
@@ -82,13 +85,17 @@
 
 /* General routines */
 static H5O_copy_dtype_merge_list_t *H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list);
+static herr_t H5P__copy_merge_comm_dt_list(H5O_copy_dtype_merge_list_t **value);
 
 /* Property class callbacks */
 static herr_t H5P__ocpy_reg_prop(H5P_genclass_t *pclass);
 
 /* Property callbacks */
+static herr_t H5P__ocpy_merge_comm_dt_list_set(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__ocpy_merge_comm_dt_list_get(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *value);
+static herr_t H5P__ocpy_merge_comm_dt_list_del(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__ocpy_merge_comm_dt_list_copy(const char* name, size_t size, void* value);
 static int H5P__ocpy_merge_comm_dt_list_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__ocpy_merge_comm_dt_list_close(const char* name, size_t size, void* value);
@@ -163,8 +170,8 @@ H5P__ocpy_reg_prop(H5P_genclass_t *pclass)
 
     /* Register merge named dtype list property */
     if(H5P_register_real(pclass, H5O_CPY_MERGE_COMM_DT_LIST_NAME, H5O_CPY_MERGE_COMM_DT_LIST_SIZE, &H5O_def_merge_comm_dtype_list_g, 
-            NULL, NULL, NULL, H5O_CPY_MERGE_COMM_DT_LIST_ENC, H5O_CPY_MERGE_COMM_DT_LIST_DEC,
-            NULL, H5O_CPY_MERGE_COMM_DT_LIST_COPY, H5O_CPY_MERGE_COMM_DT_LIST_CMP, H5O_CPY_MERGE_COMM_DT_LIST_CLOSE) < 0)
+            NULL, H5O_CPY_MERGE_COMM_DT_LIST_SET, H5O_CPY_MERGE_COMM_DT_LIST_GET, H5O_CPY_MERGE_COMM_DT_LIST_ENC, H5O_CPY_MERGE_COMM_DT_LIST_DEC,
+            H5O_CPY_MERGE_COMM_DT_LIST_DEL, H5O_CPY_MERGE_COMM_DT_LIST_COPY, H5O_CPY_MERGE_COMM_DT_LIST_CMP, H5O_CPY_MERGE_COMM_DT_LIST_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register property for callback when completing the search for a matching named datatype from the named dtype list */
@@ -187,25 +194,160 @@ done:
  *
  * Programmer:  Neil Fortner
  *              October 27, 2011
+ *
  *-------------------------------------------------------------------------
  */
 static H5O_copy_dtype_merge_list_t *
 H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
 {
-    H5O_copy_dtype_merge_list_t *tmp_node;
-
     FUNC_ENTER_STATIC_NOERR
 
     /* Free the list */
     while(dt_list) {
+        H5O_copy_dtype_merge_list_t *tmp_node;
+
         tmp_node = dt_list->next;
+
         (void)H5MM_xfree(dt_list->path);
         (void)H5FL_FREE(H5O_copy_dtype_merge_list_t, dt_list);
+
         dt_list = tmp_node;
     } /* end while */
 
     FUNC_LEAVE_NOAPI(NULL);
 } /* H5P__free_merge_comm_dtype_list */
+
+
+/*--------------------------------------------------------------------------
+ * Function:	H5P__copy_merge_comm_dt_list
+ *
+ * Purpose:	Copy a merge committed datatype list
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, September 2, 2015
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5P__copy_merge_comm_dt_list(H5O_copy_dtype_merge_list_t **value)
+{
+    const H5O_copy_dtype_merge_list_t *src_dt_list;     /* Source merge named datatype lists */
+    H5O_copy_dtype_merge_list_t *dst_dt_list = NULL;    /* Destination merge named datatype lists */
+    H5O_copy_dtype_merge_list_t *dst_dt_list_tail = NULL, *tmp_dt_list = NULL; /* temporary merge named datatype lists */
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of merge committed dtype list */
+    src_dt_list = *value;
+    while(src_dt_list) {
+        /* Copy src_dt_list */
+        if(NULL == (tmp_dt_list = H5FL_CALLOC(H5O_copy_dtype_merge_list_t)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed")
+        if(NULL == (tmp_dt_list->path = H5MM_strdup(src_dt_list->path)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed")
+
+        /* Add copied node to dest dtype list */
+        if(dst_dt_list_tail) {
+            dst_dt_list_tail->next = tmp_dt_list;
+            dst_dt_list_tail = tmp_dt_list;
+        } /* end if */
+        else {
+            dst_dt_list = tmp_dt_list;
+            dst_dt_list_tail = tmp_dt_list;
+        } /* end else */
+        tmp_dt_list = NULL;
+
+        /* Advance src_dt_list pointer */
+        src_dt_list = src_dt_list->next;
+    } /* end while */
+
+    /* Set the merge named dtype list property for the destination property list */
+    *value = dst_dt_list;
+
+done:
+    if(ret_value < 0) {
+        dst_dt_list = H5P__free_merge_comm_dtype_list(dst_dt_list);
+        if(tmp_dt_list) {
+            tmp_dt_list->path = (char *)H5MM_xfree(tmp_dt_list->path);
+            tmp_dt_list = H5FL_FREE(H5O_copy_dtype_merge_list_t, tmp_dt_list);
+        } /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__copy_merge_comm_dt_list() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__ocpy_merge_comm_dt_list_set
+ *
+ * Purpose:     Copies a merge committed datatype list property when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, Sept 2, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocpy_merge_comm_dt_list_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of merge committed dtype list */
+    if(H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy merge committed dtype list")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocpy_merge_comm_dt_list_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__ocpy_merge_comm_dt_list_get
+ *
+ * Purpose:     Copies a merge committed datatype list property when it's retrieved from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, Sept 2, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocpy_merge_comm_dt_list_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of merge committed dtype list */
+    if(H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy merge committed dtype list")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocpy_merge_comm_dt_list_get() */
 
 
 /*-------------------------------------------------------------------------
@@ -343,6 +485,36 @@ done:
 
 
 /*--------------------------------------------------------------------------
+ * Function:	H5P__ocpy_merge_comm_dt_list_del
+ *
+ * Purpose:     Frees memory used to store the merge committed datatype list property
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, September 2, 2015
+ *
+ *--------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5P__ocpy_merge_comm_dt_list_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Free the merge named dtype list */
+    H5P__free_merge_comm_dtype_list(*(H5O_copy_dtype_merge_list_t **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__ocpy_merge_comm_dt_list_del() */
+
+
+/*--------------------------------------------------------------------------
  * Function:	H5P__ocpy_merge_comm_dt_list_copy
  *
  * Purpose:	Copy the merge committed datatype list
@@ -360,51 +532,18 @@ static herr_t
 H5P__ocpy_merge_comm_dt_list_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
     void *value)
 {
-    const H5O_copy_dtype_merge_list_t *src_dt_list;     /* Source merge named datatype lists */
-    H5O_copy_dtype_merge_list_t *dst_dt_list = NULL;    /* Destination merge named datatype lists */
-    H5O_copy_dtype_merge_list_t *dst_dt_list_tail = NULL, *tmp_dt_list = NULL; /* temporary merge named datatype lists */
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
+    /* Sanity check */
     HDassert(value);
 
     /* Make copy of merge committed dtype list */
-    src_dt_list = *(const H5O_copy_dtype_merge_list_t **)value;
-    while(src_dt_list) {
-        /* Copy src_dt_list */
-        if(NULL == (tmp_dt_list = H5FL_CALLOC(H5O_copy_dtype_merge_list_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        if(NULL == (tmp_dt_list->path = H5MM_strdup(src_dt_list->path)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-        /* Add copied node to dest dtype list */
-        if(dst_dt_list_tail) {
-            dst_dt_list_tail->next = tmp_dt_list;
-            dst_dt_list_tail = tmp_dt_list;
-        } /* end if */
-        else {
-            dst_dt_list = tmp_dt_list;
-            dst_dt_list_tail = tmp_dt_list;
-        } /* end else */
-        tmp_dt_list = NULL;
-
-        /* Advance src_dt_list pointer */
-        src_dt_list = src_dt_list->next;
-    } /* end while */
-
-    /* Set the merge named dtype list property for the destination property list */
-    *(H5O_copy_dtype_merge_list_t **)value = dst_dt_list;
+    if(H5P__copy_merge_comm_dt_list((H5O_copy_dtype_merge_list_t **)value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy merge committed dtype list")
 
 done:
-    if(ret_value < 0) {
-        dst_dt_list = H5P__free_merge_comm_dtype_list(dst_dt_list);
-        if(tmp_dt_list) {
-            tmp_dt_list->path = (char *)H5MM_xfree(tmp_dt_list->path);
-            tmp_dt_list = H5FL_FREE(H5O_copy_dtype_merge_list_t, tmp_dt_list);
-        } /* end if */
-    } /* end if */
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__ocpy_merge_comm_dt_list_copy() */
 
@@ -616,7 +755,7 @@ H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get dtype list */
-    if(H5P_get(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &old_list) < 0)
+    if(H5P_peek(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &old_list) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get merge named dtype list")
 
     /* Add the new path to the list */
@@ -627,7 +766,7 @@ H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
     new_obj->next = old_list;
 
     /* Update the list stored in the property list */
-    if(H5P_set(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &new_obj) < 0)
+    if(H5P_poke(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &new_obj) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set merge named dtype list")
 
 done:
@@ -672,14 +811,14 @@ H5Pfree_merge_committed_dtype_paths(hid_t plist_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get dtype list */
-    if(H5P_get(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &dt_list) < 0)
+    if(H5P_peek(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &dt_list) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get merge committed dtype list")
 
     /* Free dtype list */
     dt_list = H5P__free_merge_comm_dtype_list(dt_list);
 
     /* Update the list stored in the property list (to NULL) */
-    if(H5P_set(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &dt_list) < 0)
+    if(H5P_poke(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &dt_list) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set merge committed dtype list")
 
 done:

@@ -231,7 +231,6 @@ H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
         op_data->ret_id = id;
         ret_value = H5_ITER_STOP;
     }
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__get_plugin_cb() */
 
@@ -1511,7 +1510,7 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                 hid_t dxpl_id, void **req)
 {
     H5P_genplist_t     *plist;                 /* Property list pointer */
-    hid_t               plugin_id;             /* VOL plugin identigier attached to fapl_id */
+    H5VL_plugin_prop_t  plugin_prop;           /* Property for vol plugin ID & info */
     H5VL_class_t       *vol_cls = NULL;
     void	       *ret_value = NULL;      /* Return value */
 
@@ -1521,10 +1520,10 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin info")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     if(NULL == (ret_value = H5VL_file_create(vol_cls, name, flags, fcpl_id, fapl_id, 
@@ -1553,7 +1552,7 @@ void *
 H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
     H5P_genplist_t     *plist;                 /* Property list pointer */
-    hid_t               plugin_id;             /* VOL plugin id attached to fapl_id */
+    H5VL_plugin_prop_t plugin_prop;            /* Property for vol plugin ID & info */
     H5VL_class_t       *vol_cls = NULL;
     void	       *ret_value = NULL;      /* Return value */
 
@@ -1563,10 +1562,10 @@ H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, vo
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin info")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     if(NULL == (ret_value = H5VL_file_open(vol_cls, name, flags, fapl_id, dxpl_id, req)))
@@ -1642,7 +1641,7 @@ H5VLfile_specific(void *file, hid_t plugin_id, H5VL_file_specific_t specific_typ
 
     if(specific_type == H5VL_FILE_IS_ACCESSIBLE) {
         H5P_genplist_t     *plist;          /* Property list pointer */
-        hid_t               vol_id;         /* VOL plugin identigier attached to fapl_id */
+        H5VL_plugin_prop_t  plugin_prop;            /* Property for vol plugin ID & info */
         hid_t               fapl_id;
 
         fapl_id = va_arg (arguments, hid_t);
@@ -1650,11 +1649,12 @@ H5VLfile_specific(void *file, hid_t plugin_id, H5VL_file_specific_t specific_typ
         /* get the VOL info from the fapl */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-        if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin")
 
-        if(NULL == (vol_cls = (H5VL_class_t *)H5I_object(vol_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL ID")
+        if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
+
+        if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
         if((ret_value = (vol_cls->file_cls.specific)
             (file, specific_type, dxpl_id, req, arguments)) < 0)

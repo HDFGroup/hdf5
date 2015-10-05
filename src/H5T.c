@@ -1215,6 +1215,7 @@ H5T__init_package(void)
     status |= H5T_register(H5T_PERS_HARD, "dbl_uint", native_double, native_uint, H5T__conv_double_uint, H5AC_ind_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "ldbl_uint", native_ldouble, native_uint, H5T__conv_ldouble_uint, H5AC_ind_dxpl_id, FALSE);
 
+    /* From floats to long */
     status |= H5T_register(H5T_PERS_HARD, "flt_long", native_float, native_long, H5T__conv_float_long, H5AC_ind_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "dbl_long", native_double, native_long, H5T__conv_double_long, H5AC_ind_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "ldbl_long", native_ldouble, native_long, H5T__conv_ldouble_long, H5AC_ind_dxpl_id, FALSE);
@@ -4416,7 +4417,9 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 
     /* Sanity check */
     HDassert(src);
+    HDassert(src->shared);
     HDassert(dst);
+    HDassert(dst->shared);
 
     /*
      * Make sure the first entry in the table is the no-op conversion path.

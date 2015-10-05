@@ -64,7 +64,7 @@ int main(int argc , char **argv)
     int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
     int   j,nc;
     int   i;
-    int   numcols;
+    int   numcols = 0;
 
     BYTE pc2nc[256] , r1[256] , g1[256] , b1[256];
 

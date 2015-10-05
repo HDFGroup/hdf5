@@ -259,63 +259,46 @@ H5O_efl_copy(const void *_mesg, void *_dest)
     const H5O_efl_t	*mesg = (const H5O_efl_t *) _mesg;
     H5O_efl_t		*dest = (H5O_efl_t *) _dest;
     size_t		u;                      /* Local index variable */
+    hbool_t             slot_allocated = FALSE; /* Flag to indicate that dynamic allocation has begun */
     void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(mesg);
-    if(!dest) {
-	if(NULL == (dest = (H5O_efl_t *)H5MM_calloc(sizeof(H5O_efl_t))))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't allocate efl message")
-        if(NULL == (dest->slot = (H5O_efl_entry_t *)H5MM_calloc(mesg->nalloc * sizeof(H5O_efl_entry_t))))
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't allocate efl message slots")
-    } /* end if */
-    else if(dest->nalloc < mesg->nalloc) {
-        H5O_efl_entry_t *temp_slot;     /* Temporary pointer to new slot information */
 
-        /* Allocate new 'slot' information */
-        if(NULL == (temp_slot = (H5O_efl_entry_t *)H5MM_calloc(mesg->nalloc * sizeof(H5O_efl_entry_t))))
+    /* Allocate destination message, if necessary */
+    if(!dest && NULL == (dest = (H5O_efl_t *)H5MM_calloc(sizeof(H5O_efl_t))))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't allocate efl message")
+
+    /* copy */
+    *dest = *mesg;
+
+    /* Deep copy allocated information */
+    if(dest->nalloc > 0) {
+        if(NULL == (dest->slot = (H5O_efl_entry_t *)H5MM_calloc(dest->nalloc * sizeof(H5O_efl_entry_t))))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't allocate efl message slots")
-
-        /* Release old 'slot' information */
-        for(u = 0; u < dest->nused; u++)
-            dest->slot[u].name = (char *)H5MM_xfree(dest->slot[u].name);
-        dest->slot = (H5O_efl_entry_t *)H5MM_xfree(dest->slot);
-
-        /* Point to new 'slot' information */
-        dest->slot = temp_slot;
+        slot_allocated = TRUE;
+        for(u = 0; u < mesg->nused; u++) {
+            dest->slot[u] = mesg->slot[u];
+            if(NULL == (dest->slot[u].name = H5MM_xstrdup(mesg->slot[u].name)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't allocate efl message slot name")
+        } /* end for */
     } /* end if */
-    else {
-        /* Release old 'slot' information */
-        for(u = 0; u < dest->nused; u++)
-            dest->slot[u].name = (char *)H5MM_xfree(dest->slot[u].name);
-    } /* end else */
-    dest->heap_addr = mesg->heap_addr;
-    dest->nalloc = mesg->nalloc;
-    dest->nused = mesg->nused;
-
-    for(u = 0; u < mesg->nused; u++) {
-	dest->slot[u] = mesg->slot[u];
-	if(NULL == (dest->slot[u].name = H5MM_xstrdup(mesg->slot[u].name)))
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "can't allocate efl message slot name")
-    } /* end for */
 
     /* Set return value */
     ret_value = dest;
 
 done:
     if(NULL == ret_value) {
-        if(dest && NULL == _dest) {
-            if(dest->slot) {
-                for(u = 0; u < mesg->nused; u++) {
-                    if(dest->slot[u].name != NULL && dest->slot[u].name != mesg->slot[u].name)
-                        dest->slot[u].name = (char *)H5MM_xfree(dest->slot[u].name);
-                } /* end for */
-                dest->slot = (H5O_efl_entry_t *)H5MM_xfree(dest->slot);
-            } /* end if */
-            dest = (H5O_efl_t *)H5MM_xfree(dest);
+        if(slot_allocated) {
+            for(u = 0; u < dest->nused; u++)
+                if(dest->slot[u].name != NULL && dest->slot[u].name != mesg->slot[u].name)
+                    dest->slot[u].name = (char *)H5MM_xfree(dest->slot[u].name);
+            dest->slot = (H5O_efl_entry_t *)H5MM_xfree(dest->slot);
         } /* end if */
+        if(NULL == _dest)
+            dest = (H5O_efl_t *)H5MM_xfree(dest);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -389,8 +372,10 @@ H5O_efl_reset(void *_mesg)
 
     /* reset */
     if(mesg->slot) {
-        for(u = 0; u < mesg->nused; u++)
+        for(u = 0; u < mesg->nused; u++) {
             mesg->slot[u].name = (char *)H5MM_xfree(mesg->slot[u].name);
+            mesg->slot[u].name_offset = 0;
+        } /* end for */
         mesg->slot = (H5O_efl_entry_t *)H5MM_xfree(mesg->slot);
     } /* end if */
     mesg->heap_addr = HADDR_UNDEF;

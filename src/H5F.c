@@ -562,9 +562,9 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     void *file;                   /* file object returned from the plugin */
     H5P_genplist_t *plist;        /* Property list pointer */
-    hid_t plugin_id;              /* VOL plugin identigier attached to fapl_id */
     H5VL_class_t *vol_cls = NULL; /* VOL Class structure for callback info */
     H5VL_t *vol_info = NULL;      /* VOL info struct */
+    H5VL_plugin_prop_t plugin_prop;         /* Property for vol plugin ID & info */
     hid_t ret_value;	          /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -599,10 +599,11 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* create a new file or truncate an existing file through the VOL */
@@ -614,7 +615,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
     vol_info->vol_cls = vol_cls;
-    vol_info->vol_id = plugin_id;
+    vol_info->vol_id = plugin_prop.plugin_id;
     if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
@@ -672,7 +673,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
     void *file;                   /* file object returned from the plugin */
     H5P_genplist_t *plist;        /* Property list pointer */
-    hid_t plugin_id;              /* VOL plugin identigier attached to fapl_id */
+    H5VL_plugin_prop_t plugin_prop;         /* Property for vol plugin ID & info */
     H5VL_class_t *vol_cls = NULL; /* VOL Class structure for callback info */
     H5VL_t *vol_info = NULL;      /* VOL info struct */
     hid_t ret_value;	          /* return value */
@@ -696,10 +697,10 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Open the file through the VOL layer */
@@ -710,7 +711,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
     vol_info->vol_cls = vol_cls;
-    vol_info->vol_id = plugin_id;
+    vol_info->vol_id = plugin_prop.plugin_id;
     if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 

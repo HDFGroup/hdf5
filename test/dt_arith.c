@@ -2859,7 +2859,7 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
 #endif
     unsigned char	*hw=NULL;		/*ptr to hardware-conv'd*/
     int			underflow;		/*underflow occurred	*/
-    int			overflow;		/*overflow occurred	*/
+    int			overflow = 0;	/*overflow occurred	*/
     int 		uflow=0;		/*underflow debug counters*/
     size_t		j, k;			/*counters		*/
     int			sendian;		/* source type endianess */

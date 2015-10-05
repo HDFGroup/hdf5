@@ -40,16 +40,17 @@ AM_INIT_AUTOMAKE([foreign])
 AM_SILENT_RULES([yes])
 
 ## AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
-## for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE
-## is *not* included here, these files will be rebuilt if out of date.
-## This is a problem because if users try to build on a machine with
+## for Makefiles, configure, src/H5config.h, etc. If AM_MAINTAINER_MODE
+## is enabled, these files will be rebuilt if out of date. This is a
+## problem because if users try to build on a machine with
 ## the wrong versions of autoconf and automake, these files will be
 ## rebuilt with the wrong versions and bad things can happen.
 ## Also, CVS doesn't preserve dependencies between timestamps, so
 ## Makefiles will often think rebuilding needs to occur when it doesn't.
-## Developers should './configure --enable-maintainer-mode' to turn on
-## rebuild rules.
-AM_MAINTAINER_MODE
+##
+## By default, it is enabled. Users can configure with
+## --disable-maintainer-mode to prevent running the autotools.
+AM_MAINTAINER_MODE([enable])
 
 ## ----------------------------------------------------------------------
 ## Set prefix default (install directory) to a directory in the build area.
@@ -823,8 +824,6 @@ LT_PREREQ([2.2])
 ## win32-dll - This will build clean dlls on win32 platforms.
 LT_INIT([dlopen,win32-dll])
 
-
-
 ## ----------------------------------------------------------------------
 ## Check if we should install only statically linked executables.
 ##   This check needs to occur after libtool is initialized because
@@ -889,32 +888,6 @@ case "X-$RPATH" in
     AC_MSG_ERROR([\'$enableval\' is not a valid rpath type])
     ;;
 esac
-
-## ----------------------------------------------------------------------
-## pmake will throw an error if variables are undefined in a Makefile.
-## These errors can be changed to warnings using the -V flag.
-##
-AC_SUBST([AM_MAKEFLAGS]) AM_MAKEFLAGS=""
-
-## Don't run test if MAKE is defined but is the empty string
-if test -n "${MAKE-make}"; then
-
-  AC_MSG_CHECKING([whether make will build with undefined variables])
-
-  cat >maketest <<EOF
-foo: \$(UNDEFINED) \$(UNDEFINED2)
-	@echo \$(UNDEFINED3) works
-EOF
-
-  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no, setting -V flag])
-    AM_MAKEFLAGS="\-V"
-  fi
-
-  rm maketest
-fi
 
 ## ----------------------------------------------------------------------
 ## Production flags?  Save the value in $CONFIG_MODE so we have it for
@@ -1088,17 +1061,22 @@ esac
 CPPFLAGS="$H5_CPPFLAGS $AM_CPPFLAGS $CPPFLAGS"
 CFLAGS="$H5_CFLAGS $AM_CFLAGS $CFLAGS"
 
-AC_TRY_COMPILE([#include <sys/types.h>],
-               [off64_t n = 0;],
-               [AC_CHECK_FUNCS([lseek64 fseeko64 ftello64 ftruncate64])],
-               [AC_MSG_RESULT([skipping test for lseek64(), fseeko64 , ftello64, ftruncate64() because off64_t is not defined])])
-AC_CHECK_FUNCS([fseeko ftello])
-AC_TRY_COMPILE([
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
-#include <sys/stat.h>],
-[struct stat64 sb;],
+]],
+    [[off64_t n = 0;]])],
+    [AC_CHECK_FUNCS([lseek64 fseeko64 ftello64 ftruncate64])],
+    [AC_MSG_RESULT([skipping test for lseek64, fseeko64 , ftello64, ftruncate64 because off64_t is not defined])])
+
+AC_CHECK_FUNCS([fseeko ftello])
+
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/types.h>
+#include <sys/stat.h>
+]],
+[[struct stat64 sb;]])],
 [AC_CHECK_FUNCS([stat64 fstat64])],
-[AC_MSG_RESULT([skipping test for stat64() and fstat64()])])
+[AC_MSG_RESULT([skipping test for stat64 and fstat64])])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
@@ -1159,17 +1137,16 @@ AC_CACHE_SAVE
 ## Check if the dev_t type is a scalar type (must come after the check for
 ## sys/types.h)
 AC_MSG_CHECKING([if dev_t is scalar])
-AC_TRY_COMPILE([
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-  ],
-  [dev_t d1, d2; if(d1==d2) return 0;],
-  AC_DEFINE([DEV_T_IS_SCALAR], [1],
-            [Define if `dev_t' is a scalar])
-  AC_MSG_RESULT([yes]),
-  AC_MSG_RESULT([no])
-)
+  ]],
+  [[dev_t d1, d2; if(d1==d2) return 0;]])],
+  [AC_DEFINE([DEV_T_IS_SCALAR], [1],
+            [Define if dev_t is a scalar])
+  AC_MSG_RESULT([yes])],
+  [AC_MSG_RESULT([no])])
 
 ## ----------------------------------------------------------------------
 ## Fake --with-xxx option to allow us to create a help message for the
@@ -1663,11 +1640,12 @@ AC_CHECK_DECL([CLOCK_MONOTONIC],[have_clock_monotonic="yes"],[have_clock_monoton
 
 ## First check if `struct tm' has a `tm_gmtoff' member.
 AC_MSG_CHECKING([for tm_gmtoff in struct tm])
-AC_TRY_COMPILE([
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
   #include <sys/time.h>
-  #include <time.h>], [struct tm tm; tm.tm_gmtoff=0;],
+  #include <time.h>
+]], [[struct tm tm; tm.tm_gmtoff=0;]])],
   [AC_DEFINE([HAVE_TM_GMTOFF], [1],
-          [Define if `tm_gmtoff' is a member of `struct tm'])
+          [Define if tm_gmtoff is a member of struct tm])
     AC_MSG_RESULT([yes])],
   [AC_MSG_RESULT([no])])
 
@@ -1679,11 +1657,11 @@ case "`uname`" in
     AC_MSG_RESULT([disabled in CYGWIN])
     ;;
   *)
-    AC_TRY_LINK([
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
     #include <sys/time.h>
-    #include <time.h>], [timezone=0;],
+    #include <time.h>]], [[timezone=0;]])],
     [AC_DEFINE([HAVE_TIMEZONE], [1],
-              [Define if `timezone' is a global variable])
+              [Define if timezone is a global variable])
       AC_MSG_RESULT([yes])],
     [AC_MSG_RESULT([no])])
     ;;
@@ -1694,10 +1672,10 @@ esac
 ## Does the struct stat have the st_blocks field?  This field is not Posix.
 ##
 AC_MSG_CHECKING([for st_blocks in struct stat])
-AC_TRY_COMPILE([
-  #include <sys/stat.h>],[struct stat sb; sb.st_blocks=0;],
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM[[
+  #include <sys/stat.h>]],[[struct stat sb; sb.st_blocks=0;]])],
   [AC_DEFINE([HAVE_STAT_ST_BLOCKS], [1],
-          [Define if `struct stat' has the `st_blocks' field])
+          [Define if struct stat has the st_blocks field])
     AC_MSG_RESULT([yes])],
   [AC_MSG_RESULT([no])])
 
@@ -1715,28 +1693,32 @@ esac
 AC_CHECK_FUNCS([_scrsize ioctl])
 
 AC_MSG_CHECKING([for struct videoconfig])
-AC_TRY_COMPILE(,[struct videoconfig w; w.numtextcols=0;],
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[struct videoconfig w; w.numtextcols=0;]])],
   [AC_DEFINE([HAVE_STRUCT_VIDEOCONFIG], [1],
-          [Define if `struct videoconfig' is defined])
+          [Define if struct videoconfig is defined])
     AC_MSG_RESULT([yes])],
   [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING([for struct text_info])
-AC_TRY_COMPILE(, [struct text_info w; w.screenwidth=0;],
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[struct text_info w; w.screenwidth=0;]])],
   [AC_DEFINE([HAVE_STRUCT_TEXT_INFO], [1],
-          [Define if `struct text_info' is defined])
+          [Define if struct text_info is defined])
     AC_MSG_RESULT([yes])],
   [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING([for TIOCGWINSZ])
-AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGWINSZ;],
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/ioctl.h>
+]],[[int w=TIOCGWINSZ;]])],
   [AC_DEFINE([HAVE_TIOCGWINSZ], [1],
           [Define if the ioctl TIOGWINSZ is defined])
     AC_MSG_RESULT([yes])],
   [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING([for TIOCGETD])
-AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGETD;],
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/ioctl.h>
+]],[[int w=TIOCGETD;]])],
   [AC_DEFINE([HAVE_TIOCGETD], [1],
           [Define if the ioctl TIOCGETD is defined])
     AC_MSG_RESULT([yes])],
@@ -1783,26 +1765,26 @@ AC_COMPILE_IFELSE(
 )
 
 AC_MSG_CHECKING([for __attribute__ extension])
-AC_TRY_COMPILE(,[int __attribute__((unused)) x],
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                [AC_DEFINE([HAVE_ATTRIBUTE], [1],
                          [Define if the __attribute__(()) extension is present])
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING([for __func__ extension])
-AC_TRY_COMPILE(,[ const char *fname = __func__; ],
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[ const char *fname = __func__; ]])],
                [AC_DEFINE([HAVE_C99_FUNC], [1],
                          [Define if the compiler understands the __func__ keyword])
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
 AC_MSG_CHECKING([for __FUNCTION__ extension])
-AC_TRY_COMPILE(,[ const char *fname = __FUNCTION__; ],
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],,[[ const char *fname = __FUNCTION__; ]])],
                [AC_DEFINE([HAVE_FUNCTION], [1],
                          [Define if the compiler understands the __FUNCTION__ keyword])
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
 AC_MSG_CHECKING([for C99 designated initialization support])
-AC_TRY_COMPILE(,[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
                 typedef struct {
                     int x;
                     union {
@@ -1810,7 +1792,7 @@ AC_TRY_COMPILE(,[
                         double d;
                     } u;
                 } di_struct_t;
-                di_struct_t x = {0, { .d = 0.0}}; ],
+                di_struct_t x = {0, { .d = 0.0}}; ]])], 
                [AC_DEFINE([HAVE_C99_DESIGNATED_INITIALIZER], [1],
                          [Define if the compiler understands C99 designated initialization of structs and unions])
                  AC_MSG_RESULT([yes])],
@@ -2172,21 +2154,23 @@ if test -n "$PARALLEL"; then
     ADD_PARALLEL_FILES="yes"
     AC_MSG_CHECKING([for MPI_Comm_c2f and MPI_Comm_f2c functions])
 
-    AC_TRY_LINK([#include <mpi.h>],
-      [MPI_Comm c_comm; MPI_Comm_c2f(c_comm)],
-      AC_DEFINE([HAVE_MPI_MULTI_LANG_Comm], [1],
-                [Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists])
-      AC_MSG_RESULT([yes]),
-      AC_MSG_RESULT([no])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+    #include <mpi.h>
+    ]],
+      [[MPI_Comm c_comm; MPI_Comm_c2f(c_comm)]])],
+      [AC_DEFINE([HAVE_MPI_MULTI_LANG_Comm], [1],
+                 [Define if MPI_Comm_c2f and MPI_Comm_f2c exist])
+                 AC_MSG_RESULT([yes])],
+                 [AC_MSG_RESULT([no])]
     )
 
     AC_MSG_CHECKING([for MPI_Info_c2f and MPI_Info_f2c functions])
-    AC_TRY_LINK([#include <mpi.h>],
-      [MPI_Info c_info; MPI_Info_c2f(c_info)],
-      AC_DEFINE([HAVE_MPI_MULTI_LANG_Info], [1],
-                [Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists])
-      AC_MSG_RESULT([yes]),
-      AC_MSG_RESULT([no])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <mpi.h>]],
+      [[MPI_Info c_info; MPI_Info_c2f(c_info)]])],
+      [AC_DEFINE([HAVE_MPI_MULTI_LANG_Info], [1],
+                [Define if MPI_Info_c2f and MPI_Info_f2c exist])
+                AC_MSG_RESULT([yes])],
+                [AC_MSG_RESULT([no])]
     )
   fi
 
@@ -2257,10 +2241,9 @@ fi
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
-
-## Check these regardless. If the checks are moved inside the main
-## direct VFD block, the output is nested.
-
+## ----------------------------------------------------------------------
+## Check if Direct I/O driver is enabled by --enable-direct-vfd
+##
 AC_CACHE_VAL([hdf5_cv_direct_io],
     AC_CHECK_DECL([O_DIRECT], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no], [[#include <fcntl.h>]]))
 AC_CACHE_VAL([hdf5_cv_posix_memalign],
@@ -2554,7 +2537,7 @@ if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_cv_ldouble_to_llong_accurate=${hdf5_cv_ldouble_to_llong_accurate=no}
 else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_llong_accurate],
-        [AC_TRY_RUN([
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([[
         int main(void)
         {
             long double         ld = 20041683600089727.779961L;
@@ -2591,7 +2574,7 @@ else
     done:
             exit(ret);
         }
-        ], [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no],)])
+        ]])], [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no],[])])
 fi
 
 if test ${hdf5_cv_ldouble_to_llong_accurate} = "yes"; then
@@ -2617,7 +2600,7 @@ if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_cv_llong_to_ldouble_correct=${hdf5_cv_llong_to_ldouble_correct=no}
 else
    AC_CACHE_VAL([hdf5_cv_llong_to_ldouble_correct],
-        [AC_TRY_RUN([
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([[
         int main(void)
         {
             long double         ld;
@@ -2658,7 +2641,7 @@ else
     done:
             exit(ret);
         }
-        ], [hdf5_cv_llong_to_ldouble_correct=yes], [hdf5_cv_llong_to_ldouble_correct=no],)])
+        ]])],[hdf5_cv_llong_to_ldouble_correct=yes], [hdf5_cv_llong_to_ldouble_correct=no],[])]) 
 fi
 
 if test ${hdf5_cv_llong_to_ldouble_correct} = "yes"; then

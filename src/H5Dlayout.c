@@ -273,7 +273,6 @@ H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
             } /* end if */
 
             /* Store EFL file name offset */
-            HDassert(0 == efl->slot[u].name_offset);
             efl->slot[u].name_offset = offset;
         } /* end for */
 
@@ -295,12 +294,11 @@ H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
 
 done:
     /* Error cleanup */
-    if(ret_value < 0) {
-        if(dset->shared->layout.type == H5D_CHUNKED && layout_init) {
-            if(H5D__chunk_dest(file, dxpl_id, dset) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
-        } /* end if */
-    } /* end if */
+    if(ret_value < 0)
+        if(layout_init)
+            /* Destroy any cached layout information for the dataset */
+            if(dset->shared->layout.ops->dest && (dset->shared->layout.ops->dest)(dset, dxpl_id) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D__layout_oh_create() */
@@ -372,6 +370,10 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
     /* Sanity check that the layout operations are set up */
     HDassert(dataset->shared->layout.ops);
 
+    /* Initialize the layout information for the dataset */
+    if(dataset->shared->layout.ops->init && (dataset->shared->layout.ops->init)(dataset->oloc.file, dxpl_id, dataset, dapl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize layout information")
+
     /* Adjust chunk dimensions to omit datatype size (in last dimension) for creation property */
     if(H5D_CHUNKED == dataset->shared->layout.type)
         dataset->shared->layout.u.chunk.ndims--;
@@ -381,10 +383,6 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
     /* Adjust chunk dimensions back again (*sigh*) */
     if(H5D_CHUNKED == dataset->shared->layout.type)
         dataset->shared->layout.u.chunk.ndims++;
-
-    /* Initialize the layout information for the dataset */
-    if(dataset->shared->layout.ops->init && (dataset->shared->layout.ops->init)(dataset->oloc.file, dxpl_id, dataset, dapl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize layout information")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -265,7 +265,6 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t msize, hid_t memb_fapl_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ihi", fapl_id, msize, memb_fapl_id);
 
-
     /* Check arguments */
     if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
@@ -275,16 +274,13 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t msize, hid_t memb_fapl_id)
         if(TRUE != H5P_isa_class(memb_fapl_id, H5P_FILE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
 
-    /*
-     * Initialize driver specific information. No need to copy it into the FA
-     * struct since all members will be copied by H5P_set_driver().
-     */
+    /* Initialize driver specific information. */
     fa.memb_size = msize;
     fa.memb_fapl_id = memb_fapl_id;
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    ret_value= H5P_set_driver(plist, H5FD_FAMILY, &fa);
+    ret_value = H5P_set_driver(plist, H5FD_FAMILY, &fa);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -314,21 +310,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_family(hid_t fapl_id, hsize_t *msize/*out*/,
-		   hid_t *memb_fapl_id/*out*/)
+H5Pget_fapl_family(hid_t fapl_id, hsize_t *msize/*out*/, hid_t *memb_fapl_id/*out*/)
 {
-    H5FD_family_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    const H5FD_family_fapl_t	*fa;
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, msize, memb_fapl_id);
 
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
-    if(H5FD_FAMILY != H5P_get_driver(plist))
+    if(H5FD_FAMILY != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
-    if(NULL == (fa = (H5FD_family_fapl_t *)H5P_get_driver_info(plist)))
+    if(NULL == (fa = (const H5FD_family_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
     if(msize)
         *msize = fa->memb_size;
@@ -587,12 +582,8 @@ H5FD_family_sb_decode(H5FD_t *_file, const char H5_ATTR_UNUSED *name, const unsi
            file->pmem_size = msize;
 
         /* Check if member size from file access property is correct */
-        if(msize != file->pmem_size) {
-            char err_msg[128];
-
-            HDsnprintf(err_msg, sizeof(err_msg), "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
-        } /* end if */
+        if(msize != file->pmem_size)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size)
 
         /* Update member file size to the size saved in the superblock.
          * That's the size intended to be. */
@@ -618,23 +609,6 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *              Raymond Lu
- *              Thursday, November 18, 2004
- *              When file is re-opened, member size passed in from access property
- *              is checked to see if it's reasonable.  If there is only 1 member
- *              file, member size can't be smaller than current member size.
- *              If there are at least 2 member files, member size can only be equal
- *              the 1st member size.
- *
- *              Raymond Lu
- *              Tuesday, May 24, 2005
- *              The modification described above has been changed.  The major checking
- *              is done in H5F_read_superblock.  Member file size is saved in the
- *              superblock now.  H5F_read_superblock() reads this saved size and compare
- *              to the size passed in from file access property.  Wrong size will
- *              result in a failure.
- *
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -658,7 +632,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Initialize file from file access properties */
     if(NULL == (file = (H5FD_family_t *)H5MM_calloc(sizeof(H5FD_family_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
-    if(H5P_FILE_ACCESS_DEFAULT==fapl_id) {
+    if(H5P_FILE_ACCESS_DEFAULT == fapl_id) {
         file->memb_fapl_id = H5P_FILE_ACCESS_DEFAULT;
         if(H5I_inc_ref(file->memb_fapl_id, FALSE) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver")
@@ -668,11 +642,11 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     } /* end if */
     else {
         H5P_genplist_t      *plist;      /* Property list pointer */
-        H5FD_family_fapl_t *fa;
+        const H5FD_family_fapl_t *fa;
 
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-        if(NULL == (fa = (H5FD_family_fapl_t *)H5P_get_driver_info(plist)))
+        if(NULL == (fa = (const H5FD_family_fapl_t *)H5P_peek_driver_info(plist)))
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
 
         /* Check for new family file size. It's used by h5repart only. */
@@ -685,8 +659,8 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
             file->repart_members = TRUE;
         } /* end if */
 
-        if(fa->memb_fapl_id==H5P_FILE_ACCESS_DEFAULT) {
-            if(H5I_inc_ref(fa->memb_fapl_id, FALSE)<0)
+        if(fa->memb_fapl_id == H5P_FILE_ACCESS_DEFAULT) {
+            if(H5I_inc_ref(fa->memb_fapl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver")
             file->memb_fapl_id = fa->memb_fapl_id;
         } /* end if */

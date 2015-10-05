@@ -25,7 +25,7 @@
 
 /* Define atomic datatypes */
 #define H5S_ALL         (hid_t)0
-#define H5S_UNLIMITED	((hsize_t)(hssize_t)(-1))
+#define H5S_UNLIMITED   HSIZE_UNDEF
 
 /* Define user-level maximum number of dimensions */
 #define H5S_MAX_RANK    32

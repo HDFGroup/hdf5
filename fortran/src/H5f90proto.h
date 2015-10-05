@@ -196,6 +196,8 @@ H5_FCDLL int_f h5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f 
 
 H5_FCDLL int_f h5awrite_f_c(hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf);
 H5_FCDLL int_f h5aread_f_c(hid_t_f *attr_id, hid_t_f *mem_type_id, void *buf);
+H5_FCDLL int_f h5acreate_c(hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *type_id,
+                        hid_t_f *space_id, hid_t_f *crt_prp, hid_t_f *aapl, hid_t_f *attr_id);
 H5_FCDLL int_f h5adelete_c(hid_t_f *obj_id, _fcd name, size_t_f *namelen);
 H5_FCDLL int_f h5aget_num_attrs_c(hid_t_f *obj_id, int_f *attr_num);
 H5_FCDLL int_f h5aget_name_c(hid_t_f *attr_id, size_t_f *size, _fcd buf);

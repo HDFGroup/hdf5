@@ -30,8 +30,6 @@
 #define H5R_FRIEND		/*suppress error about including H5Rpkg	  */
 #define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5VL_native_init_interface
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"             /* Attribute pkg                        */
@@ -213,12 +211,18 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5VL_native_init_interface(void)
+H5VL__init_package(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    H5VL_native_init();
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5VL_native_init_interface() */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    if(H5VL_native_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize Native VOL")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -238,7 +242,7 @@ H5VL_native_init_interface(void)
 hid_t
 H5VL_native_init(void)
 {
-    hid_t ret_value = FAIL;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -255,6 +259,27 @@ H5VL_native_init(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_init() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VL__native_term
+ *
+ * Purpose:     Shut down the native VOL
+ *
+ * Returns:     SUCCEED (Can't fail)
+ *
+ *---------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__native_term(void)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Reset VFL ID */
+    H5VL_NATIVE_g = 0;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__native_term() */
 
 
 /*---------------------------------------------------------------------------

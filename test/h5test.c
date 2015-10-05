@@ -127,75 +127,68 @@ h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
 /*-------------------------------------------------------------------------
  * Function:  h5_clean_files
  *
- * Purpose:  Cleanup temporary test files.
+ * Purpose:  Cleanup temporary test files (always).
  *    base_name contains the list of test file names.
- *    The file access property list is also closed.
  *
- * Return:  Non-zero if cleanup actions were performed; zero otherwise.
+ * Return:  void
  *
- * Programmer:  Quincey Koziol
- *              September 13, 2015
+ * Programmer:  Neil Fortner
+ *              June 1, 2015
  *
  *-------------------------------------------------------------------------
  */
-int
+void
 h5_clean_files(const char *base_name[], hid_t fapl)
 {
-    int    retval = 0;
+    int i;
 
-    if(GetTestCleanup()) {
-        int i;
+    for(i = 0; base_name[i]; i++) {
+        char filename[1024];
+        char temp[2048];
+        hid_t driver;
 
-        for(i = 0; base_name[i]; i++) {
-            char filename[1024];
-            char temp[2048];
-            hid_t driver;
+        if(NULL == h5_fixname(base_name[i], fapl, filename, sizeof(filename)))
+            continue;
 
-            if(NULL == h5_fixname(base_name[i], fapl, filename, sizeof(filename)))
-                continue;
+        driver = H5Pget_driver(fapl);
 
-            driver = H5Pget_driver(fapl);
+        if(driver == H5FD_FAMILY) {
+            int j;
 
-            if(driver == H5FD_FAMILY) {
-                int j;
+            for(j = 0; /*void*/; j++) {
+                HDsnprintf(temp, sizeof temp, filename, j);
 
-                for(j = 0; /*void*/; j++) {
-                    HDsnprintf(temp, sizeof temp, filename, j);
+                if(HDaccess(temp, F_OK) < 0)
+                    break;
 
-                    if(HDaccess(temp, F_OK) < 0)
-                        break;
+                HDremove(temp);
+            } /* end for */
+        } else if(driver == H5FD_CORE) {
+            hbool_t backing;        /* Whether the core file has backing store */
 
-                    HDremove(temp);
-                } /* end for */
-            } else if(driver == H5FD_CORE) {
-                hbool_t backing;        /* Whether the core file has backing store */
+            H5Pget_fapl_core(fapl, NULL, &backing);
 
-                H5Pget_fapl_core(fapl, NULL, &backing);
-
-                /* If the file was stored to disk with bacing store, remove it */
-                if(backing)
-                    HDremove(filename);
-            } else if (driver == H5FD_MULTI) {
-                H5FD_mem_t mt;
-
-                HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-
-                for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
-                    HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
-                    HDremove(temp); /*don't care if it fails*/
-                } /* end for */
-            } else {
+            /* If the file was stored to disk with bacing store, remove it */
+            if(backing)
                 HDremove(filename);
-            }
-        } /* end for */
+        } else if (driver == H5FD_MULTI) {
+            H5FD_mem_t mt;
 
-        retval = 1;
-    } /* end if */
+            HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+                HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
+                HDremove(temp); /*don't care if it fails*/
+            } /* end for */
+        } else {
+            HDremove(filename);
+        }
+    } /* end for */
 
     /* Close the FAPL used to access the file */
     H5Pclose(fapl);
 
-    return retval;
+    return;
 } /* end h5_clean_files() */
 
 
@@ -218,8 +211,12 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 {
     int    retval = 0;
 
-    /* Clean up the files and the FAPL */
-    retval = h5_clean_files(base_name, fapl);
+    if(GetTestCleanup()) {
+        /* Clean up files in base_name, and the FAPL */
+        h5_clean_files(base_name, fapl);
+
+        retval = 1;
+    } /* end if */
 
     /* Restore the original error reporting routine */
     h5_restore_err();

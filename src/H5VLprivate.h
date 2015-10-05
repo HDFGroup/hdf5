@@ -46,7 +46,11 @@ typedef struct H5VL_object_t {
     H5VL_t             *vol_info;       /* pointer to VOL info struct */
 } H5VL_object_t;
 
-
+/* Define structure to hold plugin ID & info for FAPLs */
+typedef struct {
+    hid_t plugin_id;            /* VOL plugin's ID */
+    const void *plugin_info;    /* VOL plugin info, for open callbacks */
+} H5VL_plugin_prop_t;
 
 /*****************************/
 /* Library Private Variables */
@@ -133,10 +137,6 @@ H5_DLL herr_t H5VL_object_optional(void *obj, const H5VL_class_t *vol_cls, hid_t
 H5_DLL herr_t H5VL_request_cancel(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status);
 H5_DLL herr_t H5VL_request_test(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status);
 H5_DLL herr_t H5VL_request_wait(void **req, const H5VL_class_t *vol_cls, H5ES_status_t *status);
-
-H5_DLL herr_t H5VL_fapl_open(struct H5P_genplist_t *plist, hid_t vol_id, const void *vol_info);
-H5_DLL herr_t H5VL_fapl_copy(hid_t vol_id, const void *vol_info, void **copied_info);
-H5_DLL herr_t H5VL_fapl_close(hid_t vol_id, void *vol_info);
 
 H5_DLL herr_t H5F_close_file(void *file);
 H5_DLL herr_t H5A_close_attr(void *attr);

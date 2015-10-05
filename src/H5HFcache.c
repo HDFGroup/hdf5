@@ -1924,7 +1924,7 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
     H5HF_hdr_t          *hdr;           /* Shared fractal heap information */
     H5HF_direct_t       *dblock = (H5HF_direct_t *)_thing;      /* Direct block info */
     H5HF_indirect_t 	*par_iblock;    /* Parent indirect block */
-    unsigned		 par_entry;     /* Entry in parent indirect block */
+    unsigned		 par_entry = 0;     /* Entry in parent indirect block */
     void 		*write_buf;     /* Pointer to buffer to write out */
     size_t 		 write_size;    /* Size of buffer to write out */
     uint8_t 		*image;         /* Pointer into raw data buffer */
@@ -2224,6 +2224,7 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
             else { /* the direct block's parent is an indirect block */
                 /* Sanity check */
                 HDassert(par_iblock);
+                HDassert(par_iblock->ents);
                 HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, addr));
 
                 /* Allocate 'normal' space for the direct block */

@@ -112,21 +112,23 @@ H5_DLL herr_t H5P_init(void);
 H5_DLL herr_t H5P_close(void *_plist);
 H5_DLL hid_t H5P_create_id(H5P_genclass_t *pclass, hbool_t app_ref);
 H5_DLL hid_t H5P_copy_plist(const H5P_genplist_t *old_plist, hbool_t app_ref);
-H5_DLL herr_t H5P_get(const H5P_genplist_t *plist, const char *name, void *value);
+H5_DLL herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value);
 H5_DLL herr_t H5P_set(H5P_genplist_t *plist, const char *name, const void *value);
+H5_DLL herr_t H5P_peek(H5P_genplist_t *plist, const char *name, void *value);
+H5_DLL herr_t H5P_poke(H5P_genplist_t *plist, const char *name, const void *value);
 H5_DLL herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
     H5P_prp_encode_func_t prp_encode, H5P_prp_decode_func_t prp_decode,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
     H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close);
-H5_DLL herr_t H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name);
+H5_DLL herr_t H5P_remove(H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_exist_plist(const H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_class_isa(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2);
 H5_DLL char *H5P_get_class_name(H5P_genclass_t *pclass);
 H5_DLL herr_t H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops,
     hbool_t recurse);
-H5_DLL hid_t H5P_get_driver(H5P_genplist_t *plist);
-H5_DLL void * H5P_get_driver_info(H5P_genplist_t *plist);
+H5_DLL hid_t H5P_peek_driver(H5P_genplist_t *plist);
+H5_DLL const void *H5P_peek_driver_info(H5P_genplist_t *plist);
 H5_DLL herr_t H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id,
             const void *new_driver_info);
 H5_DLL herr_t H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info);

@@ -131,7 +131,7 @@ typedef htri_t (*H5S_sel_is_valid_func_t)(const H5S_t *space);
 typedef hssize_t (*H5S_sel_serial_size_func_t)(const H5S_t *space);
 /* Method to store current selection in "serialized" form (a byte sequence suitable for storing on disk) */
 typedef herr_t (*H5S_sel_serialize_func_t)(const H5S_t *space, uint8_t **p);
-/* Method to store create selection from "serialized" form (a byte sequence suitable for storing on disk) */
+/* Method to create selection from "serialized" form (a byte sequence suitable for storing on disk) */
 typedef herr_t (*H5S_sel_deserialize_func_t)(H5S_t *space, const uint8_t **p);
 /* Method to determine smallest n-D bounding box containing the current selection */
 typedef herr_t (*H5S_sel_bounds_func_t)(const H5S_t *space, hsize_t *start, hsize_t *end);
@@ -245,7 +245,7 @@ H5_DLLVAR const H5S_select_class_t H5S_sel_point[1];
 
 /* Extent functions */
 H5_DLL herr_t H5S_extent_release(H5S_extent_t *extent);
-H5_DLL herr_t H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src,
+H5_DLL herr_t H5S_extent_copy_real(H5S_extent_t *dst, const H5S_extent_t *src,
     hbool_t copy_max);
 
 /* Operations on selections */

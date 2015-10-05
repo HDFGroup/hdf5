@@ -220,143 +220,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_fapl_open
- *
- * Purpose:	Mark a vol as used by a file access property list
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              January, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_fapl_open(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
-{
-    void  *copied_vol_info = NULL;     /* Temporary VOL driver info */
-    herr_t ret_value = SUCCEED;        /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* increment the refcount on the plugin id */
-    if(H5I_inc_ref(vol_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
-    if(H5VL_fapl_copy(vol_id, vol_info, &copied_vol_info) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "can't copy VOL plugin info")
-
-    /* Set the vol properties for the list */
-    if(H5P_set(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol ID")
-    if(H5P_set(plist, H5F_ACS_VOL_INFO_NAME, &copied_vol_info) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol info")
-    copied_vol_info = NULL;
-
-done:
-    if(ret_value < 0)
-        if(copied_vol_info && H5VL_fapl_close(vol_id, copied_vol_info) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close copy of driver info")
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_fapl_open() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_fapl_copy
- *
- * Purpose:	copies plugin specific info to the fapl
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              July, 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_fapl_copy(hid_t vol_id, const void *vol_info, void **copied_info)
-{
-    H5VL_class_t *vol_cls;
-    void *new_info = NULL;
-    herr_t ret_value = SUCCEED;        /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object(vol_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL ID")
-
-    /* Copy old pl, if one exists */
-    if(vol_info) {
-        /* Allow the driver to copy or do it ourselves */
-        if(vol_cls->fapl_copy) {
-            new_info = (vol_cls->fapl_copy)(vol_info);
-            if(NULL == new_info)
-                HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "property list copy failed")
-        } 
-        else if(vol_cls->fapl_size > 0) {
-            if(NULL == (new_info = H5MM_malloc(vol_cls->fapl_size)))
-                HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "property list allocation failed")
-            HDmemcpy(new_info, vol_info, vol_cls->fapl_size);
-        } else
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "no way to copy plugin property list")
-    } /* end if */
-
-    /* Set copied value */
-    *copied_info = new_info;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_fapl_copy() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_fapl_close
- *
- * Purpose:	Closes a vol for a property list
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Mohamad Chaarawi
- *              January, 2012
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5VL_fapl_close(hid_t vol_id, void *vol_info)
-{
-    H5VL_class_t *vol_cls;
-    herr_t       ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(vol_id > 0) {
-        if(NULL == (vol_cls = (H5VL_class_t *)H5I_object(vol_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL ID")
-
-        /* Allow driver to free or do it ourselves */
-        if(vol_info && vol_cls->fapl_free) {
-            if((vol_cls->fapl_free)(vol_info) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "plugin free request failed")
-        } /* end if */
-        else
-            H5MM_xfree(vol_info);
-
-        /* Decrement reference count for plugin */
-        if(H5I_dec_ref(vol_id) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't decrement reference count for plugin")
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_fapl_close() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5VL_get_plugin_name
  *
  * Purpose:	Private version of H5VLget_plugin_name
@@ -1530,7 +1393,7 @@ H5VL_file_specific(void *file, const H5VL_class_t *vol_cls, H5VL_file_specific_t
 
     if(specific_type == H5VL_FILE_IS_ACCESSIBLE) {
         H5P_genplist_t     *plist;          /* Property list pointer */
-        hid_t               vol_id;         /* VOL plugin identigier attached to fapl_id */
+        H5VL_plugin_prop_t  plugin_prop;    /* Property for vol plugin ID & info */
         va_list             tmp_args;       /* argument list passed from the API call */
         hid_t               fapl_id;
 
@@ -1541,11 +1404,12 @@ H5VL_file_specific(void *file, const H5VL_class_t *vol_cls, H5VL_file_specific_t
         /* get the VOL info from the fapl */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-        if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin")
 
-        if(NULL == (vol_cls = (H5VL_class_t *)H5I_object(vol_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL ID")
+        if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
+
+        if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
         va_start (arguments, req);
         if((ret_value = (vol_cls->file_cls.specific)

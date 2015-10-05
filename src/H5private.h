@@ -165,6 +165,9 @@
  */
 #define H5_DEFAULT_VFD      H5FD_SEC2
 
+/* Define the default VOL */
+#define H5_DEFAULT_VOL      H5VL_NATIVE
+
 #ifdef H5_HAVE_WIN32_API
 /* The following two defines must be before any windows headers are included */
 #define WIN32_LEAN_AND_MEAN    /* Exclude rarely-used stuff from Windows headers */
