@@ -352,6 +352,8 @@
 ./c++/src/H5Location.h
 ./c++/src/H5Object.cpp
 ./c++/src/H5Object.h
+./c++/src/H5OcreatProp.cpp
+./c++/src/H5OcreatProp.h
 ./c++/src/H5PredType.cpp
 ./c++/src/H5PredType.h
 ./c++/src/H5PropList.cpp
