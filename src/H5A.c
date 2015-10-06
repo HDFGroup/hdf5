@@ -714,6 +714,7 @@ hid_t
 H5Aget_space(hid_t attr_id)
 {
     H5VL_object_t *attr;
+    H5S_t      *ds = NULL;
     hid_t	ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -753,6 +754,7 @@ hid_t
 H5Aget_type(hid_t attr_id)
 {
     H5VL_object_t *attr;
+    H5T_t      *dt = NULL;
     hid_t	 ret_value;     /* Return value */
 
     FUNC_ENTER_API(FAIL)

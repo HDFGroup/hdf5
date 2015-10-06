@@ -734,11 +734,11 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
 /*-------------------------------------------------------------------------
  * Function:	H5A_get_space
  *
- * Purpose:	Returns and ID for the dataspace of the attribute.
+ * Purpose:	Returns dataspace of the attribute.
  *
- * Return:	Success:	ID for dataspace
+ * Return:	Success:	dataspace
  *
- *		Failure:	FAIL
+ *		Failure:	NULL
  *
  * Programmer:	Mohamad Chaarawi
  *		March, 2012
@@ -748,24 +748,23 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
 hid_t
 H5A_get_space(H5A_t *attr)
 {
-    H5S_t	*ds = NULL;
+    H5S_t      *ds = NULL;
     hid_t       ret_value = FAIL;
-
     FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(attr);
 
     /* Copy the attribute's dataspace */
     if(NULL == (ds = H5S_copy(attr->shared->ds, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy dataspace")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to copy dataspace")
 
     /* Atomize */
     if((ret_value = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
 
 done:
-    if(ret_value < 0 && ds) {
-        if(H5S_close(ds) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
-    } /* end if */
+    if(ret_value < 0 && ds && H5S_close(ds) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_space() */
@@ -774,11 +773,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5A_get_type
  *
- * Purpose:	Returns and ID for the datatype of the dataset.
+ * Purpose:	Returns datatype of the dataset.
  *
- * Return:	Success:	ID for datatype
+ * Return:	Success:	datatype
  *
- *		Failure:	FAIL
+ *		Failure:	NULL
  *
  * Programmer:	Mohamad Chaarawi
  *		March, 2012
@@ -788,14 +787,16 @@ done:
 hid_t
 H5A_get_type(H5A_t *attr)
 {
-    H5T_t	*dt = NULL;
-    hid_t       ret_value = FAIL;
+    H5T_t *dt = NULL;
+    hid_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    HDassert(attr);
+
     /* Patch the datatype's "top level" file pointer */
     if(H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to patch datatype's file pointer")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to patch datatype's file pointer")
 
     /*
      * Copy the attribute's datatype.  If the type is a named type then
@@ -803,15 +804,15 @@ H5A_get_type(H5A_t *attr)
      * read-only.
      */
     if(NULL == (dt = H5T_copy(attr->shared->dt, H5T_COPY_REOPEN)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy datatype")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to copy datatype")
 
     /* Mark any datatypes as being in memory now */
     if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
     /* Lock copied type */
     if(H5T_lock(dt, FALSE) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to lock transient datatype")
 
     if(H5T_is_named(dt)) {
         /* If this is a committed datatype, we need to recreate the
@@ -826,10 +827,8 @@ H5A_get_type(H5A_t *attr)
     }
 
 done:
-    if(ret_value < 0) {
-        if(dt && H5T_close(dt) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
-    } /* end if */
+    if(ret_value < 0 && dt && (H5T_close(dt) < 0))
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_type() */

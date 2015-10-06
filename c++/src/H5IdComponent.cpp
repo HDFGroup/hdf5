@@ -13,11 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
-#include <iostream>
-#endif
 #include <string>
 
 #include "H5Include.h"
@@ -31,11 +26,16 @@
 namespace H5 {
 #endif
 
+// This flag controls whether H5Library::initH5cpp has been called to register
+// terminating functions with atexit()
+bool IdComponent::H5cppinit = false;
+bool IdComponent::H5dontAtexit_called = false;
+
 //--------------------------------------------------------------------------
 // Function:	IdComponent overloaded constructor
-///\brief	Creates an IdComponent object using the id of an existing object.
-///\param	h5_id - IN: Id of an existing object
-///\exception	H5::DataTypeIException
+// Purpose	Creates an IdComponent object using the id of an existing object.
+// Param	h5_id - IN: Id of an existing object
+// Exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //
 // *** Deprecation warning ***
@@ -43,13 +43,9 @@ namespace H5 {
 // been moved to the sub-classes.  It will be removed in 1.10 release.  If its
 // removal does not raise any problems in 1.10, it will be removed from 1.8 in
 // subsequent releases.
+// - Removed from documentation in 1.8.16 -BMR (October 2015)
 //--------------------------------------------------------------------------
 IdComponent::IdComponent(const hid_t h5_id) {}
-
-//void IdComponent::p_setId(const hid_t new_id)
-//{
-    //p_setId(new_id);
-//}
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent copy constructor
@@ -296,7 +292,16 @@ H5std_string IdComponent::inMemFunc(const char* func_name) const
 ///\brief	Default constructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IdComponent::IdComponent() {}
+IdComponent::IdComponent()
+{
+    // initH5cpp will register the terminating functions with atexit().
+    // We only do this once.
+    if (!H5cppinit)
+    {
+        H5Library::getInstance()->initH5cpp();
+        H5cppinit = true;
+    }
+}
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::p_get_file_name (protected)

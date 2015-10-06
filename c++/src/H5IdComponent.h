@@ -31,6 +31,12 @@ class DataSpace;
 */
 class H5_DLLCPP IdComponent {
    public:
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+        static bool H5cppinit;
+	static bool H5dontAtexit_called;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
 	// Increment reference counter.
 	void incRefCount(const hid_t obj_id) const;
 	void incRefCount() const;

@@ -20,6 +20,7 @@
 #include "H5IdComponent.h"
 #include "H5PropList.h"
 #include "H5Object.h"
+#include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5FaccProp.h"

@@ -35,6 +35,14 @@ set (examples
     h5_elink_unix2win
     h5_shared_mesg
     h5_vol_external_log_native
+    h5_vds
+    h5_vds-exc
+    h5_vds-exclim
+    h5_vds-eiger
+    h5_vds-simpleIO
+    h5_vds-percival
+    h5_vds-percival-unlim
+    h5_vds-percival-unlim-maxmin
 )
 
 foreach (example ${examples})

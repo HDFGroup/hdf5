@@ -5403,3 +5403,24 @@ H5P_get_class(const H5P_genplist_t *plist)
     FUNC_LEAVE_NOAPI(plist->pclass)
 } /* end H5P_get_class() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P_ignore_cmp
+ *
+ * Purpose:        Callback routine to ignore comparing property values.
+ *
+ * Return:         zero
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 October, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5P_ignore_cmp(const void H5_ATTR_UNUSED *val1, const void H5_ATTR_UNUSED *val2,
+    size_t H5_ATTR_UNUSED size)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(0)
+} /* end H5P_ignore_cmp() */

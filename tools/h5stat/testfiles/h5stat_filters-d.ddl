@@ -18,6 +18,7 @@ Dataset layout information:
 	Dataset layout counts[COMPACT]: 1
 	Dataset layout counts[CONTIG]: 2
 	Dataset layout counts[CHUNKED]: 12
+	Dataset layout counts[VIRTUAL]: 0
 	Number of external files : 2
 Dataset filters information:
 	Number of datasets with:

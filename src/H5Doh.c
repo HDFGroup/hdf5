@@ -398,6 +398,17 @@ H5O__dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         if(H5D__chunk_bh_info(f, dxpl_id, &layout, &pline, &(bh_info->index_size)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
     } /* end if */
+    else if(layout.type == H5D_VIRTUAL
+            && (layout.storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF)) {
+        size_t virtual_heap_size;
+
+        /* Get size of global heap object for virtual dataset */
+        if(H5HG_get_obj_size(f, dxpl_id, &(layout.storage.u.virt.serial_list_hobjid), &virtual_heap_size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get global heap size for virtual dataset mapping")
+
+        /* Return heap size */
+        bh_info->heap_size = (hsize_t)virtual_heap_size;
+    } /* end if */
 
     /* Check for External File List message in the object header */
     if((exists = H5O_msg_exists_oh(oh, H5O_EFL_ID)) < 0)

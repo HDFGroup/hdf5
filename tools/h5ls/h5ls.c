@@ -1847,6 +1847,34 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                 } /* end if */
                 break;
 
+            case H5D_VIRTUAL:
+                {
+                    char dset_name[256];        /* Dataset name */
+                    size_t vmaps;
+
+                    H5Pget_virtual_count(dcpl, &vmaps);
+
+                    if (vmaps) {
+                        size_t next;
+                        ssize_t ssize_out;
+
+                        h5tools_str_append(&buffer, "    %-10s {%ld} Source {\n", "Maps:", vmaps);
+                        for (next = 0; next < (unsigned) vmaps; next++) {
+                            ssize_out = H5Pget_virtual_filename(dcpl, next, NULL, 0);
+                            H5Pget_virtual_filename(dcpl, next, f_name, sizeof(f_name));
+                            ssize_out = H5Pget_virtual_dsetname(dcpl, next, NULL, 0);
+                            H5Pget_virtual_dsetname(dcpl, next, dset_name, sizeof(dset_name));
+                            h5tools_str_append(&buffer, "    %-10s        ", " ");
+                            print_string(&buffer, f_name, TRUE);
+                            h5tools_str_append(&buffer, "   ");
+                            print_string(&buffer, dset_name, TRUE);
+                            h5tools_str_append(&buffer, "\n");
+                        }
+                        h5tools_str_append(&buffer, "     %-10s}\n", " ");
+                    }
+                }
+                break;
+
             case H5D_LAYOUT_ERROR:
             case H5D_NLAYOUTS:
             default:
