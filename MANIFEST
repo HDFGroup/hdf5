@@ -2364,3 +2364,7 @@
 ./tools/misc/CMakeTests.cmake
 ./tools/perform/CMakeLists.txt
 ./tools/perform/CMakeTests.cmake
+
+# CMake-specific User Scripts
+./config/cmake/scripts/CTestScript.cmake
+./config/cmake/scripts/HDF518config.cmake
