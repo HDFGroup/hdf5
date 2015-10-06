@@ -291,7 +291,7 @@ H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, doub
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_chunk_cache */
 
 
 /*-------------------------------------------------------------------------

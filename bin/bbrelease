@@ -269,7 +269,7 @@ if [ X$revmode = Xyes ]; then
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
     branch=`svn info | grep ^URL: | awk -F/ '{print $NF}'`
-    revision=`svn info | grep "Last Changed Rev:" | awk '{print $4}'`
+    revision=`svn info | grep "Revision:" | awk '{print $2}'`
     # Set version information to m.n.r-r$revision.
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-r$revision
