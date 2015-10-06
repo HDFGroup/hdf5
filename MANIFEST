@@ -32,7 +32,7 @@
 ./README.txt
 ./BRANCH.txt
 ./acsite.m4
-./autogen.sh           _DO_NOT_DISTRIBUTE_
+./autogen.sh         
 ./configure.ac
 
 ./bin/COPYING
