@@ -40,16 +40,17 @@ AM_INIT_AUTOMAKE([foreign])
 AM_SILENT_RULES([yes])
 
 ## AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
-## for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE
-## is *not* included here, these files will be rebuilt if out of date.
-## This is a problem because if users try to build on a machine with
+## for Makefiles, configure, src/H5config.h, etc. If AM_MAINTAINER_MODE
+## is enabled, these files will be rebuilt if out of date. This is a
+## problem because if users try to build on a machine with
 ## the wrong versions of autoconf and automake, these files will be
 ## rebuilt with the wrong versions and bad things can happen.
 ## Also, CVS doesn't preserve dependencies between timestamps, so
 ## Makefiles will often think rebuilding needs to occur when it doesn't.
-## Developers should './configure --enable-maintainer-mode' to turn on
-## rebuild rules.
-AM_MAINTAINER_MODE
+##
+## By default, it is enabled. Users can configure with
+## --disable-maintainer-mode to prevent running the autotools.
+AM_MAINTAINER_MODE([enable])
 
 ## ----------------------------------------------------------------------
 ## Set prefix default (install directory) to a directory in the build area.
@@ -823,8 +824,6 @@ LT_PREREQ([2.2])
 ## win32-dll - This will build clean dlls on win32 platforms.
 LT_INIT([dlopen,win32-dll])
 
-
-
 ## ----------------------------------------------------------------------
 ## Check if we should install only statically linked executables.
 ##   This check needs to occur after libtool is initialized because
@@ -889,32 +888,6 @@ case "X-$RPATH" in
     AC_MSG_ERROR([\'$enableval\' is not a valid rpath type])
     ;;
 esac
-
-## ----------------------------------------------------------------------
-## pmake will throw an error if variables are undefined in a Makefile.
-## These errors can be changed to warnings using the -V flag.
-##
-AC_SUBST([AM_MAKEFLAGS]) AM_MAKEFLAGS=""
-
-## Don't run test if MAKE is defined but is the empty string
-if test -n "${MAKE-make}"; then
-
-  AC_MSG_CHECKING([whether make will build with undefined variables])
-
-  cat >maketest <<EOF
-foo: \$(UNDEFINED) \$(UNDEFINED2)
-	@echo \$(UNDEFINED3) works
-EOF
-
-  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no, setting -V flag])
-    AM_MAKEFLAGS="\-V"
-  fi
-
-  rm maketest
-fi
 
 ## ----------------------------------------------------------------------
 ## Production flags?  Save the value in $CONFIG_MODE so we have it for
@@ -2257,10 +2230,9 @@ fi
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
-
-## Check these regardless. If the checks are moved inside the main
-## direct VFD block, the output is nested.
-
+## ----------------------------------------------------------------------
+## Check if Direct I/O driver is enabled by --enable-direct-vfd
+##
 AC_CACHE_VAL([hdf5_cv_direct_io],
     AC_CHECK_DECL([O_DIRECT], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no], [[#include <fcntl.h>]]))
 AC_CACHE_VAL([hdf5_cv_posix_memalign],

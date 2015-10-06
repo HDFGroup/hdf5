@@ -73,21 +73,23 @@ endif (HDF5_GENERATE_HEADERS)
 # List Source files
 #-----------------------------------------------------------------------------
 set (HL_SRCS
+    ${HL_SRCS}
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DO.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DS.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5IM.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5LT.c
-    ${HDF5_HL_SRC_SOURCE_DIR}/H5LTanalyze.c
-    ${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.c
+    #${HDF5_HL_SRC_SOURCE_DIR}/H5LTanalyze.c
+    #${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5PT.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5TB.c
 )
 
 set (HL_HEADERS
+    ${HL_HEADERS}
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DOpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DSpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5IMpublic.h
-    ${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.h
+    #${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5LTpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5PTpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5TBpublic.h
@@ -131,7 +133,7 @@ if (BUILD_SHARED_LIBS)
 endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
-# Add file(s) to CMake Install 
+# Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 install (
     FILES
@@ -149,7 +151,7 @@ if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_HL_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hllibraries)
   endif (BUILD_SHARED_LIBS)
-  
+
   install (
       TARGETS
           ${install_targets}
