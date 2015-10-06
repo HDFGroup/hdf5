@@ -24,8 +24,8 @@ namespace H5 {
 //! Class PropList provides operations for generic property lists.
 class H5_DLLCPP PropList : public IdComponent {
    public:
-	// Default property list
-        static const PropList DEFAULT;
+	///\brief Default property list
+        static const PropList& DEFAULT;
 
 	// Creates a property list of a given type or creates a copy of an
 	// existing property list giving the property list id.
@@ -110,12 +110,23 @@ class H5_DLLCPP PropList : public IdComponent {
 	// Destructor: properly terminates access to this property list.
 	virtual ~PropList();
 
-   protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+	// Deletes the PropList global constant
+	static void deleteConstants();
+
+    protected:
 	hid_t id;	// HDF5 property list id
 
 	// Sets the property list id.
 	virtual void p_setId(const hid_t new_id);
+
+    private:
+	static PropList* DEFAULT_;
+
+	// Dynamically allocates the PropList global constant
+	static PropList* getConstant();
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 

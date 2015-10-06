@@ -689,7 +689,9 @@ herr_t
 H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
         void *operator_data)
 {
+    H5T_t *type;                /* Datatype */
     H5S_t *space;               /* Dataspace for iteration */
+    H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -702,12 +704,18 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
     if(H5I_DATATYPE != H5I_get_type(type_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype")
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
     if(!(H5S_has_extent(space)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
-    ret_value = H5D__iterate(buf, type_id, space, op, operator_data);
+    dset_op.op_type = H5S_SEL_ITER_OP_APP;
+    dset_op.u.app_op.op = op;
+    dset_op.u.app_op.type_id = type_id;
+
+    ret_value = H5S_select_iterate(buf, type, space, &dset_op, operator_data);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -796,6 +804,8 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     char bogus;                 /* bogus value to pass to H5Diterate() */
     H5S_t *space;               /* Dataspace for iteration */
     H5P_genplist_t  *plist;     /* Property list */
+    H5T_t *type;                /* Datatype */
+    H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -807,6 +817,8 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(NULL == (dset = (H5D_t *)H5I_object(dataset_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
     if(!(H5S_has_extent(space)))
@@ -846,8 +858,12 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     /* Set the initial number of bytes required */
     vlen_bufsize.size = 0;
 
-    /* Call H5D__iterate with args, etc. */
-    ret_value = H5D__iterate(&bogus, type_id, space, H5D__vlen_get_buf_size, &vlen_bufsize);
+    /* Call H5S_select_iterate with args, etc. */
+    dset_op.op_type = H5S_SEL_ITER_OP_APP;
+    dset_op.u.app_op.op = H5D__vlen_get_buf_size;
+    dset_op.u.app_op.type_id = type_id;
+
+    ret_value = H5S_select_iterate(&bogus, type, space, &dset_op, &vlen_bufsize);
 
     /* Get the size if we succeeded */
     if(ret_value >= 0)

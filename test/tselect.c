@@ -13230,6 +13230,439 @@ test_hyper_regular(void)
 
 /****************************************************************
 **
+**  test_hyper_unlim(): Tests unlimited hyperslab selections
+**
+****************************************************************/
+static void
+test_hyper_unlim_check(hid_t sid, hsize_t *dims, hssize_t enpoints,
+    hssize_t enblocks, hsize_t *eblock1, hsize_t *eblock2)
+{
+    hid_t       lim_sid;
+    hsize_t     start[3];
+    H5S_sel_type sel_type;
+    hssize_t    npoints;
+    hssize_t    nblocks;
+    hsize_t     blocklist[12];
+    herr_t      ret;
+
+    HDassert(enblocks <= 2);
+
+    /* Copy sid to lim_sid */
+    lim_sid = H5Scopy(sid);
+    CHECK(lim_sid, FAIL, "H5Scopy");
+
+    /* "And" lim_sid with dims to create limited selection */
+    HDmemset(start, 0, sizeof(start));
+    ret = H5Sselect_hyperslab(lim_sid, H5S_SELECT_AND, start, NULL, dims, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Check number of elements */
+    npoints = H5Sget_select_npoints(lim_sid);
+    CHECK(npoints, FAIL, "H5Sget_select_npoints");
+    VERIFY(npoints, enpoints, "H5Sget_select_npoints");
+
+    /* Get selection type */
+    sel_type = H5Sget_select_type(lim_sid);
+    CHECK(sel_type, H5S_SEL_ERROR, "H5Sget_select_type");
+
+    /* Only examine blocks for hyperslab selection */
+    if(sel_type == H5S_SEL_HYPERSLABS) {
+        /* Get number of blocks */
+        nblocks = H5Sget_select_hyper_nblocks(lim_sid);
+        CHECK(nblocks, FAIL, "H5Sget_select_hyper_nblocks");
+        VERIFY(nblocks, enblocks, "H5Sget_select_hyper_nblocks");
+
+        if(nblocks > 0) {
+            /* Get blocklist */
+            ret = H5Sget_select_hyper_blocklist(lim_sid, (hsize_t)0, (hsize_t)nblocks, blocklist);
+            CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
+
+            /* Verify blocklist */
+            if(nblocks == (hssize_t)1) {
+                if(HDmemcmp(blocklist, eblock1, 6 * sizeof(eblock1[0])))
+                    ERROR("H5Sget_select_hyper_blocklist");
+            } /* end if */
+            else {
+                HDassert(nblocks == (hssize_t)2);
+                if(HDmemcmp(blocklist, eblock1, 6 * sizeof(eblock1[0]))) {
+                    if(HDmemcmp(blocklist, eblock2, 6 * sizeof(eblock2[0])))
+                        ERROR("H5Sget_select_hyper_blocklist");
+                    if(HDmemcmp(&blocklist[6], eblock1, 6 * sizeof(eblock1[0])))
+                        ERROR("H5Sget_select_hyper_blocklist");
+                } /* end if */
+                else
+                    if(HDmemcmp(&blocklist[6], eblock2, 6 * sizeof(eblock2[0])))
+                        ERROR("H5Sget_select_hyper_blocklist");
+            } /* end else */
+        } /* end if */
+    } /* end if */
+    else
+        if(sel_type != H5S_SEL_NONE)
+            ERROR("H5Sget_select_type");
+
+    /* Close the limited dataspace */
+    ret = H5Sclose(lim_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* end test_hyper_unlim_check() */
+
+static void
+test_hyper_unlim(void)
+{
+    hid_t       sid;
+    hsize_t     dims[3] = {4, 4, 7};
+    hsize_t     mdims[3] = {4, H5S_UNLIMITED, 7};
+    hsize_t     start[3] = {1, 2, 1};
+    hsize_t     stride[3] = {1, 1, 3};
+    hsize_t     count[3] = {1, 1, 2};
+    hsize_t     block[3] = {2, H5S_UNLIMITED, 2};
+    hsize_t     start2[3];
+    hsize_t     count2[3];
+    hsize_t     eblock1[6] = {1, 2, 1, 2, 3, 2};
+    hsize_t     eblock2[6] = {1, 2, 4, 2, 3, 5};
+    hssize_t    offset[3] = {0, -1, 0};
+    hssize_t    ssize_out;
+    herr_t      ret;
+
+    /* Output message about test being performed */
+    MESSAGE(6, ("Testing unlimited hyperslab selections\n"));
+
+    /* Create dataspace */
+    sid = H5Screate_simple(3, dims, mdims);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Select unlimited hyperslab */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Check with unlimited dimension clipped to 4 */
+    test_hyper_unlim_check(sid, dims, (hssize_t)16, (hssize_t)2, eblock1, eblock2);
+
+    /* Check with unlimited dimension clipped to 3 */
+    dims[1] = 3;
+    eblock1[4] = 2;
+    eblock2[4] = 2;
+    test_hyper_unlim_check(sid, dims, (hssize_t)8, (hssize_t)2, eblock1, eblock2);
+
+    /* Check with unlimited dimension clipped to 2 */
+    dims[1] = 2;
+    test_hyper_unlim_check(sid, dims, (hssize_t)0, (hssize_t)0, eblock1, eblock2);
+
+    /* Check with unlimited dimension clipped to 1 */
+    dims[1] = 1;
+    test_hyper_unlim_check(sid, dims, (hssize_t)0, (hssize_t)0, eblock1, eblock2);
+
+    /* Check with unlimited dimension clipped to 7 */
+    dims[1] = 7;
+    eblock1[4] = 6;
+    eblock2[4] = 6;
+    test_hyper_unlim_check(sid, dims, (hssize_t)40, (hssize_t)2, eblock1, eblock2);
+
+    /* Set offset of selection */
+    ret = H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Check with adjusted offset (should not affect result) */
+    test_hyper_unlim_check(sid, dims, (hssize_t)40, (hssize_t)2, eblock1, eblock2);
+
+    /* Reset offset of selection */
+    offset[1] = (hssize_t)0;
+    ret = H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /*
+     * Now try with multiple blocks in unlimited dimension
+     */
+    stride[1] = 3;
+    stride[2] = 1;
+    count[1] = H5S_UNLIMITED;
+    count[2] = 1;
+    block[1] = 2;
+
+    /* Select unlimited hyperslab */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Check with new selection */
+    eblock1[1] = 2;
+    eblock1[4] = 3;
+    eblock2[1] = 5;
+    eblock2[2] = 1;
+    eblock2[4] = 6;
+    eblock2[5] = 2;
+    test_hyper_unlim_check(sid, dims, (hssize_t)16, (hssize_t)2, eblock1, eblock2);
+
+    /* Check with unlimited dimension clipped to 3 */
+    dims[1] = 3;
+    eblock1[4] = 2;
+    test_hyper_unlim_check(sid, dims, (hssize_t)4, (hssize_t)1, eblock1, eblock2);
+
+    /* Check with unlimited dimension clipped to 4 */
+    dims[1] = 4;
+    eblock1[4] = 3;
+    test_hyper_unlim_check(sid, dims, (hssize_t)8, (hssize_t)1, eblock1, eblock2);
+
+    /* Check with unlimited dimension clipped to 5 */
+    dims[1] = 5;
+    eblock1[4] = 3;
+    test_hyper_unlim_check(sid, dims, (hssize_t)8, (hssize_t)1, eblock1, eblock2);
+
+    /* Check with unlimited dimension clipped to 6 */
+    dims[1] = 6;
+    eblock1[4] = 3;
+    eblock2[4] = 5;
+    test_hyper_unlim_check(sid, dims, (hssize_t)12, (hssize_t)2, eblock1, eblock2);
+
+    /* Set offset of selection */
+    offset[1] = (hssize_t)-1;
+    ret = H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Check with adjusted offset (should not affect result) */
+    test_hyper_unlim_check(sid, dims, (hssize_t)12, (hssize_t)2, eblock1, eblock2);
+
+    /* Set offset of selection */
+    offset[1] = (hssize_t)3;
+    ret = H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /* Check with adjusted offset (should not affect result) */
+    test_hyper_unlim_check(sid, dims, (hssize_t)12, (hssize_t)2, eblock1, eblock2);
+
+    /* Reset offset of selection */
+    offset[1] = (hssize_t)0;
+    ret = H5Soffset_simple(sid, offset);
+    CHECK(ret, FAIL, "H5Soffset_simple");
+
+    /*
+     * Now try invalid operations
+     */
+    H5E_BEGIN_TRY {
+        /* Try multiple unlimited dimensions */
+        start[0] = 1;
+        start[1] = 2;
+        start[2] = 1;
+        stride[0] = 1;
+        stride[1] = 3;
+        stride[2] = 3;
+        count[0] = 1;
+        count[1] = H5S_UNLIMITED;
+        count[2] = H5S_UNLIMITED;
+        block[0] = 2;
+        block[1] = 2;
+        block[2] = 2;
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+
+        /* Try unlimited count and block */
+        count[2] = 2;
+        block[1] = H5S_UNLIMITED;
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+    } H5E_END_TRY
+
+    /* Try operations with two unlimited selections */
+    block[1] = 2;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    H5E_BEGIN_TRY {
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_OR, start, NULL, count, NULL);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_AND, start, NULL, count, NULL);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_XOR, start, NULL, count, NULL);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_NOTB, start, NULL, count, NULL);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_NOTA, start, NULL, count, NULL);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+    } H5E_END_TRY
+
+    /* Try invalid combination operations */
+    H5E_BEGIN_TRY {
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_OR, start, NULL, block, NULL);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_XOR, start, NULL, block, NULL);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_NOTB, start, NULL, block, NULL);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+    } H5E_END_TRY
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, block, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    H5E_BEGIN_TRY {
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_OR, start, stride, count, block);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_XOR, start, stride, count, block);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_NOTA, start, stride, count, block);
+        VERIFY(ret, FAIL, "H5Sselect_hyperslab");
+    } H5E_END_TRY
+
+    /*
+     * Now test valid combination operations
+     */
+    /* unlim AND non-unlim */
+    count[0] = 1;
+    count[1] = H5S_UNLIMITED;
+    count[2] = 2;
+    block[0] = 2;
+    block[1] = 2;
+    block[2] = 2;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    start2[0] = 2;
+    start2[1] = 2;
+    start2[2] = 0;
+    count2[0] = 5;
+    count2[1] = 4;
+    count2[2] = 2;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_AND, start2, NULL, count2, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    eblock1[0] = 2;
+    eblock1[3] = 2;
+    eblock1[1] = 2;
+    eblock1[4] = 3;
+    eblock1[2] = 1;
+    eblock1[5] = 1;
+    eblock2[0] = 2;
+    eblock2[3] = 2;
+    eblock2[1] = 5;
+    eblock2[4] = 5;
+    eblock2[2] = 1;
+    eblock2[5] = 1;
+    dims[0] = 50;
+    dims[1] = 50;
+    dims[2] = 50;
+    test_hyper_unlim_check(sid, dims, (hssize_t)3, (hssize_t)2, eblock1, eblock2);
+
+    /* unlim NOTA non-unlim */
+    count[0] = 1;
+    count[1] = H5S_UNLIMITED;
+    count[2] = 2;
+    block[0] = 2;
+    block[1] = 2;
+    block[2] = 2;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    start2[0] = 1;
+    start2[1] = 5;
+    start2[2] = 2;
+    count2[0] = 2;
+    count2[1] = 2;
+    count2[2] = 6;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_NOTA, start2, NULL, count2, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    eblock1[0] = 1;
+    eblock1[3] = 2;
+    eblock1[1] = 5;
+    eblock1[4] = 6;
+    eblock1[2] = 3;
+    eblock1[5] = 3;
+    eblock2[0] = 1;
+    eblock2[3] = 2;
+    eblock2[1] = 5;
+    eblock2[4] = 6;
+    eblock2[2] = 6;
+    eblock2[5] = 7;
+    dims[0] = 50;
+    dims[1] = 50;
+    dims[2] = 50;
+    test_hyper_unlim_check(sid, dims, (hssize_t)12, (hssize_t)2, eblock1, eblock2);
+
+    /* non-unlim AND unlim */
+    start2[0] = 2;
+    start2[1] = 2;
+    start2[2] = 0;
+    count2[0] = 5;
+    count2[1] = 4;
+    count2[2] = 2;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start2, NULL, count2, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    count[0] = 1;
+    count[1] = H5S_UNLIMITED;
+    count[2] = 2;
+    block[0] = 2;
+    block[1] = 2;
+    block[2] = 2;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_AND, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    eblock1[0] = 2;
+    eblock1[3] = 2;
+    eblock1[1] = 2;
+    eblock1[4] = 3;
+    eblock1[2] = 1;
+    eblock1[5] = 1;
+    eblock2[0] = 2;
+    eblock2[3] = 2;
+    eblock2[1] = 5;
+    eblock2[4] = 5;
+    eblock2[2] = 1;
+    eblock2[5] = 1;
+    dims[0] = 50;
+    dims[1] = 50;
+    dims[2] = 50;
+    test_hyper_unlim_check(sid, dims, (hssize_t)3, (hssize_t)2, eblock1, eblock2);
+
+    /* non-unlim NOTB unlim */
+    start2[0] = 1;
+    start2[1] = 5;
+    start2[2] = 2;
+    count2[0] = 2;
+    count2[1] = 2;
+    count2[2] = 6;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start2, NULL, count2, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    count[0] = 1;
+    count[1] = H5S_UNLIMITED;
+    count[2] = 2;
+    block[0] = 2;
+    block[1] = 2;
+    block[2] = 2;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_NOTB, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    eblock1[0] = 1;
+    eblock1[3] = 2;
+    eblock1[1] = 5;
+    eblock1[4] = 6;
+    eblock1[2] = 3;
+    eblock1[5] = 3;
+    eblock2[0] = 1;
+    eblock2[3] = 2;
+    eblock2[1] = 5;
+    eblock2[4] = 6;
+    eblock2[2] = 6;
+    eblock2[5] = 7;
+    dims[0] = 50;
+    dims[1] = 50;
+    dims[2] = 50;
+    test_hyper_unlim_check(sid, dims, (hssize_t)12, (hssize_t)2, eblock1, eblock2);
+
+    /* Test H5Sget_select_npoints() */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    ssize_out = H5Sget_select_npoints(sid);
+    VERIFY(ssize_out, (hssize_t)H5S_UNLIMITED, "H5Sget_select_npoints");
+
+    /* Test H5Sget_select_hyper_nblocks() */
+    ssize_out = H5Sget_select_hyper_nblocks(sid);
+    VERIFY(ssize_out, (hssize_t)H5S_UNLIMITED, "H5Sget_select_hyper_nblocks");
+
+    /* Test H5Sget_select_bounds() */
+    ret = H5Sget_select_bounds(sid, start2, count2);
+    CHECK(ret, FAIL, "H5Sget_select_bounds");
+    VERIFY(start2[0], start[0], "H5Sget_select_bounds");
+    VERIFY(start2[1], start[1], "H5Sget_select_bounds");
+    VERIFY(start2[2], start[2], "H5Sget_select_bounds");
+    VERIFY(count2[0], start[0] + (stride[0] * (count[0] - (hsize_t)1)) + block[0] - (hsize_t)1, "H5Sget_select_bounds");
+    VERIFY(count2[1], H5S_UNLIMITED, "H5Sget_select_bounds");
+    VERIFY(count2[2], start[2] + (stride[2] * (count[2] - (hsize_t)1)) + block[2] - (hsize_t)1, "H5Sget_select_bounds");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* end test_hyper_unlim() */
+
+/****************************************************************
+**
 **  test_select(): Main H5S selection testing routine.
 **
 ****************************************************************/
@@ -13391,6 +13824,9 @@ test_select(void)
 
     /* Test 'regular' hyperslab query routines */
     test_hyper_regular();
+
+    /* Test unlimited hyperslab selections */
+    test_hyper_unlim();
 
 }   /* test_select() */
 

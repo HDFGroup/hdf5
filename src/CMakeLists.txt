@@ -118,6 +118,7 @@ set (H5D_SRCS
     ${HDF5_SRC_DIR}/H5Dscatgath.c
     ${HDF5_SRC_DIR}/H5Dselect.c
     ${HDF5_SRC_DIR}/H5Dtest.c
+    ${HDF5_SRC_DIR}/H5Dvirtual.c
 )
 
 set (H5D_HDRS

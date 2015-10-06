@@ -24,8 +24,8 @@ namespace H5 {
 //! Class DataSpace operates on HDF5 dataspaces.
 class H5_DLLCPP DataSpace : public IdComponent {
    public:
-	// Default DataSpace objects
-	static const DataSpace ALL;
+	///\brief Default DataSpace objects
+	static const DataSpace& ALL;
 
 	// Creates a dataspace object given the space type
 	DataSpace(H5S_class_t type = H5S_SCALAR);
@@ -118,20 +118,34 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// Gets the dataspace id.
 	virtual hid_t getId() const;
 
+	// Deletes the global constant
+	static void deleteConstants();
+
 	// Destructor: properly terminates access to this dataspace.
 	virtual ~DataSpace();
 
-   protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+   protected:
 	// Sets the dataspace id.
 	virtual void p_setId(const hid_t new_id);
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
 	hid_t id;       // HDF5 dataspace id
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+	static DataSpace* ALL_;
+
+	// Creates the global constant
+	static DataSpace* getConstant();
+
 	// Friend function to set DataSpace id.  For library use only.
 	friend void f_DataSpace_setId(DataSpace *dspace, hid_t new_id);
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 #ifndef H5_NO_NAMESPACE
 }
