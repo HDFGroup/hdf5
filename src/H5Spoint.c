@@ -42,9 +42,11 @@ static herr_t H5S_point_release(H5S_t *space);
 static htri_t H5S_point_is_valid(const H5S_t *space);
 static hssize_t H5S_point_serial_size(const H5S_t *space);
 static herr_t H5S_point_serialize(const H5S_t *space, uint8_t **p);
-static herr_t H5S_point_deserialize(H5S_t *space, const uint8_t **p);
+static herr_t H5S_point_deserialize(H5S_t *space, uint32_t version, uint8_t flags,
+    const uint8_t **p);
 static herr_t H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t H5S_point_offset(const H5S_t *space, hsize_t *off);
+static int H5S__point_unlim_dim(const H5S_t *space);
 static htri_t H5S_point_is_contiguous(const H5S_t *space);
 static htri_t H5S_point_is_single(const H5S_t *space);
 static htri_t H5S_point_is_regular(const H5S_t *space);
@@ -76,6 +78,8 @@ const H5S_select_class_t H5S_sel_point[1] = {{
     H5S_point_deserialize,
     H5S_point_bounds,
     H5S_point_offset,
+    H5S__point_unlim_dim,
+    NULL,
     H5S_point_is_contiguous,
     H5S_point_is_single,
     H5S_point_is_regular,
@@ -882,6 +886,8 @@ H5S_point_serialize (const H5S_t *space, uint8_t **p)
     herr_t H5S_point_deserialize(space, p)
         H5S_t *space;           IN/OUT: Dataspace pointer to place
                                 selection into
+        uint32_t version        IN: Selection version
+        uint8_t flags           IN: Selection flags
         uint8 **p;              OUT: Pointer to buffer holding serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
@@ -896,7 +902,8 @@ H5S_point_serialize (const H5S_t *space, uint8_t **p)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_deserialize (H5S_t *space, const uint8_t **p)
+H5S_point_deserialize(H5S_t *space, uint32_t H5_ATTR_UNUSED version, uint8_t H5_ATTR_UNUSED flags,
+    const uint8_t **p)
 {
     H5S_seloper_t op = H5S_SELECT_SET;  /* Selection operation */
     hsize_t *coord = NULL, *tcoord;     /* Pointer to array of elements */
@@ -1193,6 +1200,35 @@ H5S_point_offset(const H5S_t *space, hsize_t *offset)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_point_offset() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S__point_unlim_dim
+ PURPOSE
+    Return unlimited dimension of selection, or -1 if none
+ USAGE
+    int H5S__point_unlim_dim(space)
+        H5S_t *space;           IN: Dataspace pointer to check
+ RETURNS
+    Unlimited dimension of selection, or -1 if none (never fails).
+ DESCRIPTION
+    Returns the index of the unlimited dimension in this selection, or -1
+    if the selection has no unlimited dimension.  Currently point
+    selections cannot have an unlimited dimension, so this function always
+    returns -1.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int
+H5S__point_unlim_dim(const H5S_t H5_ATTR_UNUSED *space)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    FUNC_LEAVE_NOAPI(-1)
+} /* end H5S__point_unlim_dim() */
 
 
 /*--------------------------------------------------------------------------

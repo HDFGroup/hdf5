@@ -14,10 +14,23 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
+#include <cstdlib>
 
-#include "H5CppDoc.h"	// included only for Doxygen to generate part of RM
+#include "H5CppDoc.h"   // included only for Doxygen to generate part of RM
 #include "H5Include.h"
 #include "H5Exception.h"
+#include "H5IdComponent.h"
+#include "H5PropList.h"
+#include "H5FaccProp.h"
+#include "H5FcreatProp.h"
+#include "H5OcreatProp.h"
+#include "H5DxferProp.h"
+#include "H5Object.h"
+#include "H5DataType.h"
+#include "H5DcreatProp.h"
+#include "H5AtomType.h"
+#include "H5PredType.h"
+#include "H5DataSpace.h"
 #include "H5Library.h"
 
 #ifndef H5_NO_NAMESPACE
@@ -25,8 +38,7 @@ namespace H5 {
 #endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-// This static variable will be set to true when dontAtExit is called
-bool H5Library::need_cleanup = false;
+H5Library* H5Library::instance = 0;
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
@@ -63,18 +75,17 @@ void H5Library::close()
 
 //--------------------------------------------------------------------------
 // Function:	H5Library::dontAtExit
-///\brief	Instructs library not to install \c atexit cleanup routine
+///\brief	Instructs library not to install the C \c atexit cleanup routine
 ///
 ///\exception	H5::LibraryIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		Removed the check for failure returned from H5dont_atexit.
+//		will be fixed to not fail (HDFFV-9540)
 //--------------------------------------------------------------------------
 void H5Library::dontAtExit()
 {
    herr_t ret_value = H5dont_atexit();
-   if( ret_value < 0 )
-   {
-      throw LibraryIException("H5Library::dontAtExit", "H5dont_atexit failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -148,6 +159,91 @@ void H5Library::garbageCollect()
 }
 
 //--------------------------------------------------------------------------
+// Function:    H5Library::initH5cpp
+///\brief       Initializes C++ library and registers terminating functions at
+///		exit.  Only for the library functions, not for user-defined
+///		functions.
+// Description
+//              initH5cpp registers the following functions with std::atexit():
+//                      termH5cpp() - calls H5close() after all cleanup in
+//                                    the C++ library is done
+//                      <classname>::deleteConstants - deletes all references for
+//                              <classname> global constants
+///\exception   H5::LibraryIException
+//
+// Programmer   Binh-Minh Ribler - September, 2015
+//--------------------------------------------------------------------------
+void H5Library::initH5cpp()
+{
+    // Register terminating functions with atexit(); they will be invoked in the
+    // reversed order
+    int ret_value = 0;
+    ret_value = std::atexit(termH5cpp);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registration of termH5cpp failed");
+
+    ret_value = std::atexit(PredType::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registration of PredType::deleteConstants failed");
+
+    ret_value = std::atexit(PropList::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registration of PropList::deleteConstants failed");
+
+     ret_value = std::atexit(FileAccPropList::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registration of FileAccPropList::deleteConstants failed");
+
+     ret_value = std::atexit(FileCreatPropList::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registration of FileCreatPropList::deleteConstants failed");
+
+     ret_value = std::atexit(DSetMemXferPropList::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registration of DSetMemXferPropList::deleteConstants failed");
+
+     ret_value = std::atexit(DSetCreatPropList::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registration of DSetCreatPropList::deleteConstants failed");
+
+    ret_value = std::atexit(DataSpace::deleteConstants);
+    if (ret_value != 0)
+        throw LibraryIException("H5Library::initH5cpp", "Registration of DataSpace::deleteConstants failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Library::termH5cpp
+///\brief       Sends request for the C layer to terminate.
+///\par Description
+///             If the C library fails to terminate, exit with a failure.
+// Programmer   Binh-Minh Ribler - September, 2015
+//--------------------------------------------------------------------------
+void H5Library::termH5cpp()
+{
+    // Close the C library
+    herr_t ret_value = H5close();
+    if (ret_value == -1)
+        exit(-1);
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Library::getInstance
+///\brief       Provides a way to instantiate the class.
+///\par Description
+///             getInstance ensures that only one instance of the H5Library
+///             is created.
+// Programmer   Binh-Minh Ribler - September, 2015
+//--------------------------------------------------------------------------
+H5Library* H5Library::getInstance()
+{
+    if (H5Library::instance == 0)
+    {
+        instance = new H5Library();
+    }
+    return(instance);
+}
+
+//--------------------------------------------------------------------------
 // Function:	H5Library::setFreeListLimits
 ///\brief	Sets limits on the different kinds of free lists.
 ///\param	reg_global_lim - IN: Limit on all "regular" free list memory used
@@ -174,6 +270,13 @@ void H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim,
       throw LibraryIException("H5Library::setFreeListLimits", "H5set_free_list_limits failed");
    }
 }
+
+// Default constructor - no instance ever created by outsiders
+H5Library::H5Library(){};
+
+// Destructor
+H5Library::~H5Library(){};
+
 #ifndef H5_NO_NAMESPACE
 } // end namespace
 #endif

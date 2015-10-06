@@ -58,8 +58,7 @@ static herr_t H5D__pre_write(hid_t file_id, hid_t dxpl_id, size_t count,
     H5D_dset_info_t *dset_info);
 
 /* Internal I/O routines for multi-dset */
-static herr_t H5D__write(hid_t file_id, hid_t dxpl_id, size_t count,
-    H5D_dset_info_t *dset_info);
+
 
 /* Setup/teardown routines */
 static herr_t H5D__ioinfo_init(H5D_t *dset,
@@ -730,7 +729,7 @@ H5D__read(hid_t file_id, hid_t dxpl_id, size_t count,
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* init io_info */
     io_info.sel_pieces = NULL;
@@ -991,7 +990,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__write(hid_t file_id, hid_t dxpl_id, size_t count,
     H5D_dset_info_t *dset_info)
 {    
@@ -1023,7 +1022,7 @@ H5D__write(hid_t file_id, hid_t dxpl_id, size_t count,
     char        fake_char;              /* Temporary variable for NULL buffer pointers */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Init io_info */
     io_info.sel_pieces = NULL;

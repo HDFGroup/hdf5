@@ -118,6 +118,7 @@ set (H5D_SRCS
     ${HDF5_SRC_DIR}/H5Dscatgath.c
     ${HDF5_SRC_DIR}/H5Dselect.c
     ${HDF5_SRC_DIR}/H5Dtest.c
+    ${HDF5_SRC_DIR}/H5Dvirtual.c
 )
 
 set (H5D_HDRS
@@ -808,11 +809,8 @@ if (HDF5_GENERATE_HEADERS)
         COMMENT " Creating Assignment overflow macro"
     )
 
-    add_custom_target(generate_precompiled DEPENDS
-    "${HDF5_SRC_DIR}/H5version.h;${HDF5_SRC_DIR}/H5overflow.h")
-
     add_custom_target(run_perl_scripts ALL
-        DEPENDS ${HDF5_SRC_DIR}/H5Edefin.h ${HDF5_SRC_DIR}/H5version.h ${HDF5_SRC_DIR}/H5overflow.h
+        DEPENDS ${HDF5_SRC_DIR}/H5Edefin.h ${HDF5_SRC_DIR}/H5Einit.h ${HDF5_SRC_DIR}/H5Epubgen.h ${HDF5_SRC_DIR}/H5Eterm.h ${HDF5_SRC_DIR}/H5version.h ${HDF5_SRC_DIR}/H5overflow.h
     )
   else (PERL_FOUND)
     message (STATUS "Cannot generate headers - perl not found")
@@ -829,7 +827,7 @@ if (MSVC OR MINGW)
   target_link_libraries (H5detect "ws2_32.lib")
 endif (MSVC OR MINGW)
 if (HDF5_GENERATE_HEADERS)
-  add_dependencies(H5detect generate_precompiled)
+  add_dependencies(H5detect run_perl_scripts)
 else (HDF5_GENERATE_HEADERS)
   add_dependencies(H5detect "${H5_GENERATED_HEADERS}")
 endif (HDF5_GENERATE_HEADERS)
@@ -848,7 +846,7 @@ if (MSVC OR MINGW)
   target_link_libraries (H5make_libsettings "ws2_32.lib")
 endif (MSVC OR MINGW)
 if (HDF5_GENERATE_HEADERS)
-  add_dependencies(H5detect generate_precompiled)
+  add_dependencies(H5make_libsettings run_perl_scripts)
 else (HDF5_GENERATE_HEADERS)
   add_dependencies(H5make_libsettings "${H5_GENERATED_HEADERS}")
 endif (HDF5_GENERATE_HEADERS)
