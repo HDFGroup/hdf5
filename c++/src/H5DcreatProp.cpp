@@ -19,6 +19,7 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
+#include "H5OcreatProp.h"
 #include "H5Object.h"
 #include "H5DcreatProp.h"
 #include "H5CommonFG.h"
@@ -91,7 +92,7 @@ const DSetCreatPropList& DSetCreatPropList::DEFAULT = *getConstant();
 ///\brief	Default constructor: creates a stub dataset creation property list
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::DSetCreatPropList() : PropList( H5P_DATASET_CREATE) {}
+DSetCreatPropList::DSetCreatPropList() : ObjCreatPropList(H5P_DATASET_CREATE) {}
 
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList copy constructor
@@ -99,7 +100,7 @@ DSetCreatPropList::DSetCreatPropList() : PropList( H5P_DATASET_CREATE) {}
 ///		DSetCreatPropList object
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::DSetCreatPropList( const DSetCreatPropList& orig ) : PropList( orig ) {}
+DSetCreatPropList::DSetCreatPropList( const DSetCreatPropList& orig ) : ObjCreatPropList(orig) {}
 
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList overloaded constructor
@@ -107,7 +108,7 @@ DSetCreatPropList::DSetCreatPropList( const DSetCreatPropList& orig ) : PropList
 ///		existing dataset creation property list.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::DSetCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
+DSetCreatPropList::DSetCreatPropList(const hid_t plist_id) : ObjCreatPropList(plist_id) {}
 
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList::setChunk

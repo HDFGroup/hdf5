@@ -28,6 +28,7 @@
 #include "H5AbstractDs.h"
 #include "H5FaccProp.h"
 #include "H5FcreatProp.h"
+#include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5CommonFG.h"
 #include "H5DataType.h"
