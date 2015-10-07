@@ -390,6 +390,7 @@ do
     echo '#pragma GCC diagnostic ignored "-Wunused-function"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wunused-macros"                  ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wunused-parameter"               ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wredundant-decls"                ' >> tmp.out
     echo '#elif defined __SUNPRO_CC                                         ' >> tmp.out
     echo '#pragma disable_warn                                              ' >> tmp.out
     echo '#elif defined _MSC_VER                                            ' >> tmp.out
