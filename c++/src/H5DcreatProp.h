@@ -28,7 +28,7 @@ namespace H5 {
     \brief Class DSetCreatPropList represents the dataset creation property
     list.
 */
-class H5_DLLCPP DSetCreatPropList : public PropList {
+class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
    public:
 	///\brief Default dataset creation property list.
 	static const DSetCreatPropList& DEFAULT;
