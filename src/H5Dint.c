@@ -2258,41 +2258,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__iterate
- *
- * Purpose:	Internal version of H5Diterate()
- *
- * Return:	Returns the return value of the last operator if it was non-zero,
- *          or zero if all elements were processed. Otherwise returns a
- *          negative value.
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 22, 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t op,
-        void *operator_data)
-{
-    herr_t ret_value;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Check args */
-    HDassert(buf);
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
-    HDassert(space);
-    HDassert(H5S_has_extent(space));
-    HDassert(op);
-
-    ret_value = H5S_select_iterate(buf, type_id, space, op, operator_data);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-}   /* end H5D__iterate() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5D_vlen_reclaim
  *
  * Purpose:	Frees the buffers allocated for storing variable-length data
@@ -2310,6 +2275,8 @@ H5D__iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t op,
 herr_t
 H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id, void *buf)
 {
+    H5T_t *type;                /* Datatype */
+    H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
     H5T_vlen_alloc_info_t _vl_alloc_info;       /* VL allocation info buffer */
     H5T_vlen_alloc_info_t *vl_alloc_info = &_vl_alloc_info;   /* VL allocation info */
     herr_t ret_value;
@@ -2322,12 +2289,19 @@ H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id, void *buf)
     HDassert(H5P_isa_class(plist_id, H5P_DATASET_XFER));
     HDassert(buf);
 
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
+
     /* Get the allocation info */
     if(H5T_vlen_get_alloc_info(plist_id,&vl_alloc_info) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve VL allocation info")
 
-    /* Call H5D__iterate with args, etc. */
-    ret_value = H5D__iterate(buf, type_id, space ,H5T_vlen_reclaim, vl_alloc_info);
+    /* Call H5S_select_iterate with args, etc. */
+    dset_op.op_type = H5S_SEL_ITER_OP_APP;
+    dset_op.u.app_op.op = H5T_vlen_reclaim;
+    dset_op.u.app_op.type_id = type_id;
+
+    ret_value = H5S_select_iterate(buf, type, space, &dset_op, vl_alloc_info);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

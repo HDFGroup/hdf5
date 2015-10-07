@@ -1233,9 +1233,9 @@ H5S_select_iter_release(H5S_sel_iter_t *sel_iter)
  PURPOSE
     Iterate over the selected elements in a memory buffer.
  USAGE
-    herr_t H5S_select_iterate(buf, type_id, space, operator, operator_data)
+    herr_t H5S_select_iterate(buf, type, space, operator, operator_data)
         void *buf;      IN/OUT: Buffer containing elements to iterate over
-        hid_t type_id;  IN: Datatype ID of BUF array.
+        H5T_t *type;    IN: Datatype of BUF array.
         H5S_t *space;   IN: Dataspace object containing selection to iterate over
         H5D_operator_t op; IN: Function pointer to the routine to be
                                 called for each element in BUF iterated over.
@@ -1256,10 +1256,9 @@ H5S_select_iter_release(H5S_sel_iter_t *sel_iter)
         the selection is not modified.
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t op,
-        void *operator_data)
+H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *space,
+    const H5S_sel_iter_op_t *op, void *op_data)
 {
-    H5T_t *dt;                  /* Datatype structure */
     H5S_sel_iter_t iter;        /* Selection iteration info */
     hbool_t iter_init = FALSE;  /* Selection iteration info has been initialized */
     hssize_t nelmts;            /* Number of elements in selection */
@@ -1274,14 +1273,12 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
 
     /* Check args */
     HDassert(buf);
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
+    HDassert(type);
     HDassert(space);
     HDassert(op);
 
     /* Get the datatype size */
-    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
-    if(0 == (elmt_size = H5T_get_size(dt)))
+    if(0 == (elmt_size = H5T_get_size(type)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid")
 
     /* Initialize iterator */
@@ -1345,8 +1342,19 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
                 /* Get the location within the user's buffer */
                 loc = (unsigned char *)buf + curr_off;
 
-                /* Call user's callback routine */
-                user_ret = (*op)(loc, type_id, ndims, coords, operator_data);
+                /* Check which type of callback to make */
+                switch(op->op_type) {
+                    case H5S_SEL_ITER_OP_APP:
+                        /* Make the application callback */
+                        user_ret = (op->u.app_op.op)(loc, op->u.app_op.type_id, ndims, coords, op_data);
+                    break;
+                    case H5S_SEL_ITER_OP_LIB:
+                        /* Call the library's callback */
+                        user_ret = (op->u.lib_op)(loc, type, ndims, coords, op_data);
+                    break;
+                    default:
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unsupported op type")
+                } /* end switch */
 
                 /* Increment offset in dataspace */
                 curr_off += elmt_size;
