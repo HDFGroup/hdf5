@@ -18,8 +18,8 @@
  * Purpose:	IOD plugin client code
  */
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg   */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Datasets		  		*/

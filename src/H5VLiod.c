@@ -302,12 +302,15 @@ DESCRIPTION
 static herr_t
 H5VL__init_package(void)
 {
+    herr_t ret_value = SUCCEED; 
+
     FUNC_ENTER_STATIC
 
     if(H5VL_iod_init() < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize FF IOD VOL plugin")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__init_package() */
 
 
@@ -328,7 +331,7 @@ H5VL__init_package(void)
 hid_t
 H5VL_iod_init(void)
 {
-    hid_t ret_value = FAIL;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -894,7 +897,7 @@ H5Pset_fapl_iod(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     fa.comm = comm;
     fa.info = info;
 
-    ret_value = H5P_set_vol(plist, H5VL_IOD_g, &fa);
+    ret_value = H5P_set_vol(plist, H5VL_IOD, &fa);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -5665,7 +5668,7 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
 
             HDmemcpy(&space_size, buf_ptr, sizeof(size_t));
             buf_ptr += sizeof(size_t);
-            if((ds = H5S_decode((const unsigned char *)buf_ptr)) == NULL)
+            if((ds = H5S_decode((const unsigned char **)&buf_ptr)) == NULL)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object");
             /* Register the type  */
             if((attr->remote_attr.space_id = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
@@ -5745,7 +5748,7 @@ H5VL_iod_obj_open_token(const void *token, H5TR_t *tr, H5I_type_t *opened_type, 
 
             HDmemcpy(&space_size, buf_ptr, sizeof(size_t));
             buf_ptr += sizeof(size_t);
-            if((ds = H5S_decode((const unsigned char *)buf_ptr)) == NULL)
+            if((ds = H5S_decode((const unsigned char **)&buf_ptr)) == NULL)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object");
             /* Register the type  */
             if((dset->remote_dset.space_id = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
@@ -6187,6 +6190,7 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
         case H5I_DATASET:
             {
                 H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)obj;
+                uint8_t *tmp_p;
 
                 iod_id = dset->remote_dset.iod_id;
                 mdkv_id = dset->remote_dset.mdkv_id;
@@ -6202,7 +6206,8 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
                 if(H5T_encode(dt, NULL, &dt_size) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
 
-                if(H5S_encode(space, NULL, &space_size) < 0)
+                tmp_p = NULL;
+                if(H5S_encode(space, &tmp_p, &space_size) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
 
                 cpl_id = dset->remote_dset.dcpl_id;
@@ -6327,7 +6332,7 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
 
             HDmemcpy(buf_ptr, &space_size, sizeof(size_t));
             buf_ptr += sizeof(size_t);
-            if(H5S_encode(space, buf_ptr, &space_size) < 0)
+            if(H5S_encode(space, (unsigned char **)&buf_ptr, &space_size) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
             buf_ptr += space_size;
             break;

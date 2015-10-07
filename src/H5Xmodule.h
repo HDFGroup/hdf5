@@ -12,33 +12,23 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#if !(defined H5X_FRIEND || defined H5X_MODULE)
-#error "Do not include this file outside the H5X package!"
-#endif
-
-#ifndef _H5Xpkg_H
-#define _H5Xpkg_H
-
-/* Include private header file */
-#include "H5Xprivate.h" /* Plugin functions                */
-
 /*
- * Dummy plugin
+ * Programmer:	Mohamad Chaarawi
+ *              Ocotber 2015
+ *
+ * Purpose:	This file contains declarations which define macros for the
+ *		H5X package.  Including this header means that the source file
+ *		is part of the H5X package.
  */
-H5_DLLVAR const H5X_class_t H5X_DUMMY[1];
+#ifndef _H5Xmodule_H
+#define _H5Xmodule_H
 
-/*
- * ALACRITY plugin
+/* Define the proper control macros for the generic FUNC_ENTER/LEAXE and error
+ *      reporting macros.
  */
-#ifdef H5_HAVE_ALACRITY
-H5_DLLVAR const H5X_class_t H5X_ALACRITY[1];
-#endif
+#define H5X_MODULE
+#define H5_MY_PKG       H5X
+#define H5_MY_PKG_ERR   H5E_PLINE
+#define H5_MY_PKG_INIT  YES
 
-/*
- * FastBit plugin
- */
-#ifdef H5_HAVE_FASTBIT
-H5_DLLVAR const H5X_class_t H5X_FASTBIT[1];
-#endif
-
-#endif /* _H5Xpkg_H */
+#endif /* _H5Xmodule_H */

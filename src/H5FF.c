@@ -22,15 +22,14 @@
 /* Module Setup */
 /****************/
 
-#define H5A_PACKAGE		/*suppress error about including H5Apkg	  */
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
-#define H5O_PACKAGE             /*suppress error about including H5Opkg   */
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
+#include "H5FFmodule.h"         /* This source code file is part of the H5FF module */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5FF__init_interface
+#define H5A_FRIEND		/*suppress error about including H5Apkg	  */
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
+#define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 
 /***********/
 /* Headers */
@@ -76,6 +75,8 @@ static herr_t H5D__apply_index_query(void *idx_handle, H5X_class_t *idx_class,
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -86,8 +87,8 @@ static herr_t H5D__apply_index_query(void *idx_handle, H5X_class_t *idx_class,
 /* Local Variables */
 /*******************/
 
-static herr_t
-H5FF__init_interface(void)
+herr_t
+H5FF__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 
@@ -96,7 +97,7 @@ H5FF__init_interface(void)
     if(H5F_init() < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init file interface")
 
-    if(H5G__init() < 0)
+    if(H5G_init() < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init group interface")
 
     if(H5D_init() < 0)
@@ -112,7 +113,7 @@ H5FF__init_interface(void)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init map interface")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FF__init_interface() */
+} /* H5FF__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -138,7 +139,7 @@ H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     H5P_genplist_t *plist;        /* Property list pointer */
     H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    hid_t plugin_id;              /* VOL plugin identigier attached to fapl_id */
+    H5VL_plugin_prop_t plugin_prop;         /* Property for vol plugin ID & info */
     H5VL_class_t *vol_cls = NULL; /* VOL Class structure for callback info */
     H5VL_t *vol_info = NULL;      /* VOL info struct */
     hid_t    ret_value;              /* Return value */
@@ -175,10 +176,11 @@ H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     if(estack_id != H5_EVENT_STACK_NULL) {
@@ -202,7 +204,7 @@ H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
     vol_info->vol_cls = vol_cls;
-    vol_info->vol_id = plugin_id;
+    vol_info->vol_id = plugin_prop.plugin_id;
     if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
@@ -239,7 +241,7 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
     H5P_genplist_t *plist;        /* Property list pointer */
     H5_priv_request_t *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL;       /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
-    hid_t plugin_id;              /* VOL plugin identigier attached to fapl_id */
+    H5VL_plugin_prop_t plugin_prop;         /* Property for vol plugin ID & info */
     H5VL_class_t *vol_cls = NULL; /* VOL Class structure for callback info */
     H5VL_t *vol_info = NULL;      /* VOL info struct */
     hid_t    ret_value;              /* Return value */
@@ -263,17 +265,18 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* setup VOL info struct */
     if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
     vol_info->vol_cls = vol_cls;
-    vol_info->vol_id = plugin_id;
+    vol_info->vol_id = plugin_prop.plugin_id;
     if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
@@ -5068,7 +5071,7 @@ H5VLiod_get_file_id(const char *filename, iod_handle_t coh, hid_t fapl_id, hid_t
     H5VL_iod_file_t *file = NULL;            /* file token from VOL plugin */
     H5P_genplist_t  *plist;          /* Property list pointer */
     H5VL_class_t    *vol_cls;        /* VOL class attached to fapl_id */
-    hid_t plugin_id;              /* VOL plugin identigier attached to fapl_id */
+    H5VL_plugin_prop_t plugin_prop;         /* Property for vol plugin ID & info */
     H5VL_t  *vol_info;             /* VOL plugin information */
     iod_handles_t root_oh;           /* root object handle */
     iod_cont_trans_stat_t *tids = NULL;
@@ -5093,17 +5096,18 @@ H5VLiod_get_file_id(const char *filename, iod_handle_t coh, hid_t fapl_id, hid_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
     if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &cs_scope) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* setup VOL info struct */
     if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
     vol_info->vol_cls = vol_cls;
-    vol_info->vol_id = plugin_id;
+    vol_info->vol_id = plugin_prop.plugin_id;
     if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 

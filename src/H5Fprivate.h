@@ -592,6 +592,7 @@ typedef struct H5F_block_t {
 
 
 /* Private functions */
+H5_DLL herr_t H5F_init(void);
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f);

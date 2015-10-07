@@ -195,6 +195,7 @@ typedef struct H5G_entry_t H5G_entry_t;
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
+H5_DLL herr_t H5G_init(void);
 H5_DLL struct H5O_loc_t *H5G_oloc(H5G_t *grp);
 H5_DLL H5G_name_t * H5G_nameof(H5G_t *grp);
 H5_DLL H5F_t *H5G_fileof(H5G_t *grp);

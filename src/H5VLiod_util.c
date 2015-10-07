@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Sprivate.h"		/* Dataspaces		  		*/

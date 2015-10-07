@@ -121,7 +121,7 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5ES__init_package(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -131,6 +131,8 @@ H5ES__init_package(void)
     /* Initialize the atom group for the ES IDs */
     if(H5I_register_type(H5I_ES_CLS) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    H5_PKG_INIT_VAR = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -166,10 +168,13 @@ H5ES_term_package(void)
 	    (void)H5I_clear_type(H5I_ES, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
+        else {
+            n += (H5I_dec_type_ref(H5I_ES) > 0);
 
-        /* Mark interface as closed */
-        if(0 == n)
-	    H5_PKG_INIT_VAR = FALSE;
+            /* Mark closed */
+            if(0 == n)
+                H5_PKG_INIT_VAR = FALSE;
+        } /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)

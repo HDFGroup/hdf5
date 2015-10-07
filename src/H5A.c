@@ -103,6 +103,32 @@ static hbool_t H5A_top_package_initialize_s = FALSE;
 
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5A_init
+ *
+ * Purpose:	Initialize the interface from some other package.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              July 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5A_init(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_init() */
+
+
 /*--------------------------------------------------------------------------
 NAME
    H5A__init_package -- Initialize interface-specific information

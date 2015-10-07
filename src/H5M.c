@@ -17,8 +17,7 @@
 /* Module Setup */
 /****************/
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5M_init_interface
+#include "H5Mmodule.h"          /* This source code file is part of the H5M module */
 
 
 /***********/
@@ -123,7 +122,7 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5M__init_package(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */

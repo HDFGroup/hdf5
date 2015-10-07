@@ -146,6 +146,32 @@ static hbool_t H5G_top_package_initialize_s = FALSE;
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_init
+ *
+ * Purpose:	Initialize the interface from some other package.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              July 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_init(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_init() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G__init_package
  *
  * Purpose:	Initializes the H5G interface.

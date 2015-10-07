@@ -13,7 +13,7 @@
 /* Define the default plugins path to compile */
 #undef DEFAULT_PLUGINDIR
 
-/* Define if `dev_t' is a scalar */
+/* Define if dev_t is a scalar */
 #undef DEV_T_IS_SCALAR
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
@@ -29,6 +29,42 @@
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
+
+/* Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE */
+#undef FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
+
+/* Define if we have Fortran C_LONG_DOUBLE */
+#undef FORTRAN_HAVE_C_LONG_DOUBLE
+
+/* Define if we have Fortran intrinsic C_SIZEOF */
+#undef FORTRAN_HAVE_C_SIZEOF
+
+/* Define if we have Fortran intrinsic SIZEOF */
+#undef FORTRAN_HAVE_SIZEOF
+
+/* Define if we have Fortran intrinsic STORAGE_SIZE */
+#undef FORTRAN_HAVE_STORAGE_SIZE
+
+/* Determine the size of C long double */
+#undef FORTRAN_SIZEOF_LONG_DOUBLE
+
+/* Define Fortran compiler ID */
+#undef Fortran_COMPILER_ID
+
+/* Define valid Fortran INTEGER KINDs */
+#undef H5CONFIG_F_IKIND
+
+/* Define number of valid Fortran INTEGER KINDs */
+#undef H5CONFIG_F_NUM_IKIND
+
+/* Define number of valid Fortran REAL KINDs */
+#undef H5CONFIG_F_NUM_RKIND
+
+/* Define valid Fortran REAL KINDs */
+#undef H5CONFIG_F_RKIND
+
+/* Define valid Fortran REAL KINDs Sizeof */
+#undef H5CONFIG_F_RKIND_SIZEOF
 
 /* Define if ALACRITY indexing is supported. */
 #undef HAVE_ALACRITY
@@ -103,6 +139,9 @@
 /* Define if support for szip filter is enabled */
 #undef HAVE_FILTER_SZIP
 
+/* Determine if __float128 is available */
+#undef HAVE_FLOAT128
+
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
@@ -133,6 +172,9 @@
 /* Define if the compiler understands the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION
 
+/* Determine if INTEGER*16 is available */
+#undef HAVE_Fortran_INTEGER_SIZEOF_16
+
 /* Define to 1 if you have the `GetConsoleScreenBufferInfo' function. */
 #undef HAVE_GETCONSOLESCREENBUFFERINFO
 
@@ -150,9 +192,6 @@
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #undef HAVE_GETTIMEOFDAY
-
-/* Define to 1 if you have the `get_fpc_csr' function. */
-#undef HAVE_GET_FPC_CSR
 
 /* Define to 1 if you have the <iapi.h> header file. */
 #undef HAVE_IAPI_H
@@ -221,9 +260,6 @@
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #undef HAVE_LIBMPE
 
-/* Define to 1 if you have the `nsl' library (-lnsl). */
-#undef HAVE_LIBNSL
-
 /* Define to 1 if you have the `pbl' library (-lpbl). */
 #undef HAVE_LIBPBL
 
@@ -232,9 +268,6 @@
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
-
-/* Define to 1 if you have the `socket' library (-lsocket). */
-#undef HAVE_LIBSOCKET
 
 /* Define to 1 if you have the `sz' library (-lsz). */
 #undef HAVE_LIBSZ
@@ -266,10 +299,10 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #undef HAVE_MPE_H
 
-/* Define if `MPI_Comm_c2f' and `MPI_Comm_f2c' exists */
+/* Define if MPI_Comm_c2f and MPI_Comm_f2c exist */
 #undef HAVE_MPI_MULTI_LANG_Comm
 
-/* Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists */
+/* Define if MPI_Info_c2f and MPI_Info_f2c exist */
 #undef HAVE_MPI_MULTI_LANG_Info
 
 /* Define to 1 if you have the <numpy/ndarrayobject.h> header file. */
@@ -292,6 +325,9 @@
 
 /* Define if we have Python NumPy support */
 #undef HAVE_PYTHON_NUMPY
+
+/* Define to 1 if you have the <quadmath.h> header file. */
+#undef HAVE_QUADMATH_H
 
 /* Define to 1 if you have the `random' function. */
 #undef HAVE_RANDOM
@@ -329,7 +365,7 @@
 /* Define to 1 if you have the `stat64' function. */
 #undef HAVE_STAT64
 
-/* Define if `struct stat' has the `st_blocks' field */
+/* Define if struct stat has the st_blocks field */
 #undef HAVE_STAT_ST_BLOCKS
 
 /* Define to 1 if you have the <stddef.h> header file. */
@@ -350,10 +386,10 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
-/* Define if `struct text_info' is defined */
+/* Define if struct text_info is defined */
 #undef HAVE_STRUCT_TEXT_INFO
 
-/* Define if `struct videoconfig' is defined */
+/* Define if struct videoconfig is defined */
 #undef HAVE_STRUCT_VIDEOCONFIG
 
 /* Define to 1 if you have the `symlink' function. */
@@ -362,14 +398,8 @@
 /* Define to 1 if you have the `system' function. */
 #undef HAVE_SYSTEM
 
-/* Define to 1 if you have the <sys/fpu.h> header file. */
-#undef HAVE_SYS_FPU_H
-
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H
-
-/* Define to 1 if you have the <sys/proc.h> header file. */
-#undef HAVE_SYS_PROC_H
 
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #undef HAVE_SYS_RESOURCE_H
@@ -379,9 +409,6 @@
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
-
-/* Define to 1 if you have the <sys/sysinfo.h> header file. */
-#undef HAVE_SYS_SYSINFO_H
 
 /* Define to 1 if you have the <sys/timeb.h> header file. */
 #undef HAVE_SYS_TIMEB_H
@@ -398,7 +425,7 @@
 /* Define if we have thread safe support */
 #undef HAVE_THREADSAFE
 
-/* Define if `timezone' is a global variable */
+/* Define if timezone is a global variable */
 #undef HAVE_TIMEZONE
 
 /* Define if the ioctl TIOCGETD is defined */
@@ -410,7 +437,7 @@
 /* Define to 1 if you have the `tmpfile' function. */
 #undef HAVE_TMPFILE
 
-/* Define if `tm_gmtoff' is a member of `struct tm' */
+/* Define if tm_gmtoff is a member of struct tm */
 #undef HAVE_TM_GMTOFF
 
 /* Define to 1 if you have the <unistd.h> header file. */
@@ -465,8 +492,7 @@
    with special algorithm. */
 #undef LONG_TO_LDOUBLE_SPECIAL
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
 /* Define if the metadata trace file code is to be compiled in */
@@ -498,6 +524,12 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* Determine the maximum decimal precision in C */
+#undef PAC_C_MAX_REAL_PRECISION
+
+/* Define Fortran Maximum Real Decimal Precision */
+#undef PAC_FC_MAX_REAL_PRECISION
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #undef PRINTF_LL_WIDTH
@@ -615,6 +647,12 @@
 
 /* The size of `unsigned', as computed by sizeof. */
 #undef SIZEOF_UNSIGNED
+
+/* The size of `_Quad', as computed by sizeof. */
+#undef SIZEOF__QUAD
+
+/* The size of `__float128', as computed by sizeof. */
+#undef SIZEOF___FLOAT128
 
 /* The size of `__int64', as computed by sizeof. */
 #undef SIZEOF___INT64

@@ -13,7 +13,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Gprivate.h"		/* IDs			  		*/

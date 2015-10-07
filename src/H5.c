@@ -311,16 +311,6 @@ H5_term_library(void)
 	pending += DOWN(M_top);
 #endif /* H5_HAVE_EFF */
 
-#ifdef H5_HAVE_EFF
-	pending += DOWN(TR);
-	pending += DOWN(RC);
-#ifdef H5_HAVE_INDEXING
-        pending += DOWN(X);
-#endif
-#endif /* H5_HAVE_EFF */
-	pending += DOWN(ES);
-	pending += DOWN(Q);
-
         /* Don't shut down the file code until objects in files are shut down */
         if(pending == 0)
             pending += DOWN(F);
@@ -345,6 +335,7 @@ H5_term_library(void)
             pending += DOWN(R);
             pending += DOWN(S);
             pending += DOWN(T);
+            pending += DOWN(M);
         } /* end if */
 
         /* Don't shut down "low-level" components until "high-level" components
@@ -355,6 +346,18 @@ H5_term_library(void)
         if(pending == 0) {
             pending += DOWN(AC);
             pending += DOWN(Z);
+
+#ifdef H5_HAVE_EFF
+            pending += DOWN(TR);
+            pending += DOWN(RC);
+            pending += DOWN(V);
+#ifdef H5_HAVE_INDEXING
+            pending += DOWN(X);
+#endif
+#endif /* H5_HAVE_EFF */
+            pending += DOWN(ES);
+            pending += DOWN(Q);
+
             pending += DOWN(FD);
             pending += DOWN(VL);
             pending += DOWN(PL);

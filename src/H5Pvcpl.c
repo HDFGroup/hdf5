@@ -27,7 +27,8 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 
 
 /***********/
@@ -335,7 +336,7 @@ H5P_dataspace_enc(const void *value, void **_pp, size_t *size)
     /* Encode the property list, if non-default */
     /* (if *pp == NULL, will only compute the size) */
     if(non_default_space) {
-        if(H5S_encode(space, *pp, &enc_size) < 0)
+        if(H5S_encode(space, pp, &enc_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't encode dataspace")
         if(*pp)
             *pp += enc_size;
@@ -383,15 +384,17 @@ H5P_dataspace_dec(const void **_pp, void *_value)
     if(non_default_space) {
         H5S_t *space;         /* Pointer to property list */
         size_t enc_size = 0;  /* Encoded size of property list */
+        uint8_t *tmp_p;
 
         /* Decode the property list */
-        if(NULL == (space = H5S_decode(*pp)))
+        if(NULL == (space = H5S_decode(pp)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode dataspace")
 
         /* Register the type and return the ID */
         if((*space_id = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
+        tmp_p = NULL;
         /* Compute the encoded size of the property list */
         if(H5S_encode(space, NULL, &enc_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "can't compute encoded property list size")

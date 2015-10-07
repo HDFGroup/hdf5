@@ -20,10 +20,8 @@
 /* Module Setup */
 /****************/
 
-#define H5X_PACKAGE /* Suppress error about including H5Xpkg */
+#include "H5Xmodule.h"          /* This source code file is part of the H5X module */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5X_init_interface
 
 /***********/
 /* Headers */
@@ -57,6 +55,10 @@
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -110,11 +112,12 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_init() */
 
+
 /*--------------------------------------------------------------------------
 NAME
-   H5X_init_interface -- Initialize interface-specific information
+   H5X__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5X_init_interface()
+    herr_t H5X__init_package()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -122,8 +125,8 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t
-H5X_init_interface(void)
+herr_t
+H5X__init_package(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -140,21 +143,23 @@ H5X_init_interface(void)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register FastBit index plugin");
 #endif
 
+    H5_PKG_INIT_VAR = TRUE;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5X_init_interface() */
+} /* end H5X__init_package() */
 
+
 /*--------------------------------------------------------------------------
  NAME
-    H5X_term_interface
+    H5X_term_package
  PURPOSE
     Terminate various H5X objects
  USAGE
-    void H5X_term_interface()
+    void H5X_term_package()
  RETURNS
-    Non-negative on success/Negative on failure
  DESCRIPTION
-    Release the atom group and any other resources allocated.
+    Release any other resources allocated.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
      Can't report errors...
@@ -162,23 +167,22 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5X_term_interface(void)
+H5X_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_interface_initialize_g) {
+    if(H5_PKG_INIT_VAR) {
         /* Free the table of filters */
         H5X_table_g = (H5X_class_t *) H5MM_xfree(H5X_table_g);
         H5X_table_used_g = H5X_table_alloc_g = 0;
 
-        /* Shut down interface */
-        H5_interface_initialize_g = 0;
+        H5_PKG_INIT_VAR = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5X_term_interface() */
+} /* H5X_term_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5X_registered
