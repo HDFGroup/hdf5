@@ -37,6 +37,7 @@
 #include "na_mpi.h"
 
 #define H5VL_IOD	(H5VL_iod_init())
+#define HDF5_VOL_IOD_VERSION_1	1	/* Version number of IOD VOL plugin */
 #else
 #define H5VL_IOD	(-1)
 #endif

@@ -17,10 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5R_PACKAGE		/*suppress error about including H5Rpkg   */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5R_init_interface
+#include "H5Rmodule.h"          /* This source code file is part of the H5R module */
 
 
 /***********/
@@ -58,6 +55,9 @@
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -76,39 +76,16 @@ static const H5I_class_t H5I_REFERENCE_CLS[1] = {{
     NULL			/* Callback routine for closing objects of this class */
 }};
 
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5R_top_package_initialize_s = FALSE;
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5R_init
- *
- * Purpose:	Initialize the interface from some other package.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, September 13, 2007
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5R_init(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5R_init() */
 
 
 /*--------------------------------------------------------------------------
 NAME
-   H5R_init_interface -- Initialize interface-specific information
+   H5R__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5R_init_interface()
+    herr_t H5R__init_package()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -116,33 +93,37 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t
-H5R_init_interface(void)
+herr_t
+H5R__init_package(void)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the file IDs */
     if(H5I_register_type(H5I_REFERENCE_CLS) < 0)
-	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface");
+	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    /* Mark "top" of interface as initialized, too */
+    H5R_top_package_initialize_s = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5R__init_package() */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5R_term_interface
+    H5R_top_term_package
  PURPOSE
     Terminate various H5R objects
  USAGE
-    void H5R_term_interface()
+    void H5R_top_term_package()
  RETURNS
     void
  DESCRIPTION
-    Release the atom group and any other resources allocated.
+    Release IDs for the atom group, deferring full interface shutdown
+    until later (in H5R_term_package).
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
      Can't report errors...
@@ -150,32 +131,69 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5R_term_interface(void)
+H5R_top_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_interface_initialize_g) {
+    if(H5R_top_package_initialize_s) {
 	if(H5I_nmembers(H5I_REFERENCE) > 0) {
 	    (void)H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
-        else {
-            /* Close deprecated interface */
-            n += H5R__term_deprec_interface();
 
-            /* Destroy the reference id group */
-	    (void)H5I_dec_type_ref(H5I_REFERENCE);
-            n++; /*H5I*/
-
-            /* Mark closed */
-	    H5_interface_initialize_g = 0;
-	} /* end else */
+        /* Mark closed */
+        if(0 == n)
+            H5R_top_package_initialize_s = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5R_term_interface() */
+} /* end H5R_top_term_package() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5R_term_package
+ PURPOSE
+    Terminate various H5R objects
+ USAGE
+    void H5R_term_package()
+ RETURNS
+    void
+ DESCRIPTION
+    Release the atom group and any other resources allocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+
+     Finishes shutting down the interface, after H5R_top_term_package()
+     is called
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int
+H5R_term_package(void)
+{
+    int	n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_REFERENCE));
+        HDassert(FALSE == H5R_top_package_initialize_s);
+
+        /* Destroy the reference id group */
+        n += (H5I_dec_type_ref(H5I_REFERENCE) > 0);
+
+        /* Mark closed */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5R_term_package() */
 
 
 /*--------------------------------------------------------------------------
@@ -424,7 +442,7 @@ H5R_dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, H5R_type_t ref_type, 
     H5G_loc_t loc;              /* Group location */
     unsigned rc;		/* Reference count of object */
     H5O_type_t obj_type;        /* Type of object */
-    hid_t ret_value;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -924,9 +942,10 @@ H5R_get_name(H5G_loc_t *loc, hid_t lapl_id, hid_t dxpl_id, H5R_type_t ref_type,
     const void *_ref, char *name, size_t size)
 {
     H5F_t *f;
-    hid_t file_id = (-1);       /* ID for file that the reference is in */
+    hid_t file_id = H5I_INVALID_HID;    /* ID for file that the reference is in */
+
     H5O_loc_t oloc;             /* Object location describing object for reference */
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value = -1;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

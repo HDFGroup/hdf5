@@ -39,5 +39,4 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype)
       endif (${libtype} MATCHES "SHARED")
     endif (HDF5_BUILD_FRAMEWORKS)
   endif (APPLE)
-
 endmacro (H5_SET_LIB_OPTIONS)

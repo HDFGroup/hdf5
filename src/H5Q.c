@@ -20,8 +20,7 @@
 /* Module Setup */
 /****************/
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5Q_init_interface
+#include "H5Qmodule.h"          /* This source code file is part of the H5Q module */
 
 /***********/
 /* Headers */
@@ -124,6 +123,10 @@ H5Q_decode_memcpy(void *data, size_t data_size, const unsigned char **buf_ptr)
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -167,9 +170,9 @@ done:
 
 /*--------------------------------------------------------------------------
 NAME
-   H5Q_init_interface -- Initialize interface-specific information
+   H5Q__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5Q_init_interface()
+    herr_t H5Q__init_package()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -178,7 +181,7 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5Q_init_interface(void)
+H5Q__init_package(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -190,15 +193,15 @@ H5Q_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Q_init_interface() */
+} /* end H5Q__init_package() */
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Q_term_interface
+    H5Q_term_package
  PURPOSE
     Terminate various H5Q objects
  USAGE
-    void H5Q_term_interface()
+    void H5Q_term_package()
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -210,29 +213,25 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5Q_term_interface(void)
+H5Q_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5_PKG_INIT_VAR) {
 	if(H5I_nmembers(H5I_QUERY) > 0) {
 	    (void)H5I_clear_type(H5I_QUERY, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
-        else {
-            /* Destroy the dataspace object id group */
-	    (void)H5I_dec_type_ref(H5I_QUERY);
-            n++; /*H5I*/
 
-	    /* Shut down interface */
-	    H5_interface_initialize_g = 0;
-	} /* end else */
+        /* Mark interface as closed */
+        if(0 == n)
+	    H5_PKG_INIT_VAR = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5Q_term_interface() */
+} /* end H5Q_term_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Qcreate

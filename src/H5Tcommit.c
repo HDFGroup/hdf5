@@ -22,10 +22,7 @@
 /* Module Setup */
 /****************/
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5T_init_commit_interface
+#include "H5Tmodule.h"          /* This source code file is part of the H5T module */
 
 
 /***********/
@@ -87,28 +84,6 @@ static H5T_t *H5T_open_oid(const H5G_loc_t *loc, hid_t dxpl_id);
 H5FL_EXTERN(H5VL_t);
 /* Declare a free list to manage the H5VL_object_t struct */
 H5FL_EXTERN(H5VL_object_t);
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5T_init_commit_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5T_init_commit_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5T_init_iterface currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5T_init_commit_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5T_init())
-} /* H5T_init_commit_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -212,10 +187,10 @@ herr_t
 H5T__commit_named(const H5G_loc_t *loc, const char *name, H5T_t *dt,
     hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id)
 {
-    H5O_obj_create_t ocrt_info;             /* Information for object creation */
-    H5T_obj_create_t tcrt_info;             /* Information for named datatype creation */
-    H5T_state_t old_state = H5T_STATE_TRANSIENT;        /* The state of the datatype before H5T__commit. */
-    herr_t      ret_value = SUCCEED;        /* Return value */
+    H5O_obj_create_t ocrt_info;         /* Information for object creation */
+    H5T_obj_create_t tcrt_info;         /* Information for named datatype creation */
+    H5T_state_t old_state;              /* The state of the datatype before H5T__commit. */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -531,7 +506,7 @@ done:
 int
 H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id)
 {
-    int ret_value;      /* Return value */
+    int ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -687,7 +662,7 @@ H5T_open(const H5G_loc_t *loc, hid_t dxpl_id)
 {
     H5T_shared_t   *shared_fo = NULL;
     H5T_t          *dt = NULL;
-    H5T_t          *ret_value;
+    H5T_t          *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -803,7 +778,7 @@ static H5T_t *
 H5T_open_oid(const H5G_loc_t *loc, hid_t dxpl_id)
 {
     H5T_t *dt = NULL;          /* Datatype from the file */
-    H5T_t *ret_value;          /* Return value */
+    H5T_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

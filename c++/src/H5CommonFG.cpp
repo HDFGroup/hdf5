@@ -14,7 +14,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <string>
-#include <iostream>
 
 #include "H5Include.h"
 #include "H5Exception.h"
@@ -23,6 +22,7 @@
 #include "H5Object.h"
 #include "H5FaccProp.h"
 #include "H5FcreatProp.h"
+#include "H5OcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
 #include "H5CommonFG.h"
@@ -1268,7 +1268,7 @@ CommonFG::~CommonFG() {}
 //--------------------------------------------------------------------------
 void f_DataType_setId(DataType* dtype, hid_t new_id)
 {
-    dtype->id = new_id;
+    dtype->p_setId(new_id);
 }
 
 //--------------------------------------------------------------------------
@@ -1283,7 +1283,7 @@ void f_DataType_setId(DataType* dtype, hid_t new_id)
 //--------------------------------------------------------------------------
 void f_DataSet_setId(DataSet* dset, hid_t new_id)
 {
-    dset->id = new_id;
+    dset->p_setId(new_id);
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS

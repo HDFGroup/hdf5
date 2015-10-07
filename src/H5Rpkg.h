@@ -21,7 +21,7 @@
  *              only within the H5R package. Source files outside the
  *              H5R package should include H5Rprivate.h instead.
  */
-#ifndef H5R_PACKAGE
+#if !(defined H5R_FRIEND || defined H5R_MODULE)
 #error "Do not include this file outside the H5R package!"
 #endif
 
@@ -55,8 +55,6 @@
 /******************************/
 
 /* General functions */
-H5_DLL herr_t H5R_init(void);
-H5_DLL herr_t H5R__term_deprec_interface(void);
 H5_DLL herr_t H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
     const void *_ref, H5O_type_t *obj_type);
 H5_DLL hid_t H5R_dereference(H5F_t *file, hid_t dapl_id, hid_t dxpl_id, H5R_type_t ref_type,

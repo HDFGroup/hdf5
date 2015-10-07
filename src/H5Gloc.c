@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/
@@ -643,7 +643,7 @@ htri_t
 H5G_loc_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 {
     H5G_loc_exists_t udata;     /* User data for traversal callback */
-    htri_t ret_value;           /* Return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -907,7 +907,7 @@ H5G_loc_get_comment(H5G_loc_t *loc, const char *name, char *comment/*out*/,
     size_t bufsize, hid_t lapl_id, hid_t dxpl_id)
 {
     H5G_loc_gc_t udata;         /* User data for traversal callback */
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value = -1;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

@@ -27,7 +27,7 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"		/* File access	 			*/
 
@@ -1279,7 +1279,7 @@ static void size2_verify_plist1(hid_t plist)
     CHECK_I(ret, "H5Pget_fill_value");
 
     ret = memcmp(&fill1, &fill1_correct, sizeof(fill1_correct));
-    VERIFY(ret, 0, memcmp);
+    VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype1_id);
     CHECK_I(ret, "H5Tclose");
@@ -1350,7 +1350,7 @@ static void size2_verify_plist2(hid_t plist)
     CHECK_I(ret, "H5Pget_fill_value");
 
     ret = HDmemcmp(&fill2, &fill2_correct, (size_t)DTYPE2_SIZE);
-    VERIFY(ret, 0, memcmp);
+    VERIFY(ret, 0, "memcmp");
 
     ret = H5Tclose(dtype2_id);
     CHECK_I(ret, "H5Tclose");
@@ -3988,10 +3988,7 @@ test_sohm(void)
     test_sohm_delete();         /* Test deleting shared messages */
     test_sohm_delete_revert();  /* Test that a file with SOHMs becomes an
                                  * empty file again when they are deleted. */
-#ifndef  H5_CANNOT_OPEN_TWICE   /* On VMS this test fails since it tries to
-                                   open target file the second time */
     test_sohm_extlink();        /* Test SOHMs when external links are used */
-#endif /* H5_CANNOT_OPEN_TWICE */
 
     test_sohm_extend_dset();    /* Test extending shared datasets */
     test_sohm_external_dtype(); /* Test using datatype in another file */

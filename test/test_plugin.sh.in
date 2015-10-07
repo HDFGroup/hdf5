@@ -36,7 +36,7 @@ case $(uname) in
     *)
         PLUGIN_LIB1="$FROM_DIR/libdynlib1.* $FROM_DIR/libdynlib3.*"
         PLUGIN_LIB2="$FROM_DIR/libdynlib2.*"
-        ::
+        ;;
 esac
 PLUGIN_LIBDIR1=testdir1
 PLUGIN_LIBDIR2=testdir2

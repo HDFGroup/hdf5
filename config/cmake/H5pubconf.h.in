@@ -15,24 +15,6 @@
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
 
-/* Defined if HDF5 was built with CMake AND build as a shared library */
-#cmakedefine H5_BUILT_AS_DYNAMIC_LIB @H5_BUILT_AS_DYNAMIC_LIB@
-
-/* Defined if HDF5 was built with CMake AND build as a static library */
-#cmakedefine H5_BUILT_AS_STATIC_LIB @H5_BUILT_AS_STATIC_LIB@
-
-/* Defined if HDF5 CPP  was built with CMake AND build as a shared library  */
-#cmakedefine H5_CPP_BUILT_AS_DYNAMIC_LIB @H5_CPP_BUILT_AS_DYNAMIC_LIB@
-
-/* Defined if HDF5 CPP  was built with CMake AND build as a static library  */
-#cmakedefine H5_CPP_BUILT_AS_STATIC_LIB @H5_CPP_BUILT_AS_STATIC_LIB@
-
-/* Defined if HDF5 HL was built with CMake AND build as a shared library */
-#cmakedefine H5_HL_BUILT_AS_DYNAMIC_LIB @H5_HL_BUILT_AS_DYNAMIC_LIB@
-
-/* Defined if HDF5 HL was built with CMake AND build as a static library */
-#cmakedefine H5_HL_BUILT_AS_STATIC_LIB @H5_HL_BUILT_AS_STATIC_LIB@
-
 /* Define if building universal (internal helper macro) */
 #cmakedefine H5_AC_APPLE_UNIVERSAL_BUILD @H5_AC_APPLE_UNIVERSAL_BUILD@
 
@@ -65,6 +47,18 @@
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
 #define @H5_FC_FUNC_@
+
+/* Define Fortran Maximum Real Decimal Precision */
+#cmakedefine H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
+
+/* Define C Maximum Real Decimal Precision */
+#cmakedefine H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
+
+/* Define if we have Fortran C_LONG_DOUBLE */
+#cmakedefine H5_FORTRAN_HAVE_C_LONG_DOUBLE @H5_FORTRAN_HAVE_C_LONG_DOUBLE@
+
+/* Determine if __float128 is available */
+#cmakedefine H5_HAVE_FLOAT128 @H5_HAVE_FLOAT128@
 
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
@@ -166,9 +160,6 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #cmakedefine H5_HAVE_GETTIMEOFDAY @H5_HAVE_GETTIMEOFDAY@
 
-/* Define to 1 if you have the `get_fpc_csr' function. */
-#cmakedefine H5_HAVE_GET_FPC_CSR @H5_HAVE_GET_FPC_CSR@
-
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
@@ -194,14 +185,8 @@
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #cmakedefine H5_HAVE_LIBMPE @H5_HAVE_LIBMPE@
 
-/* Define to 1 if you have the `nsl' library (-lnsl). */
-#cmakedefine H5_HAVE_LIBNSL @H5_HAVE_LIBNSL@
-
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #cmakedefine H5_HAVE_LIBPTHREAD @H5_HAVE_LIBPTHREAD@
-
-/* Define to 1 if you have the `socket' library (-lsocket). */
-#cmakedefine H5_HAVE_LIBSOCKET @H5_HAVE_LIBSOCKET@
 
 /* Define to 1 if you have the `sz' library (-lsz). */
 #cmakedefine H5_HAVE_LIBSZ @H5_HAVE_LIBSZ@
@@ -335,14 +320,8 @@
 /* Define to 1 if you have the `system' function. */
 #cmakedefine H5_HAVE_SYSTEM @H5_HAVE_SYSTEM@
 
-/* Define to 1 if you have the <sys/fpu.h> header file. */
-#cmakedefine H5_HAVE_SYS_FPU_H @H5_HAVE_SYS_FPU_H@
-
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #cmakedefine H5_HAVE_SYS_IOCTL_H @H5_HAVE_SYS_IOCTL_H@
-
-/* Define to 1 if you have the <sys/proc.h> header file. */
-#cmakedefine H5_HAVE_SYS_PROC_H @H5_HAVE_SYS_PROC_H@
 
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #cmakedefine H5_HAVE_SYS_RESOURCE_H @H5_HAVE_SYS_RESOURCE_H@
@@ -352,9 +331,6 @@
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #cmakedefine H5_HAVE_SYS_STAT_H @H5_HAVE_SYS_STAT_H@
-
-/* Define to 1 if you have the <sys/sysinfo.h> header file. */
-#cmakedefine H5_HAVE_SYS_SYSINFO_H @H5_HAVE_SYS_SYSINFO_H@
 
 /* Define to 1 if you have the <sys/timeb.h> header file. */
 #cmakedefine H5_HAVE_SYS_TIMEB_H @H5_HAVE_SYS_TIMEB_H@

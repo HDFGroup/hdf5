@@ -44,15 +44,15 @@ typedef struct H5HG_heap_t H5HG_heap_t;
 #define H5HG_MAXSIZE	65536
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
-#ifdef H5HG_PACKAGE
+#ifdef H5HG_MODULE
 #define H5HG_ADDR(H)            ((H)->addr)
 #define H5HG_SIZE(H)            ((H)->size)
 #define H5HG_FREE_SIZE(H)       ((H)->obj[0].size)
-#else /* H5HG_PACKAGE */
+#else /* H5HG_MODULE */
 #define H5HG_ADDR(H)            (H5HG_get_addr(H))
 #define H5HG_SIZE(H)            (H5HG_get_size(H))
 #define H5HG_FREE_SIZE(H)       (H5HG_get_free_size(H))
-#endif /* H5HG_PACKAGE */
+#endif /* H5HG_MODULE */
 
 
 /* Main global heap routines */
@@ -60,6 +60,7 @@ H5_DLL herr_t H5HG_insert(H5F_t *f, hid_t dxpl_id, size_t size, void *obj,
 			   H5HG_t *hobj/*out*/);
 H5_DLL void *H5HG_read(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, void *object, size_t *buf_size/*out*/);
 H5_DLL int H5HG_link(H5F_t *f, hid_t dxpl_id, const H5HG_t *hobj, int adjust);
+H5_DLL herr_t H5HG_get_obj_size(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj, size_t *obj_size);
 H5_DLL herr_t H5HG_remove(H5F_t *f, hid_t dxpl_id, H5HG_t *hobj);
 
 /* Support routines */

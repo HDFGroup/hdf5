@@ -81,7 +81,7 @@
 #define FLETCHER32      "CHECKSUM FLETCHER32"
 #define SZIP            "COMPRESSION SZIP"
 #define NBIT            "COMPRESSION NBIT"
-#define SCALEOFFSET            "COMPRESSION SCALEOFFSET"
+#define SCALEOFFSET     "COMPRESSION SCALEOFFSET"
 #define SCALEOFFSET_MINBIT            "MIN BITS"
 #define STORAGE_LAYOUT  "STORAGE_LAYOUT"
 #define CONTIGUOUS      "CONTIGUOUS"
@@ -93,6 +93,16 @@
 #define PACKED_BITS     "PACKED_BITS"
 #define PACKED_OFFSET   "OFFSET"
 #define PACKED_LENGTH   "LENGTH"
+#define VDS_VIRTUAL     "VIRTUAL"
+#define VDS_MAPPING     "MAPPING"
+#define VDS_SOURCE      "SOURCE"
+#define VDS_REG_HYPERSLAB   "SELECTION REGULAR_HYPERSLAB"
+#define VDS_IRR_HYPERSLAB   "SELECTION IRREGULAR_HYPERSLAB"
+#define VDS_POINT       "POINT"
+#define VDS_SRC_FILE    "FILE"
+#define VDS_SRC_DATASET "DATASET"
+#define VDS_NONE        "SELECTION NONE"
+#define VDS_ALL         "SELECTION ALL"
 
 #define BEGIN           "{"
 #define END             "}"
@@ -181,6 +191,15 @@ typedef struct h5tools_dump_header_t {
     const char *dataspacedescriptionend;
     const char *dataspacedimbegin;
     const char *dataspacedimend;
+
+    const char *virtualselectionbegin;
+    const char *virtualselectionend;
+    const char *virtualselectionblockbegin;
+    const char *virtualselectionblockend;
+    const char *virtualfilenamebegin;
+    const char *virtualfilenameend;
+    const char *virtualdatasetnamebegin;
+    const char *virtualdatasetnameend;
 
 } h5tools_dump_header_t;
 
@@ -574,8 +593,12 @@ H5TOOLS_DLL void    h5tools_region_simple_prefix(FILE *stream, const h5tool_form
                             h5tools_context_t *ctx, hsize_t elmtno, hsize_t *ptdata, int secnum);
 
 H5TOOLS_DLL int     render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t nelmts);
+H5TOOLS_DLL int     render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
+                            hid_t container, int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata);
 H5TOOLS_DLL hbool_t render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
                              FILE *stream, hid_t container);
+H5TOOLS_DLL int     render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
+                            FILE* stream, hid_t container, int ndims, hid_t type_id, hssize_t npoints);
 H5TOOLS_DLL hbool_t render_bin_output_region_points(hid_t region_space, hid_t region_id,
                              FILE *stream, hid_t container);
 

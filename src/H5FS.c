@@ -27,7 +27,8 @@
 /* Module Setup */
 /****************/
 
-#define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
+#include "H5FSmodule.h"         /* This source code file is part of the H5FS module */
+
 
 /***********/
 /* Headers */
@@ -37,6 +38,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5MFprivate.h"	/* File memory management		*/
+
 
 /****************/
 /* Local Macros */
@@ -65,6 +67,9 @@ static herr_t H5FS_sinfo_free_node_cb(void *item, void *key, void *op_data);
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Declare a free list to manage the H5FS_section_class_t sequence information */
 H5FL_SEQ_DEFINE(H5FS_section_class_t);
@@ -107,7 +112,7 @@ H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr, const H5FS_create_t *fs_c
     uint16_t nclasses, const H5FS_section_class_t *classes[], void *cls_init_udata, hsize_t alignment, hsize_t threshold)
 {
     H5FS_t *fspace = NULL;      /* New free space structure */
-    H5FS_t *ret_value;          /* Return value */
+    H5FS_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, NULL)
 #ifdef H5FS_DEBUG
@@ -196,7 +201,7 @@ H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, uint16_t nclasses,
 {
     H5FS_t *fspace = NULL;      /* New free space structure */
     H5FS_hdr_cache_ud_t cache_udata; /* User-data for metadata cache callback */
-    H5FS_t *ret_value;          /* Return value */
+    H5FS_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, NULL)
 #ifdef H5FS_DEBUG
@@ -602,7 +607,7 @@ H5FS__new(const H5F_t *f, uint16_t nclasses, const H5FS_section_class_t *classes
 {
     H5FS_t *fspace = NULL;      /* Free space manager */
     size_t u;                   /* Local index variable */
-    H5FS_t *ret_value;          /* Return value */
+    H5FS_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 

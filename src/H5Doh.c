@@ -17,8 +17,8 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
 
 
 /***********/
@@ -108,7 +108,7 @@ H5FL_DEFINE(H5D_copy_file_ud_t);
 static void *
 H5O__dset_get_copy_file_udata(void)
 {
-    void *ret_value;       /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -223,10 +223,10 @@ done:
 static hid_t
 H5O__dset_open(const H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
-    H5D_t       *dset = NULL;           /* Dataset opened */
-    htri_t  isdapl;                 /* lapl_id is a dapl */
-    hid_t   dapl_id;                /* dapl to use to open this dataset */
-    hid_t	ret_value;              /* Return value */
+    H5D_t  *dset = NULL;                /* Dataset opened */
+    htri_t  isdapl;                     /* lapl_id is a dapl */
+    hid_t   dapl_id;                    /* dapl to use to open this dataset */
+    hid_t   ret_value = H5I_INVALID_HID;        /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -279,7 +279,7 @@ H5O__dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
     H5D_obj_create_t *crt_info = (H5D_obj_create_t *)_crt_info; /* Dataset creation parameters */
     H5D_t *dset = NULL;         /* New dataset created */
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -327,7 +327,7 @@ static H5O_loc_t *
 H5O__dset_get_oloc(hid_t obj_id)
 {
     H5D_t       *dset;                  /* Dataset opened */
-    H5O_loc_t	*ret_value;             /* Return value */
+    H5O_loc_t	*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -397,6 +397,17 @@ H5O__dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 
         if(H5D__chunk_bh_info(f, dxpl_id, &layout, &pline, &(bh_info->index_size)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
+    } /* end if */
+    else if(layout.type == H5D_VIRTUAL
+            && (layout.storage.u.virt.serial_list_hobjid.addr != HADDR_UNDEF)) {
+        size_t virtual_heap_size;
+
+        /* Get size of global heap object for virtual dataset */
+        if(H5HG_get_obj_size(f, dxpl_id, &(layout.storage.u.virt.serial_list_hobjid), &virtual_heap_size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get global heap size for virtual dataset mapping")
+
+        /* Return heap size */
+        bh_info->heap_size = (hsize_t)virtual_heap_size;
     } /* end if */
 
     /* Check for External File List message in the object header */

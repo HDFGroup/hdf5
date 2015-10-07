@@ -60,6 +60,8 @@ static herr_t H5M_close_map(void *map);
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -78,6 +80,9 @@ static const H5I_class_t H5I_MAP_CLS[1] = {{
     0,                          /* # of reserved IDs for class */
     (H5I_free_t)H5M_close_map   /* Callback routine for closing auxilary objects of this class */
 }};
+
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5M_top_package_initialize_s = FALSE;
 
 
 /*-------------------------------------------------------------------------
@@ -108,9 +113,9 @@ done:
 
 /*--------------------------------------------------------------------------
 NAME
-   H5M_init_interface -- Initialize interface-specific information
+   H5M__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5M_init_interface()
+    herr_t H5M__init_package()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -119,63 +124,98 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5M_init_interface(void)
+H5M__init_package(void)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
-    /*
-     * Create attribute ID type.
-     */
     if(H5I_register_type(H5I_MAP_CLS) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
+    /* Mark "top" of interface as initialized, too */
+    H5M_top_package_initialize_s = TRUE;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5M_init_interface() */
+} /* end H5M__init_package() */
 
 
-/*--------------------------------------------------------------------------
- NAME
-    H5M_term_interface
- PURPOSE
-    Terminate various H5M objects
- USAGE
-    void H5M_term_interface()
- RETURNS
- DESCRIPTION
-    Release any other resources allocated.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:	H5M_top_term_package
+ *
+ * Purpose:	Close the "top" of the interface, releasing IDs, etc.
+ *
+ * Return:	Success:	Positive if anything is done that might
+ *				affect other interfaces; zero otherwise.
+ * 		Failure:	Negative.
+ *
+ * Programmer:	Quincey Koziol
+ *		Sunday, September	13, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
 int
-H5M_term_interface(void)
+H5M_top_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
-	if(H5I_nmembers(H5I_MAP) > 0) {
-	    (void)H5I_clear_type(H5I_MAP, FALSE, FALSE);
+    if(H5M_top_package_initialize_s) {
+        if(H5I_nmembers(H5I_MAP) > 0) {
+            (void)H5I_clear_type(H5I_MAP, FALSE, FALSE);
             n++; /*H5I*/
-	} /* end if */
-        else {
-            /* Destroy the dataspace object id group */
-	    (void)H5I_dec_type_ref(H5I_MAP);
-            n++; /*H5I*/
+        } /* end if */
 
-	    /* Shut down interface */
-	    H5_interface_initialize_g = 0;
-	} /* end else */
+        /* Mark closed */
+        if(0 == n)
+            H5M_top_package_initialize_s = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* H5M_term_interface() */
+} /* end H5M_top_term_package() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5M_term_package
+ *
+ * Purpose:	Terminates the H5M interface
+ *
+ * Note:	Finishes shutting down the interface, after
+ *		H5M_top_term_package() is called
+ *
+ * Return:	Success:	Positive if anything is done that might
+ *				affect other interfaces; zero otherwise.
+ * 		Failure:	Negative.
+ *
+ * Programmer:	Robb Matzke
+ *		Monday, January	 5, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5M_term_package(void)
+{
+    int	n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_MAP));
+        HDassert(FALSE == H5M_top_package_initialize_s);
+
+        /* Destroy the map object id map */
+        n += (H5I_dec_type_ref(H5I_MAP) > 0);
+
+        /* Mark closed */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5M_term_package() */
 
 
 /*-------------------------------------------------------------------------

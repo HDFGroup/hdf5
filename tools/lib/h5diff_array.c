@@ -102,29 +102,29 @@
 
 static hbool_t not_comparable;
 
-#define PER(A,B) {                                   \
-    per = -1;                                        \
-    not_comparable = FALSE;                          \
-    both_zero = FALSE;                               \
-    if(0 == (A) && 0 == (B))                         \
-        both_zero = TRUE;                            \
-    if(0 != (A))                                     \
-        per = (double)ABS((double)((B) - (A)) / (double)(A)); \
-    else                                             \
-        not_comparable = TRUE;                       \
+#define PER(A,B) {                                                      \
+    per = -1;                                                           \
+    not_comparable = FALSE;                                             \
+    both_zero = FALSE;                                                  \
+    if(H5_DBL_ABS_EQUAL(0,A) && H5_DBL_ABS_EQUAL(0,B))                  \
+        both_zero = TRUE;                                               \
+    if(!H5_DBL_ABS_EQUAL(0,A))                                          \
+        per = (double)ABS((double)((B) - (A)) / (double)(A));           \
+    else                                                                \
+        not_comparable = TRUE;                                          \
 }
 
 
-#define PER_UNSIGN(TYPE,A,B) {                       \
-    per = -1;                                        \
-    not_comparable = FALSE;                          \
-    both_zero = FALSE;                               \
-    if((A) == 0 && (B) == 0)                         \
-        both_zero = TRUE;                            \
-    if((A) != 0)                                     \
-        per = ABS((double)((TYPE)((B) - (A))) / (double)(A)) ; \
-    else                                             \
-        not_comparable = TRUE;                       \
+#define PER_UNSIGN(TYPE,A,B) {                                          \
+    per = -1;                                                           \
+    not_comparable = FALSE;                                             \
+    both_zero = FALSE;                                                  \
+    if(H5_DBL_ABS_EQUAL(0,A) && H5_DBL_ABS_EQUAL(0,B))                  \
+        both_zero = TRUE;                                               \
+    if(!H5_DBL_ABS_EQUAL(0,A))                                          \
+        per = ABS((double)((TYPE)((B) - (A))) / (double)(A)) ;          \
+    else                                                                \
+        not_comparable = TRUE;                                          \
 }
 
 
@@ -6090,28 +6090,6 @@ my_isnan(dtype_t type, void *val)
         }
     }
 
-#ifdef H5_VMS
-    /* For "float" and "double" on OpenVMS/Alpha, NaN is
-    * actually a valid value of maximal value.*/
-    if(!retval)
-    {
-        if (FLT_FLOAT==type)
-        {
-            float x;
-
-            HDmemcpy(&x, val, sizeof(float));
-            retval = (x==FLT_MAX || x==-FLT_MAX);
-        } else if (FLT_DOUBLE==type) {
-            double x;
-
-            HDmemcpy(&x, val, sizeof(double));
-            retval = (x==DBL_MAX || x==-DBL_MAX);
-        } else
-        {
-            return FALSE;
-        }
-    }
-#endif /*H5_VMS*/
     h5difftrace("my_isnan finish\n");
 
     return retval;

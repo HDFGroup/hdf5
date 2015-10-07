@@ -413,9 +413,9 @@ h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_str_dump_region_blocks
+ * Function:    h5tools_str_dump_space_slabs
  *
- * Purpose: Prints information about a dataspace region by appending
+ * Purpose: Prints information about a dataspace selection by appending
  *          the information to the specified string.
  *
  * Return:  none
@@ -426,19 +426,85 @@ h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
  *-------------------------------------------------------------------------
  */
 void
-h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
+h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace,
+        const h5tool_format_t *info, h5tools_context_t *ctx)
+{
+    hsize_t   start[H5S_MAX_RANK];
+    hsize_t   stride[H5S_MAX_RANK];
+    hsize_t   count[H5S_MAX_RANK];
+    hsize_t   block[H5S_MAX_RANK];
+    int       j;
+    int       ndims = H5Sget_simple_extent_ndims(rspace);
+
+    H5Sget_regular_hyperslab(rspace, start, stride, count, block);
+
+    /* Print hyperslab information */
+
+    /* Start coordinates */
+    h5tools_str_append(str, "%s%s ", info->line_indent, START);
+    for (j = 0; j < ndims; j++)
+        h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", start[j]);
+    h5tools_str_append(str, ")");
+    h5tools_str_append(str, "%s", "\n");
+    h5tools_str_indent(str, info, ctx);
+
+    /* Stride coordinates */
+    h5tools_str_append(str, "%s ", STRIDE);
+    for (j = 0; j < ndims; j++)
+        h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", stride[j]);
+    h5tools_str_append(str, ")");
+    h5tools_str_append(str, "%s", "\n");
+    h5tools_str_indent(str, info, ctx);
+
+    /* Count coordinates */
+    h5tools_str_append(str, "%s ", COUNT);
+    for (j = 0; j < ndims; j++) {
+        if(count[j] == H5S_UNLIMITED)
+            h5tools_str_append(str, "%s%s", j ? "," : "(","H5S_UNLIMITED");
+        else
+            h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", count[j]);
+    }
+    h5tools_str_append(str, ")");
+    h5tools_str_append(str, "%s", "\n");
+    h5tools_str_indent(str, info, ctx);
+
+    /* Block coordinates */
+    h5tools_str_append(str, "%s ", BLOCK);
+    for (j = 0; j < ndims; j++) {
+        if(block[j] == H5S_UNLIMITED)
+            h5tools_str_append(str, "%s%s", j ? "," : "(","H5S_UNLIMITED");
+        else
+            h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", block[j]);
+    }
+    h5tools_str_append(str, ")");
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_str_dump_space_blocks
+ *
+ * Purpose: Prints information about a dataspace selection by appending
+ *          the information to the specified string.
+ *
+ * Return:  none
+ *
+ * In/Out:
+ *      h5tools_str_t     *str
+ *-------------------------------------------------------------------------
+ */
+void
+h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace,
         const h5tool_format_t *info)
 {
     hssize_t   nblocks;
     hsize_t    alloc_size;
     hsize_t   *ptdata;
-    int        ndims = H5Sget_simple_extent_ndims(region);
+    int        ndims = H5Sget_simple_extent_ndims(rspace);
 
     /*
-     * This function fails if the region does not have blocks.
+     * This function fails if the rspace does not have blocks.
      */
     H5E_BEGIN_TRY {
-        nblocks = H5Sget_select_hyper_nblocks(region);
+        nblocks = H5Sget_select_hyper_nblocks(rspace);
     } H5E_END_TRY;
 
     /* Print block information */
@@ -449,13 +515,12 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
         ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
-        H5Sget_select_hyper_blocklist(region, (hsize_t)0, (hsize_t)nblocks, ptdata);
+        H5Sget_select_hyper_blocklist(rspace, (hsize_t)0, (hsize_t)nblocks, ptdata);
 
         for (i = 0; i < nblocks; i++) {
             int j;
 
-            h5tools_str_append(str, info->dset_blockformat_pre, i ? "," OPTIONAL_LINE_BREAK " " : "",
-                               (unsigned long)i);
+            h5tools_str_append(str, info->dset_blockformat_pre, i ? "," OPTIONAL_LINE_BREAK " " : "", (unsigned long)i);
 
             /* Start coordinates and opposite corner */
             for (j = 0; j < ndims; j++)
@@ -474,32 +539,31 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_str_dump_region_points
+ * Function:    h5tools_str_dump_space_points
  *
- * Purpose: Prints information about a dataspace region by appending
+ * Purpose: Prints information about a dataspace selection by appending
  *          the information to the specified string.
  *
  * Return:  none
  *
  * In/Out:
- *      h5tools_context_t *ctx
  *      h5tools_str_t     *str
  *-------------------------------------------------------------------------
  */
 void
-h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
+h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace,
         const h5tool_format_t *info)
 {
     hssize_t   npoints;
     hsize_t    alloc_size;
     hsize_t   *ptdata;
-    int        ndims = H5Sget_simple_extent_ndims(region);
+    int        ndims = H5Sget_simple_extent_ndims(rspace);
 
     /*
-     * This function fails if the region does not have points.
+     * This function fails if the rspace does not have points.
      */
     H5E_BEGIN_TRY {
-        npoints = H5Sget_select_elem_npoints(region);
+        npoints = H5Sget_select_elem_npoints(rspace);
     } H5E_END_TRY;
 
     /* Print point information */
@@ -510,7 +574,7 @@ h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region,
         HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
         ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
         H5_CHECK_OVERFLOW(npoints, hssize_t, hsize_t);
-        H5Sget_select_elem_pointlist(region, (hsize_t)0, (hsize_t)npoints, ptdata);
+        H5Sget_select_elem_pointlist(rspace, (hsize_t)0, (hsize_t)npoints, ptdata);
 
         for (i = 0; i < npoints; i++) {
             int j;
@@ -860,11 +924,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             else
                                 tempchar = (tempchar >> packed_data_offset) & packed_data_mask;
                         }
-    #ifdef H5_VMS
-                        h5tools_str_append(str, OPT(info->fmt_schar, "%hd"), tempchar);
-    #else
                         h5tools_str_append(str, OPT(info->fmt_schar, "%hhd"), tempchar);
-    #endif
                     }
                 } /* end if (sizeof(char) == nsize) */
                 else if (sizeof(int) == nsize) {
@@ -1062,6 +1122,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                     h5tools_str_append(str, H5_TOOLS_DATATYPE);
                                     break;
 
+                                case H5O_TYPE_UNKNOWN:
+                                case H5O_TYPE_NTYPES:
                                 default:
                                     h5tools_str_append(str, "%u-", (unsigned) oi.type);
                                     break;
@@ -1191,7 +1253,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 }
                 break;
 
-            default:
+            case H5T_TIME:
+            case H5T_BITFIELD:
+            case H5T_OPAQUE:
                 {
                     /* All other types get printed as hexadecimal */
                     size_t i;
@@ -1203,6 +1267,12 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             h5tools_str_append(str, "%s%02x", i ? ":" : "", ucp_vp[i]);
                     }
                 }
+                break;
+
+            case H5T_NO_CLASS:
+            case H5T_NCLASSES:
+            default:
+                h5tools_str_append(str, "invalid datatype");
                 break;
         } /* end switch */
     }
@@ -1238,9 +1308,9 @@ h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
 
             region_type = H5Sget_select_type(region);
             if(region_type==H5S_SEL_POINTS)
-                h5tools_str_dump_region_points(str, region, info);
+                h5tools_str_dump_space_points(str, region, info);
             else
-                h5tools_str_dump_region_blocks(str, region, info);
+                h5tools_str_dump_space_blocks(str, region, info);
 
             h5tools_str_append(str, "}");
 
@@ -1392,17 +1462,16 @@ h5tools_str_replace ( const char *string, const char *substr, const char *replac
 	char *head = NULL;
      
 	if ( substr == NULL || replacement == NULL ) 
-		return HDstrdup (string);
-		
+	    return HDstrdup (string);
 	newstr = HDstrdup (string);
 	head = newstr;
 	while ( (tok = HDstrstr ( head, substr ))){
 		oldstr = newstr;
-		newstr = HDmalloc ( HDstrlen ( oldstr ) - HDstrlen ( substr ) + HDstrlen ( replacement ) + 1 );
+		newstr = (char *)HDmalloc( HDstrlen( oldstr ) - HDstrlen( substr ) + HDstrlen( replacement ) + 1 );
 
         if ( newstr == NULL ){
-			HDfree (oldstr);
-			return NULL;
+	    HDfree (oldstr);
+	    return NULL;
         }
         HDmemcpy ( newstr, oldstr, tok - oldstr );
         HDmemcpy ( newstr + (tok - oldstr), replacement, HDstrlen ( replacement ) );

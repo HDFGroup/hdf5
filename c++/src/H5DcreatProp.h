@@ -25,10 +25,10 @@ namespace H5 {
     \brief Class DSetCreatPropList represents the dataset creation property
     list.
 */
-class H5_DLLCPP DSetCreatPropList : public PropList {
+class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
    public:
-	// Default dataset creation property list.
-	static const DSetCreatPropList DEFAULT;
+	///\brief Default dataset creation property list.
+	static const DSetCreatPropList& DEFAULT;
 
 	// Creates a dataset creation property list.
 	DSetCreatPropList();
@@ -123,6 +123,19 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 
 	// Noop destructor.
 	virtual ~DSetCreatPropList();
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+        // Deletes the global constant, should only be used by the library
+        static void deleteConstants();
+
+    private:
+	static DSetCreatPropList* DEFAULT_;
+
+        // Creates the global constant, should only be used by the library
+        static DSetCreatPropList* getConstant();
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 #ifndef H5_NO_NAMESPACE
 }

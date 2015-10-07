@@ -57,6 +57,10 @@ main (void)
       strcpy(filename1, NAME_BE_1);
       strcpy(filename2, NAME_BE_2);
       break;
+    case H5T_ORDER_ERROR:
+    case H5T_ORDER_VAX:
+    case H5T_ORDER_MIXED:
+    case H5T_ORDER_NONE:
     default:
       goto error;
   }

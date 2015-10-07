@@ -21,7 +21,7 @@
  *		the H5FD package.  Source files outside the H5FD package should
  *		include H5FDprivate.h instead.
  */
-#ifndef H5FD_PACKAGE
+#if !(defined H5FD_FRIEND || defined H5FD_MODULE)
 #error "Do not include this file outside the H5FD package!"
 #endif
 
@@ -52,7 +52,6 @@
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5FD_init(void);
 H5_DLL haddr_t H5FD_alloc_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
     hsize_t size, haddr_t *align_addr, hsize_t *align_size);
 H5_DLL herr_t H5FD_free_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,

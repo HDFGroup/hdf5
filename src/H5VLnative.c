@@ -21,17 +21,15 @@
  *              using HDF5 VFDs. 
  */
 
-#define H5A_PACKAGE		/*suppress error about including H5Apkg	  */
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
-#define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
-#define H5R_PACKAGE		/*suppress error about including H5Rpkg	  */
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
+#define H5A_FRIEND		/*suppress error about including H5Apkg	  */
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg   */
+#define H5L_FRIEND		/*suppress error about including H5Lpkg   */
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
+#define H5R_FRIEND		/*suppress error about including H5Rpkg	  */
+#define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5VL_native_init_interface
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"             /* Attribute pkg                        */
@@ -213,12 +211,18 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5VL_native_init_interface(void)
+H5VL__init_package(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    H5VL_native_init();
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5VL_native_init_interface() */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    if(H5VL_native_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize Native VOL")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -238,7 +242,7 @@ H5VL_native_init_interface(void)
 hid_t
 H5VL_native_init(void)
 {
-    hid_t ret_value = FAIL;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -255,6 +259,27 @@ H5VL_native_init(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_init() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VL__native_term
+ *
+ * Purpose:     Shut down the native VOL
+ *
+ * Returns:     SUCCEED (Can't fail)
+ *
+ *---------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__native_term(void)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Reset VFL ID */
+    H5VL_NATIVE_g = 0;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__native_term() */
 
 
 /*---------------------------------------------------------------------------
@@ -1334,11 +1359,6 @@ H5VL_native_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *na
 {
     H5D_t       *dset = NULL;
     H5G_loc_t	 loc;		        /* Object location of group */
-    H5G_loc_t	 dset_loc;		/* Object location of dataset */
-    H5G_name_t   path;            	/* Dataset group hier. path */
-    H5O_loc_t    oloc;            	/* Dataset object location */
-    H5O_type_t   obj_type;              /* Type of object at location */
-    hbool_t      loc_found = FALSE;     /* Location at 'name' found */
     void         *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1346,31 +1366,13 @@ H5VL_native_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *na
     if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
 
-    /* Set up dataset location to fill in */
-    dset_loc.oloc = &oloc;
-    dset_loc.path = &path;
-    H5G_loc_reset(&dset_loc);
-
-    /* Find the dataset object */
-    if(H5G_loc_find(&loc, name, &dset_loc, dapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found")
-    loc_found = TRUE;
-
-    /* Check that the object found is the correct type */
-    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get object type")
-    if(obj_type != H5O_TYPE_DATASET)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, NULL, "not a dataset")
-
     /* Open the dataset */
-    if(NULL == (dset = H5D_open(&dset_loc, dapl_id, dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't open dataset")
+    if(NULL == (dset = H5D__open_name(&loc, name, dapl_id, dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "unable to open dataset")
 
     ret_value = (void *)dset;
 
 done:
-    if(NULL == dset && loc_found && H5G_loc_free(&dset_loc) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "can't free location")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_dataset_open() */
 
@@ -2446,12 +2448,12 @@ H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void 
                     /* Retrieve the group's information */
                     if(H5G__obj_info(grp_loc.oloc, grp_info/*out*/, dxpl_id) < 0) {
                         H5G_loc_free(&grp_loc);
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve group info")
                     }
 
                     /* Release the object location */
                     if(H5G_loc_free(&grp_loc) < 0)
-                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+                        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
                 }
                 else if(loc_params.type == H5VL_OBJECT_BY_IDX) { /* H5Gget_info_by_idx */
                     H5G_loc_t   grp_loc;                /* Location used to open group */
@@ -2470,17 +2472,17 @@ H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void 
                                            loc_params.loc_data.loc_by_idx.n, &grp_loc/*out*/, 
                                            loc_params.loc_data.loc_by_idx.lapl_id, 
                                            dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+                        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "group not found")
 
                     /* Retrieve the group's information */
                     if(H5G__obj_info(grp_loc.oloc, grp_info/*out*/, dxpl_id) < 0) {
                         H5G_loc_free(&grp_loc);
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve group info")
                     }
 
                     /* Release the object location */
                     if(H5G_loc_free(&grp_loc) < 0)
-                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+                        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
                 }
                 else {
                     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get info parameters")
@@ -2591,7 +2593,7 @@ H5VL_native_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc
                     /* Link to the object */
                     if(H5L_link(&link_loc, loc_params.loc_data.loc_by_name.name, &cur_loc, lcpl_id, 
                                 lapl_id, dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create link")
                 }
                 break;
             }
@@ -2992,7 +2994,7 @@ H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *ope
                 /* Open the object */
                 if((temp_id = H5O_open_name(&loc, loc_params.loc_data.loc_by_name.name, 
                                             loc_params.loc_data.loc_by_name.lapl_id, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open object")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object")
                 break;
             }
         case H5VL_OBJECT_BY_IDX:
@@ -3008,13 +3010,13 @@ H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *ope
                                        loc_params.loc_data.loc_by_idx.order, loc_params.loc_data.loc_by_idx.n, 
                                        &obj_loc/*out*/, loc_params.loc_data.loc_by_idx.lapl_id, 
                                        dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "group not found")
+                    HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "group not found")
                 loc_found = TRUE;
 
                 /* Open the object */
                 if((temp_id = H5O_open_by_loc(&obj_loc, loc_params.loc_data.loc_by_idx.lapl_id, 
                                               dxpl_id, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open object")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object")
                 break;
             }
         case H5VL_OBJECT_BY_ADDR:
@@ -3033,7 +3035,7 @@ H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *ope
                 /* Open the object */
                 if((temp_id = H5O_open_by_loc(&obj_loc, H5P_LINK_ACCESS_DEFAULT, 
                                               dxpl_id, TRUE)) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open object")
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object")
                 break;
             }
         case H5VL_OBJECT_BY_REF:
@@ -3065,7 +3067,7 @@ done:
     /* Release the object location if we failed after copying it */
     if(temp_id < 0 && loc_found)
         if(H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, NULL, "can't free location")
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "can't free location")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_object_open() */
 
@@ -3251,12 +3253,12 @@ H5VL_native_object_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_object
                 if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Ovisit */
                     if((ret_value = H5O_visit(&loc, ".", idx_type, order, op, op_data, 
                                               H5P_LINK_ACCESS_DEFAULT, dxpl_id)) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visitation failed")
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
                 }
                 else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Ovisit_by_name */
                     if((ret_value = H5O_visit(&loc, loc_params.loc_data.loc_by_name.name, idx_type, order, 
                                               op, op_data, loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visitation failed")
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
                 }
                 else
                     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown object visit params");
@@ -3324,13 +3326,13 @@ H5VL_native_object_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req,
                     /* Retrieve the object's information */
                     if(H5G_loc_info(&loc, ".", TRUE, obj_info, H5P_LINK_ACCESS_DEFAULT, 
                                     dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+                        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
                 }
                 else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Oget_info_by_name */
                     /* Retrieve the object's information */
                     if(H5G_loc_info(&loc, loc_params.loc_data.loc_by_name.name, TRUE, obj_info, 
                                     loc_params.loc_data.loc_by_name.lapl_id, dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+                        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
                 }
                 else if(loc_params.type == H5VL_OBJECT_BY_IDX) { /* H5Oget_info_by_idx */
                     H5G_loc_t   obj_loc;                /* Location used to open group */
@@ -3349,17 +3351,17 @@ H5VL_native_object_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req,
                                            loc_params.loc_data.loc_by_idx.n, &obj_loc/*out*/, 
                                            loc_params.loc_data.loc_by_idx.lapl_id, 
                                            dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+                        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "group not found")
 
                     /* Retrieve the object's information */
                     if(H5O_get_info(obj_loc.oloc, dxpl_id, TRUE, obj_info) < 0) {
                         H5G_loc_free(&obj_loc);
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve object info")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object info")
                     }
 
                     /* Release the object location */
                     if(H5G_loc_free(&obj_loc) < 0)
-                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+                        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
                 }
                 else {
                     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get info parameters")
@@ -3377,12 +3379,12 @@ H5VL_native_object_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req,
                 if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Oget_comment */
                     if((*ret = H5G_loc_get_comment(&loc, ".", comment/*out*/, bufsize, 
                                                    H5P_LINK_ACCESS_DEFAULT, dxpl_id)) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+                        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
                 }
                 else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Oget_comment_by_name */
                     if((*ret = H5G_loc_get_comment(&loc, loc_params.loc_data.loc_by_name.name, comment/*out*/, bufsize, 
                                                    loc_params.loc_data.loc_by_name.lapl_id, dxpl_id)) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+                        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
                 }
                 else {
                     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown set_coment parameters")
@@ -3397,13 +3399,13 @@ H5VL_native_object_optional(void *obj, hid_t dxpl_id, void H5_ATTR_UNUSED **req,
                 if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Oset_comment */
                     /* (Re)set the object's comment */
                     if(H5G_loc_set_comment(&loc, ".", comment, H5P_LINK_ACCESS_DEFAULT, dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+                        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
                 }
                 else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Oset_comment_by_name */
                     /* (Re)set the object's comment */
                     if(H5G_loc_set_comment(&loc, loc_params.loc_data.loc_by_name.name, comment, 
                                            loc_params.loc_data.loc_by_name.lapl_id, dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+                        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
                 }
                 else {
                     HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown set_coment parameters")

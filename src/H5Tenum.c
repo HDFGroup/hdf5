@@ -18,10 +18,7 @@
  *      in the H5T interface.
  */
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5T_init_enum_interface
+#include "H5Tmodule.h"          /* This source code file is part of the H5T module */
 
 
 #include "H5private.h"		/*generic functions			  */
@@ -36,27 +33,6 @@ static char *H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out
 static herr_t H5T_enum_valueof(const H5T_t *dt, const char *name,
 				void *value/*out*/);
 
-
-/*--------------------------------------------------------------------------
-NAME
-   H5T_init_enum_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5T_init_enum_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5T_init_iterface currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5T_init_enum_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5T_init())
-} /* H5T_init_enum_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -123,7 +99,7 @@ done:
 H5T_t *
 H5T__enum_create(const H5T_t *parent)
 {
-    H5T_t	*ret_value;		/*new enumeration data type	*/
+    H5T_t	*ret_value = NULL;	/* New enumeration data type	*/
 
     FUNC_ENTER_PACKAGE
 
@@ -416,7 +392,7 @@ H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t si
     unsigned	lt, md = 0, rt;		/* Indices for binary search	*/
     int	        cmp = (-1);		/* Comparison result		*/
     hbool_t     alloc_name = FALSE;     /* Whether name has been allocated */
-    char        *ret_value;             /* Return value */
+    char        *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

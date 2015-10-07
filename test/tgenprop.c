@@ -21,7 +21,7 @@
 *
 *************************************************************/
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+#define H5P_FRIEND		/*suppress error about including H5Ppkg	  */
 
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5P_TESTING
@@ -63,6 +63,18 @@ double          prop4_def=1.41F;   /* Property 4 default value */
 
 #define PROP5_NAME      "async request"
 #define PROP6_NAME      "async flag"
+
+/* Structs used during iteration */
+typedef struct iter_data_t {
+    int     iter_count;
+    char    **names;
+} iter_data_t;
+
+typedef struct count_data_t {
+    int     count;
+    hid_t   id;
+} count_data_t;
+
 
 /****************************************************************
 **
@@ -287,17 +299,12 @@ test_genprop_basic_class_prop(void)
 **
 ****************************************************************/
 static int
-test_genprop_iter1(hid_t id, const char *name, void *iter_data)
+test_genprop_iter1(hid_t H5_ATTR_UNUSED id, const char *name,
+    void *iter_data)
 {
-    struct {                /* Struct for iterations */
-        int iter_count;
-        const char **names;
-    } *iter_struct = iter_data;
+    iter_data_t *idata = (iter_data_t *)iter_data;
 
-    /* Shut compiler up */
-    id = id;
-
-    return(HDstrcmp(name,iter_struct->names[iter_struct->iter_count++]));
+    return HDstrcmp(name,idata->names[idata->iter_count++]);
 }
 
 /****************************************************************
@@ -376,43 +383,34 @@ test_genprop_class_iter(void)
 static herr_t
 test_genprop_cls_crt_cb1(hid_t list_id, void *create_data)
 {
-    struct {                /* Struct for iterations */
-        int count;
-        hid_t id;
-    } *count_struct=create_data;
+    count_data_t *cdata = (count_data_t *)create_data;
 
-    count_struct->count++;
-    count_struct->id=list_id;
+    cdata->count++;
+    cdata->id = list_id;
 
-    return(SUCCEED);
+    return SUCCEED;
 }
 
 static herr_t
 test_genprop_cls_cpy_cb1(hid_t new_list_id, hid_t H5_ATTR_UNUSED old_list_id, void *copy_data)
 {
-    struct {                /* Struct for iterations */
-        int count;
-        hid_t id;
-    } *count_struct=copy_data;
+    count_data_t *cdata = (count_data_t *)copy_data;
 
-    count_struct->count++;
-    count_struct->id=new_list_id;
+    cdata->count++;
+    cdata->id = new_list_id;
 
-    return(SUCCEED);
+    return SUCCEED;
 }
 
 static herr_t
 test_genprop_cls_cls_cb1(hid_t list_id, void *create_data)
 {
-    struct {                /* Struct for iterations */
-        int count;
-        hid_t id;
-    } *count_struct=create_data;
+    count_data_t *cdata = (count_data_t *)create_data;
 
-    count_struct->count++;
-    count_struct->id=list_id;
+    cdata->count++;
+    cdata->id = list_id;
 
-    return(SUCCEED);
+    return SUCCEED;
 }
 
 /****************************************************************
@@ -789,7 +787,7 @@ test_genprop_basic_list_prop(void)
     ret = H5Pget(lid1, PROP4_NAME,&prop4_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
-    if(!H5_FLT_ABS_EQUAL(prop4_value,*PROP4_DEF_VALUE))
+    if(!H5_FLT_ABS_EQUAL(prop4_value,(double)*PROP4_DEF_VALUE))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
 	    "H5Pget", *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
 
@@ -846,17 +844,12 @@ test_genprop_basic_list_prop(void)
 **
 ****************************************************************/
 static int
-test_genprop_iter2(hid_t id, const char *name, void *iter_data)
+test_genprop_iter2(hid_t H5_ATTR_UNUSED id, const char *name,
+    void *iter_data)
 {
-    struct {                /* Struct for iterations */
-        int iter_count;
-        const char **names;
-    } *iter_struct=iter_data;
+    iter_data_t *idata = (iter_data_t *)iter_data;
 
-    /* Shut compiler up */
-    id=id;
-
-    return(HDstrcmp(name,iter_struct->names[iter_struct->iter_count++]));
+    return HDstrcmp(name,idata->names[idata->iter_count++]);
 }
 
 /****************************************************************
@@ -1000,15 +993,12 @@ prop_cb_info prop3_cb_info;     /* Callback statistics for property #3 */
 static herr_t
 test_genprop_cls_cpy_cb2(hid_t new_list_id, hid_t H5_ATTR_UNUSED old_list_id, void *create_data)
 {
-    struct {                /* Struct for iterations */
-        int count;
-        hid_t id;
-    } *count_struct=create_data;
+    count_data_t *cdata = (count_data_t *)create_data;
 
-    count_struct->count++;
-    count_struct->id=new_list_id;
+    cdata->count++;
+    cdata->id = new_list_id;
 
-    return(SUCCEED);
+    return SUCCEED;
 }
 
 /****************************************************************
@@ -1218,9 +1208,9 @@ test_genprop_list_callback(void)
     lid1 = H5Pcreate(cid1);
     CHECK_I(lid1, "H5Pcreate");
 
-    /* The compare callback should have been called once on property 1 (to check
-     * if the create callback modified the value) */
-    VERIFY(prop1_cb_info.cmp_count, 1, "H5Pcreate");
+    /* The compare callback should not have been called once on property 1, as
+     *  the property is always copied */
+    VERIFY(prop1_cb_info.cmp_count, 0, "H5Pcreate");
     /* The compare callback should not have been called on property 3, as there
      * is no create callback */
     VERIFY(prop3_cb_info.cmp_count, 0, "H5Pcreate");
@@ -1236,9 +1226,8 @@ test_genprop_list_callback(void)
     ret = H5Pget(lid1, PROP1_NAME,&prop1_value);
     CHECK_I(ret, "H5Pget");
     VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
-    /* The compare callback should have been called once (to check if the get
-     * callback modified the value) */
-    VERIFY(prop1_cb_info.cmp_count, 2, "H5Pget");
+    /* The compare callback should not have been called */
+    VERIFY(prop1_cb_info.cmp_count, 0, "H5Pget");
     ret = H5Pget(lid1, PROP2_NAME,&prop2_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
@@ -1257,7 +1246,7 @@ test_genprop_list_callback(void)
     ret = H5Pget(lid1, PROP4_NAME,&prop4_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
-    if(!H5_FLT_ABS_EQUAL(prop4_value,*PROP4_DEF_VALUE))
+    if(!H5_FLT_ABS_EQUAL(prop4_value,(double)*PROP4_DEF_VALUE))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
 	    "H5Pget", *PROP4_DEF_VALUE, prop4_value, (int)__LINE__, __FILE__);
 
@@ -1281,17 +1270,15 @@ test_genprop_list_callback(void)
     if(HDmemcmp(prop1_cb_info.set_value,&prop1_new_value, PROP1_SIZE)!=0)
         TestErrPrintf("Property #1 value doesn't match!, line=%d\n",__LINE__);
 
-    /* The compare callback should have been called once (to check if the new
-     * value needed to be copied onto the property list) */
-    VERIFY(prop1_cb_info.cmp_count, 3, "H5Pset");
+    /* The compare callback should not have been called  */
+    VERIFY(prop1_cb_info.cmp_count, 0, "H5Pset");
 
     /* Set value of property #3 to different value */
     ret = H5Pset(lid1, PROP3_NAME,prop3_new_value);
     CHECK_I(ret, "H5Pset");
 
-    /* The compare callback should have been called once (to check if the new
-     * value needed to be copied onto the property list) */
-    VERIFY(prop3_cb_info.cmp_count, 1, "H5Pset");
+    /* The compare callback should not have been called */
+    VERIFY(prop3_cb_info.cmp_count, 0, "H5Pset");
 
     /* Check new value of tracked properties */
     ret = H5Pget(lid1, PROP1_NAME,&prop1_value);
@@ -1338,8 +1325,8 @@ test_genprop_list_callback(void)
     VERIFY(ret, 1, "H5Pequal");
 
     /* Verify compare callback information for properties tracked */
-    VERIFY(prop1_cb_info.cmp_count, 4, "H5Pequal");
-    VERIFY(prop3_cb_info.cmp_count, 2, "H5Pequal");
+    VERIFY(prop1_cb_info.cmp_count, 1, "H5Pequal");
+    VERIFY(prop3_cb_info.cmp_count, 1, "H5Pequal");
 
     /* Close first list */
     ret = H5Pclose(lid1);

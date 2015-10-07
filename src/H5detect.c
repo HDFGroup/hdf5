@@ -608,7 +608,7 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 /* Module Setup */\n\
 /****************/\n\
 \n\
-#define H5T_PACKAGE /*suppress error about including H5Tpkg.h*/\n\
+#include \"H5Tmodule.h\"          /* This source code file is part of the H5T module */\n\
 \n\
 \n\
 /***********/\n\
@@ -667,7 +667,7 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
     printf("\n\
 \n\
 /*-------------------------------------------------------------------------\n\
- * Function:	H5TN_init_interface\n\
+ * Function:	H5T__init_native\n\
  *\n\
  * Purpose:	Initialize pre-defined native datatypes from code generated\n\
  *              during the library configuration by H5detect.\n\
@@ -681,12 +681,12 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
  *-------------------------------------------------------------------------\n\
  */\n\
 herr_t\n\
-H5TN_init_interface(void)\n\
+H5T__init_native(void)\n\
 {\n\
     H5T_t	*dt = NULL;\n\
     herr_t	ret_value = SUCCEED;\n\
 \n\
-    FUNC_ENTER_NOAPI(FAIL)\n");
+    FUNC_ENTER_PACKAGE\n");
 
     for(i = 0; i < nd; i++) {
         /* The native endianess of this machine */
@@ -809,7 +809,7 @@ done:\n\
         } /* end if */\n\
     } /* end if */\n\
 \n\
-    FUNC_LEAVE_NOAPI(ret_value);\n} /* end H5TN_init_interface() */\n");
+    FUNC_LEAVE_NOAPI(ret_value);\n} /* end H5T__init_native() */\n");
 
     /* Print the ALIGNMENT and signal-handling status as comments */
     printf("\n"

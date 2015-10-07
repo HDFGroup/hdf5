@@ -31,10 +31,7 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5G__init_deprec_interface
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/
@@ -102,51 +99,6 @@ static H5G_obj_t H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx,
 /*******************/
 
 
-
-/*--------------------------------------------------------------------------
-NAME
-   H5G__init_deprec_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5G__init_deprec_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5G__init() currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5G__init_deprec_interface(void)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    FUNC_LEAVE_NOAPI(H5G__init())
-} /* H5G__init_deprec_interface() */
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5G__term_deprec_interface -- Terminate interface
-USAGE
-    herr_t H5G__term_deprec_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Terminates interface.  (Just resets H5_interface_initialize_g
-    currently).
-
---------------------------------------------------------------------------*/
-herr_t
-H5G__term_deprec_interface(void)
-{
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Mark closed */
-    H5_interface_initialize_g = 0;
-
-    FUNC_LEAVE_NOAPI(0)
-} /* H5G__term_deprec_interface() */
-
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
@@ -164,7 +116,7 @@ H5G__term_deprec_interface(void)
 H5G_obj_t
 H5G_map_obj_type(H5O_type_t obj_type)
 {
-    H5G_obj_t ret_value;        /* Return value */
+    H5G_obj_t ret_value = H5G_UNKNOWN;  /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1225,7 +1177,7 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message */
     htri_t linfo_exists;        /* Whether the link info message exists */
-    H5G_obj_t ret_value;        /* Return value */
+    H5G_obj_t ret_value = H5G_UNKNOWN;  /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, oloc->addr, H5G_UNKNOWN)
 

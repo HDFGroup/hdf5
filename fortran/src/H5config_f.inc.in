@@ -1,0 +1,62 @@
+! fortran/src/H5config_f.inc. Generated from fortran/src/H5config_f.inc.in by configure
+
+! The script to replace the defines in H5config_f.inc.in is
+! located in configure.ac in the Fortran section. 
+
+! Define if we have parallel support
+#undef HAVE_PARALLEL
+
+! Define if the intrinsic function STORAGE_SIZE exists
+#undef FORTRAN_HAVE_STORAGE_SIZE
+
+! Define if the intrinsic function SIZEOF exists
+#undef FORTRAN_HAVE_SIZEOF
+
+! Define if the intrinsic function C_SIZEOF exists
+#undef FORTRAN_HAVE_C_SIZEOF
+
+! Define if the intrinsic function C_LONG_DOUBLE exists
+#undef FORTRAN_HAVE_C_LONG_DOUBLE
+
+! Define if Fortran C_LONG_DOUBLE is different from C_DOUBLE
+#undef FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
+
+! Define if the intrinsic module ISO_FORTRAN_ENV exists
+#undef HAVE_ISO_FORTRAN_ENV
+
+! Define the size of C's long double
+#undef SIZEOF_DOUBLE
+
+! Define the size of C's long double
+#undef SIZEOF_LONG_DOUBLE
+
+! Define the maximum decimal precision for reals
+#undef PAC_FC_MAX_REAL_PRECISION
+
+! If C has quad precision
+#undef HAVE_FLOAT128
+
+! Define if INTEGER*16 is available 
+#undef HAVE_Fortran_INTEGER_SIZEOF_16
+
+! Maximum decimal precision for C
+#undef PAC_C_MAX_REAL_PRECISION
+
+! number of valid REAL KINDs
+#undef H5CONFIG_F_NUM_RKIND
+
+! valid REAL KINDs (need to have a matching C counter-part)
+#undef H5CONFIG_F_RKIND
+
+! valid REAL KINDs (need to have a matching C counter-part)
+#undef H5CONFIG_F_RKIND_SIZEOF
+
+! number of valid INTEGER KINDs
+#undef H5CONFIG_F_NUM_IKIND
+
+! valid INTEGER KINDs (need to have a matching C counter-part)
+#undef H5CONFIG_F_IKIND
+
+! Fortran compiler name
+#undef Fortran_COMPILER_ID
+

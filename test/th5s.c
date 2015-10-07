@@ -565,7 +565,7 @@ test_h5s_zero_dim(void)
                 wdata_real[i][j][k] = i + j + k;
 
     /* Test with different space allocation times */
-    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
 
         /* Make sure we can create the space with the dimension size 0 (starting from v1.8.7).
          * The dimension doesn't need to be unlimited. */
@@ -2326,6 +2326,48 @@ test_h5s_extent_copy(void)
 
 /****************************************************************
 **
+**  test_h5s_bug1(): Test Creating dataspace with H5Screate then
+*                    setting extent with H5Sextent_copy.
+**
+****************************************************************/
+static void
+test_h5s_bug1(void)
+{
+    hid_t space1;               /* Dataspace to copy extent to */
+    hid_t space2;               /* Scalar dataspace */
+    hsize_t dims[2] = {10, 10}; /* Dimensions */
+    hsize_t start[2] = {0, 0};  /* Hyperslab start */
+    htri_t select_valid;        /* Whether the dataspace selection is valid */
+    herr_t ret;                 /* Generic error return */
+
+    /* Create dataspaces */
+    space1 = H5Screate(H5S_SIMPLE);
+    CHECK(space1, FAIL, "H5Screate");
+    space2 = H5Screate_simple(2, dims, NULL);
+    CHECK(space2, FAIL, "H5Screate");
+
+    /* Copy extent to space1 */
+    ret = H5Sextent_copy(space1, space2);
+    CHECK(ret, FAIL, "H5Sextent_copy");
+
+    /* Select hyperslab in space1 containing entire extent */
+    ret = H5Sselect_hyperslab(space1, H5S_SELECT_SET, start, NULL, dims, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Check that space1's selection is valid */
+    select_valid = H5Sselect_valid(space1);
+    CHECK(select_valid, FAIL, "H5Sselect_valid");
+    VERIFY(select_valid, TRUE, "H5Sselect_valid result");
+
+    /* Close dataspaces */
+    ret = H5Sclose(space1);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(space2);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* test_h5s_bug1() */
+
+/****************************************************************
+**
 **  test_h5s(): Main H5S (dataspace) testing routine.
 **
 ****************************************************************/
@@ -2350,6 +2392,7 @@ test_h5s(void)
 
     test_h5s_extent_equal();	/* Test extent comparison code */
     test_h5s_extent_copy();     /* Test extent copy code */
+    test_h5s_bug1();            /* Test bug in offset initialization */
 } /* test_h5s() */
 
 

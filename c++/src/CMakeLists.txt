@@ -2,13 +2,6 @@ cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_CPP_SRC)
 
 #-----------------------------------------------------------------------------
-# Shared/Static Libs
-#-----------------------------------------------------------------------------
-if (BUILD_SHARED_LIBS)
-  set (CPP_BUILT_AS_DYNAMIC_LIB 1)
-endif (BUILD_SHARED_LIBS)
-
-#-----------------------------------------------------------------------------
 # Generate configure file
 #-----------------------------------------------------------------------------
 configure_file (${HDF_RESOURCES_DIR}/H5cxx_config.h.in
@@ -42,6 +35,7 @@ set (CPP_SRCS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Library.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Location.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Object.cpp
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5OcreatProp.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5PredType.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5PropList.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5StrType.cpp
@@ -77,21 +71,38 @@ set (CPP_HDRS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Library.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Location.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Object.h
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5OcreatProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5PredType.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5PropList.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5StrType.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5VarLenType.h
 )
 
-add_library (${HDF5_CPP_LIB_TARGET} ${LIB_TYPE} ${CPP_SRCS} ${CPP_HDRS})
-TARGET_C_PROPERTIES (${HDF5_CPP_LIB_TARGET} ${LIB_TYPE} " " " ")
+add_library (${HDF5_CPP_LIB_TARGET} STATIC ${CPP_SRCS} ${CPP_HDRS})
+TARGET_C_PROPERTIES (${HDF5_CPP_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIB_TARGET}")
-H5_SET_LIB_OPTIONS (${HDF5_CPP_LIB_TARGET} ${HDF5_CPP_LIB_NAME} ${LIB_TYPE})
+H5_SET_LIB_OPTIONS (${HDF5_CPP_LIB_TARGET} ${HDF5_CPP_LIB_NAME} STATIC)
 set_target_properties (${HDF5_CPP_LIB_TARGET} PROPERTIES
     FOLDER libraries/cpp
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
+set (install_targets ${HDF5_CPP_LIB_TARGET})
+
+if (BUILD_SHARED_LIBS)
+  add_library (${HDF5_CPP_LIBSH_TARGET} SHARED ${CPP_SRCS} ${CPP_HDRS})
+  TARGET_C_PROPERTIES (${HDF5_CPP_LIBSH_TARGET} SHARED " " " ")
+  target_link_libraries (${HDF5_CPP_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIBSH_TARGET}")
+  H5_SET_LIB_OPTIONS (${HDF5_CPP_LIBSH_TARGET} ${HDF5_CPP_LIB_NAME} SHARED)
+  set_target_properties (${HDF5_CPP_LIBSH_TARGET} PROPERTIES
+      FOLDER libraries/cpp
+      COMPILE_DEFINITIONS "H5_BUILT_AS_DYNAMIC_LIB"
+      INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+      INTERFACE_COMPILE_DEFINITIONS H5_BUILT_AS_DYNAMIC_LIB=1
+  )
+  set (install_targets ${install_targets} ${HDF5_CPP_LIBSH_TARGET})
+endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
@@ -110,12 +121,12 @@ install (
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
-    INSTALL_TARGET_PDB (${HDF5_CPP_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} cpplibraries)
+    INSTALL_TARGET_PDB (${HDF5_CPP_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} cpplibraries)
   endif (BUILD_SHARED_LIBS)
 
   install (
       TARGETS
-          ${HDF5_CPP_LIB_TARGET}
+          ${install_targets}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
       LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT cpplibraries

@@ -21,11 +21,9 @@
  *              by the function shipper.
  */
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5P_FRIEND		/*suppress error about including H5Ppkg	  */
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5VL_iod_init_interface
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -290,9 +288,9 @@ static H5VL_class_t H5VL_iod_g = {
 
 /*--------------------------------------------------------------------------
 NAME
-   H5VL_iod_init_interface -- Initialize interface-specific information
+   H5VL__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5VL_iod_init_interface()
+    herr_t H5VL__init_package()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -302,12 +300,15 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5VL_iod_init_interface(void)
+H5VL__init_package(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-    H5VL_iod_init();
+    FUNC_ENTER_STATIC
+
+    if(H5VL_iod_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize FF IOD VOL plugin")
+
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5VL_iod_init_interface() */
+} /* H5VL__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -344,6 +345,27 @@ H5VL_iod_init(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_init() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VL__iod_term
+ *
+ * Purpose:     Shut down the iod VOL
+ *
+ * Returns:     SUCCEED (Can't fail)
+ *
+ *---------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__iod_term(void)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Reset VOL ID */
+    H5VL_IOD_g = 0;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__iod_term() */
 
 
 /*-------------------------------------------------------------------------

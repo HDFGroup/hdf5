@@ -69,6 +69,11 @@ MAJOR, H5E_EFL, External file list
 MAJOR, H5E_REFERENCE, References
 MAJOR, H5E_VFL, Virtual File Layer
 MAJOR, H5E_VOL, Virtual Object Layer
+MAJOR, H5E_MAP, Map
+MAJOR, H5E_VIEW, View
+MAJOR, H5E_TRANS, Transaction
+MAJOR, H5E_RCXT, Read Context
+MAJOR, H5E_ESTACK, Event Stack
 MAJOR, H5E_QUERY, Query
 MAJOR, H5E_TST, Ternary Search Trees
 MAJOR, H5E_RS, Reference Counted Strings
@@ -220,6 +225,7 @@ MINOR, DSPACE, H5E_CANTSELECT, Can't select hyperslab
 MINOR, DSPACE, H5E_CANTNEXT, Can't move to next iterator location
 MINOR, DSPACE, H5E_BADSELECT, Invalid selection
 MINOR, DSPACE, H5E_CANTCOMPARE, Can't compare objects
+MINOR, DSPACE, H5E_CANTAPPEND, Can't append object
 
 # Property list errors
 MINOR, PLIST, H5E_CANTGET, Can't get value

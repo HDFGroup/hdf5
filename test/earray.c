@@ -22,7 +22,7 @@
  * This file needs to access private datatypes from the H5EA package.
  * This file also needs to access the extensible array testing code.
  */
-#define H5EA_PACKAGE
+#define H5EA_FRIEND		/*suppress error about including H5EApkg	  */
 #define H5EA_TESTING
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 
@@ -30,7 +30,7 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"		/* File access	 			*/
 
@@ -2902,7 +2902,7 @@ main(void)
     init_cparam(&cparam);
 
     /* Iterate over the testing parameters */
-    for(curr_test = EARRAY_TEST_NORMAL; curr_test < EARRAY_TEST_NTESTS; curr_test++) {
+    for(curr_test = EARRAY_TEST_NORMAL; curr_test < EARRAY_TEST_NTESTS; H5_INC_ENUM(earray_test_type_t, curr_test)) {
 
         /* Initialize the testing parameters */
         init_tparam(&tparam, &cparam);
@@ -2934,7 +2934,7 @@ main(void)
         nerrors += test_flush_depend(fapl, &cparam, &tparam);
 
         /* Iterate over the type of capacity tests */
-        for(curr_iter = EARRAY_ITER_FW; curr_iter < EARRAY_ITER_NITERS; curr_iter++) {
+        for(curr_iter = EARRAY_ITER_FW; curr_iter < EARRAY_ITER_NITERS; H5_INC_ENUM(earray_iter_type_t, curr_iter)) {
             hsize_t sblk;               /* Super block index */
             hsize_t dblk;               /* Data block index */
             hsize_t nelmts;             /* # of elements to test */

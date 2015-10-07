@@ -27,10 +27,8 @@
 /* Module Setup */
 /****************/
 
-#define H5VL_PACKAGE		/*suppress error about including H5VLpkg  */
+#include "H5VLmodule.h"         /* This source code file is part of the H5VL module */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5VL_init_interface
 
 /***********/
 /* Headers */
@@ -49,6 +47,13 @@
 /********************/
 static herr_t H5VL_free_cls(H5VL_class_t *cls);
 
+/*********************/
+/* Package Variables */
+/*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 /*******************/
 /* Local Variables */
 /*******************/
@@ -65,16 +70,18 @@ static const H5I_class_t H5I_VOL_CLS[1] = {{
     (H5I_free_t)H5VL_free_cls   /* Callback routine for closing objects of this class */
 }};
 
-
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5VL_top_package_initialize_s = FALSE;
+
 /*-------------------------------------------------------------------------
- * Function:	H5VL_init
+ * Function:H5VL_init
  *
- * Purpose:	Initialize the interface from some other package.
+ * Purpose:Initialize the interface from some other package.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:Success:non-negative
+ *Failure:negative
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:Mohamad Chaarawi
  *              January, 2012
  *
  *-------------------------------------------------------------------------
@@ -92,85 +99,76 @@ done:
 } /* end H5VL_init() */
 
 
-/*-------------------------------------------------------------------------
- * Function:	H5VL_init_interface
- *
- * Purpose:	Initialize the virtual object layer.
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *              January, 2012
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL_init_interface(void)
+/*--------------------------------------------------------------------------
+NAME
+   H5VL__init_package -- Initialize interface-specific information
+USAGE
+    herr_t H5VL__init_package()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+--------------------------------------------------------------------------*/
+herr_t
+H5VL__init_package(void)
 {
-    herr_t ret_value = SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
-    /* register VOL ID type */
+    /* Initialize the atom group for the VL IDs */
     if(H5I_register_type(H5I_VOL_CLS) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_init_interface() */
+} /* end H5VL__init_package() */
 
 
-/*-------------------------------------------------------------------------
- * Function:	H5VL_term_interface
- *
- * Purpose:	Terminate this interface: free all memory and reset global
- *		variables to their initial values.  Release all ID groups
- *		associated with this interface.
- *
- * Return:	Success:	Positive if anything was done that might
- *				have affected other interfaces; zero
- *				otherwise.
- *
- *		Failure:        Never fails.
- *
- * Programmer:	Mohamad Chaarawi
- *              January, 2012
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
+/*--------------------------------------------------------------------------
+ NAME
+    H5VL_term_package
+ PURPOSE
+    Terminate various H5VL objects
+ USAGE
+    void H5VL_term_package()
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    Release the atom group and any other resources allocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+
+     Finishes shutting down the interface, after H5VL_top_term_package()
+     is called
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
 int
-H5VL_term_interface(void)
+H5VL_term_package(void)
 {
-    int n = 0, n1 = 0;
-    hbool_t term = TRUE;
+    int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
-	if((n1=H5I_nmembers(H5I_VOL))!=0) {
-	    H5I_clear_type(H5I_VOL, FALSE, FALSE);
-            term = FALSE;
-	} else {
-	    H5I_dec_type_ref(H5I_VOL);
-	}
+    if(H5_PKG_INIT_VAR) {
 
-        if (term) {
-            H5_interface_initialize_g = 0;
-            n = 1;
+        if(H5I_nmembers(H5I_VOL) > 0) {
+            (void)H5I_clear_type(H5I_VOL, FALSE, FALSE);
+            n++;
         }
         else {
-            n = n1;
+            n += (H5I_dec_type_ref(H5I_VOL) > 0);
+
+            /* Mark interface as closed */
+            if(0 == n)
+                H5_PKG_INIT_VAR = FALSE;
         }
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-}
+} /* end H5VL_term_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -233,7 +231,6 @@ H5VL__get_plugin_cb(void *obj, hid_t id, void *_op_data)
         op_data->ret_id = id;
         ret_value = H5_ITER_STOP;
     }
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__get_plugin_cb() */
 
@@ -1513,7 +1510,7 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                 hid_t dxpl_id, void **req)
 {
     H5P_genplist_t     *plist;                 /* Property list pointer */
-    hid_t               plugin_id;             /* VOL plugin identigier attached to fapl_id */
+    H5VL_plugin_prop_t  plugin_prop;           /* Property for vol plugin ID & info */
     H5VL_class_t       *vol_cls = NULL;
     void	       *ret_value = NULL;      /* Return value */
 
@@ -1523,10 +1520,10 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin info")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     if(NULL == (ret_value = H5VL_file_create(vol_cls, name, flags, fcpl_id, fapl_id, 
@@ -1555,7 +1552,7 @@ void *
 H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
     H5P_genplist_t     *plist;                 /* Property list pointer */
-    hid_t               plugin_id;             /* VOL plugin id attached to fapl_id */
+    H5VL_plugin_prop_t plugin_prop;            /* Property for vol plugin ID & info */
     H5VL_class_t       *vol_cls = NULL;
     void	       *ret_value = NULL;      /* Return value */
 
@@ -1565,10 +1562,10 @@ H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, vo
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin info")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL plugin ID")
 
     if(NULL == (ret_value = H5VL_file_open(vol_cls, name, flags, fapl_id, dxpl_id, req)))
@@ -1644,7 +1641,7 @@ H5VLfile_specific(void *file, hid_t plugin_id, H5VL_file_specific_t specific_typ
 
     if(specific_type == H5VL_FILE_IS_ACCESSIBLE) {
         H5P_genplist_t     *plist;          /* Property list pointer */
-        hid_t               vol_id;         /* VOL plugin identigier attached to fapl_id */
+        H5VL_plugin_prop_t  plugin_prop;            /* Property for vol plugin ID & info */
         hid_t               fapl_id;
 
         fapl_id = va_arg (arguments, hid_t);
@@ -1652,11 +1649,12 @@ H5VLfile_specific(void *file, hid_t plugin_id, H5VL_file_specific_t specific_typ
         /* get the VOL info from the fapl */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-        if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin")
 
-        if(NULL == (vol_cls = (H5VL_class_t *)H5I_object(vol_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL ID")
+        if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
+
+        if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
         if((ret_value = (vol_cls->file_cls.specific)
             (file, specific_type, dxpl_id, req, arguments)) < 0)

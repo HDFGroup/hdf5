@@ -21,7 +21,7 @@
  *              the H5A package.  Source files outside the H5A package should
  *              include H5Aprivate.h instead.
  */
-#ifndef H5A_PACKAGE
+#if !(defined H5A_FRIEND || defined H5A_MODULE)
 #error "Do not include this file outside the H5A package!"
 #endif
 
@@ -184,8 +184,6 @@ H5_DLLVAR const H5B2_class_t H5A_BT2_CORDER[1];
 /******************************/
 
 /* Function prototypes for H5A package scope */
-H5_DLL herr_t H5A_init(void);
-H5_DLL herr_t H5A__term_deprec_interface(void);
 H5_DLL H5A_t *H5A_create(const H5G_loc_t *loc, const char *name,
     const H5T_t *type, const H5S_t *space, hid_t acpl_id, hid_t dxpl_id);
 H5_DLL H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name,
@@ -195,8 +193,6 @@ H5_DLL H5A_t *H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name,
 H5_DLL herr_t H5A__open_common(const H5G_loc_t *loc, H5A_t *attr);
 H5_DLL H5A_t *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr);
 H5_DLL herr_t H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo);
-H5_DLL hid_t H5A_get_type(H5A_t *attr);
-H5_DLL hid_t H5A_get_space(H5A_t *attr);
 H5_DLL hid_t H5A_get_create_plist(H5A_t* attr);
 H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);

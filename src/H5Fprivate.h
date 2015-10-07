@@ -271,7 +271,7 @@
                                  ((O1) >= (O2) && (O1) < ((O2) + (L2))))
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
-#ifdef H5F_PACKAGE
+#ifdef H5F_MODULE
 #define H5F_INTENT(F)           ((F)->shared->flags)
 #define H5F_OPEN_NAME(F)        ((F)->open_name)
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)
@@ -313,7 +313,7 @@
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (((F)->shared->grp_btree_shared = (RC)) ? SUCCEED : FAIL)
 #define H5F_USE_TMP_SPACE(F)    ((F)->shared->use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->tmp_addr, (ADDR)))
-#else /* H5F_PACKAGE */
+#else /* H5F_MODULE */
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_OPEN_NAME(F)        (H5F_get_open_name(F))
 #define H5F_ACTUAL_NAME(F)      (H5F_get_actual_name(F))
@@ -355,7 +355,7 @@
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (H5F_set_grp_btree_shared((F), (RC)))
 #define H5F_USE_TMP_SPACE(F)    (H5F_use_tmp_space(F))
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_is_tmp_addr((F), (ADDR)))
-#endif /* H5F_PACKAGE */
+#endif /* H5F_MODULE */
 
 
 /* Macros to encode/decode offset/length's for storing in the file */
@@ -443,10 +443,8 @@
 #define H5F_ACS_SIEVE_BUF_SIZE_NAME             "sieve_buf_size" /* Maximum sieve buffer size (when data sieving is allowed by file driver) */
 #define H5F_ACS_SDATA_BLOCK_SIZE_NAME           "sdata_block_size" /* Minimum "small data" allocation block size (when aggregating "small" raw data allocations) */
 #define H5F_ACS_GARBG_COLCT_REF_NAME            "gc_ref"        /* Garbage-collect references */
-#define H5F_ACS_FILE_DRV_ID_NAME                "driver_id"     /* File driver ID */
-#define H5F_ACS_FILE_DRV_INFO_NAME              "driver_info"   /* File driver info */
-#define H5F_ACS_VOL_ID_NAME                     "vol_id"        /* File VOL ID */
-#define H5F_ACS_VOL_INFO_NAME                   "vol_info"      /* FILE VOL info */
+#define H5F_ACS_FILE_DRV_NAME                   "driver-id/info" /* File driver ID & info */
+#define H5F_ACS_VOL_NAME                        "plugin-id/info" /* VOL plugin ID & info */
 #define H5F_ACS_CLOSE_DEGREE_NAME		"close_degree"  /* File close degree */
 #define H5F_ACS_FAMILY_OFFSET_NAME              "family_offset" /* Offset position in file for family file driver */
 #define H5F_ACS_FAMILY_NEWSIZE_NAME             "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */
@@ -670,9 +668,6 @@ H5_DLL void H5F_addr_encode(const H5F_t *f, uint8_t **pp, haddr_t addr);
 H5_DLL void H5F_addr_encode_len(size_t addr_len, uint8_t **pp, haddr_t addr);
 H5_DLL void H5F_addr_decode(const H5F_t *f, const uint8_t **pp, haddr_t *addr_p);
 H5_DLL void H5F_addr_decode_len(size_t addr_len, const uint8_t **pp, haddr_t *addr_p);
-
-/* File access property list callbacks */
-H5_DLL herr_t H5P_facc_close(hid_t dxpl_id, void *close_data);
 
 /* Shared file list related routines */
 H5_DLL void H5F_sfile_assert_num(unsigned n);

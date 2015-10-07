@@ -1014,14 +1014,14 @@ int test_attributes(const char *file,
 static int test_attributes_verbose_level(const char *fname1, const char *fname2)
 {
     herr_t  status = SUCCEED;
-    hid_t   fid1, fid2;
-    hid_t   f1_gid, f2_gid;
-    hid_t   f1_gid2, f2_gid2;
-    hid_t   f1_gid3, f2_gid3;
-    hid_t   f1_gid4, f2_gid4;
-    hid_t   f1_did, f2_did;
-    hid_t   f1_sid, f2_sid;
-    hid_t   f1_tid, f2_tid;
+    hid_t   fid1    = -1,   fid2 = -1;
+    hid_t   f1_gid  = -1,   f2_gid = -1;
+    hid_t   f1_gid2 = -1,   f2_gid2 = -1;
+    hid_t   f1_gid3 = -1,   f2_gid3 = -1;
+    hid_t   f1_gid4 = -1,   f2_gid4 = -1;
+    hid_t   f1_did  = -1,   f2_did = -1;
+    hid_t   f1_sid  = -1,   f2_sid = -1;
+    hid_t   f1_tid  = -1,   f2_tid = -1;
     /* dset */
     hsize_t dset_dims[1]={3};
     int dset_data[3] = {0,1,2};
@@ -1252,9 +1252,9 @@ out:
     /*-----------------------------------------------------------------------
     * Close
     *-----------------------------------------------------------------------*/
-    if(fid1)
+    if(fid1 > 0)
         H5Fclose(fid1);
-    if(fid2)
+    if(fid2 > 0)
         H5Fclose(fid2);
     if(f1_gid > 0)
         H5Gclose(f1_gid);
@@ -1276,13 +1276,13 @@ out:
         H5Dclose(f1_did);
     if(f2_did > 0)
         H5Dclose(f2_did);
-    if(f1_sid >0)
+    if(f1_sid > 0)
         H5Sclose(f1_sid);
-    if(f2_sid >0)
+    if(f2_sid > 0)
         H5Sclose(f2_sid);
-    if(f1_tid >0)
+    if(f1_tid > 0)
         H5Tclose(f1_tid);
-    if(f2_tid >0)
+    if(f2_tid > 0)
         H5Tclose(f2_tid);
 
     return status;
@@ -2797,15 +2797,18 @@ out:
 #define GRP_R_DSETNAME2 "dset2"
 static int test_group_recurse2(void)
 {
-    hid_t       fileid1;
-    hid_t       grp1=0, grp2;
-    hid_t       grp3=0;
-    hid_t       grp4=0;
-    hid_t       dset1, dset2;
-    hid_t       datatype, dataspace;   /* handles */
-    hid_t       fileid2;
-    hid_t       fileid3;
-    hid_t       fileid4;
+    hid_t       fileid1     = -1;
+    hid_t       grp1        = -1;
+    hid_t       grp2        = -1;
+    hid_t       grp3        = -1;
+    hid_t       grp4        = -1;
+    hid_t       dset1       = -1;
+    hid_t       dset2       = -1;
+    hid_t       datatype    = -1;
+    hid_t       dataspace   = -1;
+    hid_t       fileid2     = -1;
+    hid_t       fileid3     = -1;
+    hid_t       fileid4     = -1;
     hsize_t     dimsf[2];              /* dataset dimensions */
     herr_t      status=0;
     int data1[4][2] = {{0,0},{1,1},{2,2},{3,3}};
@@ -3098,12 +3101,18 @@ out:
     /*
      * Close/release resources.
      */
-    H5Sclose(dataspace);
-    H5Tclose(datatype);
-    H5Fclose(fileid1);
-    H5Fclose(fileid2);
-    H5Fclose(fileid3);
-    H5Fclose(fileid4);
+    if(dataspace > 0)
+        H5Sclose(dataspace);
+    if(datatype > 0)
+        H5Tclose(datatype);
+    if(fileid1 > 0)
+        H5Fclose(fileid1);
+    if(fileid2 > 0)
+        H5Fclose(fileid2);
+    if(fileid3 > 0)
+        H5Fclose(fileid3);
+    if(fileid4 > 0)
+        H5Fclose(fileid4);
 
     return status;
 }
@@ -3506,8 +3515,8 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
 {
     int i;
 
-    hid_t    fid1;      /* file id */
-    hid_t    gid;
+    hid_t    fid1   = -1;      /* file id */
+    hid_t    gid    = -1;
 
     /* compound1 datatype */
     typedef struct comp1_t
@@ -4153,60 +4162,60 @@ out:
    /*-----------------------------------------------------------------------
     * Close
     *-----------------------------------------------------------------------*/
-    if(fid1)
+    if(fid1 > 0)
         H5Fclose(fid1);
-    if(gid)
+    if(gid > 0)
         H5Gclose(gid);
     /* vlen string */
-    if(tid_vlen_str)
+    if(tid_vlen_str > 0)
         H5Tclose(tid_vlen_str);
-    if(sid_vlen_str)
+    if(sid_vlen_str > 0)
         H5Sclose(sid_vlen_str);
     /* fixed len string */
-    if(tid_fixlen_str)
+    if(tid_fixlen_str > 0)
         H5Tclose(tid_fixlen_str);
-    if(sid_fixlen_str)
+    if(sid_fixlen_str > 0)
         H5Sclose(sid_fixlen_str);
     /* vlen string array */
-    if(tid_vlen_str_array_pre)
+    if(tid_vlen_str_array_pre > 0)
         H5Tclose(tid_vlen_str_array_pre);
-    if(tid_vlen_str_array)
+    if(tid_vlen_str_array > 0)
         H5Tclose(tid_vlen_str_array);
-    if(sid_vlen_str_array)
+    if(sid_vlen_str_array > 0)
         H5Sclose(sid_vlen_str_array);
     /* fixed len string array */
-    if(tid_fixlen_str_array_pre)
+    if(tid_fixlen_str_array_pre > 0)
         H5Tclose(tid_fixlen_str_array_pre);
-    if(tid_fixlen_str_array)
+    if(tid_fixlen_str_array > 0)
         H5Tclose(tid_fixlen_str_array);
-    if(sid_fixlen_str_array)
+    if(sid_fixlen_str_array > 0)
         H5Sclose(sid_fixlen_str_array);
     /* compound */
-    if(tid1_comp)
+    if(tid1_comp > 0)
         H5Tclose(tid1_comp);
-    if(tid2_comp)
+    if(tid2_comp > 0)
         H5Tclose(tid2_comp);
-    if(tid3_comp)
+    if(tid3_comp > 0)
         H5Tclose(tid3_comp);
-    if(tid4_comp)
+    if(tid4_comp > 0)
         H5Tclose(tid4_comp);
-    if(tid5_comp)
+    if(tid5_comp > 0)
         H5Tclose(tid5_comp);
-    if(tid6_comp)
+    if(tid6_comp > 0)
         H5Tclose(tid6_comp);
-    if(tid7_comp)
+    if(tid7_comp > 0)
         H5Tclose(tid7_comp);
-    if(tid8_comp)
+    if(tid8_comp > 0)
         H5Tclose(tid8_comp);
-    if(tid9_comp)
+    if(tid9_comp > 0)
         H5Tclose(tid9_comp);
-    if(did_comp)
+    if(did_comp > 0)
         H5Dclose(did_comp);
-    if(sid_comp)
+    if(sid_comp > 0)
         H5Sclose(sid_comp);
 
     return status;
-}
+} /* end test_comp_vlen_strings() */
 
 
 /*-------------------------------------------------------------------------
@@ -5023,10 +5032,10 @@ static void test_data_nocomparables (const char * fname, int make_diffs)
 
 
     /* attr2 - non-compatible : same rank, different dimention */
-    write_attr(did2,1, attr2_dim_ptr,"attr2", H5T_NATIVE_INT, data3);
+    write_attr(did2,1,(hsize_t *)attr2_dim_ptr,"attr2", H5T_NATIVE_INT, data3);
 
     /* attr3 - non-compatible : different rank */
-    write_attr(did2, rank_attr,attr3_dim_ptr,"attr3", H5T_NATIVE_INT, attr_data_ptr3);
+    write_attr(did2, rank_attr,(hsize_t *)attr3_dim_ptr,"attr3", H5T_NATIVE_INT, attr_data_ptr3);
 
     /* attr4 - compatible : different data values */
     write_attr(did2,1,dims1_1,"attr4", H5T_NATIVE_INT, attr_data_ptr4);
@@ -6551,7 +6560,7 @@ void write_dset_in(hid_t loc_id,
 
         /* allocate and initialize array data to write */
         size = ( H5TOOLS_MALLOCSIZE / sizeof(double) + 1 ) * sizeof(double);
-        dbuf = HDmalloc( size );
+        dbuf = (double *)HDmalloc( size );
 
         for( j = 0; j < H5TOOLS_MALLOCSIZE / sizeof(double) + 1; j++)
             dbuf[j] = j;
@@ -7018,10 +7027,10 @@ void gen_datareg(hid_t fid,
     int             i;
 
     /* allocate the buffer for write the references */
-    rbuf = HDcalloc((size_t)2, sizeof(hdset_reg_ref_t));
+    rbuf = (hdset_reg_ref_t *)HDcalloc((size_t)2, sizeof(hdset_reg_ref_t));
 
     /* allocate the buffer for write the data dataset */
-    buf = HDmalloc(10 * 10 * sizeof(int));
+    buf = (int *)HDmalloc(10 * 10 * sizeof(int));
 
     for(i = 0; i < 10 * 10; i++)
         buf[i] = i;

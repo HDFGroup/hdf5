@@ -35,7 +35,7 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
 
 
 /***********/
@@ -210,12 +210,12 @@ H5F_cwfs_find_free_heap(H5F_t *f, hid_t dxpl_id, size_t need, haddr_t *addr)
             new_need = MAX(H5HG_SIZE(f->shared->cwfs[cwfsno]), new_need);
 
             if((H5HG_SIZE(f->shared->cwfs[cwfsno]) + new_need) <= H5HG_MAXSIZE) {
-                htri_t extended;        /* Whether the heap was extended */
+                htri_t was_extended;        /* Whether the heap was extended */
 
-                extended = H5MF_try_extend(f, dxpl_id, H5FD_MEM_GHEAP, H5HG_ADDR(f->shared->cwfs[cwfsno]), (hsize_t)H5HG_SIZE(f->shared->cwfs[cwfsno]), (hsize_t)new_need);
-                if(extended < 0)
+                was_extended = H5MF_try_extend(f, dxpl_id, H5FD_MEM_GHEAP, H5HG_ADDR(f->shared->cwfs[cwfsno]), (hsize_t)H5HG_SIZE(f->shared->cwfs[cwfsno]), (hsize_t)new_need);
+                if(was_extended < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "error trying to extend heap")
-                else if(extended == TRUE) {
+                else if(was_extended == TRUE) {
                     if(H5HG_extend(f, dxpl_id, H5HG_ADDR(f->shared->cwfs[cwfsno]), new_need) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to extend global heap collection")
                     *addr = H5HG_ADDR(f->shared->cwfs[cwfsno]);
@@ -260,8 +260,9 @@ herr_t
 H5F_cwfs_advance_heap(H5F_t *f, H5HG_heap_t *heap, hbool_t add_heap)
 {
     unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(f);
@@ -281,7 +282,8 @@ H5F_cwfs_advance_heap(H5F_t *f, H5HG_heap_t *heap, hbool_t add_heap)
         f->shared->cwfs[f->shared->ncwfs - 1] = heap;
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_cwfs_advance_heap() */
 
 
@@ -302,8 +304,9 @@ herr_t
 H5F_cwfs_remove_heap(H5F_file_t *shared, H5HG_heap_t *heap)
 {
     unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     HDassert(shared);
@@ -318,6 +321,7 @@ H5F_cwfs_remove_heap(H5F_file_t *shared, H5HG_heap_t *heap)
         } /* end if */
     } /* end for */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_cwfs_remove_heap() */
 

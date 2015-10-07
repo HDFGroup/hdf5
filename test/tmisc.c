@@ -23,7 +23,7 @@
 *
 *************************************************************/
 
-#define H5D_PACKAGE    /*suppress error about including H5Dpkg    */
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
 
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5D_TESTING
@@ -713,7 +713,7 @@ create_struct3(void)
     misc5_struct3_hndl *str3hndl;       /* New 'struct3' created */
     herr_t ret;                         /* For error checking */
 
-    str3hndl = HDmalloc(sizeof(misc5_struct3_hndl));
+    str3hndl = (misc5_struct3_hndl *)HDmalloc(sizeof(misc5_struct3_hndl));
     CHECK(str3hndl,NULL,"malloc");
 
     str3hndl->st3h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct3));
@@ -722,10 +722,10 @@ create_struct3(void)
     ret = H5Tinsert(str3hndl->st3h_base, "st3_el1", HOFFSET( misc5_struct3, st3_el1), H5T_NATIVE_INT);
     CHECK(ret,FAIL,"H5Tinsert");
 
-    str3hndl->st3h_id=H5Tvlen_create(str3hndl->st3h_base);
+    str3hndl->st3h_id = H5Tvlen_create(str3hndl->st3h_base);
     CHECK(str3hndl->st3h_id,FAIL,"H5Tvlen_create");
 
-    return(str3hndl);
+    return str3hndl;
 }
 
 static void
@@ -733,10 +733,10 @@ delete_struct3(misc5_struct3_hndl *str3hndl)
 {
     herr_t ret;                         /* For error checking */
 
-    ret=H5Tclose(str3hndl->st3h_id);
+    ret = H5Tclose(str3hndl->st3h_id);
     CHECK(ret,FAIL,"H5Tclose");
 
-    ret=H5Tclose(str3hndl->st3h_base);
+    ret = H5Tclose(str3hndl->st3h_base);
     CHECK(ret,FAIL,"H5Tclose");
 
     HDfree(str3hndl);
@@ -756,7 +756,7 @@ create_struct2(void)
     misc5_struct2_hndl *str2hndl;       /* New 'struct2' created */
     herr_t ret;                         /* For error checking */
 
-    str2hndl = HDmalloc(sizeof(misc5_struct2_hndl));
+    str2hndl = (misc5_struct2_hndl *)HDmalloc(sizeof(misc5_struct2_hndl));
     CHECK(str2hndl, NULL, "malloc");
 
     str2hndl->st2h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct2));
@@ -765,16 +765,16 @@ create_struct2(void)
     ret = H5Tinsert(str2hndl->st2h_base, "st2_el1", HOFFSET(misc5_struct2, st2_el1), H5T_NATIVE_INT);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    str2hndl->st2h_st3hndl=create_struct3();
+    str2hndl->st2h_st3hndl = create_struct3();
     CHECK(str2hndl->st2h_st3hndl,NULL,"create_struct3");
 
-    ret=H5Tinsert(str2hndl->st2h_base, "st2_el2", HOFFSET(misc5_struct2, st2_el2), str2hndl->st2h_st3hndl->st3h_id);
+    ret = H5Tinsert(str2hndl->st2h_base, "st2_el2", HOFFSET(misc5_struct2, st2_el2), str2hndl->st2h_st3hndl->st3h_id);
     CHECK(ret,FAIL,"H5Tinsert");
 
-    str2hndl->st2h_id= H5Tvlen_create(str2hndl->st2h_base);
+    str2hndl->st2h_id = H5Tvlen_create(str2hndl->st2h_base);
     CHECK(str2hndl->st2h_id,FAIL,"H5Tvlen_create");
 
-    return(str2hndl);
+    return str2hndl;
 }
 
 static void
@@ -798,10 +798,10 @@ set_struct2(misc5_struct2 *buf)
 {
     unsigned i;         /* Local index variable */
 
-    buf->st2_el1=MISC5_DBGELVAL2;
-    buf->st2_el2.len=MISC5_DBGNELM3;
+    buf->st2_el1 = MISC5_DBGELVAL2;
+    buf->st2_el2.len = MISC5_DBGNELM3;
 
-    buf->st2_el2.p=HDmalloc((buf->st2_el2.len)*sizeof(misc5_struct3));
+    buf->st2_el2.p = HDmalloc((buf->st2_el2.len)*sizeof(misc5_struct3));
     CHECK(buf->st2_el2.p,NULL,"malloc");
 
     for(i=0; i<(buf->st2_el2.len); i++)
@@ -822,7 +822,7 @@ create_struct1(void)
     misc5_struct1_hndl *str1hndl;       /* New 'struct1' created */
     herr_t ret;                         /* For error checking */
 
-    str1hndl = HDmalloc(sizeof(misc5_struct1_hndl));
+    str1hndl = (misc5_struct1_hndl *)HDmalloc(sizeof(misc5_struct1_hndl));
     CHECK(str1hndl, NULL, "malloc");
 
     str1hndl->st1h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct1));
@@ -834,13 +834,13 @@ create_struct1(void)
     str1hndl->st1h_st2hndl=create_struct2();
     CHECK(str1hndl->st1h_st2hndl,NULL,"create_struct2");
 
-    ret=H5Tinsert(str1hndl->st1h_base, "st1_el2", HOFFSET(misc5_struct1, st1_el2), str1hndl->st1h_st2hndl->st2h_id);
+    ret = H5Tinsert(str1hndl->st1h_base, "st1_el2", HOFFSET(misc5_struct1, st1_el2), str1hndl->st1h_st2hndl->st2h_id);
     CHECK(ret,FAIL,"H5Tinsert");
 
-    str1hndl->st1h_id=H5Tvlen_create(str1hndl->st1h_base);
+    str1hndl->st1h_id = H5Tvlen_create(str1hndl->st1h_base);
     CHECK(str1hndl->st1h_id,FAIL,"H5Tvlen_create");
 
-    return(str1hndl);
+    return str1hndl;
 }
 
 static void
@@ -848,12 +848,12 @@ delete_struct1(misc5_struct1_hndl *str1hndl)
 {
     herr_t ret;                         /* For error checking */
 
-    ret=H5Tclose(str1hndl->st1h_id);
+    ret = H5Tclose(str1hndl->st1h_id);
     CHECK(ret,FAIL,"H5Tclose");
 
     delete_struct2(str1hndl->st1h_st2hndl);
 
-    ret=H5Tclose(str1hndl->st1h_base);
+    ret = H5Tclose(str1hndl->st1h_base);
     CHECK(ret,FAIL,"H5Tclose");
 
     HDfree(str1hndl);
@@ -1243,10 +1243,10 @@ test_misc8(void)
     MESSAGE(5, ("Testing dataset storage sizes\n"));
 
     /* Allocate space for the data to write & read */
-    wdata=HDmalloc(sizeof(int)*MISC8_DIM0*MISC8_DIM1);
+    wdata = (int *)HDmalloc(sizeof(int) * MISC8_DIM0 * MISC8_DIM1);
     CHECK(wdata,NULL,"malloc");
 #ifdef VERIFY_DATA
-    rdata=HDmalloc(sizeof(int)*MISC8_DIM0*MISC8_DIM1);
+    rdata = (int *)HDmalloc(sizeof(int) * MISC8_DIM0 * MISC8_DIM1);
     CHECK(rdata,NULL,"malloc");
 #endif /* VERIFY_DATA */
 
@@ -1254,7 +1254,7 @@ test_misc8(void)
     tdata=wdata;
     for(u=0; u<MISC8_DIM0; u++)
         for(v=0; v<MISC8_DIM1; v++)
-            *tdata++=((u*MISC8_DIM1)+v)%13;
+            *tdata++ = (int)(((u * MISC8_DIM1) + v) % 13);
 
     /* Create a file acccess property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -1310,7 +1310,7 @@ test_misc8(void)
     /* Check the storage size */
     storage_size = H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-    VERIFY(storage_size, MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+    VERIFY(storage_size, (hsize_t)(MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5Dget_storage_size");
 
     /* Close dataset ID */
     ret = H5Dclose(did);
@@ -1336,7 +1336,7 @@ test_misc8(void)
     /* Check the storage size after data is written */
     storage_size = H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-    VERIFY(storage_size, MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+    VERIFY(storage_size, (hsize_t)(MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5Dget_storage_size");
 
     /* Close dataset ID */
     ret = H5Dclose(did);
@@ -1361,7 +1361,7 @@ test_misc8(void)
     /* Check the storage size after data is written */
     storage_size = H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-    VERIFY(storage_size, MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+    VERIFY(storage_size, (hsize_t)(MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5Dget_storage_size");
 
     /* Close dataset ID */
     ret = H5Dclose(did);
@@ -1405,7 +1405,7 @@ test_misc8(void)
     /* Check the storage size */
     storage_size = H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-    VERIFY(storage_size, MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+    VERIFY(storage_size, (hsize_t)(MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5Dget_storage_size");
 
     /* Close dataset ID */
     ret = H5Dclose(did);
@@ -1432,7 +1432,7 @@ test_misc8(void)
     /* Check the storage size after data is written */
     storage_size = H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-    VERIFY(storage_size, MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+    VERIFY(storage_size, (hsize_t)(MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5Dget_storage_size");
 
     /* Close dataset ID */
     ret = H5Dclose(did);
@@ -1462,7 +1462,7 @@ test_misc8(void)
     /* Check the storage size after data is written */
     storage_size = H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-    VERIFY(storage_size, MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+    VERIFY(storage_size, (hsize_t)(MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5Dget_storage_size");
 
     /* Close dataset ID */
     ret = H5Dclose(did);
@@ -1486,7 +1486,7 @@ test_misc8(void)
 
     /* Check the storage size after only four chunks are written */
     storage_size = H5Dget_storage_size(did);
-    VERIFY(storage_size, 4 * MISC8_CHUNK_DIM0 * MISC8_CHUNK_DIM1 * H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+    VERIFY(storage_size, (hsize_t)(4 * MISC8_CHUNK_DIM0 * MISC8_CHUNK_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5Dget_storage_size");
 
     /* Write entire dataset */
     ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -1509,7 +1509,7 @@ test_misc8(void)
     /* Check the storage size after data is written */
     storage_size = H5Dget_storage_size(did);
     CHECK(storage_size, 0, "H5Dget_storage_size");
-    VERIFY(storage_size, MISC8_DIM0*MISC8_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5Dget_storage_size");
+    VERIFY(storage_size, (hsize_t)(MISC8_DIM0 * MISC8_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5Dget_storage_size");
 
     /* Close dataset ID */
     ret = H5Dclose(did);
@@ -2701,14 +2701,20 @@ test_misc16(void)
 {
     hid_t file;         /* File ID */
     herr_t ret;         /* Generic return value */
-    const char wdata[MISC16_SPACE_DIM][MISC16_STR_SIZE] =
-                        {"1234567", "1234567\0", "12345678", {NULL}};
+    char wdata[MISC16_SPACE_DIM][MISC16_STR_SIZE];
     char rdata[MISC16_SPACE_DIM][MISC16_STR_SIZE];  /* Information read in */
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid;       /* Dataspace ID			*/
     hid_t		tid;       /* Datatype ID			*/
     hsize_t		dims[] = {MISC16_SPACE_DIM};
     int                 i;
+
+    /* Initialize the data */
+    /* (Note that these are supposed to stress the code, so are a little weird) */
+    HDmemcpy(wdata[0], "1234567", MISC16_STR_SIZE);
+    HDmemcpy(wdata[1], "1234567\0", MISC16_STR_SIZE);
+    HDmemcpy(wdata[2], "12345678", MISC16_STR_SIZE);
+    HDmemcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC16_STR_SIZE);
 
     /* Create the file */
     file = H5Fcreate(MISC16_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2743,11 +2749,11 @@ test_misc16(void)
     /* Compare data read in */
     for(i = 0; i < MISC16_SPACE_DIM; i++) {
         if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
-            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            TestErrPrintf("Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(unsigned)__LINE__, (int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
         if(HDstrcmp(wdata[i], rdata[i]) != 0 ) {
-            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+            TestErrPrintf("Line %u: VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(unsigned)__LINE__, (int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
     } /* end for */
@@ -2780,14 +2786,20 @@ test_misc17(void)
 {
     hid_t file;         /* File ID */
     herr_t ret;         /* Generic return value */
-    const char wdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2] =
-                        {"1234567", "1234567\0", "12345678", {NULL}};
+    char wdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2];
     char rdata[MISC17_SPACE_DIM1][MISC17_SPACE_DIM2];  /* Information read in */
     hid_t		dataset;	/* Dataset ID			*/
     hid_t		sid;       /* Dataspace ID			*/
     hid_t		tid;       /* Datatype ID			*/
     hsize_t		dims[] = {MISC17_SPACE_DIM1, MISC17_SPACE_DIM2};
     int                 i;
+
+    /* Initialize the data */
+    /* (Note that these are supposed to stress the code, so are a little weird) */
+    HDmemcpy(wdata[0], "1234567", MISC17_SPACE_DIM2);
+    HDmemcpy(wdata[1], "1234567\0", MISC17_SPACE_DIM2);
+    HDmemcpy(wdata[2], "12345678", MISC17_SPACE_DIM2);
+    HDmemcpy(wdata[3], "\0\0\0\0\0\0\0\0", MISC17_SPACE_DIM2);
 
     /* Create the file */
     file = H5Fcreate(MISC17_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2819,11 +2831,11 @@ test_misc17(void)
     /* Compare data in the way of strings. */
     for(i = 0; i < MISC17_SPACE_DIM1; i++) {
         if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
-            TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
+            TestErrPrintf("Line %u: VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(unsigned)__LINE__, (int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
         if(HDstrcmp(wdata[i], rdata[i]) != 0 ) {
-            TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
+            TestErrPrintf("Line %u: VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(unsigned)__LINE__, (int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
     } /* end for */
@@ -3782,6 +3794,7 @@ test_misc23(void)
     char        objname[MISC23_NAME_BUF_SIZE];  /* Name of object */
     H5O_info_t  oinfo;
     htri_t      tri_status;
+    ssize_t     namelen;
     herr_t      status;
 
     /* Output message about test being performed */
@@ -3851,8 +3864,8 @@ test_misc23(void)
     CHECK(tmp_id, FAIL, "H5Gcreate2");
 
     /* Query that the name of the new group is correct */
-    status = H5Iget_name(tmp_id, objname, (size_t)MISC23_NAME_BUF_SIZE);
-    CHECK(status, FAIL, "H5Iget_name");
+    namelen = H5Iget_name(tmp_id, objname, (size_t)MISC23_NAME_BUF_SIZE);
+    CHECK(namelen, FAIL, "H5Iget_name");
     VERIFY_STR(objname, "/A/B01/grp", "H5Iget_name");
 
     status = H5Gclose(tmp_id);
@@ -4991,7 +5004,7 @@ test_misc28(void)
 
     /* Initialize write buffer */
     for(i=0; i<MISC28_SIZE; i++)
-        buf[i] = i;
+        buf[i] = (char)i;
 
     /* Create memory dataspace and selection in file dataspace */
     sidm = H5Screate_simple(1, mdims, NULL);
@@ -5012,7 +5025,7 @@ test_misc28(void)
 
     /* Initialize write buffer */
     for(i=0; i<MISC28_SIZE; i++)
-        buf[i] = MISC28_SIZE - 1 - i;
+        buf[i] = (char)(MISC28_SIZE - 1 - i);
 
     /* Select new hyperslab */
     start[1] = 1;

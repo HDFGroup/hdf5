@@ -515,12 +515,14 @@ test_reference_region(void)
     hsize_t	high[SPACE2_RANK];	/* Selection bounds */
     hdset_reg_ref_t      *wbuf,		/* buffer to write to disk */
                *rbuf;       /* buffer read from disk */
-    hdset_reg_ref_t  nvrbuf[3]={{0},{101},{1000000000}}; /* buffer with non-valid refs */
+    hdset_reg_ref_t  nvrbuf[3]={{0},{101},{255}}; /* buffer with non-valid refs */
     uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
                *drbuf;      /* Buffer for reading numeric data from disk */
     uint8_t    *tu8;        /* Temporary pointer to uint8 data */
     H5O_type_t  obj_type;       /* Type of object */
     int        i, j;           /* counting variables */
+    hssize_t    hssize_ret;     /* hssize_t return value */
+    htri_t      tri_ret;        /* htri_t return value */
     herr_t	ret;		/* Generic return value		*/
     haddr_t     addr = HADDR_UNDEF; /* test for undefined reference */
     hid_t dset_NA;   /* Dataset id for undefined reference */
@@ -613,6 +615,24 @@ test_reference_region(void)
     /* Store second dataset region */
     ret = H5Rcreate(&wbuf[1], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
     CHECK(ret, FAIL, "H5Rcreate");
+
+    /* Select unlimited hyperslab for third reference */
+    start[0] = 1; start[1] = 8;
+    stride[0] = 4; stride[1] = 1;
+    count[0] = H5S_UNLIMITED; count[1] = 1;
+    block[0] = 2; block[1] = 2;
+    ret = H5Sselect_hyperslab(sid2, H5S_SELECT_SET, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    hssize_ret = H5Sget_select_npoints(sid2);
+    VERIFY(hssize_ret, (hssize_t)H5S_UNLIMITED, "H5Sget_select_npoints");
+
+    /* Store third dataset region */
+    ret = H5Rcreate(&wbuf[2], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
+    CHECK(ret, FAIL, "H5Rcreate");
+    ret = H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &wbuf[0], &obj_type);
+    CHECK(ret, FAIL, "H5Rget_obj_type2");
+    VERIFY(obj_type, H5O_TYPE_DATASET, "H5Rget_obj_type2");
 
     /* Write selection to disk */
     ret = H5Dwrite(dset1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
@@ -742,7 +762,7 @@ test_reference_region(void)
     VERIFY(ret, 36, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_hyper_nblocks(sid2);
     VERIFY(ret, 1, "H5Sget_select_hyper_nblocks");
-    coords = HDmalloc(ret * SPACE2_RANK * sizeof(hsize_t) * 2); /* allocate space for the hyperslab blocks */
+    coords = (hsize_t *)HDmalloc(ret * SPACE2_RANK * sizeof(hsize_t) * 2); /* allocate space for the hyperslab blocks */
     ret = H5Sget_select_hyper_blocklist(sid2, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
     VERIFY(coords[0], 2, "Hyperslab Coordinates");
@@ -770,7 +790,7 @@ test_reference_region(void)
     VERIFY(ret, 10, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_elem_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_elem_npoints");
-    coords = HDmalloc(ret * SPACE2_RANK * sizeof(hsize_t)); /* allocate space for the element points */
+    coords = (hsize_t *)HDmalloc(ret * SPACE2_RANK * sizeof(hsize_t)); /* allocate space for the element points */
     ret = H5Sget_select_elem_pointlist(sid2, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
     VERIFY(coords[0], coord1[0][0], "Element Coordinates");
@@ -800,6 +820,31 @@ test_reference_region(void)
     VERIFY(low[1], 0, "Selection Bounds");
     VERIFY(high[0], 9, "Selection Bounds");
     VERIFY(high[1], 9, "Selection Bounds");
+
+    /* Close region space */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Get the unlimited selection */
+    sid2 = H5Rget_region(dset1, H5R_DATASET_REGION, &rbuf[2]);
+    CHECK(sid2, FAIL, "H5Rget_region");
+
+    /* Verify correct hyperslab selected */
+    hssize_ret = H5Sget_select_npoints(sid2);
+    VERIFY(hssize_ret, (hssize_t)H5S_UNLIMITED, "H5Sget_select_npoints");
+    tri_ret = H5Sis_regular_hyperslab(sid2);
+    CHECK(tri_ret, FAIL, "H5Sis_regular_hyperslab");
+    VERIFY(tri_ret, TRUE, "H5Sis_regular_hyperslab Result");
+    ret = H5Sget_regular_hyperslab(sid2, start, stride, count, block);
+    CHECK(ret, FAIL, "H5Sget_regular_hyperslab");
+    VERIFY(start[0], (hsize_t)1, "Hyperslab Coordinates");
+    VERIFY(start[1], (hsize_t)8, "Hyperslab Coordinates");
+    VERIFY(stride[0], (hsize_t)4, "Hyperslab Coordinates");
+    VERIFY(stride[1], (hsize_t)1, "Hyperslab Coordinates");
+    VERIFY(count[0], H5S_UNLIMITED, "Hyperslab Coordinates");
+    VERIFY(count[1], (hsize_t)1, "Hyperslab Coordinates");
+    VERIFY(block[0], (hsize_t)2, "Hyperslab Coordinates");
+    VERIFY(block[1], (hsize_t)2, "Hyperslab Coordinates");
 
     /* Close region space */
     ret = H5Sclose(sid2);

@@ -17,13 +17,13 @@
  */
 #include "h5test.h"
 
-#define H5FS_PACKAGE
+#define H5FS_FRIEND		/*suppress error about including H5FSpkg	  */
 #define H5FS_TESTING
 #include "H5FSpkg.h"		/* Free space manager */
 
 
 /* Other private headers that this test requires */
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #include "H5Fpkg.h"
 #include "H5Iprivate.h"
 #include "H5VMprivate.h"
@@ -2840,6 +2840,8 @@ main(void)
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
     if(env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
+
+    h5_reset();
 
     fapl = h5_fileaccess();
 

@@ -28,11 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5FD_PACKAGE		/*suppress error about including H5FDpkg  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5FD_init_interface
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#include "H5FDmodule.h"         /* This source code file is part of the H5FD module */
 
 
 /***********/
@@ -65,18 +62,16 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size,
-    const void *old_pl, void **copied_pl);
-static herr_t H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *),
-    void *pl);
 static herr_t H5FD_free_cls(H5FD_class_t *cls);
-static herr_t H5FD_fapl_copy(hid_t driver_id, const void *fapl, void **copied_fapl);
 static int H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/);
 static int H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/);
 
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 
 /*****************************/
@@ -113,53 +108,24 @@ static const H5I_class_t H5I_VFL_CLS[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_init
- *
- * Purpose:	Initialize the interface from some other package.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, January  3, 2007
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_init(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_init() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_init_interface
+ * Function:	H5FD__init_package
  *
  * Purpose:	Initialize the virtual file layer.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Monday, July 26, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5FD_init_interface(void)
+herr_t
+H5FD__init_package(void)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     if(H5I_register_type(H5I_VFL_CLS) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
@@ -169,11 +135,11 @@ H5FD_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_init_interface() */
+} /* end H5FD__init_package() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_term_interface
+ * Function:	H5FD_term_package
  *
  * Purpose:	Terminate this interface: free all memory and reset global
  *		variables to their initial values.  Release all ID groups
@@ -182,40 +148,37 @@ done:
  * Return:	Success:	Positive if anything was done that might
  *				have affected other interfaces; zero
  *				otherwise.
- *
  *		Failure:        Never fails.
  *
  * Programmer:	Robb Matzke
  *              Friday, February 19, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
-H5FD_term_interface(void)
+H5FD_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5_PKG_INIT_VAR) {
 	if(H5I_nmembers(H5I_VFL) > 0) {
 	    (void)H5I_clear_type(H5I_VFL, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
         else {
             /* Destroy the VFL driver id group */
-	    (void)H5I_dec_type_ref(H5I_VFL);
-            n++; /*H5I*/
+	    n += (H5I_dec_type_ref(H5I_VFL) > 0);
 
 	    /* Mark closed */
-	    H5_interface_initialize_g = 0;
+            if(0 == n)
+                H5_PKG_INIT_VAR = FALSE;
 	} /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5FD_term_interface() */
+} /* end H5FD_term_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -223,7 +186,7 @@ H5FD_term_interface(void)
  *
  * Purpose:	Frees a file driver class struct and returns an indication of
  *		success. This function is used as the free callback for the
- *		virtual file layer object identifiers (cf H5FD_init_interface).
+ *		virtual file layer object identifiers (cf H5FD__init_package).
  *
  * Return:	Success:	Non-negative
  *
@@ -350,7 +313,7 @@ H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
     const H5FD_class_t	*cls = (const H5FD_class_t *)_cls;
     H5FD_class_t	*saved = NULL;
     H5FD_mem_t		type;
-    hid_t		ret_value;
+    hid_t		ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -450,16 +413,17 @@ H5FD_get_class(hid_t id)
 	ret_value = (H5FD_class_t *)H5I_object(id);
     else {
         H5P_genplist_t *plist;      /* Property list pointer */
-        hid_t driver_id = -1;
 
         /* Get the plist structure */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
         if(TRUE == H5P_isa_class(id, H5P_FILE_ACCESS)) {
-            if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
-            ret_value = H5FD_get_class(driver_id);
+            H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
+
+            if(H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID & info")
+            ret_value = H5FD_get_class(driver_prop.driver_id);
         } /* end if */
         else
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver id or file access property list")
@@ -614,96 +578,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_pl_copy
- *
- * Purpose:	Copies the driver-specific part of the a property list.
- *              This is common code, used by both the dataset transfer and
- *              file access property list routines.
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, October 23, 2003
- *
- * Modifications:
- *  Pedro Vicente Nunes, Wednesday, July 26, 2006
- *  added a HGOTO_ERROR call in the case the copy function returns NULL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_pl_copy(void *(*copy_func)(const void *), size_t pl_size, const void *old_pl, void **copied_pl)
-{
-    void *new_pl = NULL;        /* Copy of property list */
-    herr_t ret_value=SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Copy old pl, if one exists */
-    if(old_pl) {
-        /* Allow the driver to copy or do it ourselves */
-        if(copy_func) {
-            new_pl = (copy_func)(old_pl);
-            if(new_pl==NULL)
-                HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "property list copy failed")
-        } else if(pl_size>0) {
-            if((new_pl = H5MM_malloc(pl_size))==NULL)
-                HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "property list allocation failed")
-            HDmemcpy(new_pl, old_pl, pl_size);
-        } else
-            HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "no way to copy driver property list")
-    } /* end if */
-
-    /* Set copied value */
-    *copied_pl=new_pl;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_pl_copy() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_pl_close
- *
- * Purpose:	Closes a driver for a property list
- *              This is common code, used by both the dataset transfer and
- *              file access property list routines.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, October 23, 2003
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *), void *pl)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Allow driver to free or do it ourselves */
-    if(pl && free_func) {
-	if((free_func)(pl) < 0)
-	    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver free request failed")
-    } /* end if */
-    else
-	H5MM_xfree(pl);
-
-    /* Decrement reference count for driver */
-    if(H5I_dec_ref(driver_id) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't decrement reference count for driver")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_pl_close() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5FD_fapl_get
  *
  * Purpose:	Gets the file access property list associated with a file.
@@ -725,8 +599,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, August 13, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 void *
@@ -747,88 +619,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_fapl_open
- *
- * Purpose:	Mark a driver as used by a file access property list
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, October 23, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_fapl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
-{
-    void *copied_driver_info = NULL;           /* Temporary VFL driver info */
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Increment the reference count on driver and copy driver info */
-    if(H5I_inc_ref(driver_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
-    if(H5FD_fapl_copy(driver_id, driver_info, &copied_driver_info) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "can't copy VFL driver info")
-
-    /* Set the driver properties for the list */
-    if(H5P_set(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set driver ID")
-    if(H5P_set(plist, H5F_ACS_FILE_DRV_INFO_NAME, &copied_driver_info) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set driver info")
-    copied_driver_info = NULL;
-
-done:
-    if(ret_value < 0)
-        if(copied_driver_info && H5FD_fapl_close(driver_id, copied_driver_info) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close copy of driver info")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_fapl_open() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_fapl_copy
- *
- * Purpose:	Copies the driver-specific part of the file access property
- *		list.
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Tuesday, August  3, 1999
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_fapl_copy(hid_t driver_id, const void *old_fapl, void **copied_fapl)
-{
-    H5FD_class_t *driver;
-    herr_t ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check args */
-    if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
-
-    /* Copy the file access property list */
-    if(H5FD_pl_copy(driver->fapl_copy, driver->fapl_size, old_fapl, copied_fapl) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "can't copy driver file access property list")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5FD_fapl_close
  *
  * Purpose:	Closes a driver for a dataset transfer property list
@@ -839,26 +629,32 @@ done:
  * Programmer:	Robb Matzke
  *              Tuesday, August  3, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_fapl_close(hid_t driver_id, void *fapl)
+H5FD_fapl_close(hid_t driver_id, const void *driver_info)
 {
-    H5FD_class_t	*driver = NULL;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(driver_id > 0) {
+        H5FD_class_t	*driver;
+
+        /* Retrieve the driver for the ID */
         if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
 
-        /* Close the driver for the property list */
-        if(H5FD_pl_close(driver_id, driver->fapl_free, fapl) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver fapl_free request failed")
+        /* Allow driver to free info or do it ourselves */
+        if(driver_info) {
+            if(driver->fapl_free) {
+                if((driver->fapl_free)((void *)driver_info) < 0)        /* Casting away const OK -QAK */
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "driver free request failed")
+            } /* end if */
+            else
+                H5MM_xfree((void *)driver_info);        /* Casting away const OK -QAK */
+        } /* end if */
     } /* end if */
 
 done:
@@ -970,11 +766,11 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_class_t	*driver;                /* VFD for file */
     H5FD_t		*file = NULL;           /* VFD file struct */
-    hid_t               driver_id = -1;         /* VFD ID */
+    H5FD_driver_prop_t  driver_prop;            /* Property for driver ID & info */
     H5P_genplist_t      *plist;                 /* Property list pointer */
     unsigned long       driver_flags = 0;       /* File-inspecific driver feature flags */
     H5FD_file_image_info_t file_image_info;     /* Initial file image */
-    H5FD_t		*ret_value;             /* Return value */
+    H5FD_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -987,11 +783,11 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
     /* Get the VFD to open the file with */
-    if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
+    if(H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID & info")
 
     /* Get driver info */
-    if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
+    if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_prop.driver_id)))
 	HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list")
     if(NULL == driver->open)
 	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method")
@@ -1000,7 +796,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5FD_driver_query(driver, &driver_flags);
 
     /* Get initial file image info */
-    if(H5P_get(plist, H5F_ACS_FILE_IMAGE_INFO_NAME, &file_image_info) < 0)
+    if(H5P_peek(plist, H5F_ACS_FILE_IMAGE_INFO_NAME, &file_image_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file image info")
 
     /* If an image is provided, make sure the driver supports this feature */
@@ -1019,7 +815,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
      * Fill in public fields. We must increment the reference count on the
      * driver ID to prevent it from being freed while this file is open.
      */
-    file->driver_id = driver_id;
+    file->driver_id = driver_prop.driver_id;
     if(H5I_inc_ref(file->driver_id, FALSE) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver")
     file->cls = driver;
@@ -1189,7 +985,7 @@ done:
 int
 H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
-    int	ret_value;
+    int	ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI(-1) /*return value is arbitrary*/
 
@@ -1602,7 +1398,7 @@ done:
 haddr_t
 H5FD_get_maxaddr(const H5FD_t *file)
 {
-    haddr_t ret_value;          /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 

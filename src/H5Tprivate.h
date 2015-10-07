@@ -36,17 +36,17 @@
 #define H5T_ELEM_BUF_SIZE       256
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
-#ifdef H5T_PACKAGE
+#ifdef H5T_MODULE
 #define H5T_GET_SIZE(T)                 ((T)->shared->size)
 #define H5T_GET_SHARED(T)               ((T)->shared)
 #define H5T_GET_MEMBER_OFFSET(T, I)     ((T)->u.compnd.memb[I].offset)
 #define H5T_GET_MEMBER_SIZE(T, I)       ((T)->u.compnd.memb[I].shared->size)
-#else /* H5T_PACKAGE */
+#else /* H5T_MODULE */
 #define H5T_GET_SIZE(T)                 (H5T_get_size(T))
 #define H5T_GET_SHARED(T)               (H5T_get_shared(T))
 #define H5T_GET_MEMBER_OFFSET(T, I)     (H5T_get_member_offset((T), (I)))
 #define H5T_GET_MEMBER_SIZE(T, I)       (H5T_get_member_size((T), (I)))
-#endif /* H5T_PACKAGE */
+#endif /* H5T_MODULE */
 
 /* Forward references of package typedefs (declared in H5Tpkg.h) */
 typedef struct H5T_t H5T_t;
@@ -106,7 +106,6 @@ struct H5O_t;
 H5_DLLVAR H5T_order_t H5T_native_order_g;
 
 /* Private functions */
-H5_DLL herr_t H5TN_init_interface(void);
 H5_DLL herr_t H5T_init(void);
 H5_DLL H5T_t *H5T_copy(H5T_t *old_dt, H5T_copy_t method);
 H5_DLL herr_t H5T_lock(H5T_t *dt, hbool_t immutable);

@@ -17,10 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5F__init_pub_interface
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
 
 
 /***********/
@@ -60,6 +57,9 @@
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -86,22 +86,21 @@ static const H5I_class_t H5I_FILE_CLS[1] = {{
 
 /*--------------------------------------------------------------------------
 NAME
-   H5F__init_pub_interface -- Initialize interface-specific information
+   H5F__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5F__init_pub_interface()
+    herr_t H5F__init_package()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5F_init() currently).
+    Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t
-H5F__init_pub_interface(void)
+herr_t
+H5F__init_package(void)
 {
-    herr_t          ret_value                = SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Initialize the atom group for the file IDs.
@@ -109,40 +108,13 @@ H5F__init_pub_interface(void)
     if(H5I_register_type(H5I_FILE_CLS) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
-    ret_value = H5F_init();
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__init_pub_interface() */
+} /* H5F__init_package() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_init
- *
- * Purpose:	Initialize the interface from some other layer.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, December 16, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_init(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_init() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_term_interface
+ * Function:	H5F_term_package
  *
  * Purpose:	Terminate this interface: free all memory and reset global
  *		variables to their initial values.  Release all ID groups
@@ -160,13 +132,13 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5F_term_interface(void)
+H5F_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5_PKG_INIT_VAR) {
 	if(H5I_nmembers(H5I_FILE) > 0) {
             (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
             n++; /*H5I*/
@@ -175,20 +147,17 @@ H5F_term_interface(void)
             /* Make certain we've cleaned up all the shared file objects */
             H5F_sfile_assert_num(0);
 
-            /* Close deprecated interface */
-            n += H5F__term_deprec_interface();
-
             /* Destroy the file object id group */
-	    (void)H5I_dec_type_ref(H5I_FILE);
-            n++; /*H5I*/
+	    n += (H5I_dec_type_ref(H5I_FILE) > 0);
 
 	    /* Mark closed */
-	    H5_interface_initialize_g = 0;
+            if(0 == n)
+                H5_PKG_INIT_VAR = FALSE;
 	} /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5F_term_interface() */
+} /* end H5F_term_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -594,9 +563,9 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     void *file;                   /* file object returned from the plugin */
     H5P_genplist_t *plist;        /* Property list pointer */
-    hid_t plugin_id;              /* VOL plugin identigier attached to fapl_id */
     H5VL_class_t *vol_cls = NULL; /* VOL Class structure for callback info */
     H5VL_t *vol_info = NULL;      /* VOL info struct */
+    H5VL_plugin_prop_t plugin_prop;         /* Property for vol plugin ID & info */
     hid_t ret_value;	          /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -631,10 +600,11 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* create a new file or truncate an existing file through the VOL */
@@ -646,7 +616,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
     vol_info->vol_cls = vol_cls;
-    vol_info->vol_id = plugin_id;
+    vol_info->vol_id = plugin_prop.plugin_id;
     if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 
@@ -704,7 +674,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
     void *file;                   /* file object returned from the plugin */
     H5P_genplist_t *plist;        /* Property list pointer */
-    hid_t plugin_id;              /* VOL plugin identigier attached to fapl_id */
+    H5VL_plugin_prop_t plugin_prop;         /* Property for vol plugin ID & info */
     H5VL_class_t *vol_cls = NULL; /* VOL Class structure for callback info */
     H5VL_t *vol_info = NULL;      /* VOL info struct */
     hid_t ret_value;	          /* return value */
@@ -728,10 +698,10 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &plugin_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin ID")
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
 
-    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_id, H5I_VOL)))
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
 
     /* Open the file through the VOL layer */
@@ -742,7 +712,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
     vol_info->vol_cls = vol_cls;
-    vol_info->vol_id = plugin_id;
+    vol_info->vol_id = plugin_prop.plugin_id;
     if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
 

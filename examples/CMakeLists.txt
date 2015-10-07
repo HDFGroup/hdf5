@@ -35,22 +35,44 @@ set (examples
     h5_elink_unix2win
     h5_shared_mesg
     h5_vol_external_log_native
+    h5_vds
+    h5_vds-exc
+    h5_vds-exclim
+    h5_vds-eiger
+    h5_vds-simpleIO
+    h5_vds-percival
+    h5_vds-percival-unlim
+    h5_vds-percival-unlim-maxmin
 )
 
 foreach (example ${examples})
   add_executable (${example} ${HDF5_EXAMPLES_SOURCE_DIR}/${example}.c)
-  TARGET_NAMING (${example} ${LIB_TYPE})
-  TARGET_C_PROPERTIES (${example} ${LIB_TYPE} " " " ")
+  TARGET_NAMING (${example} STATIC)
+  TARGET_C_PROPERTIES (${example} STATIC " " " ")
   target_link_libraries (${example} ${HDF5_LIB_TARGET})
   set_target_properties (${example} PROPERTIES FOLDER examples)
+  if (BUILD_SHARED_LIBS)
+    add_executable (${example}-shared ${HDF5_EXAMPLES_SOURCE_DIR}/${example}.c)
+    TARGET_NAMING (${example}-shared SHARED)
+    TARGET_C_PROPERTIES (${example}-shared SHARED " " " ")
+    target_link_libraries (${example}-shared ${HDF5_LIBSH_TARGET})
+    set_target_properties (${example}-shared PROPERTIES FOLDER examples)
+  endif (BUILD_SHARED_LIBS)
 endforeach (example ${examples})
 
 if (H5_HAVE_PARALLEL)
   add_executable (ph5example ${HDF5_EXAMPLES_SOURCE_DIR}/ph5example.c)
-  TARGET_NAMING (ph5example ${LIB_TYPE})
-  TARGET_C_PROPERTIES (ph5example ${LIB_TYPE} " " " ")
+  TARGET_NAMING (ph5example STATIC)
+  TARGET_C_PROPERTIES (ph5example STATIC " " " ")
   target_link_libraries (ph5example ${HDF5_LIB_TARGET})
   set_target_properties (ph5example PROPERTIES FOLDER examples)
+  if (BUILD_SHARED_LIBS)
+    add_executable (ph5example-shared ${HDF5_EXAMPLES_SOURCE_DIR}/ph5example.c)
+    TARGET_NAMING (ph5example-shared SHARED)
+    TARGET_C_PROPERTIES (ph5example-shared SHARED " " " ")
+    target_link_libraries (ph5example-shared ${HDF5_LIBSH_TARGET})
+    set_target_properties (ph5example-shared PROPERTIES FOLDER examples)
+  endif (BUILD_SHARED_LIBS)
 endif (H5_HAVE_PARALLEL)
 
 #if (H5_HAVE_EFF)
