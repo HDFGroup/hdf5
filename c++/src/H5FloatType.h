@@ -24,8 +24,8 @@ namespace H5 {
 //! Class FloatType operates on HDF5 floating point datatype.
 class H5_DLLCPP FloatType : public AtomType {
    public:
-        // Creates a floating-point type using a predefined type.
-        FloatType( const PredType& pred_type );
+	// Creates a floating-point type using a predefined type.
+	FloatType( const PredType& pred_type );
 
 	// Gets the floating-point datatype of the specified dataset.
 	FloatType( const DataSet& dataset );

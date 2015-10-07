@@ -86,9 +86,11 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	// Destructor: properly terminates access to this attribute.
 	virtual ~Attribute();
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
    protected:
 	// Sets the attribute id.
 	virtual void p_setId(const hid_t new_id);
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:
 	hid_t id;	// HDF5 attribute id

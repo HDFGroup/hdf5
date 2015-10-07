@@ -147,10 +147,10 @@ StrType::StrType( const DataSet& dataset ) : AtomType ()
 ///\return	Character set type, which can be:
 ///		\li \c H5T_CSET_ASCII (0) - Character set is US ASCII.
 ///\note
-///	ASCII and UTF-8 Unicode are the only currently supported character 
-///	encodings. Extended ASCII encodings (for example, ISO 8859) are not 
-///	supported. This encoding policy is not enforced by the HDF5 Library. 
-///	Using encodings other than ASCII and UTF-8 can lead to compatibility 
+///	ASCII and UTF-8 Unicode are the only currently supported character
+///	encodings. Extended ASCII encodings (for example, ISO 8859) are not
+///	supported. This encoding policy is not enforced by the HDF5 Library.
+///	Using encodings other than ASCII and UTF-8 can lead to compatibility
 ///	and usability problems. See the C API entry H5Pset_char_encoding for
 ///	more information.
 ///\exception	H5::DataTypeIException
@@ -174,10 +174,10 @@ H5T_cset_t StrType::getCset() const
 ///\param	cset - IN: character set type, which can be:
 ///		\li \c H5T_CSET_ASCII (0) - Character set is US ASCII.
 ///\note
-///	ASCII and UTF-8 Unicode are the only currently supported character 
-///	encodings. Extended ASCII encodings (for example, ISO 8859) are not 
-///	supported. This encoding policy is not enforced by the HDF5 Library. 
-///	Using encodings other than ASCII and UTF-8 can lead to compatibility 
+///	ASCII and UTF-8 Unicode are the only currently supported character
+///	encodings. Extended ASCII encodings (for example, ISO 8859) are not
+///	supported. This encoding policy is not enforced by the HDF5 Library.
+///	Using encodings other than ASCII and UTF-8 can lead to compatibility
 ///	and usability problems. See the C API entry H5Pset_char_encoding for
 ///	more information.
 ///\exception	H5::DataTypeIException

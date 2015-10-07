@@ -1128,7 +1128,7 @@ H5O_type_t CommonFG::childObjType(hsize_t index, H5_index_t index_type, H5_iter_
 unsigned CommonFG::childObjVersion(const char* objname) const
 {
     H5O_info_t objinfo;
-    unsigned version = -1;
+    unsigned version = 0;
 
     // Use C API to get information of the object
     herr_t ret_value = H5Oget_info_by_name(getLocId(), objname, &objinfo, H5P_DEFAULT);
@@ -1266,7 +1266,7 @@ CommonFG::~CommonFG() {}
 //--------------------------------------------------------------------------
 void f_DataType_setId(DataType* dtype, hid_t new_id)
 {
-    dtype->id = new_id;
+    dtype->p_setId(new_id);
 }
 
 //--------------------------------------------------------------------------
@@ -1281,7 +1281,7 @@ void f_DataType_setId(DataType* dtype, hid_t new_id)
 //--------------------------------------------------------------------------
 void f_DataSet_setId(DataSet* dset, hid_t new_id)
 {
-    dset->id = new_id;
+    dset->p_setId(new_id);
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS

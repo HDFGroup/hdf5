@@ -152,8 +152,6 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
     }
 }
 
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
 //--------------------------------------------------------------------------
 // Function:	H5File overloaded constructor
 ///\brief	Creates an H5File object using an existing file id.
@@ -172,6 +170,8 @@ H5File::H5File(hid_t existing_id) : H5Location(), CommonFG()
     id = existing_id;
     incRefCount(); // increment number of references to this id
 }
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5File copy constructor
@@ -227,7 +227,7 @@ bool H5File::isHdf5(const H5std_string& name )
 ///\param	name         - IN: Name of the file
 ///\param	flags        - IN: File access flags
 ///\param	access_plist - IN: File access property list.  Default to
-///		FileCreatPropList::DEFAULT
+///		FileAccPropList::DEFAULT
 ///\par Description
 ///		Valid values of \a flags include:
 ///		H5F_ACC_RDWR:   Open with read/write access. If the file is
@@ -521,6 +521,23 @@ hsize_t H5File::getFileSize() const
    return (file_size);
 }
 
+//--------------------------------------------------------------------------
+// Function:	H5File::getId
+///\brief	Get the id of this file
+///\return	File identifier
+// Modification:
+//	May 2008 - BMR
+//		Class hierarchy is revised to address bugzilla 1068.  Class
+//		AbstractDS and Attribute are moved out of H5Object.  In
+//		addition, member IdComponent::id is moved into subclasses, and
+//		IdComponent::getId now becomes pure virtual function.
+// Programmer	Binh-Minh Ribler - May, 2008
+//--------------------------------------------------------------------------
+hid_t H5File::getId() const
+{
+   return(id);
+}
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	H5File::reopen
@@ -547,37 +564,18 @@ hid_t H5File::getLocId() const
 {
    return( getId() );
 }
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
-// Function:    H5File::getId
-///\brief	Get the id of this file
-///\return	File identifier
-// Modification:
-//      May 2008 - BMR
-//              Class hierarchy is revised to address bugzilla 1068.  Class
-//              AbstractDS and Attribute are moved out of H5Object.  In
-//              addition, member IdComponent::id is moved into subclasses, and
-//              IdComponent::getId now becomes pure virtual function.
-// Programmer   Binh-Minh Ribler - May, 2008
-//--------------------------------------------------------------------------
-hid_t H5File::getId() const
-{
-   return(id);
-}
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-//--------------------------------------------------------------------------
-// Function:    H5File::p_setId (protected)
-///\brief       Sets the identifier of this object to a new value.
+// Function:	H5File::p_setId (protected)
+///\brief	Sets the identifier of this object to a new value.
 ///
-///\exception   H5::IdComponentException when the attempt to close the HDF5
-///             object fails
+///\exception	H5::IdComponentException when the attempt to close the HDF5
+///		object fails
 // Description:
-//              The underlaying reference counting in the C library ensures
-//              that the current valid id of this object is properly closed.
-//              Then the object's id is reset to the new id.
-// Programmer   Binh-Minh Ribler - 2000
+//		The underlaying reference counting in the C library ensures
+//		that the current valid id of this object is properly closed.
+//		Then the object's id is reset to the new id.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5File::p_setId(const hid_t new_id)
 {
