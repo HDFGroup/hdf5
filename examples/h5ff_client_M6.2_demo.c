@@ -65,6 +65,12 @@ int main( int argc, char **argv ) {
 
    MPI_Comm_rank( MPI_COMM_WORLD, &my_rank );
    MPI_Comm_size( MPI_COMM_WORLD, &comm_size );
+
+   if(comm_size < 2) {
+       fprintf(stderr, "Need at least 2 MPI ranks to run this test. Aborting..\n");
+       MPI_Abort(MPI_COMM_WORLD, 1);
+   }
+
    fprintf( stderr, "M6.2-r%d: Number of MPI processes = %d\n", my_rank, comm_size );
 
    /* Parse command-line options controlling behavior */
@@ -422,7 +428,7 @@ int main( int argc, char **argv ) {
           } H5E_END_TRY;
       }
 
-      MPI_Bcast( &rc_id4, 1, MPI_INT, 0, MPI_COMM_WORLD );
+      MPI_Bcast( &rc_id4, 1, MPI_INT64_T, 0, MPI_COMM_WORLD );
 
       if ( rc_id4 >= 0 ) {
          if ( 0 != my_rank ) {
@@ -521,6 +527,7 @@ int main( int argc, char **argv ) {
        */
    
    }
+
    MPI_Barrier( MPI_COMM_WORLD );
 
    /* Release the read handle and close read context on open CVs */
@@ -550,7 +557,8 @@ int main( int argc, char **argv ) {
    fprintf( stderr, "M6.2-r%d: open the container\n", my_rank );
 
    /* Get latest CV on open */
-   file_id = H5Fopen_ff( file_name, H5F_ACC_RDWR, fapl_id, &last_rc_id, H5_EVENT_STACK_NULL ); assert( file_id >= 0 );
+   file_id = H5Fopen_ff( file_name, H5F_ACC_RDWR, fapl_id, &last_rc_id, H5_EVENT_STACK_NULL ); 
+   assert( file_id >= 0 );
 
    H5RCget_version( last_rc_id, &last_version );
    fprintf( stderr, "M6.2-r%d: Latest CV in file is cv %d\n", my_rank, (int)last_version );
@@ -563,13 +571,17 @@ int main( int argc, char **argv ) {
    for ( v; v <= last_version; v++ ) {
       version = v;
       if ( 0 == my_rank ) {
-          fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
-          H5E_BEGIN_TRY 
-              rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
-          H5E_END_TRY
+          if(v < last_version) {
+              fprintf( stderr, "M6.2-r%d: Try to acquire read context for cv %d\n", my_rank, (int)version );
+              H5E_BEGIN_TRY 
+                  rc_id = H5RCacquire( file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL ); 
+              H5E_END_TRY
+          }
+          else
+              rc_id = last_rc_id;
       }
 
-      MPI_Bcast( &rc_id, 1, MPI_INT, 0, MPI_COMM_WORLD );
+      MPI_Bcast( &rc_id, 1, MPI_INT64_T, 0, MPI_COMM_WORLD );
 
       if ( rc_id < 0 ) {
           if ( 0 == my_rank ) {
@@ -583,10 +595,12 @@ int main( int argc, char **argv ) {
           print_container_contents( file_id, rc_id, "/", my_rank );
 
           MPI_Barrier( MPI_COMM_WORLD );
-          if ( 0 == my_rank ) {
-              ret = H5RCrelease( rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+          if(v < last_version) {
+              if ( 0 == my_rank ) {
+                  ret = H5RCrelease( rc_id, H5_EVENT_STACK_NULL ); ASSERT_RET;
+              }
+              ret = H5RCclose( rc_id ); ASSERT_RET;
           }
-          ret = H5RCclose( rc_id ); ASSERT_RET;
       }
    }
 
