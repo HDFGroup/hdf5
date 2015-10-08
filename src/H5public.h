@@ -114,9 +114,9 @@ extern "C" {
         (H5_VERS_MAJOR<Maj))
 
 /* LT Version numbers */
-#define LT_VERS_INTERFACE	10
-#define LT_VERS_REVISION	1
-#define LT_VERS_AGE		0
+#define LT_VERS_INTERFACE	11
+#define LT_VERS_REVISION	0
+#define LT_VERS_AGE		1
 
 /*
  * Status return values.  Failed integer functions in HDF5 result almost

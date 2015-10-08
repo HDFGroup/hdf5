@@ -660,9 +660,9 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 # See libtool versioning documentation online.
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
-LT_VERS_INTERFACE = 10
-LT_VERS_REVISION = 1
-LT_VERS_AGE = 0
+LT_VERS_INTERFACE = 11
+LT_VERS_REVISION = 0
+LT_VERS_AGE = 1
 
 # This library is our main target.
 lib_LTLIBRARIES = libhdf5_hl.la
