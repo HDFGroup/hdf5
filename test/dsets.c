@@ -1138,15 +1138,15 @@ test_conv_buffer(hid_t fid)
 
     /* Populate the data members */
     for(j = 0; j < DIM1; j++)
-	for(k = 0; k < DIM2; k++)
-	    for(l = 0; l < DIM3; l++)
-		cf->a[j][k][l] = 10*(j+1) + l + k;
+        for(k = 0; k < DIM2; k++)
+            for(l = 0; l < DIM3; l++)
+                cf->a[j][k][l] = 10*(j+1) + l + k;
 
     for(j = 0; j < DIM2; j++)
-	cf->b[j] = (float)(100.0f*(j+1) + 0.01f*j);
+        cf->b[j] = 100.0f * (float)(j+1) + 0.01f * (float)j;
 
     for(j = 0; j < DIM3; j++)
-	cf->c[j] = 100.0f*(j+1) + 0.02f*j;
+        cf->c[j] = 100.0f * (float)(j+1) + 0.02f * (float)j;
 
 
   /* Create data space */
@@ -1223,7 +1223,7 @@ test_conv_buffer(hid_t fid)
   HDfree(cf);
   HDfree(cfrR);
   puts(" PASSED");
-  return(0);
+  return 0;
 
 error:
   return -1;
@@ -2813,7 +2813,8 @@ test_nbit_int(hid_t file)
     int                 new_data[2][5];
     unsigned int        mask;
     size_t              precision, offset;
-    size_t             i, j;
+    double              power;
+    size_t              i, j;
 
     puts("Testing nbit filter");
     TESTING("    nbit int (setup)");
@@ -2846,8 +2847,8 @@ test_nbit_int(hid_t file)
     /* Initialize data, assuming size of long long >= size of int */
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[i][j] = (int)(((long long)HDrandom() %
-                           (long long)HDpow(2.0f, (double)(precision - 1))) << offset);
+        power = HDpow(2.0f, (double)(precision - 1));
+        orig_data[i][j] = (int)(((long long)HDrandom() % (long long)power) << offset);
 
         /* even-numbered values are negtive */
         if((i*size[1]+j+1)%2 == 0)
@@ -3173,7 +3174,8 @@ test_nbit_array(hid_t file)
     unsigned int        orig_data[2][5][3][2];
     unsigned int        new_data[2][5][3][2];
     size_t              precision, offset;
-    size_t             i, j, m, n;
+    double              power;
+    size_t              i, j, m, n;
 
     TESTING("    nbit array (setup)");
 
@@ -3212,9 +3214,11 @@ test_nbit_array(hid_t file)
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++)
         for(m = 0; m < (size_t)adims[0]; m++)
-          for(n = 0; n < (size_t)adims[1]; n++)
+          for(n = 0; n < (size_t)adims[1]; n++) {
+            power = HDpow(2.0F, (double)precision);
             orig_data[i][j][m][n] = (unsigned int)(((long long)HDrandom() %
-                                     (long long)HDpow(2.0F, (double)precision)) << offset);
+                                     (long long)power) << offset);
+          } /* end for */
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -3313,7 +3317,8 @@ test_nbit_compound(hid_t file)
     atomic              orig_data[2][5];
     atomic              new_data[2][5];
     unsigned int        i_mask, s_mask, c_mask;
-    size_t             i, j;
+    double              power;
+    size_t              i, j;
 
 
     TESTING("    nbit compound (setup)");
@@ -3372,12 +3377,12 @@ test_nbit_compound(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[i][j].i = (int)(((long long)HDrandom() %
-                             (long long)HDpow(2.0F, (double)(precision[0]-1))) << offset[0]);
-        orig_data[i][j].c = (char)(((long long)HDrandom() %
-                             (long long)HDpow(2.0F, (double)(precision[1]-1))) << offset[1]);
-        orig_data[i][j].s = (short)(((long long)HDrandom() %
-                             (long long)HDpow(2.0F, (double)(precision[2]-1))) << offset[2]);
+        power = HDpow(2.0F, (double)(precision[0]-1));
+        orig_data[i][j].i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
+        power = HDpow(2.0F, (double)(precision[1]-1));
+        orig_data[i][j].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+        power = HDpow(2.0F, (double)(precision[2]-1));
+        orig_data[i][j].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
         orig_data[i][j].f = float_val[i][j];
 
         /* some even-numbered integer values are negtive */
@@ -3507,7 +3512,8 @@ test_nbit_compound_2(hid_t file)
     complex             orig_data[2][5];
     complex             new_data[2][5];
     unsigned int        i_mask, s_mask, c_mask, b_mask;
-    size_t             i, j, m, n, b_failed, d_failed;
+    double              power;
+    size_t              i, j, m, n, b_failed, d_failed;
 
 
     TESTING("    nbit compound complex (setup)");
@@ -3598,33 +3604,34 @@ test_nbit_compound_2(hid_t file)
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[i][j].a.i = (int)(((long long)HDrandom() %
-                               (long long)HDpow(2.0F, (double)(precision[0]-1))) << offset[0]);
-        orig_data[i][j].a.c = (char)(((long long)HDrandom() %
-                               (long long)HDpow(2.0F, (double)(precision[1]-1))) << offset[1]);
-        orig_data[i][j].a.s = (short)(-((long long)HDrandom() %
-                               (long long)HDpow(2.0F, (double)(precision[2]-1))) << offset[2]);
+        power = HDpow(2.0F, (double)(precision[0]-1));
+        orig_data[i][j].a.i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
+        power = HDpow(2.0F, (double)(precision[1]-1));
+        orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+        power = HDpow(2.0F, (double)(precision[2]-1));
+        orig_data[i][j].a.s = (short)(-((long long)HDrandom() % (long long)power) << offset[2]);
         orig_data[i][j].a.f = float_val[i][j];
 
-        orig_data[i][j].v = (unsigned int)(((long long)HDrandom() %
-                             (long long)HDpow(2.0F, (double)precision[3])) << offset[3]);
-
-        for(m = 0; m < (size_t)array_dims[0]; m++)
-          for(n = 0; n < (size_t)array_dims[1]; n++)
-            orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() %
-                                       (long long)HDpow(2.0F, (double)(precision[4]-1))) << offset[4]);
+        power = HDpow(2.0F, (double)precision[3]);
+        orig_data[i][j].v = (unsigned int)(((long long)HDrandom() % (long long)power) << offset[3]);
 
         for(m = 0; m < (size_t)array_dims[0]; m++)
           for(n = 0; n < (size_t)array_dims[1]; n++) {
-            orig_data[i][j].d[m][n].i = (int)(-((long long)HDrandom() %
-                                         (long long)HDpow(2.0F, (double)(precision[0]-1))) << offset[0]);
-            orig_data[i][j].d[m][n].c = (char)(((long long)HDrandom() %
-                                         (long long)HDpow(2.0F, (double)(precision[1]-1))) << offset[1]);
-            orig_data[i][j].d[m][n].s = (short)(((long long)HDrandom() %
-                                         (long long)HDpow(2.0F, (double)(precision[2]-1))) << offset[2]);
+            power = HDpow(2.0F, (double)(precision[4]-1));
+            orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() % (long long)power) << offset[4]);
+          } /* end for */
+
+        for(m = 0; m < (size_t)array_dims[0]; m++)
+          for(n = 0; n < (size_t)array_dims[1]; n++) {
+            power = HDpow(2.0F, (double)(precision[0]-1));
+            orig_data[i][j].d[m][n].i = (int)(-((long long)HDrandom() % (long long)power) << offset[0]);
+            power = HDpow(2.0F, (double)(precision[1]-1));
+            orig_data[i][j].d[m][n].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+            power = HDpow(2.0F, (double)(precision[2]-1));
+            orig_data[i][j].d[m][n].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
             orig_data[i][j].d[m][n].f = float_val[i][j];
-          }
-      }
+          } /* end for */
+      } /* end for */
 
     PASSED();
 
@@ -3769,7 +3776,8 @@ test_nbit_compound_3(hid_t file)
     const hsize_t       chunk_size[1] = {5};
     atomic              orig_data[5];
     atomic              new_data[5];
-    size_t             i, k, j;
+    double              power;
+    size_t              i, k, j;
 
 
     TESTING("    nbit compound with no-op type (setup)");
@@ -3816,8 +3824,9 @@ test_nbit_compound_3(hid_t file)
 
     /* Initialize data */
     for(i = 0; i < (size_t)size[0]; i++) {
+        power = HDpow(2.0F, 17.0F - 1.0F);
         HDmemset(&orig_data[i], 0, sizeof(orig_data[i]));
-        orig_data[i].i = HDrandom() % (long)HDpow(2.0F, 17.0F - 1.0F);
+        orig_data[i].i = HDrandom() % (long)power;
         HDstrcpy(orig_data[i].str, "fixed-length C string");
         orig_data[i].vl_str = HDstrdup("variable-length C string");
 
@@ -3936,6 +3945,7 @@ test_nbit_int_size(hid_t file)
     hsize_t dims[2], chunk_size[2];
     hsize_t dset_size = 0;
     int     orig_data[DSET_DIM1][DSET_DIM2];
+    double  power;
     int     i, j;
     size_t  precision, offset;
 
@@ -3986,8 +3996,10 @@ test_nbit_int_size(hid_t file)
    * corresponding to the memory datatype's precision and offset.
    */
    for (i=0; i < DSET_DIM1; i++)
-       for (j=0; j < DSET_DIM2; j++)
-           orig_data[i][j] = rand() % (int)pow((double)2, (double)(precision-1)) << offset;
+       for (j=0; j < DSET_DIM2; j++) {
+           power = HDpow(2.0F, (double)(precision-1));
+           orig_data[i][j] = HDrandom() % (int)power << offset;
+       } /* end for */
 
 
    /* Describe the dataspace. */

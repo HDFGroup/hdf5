@@ -704,7 +704,7 @@ static void test_grp_memb_funcs(hid_t fapl)
     char dataset_name[NAMELEN];  /* dataset name */
     ssize_t name_len;       /* Length of object's name */
     H5G_info_t ginfo;       /* Buffer for querying object's info */
-    herr_t ret;		    /* Generic return value */
+    herr_t ret = SUCCEED;	/* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Group Member Information Functionality\n"));
