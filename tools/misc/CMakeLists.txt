@@ -59,12 +59,15 @@ if (BUILD_TESTING)
     target_link_libraries (h5repart_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
     #add_test (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
+
     add_executable (h5extend_gentest ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5extend_gentest.c)
     TARGET_NAMING (h5extend_gentest STATIC)
     TARGET_C_PROPERTIES (h5extend_gentest STATIC " " " ")
     target_link_libraries (h5extend_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5extend_gentest PROPERTIES FOLDER generator/tools)
     #add_test (NAME h5extend_gentest COMMAND $<TARGET_FILE:h5extend_gentest>)
+
+    add_subdirectory (${HDF5_TOOLS_MISC_SOURCE_DIR}/vds)
   endif (HDF5_BUILD_GENERATORS)
 
   add_executable (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)

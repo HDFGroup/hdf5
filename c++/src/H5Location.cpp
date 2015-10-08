@@ -21,6 +21,7 @@
 #include "H5PropList.h"
 #include "H5Location.h"
 #include "H5Object.h"
+#include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5FaccProp.h"
@@ -33,9 +34,6 @@
 #include "H5DataSet.h"
 #include "H5Attribute.h"
 #include "H5private.h"		// for HDmemset
-#include <iostream>
-using namespace std;
-
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -951,7 +949,7 @@ H5Location::~H5Location() {}
 //--------------------------------------------------------------------------
 void f_Attribute_setId(Attribute* attr, hid_t new_id)
 {
-    attr->id = new_id;
+    attr->p_setId(new_id);
 }
 
 //--------------------------------------------------------------------------
@@ -966,7 +964,7 @@ void f_Attribute_setId(Attribute* attr, hid_t new_id)
 //--------------------------------------------------------------------------
 void f_DataSpace_setId(DataSpace* dspace, hid_t new_id)
 {
-    dspace->id = new_id;
+    dspace->p_setId(new_id);
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS

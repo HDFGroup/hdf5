@@ -96,7 +96,7 @@ static H5E_auto2_t err_func = NULL;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
 static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, 
-                              char *fullname, size_t size);
+                              char *fullname, size_t size, hbool_t nest_printf);
 
 
 /*-------------------------------------------------------------------------
@@ -327,7 +327,7 @@ h5_reset(void)
 char *
 h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size));
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, FALSE));
 }
 
 
@@ -347,7 +347,33 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 char *
 h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size)
 {
-    return (h5_fixname_real(base_name, fapl, NULL, fullname, size));
+    return (h5_fixname_real(base_name, fapl, NULL, fullname, size, FALSE));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:  h5_fixname_printf
+ *
+ * Purpose:  Same as h5_fixname but returns a filename that can be passed
+ *    through a printf-style function once before being passed to the file
+ *    driver.  Basically, replaces all % characters used by the file
+ *    driver with %%.
+ *
+ * Return:  Success:  The FULLNAME pointer.
+ *
+ *    Failure:  NULL if BASENAME or FULLNAME is the null
+ *        pointer or if FULLNAME isn't large enough for
+ *        the result.
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, July 15, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size)
+{
+    return (h5_fixname_real(base_name, fapl, ".h5", fullname, size, TRUE));
 }
 
 
@@ -375,7 +401,7 @@ h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t s
  */
 static char *
 h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, 
-                char *fullname, size_t size)
+                char *fullname, size_t size, hbool_t nest_printf)
 {
     const char     *prefix = NULL;
     char           *ptr, last = '\0';
@@ -396,7 +422,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
 
         if(suffix) {
             if(H5FD_FAMILY == driver)
-                suffix = "%05d.h5";
+                suffix = nest_printf ? "%%05d.h5" : "%05d.h5";
             else if (H5FD_MULTI == driver)
                 suffix = NULL;
         }

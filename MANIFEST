@@ -33,7 +33,7 @@
 ./README.txt
 ./BRANCH.txt
 ./acsite.m4
-./autogen.sh           _DO_NOT_DISTRIBUTE_
+./autogen.sh         
 ./configure.ac
 
 ./bin/COPYING
@@ -130,6 +130,14 @@
 ./examples/h5_ref2reg.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
+./examples/h5_vds.c
+./examples/h5_vds-exc.c
+./examples/h5_vds-exclim.c
+./examples/h5_vds-eiger.c
+./examples/h5_vds-simpleIO.c
+./examples/h5_vds-percival.c
+./examples/h5_vds-percival-unlim.c
+./examples/h5_vds-percival-unlim-maxmin.c
 ./examples/testh5cc.sh.in
 ./examples/README
 
@@ -345,6 +353,8 @@
 ./c++/src/H5Location.h
 ./c++/src/H5Object.cpp
 ./c++/src/H5Object.h
+./c++/src/H5OcreatProp.cpp
+./c++/src/H5OcreatProp.h
 ./c++/src/H5PredType.cpp
 ./c++/src/H5PredType.h
 ./c++/src/H5PropList.cpp
@@ -484,6 +494,7 @@
 ./src/H5Dscatgath.c
 ./src/H5Dselect.c
 ./src/H5Dtest.c
+./src/H5Dvirtual.c
 ./src/H5E.c
 ./src/H5Edeprec.c
 ./src/H5Eint.c
@@ -986,6 +997,7 @@
 ./test/test_filters_be.h5
 ./test/gen_filters.c
 ./test/chunk_info.c
+./test/vds.c
 
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
@@ -1145,6 +1157,7 @@
 ./tools/h5dump/testh5dump.sh.in
 ./tools/h5dump/testh5dumppbits.sh.in
 ./tools/h5dump/testh5dumpxml.sh.in
+./tools/h5dump/testh5dumpvds.sh.in
 ./tools/h5dump/binread.c
 
 ./tools/h5import/Makefile.am
@@ -1232,9 +1245,11 @@
 ./tools/h5repack/testh5repack_detect_szip.c
 
 # h5ls sources
+./tools/h5ls/CMakeTestsVDS.cmake
 ./tools/h5ls/Makefile.am
 ./tools/h5ls/h5ls.c
 ./tools/h5ls/testh5ls.sh.in
+./tools/h5ls/testh5lsvds.sh.in
 
 # h5copy sources
 ./tools/h5copy/testh5copy.sh.in
@@ -1286,6 +1301,18 @@
 ./tools/misc/testfiles/h5mkgrp_help.txt
 ./tools/misc/testfiles/h5mkgrp_version.txt.in
 ./tools/misc/h5perf_gentest.c
+./tools/misc/vds/Makefile.am
+./tools/misc/vds/UC_1.h
+./tools/misc/vds/UC_1_one_dim_gen.c
+./tools/misc/vds/UC_2.h
+./tools/misc/vds/UC_2_two_dims_gen.c
+./tools/misc/vds/UC_3.h
+./tools/misc/vds/UC_3_gaps_gen.c
+./tools/misc/vds/UC_4.h
+./tools/misc/vds/UC_4_printf_gen.c
+./tools/misc/vds/UC_5.h
+./tools/misc/vds/UC_5_stride_gen.c
+./tools/misc/vds/UC_common.h
 
 # h5stat sources
 ./tools/h5stat/Makefile.am
@@ -1705,6 +1732,43 @@
 ./tools/testfiles/pbits/tpbitsOverlapped.ddl
 ./tools/testfiles/packedbits.h5
 
+# h5dump vds validation
+./tools/testfiles/vds/tvds-1.ddl
+./tools/testfiles/vds/tvds-2.ddl
+./tools/testfiles/vds/tvds-3_1.ddl
+./tools/testfiles/vds/tvds-3_2.ddl
+./tools/testfiles/vds/tvds-4.ddl
+./tools/testfiles/vds/tvds-5.ddl
+./tools/testfiles/vds/tvds_layout-1.ddl
+./tools/testfiles/vds/tvds_layout-2.ddl
+./tools/testfiles/vds/tvds_layout-3_1.ddl
+./tools/testfiles/vds/tvds_layout-3_2.ddl
+./tools/testfiles/vds/tvds_layout-4.ddl
+./tools/testfiles/vds/tvds_layout-5.ddl
+./tools/testfiles/vds/1_a.h5
+./tools/testfiles/vds/1_b.h5
+./tools/testfiles/vds/1_c.h5
+./tools/testfiles/vds/1_d.h5
+./tools/testfiles/vds/1_e.h5
+./tools/testfiles/vds/1_f.h5
+./tools/testfiles/vds/1_vds.h5
+./tools/testfiles/vds/2_a.h5
+./tools/testfiles/vds/2_b.h5
+./tools/testfiles/vds/2_c.h5
+./tools/testfiles/vds/2_d.h5
+./tools/testfiles/vds/2_e.h5
+./tools/testfiles/vds/2_vds.h5
+./tools/testfiles/vds/3_1_vds.h5
+./tools/testfiles/vds/3_2_vds.h5
+./tools/testfiles/vds/4_0.h5
+./tools/testfiles/vds/4_1.h5
+./tools/testfiles/vds/4_2.h5
+./tools/testfiles/vds/4_vds.h5
+./tools/testfiles/vds/5_a.h5
+./tools/testfiles/vds/5_b.h5
+./tools/testfiles/vds/5_c.h5
+./tools/testfiles/vds/5_vds.h5
+
 # h5dump h5import validation
 ./tools/testfiles/out3.h5import
 ./tools/testfiles/tordergr.h5
@@ -1781,7 +1845,13 @@
 ./tools/testfiles/thlinks-nodangle-1.ls
 ./tools/testfiles/tudlink-1.ls
 
-
+# h5ls vds validation
+./tools/testfiles/vds/tvds-1.ls
+./tools/testfiles/vds/tvds-2.ls
+./tools/testfiles/vds/tvds-3_1.ls
+./tools/testfiles/vds/tvds-3_2.ls
+./tools/testfiles/vds/tvds-4.ls
+./tools/testfiles/vds/tvds-5.ls
 
 #additional test input and output for h5dump XML
 ./tools/testfiles/tall.h5.xml
@@ -2096,6 +2166,10 @@
 ./tools/h5diff/testfiles/tmptest.he5
 ./tools/h5diff/testfiles/h5diff_tmp2.txt
 ./tools/h5diff/testfiles/tmpSingleSiteBethe.output.h5
+#vds
+./tools/h5diff/testfiles/h5diff_v1.txt
+./tools/h5diff/testfiles/h5diff_v2.txt
+./tools/h5diff/testfiles/h5diff_v3.txt
 
 #test files for h5repack
 ./tools/h5repack/testfiles/README
@@ -2469,6 +2543,7 @@
 ./tools/h5dump/CMakeTests.cmake
 ./tools/h5dump/CMakeTestsPBITS.cmake
 ./tools/h5dump/CMakeTestsXML.cmake
+./tools/h5dump/CMakeTestsVDS.cmake
 ./tools/h5import/CMakeLists.txt
 ./tools/h5import/CMakeTests.cmake
 ./tools/h5jam/CMakeLists.txt
@@ -2482,9 +2557,10 @@
 ./tools/lib/CMakeLists.txt
 ./tools/misc/CMakeLists.txt
 ./tools/misc/CMakeTests.cmake
+./tools/misc/vds/CMakeLists.txt
 ./tools/perform/CMakeLists.txt
 ./tools/perform/CMakeTests.cmake
 
 # CMake-specific User Scripts
-./config/cmake/scripts/CTestScript.cmake   _DO_NOT_DISTRIBUTE_
-./config/cmake/scripts/HDF518config.cmake   _DO_NOT_DISTRIBUTE_
+./config/cmake/scripts/CTestScript.cmake
+./config/cmake/scripts/HDF518config.cmake

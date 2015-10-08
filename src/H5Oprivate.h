@@ -38,6 +38,7 @@
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5HGprivate.h"        /* Global Heaps                         */
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatype functions			*/
 #include "H5Zprivate.h"         /* I/O pipeline filters			*/
@@ -384,7 +385,8 @@ typedef struct H5O_eoa_t {
  *      for larger chunk dimensions, stores chunk indices into their own
  *      message (the "layout index" message), adds features for compact/dense
  *      storage of elements and/or chunk records, adds features for abbreviating
- *      the storage used for partial chunks on boundaries, etc.
+ *      the storage used for partial chunks on boundaries, adds the virtual
+ *      layout type, etc.
  */
 #define H5O_LAYOUT_VERSION_4	4
 
@@ -422,12 +424,88 @@ typedef struct H5O_storage_compact_t {
     void        *buf;                   /* Buffer for compact dataset        */
 } H5O_storage_compact_t;
 
+typedef struct H5O_storage_virtual_srcdset_t {
+    /* Stored */
+    struct H5S_t *virtual_select;       /* Selection in the virtual dataset that is mapped to source selection */
+
+    /* Not stored */
+    char *file_name;                    /* Source file name used for virtual dataset mapping */
+    char *dset_name;                    /* Source dataset name used for virtual dataset mapping */
+    struct H5S_t *clipped_source_select; /* Clipped version of source_select  */
+    struct H5S_t *clipped_virtual_select; /* Clipped version of virtual_select */
+    struct H5D_t *dset;                 /* Source dataset                     */
+    hbool_t dset_exists;                /* Whether the dataset exists (was opened successfully) */
+
+    /* Temporary - only used during I/O operation, NULL at all other times */
+    struct H5S_t *projected_mem_space;  /* Selection within mem_space for this mapping */
+} H5O_storage_virtual_srcdset_t;
+
+typedef struct H5O_storage_virtual_name_seg_t {
+    char *name_segment;                 /* String for this name segment       */
+    struct H5O_storage_virtual_name_seg_t *next; /* Next name segment         */
+} H5O_storage_virtual_name_seg_t;
+
+typedef enum H5O_virtual_space_status_t {
+    H5O_VIRTUAL_STATUS_INVALID = 0,     /* Space extent is invalid            */
+    H5O_VIRTUAL_STATUS_SEL_BOUNDS,      /* Space extent set to bounds of selection */
+    H5O_VIRTUAL_STATUS_USER,            /* Space extent provided by application */
+    H5O_VIRTUAL_STATUS_CORRECT          /* Space extent matches dataset       */
+} H5O_virtual_space_status_t;
+
+typedef struct H5O_storage_virtual_ent_t {
+    /* Stored */
+    H5O_storage_virtual_srcdset_t source_dset; /* Information about the source dataset */
+    char *source_file_name;             /* Original (unparsed) source file name */
+    char *source_dset_name;             /* Original (unparsed) source dataset name */
+    struct H5S_t *source_select;        /* Selection in the source dataset for mapping */
+
+    /* Not stored */
+    H5O_storage_virtual_srcdset_t *sub_dset; /* Array of sub-source dataset info structs */
+    size_t sub_dset_nalloc;             /* Number of slots allocated in sub_dset */
+    size_t sub_dset_nused;              /* Number of slots "used" in sub_dset - essentially the farthest sub dataset in the extent */
+    size_t sub_dset_io_start;           /* First element in sub_dset involved in current I/O op.  Field has no meaning and may be uninitialized at all other times */
+    size_t sub_dset_io_end;             /* First element in sub_dset outside of current I/O op.  Field has no meaning and may be uninitialized at all other times */
+    H5O_storage_virtual_name_seg_t *parsed_source_file_name; /* Parsed version of source_dset.file_name */
+    size_t psfn_static_strlen;          /* Length of parsed_source_file_name without block number substitutions */
+    size_t psfn_nsubs;                  /* Number of block number substitutions in parsed_source_file_name */
+    H5O_storage_virtual_name_seg_t *parsed_source_dset_name; /* Parsed version of source_dset.dset_name */
+    size_t psdn_static_strlen;          /* Length of parsed_source_dset_name without block number substitutions */
+    size_t psdn_nsubs;                  /* Number of block number substitutions in parsed_source_dset_name */
+    int unlim_dim_source;               /* Unlimited dimension in source_select */
+    int unlim_dim_virtual;              /* Unlimited dimension in virtual_select */
+    hsize_t unlim_extent_source;        /* Extent of unlimited dimension in source dset last time virtual_select was patched to match selection */
+    hsize_t unlim_extent_virtual;       /* Extent of unlimited dimension in virtual dset last time source_select was patched to match selection */
+    hsize_t clip_size_virtual;          /* Size selection would be clipped to in virtual selection, ignoring other mappings, when source extent == unlim_extent_source */
+    hsize_t clip_size_source;           /* Size selection would be clipped to in source selection when virtual extent == unlim_extent_virtual */
+    H5O_virtual_space_status_t source_space_status; /* Extent patching status of source_select */
+    H5O_virtual_space_status_t virtual_space_status; /* Extent patching status of virtual_select */
+} H5O_storage_virtual_ent_t;
+
+typedef struct H5O_storage_virtual_t {
+    /* Stored in message */
+    H5HG_t      serial_list_hobjid;     /* Global heap ID for the list of virtual mapping entries stored on disk */
+
+    /* Stored in heap */
+    size_t      list_nused;             /* Number of array elements used in list    */
+    H5O_storage_virtual_ent_t *list;    /* Array of virtual dataset mapping entries */
+
+    /* Not stored */
+    size_t      list_nalloc;            /* Number of slots allocated          */
+    hsize_t     min_dims[H5S_MAX_RANK]; /* Minimum extent of VDS (maximum of all non-unlimited selection bounds) */
+    H5D_vds_view_t view;                /* Method for calculating the extent of the virtual dataset with unlimited selections */
+    hsize_t     printf_gap;             /* Maximum number of sequential missing source datasets before terminating the search for more */
+    hid_t       source_fapl;            /* FAPL to use to open source files */
+    hid_t       source_dapl;            /* DAPL to use to open source datasets */
+    hbool_t     init;                   /* Whether all information has been completely initialized */
+} H5O_storage_virtual_t;
+
 typedef struct H5O_storage_t {
     H5D_layout_t type;			/* Type of layout                    */
     union {
         H5O_storage_contig_t contig;    /* Information for contiguous storage */
         H5O_storage_chunk_t chunk;      /* Information for chunked storage    */
         H5O_storage_compact_t compact;  /* Information for compact storage    */
+        H5O_storage_virtual_t virt;     /* Information for virtual storage    */
     } u;
 } H5O_storage_t;
 

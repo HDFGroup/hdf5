@@ -247,6 +247,7 @@ set (H5_TESTS
     cross_read
     freespace
     mf
+    vds
     farray
     earray
     btree2

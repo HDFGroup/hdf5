@@ -4,9 +4,9 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 # For any comments please contact cdashhelp@hdfgroup.org
 #
 ########################################################
-# ----------------------------------------------------------- 
+# -----------------------------------------------------------
 # -- Get environment
-# ----------------------------------------------------------- 
+# -----------------------------------------------------------
 if(NOT SITE_OS_NAME)
   ## machine name not provided - attempt to discover with uname
   ## -- set hostname
@@ -18,7 +18,7 @@ if(NOT SITE_OS_NAME)
   macro(getuname name flag)
     exec_program("${UNAME}" ARGS "${flag}" OUTPUT_VARIABLE "${name}")
   endmacro(getuname)
- 
+
   getuname(osname -s)
   getuname(osrel  -r)
   getuname(cpu    -m)
@@ -45,7 +45,7 @@ else(NOT SITE_OS_NAME)
   endif()
   set(BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
 endif(NOT SITE_OS_NAME)
- 
+
 #-----------------------------------------------------------------------------
 # MAC machines need special option
 #-----------------------------------------------------------------------------
@@ -72,14 +72,15 @@ if(CTEST_USE_TAR_SOURCE)
     message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_USE_TAR_SOURCE}.tar]")
     execute_process(COMMAND ${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}/${CTEST_USE_TAR_SOURCE}.tar RESULT_VARIABLE rv)
   endif()
- 
+
   if(NOT rv EQUAL 0)
     message(STATUS "extracting... [error-(${rv}) clean up]")
     file(REMOVE_RECURSE "${CTEST_SOURCE_DIRECTORY}")
     message(FATAL_ERROR "error: extract of ${CTEST_USE_TAR_SOURCE} failed")
   endif()
-     
+
   file(RENAME ${CTEST_DASHBOARD_ROOT}/${CTEST_USE_TAR_SOURCE} ${CTEST_SOURCE_DIRECTORY})
+  set(LOCAL_SKIP_UPDATE "TRUE")
 else(CTEST_USE_TAR_SOURCE)
   if(LOCAL_UPDATE)
     if(CTEST_USE_GIT_SOURCE)
@@ -120,7 +121,7 @@ else(CTEST_USE_TAR_SOURCE)
       if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}")
         set(NEED_REPOSITORY_CHECKOUT 1)
       endif()
- 
+
       if(NOT CTEST_REPO_VERSION)
         set(CTEST_REPO_VERSION "HEAD")
       endif()
@@ -135,7 +136,7 @@ else(CTEST_USE_TAR_SOURCE)
     endif(CTEST_USE_GIT_SOURCE)
   endif(LOCAL_UPDATE)
 endif(CTEST_USE_TAR_SOURCE)
- 
+
 #-----------------------------------------------------------------------------
 ## Clear the build directory
 ## --------------------------
@@ -155,7 +156,7 @@ if(NOT N EQUAL 0)
   endif()
   set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
 endif()
- 
+
 #-----------------------------------------------------------------------------
 # Send the main script as a note.
 list(APPEND CTEST_NOTES_FILES
@@ -163,7 +164,7 @@ list(APPEND CTEST_NOTES_FILES
     "${CMAKE_CURRENT_LIST_FILE}"
     "${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake"
 )
- 
+
 #-----------------------------------------------------------------------------
 # Check for required variables.
 # --------------------------
@@ -176,7 +177,7 @@ foreach(req
     message(FATAL_ERROR "The containing script must set ${req}")
   endif()
 endforeach(req)
- 
+
 #-----------------------------------------------------------------------------
 # Initialize the CTEST commands
 #------------------------------
@@ -193,11 +194,11 @@ else()
       "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
   )
 endif()
- 
+
 #-----------------------------------------------------------------------------
 ## -- set output to english
 set($ENV{LC_MESSAGES}  "en_EN")
- 
+
 # Print summary information.
 foreach(v
     CTEST_SITE
@@ -215,7 +216,7 @@ foreach(v
   set(vars "${vars}  ${v}=[${${v}}]\n")
 endforeach(v)
 message(STATUS "Dashboard script configuration:\n${vars}\n")
- 
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
   ## NORMAL process
@@ -235,12 +236,12 @@ message(STATUS "Dashboard script configuration:\n${vars}\n")
   if(LOCAL_SUBMIT)
     ctest_submit (PARTS Update Configure Notes)
   endif()
-  
+
   ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
   if(LOCAL_SUBMIT)
     ctest_submit (PARTS Build)
   endif()
-  
+
   if(NOT LOCAL_SKIP_TEST)
     if(NOT LOCAL_MEMCHECK_TEST)
       ctest_test (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args} RETURN_VALUE res)
@@ -263,7 +264,7 @@ message(STATUS "Dashboard script configuration:\n${vars}\n")
       endif()
     endif()
   endif(NOT LOCAL_SKIP_TEST)
-  
+
   if(NOT LOCAL_MEMCHECK_TEST AND NOT LOCAL_NO_PACKAGE)
     ##-----------------------------------------------
     ## Package the product
