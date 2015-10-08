@@ -1105,7 +1105,7 @@ H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type)
     herr_t ret_value = SUCCEED; /* return value */
     
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", did);
+    H5TRACE2("e", "i*Dk", did, idx_type);
 
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
