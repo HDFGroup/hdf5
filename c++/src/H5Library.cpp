@@ -38,6 +38,12 @@ namespace H5 {
 #endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+// This static variable will be set to true when dontAtExit is called
+// - unused, will be removed in future releases.
+bool H5Library::need_cleanup = false;
+
+// IdComponent default constructor instantiates this object to register cleanup
+// functions before any global constant is created.
 H5Library* H5Library::instance = 0;
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
