@@ -1,4 +1,4 @@
-HDF5 version 1.8.16-snap18 currently under development
+HDF5 version 1.8.17-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
@@ -57,165 +57,15 @@ New Features
 
     Configuration
     -------------
-    - The thread-safety + high-level library combination has been marked
-      as "unsupported" in the Autotools
-
-      The global lock used by the thread-safety feature has never been
-      raised to the high-level library level, making it possible that
-      library state could change if a context switch were to occur in
-      a high-level library call. Because of this, the combination of
-      thread-safety and high-level library is officially unsupported by
-      The HDF Group.
-
-      In the past, although this combination has never been supported, this
-      was not enforced by the build systems. These changes will cause an
-      Autotools configure step to fail if --enable-threadsafe and
-      --enable-hl are combined unless additional options are specified.
-      Since the high-level library is built by default, this means that
-      these extra configuration options will need to be used any time
-      --enable-threadsafe is selected.
-
-      To build with --enable-threadsafe, either:
-
-      1) Use --disable-hl to disable the high-level library (recommended)
-
-      2) Use --enable-unsupported to build the high-level library with
-         the thread-safety feature.
-
-      (DER - 2015/09/10 HDFFV-8719)
-
-    - Using CMake now builds both static and shared libraries.
-
-      The CMake files have been updated to build both static and shared
-      libraries, with tools only built statically. The packaging of the
-      libraries and tools will include cmake-config files that allows
-      projects to choose either shared or static (default) libraries
-      to be found with the find_package command using the COMPONENTS
-      keyword and a list of components. The imported libraries will
-      include any interface specific settings and dependent libraries.
-
-      The default setting for BUILD_SHARED_LIBS has changed from OFF
-      to ON, which builds both static and shared libraries. The static
-      libraries are always built because of tools requirements.
-
-      (ADB - 2015/08/24 HDFFV-5881)
-
-    - Inline functions now correctly annotated w/ Autotools builds.
-
-      The method used to detect the appropriate inline markup scheme was
-      nonfunctional in Autotools builds. The Autotools have been modified
-      to correctly detect the compiler's inline markup symbol and apply it
-      to the source. Note that only a very small number of internal
-      functions are marked inline so this was not a very big change or
-      likely to significantly affect performance.
-
-      As a part of this change, the H5_inline symbol no longer appears in
-      H5pubconf.h.
-
-      (DER - 2015/08/13 HDFFV-9119, HDFFV-9421)
-
-    - Removed obsolete/unmaintained files from config/
-
-      Several files were removed from the config directory. These files
-      represent old operating systems, were no longer necessary, and/or
-      were no longer maintained. configure.ac was updated to reflect the
-      removed files.
-
-      Removed:
-
-        craynv
-        dec-flags
-        hpux11.23
-        ia64-linux-gnu
-        nec-superux14.1
-        sv1-cray
-        x86_64-redstorm-linux-gnu
-        powerpc-ibm-aix5.x
-
-      As a part of this work, a few lines that deal with locating the
-      sys/fpu.h header on SGI machines and some OSF/1 configure lines
-      were also removed. The Solaris config was also renamed to not have
-      a version number since the version number was ignored by configure
-      as it applies to all Solaris versions.
-
-      (DER - 2015/09/04 HDFFV-9116)
-
-    - Removed the FP_TO_INTEGER_OVERFLOW_WORKS macro/defines from the library
-
-      This was for working around bugs in the Cray X1 compiler, which is no
-      longer supported.
-
-    (DER - 2015/09/09 HDFFV-9191) 
-
-    - Removed the H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS and
-      H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS symbols and associated code.
-
-      H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS was a work-around on old 64-bit
-      SGI and Solaris systems.
-
-      H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS was a work-around for old PGI
-      compilers on Linux.
-
-      Neither of these were used in any current library code and only appeared
-      in the dt_arith test.
-
-      (DER - 2015/09/09 HDFFV-9187)
-
-    - Removed CONVERT_DENORMAL_FLOAT symbol and associated code from the
-      library.
-
-      This was only set in configure files for Cray and NEC computers. These
-      config files no longer exist so there is no effect on currently
-      supported platforms.
-
-      (DER - 2015/09/09 HDFFV-9188)
-
-    - Removed _BSD_SOURCE and _DEFAULT_SOURCE from configure.ac
-
-      These are old BSD-compatibility symbols that are no longer needed by
-      the library.
-
-      (DER - 2015/09/10 HDFFV-9079)
-
-    - Removed HW_FP_TO_LLONG_NOT_WORKS symbol and associated code from the
-      library.
-
-      This was part of a work-around for the VS.NET 2003 compiler, which is
-      no longer supported.
-
-      (DER - 2015/09/10 HDFFV-9189)
-
-    - Removed the BAD_LOG2_CODE_GENERATED symbol and associated code from the
-      library.
-
-      This was an IRIX work-around.
-
-      (DER - 2015/09/11 HDFFV-9195)
+    - None
 
     Library
     -------
-
-    - H5F_ACC_DEBUG flag for H5Fopen/create: functionality removed
-
-      The symbol was used to emit some extra debugging information
-      for HDF Group developers in the multi VFD. The underlying
-      functionality has been removed due to disuse. The symbol
-      remains defined since it was visible in H5Fpublic.h but it
-      has been set to zero and has no effect anywhere in the library.
-
-      (DER - 2015-05-02, HDFFV-1074)
-
-    - New public API call: H5is_library_threadsafe()
-
-      This API call indicates if the library was built with thread-
-      safety enabled.
-
-      (DER - 2015-09-01, HDFFV-9496)
+    - None
 
     Parallel Library
     ----------------
-    -
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - None
 
     Tools
     -----
@@ -241,40 +91,20 @@ Support for New Platforms, Languages, and Compilers
     -
     -
 
-Bug Fixes since HDF5-1.8.15
+Bug Fixes since HDF5-1.8.16
 ===========================
 
     Configuration
     -------------
-
     - None
 
     Library
     -------
-    - Fix potential error in H5Iclear_type
-
-      If the ID type's close callback could close another ID of the same type,
-      H5Iclear_type could occasionally run into problems due to the inner
-      workings of the skip list package.  This could potentially cause an
-      error on library shutdown without calling H5Iclear_type directly.  This
-      issue has been fixed.
-
-      (NAF - 2015-08-12)
-
-    - Fix uninitialized memory in dataspace selection code
-
-      When creating a dataspace with H5Screate and setting the extent with
-      H5Sextent_copy, the selection offset was not initialized, potentially
-      causing invalid I/O.  There may be other cases where this happened.
-      MOdified library to always initialize the offset.
-
-      (NAF - 2015-09-08)
-
+    - None
 
     Parallel Library
     ----------------
-    -
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - None
 
     Performance
     -------------
@@ -282,18 +112,11 @@ Bug Fixes since HDF5-1.8.15
 
     Tools
     -----
-    - Fix h5repack with UD filters
-
-      h5repack would throw a buffer overrun exception on Windows when
-      parsing a UD filter id of 5 digits. A local variable in the parse
-      routine was not of sufficient size.
-
-      (ADB - 2015/09/01 HDFFV-9515)
+    - None
 
     Fortran API
     ------------
     - None
-
 
     C++ API
     ------

@@ -94,10 +94,10 @@ extern "C" {
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	8	/* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	16	/* For tweaks, bug-fixes, or development     */
-#define H5_VERS_SUBRELEASE "snap18"	/* For pre-releases like snap0       */
+#define H5_VERS_RELEASE	17	/* For tweaks, bug-fixes, or development     */
+#define H5_VERS_SUBRELEASE "snap0"	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.8.16-snap18"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.8.17-snap0"      /* Full version string */
 
 #define H5check()	H5check_version(LT_VERS_INTERFACE, LT_VERS_REVISION, \
 					LT_VERS_AGE)
@@ -114,9 +114,9 @@ extern "C" {
         (H5_VERS_MAJOR<Maj))
 
 /* LT Version numbers */
-#define LT_VERS_INTERFACE	10
-#define LT_VERS_REVISION	1
-#define LT_VERS_AGE		0
+#define LT_VERS_INTERFACE	11
+#define LT_VERS_REVISION	0
+#define LT_VERS_AGE		1
 
 /*
  * Status return values.  Failed integer functions in HDF5 result almost
