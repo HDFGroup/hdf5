@@ -99,8 +99,8 @@ extern "C" {
 				/* Empty string for real releases.           */
 #define H5_VERS_INFO    "HDF5 library version: 1.8.16-snap18"      /* Full version string */
 
-#define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
-				        H5_VERS_RELEASE)
+#define H5check()	H5check_version(LT_VERS_INTERFACE, LT_VERS_REVISION, \
+					LT_VERS_AGE)
 
 /* macros for comparing the version */
 #define H5_VERSION_GE(Maj,Min,Rel) \
@@ -112,6 +112,11 @@ extern "C" {
        (((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR==Min) && (H5_VERS_RELEASE<=Rel)) || \
         ((H5_VERS_MAJOR==Maj) && (H5_VERS_MINOR<Min)) || \
         (H5_VERS_MAJOR<Maj))
+
+/* LT Version numbers */
+#define LT_VERS_INTERFACE	10
+#define LT_VERS_REVISION	1
+#define LT_VERS_AGE		0
 
 /*
  * Status return values.  Failed integer functions in HDF5 result almost
@@ -329,8 +334,7 @@ H5_DLL herr_t H5set_free_list_limits (int reg_global_lim, int reg_list_lim,
                 int blk_list_lim);
 H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
 				unsigned *relnum);
-H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
-			       unsigned relnum);
+H5_DLL herr_t H5check_version(unsigned interface, unsigned revision, unsigned age);
 H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
 H5_DLL herr_t H5free_memory(void *mem);
 H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);

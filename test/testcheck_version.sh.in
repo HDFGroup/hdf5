@@ -217,10 +217,11 @@ h5libsettings=../src/libhdf5.settings
 
 PURPOSE
 
-# Figure out library version numbers from the header file.
-h5versmajor=`grep '#define H5_VERS_MAJOR' $srcdir/../src/H5public.h | cut -f2` 
-h5versminor=`grep '#define H5_VERS_MINOR' $srcdir/../src/H5public.h | cut -f2` 
-h5versrelease=`grep '#define H5_VERS_RELEASE' $srcdir/../src/H5public.h | cut -f2` 
+# Figure out lt version numbers from the header file.
+# sed uses spaces and tabs as white spaces.
+h5versmajor=`sed -e 's/#define[ 	]*LT_VERS_INTERFACE[ 	]*//p;d' $srcdir/../src/H5public.h`
+h5versminor=`sed -e 's/#define[ 	]*LT_VERS_REVISION[ 	]*//p;d' $srcdir/../src/H5public.h`
+h5versrelease=`sed -e 's/#define[ 	]*LT_VERS_AGE[ 	]*//p;d' $srcdir/../src/H5public.h`
 DEBUGPRINT $h5versmajor.$h5versminor.$h5versrelease
 case "$h5versmajor$h5versminor$h5versrelease" in
     [0-9]*)     # good. noop.
@@ -247,7 +248,7 @@ fi
 # HDF5_DISABLE_VERSION_CHECK, as unset, "", -1, 0, 1, 2, 3
 
 for val_disable_version_check in unset "" -1 0 1 2 3; do
-    for wrong_version in none M m r; do
+    for wrong_version in none M r ; do
 	TESTING "$val_disable_version_check" "$wrong_version"
     done
 done

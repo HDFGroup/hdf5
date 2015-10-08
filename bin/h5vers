@@ -105,6 +105,13 @@ sub setvers {
 	    $vers[3]?"-":"", $vers[3])/me;
 }
 
+sub setltvers {
+  my ($contents, @vers) = @_;
+  $_[0] =~ s/^(\#\s*define\s+LT_VERS_INTERFACE\s+)\d+/$1$vers[0]/m;
+  $_[0] =~ s/^(\#\s*define\s+LT_VERS_REVISION\s+)\d+/$1$vers[1]/m;
+  $_[0] =~ s/^(\#\s*define\s+LT_VERS_AGE\s+)\d+/$1$vers[2]/m;
+}
+
 sub usage {
   my ($prog) = $0 =~ /([^\/]+)$/;
   print STDERR <<EOF;
@@ -239,7 +246,7 @@ if ($set) {
   $RELEASE = "";
   $CONFIGURE = "";
   $CPP_DOC_CONFIG = "";
-  $LT_VERS = "";        
+#  $LT_VERS = "";        
   @newver = @curver;
 }
 
@@ -256,35 +263,45 @@ if ($newver[0]*1000000 + $newver[1]*1000 + $newver[2] >
   $version_increased="true";
 }
 
-# Update the version number if it changed.
-if ($newver[0]!=$curver[0] ||
-    $newver[1]!=$curver[1] ||
-    $newver[2]!=$curver[2] ||
-    $newver[3]ne$curver[3]) {
-  setvers $contents, @newver or die "unable to set version\n";
-  rename $file, "$file~" or die "unable to save backup file\n";
-  open FILE, ">$file" or die "unable to open $file but backup saved!\n";
-  print FILE $contents;
-  close FILE;
-}
-
-# Update the libtool shared library version in src/Makefile.am if
-# the version number has increased.
-if ($LT_VERS && $version_increased) {
+my @newltver;
+# Update the libtool shared library version in src/H5public.h
+if ($LT_VERS) {
   open FILE, $LT_VERS or die "$LT_VERS: $!\n";
   my ($contentsy) = join "", <FILE>;
   close FILE;
 
   local($_) = $contentsy;
 
-  my ($lt_revision) = /^LT_VERS_REVISION\s*=\s*(\d+)/m;
-  my $new_lt_revision = $lt_revision+1;
-  ($contentsy) =~ s/^(LT_VERS_REVISION\s*=\s*)\d+/$1$new_lt_revision/m;
+  # Don't increment LT_VERS_REVISION, but instead copy LT_VERS_* values 
+  # to H5public.h.
+  #  my ($lt_revision) = /^LT_VERS_REVISION\s*=\s*(\d+)/m;
+  #  my $new_lt_revision = $lt_revision+1;
+  #  ($contentsy) =~ s/^(LT_VERS_REVISION\s*=\s*)\d+/$1$new_lt_revision/m;
 
-  open FILE, ">$LT_VERS" or die "$LT_VERS: $!\n";
-  print FILE $contentsy;
-  close FILE;
+  #  open FILE, ">$LT_VERS" or die "$LT_VERS: $!\n";
+  #  print FILE $contentsy;
+  #  close FILE;
+
+  my ($lt_interface) = /^LT_VERS_INTERFACE\s*=\s*(\d+)/m;
+  my ($lt_revision) = /^LT_VERS_REVISION\s*=\s*(\d+)/m;
+  my ($lt_age) = /^LT_VERS_AGE\s*=\s*(\d+)/m;
+
+  @newltver = ($lt_interface, $lt_revision, $lt_age);
+
 }
+
+# Update the version number if it changed.
+if ($newver[0]!=$curver[0] ||
+    $newver[1]!=$curver[1] ||
+    $newver[2]!=$curver[2] ||
+    $newver[3]ne$curver[3]) {
+  setvers $contents, @newver or die "unable to set version\n";
+}
+  setltvers $contents, @newltver or die "unable to set lt version\n";
+  rename $file, "$file~" or die "unable to save backup file\n";
+  open FILE, ">$file" or die "unable to open $file but backup saved!\n";
+  print FILE $contents;
+  close FILE;
 
 # Update the README.txt file
 if ($README) {
@@ -435,6 +452,9 @@ if ($verbose) {
   printf("%d.%d.%d%s\n", @newver[0,1,2],
 	 $newver[3] eq "" ? "" : "-".$newver[3]);
 }
+
+# print shared lib version in the format of interface.revision.age
+printf("Shared lib version %d.%d.%d\n", @newltver[0,1,2]);
 
 exit 0;
 
