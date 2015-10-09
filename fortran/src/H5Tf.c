@@ -2421,7 +2421,10 @@ h5tenum_insert_ptr_c(hid_t_f *type_id, _fcd name, int_f* namelen, void *value)
   if (c_name == NULL) return ret_value;
 
   status = H5Tenum_insert( (hid_t)*type_id, c_name, value);
+
+  HDfree(c_name);
   if ( status < 0  ) return ret_value;
+
   ret_value = 0;
   return ret_value;
 }
