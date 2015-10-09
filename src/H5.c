@@ -675,31 +675,6 @@ done:
  *		called from user to verify that the versions of header files
  *		compiled into the application match the version of the hdf5
  *		library.
- * Algorithm:
- *
- * Definitions:
- * Compile-time (aka headers, defined in src/H5public.h):
- * the three arguments supplied
- * interface: compile time interface
- * revision: compile time revision
- * age: compiler time age
- *  
- * Link-time (aka values library has from its version of src/H5public.h):
- * LT_VERS_INTERFACE
- * LT_VERS_REVISION
- * LT_VERS_AGE
- *  
- * Verification criteria:
- * Assert interface >= age and LT_VERS_INTERFACE >= LT_VERS_AGE
- *
- * if ((LT_VERS_INTERFACE - LT_VERS_AGE) .ne. (interface - age)) then
- *     mesg “incompatible”
- * else
- *     if (age > LT_VERS_AGE) then
- *         mesg “incompatible”
- *     endif
- * endif
- *
  *
  * Return:	Success:	SUCCEED
  *
@@ -711,8 +686,6 @@ done:
  * Modifications:
  *	Albert Cheng, May 12, 2001
  *	Added verification of H5_VERS_INFO.
- *      Albert Cheng, Oct 8, 2015
- *      Changed to use shared library version for verification criteria.
  *
  *-------------------------------------------------------------------------
  */
@@ -727,43 +700,33 @@ done:
     "settings such as 'LD_LIBRARY_PATH'.\n"
 
 herr_t
-H5check_version(unsigned interface, unsigned revision, unsigned age)
+H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 {
     char	lib_str[256];
     char	substr[] = H5_VERS_SUBRELEASE;
     static int	checked = 0;            /* If we've already checked the version info */
     static unsigned int	disable_version_check = 0;      /* Set if the version check should be disabled */
     static const char *version_mismatch_warning = VERSION_MISMATCH_WARNING;
-    const char *s;  /* Environment string for disabling version check */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
-    H5TRACE3("e", "IuIuIu", interface, revision, age);
+    H5TRACE3("e", "IuIuIu", majnum, minnum, relnum);
 
     /* Don't check again, if we already have */
     if (checked)
 	HGOTO_DONE(SUCCEED)
 
-    /* Check if the user wishes to allow different versions of the header */
-    /* files and the library. */
-    s = HDgetenv ("HDF5_DISABLE_VERSION_CHECK");
+    {    const char *s;  /* Environment string for disabling version check */
 
-    if (s && HDisdigit(*s))
-	disable_version_check = (unsigned int)HDstrtol (s, NULL, 0);
+        /* Allow different versions of the header files and library? */
+        s = HDgetenv ("HDF5_DISABLE_VERSION_CHECK");
 
-    /* assert version sanity */
-    if ((LT_VERS_INTERFACE < LT_VERS_AGE) || (interface < age)){
-	HDfprintf(stderr, "It is illegal for interface is less than age\n"
-	    "LT_VERS_INTERFACE=%u, LT_VERS_AGE=%u, interface=%u, age=%u\n",
-	    LT_VERS_INTERFACE, LT_VERS_AGE, interface, age);
-	    /* Bail out now. */
-
-	    HDfputs ("Bye...\n", stderr);
-	    HDabort ();
+        if (s && HDisdigit(*s))
+            disable_version_check = (unsigned int)HDstrtol (s, NULL, 0);
     }
 
-    if (((LT_VERS_INTERFACE - LT_VERS_AGE) != (interface - age)) || \
-        (age > LT_VERS_AGE)) {
+    if (H5_VERS_MAJOR!=majnum || H5_VERS_MINOR!=minnum ||
+            H5_VERS_RELEASE!=relnum) {
         switch (disable_version_check) {
 	case 0:
 	    HDfprintf(stderr, "%s%s", version_mismatch_warning,
@@ -772,8 +735,8 @@ H5check_version(unsigned interface, unsigned revision, unsigned age)
 		     "Setting it to 2 or higher will suppress the warning messages totally.\n");
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
-		     interface, revision, age,
-		     (unsigned)LT_VERS_INTERFACE, (unsigned)LT_VERS_REVISION, (unsigned)LT_VERS_AGE);
+		     majnum, minnum, relnum,
+		     (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
 	    /* Show library settings if available */
 	    HDfprintf (stderr, "%s", H5libhdf5_settings);
 
@@ -790,8 +753,8 @@ H5check_version(unsigned interface, unsigned revision, unsigned age)
 		     version_mismatch_warning, disable_version_check);
 	    /* Mention the versions we are referring to */
 	    HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
-		     interface, revision, age,
-		     (unsigned)LT_VERS_INTERFACE, (unsigned)LT_VERS_REVISION, (unsigned)LT_VERS_AGE);
+		     majnum, minnum, relnum,
+		     (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
 	    /* Show library settings if available */
 	    HDfprintf (stderr, "%s", H5libhdf5_settings);
 	    break;
