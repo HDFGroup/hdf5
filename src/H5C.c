@@ -10390,6 +10390,9 @@ H5C_cork(H5C_t * cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
 	    if(ptr == NULL || *ptr != obj_addr)
 		HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't remove address from list")
 
+	    /* Free address */
+	    ptr = H5FL_FREE(haddr_t, ptr);
+
 	    /* Set the entry's cork status */
 	    is_corked = FALSE;
 	    break;
