@@ -136,6 +136,19 @@ H5T__visit(H5T_t *dt, unsigned visit_flags, H5T_operator_t op, void *op_value)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "can't visit parent datatype")
             break;
 
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+            /* Not real values */
+            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
+            break;
+
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_REFERENCE:
         default:
             /* Visit "simple" datatypes here */
             if(visit_flags & H5T_VISIT_SIMPLE)

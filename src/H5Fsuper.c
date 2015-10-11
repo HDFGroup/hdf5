@@ -930,20 +930,20 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
 
         /* Check for driver info to store */
         if(driver_size > 0) {
-            H5O_drvinfo_t t_drvinfo;      /* Driver info */
+            H5O_drvinfo_t info;      /* Driver info */
             uint8_t dbuf[H5F_MAX_DRVINFOBLOCK_SIZE];  /* Driver info block encoding buffer */
 
             /* Sanity check */
             HDassert(driver_size <= H5F_MAX_DRVINFOBLOCK_SIZE);
 
             /* Encode driver-specific data */
-            if(H5FD_sb_encode(f->shared->lf, t_drvinfo.name, dbuf) < 0)
+            if(H5FD_sb_encode(f->shared->lf, info.name, dbuf) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode driver information")
 
             /* Write driver info information to the superblock extension */
-            t_drvinfo.len = driver_size;
-            t_drvinfo.buf = dbuf;
-            if(H5O_msg_create(&ext_loc, H5O_DRVINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &t_drvinfo, dxpl_id) < 0)
+            info.len = driver_size;
+            info.buf = dbuf;
+            if(H5O_msg_create(&ext_loc, H5O_DRVINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &info, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update driver info header message")
         } /* end if */
 

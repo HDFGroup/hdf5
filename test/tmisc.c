@@ -713,7 +713,7 @@ create_struct3(void)
     misc5_struct3_hndl *str3hndl;       /* New 'struct3' created */
     herr_t ret;                         /* For error checking */
 
-    str3hndl = HDmalloc(sizeof(misc5_struct3_hndl));
+    str3hndl = (misc5_struct3_hndl *)HDmalloc(sizeof(misc5_struct3_hndl));
     CHECK(str3hndl,NULL,"malloc");
 
     str3hndl->st3h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct3));
@@ -722,10 +722,10 @@ create_struct3(void)
     ret = H5Tinsert(str3hndl->st3h_base, "st3_el1", HOFFSET( misc5_struct3, st3_el1), H5T_NATIVE_INT);
     CHECK(ret,FAIL,"H5Tinsert");
 
-    str3hndl->st3h_id=H5Tvlen_create(str3hndl->st3h_base);
+    str3hndl->st3h_id = H5Tvlen_create(str3hndl->st3h_base);
     CHECK(str3hndl->st3h_id,FAIL,"H5Tvlen_create");
 
-    return(str3hndl);
+    return str3hndl;
 }
 
 static void
@@ -733,10 +733,10 @@ delete_struct3(misc5_struct3_hndl *str3hndl)
 {
     herr_t ret;                         /* For error checking */
 
-    ret=H5Tclose(str3hndl->st3h_id);
+    ret = H5Tclose(str3hndl->st3h_id);
     CHECK(ret,FAIL,"H5Tclose");
 
-    ret=H5Tclose(str3hndl->st3h_base);
+    ret = H5Tclose(str3hndl->st3h_base);
     CHECK(ret,FAIL,"H5Tclose");
 
     HDfree(str3hndl);
@@ -756,7 +756,7 @@ create_struct2(void)
     misc5_struct2_hndl *str2hndl;       /* New 'struct2' created */
     herr_t ret;                         /* For error checking */
 
-    str2hndl = HDmalloc(sizeof(misc5_struct2_hndl));
+    str2hndl = (misc5_struct2_hndl *)HDmalloc(sizeof(misc5_struct2_hndl));
     CHECK(str2hndl, NULL, "malloc");
 
     str2hndl->st2h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct2));
@@ -765,16 +765,16 @@ create_struct2(void)
     ret = H5Tinsert(str2hndl->st2h_base, "st2_el1", HOFFSET(misc5_struct2, st2_el1), H5T_NATIVE_INT);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    str2hndl->st2h_st3hndl=create_struct3();
+    str2hndl->st2h_st3hndl = create_struct3();
     CHECK(str2hndl->st2h_st3hndl,NULL,"create_struct3");
 
-    ret=H5Tinsert(str2hndl->st2h_base, "st2_el2", HOFFSET(misc5_struct2, st2_el2), str2hndl->st2h_st3hndl->st3h_id);
+    ret = H5Tinsert(str2hndl->st2h_base, "st2_el2", HOFFSET(misc5_struct2, st2_el2), str2hndl->st2h_st3hndl->st3h_id);
     CHECK(ret,FAIL,"H5Tinsert");
 
-    str2hndl->st2h_id= H5Tvlen_create(str2hndl->st2h_base);
+    str2hndl->st2h_id = H5Tvlen_create(str2hndl->st2h_base);
     CHECK(str2hndl->st2h_id,FAIL,"H5Tvlen_create");
 
-    return(str2hndl);
+    return str2hndl;
 }
 
 static void
@@ -798,10 +798,10 @@ set_struct2(misc5_struct2 *buf)
 {
     unsigned i;         /* Local index variable */
 
-    buf->st2_el1=MISC5_DBGELVAL2;
-    buf->st2_el2.len=MISC5_DBGNELM3;
+    buf->st2_el1 = MISC5_DBGELVAL2;
+    buf->st2_el2.len = MISC5_DBGNELM3;
 
-    buf->st2_el2.p=HDmalloc((buf->st2_el2.len)*sizeof(misc5_struct3));
+    buf->st2_el2.p = HDmalloc((buf->st2_el2.len)*sizeof(misc5_struct3));
     CHECK(buf->st2_el2.p,NULL,"malloc");
 
     for(i=0; i<(buf->st2_el2.len); i++)
@@ -822,7 +822,7 @@ create_struct1(void)
     misc5_struct1_hndl *str1hndl;       /* New 'struct1' created */
     herr_t ret;                         /* For error checking */
 
-    str1hndl = HDmalloc(sizeof(misc5_struct1_hndl));
+    str1hndl = (misc5_struct1_hndl *)HDmalloc(sizeof(misc5_struct1_hndl));
     CHECK(str1hndl, NULL, "malloc");
 
     str1hndl->st1h_base = H5Tcreate(H5T_COMPOUND, sizeof(misc5_struct1));
@@ -834,13 +834,13 @@ create_struct1(void)
     str1hndl->st1h_st2hndl=create_struct2();
     CHECK(str1hndl->st1h_st2hndl,NULL,"create_struct2");
 
-    ret=H5Tinsert(str1hndl->st1h_base, "st1_el2", HOFFSET(misc5_struct1, st1_el2), str1hndl->st1h_st2hndl->st2h_id);
+    ret = H5Tinsert(str1hndl->st1h_base, "st1_el2", HOFFSET(misc5_struct1, st1_el2), str1hndl->st1h_st2hndl->st2h_id);
     CHECK(ret,FAIL,"H5Tinsert");
 
-    str1hndl->st1h_id=H5Tvlen_create(str1hndl->st1h_base);
+    str1hndl->st1h_id = H5Tvlen_create(str1hndl->st1h_base);
     CHECK(str1hndl->st1h_id,FAIL,"H5Tvlen_create");
 
-    return(str1hndl);
+    return str1hndl;
 }
 
 static void
@@ -848,12 +848,12 @@ delete_struct1(misc5_struct1_hndl *str1hndl)
 {
     herr_t ret;                         /* For error checking */
 
-    ret=H5Tclose(str1hndl->st1h_id);
+    ret = H5Tclose(str1hndl->st1h_id);
     CHECK(ret,FAIL,"H5Tclose");
 
     delete_struct2(str1hndl->st1h_st2hndl);
 
-    ret=H5Tclose(str1hndl->st1h_base);
+    ret = H5Tclose(str1hndl->st1h_base);
     CHECK(ret,FAIL,"H5Tclose");
 
     HDfree(str1hndl);
@@ -1243,10 +1243,10 @@ test_misc8(void)
     MESSAGE(5, ("Testing dataset storage sizes\n"));
 
     /* Allocate space for the data to write & read */
-    wdata=HDmalloc(sizeof(int)*MISC8_DIM0*MISC8_DIM1);
+    wdata = (int *)HDmalloc(sizeof(int) * MISC8_DIM0 * MISC8_DIM1);
     CHECK(wdata,NULL,"malloc");
 #ifdef VERIFY_DATA
-    rdata=HDmalloc(sizeof(int)*MISC8_DIM0*MISC8_DIM1);
+    rdata = (int *)HDmalloc(sizeof(int) * MISC8_DIM0 * MISC8_DIM1);
     CHECK(rdata,NULL,"malloc");
 #endif /* VERIFY_DATA */
 

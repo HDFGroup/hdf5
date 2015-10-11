@@ -1498,14 +1498,24 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 }
             }
             break;
-        default:
+
+        case H5T_TIME:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
             for (block_index = 0; block_index < block_nelmts; block_index++) {
                 mem = ((unsigned char*)_mem) + block_index * size;
                 if (size != HDfwrite(mem, sizeof(char), size, stream))
                     H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
-            }
+            } /* end for */
             break;
-    }
+
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            /* Badness */
+            H5E_THROW(FAIL, H5E_tools_min_id_g, "bad type class");
+            break;
+    } /* end switch */
 
 CATCH
     return ret_value;

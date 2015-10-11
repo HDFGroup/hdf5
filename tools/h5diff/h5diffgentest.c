@@ -5124,10 +5124,10 @@ static void test_data_nocomparables (const char * fname, int make_diffs)
 
 
     /* attr2 - non-compatible : same rank, different dimention */
-    write_attr(did2,1, attr2_dim_ptr,"attr2", H5T_NATIVE_INT, data3);
+    write_attr(did2,1,(hsize_t *)attr2_dim_ptr,"attr2", H5T_NATIVE_INT, data3);
 
     /* attr3 - non-compatible : different rank */
-    write_attr(did2, rank_attr,attr3_dim_ptr,"attr3", H5T_NATIVE_INT, attr_data_ptr3);
+    write_attr(did2, rank_attr,(hsize_t *)attr3_dim_ptr,"attr3", H5T_NATIVE_INT, attr_data_ptr3);
 
     /* attr4 - compatible : different data values */
     write_attr(did2,1,dims1_1,"attr4", H5T_NATIVE_INT, attr_data_ptr4);
@@ -6652,7 +6652,7 @@ void write_dset_in(hid_t loc_id,
 
         /* allocate and initialize array data to write */
         size = ( H5TOOLS_MALLOCSIZE / sizeof(double) + 1 ) * sizeof(double);
-        dbuf = HDmalloc( size );
+        dbuf = (double *)HDmalloc( size );
 
         for( j = 0; j < H5TOOLS_MALLOCSIZE / sizeof(double) + 1; j++)
             dbuf[j] = j;
@@ -7119,10 +7119,10 @@ void gen_datareg(hid_t fid,
     int             i;
 
     /* allocate the buffer for write the references */
-    rbuf = HDcalloc((size_t)2, sizeof(hdset_reg_ref_t));
+    rbuf = (hdset_reg_ref_t *)HDcalloc((size_t)2, sizeof(hdset_reg_ref_t));
 
     /* allocate the buffer for write the data dataset */
-    buf = HDmalloc(10 * 10 * sizeof(int));
+    buf = (int *)HDmalloc(10 * 10 * sizeof(int));
 
     for(i = 0; i < 10 * 10; i++)
         buf[i] = i;
