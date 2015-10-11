@@ -31,7 +31,7 @@ class H5_DLLCPP H5Library {
    public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
         static bool need_cleanup; // indicates if H5close should be called
-                                // - unused, will be removed in future releases.
+                             // - unused, will be removed in future releases.
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 	// Initializes the HDF5 library.
@@ -65,14 +65,9 @@ class H5_DLLCPP H5Library {
         // Sends request for terminating the HDF5 library.
         static void termH5cpp(void);
 
-        static H5Library* getInstance();
-
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
    private:
-
-        // private instance to be created by H5Library only
-        static H5Library* instance;
 
         // Default constructor - no instance ever created from outsiders
         H5Library();
