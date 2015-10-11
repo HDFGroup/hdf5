@@ -26,14 +26,19 @@
 namespace H5 {
 #endif
 
-// This flag controls whether H5Library::initH5cpp has been called to register
-// terminating functions with atexit()
+// This flag indicates whether H5Library::initH5cpp has been called to register
+// the terminating functions with atexit()
 bool IdComponent::H5cppinit = false;
+
+// This flag is used to decide whether H5dont_atexit should be called.
+// Subclasses that have global constants use it.  This is a temporary
+// work-around in 1.8.16.  It will be removed after HDFFV-9540 is fixed.
 bool IdComponent::H5dontAtexit_called = false;
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent overloaded constructor
-// Purpose	Creates an IdComponent object using the id of an existing object.
+///\brief 	Creates an IdComponent object using the id of an existing
+///		object. - Obsolete, will be removed in 1.8.17
 // Param	h5_id - IN: Id of an existing object
 // Exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
@@ -43,7 +48,6 @@ bool IdComponent::H5dontAtexit_called = false;
 // been moved to the sub-classes.  It will be removed in 1.10 release.  If its
 // removal does not raise any problems in 1.10, it will be removed from 1.8 in
 // subsequent releases.
-// - Removed from documentation in 1.8.16 -BMR (October 2015)
 //--------------------------------------------------------------------------
 IdComponent::IdComponent(const hid_t h5_id) {}
 
@@ -295,10 +299,10 @@ H5std_string IdComponent::inMemFunc(const char* func_name) const
 IdComponent::IdComponent()
 {
     // initH5cpp will register the terminating functions with atexit().
-    // We only do this once.
+    // This should only be done once.
     if (!H5cppinit)
     {
-        H5Library::getInstance()->initH5cpp();
+        H5Library::initH5cpp();
         H5cppinit = true;
     }
 }

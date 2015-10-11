@@ -17,6 +17,8 @@
 #ifndef __IdComponent_H
 #define __IdComponent_H
 
+// IdComponent represents an HDF5 object that has an identifier.
+
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
@@ -30,12 +32,7 @@ class DataSpace;
     rarely needs them.
 */
 class H5_DLLCPP IdComponent {
-   public:
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-        static bool H5cppinit;
-	static bool H5dontAtexit_called;
-#endif // DOXYGEN_SHOULD_SKIP_THIS
+    public:
 
 	// Increment reference counter.
 	void incRefCount(const hid_t obj_id) const;
@@ -58,11 +55,6 @@ class H5_DLLCPP IdComponent {
 	// Assignment operator.
 	IdComponent& operator=( const IdComponent& rhs );
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Gets the identifier of this object.
-	virtual hid_t getId () const = 0;
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
 	// Sets the identifier of this object to a new value.
 	void setId(const hid_t new_id);
 
@@ -76,10 +68,14 @@ class H5_DLLCPP IdComponent {
 	// Creates an object to hold an HDF5 identifier.
 	IdComponent( const hid_t h5_id );
 
-	// Copy constructor: makes copy of the original IdComponent object.
-	// IdComponent( const IdComponent& original );
-
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+	// Copy constructor: makes copy of the original IdComponent object.
+	// IdComponent( const IdComponent& original ); - removed from 1.8.15
+
+	// Gets the identifier of this object.
+	virtual hid_t getId () const = 0;
+
 	// Pure virtual function for there are various H5*close for the
 	// subclasses.
 	virtual void close() = 0;
@@ -96,11 +92,12 @@ class H5_DLLCPP IdComponent {
 	// Destructor
 	virtual ~IdComponent();
 
-   protected:
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+    protected:
 	// Default constructor.
 	IdComponent();
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Gets the name of the file, in which an HDF5 object belongs.
 	H5std_string p_get_file_name() const;
 
@@ -110,7 +107,14 @@ class H5_DLLCPP IdComponent {
 	// Sets the identifier of this object to a new value. - this one
 	// doesn't increment reference count
 	virtual void p_setId(const hid_t new_id) = 0;
-	//virtual void p_setId(const hid_t new_id);
+
+	// This flag is used to decide whether H5dont_atexit should be called
+	static bool H5dontAtexit_called;
+
+    private:
+	// This flag indicates whether H5Library::initH5cpp has been called
+	// to register various terminating functions with atexit()
+        static bool H5cppinit;
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

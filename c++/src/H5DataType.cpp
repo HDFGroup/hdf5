@@ -144,10 +144,10 @@ DataType::DataType(const DataType& original) : H5Object()
 
 //--------------------------------------------------------------------------
 // Function:    DataType overloaded constructor
-///\brief       Creates a integer type using a predefined type
+///\brief       Creates a DataType instance using a predefined type
 ///\param       pred_type - IN: Predefined datatype
 ///\exception   H5::DataTypeIException
-// Programmer   Binh-Minh Ribler - 2000
+// Programmer   Binh-Minh Ribler - 2015
 // Description
 //		Copying the type so that when a predefined type is passed in,
 //		a copy of it is made, not just a duplicate of the HDF5 id.
