@@ -1123,13 +1123,6 @@ done:
  *		all unprotected entries should be flushed before the
  *		function returns failure.
  *
- *		The primary_dxpl_id and secondary_dxpl_id parameters
- *		specify the dxpl_ids used on the first write occasioned
- *		by the flush (primary_dxpl_id), and on all subsequent
- *		writes (secondary_dxpl_id).  This is useful in the metadata
- *		cache, but may not be needed elsewhere.  If so, just use the
- *		same dxpl_id for both parameters.
- *
  * Return:      Non-negative on success/Negative on failure or if there was
  *		a request to flush all items and something was protected.
  *
@@ -1185,17 +1178,13 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
     HDassert( cache_ptr->slist_ptr );
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-    if ( ( H5C_validate_protected_entry_list(cache_ptr) < 0 ) ||
-         ( H5C_validate_pinned_entry_list(cache_ptr) < 0 ) ||
-         ( H5C_validate_lru_list(cache_ptr) < 0 ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "an extreme sanity check failed on entry.\n");
-    }
+    if((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
+            (H5C_validate_pinned_entry_list(cache_ptr) < 0) ||
+            (H5C_validate_lru_list(cache_ptr) < 0))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry.\n");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     ignore_protected = ( (flags & H5C__FLUSH_IGNORE_PROTECTED_FLAG) != 0 );
-
     destroy = ( (flags & H5C__FLUSH_INVALIDATE_FLAG) != 0 );
 
     /* note that flush_marked_entries is set to FALSE if destroy is TRUE */
@@ -1205,12 +1194,11 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
                            );
 
     HDassert( ! ( destroy && ignore_protected ) );
-
     HDassert( ! ( cache_ptr->flush_in_progress ) );
 
     cache_ptr->flush_in_progress = TRUE;
 
-    if ( destroy ) {
+    if(destroy) {
         if(H5C_flush_invalidate_cache(f, dxpl_id, flags) < 0)
             /* This shouldn't happen -- if it does, we are toast so
              * just scream and die.
@@ -1491,11 +1479,9 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
     }
 
 done:
-
     cache_ptr->flush_in_progress = FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_flush_cache() */
 
 
@@ -3352,7 +3338,7 @@ H5C_protect(H5F_t *		f,
          ( H5C_validate_pinned_entry_list(cache_ptr) < 0 ) ||
          ( H5C_validate_lru_list(cache_ptr) < 0 ) ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, \
                     "an extreme sanity check failed on entry.\n");
     }
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
@@ -7279,11 +7265,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_invalidate_cache(const H5F_t * f,
-                           hid_t    dxpl_id,
-                           unsigned flags)
+H5C_flush_invalidate_cache(const H5F_t * f, hid_t dxpl_id, unsigned flags)
 {
-    H5C_t *		cache_ptr = f->shared->cache;
+    H5C_t *		cache_ptr;
     hbool_t             restart_slist_scan;
     int32_t		protected_entries = 0;
     int32_t		i;
@@ -7308,10 +7292,12 @@ H5C_flush_invalidate_cache(const H5F_t * f,
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert( f );
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->slist_ptr );
+    HDassert(f);
+    HDassert(f->shared);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->slist_ptr);
 
     /* Filter out the flags that are not relevant to the flush/invalidate.
      * At present, only the H5C__FLUSH_CLEAR_ONLY_FLAG is kept.
@@ -7410,35 +7396,28 @@ H5C_flush_invalidate_cache(const H5F_t * f,
 	cache_ptr->slist_change_in_serialize = FALSE;
 
 	/* this done, start the scan of the slist */
-
 	restart_slist_scan = TRUE;
 
-	while ( ( restart_slist_scan ) || ( node_ptr != NULL ) )
-        {
-	    if ( restart_slist_scan )
-	    {
-		restart_slist_scan = FALSE;
+        while(restart_slist_scan || (node_ptr != NULL)) {
+            if(restart_slist_scan) {
+                restart_slist_scan = FALSE;
 
-		/* Start at beginning of skip list */
-		node_ptr = H5SL_first(cache_ptr->slist_ptr);
+                /* Start at beginning of skip list */
+                node_ptr = H5SL_first(cache_ptr->slist_ptr);
 
-		if ( node_ptr == NULL )
-		{
-		    /* the slist is empty -- break out of inner loop */
-		    break;
-		}
-		HDassert( node_ptr != NULL );
+                if(node_ptr == NULL)
+                    /* the slist is empty -- break out of inner loop */
+                    break;
 
-		/* Get cache entry for this node */
-		next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+                /* Get cache entry for this node */
+                next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+                if(NULL == next_entry_ptr)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
 
-		if(NULL == next_entry_ptr)
-		    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
-
-		HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
-		HDassert( next_entry_ptr->is_dirty );
-		HDassert( next_entry_ptr->in_slist );
-            }
+                HDassert(next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                HDassert(next_entry_ptr->is_dirty);
+                HDassert(next_entry_ptr->in_slist);
+            } /* end if */
 
 	    entry_ptr = next_entry_ptr;
 
@@ -7453,27 +7432,25 @@ H5C_flush_invalidate_cache(const H5F_t * f,
              * slist if we find them.  However, best we do some extra
 	     * sanity checking just in case.
 	     */
-
-	    HDassert( entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
-	    HDassert( entry_ptr->in_slist );
-	    HDassert( entry_ptr->is_dirty );
+            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+            HDassert(entry_ptr->in_slist);
+            HDassert(entry_ptr->is_dirty);
 
             /* increment node pointer now, before we delete its target
              * from the slist.
              */
-
             node_ptr = H5SL_next(node_ptr);
-            if ( node_ptr != NULL ) {
+            if(node_ptr != NULL) {
                 next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-                if ( NULL == next_entry_ptr )
+                if(NULL == next_entry_ptr)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
-                HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
-                HDassert( next_entry_ptr->is_dirty );
-                HDassert( next_entry_ptr->in_slist );
-		HDassert( entry_ptr != next_entry_ptr );
-            } else {
+                HDassert(next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                HDassert(next_entry_ptr->is_dirty);
+                HDassert(next_entry_ptr->in_slist);
+                HDassert(entry_ptr != next_entry_ptr);
+            } /* end if */
+            else
                 next_entry_ptr = NULL;
-            }
 
             /* Note that we now remove nodes from the slist as we flush
              * the associated entries, instead of leaving them there
@@ -7485,24 +7462,20 @@ H5C_flush_invalidate_cache(const H5F_t * f,
              * flush, we must keep the slist in cannonical form at all
              * times.
              */
-
-            HDassert( entry_ptr != NULL );
-            HDassert( entry_ptr->in_slist );
+            HDassert(entry_ptr != NULL);
+            HDassert(entry_ptr->in_slist);
 
             if ( ( ( ! entry_ptr->flush_me_last ) ||
                    ( ( entry_ptr->flush_me_last ) &&
                      ( cache_ptr->num_last_entries >=
                        cache_ptr->slist_len ) ) ) &&
                  ( entry_ptr->flush_dep_nchildren == 0 ) ) {
-
-                if ( entry_ptr->is_protected ) {
-
+                if(entry_ptr->is_protected) {
                     /* we have major problems -- but lets flush
                      * everything we can before we flag an error.
                      */
                     protected_entries++;
-
-                } else if ( entry_ptr->is_pinned ) {
+                } else if(entry_ptr->is_pinned) {
 
 #if H5C_DO_SANITY_CHECKS
 		    /* update flushed_slist_len & flushed_slist_size
@@ -7523,7 +7496,6 @@ H5C_flush_invalidate_cache(const H5F_t * f,
                          * so just scream and die.
                          */
 			HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "dirty pinned entry flush failed.")
-
 #if H5C_DO_SANITY_CHECKS
 		    /* entry size may have changed during the flush.
 		     * Update flushed_slist_size to account for this.
@@ -7548,7 +7520,6 @@ H5C_flush_invalidate_cache(const H5F_t * f,
 		    }
                 } /* end if */
                 else {
-
 #if H5C_DO_SANITY_CHECKS
 		    /* update flushed_slist_len & flushed_slist_size
 		     * before the flush.  Note that the entry will
@@ -7564,11 +7535,7 @@ H5C_flush_invalidate_cache(const H5F_t * f,
 #endif /* H5C_DO_SANITY_CHECKS */
 
                     if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, (cooked_flags | H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG), entry_size_change_ptr) < 0)
-                        /* This shouldn't happen -- if it does, we are toast so
-                         * just scream and die.
-                         */
 			HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "dirty entry flush destroy failed.")
-
 #if H5C_DO_SANITY_CHECKS
 		    /* entry size may have changed during the flush.
 		     * Update flushed_slist_size to account for this.
@@ -7606,13 +7573,12 @@ H5C_flush_invalidate_cache(const H5F_t * f,
          * out from under us.
          */
 
-        if ( node_ptr == NULL ) {
-
-	    HDassert( (flushed_slist_len + cache_ptr->slist_len) ==
-                      (initial_slist_len + cache_ptr->slist_len_increase) );
-	    HDassert( (flushed_slist_size + (int64_t)cache_ptr->slist_size) ==
-                      ((int64_t)initial_slist_size + cache_ptr->slist_size_increase) );
-	}
+        if(node_ptr == NULL) {
+            HDassert((flushed_slist_len + cache_ptr->slist_len) ==
+                    (initial_slist_len + cache_ptr->slist_len_increase));
+            HDassert((flushed_slist_size + (int64_t)cache_ptr->slist_size) ==
+                    ((int64_t)initial_slist_size + cache_ptr->slist_size_increase));
+        } /* end if */
 #endif /* H5C_DO_SANITY_CHECKS */
 
         /* Since we are doing a destroy, we must make a pass through
@@ -7626,18 +7592,16 @@ H5C_flush_invalidate_cache(const H5F_t * f,
          *
          * Writes to disk are possible here.
          */
-        for ( i = 0; i < H5C__HASH_TABLE_LEN; i++ )
-        {
+        for(i = 0; i < H5C__HASH_TABLE_LEN; i++) {
             next_entry_ptr = cache_ptr->index[i];
 
-            while ( next_entry_ptr != NULL )
-            {
+            while(next_entry_ptr != NULL) {
                 entry_ptr = next_entry_ptr;
                 HDassert( entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
 
                 next_entry_ptr = entry_ptr->ht_next;
-                HDassert ( ( next_entry_ptr == NULL ) ||
-                           ( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC ) );
+                HDassert((next_entry_ptr == NULL) ||
+                        (next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC));
 
                 if ( ( ( ! entry_ptr->flush_me_last ) ||
                        ( ( entry_ptr->flush_me_last ) &&
@@ -7645,18 +7609,15 @@ H5C_flush_invalidate_cache(const H5F_t * f,
                            cache_ptr->slist_len ) ) ) &&
                      ( entry_ptr->flush_dep_nchildren == 0 ) ) {
 
-                    if ( entry_ptr->is_protected ) {
-
+                    if(entry_ptr->is_protected) {
                         /* we have major problems -- but lets flush and destroy
                          * everything we can before we flag an error.
                          */
                         protected_entries++;
 
-                        if ( ! entry_ptr->in_slist ) {
-
-                            HDassert( !(entry_ptr->is_dirty) );
-                        }
-                    } else if ( ! ( entry_ptr->is_pinned ) ) {
+                        if(!entry_ptr->in_slist)
+                            HDassert(!(entry_ptr->is_dirty));
+                    } else if(!(entry_ptr->is_pinned)) {
 			/* if *entry_ptr is dirty, it is possible
 			 * that one or more other entries may be
                          * either removed from the cache, loaded
@@ -7685,21 +7646,16 @@ H5C_flush_invalidate_cache(const H5F_t * f,
 			entry_was_dirty = entry_ptr->is_dirty;
 
                         if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, (cooked_flags | H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG), NULL) < 0)
-                            /* This shouldn't happen -- if it does, we are toast so
-                             * just scream and die.
-                             */
 			    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Entry flush destroy failed.")
 
-			if ( entry_was_dirty ) {
-
-			    /* update stats for hash bucket scan
-			     * restart here.
-			     *                   -- JRM
-			     */
-			    next_entry_ptr = cache_ptr->index[i];
-			    H5C__UPDATE_STATS_FOR_HASH_BUCKET_SCAN_RESTART(cache_ptr)
-                       }
-
+                        if(entry_was_dirty) {
+                            /* update stats for hash bucket scan
+                             * restart here.
+                             *                   -- JRM 
+                             */
+                            next_entry_ptr = cache_ptr->index[i];
+                            H5C__UPDATE_STATS_FOR_HASH_BUCKET_SCAN_RESTART(cache_ptr)
+                        } /* end if */
                     } /* end if */
                 } /* end if */
                 /* We can't do anything if the entry is pinned.  The
@@ -7726,16 +7682,11 @@ H5C_flush_invalidate_cache(const H5F_t * f,
                  *         in case I am wrong.
                  *                                    -- JRM
                  */
-                if ( ( next_entry_ptr != NULL ) &&
-                     ( next_entry_ptr->magic !=
-                       H5C__H5C_CACHE_ENTRY_T_MAGIC ) ) {
-
+                if((next_entry_ptr != NULL) && (next_entry_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC))
                     /* Something horrible has happened to
                      * *next_entry_ptr -- scream and die.
                      */
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                "next_entry_ptr->magic is invalid?!?!?.")
-                }
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr->magic is invalid?!?!?.")
             } /* end while loop scanning hash table bin */
         } /* end for loop scanning hash table */
 
@@ -7749,19 +7700,14 @@ H5C_flush_invalidate_cache(const H5F_t * f,
            /* The number of pinned entries is positive, and it is not
             * declining.  Scream and die.
             */
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                        "Pinned entry count not decreasing, cur_pel_len = %d, old_pel_len = %d", (int)cur_pel_len, (int)old_pel_len)
-
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Pinned entry count not decreasing, cur_pel_len = %d, old_pel_len = %d", (int)cur_pel_len, (int)old_pel_len)
         }
-
         HDassert( protected_entries == cache_ptr->pl_len );
         if ( ( protected_entries > 0 ) &&
              ( protected_entries == cache_ptr->index_len ) ) {
 
             /* Only protected entries are left in the cache.  Scream and die.
              */
-
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                         "Only protected entries left in cache, protected_entries = %d", (int)protected_entries)
 
@@ -7770,30 +7716,27 @@ H5C_flush_invalidate_cache(const H5F_t * f,
     } /* main while loop */
 
     /* Invariants, after destroying all entries in the hash table */
-    HDassert( cache_ptr->index_size == 0 );
-    HDassert( cache_ptr->clean_index_size == 0 );
-    HDassert( cache_ptr->dirty_index_size == 0 );
-    HDassert( cache_ptr->slist_len == 0 );
-    HDassert( cache_ptr->slist_size == 0 );
-    HDassert( cache_ptr->pel_len == 0 );
-    HDassert( cache_ptr->pel_size == 0 );
-    HDassert( cache_ptr->pl_len == 0 );
-    HDassert( cache_ptr->pl_size == 0 );
-    HDassert( cache_ptr->LRU_list_len == 0 );
-    HDassert( cache_ptr->LRU_list_size == 0 );
+    HDassert(cache_ptr->index_size == 0);
+    HDassert(cache_ptr->clean_index_size == 0);
+    HDassert(cache_ptr->dirty_index_size == 0);
+    HDassert(cache_ptr->slist_len == 0);
+    HDassert(cache_ptr->slist_size == 0);
+    HDassert(cache_ptr->pel_len == 0);
+    HDassert(cache_ptr->pel_size == 0);
+    HDassert(cache_ptr->pl_len == 0);
+    HDassert(cache_ptr->pl_size == 0);
+    HDassert(cache_ptr->LRU_list_len == 0);
+    HDassert(cache_ptr->LRU_list_size == 0);
 
 
-    HDassert( protected_entries <= cache_ptr->pl_len );
+    HDassert(protected_entries <= cache_ptr->pl_len);
 
-    if ( protected_entries > 0 ) {
+    if(protected_entries > 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cache has protected entries.")
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                    "Cache has protected entries.")
+    else if(cur_pel_len > 0) {
 
-    } else if ( cur_pel_len > 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                    "Can't unpin all pinned entries.")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't unpin all pinned entries.")
 
     }
 
@@ -7971,7 +7914,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
         unsigned coll_meta;         /* Collective metadata write flag */
 
         /* Get the dataset transfer property list */
-        if(NULL == (dxpl = H5I_object(dxpl_id)))
+        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
         /* Get the collective metadata write property */
