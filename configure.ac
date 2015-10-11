@@ -26,7 +26,17 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.223-swmr1], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.231-swmr1], [help@hdfgroup.org])
+
+## PLACE CHECKS FOR REQUIRED PACKAGES NEEDED TO INSTALL HDF5 AT THE BEGINNING
+## --------------------------------------------------------------------------
+## Requirement #1: Check if Perl is installed.
+##
+AC_SUBST([PERL]) PERL=""
+AC_CHECK_PROG([PERL], [perl], true, false, [$PATH])
+if test "x$PERL" != "xtrue"; then
+   AC_MSG_ERROR([*** Perl is required for installing HDF5, but Perl could not be found!])
+fi
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
