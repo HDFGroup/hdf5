@@ -1673,60 +1673,8 @@ usage(const char *prog)
         printf("  HDF5_MPI_INFO    MPI INFO object key=value separated by ;\n");
         printf("  HDF5_PARAPREFIX  Paralllel data files prefix\n");
         fflush(stdout);
-    }
-}
-
-void debug_start_stop_time(io_time_t *pt, timer_type t, int start_stop)
-{
-#if 1
-        if (pio_debug_level >= 4) {
-            const char *msg;
-            int myrank;
-
-            MPI_Comm_rank(pio_comm_g, &myrank);
-
-            switch (t) {
-            case HDF5_FILE_OPENCLOSE:
-                msg = "File Open/Close";
-                break;
-            case HDF5_DATASET_CREATE:
-                msg = "Dataset Create";
-                break;
-            case HDF5_MPI_WRITE:
-                msg = "MPI Write";
-                break;
-            case HDF5_MPI_READ:
-                msg = "MPI Read";
-                break;
-            case HDF5_FINE_WRITE_FIXED_DIMS:
-                msg = "Fine Write";
-                break;
-            case HDF5_FINE_READ_FIXED_DIMS:
-                msg = "Fine Read";
-                break;
-            case HDF5_GROSS_WRITE_FIXED_DIMS:
-                msg = "Gross Write";
-                break;
-            case HDF5_GROSS_READ_FIXED_DIMS:
-                msg = "Gross Read";
-                break;
-            case HDF5_RAW_WRITE_FIXED_DIMS:
-                msg = "Raw Write";
-                break;
-            case HDF5_RAW_READ_FIXED_DIMS:
-                msg = "Raw Read";
-                break;
-            default:
-                msg = "Unknown Timer";
-                break;
-            }
-
-            fprintf(output, "    Proc %d: %s %s: %.2f\n", myrank, msg,
-                    (start_stop == TSTART ? "Start" : "Stop"),
-                    pt->total_time[t]);
-        }
-#endif
-} /* debug_start_stop_time */
+    } /* end if */
+} /* end usage() */
 
 #else /* H5_HAVE_PARALLEL */
 
@@ -1736,13 +1684,12 @@ void debug_start_stop_time(io_time_t *pt, timer_type t, int start_stop)
  *              parallel stuff.
  * Return:      EXIT_SUCCESS
  * Programmer:  Bill Wendling, 14. November 2001
- * Modifications:
  */
 int
 main(void)
 {
     printf("No parallel IO performance because parallel is not configured\n");
     return EXIT_SUCCESS;
-}
+} /* end main */
 
 #endif /* !H5_HAVE_PARALLEL */

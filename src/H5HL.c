@@ -113,7 +113,7 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/))
 
     H5HL_t      *heap = NULL;           /* Heap created                 */
     H5HL_prfx_t *prfx = NULL;           /* Heap prefix                  */
-    hsize_t     total_size;             /* Total heap size on disk      */
+    hsize_t     total_size = 0;         /* Total heap size on disk      */
 
     /* check arguments */
     HDassert(f);
@@ -327,7 +327,7 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, unsigned flags))
     H5HL_cache_prfx_ud_t prfx_udata;                    /* User data for protecting local heap prefix       */
     H5HL_prfx_t *prfx = NULL;                           /* Local heap prefix                                */
     H5HL_dblk_t *dblk = NULL;                           /* Local heap data block                            */
-    H5HL_t *heap;                                       /* Heap data structure                              */
+    H5HL_t *heap = NULL;                                /* Heap data structure                              */
     unsigned prfx_cache_flags = H5AC__NO_FLAGS_SET;     /* Cache flags for unprotecting prefix entry        */
     unsigned dblk_cache_flags = H5AC__NO_FLAGS_SET;     /* Cache flags for unprotecting data block entry    */
 
@@ -389,11 +389,11 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, unsigned flags))
 
 CATCH
     /* Release the prefix from the cache, now pinned */
-    if(prfx && FAIL == H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, prfx_cache_flags))
+    if(prfx && heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, prfx_cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release local heap prefix");
 
     /* Release the data block from the cache, now pinned */
-    if(dblk && FAIL == H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_DBLK, heap->dblk_addr, dblk, dblk_cache_flags))
+    if(dblk && heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_DBLK, heap->dblk_addr, dblk, dblk_cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release local heap data block");
 
 END_FUNC(PRIV) /* end H5HL_protect() */
@@ -918,7 +918,7 @@ BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
 H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr))
 
-    H5HL_t      *heap;                  /* Local heap to delete */
+    H5HL_t      *heap = NULL;           /* Local heap to delete */
     H5HL_cache_prfx_ud_t prfx_udata;    /* User data for protecting local heap prefix */
     H5HL_prfx_t *prfx = NULL;           /* Local heap prefix */
     H5HL_dblk_t *dblk = NULL;           /* Local heap data block */
@@ -967,11 +967,11 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr))
 
 CATCH
     /* Release the data block from the cache, now deleted */
-    if(dblk && FAIL == H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_DBLK, heap->dblk_addr, dblk, cache_flags))
+    if(dblk && heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_DBLK, heap->dblk_addr, dblk, cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release local heap data block");
 
     /* Release the prefix from the cache, now deleted */
-    if(prfx && FAIL == H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, cache_flags))
+    if(prfx && heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP_PRFX, heap->prfx_addr, prfx, cache_flags) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release local heap prefix");
 
 END_FUNC(PRIV) /* end H5HL_delete() */

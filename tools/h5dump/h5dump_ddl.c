@@ -1518,10 +1518,10 @@ handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H
 void
 handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name)
 {
-    hid_t  oid = -1;
-    hid_t  attr_id = -1;
-    char *obj_name;
-    char *attr_name;
+    hid_t  oid          = -1;
+    hid_t  attr_id      = -1;
+    char *obj_name      = NULL;
+    char *attr_name     = NULL;
     int j;
     h5tools_str_t buffer;          /* string into which to render   */
     h5tools_context_t ctx;            /* print context  */
@@ -1898,8 +1898,9 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
             begin_obj(h5tools_dump_header_format->softlinkbegin, links, h5tools_dump_header_format->softlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);
-            if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0)
+            if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0) {
                 PRINTSTREAM(rawoutstream, "LINKTARGET \"%s\"\n", buf);
+            }
             else {
                 error_msg("h5dump error: unable to get link value for \"%s\"\n", links);
                 h5tools_setstatus(EXIT_FAILURE);
@@ -1941,7 +1942,7 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
         case H5L_TYPE_MAX:
             HDassert(0);
             /* fall through */
-        H5L_TYPE_HARD:
+        case H5L_TYPE_HARD:
         default:
             begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");

@@ -927,8 +927,8 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
     hsize_t *ptdata;
     int      ndims;
     hssize_t indx;
-    hid_t    dtype;
-    hid_t    type_id;
+    hid_t    dtype = -1;
+    hid_t    type_id = -1;
 
     HDassert(info);
     HDassert(ctx);
@@ -1049,10 +1049,10 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
  done:
     HDfree(ptdata);
 
-    if(H5Tclose(type_id) < 0)
+    if(type_id > 0 && H5Tclose(type_id) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
 
-    if(H5Tclose(dtype) < 0)
+    if(dtype > 0 && H5Tclose(dtype) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
 
     ctx->need_prefix = TRUE;

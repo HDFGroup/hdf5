@@ -37,11 +37,11 @@ const char *setname = "align";
 
 int main(void)
 {
-    hid_t fil,spc,set;
-    hid_t cs6, cmp, fix;
-    hid_t cmp1, cmp2, cmp3;
-    hid_t plist;
-    hid_t array_dt;
+    hid_t fil=-1, spc=-1, set=-1;
+    hid_t cs6=-1, cmp=-1, fix=-1;
+    hid_t cmp1=-1, cmp2=-1, cmp3=-1;
+    hid_t plist=-1;
+    hid_t array_dt=-1;
 
     hsize_t dim[2];
     hsize_t cdim[4];
