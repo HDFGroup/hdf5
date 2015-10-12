@@ -1449,12 +1449,6 @@ done:
 static herr_t
 H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id) 
 {
-    H5P_genplist_t *dapl;               /* data access property list object pointer */
-    hsize_t curr_dims[H5S_MAX_RANK];	/* current dimension sizes */
-    hsize_t max_dims[H5S_MAX_RANK];	/* current dimension sizes */
-    int rank;                       	/* dataspace # of dimensions */
-    int i;				/* local index variable */
-    H5D_append_flush_t info;
     herr_t ret_value = SUCCEED;         /* return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1463,49 +1457,57 @@ H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id)
     HDassert(dset);
     HDassert(dset->shared);
 
+    /* Set default append flush values */
     dset->shared->append_flush.ndims = 0;
     dset->shared->append_flush.func = NULL;
     dset->shared->append_flush.udata = NULL;
     HDmemset(dset->shared->append_flush.boundary,  0, sizeof(dset->shared->append_flush.boundary));
 
     if(dapl_id != H5P_DATASET_ACCESS_DEFAULT && dset->shared->layout.type == H5D_CHUNKED) {
+        H5P_genplist_t *dapl;               /* data access property list object pointer */
+
 	/* Get dataset access property list */
 	if(NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
 	    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dapl ID");
 
 	/* Check if append flush property exists */
 	if(H5P_exist_plist(dapl, H5D_ACS_APPEND_FLUSH_NAME) > 0) {
+            H5D_append_flush_t info;
 
 	    /* Get append flush property */
 	    if(H5P_get(dapl, H5D_ACS_APPEND_FLUSH_NAME, &info) < 0)
 		HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get append flush info")
 	    else if(info.ndims > 0) {
+                hsize_t curr_dims[H5S_MAX_RANK];	/* current dimension sizes */
+                hsize_t max_dims[H5S_MAX_RANK];		/* current dimension sizes */
+                int rank;                       	/* dataspace # of dimensions */
+                unsigned u;     			/* local index variable */
 
 		/* Get dataset rank */
 		if((rank = H5S_get_simple_extent_dims(dset->shared->space, curr_dims, max_dims)) < 0)
 		    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
 
-		if(info.ndims != rank)
+		if(info.ndims != (unsigned)rank)
 		    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "boundary dimension rank does not match dataset rank")
 
 		/* Validate boundary sizes */
-		for(i = 0; i < info.ndims; i++) {
-		    if(info.boundary[i] != 0) /* when a non-zero boundary is set */
+		for(u = 0; u < info.ndims; u++) {
+		    if(info.boundary[u] != 0) /* when a non-zero boundary is set */
 			/* the dimension is extendible? */
-			if(max_dims[i] != H5S_UNLIMITED && max_dims[i] == curr_dims[i])
+			if(max_dims[u] != H5S_UNLIMITED && max_dims[u] == curr_dims[u])
 			    break;
-		}
+		} /* end for */
 
-		if(i != info.ndims) /* at least one boundary dimension is not extendible */
+		if(u != info.ndims) /* at least one boundary dimension is not extendible */
 		    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "boundary dimension is not valid")
 
 		dset->shared->append_flush.ndims = info.ndims;
 		dset->shared->append_flush.func = info.func;
 		dset->shared->append_flush.udata = info.udata;
 		HDmemcpy(dset->shared->append_flush.boundary, info.boundary, sizeof(info.boundary));
-	    }
-	}
-    }
+	    } /* end else-if */
+	} /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

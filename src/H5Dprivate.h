@@ -149,7 +149,7 @@ typedef struct H5D_copy_file_ud_t {
 
 /* Structure for dataset append flush property (H5Pset_append_flush) */
 typedef struct H5D_append_flush_t {
-    int ndims;				/* The # of dimensions for "boundary" */
+    unsigned ndims;			/* The # of dimensions for "boundary" */
     hsize_t boundary[H5S_MAX_RANK];	/* The dimension sizes for determining boundary */
     H5D_append_cb_t func;		/* The callback function */
     void *udata;			/* User data */

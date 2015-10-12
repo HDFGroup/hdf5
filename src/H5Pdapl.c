@@ -49,13 +49,13 @@
 /* Definitions for size of raw data chunk cache(slots) */
 #define H5D_ACS_DATA_CACHE_NUM_SLOTS_SIZE       sizeof(size_t)
 #define H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF        H5D_CHUNK_CACHE_NSLOTS_DEFAULT
-#define H5D_ACS_DATA_CACHE_NUM_SLOTS_ENC        H5P__encode_size_t
-#define H5D_ACS_DATA_CACHE_NUM_SLOTS_DEC        H5P__decode_size_t
+#define H5D_ACS_DATA_CACHE_NUM_SLOTS_ENC        H5P__encode_chunk_cache_nslots
+#define H5D_ACS_DATA_CACHE_NUM_SLOTS_DEC        H5P__decode_chunk_cache_nslots
 /* Definition for size of raw data chunk cache(bytes) */
 #define H5D_ACS_DATA_CACHE_BYTE_SIZE_SIZE       sizeof(size_t)
 #define H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF        H5D_CHUNK_CACHE_NBYTES_DEFAULT
-#define H5D_ACS_DATA_CACHE_BYTE_SIZE_ENC        H5P__encode_size_t
-#define H5D_ACS_DATA_CACHE_BYTE_SIZE_DEC        H5P__decode_size_t
+#define H5D_ACS_DATA_CACHE_BYTE_SIZE_ENC        H5P__encode_chunk_cache_nbytes
+#define H5D_ACS_DATA_CACHE_BYTE_SIZE_DEC        H5P__decode_chunk_cache_nbytes
 /* Definition for preemption read chunks first */
 #define H5D_ACS_PREEMPT_READ_CHUNKS_SIZE        sizeof(double)
 #define H5D_ACS_PREEMPT_READ_CHUNKS_DEF         H5D_CHUNK_CACHE_W0_DEFAULT
@@ -83,6 +83,12 @@
 
 /* Property class callbacks */
 static herr_t H5P__dacc_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P__encode_chunk_cache_nslots(const void *value, void **_pp,
+    size_t *size);
+static herr_t H5P__decode_chunk_cache_nslots(const void **_pp, void *_value);
+static herr_t H5P__encode_chunk_cache_nbytes(const void *value, void **_pp,
+    size_t *size);
+static herr_t H5P__decode_chunk_cache_nbytes(const void **_pp, void *_value);
 
 
 /*********************/
@@ -295,6 +301,226 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:       H5P__encode_chunk_cache_nslots
+ *
+ * Purpose:        Encode the rdcc_nslots parameter to a serialized
+ *                 property list.  Similar to H5P__encode_size_t except
+ *                 the value of 255 for the enc_size field is reserved to
+ *                 indicate H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF, in which
+ *                 nothing further is encoded.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *
+ * Programmer:     Neil Fortner
+ *                 Wednesday, January 23, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
+{
+    uint64_t enc_value;     /* Property value to encode */
+    uint8_t **pp = (uint8_t **)_pp;
+    unsigned enc_size;      /* Size of encoded property */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+    HDassert(size);
+
+    /* Determine if this is the default value, in which case only encode
+     * enc_size (as 255).  Also set size needed for encoding. */
+    if(*(const size_t *)value == H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF) {
+        enc_size = 0;
+        *size += 1;
+    } /* end if */
+    else {
+        enc_value = (uint64_t)*(const size_t *)value;
+        enc_size = H5VM_limit_enc_size(enc_value);
+        HDassert(enc_size > 0);
+        *size += (1 + enc_size);
+    } /* end else */
+
+    HDassert(enc_size < 256);
+
+    if(NULL != *pp) {
+        /* Encode the size */
+        *(*pp)++ = (uint8_t)enc_size;
+
+        /* Encode the value if necessary */
+        if(enc_size != 0) {
+            UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+        } /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__encode_chunk_cache_nslots() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__decode_chunk_cache_nslots
+ *
+ * Purpose:        Decode the rdcc_nslots parameter from a serialized
+ *                 property list.  Similar to H5P__decode_size_t except
+ *                 the value of 255 for the enc_size field is reserved to
+ *                 indicate H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF, in which
+ *                 nothing further needs to be decoded.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *
+ * Programmer:     Neil Fortner
+ *                 Wednesday, January 23, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__decode_chunk_cache_nslots(const void **_pp, void *_value)
+{
+    size_t *value = (size_t *)_value;   /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
+    uint64_t enc_value;                 /* Decoded property value */
+    unsigned enc_size;                  /* Size of encoded property */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(value);
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+
+    /* Determine if enc_size indicates that this is the default value, in which
+     * case set value to H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF and return */
+    if(enc_size == 0)
+        *value = H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF;
+    else {
+        /* Decode the value */
+        UINT64DECODE_VAR(*pp, enc_value, enc_size);
+        H5_CHECKED_ASSIGN(*value, uint64_t, enc_value, size_t);
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__decode_chunk_cache_nslots() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__encode_chunk_cache_nbytes
+ *
+ * Purpose:        Encode the rdcc_nbytes parameter to a serialized
+ *                 property list.  Similar to H5P__encode_size_t except
+ *                 the value of 255 for the enc_size field is reserved to
+ *                 indicate H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF, in which
+ *                 nothing further is encoded.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *
+ * Programmer:     Neil Fortner
+ *                 Wednesday, January 23, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
+{
+    uint64_t enc_value;     /* Property value to encode */
+    uint8_t **pp = (uint8_t **)_pp;
+    unsigned enc_size;      /* Size of encoded property */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+    HDassert(size);
+
+    /* Determine if this is the default value, in which case only encode
+     * enc_size (as 255).  Also set size needed for encoding. */
+    if(*(const size_t *)value == H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF) {
+        enc_size = 0;
+        *size += 1;
+    } /* end if */
+    else {
+        enc_value = (uint64_t)*(const size_t *)value;
+        enc_size = H5VM_limit_enc_size(enc_value);
+        HDassert(enc_size > 0);
+        *size += (1 + enc_size);
+    } /* end else */
+
+    HDassert(enc_size < 256);
+
+    if(NULL != *pp) {
+        /* Encode the size */
+        *(*pp)++ = (uint8_t)enc_size;
+
+        /* Encode the value if necessary */
+        if(enc_size != 0) {
+            UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+        } /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__encode_chunk_cache_nbytes() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__decode_chunk_cache_nbytes
+ *
+ * Purpose:        Decode the rdcc_nbytes parameter from a serialized
+ *                 property list.  Similar to H5P__decode_size_t except
+ *                 the value of 255 for the enc_size field is reserved to
+ *                 indicate H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF, in which
+ *                 nothing further needs to be decoded.
+ *
+ * Return:         Success:     Non-negative
+ *                 Failure:     Negative
+ *
+ * Programmer:     Neil Fortner
+ *                 Wednesday, January 23, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__decode_chunk_cache_nbytes(const void **_pp, void *_value)
+{
+    size_t *value = (size_t *)_value;   /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
+    uint64_t enc_value;                 /* Decoded property value */
+    unsigned enc_size;                  /* Size of encoded property */
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(value);
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+
+    /* Determine if enc_size indicates that this is the default value, in which
+     * case set value to H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF and return */
+    if(enc_size == 0)
+        *value = H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF;
+    else {
+        /* Decode the value */
+        UINT64DECODE_VAR(*pp, enc_value, enc_size);
+        H5_CHECKED_ASSIGN(*value, uint64_t, enc_value, size_t);
+    } /* end else */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__decode_chunk_cache_nbytes() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_append_flush
  *
  * Purpose:	Sets the boundary, callback function, and user data in the
@@ -313,7 +539,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_append_flush(hid_t plist_id, int ndims, const hsize_t *boundary, H5D_append_cb_t func, void *udata)
+H5Pset_append_flush(hid_t plist_id, unsigned ndims, const hsize_t *boundary, H5D_append_cb_t func, void *udata)
 {
     H5P_genplist_t *plist;      	/* property list pointer */
     H5D_append_flush_t info;
@@ -321,7 +547,7 @@ H5Pset_append_flush(hid_t plist_id, int ndims, const hsize_t *boundary, H5D_appe
     herr_t ret_value = SUCCEED;   	/* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIs*hx*x", plist_id, ndims, boundary, func, udata);
+    H5TRACE5("e", "iIu*hx*x", plist_id, ndims, boundary, func, udata);
 
     /* Check arguments */
     if(ndims <= 0)
@@ -347,11 +573,11 @@ H5Pset_append_flush(hid_t plist_id, int ndims, const hsize_t *boundary, H5D_appe
 
     HDmemset(info.boundary, 0, sizeof(info.boundary));
     /* boundary can be 0 to indicate no boundary is set */
-    for(u = 0; u < (unsigned)ndims; u++) {
+    for(u = 0; u < ndims; u++) {
         if(boundary[u] != (boundary[u] & 0xffffffff)) /* negative value (including H5S_UNLIMITED) */
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all boundary dimensions must be less than 2^32")
         info.boundary[u] = boundary[u]; /* Store user's boundary dimensions */
-    }
+    } /* end for */
 
     /* Set values */
     if(H5P_set(plist, H5D_ACS_APPEND_FLUSH_NAME, &info) < 0)
@@ -378,15 +604,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_append_flush(hid_t plist_id, int ndims, hsize_t boundary[], H5D_append_cb_t *func, void **udata)
+H5Pget_append_flush(hid_t plist_id, unsigned ndims, hsize_t boundary[], H5D_append_cb_t *func, void **udata)
 {
     H5P_genplist_t *plist;      /* property list pointer */
     H5D_append_flush_t  info;
-    int i;			/* local index variable */
+    unsigned u;			/* local index variable */
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIs*h*x**x", plist_id, ndims, boundary, func, udata);
+    H5TRACE5("e", "iIu*h*x**x", plist_id, ndims, boundary, func, udata);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
@@ -399,11 +625,10 @@ H5Pget_append_flush(hid_t plist_id, int ndims, hsize_t boundary[], H5D_append_cb
     /* Assign return values */
     if(boundary) {
 	HDmemset(boundary, 0, ndims * sizeof(hsize_t));
-	if(info.ndims > 0) {
-	    for(i = 0; i < info.ndims && i < ndims; i++)
-		boundary[i] = info.boundary[i];
-	}
-    }
+	if(info.ndims > 0)
+	    for(u = 0; u < info.ndims && u < ndims; u++)
+		boundary[u] = info.boundary[u];
+    } /* end if */
     if(func)
 	*func = info.func;
     if(udata)
@@ -412,3 +637,4 @@ H5Pget_append_flush(hid_t plist_id, int ndims, hsize_t boundary[], H5D_append_cb
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_append_flush() */
+

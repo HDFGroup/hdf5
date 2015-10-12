@@ -392,9 +392,9 @@ H5_DLL herr_t H5Pget_chunk_cache(hid_t dapl_id,
        size_t *rdcc_nbytes/*out*/,
        double *rdcc_w0/*out*/);
 H5_DLL herr_t H5Pset_append_flush(hid_t plist_id, 
-    int ndims, const hsize_t boundary[], H5D_append_cb_t func, void *udata);
+    unsigned ndims, const hsize_t boundary[], H5D_append_cb_t func, void *udata);
 H5_DLL herr_t H5Pget_append_flush(hid_t plist_id, 
-    int dims, hsize_t boundary[], H5D_append_cb_t *func, void **udata);
+    unsigned dims, hsize_t boundary[], H5D_append_cb_t *func, void **udata);
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);

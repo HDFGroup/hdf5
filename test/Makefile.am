@@ -56,7 +56,7 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            pool accum hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
            twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
-           set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
+           set_extent ttsafe enc_dec_plist enc_dec_plist_cross_platform\
            getname vfd ntypes dangle dtransform reserved cross_read \
            freespace mf farray earray btree2 fheap file_image unregister \
            cache_logging cork swmr
