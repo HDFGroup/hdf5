@@ -122,6 +122,8 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
 {
     H5O_shmesg_table_t sohm_table;      /* SOHM message for superblock extension */
     H5SM_master_table_t *table = NULL;  /* SOHM master table for file */
+    H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
+    H5AC_ring_t ring, orig_ring = H5AC_RING_INV;      /* Original ring value */
     haddr_t table_addr = HADDR_UNDEF;   /* Address of SOHM master table in file */
     unsigned list_max, btree_min;       /* Phase change limits for SOHM indices */
     unsigned index_type_flags[H5O_SHMESG_MAX_NINDEXES]; /* Messages types stored in each index */
@@ -135,6 +137,10 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
     HDassert(f);
     /* File should not already have a SOHM table */
     HDassert(!H5F_addr_defined(H5F_SOHM_ADDR(f)));
+
+    /* Set the ring type in the DXPL */
+    if(H5AC_set_ring(dxpl_id, H5AC_RING_US, &dxpl, &orig_ring) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTSET, FAIL, "unable to set ring value")
 
     /* Initialize master table */
     if(NULL == (table = H5FL_MALLOC(H5SM_master_table_t)))
@@ -220,6 +226,11 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
     if(type_flags_used & H5O_SHMESG_ATTR_FLAG)
         H5F_SET_STORE_MSG_CRT_IDX(f, TRUE);
 
+    /* Set the ring type to superblock extension */
+    ring = H5AC_RING_SBE;
+    if((H5P_set(dxpl, H5AC_RING_NAME, &ring)) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTSET, FAIL, "unable to set property value")
+
     /* Write shared message information to the superblock extension */
     sohm_table.addr = H5F_SOHM_ADDR(f);
     sohm_table.version = H5F_SOHM_VERS(f);
@@ -228,6 +239,10 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
         HGOTO_ERROR(H5E_SOHM, H5E_CANTINIT, FAIL, "unable to update SOHM header message")
 
 done:
+    /* Reset the ring in the DXPL */
+    if(H5AC_reset_ring(dxpl, orig_ring) < 0)
+        HDONE_ERROR(H5E_SOHM, H5E_CANTSET, FAIL, "unable to set property value")
+
     if(ret_value < 0) {
         if(table_addr != HADDR_UNDEF)
             H5MF_xfree(f, H5FD_MEM_SOHM_TABLE, dxpl_id, table_addr, (hsize_t)table->table_size);
@@ -1929,6 +1944,8 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
     H5F_t *f = ext_loc->file;           /* File pointer (convenience variable) */
     H5O_shmesg_table_t sohm_table;      /* SOHM message from superblock extension */
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
+    H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
+    H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
     unsigned tmp_sohm_nindexes;		/* Number of shared messages indexes in the table */
     htri_t status;                      /* Status for message existing */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1968,6 +1985,10 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
 
         /* Set up user data for callback */
         cache_udata.f = f;
+
+        /* Set the ring type in the DXPL */
+        if(H5AC_set_ring(dxpl_id, H5AC_RING_US, &dxpl, &orig_ring) < 0)
+            HGOTO_ERROR(H5E_SOHM, H5E_CANTSET, FAIL, "unable to set ring value")
 
         /* Read the rest of the SOHM table information from the cache */
         if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, H5F_SOHM_ADDR(f), &cache_udata, H5AC__READ_ONLY_FLAG)))
@@ -2020,6 +2041,10 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
     } /* end else */
 
 done:
+    /* Reset the ring in the DXPL */
+    if(H5AC_reset_ring(dxpl, orig_ring) < 0)
+        HDONE_ERROR(H5E_SOHM, H5E_CANTSET, FAIL, "unable to set property value")
+
     /* Release the master SOHM table if we took it out of the cache */
     if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, H5F_SOHM_ADDR(f), table, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM master table")

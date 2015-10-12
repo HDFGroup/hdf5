@@ -17,7 +17,7 @@
 
 #include "h5test.h"
 
-#define LOG_LOCATION "cache_logging.log"
+#define LOG_LOCATION "cache_logging.out"
 #define FILE_NAME    "cache_logging"
 
 #define N_GROUPS 100

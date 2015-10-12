@@ -151,7 +151,7 @@ flush2.chkexe_: flush1.chkexe_
 # prefix or low-level driver with environment variables will influence
 # the temporary file name in ways that the makefile is not aware of.
 CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
-    dset_offset.h5 chunk_fixed.h5 cache_logging.log \
+    dset_offset.h5 chunk_fixed.h5 cache_logging.out \
     max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
     huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_fast.h5 \
     chunk_expand.h5 layout_extend.h5 swmr_fail.h5 partial_chunks.h5 \
