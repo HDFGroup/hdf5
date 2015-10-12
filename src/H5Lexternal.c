@@ -254,7 +254,7 @@ H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
 	HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get parent's file access property list")
 
     /* Get callback_info */
-    if(H5P_get(plist, H5L_ACS_ELINK_CB_NAME, &cb_info)<0)
+    if(H5P_get(plist, H5L_ACS_ELINK_CB_NAME, &cb_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get elink callback info")
 
     /* Get file access property list */
@@ -279,7 +279,7 @@ H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
         /* Check if we need to allocate larger buffer */
         if((size_t)group_name_len > sizeof(local_group_name)) {
             if(NULL == (parent_group_name = (char *)H5MM_malloc((size_t)group_name_len)))
-                HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, FAIL, "can't allocate buffer to hold group name, group_name_len = %Zu", group_name_len)
+                HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, FAIL, "can't allocate buffer to hold group name, group_name_len = %zd", group_name_len)
         } /* end if */
         else
             parent_group_name = local_group_name;
@@ -378,7 +378,7 @@ H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
 
     /* try searching from property list */
     if(ext_file == NULL) {
-        if(H5P_get(plist, H5L_ACS_ELINK_PREFIX_NAME, &my_prefix) < 0)
+        if(H5P_peek(plist, H5L_ACS_ELINK_PREFIX_NAME, &my_prefix) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix")
         if(my_prefix) {
             if(H5L_build_name(my_prefix, temp_file_name, &full_name/*out*/) < 0)

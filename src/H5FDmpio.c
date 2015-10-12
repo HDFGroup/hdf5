@@ -304,33 +304,6 @@ H5FD_mpio_term(void)
  * Programmer:	Albert Cheng
  *		Feb 3, 1998
  *
- * Modifications:
- *		Robb Matzke, 1998-02-18
- *		Check all arguments before the property list is updated so we
- *		don't leave the property list in a bad state if something
- *		goes wrong.  Also, the property list data type changed to
- *		allow more generality so all the mpi-related stuff is in the
- *		`u.mpi' member.  The `access_mode' will contain only
- * 		mpi-related flags defined in H5Fpublic.h.
- *
- *		Albert Cheng, 1998-04-16
- *		Removed the ACCESS_MODE argument.  The access mode is changed
- *		to be controlled by data transfer property list during data
- *		read/write calls.
- *
- * 		Robb Matzke, 1999-08-06
- *		Modified to work with the virtual file layer.
- *
- *		Raymond Lu, 2001-10-23
- *		Changed the file access list to the new generic property
- *		list.
- *
- *		Albert Cheng, 2003-04-17
- *		Modified the description of the function that it now stores
- *		a duplicate of the communicator and INFO object.  Free the
- *		old duplicates if previously set.  (Work is actually done
- *		by H5P_set_driver.)
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -357,11 +330,11 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     fa.info = info;
 
     /* duplication is done during driver setting. */
-    ret_value= H5P_set_driver(plist, H5FD_MPIO, &fa);
+    ret_value = H5P_set_driver(plist, H5FD_MPIO, &fa);
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* H5Pset_fapl_mpio() */
 
 
 /*-------------------------------------------------------------------------
@@ -386,71 +359,60 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, February 26, 1998
  *
- * Modifications:
- *
- *	        Albert Cheng, Apr 16, 1998
- *	        Removed the access_mode argument.  The access_mode is changed
- *	        to be controlled by data transfer property list during data
- *	        read/write calls.
- *
- *		Raymond Lu, 2001-10-23
- *		Changed the file access list to the new generic property
- *		list.
- *
- *		Albert Cheng, 2003-04-17
- *		Return duplicates of the stored communicator and Info object.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
 {
-    H5FD_mpio_fapl_t	*fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    MPI_Comm	comm_tmp=MPI_COMM_NULL;
-    int		mpi_code;		/* mpi return code */
-    herr_t      ret_value=SUCCEED;      /* Return value */
+    const H5FD_mpio_fapl_t *fa;       /* MPIO fapl info */
+    MPI_Comm	comm_tmp = MPI_COMM_NULL;
+    hbool_t     comm_copied = FALSE;    /* MPI Comm has been duplicated */
+    int		mpi_code;		/* MPI return code */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, comm, info);
 
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list")
-    if(H5FD_MPIO != H5P_get_driver(plist))
+    if(H5FD_MPIO != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
-    if(NULL == (fa = (H5FD_mpio_fapl_t *)H5P_get_driver_info(plist)))
+    if(NULL == (fa = (const H5FD_mpio_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     /* Store the duplicated communicator in a temporary variable for error */
-    /* recovery in case the INFO duplication fails.  We cannot attempt to */
-    /* the value into *comm yet since if MPI_Comm_dup fails, we will end  */
-    /* up freeing whatever *comm holds and that could be invalid. */
-    if (comm){
-	if (MPI_SUCCESS != (mpi_code=MPI_Comm_dup(fa->comm, &comm_tmp)))
+    /* recovery in case the INFO duplication fails. */
+    if(comm) {
+	if(MPI_SUCCESS != (mpi_code = MPI_Comm_dup(fa->comm, &comm_tmp)))
 	    HMPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code)
-    }
+        comm_copied = TRUE;
+    } /* end if */
 
-    if (info){
-	if (MPI_INFO_NULL != fa->info){
-	    if (MPI_SUCCESS != (mpi_code=MPI_Info_dup(fa->info, info)))
+    if(info) {
+	if(MPI_INFO_NULL != fa->info) {
+	    if(MPI_SUCCESS != (mpi_code = MPI_Info_dup(fa->info, info)))
 		HMPI_GOTO_ERROR(FAIL, "MPI_Info_dup failed", mpi_code)
-	}else{
+	} /* end if */
+        else
 	    /* do not dup it */
 	    *info = MPI_INFO_NULL;
-	}
-    }
+    } /* end if */
 
-    if (comm)
+    /* Store the copied communicator, now that the Info object has been
+     *  successfully copied.
+     */
+    if(comm)
         *comm = comm_tmp;
 
 done:
-    if (FAIL==ret_value){
+    if(ret_value < 0)
 	/* need to free anything created here */
-	if (comm_tmp != MPI_COMM_NULL)
+	if(comm_copied)
 	    MPI_Comm_free(&comm_tmp);
-    }
+
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_fapl_mpio() */
 
 
 /*-------------------------------------------------------------------------
@@ -965,32 +927,6 @@ done:
  * Programmer:
  *              January 30, 1998
  *
- * Modifications:
- * 		Robb Matzke, 1998-02-18
- *		Added the ACCESS_PARMS argument.  Moved some error checking
- *		here from elsewhere.
- *
- *      	rky, 1998-01-11
- *      	Added H5FD_mpio_Debug debug flags controlled by MPI_Info.
- *
- *      	rky, 1998-08-28
- *		Init flag controlling redundant metadata writes to disk.
- *
- *      	rky, 1998-12-07
- *		Added barrier after MPI_File_set_size to prevent race
- *		condition -- subsequent writes were being truncated, causing
- *		holes in file.
- *
- * 		Robb Matzke, 1999-08-06
- *		Modified to work with the virtual file layer.
- *
- *      	rky & ppw, 1999-11-07
- *		Modified "H5FD_mpio_open" so that file-truncation is
- *              avoided for brand-new files (with zero filesize).
- *
- * 		Albert Cheng, 2003-04-17
- * 		Duplicate the communicator and Info object so that file is
- * 		insulated from the old one.
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -1005,11 +941,11 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     int				mpi_size;       /* Total number of MPI processes */
     int				mpi_code;	/* mpi return code */
     MPI_Offset			size;
-    const H5FD_mpio_fapl_t	*fa=NULL;
+    const H5FD_mpio_fapl_t	*fa = NULL;
     H5FD_mpio_fapl_t		_fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    MPI_Comm                    comm_dup=MPI_COMM_NULL;
-    MPI_Info                    info_dup=MPI_INFO_NULL;
+    MPI_Comm                    comm_dup = MPI_COMM_NULL;
+    MPI_Info                    info_dup = MPI_INFO_NULL;
     H5FD_t			*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1024,39 +960,42 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Obtain a pointer to mpio-specific file access properties */
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(H5P_FILE_ACCESS_DEFAULT == fapl_id || H5FD_MPIO != H5P_get_driver(plist)) {
+    if(H5P_FILE_ACCESS_DEFAULT == fapl_id || H5FD_MPIO != H5P_peek_driver(plist)) {
 	_fa.comm = MPI_COMM_SELF; /*default*/
 	_fa.info = MPI_INFO_NULL; /*default*/
 	fa = &_fa;
-    } else {
-        if(NULL == (fa = (const H5FD_mpio_fapl_t *)H5P_get_driver_info(plist)))
+    } /* end if */
+    else {
+        if(NULL == (fa = (const H5FD_mpio_fapl_t *)H5P_peek_driver_info(plist)))
 	    HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
-    }
+    } /* end else */
 
     /* Duplicate communicator and Info object for use by this file. */
-    if (FAIL==H5FD_mpi_comm_info_dup(fa->comm, fa->info, &comm_dup, &info_dup))
+    if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &comm_dup, &info_dup))
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
 
     /* convert HDF5 flags to MPI-IO flags */
     /* some combinations are illegal; let MPI-IO figure it out */
-    mpi_amode  = (flags&H5F_ACC_RDWR) ? MPI_MODE_RDWR : MPI_MODE_RDONLY;
-    if (flags&H5F_ACC_CREAT)	mpi_amode |= MPI_MODE_CREATE;
-    if (flags&H5F_ACC_EXCL)	mpi_amode |= MPI_MODE_EXCL;
+    mpi_amode  = (flags & H5F_ACC_RDWR) ? MPI_MODE_RDWR : MPI_MODE_RDONLY;
+    if(flags & H5F_ACC_CREAT)
+        mpi_amode |= MPI_MODE_CREATE;
+    if(flags & H5F_ACC_EXCL)
+        mpi_amode |= MPI_MODE_EXCL;
 
 #ifdef H5FDmpio_DEBUG
     /* Check for debug commands in the info parameter */
     {
-	char debug_str[128];
-        int flag, i;
-        if (MPI_INFO_NULL != info_dup) {
-            MPI_Info_get(fa->info, H5F_MPIO_DEBUG_KEY, sizeof(debug_str)-1, debug_str, &flag);
-            if (flag) {
-                fprintf(stdout, "H5FD_mpio debug flags=%s\n", debug_str );
-                for (i=0;
-                     debug_str[i]/*end of string*/ && i<128/*just in case*/;
-                     ++i) {
+        if(MPI_INFO_NULL != info_dup) {
+            char debug_str[128];
+            int flag;
+
+            MPI_Info_get(fa->info, H5F_MPIO_DEBUG_KEY, sizeof(debug_str) - 1, debug_str, &flag);
+            if(flag) {
+                int i;
+
+                fprintf(stdout, "H5FD_mpio debug flags = '%s'\n", debug_str);
+                for(i = 0; debug_str[i]/*end of string*/ && i < 128/*just in case*/; ++i)
                     H5FD_mpio_Debug[(int)debug_str[i]] = 1;
-                }
             }
         }
     }
@@ -1523,21 +1462,21 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t dxpl_id, had
             use_view_this_time = TRUE;
 
             /* prepare for a full-blown xfer using btype, ftype, and disp */
-            if(H5P_get(plist, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, &buf_type)<0)
+            if(H5P_get(plist, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, &buf_type) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
-            if(H5P_get(plist, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, &file_type)<0)
+            if(H5P_get(plist, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, &file_type) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O type property")
 
             /*
              * Set the file view when we are using MPI derived types
              */
-            if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, mpi_off, MPI_BYTE, file_type, H5FD_mpi_native_g,  file->info)))
+            if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, mpi_off, MPI_BYTE, file_type, H5FD_mpi_native_g, file->info)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
 
             /* When using types, use the address as the displacement for
              * MPI_File_set_view and reset the address for the read to zero
              */
-            mpi_off=0;
+            mpi_off = 0;
         } /* end if */
     } /* end if */
 
@@ -1553,7 +1492,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t dxpl_id, had
         HDassert(plist);
 
         /* get the transfer mode from the dxpl */
-        if(H5P_get(plist, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, &coll_opt_mode)<0)
+        if(H5P_get(plist, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, &coll_opt_mode) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
 
         if(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {

@@ -538,7 +538,7 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
     fa.increment = increment;
     fa.backing_store = backing_store;
 
-    ret_value= H5P_set_driver(plist, H5FD_CORE, &fa);
+    ret_value = H5P_set_driver(plist, H5FD_CORE, &fa);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -560,8 +560,8 @@ done:
 herr_t
 H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_store /*out*/)
 {
-    H5FD_core_fapl_t    *fa;
     H5P_genplist_t      *plist;                 /* Property list pointer */
+    const H5FD_core_fapl_t    *fa;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -569,14 +569,14 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_stor
 
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5FD_CORE != H5P_get_driver(plist))
+    if(H5FD_CORE != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
-    if(NULL == (fa = (H5FD_core_fapl_t *)H5P_get_driver_info(plist)))
+    if(NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
-    if (increment)
+    if(increment)
         *increment = fa->increment;
-    if (backing_store)
+    if(backing_store)
         *backing_store = fa->backing_store;
 
 done:
@@ -664,7 +664,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     HDassert(H5P_DEFAULT != fapl_id);
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(NULL == (fa = (H5FD_core_fapl_t *)H5P_get_driver_info(plist)))
+    if(NULL == (fa = (H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
 
     /* Build the open flags */
@@ -674,7 +674,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if(H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
 
     /* Retrieve initial file image info */
-    if(H5P_get(plist, H5F_ACS_FILE_IMAGE_INFO_NAME, &file_image_info) < 0)
+    if(H5P_peek(plist, H5F_ACS_FILE_IMAGE_INFO_NAME, &file_image_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial file image info")
 
     /* If the file image exists and this is an open, make sure the file doesn't exist */

@@ -176,6 +176,8 @@ MINOR, CACHE, H5E_CANTDEPEND, Unable to create a flush dependency
 MINOR, CACHE, H5E_CANTUNDEPEND, Unable to destroy a flush dependency
 MINOR, CACHE, H5E_CANTNOTIFY, Unable to notify object about action
 MINOR, CACHE, H5E_LOGFAIL, Failure in the cache logging framework
+MINOR, CACHE, H5E_CANTCORK, Unable to cork an object
+MINOR, CACHE, H5E_CANTUNCORK, Unable to uncork an object
 
 # B-tree related errors
 MINOR, BTREE, H5E_NOTFOUND, Object not found

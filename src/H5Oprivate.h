@@ -404,6 +404,9 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_VERSION_4	4
 
+/* The default version of the format.  (Earlier versions had bugs) */
+#define H5O_LAYOUT_VERSION_DEFAULT H5O_LAYOUT_VERSION_3
+
 /* The latest version of the format.  Look through the 'encode'
  *      and 'size' callbacks for places to change when updating this. */
 #define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_4

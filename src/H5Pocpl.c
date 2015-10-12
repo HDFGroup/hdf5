@@ -63,9 +63,14 @@
 #define H5O_CRT_OHDR_FLAGS_DEC          H5P__decode_uint8_t
 /* Definitions for filter pipeline */
 #define H5O_CRT_PIPELINE_SIZE sizeof(H5O_pline_t)
+#define H5O_CRT_PIPELINE_SET            H5P__ocrt_pipeline_set
+#define H5O_CRT_PIPELINE_GET            H5P__ocrt_pipeline_get
 #define H5O_CRT_PIPELINE_ENC            H5P__ocrt_pipeline_enc
 #define H5O_CRT_PIPELINE_DEC            H5P__ocrt_pipeline_dec
+#define H5O_CRT_PIPELINE_DEL            H5P__ocrt_pipeline_del
+#define H5O_CRT_PIPELINE_COPY           H5P__ocrt_pipeline_copy
 #define H5O_CRT_PIPELINE_CMP            H5P__ocrt_pipeline_cmp
+#define H5O_CRT_PIPELINE_CLOSE          H5P__ocrt_pipeline_close
 
 
 /******************/
@@ -84,13 +89,16 @@
 
 /* Property class callbacks */
 static herr_t H5P__ocrt_reg_prop(H5P_genclass_t *pclass);
-static herr_t H5P__ocrt_copy(hid_t new_plist_t, hid_t old_plist_t, void *copy_data);
-static herr_t H5P__ocrt_close(hid_t dxpl_id, void *close_data);
 
 /* Property callbacks */
 static herr_t H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__ocrt_pipeline_dec(const void **_pp, void *value);
+static herr_t H5P__ocrt_pipeline_set(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__ocrt_pipeline_get(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__ocrt_pipeline_del(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__ocrt_pipeline_copy(const char *name, size_t size, void *value);
 static int H5P__ocrt_pipeline_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__ocrt_pipeline_close(const char *name, size_t size, void *value);
 
 /* Local routines */
 static herr_t H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, 
@@ -113,9 +121,9 @@ const H5P_libclass_t H5P_CLS_OCRT[1] = {{
 
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
-    H5P__ocrt_copy,		/* Class copy callback          */
+    NULL,			/* Class copy callback          */
     NULL,		        /* Class copy callback info     */
-    H5P__ocrt_close,		/* Class close callback         */
+    NULL,			/* Class close callback         */
     NULL 		        /* Class close callback info    */
 }};
 
@@ -177,104 +185,13 @@ H5P__ocrt_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the pipeline property */
     if(H5P_register_real(pclass, H5O_CRT_PIPELINE_NAME, H5O_CRT_PIPELINE_SIZE, &H5O_def_pline_g, 
-            NULL, NULL, NULL, H5O_CRT_PIPELINE_ENC, H5O_CRT_PIPELINE_DEC,
-            NULL, NULL, H5O_CRT_PIPELINE_CMP, NULL) < 0)
+            NULL, H5O_CRT_PIPELINE_SET, H5O_CRT_PIPELINE_GET, H5O_CRT_PIPELINE_ENC, H5O_CRT_PIPELINE_DEC,
+            H5O_CRT_PIPELINE_DEL, H5O_CRT_PIPELINE_COPY, H5O_CRT_PIPELINE_CMP, H5O_CRT_PIPELINE_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__ocrt_reg_prop() */
-
-
-/*-------------------------------------------------------------------------
- * Function:       H5P__ocrt_copy
- *
- * Purpose:        Callback routine which is called whenever any object
- *                 creation property list is copied.  This routine copies
- *                 the properties from the old list to the new list.
- *
- * Return:         Success:        Non-negative
- *                 Failure:        Negative
- *
- * Programmer:     Neil Fortner
- *                 Monday, September 21, 2009
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static herr_t
-H5P__ocrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void H5_ATTR_UNUSED *copy_data)
-{
-    H5O_pline_t    src_pline, dst_pline;        /* Source & destination pipelines */
-    H5P_genplist_t *src_plist;                  /* Pointer to source property list */
-    H5P_genplist_t *dst_plist;                  /* Pointer to destination property list */
-    herr_t         ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Verify property list IDs */
-    if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_plist_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object creation property list")
-    if(NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_plist_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object creation property list")
-
-    /* Get the link pipeline property from the old property list */
-    if(H5P_get(src_plist, H5O_CRT_PIPELINE_NAME, &src_pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
-
-    /* Make copy of link pipeline */
-    if(NULL == H5O_msg_copy(H5O_PLINE_ID, &src_pline, &dst_pline))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy link pipeline")
-
-    /* Set the link pipeline property for the destination property list */
-    if(H5P_set(dst_plist, H5O_CRT_PIPELINE_NAME, &dst_pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__ocrt_copy() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5P__ocrt_close
- *
- * Purpose:	Callback routine which is called whenever any object create
- *              property list is closed.  This routine performs any generic
- *              cleanup needed on the properties the library put into the list.
- *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:     Neil Fortner
- *                 Monday, September 21, 2009
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static herr_t
-H5P__ocrt_close(hid_t dcpl_id, void H5_ATTR_UNUSED *close_data)
-{
-    H5O_pline_t     pline;              /* I/O pipeline */
-    H5P_genplist_t *plist;              /* Property list */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Check arguments */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object creation property list")
-
-    /* Get the link pipeline property from the old property list */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
-
-    /* Clean up any values set for the link pipeline */
-    if(H5O_msg_reset(H5O_PLINE_ID, &pline) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't release pipeline info")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__ocrt_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -615,7 +532,7 @@ H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned flags,
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the pipeline property to modify */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
 
     /* Modify the filter parameters of the I/O pipeline */
@@ -623,7 +540,7 @@ H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned flags,
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline")
 
     /* Put the I/O pipeline information back into the property list */
-    if(H5P_set(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
 
 done:
@@ -841,7 +758,7 @@ H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags,
     } /* end if */
 
     /* Get the pipeline property to append to */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
 
     /* Add the filter to the I/O pipeline */
@@ -849,7 +766,7 @@ H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags,
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add filter to pipeline")
 
     /* Put the I/O pipeline information back into the property list */
-    if(H5P_set(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
 
 done:
@@ -899,7 +816,7 @@ H5Pget_nfilters(hid_t plist_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the pipeline property to query */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
 
     /* Set return value */
@@ -982,7 +899,7 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5Z_FILTER_ERROR, "can't find object for ID")
 
     /* Get the pipeline property to query */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline")
 
     /* Check index */
@@ -1038,7 +955,7 @@ H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsigned int *flags
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get pipeline info */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
 
     /* Get pointer to filter in pipeline */
@@ -1167,7 +1084,7 @@ H5Pall_filters_avail(hid_t plist_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the pipeline property to query */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
 
     /* Check if all filters are available */
@@ -1203,7 +1120,7 @@ H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get pipeline info */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
 
     /* Check if the file is in the pipeline */
@@ -1250,7 +1167,7 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the pipeline property to modify */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
 
     /* Check if there are any filters */
@@ -1260,7 +1177,7 @@ H5Premove_filter(hid_t plist_id, H5Z_filter_t filter)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't delete filter")
 
         /* Put the I/O pipeline information back into the property list */
-        if(H5P_set(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        if(H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
     } /* end if */
 
@@ -1318,7 +1235,7 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the pipeline property to append to */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
 
     /* Add the filter */
@@ -1326,7 +1243,7 @@ H5Pset_deflate(hid_t plist_id, unsigned level)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add deflate filter to pipeline")
 
     /* Put the I/O pipeline information back into the property list */
-    if(H5P_set(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
 
 done:
@@ -1369,7 +1286,7 @@ H5Pset_fletcher32(hid_t plist_id)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the pipeline property to append to */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
 
     /* Add the Fletcher32 checksum as a filter */
@@ -1377,7 +1294,7 @@ H5Pset_fletcher32(hid_t plist_id)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add fletcher32 filter to pipeline")
 
     /* Put the I/O pipeline information back into the property list */
-    if(H5P_set(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_poke(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
 
 done:
@@ -1459,6 +1376,82 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_get_filter() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__ocrt_pipeline_set
+ *
+ * Purpose:     Copies an I/O pipeline property when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, Sept 3, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_pipeline_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    H5O_pline_t     *pline = (H5O_pline_t *)value; /* Create local aliases for values */
+    H5O_pline_t     new_pline;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of I/O pipeline */
+    if(NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &new_pline))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline")
+
+    /* Copy new I/O pipeline message over old one */
+    *pline = new_pline;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_pipeline_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__ocrt_pipeline_get
+ *
+ * Purpose:     Copies a layout property when it's retrieved from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, Sept 1, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_pipeline_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    H5O_pline_t     *pline = (H5O_pline_t *)value; /* Create local aliases for values */
+    H5O_pline_t     new_pline;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Make copy of I/O pipeline */
+    if(NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &new_pline))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline")
+
+    /* Copy new I/O pipeline message over old one */
+    *pline = new_pline;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_pipeline_get() */
 
 
 /*-------------------------------------------------------------------------
@@ -1650,6 +1643,77 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5P__ocrt_pipeline_del
+ *
+ * Purpose:     Frees memory used to store the I/O pipeline property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, Sept 3, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_pipeline_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Reset the old I/O pipeline */
+    if(H5O_msg_reset(H5O_PLINE_ID, value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release I/O pipeline message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_pipeline_del() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5P__ocrt_pipeline_copy
+ *
+ * Purpose:     Copy the I/O pipeline property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, Sept 3, 2015
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_pipeline_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
+    void *value)
+{
+    H5O_pline_t     *pline = (H5O_pline_t *)value; /* Create local aliases for values */
+    H5O_pline_t     new_pline;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(pline);
+
+    /* Make copy of I/O pipeline */
+    if(NULL == H5O_msg_copy(H5O_PLINE_ID, pline, &new_pline))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy I/O pipeline")
+
+    /* Copy new I/O pipeline message over old one */
+    *pline = new_pline;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_pipeline_copy() */
+
+
+/*-------------------------------------------------------------------------
  * Function:       H5P__ocrt_pipeline_cmp
  *
  * Purpose:        Callback routine which is called whenever a filter pipeline
@@ -1730,6 +1794,39 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__ocrt_pipeline_cmp() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__ocrt_pipeline_close
+ *
+ * Purpose:     Frees memory used to store the I/O pipeline property
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, Sept 3, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__ocrt_pipeline_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
+    void *value)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Reset the old I/O pipeline */
+    if(H5O_msg_reset(H5O_PLINE_ID, value) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTRESET, FAIL, "can't release I/O pipeline message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__ocrt_pipeline_close() */
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
@@ -1795,7 +1892,7 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5Z_FILTER_ERROR, "can't find object for ID")
 
     /* Get pipeline info */
-    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+    if(H5P_peek(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline")
 
     /* Check more args */

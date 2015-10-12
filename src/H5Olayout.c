@@ -566,6 +566,9 @@ H5O_layout_copy(const void *_mesg, void *_dest)
         case H5D_COMPACT:
             /* Deep copy the buffer for compact datasets also */
             if(mesg->storage.u.compact.size > 0) {
+                /* Sanity check */
+                HDassert(mesg->storage.u.compact.buf);
+
                 /* Allocate memory for the raw data */
                 if(NULL == (dest->storage.u.compact.buf = H5MM_malloc(dest->storage.u.compact.size)))
                     HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
@@ -662,13 +665,13 @@ H5O_layout_reset(void *_mesg)
 
     if(mesg) {
         /* Reset associated storage information, if it's been initialized */
-        if(H5D_LAYOUT_ERROR != mesg->storage.type) {
+        if(H5D_LAYOUT_ERROR != mesg->storage.type)
             if(H5O_storage_reset(&mesg->storage) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free message resources")
-        } /* end if */
 
         /* Reset the message */
         mesg->type = H5D_CONTIGUOUS;
+        mesg->version = H5O_LAYOUT_VERSION_DEFAULT;
     } /* end if */
 
 done:

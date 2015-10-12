@@ -133,6 +133,7 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D__contig_readvv,
     H5D__contig_writevv,
     H5D__contig_flush,
+    NULL,
     NULL
 }};
 
@@ -466,7 +467,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__contig_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset, hid_t dapl_id)
+H5D__contig_init(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    const H5D_t *dset, hid_t H5_ATTR_UNUSED dapl_id)
 {
     hsize_t tmp_size;                   /* Temporary holder for raw data size */
     size_t tmp_sieve_buf_size;          /* Temporary holder for sieve buffer size */
