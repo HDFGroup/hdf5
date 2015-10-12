@@ -445,7 +445,6 @@ H5FD_get_class(hid_t id)
 	ret_value = (H5FD_class_t *)H5I_object(id);
     else {
         H5P_genplist_t *plist;      /* Property list pointer */
-        hid_t driver_id = -1;
 
         /* Get the plist structure */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
