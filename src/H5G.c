@@ -594,7 +594,7 @@ H5G_get_create_plist(H5G_t *grp)
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link pipeline")
 
         /* Set the pipeline for the property list */
-        if(H5P_set(new_plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        if(H5P_poke(new_plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set link pipeline")
     } /* end if */
 

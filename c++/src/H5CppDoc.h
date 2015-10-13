@@ -29,10 +29,10 @@
  * The C++ API provides C++ wrappers for the HDF5 C Library.
  * 
  * It is assumed that the user has knowledge of the 
- * <a href="http://www.hdfgroup.org/HDF5/doc/H5.format.html">
+ * <a href="https://www.hdfgroup.org/HDF5/doc/H5.format.html">
  * HDF5 file format</a> and its components. 
  * For more information on the HDF5 C Library, see the 
- * <a href="http://www.hdfgroup.org/HDF5/doc/index.html"> 
+ * <a href="https://www.hdfgroup.org/HDF5/doc/index.html"> 
  * HDF5 Software Documentation</a> page.
  *
  * Because the HDF5 C Library maps very well to
@@ -57,8 +57,8 @@
  *
  * The HDF5 C++ API is included with the HDF5 source code and can 
  * be obtained from 
- * <a href="http://www.hdfgroup.org/HDF5/release/obtainsrc.html">
- * http://www.hdfgroup.org/HDF5/release/obtainsrc.html</a>.
+ * <a href="https://www.hdfgroup.org/HDF5/release/obtainsrc.html">
+ * https://www.hdfgroup.org/HDF5/release/obtainsrc.html</a>.
  * 
  * Please refer to the release_docs/INSTALL file under the top directory 
  * of the HDF5 source code for information about installing, building, 

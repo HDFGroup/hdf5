@@ -334,8 +334,8 @@ hsize_t diff_attr(hid_t loc1_id,
     size_t     msize2;          /* memory size of memory type */
     void       *buf1=NULL;      /* data buffer */
     void       *buf2=NULL;      /* data buffer */
-    int	       buf1hasdata=0;	/* buffer has data */
-    int	       buf2hasdata=0;	/* buffer has data */
+    hbool_t    buf1hasdata=FALSE;	/* buffer has data */
+    hbool_t    buf2hasdata=FALSE;	/* buffer has data */
     hsize_t    nelmts1;         /* number of elements in dataset */
     int        rank1;           /* rank of dataset */
     int        rank2;           /* rank of dataset */
@@ -472,12 +472,12 @@ hsize_t diff_attr(hid_t loc1_id,
 	    parallel_print("Failed reading attribute1 %s/%s\n", path1, name1);
 	    goto error;
 	}else
-	    buf1hasdata = 1;
+	    buf1hasdata = TRUE;
         if(H5Aread(attr2_id,mtype2_id,buf2) < 0){
 	    parallel_print("Failed reading attribute2 %s/%s\n", path2, name2);
 	    goto error;
 	}else
-	    buf2hasdata = 1;
+	    buf2hasdata = TRUE;
 
         /* format output string */
         HDsnprintf(np1, sizeof(np1), "%s of <%s>", name1, path1);
