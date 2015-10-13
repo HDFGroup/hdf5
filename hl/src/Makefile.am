@@ -28,7 +28,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src
 lib_LTLIBRARIES=libhdf5_hl.la
 
 # Add libtool numbers to the HDF5 hl library (from config/lt_vers.am)
-libhdf5_hl_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
+libhdf5_hl_la_LDFLAGS= -version-info $(LT_HL_VERS_INTERFACE):$(LT_HL_VERS_REVISION):$(LT_HL_VERS_AGE) $(AM_LDFLAGS)
 
 # List sources to include in the HDF5 HL Library.
 libhdf5_hl_la_SOURCES=H5DO.c H5DS.c H5IM.c H5LT.c H5LTanalyze.c H5LTparse.c H5PT.c H5TB.c

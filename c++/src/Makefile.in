@@ -673,12 +673,27 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 LT_VERS_INTERFACE = 11
 LT_VERS_REVISION = 0
 LT_VERS_AGE = 1
+LT_CXX_VERS_INTERFACE = 11
+LT_CXX_VERS_REVISION = 0
+LT_CXX_VERS_AGE = 0
+LT_F_VERS_INTERFACE = 11
+LT_F_VERS_REVISION = 0
+LT_F_VERS_AGE = 1
+LT_HL_VERS_INTERFACE = 11
+LT_HL_VERS_REVISION = 0
+LT_HL_VERS_AGE = 1
+LT_HL_CXX_VERS_INTERFACE = 11
+LT_HL_CXX_VERS_REVISION = 0
+LT_HL_CXX_VERS_AGE = 1
+LT_HL_F_VERS_INTERFACE = 11
+LT_HL_F_VERS_REVISION = 0
+LT_HL_F_VERS_AGE = 1
 
 # This is our main target
 lib_LTLIBRARIES = libhdf5_cpp.la
 
 # Add libtool numbers to the HDF5 C++ library (from config/lt_vers.am)
-libhdf5_cpp_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
+libhdf5_cpp_la_LDFLAGS = -version-info $(LT_CXX_VERS_INTERFACE):$(LT_CXX_VERS_REVISION):$(LT_CXX_VERS_AGE) $(AM_LDFLAGS)
 bin_SCRIPTS = h5c++
 
 # Source files for the library

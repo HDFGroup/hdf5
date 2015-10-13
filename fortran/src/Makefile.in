@@ -726,13 +726,28 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 LT_VERS_INTERFACE = 11
 LT_VERS_REVISION = 0
 LT_VERS_AGE = 1
+LT_CXX_VERS_INTERFACE = 11
+LT_CXX_VERS_REVISION = 0
+LT_CXX_VERS_AGE = 0
+LT_F_VERS_INTERFACE = 11
+LT_F_VERS_REVISION = 0
+LT_F_VERS_AGE = 1
+LT_HL_VERS_INTERFACE = 11
+LT_HL_VERS_REVISION = 0
+LT_HL_VERS_AGE = 1
+LT_HL_CXX_VERS_INTERFACE = 11
+LT_HL_CXX_VERS_REVISION = 0
+LT_HL_CXX_VERS_AGE = 1
+LT_HL_F_VERS_INTERFACE = 11
+LT_HL_F_VERS_REVISION = 0
+LT_HL_F_VERS_AGE = 1
 AM_FCLIBS = $(LIBHDF5)
 
 # This is our main target, the fortran library
 lib_LTLIBRARIES = libhdf5_fortran.la
 
 # Add libtool numbers to the HDF5 Fortran library (from config/lt_vers.am)
-libhdf5_fortran_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
+libhdf5_fortran_la_LDFLAGS = -version-info $(LT_F_VERS_INTERFACE):$(LT_F_VERS_REVISION):$(LT_F_VERS_AGE) $(AM_LDFLAGS)
 @BUILD_PARALLEL_CONDITIONAL_FALSE@PARALLEL_COND_SRC = HDF5.f90
 
 # Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled

@@ -28,7 +28,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src
 lib_LTLIBRARIES=libhdf5_hl_cpp.la
 
 # Add libtool numbers to the HDF5 HL C++ library (from config/lt_vers.am)
-libhdf5_hl_cpp_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
+libhdf5_hl_cpp_la_LDFLAGS= -version-info $(LT_HL_CXX_VERS_INTERFACE):$(LT_HL_CXX_VERS_REVISION):$(LT_HL_CXX_VERS_AGE) $(AM_LDFLAGS)
 
 # Source files for the library
 # At the moment, only the H5PT Packet Table has a C++ API.
