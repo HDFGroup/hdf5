@@ -606,7 +606,8 @@ herr_t test_refresh(void)
 
     /* Variables */
     hid_t aid,fid,sid,tid1,did,dcpl,fapl = 0;
-    hid_t gid,gid2,gid3,tid2,tid3,did2,did3,status = 0;
+    hid_t gid,gid2,gid3,tid2,tid3,did2,did3;
+    herr_t status = 0;
     hsize_t dims[2] = {50,50};
     hsize_t cdims[2] = {1,1};
     int fillval = 2;
@@ -770,6 +771,7 @@ herr_t test_refresh(void)
 
     /* Close Stuff */
     if (H5Pclose(fapl) < 0) TEST_ERROR;
+    if (H5Pclose(dcpl) < 0) TEST_ERROR;
     if (H5Tclose(tid1) < 0) TEST_ERROR;
     if (H5Tclose(tid2) < 0) TEST_ERROR;
     if (H5Tclose(tid3) < 0) TEST_ERROR;
@@ -854,7 +856,8 @@ error:
 herr_t flush_verification(const char * obj_pathname, const char * expected) 
 {
     /* Variables */
-    hid_t oid,fid,status = 0;
+    hid_t oid = -1, fid = -1;
+    herr_t status = 0;
     H5O_info_t oinfo;
 
     /* Try to open the testfile and then obj_pathname within the file */

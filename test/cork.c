@@ -1877,131 +1877,131 @@ test_dset_cork(hbool_t newformat)
 
     /* Testing Macro */
     if(newformat) {
-	TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (new library format)");
+	    TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (new library format)");
     } else {
-	TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library format)");
+	    TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library format)");
     }
 
     /* Create fapl */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Set to use latest format */
     if(newformat) {
-	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) 
-	TEST_ERROR;
+	    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) 
+            TEST_ERROR;
     }
 
     /* Create a new HDF5 file */
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Create a group */
     if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Commit the datatype with the group */
     if((tid1 = H5Tcopy(H5T_NATIVE_INT)) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(H5Tcommit2(gid, "datatype", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Cork the named datatype */
     if(H5Odisable_mdc_flushes(tid1) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Set up dataset creation property list */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-	TEST_ERROR
+        TEST_ERROR
     
     /* Enable chunking */
     if(H5Pset_chunk(dcpl, RANK, cdims) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Set up a fill value */
     if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Create dataspace */
     dims[0] = DIMS0;
     dims[1] = DIMS1;
     if((sid = H5Screate_simple(RANK, dims, maxdims)) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Create the dataset inside the group with the named datatype */
     if((did1 = H5Dcreate2(gid, "dataset", tid1, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Check cork status of the named datatype */
     if(H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Cork the dataset */
     if(H5Odisable_mdc_flushes(did1) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Check cork status of the dataset */
     if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Check cork status of the group */
     if(H5Oare_mdc_flushes_disabled(gid, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Initialize the buffer */
     for(i = 0; i < DIMS0;i++)
-	for(j = 0;j < DIMS1;j++)
+        for(j = 0;j < DIMS1;j++)
             data[i][j] = k++;
 
     /* Write to the dataset */
     if(H5Dwrite(did1, tid1, sid, sid, H5P_DEFAULT, data) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Flush the dataset */
     if(H5Oflush(did1) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Check cork status of the dataset */
     if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Check cork status of the named datatype */
     if(H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Close the dataset */
     if(H5Dclose(did1) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Open the dataset again */
     if((did1 = H5Dopen2(gid, "dataset", H5P_DEFAULT)) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Check cork status of dataset */
     if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Read from the dataset */
     if(H5Dread(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Cork the dataset */
     if(H5Odisable_mdc_flushes(did1) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Delete the dataset */
     if(H5Ldelete(gid, "dataset", H5P_DEFAULT) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Check cork status of the dataset */
     if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Close the dataset */
@@ -2009,23 +2009,23 @@ test_dset_cork(hbool_t newformat)
 
     /* Create the dataset again */
     if((did1 = H5Dcreate2(gid, "dataset", tid1, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Cork the dataset */
     if(H5Odisable_mdc_flushes(did1) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Write to the dataset */
     if(H5Dwrite(did1, tid1, sid, sid, H5P_DEFAULT, data) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Refresh the dataset */
     if(H5Drefresh(did1) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Check cork status of the dataset */
     if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
     
     /* Close the dataset */
@@ -2033,24 +2033,24 @@ test_dset_cork(hbool_t newformat)
 
     /* First open of the dataset */
     if((did1 = H5Dopen2(gid, "dataset", H5P_DEFAULT)) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Second open of the dataset */
     if((did2 = H5Dopen2(gid, "dataset", H5P_DEFAULT)) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Cork the first opened dataset */
     if(H5Odisable_mdc_flushes(did1) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Check cork status of the first opened dataset */
     if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Check cork status of the second opened dataset */
     if(H5Oare_mdc_flushes_disabled(did2, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Close the second opened dataset */
@@ -2058,7 +2058,7 @@ test_dset_cork(hbool_t newformat)
 
     /* Check cork status of the first opened dataset */
     if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Close the first opened dastaset */
@@ -2066,30 +2066,30 @@ test_dset_cork(hbool_t newformat)
 
     /* Check cork status of the named datatype */
     if(H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Second open of the named datatype */
     if((tid2 = H5Topen2(gid, "datatype", H5P_DEFAULT)) < 0) 
-	TEST_ERROR
+        TEST_ERROR
 
     /* Check cork status of the second opened named datatype */
     if(H5Oare_mdc_flushes_disabled(tid2, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(!corked) TEST_ERROR
 
     /* Uncork the second opened named datatype */
     if(H5Oenable_mdc_flushes(tid2) < 0)
-	TEST_ERROR
+        TEST_ERROR
 
     /* Check cork status of the second opened named datatype */
     if(H5Oare_mdc_flushes_disabled(tid2, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Check cork status of the first opened named datatype */
     if(H5Oare_mdc_flushes_disabled(tid1, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Close the first opened datatype */
@@ -2100,7 +2100,7 @@ test_dset_cork(hbool_t newformat)
 
     /* Check cork status of the group */
     if(H5Oare_mdc_flushes_disabled(gid, &corked) < 0)
-	TEST_ERROR
+        TEST_ERROR
     if(corked) TEST_ERROR
 
     /* Closing */
@@ -2108,6 +2108,7 @@ test_dset_cork(hbool_t newformat)
     if(H5Sclose(sid) < 0) TEST_ERROR
     if(H5Pclose(fapl) < 0) TEST_ERROR
     if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Pclose(dcpl) < 0) TEST_ERROR
 
     PASSED();
     return 0;
