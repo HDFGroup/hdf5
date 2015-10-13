@@ -239,8 +239,7 @@ DataType& DataType::operator=( const DataType& rhs )
 {
     if (this != &rhs)
     {
-	id = rhs.id;
-	incRefCount(); // increment number of references to this id
+	setId(rhs.id);
     }
     return(*this);
 }
