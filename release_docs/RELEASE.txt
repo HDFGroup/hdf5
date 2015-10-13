@@ -270,6 +270,22 @@ Bug Fixes since HDF5-1.8.15
 
       (NAF - 2015-09-08)
 
+    - Truncate file in H5Fflush() if EOA != EOF to avoid file
+      corruption in certain scenarios
+
+      HDFFV-9418: In the following scenario, the resulting HDF5 file
+      would be incorrectly corrupted because the truncate operation
+      wasat some point  wrongly moved out of the flush operation:
+          - Create a new file with a single dataset.  
+          - Write parts of the dataset (make sure that some values at
+            the end of the dataset are not initialized). 
+          - Flush the file. 
+          - Crash the program 
+          - Try to open the h5 file with h5dump or h5debug, but
+            resulting file is corrupted. 
+
+      (MSC - 2015-06-15)
+
 
     Parallel Library
     ----------------
