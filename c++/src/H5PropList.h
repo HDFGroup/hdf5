@@ -127,6 +127,9 @@ class H5_DLLCPP PropList : public IdComponent {
 	// Dynamically allocates the PropList global constant
 	static PropList* getConstant();
 
+	// Friend function to set PropList id.  For library use only.
+	friend void f_PropList_setId(PropList* plist, hid_t new_id);
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 
