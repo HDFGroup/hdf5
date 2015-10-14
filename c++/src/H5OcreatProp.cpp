@@ -188,8 +188,6 @@ void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
 // Function:	ObjCreatPropList::getAttrCrtOrder
 ///\brief	Gets tracking and indexing settings for attribute
 ///		creation order.
-///\param	crt_order_flags - OUT: Flags specifying whether to track and
-///					index attribute creation order
 ///\exception	H5::PropListIException
 ///\par Description
 ///		When no flag is set, i.e. crt_order_flags = 0, attribute

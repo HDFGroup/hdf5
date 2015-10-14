@@ -26,6 +26,9 @@
 namespace H5 {
 #endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// For internal use only
+
 // This flag indicates whether H5Library::initH5cpp has been called to register
 // the terminating functions with atexit()
 bool IdComponent::H5cppinit = false;
@@ -34,6 +37,7 @@ bool IdComponent::H5cppinit = false;
 // Subclasses that have global constants use it.  This is a temporary
 // work-around in 1.8.16.  It will be removed after HDFFV-9540 is fixed.
 bool IdComponent::H5dontAtexit_called = false;
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent overloaded constructor

@@ -49,6 +49,8 @@ namespace H5 {
 //--------------------------------------------------------------------------
 // Function	H5File default constructor
 ///\brief	Default constructor: creates a stub H5File object.
+///\par Description
+///		The data member \a id will be initialized to H5I_INVALID_HID.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5File::H5File() : H5Location(), CommonFG(), id(H5I_INVALID_HID) {}
@@ -78,7 +80,7 @@ H5File::H5File() : H5Location(), CommonFG(), id(H5I_INVALID_HID) {}
 ///		For info on file creation in the case of an already-open file,
 ///		please refer to the \b Special \b case section in the C layer
 ///		Reference Manual at:
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5F.html#File-Create
+/// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5F.html#File-Create
 // Notes	With a PGI compiler (~2012-2013), the exception thrown by p_get_file
 //		could not be caught in the applications.  Added try block here
 //		to catch then re-throw it. -BMR 2013/03/21
@@ -229,15 +231,14 @@ bool H5File::isHdf5(const H5std_string& name )
 ///\param	flags        - IN: File access flags
 ///\param	access_plist - IN: File access property list.  Default to
 ///		FileAccPropList::DEFAULT
+///\exception	H5::FileIException
 ///\par Description
 ///		Valid values of \a flags include:
-///		H5F_ACC_RDWR:   Open with read/write access. If the file is
-///				currently open for read-only access then it
-///				will be reopened. Absence of this flag
-///				implies read-only access.
-///
-///		H5F_ACC_RDONLY: Open with read only access. - default
-///
+///		\li \c H5F_ACC_RDONLY - Open with read-only.
+///		\li \c H5F_ACC_RDWR - Open with read/write access.
+///		For more information about file access, please refer to the
+///		C layer Reference Manual page at:
+///		https://www.hdfgroup.org/HDF5/doc/RM/RM_H5F.html#File-Open
 // Programmer	Binh-Minh Ribler - Oct, 2005
 //--------------------------------------------------------------------------
 void H5File::openFile(const char* name, unsigned int flags, const FileAccPropList& access_plist)
@@ -265,6 +266,11 @@ void H5File::openFile(const char* name, unsigned int flags, const FileAccPropLis
 ///\param	flags        - IN: File access flags
 ///\param	access_plist - IN: File access property list.  Default to
 ///		FileAccPropList::DEFAULT
+///\exception	H5::FileIException
+///\par Description
+///		Valid values of \a flags include:
+///		\li \c H5F_ACC_RDONLY - Open with read-only.
+///		\li \c H5F_ACC_RDWR - Open with read/write access.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5File::openFile(const H5std_string& name, unsigned int flags, const FileAccPropList& access_plist)
@@ -298,9 +304,9 @@ void H5File::reOpen()
         throw FileIException("H5File::reOpen", close_error.getDetailMsg());
     }
 
-   // call C routine to reopen the file - Note: not sure about this,
+   // call C routine to reopen the file
    // which id to be the parameter when closing?
-   id = H5Freopen( id );
+   id = H5Freopen(id);
    if( id < 0 ) // Raise exception when H5Freopen returns a neg value
       throw FileIException("H5File::reOpen", "H5Freopen failed");
 }
