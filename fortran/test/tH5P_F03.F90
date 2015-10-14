@@ -221,6 +221,9 @@ SUBROUTINE test_create(total_error)
   CALL h5dopen_f(file, "dset9", dset9, error)
   CALL check("h5dopen_f", error, total_error)
 
+  CALL H5Pclose_f(dcpl, error)
+  CALL check("H5Pclose_f", error, total_error)
+
   CALL H5Dget_create_plist_f(dset9, dcpl, error)
   CALL check("H5Dget_create_plist_f", error, total_error)
 
