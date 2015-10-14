@@ -336,11 +336,6 @@ fi
 AC_PROG_CC
 CC_BASENAME="`echo $CC | cut -f1 -d' ' | xargs basename 2>/dev/null`"
 
-## ----------------------------------------------------------------------
-## Check if they have Perl installed on their system. 
-AC_SUBST([PERL]) PERL=""
-AC_CHECK_PROGS([PERL], [perl],, [$PATH])
-
 ## ----------------------------------------------------------------------------
 ## Configure disallows unsupported combinations of options. However, users
 ## may want to override and build with unsupported combinations for their

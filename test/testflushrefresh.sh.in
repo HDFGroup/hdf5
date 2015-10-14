@@ -40,11 +40,13 @@ nerrors=0
 # like to use Perl. If it wasn't detected by configure, then use date, though
 # this is less portable and might cause problems on machines that don't
 # recognize the +%s option (like Solaris).
+#
+# Note that PERL will resolve to true or false, not a path.
 PERL=@PERL@
 if test -n "$PERL"; then
     TimeStamp()
     {
-        time=`${PERL} -e 'print int(time)'`
+        time=`perl -e 'print int(time)'`
         echo "$time"
     }
 else
