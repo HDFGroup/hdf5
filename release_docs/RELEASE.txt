@@ -82,7 +82,26 @@ New Features
 
     C++ API
     -------
-    - None
+    - Class H5::ObjCreatPropList is added for the object creation property
+      list class.
+
+      Class H5::ObjCreatPropList is derived from H5::PropList and is a
+      baseclass of H5::DSetCreatPropList.  Additional property list classes
+      will be derived from H5::ObjCreatPropList when they are added to the
+      library in future releases.
+
+      (BMR, 2015/10/13, Part of HDFFV-9169)
+
+    - New Wrappers for C Functions H5P[s/g]et_attr_phase_change and
+      H5P[s/g]et_attr_creation_order.
+
+      Wrappers were added to class H5::ObjCreatPropList for the C Functions
+      H5Pset_attr_phase_change:		H5::ObjCreatPropList::setAttrPhaseChange
+      H5Pget_attr_phase_change:		H5::ObjCreatPropList::getAttrPhaseChange
+      H5Pset_attr_creation_order:	H5::ObjCreatPropList::setAttrCrtOrder
+      H5Pget_attr_creation_order:	H5::ObjCreatPropList::getAttrCrtOrder
+
+      (BMR, 2015/10/13, Part of HDFFV-9167 and HDFFV-9169)
 
 
 
@@ -120,7 +139,16 @@ Bug Fixes since HDF5-1.8.16
 
     C++ API
     ------
-    - None
+    - Removed memory leaks
+
+      The static global constant objects were changed to constant references
+      referencing dynamically allocated objects.  This ensures that the clean-up
+      process in the C++ library occurs before the termination of the C library
+      and prevents memory leaks because the previous global constants were not
+      properly deleted before the C library termination.
+
+      (BMR, 2015/10/13, HDFFV-9529)
+
 
     High-Level APIs:
     ------
