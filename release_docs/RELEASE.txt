@@ -339,6 +339,10 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (Debian 4.7.2-5) 4.7.2
                                   (cmake and autotools)
 
+    Mac OS X El Capitan 10.11     Apple clang/clang++ version 7.0.0 from Xcode 7.0.1
+    64-bit    			  gfortran GNU Fortran (GCC) 5.2.0
+    (VM)      
+
     Fedora20 3.15.3-200.fc20.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
                                   gcc (GCC) 4.8.3 20140624 (Red Hat 4.8.3-1)
                                   GNU Fortran (GCC) 4.8.3 20140624 (Red Hat 4.8.3-1)
