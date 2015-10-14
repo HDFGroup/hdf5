@@ -31,7 +31,7 @@ in 1.8.0?" document:
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes
 from Release to Release" document, in the section "Release 1.8.16 (current
-release) versus Release 1.8.15
+release) versus Release 1.8.15":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -62,7 +62,7 @@ New Features
 
       The global lock used by the thread-safety feature has never been
       raised to the high-level library level, making it possible that
-      library state could change if a context switch were to occur in
+      the library state could change if a context switch were to occur in
       a high-level library call. Because of this, the combination of
       thread-safety and high-level library is officially unsupported by
       The HDF Group.
@@ -100,7 +100,7 @@ New Features
 
       (ADB - 2015/08/24 HDFFV-5881)
 
-    - Inline functions now correctly annotated w/ Autotools builds.
+    - Inline functions now correctly annotated with Autotools builds.
 
       The method used to detect the appropriate inline markup scheme was
       nonfunctional in Autotools builds. The Autotools have been modified
@@ -284,25 +284,25 @@ Bug Fixes since HDF5-1.8.15
       When creating a dataspace with H5Screate and setting the extent with
       H5Sextent_copy, the selection offset was not initialized, potentially
       causing invalid I/O.  There may be other cases where this happened.
-      MOdified library to always initialize the offset.
+      Modified the library to always initialize the offset.
 
       (NAF - 2015-09-08)
 
     - Truncate file in H5Fflush() if EOA != EOF to avoid file
       corruption in certain scenarios
 
-      HDFFV-9418: In the following scenario, the resulting HDF5 file
-      would be incorrectly corrupted because the truncate operation
-      wasat some point  wrongly moved out of the flush operation:
+      In the following scenario, the resulting HDF5 file would be 
+      incorrectly corrupted because the truncate operation
+      was at some point wrongly moved out of the flush operation:
           - Create a new file with a single dataset.  
           - Write parts of the dataset (make sure that some values at
             the end of the dataset are not initialized). 
           - Flush the file. 
-          - Crash the program 
-          - Try to open the h5 file with h5dump or h5debug, but
+          - Crash the program. 
+          - Try to open the file with h5dump or h5debug, but the 
             resulting file is corrupted. 
 
-      (MSC - 2015-06-15)
+      (MSC - 2015-06-15 HDFFV-9418)
 
 
     Parallel Library
@@ -316,11 +316,11 @@ Bug Fixes since HDF5-1.8.15
 
     Tools
     -----
-    - Fix h5repack with UD filters
+    - Fixed h5repack with user-defined filters
 
       h5repack would throw a buffer overrun exception on Windows when
-      parsing a UD filter id of 5 digits. A local variable in the parse
-      routine was not of sufficient size.
+      parsing a user-defined filter ID of 5 digits. A local variable in 
+      the parse routine was not of sufficient size.
 
       (ADB - 2015/09/01 HDFFV-9515)
 
@@ -554,7 +554,7 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
-* On windows platforms in debug configurations, the VFD flush1 tests will fail
+* On Windows platforms in debug configurations, the VFD flush1 tests will fail
   with the split and multi VFD drivers. These tests will display a modal debug
   dialog which must be answered or wait for the test timeout to expire.
   (ADB - 2014/06/23 - HDFFV-8851)
@@ -621,9 +621,9 @@ Known Problems
   (AKC - 2011/05/07)
 
 * Shared Fortran libraries are not quite working on AIX. While they are
-  generated when --enable-shared is specified, the fortran and hl/fortran
-  tests fail. the issue. HL and C++ shared libraries should now be
-  working as intended, however.
+  generated when --enable-shared is specified, the Fortran and HL/Fortran
+  tests fail. HL and C++ shared libraries should now be working as intended, 
+  however.
   (MAM - 2011/04/20)
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
@@ -639,7 +639,7 @@ Known Problems
   http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
   (NAF - 2011/01/19)
 
-* All the VFL drivers aren't backward compatible.  In H5FDpublic.h, the
+* All of the VFL drivers aren't backward compatible.  In H5FDpublic.h, the
   structure H5FD_class_t changed in 1.8.  There is new parameter added to
   get_eoa and set_eoa callback functions.  A new callback function
   get_type_map was added in.  The public function H5FDrealloc was taken
@@ -664,6 +664,6 @@ Known Problems
   library before v1.6.3; the checksum value was not consistent between big-
   endian and little-endian systems.  This bug was fixed in Release 1.6.3.
   However, after fixing the bug, the checksum value was no longer the same as
-  before on little-endian system.  Library releases after 1.6.4 can still read
+  before on little-endian systems. Library releases after 1.6.4 can still read
   datasets created or rewritten with an HDF5 library of v1.6.2 or before.
   (SLU - 2005/06/30)
