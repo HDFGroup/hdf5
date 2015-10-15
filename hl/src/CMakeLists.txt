@@ -42,7 +42,7 @@ if (BUILD_SHARED_LIBS)
   add_library (${HDF5_HL_LIBSH_TARGET} SHARED ${HL_SRCS} ${HL_HEADERS})
   TARGET_C_PROPERTIES (${HDF5_HL_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_HL_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  H5_SET_LIB_OPTIONS (${HDF5_HL_LIBSH_TARGET} ${HDF5_HL_LIB_NAME} SHARED)
+  H5_SET_LIB_OPTIONS (${HDF5_HL_LIBSH_TARGET} ${HDF5_HL_LIB_NAME} SHARED ${HDF5_HL_PACKAGE_SOVERSION})
   set_target_properties (${HDF5_HL_LIBSH_TARGET} PROPERTIES
       FOLDER libraries/hl
       COMPILE_DEFINITIONS "H5_BUILT_AS_DYNAMIC_LIB"
@@ -54,7 +54,7 @@ if (BUILD_SHARED_LIBS)
 endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
-# Add file(s) to CMake Install 
+# Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 install (
     FILES
@@ -72,7 +72,7 @@ if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_HL_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hllibraries)
   endif (BUILD_SHARED_LIBS)
-  
+
   install (
       TARGETS
           ${install_targets}
