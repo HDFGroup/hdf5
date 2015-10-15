@@ -8124,7 +8124,10 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
 #ifdef H5_HAVE_FILTER_DEFLATE
         /* Loop over compressing chunks */
         for(compress = FALSE; compress <= TRUE; compress++) {
+#else
+        for(compress = FALSE; compress <= FALSE; compress++) {
 #endif /* H5_HAVE_FILTER_DEFLATE */
+
             H5D_alloc_time_t alloc_time;        /* Storage allocation time */
 
             /* Loop over storage allocation time */
@@ -8366,9 +8369,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
                     if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
                 } /* end for */
             } /* end for */
-#ifdef H5_HAVE_FILTER_DEFLATE
         } /* end for */
-#endif /* H5_HAVE_FILTER_DEFLATE */
     } /* end for */
 
     /* Close everything */
