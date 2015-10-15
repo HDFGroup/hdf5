@@ -1935,7 +1935,7 @@ H5Pset_chunk_opts(hid_t plist_id, unsigned options)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Retrieve the layout property */
-    if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
     if(H5D_CHUNKED != layout.type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout")
@@ -1952,7 +1952,7 @@ H5Pset_chunk_opts(hid_t plist_id, unsigned options)
         layout.version = H5O_LAYOUT_VERSION_4;
 
     /* Set layout value */
-    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(H5P_poke(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set layout")
 
 done:
@@ -1998,7 +1998,7 @@ H5Pget_chunk_opts(hid_t plist_id, unsigned *options)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Retrieve the layout property */
-    if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+    if(H5P_peek(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't get layout")
     if(H5D_CHUNKED != layout.type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a chunked storage layout")
