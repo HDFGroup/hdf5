@@ -149,6 +149,16 @@ Bug Fixes since HDF5-1.8.16
 
       (BMR, 2015/10/13, HDFFV-9529)
 
+    - Fixed the problem about identifier being closed prematurely
+
+      The C++ library needs to increment the id's reference counter when it is
+      duplicated in the form of C++ objects, but not when the id is obtained
+      from a C function.  With this approach, both problems, prematurely
+      closing id's and memory leak due to id not being closed, should be
+      eliminated.
+
+      (BMR, 2015/10/15, HDFFV-7947)
+
 
     High-Level APIs:
     ------
