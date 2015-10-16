@@ -4,54 +4,29 @@
 use warnings;
 use strict;
 use Cwd;
+use File::Basename;
+
+my %destsubdir = ('emu' => 'sunos-5.11-sparc-32-sunc512',
+                  'emu64' => 'sunos-5.11-sparc-64-sunc512',
+                  'freedom' => 'freebsd-8.2-amd64-gcc461',
+                  'loyalty' => 'freebsd-8.2-i386-gcc461',
+                  'ostrich' => 'linux-el6-ppc64-gcc447',
+                  'ostrichxl' => 'linux-el6-ppc64-xl13.1',
+                  'platypus' => 'linux-centos6-x86_64-gcc447',
+                  'moohan' => 'linux-centos7-x86_64-gcc483',
+                  'kite' => 'osx-10.8-x86_64-clang5.1',
+                  'quail' => 'osx-10.9-x86_64-clang6.0',
+                  'osx1010test' => 'osx-10.10-x86_64-clang6.0');
 
 
-
-my %destsubdir = ('duck' => 'mac-lion-x86_64',
-                  'emu' => 'solaris',
-                  'emu64' => 'solaris64',
-                  'freedom' => 'freebsd-amd64',
-                  'jam' => 'linux',
-                  'jamgnu482' => 'linux-gnu482',
-                  'koala' => 'linux-x86_64',
-                  'koalagnu482' => 'linux-x86_64-gnu482',
-                  'loyalty' => 'freebsd',
-                  'ostrich' => 'linux-ppc64',
-                  'ostrichxl' => 'linux-ppc64xl',
-                  'platypus' => 'linux-centos6-x86_64',
-                  'hdf-duck' => 'mac-lion-x86_64',
-                  'kite' => 'mac-mountainlion-x86_64',
-                  'quail' => 'mac-mavericks-x86_64');
-#my %destsubdir = ('jam' => 'linux',
-#                  'jamgnu481' => 'linux-gnu481',
-#                  'koalagnu481' => 'linux-x86_64-gnu481',
-#                  'koala' => 'linux-x86_64');
-
-
-my %szipdir = ('duck' => '/mnt/hdf/packages/szip/shared/encoder/macOS-10.8',
-               'duck-static' => '/mnt/hdf/packages/szip/static/encoder/mac-intel-x86_64',
-               'emu' =>  '/mnt/hdf/packages/szip/shared/encoder/SunOS-5.10',
+my %szipdir = ('emu' =>  '/mnt/hdf/packages/szip/shared/encoder/SunOS-5.10',
                'emu-static' => '/mnt/hdf/packages/szip/static/encoder/SunOS-5.10',
                'emu64' => '/mnt/hdf/packages/szip-PIC/shared/encoder/SunOS-5.11-64',
                'emu64-static' => '/mnt/hdf/packages/szip-PIC/shared/encoder/SunOS-5.11-64',
                'freedom' => '/mnt/hdf/packages/szip/shared/encoder/FreeBSD-64',
                'freedom-static' => '/mnt/hdf/packages/szip/static/encoder/FreeBSD-64',
-               'hdf-duck' => '/mnt/hdf/packages/szip/shared/encoder/MacOS-10.8',
-               'hdf-duck-static' => '/mnt/hdf/packages/szip/static/encoder/mac-intel-x86_64',
-               'jam' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-gcc',
-               'jamgnu482' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-gcc',
-               'jam-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-gcc',
-               'jamgnu482-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-gcc',
                'kite' => '/mnt/hdf/packages/szip/shared/encoder/MacOS-10.8',
                'kite-static' => '/mnt/hdf/packages/szip-PIC/static/encoder/MacOS-10.8',
-               'koala' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-x86_64-gcc',
-               'koalagnu482' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-x86_64-gcc',
-               'koala-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-x86_64-gcc',
-               'koalagnu482-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-x86_64-gcc',
-               'jam-new' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-gcc',
-               'jam-new-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-gcc',
-               'koala-new' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-x86_64-gcc',
-               'koala-new-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-x86_64-gcc',
                'loyalty' => '/mnt/hdf/packages/szip/shared/encoder/FreeBSD',
                'loyalty-static' => '/mnt/hdf/packages/szip/static/encoder/FreeBSD',
                'ostrich32' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-ppc64-gcc',
@@ -62,35 +37,19 @@ my %szipdir = ('duck' => '/mnt/hdf/packages/szip/shared/encoder/macOS-10.8',
                'ostrichxl-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-ibmppc64-gcc',
                'platypus' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-x86_64-gcc',
                'platypus-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-x86_64-gcc',
+               'moohan' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-x86_64-gcc',
+               'moohan-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-x86_64-gcc',
                'quail' => '/mnt/hdf/packages/szip/shared/encoder/MacOS-10.8',
                'quail-static' => '/mnt/hdf/packages/szip-PIC/static/encoder/MacOS-10.8');
 
-my %zlibdir = ('duck' => ' /mnt/hdf/packages/zlib-125/shared/mac-intel-x86_64',
-               'duck-static' => ' /mnt/hdf/packages/zlib-125/static/mac-intel-x86_64',
-               'emu' => '/mnt/hdf/packages/zlib-125/shared/SunOS-5.10',
+my %zlibdir = ('emu' => '/mnt/hdf/packages/zlib-125/shared/SunOS-5.10',
                'emu-static' => '/mnt/hdf/packages/zlib-125/static/SunOS-5.10',
                'emu64' => '/mnt/hdf/packages/zlib-123-PIC/SunOS-5.11-64',
                'emu64-static' => '/mnt/hdf/packages/zlib-123-PIC/SunOS-5.11-64',
-               'fred' => ' /mnt/hdf/packages/zlib-125/static/mac-intel-x86_64',
-               'fred-static' => ' /mnt/hdf/packages/zlib-125/static/mac-intel-x86_64',
                'freedom' => '/mnt/hdf/packages/zlib-125/shared/FreeBSD-64',
                'freedom-static' => '/mnt/hdf/packages/zlib-125/static/FreeBSD-64',
-               'hdf-duck' => ' /mnt/hdf/packages/zlib-125/shared/mac-intel-x86_64',
-               'hdf-duck-static' => ' /mnt/hdf/packages/zlib-125/static/mac-intel-x86_64',
-               'jam' => '/mnt/hdf/packages/zlib-125/shared/Linux2.6-gcc',
-               'jamgnu482' => '/mnt/hdf/packages/zlib-125/shared/Linux2.6-gcc',
-               'jam-static' => '/mnt/hdf/packages/zlib-125/static/Linux2.6-gcc',
-               'jamgnu482-static' => '/mnt/hdf/packages/zlib-125/static/Linux2.6-gcc',
                'kite' => ' /mnt/hdf/packages/zlib-125/shared/mac-intel-x86_64',
                'kite-static' => ' /mnt/hdf/packages/zlib-125/static/mac-intel-x86_64',
-               'koala' => '/mnt/hdf/packages/zlib-125/shared/Linux2.6-x86_64-gcc',
-               'koalagnu482' => '/mnt/hdf/packages/zlib-125/shared/Linux2.6-x86_64-gcc',
-               'koala-static' => '/mnt/hdf/packages/zlib-125/static/Linux2.6-x86_64-gcc',
-               'koalagnu482-static' => '/mnt/hdf/packages/zlib-125/static/Linux2.6-x86_64-gcc',
-               'jam-new' => '/mnt/hdf/packages/zlib-125/shared/Linux2.6-gcc',
-               'jam-new-static' => '/mnt/hdf/packages/zlib-125/static/Linux2.6-gcc',
-               'koala-new' => '/mnt/hdf/packages/zlib-125/shared/Linux2.6-x86_64-gcc',
-               'koala-new-static' => '/mnt/hdf/packages/zlib-125/static/Linux2.6-x86_64-gcc',
                'loyalty' => '/mnt/hdf/packages/zlib-125/shared/FreeBSD',
                'loyalty-static' => '/mnt/hdf/packages/zlib-125/static/FreeBSD',
                'ostrich32' => '/mnt/hdf/packages/zlib-125/PIC/Linux2.6-ppc64-gcc',
@@ -101,8 +60,12 @@ my %zlibdir = ('duck' => ' /mnt/hdf/packages/zlib-125/shared/mac-intel-x86_64',
                'ostrichxl-static'  => '/mnt/hdf/packages/zlib-125/PIC/Linux2.6-ppc64-gcc-64',
                'platypus' => '/mnt/hdf/packages/zlib-125/shared/Linux2.6-x86_64-gcc',
                'platypus-static' => '/mnt/hdf/packages/zlib-125/static/Linux2.6-x86_64-gcc',
+               'moohan' => '/mnt/hdf/packages/zlib-125/shared/Linux2.6-x86_64-gcc',
+               'moohan-static' => '/mnt/hdf/packages/zlib-125/static/Linux2.6-x86_64-gcc',
                'quail' => ' /mnt/hdf/packages/zlib-125/shared/mac-intel-x86_64',
-               'quail-static' => ' /mnt/hdf/packages/zlib-125/static/mac-intel-x86_64');
+               'quail-static' => ' /mnt/hdf/packages/zlib-125/static/mac-intel-x86_64',
+               'osx1010test' => ' /mnt/hdf/packages/zlib-125/shared/mac-intel-x86_64',
+               'osx1010test-static' => ' /mnt/hdf/packages/zlib-125/static/mac-intel-x86_64');
 
 my $indirectory = ".";
 $indirectory = shift;
@@ -112,6 +75,8 @@ $outdirectory = shift;
 
 my $key = ".";
 #$key = shift;
+
+my $scriptdirname = dirname(__FILE__);
 
 unless (-d $outdirectory) {
    print "$outdirectory not found.  Create it or choose another one and try again.\n";
@@ -166,7 +131,7 @@ sub addzandszlibs {
          print $output;
 
          chdir $currentdir or die "Couldn't change directory back to $currentdir, $!";
-      } elsif ($dir eq "duck" || $dir eq "quail" || $dir eq "kite") {
+      } elsif ($dir eq "osx1010test" || $dir eq "quail" || $dir eq "kite") {
          #we've been using the static libraries for the macs - built with -fPIC
 #         $cmd = "cp $szdir/lib/libsz.a $indirectory/$dir/lib";
 #         $output = `$cmd`;
@@ -299,7 +264,7 @@ foreach $key (keys %destsubdir) {
    }
    else {
       print "Make the Outer README file:  ";
-      $cmd = "perl ./makeOuter1814README.pl $indirectory/$key $outdirectory $directoryname";
+      $cmd = "perl ./makeOuter1816README.pl $indirectory/$key $outdirectory $directoryname";
       print $cmd, "\n";
       my $output = `$cmd`;
       print $output;
@@ -314,16 +279,22 @@ foreach $key (keys %destsubdir) {
    foreach my $dir (@dirnames) {
       next if $dir eq "";
       print "Make the Inner README files.\n";
-      $cmd = "perl ./makeInternal1814README.pl $indirectory/$dir";
+      $cmd = "perl ./makeInternal1816README.pl $indirectory/$dir";
       print $cmd, "\n";
       $output = `$cmd`;
       print $output;
       print "Add the zlib and szip files for $dir.\n";
       &addzandszlibs($dir, $indirectory);
       my $currentdir = getcwd();
-      
+     
+      print "Remove all lib*.la files from $dir/lib*.\n";
+      $cmd = "rm $indirectory/$dir/lib*/lib*.la";
+      print $cmd, "\n";
+      $output = `$cmd`;
+      print $output;
+
       chdir "$indirectory/$dir/bin" or die "Couldn't change directory to $indirectory/$dir/bin, $!";
-      $cmd = "/home/lrknox/hdf/release_scripts/h5rmflags -force";
+      $cmd = "$scriptdirname/h5rmflags -force";
       $output = `$cmd`;
       print $output;
       chdir $currentdir or die "Couldn't change directory back to $currentdir, $!";

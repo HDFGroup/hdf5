@@ -39,11 +39,31 @@ LT_VERS_AGE = 1
 ##
 ## Note that this versioning system doesn't attempt to handle
 ## the effects of the H5_V1_x_COMPAT flag.
-##
-## Since the revision number is automatically incremented by
-## bin/h5vers, don't move LT_VERS_REVISION from the fourth line
-## without also editing the script!
 
+## Version numbers for wrapper shared library files.
+LT_CXX_VERS_INTERFACE = 11
+LT_CXX_VERS_REVISION = 0
+LT_CXX_VERS_AGE = 0
+
+LT_F_VERS_INTERFACE = 10
+LT_F_VERS_REVISION = 2
+LT_F_VERS_AGE = 0
+
+LT_HL_VERS_INTERFACE = 10
+LT_HL_VERS_REVISION = 2
+LT_HL_VERS_AGE = 0
+
+LT_HL_CXX_VERS_INTERFACE = 10
+LT_HL_CXX_VERS_REVISION = 2
+LT_HL_CXX_VERS_AGE = 0
+
+LT_HL_F_VERS_INTERFACE = 10
+LT_HL_F_VERS_REVISION = 2
+LT_HL_F_VERS_AGE = 0
+
+LT_TOOLS_VERS_INTERFACE = 10
+LT_TOOLS_VERS_REVISION = 2
+LT_TOOLS_VERS_AGE = 0
 
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.

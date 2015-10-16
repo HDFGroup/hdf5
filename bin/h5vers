@@ -243,6 +243,14 @@ if ($set) {
   @newver = @curver;
 }
 
+# Note if the new version is for an official release.
+# if the fourth version field is empty or contains "patch",
+# "currently under development" shouldn't be printed as 
+# part of the version string.
+my $is_official_release="";
+if ($newver[3] eq "" || $newver[3] =~ /patch\d/) {
+    $is_official_release="true";
+}
 # Note if the version increased or decreased
 my $version_increased="";
 # Print a warning if the version got smaller (don't check annot field)
@@ -276,25 +284,29 @@ if ($LT_VERS && $version_increased) {
   close FILE;
 
   local($_) = $contentsy;
+  
+  # As of the HDF5 v1.8.16 release, h5vers should not increment
+  # the LT_VERS numbers, so the next 6 lines are commented out.
+  # A future version may copy the numbers to H5public.h, so this
+  # section is retained for future reference.
+  #my ($lt_revision) = /^LT_VERS_REVISION\s*=\s*(\d+)/m;
+  #my $new_lt_revision = $lt_revision+1;
+  #($contentsy) =~ s/^(LT_VERS_REVISION\s*=\s*)\d+/$1$new_lt_revision/m;
 
-  my ($lt_revision) = /^LT_VERS_REVISION\s*=\s*(\d+)/m;
-  my $new_lt_revision = $lt_revision+1;
-  ($contentsy) =~ s/^(LT_VERS_REVISION\s*=\s*)\d+/$1$new_lt_revision/m;
-
-  open FILE, ">$LT_VERS" or die "$LT_VERS: $!\n";
-  print FILE $contentsy;
-  close FILE;
+  #open FILE, ">$LT_VERS" or die "$LT_VERS: $!\n";
+  #print FILE $contentsy;
+  #close FILE;
 }
+
 
 # Update the README.txt file
 if ($README) {
   open FILE, $README or die "$README: $!\n";
   my @contents = <FILE>;
   close FILE;
-  $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
+  $contents[0] = sprintf("HDF5 version %d.%d.%d%s\n",
 			 @newver[0,1,2],
-			 $newver[3] eq "" ? "" : "-".$newver[3],
-			 "currently under development\n");
+			 $is_official_release ? $newver[3] eq "" ? "" : "-".$newver[3] : "-".$newver[3]." currently under development");
   open FILE, ">$README" or die "$README: $!\n";
   print FILE @contents;
   close FILE;
@@ -305,10 +317,9 @@ if ($RELEASE) {
   open FILE, $RELEASE or die "$RELEASE: $!\n";
   my @contents = <FILE>;
   close FILE;
-  $contents[0] = sprintf("HDF5 version %d.%d.%d%s %s",
+  $contents[0] = sprintf("HDF5 version %d.%d.%d%s\n",
 			 @newver[0,1,2],
-			 $newver[3] eq "" ? "" : "-".$newver[3],
-			 "currently under development\n");
+                         $is_official_release ? $newver[3] eq "" ? "" : "-".$newver[3] : "-".$newver[3]." currently under development");
   open FILE, ">$RELEASE" or die "$RELEASE: $!\n";
   print FILE @contents;
   close FILE;
@@ -317,10 +328,9 @@ if ($RELEASE) {
 # Update the c++/src/cpp_doc_config file
 if ($CPP_DOC_CONFIG) {
   my $data = read_file($CPP_DOC_CONFIG);
-  my $version_string = sprintf("\"%d.%d.%d%s %s\"",
-                               @newver[0,1,2],
-                               $newver[3] eq "" ? "" : "-".$newver[3],
-                               "currently under development");
+  my $version_string = sprintf("\"%d.%d.%d%s\"",
+                           @newver[0,1,2],
+                           $is_official_release ? $newver[3] eq "" ? "" : "-".$newver[3] : "-".$newver[3]." currently under development");
 
   $data =~ s/PROJECT_NUMBER\s*=.*/PROJECT_NUMBER         = $version_string/;
 

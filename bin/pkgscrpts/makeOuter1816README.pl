@@ -81,26 +81,22 @@ elsif ($indirectory =~ /platypus/) {
 #   $line1 = "  5-$version-$outsubdir-16API.tar.gz - Includes C, C++, F90 APIs (using\n";
    $line3 = "  5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using\n";
    $line5 = "  5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using\n";
-   $compilerstring = "                                        gcc, g++, and gfortran 4.4.7)\n";
-}
-elsif ($indirectory =~ /jam/) {
-#   $line1 = "  5-$version-$outsubdir-16API.tar.gz - Includes C, C++, F90 APIs (using\n";
-   $line3 = "  5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using\n";
-   $line5 = "  5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using\n";
-   if ($indirectory =~ /gnu482/) {
-      $compilerstring = "                                        gcc, g++, and gfortran 4.8.2)\n";
+   if ($indirectory =~ /gcc482/) {
+      my $cs1 = "                                        gcc, g++, and gfortran 4.8.2)\n";
+      my $cs2 = "\tWarning!";
+      my $cs3 = "\tIf the 4.8.2 version is not the system default, the scripts listed provided for compiling";
+      my $cs4 = "\tapplications (h5cc, hf5c, etc.) will not work unless either the environment is modified";
+      my $cs5 = "\tor the full path to the 4.8.2 compiler versions is added to the scripts.\n\n";
+      $compilerstring = join "\n", $cs1, $cs2, $cs3, $cs4, $cs5;
    } else {    
-      $compilerstring = "                                        gcc, g++, and gfortran 4.1.2)\n";
+      $compilerstring = "                                        gcc, g++, and gfortran 4.4.7)\n";
    }
 }
-elsif ($indirectory =~ /koala/) {
+elsif ($indirectory =~ /moohan/) {
 #   $line1 = "  5-$version-$outsubdir-16API.tar.gz - Includes C, C++, F90 APIs (using\n";
    $line3 = "  5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using\n";
    $line5 = "  5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using\n";
-   if ($indirectory =~ /gnu482/) {
-      $compilerstring = "                                        gcc, g++, and gfortran 4.8.2)\n";
-   } else {    
-      $compilerstring = "                                        gcc, g++, and gfortran 4.1.2)\n";
+   $compilerstring = "                                        gcc, g++, and gfortran 4.8.3)\n";
    }
 } 
 elsif ($indirectory =~ /emu/) {
@@ -109,23 +105,23 @@ elsif ($indirectory =~ /emu/) {
    $line5 = "  5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using\n";
    $compilerstring = "                                        Sun C and C++ 5.12, Sun Fortran 95 8.6)\n";
 }
-elsif ($indirectory =~ /duck/) {
-   $line3 = "  5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using\n";
-   $line5 = "  5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using\n";
-   $compilerstring = "                                        Apple clang/clang++ 3.0 from Xcode 4.6.1, 
-                                                              gfortran 4.6.2)\n";
-}
 elsif ($indirectory =~ /kite/) {
    $line3 = "  5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using\n";
    $line5 = "  5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using\n";
-   $compilerstring = "                                        Apple clang/clang++ 5.0 from Xcode 5.0.2,
+   $compilerstring = "                                        Apple clang/clang++ 5.1 from Xcode 5.1,
                                                               gfortran 4.8.2)\n";
 }
 elsif ($indirectory =~ /quail/) {
    $line3 = "  5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using\n";
    $line5 = "  5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using\n";
-   $compilerstring = "                                        Apple clang/clang++ 5.1 from Xcode 5.1,
-                                                              gfortran 4.8.2)\n";
+   $compilerstring = "                                        Apple clang/clang++ 6.0 from Xcode 6.2,
+                                                              gfortran 4.9.2)\n";
+}
+elsif ($indirectory =~ /osx1010test/) {
+   $line3 = "  5-$version-$outsubdir-static.tar.gz  - Includes C, C++, F90 APIs (using\n";
+   $line5 = "  5-$version-$outsubdir-shared.tar.gz  - Includes C, C++, F90 APIs (using\n";
+   $compilerstring = "                                        Apple clang/clang++ 6.0 from Xcode 7.0,
+                                                              gfortran 4.9.2)\n";
 }
 
     print OUTFILE $line3;
