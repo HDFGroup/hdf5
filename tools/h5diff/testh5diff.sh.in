@@ -120,6 +120,29 @@ $SRC_H5DIFF_TESTFILES/h5diff_attr_v_level2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_enum_invalid_values.h5
 $SRC_H5DIFF_TESTFILES/non_comparables1.h5
 $SRC_H5DIFF_TESTFILES/non_comparables2.h5
+$SRC_TOOLS_TESTFILES/vds/1_a.h5
+$SRC_TOOLS_TESTFILES/vds/1_b.h5
+$SRC_TOOLS_TESTFILES/vds/1_c.h5
+$SRC_TOOLS_TESTFILES/vds/1_d.h5
+$SRC_TOOLS_TESTFILES/vds/1_e.h5
+$SRC_TOOLS_TESTFILES/vds/1_f.h5
+$SRC_TOOLS_TESTFILES/vds/1_vds.h5
+$SRC_TOOLS_TESTFILES/vds/2_a.h5
+$SRC_TOOLS_TESTFILES/vds/2_b.h5
+$SRC_TOOLS_TESTFILES/vds/2_c.h5
+$SRC_TOOLS_TESTFILES/vds/2_d.h5
+$SRC_TOOLS_TESTFILES/vds/2_e.h5
+$SRC_TOOLS_TESTFILES/vds/2_vds.h5
+$SRC_TOOLS_TESTFILES/vds/3_1_vds.h5
+$SRC_TOOLS_TESTFILES/vds/3_2_vds.h5
+$SRC_TOOLS_TESTFILES/vds/4_0.h5
+$SRC_TOOLS_TESTFILES/vds/4_1.h5
+$SRC_TOOLS_TESTFILES/vds/4_2.h5
+$SRC_TOOLS_TESTFILES/vds/4_vds.h5
+$SRC_TOOLS_TESTFILES/vds/5_a.h5
+$SRC_TOOLS_TESTFILES/vds/5_b.h5
+$SRC_TOOLS_TESTFILES/vds/5_c.h5
+$SRC_TOOLS_TESTFILES/vds/5_vds.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -1109,6 +1132,13 @@ TOOLTEST h5diff_643.txt -v -d 5 --use-system-epsilon h5diff_basic1.h5 h5diff_bas
 TOOLTEST h5diff_644.txt -v --use-system-epsilon -d 5 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
 TOOLTEST h5diff_645.txt -v -p 0.05 --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
 TOOLTEST h5diff_646.txt -v --use-system-epsilon -p 0.05 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
+
+# ##############################################################################
+# VDS tests
+# ##############################################################################
+TOOLTEST h5diff_v1.txt -v 1_vds.h5 2_vds.h5
+TOOLTEST h5diff_v2.txt -r 1_vds.h5 2_vds.h5
+TOOLTEST h5diff_v3.txt -c 1_vds.h5 2_vds.h5
 
 
 # ##############################################################################

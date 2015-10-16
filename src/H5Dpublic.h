@@ -54,7 +54,8 @@ typedef enum H5D_layout_t {
     H5D_COMPACT		= 0,	/*raw data is very small		     */
     H5D_CONTIGUOUS	= 1,	/*the default				     */
     H5D_CHUNKED		= 2,	/*slow and fancy			     */
-    H5D_NLAYOUTS	= 3	/*this one must be last!		     */
+    H5D_VIRTUAL         = 3,    /*actual data is stored in other datasets     */
+    H5D_NLAYOUTS	= 4	/*this one must be last!		     */
 } H5D_layout_t;
 
 /* Types of chunk index data structures */
@@ -99,6 +100,13 @@ typedef enum H5D_fill_value_t {
     H5D_FILL_VALUE_DEFAULT      =1,
     H5D_FILL_VALUE_USER_DEFINED =2
 } H5D_fill_value_t;
+
+/* Values for VDS bounds option */
+typedef enum H5D_vds_view_t {
+    H5D_VDS_ERROR               = -1,
+    H5D_VDS_FIRST_MISSING       = 0,
+    H5D_VDS_LAST_AVAILABLE      = 1
+} H5D_vds_view_t;
 
 /* Callback for H5Pset_append_flush() in a dataset access property list */
 typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_data);

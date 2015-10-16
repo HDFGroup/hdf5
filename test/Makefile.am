@@ -58,7 +58,7 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            twriteorder big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_cross_platform\
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf farray earray btree2 fheap file_image unregister \
+           freespace mf vds farray earray btree2 fheap file_image unregister \
            cache_logging cork swmr
 
 # List programs to be built when testing here.
@@ -177,6 +177,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
+    vds_virt.h5 vds_src_[0-1].h5 \
     swmr_data.h5 use_use_append_chunk.h5 use_append_mchunks.h5 use_disable_mdc_flushes.h5     \
     flushrefresh.h5 flushrefresh_VERIFICATION_START                  \
     flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \

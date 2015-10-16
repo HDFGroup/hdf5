@@ -284,7 +284,7 @@ H5_term_library(void)
      n) : n))
 
     do {
-	pending = 0;
+        pending = 0;
 
         /* Try to organize these so the "higher" level components get shut
          * down before "lower" level components that they might rely on. -QAK
@@ -307,6 +307,11 @@ H5_term_library(void)
         /* Don't shut down the file code until objects in files are shut down */
         if(pending == 0)
             pending += DOWN(F);
+
+        /* Don't shut down the property list code until all objects that might
+         * use property lists are shut down */
+        if(pending == 0)
+            pending += DOWN(P);
 
         /* Wait to shut down the "bottom" of various interfaces until the
          *      files are closed, so pieces of the file can be serialized
@@ -333,7 +338,6 @@ H5_term_library(void)
         if(pending == 0) {
             pending += DOWN(AC);
             pending += DOWN(Z);
-            pending += DOWN(P);
             pending += DOWN(FD);
             pending += DOWN(PL);
             /* Don't shut down the error code until other APIs which use it are shut down */

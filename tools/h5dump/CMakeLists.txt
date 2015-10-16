@@ -39,6 +39,8 @@ if (BUILD_TESTING)
 
   include (CMakeTestsPBITS.cmake)
 
+  include (CMakeTestsVDS.cmake)
+
   include (CMakeTestsXML.cmake)
 endif (BUILD_TESTING)
 

@@ -52,6 +52,8 @@
 #define H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME   "rdcc_nslots"   /* Size of raw data chunk cache(slots) */
 #define H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME   "rdcc_nbytes"   /* Size of raw data chunk cache(bytes) */
 #define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"       /* Preemption read chunks first */
+#define H5D_ACS_VDS_VIEW_NAME               "vds_view"      /* VDS view option */
+#define H5D_ACS_VDS_PRINTF_GAP_NAME         "vds_printf_gap" /* VDS printf gap size */
 #define H5D_ACS_APPEND_FLUSH_NAME    "append_flush"         /* Append flush actions */
 
 /* ======== Data transfer properties ======== */
@@ -106,6 +108,9 @@
 #define H5D_VLEN_ALLOC_INFO     NULL
 #define H5D_VLEN_FREE           NULL
 #define H5D_VLEN_FREE_INFO      NULL
+
+/* Default virtual dataset list size */
+#define H5D_VIRTUAL_DEF_LIST_SIZE 8
 
 
 /****************************/
@@ -183,6 +188,18 @@ H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
 
 /* Functions that operate on chunked storage */
 H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
+
+/* Functions that operate on virtual storage */
+H5_DLL herr_t H5D_virtual_check_mapping_pre(const H5S_t *vspace,
+    const H5S_t *src_space, H5O_virtual_space_status_t space_status);
+H5_DLL herr_t H5D_virtual_check_mapping_post(
+    const H5O_storage_virtual_ent_t *ent);
+H5_DLL herr_t H5D_virtual_check_min_dims(const H5D_t *dset);
+H5_DLL herr_t H5D_virtual_update_min_dims(H5O_layout_t *layout, size_t idx);
+H5_DLL herr_t H5D_virtual_parse_source_name(const char *source_name,
+    H5O_storage_virtual_name_seg_t **parsed_name, size_t *static_strlen,
+    size_t *nsubs);
+H5_DLL herr_t H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_seg);
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,

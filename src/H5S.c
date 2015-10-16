@@ -50,8 +50,6 @@
 /* Local Prototypes */
 /********************/
 static htri_t H5S_is_simple(const H5S_t *sdim);
-static herr_t H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc);
-static H5S_t *H5S_decode(const unsigned char **p);
 
 
 /*********************/
@@ -1575,11 +1573,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
 {
     H5F_t       *f = NULL;      /* Fake file structure*/
-    unsigned char *pp = (*p);   /* Local pointer for decoding */
     size_t      extent_size;    /* Size of serialized dataspace extent */
     hssize_t    sselect_size;   /* Signed size of serialized dataspace selection */
     size_t      select_size;    /* Size of serialized dataspace selection */
@@ -1602,9 +1599,11 @@ H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
 
     /* Verify the size of buffer.  If it's not big enough, simply return the
      * right size without filling the buffer. */
-    if(!pp || *nalloc < (extent_size + select_size + 1 + 1 + 1 + 4))
+    if(!*p || *nalloc < (extent_size + select_size + 1 + 1 + 1 + 4))
         *nalloc = extent_size + select_size + 1 + 1 + 1 + 4;
     else {
+        unsigned char *pp = (*p);   /* Local pointer for decoding */
+
         /* Encode the type of the information */
         *pp++ = H5O_SDSPACE_ID;
 
@@ -1693,7 +1692,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5S_t*
+H5S_t*
 H5S_decode(const unsigned char **p)
 {
     H5F_t       *f = NULL;              /* Fake file structure*/

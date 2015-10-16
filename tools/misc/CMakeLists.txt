@@ -52,6 +52,9 @@ if (BUILD_TESTING)
     target_link_libraries (h5repart_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5repart_gentest PROPERTIES FOLDER generator/tools)
     #add_test (NAME h5repart_gentest COMMAND $<TARGET_FILE:h5repart_gentest>)
+
+    add_subdirectory (${HDF5_TOOLS_MISC_SOURCE_DIR}/vds)
+
   endif (HDF5_BUILD_GENERATORS)
 
   add_executable (h5repart_test ${HDF5_TOOLS_MISC_SOURCE_DIR}/repart_test.c)

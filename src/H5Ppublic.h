@@ -359,6 +359,15 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
 H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
 H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
+H5_DLL herr_t H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id,
+    const char *src_file_name, const char *src_dset_name, hid_t src_space_id);
+H5_DLL herr_t H5Pget_virtual_count(hid_t dcpl_id, size_t *count/*out*/);
+H5_DLL hid_t H5Pget_virtual_vspace(hid_t dcpl_id, size_t index);
+H5_DLL hid_t H5Pget_virtual_srcspace(hid_t dcpl_id, size_t index);
+H5_DLL ssize_t H5Pget_virtual_filename(hid_t dcpl_id, size_t index,
+    char *name/*out*/, size_t size);
+H5_DLL ssize_t H5Pget_virtual_dsetname(hid_t dcpl_id, size_t index,
+    char *name/*out*/, size_t size);
 H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
           hsize_t size);
 H5_DLL herr_t H5Pset_chunk_opts(hid_t plist_id, unsigned opts);
@@ -391,10 +400,14 @@ H5_DLL herr_t H5Pget_chunk_cache(hid_t dapl_id,
        size_t *rdcc_nslots/*out*/,
        size_t *rdcc_nbytes/*out*/,
        double *rdcc_w0/*out*/);
-H5_DLL herr_t H5Pset_append_flush(hid_t plist_id, 
-    unsigned ndims, const hsize_t boundary[], H5D_append_cb_t func, void *udata);
-H5_DLL herr_t H5Pget_append_flush(hid_t plist_id, 
-    unsigned dims, hsize_t boundary[], H5D_append_cb_t *func, void **udata);
+H5_DLL herr_t H5Pset_virtual_view(hid_t plist_id, H5D_vds_view_t view);
+H5_DLL herr_t H5Pget_virtual_view(hid_t plist_id, H5D_vds_view_t *view);
+H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size);
+H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size);
+H5_DLL herr_t H5Pset_append_flush(hid_t plist_id, unsigned ndims,
+    const hsize_t boundary[], H5D_append_cb_t func, void *udata);
+H5_DLL herr_t H5Pget_append_flush(hid_t plist_id, unsigned dims,
+    hsize_t boundary[], H5D_append_cb_t *func, void **udata);
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);
