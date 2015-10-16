@@ -204,10 +204,7 @@ H5D__compact_construct(H5F_t *f, H5D_t *dset)
     /* Verify data size is smaller than maximum header message size
      * (64KB) minus other layout message fields.
      */
-    if(dset->shared->layout.version < H5O_LAYOUT_VERSION_4)
-        max_comp_data_size = H5O_MESG_MAX_SIZE - H5D__layout_meta_size(f, &(dset->shared->layout), FALSE);
-    else
-        max_comp_data_size = H5O_MESG_MAX_SIZE - H5O_storage_meta_size(f, &(dset->shared->layout.storage), FALSE);
+    max_comp_data_size = H5O_MESG_MAX_SIZE - H5D__layout_meta_size(f, &(dset->shared->layout), FALSE);
     if(dset->shared->layout.storage.u.compact.size > max_comp_data_size)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "compact dataset size is bigger than header message maximum size")
 
@@ -373,15 +370,8 @@ H5D__compact_flush(H5D_t *dset, hid_t dxpl_id)
 
     /* Check if the buffered compact information is dirty */
     if(dset->shared->layout.storage.u.compact.dirty) {
-        /* Check whether compact data is storage in layout or storage message */
-        if(dset->shared->layout.version < H5O_LAYOUT_VERSION_4) {
-            if(H5O_msg_write(&(dset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dset->shared->layout), dxpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
-        } /* end if */
-        else {
-            if(H5O_msg_write(&(dset->oloc), H5O_STORAGE_ID, 0, H5O_UPDATE_TIME, &(dset->shared->layout.storage), dxpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
-        } /* end else */
+        if(H5O_msg_write(&(dset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dset->shared->layout), dxpl_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
         dset->shared->layout.storage.u.compact.dirty = FALSE;
     } /* end if */
 
@@ -451,10 +441,6 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst
     HDassert(f_dst);
     HDassert(storage_dst);
     HDassert(dt_src);
-
-    /* Allocate space for destination data */
-    if(NULL == (storage_dst->buf = H5MM_malloc(storage_src->size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory for compact dataset")
 
     /* Create datatype ID for src datatype, so it gets freed */
     if((tid_src = H5I_register(H5I_DATATYPE, dt_src, FALSE)) < 0)

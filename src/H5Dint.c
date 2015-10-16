@@ -2823,9 +2823,7 @@ H5D__format_convert(H5D_t *dataset, hid_t dxpl_id)
        (dataset->shared->layout.storage.u.chunk.ops->dest)(&idx_info) < 0)
       HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
 
-    /* Delete the "storage" and "layout" messages */
-    if(H5O_msg_remove(&dataset->oloc, H5O_STORAGE_ID, H5O_ALL, TRUE, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete storage message")
+    /* Delete the "layout" message */
     if(H5O_msg_remove(&dataset->oloc, H5O_LAYOUT_ID, H5O_ALL, TRUE, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete layout message")
 

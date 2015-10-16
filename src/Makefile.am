@@ -88,7 +88,6 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Osdspace.c H5Oshared.c \
         H5Oshmesg.c \
         H5Ostab.c \
-        H5Ostorage.c \
         H5Otest.c H5Ounknown.c \
         H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c \
         H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \

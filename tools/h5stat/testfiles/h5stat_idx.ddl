@@ -13,7 +13,7 @@ File space information for file metadata (in bytes):
 	User block: 0
 	Object headers: (total/unused)
 		Groups: 147/47
-		Datasets(exclude compact data): 568/346
+		Datasets(exclude compact data): 568/362
 		Datatypes: 0/0
 	Groups:
 		B-tree/List: 0

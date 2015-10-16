@@ -201,6 +201,7 @@ const H5AC_class_t H5AC_EARRAY_TEST[1] = {{
     /* mem_type      */ H5FD_MEM_DEFAULT,
     /* flags         */ H5AC__CLASS_NO_IO_FLAG,
     /* get_load_size */ (H5AC_get_load_size_func_t)earray_cache_test_get_load_size,
+    /* varify_chksum */ (H5AC_verify_chksum_func_t)NULL,
     /* deserialize   */ (H5AC_deserialize_func_t)earray_cache_test_deserialize,
     /* image_len     */ (H5AC_image_len_func_t)earray_cache_test_image_len,
     /* pre_serialize */ (H5AC_pre_serialize_func_t)NULL,

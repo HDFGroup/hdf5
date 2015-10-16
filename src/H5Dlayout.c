@@ -170,20 +170,16 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
     switch(layout->type) {
         case H5D_COMPACT:
             /* This information only present in older versions of message */
-            if(layout->version < H5O_LAYOUT_VERSION_4) {
-                /* Size of raw data */
-                ret_value += 2;
-                if(include_compact_data)
-                    ret_value += layout->storage.u.compact.size;/* data for compact dataset             */
-            } /* end if */
+            /* Size of raw data */
+            ret_value += 2;
+            if(include_compact_data)
+                ret_value += layout->storage.u.compact.size; /* data for compact dataset             */
             break;
 
         case H5D_CONTIGUOUS:
             /* This information only present in older versions of message */
-            if(layout->version < H5O_LAYOUT_VERSION_4) {
-                ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
-                ret_value += H5F_SIZEOF_SIZE(f);    /* Length of data */
-            } /* end if */
+            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+            ret_value += H5F_SIZEOF_SIZE(f);    /* Length of data */
             break;
 
         case H5D_CHUNKED:
@@ -239,6 +235,9 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                     default:
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid chunk index type")
                 } /* end switch */
+
+                /* Chunk index address */
+                ret_value += H5F_SIZEOF_ADDR(f);
             } /* end else */
             break;
 
@@ -510,24 +509,11 @@ H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update external file list message")
     } /* end if */
 
-    /* Check what version of the layout message to write */
-    if(layout->version < H5O_LAYOUT_VERSION_4) {
-        /* Create layout message */
-        /* (Don't make layout message constant unless allocation time is early, since space may not be allocated) */
-        /* (Note: this is relying on H5D_alloc_storage not calling H5O_msg_write during dataset creation) */
-        if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout) < 0)
-             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
-    } /* end if */
-    else {
-        /* Create layout message */
-        /* (Note: this is relying on H5D_alloc_storage not calling H5O_msg_write during dataset creation) */
-        if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, H5O_MSG_FLAG_CONSTANT, 0, layout) < 0)
-             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
-
-        /* Create storage message */
-        if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_STORAGE_ID, 0, 0, &layout->storage) < 0)
-             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update storage")
-    } /* end else */
+    /* Create layout message */
+    /* (Don't make layout message constant unless allocation time is early, since space may not be allocated) */
+    /* (Note: this is relying on H5D_alloc_storage not calling H5O_msg_write during dataset creation) */
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout) < 0)
+         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
 
 done:
     /* Error cleanup */
@@ -587,15 +573,6 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
      */
     if(NULL == H5O_msg_read(&(dataset->oloc), H5O_LAYOUT_ID, &(dataset->shared->layout), dxpl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data layout message")
-
-    /* Check for newer version of the layout message, which indicates that some
-     * information is stored in the 'storage' message.
-     */
-    if(dataset->shared->layout.version >= H5O_LAYOUT_VERSION_4) {
-        /* Retrieve the storage information */
-        if(NULL == H5O_msg_read(&(dataset->oloc), H5O_STORAGE_ID, &(dataset->shared->layout.storage), dxpl_id))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data storage message")
-    } /* end if */
 
     /* Check for external file list message (which might not exist) */
     if((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_EFL_ID, dxpl_id)) < 0)
@@ -659,18 +636,9 @@ H5D__layout_oh_write(H5D_t *dataset, hid_t dxpl_id, H5O_t *oh, unsigned update_f
     HDassert(dataset);
     HDassert(oh);
 
-    /* Determine which message to write, based on the version of the layout info */
-    if(dataset->shared->layout.version < H5O_LAYOUT_VERSION_4) {
-        /* Write the layout message to the dataset's header */
-        if(H5O_msg_write_oh(dataset->oloc.file, dxpl_id, oh, H5O_LAYOUT_ID, H5O_MSG_FLAG_CONSTANT, update_flags, &dataset->shared->layout) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout message")
-    } /* end if */
-    else {
-        /* Write the storage message to the dataset's header */
-        if(H5O_msg_write_oh(dataset->oloc.file, dxpl_id, oh, H5O_STORAGE_ID, 0, update_flags, &dataset->shared->layout.storage) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update storage message")
-    } /* end else */
-
+    /* Write the layout message to the dataset's header */
+    if(H5O_msg_write_oh(dataset->oloc.file, dxpl_id, oh, H5O_LAYOUT_ID, H5O_MSG_FLAG_CONSTANT, update_flags, &dataset->shared->layout) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout message")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

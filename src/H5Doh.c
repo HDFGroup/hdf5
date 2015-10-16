@@ -386,15 +386,6 @@ H5O__dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find layout message")
     layout_read = TRUE;
 
-    /* Check for newer version of the layout message, which indicates that some
-     * information is stored in the 'storage' message.
-     */
-    if(layout.version >= H5O_LAYOUT_VERSION_4) {
-        /* Retrieve the storage information */
-        if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_STORAGE_ID, &(layout.storage)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to read data storage message")
-    } /* end if */
-
     /* Check for chunked dataset storage */
     if(layout.type == H5D_CHUNKED && H5D__chunk_is_space_alloc(&layout.storage)) {
         /* Check for I/O pipeline message */
