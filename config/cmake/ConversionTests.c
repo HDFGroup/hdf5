@@ -1,5 +1,8 @@
 #ifdef H5_LDOUBLE_TO_LONG_SPECIAL_TEST
 
+#include <string.h>
+#include <stdlib.h>
+
 int main(void)
 {
     long double         ld = 20041683600089727.779961L;
@@ -57,6 +60,9 @@ done:
 #endif
 
 #ifdef H5_LONG_TO_LDOUBLE_SPECIAL_TEST
+
+#include <string.h>
+#include <stdlib.h>
 
 int main(void)
 {
@@ -117,6 +123,10 @@ done:
 #endif
 
 #ifdef H5_LDOUBLE_TO_LLONG_ACCURATE_TEST
+
+#include <string.h>
+#include <stdlib.h>
+
 int main(void)
 {
     long double         ld = 20041683600089727.779961L;
@@ -156,6 +166,10 @@ done:
 #endif
 
 #ifdef H5_LLONG_TO_LDOUBLE_CORRECT_TEST
+
+#include <string.h>
+#include <stdlib.h>
+
 int main(void)
 {
     long double         ld;
