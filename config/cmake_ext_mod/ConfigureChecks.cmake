@@ -437,6 +437,7 @@ if (NOT WINDOWS)
   #-----------------------------------------------------------------------------
   # Check a bunch of time functions
   #-----------------------------------------------------------------------------
+  CHECK_FUNCTION_EXISTS (gettimeofday      ${HDF_PREFIX}_HAVE_GETTIMEOFDAY)
   foreach (test
       HAVE_TM_GMTOFF
       HAVE___TM_GMTOFF
