@@ -618,8 +618,8 @@ test_sec2(hid_t fapl)
 quit:
     /* End with normal return code */
     /* Clean up the test file */
-    if(h5_clean_files(FILENAME, fapl))
-        HDremove(DNAME);
+    h5_clean_files(FILENAME, fapl);
+    HDremove(DNAME);
     return 0;
 
 error:
@@ -655,8 +655,8 @@ test_stdio(hid_t fapl)
 quit:
     /* End with normal return code */
     /* Clean up the test file */
-    if(h5_clean_files(FILENAME, fapl))
-        HDremove(DNAME);
+    h5_clean_files(FILENAME, fapl);
+    HDremove(DNAME);
     HDfflush(stdout);
     return 0;
 
@@ -716,8 +716,8 @@ test_family(hid_t fapl)
 quit:
     /* End with normal return code */
     /* Clean up the test file */
-    if(h5_clean_files(FILENAME, fapl))
-        HDremove(DNAME);
+    h5_clean_files(FILENAME, fapl);
+    HDremove(DNAME);
     return 0;
 
 error:

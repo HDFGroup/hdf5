@@ -920,8 +920,7 @@ test_get_file_image(const char * test_banner,
     VERIFY(err == SUCCEED, "H5Pclose(core_fapl_id) failed.");
 
     /* tidy up */
-    result = h5_clean_files(FILENAME2, fapl);
-    VERIFY(result != 0, "h5_clean_files() failed.");
+    h5_clean_files(FILENAME2, fapl);
 
     /* discard the image buffer if it exists */
     if(image_ptr != NULL) 
@@ -1069,8 +1068,7 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(file_id) failed.");
 
     /* tidy up */
-    result = h5_clean_files(FILENAME2, fapl_id);
-    VERIFY(result != 0, "h5_clean_files(1) failed.");
+    h5_clean_files(FILENAME2, fapl_id);
 
     /* discard the image buffer if it exists */
     if(image_ptr != NULL) 
@@ -1175,8 +1173,7 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
     /* tidy up */
-    result = h5_clean_files(FILENAME2, fapl_id);
-    VERIFY(result != 0, "h5_clean_files(2 failed.");
+    h5_clean_files(FILENAME2, fapl_id);
 
     /************************** Test #3 **********************************/
     /* set up a split file driver test file, and try to get its image 
@@ -1238,8 +1235,7 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
     /* tidy up */
-    result = h5_clean_files(FILENAME2, fapl_id);
-    VERIFY(result != 0, "h5_clean_files(2 failed.");
+    h5_clean_files(FILENAME2, fapl_id);
 
     /************************** Test #4 **********************************/
     /* set up a family file driver test file, and try to get its image 
@@ -1299,8 +1295,7 @@ test_get_file_image_error_rejection(void)
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
     /* tidy up */
-    result = h5_clean_files(FILENAME2, fapl_id);
-    VERIFY(result != 0, "h5_clean_files(2 failed.");
+    h5_clean_files(FILENAME2, fapl_id);
     
     PASSED();
 

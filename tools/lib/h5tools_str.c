@@ -466,8 +466,7 @@ h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region,
         for (i = 0; i < nblocks; i++) {
             int j;
 
-            h5tools_str_append(str, info->dset_blockformat_pre, i ? "," OPTIONAL_LINE_BREAK " " : "",
-                               (unsigned long)i);
+            h5tools_str_append(str, info->dset_blockformat_pre, i ? "," OPTIONAL_LINE_BREAK " " : "", (unsigned long)i);
 
             /* Start coordinates and opposite corner */
             for (j = 0; j < ndims; j++)
@@ -1463,8 +1462,7 @@ h5tools_str_replace ( const char *string, const char *substr, const char *replac
 	char *head = NULL;
      
 	if ( substr == NULL || replacement == NULL ) 
-		return HDstrdup (string);
-		
+	    return HDstrdup (string);
 	newstr = HDstrdup (string);
 	head = newstr;
 	while ( (tok = HDstrstr ( head, substr ))){
@@ -1472,8 +1470,8 @@ h5tools_str_replace ( const char *string, const char *substr, const char *replac
 		newstr = (char *)HDmalloc( HDstrlen( oldstr ) - HDstrlen( substr ) + HDstrlen( replacement ) + 1 );
 
         if ( newstr == NULL ){
-			HDfree (oldstr);
-			return NULL;
+	    HDfree (oldstr);
+	    return NULL;
         }
         HDmemcpy ( newstr, oldstr, tok - oldstr );
         HDmemcpy ( newstr + (tok - oldstr), replacement, HDstrlen ( replacement ) );

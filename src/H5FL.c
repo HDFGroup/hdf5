@@ -204,8 +204,8 @@ H5FL_term_package(void)
         /* Dump information about all the outstanding allocations */
         while(trk != NULL) {
             /* Print information about the outstanding block */
-            HDfprintf(stderr,"%s: Outstanding allocation:\n", "H5FL_term_package");
-            HDfprintf(stderr,"\tFile: %s, Function: %s, Line: %d\n", trk->file, trk->func, trk->line);
+            HDfprintf(stderr,"%s: Outstanding allocation:\n", FUNC);
+            HDfprintf(stderr,"\tPtr: %p, File: %s, Function: %s, Line: %d\n", (((unsigned char *)trk) + sizeof(H5FL_track_t)), trk->file, trk->func, trk->line);
             H5CS_print_stack(trk->stack, stderr);
 
             /* Advance to next node */
