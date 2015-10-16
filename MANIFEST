@@ -71,9 +71,10 @@
 ./bin/make_overflow
 ./bin/make_vers
 ./bin/makehelp
-./bin/pkgscrpts/make1814TarFiles.pl       _DO_NOT_DISTRIBUTE_
-./bin/pkgscrpts/makeInternal1814README.pl _DO_NOT_DISTRIBUTE_
-./bin/pkgscrpts/makeOuter1814README.pl    _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/make1816TarFiles.pl       _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/makeInternal1816README.pl _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/makeOuter1816README.pl    _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/h5rmflags                 _DO_NOT_DISTRIBUTE_
 ./bin/missing
 ./bin/mkdirs
 ./bin/mkinstalldirs
@@ -85,7 +86,7 @@
 ./bin/snapshot
 ./bin/snapshot_version              _DO_NOT_DISTRIBUTE_
 ./bin/test-driver
-./bin/pkgscrpts/testh51814binary.sh _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/testbinaries.sh     _DO_NOT_DISTRIBUTE_
 ./bin/timekeeper                    _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
